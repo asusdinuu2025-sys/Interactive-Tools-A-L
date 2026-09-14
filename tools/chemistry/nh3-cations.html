@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NH3 සමඟ කැටායන ප්‍රතික්‍රියා - රසායන විද්‍යා පරීක්ෂණාගාරය</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts for Sinhala Support -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;500;600;700;800&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans Sinhala', sans-serif;
+            background: linear-gradient(135deg, #090d16 0%, #111827 50%, #070a12 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+        }
+
+        /* Back to Chemistry link, fixed so it never interferes with the simulator layout */
+        .back-to-chemistry {
+            position: fixed;
+            top: 14px;
+            left: 14px;
+            z-index: 50;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            color: #cbd5e1;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-decoration: none;
+            backdrop-filter: blur(8px);
+            transition: background 0.2s, color 0.2s, border-color 0.2s;
+        }
+        .back-to-chemistry:hover {
+            background: rgba(30, 41, 59, 0.9);
+            border-color: rgba(99, 102, 241, 0.6);
+            color: #e0e7ff;
+        }
+
+        /* Glassmorphism Test Tube Styling */
+        .test-tube-outer {
+            width: 96px;
+            height: 290px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 3px solid rgba(255, 255, 255, 0.35);
+            border-top: none;
+            border-bottom-left-radius: 48px;
+            border-bottom-right-radius: 48px;
+            position: relative;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.5),
+                        inset 2px 2px 10px rgba(255, 255, 255, 0.25),
+                        inset -2px -2px 10px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .test-tube-lip {
+            width: 114px;
+            height: 14px;
+            background: rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 7px;
+            position: absolute;
+            top: -14px;
+            left: -12px;
+        }
+
+        /* Liquid Level Base Transition */
+        .liquid-container {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 45%;
+            transition: height 1.2s ease-in-out, background-color 1.5s ease-in-out;
+            border-bottom-left-radius: 45px;
+            border-bottom-right-radius: 45px;
+        }
+
+        /* Meniscus Curve */
+        .meniscus {
+            position: absolute;
+            top: -8px;
+            width: 100%;
+            height: 16px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transition: background-color 1.5s ease-in-out;
+        }
+
+        /* Precipitate Animation Layer */
+        .precipitate-layer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 0%;
+            opacity: 0;
+            transition: all 1.5s ease-in-out;
+            border-bottom-left-radius: 45px;
+            border-bottom-right-radius: 45px;
+            filter: blur(1px);
+        }
+
+        .precipitate-active {
+            opacity: 0.95;
+            height: 38%;
+        }
+
+        /* Dropper Animation */
+        @keyframes dropFall {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            70% { transform: translateY(140px) scale(0.9); opacity: 1; }
+            100% { transform: translateY(160px) scale(0.2); opacity: 0; }
+        }
+
+        .droplet {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 0 50% 50% 50%;
+            transform: rotate(45deg);
+            opacity: 0;
+        }
+
+        .droplet-animating {
+            animation: dropFall 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+        }
+
+        /* Bubble oxidation effect for Co2+ + O2 */
+        @keyframes bubbleUp {
+            0% { transform: translateY(100px) scale(0.5); opacity: 0; }
+            50% { opacity: 0.8; }
+            100% { transform: translateY(-20px) scale(1.2); opacity: 0; }
+        }
+
+        .bubble {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            bottom: 10px;
+            opacity: 0;
+        }
+
+        .bubble-animating {
+            animation: bubbleUp 1.8s infinite ease-in;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.5);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="p-3 md:p-6 flex flex-col justify-between min-h-screen">
+
+    <!-- Back to Chemistry link (added for E-tools site navigation; does not touch simulator markup/logic) -->
+    <a href="../../chemistry.html" class="back-to-chemistry">
+        <i class="fa-solid fa-arrow-left"></i>
+        Back to Chemistry
+    </a>
+
+    <!-- Header Section -->
+    <header class="max-w-6xl mx-auto w-full text-center mb-5">
+        <div class="inline-flex items-center gap-2 bg-indigo-950/60 border border-indigo-500/30 px-4 py-1.5 rounded-full mb-3 backdrop-blur-md">
+            <i class="fa-solid font-bold fa-flask-vial text-indigo-400 text-lg"></i>
+            <span class="text-indigo-200 text-xs md:text-sm font-semibold">අ.පො.ස උසස් පෙළ රසායන විද්‍යාව - ප්‍රායෝගික පරීක්ෂණ</span>
+        </div>
+        <h1 class="text-2xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 tracking-wide">
+            ජලීය NH₃ සමඟ කැටායන ප්‍රතික්‍රියා
+        </h1>
+        <p class="text-slate-400 text-xs md:text-sm mt-1.5 max-w-2xl mx-auto">
+            අවක්ෂේප සෑදීම, වැඩිපුර NH₃ හමුවේ සංකීර්ණ අයන සාදමින් දියවීම සහ විශේෂ සාන්ද්‍රණ තත්ත්ව අධ්‍යයනය කරන්න.
+        </p>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-5 items-start my-auto">
+
+        <!-- Left Column: Cation Selection Controls -->
+        <section class="lg:col-span-4 bg-slate-900/70 border border-slate-800 backdrop-blur-md p-5 rounded-2xl shadow-xl flex flex-col gap-4">
+            <h2 class="text-sm font-bold text-slate-200 flex items-center gap-2 border-b border-slate-800 pb-2 uppercase tracking-wider">
+                <i class="fa-solid fa-list-check text-indigo-400"></i>
+                1. කැටායනයක් තෝරන්න (Select Cation)
+            </h2>
+
+            <!-- Cation Grid Selector Buttons -->
+            <div id="cationGrid" class="grid grid-cols-3 gap-2">
+                <!-- Dynamically populated via JS -->
+            </div>
+
+            <!-- Action Controls -->
+            <h2 class="text-sm font-bold text-slate-200 flex items-center gap-2 border-b border-slate-800 pb-2 mt-2 uppercase tracking-wider">
+                <i class="fa-solid fa-vial text-emerald-400"></i>
+                2. ප්‍රතිකාරකය එකතු කිරීම (Add Reagent)
+            </h2>
+
+            <div class="flex flex-col gap-2.5">
+                <button id="btnDropNH3" onclick="addNH3Drops()" class="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white font-semibold py-2.5 px-4 rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2 text-sm disabled:opacity-40 disabled:cursor-not-allowed">
+                    <i class="fa-solid fa-droplet text-cyan-200"></i>
+                    NH₃ ටිකක් එකතු කරන්න (Dilute NH₃)
+                </button>
+
+                <button id="btnExcessNH3" onclick="addExcessNH3()" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold py-2.5 px-4 rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2 text-sm disabled:opacity-40 disabled:cursor-not-allowed">
+                    <i class="fa-solid fa-bottle-droplet text-purple-200"></i>
+                    වැඩිපුර NH₃ එකතු කරන්න (Excess NH₃)
+                </button>
+
+                <!-- Dynamic Special Button for Co2+ air oxidation or Cr3+ condition -->
+                <button id="btnSpecialAction" onclick="handleSpecialAction()" class="hidden w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-semibold py-2.5 px-4 rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2 text-sm">
+                    <i id="specialIcon" class="fa-solid fa-wind"></i>
+                    <span id="specialBtnText">වාතයට (O₂) නිරාවරණය කරන්න</span>
+                </button>
+
+                <button id="btnReset" onclick="resetReaction()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium py-2 px-4 rounded-xl transition duration-200 flex items-center justify-center gap-2 border border-slate-700 text-xs mt-1">
+                    <i class="fa-solid fa-rotate-left"></i>
+                    නැවත මුල සිට (Reset)
+                </button>
+            </div>
+        </section>
+
+        <!-- Center Column: Animated Lab Apparatus Visualization -->
+        <section class="lg:col-span-4 bg-slate-900/70 border border-slate-800 backdrop-blur-md p-6 rounded-2xl shadow-xl flex flex-col items-center justify-center min-h-[400px] relative overflow-hidden">
+
+            <!-- Background Glow -->
+            <div id="bgGlow" class="absolute w-48 h-48 rounded-full blur-3xl opacity-25 bg-indigo-500 pointer-events-none transition-all duration-1000"></div>
+
+            <!-- Dropper Reagent Visual -->
+            <div id="dropper" class="absolute top-5 flex flex-col items-center opacity-0 transition-opacity duration-300 pointer-events-none z-20">
+                <div class="w-4 h-9 bg-slate-400/80 rounded-t-sm border border-slate-300"></div>
+                <div class="w-2 h-5 bg-slate-300/80"></div>
+                <div class="w-1 h-3 bg-slate-200/90 rounded-b-full"></div>
+            </div>
+
+            <!-- Falling Droplet Animation Element -->
+            <div id="droplet" class="droplet top-20 z-10"></div>
+
+            <!-- Test Tube Apparatus Design -->
+            <div class="mt-10 mb-2 relative flex flex-col items-center">
+                <div class="test-tube-outer flex items-end">
+                    <div class="test-tube-lip"></div>
+                    <!-- Fluid Level & Base Liquid Color -->
+                    <div id="liquid" class="liquid-container bg-blue-500/30">
+                        <!-- Bubbles for Air Oxidation -->
+                        <div id="bubble1" class="bubble left-3"></div>
+                        <div id="bubble2" class="bubble left-8" style="animation-delay: 0.6s;"></div>
+                        <div id="bubble3" class="bubble right-4" style="animation-delay: 1.1s;"></div>
+                        <div id="meniscus" class="meniscus bg-blue-400/40"></div>
+                    </div>
+                    <!-- Precipitate Layer at bottom -->
+                    <div id="precipitate" class="precipitate-layer"></div>
+                </div>
+
+                <!-- Stand Base Visualization -->
+                <div class="w-36 h-3.5 bg-slate-700 rounded-full mt-2 border border-slate-600 shadow-md"></div>
+            </div>
+
+            <!-- Status Badge -->
+            <div id="statusBadge" class="mt-3 px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 shadow text-center">
+                ආරම්භක ද්‍රාවණය
+            </div>
+        </section>
+
+        <!-- Right Column: Scientific Information and Explanation -->
+        <section class="lg:col-span-4 bg-slate-900/70 border border-slate-800 backdrop-blur-md p-5 rounded-2xl shadow-xl flex flex-col justify-between min-h-[400px]">
+            <div>
+                <h2 class="text-sm font-bold text-slate-200 flex items-center gap-2 border-b border-slate-800 pb-2 mb-3 uppercase tracking-wider">
+                    <i class="fa-solid fa-square-poll-vertical text-amber-400"></i>
+                    නිරීක්ෂණ සහ තොරතුරු
+                </h2>
+
+                <!-- Dynamic Info Content -->
+                <div class="space-y-3 text-xs">
+                    <!-- Selected Cation -->
+                    <div class="bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/60">
+                        <span class="text-[10px] text-slate-400 block mb-0.5">තෝරාගත් කැටායනය:</span>
+                        <div id="infoCationName" class="text-sm font-bold text-indigo-300">-</div>
+                    </div>
+
+                    <!-- Precipitate Information -->
+                    <div class="bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/60">
+                        <span class="text-[10px] text-slate-400 block mb-0.5">අවක්ෂේපය (Dilute NH₃):</span>
+                        <div id="infoPptName" class="font-semibold text-slate-200">-</div>
+                    </div>
+
+                    <!-- Complex Ion Information -->
+                    <div class="bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/60">
+                        <span class="text-[10px] text-slate-400 block mb-0.5">සංකීර්ණ අයනය සහ ද්‍රාවණයේ පැහැය:</span>
+                        <div id="infoComplexName" class="font-semibold text-emerald-300">-</div>
+                    </div>
+
+                    <!-- Balanced Chemical Equation -->
+                    <div class="bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/60">
+                        <span class="text-[10px] text-slate-400 block mb-1">රසායනික සමීකරණය:</span>
+                        <div id="infoEquation" class="font-mono text-[11px] text-amber-200 break-words bg-slate-950/70 p-2 rounded border border-slate-800">
+                            -
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Theoretical Explanation Box -->
+            <div class="mt-3 p-3 bg-indigo-950/40 border border-indigo-800/50 rounded-xl text-xs text-indigo-200 leading-relaxed">
+                <i class="fa-solid fa-circle-info mr-1 text-indigo-400"></i>
+                <span id="infoExplanation">කැටායනයක් තෝරා NH₃ එකතු කර බලන්න.</span>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Important Theory Rule Section for AL Syllabus -->
+    <section class="max-w-6xl mx-auto w-full mt-5 bg-slate-900/80 border border-slate-800 rounded-2xl p-4 text-xs backdrop-blur-md shadow-lg">
+        <div class="flex items-center gap-2 font-bold text-amber-400 mb-2 border-b border-slate-800 pb-1.5 text-xs md:text-sm">
+            <i class="fa-solid fa-lightbulb"></i>
+            උසස් පෙළ විශේෂ සටහන (A/L Chemistry Syllabus Highlights):
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-slate-300 leading-relaxed">
+            <div class="bg-slate-950/50 p-3 rounded-xl border border-slate-800">
+                <span class="text-indigo-400 font-semibold block mb-1">1. ප්‍රබල සහ දුබල භෂ්ම වල අවක්ෂේප දියවීම (Zn²⁺):</span>
+                <strong>Zn²⁺</strong> සාදන hydroxide අවක්ෂේපය, <strong>වැඩිපුර ප්‍රබල භෂ්ම (NaOH)</strong> හමුවේ මෙන්ම <strong>වැඩිපුර දුබල භෂ්ම (NH₃)</strong> හමුවේද ද්‍රාව්‍ය වී සංකීර්ණ අයන සාදයි.
+            </div>
+            <div class="bg-slate-950/50 p-3 rounded-xl border border-slate-800">
+                <span class="text-amber-400 font-semibold block mb-1">2. වැඩිපුර භෂ්ම හමුවේ දිය නොවෙන කැටායන:</span>
+                <strong>Mg²⁺, Mn²⁺, Al³⁺, Fe²⁺, Fe³⁺</strong> වැනි කැටායන සාදන හයිඩ්‍රොක්සයිඩ, වැඩිපුර ප්‍රබල හෝ දුබල භෂ්ම හමුවේ දියවී සංකීර්ණ අයන සාදන්නේ <u>නැත</u>. (Mg(OH)₂, Mn(OH)₂ ආදිය අවක්ෂේප ලෙස පවතී).
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer with Branding -->
+    <footer class="max-w-6xl mx-auto w-full text-center text-xs text-slate-500 mt-6 pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <span class="text-slate-400">රසායන විද්‍යා අධ්‍යාපනික අනුකරණය | Sri Lankan A/L Chemistry Syllabus</span>
+
+        <!-- Designed by Dinusha Logo Link -->
+        <a href="https://t.me/dinusha_official" target="_blank" rel="noopener noreferrer" title="Contact on Telegram" class="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-950 via-purple-950 to-slate-900 border border-indigo-500/40 hover:border-indigo-400 px-3.5 py-1.5 rounded-full shadow-md text-slate-200 transition duration-300 transform hover:scale-105 group cursor-pointer">
+            <i class="fa-brands fa-telegram text-sky-400 text-sm group-hover:animate-bounce"></i>
+            <span class="font-semibold text-xs tracking-wide" style="font-family: 'Poppins', sans-serif;">designed by <span class="text-indigo-300 font-bold group-hover:text-indigo-200">Dinusha ツ</span></span>
+        </a>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Cation Data Dictionary containing color states, equations, and Sri Lankan A/L syllabus notes
+        const cationData = {
+            'Cu2': {
+                name: 'කොපර්(II) අයනය - Cu²⁺',
+                symbol: 'Cu²⁺',
+                initialColor: 'rgba(59, 130, 246, 0.45)', // Pale blue solution
+                meniscusInitial: 'rgba(96, 165, 250, 0.6)',
+                pptName: 'Cu(OH)₂ - ලා නිල් පැහැති අවක්ෂේපය',
+                pptColor: 'rgba(56, 189, 248, 0.95)', // Pale blue ppt
+                pptLiquidColor: 'rgba(186, 230, 253, 0.25)',
+                complexName: '[Cu(NH₃)₄]²⁺ - තද නිල් (Royal Blue) ද්‍රාවණය',
+                complexColor: 'rgba(30, 27, 75, 0.95)', // Deep blue / navy
+                meniscusComplex: 'rgba(67, 56, 202, 0.9)',
+                eqPpt: 'Cu²⁺(aq) + 2NH₃(aq) + 2H₂O(l) → Cu(OH)₂(s) + 2NH₄⁺(aq)',
+                eqComplex: 'Cu(OH)₂(s) + 4NH₃(aq) → [Cu(NH₃)₄]²⁺(aq) + 2OH⁻(aq)',
+                explanation: 'ස්වල්පයක් NH₃ එකතු කළ විට ලා නිල් පැහැති Cu(OH)₂ අවක්ෂේප වේ. වැඩිපුර NH₃ එකතු කළ විට [Cu(NH₃)₄]²⁺ (ටෙට්‍රාඇමීන්කොපර්(II)) තද නිල් පැහැති සංකීර්ණ අයනය සාදමින් අවක්ෂේපය සම්පූර්ණයෙන් දිය වේ.'
+            },
+            'Zn2': {
+                name: 'සින්ක් අයනය - Zn²⁺',
+                symbol: 'Zn²⁺',
+                initialColor: 'rgba(241, 245, 249, 0.15)', // Colorless
+                meniscusInitial: 'rgba(255, 255, 255, 0.3)',
+                pptName: 'Zn(OH)₂ - සුදු පැහැති අවක්ෂේපය',
+                pptColor: 'rgba(255, 255, 255, 0.92)', // White ppt
+                pptLiquidColor: 'rgba(241, 245, 249, 0.1)',
+                complexName: '[Zn(NH₃)₄]²⁺ - වර්ණහීන ද්‍රාවණය',
+                complexColor: 'rgba(241, 245, 249, 0.2)', // Colorless complex solution
+                meniscusComplex: 'rgba(255, 255, 255, 0.4)',
+                eqPpt: 'Zn²⁺(aq) + 2NH₃(aq) + 2H₂O(l) → Zn(OH)₂(s) + 2NH₄⁺(aq)',
+                eqComplex: 'Zn(OH)₂(s) + 4NH₃(aq) → [Zn(NH₃)₄]²⁺(aq) + 2OH⁻(aq)',
+                explanation: 'NH₃ ස්වල්පයක් හමුවේ සුදු පැහැති Zn(OH)₂ අවක්ෂේප වේ. Zn²⁺ අවක්ෂේපය වැඩිපුර ප්‍රබල භෂ්ම (NaOH → [Zn(OH)₄]²⁻) මෙන්ම වැඩිපුර දුබල භෂ්ම (NH₃ → [Zn(NH₃)₄]²⁺) යන දෙකේදීම දියවේ.'
+            },
+            'Co2': {
+                name: 'කොබෝල්ට්(II) අයනය - Co²⁺',
+                symbol: 'Co²⁺',
+                initialColor: 'rgba(244, 114, 182, 0.35)', // Pink solution
+                meniscusInitial: 'rgba(251, 113, 133, 0.5)',
+                pptName: 'Co(OH)₂ - නිල් / ළා රෝස පැහැති අවක්ෂේපය',
+                pptColor: 'rgba(37, 99, 235, 0.9)', // Blueish ppt
+                pptLiquidColor: 'rgba(244, 114, 182, 0.2)',
+                complexName: '[Co(NH₃)₆]²⁺ - කහ-දුඹුරු පැහැති (Yellow-Brown) ද්‍රාවණය',
+                complexColor: 'rgba(180, 83, 9, 0.85)', // Yellow-brown
+                meniscusComplex: 'rgba(217, 119, 6, 0.9)',
+                eqPpt: 'Co²⁺(aq) + 2NH₃(aq) + 2H₂O(l) → Co(OH)₂(s) + 2NH₄⁺(aq)',
+                eqComplex: 'Co(OH)₂(s) + 6NH₃(aq) → [Co(NH₃)₆]²⁺(aq) + 2OH⁻(aq)',
+                explanation: 'NH₃ ස්වල්පයක් හමුවේ නිල්/ළා රෝස Co(OH)₂ අවක්ෂේප වේ. වැඩිපුර NH₃ හමුවේ [Co(NH₃)₆]²⁺ සාදමින් කහ-දුඹුරු ද්‍රාවණයක් ලැබේ. මෙය වාතයට (O₂) නිරාවරණය කළ විට [Co(NH₃)₆]³⁺ බවට ඔක්සිකරණය වී තැඹිලි-දුඹුරු වේ!'
+            },
+            'Ag1': {
+                name: 'සිල්වර් අයනය - Ag⁺',
+                symbol: 'Ag⁺',
+                initialColor: 'rgba(241, 245, 249, 0.15)', // Colorless
+                meniscusInitial: 'rgba(255, 255, 255, 0.3)',
+                pptName: 'Ag₂O - දුඹුරු පැහැති අවක්ෂේපය',
+                pptColor: 'rgba(120, 53, 15, 0.95)', // Brown ppt
+                pptLiquidColor: 'rgba(254, 243, 199, 0.15)',
+                complexName: '[Ag(NH₃)₂]⁺ - වර්ණහීන ද්‍රාවණය (Tollens Reagent)',
+                complexColor: 'rgba(241, 245, 249, 0.2)', // Colorless solution
+                meniscusComplex: 'rgba(255, 255, 255, 0.4)',
+                eqPpt: '2Ag⁺(aq) + 2NH₃(aq) + H₂O(l) → Ag₂O(s) + 2NH₄⁺(aq)',
+                eqComplex: 'Ag₂O(s) + 4NH₃(aq) + H₂O(l) → 2[Ag(NH₃)₂]⁺(aq) + 2OH⁻(aq)',
+                explanation: 'NH₃ ටිකක් එකතු කළ විට දුඹුරු පැහැති Ag₂O අවක්ෂේප වේ. වැඩිපුර NH₃ හමුවේ [Ag(NH₃)₂]⁺ (ඩයිඇමීන්සිල්වර්(I)) වර්ණහීන සංකීර්ණ අයනය සාදමින් පහසුවෙන් දිය වේ.'
+            },
+            'Ni2': {
+                name: 'නිකල්(II) අයනය - Ni²⁺',
+                symbol: 'Ni²⁺',
+                initialColor: 'rgba(34, 197, 94, 0.35)', // Light green
+                meniscusInitial: 'rgba(74, 222, 128, 0.5)',
+                pptName: 'Ni(OH)₂ - ළා කොළ පැහැති අවක්ෂේපය',
+                pptColor: 'rgba(34, 197, 94, 0.9)', // Green ppt
+                pptLiquidColor: 'rgba(220, 252, 231, 0.15)',
+                complexName: '[Ni(NH₃)₆]²⁺ - නිල්/දම් පැහැති (Violet-Blue) ද්‍රාවණය',
+                complexColor: 'rgba(99, 102, 241, 0.85)', // Blue-violet solution
+                meniscusComplex: 'rgba(129, 140, 248, 0.9)',
+                eqPpt: 'Ni²⁺(aq) + 2NH₃(aq) + 2H₂O(l) → Ni(OH)₂(s) + 2NH₄⁺(aq)',
+                eqComplex: 'Ni(OH)₂(s) + 6NH₃(aq) → [Ni(NH₃)₆]²⁺(aq) + 2OH⁻(aq)',
+                explanation: 'ස්වල්පයක් NH₃ හමුවේ ළා කොළ පැහැති Ni(OH)₂ අවක්ෂේප වේ. වැඩිපුර NH₃ හමුවේ [Ni(NH₃)₆]²⁺ (හෙක්සාඇමීන්නිකල්(II)) නිල්-දම් පැහැති සංකීර්ණ ද්‍රාවණයක් සාදමින් දිය වේ.'
+            },
+            'Cd2': {
+                name: 'කැඩ්මියම් අයනය - Cd²⁺',
+                symbol: 'Cd²⁺',
+                initialColor: 'rgba(241, 245, 249, 0.15)', // Colorless
+                meniscusInitial: 'rgba(255, 255, 255, 0.3)',
+                pptName: 'Cd(OH)₂ - සුදු පැහැති අවක්ෂේපය',
+                pptColor: 'rgba(248, 250, 252, 0.95)', // White ppt
+                pptLiquidColor: 'rgba(241, 245, 249, 0.1)',
+                complexName: '[Cd(NH₃)₄]²⁺ - වර්ණහීන ද්‍රාවණය',
+                complexColor: 'rgba(241, 245, 249, 0.2)', // Colorless
+                meniscusComplex: 'rgba(255, 255, 255, 0.4)',
+                eqPpt: 'Cd²⁺(aq) + 2NH₃(aq) + 2H₂O(l) → Cd(OH)₂(s) + 2NH₄⁺(aq)',
+                eqComplex: 'Cd(OH)₂(s) + 4NH₃(aq) → [Cd(NH₃)₄]²⁺(aq) + 2OH⁻(aq)',
+                explanation: 'NH₃ ස්වල්පයක් එකතු කළ විට සුදු පැහැති Cd(OH)₂ අවක්ෂේප වේ. වැඩිපුර NH₃ එකතු කළ විට [Cd(NH₃)₄]²⁺ (ටෙට්‍රාඇමීන්කැඩ්මියම්(II)) වර්ණහීන සංකීර්ණ අයනය සාදමින් දිය වේ.'
+            },
+            'Cr3': {
+                name: 'ක්‍රෝමියම්(III) අයනය - Cr³⁺',
+                symbol: 'Cr³⁺',
+                initialColor: 'rgba(16, 185, 129, 0.4)', // Darker green
+                meniscusInitial: 'rgba(52, 211, 153, 0.6)',
+                pptName: 'Cr(OH)₃ - අළු-කොළ පැහැති අවක්ෂේපය',
+                pptColor: 'rgba(5, 150, 105, 0.92)', // Grey-green ppt
+                pptLiquidColor: 'rgba(209, 250, 229, 0.15)',
+                complexName: 'ජලීය NH₃ සමඟ සංකීර්ණ අයන සාදන්නේ නැත!',
+                complexColor: 'rgba(16, 185, 129, 0.3)',
+                meniscusComplex: 'rgba(52, 211, 153, 0.6)',
+                eqPpt: 'Cr³⁺(aq) + 3NH₃(aq) + 3H₂O(l) → Cr(OH)₃(s) + 3NH₄⁺(aq)',
+                eqComplex: 'Cr(OH)₃(s) + aqueous NH₃ → දිය නොවේ (No dissolution)',
+                explanation: '<strong>වැදගත් A/L සටහන:</strong> Cr³⁺ සාදන Cr(OH)₃ ජලීය (aqueous) dilute හෝ excess NH₃ හමුවේ <u>දිය නොවේ</u>! දම් පැහැති [Cr(NH₃)₆]³⁺ ලැබීමට <strong>සාන්ද්‍ර (Conc.) NH₃</strong> අවශ්‍ය වන අතර, කහ පැහැති [Cr(NH₃)₆]³⁺ සාදා ගැනීමට <strong>ද්‍රව (Liquid) NH₃</strong> අවශ්‍ය වේ.'
+            }
+        };
+
+        // State variables
+        let selectedCationKey = 'Cu2';
+        let currentState = 'initial'; // 'initial', 'ppt', 'complex', 'oxidized', 'conc_nh3', 'liq_nh3'
+
+        // DOM Element references
+        const cationGrid = document.getElementById('cationGrid');
+        const liquid = document.getElementById('liquid');
+        const meniscus = document.getElementById('meniscus');
+        const precipitate = document.getElementById('precipitate');
+        const bgGlow = document.getElementById('bgGlow');
+        const dropper = document.getElementById('dropper');
+        const droplet = document.getElementById('droplet');
+        const statusBadge = document.getElementById('statusBadge');
+
+        const btnDropNH3 = document.getElementById('btnDropNH3');
+        const btnExcessNH3 = document.getElementById('btnExcessNH3');
+        const btnSpecialAction = document.getElementById('btnSpecialAction');
+        const specialBtnText = document.getElementById('specialBtnText');
+        const specialIcon = document.getElementById('specialIcon');
+
+        const infoCationName = document.getElementById('infoCationName');
+        const infoPptName = document.getElementById('infoPptName');
+        const infoComplexName = document.getElementById('infoComplexName');
+        const infoEquation = document.getElementById('infoEquation');
+        const infoExplanation = document.getElementById('infoExplanation');
+
+        // Render Cation Selection Buttons
+        function initCationButtons() {
+            cationGrid.innerHTML = '';
+            Object.keys(cationData).forEach(key => {
+                const cation = cationData[key];
+                const btn = document.createElement('button');
+                btn.className = `cation-btn p-2.5 rounded-xl border text-center transition duration-200 flex flex-col items-center justify-center gap-0.5 ${
+                    key === selectedCationKey
+                    ? 'bg-indigo-600/50 border-indigo-400 text-white shadow-lg ring-2 ring-indigo-400/50'
+                    : 'bg-slate-800/60 border-slate-700/80 text-slate-300 hover:bg-slate-700/60'
+                }`;
+                btn.onclick = () => selectCation(key);
+                btn.innerHTML = `
+                    <span class="text-sm font-bold">${cation.symbol}</span>
+                    <span class="text-[9px] text-slate-400 truncate w-full">${cation.name.split('-')[0]}</span>
+                `;
+                cationGrid.appendChild(btn);
+            });
+        }
+
+        // Select Cation Handler
+        function selectCation(key) {
+            selectedCationKey = key;
+            initCationButtons();
+            resetReaction();
+        }
+
+        // Trigger Dropper Drop Animation
+        function animateDropper(callback) {
+            dropper.style.opacity = '1';
+            droplet.classList.add('droplet-animating');
+
+            setTimeout(() => {
+                droplet.classList.remove('droplet-animating');
+                dropper.style.opacity = '0';
+                if (callback) callback();
+            }, 1000);
+        }
+
+        // Action 1: Add dilute NH3 drops (Precipitation)
+        function addNH3Drops() {
+            if (currentState === 'ppt') return;
+
+            animateDropper(() => {
+                currentState = 'ppt';
+                const data = cationData[selectedCationKey];
+
+                // Adjust Liquid appearance
+                liquid.style.height = '52%';
+                liquid.style.backgroundColor = data.pptLiquidColor;
+                meniscus.style.backgroundColor = data.meniscusInitial;
+
+                // Show Precipitate
+                precipitate.style.backgroundColor = data.pptColor;
+                precipitate.classList.add('precipitate-active');
+
+                // Glow background
+                bgGlow.style.backgroundColor = data.pptColor;
+
+                // Status & Buttons
+                statusBadge.innerText = 'NH₃ ස්වල්පයක් හමුවේ: අවක්ෂේපය සෑදීම';
+                statusBadge.className = 'mt-3 px-4 py-1.5 rounded-full text-xs font-semibold bg-amber-900/40 text-amber-300 border border-amber-700 shadow';
+
+                btnDropNH3.disabled = true;
+                btnExcessNH3.disabled = false;
+
+                // Update Special Buttons for Co2+ or Cr3+
+                if (selectedCationKey === 'Co2' || selectedCationKey === 'Cr3') {
+                    btnSpecialAction.classList.add('hidden');
+                }
+
+                // Update Info Panel
+                infoPptName.innerText = data.pptName;
+                infoEquation.innerText = data.eqPpt;
+                infoExplanation.innerHTML = `ස්වල්පයක් NH₃ එකතු කළ විට, NH₃ ජලවිච්ඡේදනයෙන් ලැබෙන OH⁻ අයන සමඟ ප්‍රතික්‍රියා කර <strong>${data.pptName}</strong> අවක්ෂේපය සාදයි.`;
+            });
+        }
+
+        // Action 2: Add excess NH3 (Dissolution & Complex Ion Formation)
+        function addExcessNH3() {
+            if (currentState === 'complex') return;
+
+            animateDropper(() => {
+                currentState = 'complex';
+                const data = cationData[selectedCationKey];
+
+                // Cr3+ Exception Handling for aqueous NH3
+                if (selectedCationKey === 'Cr3') {
+                    statusBadge.innerText = 'වැඩිපුර ජලීය NH₃: අවක්ෂේපය දිය නොවේ!';
+                    statusBadge.className = 'mt-3 px-4 py-1.5 rounded-full text-xs font-semibold bg-red-900/40 text-red-300 border border-red-700 shadow';
+
+                    infoComplexName.innerHTML = '<span class="text-red-400">ජලීය NH₃ හමුවේ දිය නොවේ</span>';
+                    infoEquation.innerText = 'Cr(OH)₃(s) + aq.NH₃ → ප්‍රතික්‍රියාවක් නැත (No dissolution)';
+                    infoExplanation.innerHTML = data.explanation;
+
+                    // Show options for Conc NH3 or Liq NH3
+                    btnSpecialAction.classList.remove('hidden');
+                    specialBtnText.innerText = 'Conc. NH₃ / Liq. NH₃ භාවිතය';
+                    specialIcon.className = 'fa-solid fa-flask-vial';
+                    return;
+                }
+
+                // Standard Dissolution for other cations
+                precipitate.classList.remove('precipitate-active');
+
+                // Adjust Liquid appearance for Complex Solution
+                liquid.style.height = '65%';
+                liquid.style.backgroundColor = data.complexColor;
+                meniscus.style.backgroundColor = data.meniscusComplex;
+
+                // Glow background
+                bgGlow.style.backgroundColor = data.complexColor;
+
+                // Status & Buttons
+                statusBadge.innerText = 'වැඩිපුර NH₃ හමුවේ: සංකීර්ණ අයනය සෑදී දියවීම';
+                statusBadge.className = 'mt-3 px-4 py-1.5 rounded-full text-xs font-semibold bg-emerald-900/40 text-emerald-300 border border-emerald-700 shadow';
+
+                btnDropNH3.disabled = true;
+                btnExcessNH3.disabled = true;
+
+                // Co2+ Special Air Exposure button activation
+                if (selectedCationKey === 'Co2') {
+                    btnSpecialAction.classList.remove('hidden');
+                    specialBtnText.innerText = 'වාතයට (O₂) නිරාවරණය කරන්න';
+                    specialIcon.className = 'fa-solid fa-wind';
+                }
+
+                // Update Info Panel
+                infoComplexName.innerText = data.complexName;
+                infoEquation.innerText = data.eqComplex;
+                infoExplanation.innerHTML = data.explanation;
+            });
+        }
+
+        // Special Action Handler (Air Oxidation for Co2+ or Conc/Liq NH3 for Cr3+)
+        function handleSpecialAction() {
+            if (selectedCationKey === 'Co2') {
+                // Co2+ Oxidation to [Co(NH3)6]3+ (Orange-Brown)
+                currentState = 'oxidized';
+
+                // Trigger Bubble animation
+                document.getElementById('bubble1').classList.add('bubble-animating');
+                document.getElementById('bubble2').classList.add('bubble-animating');
+                document.getElementById('bubble3').classList.add('bubble-animating');
+
+                setTimeout(() => {
+                    document.getElementById('bubble1').classList.remove('bubble-animating');
+                    document.getElementById('bubble2').classList.remove('bubble-animating');
+                    document.getElementById('bubble3').classList.remove('bubble-animating');
+
+                    const orangeBrownColor = 'rgba(217, 119, 6, 0.95)'; // Orange-brown
+                    liquid.style.backgroundColor = orangeBrownColor;
+                    meniscus.style.backgroundColor = 'rgba(245, 158, 11, 0.9)';
+                    bgGlow.style.backgroundColor = orangeBrownColor;
+
+                    statusBadge.innerText = 'O₂ මගින් ඔක්සිකරණය වී: තැඹිලි-දුඹුරු පැහැති වීම';
+                    statusBadge.className = 'mt-3 px-4 py-1.5 rounded-full text-xs font-semibold bg-orange-900/50 text-orange-300 border border-orange-700 shadow';
+
+                    infoComplexName.innerText = '[Co(NH₃)₆]³⁺ - තැඹිලි-දුඹුරු පැහැති (Orange-Brown) ද්‍රාවණය';
+                    infoEquation.innerText = '4[Co(NH₃)₆]²⁺(aq) + O₂(g) + 2H₂O(l) → 4[Co(NH₃)₆]³⁺(aq) + 4OH⁻(aq)';
+                    infoExplanation.innerHTML = 'වාතයේ ඇති O₂ මඟින් [Co(NH₃)₆]²⁺ සංකීර්ණය [Co(NH₃)₆]³⁺ බවට පහසුවෙන්ම ඔක්සිකරණය වේ. මේ නිසා කහ-දුඹුරු ද්‍රාවණය <strong>තැඹිලි-දුඹුරු පැහැයට</strong> පත්වේ.';
+
+                    btnSpecialAction.classList.add('hidden');
+                }, 1200);
+
+            } else if (selectedCationKey === 'Cr3') {
+                // Cycle between Conc NH3 (Purple) and Liquid NH3 (Yellow)
+                if (currentState !== 'conc_nh3') {
+                    currentState = 'conc_nh3';
+                    precipitate.classList.remove('precipitate-active');
+
+                    const purpleColor = 'rgba(147, 51, 234, 0.85)'; // Purple/Violet
+                    liquid.style.backgroundColor = purpleColor;
+                    meniscus.style.backgroundColor = 'rgba(192, 132, 252, 0.9)';
+                    bgGlow.style.backgroundColor = purpleColor;
+
+                    statusBadge.innerText = 'සාන්ද්‍ර (Conc.) NH₃ හමුවේ: දම් පැහැති සංකීර්ණය';
+                    statusBadge.className = 'mt-3 px-4 py-1.5 rounded-full text-xs font-semibold bg-purple-900/50 text-purple-300 border border-purple-700 shadow';
+
+                    infoComplexName.innerText = '[Cr(NH₃)₆]³⁺ - දම් පැහැති (Purple/Violet) ද්‍රාවණය';
+                    infoEquation.innerText = 'Cr(OH)₃(s) + 6 Conc.NH₃(aq) → [Cr(NH₃)₆]³⁺(aq) + 3OH⁻(aq)';
+                    infoExplanation.innerHTML = '<strong>සාන්ද්‍ර (Conc.) NH₃</strong> භාවිත කළ විට පමණක් Cr(OH)₃ දියවී <strong>දම් පැහැති [Cr(NH₃)₆]³⁺</strong> සාදයි. (නැවත ඔබා ද්‍රව Liquid NH₃ බලන්න)';
+
+                    specialBtnText.innerText = 'ද්‍රව (Liquid) NH₃ තත්ත්ව බලන්න';
+                } else {
+                    currentState = 'liq_nh3';
+                    const yellowColor = 'rgba(234, 179, 8, 0.85)'; // Yellow
+                    liquid.style.backgroundColor = yellowColor;
+                    meniscus.style.backgroundColor = 'rgba(253, 224, 71, 0.9)';
+                    bgGlow.style.backgroundColor = yellowColor;
+
+                    statusBadge.innerText = 'ද්‍රව (Liquid) NH₃ හමුවේ: කහ පැහැති සංකීර්ණය';
+                    statusBadge.className = 'mt-3 px-4 py-1.5 rounded-full text-xs font-semibold bg-yellow-900/50 text-yellow-300 border border-yellow-700 shadow';
+
+                    infoComplexName.innerText = '[Cr(NH₃)₆]³⁺ - කහ පැහැති (Yellow) ද්‍රාවණය';
+                    infoEquation.innerText = 'Cr³⁺ + 6 Liquid NH₃ (Anhydrous) → [Cr(NH₃)₆]³⁺';
+                    infoExplanation.innerHTML = 'අනාරද්‍ර (Anhydrous) <strong>ද්‍රව (Liquid) NH₃</strong> මාධ්‍යයේදී [Cr(NH₃)₆]³⁺ සංකීර්ණය <strong>කහ පැහැති</strong> වේ!';
+
+                    specialBtnText.innerText = 'සාන්ද්‍ර (Conc.) NH₃ තත්ත්ව බලන්න';
+                }
+            }
+        }
+
+        // Action 3: Reset Test Tube
+        function resetReaction() {
+            currentState = 'initial';
+            const data = cationData[selectedCationKey];
+
+            // Reset Fluid Layer
+            liquid.style.height = '45%';
+            liquid.style.backgroundColor = data.initialColor;
+            meniscus.style.backgroundColor = data.meniscusInitial;
+
+            // Hide Precipitate Layer
+            precipitate.classList.remove('precipitate-active');
+            precipitate.style.backgroundColor = 'transparent';
+
+            // Glow Background reset
+            bgGlow.style.backgroundColor = data.initialColor;
+
+            // Status Badge reset
+            statusBadge.innerText = 'ආරම්භක ද්‍රාවණය';
+            statusBadge.className = 'mt-3 px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 shadow text-center';
+
+            // Reset Buttons State
+            btnDropNH3.disabled = false;
+            btnExcessNH3.disabled = false;
+            btnSpecialAction.classList.add('hidden');
+
+            // Info Panel Reset
+            infoCationName.innerText = data.name;
+            infoPptName.innerText = 'තවම අවක්ෂේප වී නැත';
+            infoComplexName.innerText = 'තවම සංකීර්ණ අයනයක් සාදා නැත';
+            infoEquation.innerText = 'ප්‍රතික්‍රියාව ආරම්භ කිරීමට NH₃ එකතු කරන්න';
+            infoExplanation.innerHTML = `${data.symbol} අයන සහිත ද්‍රාවණයට dilute NH₃ හෝ excess NH₃ එකතු කර වෙනස්වීම බලන්න.`;
+        }
+
+        // Initialize App on Window Load
+        window.onload = function() {
+            initCationButtons();
+            resetReaction();
+        };
+    </script>
+</body>
+</html>
