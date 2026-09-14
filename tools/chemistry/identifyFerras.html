@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fe²⁺ සහ Fe³⁺ හඳුනාගැනීමේ පරීක්ෂණාගාරය</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts for Sinhala Support -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;500;600;700;800&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans Sinhala', sans-serif;
+            background: linear-gradient(135deg, #090d16 0%, #111827 50%, #070a12 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+        }
+
+        /* Glassmorphism Test Tube Styling */
+        .test-tube-outer {
+            width: 96px;
+            height: 290px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 3px solid rgba(255, 255, 255, 0.35);
+            border-top: none;
+            border-bottom-left-radius: 48px;
+            border-bottom-right-radius: 48px;
+            position: relative;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.5), 
+                        inset 2px 2px 10px rgba(255, 255, 255, 0.25),
+                        inset -2px -2px 10px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .test-tube-lip {
+            width: 114px;
+            height: 14px;
+            background: rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 7px;
+            position: absolute;
+            top: -14px;
+            left: -12px;
+        }
+
+        /* Liquid Container Dynamic Level */
+        .liquid-container {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 45%;
+            transition: height 1.2s ease-in-out, background-color 1.5s ease-in-out;
+            border-bottom-left-radius: 45px;
+            border-bottom-right-radius: 45px;
+        }
+
+        /* Meniscus Curve */
+        .meniscus {
+            position: absolute;
+            top: -8px;
+            width: 100%;
+            height: 16px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transition: background-color 1.5s ease-in-out;
+        }
+
+        /* Precipitate Animation Layer */
+        .precipitate-layer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 0%;
+            opacity: 0;
+            transition: all 1.5s ease-in-out;
+            border-bottom-left-radius: 45px;
+            border-bottom-right-radius: 45px;
+            filter: blur(1px);
+        }
+
+        .precipitate-active {
+            opacity: 0.95;
+            height: 40%;
+        }
+
+        /* Dropper Animation */
+        @keyframes dropFall {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            70% { transform: translateY(140px) scale(0.9); opacity: 1; }
+            100% { transform: translateY(160px) scale(0.2); opacity: 0; }
+        }
+
+        .droplet {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 0 50% 50% 50%;
+            transform: rotate(45deg);
+            opacity: 0;
+        }
+
+        .droplet-animating {
+            animation: dropFall 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.5);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="p-3 md:p-6 flex flex-col justify-between min-h-screen">
+
+    <!-- Header Section -->
+    <header class="max-w-6xl mx-auto w-full text-center mb-5">
+        <div class="inline-flex items-center gap-2 bg-indigo-950/60 border border-indigo-500/30 px-4 py-1.5 rounded-full mb-3 backdrop-blur-md">
+            <i class="fa-solid fa-flask-vial text-indigo-400 text-lg"></i>
+            <span class="text-indigo-200 text-xs md:text-sm font-semibold">අ.පො.ස උසස් පෙළ රසායන විද්‍යාව - ගුණාත්මක විග්‍රහය</span>
+        </div>
+        <h1 class="text-2xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 tracking-wide">
+            Fe²⁺ සහ Fe³⁺ අයන හඳුනාගැනීමේ පරීක්ෂණ
+        </h1>
+        <p class="text-slate-400 text-xs md:text-sm mt-1.5 max-w-2xl mx-auto">
+            NaOH, SCN⁻, K₄[Fe(CN)₆] සහ K₃[Fe(CN)₆] ප්‍රතිකාරක යොදාගනිමින් වන වර්ණ විපර්යාස සහ අවක්ෂේප නිරීක්ෂණය කරන්න.
+        </p>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-5 items-start my-auto">
+
+        <!-- Left Column: Cation & Reagent Controls -->
+        <section class="lg:col-span-4 bg-slate-900/70 border border-slate-800 backdrop-blur-md p-5 rounded-2xl shadow-xl flex flex-col gap-4">
+            
+            <!-- 1. Cation Selector -->
+            <h2 class="text-sm font-bold text-slate-200 flex items-center gap-2 border-b border-slate-800 pb-2 uppercase tracking-wider">
+                <i class="fa-solid fa-vial-circle-check text-indigo-400"></i>
+                1. කැටායනය තෝරන්න (Select Cation)
+            </h2>
+
+            <div id="cationGrid" class="grid grid-cols-2 gap-3">
+                <button id="btnFe2" onclick="selectCation('Fe2')" class="p-3 rounded-xl border transition duration-200 flex flex-col items-center justify-center gap-1 bg-indigo-600/50 border-indigo-400 text-white shadow-lg ring-2 ring-indigo-400/50">
+                    <span class="text-base font-bold">Fe²⁺</span>
+                    <span class="text-[10px] text-emerald-300">ෆෙරස් අයනය (ළා කොළ)</span>
+                </button>
+                <button id="btnFe3" onclick="selectCation('Fe3')" class="p-3 rounded-xl border transition duration-200 flex flex-col items-center justify-center gap-1 bg-slate-800/60 border-slate-700/80 text-slate-300 hover:bg-slate-700/60">
+                    <span class="text-base font-bold">Fe³⁺</span>
+                    <span class="text-[10px] text-amber-300">ෆෙරික් අයනය (තැඹිලි/කහ)</span>
+                </button>
+            </div>
+
+            <!-- 2. Reagent Selector -->
+            <h2 class="text-sm font-bold text-slate-200 flex items-center gap-2 border-b border-slate-800 pb-2 mt-2 uppercase tracking-wider">
+                <i class="fa-solid fa-droplet text-emerald-400"></i>
+                2. ප්‍රතිකාරකය එකතු කරන්න (Add Reagent)
+            </h2>
+
+            <div class="grid grid-cols-2 gap-2.5">
+                <button onclick="applyReagent('NaOH')" class="bg-gradient-to-r from-teal-700 to-emerald-700 hover:from-teal-600 hover:to-emerald-600 text-white font-semibold py-2.5 px-3 rounded-xl shadow transition duration-200 text-xs flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-bottle-droplet text-cyan-200"></i> NaOH
+                </button>
+
+                <button onclick="applyReagent('SCN')" class="bg-gradient-to-r from-rose-700 to-red-700 hover:from-rose-600 hover:to-red-600 text-white font-semibold py-2.5 px-3 rounded-xl shadow transition duration-200 text-xs flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-vial text-rose-200"></i> SCN⁻ (KSCN)
+                </button>
+
+                <button onclick="applyReagent('K4FeCN6')" class="bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-600 hover:to-indigo-600 text-white font-semibold py-2.5 px-3 rounded-xl shadow transition duration-200 text-xs flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-atom text-blue-200"></i> K₄[Fe(CN)₆]
+                </button>
+
+                <button onclick="applyReagent('K3FeCN6')" class="bg-gradient-to-r from-amber-700 to-orange-700 hover:from-amber-600 hover:to-orange-600 text-white font-semibold py-2.5 px-3 rounded-xl shadow transition duration-200 text-xs flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-flask text-amber-200"></i> K₃[Fe(CN)₆]
+                </button>
+            </div>
+
+            <button id="btnReset" onclick="resetReaction()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium py-2 px-4 rounded-xl transition duration-200 flex items-center justify-center gap-2 border border-slate-700 text-xs mt-2">
+                <i class="fa-solid fa-rotate-left"></i> නැවත මුල සිට (Reset)
+            </button>
+
+        </section>
+
+        <!-- Center Column: Animated Lab Test Tube -->
+        <section class="lg:col-span-4 bg-slate-900/70 border border-slate-800 backdrop-blur-md p-6 rounded-2xl shadow-xl flex flex-col items-center justify-center min-h-[400px] relative overflow-hidden">
+            
+            <!-- Dynamic Background Glow -->
+            <div id="bgGlow" class="absolute w-48 h-48 rounded-full blur-3xl opacity-25 bg-emerald-500 pointer-events-none transition-all duration-1000"></div>
+
+            <!-- Dropper Visual -->
+            <div id="dropper" class="absolute top-5 flex flex-col items-center opacity-0 transition-opacity duration-300 pointer-events-none z-20">
+                <div class="w-4 h-9 bg-slate-400/80 rounded-t-sm border border-slate-300"></div>
+                <div class="w-2 h-5 bg-slate-300/80"></div>
+                <div class="w-1 h-3 bg-slate-200/90 rounded-b-full"></div>
+            </div>
+
+            <!-- Falling Droplet -->
+            <div id="droplet" class="droplet top-20 z-10"></div>
+
+            <!-- Test Tube Visual -->
+            <div class="mt-10 mb-2 relative flex flex-col items-center">
+                <div class="test-tube-outer flex items-end">
+                    <div class="test-tube-lip"></div>
+                    <!-- Liquid Layer -->
+                    <div id="liquid" class="liquid-container bg-emerald-500/20">
+                        <div id="meniscus" class="meniscus bg-emerald-400/30"></div>
+                    </div>
+                    <!-- Precipitate Layer -->
+                    <div id="precipitate" class="precipitate-layer"></div>
+                </div>
+
+                <!-- Stand Base Visual -->
+                <div class="w-36 h-3.5 bg-slate-700 rounded-full mt-2 border border-slate-600 shadow-md"></div>
+            </div>
+
+            <!-- Status Badge -->
+            <div id="statusBadge" class="mt-3 px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 shadow text-center">
+                ආරම්භක Fe²⁺ ද්‍රාවණය
+            </div>
+        </section>
+
+        <!-- Right Column: Scientific Information -->
+        <section class="lg:col-span-4 bg-slate-900/70 border border-slate-800 backdrop-blur-md p-5 rounded-2xl shadow-xl flex flex-col justify-between min-h-[400px]">
+            <div>
+                <h2 class="text-sm font-bold text-slate-200 flex items-center gap-2 border-b border-slate-800 pb-2 mb-3 uppercase tracking-wider">
+                    <i class="fa-solid fa-square-poll-vertical text-amber-400"></i>
+                    නිරීක්ෂණ සහ රසායනික සටහන
+                </h2>
+
+                <div class="space-y-3 text-xs">
+                    <!-- Selected Cation -->
+                    <div class="bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/60">
+                        <span class="text-[10px] text-slate-400 block mb-0.5">තෝරාගත් කැටායනය:</span>
+                        <div id="infoCationName" class="text-sm font-bold text-emerald-300">Fe²⁺ (ෆෙරස් අයනය)</div>
+                    </div>
+
+                    <!-- Observation Color/Precipitate -->
+                    <div class="bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/60">
+                        <span class="text-[10px] text-slate-400 block mb-0.5">ප්‍රතික්‍රියා නිරීක්ෂණය සහ වර්ණය:</span>
+                        <div id="infoObservation" class="font-semibold text-slate-200">ප්‍රතිකාරකයක් තෝරන්න...</div>
+                    </div>
+
+                    <!-- Chemical Equation -->
+                    <div class="bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/60">
+                        <span class="text-[10px] text-slate-400 block mb-1">රසායනික සමීකරණය / සංකීර්ණය:</span>
+                        <div id="infoEquation" class="font-mono text-[11px] text-amber-200 break-words bg-slate-950/70 p-2 rounded border border-slate-800">
+                            -
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Theoretical Explanation Box -->
+            <div class="mt-3 p-3 bg-indigo-950/40 border border-indigo-800/50 rounded-xl text-xs text-indigo-200 leading-relaxed">
+                <i class="fa-solid fa-circle-info mr-1 text-indigo-400"></i>
+                <span id="infoExplanation">Fe²⁺ හෝ Fe³⁺ අයන හඳුනාගැනීම සඳහා ඉහත ඇති ප්‍රතිකාරකයක් (Reagent) මත ක්ලික් කරන්න.</span>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Important Theory Rule Section for AL Syllabus -->
+    <section class="max-w-6xl mx-auto w-full mt-5 bg-slate-900/80 border border-slate-800 rounded-2xl p-4 text-xs backdrop-blur-md shadow-lg">
+        <div class="flex items-center gap-2 font-bold text-amber-400 mb-2 border-b border-slate-800 pb-1.5 text-xs md:text-sm">
+            <i class="fa-solid fa-lightbulb"></i>
+            උසස් පෙළ රසායන විද්‍යාව - Fe²⁺ සහ Fe³⁺ විශේෂ පරීක්ෂණ සටහන:
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-slate-300 leading-relaxed">
+            <div class="bg-slate-950/50 p-3 rounded-xl border border-slate-800">
+                <span class="text-emerald-400 font-semibold block mb-1">1. Fe²⁺ (ෆෙරස්) විශේෂතා:</span>
+                • <strong>NaOH:</strong> ළා කොළ පැහැති Fe(OH)₂ අවක්ෂේපය (වාතයේදී දුඹුරු Fe(OH)₃ බවට පත්වේ).<br>
+                • <strong>K₃[Fe(CN)₆]:</strong> තද නිල් පැහැති (Prussian Blue) අවක්ෂේපය සාදයි.<br>
+                • <strong>K₄[Fe(CN)₆]:</strong> ළා නිල් / සුදු පැහැති අවක්ෂේපයක් සාදයි.
+            </div>
+            <div class="bg-slate-950/50 p-3 rounded-xl border border-slate-800">
+                <span class="text-amber-400 font-semibold block mb-1">2. Fe³⁺ (ෆෙරික්) විශේෂතා:</span>
+                • <strong>NaOH:</strong> තැඹිලි-දුඹුරු පැහැති Fe(OH)₃ අවක්ෂේපය.<br>
+                • <strong>SCN⁻:</strong> ලේ රතු පැහැති (Blood Red) [Fe(SCN)]²⁺ සංකීර්ණ ද්‍රාවණය.<br>
+                • <strong>K₄[Fe(CN)₆]:</strong> තද නිල් පැහැති (Prussian Blue) අවක්ෂේපය සාදයි.
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer with Telegram Channel Links & Branding -->
+    <footer class="max-w-6xl mx-auto w-full text-center text-xs text-slate-500 mt-6 pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <span class="text-slate-400">අධ්‍යාපනික අනුකරණය | Fe²⁺ & Fe³⁺ Identification Tool</span>
+        
+        <div class="flex items-center gap-3">
+            <!-- Telegram E-Tools Channel Button -->
+            <a href="https://t.me/htmlstudytools" target="_blank" rel="noopener noreferrer" title="HTML Study Tools Telegram Channel" class="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3.5 py-1.5 rounded-full shadow-md text-slate-200 transition duration-300 transform hover:scale-105 cursor-pointer">
+                <i class="fa-paper-plane text-cyan-400 text-xs"></i>
+                <span class="font-semibold text-xs" style="font-family: 'Poppins', sans-serif;">HTML Study Tools Channel</span>
+            </a>
+
+            <!-- Designed by Dinusha Telegram Personal Profile -->
+            <a href="https://t.me/dinusha_Official" target="_blank" rel="noopener noreferrer" title="Contact Dinusha on Telegram" class="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-950 via-purple-950 to-slate-900 border border-indigo-500/40 hover:border-indigo-400 px-3.5 py-1.5 rounded-full shadow-md text-slate-200 transition duration-300 transform hover:scale-105 group cursor-pointer">
+                <i class="fa-brands fa-telegram text-sky-400 text-sm group-hover:animate-bounce"></i>
+                <span class="font-semibold text-xs tracking-wide" style="font-family: 'Poppins', sans-serif;">designed by <span class="text-indigo-300 font-bold group-hover:text-indigo-200">@dinusha_Official</span></span>
+            </a>
+        </div>
+    </footer>
+
+    <!-- Simulation Logic JavaScript -->
+    <script>
+        // Data for Fe2+ and Fe3+ Reactions
+        const reactionsData = {
+            'Fe2': {
+                name: 'Fe²⁺ (ෆෙරස් අයනය)',
+                initialColor: 'rgba(16, 185, 129, 0.25)', // Pale green solution
+                meniscusInitial: 'rgba(52, 211, 153, 0.4)',
+                reagents: {
+                    'NaOH': {
+                        obsName: 'Fe(OH)₂ - ළා කොළ පැහැති අවක්ෂේපය',
+                        isPpt: true,
+                        color: 'rgba(20, 83, 45, 0.95)', // Dirty green ppt
+                        liquidColor: 'rgba(241, 245, 249, 0.1)',
+                        meniscusColor: 'rgba(255, 255, 255, 0.3)',
+                        equation: 'Fe²⁺(aq) + 2OH⁻(aq) → Fe(OH)₂(s) ↓',
+                        explanation: 'NaOH එකතු කළ විට ළා කොළ පැහැති Fe(OH)₂ අවක්ෂේප වේ. (වාතයේ තැබූ විට O₂ නිසා ඔක්සිකරණය වී ක්‍රමයෙන් තැඹිලි-දුඹුරු Fe(OH)₃ බවට පත්වේ).'
+                    },
+                    'SCN': {
+                        obsName: 'පැහැදිලි වෙනසක් නැත / රතු පැහැයක් නොලැබේ',
+                        isPpt: false,
+                        color: 'rgba(16, 185, 129, 0.25)',
+                        liquidColor: 'rgba(16, 185, 129, 0.25)',
+                        meniscusColor: 'rgba(52, 211, 153, 0.4)',
+                        equation: 'Fe²⁺(aq) + SCN⁻(aq) → ප්‍රතික්‍රියාවක් නැත (සංකීර්ණයක් නොසෑදේ)',
+                        explanation: 'පිරිසිදු Fe²⁺ ද්‍රාවණ SCN⁻ සමඟ ලේ රතු සංකීර්ණ සාදන්නේ නැත. (SCN⁻ පරීක්ෂණය Fe³⁺ සඳහා පමණක් විශිෂ්ට වේ).'
+                    },
+                    'K4FeCN6': {
+                        obsName: 'ළා නිල් / සුදු පැහැති අවක්ෂේපය',
+                        isPpt: true,
+                        color: 'rgba(191, 219, 254, 0.9)', // Pale blue / bluish white
+                        liquidColor: 'rgba(224, 242, 254, 0.2)',
+                        meniscusColor: 'rgba(147, 197, 253, 0.5)',
+                        equation: 'K₂Fe[Fe(CN)₆] / Fe₂[Fe(CN)₆] ළා නිල් අවක්ෂේපය',
+                        explanation: 'Fe²⁺ ද්‍රාවණයකට K₄[Fe(CN)₆] (Potassium ferrocyanide) එකතු කළ විට ළා නිල්/සුදු පැහැති අවක්ෂේපයක් ලැබේ.'
+                    },
+                    'K3FeCN6': {
+                        obsName: 'තද නිල් පැහැති අවක්ෂේපය (Prussian Blue)',
+                        isPpt: true,
+                        color: 'rgba(30, 58, 138, 0.98)', // Dark Prussian Blue
+                        liquidColor: 'rgba(30, 58, 138, 0.3)',
+                        meniscusColor: 'rgba(29, 78, 216, 0.8)',
+                        equation: 'Fe³⁺ + [Fe(CN)₆]⁴⁻ → Fe₄[Fe(CN)₆]₃(s) ↓',
+                        explanation: 'Fe²⁺ සහ K₃[Fe(CN)₆] (Potassium ferricyanide) ප්‍රතික්‍රියා කර තද නිල් පැහැති (Prussian Blue / Turnbull\'s Blue) අවක්ෂේපය සාදයි.'
+                    }
+                }
+            },
+            'Fe3': {
+                name: 'Fe³⁺ (ෆෙරික් අයනය)',
+                initialColor: 'rgba(217, 119, 6, 0.35)', // Light brownish yellow solution
+                meniscusInitial: 'rgba(245, 158, 11, 0.5)',
+                reagents: {
+                    'NaOH': {
+                        obsName: 'Fe(OH)₃ - තැඹිලි-දුඹුරු (Rust Brown) අවක්ෂේපය',
+                        isPpt: true,
+                        color: 'rgba(146, 64, 14, 0.95)', // Reddish brown ppt
+                        liquidColor: 'rgba(254, 243, 199, 0.15)',
+                        meniscusColor: 'rgba(251, 191, 36, 0.4)',
+                        equation: 'Fe³⁺(aq) + 3OH⁻(aq) → Fe(OH)₃(s) ↓',
+                        explanation: 'NaOH එකතු කළ විට තැඹිලි-දුඹුරු පැහැති Fe(OH)₃ (Iron(III) hydroxide) අවක්ෂේපය සෑදේ.'
+                    },
+                    'SCN': {
+                        obsName: '[Fe(SCN)]²⁺ - ලේ රතු පැහැති (Blood Red) ද්‍රාවණය',
+                        isPpt: false,
+                        color: 'rgba(153, 27, 27, 0.95)', // Blood red solution
+                        liquidColor: 'rgba(153, 27, 27, 0.95)',
+                        meniscusColor: 'rgba(220, 38, 38, 0.9)',
+                        equation: 'Fe³⁺(aq) + SCN⁻(aq) → [Fe(SCN)]²⁺(aq) (Blood Red Solution)',
+                        explanation: 'SCN⁻ (Thiocyanate) අයන එකතු කළ විට තද ලේ රතු පැහැති [Fe(SCN)]²⁺ (thiocyanatoiron(III)) සංකීර්ණ ද්‍රාවණය සෑදේ. මෙය Fe³⁺ සඳහා ඉතා සුවිශේෂී පරීක්ෂණයකි.'
+                    },
+                    'K4FeCN6': {
+                        obsName: 'තද නිල් පැහැති අවක්ෂේපය (Prussian Blue)',
+                        isPpt: true,
+                        color: 'rgba(30, 58, 138, 0.98)', // Dark Prussian Blue
+                        liquidColor: 'rgba(30, 58, 138, 0.3)',
+                        meniscusColor: 'rgba(29, 78, 216, 0.8)',
+                        equation: '4Fe³⁺(aq) + 3[Fe(CN)₆]⁴⁻(aq) → Fe₄[Fe(CN)₆]₃(s) ↓',
+                        explanation: 'Fe³⁺ ද්‍රාවණයකට K₄[Fe(CN)₆] එකතු කළ විට ප්‍රෂියන් නිල් (Prussian Blue) තද නිල් පැහැති අවක්ෂේපය සාදයි.'
+                    },
+                    'K3FeCN6': {
+                        obsName: 'තැඹිලි-දුඹුරු පැහැති ද්‍රාවණය (අවක්ෂේප නැත)',
+                        isPpt: false,
+                        color: 'rgba(180, 83, 9, 0.85)', // Brownish yellow solution
+                        liquidColor: 'rgba(180, 83, 9, 0.85)',
+                        meniscusColor: 'rgba(217, 119, 6, 0.9)',
+                        equation: 'Fe³⁺(aq) + [Fe(CN)₆]³⁻(aq) → Fe[Fe(CN)₆](aq) (Brown/Green Solution)',
+                        explanation: 'Fe³⁺ සහ K₃[Fe(CN)₆] අතර පෙනෙන අවක්ෂේපයක් නොසාදෙන අතර, ද්‍රාවණය තැඹිලි-දුඹුරු / කොළ-දුඹුරු පැහැයක් ගනී.'
+                    }
+                }
+            }
+        };
+
+        // State variables
+        let selectedCation = 'Fe2';
+
+        // DOM Elements
+        const btnFe2 = document.getElementById('btnFe2');
+        const btnFe3 = document.getElementById('btnFe3');
+        const liquid = document.getElementById('liquid');
+        const meniscus = document.getElementById('meniscus');
+        const precipitate = document.getElementById('precipitate');
+        const bgGlow = document.getElementById('bgGlow');
+        const dropper = document.getElementById('dropper');
+        const droplet = document.getElementById('droplet');
+        const statusBadge = document.getElementById('statusBadge');
+
+        const infoCationName = document.getElementById('infoCationName');
+        const infoObservation = document.getElementById('infoObservation');
+        const infoEquation = document.getElementById('infoEquation');
+        const infoExplanation = document.getElementById('infoExplanation');
+
+        // Select Cation Handler
+        function selectCation(cationKey) {
+            selectedCation = cationKey;
+            
+            if (cationKey === 'Fe2') {
+                btnFe2.className = 'p-3 rounded-xl border transition duration-200 flex flex-col items-center justify-center gap-1 bg-indigo-600/50 border-indigo-400 text-white shadow-lg ring-2 ring-indigo-400/50';
+                btnFe3.className = 'p-3 rounded-xl border transition duration-200 flex flex-col items-center justify-center gap-1 bg-slate-800/60 border-slate-700/80 text-slate-300 hover:bg-slate-700/60';
+            } else {
+                btnFe3.className = 'p-3 rounded-xl border transition duration-200 flex flex-col items-center justify-center gap-1 bg-amber-600/50 border-amber-400 text-white shadow-lg ring-2 ring-amber-400/50';
+                btnFe2.className = 'p-3 rounded-xl border transition duration-200 flex flex-col items-center justify-center gap-1 bg-slate-800/60 border-slate-700/80 text-slate-300 hover:bg-slate-700/60';
+            }
+
+            resetReaction();
+        }
+
+        // Dropper Animation Helper
+        function animateDropper(callback) {
+            dropper.style.opacity = '1';
+            droplet.classList.add('droplet-animating');
+
+            setTimeout(() => {
+                droplet.classList.remove('droplet-animating');
+                dropper.style.opacity = '0';
+                if (callback) callback();
+            }, 1000);
+        }
+
+        // Apply Reagent Logic
+        function applyReagent(reagentKey) {
+            animateDropper(() => {
+                const cation = reactionsData[selectedCation];
+                const reagent = cation.reagents[reagentKey];
+
+                if (reagent.isPpt) {
+                    // Show Precipitate Animation
+                    liquid.style.height = '55%';
+                    liquid.style.backgroundColor = reagent.liquidColor;
+                    meniscus.style.backgroundColor = reagent.meniscusColor;
+
+                    precipitate.style.backgroundColor = reagent.color;
+                    precipitate.classList.add('precipitate-active');
+
+                    bgGlow.style.backgroundColor = reagent.color;
+                } else {
+                    // Show Solution Color Change (No Precipitate)
+                    precipitate.classList.remove('precipitate-active');
+                    
+                    liquid.style.height = '62%';
+                    liquid.style.backgroundColor = reagent.color;
+                    meniscus.style.backgroundColor = reagent.meniscusColor;
+
+                    bgGlow.style.backgroundColor = reagent.color;
+                }
+
+                // Update Status & Information Panel
+                statusBadge.innerText = `${reagentKey} එකතු කළ පසු නිරීක්ෂණය`;
+                statusBadge.className = 'mt-3 px-4 py-1.5 rounded-full text-xs font-semibold bg-indigo-900/50 text-indigo-200 border border-indigo-700 shadow';
+
+                infoObservation.innerText = reagent.obsName;
+                infoEquation.innerText = reagent.equation;
+                infoExplanation.innerHTML = reagent.explanation;
+            });
+        }
+
+        // Reset Test Tube
+        function resetReaction() {
+            const cation = reactionsData[selectedCation];
+
+            liquid.style.height = '45%';
+            liquid.style.backgroundColor = cation.initialColor;
+            meniscus.style.backgroundColor = cation.meniscusInitial;
+
+            precipitate.classList.remove('precipitate-active');
+            precipitate.style.backgroundColor = 'transparent';
+
+            bgGlow.style.backgroundColor = cation.initialColor;
+
+            statusBadge.innerText = `ආරම්භක ${cation.name} ද්‍රාවණය`;
+            statusBadge.className = 'mt-3 px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 shadow text-center';
+
+            infoCationName.innerText = cation.name;
+            infoObservation.innerText = 'ප්‍රතිකාරකයක් තෝරන්න...';
+            infoEquation.innerText = '-';
+            infoExplanation.innerHTML = `${cation.name} අයන සඳහා පරීක්ෂණ සිදු කිරීමට NaOH, SCN⁻, K₄[Fe(CN)₆] හෝ K₃[Fe(CN)₆] බොත්තමක් ඔබන්න.`;
+        }
+
+        // Initialize default view
+        window.onload = function() {
+            resetReaction();
+        };
+    </script>
+</body>
+</html>
