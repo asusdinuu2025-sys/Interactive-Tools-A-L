@@ -1,4 +1,4 @@
-# E-tools for G.C.E A/L Sri Lanka
+# Study-Lab G.C.E A/L Sri Lanka
 
 A static educational website with interactive tools for Sri Lankan G.C.E. Advanced Level students, covering Mathematics, Biology, Chemistry and Physics.
 
@@ -7,7 +7,7 @@ Built with plain HTML, CSS and JavaScript only — no framework, no build step, 
 ## Project structure
 
 ```
-E-tools/
+Study-Lab/
 ├── index.html            Homepage with 4 subject cards
 ├── maths.html            Mathematics tool directory
 ├── biology.html          Biology tool directory
