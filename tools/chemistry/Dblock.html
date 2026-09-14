@@ -1,0 +1,2003 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>d-Block අධ්‍යයන මාර්ගෝපදේශය | A/L රසායන</title>
+
+<!-- MathJax -->
+<script>
+MathJax = {
+  tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$']] },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-chtml.min.js"></script>
+
+<style>
+/* ===== CSS VARIABLES ===== */
+:root {
+  --bg: #0d1117;
+  --bg2: #161b22;
+  --bg3: #21262d;
+  --border: #30363d;
+  --text: #e6edf3;
+  --text2: #8b949e;
+  --accent: #58a6ff;
+  --accent2: #3fb950;
+  --accent3: #f78166;
+  --gold: #d29922;
+  --purple: #bc8cff;
+  --card-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  --radius: 14px;
+  --radius-sm: 8px;
+  --font-main: 'Noto Sans Sinhala', 'Noto Serif Sinhala', sans-serif;
+  --font-mono: 'Courier New', monospace;
+  --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+
+body.light {
+  --bg: #f0f4f8;
+  --bg2: #ffffff;
+  --bg3: #e8edf2;
+  --border: #d0d7de;
+  --text: #1c2128;
+  --text2: #57606a;
+  --card-shadow: 0 4px 24px rgba(0,0,0,0.1);
+}
+
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-main);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.7;
+  transition: background var(--transition), color var(--transition);
+  min-height: 100vh;
+}
+
+/* ===== HEADER ===== */
+.header {
+  background: linear-gradient(135deg, #0d1117 0%, #1a2035 50%, #0d1117 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(12px);
+}
+
+body.light .header {
+  background: linear-gradient(135deg, #1e3a5f 0%, #2563a8 50%, #1e3a5f 100%);
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.header-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+
+.header-subtitle {
+  font-size: 11px;
+  color: rgba(255,255,255,0.6);
+}
+
+.theme-btn {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.theme-btn:hover { background: rgba(255,255,255,0.22); }
+
+.search-wrap {
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 24px;
+  color: #fff;
+  font-family: var(--font-main);
+  font-size: 13px;
+  padding: 9px 16px 9px 36px;
+  outline: none;
+  transition: all var(--transition);
+}
+.search-input::placeholder { color: rgba(255,255,255,0.5); }
+.search-input:focus { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.4); }
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255,255,255,0.5);
+  font-size: 13px;
+  pointer-events: none;
+}
+
+/* ===== NAV PILLS ===== */
+.nav-pills {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+}
+.nav-pills::-webkit-scrollbar { display: none; }
+
+.pill {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text2);
+  font-family: var(--font-main);
+  font-size: 12px;
+  padding: 6px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition);
+}
+.pill.active, .pill:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* ===== MAIN CONTENT ===== */
+.main { padding: 16px; max-width: 800px; margin: 0 auto; }
+
+/* ===== SECTION ===== */
+.section { margin-bottom: 24px; }
+
+.section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ===== OVERVIEW TABLE ===== */
+.table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  min-width: 560px;
+}
+
+thead tr { background: var(--bg3); }
+
+th {
+  padding: 10px 8px;
+  text-align: center;
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+td {
+  padding: 9px 8px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+
+tr:last-child td { border-bottom: none; }
+
+tbody tr:hover { background: rgba(88,166,255,0.06); }
+
+.element-symbol {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--accent);
+}
+
+.config-text {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text2);
+}
+
+/* ===== ELEMENT CARDS ===== */
+.element-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.element-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+  transition: all var(--transition);
+}
+
+.element-card:hover { border-color: var(--accent); }
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  gap: 12px;
+}
+
+.card-header:active { background: rgba(88,166,255,0.05); }
+
+.card-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.element-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
+  border: 2px solid;
+}
+
+.element-badge .sym { font-size: 18px; line-height: 1; }
+.element-badge .num { font-size: 9px; opacity: 0.8; }
+
+.card-info { flex: 1; }
+.card-name { font-weight: 700; font-size: 14px; color: var(--text); }
+.card-meta { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+.card-chevron {
+  color: var(--text2);
+  font-size: 16px;
+  transition: transform var(--transition);
+  flex-shrink: 0;
+}
+
+.element-card.open .card-chevron { transform: rotate(180deg); }
+
+.card-body {
+  display: none;
+  padding: 0 16px 16px;
+  border-top: 1px solid var(--border);
+  animation: slideDown 0.2s ease;
+}
+
+.element-card.open .card-body { display: block; }
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== CONTENT BLOCKS ===== */
+.info-block {
+  background: var(--bg3);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin-top: 12px;
+  border-left: 3px solid var(--accent);
+}
+
+.info-block.green { border-left-color: var(--accent2); }
+.info-block.red { border-left-color: var(--accent3); }
+.info-block.gold { border-left-color: var(--gold); }
+.info-block.purple { border-left-color: var(--purple); }
+
+.info-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text2);
+  margin-bottom: 6px;
+}
+
+.info-content { font-size: 13px; color: var(--text); }
+
+/* ===== COLOR CHIPS ===== */
+.color-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.color-chip {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 10px 5px 5px;
+  font-size: 12px;
+}
+
+.color-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.2);
+  flex-shrink: 0;
+}
+
+.eq-box {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin-top: 10px;
+  font-size: 12px;
+  text-align: center;
+  overflow-x: auto;
+}
+
+/* ===== COLOR MASTER TABLE ===== */
+.color-master-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.color-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all var(--transition);
+}
+
+.color-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+
+.color-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.color-ion { font-size: 12px; font-weight: 600; color: var(--text); }
+.color-name { font-size: 11px; color: var(--text2); margin-top: 1px; }
+
+/* ===== QUIZ SECTION ===== */
+.quiz-card {
+  background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  text-align: center;
+}
+
+.quiz-question-box {
+  background: var(--bg3);
+  border-radius: var(--radius-sm);
+  padding: 20px;
+  margin: 16px 0;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quiz-ion {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.quiz-reveal-btn {
+  background: var(--accent);
+  border: none;
+  border-radius: 24px;
+  color: #fff;
+  font-family: var(--font-main);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 28px;
+  cursor: pointer;
+  transition: all var(--transition);
+  margin: 6px;
+  min-height: 44px;
+}
+
+.quiz-reveal-btn:hover { background: #79b8ff; transform: translateY(-1px); }
+.quiz-reveal-btn.secondary { background: var(--bg3); color: var(--text); border: 1px solid var(--border); }
+.quiz-reveal-btn.secondary:hover { border-color: var(--accent); color: var(--accent); background: var(--bg3); }
+
+.quiz-answer {
+  background: var(--bg3);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  margin-top: 14px;
+  display: none;
+  animation: slideDown 0.2s ease;
+}
+
+.quiz-answer.show { display: block; }
+
+.answer-swatch {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  margin: 0 auto 8px;
+  border: 2px solid rgba(255,255,255,0.2);
+}
+
+.answer-color-text { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.answer-sub { font-size: 12px; color: var(--text2); }
+
+.quiz-score {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin: 12px 0;
+  font-size: 13px;
+  color: var(--text2);
+}
+
+.score-val { font-weight: 700; font-size: 18px; color: var(--accent); }
+
+/* ===== OXIDE TRENDS ===== */
+.oxide-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.oxide-item {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  text-align: center;
+}
+
+.oxide-formula { font-weight: 700; font-size: 13px; color: var(--text); }
+.oxide-state { font-size: 11px; margin-top: 4px; padding: 3px 8px; border-radius: 10px; display: inline-block; }
+
+.acidic { background: rgba(247,129,102,0.2); color: #f78166; }
+.basic { background: rgba(63,185,80,0.2); color: #3fb950; }
+.amphoteric { background: rgba(210,153,34,0.2); color: #d29922; }
+
+/* ===== SEARCH HIGHLIGHT ===== */
+.search-highlight { background: rgba(210,153,34,0.3); border-radius: 3px; }
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ===== HIDDEN ===== */
+.hidden { display: none !important; }
+
+/* ===== BADGE COLORS ===== */
+.badge-sc { background: rgba(88,166,255,0.1); border-color: #58a6ff; color: #58a6ff; }
+.badge-ti { background: rgba(63,185,80,0.1); border-color: #3fb950; color: #3fb950; }
+.badge-v  { background: rgba(188,140,255,0.1); border-color: #bc8cff; color: #bc8cff; }
+.badge-cr { background: rgba(247,129,102,0.1); border-color: #f78166; color: #f78166; }
+.badge-mn { background: rgba(210,153,34,0.1); border-color: #d29922; color: #d29922; }
+.badge-fe { background: rgba(139,148,158,0.1); border-color: #8b949e; color: #8b949e; }
+.badge-co { background: rgba(88,166,255,0.15); border-color: #4a90e2; color: #4a90e2; }
+.badge-ni { background: rgba(63,185,80,0.15); border-color: #28a745; color: #28a745; }
+.badge-cu { background: rgba(210,105,30,0.15); border-color: #cd7f32; color: #cd7f32; }
+.badge-zn { background: rgba(255,255,255,0.05); border-color: #aaa; color: #aaa; }
+
+/* ===== MJ fix ===== */
+mjx-container { font-size: 13px !important; overflow-x: auto; }
+
+/* ===== REACTION BOX ===== */
+.rxn-box {
+  background: var(--bg3);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  margin: 6px 0;
+  font-size: 12px;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+}
+
+@media (min-width: 600px) {
+  .color-master-grid { grid-template-columns: 1fr 1fr 1fr; }
+  .oxide-grid { grid-template-columns: 1fr 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-top">
+    <div>
+      <div class="header-title">🔬 d-Block අධ්‍යයන මාර්ගෝපදේශය</div>
+      <div class="header-subtitle">ශ්‍රී ලංකා A/L රසායන විද්‍යාව | 3d Series</div>
+    </div>
+    <button class="theme-btn" onclick="toggleTheme()">☀️ ආලෝකය</button>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" type="search" placeholder="අයන හෝ ප්‍රතික්‍රියාවක් සොයන්න..." id="searchInput" oninput="handleSearch(this.value)">
+  </div>
+</header>
+
+<!-- NAV PILLS -->
+<nav class="nav-pills" id="navPills">
+  <button class="pill active" onclick="scrollToSection('overview', this)">3d දළ විශ්ලේෂණය</button>
+  <button class="pill" onclick="scrollToSection('elements', this)">මූලද්‍රව්‍ය</button>
+  <button class="pill" onclick="scrollToSection('colors', this)">වර්ණ වගුව</button>
+  <button class="pill" onclick="scrollToSection('oxides', this)">ඔක්සයිඩ ප්‍රවණතා</button>
+  <button class="pill" onclick="scrollToSection('quiz', this)">🎯 ප්‍රශ්නෝත්තර</button>
+</nav>
+
+<main class="main">
+
+  <!-- ========== SECTION 1: OVERVIEW TABLE ========== -->
+  <section class="section" id="overview">
+    <div class="section-title">📊 3d Series දළ විශ්ලේෂණය (Sc → Zn)</div>
+    <div class="table-wrap">
+      <table id="overviewTable">
+        <thead>
+          <tr>
+            <th>Z</th>
+            <th>සංකේතය</th>
+            <th>නාමය (සිංහල)</th>
+            <th>ඉලෙක්ට්‍රෝන සැකසුම</th>
+            <th>සාමාන්‍ය ඔ.අ.</th>
+            <th>පරමාණු අරය (pm)</th>
+            <th>ශ්‍රේෂ්ඨ ඔ.අ.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>21</td>
+            <td class="element-symbol">Sc</td>
+            <td>ස්කෑන්ඩියම්</td>
+            <td class="config-text">[Ar] 3d¹ 4s²</td>
+            <td>+3</td>
+            <td>162</td>
+            <td>+3</td>
+          </tr>
+          <tr>
+            <td>22</td>
+            <td class="element-symbol">Ti</td>
+            <td>ටයිටේනියම්</td>
+            <td class="config-text">[Ar] 3d² 4s²</td>
+            <td>+2, +3, +4</td>
+            <td>147</td>
+            <td>+4</td>
+          </tr>
+          <tr>
+            <td>23</td>
+            <td class="element-symbol">V</td>
+            <td>වැනේඩියම්</td>
+            <td class="config-text">[Ar] 3d³ 4s²</td>
+            <td>+2,+3,+4,+5</td>
+            <td>134</td>
+            <td>+5</td>
+          </tr>
+          <tr>
+            <td>24</td>
+            <td class="element-symbol">Cr</td>
+            <td>ක්‍රෝමියම්</td>
+            <td class="config-text">[Ar] 3d⁵ 4s¹</td>
+            <td>+2,+3,+6</td>
+            <td>128</td>
+            <td>+6</td>
+          </tr>
+          <tr>
+            <td>25</td>
+            <td class="element-symbol">Mn</td>
+            <td>මැංගනීස්</td>
+            <td class="config-text">[Ar] 3d⁵ 4s²</td>
+            <td>+2,+4,+7</td>
+            <td>127</td>
+            <td>+7</td>
+          </tr>
+          <tr>
+            <td>26</td>
+            <td class="element-symbol">Fe</td>
+            <td>යකඩ</td>
+            <td class="config-text">[Ar] 3d⁶ 4s²</td>
+            <td>+2, +3</td>
+            <td>126</td>
+            <td>+3</td>
+          </tr>
+          <tr>
+            <td>27</td>
+            <td class="element-symbol">Co</td>
+            <td>කොබෝල්ට්</td>
+            <td class="config-text">[Ar] 3d⁷ 4s²</td>
+            <td>+2, +3</td>
+            <td>125</td>
+            <td>+3</td>
+          </tr>
+          <tr>
+            <td>28</td>
+            <td class="element-symbol">Ni</td>
+            <td>නිකල්</td>
+            <td class="config-text">[Ar] 3d⁸ 4s²</td>
+            <td>+2, +3</td>
+            <td>124</td>
+            <td>+2</td>
+          </tr>
+          <tr>
+            <td>29</td>
+            <td class="element-symbol">Cu</td>
+            <td>තඹ</td>
+            <td class="config-text">[Ar] 3d¹⁰ 4s¹</td>
+            <td>+1, +2</td>
+            <td>128</td>
+            <td>+2</td>
+          </tr>
+          <tr>
+            <td>30</td>
+            <td class="element-symbol">Zn</td>
+            <td>සින්ක්</td>
+            <td class="config-text">[Ar] 3d¹⁰ 4s²</td>
+            <td>+2</td>
+            <td>133</td>
+            <td>+2</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="info-block" style="margin-top:12px;">
+      <div class="info-label">ප්‍රවණතා සටහන</div>
+      <div class="info-content">
+        ⬅️ Sc සිට Cr දක්වා: අරය <strong>අඩු</strong> වේ (න්‍යෂ්ටිය ආකර්ෂණය ↑)<br>
+        ➡️ Cr සිට Zn දක්වා: අරය <strong>සුළු වෙනසක්</strong> (d-ඉලෙක්ට්‍රෝන ආවරණය ↑)<br>
+        🌟 Cr ([Ar] 3d⁵ 4s¹) සහ Cu ([Ar] 3d¹⁰ 4s¹) — අර්ධ සහ සම්පූර්ණ 3d ශ්‍රේෂ්ඨ ස්ථායිතාව
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== SECTION 2: ELEMENT CARDS ========== -->
+  <section class="section" id="elements">
+    <div class="section-title">⚗️ මූලද්‍රව්‍ය විශ්ලේෂණය</div>
+    <div class="element-grid" id="elementGrid">
+
+      <!-- SC & TI -->
+      <div class="element-card" id="card-sc-ti">
+        <div class="card-header" onclick="toggleCard('card-sc-ti')">
+          <div class="card-left">
+            <div class="element-badge badge-sc"><span class="sym">Sc</span><span class="num">21</span></div>
+            <div class="card-info">
+              <div class="card-name">ස්කෑන්ඩියම් & ටයිටේනියම්</div>
+              <div class="card-meta">Scandium & Titanium | [Ar] 3d¹⁻² 4s²</div>
+            </div>
+          </div>
+          <div class="card-chevron">▼</div>
+        </div>
+        <div class="card-body">
+          <div class="info-block">
+            <div class="info-label">ස්කෑන්ඩියම් (Sc) — Z=21</div>
+            <div class="info-content">
+              ඉලෙක්ට්‍රෝන සැකසුම: [Ar] 3d¹ 4s² <br>
+              <strong>$Sc^{3+}$</strong> — 3d ඉලෙක්ට්‍රෝන නොමැති බැවින් <strong>වර්ණ රහිත (Colourless)</strong>. <br>
+              d-d සංක්‍රාන්ති සිදු නොවේ → දෘශ්‍ය ආලෝකය අවශෝෂණය නොකරයි.<br><br>
+              <strong>භාවිතා:</strong> ශක්තිමත් මිශ්‍ර ලෝහ සෑදීම , ක්‍රීඩා උපකරණ සැදීම 
+            </div>
+          </div>
+          <div class="info-block green">
+            <div class="info-label">ටයිටේනියම් (Ti) — Z=22</div>
+            <div class="info-content">
+              ඉලෙක්ට්‍රෝන සැකසුම: [Ar] 3d² 4s² <br>
+              ඔක්සිකරණ අංක: <strong>+2, +3, +4</strong> (ශ්‍රේෂ්ඨ: +4)<br>
+              $TiO_2$ — සුදු වර්ණය (ආලේප, ඖෂධ, ආහාර)<br>
+              <strong>භාවිතා:</strong>ශක්තිමත් සැහැල්ලු ලෝහ, ලෝහමය අස්ථි කොටස්, විකාදනය අඩු ලෝහ<br>
+              <strong>$Ti^{4+}$</strong>: 3d⁰ → වර්ණ රහිත &nbsp; | &nbsp; $Ti^{3+}$: 3d¹ → <span style="color:#a78bfa">දම් (violet)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VANADIUM -->
+      <div class="element-card" id="card-v">
+        <div class="card-header" onclick="toggleCard('card-v')">
+          <div class="card-left">
+            <div class="element-badge badge-v"><span class="sym">V</span><span class="num">23</span></div>
+            <div class="card-info">
+              <div class="card-name">වැනේඩියම් (Vanadium)</div>
+              <div class="card-meta">ඔ.අ. +2 +3 +4 +5 | [Ar] 3d³ 4s²</div>
+            </div>
+          </div>
+          <div class="card-chevron">▼</div>
+        </div>
+        <div class="card-body">
+          <div class="info-block purple">
+            <div class="info-label">ඔක්සිකරණ අංක සහ වර්ණ</div>
+            <div class="info-content">
+              <div class="color-row">
+                <div class="color-chip"><div class="color-dot" style="background:#a78bfa"></div><span>$V^{2+}$ (3d³) — <strong>දම් (Violet/Lilac)</strong></span></div>
+                <div class="color-chip"><div class="color-dot" style="background:#22c55e"></div><span>$V^{3+}$ (3d²) — <strong>කොළ (Green)</strong></span></div>
+                <div class="color-chip"><div class="color-dot" style="background:#3b82f6"></div><span>$VO^{2+}$ (+4, 3d¹) — <strong>නිල් (Blue)</strong></span></div>
+                <div class="color-chip"><div class="color-dot" style="background:#eab308"></div><span>$VO_2^+$ (+5, 3d⁰) — <strong>කහ (Yellow)</strong></span></div>
+              </div>
+            </div>
+          </div>
+          <div class="info-block">
+            <div class="info-label">ශ්‍රේෂ්ඨ ඔ.අ. ප්‍රවණතාව</div>
+            <div class="info-content">
+              ඔ.අ. ↑ → d-ඉලෙක්ට්‍රෝන ↓ → වර්ණය වෙනස් වේ: 
+              <strong style="color:#a78bfa">දම්</strong> → <strong style="color:#22c55e">කොළ</strong> → <strong style="color:#3b82f6">නිල්</strong> → <strong style="color:#eab308">කහ</strong><br><br>
+              <strong>$Zn$ සමඟ හ.ද.ද. ප්‍රතිඝනය:</strong>
+            </div>
+          </div>
+          <div class="rxn-box">
+            $VO_2^+ + 2H^+ + e^- \rightarrow VO^{2+} + H_2O$ &nbsp; (+4)
+          </div>
+          <div class="rxn-box">
+            $VO^{2+} + 2H^+ + e^- \rightarrow V^{3+} + H_2O$ &nbsp; (+3)
+          </div>
+          <div class="rxn-box">
+            $V^{3+} + e^- \rightarrow V^{2+}$ &nbsp; (+2)
+          </div>
+          <div class="info-block green">
+            <div class="info-label">කාර්මික භාවිතා</div>
+            <div class="info-content">
+              උත්ප්‍රේරක සංයෝග සෑදීම, වානේ සෑදීමට මිශ්‍ර කිරීම, H₂SO₄ නිෂ්පාදනය.
+            </div>
+          </div>
+        </div>
+      </div>
+
+  <!-- CHROMIUM -->
+<div class="element-card" id="card-cr">
+  <div class="card-header" onclick="toggleCard('card-cr')">
+    <div class="card-left">
+      <div class="element-badge badge-cr"><span class="sym">Cr</span><span class="num">24</span></div>
+      <div class="card-info">
+        <div class="card-name">ක්‍රෝමියම් (Chromium)</div>
+        <div class="card-meta">ඔ.අ. +2,+3,+6 | [Ar] 3d⁵ 4s¹</div>
+      </div>
+    </div>
+    <div class="card-chevron">▼</div>
+  </div>
+  <div class="card-body">
+
+    <!-- Cr3+ reaction chain (from image) -->
+    <div class="info-block">
+      <div class="info-label">$Cr^{3+}$ ප්‍රතික්‍රියා සහ වර්ණ විපර්යාස</div>
+      <div class="info-content"><strong>ප්‍රතික්‍රියා දාමය:</strong></div>
+    </div>
+    <div class="rxn-box">
+      $Cr^{3+}$ &nbsp;→&nbsp; $[Cr(H_2O)_6]^{3+}(aq)$
+      <span style="color:var(--text2);font-size:11px;">(දම්/කොළ)</span><br><br>
+      <span style="color:var(--text2);font-size:11px;">ප්‍රමාණවත් $OH^-$ හෝ $NH_3$ සමඟ ↓</span><br>
+      $Cr(OH)_3 \downarrow$
+      <span style="color:var(--text2);font-size:11px;">(නිල් - කොළ අවක්ෂේපය)</span><br><br>
+      <div style="display:flex; gap:16px; flex-wrap:wrap; margin-top:4px;">
+        <div>
+          <span style="color:var(--text2);font-size:11px;">වැඩිපුර $OH^-$ සමඟ ↓</span><br>
+          $[Cr(OH)_6]^{3-}(aq)$
+          <span style="color:var(--text2);font-size:11px;">(තද කොළ ද්‍රාවණය)</span>
+        </div>
+        <div>
+          <span style="color:var(--text2);font-size:11px;">වැඩිපුර $NH_3$ සමඟ ↓</span><br>
+          X
+          <span style="color:var(--text2);font-size:11px;"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-block red">
+      <div class="info-label">$CrO_4^{2-}$ ⟷ $Cr_2O_7^{2-}$ සමතුලිතතාවය (pH ‌ජලයෙ)</div>
+      <div class="info-content">
+        <div class="color-row" style="margin-bottom:8px;">
+          <div class="color-chip"><div class="color-dot" style="background:#eab308"></div><span>$CrO_4^{2-}$ — <strong>කහ (Yellow)</strong></span></div>
+          <div class="color-chip"><div class="color-dot" style="background:#f97316"></div><span>$Cr_2O_7^{2-}$ — <strong>තැඹිලි (Orange)</strong></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="eq-box">
+      $2CrO_4^{2-}(aq) + 2H^+(aq) \rightleftharpoons Cr_2O_7^{2-}(aq) + H_2O(l)$<br>
+      <span style="color:var(--text2);font-size:11px;">pH ↓ (අම්ල) → $Cr_2O_7^{2-}$ (තැඹිලි) &nbsp;|&nbsp; pH ↑ (ක්ෂාරය) → $CrO_4^{2-}$ (කහ)</span>
+    </div>
+    <div class="info-block">
+      <div class="info-label">$K_2Cr_2O_7$ ඔ.ක. ප්‍රතික්‍රියා (අම්ල මාධ්‍යය)</div>
+      <div class="info-content"><strong>$Fe^{2+}$ සමඟ:</strong></div>
+    </div>
+    <div class="rxn-box">
+      $Cr_2O_7^{2-} + 6Fe^{2+} + 14H^+ \rightarrow 2Cr^{3+} + 6Fe^{3+} + 7H_2O$
+    </div>
+    <div class="info-block" style="margin-top:8px;">
+      <div class="info-content"><strong>$H_2S$ සමඟ:</strong></div>
+    </div>
+    <div class="rxn-box">
+      $Cr_2O_7^{2-} + 3H_2S + 8H^+ \rightarrow 2Cr^{3+} + 3S + 7H_2O$
+    </div>
+    <div class="info-block" style="margin-top:8px;">
+      <div class="info-content"><strong>$SO_2$ සමඟ:</strong></div>
+    </div>
+    <div class="rxn-box">
+      $Cr_2O_7^{2-} + 3SO_2 + 2H^+ \rightarrow 2Cr^{3+} + 3SO_4^{2-} + H_2O$
+    </div>
+    <div class="info-block green">
+      <div class="info-label">වර්ණ සාරාංශය</div>
+      <div class="info-content">
+        <div class="color-row">
+          <div class="color-chip"><div class="color-dot" style="background:#60a5fa"></div><span>$Cr^{2+}$ — නිල්</span></div>
+          <div class="color-chip"><div class="color-dot" style="background:#22c55e"></div><span>$Cr^{3+}$ — කොළ/දම්</span></div>
+          <div class="color-chip"><div class="color-dot" style="background:#eab308"></div><span>$CrO_4^{2-}$ — කහ</span></div>
+          <div class="color-chip"><div class="color-dot" style="background:#f97316"></div><span>$Cr_2O_7^{2-}$ — තැඹිලි</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MANGANESE -->
+<div class="element-card" id="card-mn">
+  <div class="card-header" onclick="toggleCard('card-mn')">
+    <div class="card-left">
+      <div class="element-badge badge-mn"><span class="sym">Mn</span><span class="num">25</span></div>
+      <div class="card-info">
+        <div class="card-name">මැංගනීස් (Manganese)</div>
+        <div class="card-meta">ඔ.අ. +2,+3,+6 | [Ar] 3d⁵ 4s²</div>
+      </div>
+    </div>
+    <div class="card-chevron">▼</div>
+  </div>
+  <div class="card-body">
+
+    <!-- Mn2+ reaction chain (from image) -->
+    <div class="info-block">
+      <div class="info-label">$Mn^{2+}$ ප්‍රතික්‍රියා සහ වර්ණ විපර්යාස</div>
+      <div class="info-content"><strong>ප්‍රතික්‍රියා දාමය:</strong></div>
+    </div>
+    <div class="rxn-box">
+      $[Mn(H_2O)_6]^{2+}(aq)$
+      <span style="color:var(--text2);font-size:11px;">(ලා රෝස / අවර්ණ)</span><br><br>
+
+      <div style="display:flex; gap:24px; flex-wrap:wrap; margin-top:4px;">
+        <div>
+          <span style="color:var(--text2);font-size:11px;">සාන්ද්‍ර $HCl$ සමඟ ←</span><br>
+          $[MnCl_4]^{2-}(aq)$
+          <span style="color:var(--text2);font-size:11px;">(කහ කොළ)</span>
+        </div>
+        <div>
+          <span style="color:var(--text2);font-size:11px;">ප්‍රමාණවත් $OH^-$ හෝ $NH_3$ සමඟ →</span><br>
+          $Mn(OH)_2(s) \downarrow$
+          <span style="color:var(--text2);font-size:11px;">(ළිඳු / ක්‍රීම් අවක්ෂේපය)</span><br><br>
+          <div style="display:flex; gap:16px; flex-wrap:wrap; margin-top:4px;">
+            <div>
+              <span style="color:var(--text2);font-size:11px;">වැඩිපුර $OH^-$ සමඟ ↑</span><br>
+              <strong>X</strong>
+              <span style="color:var(--text2);font-size:11px;">(දිය නොවේ)</span>
+            </div>
+            <div>
+              <span style="color:var(--text2);font-size:11px;">වැඩිපුර තනුක $NH_3$ සමඟ ↓</span><br>
+              <strong>X</strong>
+              <span style="color:var(--text2);font-size:11px;">(දිය නොවේ)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-block purple">
+      <div class="info-label">$KMnO_4$ ප්‍රතික්‍රියා — මාධ්‍ය අනුව</div>
+      <div class="info-content">
+        <div class="color-row" style="margin-bottom:10px;">
+          <div class="color-chip"><div class="color-dot" style="background:#9333ea"></div><span>$MnO_4^-$ — <strong>දම් (Purple)</strong></span></div>
+          <div class="color-chip"><div class="color-dot" style="background:#4dec48"></div><span>$MnO_4^{2-}$ — <strong>කොළ (Green)</strong></span></div>
+          <div class="color-chip"><div class="color-dot" style="background:#b97dd4"></div><span>$Mn^{2+}$ — <strong>ලා රෝස (Pale Pink)</strong></span></div>
+          <div class="color-chip"><div class="color-dot" style="background:#642f04; border-color:#555;"></div><span>$MnO_2$ — <strong>කලු දුඹුරු(Dark Brown)</strong></span></div>
+        </div>
+        <strong>🔴 අම්ල මාධ්‍යය ($H_2SO_4$):</strong> $MnO_4^-$ → $Mn^{2+}$ (ලා රෝස)
+      </div>
+    </div>
+    <div class="rxn-box">
+      $MnO_4^- + 8H^+ + 5e^- \rightarrow Mn^{2+} + 4H_2O$
+    </div>
+    <div class="rxn-box">
+      $2MnO_4^- + 5H_2C_2O_4 + 6H^+ \rightarrow 2Mn^{2+} + 10CO_2 + 8H_2O$
+    </div>
+    <div class="info-block" style="margin-top:10px;">
+      <div class="info-content"><strong>🔵 ක්ෂාරීය/උදාසීන මාධ්‍යය:</strong> $MnO_4^-$ → $MnO_2$ (කළු)↓</div>
+    </div>
+    <div class="rxn-box">
+      $MnO_4^- + 2H_2O + 3e^- \rightarrow MnO_2 + 4OH^-$
+    </div>
+    <div class="info-block gold">
+      <div class="info-label">$MnO_4^{2-}$ (Manganate) අසමාන ඔ.ක.ද. (Disproportionation)</div>
+      <div class="info-content">
+        $MnO_4^{2-}$ (<span style="color:#22c55e">කොළ</span>) → $MnO_4^-$ (<span style="color:#9333ea">දම්</span>) + $MnO_2$ (කළු)
+      </div>
+    </div>
+    <div class="rxn-box">
+      $3MnO_4^{2-} + 2H_2O \rightarrow 2MnO_4^- + MnO_2 + 4OH^-$
+    </div>
+    <div class="info-block green">
+      <div class="info-label">$MnO_2$ — ස්ප‍ෂ්ටීකාරකය</div>
+      <div class="info-content">
+        $2KClO_3 \xrightarrow{MnO_2, \Delta} 2KCl + 3O_2$ (ඔක්සිජන් නිෂ්පාදනය)<br>
+        ඩ‍්‍රයි සෙල් බැටරි — $MnO_2$ ක‍ෂාකාරකය ලෙස
+      </div>
+    </div>
+
+  </div>
+</div>
+
+      <!-- IRON -->
+<div class="element-card" id="card-fe">
+  <div class="card-header" onclick="toggleCard('card-fe')">
+    <div class="card-left">
+      <div class="element-badge badge-fe"><span class="sym">Fe</span><span class="num">26</span></div>
+      <div class="card-info">
+        <div class="card-name">යකඩ (Iron)</div>
+        <div class="card-meta">ඔ.අ. +2,+3 | $1s^2 2s^2 2p^6 3s^2 3p^6 3d^6 4s^2$</div>
+      </div>
+    </div>
+    <div class="card-chevron">▼</div>
+  </div>
+  <div class="card-body">
+
+    <!-- Fe2+ reaction chain -->
+    <div class="info-block">
+      <div class="info-label">Fe²⁺ ප්‍රතික්‍රියා සහ වර්ණ විපර්යාස</div>
+      <div class="info-content"><strong>ප්‍රතික්‍රියා දාමය:</strong></div>
+    </div>
+    <div class="rxn-box">
+      $[Fe(H_2O)_6]^{2+}(aq)$
+      <span style="color:var(--text2);font-size:11px;">(ලා කොළ)</span><br><br>
+      <div style="display:flex; gap:24px; flex-wrap:wrap; margin-top:4px;">
+        <div>
+          <span style="color:var(--text2);font-size:11px;">සාන්ද්‍ර $HCl$ සමඟ ←</span><br>
+          $[FeCl_4]^{2-}(aq)$
+          <span style="color:var(--text2);font-size:11px;">(කහ)</span>
+        </div>
+        <div>
+          <span style="color:var(--text2);font-size:11px;">ප්‍රමාණවත් $OH^-$ හෝ $NH_4OH$ සමඟ →</span><br>
+          $Fe(OH)_2(s) \downarrow$
+          <span style="color:var(--text2);font-size:11px;">(කිළිටි කොළ අවක්ෂේපය)</span><br><br>
+          <div style="display:flex; gap:16px; flex-wrap:wrap; margin-top:4px;">
+            <div>
+              <span style="color:var(--text2);font-size:11px;">වැඩිපුර $OH^-$ සමඟ →</span><br>
+              <strong>X</strong> <span style="color:var(--text2);font-size:11px;">(දිය නොවේ)</span>
+            </div>
+            <div>
+              <span style="color:var(--text2);font-size:11px;">වැඩිපුර $NH_3$ සමඟ ↑</span><br>
+              <strong>X</strong> <span style="color:var(--text2);font-size:11px;">(දිය නොවේ)</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <span style="color:var(--text2);font-size:11px;">සාන්ද්‍ර $H_2SO_4$ / යෝකද වෙලාක්ෂීය හෙළීය (ඔ.ක.) ↓</span><br>
+          $Fe^{3+}$
+          <span style="color:var(--text2);font-size:11px;">(වාතය)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fe3+ reaction chain -->
+    <div class="info-block" style="margin-top:8px;">
+      <div class="info-label">Fe³⁺ ප්‍රතික්‍රියා සහ වර්ණ විපර්යාස</div>
+      <div class="info-content"><strong>ප්‍රතික්‍රියා දාමය:</strong></div>
+    </div>
+    <div class="rxn-box">
+      $[Fe(H_2O)_6]^{3+}(aq)$
+      <span style="color:var(--text2);font-size:11px;">(කහ දුඹුරු)</span><br><br>
+      <div style="display:flex; gap:24px; flex-wrap:wrap; margin-top:4px;">
+        <div>
+          <span style="color:var(--text2);font-size:11px;">සාන්ද්‍ර $HCl$ සමඟ ←</span><br>
+          $[FeCl_4]^{-}(aq)$
+          <span style="color:var(--text2);font-size:11px;">(කහ)</span>
+        </div>
+        <div>
+          <span style="color:var(--text2);font-size:11px;">ප්‍රමාණවත් $OH^-$ සමඟ →</span><br>
+          $Fe(OH)_3(s) \downarrow$
+          <span style="color:var(--text2);font-size:11px;">(රතු දුඹුරු අවක්ෂේපය)</span><br><br>
+          <div style="display:flex; gap:16px; flex-wrap:wrap; margin-top:4px;">
+            <div>
+              <span style="color:var(--text2);font-size:11px;">වැඩිපුර $OH^-$ සමඟ →</span><br>
+              <strong>X</strong> <span style="color:var(--text2);font-size:11px;">(දිය නොවේ)</span>
+            </div>
+            <div>
+              <span style="color:var(--text2);font-size:11px;">වැඩිපුර $NH_3$ සමඟ ↓</span><br>
+              <strong>X</strong> <span style="color:var(--text2);font-size:11px;">(දිය නොවේ)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Identification tests -->
+    <div class="info-block red" style="margin-top:8px;">
+      <div class="info-label">Fe වල කැටායන හඳුනා ගැනීමේ පරීක්ෂණ</div>
+      <div class="info-content">
+        <strong>1. $Fe^{2+}$ හඳුනාගැනීම:</strong><br>
+        $K_3[Fe(CN)_6]$ සමඟ → <span style="color:#1d4ed8">තද නිල් අවක්ෂේපය (Turnbull's Blue)</span>
+      </div>
+    </div>
+    <div class="rxn-box">
+      $Fe^{2+}(aq) + K_3[Fe(CN)_6](aq) \rightarrow KFe[Fe(CN)_6](s) + 2K^+(aq)$
+    </div>
+    <div class="info-block red" style="margin-top:8px;">
+      <div class="info-content">
+        <strong>2. $Fe^{3+}$ හඳුනාගැනීම — විකල්ප 1:</strong><br>
+        $K_4[Fe(CN)_6]$ සමඟ → <span style="color:#1d4ed8">තද නිල් අවක්ෂේපය (Prussian Blue)</span>
+      </div>
+    </div>
+    <div class="rxn-box">
+      $4Fe^{3+}(aq) + K_4[Fe(CN)_6](aq) \rightarrow Fe_4[Fe(CN)_6]_3(s) + 4K^+(aq)$
+    </div>
+    <div class="info-block red" style="margin-top:8px;">
+      <div class="info-content">
+        <strong>$Fe^{3+}$ හඳුනාගැනීම — විකල්ප 2:</strong><br>
+        තරමක් දුරට ආම්ලික $NH_4SCN$ සමඟ → <span style="color:#dc2626">රතු පැහැ සංකීර්ණය</span>
+      </div>
+    </div>
+    <div class="rxn-box">
+      $[Fe(H_2O)_6]^{3+} + NH_4SCN(aq) \rightarrow [Fe(SCN)(H_2O)_5]^{2+} + NH_4^+(aq)$
+    </div>
+
+    <!-- Oxidation reactions -->
+    <div class="info-block green">
+      <div class="info-label">$Fe^{2+}$ → $Fe^{3+}$ ඔක්සිකරණ</div>
+      <div class="info-content">
+        $Fe^{2+}$ — ඔ.ක.ල. ලෙස ක්‍රියා කරයි ($KMnO_4$, $K_2Cr_2O_7$ සමඟ)
+      </div>
+    </div>
+    <div class="rxn-box">
+      $MnO_4^- + 5Fe^{2+} + 8H^+ \rightarrow Mn^{2+} + 5Fe^{3+} + 4H_2O$
+    </div>
+    <div class="rxn-box">
+      $Cr_2O_7^{2-} + 6Fe^{2+} + 14H^+ \rightarrow 2Cr^{3+} + 6Fe^{3+} + 7H_2O$
+    </div>
+
+    <!-- Color summary -->
+    <div class="info-block gold">
+      <div class="info-label">වර්ණ සාරාංශය</div>
+      <div class="info-content">
+        <div class="color-row">
+          <div class="color-chip"><div class="color-dot" style="background:#22c55e"></div><span>$[Fe(H_2O)_6]^{2+}$ — ලා කොළ</span></div>
+          <div class="color-chip"><div class="color-dot" style="background:#92400e"></div><span>$[Fe(H_2O)_6]^{3+}$ — කහ දුඹුරු</span></div>
+          <div class="color-chip"><div class="color-dot" style="background:#eab308"></div><span>$[FeCl_4]^{2-}$/$[FeCl_4]^{-}$ — කහ</span></div>
+          <div class="color-chip"><div class="color-dot" style="background:#1d4ed8"></div><span>$KFe[Fe(CN)_6]$ / $Fe_4[Fe(CN)_6]_3$ — තද නිල්</span></div>
+          <div class="color-chip"><div class="color-dot" style="background:#dc2626"></div><span>$[Fe(SCN)(H_2O)_5]^{2+}$ — රතු</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- COBALT -->
+<div class="element-card" id="card-co">
+  <div class="card-header" onclick="toggleCard('card-co')">
+    <div class="card-left">
+      <div class="element-badge badge-co"><span class="sym">Co</span><span class="num">27</span></div>
+      <div class="card-info">
+        <div class="card-name">කොබෝල්ට් (Cobalt)</div>
+        <div class="card-meta">ඔ.අ. +2,+3 | $1s^2 2s^2 2p^6 3s^2 3p^6 3d^7 4s^2$</div>
+      </div>
+    </div>
+    <div class="card-chevron">▼</div>
+  </div>
+  <div class="card-body">
+
+    <!-- Co2+ reaction chain -->
+    <div class="info-block">
+      <div class="info-label">$Co^{2+}$ ප්‍රතික්‍රියා සහ වර්ණ විපර්යාස</div>
+      <div class="info-content"><strong>ප්‍රතික්‍රියා දාමය:</strong></div>
+    </div>
+    <div class="rxn-box">
+      $[Co(H_2O)_6]^{2+}(aq)$
+      <span style="color:var(--text2);font-size:11px;">(රෝස)</span><br><br>
+      <div style="display:flex; gap:24px; flex-wrap:wrap; margin-top:4px;">
+        <div>
+          <span style="color:var(--text2);font-size:11px;">සාන්ද්‍ර $HCl$ සමඟ ←</span><br>
+          $[CoCl_4]^{2-}(aq)$
+          <span style="color:var(--text2);font-size:11px;">(නිල්)</span>
+        </div>
+        <div>
+          <span style="color:var(--text2);font-size:11px;">ප්‍රමාණවත් $OH^-$ හෝ $NH_4OH$ සමඟ →</span><br>
+          $Co(OH)_2(s) \downarrow$
+          <span style="color:var(--text2);font-size:11px;">(රෝස අවක්ෂේපය)</span><br><br>
+          <div style="display:flex; gap:16px; flex-wrap:wrap; margin-top:4px;">
+            <div>
+              <span style="color:var(--text2);font-size:11px;">වැඩිපුර $OH^-$ සමඟ →</span><br>
+              <strong>X</strong>
+              <span style="color:var(--text2);font-size:11px;">(දිය නොවේ)</span>
+            </div>
+            <div>
+              <span style="color:var(--text2);font-size:11px;">වැඩිපුර $NH_4OH$ සමඟ →</span><br>
+              $[Co(NH_3)_6]^{2+}(aq)$
+              <span style="color:var(--text2);font-size:11px;">(කහ දුඹුරු)</span><br>
+              <span style="color:var(--text2);font-size:11px;">$H_2O_2$ සමඟ ↓ (ඔ.ක.)</span><br>
+              $[Co(NH_3)_6]^{3+}(aq)$
+              <span style="color:var(--text2);font-size:11px;">(තද දම්)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Key equations -->
+    <div class="info-block" style="margin-top:8px;">
+      <div class="info-label">ප්‍රධාන ප්‍රතික්‍රියා සමීකරණ</div>
+      <div class="info-content"><strong>$[CoCl_4]^{2-}$ සෑදීම:</strong></div>
+    </div>
+    <div class="rxn-box">
+      $[Co(H_2O)_6]^{2+} + 4Cl^- \rightleftharpoons [CoCl_4]^{2-} + 6H_2O$<br>
+      <span style="color:var(--text2);font-size:11px;">රෝස → නිල් (සාන්ද්‍ර $HCl$ / රත් කිරීම)</span>
+    </div>
+    <div class="info-block" style="margin-top:8px;">
+      <div class="info-content"><strong>$NH_4OH$ සමඟ — $[Co(NH_3)_6]^{2+}$ සෑදීම:</strong></div>
+    </div>
+    <div class="rxn-box">
+      $Co(OH)_2(s) + 6NH_4OH \rightarrow [Co(NH_3)_6]^{2+} + 2OH^- + 6H_2O$<br>
+      <span style="color:var(--text2);font-size:11px;">(කහ දුඹුරු ද්‍රාවණය)</span>
+    </div>
+    <div class="info-block" style="margin-top:8px;">
+      <div class="info-content"><strong>$H_2O_2$ සමඟ ඔ.ක. — $[Co(NH_3)_6]^{3+}$ සෑදීම:</strong></div>
+    </div>
+    <div class="rxn-box">
+      $2[Co(NH_3)_6]^{2+} + H_2O_2 \rightarrow 2[Co(NH_3)_6]^{3+} + 2OH^-$<br>
+      <span style="color:var(--text2);font-size:11px;">කහ දුඹුරු → තද දම් (ඔ.ක.)</span>
+    </div>
+
+    <!-- Color summary -->
+    <div class="info-block green">
+      <div class="info-label">වර්ණ සාරාංශය</div>
+      <div class="info-content">
+        <div class="color-row">
+          <div class="color-chip"><div class="color-dot" style="background:#f9a8d4"></div><span>$[Co(H_2O)_6]^{2+}$ — රෝස</span></div>
+          <div class="color-chip"><div class="color-dot" style="background:#3b82f6"></div><span>$[CoCl_4]^{2-}$ — නිල්</span></div>
+          <div class="color-chip"><div class="color-dot" style="background:#f9a8d4"></div><span>$Co(OH)_2$ — රෝස</span></div>
+          <div class="color-chip"><div class="color-dot" style="background:#ca8a04"></div><span>$[Co(NH_3)_6]^{2+}$ — කහ දුඹුරු</span></div>
+          <div class="color-chip"><div class="color-dot" style="background:#7e22ce"></div><span>$[Co(NH_3)_6]^{3+}$ — තද දම්</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Nickel -->
+<div class="element-card" id="card-ni">
+  <div class="card-header" onclick="toggleCard('card-ni')">
+    <div class="card-left">
+      <div class="element-badge badge-ni"><span class="sym">Ni</span><span class="num">28</span></div>
+      <div class="card-info">
+        <div class="card-name">නිකල් (Nickel)</div>
+        <div class="card-meta">ඔ.අ. +2 | $1s^2 2s^2 2p^6 3s^2 3p^6 3d^8 4s^2$</div>
+      </div>
+    </div>
+    <div class="card-chevron">▼</div>
+  </div>
+  <div class="card-body">
+
+    <!-- Ni2+ reaction chain -->
+    <div class="info-block">
+      <div class="info-label">$Ni^{2+}$ ප්‍රතික්‍රියා සහ වර්ණ විපර්යාස</div>
+      <div class="info-content"><strong>ප්‍රතික්‍රියා දාමය:</strong></div>
+    </div>
+    <div class="rxn-box">
+      $[Ni(H_2O)_6]^{2+}(aq)$
+      <span style="color:var(--text2);font-size:11px;">(කොල)</span><br><br>
+      <div style="display:flex; gap:24px; flex-wrap:wrap; margin-top:4px;">
+        <div>
+          <span style="color:var(--text2);font-size:11px;">සාන්ද්‍ර $HCl$ සමඟ ←</span><br>
+          $[NiCl_4]^{2-}(aq)$
+          <span style="color:var(--text2);font-size:11px;">(කහ)</span>
+        </div>
+        <div>
+          <span style="color:var(--text2);font-size:11px;">ප්‍රමාණවත් $OH^-$ හෝ $NH_4OH$ සමඟ →</span><br>
+          $Ni(OH)_2(s) \downarrow$
+          <span style="color:var(--text2);font-size:11px;">(කොල අවක්ෂේපය)</span><br><br>
+          <div style="display:flex; gap:16px; flex-wrap:wrap; margin-top:4px;">
+            <div>
+              <span style="color:var(--text2);font-size:11px;">වැඩිපුර $OH^-$ සමඟ →</span><br>
+              <strong>X</strong>
+              <span style="color:var(--text2);font-size:11px;">(දිය නොවේ)</span>
+            </div>
+            <div>
+              <span style="color:var(--text2);font-size:11px;">වැඩිපුර $NH_4OH$ සමඟ →</span><br>
+              $[Ni(NH_3)_6]^{2+}(aq)$
+              <span style="color:var(--text2);font-size:11px;">(තද දම්)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Key equations -->
+    <div class="info-block" style="margin-top:8px;">
+      <div class="info-label">ප්‍රධාන ප්‍රතික්‍රියා සමීකරණ</div>
+      <div class="info-content"><strong>$[NiCl_4]^{2-}$ සෑදීම:</strong></div>
+    </div>
+    <div class="rxn-box">
+      $[Ni(H_2O)_6]^{2+} + 4Cl^- \rightleftharpoons [NiCl_4]^{2-} + 6H_2O$<br>
+      <span style="color:var(--text2);font-size:11px;">කොල → කහ (සාන්ද්‍ර $HCl$)</span>
+    </div>
+
+    <div class="info-block" style="margin-top:8px;">
+      <div class="info-content"><strong>$OH^-$ හෝ $NH_4OH$ සමඟ — $Ni(OH)_2$ සෑදීම:</strong></div>
+    </div>
+    <div class="rxn-box">
+      $Ni^{2+}(aq) + 2OH^- \rightarrow Ni(OH)_2(s) \downarrow$<br>
+      <span style="color:var(--text2);font-size:11px;">(කොල අවක්ෂේපය)</span>
+    </div>
+
+    <div class="info-block" style="margin-top:8px;">
+      <div class="info-content"><strong>වැඩිපුර $NH_4OH$ සමඟ — $[Ni(NH_3)_6]^{2+}$ සෑදීම:</strong></div>
+    </div>
+    <div class="rxn-box">
+      $Ni(OH)_2(s) + 6NH_4OH \rightarrow [Ni(NH_3)_6]^{2+} + 2OH^- + 6H_2O$<br>
+      <span style="color:var(--text2);font-size:11px;">(තද දම් ද්‍රාවණය)</span>
+    </div>
+
+    <!-- Color summary -->
+    <div class="info-block green">
+      <div class="info-label">වර්ණ සාරාංශය</div>
+      <div class="info-content">
+        <div class="color-row">
+          <div class="color-chip"><div class="color-dot" style="background:#4ade80"></div><span>$[Ni(H_2O)_6]^{2+}$ — කොල</span></div>
+          <div class="color-chip"><div class="color-dot" style="background:#facc15"></div><span>$[NiCl_4]^{2-}$ — කහ</span></div>
+          <div class="color-chip"><div class="color-dot" style="background:#4ade80"></div><span>$Ni(OH)_2$ — කොල</span></div>
+          <div class="color-chip"><div class="color-dot" style="background:#7e22ce"></div><span>$[Ni(NH_3)_6]^{2+}$ — තද දම්</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- COPPER -->
+<div class="element-card" id="card-cu">
+  <div class="card-header" onclick="toggleCard('card-cu')">
+    <div class="card-left">
+      <div class="element-badge badge-cu"><span class="sym">Cu</span><span class="num">29</span></div>
+      <div class="card-info">
+        <div class="card-name">තඹ (Copper)</div>
+        <div class="card-meta">ඔ.අ. +1, +2 | $1s^2 2s^2 2p^6 3s^2 3p^6 3d^{10} 4s^1$</div>
+      </div>
+    </div>
+    <div class="card-chevron">▼</div>
+  </div>
+  <div class="card-body">
+
+    <!-- Cu2+ reaction chain -->
+    <div class="info-block">
+      <div class="info-label">$Cu^{2+}$ ප්‍රතික්‍රියා සහ වර්ණ විපර්යාස</div>
+      <div class="info-content"><strong>ප්‍රතික්‍රියා දාමය:</strong></div>
+    </div>
+    <div class="rxn-box">
+      $[Cu(H_2O)_6]^{2+}(aq)$
+      <span style="color:var(--text2);font-size:11px;">(ලා නිල්)</span><br><br>
+      <div style="display:flex; gap:24px; flex-wrap:wrap; margin-top:4px;">
+        <div>
+          <span style="color:var(--text2);font-size:11px;">සාන්ද්‍ර $HCl$ සමඟ ←</span><br>
+          $[CuCl_4]^{2-}(aq)$
+          <span style="color:var(--text2);font-size:11px;">(කහ)</span>
+        </div>
+        <div>
+          <span style="color:var(--text2);font-size:11px;">ප්‍රමාණවත් $OH^-$ හෝ $NH_4OH$ සමඟ →</span><br>
+          $Cu(OH)_2(s) \downarrow$
+          <span style="color:var(--text2);font-size:11px;">(ලා නිල් අවක්ෂේපය)</span><br><br>
+          <div style="display:flex; gap:16px; flex-wrap:wrap; margin-top:4px;">
+            <div>
+              <span style="color:var(--text2);font-size:11px;">වැඩිපුර $OH^-$ සමඟ →</span><br>
+              <strong>X</strong>
+              <span style="color:var(--text2);font-size:11px;">(දිය නොවේ)</span>
+            </div>
+            <div>
+              <span style="color:var(--text2);font-size:11px;">වැඩිපුර $NH_4OH$ සමඟ →</span><br>
+              $[Cu(NH_3)_4]^{2+}(aq)$
+              <span style="color:var(--text2);font-size:11px;">(තද නිල්)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Key equations -->
+    <div class="info-block" style="margin-top:8px;">
+      <div class="info-label">ප්‍රධාන ප්‍රතික්‍රියා සමීකරණ</div>
+      <div class="info-content"><strong>$[CuCl_4]^{2-}$ සෑදීම:</strong></div>
+    </div>
+    <div class="rxn-box">
+      $[Cu(H_2O)_6]^{2+} + 4Cl^- \rightleftharpoons [CuCl_4]^{2-} + 6H_2O$<br>
+      <span style="color:var(--text2);font-size:11px;">ලා නිල් → කහ (සාන්ද්‍ර $HCl$)</span>
+    </div>
+
+    <div class="info-block" style="margin-top:8px;">
+      <div class="info-content"><strong>$OH^-$ හෝ $NH_4OH$ සමඟ — $Cu(OH)_2$ සෑදීම:</strong></div>
+    </div>
+    <div class="rxn-box">
+      $Cu^{2+}(aq) + 2OH^- \rightarrow Cu(OH)_{2(s)} \downarrow$<br>
+      <span style="color:var(--text2);font-size:11px;">(ලා නිල් අවක්ෂේපය)</span>
+    </div>
+
+    <div class="info-block" style="margin-top:8px;">
+      <div class="info-content"><strong>වැඩිපුර $NH_4OH$ සමඟ — $[Cu(NH_3)_4]^{2+}$ සෑදීම:</strong></div>
+    </div>
+    <div class="rxn-box">
+      $Cu(OH)_2(s) + 4NH_3 \rightarrow [Cu(NH_3)_4]^{2+} + 2OH^-$<br>
+      <span style="color:var(--text2);font-size:11px;">(තද නිල් ද්‍රාවණය)</span>
+    </div>
+
+    <!-- CuSO4 dehydration -->
+    <div class="info-block" style="margin-top:8px;">
+      <div class="info-content"><strong>$CuSO_4$ නිර්ජලනය:</strong></div>
+    </div>
+    <div class="rxn-box">
+      $CuSO_4 \cdot H_2O \xrightarrow{\Delta} CuSO_4 + H_2O$<br>
+      <span style="color:var(--text2);font-size:11px;">නිල් (Blue) → සුදු (White)</span>
+    </div>
+
+    <!-- I⁻ reaction chain -->
+    <div class="info-block" style="margin-top:8px;">
+      <div class="info-label">$Cu^{2+}$ සමඟ $I^-$ ප්‍රතික්‍රියා දාමය</div>
+      <div class="info-content">
+        <span style="color:var(--text2);font-size:11px;">$(+2)\ Cu^{2+}$ සමඟ $I^-$ ක්‍රියා කිරීම</span><br>
+        <span style="color:var(--text2);font-size:11px;">$(+1)\ CuO$ — ලා කහ තැඹිලි</span><br>
+        <span style="color:var(--text2);font-size:11px;">$Cu^{2+}$ සමඟ $I^-$ කෙලින් ප්‍රතික්‍රිය කිරීම</span>
+      </div>
+    </div>
+    <div class="rxn-box">
+      $Cu^{2+} + I^- \longrightarrow$
+      <div style="display:flex; gap:24px; flex-wrap:wrap; margin-top:6px;">
+        <div>
+          $I_2$
+          <span style="color:var(--text2);font-size:11px;">(දුඹුරු)</span><br>
+          <span style="font-size:11px;">+ $I^-$ ←</span><br>
+          $I_3^-$
+          <span style="color:var(--text2);font-size:11px;">(දුඹුරු)</span>
+        </div>
+        <div>
+          $CuI$
+          <span style="color:var(--text2);font-size:11px;">(සුදු ↓)</span>
+        </div>
+      </div>
+    </div>
+    <div class="rxn-box">
+      $2Cu^{2+}(aq) + 4I^-(aq) \rightarrow 2CuI(s)\downarrow + I_2(aq)$<br>
+      <span style="color:var(--text2);font-size:11px;">සුදු CuI අවක්ෂේපය + දුඹුරු $I_2$</span>
+    </div>
+
+    <!-- Cu+ vs Cu2+ stability -->
+    <div class="info-block gold">
+      <div class="info-label">$Cu^+$ vs $Cu^{2+}$ ස්ථායිතාව</div>
+      <div class="info-content">
+        ජලීය ද්‍රාවණයේ $Cu^+$ <strong>අස්ථාවරයි</strong> → අසමාන ඔ.ක.ද. සිදු වේ:<br>
+        $2Cu^+(aq) \rightarrow Cu(s) + Cu^{2+}(aq)$<br>
+        ඝන $CuI$, $CuCN$ ආකාරයෙන් $Cu^+$ ස්ථාවරයි.
+      </div>
+    </div>
+
+    <!-- Cu halides table -->
+    <div class="info-block">
+      <div class="info-label">Cu වල හේලයිඩ (Halides)</div>
+      <div class="info-content">
+        <table style="width:100%;border-collapse:collapse;font-size:0.9em;">
+          <thead>
+            <tr>
+              <th style="border:1px solid #ccc;padding:6px;text-align:center;background:rgba(0,0,0,0.05);">(+1)</th>
+              <th style="border:1px solid #ccc;padding:6px;text-align:center;background:rgba(0,0,0,0.05);">(+2)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="border:1px solid #ccc;padding:6px;">
+                $CuCl$ හෝ $Cu_2Cl_2$<br>
+                $CuBr$ හෝ $Cu_2Br_2$<br>
+                $CuI$ හෝ $Cu_2I_2$<br>
+                <em style="font-size:0.85em;">ජල අද්‍රාව්‍ය සුදු පහාරති සහ</em>
+              </td>
+              <td style="border:1px solid #ccc;padding:6px;">
+                $CuCl_2$ — අදුරු කොළ<br>
+                $CuBr_2$ — කළු අළු<br>
+                <em style="font-size:0.85em;">ජලයේ දිය වී නිල් පහාරති ලබා දේ</em>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="margin-top:8px;font-size:0.88em;">⚠️ $CuF_2$ පමණක් (+2) ආකාරයෙන් ස්ථාවරයි — $CuF$ ස්ථාවර නොවේ</div>
+      </div>
+    </div>
+
+    <!-- Color summary -->
+    <div class="info-block green">
+      <div class="info-label">වර්ණ සාරාංශය</div>
+      <div class="info-content">
+        <div class="color-row">
+          <div class="color-chip"><div class="color-dot" style="background:#93c5fd"></div><span>$[Cu(H_2O)_6]^{2+}$ — ලා නිල්</span></div>
+          <div class="color-chip"><div class="color-dot" style="background:#fbbf24"></div><span>$[CuCl_4]^{2-}$ — කහ</span></div>
+          <div class="color-chip"><div class="color-dot" style="background:#bfdbfe"></div><span>$Cu(OH)_2$ — ලා නිල්</span></div>
+          <div class="color-chip"><div class="color-dot" style="background:#1d4ed8"></div><span>$[Cu(NH_3)_4]^{2+}$ — තද නිල්</span></div>
+          <div class="color-chip"><div class="color-dot" style="background:#fff;border-color:#ccc;"></div><span>$CuI$ — සුදු ↓</span></div>
+          <div class="color-chip"><div class="color-dot" style="background:#b45309"></div><span>$I_2$ — දුඹුරු</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ZINC -->
+<div class="element-card" id="card-zn">
+  <div class="card-header" onclick="toggleCard('card-zn')">
+    <div class="card-left">
+      <div class="element-badge badge-zn"><span class="sym">Zn</span><span class="num">30</span></div>
+      <div class="card-info">
+        <div class="card-name">සින්ක් (Zinc)</div>
+        <div class="card-meta">ඔ.අ. +2 | $1s^2 2s^2 2p^6 3s^2 3p^6 3d^{10} 4s^2$</div>
+      </div>
+    </div>
+    <div class="card-chevron">▼</div>
+  </div>
+  <div class="card-body">
+
+    <!-- Zn2+ reaction chain -->
+    <div class="info-block">
+      <div class="info-label">$Zn^{2+}$ ප්‍රතික්‍රියා සහ වර්ණ විපර්යාස</div>
+      <div class="info-content"><strong>ප්‍රතික්‍රියා දාමය:</strong></div>
+    </div>
+    <div class="rxn-box">
+      $[Zn(H_2O)_6]^{2+}(aq)$
+      <span style="color:var(--text2);font-size:11px;">(අවර්ණ)</span><br><br>
+      <div style="display:flex; gap:24px; flex-wrap:wrap; margin-top:4px;">
+        <div>
+          <span style="color:var(--text2);font-size:11px;">සාන්ද්‍ර $HCl$ සමඟ ←</span><br>
+          $[ZnCl_4]^{2-}(aq)$
+          <span style="color:var(--text2);font-size:11px;">(අවර්ණ)</span>
+        </div>
+        <div>
+          <span style="color:var(--text2);font-size:11px;">ප්‍රමාණවත් $OH^-$ හෝ ත. $NH_4OH$ සමඟ →</span><br>
+          $Zn(OH)_2(s) \downarrow$
+          <span style="color:var(--text2);font-size:11px;">(සුදු අවක්ෂේපය)</span><br><br>
+          <div style="display:flex; gap:16px; flex-wrap:wrap; margin-top:4px;">
+            <div>
+              <span style="color:var(--text2);font-size:11px;">වැඩිපුර $OH^-$ සමඟ →</span><br>
+              $[Zn(OH)_4]^{2-}(aq)$
+              <span style="color:var(--text2);font-size:11px;">(අවර්ණ, දිය වේ)</span><br>
+              <span style="color:var(--text2);font-size:11px;">හෝ $ZnO_2^{2-}$</span>
+            </div>
+            <div>
+              <span style="color:var(--text2);font-size:11px;">වැඩිපුර තනුක $NH_4OH$ සමඟ →</span><br>
+              $[Zn(NH_3)_4]^{2+}(aq)$
+              <span style="color:var(--text2);font-size:11px;">(අවර්ණ)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Key equations -->
+    <div class="info-block" style="margin-top:8px;">
+      <div class="info-label">ප්‍රධාන ප්‍රතික්‍රියා සමීකරණ</div>
+      <div class="info-content"><strong>$[ZnCl_4]^{2-}$ සෑදීම:</strong></div>
+    </div>
+    <div class="rxn-box">
+      $[Zn(H_2O)_6]^{2+} + 4Cl^- \rightleftharpoons [ZnCl_4]^{2-} + 6H_2O$<br>
+      <span style="color:var(--text2);font-size:11px;">සාන්ද්‍ර $HCl$ සමඟ (අවර්ණ)</span>
+    </div>
+    <div class="info-block" style="margin-top:8px;">
+      <div class="info-content"><strong>$OH^-$ සමඟ — $Zn(OH)_2$ සෑදීම හා දිය වීම:</strong></div>
+    </div>
+    <div class="rxn-box">
+      $Zn^{2+} + 2OH^- \rightarrow Zn(OH)_2(s) \downarrow$<br>
+      <span style="color:var(--text2);font-size:11px;">(සුදු අවක්ෂේපය)</span><br><br>
+      $Zn(OH)_2 + 2OH^- \rightarrow [Zn(OH)_4]^{2-}(aq)$<br>
+      <span style="color:var(--text2);font-size:11px;">වැඩිපුර $OH^-$ සමඟ → දිය වේ (හෝ $ZnO_2^{2-}$)</span>
+    </div>
+    <div class="info-block" style="margin-top:8px;">
+      <div class="info-content"><strong>සාන්ද්‍ර $NH_4OH$ සමඟ — $[Zn(NH_3)_4]^{2+}$ සෑදීම:</strong></div>
+    </div>
+    <div class="rxn-box">
+      $Zn(OH)_2(s) + 4NH_4OH \rightarrow [Zn(NH_3)_4]^{2+} + 2OH^- + 4H_2O$<br>
+      <span style="color:var(--text2);font-size:11px;">(අවර්ණ ද්‍රාවණය)</span>
+    </div>
+    <div class="info-block" style="margin-top:8px;">
+      <div class="info-content"><strong>උභයගුණික ප්‍රතික්‍රියා:</strong></div>
+    </div>
+    <div class="rxn-box">
+      $Zn + 2HCl \rightarrow ZnCl_2 + H_2$<br>
+      $Zn + 2NaOH \rightarrow Na_2ZnO_2 + H_2$
+    </div>
+
+    <!-- Al3+ vs Zn2+ separation -->
+    <div class="info-block" style="margin-top:8px;">
+      <div class="info-label">$Al^{3+}$ සහ $Zn^{2+}$ වෙන්කර ගැනීම</div>
+      <div class="info-content"><strong>1. $OH^-$ මගින්:</strong></div>
+    </div>
+    <div class="rxn-box">
+      $Al^{3+}$: කුමයෙන් $OH^-$ → $Al(OH)_3 \downarrow$ (සුදු ජෙලටිනීය) — වැඩිපුර $OH^-$ → $[Al(OH)_4]^-(aq)$ (අවර්ණ)<br><br>
+      $Zn^{2+}$: කුමයෙන් $OH^-$ → $Zn(OH)_2 \downarrow$ (සුදු ජෙලටිනීය) — වැඩිපුර $OH^-$ → $[Zn(OH)_4]^{2-}(aq)$ (අවර්ණ)<br><br>
+      <span style="color:var(--text2);font-size:11px;">⚠ වෙන් කරගත නොහැකය — දෙකම $OH^-$ වලදී සමාන හැසිරීමක් දක්වයි</span>
+    </div>
+    <div class="info-block" style="margin-top:8px;">
+      <div class="info-content"><strong>2. $NH_3$ මගින්:</strong></div>
+    </div>
+    <div class="rxn-box">
+      $Al^{3+}$: කුමයෙන් $NH_3$ → $Al(OH)_3 \downarrow$ (සුදු ජෙලටිනීය) — වැඩිපුර $NH_3$ → <strong>X</strong> (දිය නොවේ)<br><br>
+      $Zn^{2+}$: කුමයෙන් $NH_3$ → $Zn(OH)_2 \downarrow$ (සුදු ජෙලටිනීය) — වැඩිපුර $NH_3$ → $[Zn(NH_3)_4]^{2+}(aq)$ (අවර්ණ)<br><br>
+      <span style="color:var(--text2);font-size:11px;">✓ වෙන් කරගත හැකය — $NH_3$ අතිරේකයේදී $Zn^{2+}$ දිය වේ, $Al^{3+}$ නොවේ</span>
+    </div>
+
+    <!-- Color summary -->
+    <div class="info-block green">
+      <div class="info-label">වර්ණ සාරාංශය</div>
+      <div class="info-content">
+        <div class="color-row">
+          <div class="color-chip"><div class="color-dot" style="background:#e5e7eb"></div><span>$[Zn(H_2O)_6]^{2+}$ — අවර්ණ</span></div>
+          <div class="color-chip"><div class="color-dot" style="background:#e5e7eb"></div><span>$[ZnCl_4]^{2-}$ — අවර්ණ</span></div>
+          <div class="color-chip"><div class="color-dot" style="background:#ffffff; border:1px solid #ccc;"></div><span>$Zn(OH)_2$ — සුදු</span></div>
+          <div class="color-chip"><div class="color-dot" style="background:#e5e7eb"></div><span>$[Zn(OH)_4]^{2-}$ — අවර්ණ</span></div>
+          <div class="color-chip"><div class="color-dot" style="background:#e5e7eb"></div><span>$[Zn(NH_3)_4]^{2+}$ — අවර්ණ</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Special notes -->
+    <div class="info-block gold">
+      <div class="info-label">විශේෂ කරුණු</div>
+      <div class="info-content">
+        • $ZnO$ — ඉහළ උෂ්ණත්වවලදී සුදු සිට කහ වෙයි; ශීතල වූ විට නැවත සුදු වෙයි<br>
+        • උභයගුණික ලෝහයක් — අම්ල <strong>සහ</strong> ක්ෂාර දෙකෙහිම ප්‍රතික්‍රියා කරයි<br>
+        • $3d$ ගොනුවේ ඇති එකම ආන්තරික නොවන මූලද්‍රව්‍යයි → <strong>වර්ණ රහිත</strong><br>
+        • $d$-$d$ සංක්‍රාන්ති නොමැති → සංක්‍රාන්ති ලෝහ ගුණ දුර්වලයි<br>
+        • ප්‍රධාන ස්ථායී ජිය අයන — $Zn^{2+}$ | සංක්‍රාන්ති නොවන ලෝහයකි
+      </div>
+    </div>
+
+  </div>
+</div>
+  </section>
+
+  <!-- ========== SECTION 3: COLOR MASTER TABLE ========== -->
+  <section class="section" id="colors">
+    <div class="section-title">🎨 වර්ණ ප්‍රධාන වගුව</div>
+    <div class="color-master-grid" id="colorGrid">
+      <div class="color-card"><div class="color-swatch" style="background:#a78bfa"></div><div><div class="color-ion">$V^{2+}$</div><div class="color-name">දම් (Violet)</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#22c55e"></div><div><div class="color-ion">$V^{3+}$</div><div class="color-name">කොළ (Green)</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#3b82f6"></div><div><div class="color-ion">$VO^{2+}$</div><div class="color-name">නිල් (Blue)</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#eab308"></div><div><div class="color-ion">$VO_2^+$</div><div class="color-name">කහ (Yellow)</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#60a5fa"></div><div><div class="color-ion">$Cr^{2+}$</div><div class="color-name">නිල් (Blue)</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#16a34a"></div><div><div class="color-ion">$Cr^{3+}$</div><div class="color-name">කොළ/දම්</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#eab308"></div><div><div class="color-ion">$CrO_4^{2-}$</div><div class="color-name">කහ (Yellow)</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#f97316"></div><div><div class="color-ion">$Cr_2O_7^{2-}$</div><div class="color-name">තැඹිලි (Orange)</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#9333ea"></div><div><div class="color-ion">$MnO_4^-$</div><div class="color-name">දම් (Purple)</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#16a34a"></div><div><div class="color-ion">$MnO_4^{2-}$</div><div class="color-name">කොළ (Green)</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#fda4af"></div><div><div class="color-ion">$Mn^{2+}$</div><div class="color-name">ලා රෝස (Pale Pink)</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#111;border:1px solid #555;"></div><div><div class="color-ion">$MnO_2$</div><div class="color-name">කළු (Black)</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#86efac"></div><div><div class="color-ion">$Fe^{2+}$</div><div class="color-name">ලා කොළ (Pale Green)</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#ca8a04"></div><div><div class="color-ion">$Fe^{3+}$</div><div class="color-name">කහ-දුඹුරු</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#1d4ed8"></div><div><div class="color-ion">Prussian Blue</div><div class="color-name">$Fe^{3+}$ + $K_4[Fe(CN)_6]$</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#bfdbfe"></div><div><div class="color-ion">$[Cu(H_2O)_6]^{2+}$</div><div class="color-name">ලා නිල් (Light Blue)</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#1e3a8a"></div><div><div class="color-ion">$[Cu(NH_3)_4]^{2+}$</div><div class="color-name">තද නිල් (Deep Blue)</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#fff;border:1px solid #999;"></div><div><div class="color-ion">$CuI$</div><div class="color-name">සුදු (White)</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#a1a1aa;"></div><div><div class="color-ion">$Zn^{2+}$</div><div class="color-name">වර්ණ රහිත (Colourless)</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#f0f0f0;border:1px solid #999;"></div><div><div class="color-ion">$Sc^{3+}$</div><div class="color-name">වර්ණ රහිත (Colourless)</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#c084fc"></div><div><div class="color-ion">$Ti^{3+}$</div><div class="color-name">දම් (Violet)</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#16a34a"></div><div><div class="color-ion">$[Ni(H_2O)_6]^{2+}$</div><div class="color-name">කොළ (Green)</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#f472b6"></div><div><div class="color-ion">$[Co(H_2O)_6]^{2+}$</div><div class="color-name">රෝස (Pink)</div></div></div>
+      <div class="color-card"><div class="color-swatch" style="background:#1e3a8a"></div><div><div class="color-ion">$[Co(NH_3)_6]^{3+}$</div><div class="color-name">කහ-දුඹුරු (Yellow)</div></div></div>
+    </div>
+  </section>
+
+  <!-- ========== SECTION 4: OXIDE TRENDS ========== -->
+  <section class="section" id="oxides">
+    <div class="section-title">🧪 d ගොනුවේ මූලද්‍රව්‍ය වල වැදගත් ප්‍රතික්‍රිය</div>
+
+<!-- CHROMIUM SECTION -->
+<div class="info-block" style="margin-bottom:8px;">
+  <div class="info-label">Cr [Chromium]</div>
+</div>
+
+<!-- Cr oxidizing reactions -->
+<div class="info-block gold" style="margin-bottom:8px;">
+  <div class="info-label">ඔක්සයිඩ අඩනයන වල ප්‍රබල ඔක්සිකාරක ක්‍රියාව</div>
+  <div class="info-content"><strong>$Cr_2O_7^{2-}$ ඔක්සිකාරක ලෙස:</strong></div>
+</div>
+<div class="rxn-box">
+  $Cr_2O_7^{2-} + Fe^{2+} \longrightarrow Fe^{3+} + Cr^{3+}$<br>
+  $Cr_2O_7^{2-} + I^-/Br^-/Cl^- \longrightarrow I_2/Br_2/Cl_2 + Cr^{3+}$<br>
+  $Cr_2O_7^{2-} + SO_2 \longrightarrow SO_4^{2-}/H_2SO_4 + Cr^{3+}$<br>
+  $Cr_2O_7^{2-} + H_2S \longrightarrow S + Cr^{3+}$
+</div>
+
+<!-- Cr2O7 / CrO4 interconversion -->
+<div class="info-block" style="margin-top:8px;">
+  <div class="info-label">ක්ෂාරික මාධ්‍යේ $Cr_2O_7^{2-}$, $CrO_4^{2-}$ බවට පරිවර්තනය</div>
+</div>
+<div class="rxn-box">
+  $Cr_2O_7^{2-} + 2OH^- \longrightarrow 2CrO_4^{2-} + H_2O$<br>
+  <span style="color:var(--text2);font-size:11px;">තැඹිලි → කහ</span>
+</div>
+<div class="info-block" style="margin-top:8px;">
+  <div class="info-label">ආම්ලික මාධ්‍යේ $CrO_4^{2-}$, $Cr_2O_7^{2-}$ බවට පරිවර්තනය</div>
+</div>
+<div class="rxn-box">
+  $2CrO_4^{2-} + 2H^+ \longrightarrow Cr_2O_7^{2-} + H_2O$<br>
+  <span style="color:var(--text2);font-size:11px;">කහ → තැඹිලි</span>
+</div>
+
+<!-- H2O2 with Cr -->
+<div class="info-block" style="margin-top:8px;">
+  <div class="info-label">$H_2O_2$ සමඟ</div>
+</div>
+<div class="rxn-box">
+  $Cr_2O_7^{2-} + H_2O_2 \longrightarrow Cr^{3+} + O_2$<br>
+  $Cr^{3+} + H_2O_2 \xrightarrow{OH^-} CrO_4^{2-} + H_2O$<br>
+  <span style="color:var(--text2);font-size:11px;">කොළ → කහ</span>
+</div>
+
+<!-- Cr oxide trends -->
+<div class="info-block gold" style="margin-bottom:14px; margin-top:8px;">
+  <div class="info-label">ප්‍රධාන නීතිය</div>
+  <div class="info-content">
+    ✅ <strong>ඔ.අ. ↑ (ඉහළ)</strong> → ඔක්සයිඩ <strong>අම්ලික</strong> ස්වභාවය ↑<br>
+    ✅ <strong>ඔ.අ. ↓ (පහළ)</strong> → ඔක්සයිඩ <strong>ක්ෂාරීය</strong> ස්වභාවය ↑<br>
+    ✅ <strong>මධ්‍ය ඔ.අ.</strong> → ද්විඅර්ථ (Amphoteric)
+  </div>
+</div>
+<div class="section-title" style="font-size:13px; color:var(--text2); border-color:var(--border);">ක්‍රෝමියම් (Cr) ඔක්සයිඩ</div>
+<div class="oxide-grid" style="margin-bottom:16px;">
+  <div class="oxide-item">
+    <div class="oxide-formula">CrO</div>
+    <div style="font-size:11px; color:var(--text2);">Cr(+2)</div>
+    <div class="oxide-state basic">ක්ෂාරීය</div>
+  </div>
+  <div class="oxide-item">
+    <div class="oxide-formula">$Cr_2O_3$</div>
+    <div style="font-size:11px; color:var(--text2);">Cr(+3)</div>
+    <div class="oxide-state amphoteric">ද්විඅර්ථ</div>
+  </div>
+  <div class="oxide-item">
+    <div class="oxide-formula">$CrO_3$</div>
+    <div style="font-size:11px; color:var(--text2);">Cr(+6)</div>
+    <div class="oxide-state acidic">අම්ලික</div>
+  </div>
+</div>
+<div class="rxn-box">
+  $Cr_2O_3 + 3H_2SO_4 \rightarrow Cr_2(SO_4)_3 + 3H_2O$ (අම්ල සමඟ)
+</div>
+<div class="rxn-box">
+  $Cr_2O_3 + 2NaOH \rightarrow 2NaCrO_2 + H_2O$ (ක්ෂාර සමඟ)
+</div>
+<div class="rxn-box">
+  $CrO_3 + H_2O \rightarrow H_2CrO_4$ (ක්‍රෝමික් අම්ලය — ශ්‍රේෂ්ඨ අම්ල)
+</div>
+
+<!-- MANGANESE SECTION -->
+<div class="info-block" style="margin-top:16px; margin-bottom:8px;">
+  <div class="info-label">Mn [Manganese]</div>
+</div>
+
+<!-- MnO4- oxidizing reactions -->
+<div class="info-block gold" style="margin-bottom:8px;">
+  <div class="info-label">ඔක්සයිඩ අඩනයන වල ප්‍රබල ඔක්සිකාරක ක්‍රියාව</div>
+  <div class="info-content"><strong>$MnO_4^-$ ඔක්සිකාරක ලෙස (ආම්ලික මාධ්‍ය):</strong></div>
+</div>
+<div class="rxn-box">
+  $MnO_4^- + Fe^{2+} \longrightarrow Fe^{3+} + Mn^{2+}$<br>
+  $MnO_4^- + C_2O_4^{2-} \longrightarrow CO_2 + Mn^{2+}$<br>
+  $MnO_4^- + NO_2^- \longrightarrow NO_3^- + Mn^{2+}$<br>
+  $MnO_4^- + I^-/Br^-/Cl^- \longrightarrow I_2/Br_2/Cl_2 + Mn^{2+}$<br>
+  $MnO_4^- + SO_2 \longrightarrow SO_4^{2-} + Mn^{2+}$<br>
+  $MnO_4^- + H_2S \longrightarrow S + Mn^{2+}$<br>
+  $MnO_4^- + I^- \xrightarrow{OH^-} IO_3^- + MnO_2$<br>
+  <span style="color:var(--text2);font-size:11px;">ක්ෂාරික මාධ්‍යයේදී $MnO_2$ ලැබේ (කළු දුඹුරු)</span>
+</div>
+
+<!-- MnO4- / MnO4(2-) interconversion -->
+<div class="info-block" style="margin-top:8px;">
+  <div class="info-label">$MnO_4^-$ සහ $MnO_4^{2-}$ අතර පරිවර්තන</div>
+</div>
+<div class="rxn-box">
+  $MnO_4^- \xrightarrow{සාN\,OH^-} MnO_4^{2-}$<br>
+  <span style="color:var(--text2);font-size:11px;">දම් → කොළ</span><br><br>
+  $MnO_4^{2-} \xrightarrow{H^+} MnO_4^- + MnO_2 \downarrow$<br>
+  <span style="color:var(--text2);font-size:11px;">කොළ → දම් + කළු දුඹුරු</span>
+</div>
+
+<!-- Mn oxide trends -->
+<div class="section-title" style="font-size:13px; color:var(--text2); border-color:var(--border); margin-top:16px;">මැංගනීස් (Mn) ඔක්සයිඩ</div>
+<div class="oxide-grid">
+  <div class="oxide-item">
+    <div class="oxide-formula">MnO</div>
+    <div style="font-size:11px; color:var(--text2);">Mn(+2)</div>
+    <div class="oxide-state basic">ක්ෂාරීය</div>
+  </div>
+  <div class="oxide-item">
+    <div class="oxide-formula">$Mn_2O_3$</div>
+    <div style="font-size:11px; color:var(--text2);">Mn(+3)</div>
+    <div class="oxide-state basic">ක්ෂාරීය</div>
+  </div>
+  <div class="oxide-item">
+    <div class="oxide-formula">$MnO_2$</div>
+    <div style="font-size:11px; color:var(--text2);">Mn(+4)</div>
+    <div class="oxide-state amphoteric">ද්විඅර්ථ</div>
+  </div>
+  <div class="oxide-item">
+    <div class="oxide-formula">$Mn_2O_7$</div>
+    <div style="font-size:11px; color:var(--text2);">Mn(+7)</div>
+    <div class="oxide-state acidic">ශ්‍රේෂ්ඨ අම්ල</div>
+  </div>
+</div>
+<div class="rxn-box" style="margin-top:12px;">
+  $Mn_2O_7 + H_2O \rightarrow 2HMnO_4$ (Permanganic Acid — ශ්‍රේෂ්ඨ අම්ල)
+</div>
+<div class="rxn-box">
+  $MnO_2 + 2HCl \rightarrow MnCl_2 + H_2O + Cl_2$ (ද්විඅර්ථ ස්වභාව)
+</div>
+
+<!-- IRON SECTION -->
+<div class="info-block" style="margin-top:16px; margin-bottom:8px;">
+  <div class="info-label">Fe [Iron] — ඔ.ව. ප්‍රතික්‍රියා</div>
+</div>
+<div class="rxn-box">
+  $Fe^{3+} + I^- \longrightarrow I_2 + Fe^{2+}$<br>
+  <span style="color:var(--text2);font-size:11px;">($Fe^{3+}$ ඔක්සිකාරකයා — $I^-$ ඔ.ව.කාරකයා)</span><br><br>
+  $Fe^{3+} + Fe \longrightarrow Fe^{2+}$<br>
+  <span style="color:var(--text2);font-size:11px;">(ලෝහ $Fe$ සමඟ $Fe^{3+}$ $Fe^{2+}$ බවට)</span>
+</div>
+
+<!-- COPPER SECTION -->
+<div class="info-block" style="margin-top:8px; margin-bottom:8px;">
+  <div class="info-label">Cu [Copper] — ඔ.ව. ප්‍රතික්‍රියා</div>
+</div>
+<div class="rxn-box">
+  $Cu^{2+} + I^- \longrightarrow I_2 + Cu^+$<br>
+  <span style="color:var(--text2);font-size:11px;">($I_3^-$ සහ CuI ලෙස ලැබේ)</span><br><br>
+  $Cu^{2+} + Cu \longrightarrow Cu^+$<br>
+  <span style="color:var(--text2);font-size:11px;">(ලෝහ $Cu$ සමඟ $Cu^{2+}$ $Cu^+$ බවට)</span>
+</div>
+  </section>
+
+  <!-- ========== SECTION 5: COLOR QUIZ ========== -->
+  <section class="section" id="quiz">
+    <div class="section-title">🎯 වර්ණ ප්‍රශ්නෝත්තර</div>
+    <div class="quiz-card">
+      <div style="font-size:14px; font-weight:600; color:var(--text2); margin-bottom:4px;">
+        අයනයේ වර්ණය කුමක්ද?
+      </div>
+      <div class="quiz-score">
+        <div><div class="score-val" id="scoreCorrect">0</div><div>නිවැරදි</div></div>
+        <div><div class="score-val" id="scoreTotal">0</div><div>එකතුව</div></div>
+        <div><div class="score-val" id="scorePct">0%</div><div>ශ්‍රේෂ්ඨ</div></div>
+      </div>
+      <div class="quiz-question-box">
+        <div class="quiz-ion" id="quizIon">ප්‍රශ්නය ආරම්භ කරන්න</div>
+      </div>
+      <div>
+        <button class="quiz-reveal-btn" id="revealBtn" onclick="revealAnswer()">🔍 වර්ණය දෙන්න</button>
+        <button class="quiz-reveal-btn secondary" onclick="nextQuestion()">⏭ ඊළඟ</button>
+        <button class="quiz-reveal-btn secondary" onclick="resetQuiz()">🔄 නැවත</button>
+      </div>
+      <div class="quiz-answer" id="quizAnswer">
+        <div class="answer-swatch" id="answerSwatch"></div>
+        <div class="answer-color-text" id="answerText"></div>
+        <div class="answer-sub" id="answerSub"></div>
+        <div style="display:flex; gap:10px; justify-content:center; margin-top:12px;">
+          <button class="quiz-reveal-btn" style="background:var(--accent2); padding:8px 20px;" onclick="markCorrect()">✅ දැනිමා</button>
+          <button class="quiz-reveal-btn" style="background:var(--accent3); padding:8px 20px;" onclick="markWrong()">❌ වරදා</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ===== THEME TOGGLE =====
+function toggleTheme() {
+  document.body.classList.toggle('light');
+  const btn = document.querySelector('.theme-btn');
+  btn.textContent = document.body.classList.contains('light') ? '🌙 අඳුර' : '☀️ ආලෝකය';
+}
+
+// ===== CARD TOGGLE =====
+function toggleCard(id) {
+  const card = document.getElementById(id);
+  card.classList.toggle('open');
+  if (card.classList.contains('open')) {
+    setTimeout(() => MathJax.typesetPromise([card]), 50);
+  }
+}
+
+// ===== SCROLL TO SECTION =====
+function scrollToSection(id, btn) {
+  const target = document.getElementById(id);
+  if (!target) return;
+  // offset for sticky header + nav
+  const offset = 110;
+  const top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+  window.scrollTo({ top, behavior: 'smooth' });
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
+// ===== SEARCH =====
+function handleSearch(query) {
+  const q = query.toLowerCase().trim();
+  if (!q) {
+    document.querySelectorAll('.element-card, .color-card, .rxn-box').forEach(el => {
+      el.classList.remove('hidden');
+    });
+    return;
+  }
+
+  // Search in element cards
+  document.querySelectorAll('.element-card').forEach(card => {
+    const text = card.textContent.toLowerCase();
+    if (text.includes(q)) {
+      card.classList.remove('hidden');
+      card.classList.add('open');
+      setTimeout(() => MathJax.typesetPromise([card]), 50);
+    } else {
+      card.classList.add('hidden');
+    }
+  });
+
+  // Search in color cards
+  document.querySelectorAll('.color-card').forEach(card => {
+    const text = card.textContent.toLowerCase();
+    card.classList.toggle('hidden', !text.includes(q));
+  });
+}
+
+// ===== QUIZ DATA =====
+const quizData = [
+  { ion: 'V²⁺', color: 'දම් (Violet/Lilac)', swatch: '#a78bfa', note: '3d³ | ඔ.අ. +2' },
+  { ion: 'V³⁺', color: 'කොළ (Green)', swatch: '#22c55e', note: '3d² | ඔ.අ. +3' },
+  { ion: 'VO²⁺', color: 'නිල් (Blue)', swatch: '#3b82f6', note: '3d¹ | ඔ.අ. +4' },
+  { ion: 'VO₂⁺', color: 'කහ (Yellow)', swatch: '#eab308', note: '3d⁰ | ඔ.අ. +5' },
+  { ion: 'Cr²⁺', color: 'නිල් (Blue)', swatch: '#60a5fa', note: 'ඔ.අ. +2' },
+  { ion: 'Cr³⁺', color: 'කොළ (Green)', swatch: '#16a34a', note: 'ඔ.අ. +3 — ස්ථාවරම' },
+  { ion: 'CrO₄²⁻', color: 'කහ (Yellow)', swatch: '#eab308', note: 'ක්ෂාරීය' },
+  { ion: 'Cr₂O₇²⁻', color: 'තැඹිලි (Orange)', swatch: '#f97316', note: 'අම්ල' },
+  { ion: 'MnO₄⁻', color: 'දම් (Purple)', swatch: '#9333ea', note: 'ඔ.අ. +7' },
+  { ion: 'MnO₄²⁻', color: 'කොළ (Green)', swatch: '#16a34a', note: 'Manganate | ඔ.අ. +6' },
+  { ion: 'Mn²⁺', color: 'ලා රෝස (Pale Pink)', swatch: '#fda4af', note: 'ඔ.අ. +2' },
+  { ion: 'MnO₂', color: 'කළු (Black)', swatch: '#1a1a1a', note: 'ඔ.අ. +4' },
+  { ion: 'Fe²⁺ [Fe(H₂O)₆]²⁺', color: 'ලා කොළ (Pale Green)', swatch: '#86efac', note: 'ෆෙරස්' },
+  { ion: 'Fe³⁺ [Fe(H₂O)₆]³⁺', color: 'කහ-දුඹුරු (Yellow-Brown)', swatch: '#ca8a04', note: 'ෆෙරික්' },
+  { ion: '[Cu(H₂O)₆]²⁺', color: 'ලා නිල් (Light Blue)', swatch: '#bfdbfe', note: 'ජලීය Cu²⁺' },
+  { ion: '[Cu(NH₃)₄]²⁺', color: 'තද නිල් (Deep Blue)', swatch: '#1e3a8a', note: 'ටෙට්‍රාමයින්' },
+  { ion: 'CuI', color: 'සුදු (White) ↓', swatch: '#f0f0f0', note: 'ඝන | I⁻ ප්‍රතික්‍රියා' },
+  { ion: 'Cu(OH)₂', color: 'ලා නිල් (Light Blue) ↓', swatch: '#93c5fd', note: 'NaOH ප්‍රතික්‍රියා' },
+  { ion: 'Sc³⁺', color: 'වර්ණ රහිත (Colourless)', swatch: '#e5e7eb', note: '3d⁰ | d-d සංක්‍රාන්ති නැත' },
+  { ion: 'Zn²⁺', color: 'වර්ණ රහිත (Colourless)', swatch: '#e5e7eb', note: '3d¹⁰ | d-d සංක්‍රාන්ති නැත' },
+  { ion: 'Ti³⁺', color: 'දම් (Violet)', swatch: '#c084fc', note: '3d¹ | ඔ.අ. +3' },
+  { ion: '[Co(H₂O)₆]²⁺', color: 'රෝස (Pink)', swatch: '#f472b6', note: 'Co²⁺ ජලීය' },
+  { ion: '[Ni(H₂O)₆]²⁺', color: 'කොළ (Green)', swatch: '#16a34a', note: 'Ni²⁺ ජලීය' },
+];
+
+let quizIndex = 0;
+let shuffled = [];
+let score = { correct: 0, total: 0 };
+let answered = false;
+
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startQuiz() {
+  shuffled = shuffleArray(quizData);
+  quizIndex = 0;
+  showQuestion();
+}
+
+function showQuestion() {
+  answered = false;
+  const q = shuffled[quizIndex % shuffled.length];
+  document.getElementById('quizIon').textContent = q.ion;
+  document.getElementById('quizAnswer').classList.remove('show');
+  document.getElementById('revealBtn').style.opacity = '1';
+  document.getElementById('revealBtn').disabled = false;
+  if (quizIndex % shuffled.length === 0 && quizIndex > 0) {
+    shuffled = shuffleArray(quizData);
+  }
+}
+
+function revealAnswer() {
+  const q = shuffled[quizIndex % shuffled.length];
+  document.getElementById('answerSwatch').style.background = q.swatch;
+  document.getElementById('answerSwatch').style.border = q.swatch === '#f0f0f0' || q.swatch === '#e5e7eb' ? '2px solid #999' : '2px solid rgba(255,255,255,0.2)';
+  document.getElementById('answerText').textContent = q.color;
+  document.getElementById('answerSub').textContent = q.note;
+  document.getElementById('quizAnswer').classList.add('show');
+  document.getElementById('revealBtn').style.opacity = '0.5';
+  document.getElementById('revealBtn').disabled = true;
+  answered = true;
+}
+
+function markCorrect() {
+  if (!answered) return;
+  score.correct++;
+  score.total++;
+  updateScore();
+  quizIndex++;
+  showQuestion();
+}
+
+function markWrong() {
+  if (!answered) return;
+  score.total++;
+  updateScore();
+  quizIndex++;
+  showQuestion();
+}
+
+function nextQuestion() {
+  if (!answered) { score.total++; updateScore(); }
+  quizIndex++;
+  showQuestion();
+}
+
+function resetQuiz() {
+  score = { correct: 0, total: 0 };
+  updateScore();
+  startQuiz();
+}
+
+function updateScore() {
+  document.getElementById('scoreCorrect').textContent = score.correct;
+  document.getElementById('scoreTotal').textContent = score.total;
+  document.getElementById('scorePct').textContent = score.total > 0 ? Math.round(score.correct / score.total * 100) + '%' : '0%';
+}
+
+// ===== INIT =====
+window.addEventListener('DOMContentLoaded', () => {
+  startQuiz();
+  // Typeset initial visible math
+  setTimeout(() => MathJax.typesetPromise(), 500);
+});
+</script>
+</body>
+</html>
