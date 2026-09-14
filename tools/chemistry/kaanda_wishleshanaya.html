@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>කාණ්ඩ විශ්ලේෂණය - E-Tools</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;500;600;700;800&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans Sinhala', sans-serif;
+            background: linear-gradient(135deg, #030712 0%, #0b0f19 50%, #020408 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+        }
+
+        /* Test Tube Setup */
+        .stage-wrapper {
+            position: relative;
+            width: 100%;
+            height: 320px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        /* Beaker elevated for burner */
+        .beaker-glass {
+            position: relative;
+            width: 130px;
+            height: 200px;
+            background: linear-gradient(to right, rgba(255,255,255,0.15), rgba(255,255,255,0.03) 50%, rgba(255,255,255,0.18));
+            border: 3px solid rgba(255, 255, 255, 0.4);
+            border-top: none;
+            border-radius: 0 0 35px 35px;
+            box-shadow: 0 0 25px rgba(0,0,0,0.8), inset 0 0 15px rgba(255,255,255,0.1);
+            overflow: hidden;
+            backdrop-filter: blur(2px);
+            z-index: 15;
+        }
+
+        .liquid-fill {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 65%;
+            transition: background-color 1.2s ease-in-out;
+            border-radius: 0 0 32px 32px;
+        }
+
+        /* Exact Proportional Precipitate Layer */
+        .ppt-layer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 0%;
+            transition: height 1.8s cubic-bezier(0.25, 1, 0.5, 1), background 1.2s ease;
+            border-radius: 0 0 32px 32px;
+            overflow: hidden;
+        }
+
+        /* Reagent Dropper */
+        .dropper {
+            position: absolute;
+            top: -70px;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: all 1s ease-in-out;
+            z-index: 30;
+            opacity: 0;
+        }
+        .dropper.active { top: 5px; opacity: 1; }
+        .drop {
+            position: absolute;
+            width: 8px; height: 14px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            left: 50%; transform: translateX(-50%); opacity: 0;
+        }
+
+        @keyframes dropFall {
+            0% { top: 35px; opacity: 1; transform: translateX(-50%) scale(1); }
+            70% { opacity: 1; }
+            100% { top: 110px; opacity: 0; transform: translateX(-50%) scale(0.3); }
+        }
+        .animate-drop { animation: dropFall 1.4s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+        /* Burner UNDER Beaker */
+        .burner-under-beaker {
+            position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+            display: flex; flex-direction: column; align-items: center; z-index: 5;
+            transition: opacity 0.8s ease; opacity: 0;
+        }
+        .burner-under-beaker.visible { opacity: 1; }
+        .heating-flame {
+            width: 32px; height: 45px;
+            background: radial-gradient(circle, rgba(59,130,246,0.95) 0%, rgba(239,68,68,0.8) 50%, transparent 100%);
+            border-radius: 50% 50% 20% 20%; filter: blur(2px);
+            animation: heatFlicker 0.1s infinite alternate ease-in-out;
+            margin-bottom: -10px; z-index: 5;
+        }
+        @keyframes heatFlicker {
+            0% { transform: scale(0.92) rotate(-1deg); }
+            100% { transform: scale(1.08) rotate(1deg); }
+        }
+        .burner-tube { width: 16px; height: 55px; background: linear-gradient(to right, #475569, #94a3b8, #334155); border-radius: 3px 3px 0 0; z-index: 10; }
+
+        /* Arrows Container */
+        .arrow-labels-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; }
+        .ppt-label {
+            position: absolute; left: 50%; transform: translateX(75px);
+            display: flex; align-items: center; gap: 6px; opacity: 0; transition: opacity 0.8s ease;
+        }
+        .ppt-label.visible { opacity: 1; }
+        .ppt-label i {
+            color: rgba(255,255,255,0.7); font-size: 14px; animation: pointLeft 1s infinite alternate ease-in-out;
+        }
+        @keyframes pointLeft { 0% { transform: translateX(0); } 100% { transform: translateX(-4px); } }
+
+        /* Flame Test Stage */
+        .flame-test-stage {
+            position: absolute; inset: 0; display: flex; flex-direction: column;
+            align-items: center; justify-content: flex-end; z-index: 30; opacity: 0;
+            pointer-events: none; transition: opacity 1s ease-in-out;
+        }
+        .flame-test-stage.active { opacity: 1; pointer-events: auto; }
+        .flame-container-main { position: relative; width: 120px; height: 180px; display: flex; justify-content: center; align-items: flex-end; margin-bottom: 75px; }
+        .flame-layer { position: absolute; bottom: 0; border-radius: 50% 50% 35% 35% / 60% 60% 40% 40%; transform-origin: center bottom; transition: all 1.2s ease-in-out; filter: blur(2px); }
+        .flame-aura { width: 120px; height: 180px; opacity: 0.4; filter: blur(20px); border-radius: 50%; }
+        .flame-outer { width: 65px; height: 145px; opacity: 0.88; animation: flameFlicker 0.15s infinite alternate ease-in-out; }
+        .flame-inner { width: 35px; height: 95px; opacity: 0.95; animation: flameFlicker 0.12s infinite alternate ease-in-out 0.05s; }
+        
+        .wire-holder-flame { position: absolute; right: -140px; bottom: 125px; width: 220px; height: 6px; transition: transform 1.5s cubic-bezier(0.65, 0, 0.35, 1); z-index: 25; }
+        .wire-rod-flame { width: 140px; height: 3px; background: linear-gradient(to right, #475569, #cbd5e1); }
+        .wire-loop-flame { width: 12px; height: 12px; border: 2px solid #cbd5e1; border-radius: 50%; margin-left: -2px; box-shadow: 0 0 5px rgba(255,255,255,0.8); }
+        .wire-in-flame-active { transform: translateX(-125px); }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #090d16; }
+        ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 3px; }
+    </style>
+</head>
+<body class="p-3 md:p-6 flex flex-col justify-between min-h-screen">
+
+    <header class="max-w-7xl mx-auto w-full text-center mb-3">
+        <div class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-purple-500/10 border border-blue-500/30 px-4 py-1 rounded-full mb-2 backdrop-blur-md">
+            <i class="fa-solid fa-flask-vial text-blue-400 text-xs animate-bounce"></i>
+            <span class="text-blue-200 text-xs md:text-sm font-semibold tracking-wide">අ.පො.ස උසස් පෙළ රසායන විද්‍යාව</span>
+        </div>
+        <h1 class="text-2xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-indigo-300 to-emerald-300 tracking-wide">
+            කැටායන විශ්ලේෂණ පද්ධතිය
+        </h1>
+    </header>
+
+    <main class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+        
+        <!-- Step Selection List -->
+        <section class="lg:col-span-4 bg-slate-900/80 border border-slate-800 backdrop-blur-md p-4 md:p-5 rounded-2xl shadow-2xl flex flex-col justify-between gap-3">
+            <div>
+                <h2 class="text-xs font-bold text-slate-300 flex items-center justify-between border-b border-slate-800 pb-2 mb-3 uppercase tracking-wider">
+                    <span><i class="fa-solid fa-list-ol text-blue-400 mr-2"></i>විශ්ලේෂණ පියවර</span>
+                    <span id="stepCounter" class="text-blue-400 font-mono">1/7</span>
+                </h2>
+                <div id="stepContainer" class="space-y-2 overflow-y-auto max-h-[340px] pr-1"></div>
+            </div>
+            <div class="pt-3 border-t border-slate-800 flex items-center gap-2">
+                <button id="btnPrev" onclick="navigateStep(-1)" class="w-1/2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium py-2 px-3 rounded-xl transition text-xs flex items-center justify-center gap-2 border border-slate-700 disabled:opacity-40">
+                    <i class="fa-solid fa-arrow-left"></i> පෙර
+                </button>
+                <button id="btnNext" onclick="navigateStep(1)" class="w-1/2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-2 px-3 rounded-xl shadow-lg transition text-xs flex items-center justify-center gap-2">
+                    ඊළඟ <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Lab Apparatus -->
+        <section class="lg:col-span-4 bg-slate-950/90 border border-slate-800 backdrop-blur-md p-6 rounded-2xl shadow-2xl flex flex-col items-center justify-between min-h-[460px] relative overflow-hidden">
+            <div class="w-full flex justify-between items-center text-xs text-slate-400 z-10">
+                <span id="reagentBadge" class="bg-blue-950/80 text-blue-300 border border-blue-800/60 px-2.5 py-1 rounded-full font-mono"></span>
+                <span id="phaseBadge" class="bg-slate-900 text-slate-300 border border-slate-700 px-2.5 py-1 rounded-full font-mono"></span>
+            </div>
+
+            <div class="stage-wrapper my-auto">
+                <div id="beakerApparatus" class="relative flex flex-col items-center justify-end h-full w-full pb-16">
+                    <div id="dropper" class="dropper flex flex-col items-center">
+                        <div class="w-3 h-8 bg-slate-600 rounded-t-sm"></div>
+                        <div class="w-6 h-3 bg-red-600 rounded-sm"></div>
+                        <div class="w-2 h-10 bg-slate-300/60 border border-white/40 rounded-b-full"></div>
+                        <div id="drop" class="drop"></div>
+                    </div>
+                    <div class="beaker-glass flex items-end justify-center relative">
+                        <div id="liquidFill" class="liquid-fill bg-blue-500/20"></div>
+                        <div id="pptLayer" class="ppt-layer"></div>
+                    </div>
+                    <div id="arrowLabelsContainer" class="arrow-labels-container"></div>
+                    <div id="burnerHardware" class="burner-under-beaker">
+                        <div class="heating-flame"></div>
+                        <div class="burner-tube"></div>
+                        <div class="w-14 h-3 bg-slate-700 rounded-sm border border-slate-600"></div>
+                        <div class="w-24 h-4 bg-slate-800 rounded-b-lg border-t border-slate-600 shadow-lg"></div>
+                    </div>
+                </div>
+
+                <div id="flameTestStage" class="flame-test-stage">
+                    <div class="absolute top-2 left-0 right-0 flex justify-center gap-1.5 z-40">
+                        <button onclick="switchFlameCation('Li')" id="fbtn-Li" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500/30 border border-amber-400 text-white shadow">Li⁺</button>
+                        <button onclick="switchFlameCation('Na')" id="fbtn-Na" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-800 border border-slate-700 text-slate-300">Na⁺</button>
+                        <button onclick="switchFlameCation('K')" id="fbtn-K" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-800 border border-slate-700 text-slate-300">K⁺</button>
+                    </div>
+                    <div class="flame-container-main">
+                        <div id="flameAura" class="flame-layer flame-aura bg-red-500"></div>
+                        <div id="flameOuter" class="flame-layer flame-outer bg-gradient-to-t from-red-600 via-rose-500 to-pink-300"></div>
+                        <div id="flameInner" class="flame-layer flame-inner bg-gradient-to-t from-red-400 via-pink-200 to-white"></div>
+                        <div class="flame-layer w-5 h-10 bg-blue-500/90 rounded-full bottom-0 filter blur-[1px]"></div>
+                    </div>
+                    <div id="flameWireHolder" class="wire-holder-flame flex items-center">
+                        <div class="wire-rod-flame"></div>
+                        <div id="flameWireLoop" class="wire-loop-flame bg-rose-400"></div>
+                    </div>
+                    <div class="burner-under-beaker visible" style="bottom: 0px;">
+                        <div class="burner-tube"></div>
+                        <div class="w-14 h-3 bg-slate-700 rounded-sm border border-slate-600"></div>
+                        <div class="w-24 h-4 bg-slate-800 rounded-b-lg border-t border-slate-600 shadow-lg"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="visualStatus" class="w-full text-center text-xs font-semibold py-2 px-3 rounded-xl bg-slate-900/90 border border-slate-800 text-slate-300 z-10 backdrop-blur-md"></div>
+        </section>
+
+        <!-- Information Column -->
+        <section class="lg:col-span-4 bg-slate-900/80 border border-slate-800 backdrop-blur-md p-5 rounded-2xl shadow-2xl flex flex-col justify-between min-h-[460px]">
+            <div>
+                <h2 class="text-xs font-bold text-slate-300 flex items-center gap-2 border-b border-slate-800 pb-2 mb-3 uppercase tracking-wider">
+                    <i class="fa-solid fa-atom text-emerald-400"></i> රසායනික පරීක්ෂණ නිරීක්ෂණය
+                </h2>
+                <div class="space-y-3 text-xs">
+                    <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700/60">
+                        <span class="text-[10px] text-slate-400 block mb-0.5">කාණ්ඩ ප්‍රතිකාරකය:</span>
+                        <div id="infoReagent" class="text-sm font-bold text-blue-300 font-mono"></div>
+                    </div>
+                    <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700/60">
+                        <span class="text-[10px] text-slate-400 block mb-0.5">අවක්ෂේපිත කැටායන:</span>
+                        <div id="infoPpt" class="text-xs font-bold text-amber-300 leading-relaxed"></div>
+                    </div>
+                    <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700/60">
+                        <span class="text-[10px] text-slate-400 block mb-1">තියරිය (Theory):</span>
+                        <div id="infoTheory" class="text-xs text-slate-300 leading-relaxed"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="infoTip" class="mt-3 p-3 bg-slate-950/70 border border-slate-800 rounded-xl text-xs text-slate-300 leading-relaxed border-l-4 border-l-blue-500"></div>
+        </section>
+    </main>
+
+    <!-- Developer Footer & E-Tools Integration -->
+    <footer class="max-w-7xl mx-auto w-full mt-5 bg-slate-900/80 border border-slate-800 backdrop-blur-md p-4 rounded-2xl flex flex-col md:flex-row items-center justify-between shadow-2xl gap-4">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center border-2 border-slate-700 shadow-lg text-white font-bold text-base">
+                ツ
+            </div>
+            <div>
+                <div class="text-slate-400 text-[10px] uppercase tracking-wide font-bold">Designed by</div>
+                <a href="https://t.me/dinusha_official" target="_blank" class="font-extrabold text-sm text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-emerald-300 hover:opacity-85 transition">
+                    Dinusha ツ
+                </a>
+            </div>
+        </div>
+        <div class="flex flex-wrap justify-center gap-3">
+            <a href="https://t.me/htmlstudytools" target="_blank" class="px-4 py-2 bg-emerald-600/20 border border-emerald-500/30 text-emerald-300 rounded-xl hover:bg-emerald-600/40 transition flex items-center gap-2 text-xs font-semibold">
+                <i class="fa-solid fa-toolbox text-sm"></i> E-Tools Portal
+            </a>
+        </div>
+    </footer>
+
+    <script>
+        // Mathematically adjusted Solid Gradients based on exact cation count
+        // Group 2: Total 9 (Black 4 [45%], Brown 1 [10%], Orange 1 [10%], Yellow 3 [35%])
+        const solidGroup2 = `linear-gradient(to top, 
+            #09090b 0%, #09090b 45%, 
+            #78350f 45%, #78350f 55%, 
+            #ea580c 55%, #ea580c 65%, 
+            #eab308 65%, #eab308 100%)`;
+
+        // Group 3: Total 3 (Fe 1 [33.3%], Al 1 [33.3%], Cr 1 [33.3%])
+        const solidGroup3 = `linear-gradient(to top, 
+            #7f1d1d 0%, #7f1d1d 33.3%, 
+            #f8fafc 33.3%, #f8fafc 66.6%, 
+            #15803d 66.6%, #15803d 100%)`;
+
+        // Group 4: Total 4 (Black 2 [50%], White 1 [25%], Pink 1 [25%])
+        const solidGroup4 = `linear-gradient(to top, 
+            #09090b 0%, #09090b 50%, 
+            #f8fafc 50%, #f8fafc 75%, 
+            #fbcfe8 75%, #fbcfe8 100%)`;
+
+        const steps = [
+            {
+                id: 1, title: '1 කාණ්ඩය (Group 1)', reagent: 'Dilute HCl',
+                solutionBg: 'rgba(59, 130, 246, 0.2)', pptBg: '#f8fafc', pptHeight: '28%',
+                pptText: 'AgCl, PbCl₂, Hg₂Cl₂ (සුදු)',
+                theory: 'තනුක HCl එකතු කළ විට Ksp අගය ඉතා අඩු 1 කාණ්ඩයේ ක්ලෝරයිඩ සුදු පැහැයෙන් අවක්ෂේප වේ.',
+                tip: 'අවක්ෂේපය පෙරා වෙන් කර ඉතිරි ද්‍රාවණය 2 වන කාණ්ඩයට යොමු කරයි.',
+                isHeating: false, isFlameTest: false,
+                labels: [ { text: 'Ag, Pb, Hg₂ ක්ලෝරයිඩ', bottom: '26%', color: 'text-slate-800 bg-white' } ]
+            },
+            {
+                id: 2, title: '2 කාණ්ඩය (Group 2)', reagent: '0.2M HCl + H₂S',
+                solutionBg: 'rgba(16, 185, 129, 0.2)', pptBg: solidGroup2, pptHeight: '60%',
+                pptText: 'කළු (4), දුඹුරු (1), තැඹිලි (1), සහ කහ (3)',
+                theory: 'HCl හමුවේ H₂S හි වියෝජනය අඩුවන අතර Ksp ඉතා අඩු 2 කාණ්ඩයේ ලෝහ සල්ෆයිඩ පමණක් අවක්ෂේප වේ.',
+                tip: 'සල්ෆයිඩ ප්‍රමාණය අනුව අවක්ෂේප මට්ටම් නිරූපණය කර ඇත.',
+                isHeating: false, isFlameTest: false,
+                labels: [
+                    { text: 'Cd, As, Sn (කහ)', bottom: '49%', color: 'text-amber-900 bg-amber-400' },
+                    { text: 'Sb₂S₃ (තැඹිලි)', bottom: '36%', color: 'text-white bg-orange-600' },
+                    { text: 'SnS (දුඹුරු)', bottom: '30%', color: 'text-white bg-amber-900' },
+                    { text: 'Pb, Cu, Hg, Bi (කළු)', bottom: '13%', color: 'text-white bg-slate-900 border border-slate-700' }
+                ]
+            },
+            {
+                id: 3, title: '3 කාණ්ඩය (Group 3)', reagent: 'රත් කිරීම + HNO₃ + NH₄OH',
+                solutionBg: 'rgba(245, 158, 11, 0.2)', pptBg: solidGroup3, pptHeight: '50%',
+                pptText: 'Fe(OH)₃ (රතු-දුඹුරු), Al(OH)₃ (සුදු), Cr(OH)₃ (කොළ)',
+                theory: 'HNO₃ මඟින් Fe²⁺ අයන Fe³⁺ බවට ඔක්සිකරණය කරයි. NH₄Cl හමුවේ [OH⁻] පාලනය කර හයිඩ්‍රොක්සයිඩ සාදයි.',
+                tip: 'අවක්ෂේප සමාන අනුපාත වලින් නිරූපණය කර ඇත.',
+                isHeating: true, isFlameTest: false,
+                labels: [
+                    { text: 'Cr(OH)₃ (කොළ)', bottom: '41%', color: 'text-white bg-green-700' },
+                    { text: 'Al(OH)₃ (සුදු)', bottom: '25%', color: 'text-slate-800 bg-white' },
+                    { text: 'Fe(OH)₃ (රතු-දුඹුරු)', bottom: '8%', color: 'text-white bg-red-900' }
+                ]
+            },
+            {
+                id: 4, title: '4 කාණ්ඩය (Group 4)', reagent: 'NH₄OH + H₂S',
+                solutionBg: 'rgba(168, 85, 247, 0.2)', pptBg: solidGroup4, pptHeight: '45%',
+                pptText: 'CoS, NiS (කළු) | ZnS (සුදු) | MnS (රෝස)',
+                theory: 'භාස්මික මාධ්‍යයේදී [S²-] සාන්ද්‍රණය වැඩි වන බැවින් Ksp සාපේක්ෂව වැඩි 4 කාණ්ඩයේ සල්ෆයිඩ අවක්ෂේප වේ.',
+                tip: 'කළු සල්ෆයිඩ 2ක් ඇති බැවින් එය වැඩි ප්‍රතිශතයක් ගනී.',
+                isHeating: false, isFlameTest: false,
+                labels: [
+                    { text: 'MnS (රෝස)', bottom: '39%', color: 'text-pink-900 bg-pink-300' },
+                    { text: 'ZnS (සුදු)', bottom: '28%', color: 'text-slate-800 bg-white' },
+                    { text: 'CoS, NiS (කළු)', bottom: '11%', color: 'text-white bg-slate-900 border border-slate-700' }
+                ]
+            },
+            {
+                id: 5, title: '5 කාණ්ඩය (Group 5)', reagent: '(NH₄)₂CO₃',
+                solutionBg: 'rgba(244, 63, 94, 0.2)', pptBg: '#f8fafc', pptHeight: '26%',
+                pptText: 'CaCO₃, SrCO₃, BaCO₃ (සුදු)',
+                theory: 'ඇල්කලයින් පෘථිවි ලෝහ කාබනේට ලෙස සුදු පැහැයෙන් අවක්ෂේප වී වෙන් වේ.',
+                tip: 'පෙරහනේ අවසාන කැටායන (Mg²⁺, Li⁺, Na⁺, K⁺) ඉතිරි වේ.',
+                isHeating: false, isFlameTest: false,
+                labels: [ { text: 'Ca, Sr, Ba කාබනේට', bottom: '24%', color: 'text-slate-800 bg-white' } ]
+            },
+            {
+                id: 6, title: 'Mg²⁺ තහවුරු කිරීම', reagent: '8-හයිඩ්‍රොක්සික්විනෝලීන්',
+                solutionBg: 'rgba(16, 185, 129, 0.25)', pptBg: '#84cc16', pptHeight: '30%',
+                pptText: 'Mg-ඔක්සිනේට් (කහ-කොළ)',
+                theory: 'භාස්මික මාධ්‍යයේදී Mg²⁺ අයන සමඟ කහ-කොළ පැහැති සංකීර්ණ අවක්ෂේපයක් සාදයි.',
+                tip: 'Mg²⁺ අයන සාර්ථකව තහවුරු විය.',
+                isHeating: false, isFlameTest: false,
+                labels: [ { text: 'Mg-ඔක්සිනේට් (කහ-කොළ)', bottom: '28%', color: 'text-lime-900 bg-lime-400' } ]
+            },
+            {
+                id: 7, title: '7. පහන් සිළු පරීක්ෂාව', reagent: 'සාන්ද්‍ර HCl + Pt කම්බිය',
+                solutionBg: '', pptBg: '', pptHeight: '0%', pptText: 'Li⁺, Na⁺, K⁺',
+                theory: 'අවසාන වශයෙන් ඉතිරිවන ක්ෂාර ලෝහ කැටායනවල ක්ලෝරයිඩ දැල්ලට අල්ලා ලාක්ෂණික වර්ණ නිරීක්ෂණය කරයි.',
+                tip: 'කැටායන විශ්ලේෂණ පරීක්ෂණ මාලාව සාර්ථකව අවසන්!',
+                isHeating: false, isFlameTest: true, labels: []
+            }
+        ];
+
+        const flameData = {
+            'Li': { name: 'Li⁺', colorText: 'රතු', outer: 'linear-gradient(to top, #dc2626, #ef4444, #f87171)', inner: 'linear-gradient(to top, #b91c1c, #fca5a5, #ffffff)', aura: 'rgba(239, 68, 68, 0.65)', bead: '#ef4444' },
+            'Na': { name: 'Na⁺', colorText: 'තීව්‍ර කහ', outer: 'linear-gradient(to top, #d97706, #f59e0b, #fbbf24)', inner: 'linear-gradient(to top, #b45309, #fde68a, #ffffff)', aura: 'rgba(245, 158, 11, 0.75)', bead: '#f59e0b' },
+            'K': { name: 'K⁺', colorText: 'ලයිලැක් / දම්', outer: 'linear-gradient(to top, #7e22ce, #a855f7, #c084fc)', inner: 'linear-gradient(to top, #6b21a8, #e9d5ff, #ffffff)', aura: 'rgba(168, 85, 247, 0.65)', bead: '#c084fc' }
+        };
+
+        let currentStepIdx = 0;
+        let activeFlameCation = 'Li';
+
+        function renderStepList() {
+            const container = document.getElementById('stepContainer');
+            container.innerHTML = '';
+            steps.forEach((s, idx) => {
+                const btn = document.createElement('button');
+                btn.onclick = () => setStep(idx);
+                btn.className = `w-full text-left p-2.5 rounded-xl border transition duration-300 flex items-center justify-between cursor-pointer ${idx === currentStepIdx ? 'bg-blue-600/30 border-blue-400 text-white shadow-md' : 'bg-slate-800/40 border-slate-700/60 text-slate-400 hover:bg-slate-800/80 hover:text-slate-200'}`;
+                btn.innerHTML = `<div class="flex items-center gap-2.5"><span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${idx === currentStepIdx ? 'bg-blue-500 text-white' : 'bg-slate-700 text-slate-300'}">${s.id}</span><span class="text-xs font-semibold">${s.title}</span></div><i class="fa-solid fa-chevron-right text-[10px] opacity-60"></i>`;
+                container.appendChild(btn);
+            });
+        }
+
+        function setStep(idx) {
+            currentStepIdx = idx;
+            const data = steps[idx];
+
+            document.getElementById('stepCounter').innerText = `${data.id}/${steps.length}`;
+            document.getElementById('reagentBadge').innerText = `Reagent: ${data.reagent}`;
+            document.getElementById('phaseBadge').innerText = `Phase ${data.id}: ${data.title.split(' ')[0]}`;
+
+            const beakerApparatus = document.getElementById('beakerApparatus');
+            const flameTestStage = document.getElementById('flameTestStage');
+            const dropper = document.getElementById('dropper');
+            const drop = document.getElementById('drop');
+            const liquidFill = document.getElementById('liquidFill');
+            const pptLayer = document.getElementById('pptLayer');
+            const burnerHardware = document.getElementById('burnerHardware');
+            const labelsContainer = document.getElementById('arrowLabelsContainer');
+            const visualStatus = document.getElementById('visualStatus');
+
+            if (data.isFlameTest) {
+                beakerApparatus.style.display = 'none';
+                flameTestStage.classList.add('active');
+                switchFlameCation(activeFlameCation);
+            } else {
+                flameTestStage.classList.remove('active');
+                beakerApparatus.style.display = 'flex';
+
+                liquidFill.style.backgroundColor = data.solutionBg;
+                pptLayer.style.height = '0%';
+                pptLayer.style.background = data.pptBg;
+                labelsContainer.innerHTML = ''; 
+
+                if (data.isHeating) burnerHardware.classList.add('visible');
+                else burnerHardware.classList.remove('visible');
+
+                dropper.classList.add('active');
+                drop.classList.add('animate-drop');
+                visualStatus.innerText = `ප්‍රතිකාරකය එකතු කරමින්...`;
+
+                setTimeout(() => {
+                    pptLayer.style.height = data.pptHeight;
+                    visualStatus.innerText = `නිරීක්ෂණය: ${data.pptText}`;
+                    
+                    data.labels.forEach((lbl, i) => {
+                        const el = document.createElement('div');
+                        el.className = 'ppt-label';
+                        el.style.bottom = lbl.bottom;
+                        el.innerHTML = `<i class="fa-solid fa-arrow-left text-slate-300 drop-shadow-md"></i><span class="ml-1.5 px-2 py-0.5 rounded shadow-lg text-[10px] font-semibold whitespace-nowrap border border-slate-500/50 ${lbl.color}">${lbl.text}</span>`;
+                        labelsContainer.appendChild(el);
+                        setTimeout(() => el.classList.add('visible'), i * 300 + 400);
+                    });
+                }, 1000);
+
+                setTimeout(() => { dropper.classList.remove('active'); drop.classList.remove('animate-drop'); }, 2400);
+            }
+
+            document.getElementById('infoReagent').innerText = data.reagent;
+            document.getElementById('infoPpt').innerText = data.pptText;
+            document.getElementById('infoTheory').innerText = data.theory;
+            document.getElementById('infoTip').innerHTML = `<i class="fa-solid fa-lightbulb text-amber-400 mr-1"></i> ${data.tip}`;
+            document.getElementById('btnPrev').disabled = currentStepIdx === 0;
+            document.getElementById('btnNext').disabled = currentStepIdx === steps.length - 1;
+            renderStepList();
+        }
+
+        function switchFlameCation(key) {
+            activeFlameCation = key;
+            const fdata = flameData[key];
+            ['Li', 'Na', 'K'].forEach(k => {
+                const b = document.getElementById(`fbtn-${k}`);
+                if (b) b.className = k === key ? 'px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500/30 border border-amber-400 text-white shadow' : 'px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-800 border border-slate-700 text-slate-300';
+            });
+            const flameWireHolder = document.getElementById('flameWireHolder');
+            flameWireHolder.classList.remove('wire-in-flame-active');
+            
+            setTimeout(() => flameWireHolder.classList.add('wire-in-flame-active'), 100);
+            setTimeout(() => {
+                document.getElementById('flameOuter').style.background = fdata.outer;
+                document.getElementById('flameInner').style.background = fdata.inner;
+                document.getElementById('flameAura').style.backgroundColor = fdata.aura;
+                document.getElementById('flameWireLoop').style.backgroundColor = fdata.bead;
+                document.getElementById('visualStatus').innerText = `පහන් සිළු පරීක්ෂාව: ${fdata.name} -> ${fdata.colorText}`;
+            }, 1000);
+        }
+
+        function navigateStep(direction) {
+            const nextIdx = currentStepIdx + direction;
+            if (nextIdx >= 0 && nextIdx < steps.length) setStep(nextIdx);
+        }
+
+        window.onload = () => setStep(0);
+    </script>
+</body>
+</html>
