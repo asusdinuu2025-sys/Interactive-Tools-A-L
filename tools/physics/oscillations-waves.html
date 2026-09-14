@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>දෝලන සහ තරංග — A/L භෞතික විද්‍යා පුනරීක්ෂණය</title>
+<style>
+:root{
+  --void:#0A0E13;
+  --panel:#111820;
+  --panel-2:#161F29;
+  --line:#223140;
+  --phosphor:#6EE7B8;
+  --phosphor-dim:#3E9C7C;
+  --amber:#F5A623;
+  --amber-dim:#B87A1A;
+  --text:#E7EEF3;
+  --text-muted:#8CA0B3;
+  --text-faint:#5A6C7D;
+  --danger:#E5687A;
+  --radius:10px;
+  --mono:'JetBrains Mono','SF Mono',ui-monospace,Consolas,monospace;
+  --sinhala:'Iskoola Pota','Noto Sans Sinhala','Nirmala UI',sans-serif;
+  --sans:'Inter',-apple-system,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--void);
+  color:var(--text);
+  font-family:var(--sinhala), var(--sans);
+  line-height:1.5;
+  min-height:100vh;
+  background-image:
+    radial-gradient(ellipse 900px 500px at 15% -10%, rgba(110,231,184,0.06), transparent),
+    radial-gradient(ellipse 700px 400px at 100% 10%, rgba(245,166,35,0.05), transparent);
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+}
+
+/* ---------- Scope header ---------- */
+.scope-header{
+  position:relative;
+  border-bottom:1px solid var(--line);
+  padding:28px 24px 22px;
+  overflow:hidden;
+  background:linear-gradient(180deg, rgba(17,24,32,0.9), rgba(10,14,19,0.4));
+}
+.scope-header::before{
+  content:"";
+  position:absolute; inset:0;
+  background-image:repeating-linear-gradient(0deg, rgba(110,231,184,0.035) 0px, rgba(110,231,184,0.035) 1px, transparent 1px, transparent 24px),
+                    repeating-linear-gradient(90deg, rgba(110,231,184,0.035) 0px, rgba(110,231,184,0.035) 1px, transparent 1px, transparent 24px);
+  pointer-events:none;
+}
+.header-inner{position:relative; max-width:1280px; margin:0 auto; display:flex; align-items:center; gap:28px; flex-wrap:wrap;}
+.scope-canvas-wrap{
+  position:relative; width:220px; height:96px; flex:0 0 auto;
+  background:#060A0D; border:1px solid var(--line); border-radius:8px;
+  box-shadow:inset 0 0 24px rgba(110,231,184,0.08);
+}
+.scope-canvas-wrap canvas{display:block; width:100%; height:100%;}
+.scope-label{
+  position:absolute; bottom:4px; left:8px; font-family:var(--mono);
+  font-size:9px; letter-spacing:0.08em; color:var(--phosphor-dim); text-transform:uppercase;
+}
+.title-block{flex:1; min-width:260px;}
+.eyebrow{
+  font-family:var(--mono); font-size:11px; letter-spacing:0.18em; text-transform:uppercase;
+  color:var(--amber); margin-bottom:8px; display:flex; align-items:center; gap:8px;
+}
+.eyebrow::before{content:""; width:6px; height:6px; border-radius:50%; background:var(--amber); box-shadow:0 0 8px var(--amber); animation:blink 1.6s infinite;}
+@keyframes blink{0%,100%{opacity:1;} 50%{opacity:0.25;}}
+h1{
+  font-size:clamp(22px,3.4vw,34px); font-weight:700; letter-spacing:-0.01em;
+  color:var(--text);
+}
+.subtitle{color:var(--text-muted); font-size:14px; margin-top:6px; max-width:640px;}
+.header-stats{display:flex; gap:22px; font-family:var(--mono); flex:0 0 auto;}
+.stat{text-align:center;}
+.stat b{display:block; font-size:22px; color:var(--phosphor);}
+.stat span{font-size:10px; color:var(--text-faint); letter-spacing:0.06em; text-transform:uppercase;}
+
+/* ---------- Layout ---------- */
+.layout{max-width:1280px; margin:0 auto; display:grid; grid-template-columns:220px 1fr; gap:0; align-items:start;}
+@media (max-width:880px){ .layout{grid-template-columns:1fr;} }
+
+.sidebar{
+  position:sticky; top:0; padding:22px 16px; border-right:1px solid var(--line);
+  display:flex; flex-direction:column; gap:4px; align-self:start; height:100vh; overflow-y:auto;
+}
+@media (max-width:880px){ .sidebar{position:relative; height:auto; border-right:none; border-bottom:1px solid var(--line); flex-direction:row; flex-wrap:wrap; padding:16px;} }
+
+.sidebar-title{font-family:var(--mono); font-size:10px; letter-spacing:0.14em; color:var(--text-faint); text-transform:uppercase; padding:6px 10px 10px;}
+.nav-btn{
+  display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+  background:transparent; border:1px solid transparent; color:var(--text-muted);
+  font-family:var(--sinhala); font-size:13.5px; padding:9px 10px; border-radius:8px; cursor:pointer;
+  transition:background 0.15s, color 0.15s, border-color 0.15s;
+}
+.nav-btn .chip{width:8px; height:8px; border-radius:2px; flex:0 0 auto; background:var(--text-faint);}
+.nav-btn:hover{background:var(--panel-2); color:var(--text);}
+.nav-btn.active{background:rgba(110,231,184,0.08); color:var(--phosphor); border-color:rgba(110,231,184,0.25);}
+.nav-btn.active .chip{background:var(--phosphor); box-shadow:0 0 6px var(--phosphor);}
+.nav-count{margin-left:auto; font-family:var(--mono); font-size:10.5px; color:var(--text-faint);}
+
+.sidebar-divider{height:1px; background:var(--line); margin:12px 4px;}
+.jumplinks a{display:block; font-size:12px; color:var(--text-faint); text-decoration:none; padding:5px 10px; font-family:var(--mono);}
+.jumplinks a:hover{color:var(--phosphor);}
+
+.main{padding:24px 24px 60px;}
+
+/* search */
+.toolbar{display:flex; gap:12px; align-items:center; margin-bottom:22px; flex-wrap:wrap;}
+.search-wrap{position:relative; flex:1; min-width:220px;}
+.search-wrap input{
+  width:100%; background:var(--panel); border:1px solid var(--line); color:var(--text);
+  padding:11px 14px 11px 38px; border-radius:8px; font-family:var(--sinhala); font-size:14px;
+  outline:none; transition:border-color 0.15s;
+}
+.search-wrap input:focus{border-color:var(--phosphor-dim);}
+.search-wrap svg{position:absolute; left:12px; top:50%; transform:translateY(-50%); opacity:0.5;}
+.result-count{font-family:var(--mono); font-size:11.5px; color:var(--text-faint); white-space:nowrap;}
+
+/* section headers */
+.section-heading{
+  display:flex; align-items:baseline; gap:10px; margin:38px 0 16px; padding-bottom:10px; border-bottom:1px solid var(--line);
+}
+.section-heading:first-of-type{margin-top:0;}
+.section-heading .num{font-family:var(--mono); font-size:12px; color:var(--phosphor-dim);}
+.section-heading h2{font-size:18px; font-weight:600;}
+.section-heading .sub{font-size:12px; color:var(--text-faint); margin-left:auto; font-family:var(--mono);}
+
+/* equation grid */
+.eq-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(270px,1fr)); gap:12px;}
+.eq-card{
+  background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+  padding:16px 16px 14px; position:relative; overflow:hidden; transition:border-color 0.15s, transform 0.15s;
+}
+.eq-card:hover{border-color:var(--phosphor-dim); transform:translateY(-1px);}
+.eq-card::before{content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--tag-color, var(--phosphor));}
+.eq-tag{font-family:var(--mono); font-size:9.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--tag-color, var(--phosphor)); margin-bottom:8px; display:block;}
+.eq-name{font-size:13px; color:var(--text-muted); margin-bottom:10px; font-family:var(--sinhala);}
+.eq-formula{
+  font-family:var(--mono); font-size:17px; color:var(--text); background:var(--panel-2);
+  border:1px solid var(--line); border-radius:6px; padding:12px 10px; text-align:center;
+  overflow-x:auto; white-space:nowrap;
+}
+.eq-formula sup{font-size:0.62em; position:relative; top:-0.6em;}
+.eq-formula sub{font-size:0.62em; position:relative; top:0.4em;}
+.eq-vars{margin-top:10px; font-size:11.5px; color:var(--text-faint); line-height:1.6;}
+.eq-vars b{color:var(--text-muted); font-family:var(--mono); font-weight:600;}
+
+.eq-card[data-cat="shm"]{--tag-color:#6EE7B8;}
+.eq-card[data-cat="waves"]{--tag-color:#F5A623;}
+.eq-card[data-cat="super"]{--tag-color:#7DB4F5;}
+.eq-card[data-cat="doppler"]{--tag-color:#E5687A;}
+
+.no-results{display:none; text-align:center; padding:60px 20px; color:var(--text-faint); font-family:var(--mono); font-size:13px;}
+
+/* ---------- Simulator panels ---------- */
+.sim-panel{
+  background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:22px;
+  margin-bottom:22px;
+}
+.sim-header{display:flex; align-items:center; gap:10px; margin-bottom:16px;}
+.sim-header h3{font-size:16px;}
+.sim-header .badge{font-family:var(--mono); font-size:10px; padding:3px 8px; border-radius:20px; background:rgba(110,231,184,0.1); color:var(--phosphor); letter-spacing:0.06em;}
+.sim-body{display:grid; grid-template-columns:1.3fr 1fr; gap:20px;}
+@media (max-width:760px){ .sim-body{grid-template-columns:1fr;} }
+.sim-canvas-wrap{background:#060A0D; border:1px solid var(--line); border-radius:10px; overflow:hidden; position:relative;}
+.sim-canvas-wrap canvas{display:block; width:100%; height:100%;}
+.sim-controls{display:flex; flex-direction:column; gap:14px;}
+.control{display:flex; flex-direction:column; gap:6px;}
+.control label{font-size:12px; color:var(--text-muted); display:flex; justify-content:space-between; font-family:var(--sinhala);}
+.control label .val{font-family:var(--mono); color:var(--phosphor); font-size:12px;}
+.control input[type=range]{
+  -webkit-appearance:none; width:100%; height:4px; border-radius:2px; background:var(--line); outline:none;
+}
+.control input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:15px; height:15px; border-radius:50%; background:var(--phosphor);
+  cursor:pointer; box-shadow:0 0 8px rgba(110,231,184,0.5);
+}
+.toggle-row{display:flex; gap:8px;}
+.toggle-btn{
+  flex:1; background:var(--panel-2); border:1px solid var(--line); color:var(--text-muted);
+  padding:8px 6px; border-radius:7px; font-size:11.5px; cursor:pointer; font-family:var(--sinhala); transition:all 0.15s;
+}
+.toggle-btn.active{background:rgba(110,231,184,0.1); border-color:var(--phosphor-dim); color:var(--phosphor);}
+.readout{
+  background:var(--panel-2); border:1px solid var(--line); border-radius:8px; padding:12px 14px; margin-top:4px;
+}
+.readout .formula-used{font-family:var(--mono); font-size:13px; color:var(--amber); margin-bottom:6px;}
+.readout .result{font-family:var(--mono); font-size:20px; color:var(--phosphor);}
+.readout .steps{font-size:11px; color:var(--text-faint); margin-top:6px; font-family:var(--mono);}
+
+.harmonic-row{display:flex; gap:6px; flex-wrap:wrap;}
+.harmonic-btn{
+  width:34px; height:34px; border-radius:7px; background:var(--panel-2); border:1px solid var(--line);
+  color:var(--text-muted); font-family:var(--mono); font-size:12px; cursor:pointer;
+}
+.harmonic-btn.active{background:rgba(245,166,35,0.12); border-color:var(--amber-dim); color:var(--amber);}
+
+footer{
+  text-align:center; padding:26px; color:var(--text-faint); font-size:11.5px; font-family:var(--mono);
+  border-top:1px solid var(--line);
+}
+</style>
+</head>
+<body>
+
+<header class="scope-header">
+  <div class="header-inner">
+    <div class="scope-canvas-wrap">
+      <canvas id="heroScope"></canvas>
+      <div class="scope-label">CH1 · SHM · x = A sin(ωt)</div>
+    </div>
+    <div class="title-block">
+      <div class="eyebrow">A/L Physics · Revision Console</div>
+      <h1>දෝලන සහ තරංග</h1>
+      <p class="subtitle">Oscillations &amp; Waves — සූත්‍ර 45+ක් ප්‍රවර්ග අනුව සකසා ඇති අන්තර්ක්‍රියාකාරී පුනරීක්ෂණ පුවරුව. Doppler simulator සහ Standing Wave visualizer සමඟින්.</p>
+    </div>
+    <div class="header-stats">
+      <div class="stat"><b id="statEq">0</b><span>සමීකරණ</span></div>
+      <div class="stat"><b>4</b><span>ප්‍රවර්ග</span></div>
+      <div class="stat"><b>2</b><span>Simulators</span></div>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-title">ප්‍රවර්ග (Filter)</div>
+    <button class="nav-btn active" data-filter="all"><span class="chip" style="background:#8CA0B3"></span>සියල්ල<span class="nav-count" id="cnt-all"></span></button>
+    <button class="nav-btn" data-filter="shm"><span class="chip" style="background:#6EE7B8"></span>සරල අනුවර්තීය චලිතය<span class="nav-count" id="cnt-shm"></span></button>
+    <button class="nav-btn" data-filter="waves"><span class="chip" style="background:#F5A623"></span>තරංග &amp; ධ්වනි ප්‍රවේගය<span class="nav-count" id="cnt-waves"></span></button>
+    <button class="nav-btn" data-filter="super"><span class="chip" style="background:#7DB4F5"></span>උපරිස්ථාපනය &amp; ස්ථාවර තරංග<span class="nav-count" id="cnt-super"></span></button>
+    <button class="nav-btn" data-filter="doppler"><span class="chip" style="background:#E5687A"></span>තීව්‍රතාව &amp; ඩොප්ලර්<span class="nav-count" id="cnt-doppler"></span></button>
+
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-title">Simulators</div>
+    <div class="jumplinks">
+      <a href="#doppler-sim">→ Doppler Effect Simulator</a>
+      <a href="#standing-sim">→ Standing Waves Visualizer</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8CA0B3" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="searchBox" placeholder="සූත්‍රයක් හෝ පදයක් සොයන්න... (උදා: T = 2π, Doppler, pipe)">
+      </div>
+      <div class="result-count" id="resultCount"></div>
+    </div>
+
+    <div id="eqContainer"></div>
+    <div class="no-results" id="noResults">— ගැලපෙන සූත්‍රයක් හමු නොවීය —</div>
+
+    <!-- ============ DOPPLER SIMULATOR ============ -->
+    <div id="doppler-sim" class="section-heading"><span class="num">05</span><h2>ඩොප්ලර් ආචරණ සිමියුලේටරය</h2><span class="sub">Doppler Effect Simulator</span></div>
+    <div class="sim-panel">
+      <div class="sim-header"><h3>තරංග පෙරමුණු දෘශ්‍යකරණය</h3><span class="badge">LIVE</span></div>
+      <div class="sim-body">
+        <div class="sim-canvas-wrap" style="height:300px;">
+          <canvas id="dopplerCanvas"></canvas>
+        </div>
+        <div class="sim-controls">
+          <div class="control">
+            <label>ප්‍රභව සංඛ්‍යාතය f (Hz) <span class="val" id="fVal">2</span></label>
+            <input type="range" id="fSlider" min="1" max="5" step="0.5" value="2">
+          </div>
+          <div class="control">
+            <label>ප්‍රභව ප්‍රවේගය v<sub>s</sub> (m s⁻¹) <span class="val" id="vsVal">0</span></label>
+            <input type="range" id="vsSlider" min="-50" max="50" step="1" value="0">
+          </div>
+          <div class="control">
+            <label>නිරීක්ෂක ප්‍රවේගය v<sub>o</sub> (m s⁻¹) <span class="val" id="voVal">0</span></label>
+            <input type="range" id="voSlider" min="-50" max="50" step="1" value="0">
+          </div>
+          <div class="control">
+            <label>සුළං ප්‍රවේගය w (m s⁻¹) <span class="val" id="wVal">0</span></label>
+            <input type="range" id="wSlider" min="-20" max="20" step="1" value="0">
+          </div>
+          <div class="readout">
+            <div class="formula-used" id="dopplerFormula">f' = f (v ± v_o)/(v ∓ v_s)</div>
+            <div class="result" id="dopplerResult">f' = 2.00 Hz</div>
+            <div class="steps" id="dopplerSteps"></div>
+          </div>
+        </div>
+      </div>
+      <p style="margin-top:14px; font-size:11.5px; color:var(--text-faint);">* ධන (+) අගය = එකිනෙකා දෙසට/දකුණට චලනය; ඍණ (−) අගය = ඉවතට/වමට චලනය. v = 340 m s⁻¹ ලෙස ගනු ලැබේ.</p>
+    </div>
+
+    <!-- ============ STANDING WAVE VISUALIZER ============ -->
+    <div id="standing-sim" class="section-heading"><span class="num">06</span><h2>ස්ථාවර තරංග දෘශ්‍යකරණය</h2><span class="sub">Standing Waves Visualizer</span></div>
+    <div class="sim-panel">
+      <div class="sim-header"><h3>තන්තුවක ස්ථාවර තරංග (දෙකෙළවර ස්ථාවර)</h3><span class="badge">LIVE</span></div>
+      <div class="sim-body">
+        <div class="sim-canvas-wrap" style="height:220px;">
+          <canvas id="standingCanvas"></canvas>
+        </div>
+        <div class="sim-controls">
+          <div class="control">
+            <label>උපස්වර අංකය (Harmonic n)</label>
+            <div class="harmonic-row" id="harmonicRow"></div>
+          </div>
+          <div class="readout">
+            <div class="formula-used">f<sub>n</sub> = (n / 2l) √(T/m)</div>
+            <div class="result" id="standingLabel">මූලික ස්වරය (n = 1)</div>
+            <div class="steps" id="standingInfo">නිශ්පන්ද (N) = 2 · ප්‍රස්පන්ද (A) = 1</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<footer>PHYSICS REVISION CONSOLE · OSCILLATIONS &amp; WAVES · A/L SRI LANKA SYLLABUS · Self-study reference — always cross-check against your official textbook.</footer>
+
+<script>
+/* =========================================================
+   EQUATION DATA
+   ========================================================= */
+const EQUATIONS = [
+// ---------------- SHM ----------------
+{cat:'shm', title:'විස්ථාපනය (Displacement)', formula:'x = A sin(ωt + α)', vars:'A=විස්තාරය, ω=කෝණික සංඛ්‍යාතය, α=මූලික කලාව'},
+{cat:'shm', title:'ප්‍රවේගය (Velocity)', formula:'v = ± ω √(A² − x²)', vars:'x=0 දී උපරිම, x=±A දී ශුන්‍ය'},
+{cat:'shm', title:'උපරිම ප්‍රවේගය', formula:'v<sub>max</sub> = ωA', vars:'සමතුලිත ලක්ෂ්‍යයේදී (x=0)'},
+{cat:'shm', title:'ත්වරණය (Acceleration)', formula:'a = − ω² x', vars:'ඍණ ලකුණ — විස්ථාපනයට විරුද්ධ දිශාව'},
+{cat:'shm', title:'උපරිම ත්වරණය', formula:'a<sub>max</sub> = ω² A', vars:'x=±A (අන්ත ලක්ෂ්‍ය) දී'},
+{cat:'shm', title:'ආවර්ත කාලය', formula:'T = 2π / ω', vars:'T=ආවර්ත කාලය (s)'},
+{cat:'shm', title:'සංඛ්‍යාතය', formula:'f = 1 / T = ω / 2π', vars:'f=සංඛ්‍යාතය (Hz)'},
+{cat:'shm', title:'චාලක ශක්තිය', formula:'K.E = ½ m ω² (A² − x²)', vars:'x=0 දී උපරිම K.E'},
+{cat:'shm', title:'විභව ශක්තිය', formula:'P.E = ½ m ω² x²', vars:'x=±A දී උපරිම P.E'},
+{cat:'shm', title:'මුළු ශක්තිය', formula:'E = ½ m ω² A²', vars:'ස්ථාවරයි — x සමඟ වෙනස් නොවේ'},
+{cat:'shm', title:'සරල අූලකය (Simple Pendulum)', formula:'T = 2π √(l / g)', vars:'l=පණුරු දිග, g=ගුරුත්වජ ත්වරණය'},
+{cat:'shm', title:'g ගණනය කිරීම', formula:'g = 4π² l / T²', vars:'පරීක්ෂණාත්මකව g සොයාගැනීමට'},
+{cat:'shm', title:'සර්පිල දුන්න – ස්කන්ධ දෝලකය', formula:'T = 2π √(m / k)', vars:'m=ස්කන්ධය, k=දුනු නියතය'},
+{cat:'shm', title:'දුනු ශ්‍රේණිගත සම්බන්ධතාව', formula:'1/k<sub>eff</sub> = 1/k₁ + 1/k₂', vars:'ශ්‍රේණියේදී effective නියතය අඩුවේ'},
+{cat:'shm', title:'දුනු සමාන්තරගත සම්බන්ධතාව', formula:'k<sub>eff</sub> = k₁ + k₂', vars:'සමාන්තරයේදී effective නියතය වැඩිවේ'},
+{cat:'shm', title:'ද්‍රවයක පාවෙන සිලින්ඩරයේ දෝලනය', formula:'T = 2π √( m / (ρ A g) )', vars:'ρ=ද්‍රව ඝනත්වය, A=හරස්කඩ වර්ගඵලය'},
+
+// ---------------- WAVES / SOUND SPEED ----------------
+{cat:'waves', title:'තරංග චලිත සමීකරණය', formula:'v = f λ', vars:'v=ප්‍රවේගය, f=සංඛ්‍යාතය, λ=තරංග ආයාමය'},
+{cat:'waves', title:'කලා වෙනස – පථ වෙනස සම්බන්ධතාව', formula:'Δφ = (2π / λ) · Δx', vars:'Δx=පථ වෙනස, Δφ=කලා වෙනස'},
+{cat:'waves', title:'තන්තුවක තීර්යක් තරංග ප්‍රවේගය', formula:'v = √(T / m)', vars:'T=තන්තු ආතතිය, m=ඒකක දිගක ස්කන්ධය'},
+{cat:'waves', title:'ධ්වනි ප්‍රවේගය — නිව්ටන්ගේ සූත්‍රය', formula:'v = √(P / ρ)', vars:'P=පීඩනය, ρ=වායු ඝනත්වය (අඩු අගය දෙයි)'},
+{cat:'waves', title:'ධ්වනි ප්‍රවේගය — ලැප්ලාස් සංශෝධනය', formula:'v = √(γ P / ρ)', vars:'γ=Cp/Cv (adiabatic නියතය)'},
+{cat:'waves', title:'ලැප්ලාස් සූත්‍රය — උෂ්ණත්ව ස්වරූපය', formula:'v = √(γ R T / M)', vars:'R=වායු නියතය, T=නිරපේක්ෂ උෂ්ණත්වය, M=අණුක ස්කන්ධය'},
+{cat:'waves', title:'උෂ්ණත්වයේ බලපෑම', formula:'v ∝ √T', vars:'v₁/v₂ = √(T₁/T₂)'},
+{cat:'waves', title:'සුළඟේ බලපෑම — ඵලදායී ප්‍රවේගය', formula:'v<sub>eff</sub> = v ± w', vars:'w=සුළං ප්‍රවේගය (+ =එකම දිශාව)'},
+{cat:'waves', title:'පීඩනයේ බලපෑම', formula:'v ≠ f(P) — නියත T දී', vars:'P වැඩිවත් ρ ද සමානුපාතිකව වැඩිවන බැවින් P/ρ නියතව පවතී'},
+
+// ---------------- SUPERPOSITION / STANDING WAVES ----------------
+{cat:'super', title:'විස්පන්ද සංඛ්‍යාතය (Beats)', formula:'f<sub>b</sub> = |f₁ − f₂|', vars:'තත්පරයට ඇසෙන තීව්‍රතා විචලන ගණන'},
+{cat:'super', title:'දෙබලයක් Filing කිරීම', formula:'f₂ ↑  (සංඛ්‍යාතය වැඩිවේ)', vars:'ලෝහය ඉවත් වීමෙන් ස්කන්ධය අඩුවී f වැඩිවේ'},
+{cat:'super', title:'දෙබලයකට Waxing කිරීම', formula:'f₂ ↓  (සංඛ්‍යාතය අඩුවේ)', vars:'ඉටි එකතු වීමෙන් ස්කන්ධය වැඩිවී f අඩුවේ'},
+{cat:'super', title:'සොනෝමීටරයේ මූලික ස්වරය', formula:'f₀ = (1 / 2l) √(T / m)', vars:'l=කම්පනය වන දිග, m=ඒකක දිගක ස්කන්ධය'},
+{cat:'super', title:'තන්තුවේ n වන උපස්වරය (Harmonic)', formula:'f<sub>n</sub> = (n / 2l) √(T / m)', vars:'n = 1,2,3… — සියලුම උපස්වර පවතී'},
+{cat:'super', title:'සංවෘත නළයේ මූලික ස්වරය', formula:'f₀ = v / 4l', vars:'එක් කෙළවරක් වසා ඇති නළය'},
+{cat:'super', title:'සංවෘත නළයේ උපස්වර', formula:'f<sub>n</sub> = (2n−1) v / 4l', vars:'ඔත්තේ උපස්වර පමණි → 1:3:5:7…'},
+{cat:'super', title:'සංවෘත නළය — කෙළවර සංශෝධනය සමඟ', formula:'f = v / 4(l + e)', vars:'e = කෙළවර සංශෝධනය (end correction)'},
+{cat:'super', title:'විවෘත නළයේ මූලික ස්වරය', formula:'f₀ = v / 2l', vars:'දෙකෙළවරම විවෘත නළය'},
+{cat:'super', title:'විවෘත නළයේ උපස්වර', formula:'f<sub>n</sub> = n v / 2l', vars:'සියලුම උපස්වර පවතී → 1:2:3:4…'},
+{cat:'super', title:'විවෘත නළය — කෙළවර සංශෝධනය සමඟ', formula:'f = v / 2(l + 2e)', vars:'දෙකෙළවරම සඳහා 2e එකතු කරයි'},
+
+// ---------------- INTENSITY & DOPPLER ----------------
+{cat:'doppler', title:'ධ්වනි තීව්‍රතාව', formula:'I = P / A = P / (4π r²)', vars:'P=බලය (Power), A=වර්ගඵලය'},
+{cat:'doppler', title:'දුර සමඟ තීව්‍රතා විචලනය', formula:'I ∝ 1 / r²', vars:'ලක්ෂ්‍ය ප්‍රභවයකින් ගෝලාකාර ව්‍යාප්තිය'},
+{cat:'doppler', title:'තීව්‍රතා මට්ටම (dB)', formula:'β = 10 log₁₀ (I / I₀)', vars:'I₀ = 10⁻¹² W m⁻² (ශ්‍රවණ සීමාව)'},
+{cat:'doppler', title:'ඩොප්ලර් — සාමාන්‍ය සමීකරණය', formula:"f' = f (v ± v<sub>o</sub>) / (v ∓ v<sub>s</sub>)", vars:'v=ධ්වනි ප්‍රවේගය (340 m/s)'},
+{cat:'doppler', title:'① ප්‍රභවය නිරීක්ෂකයා දෙසට', formula:"f' = f v / (v − v<sub>s</sub>)", vars:'නිරීක්ෂකයා ස්ථිරයි; f\' > f'},
+{cat:'doppler', title:'② ප්‍රභවය ඉවතට යයි', formula:"f' = f v / (v + v<sub>s</sub>)", vars:'නිරීක්ෂකයා ස්ථිරයි; f\' < f'},
+{cat:'doppler', title:'③ නිරීක්ෂකයා ප්‍රභවය දෙසට', formula:"f' = f (v + v<sub>o</sub>) / v", vars:'ප්‍රභවය ස්ථිරයි; f\' > f'},
+{cat:'doppler', title:'④ නිරීක්ෂකයා ඉවතට යයි', formula:"f' = f (v − v<sub>o</sub>) / v", vars:'ප්‍රභවය ස්ථිරයි; f\' < f'},
+{cat:'doppler', title:'⑤ දෙදෙනාම එකිනෙකා දෙසට', formula:"f' = f (v + v<sub>o</sub>) / (v − v<sub>s</sub>)", vars:'උපරිම වැඩිවීම'},
+{cat:'doppler', title:'⑥ දෙදෙනාම එකිනෙකාගෙන් ඉවතට', formula:"f' = f (v − v<sub>o</sub>) / (v + v<sub>s</sub>)", vars:'උපරිම අඩුවීම'},
+{cat:'doppler', title:'⑦ ප්‍රභවය පසුපස, නිරීක්ෂක ඉදිරියෙන් (එකම දිශාව)', formula:"f' = f (v − v<sub>o</sub>) / (v − v<sub>s</sub>)", vars:'දෙදෙනාම එකම දිශාවට ගමන් කරයි'},
+{cat:'doppler', title:'⑧ ප්‍රභවය ඉදිරියෙන්, නිරීක්ෂක පසුපස (එකම දිශාව)', formula:"f' = f (v + v<sub>o</sub>) / (v + v<sub>s</sub>)", vars:'දෙදෙනාම එකම දිශාවට ගමන් කරයි'},
+{cat:'doppler', title:'සුළං සහිතව — ඵලදායී v ආදේශය', formula:'v → (v ± w) සියලුම සූත්‍රවල', vars:'w=සුළං ප්‍රවේගය; ප්‍රභවයෙන් නිරීක්ෂකයා දෙසට ගලනවා නම් +'},
+{cat:'doppler', title:'චලනය වන බිත්තියකින් පරාවර්තනය', formula:"f' = f (v + v<sub>w</sub>) / (v − v<sub>w</sub>)", vars:'v_w=බිත්තිය ප්‍රභවය දෙසට එන ප්‍රවේගය (දෙපියවර ක්‍රියාවලිය)'},
+];
+
+const CAT_LABELS = {shm:'SHM', waves:'Waves & Sound', super:'Superposition', doppler:'Intensity & Doppler'};
+
+/* =========================================================
+   RENDER EQUATIONS
+   ========================================================= */
+const sections = [
+  {key:'shm', num:'01', title:'සරල අනුවර්තීය චලිතය', sub:'Simple Harmonic Motion'},
+  {key:'waves', num:'02', title:'යාන්ත්‍රික තරංග සහ ධ්වනියේ ප්‍රවේගය', sub:'Mechanical Waves & Speed of Sound'},
+  {key:'super', num:'03', title:'තරංග උපරිස්ථාපනය සහ ස්ථාවර තරංග', sub:'Superposition & Standing Waves'},
+  {key:'doppler', num:'04', title:'ධ්වනි තීව්‍රතාව සහ ඩොප්ලර් ආචරණය', sub:'Intensity & Doppler Effect'},
+];
+
+const eqContainer = document.getElementById('eqContainer');
+
+function cardHTML(eq){
+  return `<div class="eq-card" data-cat="${eq.cat}" data-search="${(eq.title+' '+eq.formula+' '+eq.vars).toLowerCase().replace(/<[^>]+>/g,'')}">
+    <span class="eq-tag">${CAT_LABELS[eq.cat]}</span>
+    <div class="eq-name">${eq.title}</div>
+    <div class="eq-formula">${eq.formula}</div>
+    <div class="eq-vars">${eq.vars}</div>
+  </div>`;
+}
+
+function renderAll(){
+  let html = '';
+  sections.forEach(sec=>{
+    const items = EQUATIONS.filter(e=>e.cat===sec.key);
+    html += `<div class="section-heading" data-section="${sec.key}"><span class="num">${sec.num}</span><h2>${sec.title}</h2><span class="sub">${sec.sub}</span></div>`;
+    html += `<div class="eq-grid" data-section-grid="${sec.key}">${items.map(cardHTML).join('')}</div>`;
+  });
+  eqContainer.innerHTML = html;
+  document.getElementById('statEq').textContent = EQUATIONS.length;
+  sections.forEach(sec=>{
+    document.getElementById('cnt-'+sec.key).textContent = EQUATIONS.filter(e=>e.cat===sec.key).length;
+  });
+  document.getElementById('cnt-all').textContent = EQUATIONS.length;
+}
+renderAll();
+
+/* filter + search */
+let activeFilter = 'all';
+function applyFilters(){
+  const q = document.getElementById('searchBox').value.trim().toLowerCase();
+  let visibleCount = 0;
+  document.querySelectorAll('.eq-card').forEach(card=>{
+    const catMatch = activeFilter==='all' || card.dataset.cat===activeFilter;
+    const textMatch = !q || card.dataset.search.includes(q);
+    const show = catMatch && textMatch;
+    card.style.display = show ? '' : 'none';
+    if(show) visibleCount++;
+  });
+  document.querySelectorAll('[data-section]').forEach(h=>{
+    const key = h.dataset.section;
+    const grid = document.querySelector(`[data-section-grid="${key}"]`);
+    const anyVisible = grid && Array.from(grid.children).some(c=>c.style.display!=='none');
+    const relevant = activeFilter==='all' || activeFilter===key;
+    const show = relevant && anyVisible;
+    h.style.display = show ? '' : 'none';
+    if(grid) grid.style.display = show ? '' : 'none';
+  });
+  document.getElementById('resultCount').textContent = visibleCount + ' සූත්‍ර';
+  document.getElementById('noResults').style.display = visibleCount===0 ? 'block' : 'none';
+}
+
+document.querySelectorAll('.nav-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    applyFilters();
+  });
+});
+document.getElementById('searchBox').addEventListener('input', applyFilters);
+applyFilters();
+
+/* =========================================================
+   HERO SCOPE ANIMATION
+   ========================================================= */
+(function(){
+  const canvas = document.getElementById('heroScope');
+  const ctx = canvas.getContext('2d');
+  function resize(){
+    canvas.width = canvas.clientWidth * devicePixelRatio;
+    canvas.height = canvas.clientHeight * devicePixelRatio;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  let t = 0;
+  function draw(){
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0,0,w,h);
+    ctx.strokeStyle = 'rgba(110,231,184,0.9)';
+    ctx.lineWidth = 2*devicePixelRatio;
+    ctx.shadowColor = '#6EE7B8';
+    ctx.shadowBlur = 8;
+    ctx.beginPath();
+    for(let x=0;x<=w;x+=2){
+      const phase = (x/w)*4*Math.PI + t;
+      const y = h/2 + Math.sin(phase) * (h*0.32);
+      if(x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+    t += 0.045;
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* =========================================================
+   DOPPLER SIMULATOR
+   ========================================================= */
+(function(){
+  const canvas = document.getElementById('dopplerCanvas');
+  const ctx = canvas.getContext('2d');
+  function resize(){
+    canvas.width = canvas.clientWidth * devicePixelRatio;
+    canvas.height = canvas.clientHeight * devicePixelRatio;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const fSlider = document.getElementById('fSlider');
+  const vsSlider = document.getElementById('vsSlider');
+  const voSlider = document.getElementById('voSlider');
+  const wSlider = document.getElementById('wSlider');
+  const V_SOUND = 340;
+
+  let pulses = []; // {r, bornX}
+  let sourceX = 0.3; // fraction across canvas
+  let lastPulseTime = 0;
+  let clock = 0;
+
+  function currentParams(){
+    return {
+      f: parseFloat(fSlider.value),
+      vs: parseFloat(vsSlider.value),
+      vo: parseFloat(voSlider.value),
+      w: parseFloat(wSlider.value)
+    };
+  }
+
+  function updateReadout(){
+    const {f, vs, vo, w} = currentParams();
+    const v = V_SOUND + w;
+    // Sign convention: source moving toward observer (positive vs) -> denominator (v - vs)
+    // observer moving toward source (positive vo) -> numerator (v + vo)
+    const denom = (v - vs);
+    const numer = (v + vo);
+    const fPrime = f * numer / denom;
+    document.getElementById('fVal').textContent = f.toFixed(1);
+    document.getElementById('vsVal').textContent = vs.toFixed(0);
+    document.getElementById('voVal').textContent = vo.toFixed(0);
+    document.getElementById('wVal').textContent = w.toFixed(0);
+    document.getElementById('dopplerFormula').innerHTML = `f' = f (v + v<sub>o</sub>) / (v − v<sub>s</sub>)`;
+    document.getElementById('dopplerResult').textContent = `f' = ${fPrime.toFixed(2)} Hz`;
+    document.getElementById('dopplerSteps').textContent =
+      `v(effective)=${v.toFixed(0)} m/s → f' = ${f}×(${v.toFixed(0)}+${vo.toFixed(0)})/(${v.toFixed(0)}−${vs.toFixed(0)}) = ${fPrime.toFixed(2)} Hz`;
+  }
+  [fSlider,vsSlider,voSlider,wSlider].forEach(s=>s.addEventListener('input', updateReadout));
+  updateReadout();
+
+  function step(dt){
+    const {f, vs} = currentParams();
+    clock += dt;
+    // emit new pulse
+    const period = 1/f;
+    if(clock - lastPulseTime >= period*0.4){ // scaled for visibility
+      lastPulseTime = clock;
+      pulses.push({r:0, x: sourceX});
+    }
+    // move source (scaled)
+    const dxSource = (vs/340) * dt * 0.6;
+    sourceX += dxSource;
+    if(sourceX>0.85) sourceX=0.85;
+    if(sourceX<0.15) sourceX=0.15;
+    // grow pulses
+    const growSpeed = 0.55; // fraction of width per second
+    pulses.forEach(p=>p.r += growSpeed*dt);
+    pulses = pulses.filter(p=>p.r < 1.1);
+  }
+
+  let last = performance.now();
+  function render(now){
+    const dt = Math.min((now-last)/1000, 0.05);
+    last = now;
+    step(dt);
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0,0,w,h);
+    // observer marker (fixed at right)
+    const obsX = w*0.9;
+    ctx.fillStyle = '#F5A623';
+    ctx.beginPath(); ctx.arc(obsX, h/2, 6*devicePixelRatio, 0, Math.PI*2); ctx.fill();
+    ctx.font = `${11*devicePixelRatio}px monospace`;
+    ctx.fillStyle = '#8CA0B3';
+    ctx.fillText('Observer', obsX-30*devicePixelRatio, h/2+24*devicePixelRatio);
+
+    // pulses
+    pulses.forEach(p=>{
+      const cx = p.x*w;
+      const radius = p.r*w*0.5;
+      ctx.strokeStyle = `rgba(110,231,184,${1-p.r})`;
+      ctx.lineWidth = 1.6*devicePixelRatio;
+      ctx.beginPath();
+      ctx.ellipse(cx, h/2, radius, radius*0.9, 0, 0, Math.PI*2);
+      ctx.stroke();
+    });
+
+    // source marker
+    const srcX = sourceX*w;
+    ctx.fillStyle = '#6EE7B8';
+    ctx.shadowColor = '#6EE7B8'; ctx.shadowBlur = 10;
+    ctx.beginPath(); ctx.arc(srcX, h/2, 7*devicePixelRatio, 0, Math.PI*2); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#8CA0B3';
+    ctx.fillText('Source', srcX-20*devicePixelRatio, h/2-16*devicePixelRatio);
+
+    requestAnimationFrame(render);
+  }
+  requestAnimationFrame(render);
+})();
+
+/* =========================================================
+   STANDING WAVE VISUALIZER
+   ========================================================= */
+(function(){
+  const canvas = document.getElementById('standingCanvas');
+  const ctx = canvas.getContext('2d');
+  function resize(){
+    canvas.width = canvas.clientWidth * devicePixelRatio;
+    canvas.height = canvas.clientHeight * devicePixelRatio;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  let n = 1; // harmonic number
+  const harmonicRow = document.getElementById('harmonicRow');
+  for(let i=1;i<=6;i++){
+    const btn = document.createElement('button');
+    btn.className = 'harmonic-btn' + (i===1?' active':'');
+    btn.textContent = i;
+    btn.addEventListener('click', ()=>{
+      n = i;
+      document.querySelectorAll('.harmonic-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const label = i===1 ? 'මූලික ස්වරය (n = 1)' : `${i-1} වන උපස්වරය (n = ${i})`;
+      document.getElementById('standingLabel').textContent = label;
+      document.getElementById('standingInfo').textContent = `නිශ්පන්ද (N) = ${i+1} · ප්‍රස්පන්ද (A) = ${i}`;
+    });
+    harmonicRow.appendChild(btn);
+  }
+
+  let t = 0;
+  function draw(){
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0,0,w,h);
+    const midY = h/2;
+    const amp = h*0.32;
+    const margin = w*0.06;
+    const usableW = w - margin*2;
+
+    // fixed ends (pegs)
+    ctx.fillStyle = '#8CA0B3';
+    ctx.fillRect(margin-3*devicePixelRatio, midY-14*devicePixelRatio, 4*devicePixelRatio, 28*devicePixelRatio);
+    ctx.fillRect(w-margin-1*devicePixelRatio, midY-14*devicePixelRatio, 4*devicePixelRatio, 28*devicePixelRatio);
+
+    // baseline
+    ctx.strokeStyle = 'rgba(140,160,179,0.2)';
+    ctx.lineWidth = 1*devicePixelRatio;
+    ctx.beginPath(); ctx.moveTo(margin, midY); ctx.lineTo(w-margin, midY); ctx.stroke();
+
+    // standing wave curve: y = A sin(n*pi*x/L) * cos(omega*t)
+    const omega = 2 + n*0.15;
+    const envelopeAlpha = Math.cos(t*omega);
+    ctx.strokeStyle = '#6EE7B8';
+    ctx.lineWidth = 2.4*devicePixelRatio;
+    ctx.shadowColor = '#6EE7B8'; ctx.shadowBlur = 6;
+    ctx.beginPath();
+    for(let px=0; px<=usableW; px+=2){
+      const xFrac = px/usableW;
+      const y = midY - Math.sin(n*Math.PI*xFrac) * amp * envelopeAlpha;
+      const cx = margin + px;
+      if(px===0) ctx.moveTo(cx,y); else ctx.lineTo(cx,y);
+    }
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // faint envelope
+    ctx.strokeStyle = 'rgba(245,166,35,0.25)';
+    ctx.lineWidth = 1*devicePixelRatio;
+    ctx.beginPath();
+    for(let px=0; px<=usableW; px+=2){
+      const xFrac = px/usableW;
+      const y = midY - Math.sin(n*Math.PI*xFrac) * amp;
+      const cx = margin + px;
+      if(px===0) ctx.moveTo(cx,y); else ctx.lineTo(cx,y);
+    }
+    ctx.stroke();
+
+    // nodes & antinodes
+    for(let i=0;i<=n;i++){
+      const xFrac = i/n;
+      const cx = margin + xFrac*usableW;
+      ctx.fillStyle = '#E5687A';
+      ctx.beginPath(); ctx.arc(cx, midY, 4*devicePixelRatio, 0, Math.PI*2); ctx.fill();
+    }
+    for(let i=0;i<n;i++){
+      const xFrac = (i+0.5)/n;
+      const cx = margin + xFrac*usableW;
+      ctx.fillStyle = '#F5A623';
+      ctx.beginPath(); ctx.arc(cx, midY - amp*0.02, 3.5*devicePixelRatio, 0, Math.PI*2); ctx.fill();
+    }
+
+    t += 0.02;
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+</body>
+</html>

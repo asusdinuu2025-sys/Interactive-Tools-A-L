@@ -1,0 +1,3331 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>භෞතික විද්‍යා සමීකරණ අත්පොත | SL A/L Physics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@300;400;600;700&family=Space+Mono:wght@400;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<style>
+:root {
+  --bg: #0a0e1a;
+  --surface: #111827;
+  --surface2: #1a2235;
+  --surface3: #1f2d44;
+  --accent: #00d4ff;
+  --accent2: #7c3aed;
+  --accent3: #f59e0b;
+  --gold: #fbbf24;
+  --text: #e2e8f0;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+  --success: #10b981;
+  --danger: #ef4444;
+  --border: rgba(0,212,255,0.15);
+  --glow: rgba(0,212,255,0.08);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --font-si: 'Noto Sans Sinhala', sans-serif;
+  --font-mono: 'Space Mono', monospace;
+  --font-display: 'Playfair Display', serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-si);
+  min-height: 100vh;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ─── Background ─── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% -20%, rgba(0,212,255,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 110%, rgba(124,58,237,0.08) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── Header ─── */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(10,14,26,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+}
+
+.header-inner {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.logo-icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.header-titles { flex: 1; }
+
+.header-title {
+  font-family: var(--font-display);
+  font-size: clamp(16px, 4vw, 20px);
+  font-weight: 900;
+  background: linear-gradient(90deg, var(--accent), var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.2;
+}
+
+.header-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  letter-spacing: 1px;
+}
+
+/* ─── Search ─── */
+.search-wrap {
+  position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-dim);
+  font-size: 16px;
+  pointer-events: none;
+}
+
+#searchInput {
+  width: 100%;
+  padding: 10px 12px 10px 38px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: var(--font-si);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#searchInput:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(0,212,255,0.1);
+}
+
+#searchInput::placeholder { color: var(--text-dim); }
+
+/* ─── Stats Bar ─── */
+.stats-bar {
+  max-width: 900px;
+  margin: 10px auto 0;
+  padding: 0 16px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.stat-chip {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.stat-chip span { color: var(--accent); font-weight: 700; }
+
+/* ─── Main ─── */
+main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── Chapter ─── */
+.chapter {
+  margin-bottom: 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+
+.chapter:hover { box-shadow: 0 4px 20px rgba(0,212,255,0.06); }
+
+.chapter-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.chapter-header:hover { background: var(--glow); }
+
+.chapter-num {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.chapter-info { flex: 1; }
+
+.chapter-name-si {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.chapter-name-en {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  margin-top: 1px;
+}
+
+.chapter-count {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-dim);
+  background: var(--surface2);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.chapter-arrow {
+  font-size: 14px;
+  color: var(--text-dim);
+  transition: transform 0.3s;
+}
+
+.chapter.open .chapter-arrow { transform: rotate(180deg); }
+
+/* ─── Equations list ─── */
+.equations-list {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+
+.chapter.open .equations-list { max-height: 9999px; }
+
+.equations-inner {
+  padding: 0 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ─── Equation Card ─── */
+.eq-card {
+  background: var(--surface2);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.eq-card:hover { border-color: rgba(0,212,255,0.2); }
+
+.eq-card.hidden { display: none; }
+
+.eq-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.eq-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+}
+
+.eq-toggle-icon {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-left: 8px;
+  transition: transform 0.2s;
+}
+
+.eq-card.expanded .eq-toggle-icon { transform: rotate(180deg); }
+
+.eq-body {
+  display: none;
+  padding: 0 12px 12px;
+}
+
+.eq-card.expanded .eq-body { display: block; }
+
+/* ─── Formula Display ─── */
+.formula-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  margin-bottom: 10px;
+  text-align: center;
+  overflow-x: auto;
+}
+
+.formula-box .katex { font-size: 1.3em; }
+
+/* ─── Derivation ─── */
+.derivation {
+  background: rgba(251,191,36,0.04);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+
+.derivation-label {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--gold);
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.derivation-text {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+/* ─── Variables ─── */
+.vars-section { margin-bottom: 10px; }
+
+.vars-label {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.vars-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.var-chip {
+  background: var(--surface3);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.var-chip .var-sym { color: var(--accent); }
+
+/* ─── Calculator ─── */
+.calc-section {
+  background: rgba(124,58,237,0.06);
+  border: 1px solid rgba(124,58,237,0.2);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+}
+
+.calc-label {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--accent2);
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.calc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.calc-input-wrap { display: flex; flex-direction: column; gap: 3px; }
+
+.calc-input-label {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-dim);
+}
+
+.calc-input {
+  padding: 7px 10px;
+  background: var(--bg);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.2s;
+}
+
+.calc-input:focus { border-color: var(--accent2); }
+
+.calc-solve-btn {
+  width: 100%;
+  padding: 9px;
+  background: linear-gradient(135deg, var(--accent2), #6d28d9);
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-family: var(--font-si);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.calc-solve-btn:active { transform: scale(0.97); opacity: 0.9; }
+
+.calc-result {
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: var(--surface3);
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--success);
+  display: none;
+}
+
+.calc-result.show { display: block; }
+.calc-result.error { color: var(--danger); }
+
+/* ─── No results ─── */
+#noResults {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-dim);
+  display: none;
+}
+
+#noResults.show { display: block; }
+
+/* ─── Footer ─── */
+.footer {
+  text-align: center;
+  padding: 30px 16px;
+  color: var(--text-dim);
+  font-size: 11px;
+  font-family: var(--font-mono);
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── Chapter colors ─── */
+.c0 { background: linear-gradient(135deg,#00d4ff,#0099cc); color:#000; }
+.c1 { background: linear-gradient(135deg,#f59e0b,#d97706); color:#000; }
+.c2 { background: linear-gradient(135deg,#10b981,#059669); color:#000; }
+.c3 { background: linear-gradient(135deg,#ef4444,#dc2626); color:#000000; }
+.c4 { background: linear-gradient(135deg,#8b5cf6,#7c3aed); color:#000000; }
+.c5 { background: linear-gradient(135deg,#06b6d4,#0891b2); color:#000; }
+.c6 { background: linear-gradient(135deg,#f97316,#ea580c); color:#000; }
+.c7 { background: linear-gradient(135deg,#84cc16,#65a30d); color:#000; }
+.c8 { background: linear-gradient(135deg,#ec4899,#db2777); color:#000000; }
+.c9 { background: linear-gradient(135deg,#a855f7,#9333ea); color:#000000; }
+.c10 { background: linear-gradient(135deg,#14b8a6,#0d9488); color:#000; }
+.c11 { background: linear-gradient(135deg,#fffb00,#f1e203); color:#000; }
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ─── Responsive ─── */
+@media (min-width: 600px) {
+  .header-inner { display: flex; align-items: center; gap: 12px; margin-bottom: 0; }
+  .header-top { margin-bottom: 0; }
+  .search-wrap { flex: 1; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="header-top">
+      <div class="logo-icon">⚛️ </div>
+      <div class="header-titles">
+        <div class="header-title">භෞතික විද්‍යා සමීකරණ</div>
+        <div class="header-sub">SL A/L PHYSICS · EQUATION by vivan(25/26) </div>
+      </div>
+    </div>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="search" id="searchInput" placeholder="සමීකරණ සොයන්න... (Search equations)">
+    </div>
+  </div>
+</header>
+
+<div class="stats-bar">
+  <div class="stat-chip">පාඩම් <span id="chapterCount">0</span></div>
+  <div class="stat-chip">සමීකරණ <span id="eqCount">0</span></div>
+  <div class="stat-chip" id="searchStat" style="display:none">ප්‍රතිඵල <span id="searchCount">0</span></div>
+</div>
+
+<main id="main">
+  <div id="noResults">
+    <div style="font-size:40px;margin-bottom:12px">🔭</div>
+    <div style="font-size:15px;margin-bottom:6px">ප්‍රතිඵල නැත</div>
+    <div style="font-size:12px">No results found for your search</div>
+  </div>
+</main>
+
+<footer class="footer">
+  ශ්‍රී ලංකා උසස් පෙළ භෞතික විද්‍යා · SL A/L Physics Equation Handbook<br>
+  KaTeX v0.16.9 · Built for mobile-first learning
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  PHYSICS DATA — All 11 chapters
+// ═══════════════════════════════════════════════════════════════
+const CHAPTERS = [
+  {
+  "si": "මිනුම",
+  "en": "Measurement",
+  "equations": [
+    {
+      "name": "මාන විශ්ලේෂණය — මාන ඒකරූපතා මූලධර්මය",
+      "formula": "\\text{[භෞතික රාශිය]} = M^a L^b T^c",
+      "derivation": "ඕනෑම භෞතික රාශියක් M (ස්කන්ධ මානය), L (දිග මානය), T (කාල මානය) යන මූලික මාන භාවිතයෙන් ප්‍රකාශ කළ හැකිය. 'මාන ඒකරූපතා මූලධර්මය' (Principle of Homogeneity of Dimensions) ප්‍රකාශ කරන්නේ, ශාරීරිකව නිවැරදි ඕනෑම සමීකරණයක මාන දෙපස (LHS සහ RHS) ඒකරූප (identical) විය යුතු බවයි. මෙය: (1) සමීකරණයක ඒකක නිරවද්‍යතාව පරීක්ෂා කිරීමට, (2) නොදන්නා රාශිවල මාන ව්‍යුත්පන්න කිරීමට, (3) සූත්‍ර පරීක්ෂා කිරීමට (නමුත් මාන රහිත නියත ව්‍යුත්පන්න කළ නොහැකිය) භාවිතා වේ. නිදසුන: ශක්තිය E = [M][L²][T⁻²] = ML²T⁻².",
+      "vars": [
+        {
+          "s": "M",
+          "d": "ස්කන්ධ මානය (Mass dimension)"
+        },
+        {
+          "s": "L",
+          "d": "දිග මානය (Length dimension)"
+        },
+        {
+          "s": "T",
+          "d": "කාල මානය (Time dimension)"
+        },
+        {
+          "s": "a, b, c",
+          "d": "මාන රහිත ඝාතාංක (dimensionless exponents)"
+        }
+      ],
+      "calc": null
+    },
+    {
+  "name": "sin, cos, tan අගයන් (Trigonometric Values)",
+  "formula": "\\sin\\theta, \\quad \\cos\\theta, \\quad \\tan\\theta",
+  "derivation": "සම්මත කෝණ සඳහා ත්‍රිකෝණමිතික අගයන්.",
+  "vars": [
+    { "s": "30°", "d": "sin = 1/2, cos = √3/2, tan = 1/√3" },
+    { "s": "45°", "d": "sin = 1/√2, cos = 1/√2, tan = 1" },
+    { "s": "60°", "d": "sin = √3/2, cos = 1/2, tan = √3" },
+    { "s": "90°", "d": "sin = 1, cos = 0, tan = අර්ථ රහිත (undefined)" }
+  ],
+  "calc": null
+},
+    {
+      "name": "ප්‍රතිශත දෝෂය",
+      "formula": "\\% \\text{ Error} = \\frac{\\Delta x}{x} \\times 100",
+      "derivation": "නිරීක්ෂිත අගය x හා එහි පරම අවිනිශ්චිතතාව Δx අතර සම්බන්ධය මඟින් ප්‍රතිශත දෝෂය ගණනය කෙරේ. භාගික අවිනිශ්චිතතාව (Fractional Uncertainty) Δx/x ලෙස නිර්වචනය කෙරෙන අතර, එය 100 කින් ගුණ කිරීමෙන් ප්‍රතිශත දෝෂය ලැබේ. මෙය මිනුමක සාපේක්ෂ අවිනිශ්චිතතාව ප්‍රතිශතයක් ලෙස ප්‍රකාශ කරයි. ඒකකය: %.",
+      "vars": [
+        {
+          "s": "Δx",
+          "d": "පරම අවිනිශ්චිතතාව (Absolute Uncertainty)"
+        },
+        {
+          "s": "x",
+          "d": "මැනගත් අගය (Measured value)"
+        },
+        {
+          "s": "Δx/x",
+          "d": "භාගික අවිනිශ්චිතතාව (Fractional Uncertainty)"
+        }
+      ],
+      "calc": {
+        "label": "ප්‍රතිශත දෝෂ ගණකය",
+        "inputs": [
+          {
+            "id": "dx",
+            "label": "Δx (පරම අවිනිශ්චිතතාව)"
+          },
+          {
+            "id": "x",
+            "label": "x (මැනගත් අගය)"
+          }
+        ],
+        "formula": "(parseFloat(dx) / parseFloat(x)) * 100",
+        "unit": "%",
+        "resultLabel": "ප්‍රතිශත දෝෂය"
+      }
+    },
+    {
+      "name": "දෝෂ ව්‍යාප්තිය — සංකලනය හා අන්තරය",
+      "formula": "\\Delta z = \\Delta x + \\Delta y \\quad (z = x \\pm y \\text{ සඳහා})",
+      "derivation": "z = x + y හෝ z = x − y ලෙස ගණනය කරන රාශිවල, z හි පරම අවිනිශ්චිතතාව (Δz) x හා y හි පරම අවිනිශ්චිතතාවල ඝාත්‍ය (arithmetic) එකතුව ලෙස ලැබේ: Δz = Δx + Δy. ආංශික අවකලනය (partial differentiation) ක්‍රමය භාවිතා කරන විට |∂z/∂x|·Δx + |∂z/∂y|·Δy = Δx + Δy. ඍණ ලකුණ තිබිය දී පවා (z = x − y), Δx සහ Δy ධනාත්මක ලෙස ගනු ලැබේ — දෝෂය කිසි විටෙකත් අඩු නොවේ.",
+      "vars": [
+        {
+          "s": "Δz",
+          "d": "z හි පරම අවිනිශ්චිතතාව"
+        },
+        {
+          "s": "Δx",
+          "d": "x හි පරම අවිනිශ්චිතතාව"
+        },
+        {
+          "s": "Δy",
+          "d": "y හි පරම අවිනිශ්චිතතාව"
+        }
+      ],
+      "calc": {
+        "label": "සංකලන/අන්තර දෝෂ ගණකය (Δz = Δx + Δy)",
+        "inputs": [
+          {
+            "id": "dx",
+            "label": "Δx (පරම අවිනිශ්චිතතාව)"
+          },
+          {
+            "id": "dy",
+            "label": "Δy (පරම අවිනිශ්චිතතාව)"
+          }
+        ],
+        "formula": "parseFloat(dx) + parseFloat(dy)",
+        "unit": "(x, y හා සම ඒකකය)",
+        "resultLabel": "Δz"
+      }
+    },
+    {
+      "name": "දෝෂ ව්‍යාප්තිය — ගුණිත හා භාගීය",
+      "formula": "\\frac{\\Delta z}{z} = \\frac{\\Delta x}{x} + \\frac{\\Delta y}{y} \\quad (z = xy \\text{ හෝ } z = x/y \\text{ සඳහා})",
+      "derivation": "z = xy හෝ z = x/y ලෙස ගණනය කරන රාශිවල, z හි භාගික අවිනිශ්චිතතාව (Fractional Uncertainty) x හා y හි භාගික අවිනිශ්චිතතාවල ඝාත්‍ය (arithmetic) එකතුව ලෙස ලැබේ. ව්‍යුත්පත්තිය: z = xy ගෙන දෙපස ස්වාභාවික ලොගරිතම ගෙන (ln z = ln x + ln y) අවකලනය කිරීමෙන් dz/z = dx/x + dy/y. ප්‍රතිශත දෝෂය = (Δx/x + Δy/y) × 100.",
+      "vars": [
+        {
+          "s": "Δz/z",
+          "d": "z හි භාගික අවිනිශ්චිතතාව (Fractional Uncertainty)"
+        },
+        {
+          "s": "Δx/x",
+          "d": "x හි භාගික අවිනිශ්චිතතාව (Fractional Uncertainty)"
+        },
+        {
+          "s": "Δy/y",
+          "d": "y හි භාගික අවිනිශ්චිතතාව (Fractional Uncertainty)"
+        }
+      ],
+      "calc": {
+        "label": "ගුණිත/භාගීය දෝෂ ගණකය (% ලෙස)",
+        "inputs": [
+          {
+            "id": "rx",
+            "label": "Δx/x (භාගික අවිනිශ්චිතතාව)"
+          },
+          {
+            "id": "ry",
+            "label": "Δy/y (භාගික අවිනිශ්චිතතාව)"
+          }
+        ],
+        "formula": "(parseFloat(rx) + parseFloat(ry)) * 100",
+        "unit": "%",
+        "resultLabel": "Δz/z (%)"
+      }
+    },
+    {
+      "name": "දෝෂ ව්‍යාප්තිය — ඝාතීය නිතිය",
+      "formula": "\\frac{\\Delta z}{z} = n \\cdot \\frac{\\Delta x}{x} \\quad (z = x^n \\text{ සඳහා})",
+      "derivation": "z = xⁿ ලෙස ගණනය කරන රාශිවල, දෙපස ස්වාභාවික ලොගරිතම ගෙන (ln z = n ln x) දෙපස x අනුව අවකලනය කිරීමෙන් (1/z)(dz/dx) = n/x, එනම් dz/z = n·dx/x. ඒ අනුව Δz/z = n·(Δx/x). ඝාතය n ඍණ (negative) වූ විටද |n| ගනු ලැබේ. ප්‍රතිශත දෝෂය = |n| × (Δx/x) × 100.",
+      "vars": [
+        {
+          "s": "n",
+          "d": "ඝාතය (Power / Exponent)"
+        },
+        {
+          "s": "Δx/x",
+          "d": "x හි භාගික අවිනිශ්චිතතාව (Fractional Uncertainty)"
+        },
+        {
+          "s": "Δz/z",
+          "d": "z හි භාගික අවිනිශ්චිතතාව (Fractional Uncertainty)"
+        }
+      ],
+      "calc": {
+        "label": "ඝාතීය දෝෂ ගණකය (% ලෙස)",
+        "inputs": [
+          {
+            "id": "n",
+            "label": "n (ඝාතය)"
+          },
+          {
+            "id": "rx",
+            "label": "Δx/x (භාගික අවිනිශ්චිතතාව)"
+          }
+        ],
+        "formula": "Math.abs(parseFloat(n)) * parseFloat(rx) * 100",
+        "unit": "%",
+        "resultLabel": "Δz/z (%)"
+      }
+    },
+    {
+      "name": "වර්නියර් කැලිපර් / ගමන් කරන අනුදර්ශකය — කුඩාම මිනුම (LC)",
+      "formula": "LC = 1\\text{ MSD} - 1\\text{ VSD} = \\frac{1\\text{ MSD}}{n}",
+      "derivation": "වර්නියර් කැලිපරයේ (Vernier Caliper) හා ගමන් කරන අනුදර්ශකයේ (Traveling Microscope) කුඩාම මිනුම (Least Count) ගණනය: n VSD = (n−1) MSD ලෙස සකස් කෙරෙන හෙයින්, 1 VSD = (n−1)/n MSD. LC = 1 MSD − 1 VSD = 1 MSD − (n−1)/n MSD = (1/n) MSD. සාමාන්‍ය නිදසුන: 1 MSD = 1 mm, n = 10 → LC = 0.1 mm. LC කුඩා වූ විට, මිනුමේ නිරවද්‍යතාව (accuracy) වැඩිය. ශුන්‍ය දෝෂය (Zero Error): කැලිපරය වසා ශුන්‍ය රේඛා සරිලන්නේ නැත්නම් ශුන්‍ය දෝෂයකි. Corrected Reading = Total Reading − Zero Error.",
+      "vars": [
+        {
+          "s": "LC",
+          "d": "කුඩාම මිනුම (Least Count)"
+        },
+        {
+          "s": "MSD",
+          "d": "ප්‍රධාන පරිමාණ බෙදීම — Main Scale Division"
+        },
+        {
+          "s": "VSD",
+          "d": "වර්නියර් පරිමාණ බෙදීම — Vernier Scale Division"
+        },
+        {
+          "s": "n",
+          "d": "වර්නියර් පරිමාණ බෙදීම් ගණන"
+        }
+      ],
+      "calc": {
+        "label": "LC ගණකය — වර්නියර් කැලිපර්",
+        "inputs": [
+          {
+            "id": "msd",
+            "label": "1 MSD (mm)"
+          },
+          {
+            "id": "n",
+            "label": "වර්නියර් බෙදීම් ගණන (n)"
+          }
+        ],
+        "formula": "parseFloat(msd) / parseFloat(n)",
+        "unit": "mm",
+        "resultLabel": "LC"
+      }
+    },
+    {
+      "name": "වර්නියර් කැලිපර් — මුළු පාඨාංකය",
+      "formula": "\\text{Total Reading} = \\text{MSR} + (\\text{VSR} \\times LC)",
+      "derivation": "වර්නියර් කැලිපරයේ මුළු පාඨාංකය (Total Reading) ලබාගැනීමේ ක්‍රමය: (1) ප්‍රධාන පරිමාණයේ පාඨාංකය (Main Scale Reading — MSR): වර්නියර් ශුන්‍ය රේඛාව (vernier zero) ස්පර්ශ කරන හෝ පසු කරන ප්‍රධාන පරිමාණ කොට්ඨාස ගණන. (2) වර්නියර් පරිමාණයේ පාඨාංකය (Vernier Scale Reading — VSR): ප්‍රධාන හා වර්නියර් රේඛා නිවැරදිව සරිලන (exactly coinciding) බෙදීම් අංකය. (3) සූත්‍රය: Total = MSR + (VSR × LC). ශුන්‍ය දෝෂ ගැලපීම: Corrected Reading = Total Reading − Zero Error.",
+      "vars": [
+        {
+          "s": "MSR",
+          "d": "ප්‍රධාන පරිමාණයේ පාඨාංකය (Main Scale Reading)"
+        },
+        {
+          "s": "VSR",
+          "d": "වර්නියර් පරිමාණයේ පාඨාංකය — සරිලන රේඛා අංකය (Vernier Scale Reading)"
+        },
+        {
+          "s": "LC",
+          "d": "කුඩාම මිනුම (Least Count)"
+        }
+      ],
+      "calc": {
+        "label": "වර්නියර් මුළු පාඨාංක ගණකය",
+        "inputs": [
+          {
+            "id": "msr",
+            "label": "MSR — ප්‍රධාන පරිමාණයේ පාඨාංකය (mm)"
+          },
+          {
+            "id": "vsr",
+            "label": "VSR — සරිලන රේඛා අංකය"
+          },
+          {
+            "id": "lc",
+            "label": "LC (mm)"
+          }
+        ],
+        "formula": "parseFloat(msr) + (parseFloat(vsr) * parseFloat(lc))",
+        "unit": "mm",
+        "resultLabel": "Total Reading"
+      }
+    },
+    {
+      "name": "මයික්‍රෝමීටර් ස්ක්‍රූ ආමානය  — කුඩාම මිනුම (LC)",
+      "formula": "LC = \\frac{\\text{Pitch (අන්තරාලය)}}{\\text{Number of circular scale divisions}}",
+      "derivation": "මයික්‍රෝමීටරයේ (Micrometer Screw Gauge) කුඩාම මිනුම (Least Count): ස්ක්‍රූවේ එක් සම්පූර්ණ භ්‍රමණයකදී ගෙනයන රේඛීය දිග 'අන්තරාලය' (Pitch) ලෙස හැඳින්වේ. LC = Pitch ÷ N (N = කෘත්‍ය පරිමාණ — circular scale — බෙදීම් ගණන). සාමාන්‍ය නිදසුන: Pitch = 0.5 mm, N = 50 → LC = 0.01 mm. ශුන්‍ය දෝෂය: ධනාත්මක ශුන්‍ය දෝෂය නම් Corrected = Total − ZE; ඍණාත්මක නම් Corrected = Total + |ZE|.",
+      "vars": [
+        {
+          "s": "LC",
+          "d": "කුඩාම මිනුම (Least Count)"
+        },
+        {
+          "s": "Pitch",
+          "d": "අන්තරාලය — ස්ක්‍රූවේ එක් භ්‍රමණයකදී ගෙනයන රේඛීය දිග (mm)"
+        },
+        {
+          "s": "N",
+          "d": "කෘත්‍ය පරිමාණ (Circular Scale) බෙදීම් ගණන"
+        }
+      ],
+      "calc": {
+        "label": "LC ගණකය — මයික්‍රෝමීටර්",
+        "inputs": [
+          {
+            "id": "pitch",
+            "label": "අන්තරාලය / Pitch (mm)"
+          },
+          {
+            "id": "n",
+            "label": "කෘත්‍ය පරිමාණ බෙදීම් ගණන (N)"
+          }
+        ],
+        "formula": "parseFloat(pitch) / parseFloat(n)",
+        "unit": "mm",
+        "resultLabel": "LC"
+      }
+    },
+    {
+      "name": "මයික්‍රෝමීටර් ස්ක්‍රූ ආමානය — මුළු පාඨාංකය",
+      "formula": "\\text{Total Reading} = \\text{MSR} + (\\text{CSR} \\times LC)",
+      "derivation": "මයික්‍රෝමීටරයේ මුළු පාඨාංකය: (1) ප්‍රධාන පරිමාණයේ පාඨාංකය (MSR — Main Scale Reading): ඝර්ෂණ ඝූරකය (thimble) විසින් හෙළිකරනු ලබන sleeve හි අඩ-mm කොටස් ගණන. (2) කෘත්‍ය පරිමාණයේ පාඨාංකය (CSR — Circular Scale Reading): thimble ප්‍රධාන datum රේඛාව (reference line) සමඟ සරිලන කෘත්‍ය රේඛා (circular scale) අංකය. (3) Total = MSR + (CSR × LC). ශුන්‍ය දෝෂ ගැලපීම: Corrected Reading = Total Reading − Zero Error.",
+      "vars": [
+        {
+          "s": "MSR",
+          "d": "ප්‍රධාන පරිමාණයේ පාඨාංකය (sleeve — Main Scale Reading)"
+        },
+        {
+          "s": "CSR",
+          "d": "කෘත්‍ය පරිමාණයේ පාඨාංකය (thimble — Circular Scale Reading)"
+        },
+        {
+          "s": "LC",
+          "d": "කුඩාම මිනුම (Least Count)"
+        }
+      ],
+      "calc": {
+        "label": "මයික්‍රෝමීටර් මුළු පාඨාංක ගණකය",
+        "inputs": [
+          {
+            "id": "msr",
+            "label": "MSR — ප්‍රධාන පරිමාණයේ පාඨාංකය (mm)"
+          },
+          {
+            "id": "csr",
+            "label": "CSR — කෘත්‍ය රේඛා අංකය"
+          },
+          {
+            "id": "lc",
+            "label": "LC (mm)"
+          }
+        ],
+        "formula": "parseFloat(msr) + (parseFloat(csr) * parseFloat(lc))",
+        "unit": "mm",
+        "resultLabel": "Total Reading"
+      }
+    },
+    {
+      "name": "ගෝලමානය (Spherometer) — කුඩාම මිනුම",
+      "formula": "LC = \\frac{\\text{Pitch (අන්තරාලය)}}{\\text{Number of circular scale divisions}}",
+      "derivation": "ගෝලාකාර මාපකයේ (Spherometer) LC ගණනය මයික්‍රෝමීටරයේ LC ගණනයට සමාන මූලධර්මයෙන් ක්‍රියා කරයි: LC = Pitch / N. සාමාන්‍යයෙන් Pitch = 1 mm, N = 100 → LC = 0.01 mm. ගෝලාකාර මාපකය ගෝලීය ගවාකාර (spherical surfaces) — ලෙන්ස, දර්පණ ආදිය — හි වක්‍ර අරය (Radius of Curvature) මිනීමට භාවිතා කෙරේ. එහි ස්ක්‍රූව ත්‍රිකෝණාකාරව සකසන කකුල් 3 ක් (legs) මත ක්‍රියා කරයි.",
+      "vars": [
+        {
+          "s": "LC",
+          "d": "කුඩාම මිනුම (Least Count)"
+        },
+        {
+          "s": "Pitch",
+          "d": "අන්තරාලය — ස්ක්‍රූ එක් භ්‍රමණයකදී ගෙනයන රේඛීය දිග (mm)"
+        },
+        {
+          "s": "N",
+          "d": "කෘත්‍ය පරිමාණ (Circular Scale) බෙදීම් ගණන"
+        }
+      ],
+      "calc": {
+        "label": "LC ගණකය — ගෝලාකාර මාපකය",
+        "inputs": [
+          {
+            "id": "pitch",
+            "label": "අන්තරාලය / Pitch (mm)"
+          },
+          {
+            "id": "n",
+            "label": "කෘත්‍ය පරිමාණ බෙදීම් ගණන (N)"
+          }
+        ],
+        "formula": "parseFloat(pitch) / parseFloat(n)",
+        "unit": "mm",
+        "resultLabel": "LC"
+      }
+    },
+    {
+      "name": "ගෝලමානය — වක්‍ර අරය (Radius of Curvature)",
+      "formula": "R = \\frac{a^2}{6h} + \\frac{h}{2}",
+      "derivation": "ගෝලාකාර මාපකයේ කකුල් 3 ත්‍රිකෝණාකාරව සකසා ඇත. කකුල් 2 ක් අතර සාමාන්‍ය දිග l ලෙස ගෙන, circumscribed circle හි අරය a = l/√3. Chord-Sagitta (ජ්‍යා-යම්) ජ්‍යාමිතිය භාවිතා කිරීමෙන්: R² = (R−h)² + a² ව්‍යුවිස්තාර (expand) කිරීමෙන් R² = R² − 2Rh + h² + a², ඒ නිසා 2Rh = h² + a², R = a²/(2h) + h/2. ත්‍රිකෝණාකාර කකුල් සහිත ස්ඵිරෝමීටරය සඳහා a² = l²/3 ආදේශ කිරීමෙන් R = l²/(6h) + h/2 ද ලිවිය හැකිය. h: ගෝලීය මතුපිට හා ල (plane surface) අතර sagitta (ඇලෙන ප්‍රදේශ). a: කකුල් 3 ගෙන් ගෙතෙන circumscribed circle හි අරය.",
+      "vars": [
+        {
+          "s": "R",
+          "d": "වක්‍ර අරය — Radius of Curvature (mm)"
+        },
+        {
+          "s": "a",
+          "d": "කකුල් 3 ගෙන් ගෙතෙන circumscribed circle හි අරය (mm)"
+        },
+        {
+          "s": "h",
+          "d": "Sagitta — ගෝලීය මතුපිටෙහි ඇලෙන ප්‍රදේශ (mm)"
+        },
+        {
+          "s": "l",
+          "d": "කකුල් 2 ක් අතර (pitch) දිග (mm) [a = l/√3]"
+        }
+      ],
+      "calc": {
+        "label": "වක්‍ර අරය ගණකය (R = a²/6h + h/2)",
+        "inputs": [
+          {
+            "id": "a",
+            "label": "a — circumradius (mm)"
+          },
+          {
+            "id": "h",
+            "label": "h — sagitta (mm)"
+          }
+        ],
+        "formula": "(Math.pow(parseFloat(a), 2) / (6 * parseFloat(h))) + (parseFloat(h) / 2)",
+        "unit": "mm",
+        "resultLabel": "R"
+        }
+      }
+    ]
+  },
+  {
+  "si": "යාන්ත්‍ර විද්‍යාව",
+  "en": "Mechanics and Rotational Motion",
+  "equations": [
+    {
+      "name": "ඒකාකාර ත්වරිත චලන සමීකරණ (SUVAT)",
+      "formula": "v = u + at \\quad;\\quad s = ut + \\tfrac{1}{2}at^2 \\quad;\\quad v^2 = u^2 + 2as",
+      "derivation": "ස්ථිර ත්වරණය a ක් ඇති විට, ත්වරණයේ නිර්වචනය a = Δv/Δt ලෙස ගෙන t අනුව සම්බන්ධ කිරීමෙන් v = u + at ලැබේ. s-t සම්බන්ධය ලබාගැනීම සඳහා v-t ප්‍රස්ථාරය යටතේ ඇති වර්ගඵලය (s = (u+v)/2 × t) ගෙන ආදේශ කිරීමෙන් s = ut + ½at² ව්‍යුත්පන්න වේ. t ඉවත් කිරීමෙන් v² = u² + 2as ලැබේ. SUVAT: s = විස්ථාපනය, u = ආරම්භක ප්‍රවේගය, v = අවසාන ප්‍රවේගය, a = ත්වරණය, t = කාලය.",
+      "vars": [
+        { "s": "s", "d": "විස්ථාපනය (m)" },
+        { "s": "u", "d": "ආරම්භක ප්‍රවේගය (m/s)" },
+        { "s": "v", "d": "අවසාන ප්‍රවේගය (m/s)" },
+        { "s": "a", "d": "ත්වරණය (m/s²)" },
+        { "s": "t", "d": "කාලය (s)" }
+      ],
+      "calc": {
+        "label": "SUVAT — v ගණනය කරන්න",
+        "inputs": [
+          { "id": "u", "label": "u (m/s)" },
+          { "id": "a", "label": "a (m/s²)" },
+          { "id": "t", "label": "t (s)" }
+        ],
+        "formula": "parseFloat(u) + parseFloat(a) * parseFloat(t)",
+        "unit": "m/s",
+        "resultLabel": "v"
+      }
+    },
+    {
+  "name": "ක්ෂමතාව (යාන්ත්‍ර විද්‍යාව)",
+  "formula": "P = Fv",
+  "derivation": "ක්ෂමතාව යනු කාර්යය කිරීමේ සීඝ්‍රතාවයි (P = W/t). නියත බලයක් (F) යටතේ වස්තුවක් ප්‍රවේගයකින් (v) චලනය වන විට, සිදුකරන කාර්යය W = F × d වේ (d යනු විස්ථාපනයයි). එය කාලයෙන් (t) බෙදූ විට, P = F × (d/t) ලැබෙන අතර, d/t යනු ප්‍රවේගය (v) බැවින් P = Fv ලෙස ව්‍යුත්පන්න වේ.",
+  "vars": [
+    { "s": "P", "d": "ක්ෂමතාව (W හෝ J s⁻¹)" },
+    { "s": "F", "d": "යෙදූ බලය (N)" },
+    { "s": "v", "d": "චලනය වන ප්‍රවේගය (m s⁻¹)" }
+  ],
+  "calc": {
+    "label": "ක්ෂමතා ගණකය (P = Fv)",
+    "inputs": [
+      { "id": "F", "label": "බලය F (N)" },
+      { "id": "v", "label": "ප්‍රවේගය v (m s⁻¹)" }
+    ],
+    "formula": "parseFloat(F) * parseFloat(v)",
+    "unit": "W",
+    "resultLabel": "P"
+  }
+},
+    {
+  "name": "ඝර්ෂණය (Friction)",
+  "formula": "F_s = \\mu_s R \\quad;\\quad f_k = \\mu_k R",
+  "derivation": "වස්තුවක් මත යෙදෙන සම්ප්‍රයුක්ත බලය නිසා එය චලනය වීමට උත්සාහ කරන විට හෝ චලනය වන විට, ස්පර්ශ පෘෂ්ඨ අතර ඇති වන ප්‍රතිරෝධී බලය ඝර්ෂණයයි. මෙම ඝර්ෂණ බලය සෑම විටම චලනයේ හෝ චලනය වීමේ ප්‍රවණතාවේ ප්‍රතිවිරුද්ධ දිශාවට ක්‍රියා කරයි. වස්තුව චලනය ආරම්භ කිරීමට ප්‍රථම ක්‍රියාත්මක වන උපරිම ඝර්ෂණ බලය සීමාකාරී ඝර්ෂණ බලය (Fs) නම් වන අතර, එය අභිලම්බ ප්‍රතික්‍රියාවට (R) සෘජුව සමානුපාතික වේ: Fs = μsR. වස්තුව චලනය වීමෙන් පසු ක්‍රියාත්මක වන ගතික ඝර්ෂණ බලය (fk) ද ඒ අනුරූප ගතික ඝර්ෂණ සංගුණකය (μk) භාවිතයෙන් fk = μkR ලෙස ලබා දේ. සාමාන්‍යයෙන් μk < μs වේ.",
+  "vars": [
+    { "s": "F_s", "d": "සීමාකාරී ඝර්ෂණ බලය (N)" },
+    { "s": "μ_s", "d": "ස්ථිතික ඝර්ෂණ සංගුණකය (මාන රහිත)" },
+    { "s": "f_k", "d": "ගතික ඝර්ෂණ බලය (N)" },
+    { "s": "μ_k", "d": "ගතික ඝර්ෂණ සංගුණකය (මාන රහිත)" },
+    { "s": "R", "d": "අභිලම්බ ප්‍රතික්‍රියාව (N)" }
+  ],
+  "calc": {
+    "label": "ඝර්ෂණ බලය ගණනය",
+    "inputs": [
+      { "id": "mu", "label": "ඝර්ෂණ සංගුණකය (μ)" },
+      { "id": "R", "label": "අභිලම්බ ප්‍රතික්‍රියාව R (N)" }
+    ],
+    "formula": "parseFloat(mu) * parseFloat(R)",
+    "unit": "N",
+    "resultLabel": "F"
+  }
+  },
+    {
+      "name": "නිව්ටන්ගේ දෙවන ගති නියමය",
+      "formula": "F = ma",
+      "derivation": "නිව්ටන්ගේ දෙවන ගති නියමය ප්‍රකාශ කරන්නේ, ස්ථිර ස්කන්ධයක් (m) ඇති වස්තුවකට ලබාදෙන ශුද්ධ බලය (F) එහි ත්වරණයට (a) සමානුපාතික බවයි. එනම්, F ∝ a (m ස්ථිර වූ විට). සමානුපාතික නියතය ස්කන්ධය (m) වන බැවින් F = ma ලෙස ලිවිය හැකිය. SI ඒකකය: Newton (N) = kg·m/s². ත්වරණය වැඩි වන විට, ලබාදිය යුතු බලයද m ට සමාන ගුණයකින් වැඩි වේ. මූලාශ්‍රය: Newton, Principia Mathematica (1687).",
+      "vars": [
+        { "s": "F", "d": "ශුද්ධ බලය (N)" },
+        { "s": "m", "d": "ස්කන්ධය (kg)" },
+        { "s": "a", "d": "ත්වරණය (m/s²)" }
+      ],
+      "calc": {
+        "label": "බල ගණකය",
+        "inputs": [
+          { "id": "m", "label": "m (kg)" },
+          { "id": "a", "label": "a (m/s²)" }
+        ],
+        "formula": "parseFloat(m) * parseFloat(a)",
+        "unit": "N",
+        "resultLabel": "F"
+      }
+    },
+    {
+      "name": "චක්‍රීය චලනය — රේඛීය හා කෝණීය ප්‍රවේගය",
+      "formula": "v = r\\omega",
+      "derivation": "කෝණීය ප්‍රවේගය ω = dθ/dt ලෙස නිර්වචනය කෙරේ. චාපය s = rθ ලෙස ලිවිය හැකි බැවින්, v = ds/dt = r·dθ/dt = rω ලෙස ව්‍යුත්පන්න වේ. r යනු චක්‍රීය පථයේ අරය වන අතර, v රේඛීය ප්‍රවේගය (tangential velocity) ය. ω ඒකකය: rad/s.",
+      "vars": [
+        { "s": "v", "d": "රේඛීය (ස්පර්ශක) ප්‍රවේගය (m/s)" },
+        { "s": "r", "d": "පථ අරය (m)" },
+        { "s": "ω", "d": "කෝණීය ප්‍රවේගය (rad/s)" }
+      ],
+      "calc": {
+        "label": "රේඛීය ප්‍රවේග ගණකය (v = rω)",
+        "inputs": [
+          { "id": "r", "label": "r (m)" },
+          { "id": "omega", "label": "ω (rad/s)" }
+        ],
+        "formula": "parseFloat(r) * parseFloat(omega)",
+        "unit": "m/s",
+        "resultLabel": "v"
+      }
+    },
+    {
+      "name": "චක්‍රීය චලනය — කේන්ද්‍රාභිසාරී ත්වරණය",
+      "formula": "a_c = \\frac{v^2}{r} = r\\omega^2",
+      "derivation": "ඒකාකාර චක්‍රීය චලනයේදී ප්‍රවේගයේ ප්‍රමාණය නිරන්තර වුවද, දිශාව නිරන්තරයෙන් වෙනස් වේ. ප්‍රවේගය t අනුව අවකලනය (differentiate) කිරීමෙන් කේන්ද්‍රාභිසාරී ත්වරණය ac = v²/r ලෙස ලැබේ. v = rω ආශ්‍රිතව ac = r²ω²/r = rω² ලෙසද ලිවිය හැකිය. ත්වරණයේ දිශාව සෑම විටම කේන්ද්‍රය දෙසට ය. කේන්ද්‍රාභිසාරී බලය: F = mac = mv²/r.",
+      "vars": [
+        { "s": "ac", "d": "කේන්ද්‍රාභිසාරී ත්වරණය (m/s²)" },
+        { "s": "v", "d": "රේඛීය ප්‍රවේගය (m/s)" },
+        { "s": "r", "d": "පථ අරය (m)" },
+        { "s": "ω", "d": "කෝණීය ප්‍රවේගය (rad/s)" }
+      ],
+      "calc": {
+        "label": "කේන්ද්‍රාභිසාරී ත්වරණ ගණකය",
+        "inputs": [
+          { "id": "v", "label": "v (m/s)" },
+          { "id": "r", "label": "r (m)" }
+        ],
+        "formula": "Math.pow(parseFloat(v), 2) / parseFloat(r)",
+        "unit": "m/s²",
+        "resultLabel": "ac"
+      }
+    },
+    {
+      "name": "කාර්යය (Work)",
+      "formula": "W = Fs\\cos\\theta",
+      "derivation": "කාර්යය යනු බලය (F) හා විස්ථාපනය (s) අතර අභ්‍යන්තර ගුණිතය (dot product) ය: W = F⃗·s⃗ = Fs cosθ. මෙහිදී θ යනු බලයේ දිශාව හා විස්ථාපනයේ දිශාව අතර කෝණය ය. θ = 90° වූ විට cosθ = 0 නිසා ව්‍යාජ කාර්යය ශූන්‍ය වේ (නිදසුන: සෙන්ට්‍රිපිටල් බලය). θ = 180° වූ විට ඍණ කාර්යයක් සිදු වේ. ඒකකය: Joule (J) = N·m = kg·m²/s².",
+      "vars": [
+        { "s": "W", "d": "කාර්යය (J)" },
+        { "s": "F", "d": "ක්‍රියාකාරී බලය (N)" },
+        { "s": "s", "d": "විස්ථාපනය (m)" },
+        { "s": "θ", "d": "බලය හා විස්ථාපනය අතර කෝණය (°)" }
+      ],
+      "calc": {
+        "label": "කාර්ය ගණකය",
+        "inputs": [
+          { "id": "F", "label": "F (N)" },
+          { "id": "s", "label": "s (m)" },
+          { "id": "theta", "label": "θ (degrees)" }
+        ],
+        "formula": "parseFloat(F) * parseFloat(s) * Math.cos(parseFloat(theta) * Math.PI / 180)",
+        "unit": "J",
+        "resultLabel": "W"
+      }
+    },
+    {
+      "name": "චාලක ශක්තිය",
+      "formula": "E_k = \\frac{1}{2}mv^2",
+      "derivation": "කාර්ය-ශක්ති ප්‍රමේය (Work-Energy Theorem) ප්‍රකාශ කරන්නේ ශුද්ධ කාර්යය (W_net) චාලක ශක්තියේ වෙනසට (ΔEk) සමාන බවයි: W = ΔEk. F = ma සහ v² = u² + 2as ආශ්‍රිතව W = Fs = mas = ½mv² − ½mu² ලෙස ව්‍යුත්පන්න කළ හැකිය. u = 0 ආරම්භයෙන් Ek = ½mv² ලෙස ලැබේ. ඒකකය: Joule (J).",
+      "vars": [
+        { "s": "Ek", "d": "චාලක ශක්තිය (J)" },
+        { "s": "m", "d": "ස්කන්ධය (kg)" },
+        { "s": "v", "d": "ප්‍රවේගය (m/s)" }
+      ],
+      "calc": {
+        "label": "චාලක ශක්ති ගණකය",
+        "inputs": [
+          { "id": "m", "label": "m (kg)" },
+          { "id": "v", "label": "v (m/s)" }
+        ],
+        "formula": "0.5 * parseFloat(m) * Math.pow(parseFloat(v), 2)",
+        "unit": "J",
+        "resultLabel": "Ek"
+      }
+    },
+    {
+      "name": "ගුරුත්වාකර්ෂණ විභව ශක්තිය",
+      "formula": "U = mgh",
+      "derivation": "ගුරුත්ව ක්ෂේත්‍රය තුළ ස්කන්ධය m වන වස්තුවක් h උසකට ගෙනයෑමට ගුරුත්ව බලයට විරුද්ධව W = mgh කාර්යයක් සිදු කළ යුතු ය. ශක්ති සංරක්ෂණ නිතිය අනුව, මෙම කාර්යය විභව ශක්තිය (U) ලෙස ගබඩා වේ: U = mgh. g = 9.81 m/s² (මුහුදු මට්ටමේ). ආශ්‍රිත ශ්‍රිතාංශ ලක්ෂ්‍යයෙන් (reference point) h මනිනු ලැබේ. ඒකකය: Joule (J).",
+      "vars": [
+        { "s": "U", "d": "ගුරුත්වාකර්ෂණ විභව ශක්තිය (J)" },
+        { "s": "m", "d": "ස්කන්ධය (kg)" },
+        { "s": "g", "d": "ගුරුත්ව ත්වරණය (m/s²)" },
+        { "s": "h", "d": "ආශ්‍රිත ශ්‍රිතාංශ ලක්ෂ්‍යයෙන් උස (m)" }
+      ],
+      "calc": {
+        "label": "විභව ශක්ති ගණකය",
+        "inputs": [
+          { "id": "m", "label": "m (kg)" },
+          { "id": "g", "label": "g (m/s²)", "placeholder": "9.81" },
+          { "id": "h", "label": "h (m)" }
+        ],
+        "formula": "parseFloat(m) * parseFloat(g) * parseFloat(h)",
+        "unit": "J",
+        "resultLabel": "U"
+      }
+    },
+    {
+      "name": "භ්‍රමණ චලිතය — ව්‍යාවර්තය හා කෝණීය ත්වරණය",
+      "formula": "\\tau = I\\alpha \\quad;\\quad L = I\\omega",
+      "derivation": "රේඛීය F = ma හා p = mv සමඟ සෘජු සාදෘශ්‍යයෙන් (analogy): ව්‍යාවර්තය τ = Iα ලෙස ලිවිය හැකිය. මෙහිදී I (අවස්ථිති ඝූර්ණය) ස්කන්ධයේ භ්‍රමණ ප්‍රතිසමය (rotational analogue) ය, α (කෝණීය ත්වරණය) = dω/dt. භ්‍රමණ සංවේගය L = Iω ලෙස නිර්වචනය කෙරේ. ශුද්ධ ව්‍යාවර්තයක් නොමැති විට dL/dt = 0 නිසා L = ස්ථිරාංකය (කෝණීය සංවේග සංරක්ෂණ නිතිය). ඒකකය: τ — N·m; L — kg·m²/s.",
+      "vars": [
+        { "s": "τ", "d": "ව්‍යාවර්තය (N·m)" },
+        { "s": "I", "d": "අවස්ථිති ඝූර්ණය (kg·m²)" },
+        { "s": "α", "d": "කෝණීය ත්වරණය (rad/s²)" },
+        { "s": "L", "d": "කෝණීය සංවේගය (kg·m²/s)" },
+        { "s": "ω", "d": "කෝණීය ප්‍රවේගය (rad/s)" }
+      ],
+      "calc": {
+        "label": "ව්‍යාවර්ත ගණකය (τ = Iα)",
+        "inputs": [
+          { "id": "I", "label": "I (kg·m²)" },
+          { "id": "alpha", "label": "α (rad/s²)" }
+        ],
+        "formula": "parseFloat(I) * parseFloat(alpha)",
+        "unit": "N·m",
+        "resultLabel": "τ"
+      }
+    },
+    {
+      "name": "භ්‍රමණ චාලක ශක්තිය",
+      "formula": "E_r = \\frac{1}{2}I\\omega^2",
+      "derivation": "රේඛීය Ek = ½mv² සමඟ සෘජු සාදෘශ්‍යයෙන්: m → I (අවස්ථිති ඝූර්ණය), v → ω (කෝණීය ප්‍රවේගය). භ්‍රමණ වස්තුවේ ඒකාංශ (mass elements dm) එකතු කිරීමෙන් (summation) Er = ½Iω² ව්‍යුත්පන්න වේ. රෝලිං වස්තුවක් (rolling object) සඳහා: E_total = ½mv² + ½Iω². ඒකකය: Joule (J).",
+      "vars": [
+        { "s": "Er", "d": "භ්‍රමණ චාලක ශක්තිය (J)" },
+        { "s": "I", "d": "අවස්ථිති ඝූර්ණය (kg·m²)" },
+        { "s": "ω", "d": "කෝණීය ප්‍රවේගය (rad/s)" }
+      ],
+      "calc": {
+        "label": "භ්‍රමණ ශක්ති ගණකය",
+        "inputs": [
+          { "id": "I", "label": "I (kg·m²)" },
+          { "id": "omega", "label": "ω (rad/s)" }
+        ],
+        "formula": "0.5 * parseFloat(I) * Math.pow(parseFloat(omega), 2)",
+        "unit": "J",
+        "resultLabel": "Er"
+      }
+    },
+    {
+  "name": "උත්තරණ චාලක ශක්තිය",
+  "formula": "E_k = \\frac{1}{2}mv^2",
+  "derivation": "භ්‍රමණ චලිතයේ යෙදෙන හෝ පෙරලෙන වස්තුවක ස්කන්ධ කේන්ද්‍රයේ රේඛීය ප්‍රවේගය (v) නිසා වස්තුවට ලැබෙන ශක්තිය උත්තරණ චාලක ශක්තිය වේ. එය වස්තුවේ ස්කන්ධය (m) සහ රේඛීය ප්‍රවේගයේ වර්ගයේ (v²) ගුණිතයෙන් අඩකට සමාන වේ.",
+  "vars": [
+    { "s": "E_k", "d": "උත්තරණ චාලක ශක්තිය (J)" },
+    { "s": "m", "d": "වස්තුවේ ස්කන්ධය (kg)" },
+    { "s": "v", "d": "ස්කන්ධ කේන්ද්‍රයේ රේඛීය ප්‍රවේගය (m s⁻¹)" }
+  ],
+  "calc": {
+    "label": "උත්තරණ චාලක ශක්ති ගණකය",
+    "inputs": [
+      { "id": "m", "label": "ස්කන්ධය m (kg)" },
+      { "id": "v", "label": "ප්‍රවේගය v (m s⁻¹)" }
+    ],
+    "formula": "0.5 * parseFloat(m) * Math.pow(parseFloat(v), 2)",
+    "unit": "J",
+    "resultLabel": "E_k"
+  }
+  },
+    {
+  "name": "ද්‍රවස්ථිති පීඩනය",
+  "formula": "P = h\\rho g",
+  "derivation": "නිශ්චලව පවතින ද්‍රවයක h ගැඹුරකදී පීඩනය, එම ලක්ෂ්‍යයට ඉහළින් ඇති ද්‍රව කඳේ බර මත රඳා පවතී. මෙහිදී වායුගෝලීය පීඩනය නොසලකා හරින විට ලැබෙන පීඩනය (Gauge Pressure) මෙය වේ.",
+  "vars": [
+    { "s": "P", "d": "පීඩනය (Pressure)" },
+    { "s": "h", "d": "ගැඹුර (Depth)" },
+    { "s": "\\rho", "d": "ද්‍රවයේ ඝනත්වය (Density of fluid)" },
+    { "s": "g", "d": "ගුරුත්වජ ත්වරණය (Gravitational acceleration)" }
+  ],
+  "calc": {
+    "label": "ද්‍රවස්ථිති පීඩනය ගණනය කරන්න",
+    "inputs": [
+      { "id": "h", "label": "ගැඹුර h (m)" },
+      { "id": "rho", "label": "ඝනත්වය ρ (kg/m³)" },
+      { "id": "g", "label": "ගුරුත්වජ ත්වරණය g (m/s²)" }
+    ],
+    "formula": "h * rho * g",
+    "unit": "Pa",
+    "resultLabel": "පීඩනය P"
+  }
+  },
+  {
+  "name": "තරලගති විද්‍යාව",
+  "formula": "A_1 v_1 = A_2 v_2",
+  "derivation": "අසම්පීඩ්‍ය තරලයක් නළයක් තුළින් ගලා යන විට, ඕනෑම ලක්ෂ්‍යයකදී වර්ගඵලය සහ ප්‍රවේගයේ ගුණිතය (පරිමා ගලායෑමේ වේගය) නියත වේ. මෙය ස්කන්ධ සංස්ථිති නියමය මත පදනම් වේ.",
+  "vars": [
+    { "s": "A", "d": "හරස්කඩ වර්ගඵලය (Cross-sectional area)" },
+    { "s": "v", "d": "තරලයේ ප්‍රවේගය (Velocity of fluid)" },
+    { "s": "Av", "d": "පරිමා ගලායෑමේ වේගය (Volume flow rate, Q)" }
+  ],
+  "calc": {
+    "label": "පරිමා ගලායෑමේ වේගය ගණනය කරන්න (Q = Av)",
+    "inputs": [
+      { "id": "A", "label": "හරස්කඩ වර්ගඵලය A (m²)" },
+      { "id": "v", "label": "තරලයේ ප්‍රවේගය v (m/s)" }
+    ],
+    "formula": "A * v",
+    "unit": "m³/s",
+    "resultLabel": "පරිමා ගලායෑමේ වේගය Q"
+      }
+    },
+    {
+  "name": "බර්නූලි මූලධර්මය (Bernoulli's Principle)",
+  "formula": "P + \\frac{1}{2}\\rho v^2 + \\rho g h = \\text{නියතය}",
+  "derivation": "අසම්පීඩ්‍ය, දුස්ස්‍රාවී නොවන තරලයක් අඛණ්ඩව ගලා යන විට, එහි ඕනෑම ලක්ෂ්‍යයක පීඩන ශක්තිය, ඒකක පරිමාවක චාලක ශක්තිය සහ ඒකක පරිමාවක විභව ශක්තිය යන ශක්තීන් තුනේ එකතුව නියතයක් වේ. මෙය ශක්ති සංස්ථිති නියමයේම ප්‍රතිඵලයකි. ප්‍රවාහ නාලිකාවක් දිගේ ගලා යන තරලයක ඕනෑම දෙකක් ලක්ෂ්‍ය අතර: P₁ + ½ρv₁² + ρgh₁ = P₂ + ½ρv₂² + ρgh₂ ලෙස ප්‍රකාශ කළ හැකිය.",
+  "vars": [
+    {
+      "s": "P",
+      "d": "පීඩනය (Pa)"
+    },
+    {
+      "s": "ρ",
+      "d": "තරලයේ ඝනත්වය (kg/m³)"
+    },
+    {
+      "s": "v",
+      "d": "ප්‍රවේගය (m/s)"
+    },
+    {
+      "s": "g",
+      "d": "ගුරුත්වජ ත්වරණය (m/s²) — සාමාන්‍යයෙන් 9.81 m/s²"
+    },
+    {
+      "s": "h",
+      "d": "උස (m)"
+    }
+  ],
+  "calc": {
+    "label": "P_total ගණකය",
+    "inputs": [
+      {
+        "id": "P",
+        "label": "P (Pa)"
+      },
+      {
+        "id": "rho",
+        "label": "ρ (kg/m³)"
+      },
+      {
+        "id": "v",
+        "label": "v (m/s)"
+      },
+      {
+        "id": "h",
+        "label": "h (m)"
+      }
+    ],
+    "formula": "parseFloat(P) + 0.5 * parseFloat(rho) * Math.pow(parseFloat(v), 2) + parseFloat(rho) * 9.81 * parseFloat(h)",
+    "unit": "Pa",
+    "resultLabel": "P_total"
+      }
+    }
+    ]
+  },
+  {
+  "si": "ආලෝකය",
+  "en": "Light",
+  "equations": [
+    {
+      "name": "ස්නෙල් නියමය",
+      "formula": "n_1 \\sin\\theta_1 = n_2 \\sin\\theta_2",
+      "derivation": "ස්නෙල් නියමය අනුව, ආලෝකය එක් මාධ්‍යයකින් තවත් මාධ්‍යයකට ගමන් කරන විට, පළමු මාධ්‍යයේ වර්තන අංකය (n₁) සහ පතනකෝණයේ සයිනය (sin θ₁) හි ගුණිතය, දෙවන මාධ්‍යයේ වර්තන අංකය (n₂) සහ වර්තනකෝණයේ සයිනය (sin θ₂) හි ගුණිතයට සමාන වේ. මෙම නියමය ආලෝකයේ ගමන් කාලය අවම වීමේ ෆර්මාගේ මූලධර්මයෙන් ව්‍යුත්පන්න කළ හැකි අතර, ආලෝකය වේගවත් මාධ්‍යයෙන් මන්දගාමී මාධ්‍යයකට ගමන් කරන විට සාමාන්‍යයේ දෙසට නැමෙන බව මෙයින් ප්‍රකාශ වේ.",
+      "vars": [
+        { "s": "n₁", "d": "පළමු මාධ්‍යයේ වර්තන අංකය (එකක් රහිත)" },
+        { "s": "θ₁", "d": "පතන කෝණය — සාමාන්‍යයේ සිට (°)" },
+        { "s": "n₂", "d": "දෙවන මාධ්‍යයේ වර්තන අංකය (එකක් රහිත)" },
+        { "s": "θ₂", "d": "වර්තන කෝණය — සාමාන්‍යයේ සිට (°)" }
+      ],
+      "calc": {
+        "label": "ස්නෙල් නියමය — වර්තන කෝණය ගණනය",
+        "inputs": [
+          { "id": "n1", "label": "n₁ (පළමු මාධ්‍යයේ වර්තන අංකය)" },
+          { "id": "theta1", "label": "θ₁ (°) — පතන කෝණය" },
+          { "id": "n2", "label": "n₂ (දෙවන මාධ්‍යයේ වර්තන අංකය)" }
+        ],
+        "formula": "(180 / Math.PI) * Math.asin((parseFloat(n1) * Math.sin(parseFloat(theta1) * Math.PI / 180)) / parseFloat(n2))",
+        "unit": "°",
+        "resultLabel": "θ₂"
+      }
+    },
+    {
+      "name": "වර්තන අංකය සහ ආලෝකයේ වේගය",
+      "formula": "n = \\frac{c}{v}",
+      "derivation": "යම් මාධ්‍යයක වර්තන අංකය (n) යනු එම මාධ්‍යයේ ආලෝකය ගමන් කරන ප්‍රවේගය (v) හා සාපේක්ෂව, රික්ත අවකාශයේ ආලෝකයේ ප්‍රවේගය (c = 3 × 10⁸ m s⁻¹) කොපමණ ගුණයකින් වැඩිද යන්න දක්වන ප්‍රමාණයකි. n සෑම විටම 1 ට සමාන හෝ 1 ට වඩා වැඩි අගයක් ගනී. රික්ත අවකාශය සඳහා n = 1 වේ. මාධ්‍යයේ ඝනත්වය වැඩිවන විට n හි අගයද වැඩි වේ.",
+      "vars": [
+        { "s": "n", "d": "වර්තන අංකය (එකක් රහිත)" },
+        { "s": "c", "d": "රික්ත අවකාශයේ ආලෝකයේ ප්‍රවේගය — නියතය: 3 × 10⁸ m s⁻¹" },
+        { "s": "v", "d": "මාධ්‍යයේ ආලෝකයේ ප්‍රවේගය (m s⁻¹)" }
+      ],
+      "calc": {
+        "label": "වර්තන අංකය ගණනය",
+        "inputs": [
+          { "id": "v", "label": "v — මාධ්‍යයේ ආලෝකයේ ප්‍රවේගය (m/s)" }
+        ],
+        "formula": "3e8 / parseFloat(v)",
+        "unit": "",
+        "resultLabel": "n"
+      }
+    },
+    {
+      "name": "අවධි කෝණය",
+      "formula": "\\sin C = \\frac{1}{n}",
+      "derivation": "ඝන මාධ්‍යයකින් (වර්තන අංකය n) විරල මාධ්‍යයකට (රික්ත අවකාශය හෝ වාතය, n = 1) ආලෝකය ගමන් කරන විට, වර්තන කෝණය 90° වන පතන කෝණය අවධි කෝණය (C) නම් වේ. පතන කෝණය C ට වඩා වැඩි වූ විට ආලෝකය දෙවන මාධ්‍යයට ප්‍රවේශ නොවී සම්පූර්ණයෙන්ම පළමු මාධ්‍ය තුළට පරාවර්තනය වේ. මෙම සංසිද්ධිය පූර්ණ අභ්‍යන්තර පරාවර්තනය (Total Internal Reflection) ලෙස හැඳින්වේ. ස්නෙල් නියමය C කෝණයේදී යෙදූ විට, n sin C = 1 × sin 90° = 1 බැවින් sin C = 1/n ලෙස ලැබේ.",
+      "vars": [
+        { "s": "C", "d": "අවධි කෝණය (°)" },
+        { "s": "n", "d": "ඝන මාධ්‍යයේ වර්තන අංකය (එකක් රහිත)" }
+      ],
+      "calc": {
+        "label": "අවධි කෝණය ගණනය",
+        "inputs": [
+          { "id": "n", "label": "n — ඝන මාධ්‍යයේ වර්තන අංකය" }
+        ],
+        "formula": "(180 / Math.PI) * Math.asin(1 / parseFloat(n))",
+        "unit": "°",
+        "resultLabel": "C"
+      }
+    },
+    {
+      "name": "කාච හා කැඩපත් සූත්‍රය",
+      "formula": "\\frac{1}{v} + \\frac{1}{u} = \\frac{1}{f}",
+      "derivation": "සත්‍යය ධනාත්මකය (Real is Positive) ලකුණු සම්මුතිය අනුව, සත්‍ය ප්‍රතිබිම්බ සඳහා v ධනාත්මකද (කාචයකදී), සත්‍ය වස්තු සඳහා u ධනාත්මකද, සහ අභිසාරී කාචයක හා ගවාක්ෂ කැඩපතක නාභීය දුර (f) ධනාත්මකද වේ. කාචයක නාභිය තුළ ස්ථාපිත ජ්‍යාමිතික ආලෝකශාස්ත්‍ර භාවිතා කිරීමෙන් මෙම සූත්‍රය ව්‍යුත්පන්න කෙරේ. 1/v + 1/u = 1/f යන සූත්‍රය නිෂ්පාදිත ප්‍රතිබිම්බයේ ස්ථානය ගණනය කිරීමට භාවිතා කෙරේ. කැඩපත් සඳහාද මෙම ස්වරූපයම යෙදේ.",
+      "vars": [
+        { "s": "v", "d": "ප්‍රතිබිම්බ දුර (m) — සත්‍ය ප්‍රතිබිම්බය සඳහා ධනාත්මකය" },
+        { "s": "u", "d": "වස්තු දුර (m) — සත්‍ය වස්තුව සඳහා ධනාත්මකය" },
+        { "s": "f", "d": "නාභීය දුර (m) — අභිසාරී කාචය/ගවාක්ෂ කැඩපත සඳහා ධනාත්මකය" }
+      ],
+      "calc": {
+        "label": "ප්‍රතිබිම්බ දුර ගණනය",
+        "inputs": [
+          { "id": "u", "label": "u — වස්තු දුර (m)" },
+          { "id": "f", "label": "f — නාභීය දුර (m)" }
+        ],
+        "formula": "1 / ((1 / parseFloat(f)) - (1 / parseFloat(u)))",
+        "unit": "m",
+        "resultLabel": "v"
+      }
+    },
+    {
+      "name": "රේඛීය විශාලනය",
+      "formula": "m = \\frac{v}{u}",
+      "derivation": "රේඛීය විශාලනය (m) යනු කාචයක් හෝ කැඩපතක් මගින් සෑදෙන ප්‍රතිබිම්බයේ ප්‍රමාණය, මූල වස්තුවේ ප්‍රමාණය හා සාපේක්ෂව කොපමණ ගුණයකින් වෙනස් වේද යන්න දක්වන ප්‍රමාණයකි. |m| > 1 නම් ප්‍රතිබිම්බය විශාල වූ අතර, |m| < 1 නම් ප්‍රතිබිම්බය කුඩා වේ. m ඍණ අගයක් නම් ප්‍රතිබිම්බය ප්‍රතිලෝමිතය (inverted) වන අතර, m ධනාත්මක නම් ප්‍රතිබිම්බය ෘජු (erect) වේ.",
+      "vars": [
+        { "s": "m", "d": "රේඛීය විශාලනය (එකක් රහිත)" },
+        { "s": "v", "d": "ප්‍රතිබිම්බ දුර (m)" },
+        { "s": "u", "d": "වස්තු දුර (m)" }
+      ],
+      "calc": {
+        "label": "රේඛීය විශාලනය ගණනය",
+        "inputs": [
+          { "id": "v", "label": "v — ප්‍රතිබිම්බ දුර (m)" },
+          { "id": "u", "label": "u — වස්තු දුර (m)" }
+        ],
+        "formula": "parseFloat(v) / parseFloat(u)",
+        "unit": "",
+        "resultLabel": "m"
+      }
+    },
+    {
+      "name": "කාචයක බලය",
+      "formula": "P = \\frac{1}{f}",
+      "derivation": "කාචයක බලය (P) යනු එය ආලෝකය කෙතරම් ශක්තිමත් ලෙස අභිසාරී (converge) හෝ අපසාරී (diverge) කරයිද යන්න දක්වන ප්‍රමාණයකි. නාභීය දුර (f) මීටර් ඒකකවලින් ගත් විට, බලය ඩයොප්ටර් (D හෙවත් m⁻¹) ඒකකවලින් ලැබේ. අභිසාරී (උත්තල) කාච සඳහා P ධනාත්මකද, අපසාරී (අවතල) කාච සඳහා P ඍණාත්මකද වේ. කාච කිහිපයක් ස්පර්ශයෙන් සංයුක්ත කළ විට, ඒකාබද්ධ බලය P_total = P₁ + P₂ + ... ලෙස ගණනය කෙරේ.",
+      "vars": [
+        { "s": "P", "d": "කාචයේ බලය (D හෙවත් m⁻¹)" },
+        { "s": "f", "d": "නාභීය දුර (m) — අභිසාරී කාචය සඳහා ධනාත්මකය" }
+      ],
+      "calc": {
+        "label": "කාචයේ බලය ගණනය",
+        "inputs": [
+          { "id": "f", "label": "f — නාභීය දුර (m)" }
+        ],
+        "formula": "1 / parseFloat(f)",
+        "unit": "D",
+        "resultLabel": "P"
+        }
+      }
+    ]
+  },
+  {
+  "si": "දෝලන හා තරංග",
+  "en": "Oscillations & Waves",
+  "equations": [
+    {
+      "name": "සරල හාර්මොනික චලනය (SHM) — ත්වරණය",
+      "formula": "a = -\\omega^2 x",
+      "derivation": "වස්තුවක ත්වරණය (a), එහි විස්ථාපනයට (x) සෘජුව සමානුපාතික වන අතර සෑම විටම මධ්‍ය ලක්ෂ්‍යය දෙසට යොමු වී පවතී නම් එම චලනය සරල හාර්මොනික චලනයකි.",
+      "vars": [
+        { "s": "a", "d": "ත්වරණය (m s⁻²)" },
+        { "s": "ω", "d": "කෝණීය සංඛ්‍යාතය (rad s⁻¹)" },
+        { "s": "x", "d": "මධ්‍ය ලක්ෂ්‍යයේ සිට විස්ථාපනය (m)" }
+      ],
+      "calc": {
+        "label": "SHM ත්වරණය ගණනය",
+        "inputs": [
+          { "id": "omega", "label": "ω (rad/s)" },
+          { "id": "x", "label": "x (m)" }
+        ],
+        "formula": "-(Math.pow(parseFloat(omega), 2)) * parseFloat(x)",
+        "unit": "m/s²",
+        "resultLabel": "a"
+      }
+    },
+    {
+      "name": "සරල හාර්මොනික චලනය (SHM) — වේගය",
+      "formula": "v = \\pm\\,\\omega\\sqrt{A^2 - x^2}",
+      "derivation": "සරල හාර්මොනික චලනයේ යෙදෙන වස්තුවක ශක්ති සංරක්ෂණ නියමය යෙදීමෙන් මෙම ප්‍රකාශනය ව්‍යුත්පන්න කෙරේ. ආයාමය (A) යනු මධ්‍ය ලක්ෂ්‍යයේ සිට ගනු ලබන උපරිම විස්ථාපනයයි. x = 0 වූ විට v උපරිම අගය (±ωA) ගනු ලබන අතර, x = ±A වූ විට v = 0 වේ. ± ලකුණ මගින් ධනාත්මක හා ඍණාත්මක යන දිශා දෙකෙහිම වේගය සම්භව්‍ය බව දක්වයි.",
+      "vars": [
+        { "s": "v", "d": "ක්ෂණික වේගය (m s⁻¹)" },
+        { "s": "ω", "d": "කෝණීය සංඛ්‍යාතය (rad s⁻¹)" },
+        { "s": "A", "d": "ආයාමය — උපරිම විස්ථාපනය (m)" },
+        { "s": "x", "d": "මධ්‍ය ලක්ෂ්‍යයේ සිට විස්ථාපනය (m)" }
+      ],
+      "calc": {
+        "label": "SHM වේගය ගණනය",
+        "inputs": [
+          { "id": "omega", "label": "ω (rad/s)" },
+          { "id": "A", "label": "A — ආයාමය (m)" },
+          { "id": "x", "label": "x (m)" }
+        ],
+        "formula": "parseFloat(omega) * Math.sqrt(Math.pow(parseFloat(A), 2) - Math.pow(parseFloat(x), 2))",
+        "unit": "m/s",
+        "resultLabel": "v"
+      }
+    },
+    {
+      "name": "සරල ලෝලකයක කාල ආවර්තය",
+      "formula": "T = 2\\pi\\sqrt{\\frac{l}{g}}",
+      "derivation": "කුඩා කෝණික විස්ථාපනයන් සඳහා (θ < 10°), සරල ලෝලකයක කාල ආවර්තය එහි දිගෙහි වර්ගමූලයට සෘජුව සමානුපාතික වන අතර ගුරුත්ව ත්වරණයේ වර්ගමූලයට ප්‍රතිලෝමව සමානුපාතික වේ.",
+      "vars": [
+        { "s": "T", "d": "කාල ආවර්තය (s)" },
+        { "s": "l", "d": "ලෝලකයේ දිග (m)" },
+        { "s": "g", "d": "ගුරුත්ව ත්වරණය (m s⁻²)" }
+      ],
+      "calc": {
+        "label": "සරල ලෝලක කාල ආවර්තය ගණනය",
+        "inputs": [
+          { "id": "l", "label": "l (m)" },
+          { "id": "g", "label": "g (m/s²)", "placeholder": "9.81" }
+        ],
+        "formula": "2 * Math.PI * Math.sqrt(parseFloat(l) / parseFloat(g))",
+        "unit": "s",
+        "resultLabel": "T"
+      }
+    },
+    {
+      "name": "තරංග ප්‍රවේගය",
+      "formula": "v = f\\lambda",
+      "derivation": "තරංගයක ප්‍රවේගය (v), එහි සංඛ්‍යාතය (f) සහ තරංග ආයාමය (λ) අතර ගුණිතයට සමාන වේ. මෙය සියලුම තරංග සඳහා පොදු සූත්‍රයකි.",
+      "vars": [
+        { "s": "v", "d": "තරංග ප්‍රවේගය (m s⁻¹)" },
+        { "s": "f", "d": "සංඛ්‍යාතය (Hz)" },
+        { "s": "λ", "d": "තරංග ආයාමය (m)" }
+      ],
+      "calc": {
+        "label": "තරංග ප්‍රවේගය ගණනය",
+        "inputs": [
+          { "id": "f", "label": "f (Hz)" },
+          { "id": "lam", "label": "λ (m)" }
+        ],
+        "formula": "parseFloat(f) * parseFloat(lam)",
+        "unit": "m/s",
+        "resultLabel": "v"
+      }
+    },
+    {
+      "name": "ධ්වනි තීව්‍රතාව (Sound Intensity)",
+      "formula": "I = \\frac{P}{A}",
+      "derivation": "ධ්වනි තීව්‍රතාව (I) යනු ශබ්ද තරංගයක් ව්‍යාප්ත වන දිශාවට ලම්බකව පිහිටි ඒකක වර්ගඵල ප්‍රදේශයක් හරහා ගමන් කරන ශක්ති ප්‍රවාහ අනුපාතයයි. P යනු ශබ්ද ප්‍රභවයේ ශක්ති ක්‍රියාකාරිත්වය (Watt) වන අතර A යනු ශක්තිය ව්‍යාප්ත වන ඵලය (m²) වේ. ශක්තිය සෑම දිශාවකටම සමාන ලෙස විකිරණය වන ගෝලාකාර ඵලයක් සඳහා A = 4πr² ලෙස ගනු ලැබේ.",
+      "vars": [
+        { "s": "I", "d": "ධ්වනි තීව්‍රතාව (W m⁻²)" },
+        { "s": "P", "d": "ශක්ති ක්‍රියාකාරිත්වය (W)" },
+        { "s": "A", "d": "ඵල ප්‍රදේශය (m²)" }
+      ],
+      "calc": {
+        "label": "ධ්වනි තීව්‍රතාව ගණනය",
+        "inputs": [
+          { "id": "P", "label": "P — ශක්ති ක්‍රියාකාරිත්වය (W)" },
+          { "id": "A", "label": "A — ඵල ප්‍රදේශය (m²)" }
+        ],
+        "formula": "parseFloat(P) / parseFloat(A)",
+        "unit": "W/m²",
+        "resultLabel": "I"
+      }
+    },
+    {
+      "name": "ධ්වනි තීව්‍රතා මට්ටම (Sound Intensity Level)",
+      "formula": "\\beta = 10\\log_{10}\\!\\left(\\frac{I}{I_0}\\right)",
+      "derivation": "මානව ශ්‍රවණය ලොගරිතමික ස්වරූපයෙන් ක්‍රියා කරන බැවින්, ධ්වනි තීව්‍රතා මට්ටම (β) ශ්‍රව්‍යතා සීමාව (I₀ = 10⁻¹² W m⁻²) හා සාපේක්ෂව ලොගරිතමික පරිමාණයෙන් ප්‍රකාශ කෙරේ. ශ්‍රව්‍යතා සීමාව (I₀) යනු සාමාන්‍ය මානව කණකට 1000 Hz සංඛ්‍යාතයේදී ශ්‍රවණය කළ හැකි අවම ධ්වනි තීව්‍රතාවය වේ. ප්‍රතිඵලය ඩෙසිබල් (dB) ඒකකවලින් ලැබේ.",
+      "vars": [
+        { "s": "β", "d": "ධ්වනි තීව්‍රතා මට්ටම (dB)" },
+        { "s": "I", "d": "ධ්වනි තීව්‍රතාව (W m⁻²)" },
+        { "s": "I₀", "d": "ශ්‍රව්‍යතා සීමාව — නියතය: 10⁻¹² W m⁻²" }
+      ],
+      "calc": {
+        "label": "ධ්වනි තීව්‍රතා මට්ටම ගණනය",
+        "inputs": [
+          { "id": "I", "label": "I — ධ්වනි තීව්‍රතාව (W/m²)" }
+        ],
+        "formula": "10 * Math.log10(parseFloat(I) / 1e-12)",
+        "unit": "dB",
+        "resultLabel": "β"
+      }
+    },
+    {
+      "name": "ඩොප්ලර් ආචරණය",
+      "formula": "f' = f\\left(\\frac{v \\pm v_o}{v \\mp v_s}\\right)",
+      "derivation": "තරංග ප්‍රභවය සහ නිරීක්ෂකයා අතර පවතින සාපේක්ෂ චලිතය හේතුවෙන් නිරීක්ෂකයාට ඇසෙන සංඛ්‍යාතයේ සිදුවන වෙනස් වීම ඩොප්ලර් ආචරණයයි.",
+      "vars": [
+        { "s": "f'", "d": "නිරීක්ෂිත සංඛ්‍යාතය (Hz)" },
+        { "s": "f", "d": "ප්‍රභවයේ සංඛ්‍යාතය (Hz)" },
+        { "s": "v", "d": "මාධ්‍යයේ තරංග ප්‍රවේගය (m s⁻¹)" },
+        { "s": "vo", "d": "නිරීක්ෂකයාගේ ප්‍රවේගය (m s⁻¹)" },
+        { "s": "vs", "d": "ප්‍රභවයේ ප්‍රවේගය (m s⁻¹)" }
+      ],
+      "calc": {
+        "label": "නිරීක්ෂිත සංඛ්‍යාතය ගණනය",
+        "inputs": [
+          { "id": "f", "label": "f (Hz)" },
+          { "id": "v", "label": "v (m/s)", "placeholder": "330" },
+          { "id": "vo", "label": "vo (m/s)" },
+          { "id": "vs", "label": "vs (m/s)" }
+        ],
+        "formula": "parseFloat(f) * (parseFloat(v) + parseFloat(vo)) / (parseFloat(v) - parseFloat(vs))",
+        "unit": "Hz",
+        "resultLabel": "f'"
+      }
+    },
+    {
+      "name": "ස්ථාවර තරංග — තන්තු (Harmonics)",
+      "formula": "f_n = \\frac{nv}{2L}",
+      "derivation": "දෙකෙළවර සිර කළ තන්තුවක ඇතිවන ස්ථාවර තරංගවල n වන අනුවාතයේ (harmonic) සංඛ්‍යාතය f_n = nv/2L මගින් ලබා දේ. මූලික ස්වරය සඳහා n = 1 වේ.",
+      "vars": [
+        { "s": "L", "d": "තන්තුවේ දිග (m)" },
+        { "s": "n", "d": "අනුවාත අංකය (1, 2, 3...)" },
+        { "s": "v", "d": "තන්තුව මත තරංග ප්‍රවේගය (m s⁻¹)" }
+      ],
+      "calc": {
+        "label": "සංඛ්‍යාතය ගණනය",
+        "inputs": [
+          { "id": "n", "label": "n (harmonic)" },
+          { "id": "v", "label": "v (m/s)" },
+          { "id": "L", "label": "L (m)" }
+        ],
+        "formula": "parseFloat(n) * parseFloat(v) / (2 * parseFloat(L))",
+        "unit": "Hz",
+        "resultLabel": "fn"
+      }
+    }
+  ]
+  },
+  {
+  "si": "තාප භෞතික විද්‍යාව",
+  "en": "Heat (Thermal Physics)",
+  "equations": [
+    {
+      "name": "නිශ්චිත තාප ධාරිතාව",
+      "formula": "Q = mc\\Delta T",
+      "derivation": "ද්‍රව්‍යයකට සැපයූ තාප ශක්තිය Q, ස්කන්ධය m හා උෂ්ණත්ව වෙනස ΔT යන දෙකටම සමානුපාතික ය: Q ∝ mΔT. සමානුපාත නියතය ලෙස නිශ්චිත තාප ධාරිතාව c = Q/(mΔT) ලෙස නිර්වචනය කෙරේ. c හි ඒකක J kg⁻¹ K⁻¹ වේ.",
+      "vars": [
+        { "s": "Q", "d": "තාප ශක්තිය (J)" },
+        { "s": "m", "d": "ස්කන්ධය (kg)" },
+        { "s": "c", "d": "නිශ්චිත තාප ධාරිතාව (J kg⁻¹ K⁻¹)" },
+        { "s": "ΔT", "d": "උෂ්ණත්ව වෙනස (K)" }
+      ],
+      "calc": {
+        "label": "Q ගණකය",
+        "inputs": [
+          { "id": "m", "label": "m (kg)" },
+          { "id": "c", "label": "c (J kg⁻¹ K⁻¹)" },
+          { "id": "dT", "label": "ΔT (K)" }
+        ],
+        "formula": "parseFloat(m)*parseFloat(c)*parseFloat(dT)",
+        "unit": "J",
+        "resultLabel": "Q"
+      }
+    },
+    {
+  "name": "නිව්ටන්ගේ සිසිලන නියමය",
+  "formula": "\\frac{dQ}{dt} = k(T - T_s)",
+  "derivation": "උණුසුම් වස්තුවකින් තාපය පිටවීමේ සීඝ්‍රතාව (dQ/dt), එම වස්තුවේ උෂ්ණත්වය (T) සහ පරිසර උෂ්ණත්වය (T_s) අතර වෙනසට සමානුපාතික වේ: dQ/dt ∝ (T - T_s). මෙහි k යනු වස්තුවේ මතුපිට ස්වභාවය සහ වර්ගඵලය මත රඳා පවතින සමානුපාත නියතයකි.",
+  "vars": [
+    { "s": "dQ/dt", "d": "තාපය පිටවීමේ සීඝ්‍රතාව (W හෝ J s⁻¹)" },
+    { "s": "k", "d": "සිසිලන නියතය (W K⁻¹)" },
+    { "s": "T", "d": "වස්තුවේ උෂ්ණත්වය (K හෝ °C)" },
+    { "s": "T_s", "d": "පරිසර උෂ්ණත්වය (K හෝ °C)" }
+  ],
+  "calc": {
+    "label": "තාපය පිටවීමේ සීඝ්‍රතාව ගණකය",
+    "inputs": [
+      { "id": "k", "label": "k (W K⁻¹)" },
+      { "id": "T", "label": "T (K හෝ °C)" },
+      { "id": "Ts", "label": "T_s (K හෝ °C)" }
+    ],
+    "formula": "parseFloat(k) * (parseFloat(T) - parseFloat(Ts))",
+    "unit": "W",
+    "resultLabel": "dQ/dt"
+  }
+  },
+    {
+      "name": "නිශ්චිත ගුප්ත තාපය (Specific Latent Heat)",
+      "formula": "Q = mL",
+      "derivation": "අවස්ථා වෙනසේදී (phase change) උෂ්ණත්වය නියතව පවතී; සැපයූ සියලු ශක්තිය අණු අතර බැඳීම් බිඳීමට හෝ ඇතිකිරීමට යොදා ගැනේ. නිශ්චිත ගුප්ත තාපය L = Q/m ලෙස නිර්වචනය වේ. ද්‍රවීකරණ ගුප්ත තාපය (Lf) හා වාෂ්පීකරණ ගුප්ත තාපය (Lv) අගයන් ද්‍රව්‍ය අනුව වෙනස් වේ.",
+      "vars": [
+        { "s": "Q", "d": "තාප ශක්තිය (J)" },
+        { "s": "m", "d": "ස්කන්ධය (kg)" },
+        { "s": "L", "d": "නිශ්චිත ගුප්ත තාපය (J kg⁻¹)" }
+      ],
+      "calc": {
+        "label": "ගුප්ත තාප ගණකය",
+        "inputs": [
+          { "id": "m", "label": "m (kg)" },
+          { "id": "L", "label": "L (J kg⁻¹)" }
+        ],
+        "formula": "parseFloat(m)*parseFloat(L)",
+        "unit": "J",
+        "resultLabel": "Q"
+      }
+    },
+    {
+      "name": "බොයිල්ගේ නියමය (Boyle's Law)",
+      "formula": "pV = \\text{නියතයකි} \\quad \\Rightarrow \\quad p_1 V_1 = p_2 V_2",
+      "derivation": "ස්ථිර උෂ්ණත්වයේදී (isothermal process) නියත ස්කන්ධයක් සහිත ආදර්ශ වායුවක පීඩනය එහි පරිමාවට ප්‍රතිලෝමව සමානුපාතික වේ: p ∝ 1/V. එනිසා p₁V₁ = p₂V₂ ලෙස ලිවිය හැකිය. ගතිජ-අණු මාදිලිය අනුව, ස්ථිර T දී අණු ගතිශක්තිය නියතව, බිත්ති හා සිදු කෙරෙන ගැටීම් වාරගණන පරිමාව සමඟ වෙනස් වේ.",
+      "vars": [
+        { "s": "p", "d": "වායු පීඩනය (Pa)" },
+        { "s": "V", "d": "පරිමාව (m³)" },
+        { "s": "T", "d": "නිරපේක්ෂ උෂ්ණත්වය — නියතයි (K)" }
+      ],
+      "calc": {
+        "label": "බොයිල් — V₂ ගණකය (p₁V₁ = p₂V₂)",
+        "inputs": [
+          { "id": "p1", "label": "p₁ (Pa)" },
+          { "id": "V1", "label": "V₁ (m³)" },
+          { "id": "p2", "label": "p₂ (Pa)" }
+        ],
+        "formula": "parseFloat(p1)*parseFloat(V1)/parseFloat(p2)",
+        "unit": "m³",
+        "resultLabel": "V₂"
+      }
+    },
+    {
+      "name": "චාල්ස්ගේ නියමය (Charles's Law)",
+      "formula": "\\frac{V}{T} = \\text{නියතයකි} \\quad \\Rightarrow \\quad \\frac{V_1}{T_1} = \\frac{V_2}{T_2}",
+      "derivation": "ස්ථිර පීඩනයේදී (isobaric process) නියත ස්කන්ධයක් සහිත ආදර්ශ වායුවක පරිමාව නිරපේක්ෂ උෂ්ණත්වයට සෘජුව සමානුපාතික වේ: V ∝ T. එනිසා V₁/T₁ = V₂/T₂ ලෙස ලිවිය හැකිය. ගතිජ-අණු මාදිලිය අනුව, T ඉහළ යාමේදී අණු ගතිශක්තිය වැඩිවී නියත පීඩනය පවත්වා ගැනීමට පරිමාව ප්‍රසාරණය විය යුතු ය.",
+      "vars": [
+        { "s": "V", "d": "පරිමාව (m³)" },
+        { "s": "T", "d": "නිරපේක්ෂ උෂ්ණත්වය (K)" },
+        { "s": "p", "d": "පීඩනය — නියතයි (Pa)" }
+      ],
+      "calc": {
+        "label": "චාල්ස් — V₂ ගණකය (V₁/T₁ = V₂/T₂)",
+        "inputs": [
+          { "id": "V1", "label": "V₁ (m³)" },
+          { "id": "T1", "label": "T₁ (K)" },
+          { "id": "T2", "label": "T₂ (K)" }
+        ],
+        "formula": "parseFloat(V1)*parseFloat(T2)/parseFloat(T1)",
+        "unit": "m³",
+        "resultLabel": "V₂"
+      }
+    },
+    {
+      "name": "ගේ-ලූසාක්ගේ නියමය / පීඩන නියමය (Gay-Lussac's Law)",
+      "formula": "\\frac{p}{T} = \\text{නියතයකි} \\quad \\Rightarrow \\quad \\frac{p_1}{T_1} = \\frac{p_2}{T_2}",
+      "derivation": "ස්ථිර පරිමාවකදී (isochoric process) නියත ස්කන්ධයක් සහිත ආදර්ශ වායුවක පීඩනය නිරපේක්ෂ උෂ්ණත්වයට සෘජුව සමානුපාතික වේ: p ∝ T. එනිසා p₁/T₁ = p₂/T₂ ලෙස ලිවිය හැකිය. ගතිජ-අණු මාදිලිය අනුව, T ඉහළ යාමේදී අණු ගතිශක්තිය වැඩිවී, නියත V දී බිත්ති මත ගැටීම් බලය ඉහළ යයි.",
+      "vars": [
+        { "s": "p", "d": "වායු පීඩනය (Pa)" },
+        { "s": "T", "d": "නිරපේක්ෂ උෂ්ණත්වය (K)" },
+        { "s": "V", "d": "පරිමාව — නියතයි (m³)" }
+      ],
+      "calc": {
+        "label": "ගේ-ලූසාක් — p₂ ගණකය (p₁/T₁ = p₂/T₂)",
+        "inputs": [
+          { "id": "p1", "label": "p₁ (Pa)" },
+          { "id": "T1", "label": "T₁ (K)" },
+          { "id": "T2", "label": "T₂ (K)" }
+        ],
+        "formula": "parseFloat(p1)*parseFloat(T2)/parseFloat(T1)",
+        "unit": "Pa",
+        "resultLabel": "p₂"
+      }
+    },
+    {
+      "name": "ආදර්ශ වායු නියමය",
+      "formula": "pV = nRT \\quad (\\text{හෝ} \\quad pV = NkT)",
+      "derivation": "බොයිල්ගේ (pV = නියත; T ස්ථිර), චාල්ස්ගේ (V/T = නියත; p ස්ථිර) හා ගේ-ලූසාක්ගේ (p/T = නියත; V ස්ථිර) නියම ඒකාබද්ධ කිරීමෙන් pV/T = නියත ලෙස ලැබේ. n mol ප්‍රමාණය සඳහා pV = nRT; N අණු ගණන සඳහා pV = NkT. විශ්වීය වායු නියතය R = 8.314 J mol⁻¹ K⁻¹; බොල්ට්ස්මාන් නියතය k = 1.38×10⁻²³ J K⁻¹.",
+      "vars": [
+        { "s": "p", "d": "පීඩනය (Pa)" },
+        { "s": "V", "d": "පරිමාව (m³)" },
+        { "s": "n", "d": "mol ප්‍රමාණය (mol)" },
+        { "s": "R", "d": "විශ්වීය වායු නියතය: 8.314 J mol⁻¹ K⁻¹" },
+        { "s": "T", "d": "නිරපේක්ෂ උෂ්ණත්වය (K)" },
+        { "s": "N", "d": "අණු ගණන" },
+        { "s": "k", "d": "බොල්ට්ස්මාන් නියතය: 1.38×10⁻²³ J K⁻¹" }
+      ],
+      "calc": {
+        "label": "ආදර්ශ වායු — p ගණකය",
+        "inputs": [
+          { "id": "n", "label": "n (mol)" },
+          { "id": "T", "label": "T (K)" },
+          { "id": "V", "label": "V (m³)" }
+        ],
+        "formula": "parseFloat(n)*8.314*parseFloat(T)/parseFloat(V)",
+        "unit": "Pa",
+        "resultLabel": "p"
+      }
+    },
+    {
+      "name": "තාප ගතිකයේ පළමු නියමය",
+      "formula": "\\Delta U = Q - W",
+      "derivation": "ශක්ති සංරක්ෂණ මූලධර්මයේ තාප ගතික ප්‍රකාශනය: පද්ධතියේ අභ්‍යන්තර ශක්තිය වෙනස (ΔU) = පද්ධතියට එකතු කළ තාපය (Q) − පද්ධතිය විසින් පරිසරයට සිදු කළ කාර්යය (W). Q ධනාත්මක වූ විට පද්ධතියට තාපය ලැබෙන අතර W ධනාත්මක වූ විට පද්ධතිය ප්‍රසාරණ කාර්යයක් සිදු කරයි.",
+      "vars": [
+        { "s": "ΔU", "d": "අභ්‍යන්තර ශක්තිය වෙනස (J)" },
+        { "s": "Q", "d": "පද්ධතියට එකතු කළ තාපය (J)" },
+        { "s": "W", "d": "පද්ධතිය විසින් සිදු කළ කාර්යය (J)" }
+      ],
+      "calc": {
+        "label": "ΔU ගණකය",
+        "inputs": [
+          { "id": "Q", "label": "Q (J)" },
+          { "id": "W", "label": "W (J)" }
+        ],
+        "formula": "parseFloat(Q)-parseFloat(W)",
+        "unit": "J",
+        "resultLabel": "ΔU"
+      }
+    },
+    {
+      "name": "වීන්ගේ විස්ථාපන නියමය",
+      "formula": "\\lambda_{\\text{max}} T = 2.898 \\times 10^{-3} \\text{ m·K}",
+      "derivation": "ප්ලාන්ක් ව්‍යාප්ති ශ්‍රිතය (Planck distribution function) තරංග දිග අනුව අවකලනය කොට dP/dλ = 0 තැබීමෙන් ලැබේ. T නිරපේක්ෂ උෂ්ණත්වයක ඇති කෘෂ්ණ වස්තුවකින් නිකුත් වන විද්‍යුත් චුම්බක විකිරණ ස්පෙක්ට්‍රමේ උච්ච තීව්‍රතා ලක්ෂ්‍යයේ තරංග දිග λmax ලෙස හැඳිනේ. T ඉහළ යාමේදී λmax කෙටි වේ (ස්පෙක්ට්‍රමේ නිල් දෙසට විස්ථාපනය).",
+      "vars": [
+        { "s": "λmax", "d": "උච්ච තීව්‍රතා තරංග දිග (m)" },
+        { "s": "T", "d": "නිරපේක්ෂ උෂ්ණත්වය (K)" }
+      ],
+      "calc": {
+        "label": "Wien λmax ගණකය",
+        "inputs": [
+          { "id": "T", "label": "T (K)" }
+        ],
+        "formula": "2.898e-3/parseFloat(T)",
+        "unit": "m",
+        "resultLabel": "λmax"
+      }
+    }
+  ]
+  },
+  {
+    "si": "ධාරා විද්‍යුතය",
+    "en": "Current Electricity",
+    "equations": [
+      {
+        "name": "ඕම්ගේ නියමය",
+        "formula": "V = IR",
+        "derivation": "ස්ථිර උෂ්ණත්වයක පවතින ලෝහමය සන්නායකයක් හරහා ගලන ධාරාව (I), එහි කෙළවරවල් අතර විභව අන්තරයට (V) සෘජුව සමානුපාතික වේ. V = IR.",
+        "vars": [
+          { "s": "V", "d": "විභව අන්තරය (V)" },
+          { "s": "I", "d": "ධාරාව (A)" },
+          { "s": "R", "d": "ප්‍රතිරෝධය (Ω)" }
+        ],
+        "calc": {
+          "label": "ඕම්ගේ නියමය ගණනය",
+          "inputs": [
+            { "id": "I", "label": "I (A)" },
+            { "id": "R", "label": "R (Ω)" }
+          ],
+          "formula": "parseFloat(I)*parseFloat(R)",
+          "unit": "V",
+          "resultLabel": "V"
+        }
+      },
+      {
+        "name": "විද්‍යුත් ක්ෂමතාව",
+        "formula": "P = IV = I^2R = \\frac{V^2}{R}",
+        "derivation": "ක්ෂමතාව යනු කාර්යය කිරීමේ සීඝ්‍රතාවයි (P = W/t). ඕම්ගේ නියමය ඇසුරින් විවිධ ආකාරවලින් ලබාගත හැකිය.",
+        "vars": [
+          { "s": "P", "d": "ක්ෂමතාව (W)" },
+          { "s": "I", "d": "ධාරාව (A)" },
+          { "s": "V", "d": "විභව අන්තරය (V)" }
+        ],
+        "calc": {
+          "label": "විද්‍යුත් ක්ෂමතාව (P = IV)",
+          "inputs": [
+            { "id": "I", "label": "I (A)" },
+            { "id": "V", "label": "V (V)" }
+          ],
+          "formula": "parseFloat(I)*parseFloat(V)",
+          "unit": "W",
+          "resultLabel": "P"
+        }
+      },
+      {
+        "name": "ප්‍රතිරෝධය සහ ප්‍රතිරෝධකතාව",
+        "formula": "R = \\frac{\\rho l}{A}",
+        "derivation": "සන්නායකයක ප්‍රතිරෝධය (R), එහි දිගට (l) සෘජුව සමානුපාතික වන අතර හරස්කඩ වර්ගඵලයට (A) ප්‍රතිලෝමව සමානුපාතික වේ.",
+        "vars": [
+          { "s": "R", "d": "ප්‍රතිරෝධය (Ω)" },
+          { "s": "ρ", "d": "ප්‍රතිරෝධකතාව (Ω m)" },
+          { "s": "l", "d": "දිග (m)" },
+          { "s": "A", "d": "හරස්කඩ වර්ගඵලය (m²)" }
+        ],
+        "calc": {
+          "label": "ප්‍රතිරෝධය ගණනය",
+          "inputs": [
+            { "id": "rho", "label": "ρ (Ω·m)" },
+            { "id": "l", "label": "l (m)" },
+            { "id": "A", "label": "A (m²)" }
+          ],
+          "formula": "parseFloat(rho)*parseFloat(l)/parseFloat(A)",
+          "unit": "Ω",
+          "resultLabel": "R"
+        }
+      },
+      {
+        "name": "කිර්කොෆ්ගේ නියම",
+        "formula": "\\sum I = 0 \\quad;\\quad \\sum E = \\sum IR",
+        "derivation": "පළමු නියමය (KCL): සන්ධියකට ඇතුළු වන ධාරාවල බීජීය එකතුව ශුන්‍ය වේ. දෙවන නියමය (KVL): සංවෘත ලූපයක විද්‍යුත් ගාමක බලවල එකතුව IR ගිලිහීම්වල එකතුවට සමාන වේ.",
+        "vars": [
+          { "s": "ΣI", "d": "ධාරාවල බීජීය එකතුව" },
+          { "s": "ΣE", "d": "වි.ගා.බ. වල එකතුව" }
+        ],
+        "calc": {
+          "label": "සරල ලූපයක ධාරාව (I = E / (R+r))",
+          "inputs": [
+            { "id": "emf", "label": "E (V)" },
+            { "id": "R1", "label": "R (Ω)" },
+            { "id": "r", "label": "r (Ω)" }
+          ],
+          "formula": "parseFloat(emf)/(parseFloat(R1)+parseFloat(r))",
+          "unit": "A",
+          "resultLabel": "I"
+        }
+      },
+      {
+        "name": "වි.ගා.බ. සහ අග්‍රස්ථ විභව අන්තරය",
+        "formula": "E = V + Ir",
+        "derivation": "කෝෂයක අග්‍ර අතර විභව අන්තරය (V), එහි විද්‍යුත් ගාමක බලයෙන් (E) අභ්‍යන්තර ප්‍රතිරෝධය (r) මත සිදුවන විභව බැසීම (Ir) අඩු කළ විට ලැබේ.",
+        "vars": [
+          { "s": "E", "d": "විද්‍යුත් ගාමක බලය (V)" },
+          { "s": "V", "d": "අග්‍රස්ථ විභව අන්තරය (V)" },
+          { "s": "I", "d": "ධාරාව (A)" },
+          { "s": "r", "d": "අභ්‍යන්තර ප්‍රතිරෝධය (Ω)" }
+        ],
+        "calc": {
+          "label": "අග්‍රස්ථ විභව අන්තරය (V) ගණනය",
+          "inputs": [
+            { "id": "emf", "label": "E (V)" },
+            { "id": "I", "label": "I (A)" },
+            { "id": "r", "label": "r (Ω)" }
+          ],
+          "formula": "parseFloat(emf)-parseFloat(I)*parseFloat(r)",
+          "unit": "V",
+          "resultLabel": "V"
+        }
+      },
+      {
+        "name": "සංසාරණ ප්‍රවේගය (Drift Velocity)",
+        "formula": "I = nAve",
+        "derivation": "සන්නායකයක් හරහා ධාරාව (I) ගලා යන විට නිදහස් ඉලෙක්ට්‍රෝන චලනය වන සාමාන්‍ය ප්‍රවේගයයි. n = නිදහස් ඉලෙක්ට්‍රෝන ඝනත්වය, e = ඉලෙක්ට්‍රෝනයක ආරෝපණය.",
+        "vars": [
+          { "s": "I", "d": "ධාරාව (A)" },
+          { "s": "n", "d": "නිදහස් ඉලෙක්ට්‍රෝන ඝනත්වය (m⁻³)" },
+          { "s": "A", "d": "හරස්කඩ වර්ගඵලය (m²)" },
+          { "s": "v", "d": "සංසාරණ ප්‍රවේගය (m/s)" },
+          { "s": "e", "d": "ඉලෙක්ට්‍රෝනයක ආරෝපණය (1.6x10⁻¹⁹ C)" }
+        ],
+        "calc": {
+          "label": "සංසාරණ ප්‍රවේගය ගණනය",
+          "inputs": [
+            { "id": "I", "label": "I (A)" },
+            { "id": "n", "label": "n (m⁻³)" },
+            { "id": "A", "label": "A (m²)" }
+          ],
+          "formula": "parseFloat(I)/(parseFloat(n)*parseFloat(A)*1.6e-19)",
+          "unit": "m/s",
+          "resultLabel": "v"
+        }
+      }
+    ]
+  },
+  {
+  "si": "චුම්බක ක්ෂේත්‍ර",
+  "en": "Magnetic Fields",
+  "equations": [
+    {
+      "name": "චලනය වන ආරෝපයකට චුම්බක බලය",
+      "formula": "F = Bqv\\sin\\theta",
+      "derivation": "Lorentz බල නියමය: F = q(v × B). විශාලත්වය: F = qvB sinθ. දිශාව: දකුණු අත් නියමය / ෆ්ලෙමින්ගේ වම් අත් නියමය (RHR / Fleming's LHR) භාවිතයෙන් තීරණය කෙරේ.",
+      "vars": [
+        {
+          "s": "F",
+          "d": "චුම්බක බලය (N)"
+        },
+        {
+          "s": "B",
+          "d": "චුම්බක ස්‍රාව ඝනත්වය (T)"
+        },
+        {
+          "s": "q",
+          "d": "ආරෝපය (C)"
+        },
+        {
+          "s": "v",
+          "d": "ප්‍රවේගය (m/s)"
+        },
+        {
+          "s": "θ",
+          "d": "ප්‍රවේගය (v) හා චුම්බක ස්‍රාව ඝනත්වය (B) අතර කෝණය"
+        }
+      ],
+      "calc": {
+        "label": "චුම්බක බල ගණකය",
+        "inputs": [
+          {
+            "id": "B",
+            "label": "B (T)"
+          },
+          {
+            "id": "q",
+            "label": "q (C)"
+          },
+          {
+            "id": "v",
+            "label": "v (m/s)"
+          },
+          {
+            "id": "theta",
+            "label": "θ (°)",
+            "placeholder": "90"
+          }
+        ],
+        "formula": "parseFloat(B)*Math.abs(parseFloat(q))*parseFloat(v)*Math.sin(parseFloat(theta||90)*Math.PI/180)",
+        "unit": "N",
+        "resultLabel": "|F|"
+      }
+    },
+    {
+      "name": "ධාරා ගෙන යන සන්නායකයකට චුම්බක බලය",
+      "formula": "F = BIl\\sin\\theta",
+      "derivation": "dF = I(dl × B). සරල සන්නායකය සඳහා දිග l: F = BIl sinθ. ෆ්ලෙමින්ගේ වම් අත් නියමය (Fleming's Left Hand Rule) මගින් බලයේ දිශාව ලබා දේ.",
+      "vars": [
+        {
+          "s": "F",
+          "d": "බලය (N)"
+        },
+        {
+          "s": "B",
+          "d": "චුම්බක ස්‍රාව ඝනත්වය (T)"
+        },
+        {
+          "s": "I",
+          "d": "ධාරාව (A)"
+        },
+        {
+          "s": "l",
+          "d": "දිග (m)"
+        },
+        {
+          "s": "θ",
+          "d": "ධාරාව (I) හා චුම්බක ස්‍රාව ඝනත්වය (B) අතර කෝණය"
+        }
+      ],
+      "calc": {
+        "label": "සන්නායක බල ගණකය",
+        "inputs": [
+          {
+            "id": "B",
+            "label": "B (T)"
+          },
+          {
+            "id": "I",
+            "label": "I (A)"
+          },
+          {
+            "id": "l",
+            "label": "l (m)"
+          },
+          {
+            "id": "theta",
+            "label": "θ (°)",
+            "placeholder": "90"
+          }
+        ],
+        "formula": "parseFloat(B)*parseFloat(I)*parseFloat(l)*Math.sin(parseFloat(theta||90)*Math.PI/180)",
+        "unit": "N",
+        "resultLabel": "F"
+      }
+    },
+    {
+      "name": "චුම්බක ස්‍රාවය",
+      "formula": "\\Phi = BA\\cos\\theta",
+      "derivation": "Φ = B⃗·A⃗ (අන්‍යෝන්‍ය ගුණිතය). θ යනු චුම්බක ස්‍රාව ඝනත්වය (B) සහ තලයට ඇඳි අභිලම්භය අතර කෝණයයි. θ = 0° වූ විට Φ = BA (උපරිම ස්‍රාවය). ඒකකය: Weber (Wb) = T·m².",
+      "vars": [
+        {
+          "s": "Φ",
+          "d": "චුම්බක ස්‍රාවය (Wb)"
+        },
+        {
+          "s": "B",
+          "d": "චුම්බක ස්‍රාව ඝනත්වය (T)"
+        },
+        {
+          "s": "A",
+          "d": "වර්ගඵලය (m²)"
+        },
+        {
+          "s": "θ",
+          "d": "චුම්බක ස්‍රාව ඝනත්වය (B) හා තලයට ඇඳි අභිලම්භය අතර කෝණය"
+        }
+      ],
+      "calc": {
+        "label": "චුම්බක ස්‍රාව ගණකය",
+        "inputs": [
+          {
+            "id": "B",
+            "label": "B (T)"
+          },
+          {
+            "id": "A",
+            "label": "A (m²)"
+          },
+          {
+            "id": "theta",
+            "label": "θ (°)",
+            "placeholder": "0"
+          }
+        ],
+        "formula": "parseFloat(B)*parseFloat(A)*Math.cos(parseFloat(theta||0)*Math.PI/180)",
+        "unit": "Wb",
+        "resultLabel": "Φ"
+      }
+    },
+    {
+      "name": "ෆැරඩේගේ ප්‍රේරණ නියමය",
+      "formula": "\\varepsilon = -N\\frac{d\\Phi}{dt}",
+      "derivation": "Faraday (1831): කුණ්ඩලයක ප්‍රේරිත EMF එක, එහි චුම්බක ස්‍රාවය කාලය සමඟ වෙනස් වන වේගයට සමානුපාතික වේ. Lenz ගේ නීතිය → ඍණ ලකුණ (ප්‍රේරිත EMF, ස්‍රාව වෙනසට එරෙහිව ක්‍රියා කරයි).",
+      "vars": [
+        {
+          "s": "ε",
+          "d": "ප්‍රේරිත EMF (V)"
+        },
+        {
+          "s": "N",
+          "d": "කුණ්ඩලයේ වාරික සංඛ්‍යාව"
+        },
+        {
+          "s": "dΦ/dt",
+          "d": "චුම්බක ස්‍රාවය කාලය සමඟ වෙනස් වන වේගය (Wb/s)"
+        }
+      ],
+      "calc": {
+        "label": "ප්‍රේරිත EMF ගණකය",
+        "inputs": [
+          {
+            "id": "N",
+            "label": "N (turns)"
+          },
+          {
+            "id": "dPhi",
+            "label": "ΔΦ (Wb)"
+          },
+          {
+            "id": "dt",
+            "label": "Δt (s)"
+          }
+        ],
+        "formula": "-(parseFloat(N)*parseFloat(dPhi)/parseFloat(dt))",
+        "unit": "V",
+        "resultLabel": "ε"
+      }
+    },
+    {
+      "name": "පරිණාමකයේ සමීකරණය",
+      "formula": "\\frac{V_p}{V_s} = \\frac{N_p}{N_s} = \\frac{I_s}{I_p}",
+      "derivation": "ආදර්ශ (ideal) පරිණාමකය: ප්‍රාථමික හා ද්විතීයික කුණ්ඩල අතර සම්පූර්ණ අන්‍යෝන්‍ය ප්‍රේරණය සිදු වේ. Vp/Vs = Np/Ns (EMF අනුපාතය). ශක්ති සංරක්ෂණයෙන්: VpIp = VsIs.",
+      "vars": [
+        {
+          "s": "Vp, Vs",
+          "d": "ප්‍රාථමික / ද්විතීයික කුණ්ඩලයේ විභවාන්තරය (V)"
+        },
+        {
+          "s": "Np, Ns",
+          "d": "ප්‍රාථමික / ද්විතීයික කුණ්ඩලයේ වාරික සංඛ්‍යාව"
+        },
+        {
+          "s": "Ip, Is",
+          "d": "ප්‍රාථමික / ද්විතීයික කුණ්ඩලයේ ධාරාව (A)"
+        }
+      ],
+      "calc": {
+        "label": "Transformer Vs ගණකය",
+        "inputs": [
+          {
+            "id": "Vp",
+            "label": "Vp (V)"
+          },
+          {
+            "id": "Np",
+            "label": "Np"
+          },
+          {
+            "id": "Ns",
+            "label": "Ns"
+          }
+        ],
+        "formula": "parseFloat(Vp)*parseFloat(Ns)/parseFloat(Np)",
+        "unit": "V",
+        "resultLabel": "Vs"
+      }
+    },
+    {
+      "name": "දිගු සරල සන්නායකයක් — B ක්ෂේත්‍රය",
+      "formula": "B = \\frac{\\mu_0 I}{2\\pi r}",
+      "derivation": "Ampere ගේ නීතිය: ∮B·dl = μ₀I. සන්නායකයට ආසන්නව ඇති r අරය සහිත වෘත්තාකාර Ampere මාර්ගයක් සලකා: B·2πr = μ₀I. μ₀ = 4π×10⁻⁷ T·m/A (නිර්වාත චුම්බකීය පාරගම්‍යතාව).",
+      "vars": [
+        {
+          "s": "B",
+          "d": "චුම්බක ස්‍රාව ඝනත්වය (T)"
+        },
+        {
+          "s": "μ₀",
+          "d": "නිර්වාත චුම්බකීය පාරගම්‍යතාව: 4π×10⁻⁷ T·m/A"
+        },
+        {
+          "s": "I",
+          "d": "සන්නායකයේ ධාරාව (A)"
+        },
+        {
+          "s": "r",
+          "d": "සන්නායකයේ සිට මනිනු ලබන දුර (m)"
+        }
+      ],
+      "calc": {
+        "label": "Wire B field ගණකය",
+        "inputs": [
+          {
+            "id": "I",
+            "label": "I (A)"
+          },
+          {
+            "id": "r",
+            "label": "r (m)"
+          }
+        ],
+        "formula": "(4*Math.PI*1e-7*parseFloat(I))/(2*Math.PI*parseFloat(r))",
+        "unit": "T",
+        "resultLabel": "B"
+        }
+      }
+    ]
+  },
+  {
+    "si": "ගුරුත්වාකර්ෂණ ක්ෂේත්‍ර",
+    "en": "Gravitational Fields",
+    "equations": [
+      {
+        "name": "නිව්ටන්ගේ විශ්ව ගුරුත්වාකර්ෂණ නියමය",
+        "formula": "F = \\frac{Gm_1 m_2}{r^2}",
+        "derivation": "විශ්වයේ ඕනෑම ස්කන්ධ දෙකක් අතර ක්‍රියා කරන ආකර්ෂණ බලය, ස්කන්ධවල ගුණිතයට සෘජුව සමානුපාතික වන අතර ඒවා අතර දුරෙහි වර්ගයට ප්‍රතිලෝමව සමානුපාතික වේ. F ∝ m₁m₂/r².",
+        "vars": [
+          {
+            "s": "F",
+            "d": "ගුරුත්වාකර්ෂණ බලය (N)"
+          },
+          {
+            "s": "G",
+            "d": "6.674×10⁻¹¹ N m² kg⁻² (විශ්ව ගුරුත්ව නියතය)"
+          },
+          {
+            "s": "m1, m2",
+            "d": "ස්කන්ධ (kg)"
+          },
+          {
+            "s": "r",
+            "d": "ස්කන්ධ කේන්ද්‍ර අතර දුර (m)"
+          }
+        ],
+        "calc": {
+          "label": "ගුරුත්වාකර්ෂණ බලය ගණනය",
+          "inputs": [
+            { "id": "m1", "label": "m1 (kg)" },
+            { "id": "m2", "label": "m2 (kg)" },
+            { "id": "r", "label": "r (m)" }
+          ],
+          "formula": "6.674e-11 * parseFloat(m1) * parseFloat(m2) / Math.pow(parseFloat(r), 2)",
+          "unit": "N",
+          "resultLabel": "F"
+        }
+      },
+      {
+        "name": "ගුරුත්ව ක්ෂේත්‍ර තීව්‍රතාව",
+        "formula": "g = \\frac{GM}{r^2}",
+        "derivation": "ගුරුත්ව ක්ෂේත්‍රයක යම් ලක්ෂ්‍යයක තැබූ ඒකක ස්කන්ධයක් මත ක්‍රියා කරන ගුරුත්වාකර්ෂණ බලය එම ලක්ෂ්‍යයේ ගුරුත්ව ක්ෂේත්‍ර තීව්‍රතාව (g) වේ. g = F/m.",
+        "vars": [
+          {
+            "s": "g",
+            "d": "ගුරුත්ව ක්ෂේත්‍ර තීව්‍රතාව (N kg⁻¹ හෝ m s⁻²)"
+          },
+          {
+            "s": "M",
+            "d": "ග්‍රහලෝකයේ හෝ වස්තුවේ ස්කන්ධය (kg)"
+          },
+          {
+            "s": "r",
+            "d": "ස්කන්ධ කේන්ද්‍රයේ සිට ඇති දුර (m)"
+          }
+        ],
+        "calc": {
+          "label": "ගුරුත්ව ක්ෂේත්‍ර තීව්‍රතාව (g) ගණනය",
+          "inputs": [
+            { "id": "M", "label": "M (kg)" },
+            { "id": "r", "label": "r (m)" }
+          ],
+          "formula": "6.674e-11 * parseFloat(M) / Math.pow(parseFloat(r), 2)",
+          "unit": "N/kg",
+          "resultLabel": "g"
+        }
+      },
+      {
+        "name": "ගුරුත්ව විභවය",
+        "formula": "V_g = -\\frac{GM}{r}",
+        "derivation": "අනන්තයේ සිට යම් ලක්ෂ්‍යයකට ඒකක ස්කන්ධයක් ගෙන ඒමට ගුරුත්ව බලයට එරෙහිව කළ යුතු කාර්යය එම ලක්ෂ්‍යයේ ගුරුත්ව විභවය (V) වේ. අනන්තයේදී විභවය ශුන්‍ය ලෙස සලකන බැවින් ඕනෑම ලක්ෂ්‍යයකදී විභවය සෘණ අගයක් ගනී.",
+        "vars": [
+          {
+            "s": "Vg",
+            "d": "ගුරුත්ව විභවය (J kg⁻¹)"
+          },
+          {
+            "s": "M",
+            "d": "ස්කන්ධය (kg)"
+          },
+          {
+            "s": "r",
+            "d": "දුර (m)"
+          }
+        ],
+        "calc": {
+          "label": "ගුරුත්ව විභවය ගණනය",
+          "inputs": [
+            { "id": "M", "label": "M (kg)" },
+            { "id": "r", "label": "r (m)" }
+          ],
+          "formula": "-6.674e-11 * parseFloat(M) / parseFloat(r)",
+          "unit": "J/kg",
+          "resultLabel": "Vg"
+        }
+      },
+      {
+        "name": "කක්ෂීය ප්‍රවේගය",
+        "formula": "v = \\sqrt{\\frac{GM}{r}}",
+        "derivation": "වස්තුවක් කක්ෂයක පවත්වා ගැනීමට අවශ්‍ය කේන්ද්‍රාභිමුඛ බලය, එම වස්තුව මත ක්‍රියා කරන ගුරුත්වාකර්ෂණ බලයෙන් සැපයේ. mv²/r = GMm/r².",
+        "vars": [
+          {
+            "s": "v",
+            "d": "කක්ෂීය ප්‍රවේගය (m s⁻¹)"
+          },
+          {
+            "s": "M",
+            "d": "ප්‍රධාන ස්කන්ධය (kg)"
+          },
+          {
+            "s": "r",
+            "d": "කක්ෂයේ අරය (m)"
+          }
+        ],
+        "calc": {
+          "label": "කක්ෂීය ප්‍රවේගය ගණනය",
+          "inputs": [
+            { "id": "M", "label": "M (kg)" },
+            { "id": "r", "label": "r (m)" }
+          ],
+          "formula": "Math.sqrt(6.674e-11 * parseFloat(M) / parseFloat(r))",
+          "unit": "m/s",
+          "resultLabel": "v"
+        }
+      }
+    ]
+  },
+  {
+  "si": "ස්ථිතික විද්‍යුත් ක්ෂේත්‍ර",
+  "en": "Electrostatic Fields",
+  "equations": [
+    {
+      "name": "කූලොම්ගේ නියමය",
+      "formula": "F = \\frac{1}{4\\pi\\varepsilon_0}\\frac{Q_1 Q_2}{r^2}",
+      "derivation": "Coulomb (1785): ලක්ෂ්‍ය ආරෝප දෙකක් අතර ක්‍රියා කරන ස්ථිතික විද්‍යුත් බලය (F), ආරෝපවල ගුණිතයට සෘජුව සමානුපාතික වන අතර ඒවා අතර දුරෙහි වර්ගයට ප්‍රතිලෝමව සමානුපාතික වේ. F ∝ Q₁Q₂/r².",
+      "vars": [
+        {
+          "s": "F",
+          "d": "ස්ථිතික විද්‍යුත් බලය (N)"
+        },
+        {
+          "s": "Q1, Q2",
+          "d": "ආරෝපණ (C)"
+        },
+        {
+          "s": "r",
+          "d": "ආරෝපණ අතර දුර (m)"
+        },
+        {
+          "s": "ε₀",
+          "d": "8.854 × 10⁻¹² F m⁻¹ (නිර්වාතයේ විද්‍යුත් පාරගම්‍යතාව)"
+        }
+      ],
+      "calc": {
+        "label": "ස්ථිතික විද්‍යුත් බලය ගණනය",
+        "inputs": [
+          { "id": "Q1", "label": "Q1 (C)" },
+          { "id": "Q2", "label": "Q2 (C)" },
+          { "id": "r", "label": "r (m)" }
+        ],
+        "formula": "8.99e9 * Math.abs(parseFloat(Q1) * parseFloat(Q2)) / Math.pow(parseFloat(r), 2)",
+        "unit": "N",
+        "resultLabel": "|F|"
+      }
+    },
+    {
+      "name": "විද්‍යුත් ක්ෂේත්‍ර තීව්‍රතාව",
+      "formula": "E = \\frac{F}{q} = \\frac{Q}{4\\pi\\varepsilon_0 r^2}",
+      "derivation": "විද්‍යුත් ක්ෂේත්‍රයක යම් ලක්ෂ්‍යයක තැබූ ඒකක ධන ආරෝපනයක් මත ක්‍රියා කරන බලය එම ලක්ෂ්‍යයේ විද්‍යුත් ක්ෂේත්‍ර තීව්‍රතාව (E) ලෙස හැඳින්වේ.",
+      "vars": [
+        {
+          "s": "E",
+          "d": "විද්‍යුත් ක්ෂේත්‍ර තීව්‍රතාව (N C⁻¹ හෝ V m⁻¹)"
+        },
+        {
+          "s": "Q",
+          "d": "ප්‍රභව ආරෝපණය (C)"
+        },
+        {
+          "s": "r",
+          "d": "ලක්ෂ්‍යයට ඇති දුර (m)"
+        }
+      ],
+      "calc": {
+        "label": "විද්‍යුත් ක්ෂේත්‍ර තීව්‍රතාව ගණනය",
+        "inputs": [
+          { "id": "Q", "label": "Q (C)" },
+          { "id": "r", "label": "r (m)" }
+        ],
+        "formula": "8.99e9 * parseFloat(Q) / Math.pow(parseFloat(r), 2)",
+        "unit": "V/m",
+        "resultLabel": "E"
+      }
+    },
+    {
+      "name": "විද්‍යුත් විභවය",
+      "formula": "V = \\frac{Q}{4\\pi\\varepsilon_0 r}",
+      "derivation": "අනන්තයේ සිට යම් ලක්ෂ්‍යයකට ඒකක ධන ආරෝපනයක් ගෙන ඒමට විද්‍යුත් බලවලට එරෙහිව කළ යුතු කාර්යය එම ලක්ෂ්‍යයේ විද්‍යුත් විභවය (V) වේ.",
+      "vars": [
+        {
+          "s": "V",
+          "d": "විද්‍යුත් විභවය (V)"
+        },
+        {
+          "s": "Q",
+          "d": "ආරෝපණය (C)"
+        },
+        {
+          "s": "r",
+          "d": "ලක්ෂ්‍යයට ඇති දුර (m)"
+        }
+      ],
+      "calc": {
+        "label": "විද්‍යුත් විභවය ගණනය",
+        "inputs": [
+          { "id": "Q", "label": "Q (C)" },
+          { "id": "r", "label": "r (m)" }
+        ],
+        "formula": "8.99e9 * parseFloat(Q) / parseFloat(r)",
+        "unit": "V",
+        "resultLabel": "V"
+      }
+    },
+    {
+      "name": "ධාරිතාව",
+      "formula": "C = \\frac{Q}{V} \\quad;\\quad C = \\frac{\\varepsilon_0 A}{d}",
+      "derivation": "ධාරිත්‍රකයක තැන්පත් ආරෝපණය (Q) එහි තහඩු අතර විභව අන්තරයට (V) දරන අනුපාතය ධාරිතාව (C) ලෙස හැඳින්වේ. සමාන්තර තහඩු සඳහා C = ε₀A/d වේ.",
+      "vars": [
+        {
+          "s": "C",
+          "d": "ධාරිතාව (F)"
+        },
+        {
+          "s": "Q",
+          "d": "ආරෝපණය (C)"
+        },
+        {
+          "s": "V",
+          "d": "විභව අන්තරය (V)"
+        },
+        {
+          "s": "A",
+          "d": "තහඩු හරස්කඩ වර්ගඵලය (m²)"
+        },
+        {
+          "s": "d",
+          "d": "තහඩු අතර පරතරය (m)"
+        }
+      ],
+      "calc": {
+        "label": "සමාන්තර තහඩු ධාරිතාව ගණනය",
+        "inputs": [
+          { "id": "A", "label": "A (m²)" },
+          { "id": "d", "label": "d (m)" }
+        ],
+        "formula": "8.854e-12 * parseFloat(A) / parseFloat(d)",
+        "unit": "F",
+        "resultLabel": "C"
+        }
+      }
+    ]
+  },
+  {
+  "si": "ඉලෙක්ට්‍රොනික විද්‍යාව",
+  "en": "Electronics",
+  "equations": [
+    {
+      "name": "ට්‍රාන්සිස්ටරයේ ධාරා ලාභය (β)",
+      "formula": "\\beta = \\frac{I_C}{I_B} \\quad;\\quad I_E = I_B + I_C",
+      "derivation": "BJT ට්‍රාන්සිස්ටරය: β = hFE = DC ධාරා ලාභය. සංග්‍රාහක ධාරාව (IC) සහ පාද ධාරාව (IB) අතර අනුපාතය DC ධාරා ලාභය ලෙස නිර්වචනය වේ. ට්‍රාන්සිස්ටර් සන්ධිය සඳහා කර්ශොෆ්ගේ ධාරා නියමය (KCL) ප්‍රයෝජනයට ගනිමින්: විමෝචක ධාරාව IE = IB + IC ලෙස ලබා ගනී.",
+      "vars": [
+        {
+          "s": "β",
+          "d": "DC ධාරා ලාභය (නිමාණ රහිත)"
+        },
+        {
+          "s": "IC",
+          "d": "සංග්‍රාහක ධාරාව (A)"
+        },
+        {
+          "s": "IB",
+          "d": "පාද ධාරාව (A)"
+        },
+        {
+          "s": "IE",
+          "d": "විමෝචක ධාරාව (A)"
+        }
+      ],
+      "calc": {
+        "label": "IC ගණකය",
+        "inputs": [
+          {
+            "id": "beta",
+            "label": "β"
+          },
+          {
+            "id": "IB",
+            "label": "IB (A)"
+          }
+        ],
+        "formula": "parseFloat(beta)*parseFloat(IB)",
+        "unit": "A",
+        "resultLabel": "IC"
+      }
+    },
+    {
+      "name": "Op-Amp — ප්‍රතිලෝමී වර්ධකය (Inverting Amplifier)",
+      "formula": "A_v = -\\frac{R_f}{R_{in}}",
+      "derivation": "අතාත්වික භූගත ලක්ෂ්‍යය (V⁻ ≈ 0V) සංකල්පය භාවිතා කෙරේ. ප්‍රතිලෝමී ආදාන පර්යන්තයේ KCL ශ්‍රිතය: Iin = −If, එනම් Vin/Rin = −Vout/Rf. ඒ අනුව වෝල්ටීයතා ලාභය Av = −Rf/Rin ලෙස ලැබේ. ෘණ ලකුණ, ආදාන හා ප්‍රතිදාන සංඥා අතර 180° දශාංශ ප්‍රතිලෝමීකරණය (phase inversion) ඇති බව පෙන්වයි.",
+      "vars": [
+        {
+          "s": "Av",
+          "d": "වෝල්ටීයතා ලාභය (නිමාණ රහිත)"
+        },
+        {
+          "s": "Rf",
+          "d": "ප්‍රතිපෝෂණ ප්‍රතිරෝධය (Ω)"
+        },
+        {
+          "s": "Rin",
+          "d": "ආදාන ප්‍රතිරෝධය (Ω)"
+        }
+      ],
+      "calc": {
+        "label": "ප්‍රතිලෝමී වර්ධකයේ වෝල්ටීයතා ලාභය ගණකය",
+        "inputs": [
+          {
+            "id": "Rf",
+            "label": "Rf (Ω)"
+          },
+          {
+            "id": "Rin",
+            "label": "Rin (Ω)"
+          }
+        ],
+        "formula": "-(parseFloat(Rf)/parseFloat(Rin))",
+        "unit": "",
+        "resultLabel": "Av"
+      }
+    },
+    {
+      "name": "Op-Amp — අප්‍රතිලෝමී වර්ධකය (Non-Inverting Amplifier)",
+      "formula": "A_v = 1 + \\frac{R_f}{R_1}",
+      "derivation": "ආදාන සංඥාව Op-Amp හි ධනාත්මක (+) ආදාන පර්යන්තයට සෘජුව ලබා දෙනු ලැබේ. අතාත්වික භූගත ලක්ෂ්‍යය සංකල්පය අනුව V⁻ = V⁺ = Vin. ප්‍රතිපෝෂණ ජාලය විභව බෙදුමක් (voltage divider) ලෙස ක්‍රියා කරන බැවින්, Av = 1 + Rf/R1 ලෙස වෝල්ටීයතා ලාභය ලබා ගනී. ප්‍රතිලෝමීකරණයක් සිදු නොවේ.",
+      "vars": [
+        {
+          "s": "Av",
+          "d": "වෝල්ටීයතා ලාභය (නිමාණ රහිත)"
+        },
+        {
+          "s": "Rf",
+          "d": "ප්‍රතිපෝෂණ ප්‍රතිරෝධය (Ω)"
+        },
+        {
+          "s": "R1",
+          "d": "භූගත (ground) ප්‍රතිරෝධය (Ω)"
+        }
+      ],
+      "calc": {
+        "label": "අප්‍රතිලෝමී වර්ධකයේ වෝල්ටීයතා ලාභය ගණකය",
+        "inputs": [
+          {
+            "id": "Rf",
+            "label": "Rf (Ω)"
+          },
+          {
+            "id": "R1",
+            "label": "R1 (Ω)"
+          }
+        ],
+        "formula": "1+(parseFloat(Rf)/parseFloat(R1))",
+        "unit": "",
+        "resultLabel": "Av"
+      }
+    },
+    {
+      "name": "Boolean ද්වාර (Logic Gates)",
+      "formula": "Y = A \\cdot B \\;(\\text{AND}) \\quad Y = A + B \\;(\\text{OR}) \\quad Y = \\overline{A} \\;(\\text{NOT})",
+      "derivation": "De Morgan ගේ ප්‍රමේය: NOT(A·B) = NOT(A) + NOT(B) හා NOT(A+B) = NOT(A)·NOT(B). NAND හා NOR ද්වාර විශ්වීය ද්වාර (universal gates) ලෙස හැඳිනේ; ඒවා භාවිතයෙන් ඕනෑම Boolean ශ්‍රිතයක් ක්‍රියාත්මක කළ හැකිය. ද්විමය (binary) 0 සහ 1 අගයන් පිළිවෙළින් අඩු-වෝල්ටීයතා හා ඉහළ-වෝල්ටීයතා තත්ත්ව නියෝජනය කරයි.",
+      "vars": [],
+      "calc": {
+        "label": "NAND ද්වාර ගණකය",
+        "inputs": [
+          {
+            "id": "A",
+            "label": "A (0 හෝ 1)"
+          },
+          {
+            "id": "B",
+            "label": "B (0 හෝ 1)"
+          }
+        ],
+        "formula": "(parseFloat(A)===1 && parseFloat(B)===1) ? 0 : 1",
+        "unit": "",
+        "resultLabel": "NAND ප්‍රතිදානය"
+      }
+    },
+    {
+      "name": "වෝල්ටීයතා බෙදුම / විභව බෙදුම (Voltage Divider)",
+      "formula": "V_{out} = V_{in} \\times \\frac{R_2}{R_1 + R_2}",
+      "derivation": "ශ්‍රේණිය (series) පරිපථයක ඒකම ධාරාව I ගලා යයි. ඕම් නියමයෙන්: I = Vin / (R1 + R2). R2 හරහා ප්‍රතිදාන වෝල්ටීයතාව: Vout = I × R2 = Vin × R2 / (R1 + R2). මෙය විභව බෙදුම් නියමය ලෙසද හැඳිනේ; R2 හරහා ලැබෙන ප්‍රතිදාන වෝල්ටීයතාව ආදාන වෝල්ටීයතාවේ R2/(R1+R2) ගුණිතයකි.",
+      "vars": [
+        {
+          "s": "Vout",
+          "d": "ප්‍රතිදාන වෝල්ටීයතාව (V)"
+        },
+        {
+          "s": "Vin",
+          "d": "ආදාන වෝල්ටීයතාව (V)"
+        },
+        {
+          "s": "R1",
+          "d": "ශ්‍රේණිය ප්‍රතිරෝධය 1 (Ω)"
+        },
+        {
+          "s": "R2",
+          "d": "ශ්‍රේණිය ප්‍රතිරෝධය 2 — ප්‍රතිදාන වෝල්ටීයතාව මෙය හරහා ලැබේ (Ω)"
+        }
+      ],
+      "calc": {
+        "label": "වෝල්ටීයතා බෙදුම ගණකය",
+        "inputs": [
+          {
+            "id": "Vin",
+            "label": "Vin (V)"
+          },
+          {
+            "id": "R1",
+            "label": "R1 (Ω)"
+          },
+          {
+            "id": "R2",
+            "label": "R2 (Ω)"
+          }
+        ],
+        "formula": "parseFloat(Vin) * parseFloat(R2) / (parseFloat(R1) + parseFloat(R2))",
+        "unit": "V",
+        "resultLabel": "Vout"
+      }
+    }
+  ]
+  },
+  {
+    "si": "ද්‍රව්‍යයේ යාන්ත්‍රික ගුණ",
+    "en": "Mechanical Properties of Matter",
+    "equations": [
+      {
+        "name": "ප්‍රතිබලය හා විකෘතිය",
+        "formula": "\\sigma = \\frac{F}{A} \\quad;\\quad \\varepsilon = \\frac{\\Delta l}{l}",
+        "derivation": "ප්‍රතිබලය (stress) = ඒකාංශ හරස්කඩ වර්ගඵලයකට ක්‍රියා කරන බලය. විකෘතිය (strain) = දිග වැඩි වීම හා ආරම්භක දිග අතර අනුපාතය (මාන රහිත). දෙකම ද්‍රව්‍යයේ යාන්ත්‍රික ලක්ෂණ විස්තර කරයි.",
+        "vars": [
+          {
+            "s": "σ",
+            "d": "ප්‍රතිබලය (Pa)"
+          },
+          {
+            "s": "F",
+            "d": "ක්‍රියාකාරී බලය (N)"
+          },
+          {
+            "s": "A",
+            "d": "හරස්කඩ වර්ගඵලය (m²)"
+          },
+          {
+            "s": "ε",
+            "d": "විකෘතිය (මාන රහිත)"
+          },
+          {
+            "s": "Δl",
+            "d": "දිග වැඩි වීම / ප්‍රසාරණය (m)"
+          },
+          {
+            "s": "l",
+            "d": "ආරම්භක දිග (m)"
+          }
+        ],
+        "calc": {
+          "label": "ප්‍රතිබල ගණකය",
+          "inputs": [
+            {
+              "id": "F",
+              "label": "F (N)"
+            },
+            {
+              "id": "A",
+              "label": "A (m²)"
+            }
+          ],
+          "formula": "parseFloat(F)/parseFloat(A)",
+          "unit": "Pa",
+          "resultLabel": "σ"
+        }
+      },
+      {
+  "name": "පොයිසෙල් සමීකරණය (Poiseuille's Equation)",
+  "formula": "V = \\frac{\\pi P a^4}{8 \\eta l}",
+  "derivation": "පොයිසෙල් සමීකරණය තිරස් කේශනාලිකා නළයක් (horizontal capillary tube) හරහා ගලා යන දුස්ස්‍රාවී තරලයක ඒකක කාලයකදී ගලා යන ආයතනය (volume flow rate) විස්තර කරයි. මෙම සමීකරණයට අනුව, තරල ගලා යෑමේ සීඝ්‍රතාව (V) නළයේ දෙකෙළවර පීඩන අන්තරය (P) සහ නළයේ අභ්‍යන්තර අරයේ සතරවන බලය (r⁴) සමඟ අනුලෝමව සම්බන්ධ වේ. එමෙන්ම, දුස්ස්‍රාවිතා සංගුණකය (η) සහ නළයේ දිග (l) සමඟ ප්‍රතිලෝමව සම්බන්ධ වේ. නිව්ටෝනීය දුස්ස්‍රාවී ප්‍රවාහයේ (Newtonian viscous flow) ධාරා ස්ථර ආකෘතිය (laminar flow model) සහ ස්ථිර-තත්ත්ව ප්‍රවාහ (steady-state flow) කොන්දේසි යටතේ මෙම ප්‍රතිඵලය ජීන් ලෙනාඩ් මාරී පොයිසෙල් (Jean Léonard Marie Poiseuille) විසින් ගණිතමය වශයෙන් ස්ථාපිත කරන ලදී.",
+  "vars": [
+    {
+      "s": "V",
+      "d": "ද්‍රව ගලා යෑමේ ආයතන සීඝ්‍රතාව (m³/s)"
+    },
+    {
+      "s": "P",
+      "d": "නළයේ දෙකෙළවර පීඩන අන්තරය (Pa)"
+    },
+    {
+      "s": "r",
+      "d": "නළයේ අභ්‍යන්තර වර්ගඵලය (m)"
+    },
+    {
+      "s": "η",
+      "d": "දුස්ස්‍රාවිතා සංගුණකය (Pa·s)"
+    },
+    {
+      "s": "l",
+      "d": "නළයේ දිග (m)"
+    }
+  ],
+  "calc": {
+    "label": "V ගණකය",
+    "inputs": [
+      {
+        "id": "P",
+        "label": "P (Pa)"
+      },
+      {
+        "id": "r",
+        "label": "r (m)"
+      },
+      {
+        "id": "eta",
+        "label": "η (Pa·s)"
+      },
+      {
+        "id": "l",
+        "label": "l (m)"
+      }
+    ],
+    "formula": "(Math.PI * parseFloat(P) * Math.pow(parseFloat(r), 4)) / (8 * parseFloat(eta) * parseFloat(l))",
+    "unit": "m³/s",
+    "resultLabel": "V"
+  }
+  },
+      {
+        "name": "යං මාපාංකය",
+        "formula": "E = \\frac{\\sigma}{\\varepsilon} = \\frac{Fl}{A\\Delta l}",
+        "derivation": "Hooke ගේ නියමය අනුව ප්‍රත්‍යාස්ථ ප්‍රදේශය තුළ: σ ∝ ε. යං මාපාංකය E යනු ප්‍රතිබලය-විකෘතිය ප්‍රස්ථාරයේ ප්‍රත්‍යාස්ථ ප්‍රදේශයේ අනුක්‍රමණයයි. E ඉහළ අගයක් ගත් ද්‍රව්‍ය, එකම ප්‍රතිබලයකදී අඩු විකෘතියක් දක්වයි.",
+        "vars": [
+          {
+            "s": "E",
+            "d": "යං මාපාංකය (Pa)"
+          },
+          {
+            "s": "σ",
+            "d": "ප්‍රතිබලය (Pa)"
+          },
+          {
+            "s": "ε",
+            "d": "විකෘතිය (මාන රහිත)"
+          },
+          {
+            "s": "F",
+            "d": "ක්‍රියාකාරී බලය (N)"
+          },
+          {
+            "s": "l",
+            "d": "ආරම්භක දිග (m)"
+          },
+          {
+            "s": "A",
+            "d": "හරස්කඩ වර්ගඵලය (m²)"
+          },
+          {
+            "s": "Δl",
+            "d": "දිග වැඩි වීම / ප්‍රසාරණය (m)"
+          }
+        ],
+        "calc": {
+          "label": "යං මාපාංක ගණකය",
+          "inputs": [
+            {
+              "id": "F",
+              "label": "F (N)"
+            },
+            {
+              "id": "l",
+              "label": "l (m)"
+            },
+            {
+              "id": "A",
+              "label": "A (m²)"
+            },
+            {
+              "id": "dl",
+              "label": "Δl (m)"
+            }
+          ],
+          "formula": "parseFloat(F)*parseFloat(l)/(parseFloat(A)*parseFloat(dl))",
+          "unit": "Pa",
+          "resultLabel": "E"
+        }
+      },
+      {
+    "name": "නියුටන්ගේ දුස්ස්‍රාවිතා නියමය",
+    "formula": "F = \\eta A \\frac{dv}{dx}",
+    "derivation": "ද්‍රවයක යාබද තට්ටු දෙකක් අතර ඇති සාපේක්ෂ ලිස්සා යෑමට ප්‍රතිරෝධය දක්වන ස්වභාවය දුස්ස්‍රාවිතාව නම් වේ. නිඋටන්ගේ දුස්ස්‍රාවිතා නියමය අනුව, ද්‍රවයේ ස්තරයක් මත ක්‍රියා කරන දුස්ස්‍රාවිතා බලය (F), ස්තරයේ ඵල ප්‍රදේශයට (A) සහ ප්‍රවේග ප්‍රවණතාවට (dv/dx) සෘජුව සමානුපාතික වේ. මෙහි සමානුපාතික නියතය දුස්ස්‍රාවිතා සංගුණකය (η) වන අතර එහි SI ඒකකය Pascal-second (Pa·s) වේ.",
+    "vars": [
+      { "s": "F", "d": "දුස්ස්‍රාවිතා බලය (N)" },
+      { "s": "η", "d": "දුස්ස්‍රාවිතා සංගුණකය (Pa·s)" },
+      { "s": "A", "d": "ස්තරයේ ඵල ප්‍රදේශය (m²)" },
+      { "s": "dv/dx", "d": "ප්‍රවේග ප්‍රවණතාව (s⁻¹)" }
+    ],
+    "calc": {
+      "label": "දුස්ස්‍රාවිතා බලය ගණනය (නිඋටන්ගේ නියමය)",
+      "inputs": [
+        { "id": "eta", "label": "η — දුස්ස්‍රාවිතා සංගුණකය (Pa·s)" },
+        { "id": "A", "label": "A — ඵල ප්‍රදේශය (m²)" },
+        { "id": "dvdx", "label": "dv/dx — ප්‍රවේග ප්‍රවණතාව (s⁻¹)" }
+      ],
+      "formula": "parseFloat(eta) * parseFloat(A) * parseFloat(dvdx)",
+      "unit": "N",
+      "resultLabel": "F"
+    }
+  },
+  {
+    "name": "ස්ටෝක්ස් නියමය",
+    "formula": "F = 6\\pi\\eta r v",
+    "derivation": "ස්ටෝක්ස් නියමය අනුව, දුස්ස්‍රාවී ද්‍රවයක් තුළ ගෝලාකාර වස්තුවක් ගමන් කරන විට, ඒ මත ක්‍රියා කරන දුස්ස්‍රාවිතා ප්‍රතිරෝධී බලය (F), ද්‍රවයේ දුස්ස්‍රාවිතා සංගුණකයට (η), ගෝලයේ අරයට (r) සහ ගෝලයේ ක්ෂණික ප්‍රවේගයට (v) සෘජුව සමානුපාතික වේ. 6π යනු ගෝලාකාර ජ්‍යාමිතිය සහ ද්‍රව ගතිකය ඒකාබද්ධ කරන ගණිතමය නියතයකි. මෙම බලය සෑම විටම වස්තුවේ ගමන් කරන දිශාවට ප්‍රතිවිරුද්ධව ක්‍රියා කරයි.",
+    "vars": [
+      { "s": "F", "d": "දුස්ස්‍රාවිතා ප්‍රතිරෝධී බලය (N)" },
+      { "s": "η", "d": "දුස්ස්‍රාවිතා සංගුණකය (Pa·s)" },
+      { "s": "r", "d": "ගෝලාකාර වස්තුවේ අරය (m)" },
+      { "s": "v", "d": "ගෝලයේ ක්ෂණික ප්‍රවේගය (m s⁻¹)" }
+    ],
+    "calc": {
+      "label": "ස්ටෝක්ස් දුස්ස්‍රාවිතා බලය ගණනය",
+      "inputs": [
+        { "id": "eta", "label": "η — දුස්ස්‍රාවිතා සංගුණකය (Pa·s)" },
+        { "id": "r", "label": "r — ගෝලයේ අරය (m)" },
+        { "id": "v", "label": "v — ගෝලයේ ප්‍රවේගය (m/s)" }
+      ],
+      "formula": "6 * Math.PI * parseFloat(eta) * parseFloat(r) * parseFloat(v)",
+      "unit": "N",
+      "resultLabel": "F"
+    }
+  },
+  {
+    "name": "අන්ත ප්‍රවේගය",
+    "formula": "v_t = \\frac{2r^2(\\rho - \\rho_f)g}{9\\eta}",
+    "derivation": "දුස්ස්‍රාවී ද්‍රවයක් තුළ ගෝලාකාර වස්තුවක් පහළට වැටෙන විට, එය මත ගුරුත්ව බලය (W), ඇා බැලීමේ බලය (U) සහ ස්ටෝක්ස් ප්‍රතිරෝධී බලය (F) ක්‍රියා කරයි. ප්‍රවේගය ක්‍රමයෙන් වැඩි වෙද්දී ස්ටෝක්ස් බලය ද වැඩි වේ. අවසානයේ ශුද්ධ බලය ශූන්‍ය වූ විට වස්තුව නියත ප්‍රවේගයකින් ගමන් කරයි — එය අන්ත ප්‍රවේගය (vt) නම් වේ. W = U + F ලෙස සමතුලිතතා කොන්දේසිය යෙදූ විට vt = 2r²(ρ − ρf)g / 9η ලැබේ. (ρ − ρf) ඍණ නම් වස්තුව ද්‍රවය තුළ ඉහළට ගමන් කරයි.",
+    "vars": [
+      { "s": "vt", "d": "අන්ත ප්‍රවේගය (m s⁻¹)" },
+      { "s": "r", "d": "ගෝලාකාර වස්තුවේ අරය (m)" },
+      { "s": "ρ", "d": "වස්තුවේ ඝනත්වය (kg m⁻³)" },
+      { "s": "ρf", "d": "ද්‍රවයේ ඝනත්වය (kg m⁻³)" },
+      { "s": "g", "d": "ගුරුත්ව ත්වරණය (m s⁻²)" },
+      { "s": "η", "d": "දුස්ස්‍රාවිතා සංගුණකය (Pa·s)" }
+    ],
+    "calc": {
+      "label": "අන්ත ප්‍රවේගය ගණනය",
+      "inputs": [
+        { "id": "r", "label": "r — ගෝලයේ අරය (m)" },
+        { "id": "rho", "label": "ρ — වස්තුවේ ඝනත්වය (kg/m³)" },
+        { "id": "rho_f", "label": "ρf — ද්‍රවයේ ඝනත්වය (kg/m³)" },
+        { "id": "g", "label": "g — ගුරුත්ව ත්වරණය (m/s²)", "placeholder": "9.81" },
+        { "id": "eta", "label": "η — දුස්ස්‍රාවිතා සංගුණකය (Pa·s)" }
+      ],
+      "formula": "(2 * Math.pow(parseFloat(r), 2) * (parseFloat(rho) - parseFloat(rho_f)) * parseFloat(g)) / (9 * parseFloat(eta))",
+      "unit": "m/s",
+      "resultLabel": "vt"
+    }
+  },
+      {
+        "name": "Hooke ගේ නියමය (Spring)",
+        "formula": "F = kx",
+        "derivation": "Robert Hooke (1676): ප්‍රත්‍යාස්ථ සීමාව ඉක්මවා නොයන තාක්, ස්ප්‍රිං එකක දිග වැඩි වීම (x) ඊට ක්‍රියා කරන බලයට (F) සමානුපාතික වේ. k = spring නියතය (N/m), එනම් F-x ප්‍රස්ථාරයේ අනුක්‍රමණයයි. ප්‍රත්‍යාස්ථ සීමාව ඉක්මවූ පසු මෙම සමානුපාතිකතාව බිඳ වැටේ.",
+        "vars": [
+          {
+            "s": "F",
+            "d": "ක්‍රියාකාරී බලය (N)"
+          },
+          {
+            "s": "k",
+            "d": "Spring නියතය — F-x ප්‍රස්ථාරයේ අනුක්‍රමණය (N/m)"
+          },
+          {
+            "s": "x",
+            "d": "දිග වැඩි වීම / ප්‍රසාරණය (m)"
+          }
+        ],
+        "calc": {
+          "label": "Hooke ගේ නියම ගණකය",
+          "inputs": [
+            {
+              "id": "k",
+              "label": "k (N/m)"
+            },
+            {
+              "id": "x",
+              "label": "x (m)"
+            }
+          ],
+          "formula": "parseFloat(k)*parseFloat(x)",
+          "unit": "N",
+          "resultLabel": "F"
+        }
+      },
+      {
+        "name": "ප්‍රත්‍යාස්ථ විභව ශක්තිය (Spring)",
+        "formula": "U = \\frac{1}{2}kx^2",
+        "derivation": "W = ∫F dx = ∫kx dx from 0 to x = ½kx². Hooke ගේ නියමය ඇසුරෙන් ලැබෙන F-x ප්‍රස්ථාරය යටතේ ඇති වර්ගඵලය, ස්ප්‍රිං එකේ ගබඩා වන ප්‍රත්‍යාස්ථ විභව ශක්තියට සමාන වේ.",
+        "vars": [
+          {
+            "s": "U",
+            "d": "ප්‍රත්‍යාස්ථ විභව ශක්තිය (J)"
+          },
+          {
+            "s": "k",
+            "d": "Spring නියතය (N/m)"
+          },
+          {
+            "s": "x",
+            "d": "දිග වැඩි වීම / ප්‍රසාරණය (m)"
+          }
+        ],
+        "calc": {
+          "label": "ප්‍රත්‍යාස්ථ විභව ශක්ති ගණකය",
+          "inputs": [
+            {
+              "id": "k",
+              "label": "k (N/m)"
+            },
+            {
+              "id": "x",
+              "label": "x (m)"
+            }
+          ],
+          "formula": "0.5*parseFloat(k)*parseFloat(x)*parseFloat(x)",
+          "unit": "J",
+          "resultLabel": "U"
+        }
+      }
+    ]
+  },
+  {
+  "si": "නූතන භෞතික විද්‍යාව — විකිරණ",
+  "en": "Radiation (Modern Physics)",
+  "equations": [
+    {
+      "name": "ප්‍රකාශ විද්‍යුත් ආචරණය — Einstein",
+      "formula": "hf = \\phi + E_{k,\\max}",
+      "derivation": "Einstein (1905): ෆෝටෝනයක ශක්තිය hf = කාර්ය ශ්‍රිතය φ + ඉලෙක්ට්‍රෝනයේ උපරිම චාලක ශක්තිය. φ = hf₀, එහිදී f₀ යනු සීමාකාරී සංඛ්‍යාතයයි. ෆෝටෝනයේ ශක්තිය φ ට අඩු නම් ඉලෙක්ට්‍රෝන නිකුත් නොවේ.",
+      "vars": [
+        {
+          "s": "h",
+          "d": "Planck නියතය: 6.63×10⁻³⁴ J·s"
+        },
+        {
+          "s": "f",
+          "d": "ෆෝටෝනයේ සංඛ්‍යාතය (Hz)"
+        },
+        {
+          "s": "φ",
+          "d": "කාර්ය ශ්‍රිතය — ලෝහ මතුපිටින් ඉලෙක්ට්‍රෝනයක් ඉවත් කිරීමට අවශ්‍ය අවම ශක්තිය (J)"
+        },
+        {
+          "s": "f₀",
+          "d": "සීමාකාරී සංඛ්‍යාතය — ප්‍රකාශ විද්‍යුත් ආචරණයට අවශ්‍ය අවම සංඛ්‍යාතය (Hz)"
+        },
+        {
+          "s": "Ek,max",
+          "d": "නිකුත් ඉලෙක්ට්‍රෝනයේ උපරිම චාලක ශක්තිය (J)"
+        }
+      ],
+      "calc": {
+        "label": "Ek,max ගණකය",
+        "inputs": [
+          {
+            "id": "f",
+            "label": "f (Hz)"
+          },
+          {
+            "id": "phi",
+            "label": "φ (J)"
+          }
+        ],
+        "formula": "6.63e-34*parseFloat(f)-parseFloat(phi)",
+        "unit": "J",
+        "resultLabel": "Ek,max"
+      }
+    },
+    {
+      "name": "ස්ටෙෆාන්-බෝල්ට්ස්මාන් නියමය",
+      "formula": "P = \\sigma A T^4",
+      "derivation": "කෘෂ්ණ වස්තු (blackbody) විකිරණය සඳහා ස්ටෙෆාන්-බෝල්ට්ස්මාන් නියමය: විකිරණ ක්ෂමතාව (P) පෘෂ්ඨ වර්ගඵලයට (A) හා නිරපේක්ෂ උෂ්ණත්වයේ හතරවන බලයට (T⁴) සමානුපාතික වේ. ස්ටෙෆාන්-බෝල්ට්ස්මාන් නියතය σ = 5.67×10⁻⁸ W m⁻² K⁻⁴. සත්‍ය වස්තූන් සඳහා P = εσAT⁴ ලෙස ලිය හැකි අතර ε = emissivity (0 සිට 1 දක්වා).",
+      "vars": [
+        { "s": "P", "d": "විකිරණ ක්ෂමතාව (W)" },
+        { "s": "σ", "d": "ස්ටෙෆාන්-බෝල්ට්ස්මාන් නියතය: 5.67×10⁻⁸ W m⁻² K⁻⁴" },
+        { "s": "A", "d": "පෘෂ්ඨ වර්ගඵලය (m²)" },
+        { "s": "T", "d": "නිරපේක්ෂ උෂ්ණත්වය (K)" }
+      ],
+      "calc": {
+        "label": "Stefan-Boltzmann ගණකය",
+        "inputs": [
+          { "id": "A", "label": "A (m²)" },
+          { "id": "T", "label": "T (K)" }
+        ],
+        "formula": "5.67e-8*parseFloat(A)*Math.pow(parseFloat(T),4)",
+        "unit": "W",
+        "resultLabel": "P"
+      }
+    },
+    {
+  "name": "වීන්ගේ විස්ථාපන නියමය",
+  "formula": "\\lambda_{max} T = b",
+  "derivation": "කෘෂ්ණ වස්තුවකින් උපරිම ශක්තියක් විමෝචනය වන තරංග ආයාමය (λ_max), එම වස්තුවේ පරම උෂ්ණත්වයට (T) ප්‍රතිලෝමව සමානුපාතික වේ: λ_max ∝ 1/T. මෙහි b යනු වීන්ගේ නියතය (Wien's constant) වන අතර එහි අගය දළ වශයෙන් 2.898 × 10⁻³ m K වේ.",
+  "vars": [
+    { "s": "λ_max", "d": "උපරිම තීව්‍රතාවයට අදාල තරංග ආයාමය (m)" },
+    { "s": "T", "d": "වස්තුවේ පරම උෂ්ණත්වය (K)" },
+    { "s": "b", "d": "වීන්ගේ නියතය (2.898 × 10⁻³ m K)" }
+  ],
+  "calc": {
+    "label": "උපරිම තරංග ආයාම ගණකය",
+    "inputs": [
+      { "id": "T", "label": "පරම උෂ්ණත්වය T (K)" }
+    ],
+    "formula": "2.898e-3 / parseFloat(T)",
+    "unit": "m",
+    "resultLabel": "λ_max"
+  }
+},
+    {
+      "name": "ද බ්‍රොග්ලී තරංග දිග",
+      "formula": "\\lambda = \\frac{h}{p} = \\frac{h}{mv}",
+      "derivation": "de Broglie (1924): ද්‍රව්‍ය අංශු ද ද්වෛත ස්වභාවය දක්වයි, එනම් ද්‍රව්‍ය තරංග ස්වභාවය හා අංශු ස්වභාවය යන දෙකම. λ = h/p, ෆෝටෝනය සඳහා λ = hc/E ට සදෘශ වේ.",
+      "vars": [
+        {
+          "s": "λ",
+          "d": "ද බ්‍රොග්ලී තරංග දිග (m)"
+        },
+        {
+          "s": "h",
+          "d": "Planck නියතය: 6.63×10⁻³⁴ J·s"
+        },
+        {
+          "s": "p",
+          "d": "අංශුවේ සංවේගය (kg·m/s)"
+        },
+        {
+          "s": "m",
+          "d": "අංශුවේ ස්කන්ධය (kg)"
+        },
+        {
+          "s": "v",
+          "d": "අංශුවේ ප්‍රවේගය (m/s)"
+        }
+      ],
+      "calc": {
+        "label": "ද බ්‍රොග්ලී λ ගණකය",
+        "inputs": [
+          {
+            "id": "m",
+            "label": "m (kg)"
+          },
+          {
+            "id": "v",
+            "label": "v (m/s)"
+          }
+        ],
+        "formula": "6.63e-34/(parseFloat(m)*parseFloat(v))",
+        "unit": "m",
+        "resultLabel": "λ"
+      }
+    },
+    {
+      "name": "විකිරණශීලී ක්ෂය වීමේ නියමය",
+      "formula": "N = N_0 e^{-\\lambda t} \\quad;\\quad A = \\lambda N",
+      "derivation": "dN/dt = -λN (සසම්භාවී විකිරණශීලී ක්ෂය වීම). අනුකලනයෙන් N = N₀e^(-λt). සක්‍රීයතාව A = λN, ඒකකය Becquerel (Bq).",
+      "vars": [
+        {
+          "s": "N",
+          "d": "ඉතිරි විකිරණශීලී න්‍යෂ්ටි සංඛ්‍යාව"
+        },
+        {
+          "s": "N₀",
+          "d": "ආරම්භක විකිරණශීලී න්‍යෂ්ටි සංඛ්‍යාව"
+        },
+        {
+          "s": "λ",
+          "d": "ක්ෂය නියතය (s⁻¹)"
+        },
+        {
+          "s": "t",
+          "d": "කාලය (s)"
+        },
+        {
+          "s": "A",
+          "d": "සක්‍රීයතාව — ඒකකය Becquerel (Bq)"
+        }
+      ],
+      "calc": {
+        "label": "ඉතිරි න්‍යෂ්ටි සංඛ්‍යාව ගණකය",
+        "inputs": [
+          {
+            "id": "N0",
+            "label": "N0"
+          },
+          {
+            "id": "lam",
+            "label": "λ (s⁻¹)"
+          },
+          {
+            "id": "t",
+            "label": "t (s)"
+          }
+        ],
+        "formula": "parseFloat(N0)*Math.exp(-parseFloat(lam)*parseFloat(t))",
+        "unit": "nuclei",
+        "resultLabel": "N"
+      }
+    },
+    {
+      "name": "අර්ධ ජීවිතය",
+      "formula": "T_{1/2} = \\frac{\\ln 2}{\\lambda} = \\frac{0.693}{\\lambda}",
+      "derivation": "N = N₀/2 වන t = T½ ආදේශ කිරීමෙන්: ½ = e^(-λT½) → T½ = ln2/λ.",
+      "vars": [
+        {
+          "s": "T½",
+          "d": "අර්ධ ජීවිතය — න්‍යෂ්ටි සංඛ්‍යාව අඩකට අඩු වීමට ගත වන කාලය (s)"
+        },
+        {
+          "s": "λ",
+          "d": "ක්ෂය නියතය (s⁻¹)"
+        }
+      ],
+      "calc": {
+        "label": "අර්ධ ජීවිත ගණකය",
+        "inputs": [
+          {
+            "id": "lam",
+            "label": "λ (s⁻¹)"
+          }
+        ],
+        "formula": "Math.log(2)/parseFloat(lam)",
+        "unit": "s",
+        "resultLabel": "T½"
+        }
+      }
+    ]
+  },
+];
+
+// ═══════════════════════════════════════════════════════════════
+//  RENDER ENGINE
+// ═══════════════════════════════════════════════════════════════
+function renderKaTeX(str) {
+  try {
+    return katex.renderToString(str, { throwOnError: false, displayMode: false });
+  } catch(e) { return str; }
+}
+
+function buildCalcHTML(calc, eqId) {
+  if (!calc) return '';
+  const inputs = calc.inputs.map(inp => `
+    <div class="calc-input-wrap">
+      <label class="calc-input-label">${inp.label}</label>
+      <input class="calc-input" type="number" id="ci_${eqId}_${inp.id}" placeholder="${inp.placeholder||'0'}" step="any">
+    </div>`).join('');
+  return `
+    <div class="calc-section">
+      <div class="calc-label">🔢 ${calc.label}</div>
+      <div class="calc-grid">${inputs}</div>
+      <button class="calc-solve-btn" onclick="solveEq('${eqId}')">= ගණනය කරන්න</button>
+      <div class="calc-result" id="cr_${eqId}"></div>
+    </div>`;
+}
+
+function buildVarsHTML(vars) {
+  if (!vars || !vars.length) return '';
+  const chips = vars.map(v => `<div class="var-chip"><span class="var-sym">${v.s}</span> — ${v.d}</div>`).join('');
+  return `<div class="vars-section"><div class="vars-label">සංකේත</div><div class="vars-grid">${chips}</div></div>`;
+}
+
+function buildEquationCard(eq, eqId) {
+  const calcData = eq.calc ? JSON.stringify(eq.calc).replace(/'/g,"&apos;") : '';
+  return `
+  <div class="eq-card" id="${eqId}" data-name="${eq.name.toLowerCase()}">
+    <div class="eq-header" onclick="toggleEq('${eqId}')">
+      <div class="eq-name">${eq.name}</div>
+      <span class="eq-toggle-icon">▼</span>
+    </div>
+    <div class="eq-body">
+      <div class="formula-box">${renderKaTeX(eq.formula)}</div>
+      <div class="derivation">
+        <div class="derivation-label">📐 ලබාගන්නා ආකාරය</div>
+        <div class="derivation-text">${eq.derivation}</div>
+      </div>
+      ${buildVarsHTML(eq.vars)}
+      ${eq.calc ? buildCalcHTML(eq.calc, eqId) : ''}
+    </div>
+  </div>`;
+}
+
+function buildChapterHTML(ch, ci) {
+  const eqs = ch.equations.map((eq,ei) => buildEquationCard(eq, `eq_${ci}_${ei}`)).join('');
+  return `
+  <div class="chapter" id="ch_${ci}">
+    <div class="chapter-header" onclick="toggleChapter(${ci})">
+      <div class="chapter-num c${ci}">${String(ci+1).padStart(2,'0')}</div>
+      <div class="chapter-info">
+        <div class="chapter-name-si">${ch.si}</div>
+        <div class="chapter-name-en">${ch.en}</div>
+      </div>
+      <div class="chapter-count">${ch.equations.length} eq</div>
+      <span class="chapter-arrow">▼</span>
+    </div>
+    <div class="equations-list">
+      <div class="equations-inner">${eqs}</div>
+    </div>
+  </div>`;
+}
+
+// Build DOM
+const main = document.getElementById('main');
+const noResults = document.getElementById('noResults');
+let totalEqs = 0;
+
+CHAPTERS.forEach((ch, ci) => {
+  totalEqs += ch.equations.length;
+  main.insertAdjacentHTML('beforeend', buildChapterHTML(ch, ci));
+});
+
+document.getElementById('chapterCount').textContent = CHAPTERS.length;
+document.getElementById('eqCount').textContent = totalEqs;
+
+// ═══════════════════════════════════════════════════════════════
+//  INTERACTIONS
+// ═══════════════════════════════════════════════════════════════
+function toggleChapter(ci) {
+  const ch = document.getElementById(`ch_${ci}`);
+  ch.classList.toggle('open');
+}
+
+function toggleEq(eqId) {
+  const card = document.getElementById(eqId);
+  card.classList.toggle('expanded');
+}
+
+// Calculator solver
+const calcStore = {};
+CHAPTERS.forEach((ch,ci) => {
+  ch.equations.forEach((eq,ei) => {
+    if (eq.calc) calcStore[`eq_${ci}_${ei}`] = eq.calc;
+  });
+});
+
+function solveEq(eqId) {
+  const calc = calcStore[eqId];
+  if (!calc) return;
+  const res = document.getElementById(`cr_${eqId}`);
+  try {
+    const vals = {};
+    for (const inp of calc.inputs) {
+      vals[inp.id] = document.getElementById(`ci_${eqId}_${inp.id}`).value;
+    }
+    // Build evaluation context
+    const ctx = Object.entries(vals).map(([k,v]) => `const ${k}="${v}";`).join('');
+    const result = eval(ctx + '(' + calc.formula + ')');
+    if (isNaN(result) || !isFinite(result)) throw new Error("Invalid input");
+    const formatted = Math.abs(result) < 0.001 || Math.abs(result) > 1e6
+      ? result.toExponential(4)
+      : parseFloat(result.toFixed(6));
+    res.textContent = `${calc.resultLabel} = ${formatted} ${calc.unit}`;
+    res.className = 'calc-result show';
+  } catch(e) {
+    res.textContent = '⚠ ඇතුළු කළ අගයන් නිවැරදි නොවේ';
+    res.className = 'calc-result show error';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SEARCH
+// ═══════════════════════════════════════════════════════════════
+document.getElementById('searchInput').addEventListener('input', function() {
+  const q = this.value.trim().toLowerCase();
+  const stat = document.getElementById('searchStat');
+  const countEl = document.getElementById('searchCount');
+  let visible = 0;
+  let anyChapterVisible = false;
+
+  CHAPTERS.forEach((ch, ci) => {
+    const chEl = document.getElementById(`ch_${ci}`);
+    let chapterHasMatch = false;
+
+    ch.equations.forEach((eq, ei) => {
+      const card = document.getElementById(`eq_${ci}_${ei}`);
+      const matches = !q ||
+        eq.name.toLowerCase().includes(q) ||
+        ch.si.toLowerCase().includes(q) ||
+        ch.en.toLowerCase().includes(q) ||
+        eq.derivation.toLowerCase().includes(q);
+
+      card.classList.toggle('hidden', !matches);
+      if (matches) { chapterHasMatch = true; visible++; }
+    });
+
+    chEl.style.display = chapterHasMatch ? '' : 'none';
+    if (chapterHasMatch) {
+      anyChapterVisible = true;
+      if (q) chEl.classList.add('open');
+    }
+  });
+
+  noResults.classList.toggle('show', !anyChapterVisible);
+  if (q) {
+    stat.style.display = '';
+    countEl.textContent = visible;
+  } else {
+    stat.style.display = 'none';
+  }
+});
+
+// Open first chapter by default
+document.getElementById('ch_0').classList.add('close');
+</script>
+</body>
+</html>

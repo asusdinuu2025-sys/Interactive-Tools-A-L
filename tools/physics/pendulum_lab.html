@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>සරල අවලම්බය - A/L Physics Virtual Lab</title>
+<style>
+:root{
+  --paper:#f2ecdd;
+  --paper-dark:#e7dfc7;
+  --ink:#20281f;
+  --ink-soft:#4b5147;
+  --slate:#2c3e34;
+  --slate-2:#3c5346;
+  --brass:#b9863f;
+  --brass-dark:#8e6428;
+  --brass-light:#e0b877;
+  --rule:#c3ad81;
+  --red:#963a2c;
+  --blue:#2b5c78;
+  --wood:#8a5a34;
+  --paper-shadow: rgba(32,40,31,0.18);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--paper);
+  background-image:
+    linear-gradient(var(--paper) 0px, var(--paper) 27px, var(--rule) 28px);
+  background-size: 100% 28px;
+  color:var(--ink);
+  font-family:'Iskoola Pota','Noto Sans Sinhala','Nirmala UI',-apple-system,'Segoe UI',Roboto,sans-serif;
+  line-height:1.6;
+  min-height:100vh;
+}
+.margin-line{
+  position:fixed; top:0; bottom:0; left:56px; width:2px; background:var(--red); opacity:.35; z-index:0;
+}
+header{
+  background:linear-gradient(180deg,var(--slate),var(--slate-2));
+  color:#f3ead2;
+  padding:22px 28px 16px 76px;
+  position:relative;
+  box-shadow:0 3px 10px var(--paper-shadow);
+  z-index:2;
+}
+header h1{
+  margin:0 0 4px 0;
+  font-family:Georgia,'Times New Roman',serif;
+  font-size:1.5rem;
+  letter-spacing:.3px;
+  display:flex; align-items:center; gap:14px;
+}
+header .eng{
+  font-size:.72rem;
+  color:#cdbf99;
+  font-family:Georgia, serif;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+}
+#pendulogo{flex-shrink:0;}
+nav{
+  display:flex; flex-wrap:wrap; gap:6px; margin-top:14px;
+  position:relative; z-index:2;
+}
+nav button{
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(240,225,190,.35);
+  color:#f3ead2;
+  padding:9px 14px;
+  font-size:.85rem;
+  border-radius:3px 3px 0 0;
+  cursor:pointer;
+  font-family:inherit;
+  display:flex; gap:8px; align-items:center;
+  transition:background .15s, transform .1s;
+}
+nav button .num{
+  font-family:Georgia,serif; font-weight:700; color:var(--brass-light); font-size:.95rem;
+}
+nav button:hover{background:rgba(255,255,255,.14);}
+nav button.active{
+  background:var(--paper);
+  color:var(--ink);
+  border-color:var(--paper);
+  font-weight:600;
+}
+nav button.active .num{color:var(--brass-dark);}
+main{
+  max-width:980px;
+  margin:0 auto;
+  padding:30px 30px 70px 76px;
+  position:relative; z-index:1;
+}
+.tab{display:none; animation:fadein .25s ease;}
+.tab.active{display:block;}
+@keyframes fadein{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+h2.section-title{
+  font-family:Georgia,'Times New Roman',serif;
+  color:var(--slate);
+  border-bottom:2px solid var(--brass);
+  padding-bottom:8px;
+  margin-top:0;
+  display:flex; align-items:baseline; gap:10px;
+}
+h2.section-title .tag{
+  font-size:.7rem; letter-spacing:2px; color:var(--brass-dark); text-transform:uppercase; font-family:Georgia,serif;
+}
+.card{
+  background:rgba(255,255,255,.45);
+  border:1px solid var(--rule);
+  border-radius:6px;
+  padding:18px 20px;
+  margin:16px 0;
+}
+.card h3{margin-top:0; color:var(--slate-2); font-family:Georgia,serif; font-size:1.05rem;}
+
+/* equation styling */
+.eqn-box{
+  background:var(--paper-dark);
+  border-left:4px solid var(--brass);
+  padding:16px 22px;
+  margin:14px 0;
+  font-size:1.15rem;
+  font-family:Georgia,'Times New Roman',serif;
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+}
+.frac{display:inline-flex; flex-direction:column; vertical-align:middle; text-align:center; margin:0 4px; line-height:1.15;}
+.frac .num{border-bottom:1.6px solid var(--ink); padding:0 5px 2px;}
+.frac .den{padding:2px 5px 0;}
+.sqrt{display:inline-flex; align-items:flex-start; margin:0 2px;}
+.sqrt .rad{font-size:1.5em; margin-right:-3px; transform:translateY(2px);}
+.sqrt .body{border-top:1.8px solid var(--ink); padding:1px 6px 0 3px;}
+.eqn-note{font-size:.85rem; color:var(--ink-soft); font-family:inherit;}
+
+ol.steps{padding-right:0; padding-left:20px;}
+ol.steps li{margin-bottom:12px; padding-left:4px;}
+ol.steps li b{color:var(--slate-2);}
+
+.diagram-wrap{display:flex; justify-content:center; margin:18px 0;}
+
+.precaution-list{list-style:none; padding:0; margin:0;}
+.precaution-list li{
+  display:flex; gap:12px; padding:12px 4px; border-bottom:1px dashed var(--rule);
+}
+.precaution-list li:last-child{border-bottom:none;}
+.precaution-list .ic{
+  flex-shrink:0; width:30px; height:30px; border-radius:50%;
+  background:var(--brass); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700;
+  font-family:Georgia,serif;
+}
+
+/* SIMULATION TAB */
+.lab-wrap{display:flex; gap:22px; flex-wrap:wrap;}
+.lab-canvas-col{flex:1 1 380px; display:flex; flex-direction:column; align-items:center;}
+.lab-controls-col{flex:1 1 280px; min-width:260px;}
+canvas#pendCanvas{
+  background:linear-gradient(180deg,#eef2ea,#e3ded0);
+  border:1px solid var(--rule); border-radius:8px;
+  box-shadow: inset 0 0 20px rgba(0,0,0,.05);
+  max-width:100%;
+}
+.ctrl-group{margin-bottom:18px;}
+.ctrl-group label{display:block; font-size:.85rem; color:var(--slate-2); margin-bottom:6px; font-weight:600;}
+.ctrl-group .val{color:var(--brass-dark); font-family:Georgia,serif;}
+input[type=range]{width:100%; accent-color:var(--brass-dark);}
+.seg{display:flex; border:1px solid var(--rule); border-radius:6px; overflow:hidden;}
+.seg button{
+  flex:1; padding:8px 4px; background:var(--paper); border:none; cursor:pointer; font-family:inherit; font-size:.85rem;
+  border-left:1px solid var(--rule);
+}
+.seg button:first-child{border-left:none;}
+.seg button.on{background:var(--brass); color:#fff; font-weight:600;}
+
+.stopwatch-box{
+  background:var(--slate); color:#f3ead2; border-radius:8px; padding:14px 16px; text-align:center; margin-bottom:14px;
+}
+.stopwatch-time{font-family:'Consolas','Courier New',monospace; font-size:2rem; letter-spacing:2px;}
+.stopwatch-sub{font-size:.75rem; color:#cdbf99; margin-top:2px;}
+.btnrow{display:flex; gap:8px; margin-top:10px;}
+.btn{
+  border:none; padding:9px 14px; border-radius:5px; cursor:pointer; font-family:inherit; font-size:.85rem; font-weight:600;
+  transition:transform .1s, filter .15s;
+}
+.btn:hover{filter:brightness(1.08);}
+.btn:active{transform:scale(.97);}
+.btn-brass{background:var(--brass); color:#fff;}
+.btn-slate{background:var(--slate-2); color:#f3ead2;}
+.btn-red{background:var(--red); color:#fff;}
+.btn-outline{background:transparent; border:1px solid var(--rule); color:var(--ink);}
+.osc-counter{
+  display:flex; justify-content:space-between; align-items:center;
+  background:var(--paper-dark); border:1px solid var(--rule); border-radius:6px; padding:10px 14px; margin-bottom:14px;
+}
+.osc-counter .n{font-family:Georgia,serif; font-size:1.6rem; color:var(--slate);}
+.hint-box{font-size:.8rem; background:rgba(185,134,63,.12); border:1px dashed var(--brass); padding:10px 12px; border-radius:6px; margin-top:6px;}
+
+/* ANALYSIS TAB */
+table.datatable{width:100%; border-collapse:collapse; margin:14px 0; font-size:.92rem;}
+table.datatable th, table.datatable td{
+  border:1px solid var(--rule); padding:8px 10px; text-align:center;
+}
+table.datatable th{background:var(--slate); color:#f3ead2; font-weight:600;}
+table.datatable tr:nth-child(even) td{background:rgba(185,134,63,.07);}
+table.datatable td button{background:none; border:none; color:var(--red); cursor:pointer; font-size:1rem;}
+.addrow{display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; margin-bottom:8px;}
+.addrow div{display:flex; flex-direction:column; gap:4px;}
+.addrow label{font-size:.75rem; color:var(--slate-2);}
+.addrow input{padding:6px 8px; border:1px solid var(--rule); border-radius:4px; width:110px; font-family:inherit;}
+.result-box{
+  display:flex; gap:18px; flex-wrap:wrap; margin-top:16px;
+}
+.result-tile{
+  flex:1 1 150px; background:var(--slate); color:#f3ead2; border-radius:8px; padding:14px 16px;
+}
+.result-tile .lab{font-size:.72rem; color:#cdbf99; text-transform:uppercase; letter-spacing:1px;}
+.result-tile .num{font-family:Georgia,serif; font-size:1.5rem; margin-top:2px; color:var(--brass-light);}
+
+footer{
+  text-align:center; padding:22px; font-size:.78rem; color:var(--ink-soft); position:relative; z-index:1;
+}
+@media (max-width:640px){
+  .margin-line{display:none;}
+  main{padding:24px 16px;}
+  header{padding:18px 16px 14px;}
+}
+</style>
+</head>
+<body>
+<div class="margin-line"></div>
+
+<header>
+  <h1>
+    <svg id="pendulogo" width="34" height="34" viewBox="0 0 34 34">
+      <line x1="4" y1="4" x2="30" y2="4" stroke="#e0b877" stroke-width="2"/>
+      <line x1="17" y1="4" x2="24" y2="24" stroke="#e0b877" stroke-width="1.6"/>
+      <circle cx="24" cy="27" r="5" fill="#b9863f" stroke="#e0b877" stroke-width="1"/>
+    </svg>
+    <span>සරල අවලම්බය <span class="eng">Simple Pendulum</span></span>
+  </h1>
+  <div class="eng">A/L Physics Practical &middot; ගුරුත්වජ ත්වරණය සෙවීම &middot; Determining g</div>
+  <nav id="tabNav"></nav>
+</header>
+
+<div class="margin-line"></div>
+<main>
+
+  <!-- TAB 1: THEORY -->
+  <section class="tab" id="tab1">
+    <h2 class="section-title"><span class="tag">01</span> න්‍යාය සහ සූත්‍ර</h2>
+
+    <div class="card">
+      <h3>කාල පරිච්ඡේදය (Time Period)</h3>
+      <p>කුඩා දෝලන කෝණයක් (θ ≤ 10°) සඳහා සරල අවලම්බයක කාල පරිච්ඡේදය <b>T</b> දිග <b>l</b> සහ ගුරුත්වජ ත්වරණය <b>g</b> මත රඳා පවතී:</p>
+      <div class="eqn-box">
+        T &nbsp;=&nbsp; 2π
+        <span class="sqrt"><span class="rad">√</span><span class="body">
+          <span class="frac"><span class="num">l</span><span class="den">g</span></span>
+        </span></span>
+      </div>
+      <p class="eqn-note">මෙහිදී T කාල පරිච්ඡේදය (තත්පර), l නූලේ දිග (මීටර්), g ගුරුත්වජ ත්වරණය (m s⁻²) වේ. T විශාලත්වය බට්ටුවේ ස්කන්ධය මතද, දෝලන විස්තාරය (කුඩා විටදී) මතද රඳා නොපවතී.</p>
+    </div>
+
+    <div class="card">
+      <h3>ප්‍රස්තාරය සඳහා රේඛීය සමීකරණය</h3>
+      <p>ඉහත සමීකරණය දෙපැත්තම වර්ග කිරීමෙන් l සහ T² අතර ඍජු රේඛීය සම්බන්ධතාවයක් ලබා ගත හැක:</p>
+      <div class="eqn-box">
+        T² &nbsp;=&nbsp;
+        <span class="frac"><span class="num">4π²</span><span class="den">g</span></span>
+        &nbsp;l
+        &nbsp;&nbsp;&nbsp;⟶⟶⟶&nbsp;&nbsp;&nbsp; y = m x
+      </div>
+      <p class="eqn-note">T² (y-අක්ෂය) සහ l (x-අක්ෂය) අතර ප්‍රස්තාරය ඇඳුවහොත්, එය <b>මූලාරම්භය හරහා යන ඍජු රේඛාවක්</b> වේ. එහි අනුක්‍රමණය (gradient) m = 4π²/g වේ.</p>
+    </div>
+
+    <div class="card">
+      <h3>ප්‍රස්තාරයේ අනුක්‍රමණයෙන් g සෙවීම</h3>
+      <div class="eqn-box">
+        g &nbsp;=&nbsp;
+        <span class="frac"><span class="num">4π²</span><span class="den">m</span></span>
+      </div>
+      <p class="eqn-note">m යනු ප්‍රස්තාරයේ අනුක්‍රමණයයි (gradient). මෙම අගය සාමාන්‍යයෙන් 9.8 m s⁻² ට ආසන්න විය යුතුය.</p>
+    </div>
+
+    <div class="card">
+      <h3>විශාල අරයක් සහිත ගෝල සඳහා</h3>
+      <p>අවලම්භ බට්ටුව විශාල අරයකින් යුත් ගෝලයක් නම්, එහි ගුරුත්ව කේන්ද්‍රය දක්වා ඇති සැබෑ දිග සැලකිය යුතුය:</p>
+      <div class="eqn-box">
+        T &nbsp;=&nbsp; 2π
+        <span class="sqrt"><span class="rad">√</span><span class="body">
+          <span class="frac"><span class="num">l + r</span><span class="den">g</span></span>
+        </span></span>
+      </div>
+      <p class="eqn-note">r = ගෝලයේ අරය (ආධාරක ලක්ෂ්‍යයේ සිට ගෝලයේ කේන්ද්‍රය දක්වා ඇති අමතර දුර නියෝජනය කරයි).</p>
+    </div>
+  </section>
+
+  <!-- TAB 2: PROCEDURE -->
+  <section class="tab" id="tab2">
+    <h2 class="section-title"><span class="tag">02</span> පරීක්ෂණාත්මක පියවර</h2>
+
+    <div class="card">
+      <h3>අවශ්‍ය උපකරණ</h3>
+      <ul>
+        <li>සරල අවලම්බයක් (නූලක් සහ ලෝහ බට්ටුවක්)</li>
+        <li>විරාම සටිකාවක් (stopwatch)</li>
+        <li>දර්ශක කූරයක් (pointer needle)</li>
+        <li>නූල් කැබැල්ලක් සහ දෘඪ ආධාරකයක්</li>
+        <li>මීටර් රුලක්</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>ක්‍රමය</h3>
+      <ol class="steps">
+        <li><b>එල්ලීම:</b> අවලම්භ බට්ටුවේ කේන්ද්‍රයේ සිට ආධාරක ලක්ෂ්‍යය දක්වා දිග (l) මුලින් 40cm පමණ වන සේ අවලම්බය දෘඪ ආධාරකයකට එල්ලා ගන්න.</li>
+        <li><b>දර්ශක කූරය සකසන්න:</b> අවලම්බ බට්ටුව නිශ්චලව පවතින විට, එහි මධ්‍ය (mean) ස්ථානයට හරියටම ඉදිරියෙන්, බට්ටුවට ඉතා ආසන්නව දර්ශක කූර තබන්න. මෙමගින් parallax දෝෂය හා කාල මැනීමේ දෝෂය අවම වේ.</li>
+        <li><b>විස්ථාපනය:</b> බට්ටුව කුඩා කෝණයකින් (θ ≤ 10°) පැත්තකට ඇද අත් හරින්න.</li>
+        <li><b>කාලය මැනීම:</b> බට්ටුව දර්ශක කූර හරහා යන අවස්ථාවේ සිට විරාම සටිකාව ආරම්භ කර, දෝලන 25 ක් සම්පූර්ණ වන තෙක් කාලය (25T) මනින්න.</li>
+        <li><b>T ගණනය කිරීම:</b> ලැබුණු කාලය 25 කින් බෙදා එක් දෝලනයක සාමාන්‍ය කාල පරිච්ඡේදය T ගණනය කරන්න.</li>
+        <li><b>දිග වෙනස් කිරීම:</b> දිග l, 10cm බැගින් වැඩි කරමින් (හෝ අඩු කරමින්) එකම ක්‍රියාවලිය පුනරාවර්තනය කර, එක් එක් l අගය සඳහා T ලබා ගන්න.</li>
+        <li><b>දත්ත වගුව:</b> l සහ T² අගයන් වගුවක සටහන් කරන්න.</li>
+        <li><b>ප්‍රස්තාරය:</b> T² (y-අක්ෂය) එරෙහිව l (x-අක්ෂය) ප්‍රස්තාර ගත කර, අනුක්‍රමණය (m) හරහා g ගණනය කරන්න.</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h3>10cm පියවරින් දිග වැඩි කරන්නේ ඇයි?</h3>
+      <p>මීටර් රුලකින් දිග මැනීමේදී ඇතිවන නිරපේක්ෂ දෝෂය (absolute error) ස්ථාවරයි (± 0.1cm පමණ). දිග කුඩා අගයක් නම් (උදා. 10cm), මෙම නිශ්චිත දෝෂය <b>සාපේක්ෂ දෝෂය</b> (relative error) විශාල කරයි. දිග 10cm පියවරින් වැඩි කිරීමෙන්, එක් එක් මිනුමේ සාපේක්ෂ දෝෂය අඩු වී, ප්‍රස්තාරයේ නිරවද්‍යතාවය වැඩි වේ.</p>
+    </div>
+  </section>
+
+  <!-- TAB 3: SIMULATION -->
+  <section class="tab" id="tab3">
+    <h2 class="section-title"><span class="tag">03</span> Virtual Lab &middot; අන්තර්ක්‍රියාකාරී අනුකරණය</h2>
+
+    <div class="lab-wrap">
+      <div class="lab-canvas-col">
+        <canvas id="pendCanvas" width="380" height="420"></canvas>
+        <div class="hint-box">දර්ශක කූරය (─▲─ රතු සලකුණ) අභිසාරී වන විට එය දෝලනයේ මධ්‍ය ස්ථානය දක්වයි. එය හරහා යන සෑම වතාවක්ම දෝලන ගණකයේ ගණන වැඩි වේ.</div>
+      </div>
+
+      <div class="lab-controls-col">
+        <div class="osc-counter">
+          <div>දෝලන ගණන <div style="font-size:.72rem;color:var(--ink-soft)">Oscillation count</div></div>
+          <div class="n" id="oscCountDisp">0</div>
+        </div>
+
+        <div class="stopwatch-box">
+          <div class="stopwatch-time" id="swDisplay">00.00</div>
+          <div class="stopwatch-sub">විරාම සටිකාව &middot; තත්පර</div>
+          <div class="btnrow">
+            <button class="btn btn-brass" id="swStart">ආරම්භ</button>
+            <button class="btn btn-slate" id="swStop">නවත්වන්න</button>
+            <button class="btn btn-outline" id="swReset">යළි සකසන්න</button>
+          </div>
+        </div>
+
+        <div class="ctrl-group">
+          <label>නූලේ දිග l : <span class="val" id="lenVal">40</span> cm</label>
+          <input type="range" id="lenSlider" min="30" max="100" step="1" value="40">
+        </div>
+
+        <div class="ctrl-group">
+          <label>ආරම්භක විස්ථාපන කෝණය θ₀ : <span class="val" id="angVal">8</span>°</label>
+          <input type="range" id="angSlider" min="2" max="45" step="1" value="8">
+          <div class="hint-box" id="angWarn" style="display:none;">θ₀ > 10° - මෙය SHM කොන්දේසිය කඩ කරයි. කාල පරිච්ඡේදය ප්‍රමිතික සූත්‍රයට වඩා තරමක් වැඩි වනු ඇත.</div>
+        </div>
+
+        <div class="ctrl-group">
+          <label>අවලම්භ බට්ටුවේ ද්‍රව්‍යය</label>
+          <div class="seg">
+            <button id="matMetal" class="on">ලෝහ (Metal)</button>
+            <button id="matWood">දර (Wood)</button>
+          </div>
+        </div>
+
+        <div class="btnrow" style="margin-top:6px;">
+          <button class="btn btn-brass" id="btnRelease" style="flex:1;">බට්ටුව මුදා හරින්න</button>
+          <button class="btn btn-outline" id="btnPause" style="flex:1;">විරාමය</button>
+        </div>
+
+        <div style="margin-top:14px;">
+          <button class="btn btn-slate" id="btnRecord" style="width:100%;">වත්මන් දිග / කාලය දත්ත වගුවට එක් කරන්න →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 4: ANALYSIS -->
+  <section class="tab" id="tab4">
+    <h2 class="section-title"><span class="tag">04</span> ප්‍රස්තාරික විශ්ලේෂණය</h2>
+
+    <div class="card">
+      <h3>දත්ත වගුව</h3>
+      <div class="addrow">
+        <div><label>l (cm)</label><input type="number" id="inL" placeholder="40"></div>
+        <div><label>T (s) - එක් දෝලනයක් </label><input type="number" step="0.001" id="inT" placeholder="1.27"></div>
+        <button class="btn btn-brass" id="addRowBtn">වගුවට එකතු කරන්න</button>
+        <button class="btn btn-outline" id="clearRowsBtn">සියල්ල මකන්න</button>
+      </div>
+      <table class="datatable">
+        <thead><tr><th>#</th><th>l (m)</th><th>T (s)</th><th>T² (s²)</th><th></th></tr></thead>
+        <tbody id="dataBody"></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>T² එරෙහිව l ප්‍රස්තාරය</h3>
+      <div style="display:flex; justify-content:center;">
+        <canvas id="graphCanvas" width="600" height="380" style="max-width:100%; background:#fbf8ef; border:1px solid var(--rule); border-radius:6px;"></canvas>
+      </div>
+      <div class="result-box">
+        <div class="result-tile"><div class="lab">අනුක්‍රමණය m</div><div class="num" id="gradVal">—</div></div>
+        <div class="result-tile"><div class="lab">ගණනය කළ g</div><div class="num" id="gVal">—</div></div>
+        <div class="result-tile"><div class="lab">දත්ත ලක්ෂ්‍ය</div><div class="num" id="nPts">0</div></div>
+      </div>
+      <p class="eqn-note" style="margin-top:10px;">අවම වර්ග ක්‍රමයට (least-squares) ගණනය කර ඇත. නිවැරදි g අගය 9.8 m s⁻² ට ආසන්න විය යුතුය. ලක්ෂ්‍ය අවම වශයෙන් 4-5 ක් සටහන් කිරීමෙන් වඩාත් නිවැරදි ප්‍රස්තාරයක් ලැබේ.</p>
+    </div>
+  </section>
+
+  <!-- TAB 5: PRECAUTIONS -->
+  <section class="tab" id="tab5">
+    <h2 class="section-title"><span class="tag">05</span> වැදගත් කරුණු හා දෝෂ අවම කිරීම</h2>
+
+    <ul class="precaution-list">
+      <li><span class="ic">θ</span>
+        <div><b>කුඩා විස්ථාපන කෝණය (θ ≤ 10°)</b><br>
+        T = 2π√(l/g) සූත්‍රය වලංගු වන්නේ කුඩා කෝණ සඳහා පමණි (sin θ ≈ θ තහවුරු වන පරාසයේදී). විශාල කෝණයකදී චලිතය සරල අනුවර්තී චලිතයක් (SHM) නොවන අතර T සූත්‍රයට වඩා තරමක් වැඩි වේ.</div>
+      </li>
+      <li><span class="ic">M</span>
+        <div><b>ලෝහ බට්ටුවක් තෝරා ගැනීම</b><br>
+        ලෝහ බට්ටුවක ඝනත්වය හා ස්කන්ධය වැඩි නිසා, ඊට සාපේක්ෂව වායු ප්‍රතිරෝධයේ බලපෑම අවම වේ. දර හෝ ලාභ ද්‍රව්‍ය බට්ටුවක් නම් වායු ප්‍රතිරෝධය නිසා දෝලනය ඉක්මනින් අවක්ෂය වී (damping), දෝලන 25ක කාලය මැනීමේදී වැඩි දෝෂයක් ඇති කරයි.</div>
+      </li>
+      <li><span class="ic">✛</span>
+        <div><b>දර්ශක කූරයේ පිහිටීම</b><br>
+        දර්ශක කූර සෑම විටම දෝලනයේ <b>මධ්‍ය ස්ථානයේ</b> තැබිය යුතුය - එතැනදී බට්ටුවේ ප්‍රවේගය උපරිම වන බැවින් කාල මැනීමේ දෝෂය අවම වේ. එමෙන්ම කූර බට්ටුවට හැකි තරම් ආසන්නව තැබීමෙන් නිරීක්ෂකයාගේ දෘෂ්ටි කෝණයෙන් ඇතිවන parallax දෝෂය අවම වේ.</div>
+      </li>
+      <li><span class="ic">m</span>
+        <div><b>T හි ස්වායත්තභාවය</b><br>
+        පරමාදර්ශී තත්ත්ව යටතේ, කාල පරිච්ඡේදය T, බට්ටුවේ ස්කන්ධය මතද, දෝලන විස්තාරය (කුඩා විටදී) මතද රඳා නොපවතී - එය රඳා පවතින්නේ l සහ g මත පමණි.</div>
+      </li>
+      <li><span class="ic">↕</span>
+        <div><b>දිග නිවැරදිව මැනීම</b><br>
+        l යනු ආධාරක ලක්ෂ්‍යයේ සිට බට්ටුවේ <b>ගුරුත්ව කේන්ද්‍රය</b> (center of mass) දක්වා ඇති දුරයි - බට්ටුවේ පහළ කෙළවර දක්වා නොවේ. විශාල ගෝලයක් නම් l + r ලෙස ගණන් ගත යුතුය.</div>
+      </li>
+      <li><span class="ic">✓</span>
+        <div><b>ප්‍රස්තාරයේ පරීක්ෂාව</b><br>
+        T² එරෙහිව l ප්‍රස්තාරය මූලාරම්භය හරහා යන ඍජු රේඛාවක් නොවේ නම්, එය පරීක්ෂණයේ ක්‍රමානුකූල දෝෂයක් (systematic error) ඇති බව පෙන්නුම් කරයි - උදාහරණයක් ලෙස l මැනීමේදී නියත දෝෂයක් තිබීම.</div>
+      </li>
+    </ul>
+  </section>
+
+</main>
+<footer>A/L Physics Virtual Lab &middot; සරල අවලම්බය - ගුරුත්වජ ත්වරණය සෙවීම &middot; Dr. Darshana Ukuwela ගේ ප්‍රායෝගික මාර්ගෝපදේශය ඇසුරෙනි</footer>
+
+<script>
+/* ===================== TAB NAVIGATION ===================== */
+const tabs=[
+  {id:'tab1', num:'1', label:'න්‍යාය සහ සූත්‍ර'},
+  {id:'tab2', num:'2', label:'පරීක්ෂණාත්මක පියවර'},
+  {id:'tab3', num:'3', label:'Virtual Lab'},
+  {id:'tab4', num:'4', label:'ප්‍රස්තාරික විශ්ලේෂණය'},
+  {id:'tab5', num:'5', label:'වැදගත් කරුණු'}
+];
+const nav=document.getElementById('tabNav');
+tabs.forEach((t,i)=>{
+  const b=document.createElement('button');
+  b.innerHTML=`<span class="num">${t.num}</span><span>${t.label}</span>`;
+  b.dataset.target=t.id;
+  if(i===0) b.classList.add('active');
+  b.addEventListener('click',()=>switchTab(t.id));
+  nav.appendChild(b);
+});
+function switchTab(id){
+  document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('active', el.id===id));
+  document.querySelectorAll('#tabNav button').forEach(el=>el.classList.toggle('active', el.dataset.target===id));
+  if(id==='tab4') renderGraph();
+}
+document.getElementById('tab1').classList.add('active');
+
+/* ===================== PENDULUM SIMULATION ===================== */
+const canvas=document.getElementById('pendCanvas');
+const ctx=canvas.getContext('2d');
+const PIVOT_X=190, PIVOT_Y=50;
+const PX_PER_M=280; // pixels per metre for the string length
+
+let lengthCm=40;
+let theta0deg=8;
+let material='metal'; // metal | wood
+let theta=0, omega=0;
+let running=false;
+let lastFrameT=null;
+
+let oscCount=0;
+let prevThetaSign=0;
+
+let swRunning=false, swElapsed=0, swLastT=null;
+let oscAtStopwatchStart=0;
+
+const G=9.8;
+
+function dampingCoef(){ return material==='metal' ? 0.04 : 0.28; }
+
+function releasePendulum(){
+  theta = theta0deg*Math.PI/180;
+  omega = 0;
+  running = true;
+  oscCount = 0;
+  prevThetaSign = Math.sign(theta) || 1;
+  document.getElementById('oscCountDisp').textContent='0';
+  lastFrameT=null;
+}
+
+function physicsStep(dt){
+  if(!running) return;
+  const l = lengthCm/100;
+  const damping = dampingCoef();
+  const subSteps=10;
+  const sdt = dt/subSteps;
+  for(let i=0;i<subSteps;i++){
+    const alpha = -(G/l)*Math.sin(theta) - damping*omega;
+    omega += alpha*sdt;
+    theta += omega*sdt;
+  }
+  checkCrossing();
+}
+
+let lastTheta=0;
+function checkCrossing(){
+  // detect zero-crossing of theta happening in the SAME direction as the very first crossing (i.e. one crossing per period)
+  if(lastTheta< 0 && theta>=0 && refDir!==-1){
+    registerOsc(); refDir=1;
+  } else if(lastTheta>0 && theta<=0 && refDir!==1){
+    registerOsc(); refDir=-1;
+  }
+  lastTheta=theta;
+}
+let refDir=0;
+function registerOsc(){
+  oscCount++;
+  document.getElementById('oscCountDisp').textContent=oscCount;
+}
+
+function drawPendulum(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  // support beam
+  ctx.fillStyle='#5c4326';
+  ctx.fillRect(PIVOT_X-70,PIVOT_Y-14,140,14);
+  ctx.fillStyle='#3c2b18';
+  for(let i=-60;i<=60;i+=14){
+    ctx.beginPath();
+    ctx.moveTo(PIVOT_X+i,PIVOT_Y-14);
+    ctx.lineTo(PIVOT_X+i+7,PIVOT_Y);
+    ctx.strokeStyle='#3c2b18'; ctx.lineWidth=2; ctx.stroke();
+  }
+  // pivot
+  ctx.beginPath(); ctx.arc(PIVOT_X,PIVOT_Y,4,0,7); ctx.fillStyle='#20281f'; ctx.fill();
+
+  const Lm=lengthCm/100;
+  const Lpx=Lm*PX_PER_M*0.62 + 60; // visual scale so it fits canvas
+  const bx=PIVOT_X + Lpx*Math.sin(theta);
+  const by=PIVOT_Y + Lpx*Math.cos(theta);
+
+  // mean-position pointer needle (fixed, at rest position of bob)
+  const meanY=PIVOT_Y+Lpx;
+  ctx.strokeStyle='#963a2c'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(PIVOT_X, meanY-46); ctx.lineTo(PIVOT_X, meanY+18); ctx.stroke();
+  ctx.fillStyle='#963a2c';
+  ctx.beginPath();
+  ctx.moveTo(PIVOT_X-7, meanY-52); ctx.lineTo(PIVOT_X+7, meanY-52); ctx.lineTo(PIVOT_X, meanY-40);
+  ctx.closePath(); ctx.fill();
+
+  // string
+  ctx.strokeStyle='#555'; ctx.lineWidth=1.4;
+  ctx.beginPath(); ctx.moveTo(PIVOT_X,PIVOT_Y); ctx.lineTo(bx,by); ctx.stroke();
+
+  // bob
+  const r= material==='metal'? 15:17;
+  const grad=ctx.createRadialGradient(bx-5,by-6,2,bx,by,r);
+  if(material==='metal'){
+    grad.addColorStop(0,'#f0d9a8'); grad.addColorStop(0.5,'#b9863f'); grad.addColorStop(1,'#7a5726');
+  }else{
+    grad.addColorStop(0,'#c99a63'); grad.addColorStop(0.6,'#8a5a34'); grad.addColorStop(1,'#5c3a1f');
+  }
+  ctx.beginPath(); ctx.arc(bx,by,r,0,7); ctx.fillStyle=grad; ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,.25)'; ctx.lineWidth=1; ctx.stroke();
+
+  // angle arc + label
+  ctx.strokeStyle='rgba(44,92,120,.5)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.arc(PIVOT_X,PIVOT_Y,40,Math.PI/2, Math.PI/2+theta, theta<0); ctx.stroke();
+}
+
+// Fixed-step tick, driven by setInterval so the animation keeps running
+// even in restricted/embedded viewers where requestAnimationFrame can stall.
+const STEP_MS = 20;
+const STEP_S = STEP_MS/1000;
+function tick(){
+  physicsStep(STEP_S);
+  drawPendulum();
+  if(swRunning){
+    swElapsed += STEP_S;
+    updateStopwatchDisplay();
+  }
+}
+setInterval(tick, STEP_MS);
+drawPendulum();
+
+function updateStopwatchDisplay(){
+  document.getElementById('swDisplay').textContent=swElapsed.toFixed(2).padStart(5,'0');
+}
+
+/* Controls */
+const lenSlider=document.getElementById('lenSlider');
+lenSlider.addEventListener('input',()=>{
+  lengthCm=parseInt(lenSlider.value);
+  document.getElementById('lenVal').textContent=lengthCm;
+  if(!running) drawPendulum();
+});
+const angSlider=document.getElementById('angSlider');
+angSlider.addEventListener('input',()=>{
+  theta0deg=parseInt(angSlider.value);
+  document.getElementById('angVal').textContent=theta0deg;
+  document.getElementById('angWarn').style.display = theta0deg>10 ? 'block':'none';
+  if(!running){ theta=theta0deg*Math.PI/180; drawPendulum(); }
+});
+
+document.getElementById('matMetal').addEventListener('click',()=>{
+  material='metal';
+  document.getElementById('matMetal').classList.add('on');
+  document.getElementById('matWood').classList.remove('on');
+});
+document.getElementById('matWood').addEventListener('click',()=>{
+  material='wood';
+  document.getElementById('matWood').classList.add('on');
+  document.getElementById('matMetal').classList.remove('on');
+});
+
+document.getElementById('btnRelease').addEventListener('click',()=>{
+  refDir=0; lastTheta = theta0deg*Math.PI/180;
+  releasePendulum();
+  drawPendulum();
+});
+document.getElementById('btnPause').addEventListener('click',()=>{
+  running=!running;
+  document.getElementById('btnPause').textContent = running? 'විරාමය' : 'දිගටම';
+  lastFrameT=null;
+});
+
+/* Stopwatch */
+document.getElementById('swStart').addEventListener('click',()=>{
+  swRunning=true;
+  oscAtStopwatchStart=oscCount;
+});
+document.getElementById('swStop').addEventListener('click',()=>{
+  swRunning=false;
+});
+document.getElementById('swReset').addEventListener('click',()=>{
+  swRunning=false; swElapsed=0; updateStopwatchDisplay();
+});
+
+/* Record to data table */
+document.getElementById('btnRecord').addEventListener('click',()=>{
+  const oscSince = Math.max(oscCount-oscAtStopwatchStart,0);
+  if(swElapsed<=0 || oscSince<1){
+    alert('කරුණාකර පළමුව විරාම සටිකාව ආරම්භ කර, අවම වශයෙන් දෝලනයක්වත් සම්පූර්ණ කර නවත්වන්න.');
+    return;
+  }
+  const T = swElapsed/oscSince;
+  addDataRow(lengthCm/100, T);
+  switchTab('tab4');
+});
+
+/* ===================== DATA TABLE + GRAPH ===================== */
+let dataset=[]; // {l, T, T2}
+const dataBody=document.getElementById('dataBody');
+
+function renderTable(){
+  dataBody.innerHTML='';
+  dataset.forEach((d,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${i+1}</td><td>${d.l.toFixed(3)}</td><td>${d.T.toFixed(3)}</td><td>${d.T2.toFixed(4)}</td>
+    <td><button data-i="${i}">✕</button></td>`;
+    dataBody.appendChild(tr);
+  });
+  dataBody.querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      dataset.splice(parseInt(btn.dataset.i),1);
+      renderTable(); renderGraph();
+    });
+  });
+  document.getElementById('nPts').textContent=dataset.length;
+}
+
+function addDataRow(lMeters,Tsec){
+  dataset.push({l:lMeters, T:Tsec, T2:Tsec*Tsec});
+  renderTable();
+  renderGraph();
+}
+
+document.getElementById('addRowBtn').addEventListener('click',()=>{
+  const l=parseFloat(document.getElementById('inL').value);
+  const T=parseFloat(document.getElementById('inT').value);
+  if(isNaN(l)||isNaN(T)||l<=0||T<=0){ alert('l සහ T අගයන් නිවැරදිව ඇතුල් කරන්න.'); return; }
+  addDataRow(l/100, T);
+  document.getElementById('inL').value='';
+  document.getElementById('inT').value='';
+});
+document.getElementById('clearRowsBtn').addEventListener('click',()=>{
+  dataset=[]; renderTable(); renderGraph();
+});
+
+function leastSquares(pts){
+  const n=pts.length;
+  if(n<2) return null;
+  let sx=0,sy=0,sxy=0,sxx=0;
+  pts.forEach(p=>{ sx+=p.x; sy+=p.y; sxy+=p.x*p.y; sxx+=p.x*p.x; });
+  const denom=(n*sxx - sx*sx);
+  if(denom===0) return null;
+  const m=(n*sxy - sx*sy)/denom;
+  const b=(sy - m*sx)/n;
+  return {m,b};
+}
+
+function renderGraph(){
+  const gc=document.getElementById('graphCanvas');
+  const gctx=gc.getContext('2d');
+  gctx.clearRect(0,0,gc.width,gc.height);
+  const padL=60,padB=50,padT=24,padR=24;
+  const W=gc.width-padL-padR, H=gc.height-padT-padB;
+
+  gctx.strokeStyle='#c3ad81';
+  gctx.strokeRect(padL,padT,W,H);
+
+  if(dataset.length===0){
+    gctx.fillStyle='#8a8a7a'; gctx.font='14px Georgia'; gctx.textAlign='center';
+    gctx.fillText('දත්ත එකතු කිරීමෙන් පසු ප්‍රස්තාරය මෙහි දිස්වේ', gc.width/2, gc.height/2);
+    document.getElementById('gradVal').textContent='—';
+    document.getElementById('gVal').textContent='—';
+    return;
+  }
+  const xs=dataset.map(d=>d.l), ys=dataset.map(d=>d.T2);
+  let xmax=Math.max(...xs, 0.01)*1.15;
+  let ymax=Math.max(...ys, 0.01)*1.15;
+  const xToPx = x => padL + (x/xmax)*W;
+  const yToPx = y => padT + H - (y/ymax)*H;
+
+  // grid + ticks
+  gctx.fillStyle='#4b5147'; gctx.font='11px Georgia'; gctx.textAlign='center';
+  for(let i=0;i<=5;i++){
+    const xv=xmax*i/5;
+    const px=xToPx(xv);
+    gctx.strokeStyle='#e6ddc4'; gctx.beginPath(); gctx.moveTo(px,padT); gctx.lineTo(px,padT+H); gctx.stroke();
+    gctx.fillText(xv.toFixed(2), px, padT+H+16);
+  }
+  gctx.textAlign='right';
+  for(let i=0;i<=5;i++){
+    const yv=ymax*i/5;
+    const py=yToPx(yv);
+    gctx.strokeStyle='#e6ddc4'; gctx.beginPath(); gctx.moveTo(padL,py); gctx.lineTo(padL+W,py); gctx.stroke();
+    gctx.fillText(yv.toFixed(2), padL-8, py+4);
+  }
+  gctx.fillStyle='#2c3e34'; gctx.font='12px Georgia'; gctx.textAlign='center';
+  gctx.fillText('l (m)', padL+W/2, gc.height-8);
+  gctx.save(); gctx.translate(14, padT+H/2); gctx.rotate(-Math.PI/2);
+  gctx.fillText('T² (s²)',0,0); gctx.restore();
+
+  // regression
+  const pts=dataset.map(d=>({x:d.l,y:d.T2}));
+  const reg=leastSquares(pts);
+  if(reg){
+    gctx.strokeStyle='#963a2c'; gctx.lineWidth=2;
+    gctx.beginPath();
+    const x1=0, y1=reg.b, x2=xmax, y2=reg.m*xmax+reg.b;
+    gctx.moveTo(xToPx(x1), yToPx(Math.max(y1,0)));
+    gctx.lineTo(xToPx(x2), yToPx(y2));
+    gctx.stroke();
+    const gEst = reg.m!==0 ? (4*Math.PI*Math.PI/reg.m) : 0;
+    document.getElementById('gradVal').textContent=reg.m.toFixed(3)+' s²/m';
+    document.getElementById('gVal').textContent=gEst.toFixed(2)+' m/s²';
+  }
+
+  // points
+  gctx.fillStyle='#2b5c78';
+  pts.forEach(p=>{
+    gctx.beginPath(); gctx.arc(xToPx(p.x), yToPx(p.y), 4.5, 0, 7); gctx.fill();
+    gctx.strokeStyle='#fff'; gctx.lineWidth=1; gctx.stroke();
+  });
+}
+
+renderTable();
+renderGraph();
+</script>
+</body>
+</html>

@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>වර්ණාවලිමානය — Spectrometer Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-deep:#0a0d13;
+  --bg-panel:#12161f;
+  --bg-panel-2:#171c27;
+  --line:#252c3a;
+  --line-soft:#1b212d;
+  --brass:#c9a45c;
+  --brass-bright:#eccf8f;
+  --brass-dim:#7d6a45;
+  --text:#e8e6df;
+  --text-dim:#8b93a1;
+  --text-faint:#5b6472;
+  --teal:#5ecfcf;
+  --sodium:#ffd35c;
+  --red-ray:#ff6b5e;
+  --violet-ray:#9f7bff;
+  --warn:#d1573f;
+  --good:#6fbf8b;
+  --radius:10px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    radial-gradient(ellipse at 20% -10%, #16202b 0%, transparent 55%),
+    radial-gradient(ellipse at 100% 110%, #1a1420 0%, transparent 50%),
+    var(--bg-deep);
+  color:var(--text);
+  font-family:'IBM Plex Sans',sans-serif;
+  min-height:100vh;
+  padding:0 0 60px 0;
+}
+.topbar{
+  padding:28px 32px 18px 32px;
+  border-bottom:1px solid var(--line-soft);
+  display:flex;
+  align-items:baseline;
+  gap:18px;
+  flex-wrap:wrap;
+}
+.topbar h1{
+  font-family:'Fraunces',serif;
+  font-weight:600;
+  font-size:1.7rem;
+  margin:0;
+  letter-spacing:0.3px;
+  color:var(--brass-bright);
+}
+.topbar .sinhala{
+  font-family:'Fraunces',serif;
+  font-weight:500;
+  color:var(--text-dim);
+  font-size:1.05rem;
+}
+.topbar .tagline{
+  color:var(--text-faint);
+  font-size:0.85rem;
+  margin-left:auto;
+  max-width:340px;
+  text-align:right;
+  line-height:1.4;
+}
+.layout{
+  display:grid;
+  grid-template-columns:minmax(0,1.45fr) minmax(340px,1fr);
+  gap:22px;
+  padding:24px 32px;
+  align-items:start;
+}
+@media (max-width:980px){
+  .layout{grid-template-columns:1fr;}
+}
+.card{
+  background:linear-gradient(180deg,var(--bg-panel) 0%, var(--bg-panel-2) 100%);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:18px;
+}
+.stage-card{padding:20px;}
+.stage-row{
+  display:flex;
+  gap:20px;
+  flex-wrap:wrap;
+  align-items:flex-start;
+}
+.apparatus-wrap{
+  position:relative;
+  flex:1 1 420px;
+  min-width:300px;
+}
+.apparatus-wrap canvas{
+  width:100%;
+  height:auto;
+  display:block;
+  background:radial-gradient(circle at 50% 46%, #0e131c 0%, #090b10 78%);
+  border-radius:50%;
+  border:1px solid var(--line);
+}
+.side-col{
+  width:210px;
+  flex:0 0 210px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.eyepiece-box{
+  background:#050608;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:12px;
+  text-align:center;
+}
+.eyepiece-box .label{
+  font-size:0.68rem;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  color:var(--brass-dim);
+  margin-bottom:8px;
+}
+.eyepiece-box canvas{
+  border-radius:50%;
+  background:#000;
+  border:3px solid #232323;
+  box-shadow:inset 0 0 30px #000, 0 0 0 1px #333;
+}
+.readout{
+  background:#000;
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:10px 12px;
+  font-family:'IBM Plex Mono',monospace;
+}
+.readout .rlabel{
+  font-size:0.62rem;
+  letter-spacing:1.2px;
+  text-transform:uppercase;
+  color:var(--text-faint);
+  margin-bottom:3px;
+}
+.readout .rval{
+  font-size:1.15rem;
+  color:var(--sodium);
+  letter-spacing:0.5px;
+}
+.readout .rval small{color:var(--text-dim);font-size:0.65rem;}
+
+/* ===== Mode Tabs ===== */
+.tabs{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-bottom:16px;
+}
+.tab-btn{
+  background:var(--bg-panel-2);
+  border:1px solid var(--line);
+  color:var(--text-dim);
+  padding:10px 8px;
+  border-radius:8px;
+  cursor:pointer;
+  font-family:'IBM Plex Sans',sans-serif;
+  font-size:0.76rem;
+  line-height:1.3;
+  text-align:left;
+  transition:all .15s ease;
+}
+.tab-btn b{display:block;color:var(--text);font-size:0.85rem;margin-bottom:2px;}
+.tab-btn:hover{border-color:var(--brass-dim);}
+.tab-btn.active{
+  background:linear-gradient(135deg,#2a2210,#1c1710);
+  border-color:var(--brass);
+  color:var(--brass-bright);
+}
+.tab-btn.active b{color:var(--brass-bright);}
+
+.panel-title{
+  font-family:'Fraunces',serif;
+  font-size:1.05rem;
+  color:var(--brass-bright);
+  margin:0 0 4px 0;
+}
+.panel-sub{
+  color:var(--text-faint);
+  font-size:0.78rem;
+  margin:0 0 16px 0;
+  line-height:1.45;
+}
+.control-group{margin-bottom:16px;}
+.control-group label{
+  display:flex;
+  justify-content:space-between;
+  font-size:0.78rem;
+  color:var(--text-dim);
+  margin-bottom:6px;
+}
+.control-group label .v{color:var(--sodium);font-family:'IBM Plex Mono',monospace;}
+input[type=range]{
+  width:100%;
+  -webkit-appearance:none;
+  height:4px;
+  border-radius:3px;
+  background:var(--line);
+  outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:15px;height:15px;border-radius:50%;
+  background:var(--brass);
+  border:2px solid var(--brass-bright);
+  cursor:pointer;
+  margin-top:-1px;
+}
+input[type=range]::-moz-range-thumb{
+  width:15px;height:15px;border-radius:50%;
+  background:var(--brass);border:2px solid var(--brass-bright);cursor:pointer;
+}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
+.btn{
+  background:var(--bg-panel-2);
+  border:1px solid var(--brass-dim);
+  color:var(--brass-bright);
+  padding:8px 12px;
+  border-radius:7px;
+  cursor:pointer;
+  font-size:0.78rem;
+  font-family:'IBM Plex Sans',sans-serif;
+  transition:all .15s ease;
+}
+.btn:hover{background:#2a2210;border-color:var(--brass);}
+.btn:disabled{opacity:0.35;cursor:not-allowed;}
+.btn.primary{background:var(--brass);color:#1a1408;border-color:var(--brass);font-weight:600;}
+.btn.primary:hover{background:var(--brass-bright);}
+.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:14px;}
+.seg button{
+  flex:1;background:var(--bg-panel-2);color:var(--text-dim);border:none;padding:8px 6px;
+  cursor:pointer;font-size:0.76rem;font-family:'IBM Plex Sans',sans-serif;
+  border-right:1px solid var(--line);
+}
+.seg button:last-child{border-right:none;}
+.seg button.active{background:var(--brass);color:#1a1408;font-weight:600;}
+
+.result-box{
+  background:#0d1c16;
+  border:1px solid #2a4438;
+  border-radius:8px;
+  padding:12px;
+  margin-top:10px;
+  font-size:0.82rem;
+  color:var(--good);
+  font-family:'IBM Plex Mono',monospace;
+  line-height:1.6;
+}
+.warn-box{
+  background:#241512;
+  border:1px solid #4a2a22;
+  border-radius:8px;
+  padding:10px 12px;
+  margin-top:10px;
+  font-size:0.76rem;
+  color:var(--warn);
+  line-height:1.4;
+}
+.notes{
+  margin-top:6px;
+  border-top:1px dashed var(--line);
+  padding-top:14px;
+}
+.notes h4{
+  font-family:'Fraunces',serif;
+  color:var(--brass-bright);
+  font-size:0.85rem;
+  margin:0 0 8px 0;
+}
+.notes ul{margin:0;padding-left:18px;color:var(--text-dim);font-size:0.78rem;line-height:1.65;}
+.notes li{margin-bottom:4px;}
+.pill{
+  display:inline-block;
+  background:var(--bg-panel-2);
+  border:1px solid var(--line);
+  color:var(--text-dim);
+  font-size:0.68rem;
+  padding:2px 8px;
+  border-radius:20px;
+  font-family:'IBM Plex Mono',monospace;
+  margin-left:6px;
+}
+.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;}
+.status-line{display:flex;align-items:center;font-size:0.78rem;color:var(--text-dim);margin-top:8px;}
+footer.creditline{
+  text-align:center;
+  color:var(--text-faint);
+  font-size:0.72rem;
+  margin-top:26px;
+  letter-spacing:0.4px;
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>Spectrometer Lab</h1>
+  <span class="sinhala">වර්ණාවලිමානය</span>
+  <div class="tagline">An interactive optical bench for Advanced Level Physics — focusing, table leveling, prism angle and minimum deviation practicals.</div>
+</div>
+
+<div class="layout">
+
+  <!-- ============ LEFT: STAGE ============ -->
+  <div class="card stage-card">
+    <div class="stage-row">
+      <div class="apparatus-wrap">
+        <canvas id="mainCanvas" width="640" height="640"></canvas>
+      </div>
+      <div class="side-col">
+        <div class="eyepiece-box">
+          <div class="label">Telescope field of view</div>
+          <canvas id="eyeCanvas" width="200" height="200"></canvas>
+        </div>
+        <div class="readout">
+          <div class="rlabel">Prism table angle</div>
+          <div class="rval" id="rTable">000° 00'</div>
+        </div>
+        <div class="readout">
+          <div class="rlabel">Telescope vernier</div>
+          <div class="rval" id="rTelescope">000° 00'</div>
+        </div>
+        <div class="readout" id="modeReadoutBox">
+          <div class="rlabel" id="modeReadoutLabel">Status</div>
+          <div class="rval" id="modeReadoutVal">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ RIGHT: CONTROLS ============ -->
+  <div class="card">
+    <div class="tabs" id="tabBar">
+      <button class="tab-btn active" data-mode="1"><b>1 · Focus</b>Collimator &amp; telescope</button>
+      <button class="tab-btn" data-mode="2"><b>2 · Leveling</b>Prism table screws a,b,c</button>
+      <button class="tab-btn" data-mode="3"><b>3 · Prism angle A</b>Reflection method</button>
+      <button class="tab-btn" data-mode="4"><b>4 · Min. deviation</b>Angle Dm &amp; index n</button>
+    </div>
+
+    <div id="modeContent"></div>
+
+    <div class="notes" id="notesPanel"></div>
+  </div>
+
+</div>
+
+<footer class="creditline">Simplified 2‑D optical model for teaching purposes · not a substitute for the physical apparatus</footer>
+
+<script>
+/* ============================================================
+   STATE
+============================================================ */
+const state = {
+  mode: 1,
+  tableAngle: 210,          // degrees, rotation of prism table (world math convention)
+  telescopeAngle: 150,      // degrees, angular position of telescope around the ring
+  screws: { a: 0, b: 0, c: 0 },
+  activeScrew: 'a',
+  focus: { s1: 50, s2: 50, s3: 50, s4: 50 }, // 50 = perfectly focused
+  light: 'mono',            // 'mono' | 'white'
+  prismA: 60,               // apex angle of the prism, degrees
+  n_true: 1.523,            // hidden "true" refractive index used by the physics engine
+  removePrism: false,       // mode 4: view collimator directly for T0
+  angleReadings: { v1: null, v2: null },
+  devReadings: { t0: null, td: null },
+  prevDeviation: null,
+  trend: '—'
+};
+
+const TOL = 3.2; // degrees tolerance for telescope "catching" a beam
+
+/* ============================================================
+   VECTOR / GEOMETRY HELPERS  (math convention: y-up, deg CCW)
+============================================================ */
+function toRad(d){ return d*Math.PI/180; }
+function norm360(d){ d = d % 360; if(d<0) d+=360; return d; }
+function rot(v, deg){
+  const r = toRad(deg), c = Math.cos(r), s = Math.sin(r);
+  return { x: v.x*c - v.y*s, y: v.x*s + v.y*c };
+}
+function dot(a,b){ return a.x*b.x + a.y*b.y; }
+function mag(a){ return Math.hypot(a.x,a.y); }
+function unit(a){ const m = mag(a)||1; return {x:a.x/m, y:a.y/m}; }
+function angleOf(v){ return norm360(Math.atan2(v.y,v.x)*180/Math.PI); }
+
+function reflect(d,n){
+  const dn = dot(d,n);
+  return { x: d.x - 2*dn*n.x, y: d.y - 2*dn*n.y };
+}
+// refract d across surface with normal n (any orientation), n1->n2. returns null on TIR
+function refract(d, nIn, n1, n2){
+  let n = { x:nIn.x, y:nIn.y };
+  let cosi = -dot(d,n);
+  if (cosi < 0) { n = {x:-n.x,y:-n.y}; cosi = -cosi; }
+  const eta = n1/n2;
+  const sin2t = eta*eta*(1-cosi*cosi);
+  if (sin2t > 1) return null;
+  const cost = Math.sqrt(1-sin2t);
+  return { x: eta*d.x + (eta*cosi-cost)*n.x, y: eta*d.y + (eta*cosi-cost)*n.y };
+}
+
+// Prism local frame: apex points toward -x (west, toward the collimator at tableAngle=0)
+function getPrismGeometry(tableAngle, Adeg){
+  const half = toRad(Adeg/2);
+  const L = 108;
+  const apexLocal  = { x:-58, y:0 };
+  const leftLocal  = { x: apexLocal.x + L*Math.cos(half), y: apexLocal.y + L*Math.sin(half) };
+  const rightLocal = { x: apexLocal.x + L*Math.cos(half), y: apexLocal.y - L*Math.sin(half) };
+
+  const apex  = rot(apexLocal, tableAngle);
+  const left  = rot(leftLocal, tableAngle);
+  const right = rot(rightLocal, tableAngle);
+  const centroid = { x:(apex.x+left.x+right.x)/3, y:(apex.y+left.y+right.y)/3 };
+
+  function outwardNormal(p1,p2){
+    const ex=p2.x-p1.x, ey=p2.y-p1.y;
+    const n1={x:-ey,y:ex}, n2={x:ey,y:-ex};
+    const mid={x:(p1.x+p2.x)/2,y:(p1.y+p2.y)/2};
+    const d={x:mid.x-centroid.x,y:mid.y-centroid.y};
+    const chosen = (n1.x*d.x+n1.y*d.y) > 0 ? n1 : n2;
+    return unit(chosen);
+  }
+  return {
+    apex, left, right, centroid,
+    normalLeft:  outwardNormal(apex,left),   // face "AB"
+    normalRight: outwardNormal(apex,right),  // face "AC"
+  };
+}
+
+const DIN = { x:1, y:0 }; // incident collimator beam always travels world +x
+
+function computeReflectionTargets(tableAngle, Adeg){
+  const g = getPrismGeometry(tableAngle, Adeg);
+  const out = { t1:null, t2:null, geom:g };
+  if (dot(DIN,g.normalLeft) < 0)  out.t1 = angleOf(reflect(DIN,g.normalLeft));
+  if (dot(DIN,g.normalRight) < 0) out.t2 = angleOf(reflect(DIN,g.normalRight));
+  return out;
+}
+
+function computeRefractionPath(tableAngle, Adeg, n_true){
+  const g = getPrismGeometry(tableAngle, Adeg);
+  let entryFace, exitFace, entryN, exitN;
+  const litLeft = dot(DIN,g.normalLeft) < 0;
+  const litRight = dot(DIN,g.normalRight) < 0;
+  if (litLeft && !litRight){ entryFace='left'; entryN=g.normalLeft; exitFace='right'; exitN=g.normalRight; }
+  else if (litRight && !litLeft){ entryFace='right'; entryN=g.normalRight; exitFace='left'; exitN=g.normalLeft; }
+  else if (litLeft && litRight){ entryFace='left'; entryN=g.normalLeft; exitFace='right'; exitN=g.normalRight; }
+  else return { valid:false, reason:'grazing', geom:g };
+
+  const inside = refract(DIN, entryN, 1, n_true);
+  if (!inside) return { valid:false, reason:'tir_entry', geom:g, entryFace, exitFace };
+  const outRay = refract(inside, exitN, n_true, 1);
+  if (!outRay) return { valid:false, reason:'tir_exit', geom:g, entryFace, exitFace, inside };
+
+  const cosDev = Math.max(-1,Math.min(1,dot(DIN,outRay)));
+  const deviation = 180 - Math.acos(cosDev)*180/Math.PI; // deviation from straight-through path
+  return {
+    valid:true, geom:g, entryFace, exitFace, inside, outRay,
+    deviation, targetAngle: angleOf(outRay)
+  };
+}
+
+/* ============================================================
+   DEGREE / MINUTE FORMATTING
+============================================================ */
+function fmtDM(deg){
+  deg = norm360(deg);
+  const d = Math.floor(deg);
+  const m = Math.round((deg-d)*60);
+  let dd=d, mm=m;
+  if(mm===60){mm=0; dd+=1;}
+  return `${String(dd).padStart(3,'0')}° ${String(mm).padStart(2,'0')}'`;
+}
+function fmtDeg1(deg){ return deg.toFixed(2)+'°'; }
+
+/* ============================================================
+   CANVAS SETUP
+============================================================ */
+const mainCanvas = document.getElementById('mainCanvas');
+const mctx = mainCanvas.getContext('2d');
+const eyeCanvas = document.getElementById('eyeCanvas');
+const ectx = eyeCanvas.getContext('2d');
+
+const CX = 320, CY = 320;     // center of main canvas (canvas px coords)
+const SCALE = 1.55;           // world units -> canvas px
+const RING_R = 250;           // radius of the graduated ring
+
+function toCanvas(p){ return { x: CX + p.x*SCALE, y: CY - p.y*SCALE }; }
+
+let glowT = 0;
+function drawMain(){
+  glowT += 0.05;
+  mctx.clearRect(0,0,640,640);
+
+  // graduated ring
+  mctx.save();
+  mctx.translate(CX,CY);
+  mctx.strokeStyle = '#2c3444';
+  mctx.lineWidth = 2;
+  mctx.beginPath(); mctx.arc(0,0,RING_R,0,Math.PI*2); mctx.stroke();
+  mctx.beginPath(); mctx.arc(0,0,RING_R-16,0,Math.PI*2); mctx.stroke();
+  for(let a=0; a<360; a+=2){
+    const big = a%10===0;
+    const r1 = RING_R-16, r2 = big? RING_R-2 : RING_R-8;
+    const rad = toRad(a);
+    mctx.strokeStyle = big ? '#c9a45c' : '#4a4232';
+    mctx.lineWidth = big?1.4:0.8;
+    mctx.beginPath();
+    mctx.moveTo(Math.cos(rad)*r1, -Math.sin(rad)*r1);
+    mctx.lineTo(Math.cos(rad)*r2, -Math.sin(rad)*r2);
+    mctx.stroke();
+  }
+  mctx.fillStyle = '#8b93a1';
+  mctx.font = '11px IBM Plex Mono';
+  mctx.textAlign='center'; mctx.textBaseline='middle';
+  for(let a=0;a<360;a+=30){
+    const rad = toRad(a);
+    const rr = RING_R+16;
+    mctx.fillText(a+'°', Math.cos(rad)*rr, -Math.sin(rad)*rr);
+  }
+  mctx.restore();
+
+  // ---- Collimator (fixed, at 180°, shining +x) ----
+  drawArm(180, RING_R-15, 168, '#5a4a2c', 'Collimator', true);
+  drawSlitSource(180);
+
+  // ---- Telescope (rotatable) ----
+  drawArm(state.telescopeAngle, RING_R-15, 168, '#5a4a2c', 'Telescope', false);
+
+  // ---- Prism table disc ----
+  mctx.save();
+  mctx.translate(CX,CY);
+  mctx.beginPath(); mctx.arc(0,0,130,0,Math.PI*2);
+  const discGrad = mctx.createRadialGradient(0,-20,10,0,0,140);
+  discGrad.addColorStop(0,'#232a37'); discGrad.addColorStop(1,'#141920');
+  mctx.fillStyle = discGrad; mctx.fill();
+  mctx.strokeStyle='#3a4356'; mctx.lineWidth=1.5; mctx.stroke();
+  // leveling screws a, b, c
+  const screwPos = [ [90,'a'], [210,'b'], [330,'c'] ];
+  screwPos.forEach(([ang,key])=>{
+    const rad=toRad(ang);
+    const x=Math.cos(rad)*112, y=-Math.sin(rad)*112;
+    mctx.beginPath(); mctx.arc(x,y,9,0,Math.PI*2);
+    mctx.fillStyle = (state.mode===2 && state.activeScrew===key) ? '#eccf8f' : '#6b6252';
+    mctx.fill();
+    mctx.strokeStyle='#111'; mctx.lineWidth=1; mctx.stroke();
+    mctx.fillStyle='#0a0a0a'; mctx.font='9px IBM Plex Mono'; mctx.textAlign='center'; mctx.textBaseline='middle';
+    mctx.fillText(key,x,y+1);
+  });
+  mctx.restore();
+
+  // ---- Prism ----
+  const geom = getPrismGeometry(state.tableAngle, state.prismA);
+  drawPrism(geom);
+
+  // ---- Rays per mode ----
+  if (state.mode===1) drawRayMode1();
+  if (state.mode===2) drawRayMode2(geom);
+  if (state.mode===3) drawRayMode3(geom);
+  if (state.mode===4) drawRayMode4(geom);
+
+  // center hub
+  mctx.save(); mctx.translate(CX,CY);
+  mctx.beginPath(); mctx.arc(0,0,7,0,Math.PI*2);
+  mctx.fillStyle='#c9a45c'; mctx.fill();
+  mctx.restore();
+}
+
+function drawArm(angleDeg, rOuter, length, color, label, isCollimator){
+  const rad = toRad(angleDeg);
+  const ox = Math.cos(rad)*rOuter, oy = -Math.sin(rad)*rOuter;
+  const ix = Math.cos(rad)*(rOuter-length), iy = -Math.sin(rad)*(rOuter-length);
+  mctx.save();
+  mctx.translate(CX,CY);
+  mctx.strokeStyle = isCollimator ? '#8a7550' : '#a68f5c';
+  mctx.lineWidth = 15;
+  mctx.lineCap='round';
+  mctx.beginPath(); mctx.moveTo(ix,iy); mctx.lineTo(ox,oy); mctx.stroke();
+  mctx.strokeStyle = '#3a2f18'; mctx.lineWidth=15; mctx.globalAlpha=0.25;
+  mctx.beginPath(); mctx.moveTo(ix,iy); mctx.lineTo(ox,oy); mctx.stroke();
+  mctx.globalAlpha=1;
+  // eyepiece/lamp cap
+  mctx.beginPath(); mctx.arc(ox,oy,11,0,Math.PI*2);
+  mctx.fillStyle = isCollimator ? '#4b3d22' : '#2b2517';
+  mctx.fill(); mctx.strokeStyle='#c9a45c'; mctx.lineWidth=1.4; mctx.stroke();
+  // label
+  mctx.fillStyle='#c9a45c'; mctx.font='11px IBM Plex Sans'; mctx.textAlign='center';
+  const lx = Math.cos(rad)*(rOuter+34), ly=-Math.sin(rad)*(rOuter+34);
+  mctx.fillText(label, lx, ly);
+  mctx.restore();
+}
+
+function drawSlitSource(angleDeg){
+  const rad = toRad(angleDeg);
+  const ox = Math.cos(rad)*(RING_R-15), oy = -Math.sin(rad)*(RING_R-15);
+  mctx.save(); mctx.translate(CX,CY);
+  const glow = 0.55+0.25*Math.sin(glowT);
+  const col = state.light==='mono' ? `rgba(255,211,92,${glow})` : `rgba(255,255,255,${glow})`;
+  mctx.beginPath(); mctx.arc(ox,oy,6,0,Math.PI*2);
+  mctx.fillStyle = col; mctx.shadowColor=col; mctx.shadowBlur=14; mctx.fill();
+  mctx.restore();
+}
+
+function drawPrism(g){
+  mctx.save(); mctx.translate(CX,CY);
+  function pc(p){ return {x:p.x*1.15, y:-p.y*1.15}; }
+  const A=pc(g.apex), L=pc(g.left), R=pc(g.right);
+  mctx.beginPath();
+  mctx.moveTo(A.x,A.y); mctx.lineTo(L.x,L.y); mctx.lineTo(R.x,R.y); mctx.closePath();
+  const grad = mctx.createLinearGradient(A.x,A.y,R.x,R.y);
+  grad.addColorStop(0,'rgba(120,190,200,0.16)');
+  grad.addColorStop(1,'rgba(120,190,200,0.05)');
+  mctx.fillStyle = grad; mctx.fill();
+  mctx.strokeStyle = '#7fd6d6'; mctx.lineWidth=1.6; mctx.stroke();
+  // vertex dots + labels
+  mctx.fillStyle='#7fd6d6'; mctx.font='10px IBM Plex Mono'; mctx.textAlign='center';
+  mctx.fillText('A', A.x + (A.x-  (L.x+R.x)/2)*0.15, A.y + (A.y-(L.y+R.y)/2)*0.15 - 4);
+  mctx.restore();
+}
+
+/* ---- ray drawing per mode ---- */
+function rayLine(p1,p2,color,width,dash){
+  mctx.save(); mctx.translate(CX,CY);
+  mctx.strokeStyle=color; mctx.lineWidth=width||2;
+  if(dash) mctx.setLineDash(dash);
+  mctx.shadowColor=color; mctx.shadowBlur=6;
+  mctx.beginPath();
+  mctx.moveTo(p1.x*1.15,-p1.y*1.15);
+  mctx.lineTo(p2.x*1.15,-p2.y*1.15);
+  mctx.stroke();
+  mctx.setLineDash([]);
+  mctx.restore();
+}
+
+function drawRayMode1(){
+  // simple straight beam collimator -> center -> telescope, showing parallel-ish rays
+  const far = 260;
+  rayLine({x:-far,y:6},{x:0,y:6}, 'rgba(255,211,92,0.55)',2);
+  rayLine({x:-far,y:-6},{x:0,y:-6}, 'rgba(255,211,92,0.55)',2);
+  rayLine({x:-far,y:0},{x:0,y:0}, '#ffd35c',2.4);
+  const rad=toRad(state.telescopeAngle);
+  rayLine({x:0,y:0},{x:Math.cos(rad)*far,y:Math.sin(rad)*far}, 'rgba(126,214,214,0.5)',2,[4,4]);
+}
+
+function drawRayMode2(g){
+  const far=230;
+  rayLine({x:-far,y:0},{x:0,y:0}, '#ffd35c',2.2);
+  // reflection targets available at current table angle
+  const r = computeReflectionTargets(state.tableAngle, state.prismA);
+  if(r.t1!==null){
+    const rad=toRad(r.t1);
+    rayLine({x:0,y:0},{x:Math.cos(rad)*far,y:Math.sin(rad)*far}, 'rgba(126,214,214,0.55)',1.8,[3,3]);
+  }
+  if(r.t2!==null){
+    const rad=toRad(r.t2);
+    rayLine({x:0,y:0},{x:Math.cos(rad)*far,y:Math.sin(rad)*far}, 'rgba(126,214,214,0.55)',1.8,[3,3]);
+  }
+  const rad=toRad(state.telescopeAngle);
+  rayLine({x:0,y:0},{x:Math.cos(rad)*far,y:Math.sin(rad)*far}, '#7fd6d6',2.4);
+}
+
+function drawRayMode3(g){
+  const far=240;
+  rayLine({x:-far,y:0},{x:g.apex.x,y:g.apex.y}, '#ffd35c',2.4);
+  const r = computeReflectionTargets(state.tableAngle, state.prismA);
+  [r.t1,r.t2].forEach((t,i)=>{
+    if(t===null) return;
+    const rad=toRad(t);
+    const near = state.telescopeAngle!==null && Math.abs(angDiff(t,state.telescopeAngle))<TOL;
+    rayLine({x:0,y:0},{x:Math.cos(rad)*far,y:Math.sin(rad)*far}, near?'#9be8e8':'rgba(126,214,214,0.45)', near?3:1.6, near?null:[3,3]);
+  });
+  const rad=toRad(state.telescopeAngle);
+  rayLine({x:0,y:0},{x:Math.cos(rad)*far,y:Math.sin(rad)*far}, '#c9a45c',1.4,[2,2]);
+}
+
+function drawRayMode4(g){
+  const far=250;
+  const path = computeRefractionPath(state.tableAngle, state.prismA, state.n_true);
+  const colors = state.light==='white' ? ['#ff6b5e','#ffd35c','#7fe07f','#5ecfcf','#9f7bff'] : ['#ffd35c'];
+  colors.forEach((col,i)=>{
+    const spread = state.light==='white' ? (i-2)*0.9 : 0; // small angular spread purely illustrative
+    // incident
+    rayLine({x:-far,y:spread*0},{x:g.apex.x*0+entryPointFor(g,path).x, y:entryPointFor(g,path).y}, col+'', i===2||colors.length===1?2.4:1.4);
+  });
+
+  if(!path.valid){
+    return;
+  }
+  const entryP = entryPointFor(g,path);
+  // internal ray
+  const exitP = exitPointFor(g,path);
+  rayLine(entryP, exitP, 'rgba(255,255,255,0.35)', 1.6, [2,2]);
+  // emergent ray(s)
+  colors.forEach((col,i)=>{
+    let dirAngle = path.targetAngle;
+    if(state.light==='white'){
+      // fake dispersion: slightly different bending per color, violet bends more
+      const spreadFactor = (2-i)*1.1;
+      dirAngle = norm360(path.targetAngle + spreadFactor);
+    }
+    const rad = toRad(dirAngle);
+    rayLine(exitP, {x:exitP.x+Math.cos(rad)*far, y:exitP.y+Math.sin(rad)*far}, col, colors.length===1?2.6:1.8);
+  });
+
+  // telescope pointer beam (what telescope currently "sees")
+  const rad=toRad(state.telescopeAngle);
+  rayLine({x:0,y:0},{x:Math.cos(rad)*far,y:Math.sin(rad)*far}, 'rgba(201,164,92,0.55)',1.4,[3,3]);
+}
+function entryPointFor(g,path){
+  if(!path.entryFace) return {x:0,y:0};
+  return path.entryFace==='left' ? midpoint(g.apex,g.left) : midpoint(g.apex,g.right);
+}
+function exitPointFor(g,path){
+  if(!path.exitFace) return {x:0,y:0};
+  return path.exitFace==='left' ? midpoint(g.apex,g.left) : midpoint(g.apex,g.right);
+}
+function midpoint(a,b){ return {x:(a.x+b.x)/2, y:(a.y+b.y)/2}; }
+function angDiff(a,b){
+  let d = norm360(a)-norm360(b);
+  d = ((d+180)%360+360)%360-180;
+  return d;
+}
+
+/* ============================================================
+   EYEPIECE VIEW
+============================================================ */
+function drawEyepiece(){
+  ectx.clearRect(0,0,200,200);
+  ectx.save();
+  ectx.beginPath(); ectx.arc(100,100,96,0,Math.PI*2); ectx.clip();
+  ectx.fillStyle='#020202'; ectx.fillRect(0,0,200,200);
+  // vignette
+  const vg = ectx.createRadialGradient(100,100,40,100,100,100);
+  vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,0.55)');
+
+  let visible = false, hOffset = 0, vOffset = 0, blur = 0, colorMode='mono', hint='';
+  const focusBlur = Math.abs(state.focus.s1-50)/50*6 + Math.abs(state.focus.s2-50)/50*6;
+  const collimBlur = Math.abs(state.focus.s4-50)/50*5;
+  const slitW = 4 + (state.focus.s3/100)*20;
+
+  if(state.mode===1){
+    visible = true; hOffset = 0;
+    vOffset = 0;
+    blur = focusBlur + collimBlur;
+  } else if(state.mode===2){
+    const screwEffect = { a: 1.0, b: -0.6, c: -0.4 }[state.activeScrew];
+    vOffset = state.screws[state.activeScrew] * 3.1;
+    visible = true; blur = 2;
+  } else if(state.mode===3){
+    const r = computeReflectionTargets(state.tableAngle, state.prismA);
+    let best = null, bestD = 999;
+    [r.t1,r.t2].forEach(t=>{ if(t===null) return; const d=Math.abs(angDiff(t,state.telescopeAngle)); if(d<bestD){bestD=d; best=t;} });
+    if(best!==null && bestD < TOL*2.2){
+      visible = true;
+      hOffset = angDiff(best,state.telescopeAngle) * 9;
+      blur = Math.abs(angDiff(best,state.telescopeAngle))*0.6 + focusBlur*0.4;
+    }
+  } else if(state.mode===4){
+    if(state.removePrism){
+      const d = angDiff(0,state.telescopeAngle);
+      if(Math.abs(d) < TOL*2.5){ visible=true; hOffset=d*9; blur=Math.abs(d)*0.5; }
+    } else {
+      const path = computeRefractionPath(state.tableAngle, state.prismA, state.n_true);
+      if(path.valid){
+        const d = angDiff(path.targetAngle, state.telescopeAngle);
+        if(Math.abs(d) < TOL*2.5){
+          visible = true;
+          hOffset = d*9;
+          blur = Math.abs(d)*0.5 + focusBlur*0.4;
+          colorMode = state.light;
+        }
+      }
+    }
+  }
+
+  // crosshairs
+  ectx.strokeStyle = 'rgba(180,210,210,0.55)';
+  ectx.lineWidth = 1;
+  ectx.beginPath(); ectx.moveTo(10,100); ectx.lineTo(190,100); ectx.stroke();
+  ectx.beginPath(); ectx.moveTo(100,10); ectx.lineTo(100,190); ectx.stroke();
+  const chBlur = Math.abs(state.focus.s1-50)/50*3;
+  ectx.filter = chBlur>0.3 ? `blur(${chBlur}px)` : 'none';
+  ectx.strokeStyle = 'rgba(150,190,190,0.35)';
+  ectx.beginPath(); ectx.moveTo(10,100); ectx.lineTo(190,100); ectx.stroke();
+  ectx.beginPath(); ectx.moveTo(100,10); ectx.lineTo(100,190); ectx.stroke();
+  ectx.filter='none';
+
+  if(visible){
+    ectx.filter = blur>0.4 ? `blur(${Math.min(blur,9)}px)` : 'none';
+    const cx = 100 + Math.max(-85,Math.min(85,hOffset));
+    const cy = 100 + Math.max(-75,Math.min(75,vOffset));
+    if(colorMode==='white'){
+      const colors=['#ff6b5e','#ffb35e','#ffe45e','#7fe07f','#5ecfcf','#7b9dff','#9f7bff'];
+      colors.forEach((c,i)=>{
+        ectx.fillStyle=c; ectx.globalAlpha=0.55;
+        ectx.fillRect(cx-slitW/2 + (i-3)*1.3, 30, slitW*0.55, 140);
+      });
+      ectx.globalAlpha=1;
+    } else {
+      const glow = 0.75+0.2*Math.sin(glowT);
+      ectx.fillStyle = `rgba(255,211,92,${glow})`;
+      ectx.shadowColor='#ffd35c'; ectx.shadowBlur=14;
+      ectx.fillRect(cx-slitW/2, 26, slitW, 148);
+      ectx.shadowBlur=0;
+    }
+    ectx.filter='none';
+  }
+  ectx.fillStyle=vg; ectx.fillRect(0,0,200,200);
+  ectx.restore();
+  ectx.strokeStyle = '#333'; ectx.lineWidth=2;
+  ectx.beginPath(); ectx.arc(100,100,96,0,Math.PI*2); ectx.stroke();
+
+  return visible;
+}
+
+/* ============================================================
+   MODE PANELS (HTML)
+============================================================ */
+const modeContent = document.getElementById('modeContent');
+const notesPanel = document.getElementById('notesPanel');
+
+function sliderRow(id,label,min,max,val,unit,step){
+  return `<div class="control-group">
+    <label>${label} <span class="v" id="${id}Val">${val}${unit||''}</span></label>
+    <input type="range" id="${id}" min="${min}" max="${max}" step="${step||1}" value="${val}">
+  </div>`;
+}
+
+function renderModePanel(){
+  if(state.mode===1){
+    modeContent.innerHTML = `
+      <p class="panel-title">Focusing the collimator &amp; telescope</p>
+      <p class="panel-sub">Bring the cross‑wires and the slit image into sharp focus before any measurement is attempted.</p>
+      ${sliderRow('s1','S₁ — Eyepiece focus (cross‑wires)',0,100,state.focus.s1,'')}
+      ${sliderRow('s2','S₂ — Telescope objective focus',0,100,state.focus.s2,'')}
+      ${sliderRow('s3','S₃ — Collimator slit width',0,100,state.focus.s3,'')}
+      ${sliderRow('s4','S₄ — Collimator lens focus (parallel rays)',0,100,state.focus.s4,'')}
+      <div class="status-line" id="focusStatus"></div>
+    `;
+    notesPanel.innerHTML = `<h4>Why this step matters</h4><ul>
+      <li>The eyepiece is first focused on the cross‑wires alone (no parallax), independent of the slit.</li>
+      <li>The telescope is then pointed at a distant object and focused with S₂ so it accepts parallel rays.</li>
+      <li>Finally the collimator lens (S₄) is adjusted until the slit image seen through the telescope is sharp — this proves the collimator now emits parallel rays.</li>
+    </ul>`;
+    bindSlider('s1'); bindSlider('s2'); bindSlider('s3'); bindSlider('s4');
+  }
+
+  if(state.mode===2){
+    modeContent.innerHTML = `
+      <p class="panel-title">Leveling the prism table</p>
+      <p class="panel-sub">View the reflection near each screw and adjust it until the slit image sits exactly on the horizontal cross‑wire.</p>
+      <div class="seg" id="screwSeg">
+        <button data-s="a" class="active">Screw a</button>
+        <button data-s="b">Screw b</button>
+        <button data-s="c">Screw c</button>
+      </div>
+      ${sliderRow('screwSlider','Screw height',-10,10,state.screws[state.activeScrew],'')}
+      <div class="btn-row"><button class="btn" id="resetScrews">Reset all screws</button></div>
+      <div class="status-line" id="levelStatus"></div>
+    `;
+    notesPanel.innerHTML = `<h4>Procedure</h4><ul>
+      <li>Rotate the table so the reflecting face nearest a screw faces the collimator.</li>
+      <li>If the image jumps up or down when the table is turned by 90°, the table is not level.</li>
+      <li>Adjust only <em>that</em> screw until the image lands on the horizontal cross‑wire — repeat for all three faces.</li>
+    </ul>`;
+    document.querySelectorAll('#screwSeg button').forEach(b=>{
+      b.onclick=()=>{ state.activeScrew=b.dataset.s;
+        document.querySelectorAll('#screwSeg button').forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');
+        document.getElementById('screwSlider').value = state.screws[state.activeScrew];
+        document.getElementById('screwSliderVal').textContent = state.screws[state.activeScrew];
+        renderAll();
+      };
+    });
+    document.getElementById('resetScrews').onclick=()=>{
+      state.screws={a:0,b:0,c:0};
+      document.getElementById('screwSlider').value=0;
+      document.getElementById('screwSliderVal').textContent=0;
+      renderAll();
+    };
+    const sl = document.getElementById('screwSlider');
+    sl.oninput = ()=>{
+      state.screws[state.activeScrew] = parseInt(sl.value);
+      document.getElementById('screwSliderVal').textContent = sl.value;
+      renderAll();
+    };
+  }
+
+  if(state.mode===3){
+    modeContent.innerHTML = `
+      <p class="panel-title">Measuring the prism angle A</p>
+      <p class="panel-sub">Rotate the prism table so the apex faces the collimator, then swing the telescope to catch each reflected beam.</p>
+      ${sliderRow('tableA3','Prism table angle',0,360,state.tableAngle,'°')}
+      ${sliderRow('telA3','Telescope angle',0,360,state.telescopeAngle,'°')}
+      <div class="btn-row">
+        <button class="btn primary" id="recordReading">Record this telescope reading</button>
+      </div>
+      <div class="readout" style="margin-top:10px;">
+        <div class="rlabel">V₁ (face AB)</div>
+        <div class="rval" id="v1disp">— not recorded —</div>
+      </div>
+      <div class="readout" style="margin-top:8px;">
+        <div class="rlabel">V₂ (face AC)</div>
+        <div class="rval" id="v2disp">— not recorded —</div>
+      </div>
+      <div id="angleResult"></div>
+      <div class="btn-row"><button class="btn" id="resetV">Clear readings</button></div>
+    `;
+    notesPanel.innerHTML = `<h4>Formula</h4><ul>
+      <li>2A = |V₁ − V₂|, so A = |V₁ − V₂| / 2</li>
+      <li>Both reflected images come from the two polished faces meeting at the apex — no refraction is involved in this step.</li>
+      <li>Use a single, well‑illuminated light source; colour is irrelevant here since only reflection is used.</li>
+    </ul>`;
+    bindSlider('tableA3', v=>{ state.tableAngle=v; });
+    bindSlider('telA3', v=>{ state.telescopeAngle=v; });
+    document.getElementById('recordReading').onclick=()=>{
+      const r = computeReflectionTargets(state.tableAngle, state.prismA);
+      let best=null,bestD=999,which=null;
+      if(r.t1!==null){ const d=Math.abs(angDiff(r.t1,state.telescopeAngle)); if(d<bestD){bestD=d;best=r.t1;which='v1';} }
+      if(r.t2!==null){ const d=Math.abs(angDiff(r.t2,state.telescopeAngle)); if(d<bestD){bestD=d;best=r.t2;which='v2';} }
+      if(best!==null && bestD<TOL){
+        state.angleReadings[which]=state.telescopeAngle;
+      }
+      updateMode3Result();
+    };
+    document.getElementById('resetV').onclick=()=>{
+      state.angleReadings={v1:null,v2:null};
+      updateMode3Result();
+    };
+    updateMode3Result();
+  }
+
+  if(state.mode===4){
+    modeContent.innerHTML = `
+      <p class="panel-title">Minimum deviation &amp; refractive index</p>
+      <p class="panel-sub">Rotate the prism table; watch the emergent ray swing, stop, then reverse. That turning point is D<sub>m</sub>.</p>
+      <div class="seg" id="lightSeg">
+        <button data-l="mono" class="active">Sodium (monochromatic)</button>
+        <button data-l="white">White light</button>
+      </div>
+      ${sliderRow('tableA4','Prism table angle',0,360,state.tableAngle,'°')}
+      ${sliderRow('telA4','Telescope angle',0,360,state.telescopeAngle,'°')}
+      <div class="btn-row">
+        <button class="btn" id="viewDirect">Toggle: view collimator directly (T₀)</button>
+      </div>
+      <div class="readout" style="margin-top:10px;">
+        <div class="rlabel">Live deviation D <span class="pill" id="trendPill">—</span></div>
+        <div class="rval" id="liveDev">—</div>
+      </div>
+      <div class="btn-row" style="margin-top:8px;">
+        <button class="btn" id="recordT0">Record T₀ (direct ray)</button>
+        <button class="btn primary" id="recordTd">Record T_d (min. deviation)</button>
+      </div>
+      <div class="readout" style="margin-top:8px;">
+        <div class="rlabel">T₀</div><div class="rval" id="t0disp">— not recorded —</div>
+      </div>
+      <div class="readout" style="margin-top:8px;">
+        <div class="rlabel">T_d</div><div class="rval" id="tddisp">— not recorded —</div>
+      </div>
+      <div id="devResult"></div>
+      <div class="warn-box" id="tirWarn" style="display:none;"></div>
+    `;
+    notesPanel.innerHTML = `<h4>Why monochromatic light?</h4><ul>
+      <li>Refractive index n depends on wavelength (dispersion), so D<sub>m</sub> is only single‑valued for one colour.</li>
+      <li>White light would give a smeared, overlapping band instead of one sharp minimum‑deviation position.</li>
+      <li>n = sin((A + D<sub>m</sub>)/2) / sin(A/2)</li>
+    </ul>`;
+    document.querySelectorAll('#lightSeg button').forEach(b=>{
+      b.onclick=()=>{ state.light=b.dataset.l;
+        document.querySelectorAll('#lightSeg button').forEach(x=>x.classList.remove('active'));
+        b.classList.add('active'); renderAll(); };
+    });
+    bindSlider('tableA4', v=>{ state.tableAngle=v; updateLiveDeviation(); });
+    bindSlider('telA4', v=>{ state.telescopeAngle=v; });
+    document.getElementById('viewDirect').onclick=()=>{
+      state.removePrism = !state.removePrism;
+      document.getElementById('viewDirect').classList.toggle('primary', state.removePrism);
+      renderAll();
+    };
+    document.getElementById('recordT0').onclick=()=>{
+      if(state.removePrism && Math.abs(angDiff(0,state.telescopeAngle))<TOL){
+        state.devReadings.t0 = state.telescopeAngle;
+      }
+      updateMode4Result();
+    };
+    document.getElementById('recordTd').onclick=()=>{
+      const path = computeRefractionPath(state.tableAngle, state.prismA, state.n_true);
+      if(!state.removePrism && path.valid && Math.abs(angDiff(path.targetAngle,state.telescopeAngle))<TOL){
+        state.devReadings.td = state.telescopeAngle;
+      }
+      updateMode4Result();
+    };
+    updateLiveDeviation();
+    updateMode4Result();
+  }
+}
+
+function bindSlider(id, cb){
+  const el = document.getElementById(id);
+  el.oninput = ()=>{
+    const v = parseFloat(el.value);
+    document.getElementById(id+'Val').textContent = v + (el.max==360?'°':'');
+    if(cb) cb(v);
+    renderAll();
+  };
+}
+
+function updateMode3Result(){
+  const v1 = document.getElementById('v1disp');
+  const v2 = document.getElementById('v2disp');
+  if(!v1) return;
+  v1.innerHTML = state.angleReadings.v1!==null ? fmtDM(state.angleReadings.v1) : '<span style="color:#5b6472">not recorded</span>';
+  v2.innerHTML = state.angleReadings.v2!==null ? fmtDM(state.angleReadings.v2) : '<span style="color:#5b6472">not recorded</span>';
+  const box = document.getElementById('angleResult');
+  if(state.angleReadings.v1!==null && state.angleReadings.v2!==null){
+    const twoA = Math.abs(angDiff(state.angleReadings.v1,state.angleReadings.v2));
+    const A = twoA/2;
+    box.innerHTML = `<div class="result-box">2A = |V₁ − V₂| = ${twoA.toFixed(2)}°<br>A = ${A.toFixed(2)}°</div>`;
+  } else {
+    box.innerHTML = '';
+  }
+}
+
+function updateLiveDeviation(){
+  const disp = document.getElementById('liveDev');
+  const pill = document.getElementById('trendPill');
+  const tirWarn = document.getElementById('tirWarn');
+  if(!disp) return;
+  const path = computeRefractionPath(state.tableAngle, state.prismA, state.n_true);
+  if(!path.valid){
+    disp.textContent = '— no emergent ray —';
+    tirWarn.style.display='block';
+    tirWarn.textContent = path.reason==='tir_exit' ? 'Total internal reflection at the exit face — rotate the table.' : 'Beam grazes the prism edge — rotate the table so one face is clearly illuminated.';
+    pill.textContent='—';
+    return;
+  }
+  tirWarn.style.display='none';
+  disp.textContent = path.deviation.toFixed(2)+'°';
+  if(state.prevDeviation!==null){
+    const dd = path.deviation - state.prevDeviation;
+    if(Math.abs(dd) < 0.02) pill.textContent='≈ turning point';
+    else pill.textContent = dd<0 ? '▼ decreasing' : '▲ increasing';
+  }
+  state.prevDeviation = path.deviation;
+}
+
+function updateMode4Result(){
+  const t0 = document.getElementById('t0disp');
+  const td = document.getElementById('tddisp');
+  if(!t0) return;
+  t0.innerHTML = state.devReadings.t0!==null ? fmtDM(state.devReadings.t0) : '<span style="color:#5b6472">not recorded</span>';
+  td.innerHTML = state.devReadings.td!==null ? fmtDM(state.devReadings.td) : '<span style="color:#5b6472">not recorded</span>';
+  const box = document.getElementById('devResult');
+  if(state.devReadings.t0!==null && state.devReadings.td!==null){
+    const Dm = Math.abs(angDiff(state.devReadings.t0,state.devReadings.td));
+    const A = state.prismA;
+    const n = Math.sin(toRad((A+Dm)/2)) / Math.sin(toRad(A/2));
+    box.innerHTML = `<div class="result-box">D_m = |T₀ − T_d| = ${Dm.toFixed(2)}°<br>
+      n = sin((A+D_m)/2) / sin(A/2)<br>
+      n = ${n.toFixed(4)}</div>`;
+  } else {
+    box.innerHTML = '';
+  }
+}
+
+/* ============================================================
+   TOP READOUTS + TABS
+============================================================ */
+function updateTopReadouts(){
+  document.getElementById('rTable').textContent = fmtDM(state.tableAngle);
+  document.getElementById('rTelescope').textContent = fmtDM(state.telescopeAngle);
+
+  const lbl = document.getElementById('modeReadoutLabel');
+  const val = document.getElementById('modeReadoutVal');
+  if(state.mode===1){ lbl.textContent='Focus quality'; 
+    const blur = Math.abs(state.focus.s1-50)+Math.abs(state.focus.s2-50)+Math.abs(state.focus.s4-50);
+    val.textContent = blur<6 ? 'Sharp — in focus' : blur<30 ? 'Slightly blurred' : 'Out of focus';
+  } else if(state.mode===2){ lbl.textContent=`Screw ${state.activeScrew} offset`;
+    val.textContent = (state.screws[state.activeScrew]===0? 'Centred ✓' : (state.screws[state.activeScrew]>0?'+':'')+state.screws[state.activeScrew]);
+  } else if(state.mode===3){ lbl.textContent='Reflections found';
+    const r = computeReflectionTargets(state.tableAngle, state.prismA);
+    const n = (r.t1!==null?1:0)+(r.t2!==null?1:0);
+    val.textContent = n+' of 2';
+  } else { lbl.textContent='Deviation D';
+    const path = computeRefractionPath(state.tableAngle, state.prismA, state.n_true);
+    val.textContent = path.valid ? path.deviation.toFixed(2)+'°' : '—';
+  }
+}
+
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    state.mode = parseInt(btn.dataset.mode);
+    renderModePanel();
+    renderAll();
+  };
+});
+
+/* ============================================================
+   MAIN RENDER LOOP
+============================================================ */
+function renderAll(){
+  drawMain();
+  drawEyepiece();
+  updateTopReadouts();
+  if(state.mode===3) updateMode3Result();
+  if(state.mode===4){ updateLiveDeviation(); updateMode4Result(); }
+}
+
+renderModePanel();
+renderAll();
+setInterval(()=>{ glowT+=0.05; drawMain(); drawEyepiece(); }, 90);
+</script>
+</body>
+</html>

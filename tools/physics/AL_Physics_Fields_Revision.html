@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ක්ෂේත්‍ර | Fields — A/L Physics Revision</title>
+<style>
+:root{
+  --bg-0:#0b0d14;
+  --bg-1:#11141d;
+  --bg-2:#171b27;
+  --line:#262c3d;
+  --text-0:#eef1fb;
+  --text-1:#a9b0c6;
+  --text-2:#6b7286;
+  --grav:#9b8cff;
+  --grav-dim:#9b8cff33;
+  --elec:#ffc857;
+  --elec-dim:#ffc85733;
+  --mag:#4fd8c4;
+  --mag-dim:#4fd8c433;
+  --accent:#ff6a6a;
+  --serif:"Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,serif;
+  --math:"Cambria Math","STIX Two Math",Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:"SF Mono","Cascadia Code","Consolas",monospace;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    radial-gradient(ellipse 1200px 600px at 15% -10%, #1b1030 0%, transparent 60%),
+    radial-gradient(ellipse 1000px 700px at 110% 10%, #06231f 0%, transparent 55%),
+    var(--bg-0);
+  color:var(--text-0);
+  font-family:var(--sans);
+  min-height:100vh;
+  line-height:1.5;
+}
+::selection{background:#4fd8c455;}
+a{color:inherit;}
+
+/* ---------- layout shell ---------- */
+.shell{max-width:1180px;margin:0 auto;padding:0 22px 80px;}
+
+header.top{
+  padding:38px 22px 26px;
+  border-bottom:1px solid var(--line);
+  margin-bottom:0;
+}
+.eyebrow{
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:var(--text-2);
+  display:flex;align-items:center;gap:10px;
+}
+.eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--mag);box-shadow:0 0 10px var(--mag);}
+h1.title{
+  font-family:var(--serif);
+  font-weight:600;
+  font-size:clamp(28px,4.4vw,44px);
+  margin:10px 0 6px;
+  letter-spacing:.2px;
+}
+h1.title .sub{
+  display:block;
+  font-family:var(--mono);
+  font-size:14px;
+  color:var(--text-2);
+  font-weight:400;
+  letter-spacing:.08em;
+  margin-top:6px;
+}
+p.lede{color:var(--text-1);max-width:700px;font-size:15px;margin:14px 0 0;}
+
+/* ---------- tab bar ---------- */
+nav.tabs{
+  position:sticky; top:0; z-index:40;
+  display:flex;gap:2px;
+  background:rgba(11,13,20,.86);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+  margin-top:26px;
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+nav.tabs::-webkit-scrollbar{display:none;}
+.tab-btn{
+  flex:0 0 auto;
+  background:none;border:none;
+  color:var(--text-2);
+  font-family:var(--sans);
+  font-size:14.5px;
+  font-weight:600;
+  padding:16px 18px 14px;
+  cursor:pointer;
+  position:relative;
+  white-space:nowrap;
+  transition:color .2s;
+}
+.tab-btn .num{font-family:var(--mono);font-weight:400;font-size:11px;opacity:.6;margin-right:8px;}
+.tab-btn::after{
+  content:"";position:absolute;left:14px;right:14px;bottom:0;height:2px;
+  background:transparent;border-radius:2px;transition:background .2s;
+}
+.tab-btn:hover{color:var(--text-0);}
+.tab-btn.active{color:var(--text-0);}
+.tab-btn.active::after{background:var(--tab-color,var(--mag));}
+.tab-btn[data-tab="grav"]{--tab-color:var(--grav);}
+.tab-btn[data-tab="elec"]{--tab-color:var(--elec);}
+.tab-btn[data-tab="mag"]{--tab-color:var(--mag);}
+.tab-btn[data-tab="comp"]{--tab-color:var(--accent);}
+
+.panel{display:none;padding-top:34px;animation:fade .35s ease;}
+.panel.active{display:block;}
+@keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+/* ---------- section framing ---------- */
+.section-head{display:flex;align-items:baseline;gap:12px;margin:44px 0 18px;}
+.section-head:first-of-type{margin-top:0;}
+.section-head .idx{font-family:var(--math);font-style:italic;font-size:26px;color:var(--sc,var(--mag));}
+.section-head h2{font-family:var(--serif);font-size:21px;font-weight:600;margin:0;}
+.section-head .en{font-family:var(--mono);font-size:11px;color:var(--text-2);letter-spacing:.08em;text-transform:uppercase;margin-left:auto;}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;}
+
+/* ---------- formula card ---------- */
+.card{
+  background:linear-gradient(180deg,var(--bg-2),var(--bg-1));
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:20px 20px 18px;
+  position:relative;
+  overflow:hidden;
+}
+.card::before{
+  content:"";position:absolute;top:0;left:0;width:3px;height:100%;
+  background:var(--sc,var(--mag));opacity:.85;
+}
+.card h3{
+  font-size:13px;font-weight:600;color:var(--text-1);
+  margin:0 0 12px;text-transform:none;letter-spacing:.01em;
+}
+.eq{
+  font-family:var(--math);font-style:italic;font-size:21px;color:var(--text-0);
+  display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:6px 0 10px;
+}
+.eq .plain{font-style:normal;}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.15;margin:0 3px;}
+.frac .num{border-bottom:1.3px solid currentColor;padding:0 5px 2px;}
+.frac .den{padding:2px 5px 0;}
+.note{font-family:var(--sans);font-style:normal;font-size:12.5px;color:var(--text-2);line-height:1.55;margin-top:4px;}
+.note b{color:var(--text-1);font-weight:600;}
+.tag{
+  display:inline-block;font-family:var(--mono);font-size:10px;color:var(--sc,var(--mag));
+  border:1px solid var(--sc,var(--mag));border-radius:20px;padding:2px 9px;margin-top:10px;letter-spacing:.03em;
+}
+
+.card.grav{--sc:var(--grav);}
+.card.elec{--sc:var(--elec);}
+.card.mag{--sc:var(--mag);}
+
+/* ---------- graph blocks ---------- */
+.graph-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;margin-top:10px;}
+.graph-card{
+  background:var(--bg-1);border:1px solid var(--line);border-radius:14px;padding:18px 18px 10px;
+}
+.graph-card h4{margin:0 0 2px;font-size:13.5px;font-weight:600;color:var(--text-0);}
+.graph-card .cap{font-size:11.5px;color:var(--text-2);margin-bottom:10px;}
+.graph-card canvas{width:100%;display:block;}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;font-size:11px;color:var(--text-2);font-family:var(--mono);}
+.legend span{display:inline-flex;align-items:center;gap:6px;}
+.legend i{width:14px;height:2.5px;border-radius:2px;display:inline-block;}
+
+/* ---------- simulator ---------- */
+.sim-box{
+  background:linear-gradient(160deg,#141826,#0d1019);
+  border:1px solid var(--line);border-radius:16px;
+  padding:22px;margin-top:14px;
+  display:grid;grid-template-columns:280px 1fr;gap:26px;
+}
+@media(max-width:720px){.sim-box{grid-template-columns:1fr;}}
+.sim-controls label{
+  font-family:var(--mono);font-size:11px;color:var(--text-2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;
+}
+.sim-controls input[type=range]{width:100%;accent-color:var(--sc,var(--mag));margin-bottom:18px;}
+.readout{
+  display:flex;justify-content:space-between;background:var(--bg-2);border:1px solid var(--line);
+  border-radius:10px;padding:10px 12px;margin-bottom:10px;font-family:var(--mono);font-size:12.5px;
+}
+.readout b{color:var(--sc,var(--mag));font-size:14px;}
+.sim-canvas-wrap{display:flex;align-items:center;justify-content:center;}
+.sim-canvas-wrap canvas{max-width:100%;background:radial-gradient(circle at 50% 50%,#0d1220 0%,#070911 80%);border-radius:12px;border:1px solid var(--line);}
+.pill-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.pill{
+  font-family:var(--mono);font-size:12px;padding:7px 14px;border-radius:20px;border:1px solid var(--line);
+  background:var(--bg-2);color:var(--text-1);cursor:pointer;transition:.15s;
+}
+.pill.on{background:var(--sc,var(--mag));color:#0b0d14;border-color:var(--sc,var(--mag));font-weight:700;}
+
+/* ---------- comparison table ---------- */
+.cmp-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;}
+table.cmp{width:100%;border-collapse:collapse;min-width:640px;font-size:13.5px;}
+table.cmp th,table.cmp td{padding:13px 16px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top;}
+table.cmp thead th{
+  font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-2);
+  background:var(--bg-1);position:sticky;top:0;
+}
+table.cmp thead th.g{color:var(--grav);}
+table.cmp thead th.e{color:var(--elec);}
+table.cmp tbody tr:hover{background:var(--bg-1);}
+table.cmp td.prop{color:var(--text-1);font-weight:600;font-size:12.5px;}
+table.cmp td .eq{font-size:16px;margin:0;}
+
+/* ---------- misc ---------- */
+.callout{
+  border:1px dashed var(--line);border-radius:12px;padding:14px 16px;margin-top:18px;
+  font-size:13px;color:var(--text-1);background:var(--bg-1);
+}
+footer{margin-top:60px;padding-top:20px;border-top:1px solid var(--line);color:var(--text-2);font-size:12px;font-family:var(--mono);text-align:center;}
+.hr-space{height:6px;}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <header class="top">
+    <div class="eyebrow"><span class="dot"></span> G.C.E. ADVANCED LEVEL &middot; PHYSICS &middot; UNIT 04</div>
+    <h1 class="title">ක්ෂේත්‍ර
+      <span class="sub">GRAVITATIONAL · ELECTROSTATIC · MAGNETIC FIELDS — REVISION SHEET</span>
+    </h1>
+    <p class="lede">ගුරුත්වාකර්ෂණ, විද්‍යුත් සහ චුම්භක ක්ෂේත්‍ර යන ප්‍රධාන කොටස් තුනටම අදාළ සූත්‍ර, ප්‍රස්තාර සහ අන්තර්ක්‍රියාකාරී සිමියුලේටර දෙකක් සහිත එකම පිටුවකින් ඉගෙනගන්න.</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="grav"><span class="num">01</span>ගුරුත්වාකර්ෂණ</button>
+    <button class="tab-btn" data-tab="elec"><span class="num">02</span>විද්‍යුත්</button>
+    <button class="tab-btn" data-tab="mag"><span class="num">03</span>චුම්භක</button>
+    <button class="tab-btn" data-tab="comp"><span class="num">04</span>සන්සන්දනය</button>
+  </nav>
+
+  <!-- ============================================================ GRAVITY ============================================================ -->
+  <section class="panel active" id="panel-grav">
+
+    <div class="section-head" style="--sc:var(--grav)">
+      <span class="idx">1</span><h2>ගුරුත්වාකර්ෂණ ක්ෂේත්‍ර</h2><span class="en">Gravitational Fields</span>
+    </div>
+
+    <div class="grid">
+      <div class="card grav">
+        <h3>නිව්ටන්ගේ විශ්ව ගුරුත්වාකර්ෂණ නියමය</h3>
+        <div class="eq">F <span class="plain">=</span>
+          <span class="frac"><span class="num">GMm</span><span class="den">r²</span></span>
+        </div>
+        <div class="note">ස්කන්ධ M සහ m අතර ආකර්ෂණ බලය r මධ්‍යස්ථාන දුරට ප්‍රතිලෝමව සමානුපාතිකයි. G = 6.67×10⁻¹¹ N m² kg⁻².</div>
+        <div class="tag">සෑම විටම ආකර්ෂණීයයි</div>
+      </div>
+
+      <div class="card grav">
+        <h3>ක්ෂේත්‍ර තීව්‍රතාව (g)</h3>
+        <div class="eq">g <span class="plain">=</span>
+          <span class="frac"><span class="num">GM</span><span class="den">r²</span></span>
+          <span class="plain">&nbsp; ; &nbsp;g₀ =</span>
+          <span class="frac"><span class="num">GM</span><span class="den">R²</span></span>
+        </div>
+        <div class="note">ඒකක ස්කන්ධයක් මත ක්‍රියා කරන බලය. පෘෂ්ඨයේදී g₀. <b>ඉහළට</b> (h): g = g₀R²/(R+h)². <b>ගැඹුරට</b> (d, ඒකාකාර ඝනත්වය): g = g₀(1 − d/R) = g₀r/R.</div>
+      </div>
+
+      <div class="card grav">
+        <h3>ගුරුත්වාකර්ෂණ විභවය සහ විභව ශක්තිය</h3>
+        <div class="eq">V <span class="plain">= −</span>
+          <span class="frac"><span class="num">GM</span><span class="den">r</span></span>
+          <span class="plain">&nbsp; ; &nbsp;U = −</span>
+          <span class="frac"><span class="num">GMm</span><span class="den">r</span></span>
+        </div>
+        <div class="note">අනන්තයේදී V = 0 ලෙස ගනු ලැබේ. එබැවින් V සෑම විටම <b>සෘණ</b> අගයක්. U = mV.</div>
+      </div>
+
+      <div class="card grav">
+        <h3>කක්ෂීය ප්‍රවේගය සහ ආවර්ත කාලය</h3>
+        <div class="eq">v <span class="plain">=</span>
+          <span class="frac"><span class="num">√GM</span><span class="den">√r</span></span>
+          <span class="plain">&nbsp; ; &nbsp;T² =</span>
+          <span class="frac"><span class="num">4π²r³</span><span class="den">GM</span></span>
+        </div>
+        <div class="note">වෘත්තාකාර කක්ෂයක් සඳහා ගුරුත්වාකර්ෂණ බලයම අභිකේන්ද්‍රික බලය සපයයි. T² ∝ r³ — කෙප්ලර්ගේ 3 වන නියමය.</div>
+        <div class="tag">Geostationary: T = 24h</div>
+      </div>
+
+      <div class="card grav">
+        <h3>පලායන ප්‍රවේගය (Escape Velocity)</h3>
+        <div class="eq">v<sub>e</sub> <span class="plain">=</span> √(2GM/R) <span class="plain">= √(2g₀R)</span></div>
+        <div class="note">වස්තුවක් අනන්තය දක්වා ගමන් කිරීමට අවශ්‍ය අවම ප්‍රවේගය. මුළු ශක්තිය E = KE + U = 0 වන විට ලැබේ.</div>
+      </div>
+
+      <div class="card grav">
+        <h3>ක්ෂේත්‍රය හා විභවය අතර සම්බන්ධතාව</h3>
+        <div class="eq">g <span class="plain">= −</span>
+          <span class="frac"><span class="num">dV</span><span class="den">dr</span></span>
+        </div>
+        <div class="note">V–r ප්‍රස්තාරයේ අනුක්‍රමණය (gradient) හි ऋण අගය g හි විශාලත්වය දෙයි. V–r වක්‍රයේ බෑවුම වැඩිතරම් R අවට.</div>
+      </div>
+    </div>
+
+    <div class="section-head" style="--sc:var(--grav);margin-top:40px;">
+      <span class="idx">1.1</span><h2>අත්‍යවශ්‍ය ප්‍රස්තාර</h2><span class="en">g–r &amp; V–r graphs</span>
+    </div>
+    <div class="graph-row">
+      <div class="graph-card">
+        <h4>g vs r — ඝන ගෝලයක් සඳහා</h4>
+        <div class="cap">r &lt; R: g = g₀·r/R (රේඛීය) &nbsp;|&nbsp; r ≥ R: g = g₀R²/r² (ප්‍රතිලෝම වර්ග)</div>
+        <canvas id="cv-g-r" height="260"></canvas>
+        <div class="legend"><span><i style="background:var(--grav)"></i>ගෝලය ඇතුළත</span><span><i style="background:#5f5a99"></i>ගෝලයෙන් පිටත</span></div>
+      </div>
+      <div class="graph-card">
+        <h4>V vs r — ඝන ගෝලයක් සඳහා</h4>
+        <div class="cap">r ≤ R: V = −(GM/2R³)(3R²−r²) &nbsp;|&nbsp; r ≥ R: V = −GM/r</div>
+        <canvas id="cv-V-r" height="260"></canvas>
+        <div class="legend"><span><i style="background:var(--grav)"></i>ගෝලය ඇතුළත</span><span><i style="background:#5f5a99"></i>ගෝලයෙන් පිටත</span></div>
+      </div>
+    </div>
+
+    <div class="section-head" style="--sc:var(--grav);margin-top:40px;">
+      <span class="idx">1.2</span><h2>Orbit Simulator</h2><span class="en">interactive</span>
+    </div>
+    <div class="sim-box" style="--sc:var(--grav)">
+      <div class="sim-controls">
+        <label>කක්ෂීය අරය r (පෘථිවි කේන්ද්‍රයේ සිට) — <span id="r-val">10 000</span> km</label>
+        <input type="range" id="r-slider" min="6600" max="45000" step="100" value="10000">
+        <div class="readout">කක්ෂීය ප්‍රවේගය v <b id="v-val">—</b></div>
+        <div class="readout">ආවර්ත කාලය T <b id="T-val">—</b></div>
+        <div class="readout">උස h (පෘෂ්ඨයෙන්) <b id="h-val">—</b></div>
+        <div class="callout" style="margin-top:14px;">M<sub>earth</sub> = 5.97×10²⁴ kg, R<sub>earth</sub> = 6371 km. Slider එකෙන් r වෙනස් කරන විට v සහ T යළි ගණනය වී, දකුණේ ඇති සතුට් රූපය ඒ අනුව කරකැවේ (animation speed විදහාපෑම සඳහා පමණි — සැබෑ කාල පරිමාණයට නොවේ).</div>
+      </div>
+      <div class="sim-canvas-wrap">
+        <canvas id="orbit-canvas" width="420" height="420"></canvas>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ============================================================ ELECTRIC ============================================================ -->
+  <section class="panel" id="panel-elec">
+
+    <div class="section-head" style="--sc:var(--elec)">
+      <span class="idx">2</span><h2>විද්‍යුත් ක්ෂේත්‍ර</h2><span class="en">Electrostatic Fields</span>
+    </div>
+
+    <div class="grid">
+      <div class="card elec">
+        <h3>කූලෝම් නියමය</h3>
+        <div class="eq">F <span class="plain">=</span>
+          <span class="frac"><span class="num">1</span><span class="den">4πε</span></span>
+          <span class="plain">·</span>
+          <span class="frac"><span class="num">q₁q₂</span><span class="den">r²</span></span>
+        </div>
+        <div class="note">ε = ε₀ε<sub>r</sub> — මාධ්‍යයේ පරාවේද්‍යතාව. ε₀ = 8.85×10⁻¹² F m⁻¹. සමාන ලක්ෂණ ආරෝපණ විකර්ෂණය කරන අතර විරුද්ධ ලක්ෂණ ආකර්ෂණය කරයි.</div>
+        <div class="tag">ආකර්ෂණ / විකර්ෂණ දෙකම</div>
+      </div>
+
+      <div class="card elec">
+        <h3>විද්‍යුත් ක්ෂේත්‍ර තීව්‍රතාව (E)</h3>
+        <div class="eq">E <span class="plain">=</span>
+          <span class="frac"><span class="num">Q</span><span class="den">4πεr²</span></span>
+          <span class="plain">&nbsp; ; &nbsp;E =</span>
+          <span class="frac"><span class="num">V</span><span class="den">d</span></span>
+        </div>
+        <div class="note">පළමු සූත්‍රය ලක්ෂ්‍ය ආරෝපණයකට; දෙවැන්න සමාන්තර තැටි අතර ඒකාකාර ක්ෂේත්‍රයකට. E ඒකකය V m⁻¹ හෝ N C⁻¹.</div>
+      </div>
+
+      <div class="card elec">
+        <h3>විද්‍යුත් විභවය සහ විභව ශක්තිය</h3>
+        <div class="eq">V <span class="plain">=</span>
+          <span class="frac"><span class="num">Q</span><span class="den">4πεr</span></span>
+          <span class="plain">&nbsp; ; &nbsp;U = qV</span>
+        </div>
+        <div class="note">අනන්තයේදී V = 0. ධන ආරෝපණයක් වටා V ධන අගයක්; ऋण ආරෝපණයක් වටා V ऋण අගයක්.</div>
+      </div>
+
+      <div class="card elec">
+        <h3>කුහර සන්නායක ගෝලය (Hollow Conducting Sphere)</h3>
+        <div class="eq">E<sub>inside</sub> <span class="plain">= 0</span> &nbsp; ; &nbsp; V<sub>inside</sub> <span class="plain">= V</span><sub>surface</sub><span class="plain"> = constant</span></div>
+        <div class="note">සියලුම අතිරික්ත ආරෝපණය පිටත පෘෂ්ඨයේ රැඳේ. පිටත E සහ V, ලක්ෂ්‍ය ආරෝපණයක් මෙන් හැසිරේ (කේන්ද්‍රයේ Q සියල්ල ඇති බව සිතා).</div>
+        <div class="tag">විභාගයට ඉතා වැදගත්</div>
+      </div>
+
+      <div class="card elec">
+        <h3>ධාරිත්‍රක (Capacitors)</h3>
+        <div class="eq">C <span class="plain">=</span>
+          <span class="frac"><span class="num">Q</span><span class="den">V</span></span>
+          <span class="plain">&nbsp; ; &nbsp;C =</span>
+          <span class="frac"><span class="num">εA</span><span class="den">d</span></span>
+        </div>
+        <div class="note">සමාන්තර තැටි ධාරිත්‍රකයක. ශ්‍රේණිගත: 1/C = 1/C₁ + 1/C₂ + …. සමාන්තරගත: C = C₁ + C₂ + ….</div>
+      </div>
+
+      <div class="card elec">
+        <h3>ධාරිත්‍රකයක ගබඩා වන ශක්තිය</h3>
+        <div class="eq">U <span class="plain">= ½QV = ½CV² = </span>
+          <span class="frac"><span class="num">Q²</span><span class="den">2C</span></span>
+        </div>
+        <div class="note">Q–V ප්‍රස්තාරයේ පහළ පවතින ත්‍රිකෝණාකාර ප්‍රදේශය මගින් ශක්තිය නිරූපණය වේ.</div>
+      </div>
+    </div>
+
+    <div class="section-head" style="--sc:var(--elec);margin-top:40px;">
+      <span class="idx">2.1</span><h2>ආරෝපිත සන්නායක ගෝලයක E සහ V</h2><span class="en">Conducting sphere graphs</span>
+    </div>
+    <div class="graph-row">
+      <div class="graph-card">
+        <h4>E vs r — ආරෝපිත සන්නායක ගෝලය</h4>
+        <div class="cap">r &lt; R: E = 0 &nbsp;|&nbsp; r ≥ R: E = Q/4πεr² (ප්‍රතිලෝම වර්ග)</div>
+        <canvas id="cv-E-r" height="260"></canvas>
+        <div class="legend"><span><i style="background:var(--elec)"></i>ගෝලය ඇතුළත (E=0)</span><span><i style="background:#a88a3d"></i>ගෝලයෙන් පිටත</span></div>
+      </div>
+      <div class="graph-card">
+        <h4>V vs r — ආරෝපිත සන්නායක ගෝලය</h4>
+        <div class="cap">r ≤ R: V = V<sub>surface</sub> (ස්ථාවර) &nbsp;|&nbsp; r ≥ R: V = Q/4πεr</div>
+        <canvas id="cv-Vc-r" height="260"></canvas>
+        <div class="legend"><span><i style="background:var(--elec)"></i>ගෝලය ඇතුළත</span><span><i style="background:#a88a3d"></i>ගෝලයෙන් පිටත</span></div>
+      </div>
+    </div>
+
+    <div class="section-head" style="--sc:var(--elec);margin-top:40px;">
+      <span class="idx">2.2</span><h2>Charge &amp; Field Visualizer</h2><span class="en">interactive</span>
+    </div>
+    <div class="sim-box" style="--sc:var(--elec)">
+      <div class="sim-controls">
+        <label>ආරෝපණයේ ලක්ෂණය</label>
+        <div class="pill-row">
+          <button class="pill on" id="pill-pos">ධන (+Q)</button>
+          <button class="pill" id="pill-neg">ऋण (−Q)</button>
+        </div>
+        <label>ක්ෂේත්‍ර රේඛා ගණන — <span id="lines-val">12</span></label>
+        <input type="range" id="lines-slider" min="6" max="24" step="2" value="12">
+        <div class="callout">ලක්ෂ්‍ය ආරෝපණයක් වටා ක්ෂේත්‍ර රේඛා සෑම විටම ගෝලීය සමමිතියෙන් විහිදේ. ධන ආරෝපණයකදී රේඛා <b>පිටතට</b>, ऋण ආරෝපණයකදී <b>ඇතුළතට</b> යොමු වේ. රේඛා ඝනත්වය E හි විශාලත්වය නිරූපණය කරයි.</div>
+      </div>
+      <div class="sim-canvas-wrap">
+        <canvas id="field-canvas" width="420" height="420"></canvas>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ============================================================ MAGNETIC ============================================================ -->
+  <section class="panel" id="panel-mag">
+
+    <div class="section-head" style="--sc:var(--mag)">
+      <span class="idx">3</span><h2>චුම්භක ක්ෂේත්‍ර</h2><span class="en">Magnetic Fields</span>
+    </div>
+
+    <div class="grid">
+      <div class="card mag">
+        <h3>චුම්භක බලය — චලනය වන ආරෝපණය</h3>
+        <div class="eq">F <span class="plain">= qvB sinθ</span></div>
+        <div class="note">θ යනු v සහ B අතර කෝණය. දිශාව දකුණත් අත් නියමයෙන් (Fleming's rule / F = qv×B) ලබා ගැනේ.</div>
+      </div>
+
+      <div class="card mag">
+        <h3>චුම්භක බලය — ධාරාවාහී සන්නායකය</h3>
+        <div class="eq">F <span class="plain">= BIL sinθ</span></div>
+        <div class="note">L යනු ක්ෂේත්‍රය තුළ ඇති සන්නායක දිග. θ = 90° දී F උපරිම (F = BIL).</div>
+      </div>
+
+      <div class="card mag">
+        <h3>සෘජු දිගු කම්බියක් වටා B</h3>
+        <div class="eq">B <span class="plain">=</span>
+          <span class="frac"><span class="num">μ₀I</span><span class="den">2πr</span></span>
+        </div>
+        <div class="note">μ₀ = 4π×10⁻⁷ T m A⁻¹ — නිර්වායුගත පාරගම්‍යතාව. B, r ට ප්‍රතිලෝමව සමානුපාතික.</div>
+      </div>
+
+      <div class="card mag">
+        <h3>වෘත්තාකාර දඟරයක කේන්ද්‍රයේ B</h3>
+        <div class="eq">B <span class="plain">=</span>
+          <span class="frac"><span class="num">μ₀NI</span><span class="den">2R</span></span>
+        </div>
+        <div class="note">N යනු දඟර හැරීම් ගණන, R යනු දඟරයේ අරය.</div>
+      </div>
+
+      <div class="card mag">
+        <h3>පරිණාලිකාවක (Solenoid) මැද B</h3>
+        <div class="eq">B <span class="plain">= μ₀nI</span></div>
+        <div class="note">n = L/N — ඒකක දිගකට ඇති හැරීම් ගණන. පරිණාලිකාව ඇතුළත ක්ෂේත්‍රය දළ වශයෙන් ඒකාකාරයි (දිග විශාල නම්).</div>
+      </div>
+
+      <div class="card mag">
+        <h3>ලොරෙන්ස් බලය සහ වෘත්තාකාර චලිතය</h3>
+        <div class="eq">r <span class="plain">=</span>
+          <span class="frac"><span class="num">mv</span><span class="den">qB</span></span>
+        </div>
+        <div class="note">චුම්භක බලය අභිකේන්ද්‍රික බලය ලෙස ක්‍රියා කරයි: qvB = mv²/r. r, B ට ප්‍රතිලෝමව සමානුපාතික.</div>
+      </div>
+
+      <div class="card mag">
+        <h3>සමාන්තර කම්බි දෙකක් අතර බලය</h3>
+        <div class="eq">
+          <span class="frac"><span class="num">F</span><span class="den">L</span></span>
+          <span class="plain">=</span>
+          <span class="frac"><span class="num">μ₀I₁I₂</span><span class="den">2πd</span></span>
+        </div>
+        <div class="note">එකම දිශාවට ධාරා ගලා ගියහොත් කම්බි ආකර්ෂණය වේ; විරුද්ධ දිශාවලට නම් විකර්ෂණය වේ.</div>
+      </div>
+
+      <div class="card mag">
+        <h3>චුම්භක ස්‍රාවය සහ විද්‍යුත් චුම්භක ප්‍රේරණය</h3>
+        <div class="eq">Φ <span class="plain">= BA cosθ &nbsp; ; &nbsp;E = −</span>
+          <span class="frac"><span class="num">dΦ</span><span class="den">dt</span></span>
+        </div>
+        <div class="note"><b>ෆැරඩේ නියමය:</b> ප්‍රේරිත emf, ස්‍රාව වෙනස්වීමේ අනුපාතයට සමානුපාතික. <b>ලෙන්ස් නියමය:</b> සෘණ ලකුණ — ප්‍රේරිත emf සෑම විටම එය ඇති කළ ස්‍රාව වෙනස්වීමට විරුද්ධ වේ.</div>
+        <div class="tag">Φ ඒකකය: Weber (Wb)</div>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top:26px;">
+      <b>මතක තබාගන්න:</b> චුම්භක ක්ෂේත්‍රයේ දිශාව සොයාගැනීමට දකුණත් අත් නීතිය (Right-hand rule) භාවිත කරන්න — සෘජු කම්බියක් සඳහා මාපටැඟිල්ල ධාරා දිශාවට යොමු කළහොත් ඇඟිලි වට කරන දිශාව B හි දිශාව වේ.
+    </div>
+
+  </section>
+
+  <!-- ============================================================ COMPARISON ============================================================ -->
+  <section class="panel" id="panel-comp">
+
+    <div class="section-head" style="--sc:var(--accent)">
+      <span class="idx">4</span><h2>සන්සන්දනාත්මක වගුව</h2><span class="en">Gravitational vs Electric Fields</span>
+    </div>
+    <p class="lede">ගුරුත්වාකර්ෂණ ක්ෂේත්‍ර සහ විද්‍යුත් ක්ෂේත්‍ර යන දෙකෙහිම සූත්‍ර එකම ව්‍යුහයක් අනුගමනය කරයි — G ↔ 1/4πε සහ M,m ↔ Q,q යනුවෙන් ආදේශ කළහොත්.</p>
+
+    <div class="cmp-wrap">
+      <table class="cmp">
+        <thead>
+          <tr>
+            <th>ගුණාංගය / Property</th>
+            <th class="g">ගුරුත්වාකර්ෂණ ක්ෂේත්‍රය</th>
+            <th class="e">විද්‍යුත් ක්ෂේත්‍රය</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="prop">මූලාශ්‍රය</td>
+            <td>ස්කන්ධය (M, m)</td>
+            <td>ආරෝපණය (Q, q)</td>
+          </tr>
+          <tr>
+            <td class="prop">නියතය</td>
+            <td>G = 6.67×10⁻¹¹ N m² kg⁻²</td>
+            <td>1/4πε , ε = ε₀ε<sub>r</sub></td>
+          </tr>
+          <tr>
+            <td class="prop">බලය</td>
+            <td class="eq">F = GMm/r²</td>
+            <td class="eq">F = Qq/4πεr²</td>
+          </tr>
+          <tr>
+            <td class="prop">බලයේ ස්වභාවය</td>
+            <td>ආකර්ෂණ පමණි (සෑම විටම)</td>
+            <td>ආකර්ෂණ <b>සහ</b> විකර්ෂණ දෙකම</td>
+          </tr>
+          <tr>
+            <td class="prop">ක්ෂේත්‍ර තීව්‍රතාව</td>
+            <td class="eq">g = GM/r²</td>
+            <td class="eq">E = Q/4πεr²</td>
+          </tr>
+          <tr>
+            <td class="prop">විභවය</td>
+            <td class="eq">V = −GM/r (සෑම විටම ऋण)</td>
+            <td class="eq">V = Q/4πεr (ලකුණ Q අනුව)</td>
+          </tr>
+          <tr>
+            <td class="prop">විභව ශක්තිය</td>
+            <td class="eq">U = −GMm/r</td>
+            <td class="eq">U = Qq/4πεr</td>
+          </tr>
+          <tr>
+            <td class="prop">ආරක්ෂණය (Shielding)</td>
+            <td>කළ නොහැක — ගුරුත්වාකර්ෂණය අවහිර කළ නොහැක</td>
+            <td>සන්නායක කවචයකින් කළ හැක (Faraday cage)</td>
+          </tr>
+          <tr>
+            <td class="prop">ක්ෂේත්‍ර රේඛා</td>
+            <td>සැමවිටම ස්කන්ධය දෙසට යොමුවේ</td>
+            <td>ධන ආරෝපණයෙන් පිටතට, ऋण ආරෝපණය දෙසට</td>
+          </tr>
+          <tr>
+            <td class="prop">සාපේක්ෂ ප්‍රබලත්වය</td>
+            <td>ඉතා දුර්වලයි (~10⁻³⁶ ගුණයකින් දුර්වල)</td>
+            <td>ඉතා ප්‍රබලයි</td>
+          </tr>
+          <tr>
+            <td class="prop">ඒකාකාර ක්ෂේත්‍රයක් නිර්මාණය</td>
+            <td>විශාල දුරකදී පමණක් දළ වශයෙන් (කුඩා ප්‍රදේශයක)</td>
+            <td>සමාන්තර තැටි දෙකක් අතර (E = V/d)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-head" style="--sc:var(--accent);margin-top:40px;">
+      <span class="idx">4.1</span><h2>සමීකරණ ව්‍යුහයේ සමානකම</h2><span class="en">structural analogy</span>
+    </div>
+    <div class="grid">
+      <div class="card grav" style="--sc:var(--grav)">
+        <h3>ගුරුත්වාකර්ෂණ ආකෘතිය</h3>
+        <div class="eq">F, g, V, U <span class="plain">← G, M</span></div>
+        <div class="note">සියලුම ගුරුත්වාකර්ෂණ සූත්‍ර 1/4πε තැනට G ආදේශ කර, Q,q තැනට M,m ආදේශ කිරීමෙන් විද්‍යුත් සූත්‍ර බවට හැරවිය හැක (ලකුණ හැර).</div>
+      </div>
+      <div class="card elec" style="--sc:var(--elec)">
+        <h3>විද්‍යුත් ආකෘතිය</h3>
+        <div class="eq">F, E, V, U <span class="plain">← 1/4πε, Q</span></div>
+        <div class="note">G ↔ 1/4πε ලෙසත්, M ↔ Q ලෙසත් සිතන්න. නමුත් ආරෝපණයට ලකුණු දෙකක් (+/−) ඇති නිසා විභවයේ ලකුණ වෙනස් විය හැක.</div>
+      </div>
+    </div>
+
+  </section>
+
+  <footer>
+    A/L PHYSICS — FIELDS REVISION &middot; SELF-STUDY TOOL &middot; NO EXTERNAL LIBRARIES
+  </footer>
+</div>
+
+<script>
+/* ================= TAB SWITCHING ================= */
+const tabBtns = document.querySelectorAll(".tab-btn");
+const panels = { grav:document.getElementById("panel-grav"), elec:document.getElementById("panel-elec"),
+                  mag:document.getElementById("panel-mag"), comp:document.getElementById("panel-comp") };
+tabBtns.forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    tabBtns.forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    Object.values(panels).forEach(p=>p.classList.remove("active"));
+    panels[btn.dataset.tab].classList.add("active");
+    // redraw canvases in case of first-reveal sizing issues
+    requestAnimationFrame(drawAllStaticGraphs);
+  });
+});
+
+/* ================= GENERIC LINE GRAPH DRAWER ================= */
+function drawLineGraph(canvas, series, opts){
+  // series: [{points:[[x,y],...], color:'#fff'}], opts:{xLabel,yLabel,xMax,yMin,yMax,vLine}
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = canvas.clientWidth || 400;
+  const cssH = parseInt(canvas.getAttribute("height")) || 240;
+  canvas.width = cssW*dpr; canvas.height = cssH*dpr;
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,cssW,cssH);
+
+  const padL=42,padR=14,padT=14,padB=32;
+  const plotW = cssW-padL-padR, plotH = cssH-padT-padB;
+
+  let allX=[],allY=[];
+  series.forEach(s=>s.points.forEach(p=>{allX.push(p[0]);allY.push(p[1]);}));
+  const xMax = opts.xMax!==undefined?opts.xMax:Math.max(...allX);
+  const xMin = opts.xMin!==undefined?opts.xMin:0;
+  const yMax = opts.yMax!==undefined?opts.yMax:Math.max(...allY)*1.12;
+  const yMin = opts.yMin!==undefined?opts.yMin:Math.min(0,Math.min(...allY)*1.12);
+
+  const X = x => padL + (x-xMin)/(xMax-xMin)*plotW;
+  const Y = y => padT + plotH - (y-yMin)/(yMax-yMin)*plotH;
+
+  // axes
+  ctx.strokeStyle = "#2a3044"; ctx.lineWidth=1;
+  ctx.beginPath();
+  ctx.moveTo(padL, Y(0)); ctx.lineTo(padL+plotW, Y(0));
+  ctx.moveTo(padL, padT); ctx.lineTo(padL, padT+plotH);
+  ctx.stroke();
+
+  // vertical marker line (e.g. at r = R)
+  if(opts.vLine!==undefined){
+    ctx.strokeStyle = "#3a4160"; ctx.setLineDash([4,4]); ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(X(opts.vLine),padT); ctx.lineTo(X(opts.vLine),padT+plotH); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle="#6b7286"; ctx.font="10px monospace"; ctx.textAlign="center";
+    ctx.fillText(opts.vLineLabel||"R", X(opts.vLine), padT+plotH+14);
+  }
+
+  // axis labels
+  ctx.fillStyle="#6b7286"; ctx.font="10px monospace"; ctx.textAlign="left";
+  ctx.fillText(opts.xLabel||"", padL+plotW-24, padT+plotH+26);
+  ctx.save();
+  ctx.translate(12, padT+14); ctx.rotate(-Math.PI/2);
+  ctx.textAlign="left"; ctx.fillText(opts.yLabel||"",0,0);
+  ctx.restore();
+
+  ctx.font="9.5px monospace"; ctx.fillStyle="#4d5468";
+  ctx.textAlign="left"; ctx.fillText("0", padL-8, Y(0)+11);
+
+  // series
+  series.forEach(s=>{
+    ctx.strokeStyle = s.color; ctx.lineWidth = 2.4; ctx.lineJoin="round";
+    ctx.beginPath();
+    s.points.forEach((p,i)=>{ i===0?ctx.moveTo(X(p[0]),Y(p[1])):ctx.lineTo(X(p[0]),Y(p[1])); });
+    ctx.stroke();
+    if(s.fill){
+      ctx.lineTo(X(s.points[s.points.length-1][0]), Y(0));
+      ctx.lineTo(X(s.points[0][0]), Y(0));
+      ctx.closePath();
+      ctx.fillStyle = s.color+"18";
+      ctx.fill();
+    }
+  });
+}
+
+function range(a,b,n){ const out=[]; for(let i=0;i<=n;i++) out.push(a+(b-a)*i/n); return out; }
+
+function drawAllStaticGraphs(){
+  const R = 1; // normalized radius
+  const G_M = 1; // normalized GM
+
+  // g vs r
+  const gIn = range(0,R,40).map(r=>[r, (r/R)]);          // g/g0 = r/R
+  const gOut = range(R,4*R,60).map(r=>[r, (R*R)/(r*r)]); // g/g0 = R^2/r^2
+  drawLineGraph(document.getElementById("cv-g-r"),
+    [{points:gIn, color:"#9b8cff"},{points:gOut, color:"#5f5a99"}],
+    {xLabel:"r", yLabel:"g / g₀", vLine:R, vLineLabel:"R", yMax:1.15, xMax:4*R});
+
+  // V vs r (normalized V/(GM/R), negative)
+  const Vin = range(0,R,40).map(r=>[r, -(1/2)*(3 - (r*r)/(R*R))]);
+  const Vout = range(R,4*R,60).map(r=>[r, -(R/r)]);
+  drawLineGraph(document.getElementById("cv-V-r"),
+    [{points:Vin, color:"#9b8cff"},{points:Vout, color:"#5f5a99"}],
+    {xLabel:"r", yLabel:"V / (GM/R)", vLine:R, vLineLabel:"R", yMin:-1.6, yMax:0.15, xMax:4*R});
+
+  // E vs r (conducting sphere), normalized
+  const Ein = range(0,R,20).map(r=>[r,0]);
+  const Eout = range(R,4*R,60).map(r=>[r, (R*R)/(r*r)]);
+  drawLineGraph(document.getElementById("cv-E-r"),
+    [{points:Ein, color:"#ffc857"},{points:Eout, color:"#a88a3d"}],
+    {xLabel:"r", yLabel:"E / E_surface", vLine:R, vLineLabel:"R", yMax:1.15, xMax:4*R});
+
+  // V vs r (conducting sphere)
+  const Vcin = range(0,R,20).map(r=>[r,1]);
+  const Vcout = range(R,4*R,60).map(r=>[r, R/r]);
+  drawLineGraph(document.getElementById("cv-Vc-r"),
+    [{points:Vcin, color:"#ffc857"},{points:Vcout, color:"#a88a3d"}],
+    {xLabel:"r", yLabel:"V / V_surface", vLine:R, vLineLabel:"R", yMax:1.15, xMax:4*R});
+}
+window.addEventListener("resize", ()=>requestAnimationFrame(drawAllStaticGraphs));
+
+/* ================= ORBIT SIMULATOR ================= */
+const G = 6.674e-11, Me = 5.97e24, Re = 6371e3;
+const rSlider = document.getElementById("r-slider");
+const rVal = document.getElementById("r-val");
+const vVal = document.getElementById("v-val");
+const TVal = document.getElementById("T-val");
+const hVal = document.getElementById("h-val");
+const orbitCanvas = document.getElementById("orbit-canvas");
+const octx = orbitCanvas.getContext("2d");
+
+let orbitAngle = 0;
+let currentPeriodSec = 1; // real seconds, used only to scale animation speed
+let currentRkm = parseFloat(rSlider.value);
+
+function updateOrbitReadout(){
+  const rKm = parseFloat(rSlider.value);
+  const r = rKm*1000;
+  const v = Math.sqrt(G*Me/r);
+  const T = 2*Math.PI*Math.sqrt(Math.pow(r,3)/(G*Me));
+  const h = rKm - (Re/1000);
+
+  rVal.textContent = rKm.toLocaleString();
+  vVal.textContent = (v/1000).toFixed(2) + " km/s";
+  TVal.textContent = T>7200 ? (T/3600).toFixed(2)+" h" : (T/60).toFixed(1)+" min";
+  hVal.textContent = h.toLocaleString() + " km";
+
+  currentPeriodSec = T;
+  currentRkm = rKm;
+}
+rSlider.addEventListener("input", updateOrbitReadout);
+
+function drawOrbit(){
+  const w = orbitCanvas.width, h = orbitCanvas.height;
+  octx.clearRect(0,0,w,h);
+  const cx=w/2, cy=h/2;
+  const earthPx = 46;
+  // scale: max slider 45000km maps to ~180px orbit radius
+  const maxR = 45000;
+  const orbitPx = 60 + (currentRkm/maxR)*140;
+
+  // orbit path
+  octx.strokeStyle="#232a3d"; octx.setLineDash([3,5]); octx.lineWidth=1;
+  octx.beginPath(); octx.arc(cx,cy,orbitPx,0,Math.PI*2); octx.stroke();
+  octx.setLineDash([]);
+
+  // earth
+  const grad = octx.createRadialGradient(cx-earthPx*0.3,cy-earthPx*0.3,4,cx,cy,earthPx);
+  grad.addColorStop(0,"#4fd8c4"); grad.addColorStop(1,"#1b3b45");
+  octx.fillStyle=grad;
+  octx.beginPath(); octx.arc(cx,cy,earthPx,0,Math.PI*2); octx.fill();
+
+  // satellite
+  const sx = cx+orbitPx*Math.cos(orbitAngle);
+  const sy = cy+orbitPx*Math.sin(orbitAngle);
+  octx.fillStyle="#9b8cff";
+  octx.shadowColor="#9b8cff"; octx.shadowBlur=12;
+  octx.beginPath(); octx.arc(sx,sy,6,0,Math.PI*2); octx.fill();
+  octx.shadowBlur=0;
+
+  // trailing arc
+  octx.strokeStyle="#9b8cff88"; octx.lineWidth=2;
+  octx.beginPath();
+  octx.arc(cx,cy,orbitPx, orbitAngle-0.6, orbitAngle);
+  octx.stroke();
+}
+
+let lastTs=null;
+function orbitLoop(ts){
+  if(lastTs===null) lastTs=ts;
+  const dt = (ts-lastTs)/1000; lastTs=ts;
+  // angular speed inversely related to sqrt(period) for visual effect, clamped for usability
+  const speedFactor = 3.2 / Math.sqrt(currentPeriodSec/3600); // faster for shorter periods
+  orbitAngle += dt * Math.max(0.25, Math.min(2.2, speedFactor));
+  drawOrbit();
+  requestAnimationFrame(orbitLoop);
+}
+
+/* ================= CHARGE & FIELD VISUALIZER ================= */
+const pillPos = document.getElementById("pill-pos");
+const pillNeg = document.getElementById("pill-neg");
+const linesSlider = document.getElementById("lines-slider");
+const linesVal = document.getElementById("lines-val");
+const fieldCanvas = document.getElementById("field-canvas");
+const fctx = fieldCanvas.getContext("2d");
+let chargeSign = 1; // 1 = positive, -1 = negative
+
+pillPos.addEventListener("click",()=>{chargeSign=1;pillPos.classList.add("on");pillNeg.classList.remove("on");drawField();});
+pillNeg.addEventListener("click",()=>{chargeSign=-1;pillNeg.classList.add("on");pillPos.classList.remove("on");drawField();});
+linesSlider.addEventListener("input",()=>{linesVal.textContent=linesSlider.value;drawField();});
+
+function drawArrowhead(ctx,x,y,angle,size,color){
+  ctx.save();
+  ctx.translate(x,y); ctx.rotate(angle);
+  ctx.fillStyle=color;
+  ctx.beginPath();
+  ctx.moveTo(size,0); ctx.lineTo(-size*0.7,size*0.55); ctx.lineTo(-size*0.7,-size*0.55);
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+
+function drawField(){
+  const w=fieldCanvas.width, h=fieldCanvas.height;
+  fctx.clearRect(0,0,w,h);
+  const cx=w/2, cy=h/2;
+  const n = parseInt(linesSlider.value);
+  const rInner = 22, rOuter = Math.min(w,h)/2 - 20;
+  const color = chargeSign>0 ? "#ffc857" : "#7fb8ff";
+
+  for(let i=0;i<n;i++){
+    const ang = (i/n)*Math.PI*2;
+    const x1 = cx+rInner*Math.cos(ang), y1=cy+rInner*Math.sin(ang);
+    const x2 = cx+rOuter*Math.cos(ang), y2=cy+rOuter*Math.sin(ang);
+    fctx.strokeStyle = color+"cc";
+    fctx.lineWidth=1.6;
+    fctx.beginPath(); fctx.moveTo(x1,y1); fctx.lineTo(x2,y2); fctx.stroke();
+
+    if(chargeSign>0){
+      // arrow pointing outward, placed 70% along
+      const mx = cx+(rInner+ (rOuter-rInner)*0.62)*Math.cos(ang);
+      const my = cy+(rInner+ (rOuter-rInner)*0.62)*Math.sin(ang);
+      drawArrowhead(fctx,mx,my,ang,7,color);
+    } else {
+      // arrow pointing inward, placed 62% along but flipped
+      const mx = cx+(rInner+ (rOuter-rInner)*0.62)*Math.cos(ang);
+      const my = cy+(rInner+ (rOuter-rInner)*0.62)*Math.sin(ang);
+      drawArrowhead(fctx,mx,my,ang+Math.PI,7,color);
+    }
+  }
+
+  // central charge
+  const grad = fctx.createRadialGradient(cx,cy,2,cx,cy,rInner);
+  grad.addColorStop(0, chargeSign>0? "#fff3d0":"#dbe9ff");
+  grad.addColorStop(1, color);
+  fctx.fillStyle=grad;
+  fctx.shadowColor=color; fctx.shadowBlur=18;
+  fctx.beginPath(); fctx.arc(cx,cy,rInner,0,Math.PI*2); fctx.fill();
+  fctx.shadowBlur=0;
+
+  fctx.fillStyle="#0b0d14"; fctx.font="bold 18px sans-serif"; fctx.textAlign="center"; fctx.textBaseline="middle";
+  fctx.fillText(chargeSign>0?"+":"−", cx, cy+1);
+}
+
+/* ================= INIT ================= */
+updateOrbitReadout();
+drawOrbit();
+requestAnimationFrame(orbitLoop);
+drawField();
+drawAllStaticGraphs();
+</script>
+</body>
+</html>

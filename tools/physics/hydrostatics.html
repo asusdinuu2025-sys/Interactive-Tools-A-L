@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>ඉපිලුම් නියමය — ද්‍රවමානය | Hydrostatics Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Noto+Sans+Sinhala:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F6F3EC; --bg2:#ECE5D3; --surface:#FFFFFF; --surface2:#FBF9F3;
+  --ink:#1F2A24; --ink-soft:#5C6B60; --ink-faint:#8B9489;
+  --accent:#2F6F5E; --accent-ink:#F4F1E6; --accent2:#C08A3E;
+  --danger:#B44D3C; --line:#DCD4BE; --line-soft:#E8E2CE;
+  --glass:#DCEFEA; --liquid:#4FA890; --shadow: 0 8px 24px -12px rgba(31,42,36,.25);
+  --radius:14px;
+}
+[data-theme="dark"]{
+  --bg:#10161B; --bg2:#161D22; --surface:#1B2329; --surface2:#20292F;
+  --ink:#E9EDE8; --ink-soft:#9FACA4; --ink-faint:#6C7A72;
+  --accent:#5FBBA3; --accent-ink:#0E1613; --accent2:#E3AE58;
+  --danger:#E37464; --line:#2B353C; --line-soft:#212A30;
+  --glass:#1D3430; --liquid:#2E7A67; --shadow: 0 8px 28px -12px rgba(0,0,0,.55);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:'Noto Sans Sinhala','Inter',system-ui,sans-serif;
+  -webkit-tap-highlight-color:transparent;
+  padding-bottom:74px;
+  transition:background .3s, color .3s;
+}
+h1,h2,h3,.disp{font-family:'Fraunces','Noto Sans Sinhala',serif; font-weight:600; letter-spacing:-.01em;}
+.mono{font-family:'JetBrains Mono',monospace;}
+::selection{background:var(--accent); color:var(--accent-ink);}
+
+/* HEADER */
+header.top{
+  position:sticky; top:0; z-index:50;
+  background:linear-gradient(180deg, var(--bg) 80%, transparent);
+  backdrop-filter:blur(6px);
+  padding:14px 16px 8px;
+}
+.topbar{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+.brand{display:flex; flex-direction:column; line-height:1.15;}
+.brand .eyebrow{font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent2);}
+.brand h1{font-size:19px; margin:2px 0 0;}
+.theme-btn{
+  width:38px; height:38px; border-radius:50%; border:1px solid var(--line);
+  background:var(--surface); display:flex; align-items:center; justify-content:center;
+  cursor:pointer; color:var(--ink); flex-shrink:0;
+}
+.theme-btn svg{width:18px; height:18px;}
+
+/* TABS */
+nav.tabs{
+  position:fixed; bottom:0; left:0; right:0; z-index:60;
+  background:var(--surface); border-top:1px solid var(--line);
+  display:flex; padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+  box-shadow:0 -6px 20px -10px rgba(0,0,0,.2);
+}
+nav.tabs button{
+  flex:1; background:none; border:none; color:var(--ink-faint);
+  display:flex; flex-direction:column; align-items:center; gap:3px;
+  padding:6px 2px; font-size:10px; font-family:inherit; cursor:pointer; border-radius:10px;
+}
+nav.tabs button svg{width:20px; height:20px;}
+nav.tabs button.active{color:var(--accent); background:var(--glass);}
+
+main{max-width:640px; margin:0 auto; padding:0 14px;}
+section.panel{display:none; animation:fadein .25s ease;}
+section.panel.active{display:block;}
+@keyframes fadein{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
+
+.card{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+  padding:16px; margin-bottom:14px; box-shadow:var(--shadow);
+}
+.section-title{display:flex; align-items:baseline; gap:8px; margin:22px 0 10px;}
+.section-title .num{font-family:'JetBrains Mono',monospace; color:var(--accent2); font-size:13px;}
+.section-title h2{font-size:17px; margin:0; color:var(--ink);}
+p.lead{color:var(--ink-soft); font-size:13.5px; line-height:1.6; margin:2px 0 14px;}
+
+/* SIMULATOR */
+.sim-stage{
+  background:linear-gradient(180deg, var(--surface2), var(--bg2));
+  border-radius:var(--radius); border:1px solid var(--line);
+  padding:0; position:relative; overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+  height:min(40vh, 320px); min-height:190px;
+}
+.sim-flags{position:absolute; top:8px; left:8px; right:8px; z-index:2; display:flex; gap:5px; flex-wrap:wrap; justify-content:center; padding:0; pointer-events:none;}
+.flag{font-family:'JetBrains Mono',monospace; font-size:10px; padding:3px 8px; border-radius:20px; background:var(--glass); color:var(--accent); border:1px solid transparent; box-shadow:0 2px 6px rgba(0,0,0,.12); backdrop-filter:blur(4px);}
+.flag.warn{background:rgba(180,77,60,.14); color:var(--danger); border-color:rgba(180,77,60,.3);}
+#simSvg{height:100%; width:auto; max-width:100%; display:block;}
+
+.info-toggle{margin:2px 0 12px;}
+.info-toggle summary{list-style:none; cursor:pointer; display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--accent); font-weight:600;}
+.info-toggle summary::-webkit-details-marker{display:none;}
+.info-toggle summary::before{content:'ℹ️';}
+.info-toggle[open] summary::before{content:'▾';}
+.info-toggle p{color:var(--ink-soft); font-size:12.8px; line-height:1.6; margin:8px 0 0;}
+
+.readout-row{display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin:10px 0;}
+.readout{background:var(--surface2); border:1px solid var(--line-soft); border-radius:10px; padding:7px 6px; text-align:center;}
+.readout .k{font-size:9.5px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.05em;}
+.readout .v{font-family:'JetBrains Mono',monospace; font-weight:700; font-size:14.5px; color:var(--accent); margin-top:1px;}
+
+.ctrl{margin:11px 0;}
+@media (max-width:420px){
+  .card{padding:12px;}
+  .ctrl{margin:9px 0;}
+  .sim-stage{height:min(34vh, 280px); min-height:170px;}
+}
+@media (max-height:700px){
+  header.top{padding:8px 16px 4px;}
+  .brand h1{font-size:16.5px;}
+  .sim-stage{height:min(30vh, 240px); min-height:160px;}
+  .card{padding:11px;}
+  .ctrl{margin:8px 0;}
+}
+.ctrl label{display:flex; justify-content:space-between; font-size:12.5px; color:var(--ink-soft); margin-bottom:6px;}
+.ctrl label b{color:var(--ink); font-weight:600;}
+.ctrl .val{font-family:'JetBrains Mono',monospace; color:var(--accent2); font-weight:700;}
+input[type=range]{
+  -webkit-appearance:none; width:100%; height:6px; border-radius:4px;
+  background:var(--line); outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:22px; height:22px; border-radius:50%;
+  background:var(--accent); border:3px solid var(--surface); box-shadow:0 2px 6px rgba(0,0,0,.3); cursor:pointer;
+}
+input[type=range]::-moz-range-thumb{
+  width:22px; height:22px; border-radius:50%; background:var(--accent); border:3px solid var(--surface); cursor:pointer;
+}
+select, input[type=number]{
+  background:var(--surface2); border:1px solid var(--line); color:var(--ink);
+  border-radius:8px; padding:8px 10px; font-family:inherit; font-size:13.5px; width:100%;
+}
+.btn{
+  background:var(--accent); color:var(--accent-ink); border:none; border-radius:10px;
+  padding:11px 16px; font-weight:700; font-size:13.5px; cursor:pointer; font-family:inherit;
+  display:inline-flex; align-items:center; gap:7px; justify-content:center;
+}
+.btn.secondary{background:transparent; color:var(--accent); border:1px solid var(--accent);}
+.btn.ghost{background:var(--surface2); color:var(--ink-soft); border:1px solid var(--line);}
+.btn-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;}
+
+/* THEORY CARDS */
+.theory-card{display:flex; gap:12px; padding:14px; border:1px solid var(--line); border-radius:12px; background:var(--surface); margin-bottom:10px;}
+.theory-card .icon{
+  width:38px; height:38px; border-radius:10px; background:var(--glass); color:var(--accent);
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.theory-card .icon svg{width:20px; height:20px;}
+.theory-card h3{font-size:14px; margin:0 0 4px; font-family:'Noto Sans Sinhala','Fraunces',serif;}
+.theory-card p{font-size:12.8px; color:var(--ink-soft); line-height:1.55; margin:0;}
+.theory-card.open p{display:block;}
+.theory-card p{display:none;}
+.theory-card.open{border-color:var(--accent);}
+
+/* accordion caret */
+.theory-card{cursor:pointer;}
+.theory-card .head{display:flex; justify-content:space-between; align-items:center; width:100%;}
+.caret{transition:transform .2s; color:var(--ink-faint); flex-shrink:0;}
+.theory-card.open .caret{transform:rotate(180deg);}
+
+/* FORMULA BOX */
+.formula{
+  background:var(--surface2); border:1px dashed var(--line); border-radius:10px;
+  padding:12px 14px; font-family:'JetBrains Mono',monospace; font-size:13.5px; color:var(--accent);
+  overflow-x:auto; white-space:nowrap; margin:10px 0;
+}
+.formula .sub{color:var(--ink-faint); font-size:10.5px; display:block; margin-top:4px;}
+
+/* EXAM MODULE */
+.step{border-left:3px solid var(--line); padding:4px 0 4px 14px; margin-bottom:16px; position:relative;}
+.step::before{content:attr(data-n); position:absolute; left:-14px; top:0; width:26px; height:26px; border-radius:50%; background:var(--accent); color:var(--accent-ink); font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; transform:translateX(-50%);}
+.step h3{font-size:13.5px; margin:2px 0 6px 4px;}
+.step .body{font-size:13px; color:var(--ink-soft); line-height:1.6; margin-left:4px;}
+.reveal-box{margin-top:8px; margin-left:4px;}
+.reveal-content{
+  display:none; background:var(--glass); border-radius:8px; padding:10px 12px; margin-top:8px;
+  font-size:12.8px; color:var(--ink); line-height:1.6;
+}
+.reveal-content.show{display:block;}
+.quiz-row{display:flex; gap:8px; align-items:center; margin-left:4px; flex-wrap:wrap;}
+.quiz-row input{max-width:120px;}
+.quiz-feedback{font-size:12px; margin-top:6px; margin-left:4px; font-weight:600;}
+.quiz-feedback.correct{color:var(--accent);}
+.quiz-feedback.wrong{color:var(--danger);}
+
+/* FLASHCARDS */
+.flash-wrap{perspective:1000px; height:180px; margin-bottom:12px;}
+.flash{position:relative; width:100%; height:100%; transition:transform .5s; transform-style:preserve-3d; cursor:pointer;}
+.flash.flipped{transform:rotateY(180deg);}
+.flash-face{
+  position:absolute; inset:0; backface-visibility:hidden; border-radius:14px;
+  display:flex; align-items:center; justify-content:center; text-align:center; padding:20px;
+  border:1px solid var(--line); box-shadow:var(--shadow);
+}
+.flash-front{background:var(--surface); font-size:15px; font-weight:600;}
+.flash-back{background:var(--accent); color:var(--accent-ink); transform:rotateY(180deg); font-size:13px; line-height:1.6;}
+.flash-nav{display:flex; justify-content:space-between; align-items:center; gap:10px;}
+.flash-count{font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--ink-faint);}
+
+/* GRAPH */
+#graphSvg{width:100%; height:auto; touch-action:none;}
+.graph-legend{display:flex; gap:14px; flex-wrap:wrap; font-size:11.5px; color:var(--ink-soft); margin-top:6px;}
+.dot{width:9px; height:9px; border-radius:50%; display:inline-block; margin-right:4px; vertical-align:middle;}
+
+/* small helpers */
+.hint{font-size:11.5px; color:var(--ink-faint); margin-top:4px; line-height:1.5;}
+.pill{display:inline-block; background:var(--glass); color:var(--accent); border-radius:20px; padding:2px 9px; font-size:10.5px; font-family:'JetBrains Mono',monospace; margin-bottom:8px;}
+hr.div{border:none; border-top:1px solid var(--line-soft); margin:16px 0;}
+</style>
+</head>
+<body data-theme="light">
+
+<header class="top">
+  <div class="topbar">
+    <div class="brand">
+      <span class="eyebrow">A/L Physics · Hydrostatics Practical</span>
+      <h1>ඉපිලුම් නියමය — ද්‍රවමානය</h1>
+    </div>
+    <button class="theme-btn" id="themeToggle" aria-label="Toggle theme">
+      <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v1M12 20v1M4.2 4.2l.7.7M18.4 18.4l.7.7M3 12h1M20 12h1M4.2 19.8l.7-.7M18.4 5.6l.7-.7"/><circle cx="12" cy="12" r="5"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+
+<!-- ================= SIMULATOR ================= -->
+<section class="panel active" id="panel-sim">
+  <details class="info-toggle">
+    <summary>මෙය ක්‍රියා කරන ආකාරය</summary>
+    <p>පරීක්ෂණ නලයක් (test tube) දියරයක ඉපිලෙන අයුරු — ඊයම් බෝල (lead shot) වලින් බර වැඩි කරන විට නලය තව දුරටත් ගිලෙයි. පහත ස්ලයිඩර මගින් අගයන් වෙනස් කර, ශක්තීන් සමතුලිත වන ආකාරය බලන්න.</p>
+  </details>
+
+  <div class="sim-stage">
+    <div class="sim-flags" id="simFlags"></div>
+    <svg id="simSvg" viewBox="0 0 300 270" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>
+
+  <div class="readout-row">
+    <div class="readout"><div class="k">ගිලුම් දිග l</div><div class="v" id="outL">—</div></div>
+    <div class="readout"><div class="k">බර W+M</div><div class="v" id="outW">—</div></div>
+    <div class="readout"><div class="k">ඉපිලුම් U</div><div class="v" id="outU">—</div></div>
+  </div>
+
+  <div class="card" style="margin-top:2px;">
+    <div class="ctrl">
+      <label>එකතු කළ ස්කන්ධය M (g) <span class="val" id="mVal">5.0</span></label>
+      <input type="range" id="mSlider" min="0" max="30" step="0.5" value="5">
+    </div>
+    <div class="ctrl">
+      <label>නලයේ බාහිර විෂ්කම්භය d (mm) <span class="val" id="dVal">12.0</span></label>
+      <input type="range" id="dSlider" min="8" max="20" step="0.2" value="12">
+    </div>
+    <div class="ctrl">
+      <label>දියරයේ ඝනත්වය ρ (g/cm³) <span class="val" id="rhoVal">1.00</span></label>
+      <input type="range" id="rhoSlider" min="0.60" max="1.60" step="0.01" value="1.00">
+    </div>
+    <div class="hint">නිත්‍ය අගයන් (රූප සටහනට): W (නලය+ඊයම් බර ආරම්භක) = 18 g, V (ශුන්‍ය ලකුණට පහළ පරිමාව) = 4.2 cm³ — මේවා පරීක්ෂණයේ නියත වේ.</div>
+    <div class="btn-row">
+      <button class="btn" id="addPointBtn">📍 මෙම ලකුණ ප්‍රස්තාරයට එක් කරන්න</button>
+      <button class="btn ghost" id="resetSimBtn">යළි සකසන්න</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="formula">
+      (M + W)g = ( V + (πd²/4)·l ) ρg
+      <span class="sub">සමතුලිතතාවය : බර = ඉපිලුම (upthrust)</span>
+    </div>
+    <div class="formula">
+      l&nbsp;=&nbsp;4M /(πd²ρ)&nbsp;+&nbsp;4W /(πd²ρ)&nbsp;−&nbsp;4V /(πd²)
+      <span class="sub">l vs M ප්‍රස්තාරයේ ප්‍රවණතාව (gradient) = 4 /(πd²ρ)</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= GRAPH ================= -->
+<section class="panel" id="panel-graph">
+  <p class="lead">සිමියුලේටරයේ දී විවිධ M අගයන් සඳහා "ලකුණ එක් කරන්න" ඔබන්න — l & M යුගල ප්‍රස්තාරගත වී, එයින් ප්‍රවණතාවෙන් දියරයේ ඝනත්වය ගණනය වේ.</p>
+  <div class="card">
+    <svg id="graphSvg" viewBox="0 0 320 260"></svg>
+    <div class="graph-legend">
+      <span><span class="dot" style="background:var(--accent2)"></span>ලකුණු (data points)</span>
+      <span><span class="dot" style="background:var(--accent)"></span>හොඳම රේඛාව (best-fit)</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn secondary" id="clearGraphBtn">ප්‍රස්තාරය හිස් කරන්න</button>
+      <button class="btn ghost" id="autoFillBtn">ස්වයංක්‍රීයව ලකුණු 6ක් උත්පාදනය කරන්න</button>
+    </div>
+  </div>
+
+  <div class="card" id="gradientCard">
+    <div class="pill">ප්‍රවණතා විශ්ලේෂණය</div>
+    <div class="readout-row">
+      <div class="readout"><div class="k">ප්‍රවණතාව m</div><div class="v" id="gGrad">—</div></div>
+      <div class="readout"><div class="k">Y-අන්තඃඛණ්ඩය c</div><div class="v" id="gInt">—</div></div>
+      <div class="readout"><div class="k">ρ ගණනය කළ</div><div class="v" id="gRho">—</div></div>
+    </div>
+    <p class="hint" id="gradSteps">ලකුණු 2ක් හෝ වැඩි ගණනක් එක් කළ පසු, m = Δl/ΔM ගණනය වී, ρ = 4/(πd²m) මගින් ඝනත්වය සොයාගැනේ.</p>
+  </div>
+</section>
+
+<!-- ================= THEORY ================= -->
+<section class="panel" id="panel-theory">
+  <p class="lead">වැදගත් සංකල්ප — ඊයම් බෝල සිට පෘෂ්ඨික ආතතිය දක්වා. ටැප් කර විස්තර දකින්න.</p>
+
+  <div class="theory-card" data-open="0">
+    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="17" r="3"/><path d="M12 3v11"/><path d="M8 7h8"/></svg></div>
+    <div style="flex:1">
+      <div class="head"><h3>ඊයම් බෝල වල කාර්යය</h3><svg class="caret" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div>
+      <p>නලයේ පතුලේ ඊයම් බෝල තැබීමෙන් ගුරුත්ව කේන්ද්‍රය (centre of gravity), ප්ලවතා කේන්ද්‍රයට (centre of buoyancy) වඩා පහළින් පවතී. මෙමගින් නලය සිරස් අතට ස්ථායීව ඉපිලීම සහතික වේ — නොමැතිනම් නලය පෙරළී යා හැක.</p>
+    </div>
+  </div>
+
+  <div class="theory-card" data-open="0">
+    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M8 6h8M8 18h8"/></svg></div>
+    <div style="flex:1">
+      <div class="head"><h3>සිහින් නලයක් සංවේදිතාව වැඩි කරන්නේ ඇයි?</h3><svg class="caret" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div>
+      <p>d කුඩා වන විට, l = 4M/(πd²ρ) සමීකරණයේ M සමඟ l වෙනස් වන වේගය (ප්‍රවණතාව) වැඩි වේ. එනම් කුඩා ස්කන්ධ වෙනසකදී පවා ගිලුම් දිගෙහි විශාල වෙනසක් පෙනේ — එමගින් ඝනත්ව මිනුම වඩාත් නිවැරදි වේ. නමුත් නලය ස්ථායීව පා විය හැකි සහ පරිමාණය ගැලපෙන තරමට විශාල විය යුතුය.</p>
+    </div>
+  </div>
+
+  <div class="theory-card" data-open="0">
+    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M12 3c-3 3-3 15 0 18M12 3c3 3 3 15 0 18"/></svg></div>
+    <div style="flex:1">
+      <div class="head"><h3>දෝෂ මූලාශ්‍ර — පෘෂ්ඨික ආතතිය</h3><svg class="caret" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div>
+      <p>දියරයේ පෘෂ්ඨික ආතතිය නලයේ බාහිර පෘෂ්ඨයට බලපෑමක් ඇති කළ හැකි නමුත්, එම බලපෑම නොසලකා හැරීම සාමාන්‍ය දෝෂයකි. එමෙන්ම, බමිසුම් (readings) ගැනීමේදී නලයේ බිත්ති හෝ බඳුනේ මතුපිට ස්පර්ශ නොවී නිදහසේ පාවෙන බව සහතික කර ගත යුතුය.</p>
+    </div>
+  </div>
+
+  <div class="theory-card" data-open="0">
+    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 9h16M9 4v16"/></svg></div>
+    <div style="flex:1">
+      <div class="head"><h3>Vernier Caliper වලින් සාමාන්‍ය විෂ්කම්භය</h3><svg class="caret" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div>
+      <p>නලයේ බාහිර විෂ්කම්භය d, ස්ථාන කිහිපයකදී මැන එම අගයන්හි සාමාන්‍යය ගැනීමෙන් වඩාත් නිවැරදි යරයාලව (cross-section) ලබා ගත හැක. එකම ස්ථානයේ එක් වතාවක් පමණක් මැනීම දෝෂයට හේතු විය හැක.</p>
+    </div>
+  </div>
+
+  <div class="theory-card" data-open="0">
+    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19h16M7 19V9M12 19V5M17 19v12"/></svg></div>
+    <div style="flex:1">
+      <div class="head"><h3>1/6 වැඩි කිරීමේ ක්‍රමය (ක්‍රමානුකූල ක්‍රමය)</h3><svg class="caret" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div>
+      <p>ප්‍රථමයෙන් නලය බුරුල් නොවී ගිලෙන උපරිම ස්කන්ධය සොයාගෙන, එහි 1/6 පමණ අගයෙන් ම%ia;dßl ලෙස ස්කන්ධ එකතු කරමින් බමිසුම් ලබා ගැනීමෙන් ප්‍රස්තාරයේ ලක්ෂ්‍ය අතර හොඳ විසිරීමක් (scatter) සහ අඩු දෝෂයක් ලැබේ.</p>
+    </div>
+  </div>
+
+  <div class="section-title"><span class="num">Apparatus</span><h2>අත්‍යවශ්‍ය උපකරණ</h2></div>
+  <div class="card" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:12.5px; color:var(--ink-soft);">
+    <div>🧪 පරීක්ෂණ නලය (test tube)</div>
+    <div>⚖️ ස්කන්ධ units (1g පොඩි)</div>
+    <div>📏 mm ලකුණු කළ තීරු කඩදාසි</div>
+    <div>🔧 Vernier Caliper</div>
+    <div>🥃 ඝනත්වය සෙවිය යුතු දියර සහිත බීකරය</div>
+    <div>🔩 ඊයම් බෝල / කුඩා ලෝහ බෝල</div>
+  </div>
+</section>
+
+<!-- ================= EXAM ================= -->
+<section class="panel" id="panel-exam">
+  <p class="lead">2013 ව්‍යුහගත ප්‍රශ්නය — තෙල් සහ ජලය දෙකම අඩංගු තුනී බිත්ති සහිත පරීක්ෂණ නලයක් යොදාගත් සැකසුම. පියවරෙන් පියවර විසඳමු.</p>
+
+  <div class="card">
+    <img alt="setup" style="display:none">
+    <div class="step" data-n="1">
+      <h3>සැකසුම</h3>
+      <div class="body">තුනී බිත්ති සහිත ඉපිලුම් නලයක් තෙල් සහ ජලයෙන් යුත් බීකරයක සිරස්ව ඉපිලේ. P ලකුණ (j<,a,) නලයේ බිත්තිය වටා පැහැදිලි වර්ණ ඉරක් ලෙස ලකුණු කර ඇත.</div>
+    </div>
+
+    <div class="step" data-n="2">
+      <h3>(a) තෙල් තුළ ගිලුණු කොටසේ බර සඳහා ප්‍රකාශනය</h3>
+      <div class="body">j<,a,g my<ska ඇති තෙල් තීරුවේ උස l₁, තෙල් ඝනත්වය d_o ලෙස ගනිමු. A = j<,a,ට යටින් ඇති නලයේ ඡේද වර්ග ඵලය.</div>
+      <div class="reveal-box">
+        <button class="btn secondary" onclick="toggleReveal(this)">පිළිතුර පෙන්වන්න</button>
+        <div class="reveal-content">
+          නර = A·l₁·d_o·g <br>(ප්ලවතාවය සඳහා දායක වන තෙල් තීරුවේ බර = ඡේද වර්ග ඵලය × උස × ඝනත්වය × g)
+        </div>
+      </div>
+    </div>
+
+    <div class="step" data-n="3">
+      <h3>(b) තෙල් සමඟ නලයේ මුළු බර</h3>
+      <div class="body">නලයේ ස්කන්ධය M සහ තෙල් තීරුවෙන් එකතු වන බර ද සලකා මුළු බර සඳහා ප්‍රකාශනයක් ලියන්න.</div>
+      <div class="reveal-box">
+        <button class="btn secondary" onclick="toggleReveal(this)">පිළිතුර පෙන්වන්න</button>
+        <div class="reveal-content">
+          W = Mg + A·l₁·d_o·g <br>(නලයේ ස්කන්ධයේ බර + තෙල් තීරුවේ බර)
+        </div>
+      </div>
+    </div>
+
+    <div class="step" data-n="4">
+      <h3>(c) නලය මත ක්‍රියා කරන උඩුකුරු තෙරපුම (upthrust)</h3>
+      <div class="body">ජලය තුළ ගිලුණු කොටසේ උස l₂ ලෙසත්, ජල ඝනත්වය d_w ලෙසත් ගෙන, ජලය මගින් ලබා දෙන ඉපිලුම් බලය සඳහා ප්‍රකාශනයක් ලියන්න.</div>
+      <div class="reveal-box">
+        <button class="btn secondary" onclick="toggleReveal(this)">පිළිතුර පෙන්වන්න</button>
+        <div class="reveal-content">
+          U = A·l₂·d_w·g
+        </div>
+      </div>
+    </div>
+
+    <div class="step" data-n="5">
+      <h3>(d)(i) — (ii) W සහ U අතර සම්බන්ධතාවය → l₂ = m·l₁ + c</h3>
+      <div class="body">සමතුලිතතාවයේදී W = U වේ. එයින්: Mg + A·l₁·d_o·g = A·l₂·d_w·g. මෙය l₂ = m l₁ + c ආකාරයට සකසන්න.</div>
+      <div class="reveal-box">
+        <button class="btn secondary" onclick="toggleReveal(this)">පිළිතුර පෙන්වන්න</button>
+        <div class="reveal-content">
+          l₂ = (d_o/d_w)·l₁ + M/(A·d_w) <br><br>
+          ∴ ප්‍රවණතාව <b>m = d_o / d_w</b> &nbsp;&nbsp; Y-අන්තඃඛණ්ඩය <b>c = M/(A·d_w)</b>
+        </div>
+      </div>
+      <div class="quiz-row" style="margin-top:10px;">
+        <span style="font-size:12.5px; color:var(--ink-soft);">m = ද_o / d_w නම්, m දන්නා විට d_o ගණනය කරන සූත්‍රය:</span>
+      </div>
+      <div class="quiz-row">
+        <input type="number" step="0.01" id="q1_dw" placeholder="d_w (g/cm³)">
+        <input type="number" step="0.01" id="q1_m" placeholder="m (ප්‍රවණතාව)">
+        <button class="btn ghost" onclick="checkQ1()">ගණනය කරන්න</button>
+      </div>
+      <div class="quiz-feedback" id="q1fb"></div>
+    </div>
+
+    <div class="step" data-n="6">
+      <h3>(e)–(f) නලයේ බිත්තිය ඝන නම් — A_i සහ A_o</h3>
+      <div class="body">නලයේ බිත්තිය තුනී නොව ඝන නම්, m = A_i·d_o /(A_o·d_w) ලෙස සකසයි. A_i = අභ්‍යන්තර ඡේද වර්ග ඵලය, A_o = බාහිර ඡේද වර්ග ඵලය. A_i සඳහා අභ්‍යන්තර විෂ්කම්භය x_i ද, A_o සඳහා බාහිර විෂ්කම්භය x_o ද මැනිය යුතුය — x_i සඳහා Travelling Microscope එකද, x_o සඳහා Vernier Caliper එකද වඩාත් සුදුසුය.</div>
+      <div class="reveal-box">
+        <button class="btn secondary" onclick="toggleReveal(this)">සම්පූර්ණ පැහැදිලි කිරීම</button>
+        <div class="reveal-content">
+          A_i = π x_i²/4, A_o = π x_o²/4 <br>
+          x_i (අභ්‍යන්තර, නලය තුළට ප්‍රවේශ විය නොහැකි) → <b>Travelling Microscope</b> මගින් නලයේ මුඛයෙන් බලා මනිනු ලැබේ.<br>
+          x_o (බාහිර, සෘජුවම ස්පර්ශ කළ හැකි) → <b>Vernier Caliper</b> මගින් සෘජුවම මනිනු ලැබේ.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FLASHCARDS ================= -->
+<section class="panel" id="panel-flash">
+  <p class="lead">ප්‍රධාන පද සහ සූත්‍ර පුනරීක්ෂණය — කාඩ්පත මත ටැප් කර පිටුපස බලන්න.</p>
+  <div class="card">
+    <div class="flash-wrap">
+      <div class="flash" id="flashEl">
+        <div class="flash-face flash-front" id="flashFront">—</div>
+        <div class="flash-face flash-back" id="flashBack">—</div>
+      </div>
+    </div>
+    <div class="flash-nav">
+      <button class="btn ghost" id="prevCard">← පෙර</button>
+      <span class="flash-count" id="cardCount">1 / 10</span>
+      <button class="btn" id="nextCard">ඊළඟ →</button>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<nav class="tabs" id="tabNav">
+  <button data-panel="sim" class="active">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 2h6M10 2v6l-5 9a2 2 0 002 3h10a2 2 0 002-3l-5-9V2"/></svg>
+    සිමියුලේටරය
+  </button>
+  <button data-panel="graph">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M7 15l4-5 3 3 5-7"/></svg>
+    ප්‍රස්තාරය
+  </button>
+  <button data-panel="theory">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+    න්‍යාය
+  </button>
+  <button data-panel="exam">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6M9 16h6M9 8h6M5 3h14v18l-7-4-7 4V3z"/></svg>
+    2013 ප්‍රශ්නය
+  </button>
+  <button data-panel="flash">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="14" height="12" rx="2"/><path d="M7 3h14v12"/></svg>
+    කාඩ්පත්
+  </button>
+</nav>
+
+<script>
+/* ===================== THEME ===================== */
+const root = document.body;
+const themeBtn = document.getElementById('themeToggle');
+const themeIcon = document.getElementById('themeIcon');
+function setTheme(t){
+  root.setAttribute('data-theme', t);
+  localStorage.setItem('hydro-theme', t);
+  themeIcon.innerHTML = t==='dark'
+    ? '<path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/>'
+    : '<path d="M12 3v1M12 20v1M4.2 4.2l.7.7M18.4 18.4l.7.7M3 12h1M20 12h1M4.2 19.8l.7-.7M18.4 5.6l.7-.7"/><circle cx="12" cy="12" r="5"/>';
+}
+setTheme(localStorage.getItem('hydro-theme') || 'light');
+themeBtn.addEventListener('click', ()=> setTheme(root.getAttribute('data-theme')==='dark' ? 'light':'dark'));
+
+/* ===================== TABS ===================== */
+const tabBtns = document.querySelectorAll('#tabNav button');
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('section.panel').forEach(p=>p.classList.remove('active'));
+    document.getElementById('panel-'+btn.dataset.panel).classList.add('active');
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+});
+
+/* ===================== THEORY ACCORDION ===================== */
+document.querySelectorAll('.theory-card').forEach(card=>{
+  card.addEventListener('click', ()=> card.classList.toggle('open'));
+});
+
+/* ===================== REVEAL / QUIZ ===================== */
+function toggleReveal(btn){
+  const box = btn.nextElementSibling;
+  box.classList.toggle('show');
+  btn.textContent = box.classList.contains('show') ? 'පිළිතුර සඟවන්න' : 'පිළිතුර පෙන්වන්න';
+}
+function checkQ1(){
+  const dw = parseFloat(document.getElementById('q1_dw').value);
+  const m = parseFloat(document.getElementById('q1_m').value);
+  const fb = document.getElementById('q1fb');
+  if(isNaN(dw) || isNaN(m)){ fb.textContent = 'කරුණාකර අගයන් දෙකම ඇතුළත් කරන්න.'; fb.className='quiz-feedback wrong'; return; }
+  const doVal = (m*dw).toFixed(3);
+  fb.textContent = `d_o = m × d_w = ${doVal} g/cm³`;
+  fb.className = 'quiz-feedback correct';
+}
+
+/* ===================== SIMULATOR PHYSICS ===================== */
+const W_FIXED = 18;   // g  (tube + initial lead shot)
+const V_FIXED = 4.2;  // cm3 (volume below zero mark)
+const TUBE_TOTAL_LEN_CM = 12; // visual tube length above beaker base reference
+
+const mSlider = document.getElementById('mSlider');
+const dSlider = document.getElementById('dSlider');
+const rhoSlider = document.getElementById('rhoSlider');
+const mVal = document.getElementById('mVal');
+const dVal = document.getElementById('dVal');
+const rhoVal = document.getElementById('rhoVal');
+const outL = document.getElementById('outL');
+const outW = document.getElementById('outW');
+const outU = document.getElementById('outU');
+const simFlags = document.getElementById('simFlags');
+const simSvg = document.getElementById('simSvg');
+
+function computeL(M, d_mm, rho){
+  const d = d_mm/10; // cm
+  const area = Math.PI*d*d/4; // cm2
+  const l = (4*M)/(Math.PI*d*d*rho) + (4*W_FIXED)/(Math.PI*d*d*rho) - (4*V_FIXED)/(Math.PI*d*d);
+  return {l, area};
+}
+
+function renderSim(){
+  const M = parseFloat(mSlider.value);
+  const d = parseFloat(dSlider.value);
+  const rho = parseFloat(rhoSlider.value);
+  mVal.textContent = M.toFixed(1);
+  dVal.textContent = d.toFixed(1);
+  rhoVal.textContent = rho.toFixed(2);
+
+  const {l, area} = computeL(M, d, rho);
+  const weightN = ((M+W_FIXED)).toFixed(2);
+  const upthrustN = ((V_FIXED + area*Math.max(l,0))*rho).toFixed(2);
+
+  outL.textContent = (isFinite(l)? l.toFixed(2):'—') + ' cm';
+  outW.textContent = weightN + ' g';
+  outU.textContent = upthrustN + ' g';
+
+  // flags
+  let flags = [];
+  if(l < 0) flags.push({t:'⚠️ ගිලුම් දිග ऋණාත්මකයි — M වැඩි කරන්න', warn:true});
+  if(l > TUBE_TOTAL_LEN_CM) flags.push({t:'⚠️ නලය පතුලට තට්ටු වේ / යටවෙයි!', warn:true});
+  if(l>=0 && l<=TUBE_TOTAL_LEN_CM) flags.push({t:'✓ නලය ස්ථායීව ඉපිලේ', warn:false});
+  simFlags.innerHTML = flags.map(f=>`<span class="flag ${f.warn?'warn':''}">${f.t}</span>`).join('');
+
+  drawSimSVG(M, d, rho, l);
+}
+
+function drawSimSVG(M, d_mm, rho, l){
+  const W=300,H=270;
+  const beakerX=55, beakerY=28, beakerW=190, beakerH=210;
+  const liquidTop = beakerY+30;
+  const scalePxPerCm = (beakerH-50)/16; // fit ~16cm visible
+  const clampedL = Math.max(0, Math.min(l, TUBE_TOTAL_LEN_CM));
+  const tubeW = 12 + (d_mm-8)*1.4;
+  const tubeH = TUBE_TOTAL_LEN_CM*scalePxPerCm;
+  const tubeX = W/2 - tubeW/2;
+  // tube bottom rests at liquidTop + clampedL*scale (submersion)
+  const tubeBottomY = liquidTop + clampedL*scalePxPerCm;
+  const tubeTopY = tubeBottomY - tubeH;
+
+  const liquidColor = `hsl(${170 - (rho-1)*40}, 45%, ${45+ (1.2-rho)*10}%)`;
+
+  let svg = `
+  <defs>
+    <linearGradient id="liqGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${liquidColor}" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="${liquidColor}" stop-opacity="0.85"/>
+    </linearGradient>
+    <linearGradient id="tubeGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="var(--ink-faint)" stop-opacity="0.15"/>
+      <stop offset="50%" stop-color="var(--surface)" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="var(--ink-faint)" stop-opacity="0.15"/>
+    </linearGradient>
+  </defs>
+  <!-- beaker -->
+  <path d="M${beakerX-6},${beakerY} L${beakerX},${beakerY+beakerH} Q${beakerX},${beakerY+beakerH+10} ${beakerX+10},${beakerY+beakerH+10} L${beakerX+beakerW-10},${beakerY+beakerH+10} Q${beakerX+beakerW},${beakerY+beakerH+10} ${beakerX+beakerW},${beakerY+beakerH} L${beakerX+beakerW+6},${beakerY}" fill="none" stroke="var(--ink-faint)" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- liquid -->
+  <path d="M${beakerX+1},${liquidTop} L${beakerX+1},${beakerY+beakerH} Q${beakerX+1},${beakerY+beakerH+9} ${beakerX+11},${beakerY+beakerH+9} L${beakerX+beakerW-11},${beakerY+beakerH+9} Q${beakerX+beakerW-1},${beakerY+beakerH+9} ${beakerX+beakerW-1},${beakerY+beakerH} L${beakerX+beakerW-1},${liquidTop} Z" fill="url(#liqGrad)"/>
+  <line x1="${beakerX}" y1="${liquidTop}" x2="${beakerX+beakerW}" y2="${liquidTop}" stroke="${liquidColor}" stroke-width="2" opacity="0.9"/>
+  <!-- mm scale marks on beaker side -->
+  ${Array.from({length:9}).map((_,i)=>{
+    const y = liquidTop + i*2*scalePxPerCm;
+    return y < beakerY+beakerH ? `<line x1="${beakerX-6}" y1="${y}" x2="${beakerX}" y2="${y}" stroke="var(--ink-faint)" stroke-width="1.5"/><text x="${beakerX-10}" y="${y+3}" font-size="8" fill="var(--ink-faint)" text-anchor="end" font-family="monospace">${i*2}</text>` : '';
+  }).join('')}
+  <!-- tube -->
+  <g>
+    <rect x="${tubeX}" y="${tubeTopY}" width="${tubeW}" height="${tubeH-tubeW/2}" fill="url(#tubeGrad)" stroke="var(--ink-soft)" stroke-width="1.5"/>
+    <path d="M${tubeX},${tubeBottomY-tubeW/2} a${tubeW/2},${tubeW/2} 0 0 0 ${tubeW},0" fill="var(--ink-faint)" fill-opacity="0.3" stroke="var(--ink-soft)" stroke-width="1.5"/>
+    <!-- lead shot -->
+    ${Array.from({length:5}).map((_,i)=>`<circle cx="${tubeX+tubeW/2 + (i%3-1)*4}" cy="${tubeBottomY-6-Math.floor(i/3)*6}" r="3" fill="var(--accent2)"/>`).join('')}
+    <!-- graduation P mark -->
+    <line x1="${tubeX-4}" y1="${tubeBottomY - TUBE_TOTAL_LEN_CM*0.15*scalePxPerCm}" x2="${tubeX+tubeW+4}" y2="${tubeBottomY - TUBE_TOTAL_LEN_CM*0.15*scalePxPerCm}" stroke="var(--danger)" stroke-width="2" stroke-dasharray="3,2"/>
+  </g>
+  <!-- force vectors -->
+  <g font-family="monospace" font-size="11" font-weight="700">
+    <line x1="${tubeX+tubeW+18}" y1="${tubeTopY+10}" x2="${tubeX+tubeW+18}" y2="${tubeTopY+50}" stroke="var(--danger)" stroke-width="2.5" marker-end="url(#arrowDown)"/>
+    <text x="${tubeX+tubeW+24}" y="${tubeTopY+35}" fill="var(--danger)">W</text>
+    <line x1="${tubeX-18}" y1="${tubeBottomY-10}" x2="${tubeX-18}" y2="${tubeBottomY-50}" stroke="var(--accent)" stroke-width="2.5" marker-end="url(#arrowUp)"/>
+    <text x="${tubeX-30}" y="${tubeBottomY-35}" fill="var(--accent)">U</text>
+  </g>
+  <defs>
+    <marker id="arrowDown" markerWidth="8" markerHeight="8" refX="4" refY="7" orient="auto"><path d="M0,0 L8,0 L4,8 Z" fill="var(--danger)"/></marker>
+    <marker id="arrowUp" markerWidth="8" markerHeight="8" refX="4" refY="1" orient="auto"><path d="M0,8 L8,8 L4,0 Z" fill="var(--accent)"/></marker>
+  </defs>
+  `;
+  simSvg.innerHTML = svg;
+}
+
+[mSlider,dSlider,rhoSlider].forEach(s=>s.addEventListener('input', ()=>{renderSim(); syncGraphAxisHint();}));
+renderSim();
+
+/* ===================== GRAPH MODULE ===================== */
+const graphSvg = document.getElementById('graphSvg');
+let points = []; // {M,l}
+const GW=320, GH=260, PAD_L=44, PAD_B=32, PAD_T=14, PAD_R=14;
+const M_MAX_AXIS = 30, L_MAX_AXIS = 20;
+
+function toPx(M,l){
+  const x = PAD_L + (M/M_MAX_AXIS)*(GW-PAD_L-PAD_R);
+  const y = (GH-PAD_B) - (l/L_MAX_AXIS)*(GH-PAD_B-PAD_T);
+  return [x,y];
+}
+
+function drawGraph(){
+  let svg = `<g font-family="monospace" font-size="8" fill="var(--ink-faint)">`;
+  // axes
+  svg += `<line x1="${PAD_L}" y1="${PAD_T}" x2="${PAD_L}" y2="${GH-PAD_B}" stroke="var(--line)" stroke-width="1.5"/>`;
+  svg += `<line x1="${PAD_L}" y1="${GH-PAD_B}" x2="${GW-PAD_R}" y2="${GH-PAD_B}" stroke="var(--line)" stroke-width="1.5"/>`;
+  for(let m=0;m<=M_MAX_AXIS;m+=5){
+    const [x,y]=toPx(m,0);
+    svg+=`<line x1="${x}" y1="${GH-PAD_B}" x2="${x}" y2="${GH-PAD_B+4}" stroke="var(--line)"/><text x="${x}" y="${GH-PAD_B+14}" text-anchor="middle">${m}</text>`;
+  }
+  for(let l=0;l<=L_MAX_AXIS;l+=4){
+    const [x,y]=toPx(0,l);
+    svg+=`<line x1="${PAD_L-4}" y1="${y}" x2="${PAD_L}" y2="${y}" stroke="var(--line)"/><text x="${PAD_L-8}" y="${y+3}" text-anchor="end">${l}</text>`;
+  }
+  svg += `<text x="${GW/2}" y="${GH-4}" text-anchor="middle" fill="var(--ink-soft)">M (g)</text>`;
+  svg += `<text x="12" y="${GH/2}" text-anchor="middle" fill="var(--ink-soft)" transform="rotate(-90 12 ${GH/2})">l (cm)</text>`;
+  svg += `</g>`;
+
+  // best fit line
+  if(points.length>=2){
+    const n=points.length;
+    const sumM = points.reduce((a,p)=>a+p.M,0);
+    const sumL = points.reduce((a,p)=>a+p.l,0);
+    const sumML = points.reduce((a,p)=>a+p.M*p.l,0);
+    const sumMM = points.reduce((a,p)=>a+p.M*p.M,0);
+    const grad = (n*sumML - sumM*sumL)/(n*sumMM - sumM*sumM);
+    const inter = (sumL - grad*sumM)/n;
+    const [x1,y1] = toPx(0, inter);
+    const [x2,y2] = toPx(M_MAX_AXIS, grad*M_MAX_AXIS+inter);
+    svg += `<line x1="${Math.max(x1,PAD_L)}" y1="${Math.min(Math.max(y1,PAD_T),GH-PAD_B)}" x2="${Math.min(x2,GW-PAD_R)}" y2="${Math.min(Math.max(y2,PAD_T),GH-PAD_B)}" stroke="var(--accent)" stroke-width="2"/>`;
+
+    const d = parseFloat(dSlider.value)/10;
+    const rho = grad>0 ? (4/(Math.PI*d*d*grad)) : NaN;
+    document.getElementById('gGrad').textContent = grad.toFixed(3);
+    document.getElementById('gInt').textContent = inter.toFixed(2);
+    document.getElementById('gRho').textContent = isFinite(rho)? rho.toFixed(3)+' g/cm³' : '—';
+    document.getElementById('gradSteps').textContent = `m = Δl/ΔM = ${grad.toFixed(3)} cm/g  →  ρ = 4/(πd²m) = ${isFinite(rho)?rho.toFixed(3):'—'} g/cm³  (d = ${(d*10).toFixed(1)} mm ලෙස භාවිතා කරමින්)`;
+  } else {
+    document.getElementById('gGrad').textContent='—';
+    document.getElementById('gInt').textContent='—';
+    document.getElementById('gRho').textContent='—';
+  }
+
+  points.forEach(p=>{
+    const [x,y] = toPx(p.M,p.l);
+    if(x>=PAD_L && x<=GW-PAD_R && y>=PAD_T && y<=GH-PAD_B)
+      svg += `<circle cx="${x}" cy="${y}" r="4" fill="var(--accent2)" stroke="var(--surface)" stroke-width="1.5"/>`;
+  });
+
+  graphSvg.innerHTML = svg;
+}
+function syncGraphAxisHint(){}
+document.getElementById('addPointBtn').addEventListener('click', ()=>{
+  const M = parseFloat(mSlider.value);
+  const d = parseFloat(dSlider.value);
+  const rho = parseFloat(rhoSlider.value);
+  const {l} = computeL(M,d,rho);
+  if(l>=0 && l<=TUBE_TOTAL_LEN_CM){
+    points.push({M,l});
+    drawGraph();
+  }
+});
+document.getElementById('clearGraphBtn').addEventListener('click', ()=>{ points=[]; drawGraph(); });
+document.getElementById('resetSimBtn').addEventListener('click', ()=>{
+  mSlider.value=5; dSlider.value=12; rhoSlider.value=1.00; renderSim();
+});
+document.getElementById('autoFillBtn').addEventListener('click', ()=>{
+  points=[];
+  const d = parseFloat(dSlider.value);
+  const rho = parseFloat(rhoSlider.value);
+  for(let i=1;i<=6;i++){
+    const M = i*4;
+    const {l} = computeL(M,d,rho);
+    if(l>=0 && l<=TUBE_TOTAL_LEN_CM) points.push({M, l: l + (Math.random()-0.5)*0.3});
+  }
+  drawGraph();
+});
+drawGraph();
+
+/* ===================== FLASHCARDS ===================== */
+const cards = [
+  {f:'ඉපිලුම් නියමය (Principle)', b:'ඝන වස්තුවක් දියරයක ඉපිලෙන විට, එහි බර, එය ඉවත් කරන දියර ප්‍රමාණයේ බරට (ඉපිලුම් බලයට) සමාන වේ.'},
+  {f:'l = 4M/(πd²ρ) + 4W/(πd²ρ) − 4V/(πd²)', b:'ගිලුම් දිග l, එකතු කළ ස්කන්ධය M, බාහිර විෂ්කම්භය d, දියර ඝනත්වය ρ අතර සම්බන්ධතාවය. ක්‍රමානුකූල ක්‍රමය (successive method) මගින් M වැඩි කරමින් l මනිනු ලැබේ.'},
+  {f:'ප්‍රවණතාව (Gradient) m = ?', b:'l vs M ප්‍රස්තාරයේ ප්‍රවණතාව m = 4/(πd²ρ). මෙයින් ρ = 4/(πd²m) ලෙස ගණනය කළ හැක.'},
+  {f:'ඊයම් බෝල මන්ද?', b:'ගුරුත්ව කේන්ද්‍රය පහළින් තබා නලයේ සිරස් ස්ථායීතාවය සහතික කිරීමට.'},
+  {f:'සිහින් නලයක ප්‍රතිලාභය', b:'සංවේදිතාව (sensitivity) වැඩි කරයි — කුඩා M වෙනසකින් l හි විශාල වෙනසක් ලබා දෙයි.'},
+  {f:'දෝෂයක් — පෘෂ්ඨික ආතතිය', b:'දියරයේ පෘෂ්ඨික ආතති බලය නොසලකා හැරීම සාමාන්‍ය ප්‍රායෝගික දෝෂයකි.'},
+  {f:'Vernier Caliper භාවිතය', b:'නලයේ බාහිර විෂ්කම්භය (d) ස්ථාන කිහිපයකින් මැන සාමාන්‍යය ගැනීමට යොදාගනී.'},
+  {f:'Travelling Microscope භාවිතය', b:'නලයේ අභ්‍යන්තර විෂ්කම්භය x_i වැනි සෘජුව ස්පර්ශ කළ නොහැකි දුරස්ථ මිනුම් සඳහා යොදාගනී.'},
+  {f:'l₂ = m l₁ + c (2013 ප්‍රශ්නය)', b:'තුනී බිත්ති සහිත නලයක් තෙල් හා ජලයේ ඉපිලෙන විට, m = d_o/d_w සහ c = M/(A d_w).'},
+  {f:'ඝන බිත්ති සහිත නලය සඳහා', b:'m = A_i d_o /(A_o d_w) — A_i අභ්‍යන්තර හා A_o බාහිර ඡේද වර්ග ඵල දෙකම සලකා බැලිය යුතුය.'},
+];
+let cardIdx=0;
+const flashEl = document.getElementById('flashEl');
+const flashFront = document.getElementById('flashFront');
+const flashBack = document.getElementById('flashBack');
+const cardCount = document.getElementById('cardCount');
+function renderCard(){
+  flashEl.classList.remove('flipped');
+  flashFront.textContent = cards[cardIdx].f;
+  flashBack.textContent = cards[cardIdx].b;
+  cardCount.textContent = `${cardIdx+1} / ${cards.length}`;
+}
+flashEl.addEventListener('click', ()=> flashEl.classList.toggle('flipped'));
+document.getElementById('nextCard').addEventListener('click', ()=>{ cardIdx=(cardIdx+1)%cards.length; renderCard(); });
+document.getElementById('prevCard').addEventListener('click', ()=>{ cardIdx=(cardIdx-1+cards.length)%cards.length; renderCard(); });
+renderCard();
+</script>
+</body>
+</html>

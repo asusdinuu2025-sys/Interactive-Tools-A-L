@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>සංවෘත නළය හා අනුනාදය — A/L භෞතික විද්‍යාව ප්‍රායෝගික</title>
+<style>
+  :root{
+    --bg:#0c121d;
+    --bg2:#0a0f18;
+    --panel:#141f30;
+    --panel2:#182740;
+    --card:#1b2942;
+    --line:#28394f;
+    --ink:#eef3f8;
+    --ink-dim:#9fb2c8;
+    --ink-mute:#6e829b;
+    --brass:#c98a3f;
+    --brass-light:#e6ac66;
+    --water:#2f8f95;
+    --water-light:#63cdd4;
+    --amber:#ffce5c;
+    --amber-soft:rgba(255,206,92,0.18);
+    --danger:#e2645c;
+    --good:#5fbf8f;
+    --radius:14px;
+    --serif:"Palatino Linotype","Georgia","Times New Roman",serif;
+    --sinhala:"Iskoola Pota","Noto Sans Sinhala","Nirmala UI","Yaldevi","Noto Sans",sans-serif;
+    --mono:ui-monospace,"SF Mono","Cascadia Mono","Consolas",monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse at 20% -10%, rgba(201,138,63,0.10), transparent 45%),
+      radial-gradient(ellipse at 90% 0%, rgba(47,143,149,0.12), transparent 40%),
+      var(--bg);
+    color:var(--ink);
+    font-family:var(--sinhala);
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--amber-soft);}
+
+  /* ---------- Header ---------- */
+  header.top{
+    padding:28px 20px 22px;
+    border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg, rgba(20,31,48,0.9), rgba(20,31,48,0.4));
+    position:sticky;top:0;z-index:50;
+    backdrop-filter:blur(10px);
+  }
+  .top-inner{max-width:1080px;margin:0 auto;}
+  .tag{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:var(--mono);
+    font-size:11px;letter-spacing:.14em;
+    color:var(--brass-light);
+    background:rgba(201,138,63,0.10);
+    border:1px solid rgba(201,138,63,0.35);
+    padding:5px 12px;border-radius:999px;
+    text-transform:uppercase;
+  }
+  .tag::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--brass-light);box-shadow:0 0 8px var(--brass-light);}
+  h1.title{
+    font-size:clamp(20px,3.4vw,32px);
+    margin:14px 0 4px;
+    font-weight:800;
+    letter-spacing:.2px;
+    color:var(--ink);
+  }
+  .subtitle{color:var(--ink-dim);font-size:14px;max-width:760px;}
+  .subtitle b{color:var(--water-light);font-weight:600;}
+
+  /* ---------- Tabs ---------- */
+  nav.tabs{
+    max-width:1080px;margin:18px auto 0;
+    display:flex;gap:6px;overflow-x:auto;
+    padding-bottom:2px;
+    scrollbar-width:thin;
+  }
+  nav.tabs::-webkit-scrollbar{height:4px;}
+  nav.tabs::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
+  .tab-btn{
+    flex:0 0 auto;
+    font-family:var(--sinhala);
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--ink-dim);
+    padding:10px 16px;
+    border-radius:10px 10px 0 0;
+    cursor:pointer;
+    font-size:14px;
+    white-space:nowrap;
+    transition:all .18s ease;
+    border-bottom:none;
+  }
+  .tab-btn:hover{color:var(--ink);background:rgba(255,255,255,0.03);}
+  .tab-btn.active{
+    color:var(--amber);
+    background:var(--panel);
+    border-color:var(--line);
+    box-shadow:0 -2px 0 var(--brass) inset;
+  }
+
+  main{max-width:1080px;margin:0 auto;padding:26px 20px 80px;}
+  .panel{display:none;animation:fade .35s ease;}
+  .panel.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+  h2.sec{
+    font-size:19px;font-weight:800;color:var(--ink);
+    margin:0 0 16px;padding-bottom:10px;border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:10px;
+  }
+  h2.sec .dot{width:8px;height:8px;border-radius:2px;background:var(--brass);transform:rotate(45deg);flex:0 0 auto;}
+
+  .card{
+    background:linear-gradient(180deg,var(--card),var(--panel));
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:20px;
+    margin-bottom:18px;
+  }
+  .card h3{margin:0 0 10px;font-size:15.5px;color:var(--brass-light);font-weight:700;}
+  .card p{color:var(--ink-dim);margin:8px 0;font-size:14.5px;}
+
+  .formula{
+    font-family:var(--serif);
+    font-style:italic;
+    background:rgba(255,255,255,0.03);
+    border:1px solid var(--line);
+    border-left:3px solid var(--brass);
+    padding:14px 18px;
+    border-radius:8px;
+    margin:12px 0;
+    font-size:18px;
+    color:var(--amber);
+    overflow-x:auto;
+  }
+  .formula sub{font-size:12px;}
+  .formula .tagnum{
+    float:left;font-family:var(--mono);font-style:normal;color:var(--ink-mute);
+    font-size:12px;margin-right:14px;margin-top:3px;
+  }
+  .var{font-family:var(--serif);font-style:italic;color:var(--water-light);}
+
+  ul.plain{margin:8px 0;padding-inline-start:22px;color:var(--ink-dim);font-size:14.5px;}
+  ul.plain li{margin:6px 0;}
+  ul.plain li b{color:var(--ink);}
+
+  table.apparatus{width:100%;border-collapse:collapse;margin-top:10px;}
+  table.apparatus td{padding:9px 6px;border-bottom:1px dashed var(--line);color:var(--ink-dim);font-size:14px;}
+  table.apparatus td:first-child{width:26px;color:var(--brass-light);font-family:var(--mono);}
+
+  /* ---------- Simulator ---------- */
+  .sim-grid{display:grid;grid-template-columns:1fr;gap:18px;}
+  @media(min-width:860px){.sim-grid{grid-template-columns:1.05fr 1fr;}}
+
+  .stage{
+    background:radial-gradient(ellipse at 50% 0%, rgba(99,205,212,0.06), transparent 60%), var(--panel2);
+    border:1px solid var(--line);border-radius:var(--radius);
+    padding:10px;display:flex;flex-direction:column;align-items:center;
+  }
+  .stage svg{width:100%;max-width:340px;height:auto;}
+
+  .readout{
+    display:flex;justify-content:space-between;gap:10px;width:100%;max-width:340px;margin-top:10px;
+    font-family:var(--mono);font-size:12px;color:var(--ink-mute);
+  }
+  .readout b{color:var(--water-light);font-size:14px;font-family:var(--sinhala);}
+
+  .meter-wrap{width:100%;max-width:340px;margin-top:12px;}
+  .meter-label{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-dim);margin-bottom:5px;}
+  .meter{height:10px;border-radius:6px;background:#0d1522;border:1px solid var(--line);overflow:hidden;}
+  .meter-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--water),var(--amber));transition:width .12s linear;box-shadow:0 0 12px var(--amber-soft);}
+
+  .controls{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;}
+  .ctrl-row{margin-bottom:16px;}
+  .ctrl-row label{display:flex;justify-content:space-between;font-size:13.5px;color:var(--ink-dim);margin-bottom:6px;}
+  .ctrl-row label span.val{font-family:var(--mono);color:var(--amber);font-weight:600;}
+  select, input[type=range]{width:100%;}
+  select{
+    background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:8px;
+    padding:9px 10px;font-family:var(--sinhala);font-size:14px;
+  }
+  input[type=range]{
+    -webkit-appearance:none;height:6px;border-radius:4px;
+    background:linear-gradient(90deg,var(--brass),var(--water));outline:none;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:18px;height:18px;border-radius:50%;
+    background:var(--ink);border:3px solid var(--brass);cursor:pointer;box-shadow:0 0 6px rgba(0,0,0,0.4);
+  }
+  input[type=range]::-moz-range-thumb{
+    width:18px;height:18px;border-radius:50%;background:var(--ink);border:3px solid var(--brass);cursor:pointer;
+  }
+
+  .btn{
+    font-family:var(--sinhala);
+    border:none;border-radius:10px;padding:12px 18px;font-size:14.5px;font-weight:700;
+    cursor:pointer;transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-primary{background:linear-gradient(180deg,var(--brass-light),var(--brass));color:#241505;box-shadow:0 4px 14px rgba(201,138,63,0.25);}
+  .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--ink-dim);}
+  .btn-water{background:linear-gradient(180deg,var(--water-light),var(--water));color:#04262a;}
+  .btn-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;}
+
+  .hint{font-size:12.5px;color:var(--ink-mute);margin-top:10px;line-height:1.6;}
+
+  /* ---------- Data & graph ---------- */
+  .calc-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;}
+  @media(max-width:600px){.calc-grid{grid-template-columns:1fr;}}
+  .field label{display:block;font-size:12.5px;color:var(--ink-dim);margin-bottom:5px;}
+  .field input{
+    width:100%;background:var(--card);border:1px solid var(--line);border-radius:8px;
+    padding:9px 10px;color:var(--ink);font-family:var(--mono);font-size:14px;
+  }
+  .result-box{
+    display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;
+  }
+  @media(max-width:600px){.result-box{grid-template-columns:1fr;}}
+  .result-card{
+    background:rgba(255,206,92,0.06);border:1px solid rgba(201,138,63,0.35);
+    border-radius:10px;padding:14px;text-align:center;
+  }
+  .result-card .big{font-family:var(--serif);font-style:italic;font-size:26px;color:var(--amber);}
+  .result-card .lbl{font-size:12px;color:var(--ink-dim);margin-top:4px;}
+
+  table.data-table{width:100%;border-collapse:collapse;margin-top:6px;font-size:13px;}
+  table.data-table th{
+    background:var(--panel2);color:var(--brass-light);font-weight:700;
+    padding:8px 6px;border-bottom:1px solid var(--line);font-size:12.5px;text-align:center;
+  }
+  table.data-table td{padding:6px 5px;border-bottom:1px solid var(--line);text-align:center;}
+  table.data-table input{
+    width:64px;background:var(--card);border:1px solid var(--line);border-radius:6px;
+    color:var(--ink);font-family:var(--mono);padding:5px;text-align:center;font-size:12.5px;
+  }
+  .scroll-x{overflow-x:auto;}
+
+  canvas#graphCanvas{width:100%;max-width:640px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;margin-top:12px;}
+
+  .fit-row{display:flex;flex-wrap:wrap;gap:16px;margin-top:14px;}
+  .fit-tag{font-family:var(--mono);font-size:13px;color:var(--water-light);background:rgba(47,143,149,0.10);border:1px solid rgba(47,143,149,0.35);padding:8px 12px;border-radius:8px;}
+
+  /* ---------- Past papers accordion ---------- */
+  .qcard{border:1px solid var(--line);border-radius:12px;margin-bottom:12px;overflow:hidden;background:var(--card);}
+  .qhead{
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+    padding:14px 16px;cursor:pointer;font-size:14.5px;color:var(--ink);
+  }
+  .qhead:hover{background:rgba(255,255,255,0.02);}
+  .qhead .qn{font-family:var(--mono);color:var(--brass-light);margin-right:10px;}
+  .chev{transition:transform .2s ease;color:var(--ink-mute);flex:0 0 auto;}
+  .qcard.open .chev{transform:rotate(180deg);}
+  .qbody{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+  .qcard.open .qbody{max-height:1200px;}
+  .qbody-inner{padding:0 16px 16px;color:var(--ink-dim);font-size:14px;}
+  .qbody-inner .ans{
+    margin-top:10px;background:rgba(95,191,143,0.07);border:1px solid rgba(95,191,143,0.3);
+    border-radius:8px;padding:12px 14px;color:var(--ink);
+  }
+  .ans b{color:var(--good);}
+  .reveal-btn{
+    margin-top:10px;font-size:12.5px;background:transparent;border:1px dashed var(--line);
+    color:var(--ink-mute);padding:6px 12px;border-radius:20px;cursor:pointer;
+  }
+  .ans{display:none;}
+  .ans.show{display:block;animation:fade .3s ease;}
+
+  footer{
+    text-align:center;padding:26px 20px 40px;color:var(--ink-mute);font-size:12.5px;border-top:1px solid var(--line);margin-top:20px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <span class="tag">A/L Physics · Practical 02</span>
+    <h1 class="title">සංවෘත නළයක් හා එක් සරසුලක් භාවිතයෙන් වාතයේ ශබ්දයේ ප්‍රවේගය (v) සහ නළයේ ආන්ත ශෝධනය (e) සෙවීම</h1>
+    <p class="subtitle">අන්තර්ක්‍රියාකාරී අනුකරණය, ගණකය සහ ප්‍රස්ථාර මාපකය සමඟින් — <b>සම්පූර්ණයෙන් offline</b> ලෙස ක්‍රියා කරයි</p>
+    <nav class="tabs" id="tabNav">
+      <button class="tab-btn active" data-tab="theory">සිද්ධාන්ත හා සූත්‍ර</button>
+      <button class="tab-btn" data-tab="apparatus">අවශ්‍ය උපකරණ</button>
+      <button class="tab-btn" data-tab="sim">අනුකරණය</button>
+      <button class="tab-btn" data-tab="data">දත්ත හා ප්‍රස්ථාරය</button>
+      <button class="tab-btn" data-tab="papers">පසුගිය ප්‍රශ්න</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- ===================== THEORY ===================== -->
+  <section class="panel active" id="panel-theory">
+    <h2 class="sec"><span class="dot"></span> සිද්ධාන්ත හා සූත්‍ර</h2>
+
+    <div class="card">
+      <h3>සංවෘත අනුනාද නළයක මූලධර්මය</h3>
+      <p>එක් කෙළවරක් වසාලූ (ජලයෙන් වසාගත්) නළයක් තුළ වායු තීරුවක් අනුනාද වන විට, නළයේ වසාගත් කෙළවර <b>නෝඩයක්</b> (node) ලෙසත්, විවෘත කෙළවරට ආසන්නයේ <b>ඇන්ටිනෝඩයක්</b> (antinode) ලෙසත් සහිත <b>අනුදිග ස්ථාවර තරංගයක්</b> (longitudinal stationary wave) නිර්මාණය වේ. විවෘත කෙළවරේදී වායු අංශුවල කම්පනය නළයෙන් ටිකක් පිටතට විහිදෙන බැවින්, ප්‍රායෝගික ඇන්ටිනෝඩය නළයේ ඇත්තකින් <span class="var">e</span> තරම් දුරකින් පිටතට පිහිටයි — මෙයට <b>ආන්ත ශෝධනය</b> (end correction) යැයි කියනු ලැබේ.</p>
+    </div>
+
+    <div class="card">
+      <h3>1. මූලික අනුනාදය (fundamental resonance)</h3>
+      <p>නළයේ ඇත්තේ සිට ජල මට්ටම දක්වා දිග <span class="var">l₁</span> ලද විට මූලික අනුනාදය ලැබෙන්නේ නම්:</p>
+      <div class="formula"><span class="tagnum">(1)</span> λ/4 = l₁ + e  ⟹  v = 4f(l₁ + e)</div>
+    </div>
+
+    <div class="card">
+      <h3>2. දෙවන අනුනාදය / පළමු ඕවර්ටෝනය</h3>
+      <p>එම සරසුලෙන්ම, දිග වැඩි කරමින් ලැබෙන ඊළඟ අනුනාද දිග <span class="var">l₂</span> නම් (¾ තරංග ආයාමයක් නළය තුළ ගැළපෙන බැවින්):</p>
+      <div class="formula"><span class="tagnum">(2)</span> 3λ/4 = l₂ + e  ⟹  v = (4/3)f(l₂ + e)</div>
+    </div>
+
+    <div class="card">
+      <h3>3. e තුරන් කිරීමෙන් ලැබෙන ප්‍රවේග සූත්‍රය</h3>
+      <p>(1) සහ (2) සමීකරණ දෙක එකට විසඳීමෙන් <span class="var">e</span> අහෝසි වී, ශබ්දයේ ප්‍රවේගය සෘජුවම ලබා ගත හැක:</p>
+      <div class="formula"><span class="tagnum">(3)</span> v = 2f(l₂ − l₁)</div>
+      <h3 style="margin-top:18px;">4. ආන්ත ශෝධන සූත්‍රය</h3>
+      <div class="formula"><span class="tagnum">(4)</span> e = (l₂ − 3l₁) / 2</div>
+    </div>
+
+    <div class="card">
+      <h3>5. ප්‍රස්ථාරමය ක්‍රමය — සරල රේඛීය සම්බන්ධතාවය</h3>
+      <p>සරසුල් කිහිපයක් (විවිධ <span class="var">f</span> අගයන්) භාවිතයෙන් අනුරූප <span class="var">l₁</span> අගයන් ලබාගෙන, (1) සමීකරණය <span class="var">l₁</span> සහ 1/<span class="var">f</span> අතර සරල රේඛීය ස්වරූපයට ගෙන ප්‍රස්ථාරයක් අඳිය හැක:</p>
+      <div class="formula">l₁ = (v/4)·(1/f) − e</div>
+      <p><span class="var">l₁</span> (y අක්ෂය) එදිරිව 1/<span class="var">f</span> (x අක්ෂය) අඳින විට, ග්‍රේඩියන්ට් (m) = <span class="var">v</span>/4 සහ y-අන්තඃඛණ්ඩය (c) = −<span class="var">e</span> වේ.</p>
+      <ul class="plain">
+        <li><b>v = 4 × ග්‍රේඩියන්ට්</b></li>
+        <li><b>e = − y-අන්තඃඛණ්ඩය</b></li>
+      </ul>
+      <p class="hint">මෙම ක්‍රමයේ වාසිය: තනි නිරීක්ෂණයක අනවශ්‍ය දෝෂයක් (anomaly) ප්‍රස්ථාරයේ එකඟ නොවන ලක්ෂ්‍යයක් ලෙස පහසුවෙන් හඳුනාගත හැකි වීමයි (systematic error අවම කිරීම).</p>
+    </div>
+  </section>
+
+  <!-- ===================== APPARATUS ===================== -->
+  <section class="panel" id="panel-apparatus">
+    <h2 class="sec"><span class="dot"></span> අවශ්‍ය උපකරණ</h2>
+    <div class="card">
+      <table class="apparatus">
+        <tr><td>01</td><td>විෂ්කම්භය 2.5–3 cm පමණ හා දිග 50 cm පමණ වූ විවෘත වීදුරු / ප්ලාස්ටික් නළයක්</td></tr>
+        <tr><td>02</td><td>ජලයෙන් පිරවූ විශාල වීදුරු සරාවක් (dropping jar / cylindrical jar)</td></tr>
+        <tr><td>03</td><td>ස්වර සංඛ්‍යාත දන්නා සරසුල් කට්ටලයක් — 288, 320, 341.3, 362, 406.4, 426.6, 480 Hz</td></tr>
+        <tr><td>04</td><td>මීටර් හාතේ රුලක් (meter ruler)</td></tr>
+        <tr><td>05</td><td>සරසුල පහර දීම සඳහා රබර් මුගුරක් / රබර් තට්ටුවක්</td></tr>
+        <tr><td>06</td><td>කලම්ප සහිත ආධාරකයක් (retort stand with clamp)</td></tr>
+        <tr><td>07</td><td>උෂ්ණත්වමානයක් (thermometer) — කාමර උෂ්ණත්වය සටහන් කිරීමට</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>ක්‍රියා පටිපාටිය (සැකෙවින්)</h3>
+      <ul class="plain">
+        <li>නළය ජල සරාව තුළ අති ජලයේ ගිල්වා ආධාරකයට සම්බන්ධ කරන්න.</li>
+        <li>සරසුල කම්පනය කර නළයට ඉහළින් අල්ලා, නළය ක්‍රමයෙන් ඉහළට ඇදිමින් පළමු වරට නළයෙන් උස් හඬක් නික්මෙන අවස්ථාව (මූලික අනුනාදය) සොයන්න.</li>
+        <li>මීටර් හාතේ කෙළවර භාවිත කර ජල මට්ටමේ සිට නළයේ විවෘත කෙළවර දක්වා දිග <span class="var">l₁</span> මනින්න.</li>
+        <li>සරසුල නැවත කම්පනය කර නළය තව දුරටත් ඉහළට ඇදලා, දෙවන අනුනාද අවස්ථාව (l₂) සොයාගන්න.</li>
+        <li>විවිධ සරසුල් සඳහා මෙය පුනරාවර්තනය කර දත්ත වගුවක සටහන් කරන්න.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===================== SIMULATOR ===================== -->
+  <section class="panel" id="panel-sim">
+    <h2 class="sec"><span class="dot"></span> අන්තර්ක්‍රියාකාරී අනුකරණය</h2>
+
+    <div class="sim-grid">
+      <div class="stage">
+        <svg id="stageSvg" viewBox="0 0 340 400" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#63cdd4" stop-opacity="0.55"/>
+              <stop offset="100%" stop-color="#1c6b70" stop-opacity="0.85"/>
+            </linearGradient>
+            <linearGradient id="tubeGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#3a4a63" stop-opacity="0.35"/>
+              <stop offset="50%" stop-color="#9fb2c8" stop-opacity="0.12"/>
+              <stop offset="100%" stop-color="#3a4a63" stop-opacity="0.35"/>
+            </linearGradient>
+            <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#ffce5c" stop-opacity="0.55"/>
+              <stop offset="100%" stop-color="#ffce5c" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+
+          <!-- jar -->
+          <rect x="55" y="230" width="230" height="150" rx="6" fill="url(#waterGrad)" stroke="#2f8f95" stroke-width="2"/>
+          <rect x="55" y="230" width="230" height="150" rx="6" fill="none" stroke="#63cdd4" stroke-opacity="0.3" stroke-width="1"/>
+          <!-- ripple lines -->
+          <path d="M65 236 Q90 232 115 236 T165 236 T215 236 T265 236" stroke="#bff3f6" stroke-opacity="0.35" stroke-width="1.5" fill="none"/>
+
+          <!-- stand pole -->
+          <rect x="292" y="40" width="6" height="330" fill="#3a4a63"/>
+          <rect x="270" y="360" width="60" height="10" rx="2" fill="#3a4a63"/>
+
+          <!-- clamp -->
+          <g id="clampGroup">
+            <rect x="205" y="80" width="95" height="10" rx="3" fill="#c98a3f"/>
+            <rect x="205" y="80" width="14" height="10" fill="#8a5c25"/>
+          </g>
+
+          <!-- glow behind tube for resonance -->
+          <circle id="resGlow" cx="170" cy="150" r="70" fill="url(#glow)" opacity="0"/>
+
+          <!-- tube -->
+          <g id="tubeGroup">
+            <rect id="tubeRect" x="150" y="90" width="40" height="290" fill="url(#tubeGrad)" stroke="#9fb2c8" stroke-width="2" rx="4"/>
+            <!-- standing wave path -->
+            <path id="waveWave" d="" stroke="#ffce5c" stroke-width="2.4" fill="none" opacity="0.9" stroke-linecap="round"/>
+            <line id="waveAxis" x1="170" x2="170" stroke="#ffce5c" stroke-opacity="0.25" stroke-width="1" stroke-dasharray="3 4"/>
+          </g>
+
+          <!-- tuning fork -->
+          <g id="forkGroup" transform="translate(170,60)">
+            <rect x="-3" y="18" width="6" height="26" fill="#c98a3f"/>
+            <path id="forkPathL" d="M -3 18 C -14 10, -14 -18, -3 -26" stroke="#e6ac66" stroke-width="5" fill="none" stroke-linecap="round"/>
+            <path id="forkPathR" d="M 3 18 C 14 10, 14 -18, 3 -26" stroke="#e6ac66" stroke-width="5" fill="none" stroke-linecap="round"/>
+            <circle cx="0" cy="44" r="4" fill="#e6ac66"/>
+          </g>
+
+          <text x="170" y="398" text-anchor="middle" fill="#6e829b" font-size="11" font-family="monospace">l₁ / l₂ = ජල මට්ටමේ සිට නළයේ ඇත්ත දක්වා දිග</text>
+        </svg>
+
+        <div class="readout">
+          <div>l (දිග): <b id="roLen">—</b> cm</div>
+          <div>f (සංඛ්‍යාතය): <b id="roFreq">—</b> Hz</div>
+          <div>v (උපකල්පිත): <b id="roV">—</b> m/s</div>
+        </div>
+
+        <div class="meter-wrap">
+          <div class="meter-label"><span>අනුනාද සමීපත්වය</span><span id="meterPct">0%</span></div>
+          <div class="meter"><div class="meter-fill" id="meterFill"></div></div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="ctrl-row">
+          <label>සරසුලේ සංඛ්‍යාතය (f) <span class="val" id="freqVal">341.3 Hz</span></label>
+          <select id="freqSelect">
+            <option value="288">288 Hz</option>
+            <option value="320">320 Hz</option>
+            <option value="341.3" selected>341.3 Hz</option>
+            <option value="362">362 Hz</option>
+            <option value="406.4">406.4 Hz</option>
+            <option value="426.6">426.6 Hz</option>
+            <option value="480">480 Hz</option>
+            <option value="custom">වෙනත් (custom)…</option>
+          </select>
+          <input type="range" id="freqCustom" min="250" max="520" step="0.1" value="341.3" style="margin-top:10px;display:none;">
+        </div>
+
+        <div class="ctrl-row">
+          <label>නළයේ දිග — l (ජල මට්ටමේ සිට ඇත්ත දක්වා) <span class="val"><span id="lenVal">18.0</span> cm</span></label>
+          <input type="range" id="lenSlider" min="1" max="45" step="0.1" value="18">
+        </div>
+
+        <div class="ctrl-row">
+          <label>කාමර උෂ්ණත්වය (°C) <span class="val"><span id="tempVal">25</span> °C</span></label>
+          <input type="range" id="tempSlider" min="10" max="40" step="1" value="25">
+          <p class="hint" style="margin-top:6px;">v = 331 + 0.6T (m/s) — උෂ්ණත්වය වැඩි වන විට ශබ්දයේ ප්‍රවේගය ද වැඩි වේ.</p>
+        </div>
+
+        <div class="ctrl-row">
+          <label>නළයේ විෂ්කම්භය (ආන්ත ශෝධනයට බලපායි) <span class="val"><span id="diaVal">3.0</span> cm</span></label>
+          <input type="range" id="diaSlider" min="1.5" max="4" step="0.1" value="3">
+          <p class="hint" style="margin-top:6px;">e ≈ 0.6r (r = අරය) — යතාර්ථවාදී අනුකරණය සඳහා පමණි.</p>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" id="strikeBtn">🔔 සරසුල පහර දෙන්න</button>
+          <button class="btn btn-water" id="recordBtn">📏 මෙම l අගය වාර්තා කරන්න</button>
+        </div>
+        <p class="hint" id="recordHint">වාර්තා කිරීමට පෙර, පහත <b>දත්ත හා ප්‍රස්ථාරය</b> ටැබයේ එම සංඛ්‍යාතයට ගැළපෙන පේළියට අගය එකතු වේ (l₁ ලෙස පළමුව, l₂ ලෙස දෙවනුව).</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== DATA & GRAPH ===================== -->
+  <section class="panel" id="panel-data">
+    <h2 class="sec"><span class="dot"></span> දත්ත, ගණකය සහ ප්‍රස්ථාර මාපකය</h2>
+
+    <div class="card">
+      <h3>ඉක්මන් ගණකය — f, l₁, l₂ ලබා දී v සහ e සොයන්න</h3>
+      <div class="calc-grid">
+        <div class="field"><label>f (Hz)</label><input type="number" id="calcF" placeholder="341.3"></div>
+        <div class="field"><label>l₁ (cm)</label><input type="number" id="calcL1" placeholder="24.5"></div>
+        <div class="field"><label>l₂ (cm)</label><input type="number" id="calcL2" placeholder="75.0"></div>
+      </div>
+      <button class="btn btn-primary" id="calcBtn">ගණනය කරන්න</button>
+      <div class="result-box">
+        <div class="result-card"><div class="big" id="calcVOut">—</div><div class="lbl">v (m/s) = 2f(l₂−l₁)</div></div>
+        <div class="result-card"><div class="big" id="calcEOut">—</div><div class="lbl">e (cm) = (l₂−3l₁)/2</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>දත්ත වගුව</h3>
+      <p>අනුකරණයෙන් වාර්තා කළ අගයන් මෙහි ස්වයංක්‍රීයව එකතු වේ. අවශ්‍ය නම් අතින්ද සංස්කරණය කළ හැක.</p>
+      <div class="scroll-x">
+        <table class="data-table" id="dataTable">
+          <thead>
+            <tr><th>f (Hz)</th><th>1/f (s) ×10⁻³</th><th>l₁ (cm)</th><th>l₂ (cm)</th></tr>
+          </thead>
+          <tbody id="dataTableBody"></tbody>
+        </table>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" id="resetTableBtn">දත්ත මකන්න</button>
+        <button class="btn btn-water" id="plotBtn">l₁ එදිරිව 1/f ප්‍රස්ථාරය අඳින්න</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>ප්‍රස්ථාරය — l₁ (y) එදිරිව 1/f (x)</h3>
+      <canvas id="graphCanvas" width="640" height="380"></canvas>
+      <div class="fit-row">
+        <div class="fit-tag">ග්‍රේඩියන්ට් (m) = <span id="fitGrad">—</span></div>
+        <div class="fit-tag">y-අන්තඃඛණ්ඩය (c) = <span id="fitInt">—</span></div>
+        <div class="fit-tag">v = 4m = <span id="fitV">—</span> m/s</div>
+        <div class="fit-tag">e = −c = <span id="fitE">—</span> cm</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PAST PAPERS ===================== -->
+  <section class="panel" id="panel-papers">
+    <h2 class="sec"><span class="dot"></span> A/L පසුගිය ප්‍රශ්න — 2011 (03)</h2>
+    <p class="hint" style="margin-bottom:14px;">පිළිතුරු බලන්න ට click කර ආදර්ශ පිළිතුරු පරීක්ෂා කරන්න.</p>
+
+    <div class="qcard" data-q="1">
+      <div class="qhead"><span><span class="qn">(a)</span>එක් කෙළවරක් වසාලූ නළයක් අනුනාද වන විට එහි නිර්මාණය වන තරංගයේ වර්ගය කුමක්ද? (අනුදිගද? හරස්දිගද? ගමන්ශීලීද? ස්ථාවරද?)</span><span class="chev">▾</span></div>
+      <div class="qbody"><div class="qbody-inner">
+        <button class="reveal-btn">පිළිතුර පෙන්වන්න</button>
+        <div class="ans"><b>පිළිතුර:</b> එය <b>අනුදිග ස්ථාවර (longitudinal stationary) තරංගයකි</b>. සරසුලෙන් නිපදවන ප්‍රාථමික තරංගය නළය තුළ පිටාර ගිය තරංගය සමඟ අත්පොරොත්තු වී ස්ථාවර රටාවක් සාදයි; වායු අංශුවල විස්ථාපනය තරංග ගමන් දිශාවට සමාන්තර බැවින් එය අනුදිග වේ.</div>
+      </div></div>
+    </div>
+
+    <div class="qcard" data-q="2">
+      <div class="qhead"><span><span class="qn">(b)-I</span>නළය ජලය තුළ පූර්ණයෙන් ගිල්වා ආරම්භ කිරීම අවශ්‍ය ඇයි?</span><span class="chev">▾</span></div>
+      <div class="qbody"><div class="qbody-inner">
+        <button class="reveal-btn">පිළිතුර පෙන්වන්න</button>
+        <div class="ans"><b>පිළිතුර:</b> මූලික අනුනාදය (කුඩාම l අගය) සොයාගැනීමට නම්, දිග ශුන්‍යයේ සිට ක්‍රමයෙන් වැඩි කරමින් <b>පළමු</b> අනුනාද අවස්ථාව හඳුනාගත යුතුය. නළය මුලින්ම සම්පූර්ණයෙන් ගිල්වා තිබීමෙන්, l = 0 ට ආසන්න අවස්ථාවේ සිට පරීක්ෂණය ආරම්භ කළ හැකි අතර, එසේ නොකළහොත් දෙවන හෝ ඊළඟ අනුනාදයක් වැරදීමකින් මූලික අනුනාදය ලෙස වාර්තා විය හැක.</div>
+      </div></div>
+    </div>
+
+    <div class="qcard" data-q="3">
+      <div class="qhead"><span><span class="qn">(b)-II</span>අනුනාද අවස්ථාවේදී නළය තුළ ඇති තරංග රූප සටහනක් අඳිමින්, ආන්ත ශෝධනය (e) පැහැදිලි කරන්න.</span><span class="chev">▾</span></div>
+      <div class="qbody"><div class="qbody-inner">
+        <button class="reveal-btn">පිළිතුර පෙන්වන්න</button>
+        <div class="ans"><b>පිළිතුර:</b> වසාගත් කෙළවරේ නෝඩයක් ද, විවෘත කෙළවරින් ටිකක් පිටතින් (දුර e තරම්) ඇන්ටිනෝඩයක් ද පිහිටයි. ප්‍රායෝගික ඇන්ටිනෝඩය නළයේ ජ්‍යාමිතික අන්තයට වඩා පිටතට තිබෙන බැවින්, සත්‍ය තරංග ආයාමයේ කාල් කොටස නළයේ මිනුම් දිගට වඩා <span class="var">e</span>කින් වැඩි වේ — එනිසා λ/4 = l + e ලෙස ලියනු ලැබේ. (ඉහත 'සිද්ධාන්ත' ටැබයේ රූප සටහන බලන්න — අනුකරණයේදීද මෙය දෘශ්‍යමාන වේ.)</div>
+      </div></div>
+    </div>
+
+    <div class="qcard" data-q="4">
+      <div class="qhead"><span><span class="qn">(b)-III</span>දත්ත ලබාගැනීම සඳහා මූලික අනුනාදය පෙන්නුම් කරන අඩුම සංඛ්‍යාතයෙන් සරසුල් තෝරාගැනීම වඩා සුදුසු ඇයි?</span><span class="chev">▾</span></div>
+      <div class="qbody"><div class="qbody-inner">
+        <button class="reveal-btn">පිළිතුර පෙන්වන්න</button>
+        <div class="ans"><b>පිළිතුර:</b> l₁ = v/(4f) − e සම්බන්ධතාවයෙන්, f අඩු වන විට l₁ විශාල වේ. l₁ විශාල අගයක් ගැනීමෙන් මිනුම් දෝෂයේ ප්‍රතිශතය (percentage error) අඩු වන අතර, e හඳුනාගැනීමේ නිරවද්‍යතාවයද වැඩි වේ. එමෙන්ම නළයේ දිග (50 cm) සීමාව තුළ l₁ සහ l₂ දෙකම ලබාගත හැකි වන පරිදි සුදුසු සංඛ්‍යාත පරාසයක් තෝරාගත යුතුය.</div>
+      </div></div>
+    </div>
+
+    <div class="qcard" data-q="5">
+      <div class="qhead"><span><span class="qn">(b)-IV</span>v = 345.6 ms⁻¹ ලෙස ගෙන, දී ඇති සරසුල් දෙකකින් ලැබෙන අවම නළ දිග (l₁) ගණනය කරන්න.</span><span class="chev">▾</span></div>
+      <div class="qbody"><div class="qbody-inner">
+        <button class="reveal-btn">පිළිතුර පෙන්වන්න</button>
+        <div class="ans"><b>ආදර්ශ ගණනය (e නොසලකා, l₁ ≈ v/4f):</b><br>
+        f = 288 Hz සඳහා → l₁ ≈ 345.6/(4×288) = <b>0.300 m (30.0 cm)</b><br>
+        f = 480 Hz සඳහා → l₁ ≈ 345.6/(4×480) = <b>0.180 m (18.0 cm)</b><br>
+        (ප්‍රායෝගිකව, සත්‍ය l₁ මින් e තරමකින් අඩුවේ — ඉහත අනුකරණයේ diameter slider එක වෙනස් කර මෙය නිරීක්ෂණය කරන්න.)</div>
+      </div></div>
+    </div>
+
+    <div class="qcard" data-q="6">
+      <div class="qhead"><span><span class="qn">(b)-V</span>v සහ e එකවර නිර්ණය කිරීම සඳහා f එදිරිව l ප්‍රස්ථාරමය ක්‍රමයක් යෝජනා කරන්න.</span><span class="chev">▾</span></div>
+      <div class="qbody"><div class="qbody-inner">
+        <button class="reveal-btn">පිළිතුර පෙන්වන්න</button>
+        <div class="ans"><b>පිළිතුර:</b> විවිධ f අගයන් සඳහා l₁ මනිනු ලැබ, l₁ (y-අක්ෂය) එදිරිව 1/f (x-අක්ෂය) ප්‍රස්ථාරයක් අඳින්න. l₁ = (v/4)(1/f) − e සමීකරණයට අනුව එය සරල රේඛාවක් වන අතර, ග්‍රේඩියන්ට් = v/4 සහ y-අන්තඃඛණ්ඩය = −e වේ. මෙම ක්‍රමය 'දත්ත හා ප්‍රස්ථාරය' ටැබයේ සජීවීව උත්සාහ කළ හැක.</div>
+      </div></div>
+    </div>
+
+    <div class="qcard" data-q="7">
+      <div class="qhead"><span><span class="qn">(b)-VI</span>දී ඇති වගුවේ අඩු f අගයන් සඳහා 1/f සම්පූර්ණ කර, පරීක්ෂණයේදී නිරවද්‍ය මිනුම් ලබාගැනීම සඳහා අනුගමනය කළ යුතු පූර්වාරක්ෂාවන් (precautions) කිහිපයක් සඳහන් කරන්න.</span><span class="chev">▾</span></div>
+      <div class="qbody"><div class="qbody-inner">
+        <button class="reveal-btn">පිළිතුර පෙන්වන්න</button>
+        <div class="ans"><b>පූර්වාරක්ෂාවන්:</b>
+          <ul class="plain" style="margin-top:8px;">
+            <li>සරසුල නළයේ මුඛයට ඉතා ආසන්නව නොතබා, තරමක් ඉහළින් අල්ලාගෙන කම්පනය කරවන්න (නළයට ස්පර්ශ නොවිය යුතුය).</li>
+            <li>නළය ඉතා සෙමින් චලනය කරමින්, හඬ උපරිම වන නිශ්චිත ලක්ෂ්‍යයම (maximum loudness) හඳුනාගන්න.</li>
+            <li>මීටර් හාතේ රුල සිරස් අතට හා ශුන්‍ය ලක්ෂ්‍යයේ zero error නොමැති බව සහතික කරගන්න.</li>
+            <li>ජල මට්ටම මනින විට ඇසේ මට්ටම (parallax error) ජල මුහුණතට සමාන්තර කරගන්න.</li>
+            <li>එකම සරසුලෙන් නිරීක්ෂණය 2-3 වතාවක් පුනරාවර්තනය කර සාමාන්‍ය අගය ගන්න.</li>
+          </ul>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="qcard" data-q="8">
+      <div class="qhead"><span><span class="qn">(b)-VII</span>දත්ත ලබාගැනීමේ කාල පරිච්ඡේදය තුළ කාමරයේ උෂ්ණත්වය සැලකිය යුතු ලෙස වැඩිවුවහොත්, ප්‍රස්ථාරයේ බලපෑම කුමක්ද? එය දෙයාකාරයකින් පැහැදිලි කරන්න.</span><span class="chev">▾</span></div>
+      <div class="qbody"><div class="qbody-inner">
+        <button class="reveal-btn">පිළිතුර පෙන්වන්න</button>
+        <div class="ans"><b>පිළිතුර:</b> v = 331 + 0.6T සම්බන්ධතාවයට අනුව උෂ්ණත්වය වැඩිවීමෙන් v ද වැඩි වේ. l₁ = (v/4)(1/f) − e බැවින්:
+          <ul class="plain" style="margin-top:8px;">
+            <li><b>(1) ග්‍රේඩියන්ට් (= v/4) ක්‍රමයෙන් වැඩි වේ</b> — එනම් දත්ත රේඛාව සම්පූර්ණ සරල රේඛාවක් නොව, තරමක් වක්‍ර හෝ අවසාන ලක්ෂ්‍ය සඳහා බෑවුම වැඩි රේඛාවක් බවට පත් විය හැක.</li>
+            <li><b>(2) y-අන්තඃඛණ්ඩය (−e) ආසන්න වශයෙන් නොවෙනස්ව පවතී</b>, මන්ද e ට උෂ්ණත්වයෙන් සෘජු බලපෑමක් නැති බැවිනි (එය නළයේ ප්‍රමාණයට පමණක් රඳා පවතී). මේ නිසා දෝෂය බෑවුමේ (සහ එමගින් v හි) පමණක් පිළිබිඹු වේ, e හි නොවේ.</li>
+          </ul>
+          <p style="margin-top:8px;">පූර්වාරක්ෂාව: පරීක්ෂණය පුරාවටම උෂ්ණත්වය නිරන්තරයෙන් සටහන් කර, එය නොවෙනස්ව තබාගැනීමට උත්සාහ කරන්න, නැතහොත් අවසන් v අගය සඳහා සාමාන්‍ය උෂ්ණත්ව නිවැරදි කිරීමක් යොදන්න.</p>
+        </div>
+      </div></div>
+    </div>
+  </section>
+
+</main>
+
+<footer>A/L භෞතික විද්‍යාව — ප්‍රායෝගික අනුකරණය · සම්පූර්ණයෙන් offline ක්‍රියාකාරී · Web Audio API + SVG</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- Tabs ---------------- */
+  var tabBtns = document.querySelectorAll(".tab-btn");
+  tabBtns.forEach(function(btn){
+    btn.addEventListener("click", function(){
+      tabBtns.forEach(function(b){b.classList.remove("active");});
+      btn.classList.add("active");
+      document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("active");});
+      document.getElementById("panel-"+btn.dataset.tab).classList.add("active");
+    });
+  });
+
+  /* ---------------- Past paper accordion ---------------- */
+  document.querySelectorAll(".qcard").forEach(function(card){
+    var head = card.querySelector(".qhead");
+    head.addEventListener("click", function(){ card.classList.toggle("open"); });
+    var revealBtn = card.querySelector(".reveal-btn");
+    var ans = card.querySelector(".ans");
+    revealBtn.addEventListener("click", function(e){
+      e.stopPropagation();
+      ans.classList.toggle("show");
+      revealBtn.textContent = ans.classList.contains("show") ? "පිළිතුර සඟවන්න" : "පිළිතුර පෙන්වන්න";
+    });
+  });
+
+  /* ================= SIMULATOR STATE ================= */
+  var state = { f: 341.3, l: 18.0, T: 25, dia: 3.0 };
+
+  var freqSelect = document.getElementById("freqSelect");
+  var freqCustom = document.getElementById("freqCustom");
+  var freqVal = document.getElementById("freqVal");
+  var lenSlider = document.getElementById("lenSlider");
+  var lenVal = document.getElementById("lenVal");
+  var tempSlider = document.getElementById("tempSlider");
+  var tempVal = document.getElementById("tempVal");
+  var diaSlider = document.getElementById("diaSlider");
+  var diaVal = document.getElementById("diaVal");
+
+  var roLen = document.getElementById("roLen");
+  var roFreq = document.getElementById("roFreq");
+  var roV = document.getElementById("roV");
+  var meterFill = document.getElementById("meterFill");
+  var meterPct = document.getElementById("meterPct");
+
+  var waveWave = document.getElementById("waveWave");
+  var waveAxis = document.getElementById("waveAxis");
+  var resGlow = document.getElementById("resGlow");
+  var tubeRect = document.getElementById("tubeRect");
+  var clampGroup = document.getElementById("clampGroup");
+  var forkGroup = document.getElementById("forkGroup");
+
+  var TUBE_TOP_Y = 90;      // svg y of tube open end
+  var TUBE_BOTTOM_Y = 380;  // svg y of tube bottom (in jar)
+  var PX_PER_CM = 6.0;      // visual scale
+  var JAR_TOP_Y = 230;
+
+  function currentV(){ return 331 + 0.6*state.T; }
+  function currentE(){ return 0.6 * (state.dia/2); } // e ~ 0.6r, cm
+
+  function resonanceProximity(){
+    var v = currentV()*100; // cm/s
+    var f = state.f;
+    var e = currentE();
+    var l1res = v/(4*f) - e;
+    var l2res = 3*v/(4*f) - e;
+    var d1 = Math.abs(state.l - l1res);
+    var d2 = Math.abs(state.l - l2res);
+    var d = Math.min(d1,d2);
+    var sigma = 1.4; // cm
+    var prox = Math.exp(-(d*d)/(2*sigma*sigma));
+    return { prox:prox, l1res:l1res, l2res:l2res };
+  }
+
+  function updateVisual(){
+    roLen.textContent = state.l.toFixed(1);
+    roFreq.textContent = state.f;
+    roV.textContent = currentV().toFixed(1);
+
+    var r = resonanceProximity();
+    var pct = Math.round(r.prox*100);
+    meterFill.style.width = pct+"%";
+    meterPct.textContent = pct+"%";
+
+    // position tube: water level fixed at jar top, tube open end (top) moves so that
+    // length l (from water surface to tube top) maps visually: tube top y = JAR_TOP_Y - l*PX_PER_CM
+    var topY = JAR_TOP_Y - state.l*PX_PER_CM;
+    if(topY < 40) topY = 40;
+    var bottomY = 380;
+    tubeRect.setAttribute("y", topY);
+    tubeRect.setAttribute("height", bottomY - topY);
+
+    // clamp follows tube top
+    clampGroup.setAttribute("transform","translate(0,"+(topY-10)+")");
+    // fork sits just above tube
+    forkGroup.setAttribute("transform","translate(170,"+(topY-40)+")");
+
+    // resonance glow
+    resGlow.setAttribute("cy", topY + 40);
+    resGlow.setAttribute("opacity", (r.prox*0.9).toFixed(2));
+
+    // standing wave: draw a sine curve from topY to (topY + l*PX_PER_CM), amplitude scales with proximity
+    var waveTop = topY;
+    var waveBottom = topY + state.l*PX_PER_CM;
+    var amp = 4 + r.prox*14;
+    var pts = [];
+    var steps = 40;
+    for(var i=0;i<=steps;i++){
+      var t = i/steps;
+      var y = waveTop + t*(waveBottom-waveTop);
+      // quarter-wave cosine shape: max displacement at open end (top), node at closed end (bottom, water)
+      var x = 170 + amp*Math.cos((Math.PI/2)*t);
+      pts.push([x,y]);
+    }
+    var d = "M "+pts.map(function(p){return p[0].toFixed(1)+" "+p[1].toFixed(1);}).join(" L ");
+    waveWave.setAttribute("d", d);
+    waveWave.setAttribute("stroke-opacity", (0.35 + r.prox*0.65).toFixed(2));
+    waveWave.setAttribute("stroke-width", (1.6 + r.prox*2.4).toFixed(2));
+    waveAxis.setAttribute("y1", waveTop);
+    waveAxis.setAttribute("y2", waveBottom);
+  }
+
+  freqSelect.addEventListener("change", function(){
+    if(freqSelect.value === "custom"){
+      freqCustom.style.display = "block";
+      state.f = parseFloat(freqCustom.value);
+    } else {
+      freqCustom.style.display = "none";
+      state.f = parseFloat(freqSelect.value);
+    }
+    freqVal.textContent = state.f + " Hz";
+    updateVisual();
+  });
+  freqCustom.addEventListener("input", function(){
+    state.f = parseFloat(freqCustom.value);
+    freqVal.textContent = state.f.toFixed(1) + " Hz";
+    updateVisual();
+  });
+  lenSlider.addEventListener("input", function(){
+    state.l = parseFloat(lenSlider.value);
+    lenVal.textContent = state.l.toFixed(1);
+    updateVisual();
+  });
+  tempSlider.addEventListener("input", function(){
+    state.T = parseFloat(tempSlider.value);
+    tempVal.textContent = state.T;
+    updateVisual();
+  });
+  diaSlider.addEventListener("input", function(){
+    state.dia = parseFloat(diaSlider.value);
+    diaVal.textContent = state.dia.toFixed(1);
+    updateVisual();
+  });
+
+  updateVisual();
+
+  /* ---------------- Web Audio: strike tuning fork ---------------- */
+  var audioCtx = null;
+  var forkAnimId = null;
+
+  function animateFork(duration){
+    var start = performance.now();
+    var amp = 8;
+    function step(now){
+      var t = (now-start)/1000;
+      if(t > duration){
+        document.getElementById("forkPathL").setAttribute("d","M -3 18 C -14 10, -14 -18, -3 -26");
+        document.getElementById("forkPathR").setAttribute("d","M 3 18 C 14 10, 14 -18, 3 -26");
+        return;
+      }
+      var decay = Math.exp(-t*2.5);
+      var wobble = Math.sin(t*90)*amp*decay;
+      document.getElementById("forkPathL").setAttribute("d","M -3 18 C "+(-14-wobble)+" 10, "+(-14-wobble)+" -18, -3 -26");
+      document.getElementById("forkPathR").setAttribute("d","M 3 18 C "+(14+wobble)+" 10, "+(14+wobble)+" -18, 3 -26");
+      forkAnimId = requestAnimationFrame(step);
+    }
+    forkAnimId = requestAnimationFrame(step);
+  }
+
+  document.getElementById("strikeBtn").addEventListener("click", function(){
+    try{
+      if(!audioCtx){ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+      if(audioCtx.state === "suspended"){ audioCtx.resume(); }
+
+      var r = resonanceProximity();
+      var baseGain = 0.05 + r.prox*0.5; // louder near resonance
+      var duration = 1.6;
+
+      var osc = audioCtx.createOscillator();
+      osc.type = "sine";
+      osc.frequency.value = state.f;
+
+      var gain = audioCtx.createGain();
+      var now = audioCtx.currentTime;
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(Math.max(baseGain,0.001), now+0.04);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now+duration);
+
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start(now);
+      osc.stop(now+duration+0.05);
+
+      animateFork(duration);
+    }catch(err){
+      console.log("Audio error", err);
+    }
+  });
+
+  /* ================= DATA TABLE ================= */
+  var FORKS = [288, 320, 341.3, 362, 406.4, 426.6, 480];
+  var tableBody = document.getElementById("dataTableBody");
+
+  function buildTable(){
+    tableBody.innerHTML = "";
+    FORKS.forEach(function(f){
+      var tr = document.createElement("tr");
+      tr.dataset.f = f;
+      var invf = (1/f*1000).toFixed(3);
+      tr.innerHTML =
+        '<td>'+f+'</td>'+
+        '<td>'+invf+'</td>'+
+        '<td><input type="number" step="0.1" class="l1input" placeholder="—"></td>'+
+        '<td><input type="number" step="0.1" class="l2input" placeholder="—"></td>';
+      tableBody.appendChild(tr);
+    });
+  }
+  buildTable();
+
+  document.getElementById("resetTableBtn").addEventListener("click", buildTable);
+
+  document.getElementById("recordBtn").addEventListener("click", function(){
+    var rows = tableBody.querySelectorAll("tr");
+    var targetRow = null, bestDiff = Infinity;
+    rows.forEach(function(r){
+      var diff = Math.abs(parseFloat(r.dataset.f) - state.f);
+      if(diff < bestDiff){ bestDiff = diff; targetRow = r; }
+    });
+    if(!targetRow) return;
+    var l1input = targetRow.querySelector(".l1input");
+    var l2input = targetRow.querySelector(".l2input");
+    if(!l1input.value){
+      l1input.value = state.l.toFixed(1);
+    } else if(!l2input.value){
+      l2input.value = state.l.toFixed(1);
+    } else {
+      l2input.value = state.l.toFixed(1);
+    }
+    // brief visual feedback
+    targetRow.style.background = "rgba(95,191,143,0.15)";
+    setTimeout(function(){ targetRow.style.background = ""; }, 500);
+  });
+
+  /* ---------------- Quick calculator ---------------- */
+  document.getElementById("calcBtn").addEventListener("click", function(){
+    var f = parseFloat(document.getElementById("calcF").value);
+    var l1 = parseFloat(document.getElementById("calcL1").value);
+    var l2 = parseFloat(document.getElementById("calcL2").value);
+    var vOut = document.getElementById("calcVOut");
+    var eOut = document.getElementById("calcEOut");
+    if(isNaN(f) || isNaN(l1) || isNaN(l2)){
+      vOut.textContent = "—"; eOut.textContent = "—";
+      return;
+    }
+    var v = 2*f*(l2-l1)/100; // l in cm -> convert to m
+    var e = (l2 - 3*l1)/2;
+    vOut.textContent = v.toFixed(1);
+    eOut.textContent = e.toFixed(2);
+  });
+
+  /* ---------------- Graph plotting + least squares ---------------- */
+  var canvas = document.getElementById("graphCanvas");
+  var ctx = canvas.getContext("2d");
+
+  function drawGraph(points){
+    var W = canvas.width, H = canvas.height;
+    var padL = 55, padR = 20, padT = 20, padB = 45;
+    ctx.clearRect(0,0,W,H);
+
+    if(points.length === 0){
+      ctx.fillStyle = "#6e829b";
+      ctx.font = "13px sans-serif";
+      ctx.fillText("l₁ සහ f දෙකම ඇතුළත් කළ පේළි නොමැත — වගුවේ අගයන් ඇතුළත් කරන්න.", 20, H/2);
+      return;
+    }
+
+    var xs = points.map(function(p){return p.x;});
+    var ys = points.map(function(p){return p.y;});
+    var xMin = Math.min.apply(null,xs), xMax = Math.max.apply(null,xs);
+    var yMin = Math.min.apply(null,ys), yMax = Math.max.apply(null,ys);
+    if(xMax===xMin){xMax+=0.0001;}
+    if(yMax===yMin){yMax+=1;}
+    var xPad = (xMax-xMin)*0.15 || 0.0001, yPad=(yMax-yMin)*0.2||1;
+    xMin -= xPad; xMax += xPad; yMin -= yPad; yMax += yPad;
+    if(yMin > 0) yMin = 0; // include origin context for intercept
+
+    function sx(x){ return padL + (x-xMin)/(xMax-xMin)*(W-padL-padR); }
+    function sy(y){ return H-padB - (y-yMin)/(yMax-yMin)*(H-padT-padB); }
+
+    // axes
+    ctx.strokeStyle = "#28394f";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(padL, padT); ctx.lineTo(padL, H-padB); ctx.lineTo(W-padR, H-padB);
+    ctx.stroke();
+
+    ctx.fillStyle = "#9fb2c8";
+    ctx.font = "11px monospace";
+    ctx.fillText("1/f (s) ×10⁻³ →", W-padR-100, H-12);
+    ctx.save();
+    ctx.translate(14, H/2+40);
+    ctx.rotate(-Math.PI/2);
+    ctx.fillText("l₁ (cm) →", 0, 0);
+    ctx.restore();
+
+    // points
+    ctx.fillStyle = "#63cdd4";
+    points.forEach(function(p){
+      ctx.beginPath();
+      ctx.arc(sx(p.x), sy(p.y), 4, 0, Math.PI*2);
+      ctx.fill();
+    });
+
+    // least squares
+    var n = points.length;
+    var result = {grad:null, intercept:null};
+    if(n >= 2){
+      var sumX=0,sumY=0,sumXY=0,sumXX=0;
+      points.forEach(function(p){ sumX+=p.x; sumY+=p.y; sumXY+=p.x*p.y; sumXX+=p.x*p.x; });
+      var denom = (n*sumXX - sumX*sumX);
+      if(Math.abs(denom) > 1e-12){
+        var grad = (n*sumXY - sumX*sumY)/denom;
+        var intercept = (sumY - grad*sumX)/n;
+        result.grad = grad; result.intercept = intercept;
+
+        ctx.strokeStyle = "#ffce5c";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        var x1 = xMin, y1 = grad*x1+intercept;
+        var x2 = xMax, y2 = grad*x2+intercept;
+        ctx.moveTo(sx(x1), sy(y1));
+        ctx.lineTo(sx(x2), sy(y2));
+        ctx.stroke();
+      }
+    }
+    return result;
+  }
+
+  function gatherPoints(){
+    var pts = [];
+    tableBody.querySelectorAll("tr").forEach(function(tr){
+      var f = parseFloat(tr.dataset.f);
+      var l1 = parseFloat(tr.querySelector(".l1input").value);
+      if(!isNaN(l1)){
+        pts.push({ x: (1/f*1000), y: l1 }); // x in ms units (×10^-3 s)
+      }
+    });
+    return pts;
+  }
+
+  document.getElementById("plotBtn").addEventListener("click", function(){
+    var pts = gatherPoints();
+    var res = drawGraph(pts);
+    var fitGrad = document.getElementById("fitGrad");
+    var fitInt = document.getElementById("fitInt");
+    var fitV = document.getElementById("fitV");
+    var fitE = document.getElementById("fitE");
+    if(res && res.grad !== null){
+      // x was in units of 1e-3 s, y in cm. l1[cm] = (v_cm_per_s/4) * (1/f)[s] - e[cm]
+      // our x_axis_val = (1/f)*1000 (ms). so slope_in_ms = grad (cm per ms-unit)
+      // convert: (1/f)[s] = x_axis_val/1000. l1 = (v/4)*(x/1000) - e => slope_wrt_x = (v/4)/1000
+      // so v(cm/s) = 4 * grad * 1000; v(m/s) = 4*grad*1000/100 = 40*grad
+      var vMs = 40*res.grad;
+      var eCm = -res.intercept;
+      fitGrad.textContent = res.grad.toFixed(4);
+      fitInt.textContent = res.intercept.toFixed(3);
+      fitV.textContent = vMs.toFixed(1);
+      fitE.textContent = eCm.toFixed(2);
+    } else {
+      fitGrad.textContent = "—"; fitInt.textContent="—"; fitV.textContent="—"; fitE.textContent="—";
+    }
+  });
+
+  // initial empty draw
+  drawGraph([]);
+
+})();
+</script>
+</body>
+</html>

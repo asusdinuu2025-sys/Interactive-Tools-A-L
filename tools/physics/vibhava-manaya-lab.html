@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>විභව මානය — අන්තර්ක්‍රියාකාරී විද්‍යාගාරය</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Noto+Sans+Sinhala:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#131e19;
+  --bg2:#182521;
+  --card:#1e2d27;
+  --card2:#24362f;
+  --line:#33473d;
+  --text:#f2ede0;
+  --text-dim:#a9bcb0;
+  --brass:#c68c46;
+  --brass-lt:#e7c477;
+  --wire:#d9c9a0;
+  --left:#e2685a;
+  --right:#5fbf8a;
+  --balance:#f2c94c;
+  --radius:16px;
+  --shadow:0 8px 24px rgba(0,0,0,.35);
+}
+[data-theme="light"]{
+  --bg:#f3efe2;
+  --bg2:#ece5d2;
+  --card:#fffdf7;
+  --card2:#f6efdd;
+  --line:#ddd0b0;
+  --text:#22291f;
+  --text-dim:#5a6653;
+  --brass:#a9702f;
+  --brass-lt:#c68c46;
+  --wire:#8a6f3e;
+  --left:#c94b3d;
+  --right:#2e8f5c;
+  --balance:#b8860b;
+  --shadow:0 8px 24px rgba(80,60,20,.12);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:radial-gradient(circle at 20% 0%, var(--bg2), var(--bg) 60%);
+  color:var(--text);
+  font-family:'Noto Sans Sinhala','Segoe UI',sans-serif;
+  min-height:100vh;
+  padding-bottom:78px;
+  transition:background .3s,color .3s;
+}
+.disp{font-family:'Fraunces',serif;}
+.app{max-width:720px;margin:0 auto;padding:14px 14px 8px;}
+header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 4px 16px;
+}
+header .brand{display:flex;flex-direction:column;gap:2px;}
+header .brand .eyebrow{
+  font-size:11px;letter-spacing:.14em;color:var(--brass-lt);
+  text-transform:uppercase;font-weight:600;
+}
+header .brand h1{
+  font-family:'Fraunces',serif;font-size:26px;margin:0;font-weight:700;
+  color:var(--text);
+}
+.theme-btn{
+  width:42px;height:42px;border-radius:50%;border:1px solid var(--line);
+  background:var(--card);color:var(--brass-lt);font-size:18px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:16px;margin-bottom:14px;box-shadow:var(--shadow);
+}
+.card h2{
+  font-family:'Fraunces',serif;font-size:19px;margin:0 0 4px;color:var(--brass-lt);
+}
+.card .sub{color:var(--text-dim);font-size:13.5px;margin-bottom:12px;line-height:1.55;}
+.badge{
+  display:inline-block;background:var(--card2);border:1px solid var(--line);
+  color:var(--brass-lt);font-size:12px;padding:3px 10px;border-radius:20px;margin-bottom:8px;
+}
+.section{display:none;animation:fade .35s ease;}
+.section.active{display:block;}
+@keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+/* nav */
+nav.tabs{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--card);border-top:1px solid var(--line);
+  display:flex;justify-content:space-around;padding:6px 2px calc(6px + env(safe-area-inset-bottom));
+  z-index:50;box-shadow:0 -6px 20px rgba(0,0,0,.25);
+}
+nav.tabs button{
+  background:none;border:none;color:var(--text-dim);font-family:inherit;
+  font-size:10.5px;display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:5px 4px;cursor:pointer;border-radius:10px;flex:1;
+}
+nav.tabs button .ic{font-size:18px;}
+nav.tabs button.active{color:var(--brass-lt);background:var(--card2);}
+
+/* svg circuit */
+.circuit-wrap{background:var(--bg2);border-radius:12px;padding:10px;border:1px solid var(--line);}
+svg text{font-family:'Noto Sans Sinhala',sans-serif;fill:var(--text-dim);}
+.wireline{stroke:var(--wire);stroke-width:5;stroke-linecap:round;}
+.wirecase{stroke:var(--line);stroke-width:10;stroke-linecap:round;}
+.jockey-mark{fill:var(--brass-lt);}
+.jockey-stem{stroke:var(--brass-lt);stroke-width:2;}
+.needle{transition:transform .12s ease-out;}
+.gcase{fill:var(--card2);stroke:var(--line);stroke-width:2;}
+.glow{filter:drop-shadow(0 0 6px var(--balance));}
+
+/* slider */
+.slider-row{margin:14px 0 6px;}
+.slider-row label{display:flex;justify-content:space-between;font-size:13px;color:var(--text-dim);margin-bottom:6px;}
+.slider-row label b{color:var(--text);font-family:'Fraunces',serif;font-weight:600;}
+input[type=range]{
+  -webkit-appearance:none;width:100%;height:6px;border-radius:4px;
+  background:linear-gradient(90deg,var(--brass) var(--fill,50%),var(--line) var(--fill,50%));
+  outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:22px;height:22px;border-radius:50%;
+  background:var(--brass-lt);border:3px solid var(--card);box-shadow:0 2px 6px rgba(0,0,0,.4);cursor:pointer;
+}
+input[type=range]::-moz-range-thumb{
+  width:22px;height:22px;border-radius:50%;background:var(--brass-lt);
+  border:3px solid var(--card);cursor:pointer;
+}
+
+/* readout grid */
+.readout{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px;}
+.readout .box{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;}
+.readout .box .k{font-size:11px;color:var(--text-dim);}
+.readout .box .v{font-family:'Fraunces',serif;font-size:17px;font-weight:600;color:var(--brass-lt);}
+.status{
+  margin-top:10px;padding:9px 12px;border-radius:10px;font-size:13.5px;text-align:center;
+  border:1px solid var(--line);background:var(--card2);color:var(--text-dim);transition:.2s;
+}
+.status.balanced{background:rgba(242,201,76,.15);border-color:var(--balance);color:var(--balance);font-weight:600;}
+
+.btn{
+  background:var(--brass);color:#1a1408;border:none;border-radius:10px;padding:10px 16px;
+  font-family:'Noto Sans Sinhala',sans-serif;font-weight:600;font-size:13.5px;cursor:pointer;
+}
+.btn.ghost{background:transparent;border:1px solid var(--brass);color:var(--brass-lt);}
+.row-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+
+/* switch toggle */
+.switch-toggle{display:flex;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:3px;margin:10px 0;}
+.switch-toggle button{flex:1;background:none;border:none;padding:8px;border-radius:8px;color:var(--text-dim);font-family:inherit;font-size:13px;cursor:pointer;}
+.switch-toggle button.active{background:var(--brass);color:#1a1408;font-weight:600;}
+
+/* subtabs */
+.subtabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;}
+.subtabs button{
+  white-space:nowrap;background:var(--card2);border:1px solid var(--line);color:var(--text-dim);
+  border-radius:20px;padding:7px 13px;font-size:12.5px;font-family:inherit;cursor:pointer;
+}
+.subtabs button.active{background:var(--brass);border-color:var(--brass);color:#1a1408;font-weight:600;}
+.subpane{display:none;}
+.subpane.active{display:block;}
+
+/* flip cards */
+.flip-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.flip-card{perspective:1000px;height:150px;cursor:pointer;}
+.flip-inner{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d;}
+.flip-card.on .flip-inner{transform:rotateY(180deg);}
+.flip-face{
+  position:absolute;inset:0;backface-visibility:hidden;border-radius:12px;padding:12px;
+  border:1px solid var(--line);display:flex;align-items:center;justify-content:center;text-align:center;
+}
+.flip-front{background:var(--card2);font-size:13px;color:var(--text);font-weight:600;}
+.flip-front .ic{display:block;font-size:24px;margin-bottom:6px;}
+.flip-back{background:var(--brass);color:#1a1408;transform:rotateY(180deg);font-size:11.5px;line-height:1.5;overflow-y:auto;}
+
+/* accordion */
+.acc-item{border:1px solid var(--line);border-radius:12px;margin-bottom:8px;overflow:hidden;background:var(--card2);}
+.acc-head{
+  padding:12px 14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;
+  font-size:13.5px;font-weight:600;color:var(--text);
+}
+.acc-head .plus{color:var(--brass-lt);font-size:18px;transition:transform .25s;}
+.acc-item.open .plus{transform:rotate(45deg);}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+.acc-item.open .acc-body{max-height:600px;}
+.acc-body-inner{padding:0 14px 14px;font-size:13px;color:var(--text-dim);line-height:1.65;}
+.acc-body-inner .formula{color:var(--brass-lt);font-family:'Fraunces',serif;}
+
+.hint{font-size:12px;color:var(--text-dim);background:var(--card2);border-left:3px solid var(--brass);padding:8px 10px;border-radius:6px;margin-top:8px;}
+canvas{width:100%;border-radius:10px;background:var(--bg2);border:1px solid var(--line);}
+</style>
+</head>
+<body data-theme="dark">
+<div class="app">
+  <header>
+    <div class="brand">
+      <span class="eyebrow">Advanced Level Physics · Dr. Darshana Ukuwela</span>
+      <h1 class="disp">විභව මානය</h1>
+    </div>
+    <button class="theme-btn" id="themeBtn">🌙</button>
+  </header>
+
+  <!-- MODULE 1 -->
+  <section class="section active" id="mod1">
+    <div class="card">
+      <span class="badge">01 · මූලධර්මය සහ ක්‍රමාංකනය</span>
+      <h2>සර්පණ ස්පර්ශකය ගමන් කරවා සමතුලිතතාව සොයන්න</h2>
+      <p class="sub">AB කම්බිය දිගේ සර්පණ ස්පර්ශකය (jockey) ලිස්සවා ගැල්වානෝමීටරයේ දර්ශකය ශුන්‍ය වන ස්ථානය (ශූන්‍ය ක්‍රමය) සොයන්න. එවිට සම්මත කෝෂයේ (E<sub>s</sub> = 1.0186 V) විභවය කම්බියේ එම දිග දිගේ ඇති විභව පාතයට සමාන වේ.</p>
+      <div class="circuit-wrap">
+        <svg viewBox="0 0 320 190" id="svg1">
+          <!-- driver cell -->
+          <g transform="translate(20,20)">
+            <text x="0" y="-6" font-size="10">ධාවක කෝෂය</text>
+            <rect x="0" y="0" width="26" height="14" fill="none" stroke="var(--wire)" stroke-width="2"/>
+            <line x1="6" y1="0" x2="6" y2="14" stroke="var(--wire)" stroke-width="4"/>
+            <line x1="20" y1="2" x2="20" y2="12" stroke="var(--wire)" stroke-width="2"/>
+          </g>
+          <!-- wire AB -->
+          <line class="wirecase" x1="30" y1="55" x2="290" y2="55"/>
+          <line class="wireline" x1="30" y1="55" x2="290" y2="55"/>
+          <text x="24" y="45" font-size="12" fill="var(--brass-lt)">A</text>
+          <text x="288" y="45" font-size="12" fill="var(--brass-lt)">B</text>
+          <line x1="30" y1="30" x2="30" y2="20" stroke="var(--wire)" stroke-width="2"/>
+          <line x1="290" y1="30" x2="290" y2="20" stroke="var(--wire)" stroke-width="2"/>
+          <line x1="30" y1="20" x2="46" y2="20" stroke="var(--wire)" stroke-width="2"/>
+          <line x1="290" y1="20" x2="46" y2="20" stroke="var(--wire)" stroke-width="2" stroke-dasharray="0"/>
+          <!-- jockey -->
+          <g id="jockey1">
+            <line class="jockey-stem" x1="0" y1="55" x2="0" y2="80"/>
+            <circle class="jockey-mark" r="5" cx="0" cy="82"/>
+          </g>
+          <!-- branch down to galvanometer + standard cell -->
+          <line x1="160" y1="55" x2="160" y2="95" stroke="var(--wire)" stroke-width="2" id="branch1"/>
+          <g transform="translate(140,95)">
+            <circle class="gcase" r="26" cx="20" cy="26"/>
+            <text x="20" y="30" font-size="10" text-anchor="middle" fill="var(--text-dim)">G</text>
+            <line class="needle" id="needle1" x1="20" y1="26" x2="20" y2="6" stroke="var(--brass-lt)" stroke-width="2.5"/>
+          </g>
+          <line x1="160" y1="147" x2="160" y2="160" stroke="var(--wire)" stroke-width="2"/>
+          <g transform="translate(148,160)">
+            <text x="0" y="18" font-size="9">E<tspan baseline-shift="sub" font-size="7">s</tspan></text>
+            <line x1="18" y1="0" x2="18" y2="16" stroke="var(--wire)" stroke-width="4"/>
+            <line x1="30" y1="3" x2="30" y2="13" stroke="var(--wire)" stroke-width="2"/>
+          </g>
+        </svg>
+      </div>
+      <div class="slider-row">
+        <label>සර්පණ ස්පර්ශකයේ ස්ථානය (l) <b id="m1lval">30.0 cm</b></label>
+        <input type="range" id="m1jockey" min="0" max="100" step="0.1" value="30">
+      </div>
+      <div class="slider-row">
+        <label>ධාවක රියෝස්ටැට් සීරුමාරුව — V<sub>AB</sub> <b id="m1vval">1.80 V</b></label>
+        <input type="range" id="m1vab" min="0.5" max="2.0" step="0.01" value="1.8">
+      </div>
+      <div class="readout">
+        <div class="box"><div class="k">විභව ප්‍රවණතාව k = V_AB / L</div><div class="v" id="m1k">0.0180 V/cm</div></div>
+        <div class="box"><div class="k">සතුලන දිග (ගණනය කළ) l<tspan>s</tspan></div><div class="v" id="m1ls">56.6 cm</div></div>
+      </div>
+      <div class="status" id="m1status">ස්පර්ශකය ලිස්සවා ගැල්වානෝමීටරය ශුන්‍ය කරන්න…</div>
+      <div class="hint">E<sub>s</sub> = k × l<sub>s</sub> — සමතුලිතතාවේදී ගැල්වානෝමීටරය හරහා ධාරාවක් ගලා නොයයි.</div>
+    </div>
+  </section>
+
+  <!-- MODULE 2 -->
+  <section class="section" id="mod2">
+    <div class="card">
+      <span class="badge">02 · අභ්‍යන්තර ප්‍රතිරෝධය r සෙවීම</span>
+      <h2>E₀, r සහිත කෝෂයක් සමඟ පරීක්ෂණය</h2>
+      <p class="sub">යතුර (key) විවෘතව තබා විවෘත පරිපථ සමතුලන දිග l₁ ලබාගන්න. පසුව යතුර වසා, R ප්‍රතිරෝධය වෙනස් කරමින් සමීප පරිපථ සමතුලන දිග l₂ ලබාගන්න.</p>
+      <div class="switch-toggle">
+        <button id="swOpen" class="active">යතුර විවෘතයි (l₁)</button>
+        <button id="swClosed">යතුර වසාඇත (l₂)</button>
+      </div>
+      <div class="circuit-wrap">
+        <svg viewBox="0 0 320 170" id="svg2">
+          <line class="wirecase" x1="30" y1="45" x2="290" y2="45"/>
+          <line class="wireline" x1="30" y1="45" x2="290" y2="45"/>
+          <text x="24" y="35" font-size="12" fill="var(--brass-lt)">A</text>
+          <text x="288" y="35" font-size="12" fill="var(--brass-lt)">B</text>
+          <g id="jockey2">
+            <line class="jockey-stem" x1="0" y1="45" x2="0" y2="70"/>
+            <circle class="jockey-mark" r="5" cx="0" cy="72"/>
+          </g>
+          <line x1="160" y1="45" x2="160" y2="85" stroke="var(--wire)" stroke-width="2"/>
+          <g transform="translate(140,85)">
+            <circle class="gcase" r="24" cx="20" cy="24"/>
+            <text x="20" y="28" font-size="9" text-anchor="middle" fill="var(--text-dim)">G</text>
+            <line class="needle" id="needle2" x1="20" y1="24" x2="20" y2="6" stroke="var(--brass-lt)" stroke-width="2.5"/>
+          </g>
+          <line x1="160" y1="133" x2="160" y2="145" stroke="var(--wire)" stroke-width="2"/>
+          <text x="120" y="158" font-size="9">E₀ , r</text>
+          <rect x="140" y="147" width="40" height="12" fill="none" stroke="var(--wire)" stroke-width="2"/>
+          <line x1="200" y1="153" x2="230" y2="153" stroke="var(--wire)" stroke-width="2"/>
+          <text x="235" y="157" font-size="9">R</text>
+          <rect x="248" y="146" width="14" height="14" fill="none" stroke="var(--brass-lt)" stroke-width="2"/>
+          <text x="90" y="120" font-size="9" fill="var(--text-dim)">යතුර ⇥</text>
+        </svg>
+      </div>
+      <div class="slider-row">
+        <label>සර්පණ ස්පර්ශකයේ ස්ථානය (l) <b id="m2lval">40.0 cm</b></label>
+        <input type="range" id="m2jockey" min="0" max="100" step="0.1" value="40">
+      </div>
+      <div class="slider-row" id="m2rrow">
+        <label>ප්‍රතිරෝධ පෙට්ටිය R <b id="m2rval">4.0 Ω</b></label>
+        <input type="range" id="m2r" min="1" max="10" step="0.5" value="4">
+      </div>
+      <div class="readout">
+        <div class="box"><div class="k">l₁ (E₀ = k·l₁)</div><div class="v" id="m2l1">— cm</div></div>
+        <div class="box"><div class="k">l₂ (V = k·l₂)</div><div class="v" id="m2l2">— cm</div></div>
+      </div>
+      <div class="status" id="m2status">ස්පර්ශකය ලිස්සවා සමතුලිතතාව සොයන්න…</div>
+      <div class="row-btns">
+        <button class="btn" id="m2record">📍 මෙම R අගය ප්‍රස්ථාරයට එක් කරන්න</button>
+        <button class="btn ghost" id="m2reset">ප්‍රස්ථාරය මකන්න</button>
+      </div>
+      <canvas id="m2canvas" height="200"></canvas>
+      <div class="readout" style="margin-top:10px;">
+        <div class="box"><div class="k">බෑවුම (slope) = r/l₁</div><div class="v" id="m2slope">—</div></div>
+        <div class="box"><div class="k">අන්තඃඛණ්ඩය (intercept) = 1/l₁</div><div class="v" id="m2int">—</div></div>
+      </div>
+      <div class="hint" id="m2rcalc">ලකුණු 2ක් හෝ වැඩි ගණනක් එක් කළ පසු r ගණනය කෙරේ.</div>
+    </div>
+  </section>
+
+  <!-- MODULE 3 -->
+  <section class="section" id="mod3">
+    <div class="card">
+      <span class="badge">03 · අනෙකුත් යෙදුම්</span>
+      <h2>සංසන්දනාත්මක යෙදුම්</h2>
+      <div class="subtabs">
+        <button class="subtab active" data-p="p3a">emf සංසන්දනය</button>
+        <button class="subtab" data-p="p3b">ප්‍රතිරෝධය · අන්ත දෝෂය</button>
+        <button class="subtab" data-p="p3c">සුළු emf මැනීම</button>
+      </div>
+
+      <div class="subpane active" id="p3a">
+        <p class="sub">කෝෂ දෙකක emf සංසන්දනය කිරීම: E₁/E₂ = l₁/l₂. පහත X හෝ Y තෝරා, එම කෝෂය සඳහා සමතුලිත දිග සොයන්න.</p>
+        <div class="switch-toggle">
+          <button id="ab-X" class="active">කෝෂය X</button>
+          <button id="ab-Y">කෝෂය Y</button>
+        </div>
+        <div class="slider-row">
+          <label>සර්පණ ස්පර්ශකයේ ස්ථානය <b id="m3aval">40.0 cm</b></label>
+          <input type="range" id="m3ajockey" min="0" max="100" step="0.1" value="40">
+        </div>
+        <div class="status" id="m3astatus">සමතුලිතතාව සොයන්න…</div>
+        <button class="btn" id="m3arecord" style="margin-top:8px;">✔ මෙම දිග වාර්තා කරන්න</button>
+        <div class="readout">
+          <div class="box"><div class="k">l (X, E₁)</div><div class="v" id="m3al1">— cm</div></div>
+          <div class="box"><div class="k">l (Y, E₂)</div><div class="v" id="m3al2">— cm</div></div>
+        </div>
+        <div class="hint" id="m3aratio">ලකුණු දෙකම වාර්තා කළ පසු E₁/E₂ අනුපාතය පෙන්වයි.</div>
+      </div>
+
+      <div class="subpane" id="p3b">
+        <p class="sub">ප්‍රතිරෝධ සංසන්දනය R₁/R₂ = l₁/l₂ සහ අන්ත දෝෂය e<sub>A</sub> = l₃ − (l₁ + l₂) ගණනය කරන්න.</p>
+        <div class="slider-row"><label>l₁ (R₁ හරහා) <b id="m3bl1v">30.0 cm</b></label><input type="range" id="m3bl1" min="0" max="100" step="0.1" value="30"></div>
+        <div class="slider-row"><label>l₂ (R₁+R₂ හරහා) <b id="m3bl2v">55.0 cm</b></label><input type="range" id="m3bl2" min="0" max="100" step="0.1" value="55"></div>
+        <div class="slider-row"><label>l₃ (කම්බිය පෙරළූ පසු) <b id="m3bl3v">86.0 cm</b></label><input type="range" id="m3bl3" min="0" max="100" step="0.1" value="86"></div>
+        <div class="readout">
+          <div class="box"><div class="k">R₁ / R₂</div><div class="v" id="m3bratio">—</div></div>
+          <div class="box"><div class="k">අන්ත දෝෂය e<sub>A</sub></div><div class="v" id="m3bea">—</div></div>
+        </div>
+      </div>
+
+      <div class="subpane" id="p3c">
+        <p class="sub">තාප විද්‍යුත් යුග්මයක් (thermocouple) වැනි milli-volt පරාසයේ emf මැනීමට, ශ්‍රේණි ආරක්ෂක ප්‍රතිරෝධයක් යොදා විභව ප්‍රවණතාව k අඩුකර සංවේදීතාව වැඩිකරයි.</p>
+        <div class="slider-row">
+          <label>ශ්‍රේණි ආරක්ෂක ප්‍රතිරෝධය R<sub>s</sub> <b id="m3cval">200 Ω</b></label>
+          <input type="range" id="m3cr" min="0" max="2000" step="10" value="200">
+        </div>
+        <div class="readout">
+          <div class="box"><div class="k">නව k අගය</div><div class="v" id="m3ck">— V/cm</div></div>
+          <div class="box"><div class="k">තාප emf (≈5 mV) සඳහා l</div><div class="v" id="m3cl">— cm</div></div>
+        </div>
+        <div class="hint">R<sub>s</sub> වැඩිකළ විට k කුඩා වී, කුඩා emf අගයක් සඳහා පවා කම්බියේ මනාව මැනිය හැකි දිගක් ලැබේ.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODULE 4 -->
+  <section class="section" id="mod4">
+    <div class="card">
+      <span class="badge">04 · පරීක්ෂණාත්මක ආරක්ෂණ සහ දෝෂ</span>
+      <h2>කාඩ්පත මත තට්ටු කර විස්තර බලන්න</h2>
+      <div class="flip-grid" id="flipGrid"></div>
+    </div>
+  </section>
+
+  <!-- MODULE 5 -->
+  <section class="section" id="mod5">
+    <div class="card">
+      <span class="badge">05 · පසුගිය ප්‍රශ්න පත්‍ර</span>
+      <h2 id="qtitle">01. විභවමාන පරීක්ෂණය — ව්‍යුහගත රචනා ප්‍රශ්නය</h2>
+      <p class="sub">විභවමාන සැකැස්මක් භාවිතයෙන් කෝෂයක අභ්‍යන්තර ප්‍රතිරෝධය (r) සෙවීම. පහත එක් එක් කොටස තට්ටු කර ආදර්ශ පිළිතුරු බලන්න.</p>
+      <div id="accWrap"></div>
+    </div>
+  </section>
+</div>
+
+<nav class="tabs">
+  <button data-m="mod1" class="active"><span class="ic">⚡</span>මූලධර්මය</button>
+  <button data-m="mod2"><span class="ic">🔋</span>r සෙවීම</button>
+  <button data-m="mod3"><span class="ic">⚖️</span>යෙදුම්</button>
+  <button data-m="mod4"><span class="ic">🛡️</span>ආරක්ෂණ</button>
+  <button data-m="mod5"><span class="ic">📝</span>ප්‍රශ්න</button>
+</nav>
+
+<script>
+/* ---------- THEME ---------- */
+const themeBtn = document.getElementById('themeBtn');
+themeBtn.onclick = ()=>{
+  const t = document.body.getAttribute('data-theme')==='dark'?'light':'dark';
+  document.body.setAttribute('data-theme', t);
+  themeBtn.textContent = t==='dark' ? '🌙' : '☀️';
+};
+
+/* ---------- NAV ---------- */
+document.querySelectorAll('nav.tabs button').forEach(b=>{
+  b.onclick = ()=>{
+    document.querySelectorAll('nav.tabs button').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById(b.dataset.m).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+    if(b.dataset.m === 'mod2' && typeof resizeCanvas === 'function'){
+      setTimeout(resizeCanvas, 30);
+    }
+  };
+});
+
+/* helper: set slider fill */
+function fillSlider(el){
+  const pct = (el.value-el.min)/(el.max-el.min)*100;
+  el.style.setProperty('--fill', pct+'%');
+}
+document.querySelectorAll('input[type=range]').forEach(fillSlider);
+
+/* helper: position jockey group + wire span 30..290 (svg1/2) */
+function setJockeyX(id, l, minX=30, maxX=290){
+  const g = document.getElementById(id);
+  const x = minX + (maxX-minX)*(l/100);
+  g.setAttribute('transform', `translate(${x},0)`);
+}
+
+/* helper: galvanometer needle angle from deviation (V) */
+function needleAngle(dev, scale){
+  let a = dev*scale;
+  return Math.max(-65, Math.min(65,a));
+}
+
+/* ================= MODULE 1 ================= */
+const Es = 1.0186;
+const m1j = document.getElementById('m1jockey');
+const m1v = document.getElementById('m1vab');
+function updateM1(){
+  fillSlider(m1j); fillSlider(m1v);
+  const l = parseFloat(m1j.value);
+  const vab = parseFloat(m1v.value);
+  const k = vab/100;
+  const ls = Es/k;
+  document.getElementById('m1lval').textContent = l.toFixed(1)+' cm';
+  document.getElementById('m1vval').textContent = vab.toFixed(2)+' V';
+  document.getElementById('m1k').textContent = k.toFixed(4)+' V/cm';
+  document.getElementById('m1ls').textContent = ls.toFixed(1)+' cm';
+  setJockeyX('jockey1', l);
+  const dev = k*l - Es;
+  const angle = needleAngle(dev, 900);
+  const needle = document.getElementById('needle1');
+  needle.setAttribute('transform', `rotate(${angle} 20 26)`);
+  const st = document.getElementById('m1status');
+  if(Math.abs(dev) < 0.003){
+    st.textContent = '⚖️ සමතුලිතයි! Eₛ = k × lₛ = '+(k*l).toFixed(4)+' V';
+    st.classList.add('balanced');
+    needle.classList.add('glow');
+  } else {
+    st.classList.remove('balanced');
+    needle.classList.remove('glow');
+    st.textContent = (dev>0? '◀ දක්ෂිණාවර්තව අපගමනය — ස්පර්ශකය A දෙසට ගෙන යන්න' : 'වාමාවර්තව අපගමනය — ස්පර්ශකය B දෙසට ගෙන යන්න ▶');
+  }
+}
+m1j.oninput = updateM1; m1v.oninput = updateM1;
+updateM1();
+
+/* ================= MODULE 2 ================= */
+const E0=1.2, r_true=2.5, k2=0.018;
+let m2mode = 'open'; // open -> l1 target ; closed -> l2 target
+const m2j = document.getElementById('m2jockey');
+const m2r = document.getElementById('m2r');
+const swOpen = document.getElementById('swOpen'), swClosed=document.getElementById('swClosed');
+let l1_found=null, dataPoints=[];
+
+function computeL2(Rval){
+  const I = E0/(Rval+r_true);
+  const V = I*Rval;
+  return V/k2;
+}
+function updateM2(){
+  fillSlider(m2j); fillSlider(m2r);
+  const l = parseFloat(m2j.value);
+  const Rval = parseFloat(m2r.value);
+  document.getElementById('m2lval').textContent = l.toFixed(1)+' cm';
+  document.getElementById('m2rval').textContent = Rval.toFixed(1)+' Ω';
+  document.getElementById('m2r').closest('.slider-row').style.opacity = (m2mode==='closed')?1:0.35;
+  document.getElementById('m2r').disabled = (m2mode!=='closed');
+
+  const l1 = E0/k2;
+  const l2 = computeL2(Rval);
+  document.getElementById('m2l1').textContent = (m2mode==='open'||l1_found)? l1.toFixed(1)+' cm' : '— cm';
+  document.getElementById('m2l2').textContent = (m2mode==='closed')? l2.toFixed(1)+' cm' : '— cm';
+
+  const target = m2mode==='open'? l1 : l2;
+  const testV = m2mode==='open'? E0 : (E0*Rval/(Rval+r_true));
+  setJockeyX('jockey2', l);
+  const dev = k2*l - testV;
+  const angle = needleAngle(dev, 900);
+  const needle = document.getElementById('needle2');
+  needle.setAttribute('transform', `rotate(${angle} 20 24)`);
+  const st = document.getElementById('m2status');
+  if(Math.abs(dev) < 0.003){
+    st.textContent = '⚖️ සමතුලිතයි — l = '+l.toFixed(1)+' cm';
+    st.classList.add('balanced'); needle.classList.add('glow');
+    if(m2mode==='open') l1_found = l1;
+  } else {
+    st.classList.remove('balanced'); needle.classList.remove('glow');
+    st.textContent = dev>0 ? '◀ A දෙසට ගෙන යන්න' : 'B දෙසට ගෙන යන්න ▶';
+  }
+}
+swOpen.onclick=()=>{m2mode='open';swOpen.classList.add('active');swClosed.classList.remove('active');updateM2();};
+swClosed.onclick=()=>{m2mode='closed';swClosed.classList.add('active');swOpen.classList.remove('active');updateM2();};
+m2j.oninput=updateM2; m2r.oninput=updateM2;
+
+const canvas = document.getElementById('m2canvas');
+const ctx = canvas.getContext('2d');
+function resizeCanvas(){ canvas.width = canvas.clientWidth; canvas.height=200; drawGraph(); }
+function drawGraph(){
+  const W=canvas.width,H=canvas.height, pad=34;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--line');
+  ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(pad,10); ctx.lineTo(pad,H-pad); ctx.lineTo(W-10,H-pad); ctx.stroke();
+  ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text-dim');
+  ctx.font = '10px sans-serif';
+  ctx.fillText('1/R →', W-40, H-14);
+  ctx.save(); ctx.translate(12,30); ctx.rotate(-Math.PI/2); ctx.fillText('1/l₂ →',0,0); ctx.restore();
+  if(dataPoints.length===0) return;
+  const xs = dataPoints.map(p=>1/p.R), ys = dataPoints.map(p=>1/p.l2);
+  const xmax = Math.max(...xs)*1.2, ymax = Math.max(...ys)*1.2;
+  function px(x){return pad + (x/xmax)*(W-pad-20);}
+  function py(y){return (H-pad) - (y/ymax)*(H-pad-20);}
+  ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--brass-lt');
+  dataPoints.forEach(p=>{
+    ctx.beginPath(); ctx.arc(px(1/p.R), py(1/p.l2), 4,0,7); ctx.fill();
+  });
+  if(dataPoints.length>=2){
+    const n=xs.length, sx=xs.reduce((a,b)=>a+b,0), sy=ys.reduce((a,b)=>a+b,0);
+    const sxy=xs.reduce((a,b,i)=>a+b*ys[i],0), sxx=xs.reduce((a,b)=>a+b*b,0);
+    const slope=(n*sxy-sx*sy)/(n*sxx-sx*sx);
+    const intercept=(sy-slope*sx)/n;
+    ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--right');
+    ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.moveTo(px(0), py(intercept));
+    ctx.lineTo(px(xmax), py(slope*xmax+intercept));
+    ctx.stroke();
+    document.getElementById('m2slope').textContent = slope.toFixed(4);
+    document.getElementById('m2int').textContent = intercept.toFixed(4);
+    const r_meas = slope/intercept;
+    document.getElementById('m2rcalc').textContent = 'ගණනය කළ r = slope/intercept = '+r_meas.toFixed(2)+' Ω  (සත්‍ය අගය: '+r_true+' Ω)';
+  }
+}
+document.getElementById('m2record').onclick = ()=>{
+  const Rval = parseFloat(m2r.value);
+  const l2 = computeL2(Rval);
+  if(dataPoints.find(p=>Math.abs(p.R-Rval)<0.01)) return;
+  dataPoints.push({R:Rval,l2});
+  drawGraph();
+};
+document.getElementById('m2reset').onclick = ()=>{ dataPoints=[]; drawGraph();
+  document.getElementById('m2slope').textContent='—'; document.getElementById('m2int').textContent='—';
+  document.getElementById('m2rcalc').textContent='ලකුණු 2ක් හෝ වැඩි ගණනක් එක් කළ පසු r ගණනය කෙරේ.'; };
+window.addEventListener('resize', resizeCanvas);
+updateM2(); setTimeout(resizeCanvas,50);
+
+/* ================= MODULE 3a ================= */
+const E1=1.45, E2=1.08, k3=0.02;
+let cellSel='X'; let l1a=null,l2a=null;
+const abX=document.getElementById('ab-X'), abY=document.getElementById('ab-Y');
+const m3aj = document.getElementById('m3ajockey');
+function updateM3a(){
+  fillSlider(m3aj);
+  const l = parseFloat(m3aj.value);
+  document.getElementById('m3aval').textContent = l.toFixed(1)+' cm';
+  const targetE = cellSel==='X'? E1:E2;
+  const dev = k3*l - targetE;
+  const st = document.getElementById('m3astatus');
+  if(Math.abs(dev)<0.003){ st.textContent='⚖️ සමතුලිතයි — l = '+l.toFixed(1)+' cm'; st.classList.add('balanced'); }
+  else { st.classList.remove('balanced'); st.textContent = dev>0?'◀ A දෙසට':'B දෙසට ▶'; }
+}
+abX.onclick=()=>{cellSel='X';abX.classList.add('active');abY.classList.remove('active');updateM3a();};
+abY.onclick=()=>{cellSel='Y';abY.classList.add('active');abX.classList.remove('active');updateM3a();};
+m3aj.oninput = updateM3a;
+document.getElementById('m3arecord').onclick=()=>{
+  const l = parseFloat(m3aj.value);
+  if(cellSel==='X'){ l1a=l; document.getElementById('m3al1').textContent=l.toFixed(1)+' cm'; }
+  else { l2a=l; document.getElementById('m3al2').textContent=l.toFixed(1)+' cm'; }
+  if(l1a && l2a){
+    document.getElementById('m3aratio').textContent =
+      'l₁/l₂ = '+(l1a/l2a).toFixed(3)+'  ≈  E₁/E₂ (සත්‍ය අනුපාතය '+(E1/E2).toFixed(3)+')';
+  }
+};
+updateM3a();
+
+/* ================= MODULE 3b ================= */
+function updateM3b(){
+  const l1=parseFloat(document.getElementById('m3bl1').value);
+  const l2=parseFloat(document.getElementById('m3bl2').value);
+  const l3=parseFloat(document.getElementById('m3bl3').value);
+  [['m3bl1','m3bl1v'],['m3bl2','m3bl2v'],['m3bl3','m3bl3v']].forEach(([s,v])=>{
+    fillSlider(document.getElementById(s));
+    document.getElementById(v).textContent = document.getElementById(s).value+' cm';
+  });
+  document.getElementById('m3bratio').textContent = (l1/l2).toFixed(3);
+  document.getElementById('m3bea').textContent = (l3-(l1+l2)).toFixed(2)+' cm';
+}
+['m3bl1','m3bl2','m3bl3'].forEach(id=>document.getElementById(id).oninput=updateM3b);
+updateM3b();
+
+/* ================= MODULE 3c ================= */
+function updateM3c(){
+  const rs = parseFloat(document.getElementById('m3cr').value);
+  fillSlider(document.getElementById('m3cr'));
+  document.getElementById('m3cval').textContent = rs+' Ω';
+  const Vbat=2.0, Rwire=10; // ohms, illustrative
+  const k = (Vbat*Rwire/(Rwire+rs))/100;
+  document.getElementById('m3ck').textContent = k.toExponential(3)+' V/cm';
+  const emf = 0.005;
+  document.getElementById('m3cl').textContent = (emf/k).toFixed(2)+' cm';
+}
+document.getElementById('m3cr').oninput = updateM3c;
+updateM3c();
+
+/* ================= MODULE 3 subtabs ================= */
+document.querySelectorAll('.subtab').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('.subtab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.subpane').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById(b.dataset.p).classList.add('active');
+  };
+});
+
+/* ================= MODULE 4 : precaution flip cards ================= */
+const precautions = [
+  {ic:'🧲', t:'තනි පසෙකට පමණක් අපගමනය', d:'G හි කෙළවර දෙකෙහිම එකවර වෝල්ටියතාව නොලැබෙන්නේ නම් (විවෘත පරිපථය, E₀ > V_AB, හෝ ධ්‍රැවතා දෝෂය) ගැල්වානෝමීටරය කම්බියේ සම්පූර්ණ දිග දිගේම එකම දිශාවට පමණක් අපගමනය වේ.'},
+  {ic:'✋', t:'කම්බිය තදින් නොපෙළිය යුතුය', d:'ස්පර්ශකය තදින් තිබ්බහොත් හෝ අදින්නට උත්සාහ කළහොත් කම්බියේ R වෙනස්ව (rugged) k අගය වෙනස් වේ. සැහැල්ලුවෙන් ස්පර්ශය පමණක් කරන්න.'},
+  {ic:'🔋', t:'ලෙඩ් ඇසිඩ් ධාවක කෝෂය', d:'විභවමාන පරිපථයේ ධාවක ධාරාව කාලයත් සමඟ නියතව තිබිය යුතුය. ලෙඩ් ඇසිඩ් සමුච්චකය (accumulator) කාලයත් සමඟ emf වෙනස් නොවන නිසා යොදාගනී.'},
+  {ic:'📏', t:'AB කම්බිය තනි ද්‍රව්‍යයකින්', d:'k නියතව තබාගැනීමට කම්බිය සම්පූර්ණයෙන්ම එකම ද්‍රව්‍යයකින් සහ ඒකාකාර හරස්කඩකින් යුතු විය යුතුය.'},
+  {ic:'🛡️', t:'ආරක්ෂක ප්‍රතිරෝධය', d:'සමතුලිතතාවය සොයන විට කම්බිය හරහා විශාල ධාරාවක් ගලා යාම වළක්වා ගැල්වානෝමීටරය ආරක්ෂා කිරීමට ඉහළ අගයක ශ්‍රේණි ප්‍රතිරෝධයක් යොදාගනී; සමතුලිතතාවයට ආසන්නව එය කෙටි කරයි.'},
+  {ic:'⏱️', t:'යතුර දිගු වේලාවක් නොවසන්න', d:'අනවශ්‍ය ලෙස යතුර දිගු වේලාවක් වසාතැබීමෙන් කෝෂය හරහා ධාරාව ගලා කෝෂ emf පරිහානියට හා කෝෂ ආයු කාලය අඩුවීමට හේතු වේ.'},
+];
+const grid = document.getElementById('flipGrid');
+precautions.forEach(p=>{
+  const c = document.createElement('div'); c.className='flip-card';
+  c.innerHTML = `<div class="flip-inner">
+      <div class="flip-face flip-front"><span class="ic">${p.ic}</span>${p.t}</div>
+      <div class="flip-face flip-back">${p.d}</div>
+    </div>`;
+  c.onclick=()=>c.classList.toggle('on');
+  grid.appendChild(c);
+});
+
+/* ================= MODULE 5 : accordion past paper ================= */
+const qa = [
+  {q:'(a) මෙම පරීක්ෂණය සිදු කිරීම සඳහා විභවමාන සැකැස්මේ සම්පූර්ණ පරිපථය රූප සටහනකින් දක්වන්න.',
+   a:'ධාවක කෝෂය (2V ඇසිඩ්-ලෙඩ්) → රියෝස්ටැට් → AB කම්බිය (A සිට B) ලෙස ප්‍රධාන ලූපය සාදන්න. පරීක්ෂණ කෝෂය (r සොයන E₀) → ආරක්ෂක ප්‍රතිරෝධය → ගැල්වානෝමීටරය → සර්පණ ස්පර්ශකය ලෙස ද්විතීයික ශාඛාව A සිට ස්පර්ශකය දක්වා සම්බන්ධ කරන්න. R ප්‍රතිරෝධ පෙට්ටිය සහ ප්ලග් යතුර පරීක්ෂණ කෝෂයට සමාන්තරව සම්බන්ධ කරන්න.'},
+  {q:'(b) පරීක්ෂණාත්මක සැකැස්මේ සියලු කොටස් නිවැරදිව සම්බන්ධ කොට ඇත්දැයි පරීක්ෂා කිරීම සඳහා අනුගමනය කරන ක්‍රියා පිළිවෙළ ලියා දක්වන්න.',
+   a:'1) ධාවක පරිපථය පමණක් සම්බන්ධකර රියෝස්ටැට් හරහා ධාරාව ගලායාම තහවුරු කරන්න. 2) ස්පර්ශකය A අබියස තබා යතුර ක්ෂණිකව ස්පර්ශකර ගැල්වානෝමීටර අපගමන දිශාව බලන්න. 3) ස්පර්ශකය B අබියස තබා නැවත පරීක්ෂා කරන්න — අපගමන දිශාව අනිත් පසට මාරු විය යුතුය (එසේ නොවුනහොත් V_AB < E₀ හෝ ධ්‍රැවතා දෝෂයකි). 4) දෙපැත්තටම එකම දිශාවට අපගමනය වේ නම් සම්බන්ධතා පරීක්ෂාකර නිවැරදි කරන්න.'},
+  {q:'(c) ප්‍රතිරෝධ පෙට්ටියේ ප්‍රතිරෝධය (R) වෙනස් කරමින් විභවමාන කම්බියේ සංතුලන දිග (l) මනිනු ලැබේ. R අනන්ත වූ විට සංතුලන දිග l₀ ලෙස ගන්න. ප්‍රස්ථාරයක් ඇඳීමෙන්, අභ්‍යන්තර ප්‍රතිරෝධය (r) සෙවීම සඳහා ඔබ භාවිත කරන ප්‍රකාශනය ව්‍යුත්පන්න කරන්න.',
+   a:'V = k·l සහ E₀ = k·l₀. E₀ = I(R+r), V=IR නිසා E₀/V = (R+r)/R = l₀/l. එයින්: 1/l = (r/l₀)(1/R) + 1/l₀. මෙය y = mx + c ස්වරූපයට සමාන බැවින් 1/l (y-අක්ෂය) එදිරිව 1/R (x-අක්ෂය) ප්‍රස්ථාරයක් ඇඳ, බෑවුම m = r/l₀ සහ අන්තඃඛණ්ඩය c = 1/l₀ ලබාගෙන r = m/c ලෙස ගණනය කරයි.'},
+  {q:'(d) ප්‍රස්ථාරය ඇඳීම සඳහා ඔබ විවිධ දත්ත ලක්ෂ්‍ය ලබාගන්නේ කෙසේද?',
+   a:'R හි විවිධ අගයන් (උදා: 2,4,6,8,10 Ω) සඳහා එක් එක් වර යතුර වසා සංතුලන දිග l මනිනු ලබයි. සෑම R අගයකටම අනුරූප 1/R සහ 1/l අගයන් ගණනය කර වගුවකට ඇතුළත් කරයි.'},
+  {q:'(e) ප්‍රතිරෝධ පෙට්ටියේ ප්‍රතිරෝධය ඉතා කුඩා අගයක පවත්වා ගැනීම සුදුසු නැත. මෙයට හේතුව කුමක්ද?',
+   a:'R කුඩා වන විට පරිපථයේ ගලායන ධාරාව විශාල වී, කෝෂය හරහා විභව පාතය සීඝ්‍රයෙන් වෙනස්වීම සහ කෝෂය රත්වීම (අභ්‍යන්තර ශක්ති හානිය) සිදුවිය හැක. එමෙන්ම කුඩා R අගයන්හිදී මිනුම් දෝෂ සාපේක්ෂව වැඩි බලපෑමක් ඇතිකරයි.'},
+  {q:'(f) මෙම පරීක්ෂණයේදී ඔබ ලැබෙන ප්‍රස්ථාරයේ දළ සටහනක්, අක්ෂ පැහැදිලිව නම් කර අඳින්න.',
+   a:'y-අක්ෂය: 1/l (cm⁻¹) — x-අක්ෂය: 1/R (Ω⁻¹). ලක්ෂ්‍ය ආසන්න රේඛීය ප්‍රවණතාවකින් ඉහළට යන සරල රේඛාවක් සාදයි; රේඛාව y-අක්ෂය ඡේදනය කරන ලක්ෂ්‍යය c = 1/l₀ වේ.'},
+  {q:'(g) ඔබ ප්‍රස්ථාරය ඇසුරෙන් r සොයාගන්නේ කෙසේද?',
+   a:'ප්‍රස්ථාරයේ බෑවුම m = r/l₀ සහ y-අන්තඃඛණ්ඩය c = 1/l₀ මනිනු ලැබේ. r = m/c ලෙස ගණනය කරයි (m සහ c යන දෙකම ග්‍රැෆ් රේඛාවෙන් සෘජුවම කියවා ගැනේ).'},
+  {q:'(h) කෝෂයේ විද්‍යුත් ගාමක බලය 2V ට වඩා සුළු වශයෙන් වැඩි වුයේ නම්, ඔබට මෙම පරීක්ෂණයේ සාර්ථකව කළ හැකිද? ඔබගේ පිළිතුරට හේතු දෙන්න.',
+   a:'නැත, එසේ කළ නොහැක. පරීක්ෂණ කෝෂයේ emf (E₀) විභවමාන කම්බියේ AB හරහා ඇති උපරිම විභව පාතය (V_AB) ට වඩා වැඩි වුවහොත්, කම්බියේ කිසිම ලක්ෂ්‍යයක සමතුලිතතාවයක් ළඟාකරගත නොහැක. එබැවින් ධාවක කෝෂයේ emf පරීක්ෂණ කෝෂයේ emf ට වඩා වැඩි විය යුතුය.'},
+];
+const accWrap = document.getElementById('accWrap');
+qa.forEach((item,i)=>{
+  const d = document.createElement('div'); d.className='acc-item';
+  d.innerHTML = `<div class="acc-head"><span>${item.q}</span><span class="plus">+</span></div>
+                 <div class="acc-body"><div class="acc-body-inner">${item.a}</div></div>`;
+  d.querySelector('.acc-head').onclick=()=>d.classList.toggle('open');
+  accWrap.appendChild(d);
+});
+</script>
+</body>
+</html>

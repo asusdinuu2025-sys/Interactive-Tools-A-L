@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ධාරා විද්‍යුතය — A/L භෞතික විද්‍යාව | ස්වයං අධ්‍යයන මෙවලම</title>
+<style>
+  :root{
+    --bg-deep:#0a0e12;
+    --bg-panel:#121821;
+    --bg-panel-raised:#161f2a;
+    --bg-input:#0c1217;
+    --copper:#d98f4e;
+    --copper-bright:#f2ac71;
+    --current:#3ed598;
+    --current-dim:#1f6b4c;
+    --danger:#e8656a;
+    --text:#eaf0f6;
+    --text-muted:#8b98a6;
+    --text-faint:#5a6673;
+    --border:#22303f;
+    --border-soft:#1a2531;
+    --mono: 'JetBrains Mono','Consolas','SFMono-Regular',ui-monospace,monospace;
+    --sinhala: 'Noto Sans Sinhala','Iskoola Pota','Nirmala UI','Yaldevi',sans-serif;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 15% 0%, rgba(217,143,78,0.07), transparent 45%),
+      radial-gradient(circle at 85% 100%, rgba(62,213,152,0.06), transparent 45%),
+      var(--bg-deep);
+    color:var(--text);
+    font-family:var(--sinhala);
+    line-height:1.65;
+    min-height:100vh;
+  }
+  ::selection{background:var(--copper);color:#0a0e12;}
+  h1,h2,h3,h4{font-family:var(--sinhala);margin:0;}
+  a{color:var(--copper-bright);}
+  input[type="number"], select{
+    font-family:var(--mono);
+    background:var(--bg-input);
+    border:1px solid var(--border);
+    color:var(--text);
+    border-radius:8px;
+    padding:8px 10px;
+    font-size:14px;
+    width:100%;
+    outline:none;
+  }
+  input[type="number"]:focus, select:focus{border-color:var(--copper);box-shadow:0 0 0 3px rgba(217,143,78,0.15);}
+  input[type="range"]{
+    width:100%; accent-color:var(--copper); cursor:pointer;
+  }
+  button{font-family:var(--sinhala); cursor:pointer;}
+  button:focus-visible, .tab-btn:focus-visible, .acc-header:focus-visible{outline:2px solid var(--current); outline-offset:2px;}
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    position:sticky; top:0; z-index:50;
+    background:rgba(10,14,18,0.9);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border-soft);
+    padding:14px 22px 0 22px;
+  }
+  .brand{display:flex; align-items:center; gap:14px; max-width:1400px; margin:0 auto; padding-bottom:12px;}
+  .brand-mark svg{display:block;}
+  .brand-text h1{font-size:20px; font-weight:800; letter-spacing:0.3px;}
+  .brand-text p{margin:2px 0 0; font-size:12.5px; color:var(--text-muted); font-family:var(--mono); letter-spacing:0.5px;}
+  .current-trace{max-width:1400px; margin:0 auto; height:14px; overflow:hidden;}
+  .current-trace svg{width:100%; height:14px; display:block;}
+  .trace-line{stroke:var(--border); stroke-width:1.5;}
+  .trace-dot{fill:var(--current); filter:drop-shadow(0 0 4px var(--current));}
+  @keyframes flow{ to { stroke-dashoffset:-1000; } }
+  .trace-flow{
+    stroke:var(--copper); stroke-width:2; stroke-linecap:round;
+    stroke-dasharray:6 14;
+    animation:flow 6s linear infinite;
+    opacity:0.85;
+  }
+  @media (prefers-reduced-motion:reduce){ .trace-flow{animation:none;} }
+
+  /* ---------- Shell / layout ---------- */
+  .app-shell{max-width:1400px; margin:0 auto; display:flex; gap:22px; padding:20px 22px 60px; align-items:flex-start;}
+  .side-tabs{
+    flex:0 0 232px; position:sticky; top:92px;
+    display:flex; flex-direction:column; gap:6px;
+  }
+  .tab-btn{
+    display:flex; align-items:center; gap:10px;
+    background:transparent; border:1px solid transparent; color:var(--text-muted);
+    text-align:right; padding:12px 14px; border-radius:10px; font-size:14.5px; font-weight:600;
+    transition:background .15s, color .15s, border-color .15s;
+    flex-direction:row-reverse; justify-content:flex-end;
+  }
+  .tab-num{
+    font-family:var(--mono); font-size:11px; color:var(--copper);
+    border:1px solid var(--border); border-radius:6px; padding:2px 6px; flex-shrink:0;
+  }
+  .tab-btn:hover{background:var(--bg-panel); color:var(--text);}
+  .tab-btn.active{background:linear-gradient(90deg, rgba(217,143,78,0.14), rgba(217,143,78,0.03)); color:var(--copper-bright); border-color:var(--border);}
+  .tab-btn.active .tab-num{background:var(--copper); color:#141414; border-color:var(--copper);}
+  .side-note{margin-top:10px; padding:12px 14px; border:1px dashed var(--border); border-radius:10px; font-size:12px; color:var(--text-faint); font-family:var(--mono); line-height:1.6;}
+
+  .content{flex:1; min-width:0;}
+  .panel{display:none; animation:fadeIn .25s ease;}
+  .panel.active{display:block;}
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);} }
+
+  .panel-head{margin-bottom:18px;}
+  .panel-head h2{font-size:24px; font-weight:800;}
+  .panel-head p{color:var(--text-muted); font-size:13.5px; margin-top:4px;}
+
+  /* ---------- Cards / Accordion ---------- */
+  .card{
+    background:var(--bg-panel); border:1px solid var(--border-soft); border-radius:var(--radius);
+    margin-bottom:14px; overflow:hidden;
+  }
+  .acc-header{
+    width:100%; background:transparent; border:none; color:var(--text);
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 18px; font-size:15.5px; font-weight:700;
+  }
+  .acc-header .chev{color:var(--copper); transition:transform .2s; font-family:var(--mono);}
+  .card.open .acc-header .chev{transform:rotate(90deg);}
+  .acc-body{max-height:0; overflow:hidden; transition:max-height .3s ease;}
+  .card.open .acc-body{max-height:4000px;}
+  .acc-inner{padding:0 18px 20px; border-top:1px solid var(--border-soft);}
+  .acc-inner > p, .acc-inner > .note{margin-top:14px;}
+
+  .formula-box{
+    font-family:var(--mono); background:var(--bg-input); border:1px solid var(--border);
+    border-right:3px solid var(--copper);
+    border-radius:8px; padding:12px 16px; margin:10px 0; font-size:15.5px; color:var(--copper-bright);
+    letter-spacing:0.3px; overflow-x:auto;
+  }
+  .formula-box .label{display:block; font-family:var(--sinhala); color:var(--text-muted); font-size:12px; margin-bottom:6px; font-weight:600;}
+  .formula-row{display:flex; flex-wrap:wrap; gap:10px;}
+  .formula-row .formula-box{flex:1 1 220px; margin:0;}
+  .note{background:rgba(62,213,152,0.06); border:1px solid var(--current-dim); border-radius:8px; padding:10px 14px; font-size:13px; color:#cfe9dd;}
+  .note b{color:var(--current);}
+  table.eqtable{width:100%; border-collapse:collapse; font-size:13.5px; margin-top:10px;}
+  table.eqtable th, table.eqtable td{border:1px solid var(--border); padding:8px 10px; text-align:right;}
+  table.eqtable th{background:var(--bg-panel-raised); color:var(--copper-bright); font-size:12.5px;}
+  table.eqtable td.mono{font-family:var(--mono); color:var(--text);}
+
+  /* ---------- Tools ---------- */
+  .subtab-bar{display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;}
+  .subtab-btn{
+    background:var(--bg-panel-raised); border:1px solid var(--border); color:var(--text-muted);
+    padding:9px 16px; border-radius:999px; font-size:13.5px; font-weight:600;
+  }
+  .subtab-btn.active{background:var(--copper); color:#14100a; border-color:var(--copper);}
+  .tool-panel{display:none;}
+  .tool-panel.active{display:block;}
+
+  .tool-card{background:var(--bg-panel); border:1px solid var(--border-soft); border-radius:var(--radius); padding:20px;}
+  .tool-card h3{font-size:16px; margin-bottom:4px;}
+  .tool-card .sub{color:var(--text-muted); font-size:12.5px; margin-bottom:16px;}
+  .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .grid-3{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+  @media(max-width:640px){.grid-2, .grid-3{grid-template-columns:1fr;}}
+  .field label{display:block; font-size:12px; color:var(--text-muted); margin-bottom:5px; font-weight:600;}
+  .field{margin-bottom:6px;}
+
+  .readout{
+    font-family:var(--mono); background:var(--bg-input); border:1px solid var(--border);
+    border-radius:10px; padding:16px; margin-top:16px; font-size:14px;
+  }
+  .readout.balanced{border-color:var(--current); box-shadow:0 0 0 3px rgba(62,213,152,0.12);}
+  .readout .big{font-size:22px; color:var(--copper-bright); font-weight:700;}
+  .readout.balanced .big{color:var(--current);}
+  .readout .tag{display:inline-block; font-family:var(--sinhala); font-size:12px; padding:3px 10px; border-radius:999px; background:var(--bg-panel-raised); color:var(--text-muted); margin-bottom:8px;}
+  .readout.balanced .tag{background:rgba(62,213,152,0.15); color:var(--current);}
+
+  .btn{
+    background:var(--copper); color:#181008; border:none; padding:10px 18px; border-radius:8px;
+    font-weight:700; font-size:13.5px;
+  }
+  .btn:hover{background:var(--copper-bright);}
+  .btn.ghost{background:transparent; border:1px solid var(--border); color:var(--text);}
+
+  svg.diagram{width:100%; height:auto; display:block; margin:16px 0;}
+  .wire{stroke:#5a6673; stroke-width:2.5; fill:none;}
+  .wire.live{stroke:var(--copper);}
+  .node{fill:var(--bg-panel-raised); stroke:var(--copper); stroke-width:2;}
+  .comp-label{font-family:var(--mono); font-size:11px; fill:var(--text-muted);}
+  .comp-val{font-family:var(--mono); font-size:12px; fill:var(--copper-bright); font-weight:700;}
+  .needle{transform-origin:200px 130px; transition:transform .25s ease;}
+
+  .scale-track{position:relative; height:34px; background:var(--bg-input); border:1px solid var(--border); border-radius:8px; margin:16px 0 6px;}
+  .scale-fill{position:absolute; top:0; left:0; height:100%; background:linear-gradient(90deg, rgba(217,143,78,0.25), rgba(217,143,78,0.05)); border-radius:8px 0 0 8px;}
+  .jockey{position:absolute; top:-6px; width:3px; height:46px; background:var(--current); box-shadow:0 0 6px var(--current); transition:left .15s ease;}
+  .scale-labels{display:flex; justify-content:space-between; font-family:var(--mono); font-size:11px; color:var(--text-faint);}
+
+  /* Resistor tool */
+  .resistor-wrap{display:flex; align-items:center; justify-content:center; padding:26px 0 10px;}
+  .swatch-row{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:10px;}
+  .swatch-row label{font-size:12px; color:var(--text-muted); font-weight:600; width:100%;}
+
+  footer{max-width:1400px; margin:0 auto; padding:20px 22px 40px; color:var(--text-faint); font-size:12px; text-align:center; font-family:var(--mono);}
+
+  @media (max-width:920px){
+    .app-shell{flex-direction:column;}
+    .side-tabs{position:static; flex-direction:row; overflow-x:auto; width:100%; flex:none; padding-bottom:4px;}
+    .tab-btn{flex-direction:row; text-align:left; white-space:nowrap;}
+    .side-note{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+        <circle cx="20" cy="20" r="18" stroke="#d98f4e" stroke-width="1.5" opacity="0.5"/>
+        <path d="M20 6 V14 M20 26 V34 M6 20 H14 M26 20 H34" stroke="#d98f4e" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="20" cy="20" r="6" fill="#3ed598" opacity="0.9"/>
+        <circle cx="20" cy="20" r="10" stroke="#3ed598" stroke-width="1" opacity="0.35"/>
+      </svg>
+    </div>
+    <div class="brand-text">
+      <h1>ධාරා විද්‍යුතය</h1>
+      <p>CURRENT ELECTRICITY — A/L PHYSICS · SELF-STUDY TERMINAL</p>
+    </div>
+  </div>
+  <div class="current-trace">
+    <svg viewBox="0 0 1000 14" preserveAspectRatio="none">
+      <line x1="0" y1="7" x2="1000" y2="7" class="trace-line"/>
+      <line x1="0" y1="7" x2="1000" y2="7" class="trace-flow"/>
+    </svg>
+  </div>
+</header>
+
+<div class="app-shell">
+  <nav class="side-tabs">
+    <button class="tab-btn active" data-tab="basic"><span class="tab-num">01</span>මූලික සමීකරණ</button>
+    <button class="tab-btn" data-tab="kirchhoff"><span class="tab-num">02</span>කර්චොෆ් නීති සහ ජාල</button>
+    <button class="tab-btn" data-tab="practicals"><span class="tab-num">03</span>ප්‍රායෝගික පරීක්ෂණ</button>
+    <button class="tab-btn" data-tab="tools"><span class="tab-num">04</span>අන්තර්ක්‍රියාකාරී මෙවලම්</button>
+    <div class="side-note">TIP — සෑම කොටසක්ම Accordion මගින් විවෘත කරගත හැක. සූත්‍ර සියල්ල Ω · V · A ඒකක සමඟ ලබා දී ඇත.</div>
+  </nav>
+
+  <main class="content">
+
+    <!-- ============ PANEL 1 : BASIC ============ -->
+    <section id="basic" class="panel active">
+      <div class="panel-head">
+        <h2>01 · මූලික සමීකරණ සහ ප්‍රතිරෝධය</h2>
+        <p>Basic Equations &amp; Resistance — විද්‍යුත් ධාරාව, ඕම්ගේ නියමය, ප්‍රතිරෝධය සහ විද්‍යුත් ශක්තිය</p>
+      </div>
+
+      <div class="card open">
+        <button class="acc-header"><span>විද්‍යුත් ධාරාව (Electric Current)</span><span class="chev">›</span></button>
+        <div class="acc-body"><div class="acc-inner">
+          <div class="formula-row">
+            <div class="formula-box"><span class="label">දළ අර්ථ දැක්වීම</span>I = Q / t</div>
+            <div class="formula-box"><span class="label">ක්ෂුද්‍ර මට්ටමින් (Microscopic)</span>I = nAv<sub>d</sub>e</div>
+          </div>
+          <p style="font-size:13.5px;color:var(--text-muted);margin-top:12px;">I = ධාරාව (A) · Q = ආරෝපණය (C) · t = කාලය (s) · n = ඒකක පරිමාවේ ඉලෙක්ට්‍රෝන ඝනත්වය (m⁻³) · A = සන්නායකයේ හරස්කඩ වර්ගඵලය (m²) · v<sub>d</sub> = අප්ලාවිත ප්‍රවේගය (Drift Velocity, m/s) · e = ඉලෙක්ට්‍රෝනයක ආරෝපණය (1.6×10⁻¹⁹ C)</p>
+          <div class="note">සටහන — <b>v<sub>d</sub></b> ඉතා කුඩා අගයක් (mm/s මට්ටමේ) වුවත්, විද්‍යුත් ක්ෂේත්‍රය සන්නායකය පුරා ආලෝක ප්‍රවේගයට ආසන්න වේගයකින් පැතිරෙන බැවින් බල්බය ක්ෂණිකව දැල්වේ.</div>
+        </div></div>
+      </div>
+
+      <div class="card">
+        <button class="acc-header"><span>ඕම්ගේ නියමය සහ ප්‍රතිරෝධය (Ohm's Law &amp; Resistance)</span><span class="chev">›</span></button>
+        <div class="acc-body"><div class="acc-inner">
+          <div class="formula-row">
+            <div class="formula-box"><span class="label">ඕම්ගේ නියමය</span>V = IR</div>
+            <div class="formula-box"><span class="label">ප්‍රතිරෝධය</span>R = ρL / A</div>
+            <div class="formula-box"><span class="label">සන්නායකතාවය</span>σ = 1 / ρ</div>
+          </div>
+          <p style="font-size:13.5px;color:var(--text-muted);margin-top:12px;">ρ = විශිෂ්ට ප්‍රතිරෝධය (Resistivity, Ω·m) · L = සන්නායකයේ දිග · A = හරස්කඩ වර්ගඵලය · σ = සන්නායකතාවය (S/m). නියත උෂ්ණත්වයකදී ලෝහමය සන්නායකයක් සඳහා V ∝ I වීම ඕම්ගේ නියමයයි.</p>
+          <div class="formula-box" style="margin-top:14px;"><span class="label">උෂ්ණත්වය සමඟ ප්‍රතිරෝධ විචලනය</span>R<sub>θ</sub> = R₀(1 + αθ)</div>
+          <p style="font-size:13.5px;color:var(--text-muted);">R₀ = 0°C දී ප්‍රතිරෝධය · R<sub>θ</sub> = θ°C දී ප්‍රතිරෝධය · α = ප්‍රතිරෝධයේ උෂ්ණත්ව සංගුණකය (temperature coefficient of resistance, °C⁻¹). ලෝහවල α ධන අගයක් වන අතර, උෂ්ණත්වය වැඩිවීමේදී ප්‍රතිරෝධයද වැඩිවේ.</p>
+        </div></div>
+      </div>
+
+      <div class="card">
+        <button class="acc-header"><span>ප්‍රතිරෝධක සම්බන්ධතා (Series &amp; Parallel Combinations)</span><span class="chev">›</span></button>
+        <div class="acc-body"><div class="acc-inner">
+          <div class="formula-row">
+            <div class="formula-box"><span class="label">ශ්‍රේණිගත සම්බන්ධතාව</span>R<sub>eff</sub> = R₁ + R₂ + R₃ + …</div>
+            <div class="formula-box"><span class="label">සමාන්තරගත සම්බන්ධතාව</span>1/R<sub>eff</sub> = 1/R₁ + 1/R₂ + …</div>
+          </div>
+          <table class="eqtable">
+            <tr><th>ලක්ෂණය</th><th>ශ්‍රේණිගත (Series)</th><th>සමාන්තරගත (Parallel)</th></tr>
+            <tr><td>ධාරාව</td><td class="mono">සියලු ප්‍රතිරෝධක තුළින් I සමාන</td><td class="mono">එක් එක් අතුරෙන් වෙන් වේ</td></tr>
+            <tr><td>වෝල්ටීයතාව</td><td class="mono">එක් එක් ප්‍රතිරෝධකයේ වෙනස්</td><td class="mono">සියලු අතු තුළින් V සමාන</td></tr>
+            <tr><td>ඵලිත ප්‍රතිරෝධය</td><td class="mono">R₁+R₂+… (වැඩිම)</td><td class="mono">තනි කුඩාම R ට වඩා අඩු</td></tr>
+          </table>
+        </div></div>
+      </div>
+
+      <div class="card">
+        <button class="acc-header"><span>විද්‍යුත් ශක්තිය සහ බලය (Electrical Energy &amp; Power)</span><span class="chev">›</span></button>
+        <div class="acc-body"><div class="acc-inner">
+          <div class="formula-row">
+            <div class="formula-box"><span class="label">ශක්තිය</span>E = VIt = I²Rt = (V²/R)t</div>
+            <div class="formula-box"><span class="label">බලය</span>P = VI = I²R = V²/R</div>
+          </div>
+          <div class="note">ඒකක — E ජූල් (J), P වොට් (W). විදුලි බිල් ගණනය සඳහා යොදන "ඒකකය" (kWh) = 1 kW බලයෙන් පැයක් ක්‍රියා කිරීමේදී වැයවන ශක්තියයි.</div>
+        </div></div>
+      </div>
+    </section>
+
+    <!-- ============ PANEL 2 : KIRCHHOFF ============ -->
+    <section id="kirchhoff" class="panel">
+      <div class="panel-head">
+        <h2>02 · කර්චොෆ් නීති සහ ජාල</h2>
+        <p>Kirchhoff's Laws &amp; Network Theorems — කෝෂ සම්බන්ධතා සහ උපරිම බල පැවරුම</p>
+      </div>
+
+      <div class="card open">
+        <button class="acc-header"><span>කර්චොෆ්ගේ පළමු නියමය — KCL (ආරෝපණ සංරක්ෂණය)</span><span class="chev">›</span></button>
+        <div class="acc-body"><div class="acc-inner">
+          <div class="formula-box">ΣI<sub>in</sub> = ΣI<sub>out</sub></div>
+          <p style="font-size:13.5px;color:var(--text-muted);">පරිපථයක ඕනෑම නෝඩයකට (junction) ඇතුල් වන මුළු ධාරාව, ඉන් පිටවන මුළු ධාරාවට සමාන වේ. මෙය ආරෝපණ සංරක්ෂණ නියමයේ ප්‍රතිඵලයකි — ස්ථාවර ධාරා ප්‍රවාහයකදී නෝඩයක ආරෝපණය එකතු නොවේ.</p>
+        </div></div>
+      </div>
+
+      <div class="card">
+        <button class="acc-header"><span>කර්චොෆ්ගේ දෙවන නියමය — KVL (ශක්ති සංරක්ෂණය)</span><span class="chev">›</span></button>
+        <div class="acc-body"><div class="acc-inner">
+          <div class="formula-box">ΣE = ΣIR</div>
+          <p style="font-size:13.5px;color:var(--text-muted);">වසන ලූපයක් (closed loop) වටා ගමන් කරන විට, ගම්‍ය විද්‍යුත් බල (emf) වල වීජීය එකතුව, ඒ ඒ ප්‍රතිරෝධක හරහා ඇති විභව පරාස (IR) වල වීජීය එකතුවට සමාන වේ. මෙය ශක්ති සංරක්ෂණ නියමයේ ප්‍රතිඵලයකි.</p>
+        </div></div>
+      </div>
+
+      <div class="card">
+        <button class="acc-header"><span>කෝෂ සම්බන්ධතා (Cells in Series &amp; Parallel)</span><span class="chev">›</span></button>
+        <div class="acc-body"><div class="acc-inner">
+          <div class="formula-row">
+            <div class="formula-box"><span class="label">ශ්‍රේණිගතව (n කෝෂ)</span>E<sub>eff</sub> = ΣE&nbsp;&nbsp;·&nbsp;&nbsp;r<sub>eff</sub> = Σr</div>
+            <div class="formula-box"><span class="label">සමාන්තරගතව (සර්වසම n කෝෂ)</span>E<sub>eff</sub> = E&nbsp;&nbsp;·&nbsp;&nbsp;r<sub>eff</sub> = r/n</div>
+          </div>
+          <div class="note">ශ්‍රේණිගත සම්බන්ධතාව — වැඩි emf එකක් අවශ්‍ය විටදී යොදයි (r<sub>eff</sub> ද වැඩිවේ). සමාන්තරගත සම්බන්ධතාව — වැඩි ධාරාවක් (අඩු අභ්‍යන්තර ප්‍රතිරෝධයක්) අවශ්‍ය විටදී යොදයි; emf එක වෙනස් නොවේ.</div>
+        </div></div>
+      </div>
+
+      <div class="card">
+        <button class="acc-header"><span>උපරිම බලය සම්ප්‍රේෂණය (Maximum Power Transfer Theorem)</span><span class="chev">›</span></button>
+        <div class="acc-body"><div class="acc-inner">
+          <div class="formula-box">R = r &nbsp;&nbsp;⇒&nbsp;&nbsp; P<sub>max</sub> = E² / 4r</div>
+          <p style="font-size:13.5px;color:var(--text-muted);">අභ්‍යන්තර ප්‍රතිරෝධය r වූ බල සැපයුමකින්, බාහිර ප්‍රතිරෝධය R වෙත උපරිම බලයක් සම්ප්‍රේෂණය වන්නේ R = r වන විටය. එවිට සම්ප්‍රේෂණය වන උපරිම බලය P<sub>max</sub> = E²/4r මගින් දෙනු ලැබේ.</p>
+        </div></div>
+      </div>
+    </section>
+
+    <!-- ============ PANEL 3 : PRACTICALS ============ -->
+    <section id="practicals" class="panel">
+      <div class="panel-head">
+        <h2>03 · ප්‍රායෝගික පරීක්ෂණ සහ මිනුම් උපකරණ</h2>
+        <p>Core Practicals &amp; Instruments — වීට්ස්ටන් සේතුව, මීටර් සේතුව, විභවමානය, ඇමීටර/වෝල්ට්මීටර පරිවර්තනය</p>
+      </div>
+
+      <div class="card open">
+        <button class="acc-header"><span>වීට්ස්ටන් සේතුව (Wheatstone Bridge)</span><span class="chev">›</span></button>
+        <div class="acc-body"><div class="acc-inner">
+          <p style="font-size:13.5px;color:var(--text-muted);margin-top:12px;">ප්‍රතිරෝධක හතරක් (P, Q, R, S) සමචතුරස්‍රාකාරව සම්බන්ධ කර, එක් විකර්ණයක බැටරියක් සහ අනෙක් විකර්ණයේ ගැල්වනෝමීටරයක් සම්බන්ධ කරයි. ගැල්වනෝමීටරය හරහා ධාරාවක් නොගලායන "සමතුලිත" අවස්ථාවේදී:</p>
+          <div class="formula-box">P / Q = R / S</div>
+          <div class="note">මෙම නියමය භාවිතයෙන් නොදන්නා ප්‍රතිරෝධයක් (S) ඉතා නිරවද්‍යතාවයකින් සෙවිය හැක. 04 කොටසේ ඇති සිමියුලේටරය භාවිතයෙන් මෙය අත්හදා බලන්න.</div>
+        </div></div>
+      </div>
+
+      <div class="card">
+        <button class="acc-header"><span>මීටර් සේතුව (Meter Bridge)</span><span class="chev">›</span></button>
+        <div class="acc-body"><div class="acc-inner">
+          <p style="font-size:13.5px;color:var(--text-muted);margin-top:12px;">වීට්ස්ටන් සේතුවේ ප්‍රායෝගික ස්වරූපයකි. 100 cm සම කම්බියක් දිගේ ජොකියක් ලිස්සා ගැල්වනෝමීටරය ශුන්‍ය දැක්වෙන (balance point) ලක්ෂ්‍යය l₁ සොයාගනී.</p>
+          <div class="formula-box"><span class="label">මූලික සූත්‍රය</span>X / Y = l₁ / (100 − l₁)</div>
+          <div class="formula-box"><span class="label">අන්ත ශෝධන (End Corrections) සමඟ</span>X / Y = (l₁ + α) / (100 − l₁ + β)</div>
+          <p style="font-size:13.5px;color:var(--text-muted);">X = නොදන්නා ප්‍රතිරෝධය · Y = දන්නා ප්‍රතිරෝධය (resistance box) · α, β = සම්බන්ධක තඹ තීරු සහ ජොකි ස්පර්ශයේදී ඇතිවන අමතර ප්‍රතිරෝධ නිසා අවශ්‍ය වන දිග ශෝධන (cm).</p>
+        </div></div>
+      </div>
+
+      <div class="card">
+        <button class="acc-header"><span>විභවමානය (Potentiometer)</span><span class="chev">›</span></button>
+        <div class="acc-body"><div class="acc-inner">
+          <div class="formula-box"><span class="label">විභව අනුක්‍රමණය (Potential Gradient)</span>k = V/L = [ E<sub>main</sub> / (R<sub>rheo</sub> + R<sub>wire</sub> + r) ] × (R<sub>wire</sub> / L)</div>
+          <p style="font-size:13.5px;color:var(--text-muted);">k = ඒකක දිගකට අහිමිවන විභවය (V/cm). මූලික සැකැස්මේදී ප්‍රධාන කෝෂයේ (E<sub>main</sub>) ධාරාව සම කම්බිය දිගේ ගලා යාමෙන් ඒකාකාර විභව අනුක්‍රමණයක් ඇති කරයි.</p>
+          <div class="formula-row" style="margin-top:14px;">
+            <div class="formula-box"><span class="label">යෙදවුම 1 — emf සැසඳීම</span>E₁ / E₂ = l₁ / l₂</div>
+            <div class="formula-box"><span class="label">යෙදවුම 2 — අභ්‍යන්තර ප්‍රතිරෝධය</span>r = R [ (l₁/l₂) − 1 ]</div>
+          </div>
+          <p style="font-size:13.5px;color:var(--text-muted);">emf සැසඳීමේදී l₁, l₂ පිළිවෙළින් කෝෂ දෙකෙහි සමතුලිත දිග වේ. අභ්‍යන්තර ප්‍රතිරෝධ පරීක්ෂණයේදී l₁ = key විවෘතව (emf) සමතුලිත දිග, l₂ = බාහිර ප්‍රතිරෝධය R සම්බන්ධ කළ පසු (terminal p.d.) සමතුලිත දිග.</p>
+        </div></div>
+      </div>
+
+      <div class="card">
+        <button class="acc-header"><span>ඇමීටර සහ වෝල්ට්මීටර පරිවර්තනය (Galvanometer Conversions)</span><span class="chev">›</span></button>
+        <div class="acc-body"><div class="acc-inner">
+          <div class="formula-row">
+            <div class="formula-box"><span class="label">ඇමීටරයක් කිරීම — Shunt (S)</span>S = (I<sub>g</sub> × G) / (I − I<sub>g</sub>)</div>
+            <div class="formula-box"><span class="label">වෝල්ට්මීටරයක් කිරීම — Multiplier (R)</span>R = (V / I<sub>g</sub>) − G</div>
+          </div>
+          <p style="font-size:13.5px;color:var(--text-muted);">G = ගැල්වනෝමීටරයේ ප්‍රතිරෝධය · I<sub>g</sub> = සම්පූර්ණ පරිමාණ අපගමන ධාරාව (full-scale deflection current) · I = මැනිය යුතු උපරිම ධාරාව · V = මැනිය යුතු උපරිම වෝල්ටීයතාව. ඇමීටරයක් සෑදීමට ගැල්වනෝමීටරයට <b>සමාන්තරව</b> අඩු ප්‍රතිරෝධයක් (shunt) ද, වෝල්ට්මීටරයක් සෑදීමට <b>ශ්‍රේණිගතව</b> වැඩි ප්‍රතිරෝධයක් (multiplier) ද යොදයි.</p>
+        </div></div>
+      </div>
+    </section>
+
+    <!-- ============ PANEL 4 : TOOLS ============ -->
+    <section id="tools" class="panel">
+      <div class="panel-head">
+        <h2>04 · අන්තර්ක්‍රියාකාරී මෙවලම්</h2>
+        <p>Interactive Circuit Tools — අගයන් වෙනස් කර සජීවීව ප්‍රතිඵල නරඹන්න</p>
+      </div>
+
+      <div class="subtab-bar">
+        <button class="subtab-btn active" data-tool="bridge">වීට්ස්ටන් / මීටර් සේතු සිමියුලේටරය</button>
+        <button class="subtab-btn" data-tool="pot">විභවමාන ගණකය</button>
+        <button class="subtab-btn" data-tool="resistor">ප්‍රතිරෝධක වර්ණ කේත මෙවලම</button>
+      </div>
+
+      <!-- ---- BRIDGE TOOL ---- -->
+      <div class="tool-panel active" id="tool-bridge">
+        <div class="tool-card">
+          <div class="subtab-bar">
+            <button class="subtab-btn active" data-mode="wheat">වීට්ස්ටන් සේතුව</button>
+            <button class="subtab-btn" data-mode="meter">මීටර් සේතුව</button>
+          </div>
+
+          <!-- Wheatstone mode -->
+          <div class="mode-panel active" id="mode-wheat">
+            <h3>වීට්ස්ටන් සේතුව — Balance Simulator</h3>
+            <div class="sub">P, Q, R අගයන් සකසා S ස්ලයිඩරය හසුරුවා ගැල්වනෝමීටරයේ ඉදිරිපත් වූ අපගමනය නරඹන්න.</div>
+            <div class="grid-3">
+              <div class="field"><label>P (Ω)</label><input type="number" id="wbP" value="10" min="1"></div>
+              <div class="field"><label>Q (Ω)</label><input type="number" id="wbQ" value="20" min="1"></div>
+              <div class="field"><label>R (Ω)</label><input type="number" id="wbR" value="15" min="1"></div>
+            </div>
+            <div class="field" style="margin-top:12px;">
+              <label>S (Ω) — <span id="wbSVal">30.0</span></label>
+              <input type="range" id="wbS" min="0.5" max="100" step="0.5" value="30">
+            </div>
+
+            <svg class="diagram" viewBox="0 0 400 260">
+              <line x1="200" y1="30" x2="90" y2="130" class="wire"/>
+              <line x1="200" y1="30" x2="310" y2="130" class="wire"/>
+              <line x1="90" y1="130" x2="200" y2="230" class="wire"/>
+              <line x1="310" y1="130" x2="200" y2="230" class="wire"/>
+              <line x1="90" y1="130" x2="310" y2="130" class="wire" stroke-dasharray="4 4" opacity="0.5"/>
+              <line x1="200" y1="30" x2="200" y2="230" class="wire" opacity="0"/>
+              <circle cx="200" cy="30" r="6" class="node"/>
+              <circle cx="90" cy="130" r="6" class="node"/>
+              <circle cx="310" cy="130" r="6" class="node"/>
+              <circle cx="200" cy="230" r="6" class="node"/>
+              <text x="130" y="72" class="comp-label">P</text>
+              <text x="130" y="88" class="comp-val" id="wbPLabel">10 Ω</text>
+              <text x="245" y="72" class="comp-label">Q</text>
+              <text x="245" y="88" class="comp-val" id="wbQLabel">20 Ω</text>
+              <text x="130" y="188" class="comp-label">R</text>
+              <text x="130" y="204" class="comp-val" id="wbRLabel">15 Ω</text>
+              <text x="245" y="188" class="comp-label">S</text>
+              <text x="245" y="204" class="comp-val" id="wbSLabel">30 Ω</text>
+              <circle cx="200" cy="130" r="22" fill="#0c1217" stroke="#3ed598" stroke-width="2"/>
+              <text x="200" y="135" text-anchor="middle" class="comp-val" style="fill:#3ed598;">G</text>
+              <g class="needle" id="wbNeedle">
+                <line x1="200" y1="130" x2="200" y2="105" stroke="#e8656a" stroke-width="2.5" stroke-linecap="round"/>
+              </g>
+              <text x="200" y="20" text-anchor="middle" class="comp-label">E (බැටරිය)</text>
+            </svg>
+
+            <div class="readout" id="wbReadout">
+              <span class="tag">තත්ත්වය</span>
+              <div class="big" id="wbStatusText">—</div>
+              <div id="wbDetail" style="color:var(--text-muted); margin-top:6px;">—</div>
+            </div>
+            <button class="btn ghost" id="wbAutoBtn" style="margin-top:14px;">S ස්වයංක්‍රීයව සමතුලනය කරන්න</button>
+          </div>
+
+          <!-- Meter bridge mode -->
+          <div class="mode-panel" id="mode-meter" style="display:none;">
+            <h3>මීටර් සේතුව — Balance Point Simulator</h3>
+            <div class="sub">X, Y සහ අන්ත ශෝධන α, β ලබා දී, ජොකිය (jockey) ස්ලයිඩරයෙන් හසුරුවන්න.</div>
+            <div class="grid-3">
+              <div class="field"><label>X — නොදන්නා (Ω)</label><input type="number" id="mbX" value="4" min="0.1" step="0.1"></div>
+              <div class="field"><label>Y — දන්නා (Ω)</label><input type="number" id="mbY" value="6" min="0.1" step="0.1"></div>
+              <div class="field"><label>&nbsp;</label><button class="btn" id="mbFindBtn" style="width:100%;">Balance Point සොයන්න</button></div>
+            </div>
+            <div class="grid-2" style="margin-top:6px;">
+              <div class="field"><label>α — End Correction (cm)</label><input type="number" id="mbAlpha" value="0" step="0.1"></div>
+              <div class="field"><label>β — End Correction (cm)</label><input type="number" id="mbBeta" value="0" step="0.1"></div>
+            </div>
+
+            <div class="field" style="margin-top:14px;">
+              <label>ජොකි ස්ථානය l₁ (cm) — <span id="mbLVal">50.0</span></label>
+              <input type="range" id="mbL" min="0" max="100" step="0.5" value="50">
+            </div>
+            <div class="scale-track">
+              <div class="scale-fill" id="mbFill" style="width:50%;"></div>
+              <div class="jockey" id="mbJockey" style="left:50%;"></div>
+            </div>
+            <div class="scale-labels"><span>0 cm</span><span>25</span><span>50</span><span>75</span><span>100 cm</span></div>
+
+            <div class="readout" id="mbReadout" style="margin-top:16px;">
+              <span class="tag">තත්ත්වය</span>
+              <div class="big" id="mbStatusText">—</div>
+              <div id="mbDetail" style="color:var(--text-muted); margin-top:6px;">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ---- POTENTIOMETER TOOL ---- -->
+      <div class="tool-panel" id="tool-pot">
+        <div class="tool-card" style="margin-bottom:16px;">
+          <h3>1 · විභව අනුක්‍රමණය (Potential Gradient, k)</h3>
+          <div class="sub">k = [E<sub>main</sub>/(R<sub>rheo</sub>+R<sub>wire</sub>+r)] × (R<sub>wire</sub>/L)</div>
+          <div class="grid-3">
+            <div class="field"><label>E<sub>main</sub> (V)</label><input type="number" id="pkE" value="2" step="0.01"></div>
+            <div class="field"><label>R<sub>rheo</sub> (Ω)</label><input type="number" id="pkRh" value="5" step="0.1"></div>
+            <div class="field"><label>R<sub>wire</sub> (Ω)</label><input type="number" id="pkRw" value="10" step="0.1"></div>
+          </div>
+          <div class="grid-2" style="margin-top:6px;">
+            <div class="field"><label>r — අභ්‍යන්තර ප්‍රතිරෝධය (Ω)</label><input type="number" id="pkr" value="0.5" step="0.01"></div>
+            <div class="field"><label>L — කම්බියේ දිග (cm)</label><input type="number" id="pkL" value="100" step="0.1"></div>
+          </div>
+          <div class="readout"><span class="tag">ප්‍රතිඵලය</span><div class="big" id="pkResult">—</div></div>
+        </div>
+
+        <div class="tool-card" style="margin-bottom:16px;">
+          <h3>2 · emf සැසඳීම (Comparing Two emfs)</h3>
+          <div class="sub">E₁/E₂ = l₁/l₂ — E<sub>x</sub> = E<sub>std</sub> × (l<sub>x</sub>/l<sub>std</sub>)</div>
+          <div class="grid-3">
+            <div class="field"><label>E<sub>std</sub> — දන්නා කෝෂය (V)</label><input type="number" id="ceEstd" value="1.02" step="0.001"></div>
+            <div class="field"><label>l<sub>std</sub> — සමතුලිත දිග (cm)</label><input type="number" id="ceLstd" value="51" step="0.1"></div>
+            <div class="field"><label>l<sub>x</sub> — නොදන්නා කෝෂයේ දිග (cm)</label><input type="number" id="ceLx" value="63" step="0.1"></div>
+          </div>
+          <div class="readout"><span class="tag">ප්‍රතිඵලය</span><div class="big" id="ceResult">—</div></div>
+        </div>
+
+        <div class="tool-card">
+          <h3>3 · අභ්‍යන්තර ප්‍රතිරෝධය (Internal Resistance)</h3>
+          <div class="sub">r = R × [(l₁/l₂) − 1]</div>
+          <div class="grid-3">
+            <div class="field"><label>R — බාහිර ප්‍රතිරෝධය (Ω)</label><input type="number" id="irR" value="5" step="0.1"></div>
+            <div class="field"><label>l₁ — key විවෘතව (cm)</label><input type="number" id="irL1" value="60" step="0.1"></div>
+            <div class="field"><label>l₂ — R සම්බන්ධ කළ පසු (cm)</label><input type="number" id="irL2" value="50" step="0.1"></div>
+          </div>
+          <div class="readout"><span class="tag">ප්‍රතිඵලය</span><div class="big" id="irResult">—</div></div>
+        </div>
+      </div>
+
+      <!-- ---- RESISTOR COLOR TOOL ---- -->
+      <div class="tool-panel" id="tool-resistor">
+        <div class="tool-card">
+          <h3>ප්‍රතිරෝධක වර්ණ කේත මෙවලම (4-Band Resistor Color Code)</h3>
+          <div class="sub">වර්ණ පටි තෝරන්න — අගය ක්ෂණිකව ගණනය වේ</div>
+
+          <div class="resistor-wrap">
+            <svg width="320" height="90" viewBox="0 0 320 90">
+              <line x1="0" y1="45" x2="60" y2="45" stroke="#8b98a6" stroke-width="4"/>
+              <line x1="260" y1="45" x2="320" y2="45" stroke="#8b98a6" stroke-width="4"/>
+              <rect x="60" y="18" width="200" height="54" rx="20" fill="#e6cba3"/>
+              <rect x="100" y="18" width="14" height="54" id="rb1" fill="#1a1a1a"/>
+              <rect x="130" y="18" width="14" height="54" id="rb2" fill="#8B4513"/>
+              <rect x="160" y="18" width="14" height="54" id="rb3" fill="#e53e3e"/>
+              <rect x="215" y="18" width="14" height="54" id="rb4" fill="#d4af37"/>
+            </svg>
+          </div>
+
+          <div class="grid-3">
+            <div class="field">
+              <label>පටිය 1 (1 වන ඉලක්කම)</label>
+              <select id="rSel1"></select>
+            </div>
+            <div class="field">
+              <label>පටිය 2 (2 වන ඉලක්කම)</label>
+              <select id="rSel2"></select>
+            </div>
+            <div class="field">
+              <label>පටිය 3 (ගුණකය — Multiplier)</label>
+              <select id="rSel3"></select>
+            </div>
+          </div>
+          <div class="grid-2" style="margin-top:6px;">
+            <div class="field">
+              <label>පටිය 4 (ඉවසීම — Tolerance)</label>
+              <select id="rSel4"></select>
+            </div>
+          </div>
+
+          <div class="readout"><span class="tag">ගණනය කළ අගය</span><div class="big" id="rResult">—</div></div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+</div>
+
+<footer>ශ්‍රී ලංකා උසස් පෙළ භෞතික විද්‍යාව · ධාරා විද්‍යුතය · ස්වයං අධ්‍යයන / පුනරීක්ෂණ මෙවලම — HTML · CSS · JS only</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- Main tabs ---------- */
+  var tabBtns = document.querySelectorAll('.tab-btn');
+  var panels = document.querySelectorAll('.panel');
+  tabBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      tabBtns.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      var target = btn.getAttribute('data-tab');
+      panels.forEach(function(p){ p.classList.toggle('active', p.id === target); });
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
+  });
+
+  /* ---------- Accordions ---------- */
+  document.querySelectorAll('.acc-header').forEach(function(h){
+    h.addEventListener('click', function(){
+      h.parentElement.classList.toggle('open');
+    });
+  });
+
+  /* ---------- Tool subtabs (bridge / pot / resistor) ---------- */
+  var toolBtns = document.querySelectorAll('.subtab-bar > .subtab-btn[data-tool]');
+  var toolPanels = document.querySelectorAll('.tool-panel');
+  toolBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      toolBtns.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      var target = btn.getAttribute('data-tool');
+      toolPanels.forEach(function(p){ p.classList.toggle('active', p.id === 'tool-' + target); });
+    });
+  });
+
+  /* ---------- Bridge mode subtabs ---------- */
+  var modeBtns = document.querySelectorAll('.subtab-bar > .subtab-btn[data-mode]');
+  modeBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      modeBtns.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      var target = btn.getAttribute('data-mode');
+      document.getElementById('mode-wheat').style.display = (target==='wheat') ? 'block' : 'none';
+      document.getElementById('mode-meter').style.display = (target==='meter') ? 'block' : 'none';
+    });
+  });
+
+  function clampAngle(x){ return Math.max(-42, Math.min(42, x)); }
+
+  /* ---------- Wheatstone Bridge ---------- */
+  var wbP = document.getElementById('wbP'), wbQ = document.getElementById('wbQ'),
+      wbR = document.getElementById('wbR'), wbS = document.getElementById('wbS');
+  var wbSVal = document.getElementById('wbSVal');
+  var wbNeedle = document.getElementById('wbNeedle');
+  var wbStatusText = document.getElementById('wbStatusText');
+  var wbDetail = document.getElementById('wbDetail');
+  var wbReadout = document.getElementById('wbReadout');
+
+  function updateWheatstoneLabels(){
+    document.getElementById('wbPLabel').textContent = parseFloat(wbP.value||0).toFixed(1) + ' Ω';
+    document.getElementById('wbQLabel').textContent = parseFloat(wbQ.value||0).toFixed(1) + ' Ω';
+    document.getElementById('wbRLabel').textContent = parseFloat(wbR.value||0).toFixed(1) + ' Ω';
+    document.getElementById('wbSLabel').textContent = parseFloat(wbS.value||0).toFixed(1) + ' Ω';
+  }
+
+  function updateWheatstone(){
+    var P = parseFloat(wbP.value) || 0.0001;
+    var Q = parseFloat(wbQ.value) || 0.0001;
+    var R = parseFloat(wbR.value) || 0.0001;
+    var S = parseFloat(wbS.value) || 0.0001;
+    wbSVal.textContent = S.toFixed(1);
+    updateWheatstoneLabels();
+
+    var Sbalance = (Q * R) / P;
+    var imbalance = (S - Sbalance) / Sbalance;
+    var angle = clampAngle(Math.tanh(imbalance * 2) * 42);
+    wbNeedle.style.transform = 'rotate(' + angle.toFixed(1) + 'deg)';
+
+    if(Math.abs(imbalance) < 0.015){
+      wbReadout.classList.add('balanced');
+      wbStatusText.textContent = 'සමතුලිතයි ✓ (Balanced)';
+      wbDetail.textContent = 'P/Q = R/S සපුරාලයි → S ≈ ' + Sbalance.toFixed(2) + ' Ω';
+    } else {
+      wbReadout.classList.remove('balanced');
+      wbStatusText.textContent = 'ගැල්වනෝමීටරයේ අපගමනයක්';
+      wbDetail.textContent = 'සමතුලනයට අවශ්‍ය S ≈ ' + Sbalance.toFixed(2) + ' Ω  (දැනට S = ' + S.toFixed(2) + ' Ω, දිශාව: ' + (imbalance>0?'S අඩු කරන්න':'S වැඩි කරන්න') + ')';
+    }
+  }
+  [wbP,wbQ,wbR,wbS].forEach(function(el){ el.addEventListener('input', updateWheatstone); });
+  document.getElementById('wbAutoBtn').addEventListener('click', function(){
+    var P = parseFloat(wbP.value) || 1, Q = parseFloat(wbQ.value) || 1, R = parseFloat(wbR.value) || 1;
+    var Sbalance = (Q*R)/P;
+    var clamped = Math.max(0.5, Math.min(100, Sbalance));
+    wbS.value = clamped.toFixed(1);
+    updateWheatstone();
+  });
+  updateWheatstone();
+
+  /* ---------- Meter Bridge ---------- */
+  var mbX = document.getElementById('mbX'), mbY = document.getElementById('mbY'),
+      mbAlpha = document.getElementById('mbAlpha'), mbBeta = document.getElementById('mbBeta'),
+      mbL = document.getElementById('mbL');
+  var mbLVal = document.getElementById('mbLVal');
+  var mbFill = document.getElementById('mbFill'), mbJockey = document.getElementById('mbJockey');
+  var mbStatusText = document.getElementById('mbStatusText'), mbDetail = document.getElementById('mbDetail');
+  var mbReadout = document.getElementById('mbReadout');
+
+  function meterBalanceLength(){
+    var X = parseFloat(mbX.value) || 0.0001;
+    var Y = parseFloat(mbY.value) || 0.0001;
+    var a = parseFloat(mbAlpha.value) || 0;
+    var b = parseFloat(mbBeta.value) || 0;
+    var ratio = X / Y;
+    var l1 = (ratio*(100+b) - a) / (1 + ratio);
+    return Math.max(0, Math.min(100, l1));
+  }
+
+  function updateMeterBridge(){
+    var l1 = parseFloat(mbL.value) || 0;
+    mbLVal.textContent = l1.toFixed(1);
+    mbFill.style.width = l1 + '%';
+    mbJockey.style.left = l1 + '%';
+
+    var balanceL = meterBalanceLength();
+    var deviation = (l1 - balanceL) / 100;
+    if(Math.abs(deviation) < 0.006){
+      mbReadout.classList.add('balanced');
+      mbStatusText.textContent = 'සමතුලිතයි ✓ (Balanced)';
+      mbDetail.textContent = 'Balance point l₁ ≈ ' + balanceL.toFixed(2) + ' cm  ·  X ≈ ' + (parseFloat(mbY.value)*(balanceL)/(100-balanceL||1)).toFixed ? computeX(balanceL) : '';
+    } else {
+      mbReadout.classList.remove('balanced');
+      mbStatusText.textContent = 'ගැල්වනෝමීටරයේ අපගමනයක්';
+      mbDetail.textContent = 'ගණනය කළ Balance Point ≈ ' + balanceL.toFixed(2) + ' cm  (ජොකිය ' + (deviation>0? 'වමට':'දකුණට') + ' ගෙන යන්න)';
+    }
+  }
+  function computeX(l1){
+    var Y = parseFloat(mbY.value)||0;
+    return 'X ≈ ' + (Y * l1/(100-l1)).toFixed(2) + ' Ω';
+  }
+  [mbX,mbY,mbAlpha,mbBeta,mbL].forEach(function(el){ el.addEventListener('input', updateMeterBridge); });
+  document.getElementById('mbFindBtn').addEventListener('click', function(){
+    mbL.value = meterBalanceLength().toFixed(1);
+    updateMeterBridge();
+  });
+  updateMeterBridge();
+
+  /* ---------- Potentiometer calculators ---------- */
+  function fmtNum(x, unit, dp){ if(!isFinite(x)) return '—'; return x.toFixed(dp==null?4:dp) + ' ' + unit; }
+
+  function updateK(){
+    var E = parseFloat(document.getElementById('pkE').value)||0;
+    var Rh = parseFloat(document.getElementById('pkRh').value)||0;
+    var Rw = parseFloat(document.getElementById('pkRw').value)||0;
+    var r = parseFloat(document.getElementById('pkr').value)||0;
+    var L = parseFloat(document.getElementById('pkL').value)||1;
+    var current = E / (Rh + Rw + r || 1);
+    var k = current * (Rw / L);
+    document.getElementById('pkResult').textContent = 'k ≈ ' + fmtNum(k,'V/cm',5) + '   (= ' + fmtNum(k*100,'V/m',3) + ')';
+  }
+  ['pkE','pkRh','pkRw','pkr','pkL'].forEach(function(id){ document.getElementById(id).addEventListener('input', updateK); });
+  updateK();
+
+  function updateCE(){
+    var Estd = parseFloat(document.getElementById('ceEstd').value)||0;
+    var Lstd = parseFloat(document.getElementById('ceLstd').value)||1;
+    var Lx = parseFloat(document.getElementById('ceLx').value)||0;
+    var Ex = Estd * (Lx/Lstd);
+    document.getElementById('ceResult').textContent = 'Eₓ ≈ ' + fmtNum(Ex,'V',4);
+  }
+  ['ceEstd','ceLstd','ceLx'].forEach(function(id){ document.getElementById(id).addEventListener('input', updateCE); });
+  updateCE();
+
+  function updateIR(){
+    var R = parseFloat(document.getElementById('irR').value)||0;
+    var l1 = parseFloat(document.getElementById('irL1').value)||0;
+    var l2 = parseFloat(document.getElementById('irL2').value)||1;
+    var r = R * ((l1/l2) - 1);
+    document.getElementById('irResult').textContent = 'r ≈ ' + fmtNum(r,'Ω',4);
+  }
+  ['irR','irL1','irL2'].forEach(function(id){ document.getElementById(id).addEventListener('input', updateIR); });
+  updateIR();
+
+  /* ---------- Resistor color code tool ---------- */
+  var digitColors = [
+    {key:'black', name:'කළු (Black)', digit:0, mult:1, hex:'#1a1a1a'},
+    {key:'brown', name:'දුඹුරු (Brown)', digit:1, mult:10, hex:'#8B4513', tol:1},
+    {key:'red', name:'රතු (Red)', digit:2, mult:100, hex:'#e53e3e', tol:2},
+    {key:'orange', name:'තැඹිලි (Orange)', digit:3, mult:1000, hex:'#ed8936'},
+    {key:'yellow', name:'කහ (Yellow)', digit:4, mult:10000, hex:'#ecc94b'},
+    {key:'green', name:'කොළ (Green)', digit:5, mult:100000, hex:'#48bb78'},
+    {key:'blue', name:'නිල් (Blue)', digit:6, mult:1000000, hex:'#4299e1'},
+    {key:'violet', name:'දම් (Violet)', digit:7, mult:10000000, hex:'#9f7aea'},
+    {key:'grey', name:'අළු (Grey)', digit:8, mult:100000000, hex:'#a0aec0'},
+    {key:'white', name:'සුදු (White)', digit:9, mult:1000000000, hex:'#f7fafc'}
+  ];
+  var multExtra = [
+    {key:'gold', name:'රන්වන් (Gold) ×0.1', mult:0.1, hex:'#d4af37', tol:5},
+    {key:'silver', name:'රිදී (Silver) ×0.01', mult:0.01, hex:'#c0c0c0', tol:10}
+  ];
+  var tolOnly = [
+    {key:'brown', name:'දුඹුරු ±1%', tol:1, hex:'#8B4513'},
+    {key:'red', name:'රතු ±2%', tol:2, hex:'#e53e3e'},
+    {key:'gold', name:'රන්වන් ±5%', tol:5, hex:'#d4af37'},
+    {key:'silver', name:'රිදී ±10%', tol:10, hex:'#c0c0c0'},
+    {key:'none', name:'වර්ණයක් නැත ±20%', tol:20, hex:'transparent'}
+  ];
+
+  function fillSelect(sel, list, defaultIndex){
+    list.forEach(function(item, i){
+      var opt = document.createElement('option');
+      opt.value = item.key;
+      opt.textContent = item.name;
+      if(i === defaultIndex) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  }
+  var rSel1 = document.getElementById('rSel1'), rSel2 = document.getElementById('rSel2'),
+      rSel3 = document.getElementById('rSel3'), rSel4 = document.getElementById('rSel4');
+  fillSelect(rSel1, digitColors, 0);
+  fillSelect(rSel2, digitColors, 1);
+  fillSelect(rSel3, digitColors.concat(multExtra), 2);
+  fillSelect(rSel4, tolOnly, 2);
+
+  function findByKey(list, key){ for(var i=0;i<list.length;i++){ if(list[i].key===key) return list[i]; } return list[0]; }
+
+  function formatOhm(v){
+    if(v >= 1e6) return (v/1e6).toFixed(v%1e6===0?0:2) + ' MΩ';
+    if(v >= 1e3) return (v/1e3).toFixed(v%1e3===0?0:2) + ' kΩ';
+    return v.toFixed(v%1===0?0:2) + ' Ω';
+  }
+
+  function updateResistor(){
+    var d1 = findByKey(digitColors, rSel1.value);
+    var d2 = findByKey(digitColors, rSel2.value);
+    var d3 = findByKey(digitColors.concat(multExtra), rSel3.value);
+    var d4 = findByKey(tolOnly, rSel4.value);
+
+    document.getElementById('rb1').setAttribute('fill', d1.hex);
+    document.getElementById('rb2').setAttribute('fill', d2.hex);
+    document.getElementById('rb3').setAttribute('fill', d3.hex);
+    document.getElementById('rb4').setAttribute('fill', d4.hex==='transparent' ? '#e6cba3' : d4.hex);
+
+    var value = (d1.digit*10 + d2.digit) * d3.mult;
+    document.getElementById('rResult').textContent = formatOhm(value) + '  ±' + d4.tol + '%';
+  }
+  [rSel1,rSel2,rSel3,rSel4].forEach(function(sel){ sel.addEventListener('change', updateResistor); });
+  updateResistor();
+
+})();
+</script>
+</body>
+</html>

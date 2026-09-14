@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="si" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>ආලෝකය | Optics — A/L Physics</title>
+<style>
+:root{
+  --bg:#0a0e16;
+  --bg-elev:#111726;
+  --bg-card:#151d30;
+  --ink:#eef1f7;
+  --ink-dim:#a6b0c3;
+  --ink-faint:#6b7488;
+  --line:#232c42;
+  --violet:#8b6bf2;
+  --blue:#3b82f6;
+  --green:#22c55e;
+  --yellow:#eab308;
+  --orange:#f97316;
+  --red:#ef4444;
+  --accent:#7c9cff;
+  --accent-soft:rgba(124,156,255,.12);
+  --paper:#ffffff;
+  --shadow: 0 10px 30px rgba(0,0,0,.35);
+  --radius:14px;
+  --nav-h:58px;
+}
+html[data-theme="light"]{
+  --bg:#f6f4ee;
+  --bg-elev:#ffffff;
+  --bg-card:#ffffff;
+  --ink:#181510;
+  --ink-dim:#5c5648;
+  --ink-faint:#948d7c;
+  --line:#e6e1d3;
+  --accent:#3452c9;
+  --accent-soft:rgba(52,82,201,.08);
+  --shadow: 0 8px 24px rgba(60,50,20,.10);
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:"Iskoola Pota","Noto Sans Sinhala","Nirmala UI","Segoe UI",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  padding-top:var(--nav-h);
+  min-height:100vh;
+  transition:background .25s ease,color .25s ease;
+}
+h1,h2,h3,h4{
+  font-family:Georgia,"Times New Roman",serif;
+  font-weight:700;
+  letter-spacing:-0.01em;
+  margin:0 0 .4em;
+}
+p{margin:0 0 .8em;}
+.mono, .formula, code{
+  font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+}
+::selection{background:var(--accent);color:#fff;}
+
+/* ===== Prism signature graphic ===== */
+.spectrum-bar{
+  height:4px;width:100%;
+  background:linear-gradient(90deg,#8b6bf2,#3b82f6,#22c55e,#eab308,#f97316,#ef4444);
+}
+
+/* ===== Top nav ===== */
+.navbar{
+  position:fixed;top:0;left:0;right:0;height:var(--nav-h);
+  display:flex;align-items:center;gap:10px;
+  background:color-mix(in srgb, var(--bg-elev) 92%, transparent);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+  z-index:100;
+  padding:0 10px;
+}
+.navbar .burger{
+  width:40px;height:40px;flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;
+  background:none;border:none;color:var(--ink);
+  cursor:pointer;border-radius:10px;
+}
+.navbar .burger:active{background:var(--accent-soft);}
+.navbar .burger svg{width:22px;height:22px;}
+.brand{
+  display:flex;flex-direction:column;line-height:1.1;flex:0 0 auto;
+  margin-right:2px;
+}
+.brand b{font-family:Georgia,serif;font-size:15px;}
+.brand span{font-size:10px;color:var(--ink-faint);letter-spacing:.08em;text-transform:uppercase;}
+.searchwrap{
+  flex:1 1 auto;position:relative;min-width:0;
+}
+.searchwrap input{
+  width:100%;height:38px;border-radius:10px;border:1px solid var(--line);
+  background:var(--bg-card);color:var(--ink);
+  padding:0 34px 0 12px;font-size:14px;
+  font-family:inherit;
+}
+.searchwrap input:focus{outline:2px solid var(--accent);outline-offset:1px;}
+.searchwrap svg{
+  position:absolute;right:10px;top:50%;transform:translateY(-50%);
+  width:16px;height:16px;color:var(--ink-faint);pointer-events:none;
+}
+.theme-btn{
+  width:40px;height:40px;flex:0 0 auto;border:none;background:none;color:var(--ink);
+  display:flex;align-items:center;justify-content:center;border-radius:10px;cursor:pointer;
+}
+.theme-btn:active{background:var(--accent-soft);}
+.theme-btn svg{width:20px;height:20px;}
+
+/* ===== Side drawer ===== */
+.scrim{
+  position:fixed;inset:0;background:rgba(0,0,0,.45);
+  opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:150;
+}
+.scrim.open{opacity:1;pointer-events:auto;}
+.drawer{
+  position:fixed;top:0;bottom:0;left:0;width:78%;max-width:300px;
+  background:var(--bg-elev);
+  border-right:1px solid var(--line);
+  transform:translateX(-105%);
+  transition:transform .28s cubic-bezier(.4,0,.2,1);
+  z-index:200;
+  display:flex;flex-direction:column;
+  padding:18px 0 22px;
+}
+.drawer.open{transform:translateX(0);}
+.drawer-head{padding:6px 20px 16px;border-bottom:1px solid var(--line);margin-bottom:8px;}
+.drawer-head b{font-family:Georgia,serif;font-size:20px;display:block;}
+.drawer-head span{font-size:12px;color:var(--ink-faint);}
+.drawer nav{display:flex;flex-direction:column;padding:6px 10px;gap:2px;overflow-y:auto;}
+.drawer nav a{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 12px;border-radius:10px;
+  color:var(--ink);text-decoration:none;font-size:15px;
+}
+.drawer nav a:active,.drawer nav a.active{background:var(--accent-soft);color:var(--accent);}
+.drawer nav a .num{
+  width:26px;height:26px;border-radius:50%;flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;font-family:Georgia,serif;
+  border:1px solid var(--line);
+}
+.drawer nav a .lbl{display:flex;flex-direction:column;line-height:1.25;}
+.drawer nav a .lbl small{color:var(--ink-faint);font-size:11px;}
+
+/* ===== Hero ===== */
+.hero{
+  padding:26px 18px 20px;
+  position:relative;overflow:hidden;
+}
+.hero-inner{position:relative;z-index:2;}
+.eyebrow{
+  font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent);font-weight:700;margin-bottom:10px;display:block;
+}
+.hero h1{font-size:30px;line-height:1.15;margin-bottom:6px;}
+.hero h1 .en{display:block;font-size:15px;font-family:inherit;font-weight:400;color:var(--ink-dim);margin-top:4px;font-style:italic;}
+.hero p.lead{color:var(--ink-dim);font-size:14px;max-width:60ch;}
+.prism-svg{width:100%;height:auto;display:block;margin-top:14px;}
+
+/* ===== Section layout ===== */
+.section{
+  padding:6px 16px 8px;
+  scroll-margin-top:calc(var(--nav-h) + 10px);
+}
+.section-head{
+  display:flex;align-items:baseline;gap:10px;
+  padding:22px 0 10px;
+  border-top:1px solid var(--line);
+  margin-top:14px;
+}
+.section:first-of-type .section-head{border-top:none;margin-top:4px;}
+.section-head .idx{
+  font-family:Georgia,serif;font-weight:700;font-size:13px;color:var(--accent);
+  border:1px solid var(--line);border-radius:20px;padding:3px 10px;flex:0 0 auto;
+}
+.section-head h2{font-size:20px;margin:0;}
+.section-head h2 .en{display:block;font-size:12px;font-weight:400;font-style:italic;color:var(--ink-faint);font-family:inherit;}
+
+.block{margin:14px 0 20px;}
+.block h3{font-size:15px;color:var(--ink);margin-bottom:6px;border-left:3px solid var(--accent);padding-left:10px;}
+.block h3 .en{display:block;font-size:11px;font-weight:400;color:var(--ink-faint);font-style:italic;}
+.block .note{font-size:13.5px;color:var(--ink-dim);margin-bottom:8px;}
+.block .note b{color:var(--ink);font-weight:600;}
+
+/* ===== Formula cards ===== */
+.fcard{
+  background:var(--bg-card);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:12px 14px;
+  margin:8px 0;
+  box-shadow:var(--shadow);
+  position:relative;
+}
+.fcard::before{
+  content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:3px;
+  background:linear-gradient(180deg,var(--violet),var(--blue));
+}
+.fcard{padding-left:18px;}
+.fcard .flabel{font-size:11.5px;color:var(--ink-faint);margin-bottom:4px;letter-spacing:.02em;}
+.fcard .fexpr{
+  font-family:"SFMono-Regular",Consolas,monospace;
+  font-size:16px;font-weight:600;color:var(--ink);
+  overflow-x:auto;white-space:nowrap;padding-bottom:2px;
+}
+.fcard .fnote{font-size:12.5px;color:var(--ink-dim);margin-top:6px;}
+.fgrid{display:grid;grid-template-columns:1fr;gap:0;}
+@media(min-width:560px){
+  .fgrid.two{grid-template-columns:1fr 1fr;gap:10px;}
+  .fgrid.two .fcard{margin:0;}
+}
+
+/* ===== small table ===== */
+.mtable{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px;}
+.mtable th,.mtable td{border:1px solid var(--line);padding:8px 10px;text-align:left;}
+.mtable th{background:var(--accent-soft);color:var(--ink);font-weight:700;}
+.mtable td{color:var(--ink-dim);}
+
+/* ===== chip list ===== */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px;}
+.chip{
+  font-size:12px;padding:5px 10px;border-radius:20px;
+  background:var(--accent-soft);color:var(--accent);border:1px solid transparent;
+}
+
+/* ===== accordion (MCQ tricks) ===== */
+.accordion{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  overflow:hidden;
+  margin:14px 0;
+  background:var(--bg-elev);
+}
+.accordion summary{
+  list-style:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:13px 14px;
+  font-size:13.5px;font-weight:700;color:var(--ink);
+}
+.accordion summary::-webkit-details-marker{display:none;}
+.accordion summary .tag{
+  font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--orange);background:rgba(249,115,22,.12);padding:3px 8px;border-radius:6px;flex:0 0 auto;
+}
+.accordion summary .chev{
+  margin-left:auto;flex:0 0 auto;transition:transform .2s ease;color:var(--ink-faint);
+}
+.accordion[open] summary .chev{transform:rotate(180deg);}
+.accordion .acc-body{
+  padding:0 14px 14px;font-size:13.5px;color:var(--ink-dim);border-top:1px solid var(--line);
+}
+.accordion .acc-body ul{margin:8px 0 0;padding-left:18px;}
+.accordion .acc-body li{margin-bottom:6px;}
+
+/* ===== diagram placeholders (pure CSS) ===== */
+.diagram{
+  border:1px dashed var(--line);
+  border-radius:12px;
+  padding:16px;
+  margin:10px 0;
+  background:repeating-linear-gradient(135deg, var(--bg-elev) 0 10px, var(--bg-card) 10px 20px);
+  text-align:center;
+}
+.diagram svg{max-width:100%;height:auto;}
+.diagram .cap{font-size:11.5px;color:var(--ink-faint);margin-top:6px;}
+
+/* search highlight / hide */
+.hide{display:none !important;}
+.search-empty{
+  text-align:center;padding:40px 20px;color:var(--ink-faint);font-size:14px;
+}
+
+footer{
+  padding:30px 18px 60px;text-align:center;color:var(--ink-faint);font-size:12px;
+}
+footer .spectrum-bar{margin:0 auto 14px;max-width:220px;border-radius:4px;}
+
+/* jump to top */
+.fab{
+  position:fixed;right:16px;bottom:16px;z-index:90;
+  width:46px;height:46px;border-radius:50%;
+  background:var(--accent);color:#fff;border:none;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 8px 20px rgba(0,0,0,.35);
+  opacity:0;pointer-events:none;transform:translateY(10px);
+  transition:opacity .2s ease,transform .2s ease;
+}
+.fab.show{opacity:1;pointer-events:auto;transform:translateY(0);}
+.fab svg{width:20px;height:20px;}
+
+@media(min-width:720px){
+  .hero h1{font-size:38px;}
+  .section{padding:6px 40px 8px;}
+  .navbar{padding:0 40px;}
+  .drawer-head,.drawer nav{padding-left:20px;}
+}
+</style>
+</head>
+<body>
+
+<div class="spectrum-bar" style="position:fixed;top:0;left:0;right:0;z-index:101;"></div>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <button class="burger" id="burgerBtn" aria-label="Menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="brand"><b>ආලෝකය</b><span>Optics · A/L</span></div>
+  <div class="searchwrap">
+    <input id="searchInput" type="text" placeholder="සොයන්න... (Snell, කාච, TIR...)" autocomplete="off">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+  </div>
+  <button class="theme-btn" id="themeBtn" aria-label="Toggle theme">
+    <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+  </button>
+</div>
+
+<!-- DRAWER -->
+<div class="scrim" id="scrim"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <b>ආලෝකය</b>
+    <span>Optics Summary Sheet</span>
+  </div>
+  <nav id="drawerNav">
+    <a href="#s1" data-target="s1"><span class="num">1</span><span class="lbl">වර්තනය<small>Refraction</small></span></a>
+    <a href="#s2" data-target="s2"><span class="num">2</span><span class="lbl">පූර්ණ අභ්‍යන්තර පරාවර්තනය<small>Total Internal Reflection</small></span></a>
+    <a href="#s3" data-target="s3"><span class="num">3</span><span class="lbl">ප්‍රිස්ම<small>Prisms</small></span></a>
+    <a href="#s4" data-target="s4"><span class="num">4</span><span class="lbl">කාච<small>Lenses</small></span></a>
+    <a href="#s5" data-target="s5"><span class="num">5</span><span class="lbl">ඇස සහ උපකරණ<small>Eye &amp; Instruments</small></span></a>
+  </nav>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <span class="eyebrow">G.C.E. Advanced Level · Physics</span>
+    <h1>ආලෝකය<span class="en">Optics — Interactive Summary Sheet</span></h1>
+    <p class="lead">වර්තනයේ සිට දෘෂ්ටි උපකරණ දක්වා — සූත්‍ර, රූප සටහන් සහ MCQ උපක්‍රම එකම තැනකින්. From refraction to optical instruments — formulas, diagrams and MCQ tricks in one offline page.</p>
+    <svg class="prism-svg" viewBox="0 0 400 90" aria-hidden="true">
+      <line x1="0" y1="45" x2="150" y2="45" stroke="#9aa4bb" stroke-width="2"/>
+      <polygon points="150,15 190,75 110,75" fill="none" stroke="#9aa4bb" stroke-width="1.5"/>
+      <line x1="150" y1="45" x2="400" y2="8" stroke="#8b6bf2" stroke-width="2"/>
+      <line x1="150" y1="45" x2="400" y2="24" stroke="#3b82f6" stroke-width="2"/>
+      <line x1="150" y1="45" x2="400" y2="40" stroke="#22c55e" stroke-width="2"/>
+      <line x1="150" y1="45" x2="400" y2="56" stroke="#eab308" stroke-width="2"/>
+      <line x1="150" y1="45" x2="400" y2="72" stroke="#f97316" stroke-width="2"/>
+      <line x1="150" y1="45" x2="400" y2="88" stroke="#ef4444" stroke-width="2"/>
+    </svg>
+  </div>
+</div>
+
+<div id="searchEmpty" class="search-empty hide">ප්‍රතිඵල හමු නොවීය — Try a different keyword.</div>
+
+<!-- ================= SECTION 1 ================= -->
+<section class="section" id="s1" data-search="refraction snell law critical wavelength depth reversibility deviation partial reflection light medium vartanaya wartanaya">
+  <div class="section-head">
+    <span class="idx">01</span>
+    <h2>ආලෝකය සහ වර්තනය <span class="en">Introduction to Light &amp; Refraction</span></h2>
+  </div>
+
+  <div class="block">
+    <h3>අර්ථ දැක්වීම <span class="en">Definition</span></h3>
+    <p class="note">එක් විනිවිද පෙනෙන (paradarshi) මාධ්‍යයක සිට තවත් විනිවිද පෙනෙන මාධ්‍යයකට ගමන් කරන ආලෝක කිරණයක දිශානතිය වෙනස් වීම <b>වර්තනය</b> ලෙස හැඳින්වේ. <br><em>A ray of light changes direction when it passes from one transparent medium to another.</em></p>
+  </div>
+
+  <div class="block">
+    <h3>ස්නෙල් නියමය <span class="en">Snell's Law</span></h3>
+    <div class="fcard">
+      <div class="flabel">Snell's Law — සම්පූර්ණ ස්වරූපය</div>
+      <div class="fexpr">₁n₂ = sin(i₁)/sin(i₂) = v₁/v₂ = λ₁/λ₂ = n₂/n₁</div>
+      <div class="fnote">i₁, i₂ — පතන හා වර්තන කෝණ · v — වේගය · λ — තරංග ආයාමය · n — වර්තනාංකය</div>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>නිරපේක්ෂ හා සාපේක්ෂ වර්තනාංකය <span class="en">Absolute &amp; Relative Refractive Index</span></h3>
+    <div class="fgrid two">
+      <div class="fcard">
+        <div class="flabel">නිරපේක්ෂ වර්තනාංකය</div>
+        <div class="fexpr">n = c / v</div>
+        <div class="fnote">c — නිර්වායුගත ආලෝක වේගය · v — මාධ්‍යයේ ආලෝක වේගය</div>
+      </div>
+      <div class="fcard">
+        <div class="flabel">සාපේක්ෂ වර්තනාංකය</div>
+        <div class="fexpr">₁n₂ = n₂ / n₁</div>
+        <div class="fnote">මාධ්‍ය 1 ට සාපේක්ෂව මාධ්‍ය 2 හි වර්තනාංකය</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>ආලෝක ප්‍රත්‍යාවර්ථතා මූලධර්මය <span class="en">Principle of Reversibility</span></h3>
+    <p class="note">ආලෝක කිරණයක ගමන් මාර්ගය ප්‍රත්‍යාවර්ථනය කළ විට, එය මුල් මාර්ගයේම ආපසු ගමන් කරයි — වර්තනාංක සමාන වේ. <em>If the path of a light ray is reversed, it retraces the same path exactly.</em></p>
+  </div>
+
+  <div class="block">
+    <h3>අපගමන කෝණය <span class="en">Deviation Angle</span></h3>
+    <div class="fcard">
+      <div class="flabel">Deviation Angle</div>
+      <div class="fexpr">d = | i − r |</div>
+      <div class="fnote">i — පතන කෝණය · r — වර්තන කෝණය</div>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>ආංශික පරාවර්තනය <span class="en">Partial Reflection</span></h3>
+    <p class="note">වඩාත් ඝන මාධ්‍යයකට ඇතුළු වන ආලෝකයෙන් <b>~3%</b> පරාවර්තනය වන අතර <b>~95%</b> ක් වර්තනය වේ (ඉතිරිය අවශෝෂණය වේ). <em>About 3% of incident light is reflected and roughly 95% is refracted at a boundary.</em></p>
+  </div>
+
+  <div class="block">
+    <h3>සත්‍ය ගැඹුර සහ දෘෂ්‍ය ගැඹුර <span class="en">Real &amp; Apparent Depth</span></h3>
+    <div class="fgrid two">
+      <div class="fcard">
+        <div class="flabel">Apparent Depth</div>
+        <div class="fexpr">දෘෂ්‍ය ගැඹුර = සත්‍ය ගැඹුර / n</div>
+      </div>
+      <div class="fcard">
+        <div class="flabel">Apparent (Lateral) Shift</div>
+        <div class="fexpr">d = t (1 − 1/n)</div>
+        <div class="fnote">t — තහඩුවේ ඝණකම</div>
+      </div>
+    </div>
+    <p class="note" style="margin-top:10px;"><b>විස්තර ගැඹුරු මාධ්‍යයේ සිට විරල මාධ්‍යයට බැලීම</b> (dense→rare, e.g. water→air): වස්තුව සත්‍ය ගැඹුරට වඩා ළඟින් පෙනේ (දෘෂ්‍ය ගැඹුර අඩුයි). <b>විරල මාධ්‍යයේ සිට ඝන මාධ්‍යයට බැලීම</b> (rare→dense): වස්තුව සත්‍ය දුරට වඩා ඈතින් පෙනේ.</p>
+  </div>
+
+  <details class="accordion">
+    <summary><span class="tag">MCQ</span> අමතර උපක්‍රම — Refraction Extra Tricks <span class="chev">▾</span></summary>
+    <div class="acc-body">
+      <ul>
+        <li>ආලෝකය ඝන මාධ්‍යයට ඇතුළු වන විට වේගය අඩු වේ, නමුත් සංඛ්‍යාතය (f) වෙනස් නොවේ — තරංග ආයාමය (λ) පමණක් අඩු වේ.</li>
+        <li>Deviation d = i − r යනු පතන කිරණයත් වර්තන කිරණයත් අතර සැබෑ කෝණික වෙනසයි; සෑම විටම නිශ්චිත ධන අගයක් ලෙස සලකන්න.</li>
+        <li>Apparent depth සූත්‍රය භාවිතා කරන්නේ නිරීක්ෂකයා මාධ්‍යයට සමකෝණික (near-normal) දිශාවෙන් බලන විට පමණි.</li>
+        <li>Real-to-apparent depth ගැටලුවලදී "shift" සහ "apparent depth" පටලවා නොගන්න — ඒවා විවිධ සූත්‍ර දෙකකි.</li>
+      </ul>
+    </div>
+  </details>
+</section>
+
+<!-- ================= SECTION 2 ================= -->
+<section class="section" id="s2" data-search="total internal reflection critical angle tir optical fiber mirage abhyantara paravartanaya avadhi konaya">
+  <div class="section-head">
+    <span class="idx">02</span>
+    <h2>පූර්ණ අභ්‍යන්තර පරාවර්තනය <span class="en">Total Internal Reflection (TIR)</span></h2>
+  </div>
+
+  <div class="block">
+    <h3>අවධි කෝණය <span class="en">Critical Angle</span></h3>
+    <p class="note">ඝන මාධ්‍යයක සිට විරල මාධ්‍යයකට ගමන් කරන ආලෝක කිරණයක් මාධ්‍ය සීමා පෘෂ්ඨය දිගේ (90°) වර්තනය වන විට, ඝන මාධ්‍යය තුළ ඇති පතන කෝණය <b>අවධි කෝණය (C)</b> නම් වේ.</p>
+    <div class="fcard">
+      <div class="flabel">Critical Angle</div>
+      <div class="fexpr">sin C = n(rare) / n(dense)</div>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>TIR සඳහා අවශ්‍ය කොන්දේසි <span class="en">Conditions for TIR</span></h3>
+    <div class="chips">
+      <span class="chip">1. ආලෝකය ඝන මාධ්‍යයේ සිට විරල මාධ්‍යයට ගමන් කළ යුතුය</span>
+      <span class="chip">2. පතන කෝණය අවධි කෝණයට වඩා විශාල විය යුතුය (i &gt; C)</span>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>ප්‍රායෝගික යෙදුම් <span class="en">Practical Applications</span></h3>
+    <div class="mtable" style="overflow-x:auto;display:block;">
+      <table style="width:100%;border-collapse:collapse;">
+        <tr><th>යෙදුම</th><th>විස්තරය</th></tr>
+        <tr><td>ප්‍රකාශ තන්තු <span class="en" style="font-style:italic;color:var(--ink-faint);">Optical Fibers</span></td><td>TIR මගින් ආලෝකය නාශයකින් තොරව දිගු දුරක් ගමන් කරයි — දුරකථන/අන්තර්ජාල සන්නිවේදනයේදී භාවිතා වේ.</td></tr>
+        <tr><td>මිරිඟුව <span class="en" style="font-style:italic;color:var(--ink-faint);">Mirage</span></td><td>රත් වූ බිම ආසන්නයේ වායු ස්තර හරහා ආලෝකය ක්‍රමයෙන් නැමී TIR වීමෙන් ජලය ඇති බවක් පෙනේ.</td></tr>
+        <tr><td>ද්‍රව ආලෝක ලප <span class="en" style="font-style:italic;color:var(--ink-faint);">Liquid Light Spots</span></td><td>ජල දහරාවක් තුළ ආලෝකය TIR මගින් හසුරුවා (guide) ගැනීම — අලංකාර ජල දහරා ආලෝකකරණයේදී භාවිතා වේ.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <details class="accordion">
+    <summary><span class="tag">MCQ</span> අමතර උපක්‍රම — TIR Extra Tricks <span class="chev">▾</span></summary>
+    <div class="acc-body">
+      <ul>
+        <li>Critical angle C දෙනා n = 1/sin C ලෙසද ලිවිය හැක; වර්තනාංකය වැඩි වන තරමට C අඩු වේ.</li>
+        <li>දියමන්තියේ (diamond) අවධි කෝණය ඉතා කුඩා නිසා ඇතුළු වන ආලෝකයෙන් වැඩි කොටසක් TIR වී දීප්තිය වැඩි කරයි.</li>
+        <li>i = C දී කිරණය මාධ්‍ය සීමා පෘෂ්ඨය දිගේ (grazing) ගමන් කරයි — මෙය TIR ආරම්භයේ සීමා අවස්ථාවයි.</li>
+      </ul>
+    </div>
+  </details>
+</section>
+
+<!-- ================= SECTION 3 ================= -->
+<section class="section" id="s3" data-search="prism prisma minimum deviation dispersion equilateral apex angle refraction">
+  <div class="section-head">
+    <span class="idx">03</span>
+    <h2>ප්‍රිස්ම <span class="en">Prisms</span></h2>
+  </div>
+
+  <div class="block">
+    <h3>ප්‍රිස්ම සමීකරණ <span class="en">Prism Equations</span></h3>
+    <div class="fgrid two">
+      <div class="fcard">
+        <div class="flabel">Apex Angle</div>
+        <div class="fexpr">A = r₁ + r₂</div>
+      </div>
+      <div class="fcard">
+        <div class="flabel">Total Deviation</div>
+        <div class="fexpr">d = (i₁ + i₂) − A</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>අවම අපගමන අවස්ථාව <span class="en">Minimum Deviation Position</span></h3>
+    <p class="note">සමපාද / සමද්විපාද ප්‍රිස්මයක් සඳහා අවම අපගමනයේදී:</p>
+    <div class="chips">
+      <span class="chip">i₁ = i₂</span>
+      <span class="chip">r₁ = r₂</span>
+      <span class="chip">ප්‍රිස්මය තුළ කිරණය පාදකයට සමාන්තරව යයි</span>
+    </div>
+    <div class="fcard" style="margin-top:10px;">
+      <div class="flabel">Minimum Deviation Formula</div>
+      <div class="fexpr">n = sin[(A + Dm)/2] / sin(A/2)</div>
+      <div class="fnote">Dm — අවම අපගමන කෝණය</div>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>වර්ණ අප්‍රේරණය <span class="en">Dispersion of Light</span></h3>
+    <p class="note">විවිධ වර්ණවල ආලෝකයට ප්‍රිස්ම ද්‍රව්‍යයේ වර්තනාංකය වෙනස් වන බැවින් (දම්-සිට-රතු දක්වා n අඩු වේ), සුදු ආලෝකය ප්‍රිස්මයක් හරහා ගමන් කරන විට වර්ණාවලියක් බවට වර්ණ අප්‍රේරණය වේ. දම් වර්ණයට වඩාත් අපගමනය සිදුවේ; රතු වර්ණයට අඩුවෙන් අපගමනය සිදුවේ.</p>
+    <div class="diagram">
+      <svg viewBox="0 0 300 90">
+        <line x1="0" y1="45" x2="120" y2="45" stroke="#9aa4bb" stroke-width="2"/>
+        <polygon points="120,15 155,70 90,70" fill="none" stroke="#9aa4bb" stroke-width="1.5"/>
+        <line x1="120" y1="45" x2="300" y2="10" stroke="#8b6bf2" stroke-width="2"/>
+        <line x1="120" y1="45" x2="300" y2="24" stroke="#3b82f6" stroke-width="2"/>
+        <line x1="120" y1="45" x2="300" y2="40" stroke="#22c55e" stroke-width="2"/>
+        <line x1="120" y1="45" x2="300" y2="56" stroke="#eab308" stroke-width="2"/>
+        <line x1="120" y1="45" x2="300" y2="72" stroke="#f97316" stroke-width="2"/>
+        <line x1="120" y1="45" x2="300" y2="86" stroke="#ef4444" stroke-width="2"/>
+      </svg>
+      <div class="cap">සුදු ආලෝකය ප්‍රිස්මයකින් වර්ණාවලියක් බවට වර්ණ අප්‍රේරණය වීම</div>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>විවිධ මාධ්‍යවල ප්‍රිස්මවල හැසිරීම <span class="en">Prisms in Different Surrounding Media</span></h3>
+    <p class="note">ප්‍රිස්මය වටා ඇති මාධ්‍යයේ වර්තනාංකය ප්‍රිස්ම ද්‍රව්‍යයට වඩා වැඩි නම් (උදා: ජලය තුළ වීදුරු ප්‍රිස්මයක්), අපගමන දිශාව ප්‍රතිලෝම වේ — ප්‍රිස්මය "විරල" ලෙස හැසිරෙයි.</p>
+  </div>
+
+  <details class="accordion">
+    <summary><span class="tag">MCQ</span> අමතර උපක්‍රම — Prism Extra Tricks <span class="chev">▾</span></summary>
+    <div class="acc-body">
+      <ul>
+        <li>i₁ = i₂ = A/2 + Dm/2 ලෙසද ලිවිය හැක — සමමිතික අවස්ථාව මතක තබාගන්න.</li>
+        <li>A + Dm සෑම විටම i₁+i₂ ට සමාන — graph ප්‍රශ්නවලදී මෙය පරික්ෂා කරන්න.</li>
+        <li>Graph: i₁ (x-අක්ෂය) එදිරිව d (y-අක්ෂය) — parabola හැඩයක් ලබා දෙන අතර අවම ලක්ෂ්‍යය Dm වේ.</li>
+        <li>Total internal reflection ප්‍රිස්ම (45°-90°-45°) කැමරා periscope වැනි උපකරණවල භාවිතා වේ — TIR කොටස සමඟ සම්බන්ධ කරන්න.</li>
+      </ul>
+    </div>
+  </details>
+</section>
+
+<!-- ================= SECTION 4 ================= -->
+<section class="section" id="s4" data-search="lens lenses convex concave thin lens magnification power diopter combination conjugate graph kaca">
+  <div class="section-head">
+    <span class="idx">04</span>
+    <h2>කාච <span class="en">Lenses</span></h2>
+  </div>
+
+  <div class="block">
+    <h3>වර්ග <span class="en">Types</span></h3>
+    <div class="mtable" style="overflow-x:auto;display:block;">
+      <table style="width:100%;border-collapse:collapse;">
+        <tr><th></th><th>විරල මාධ්‍යයේ</th><th>ඝන මාධ්‍යයේ</th></tr>
+        <tr><td><b>අභිසාරී <span class="en" style="font-style:italic;">Convex</span></b></td><td>සාමාන්‍ය උත්තල කාච</td><td>ගහන මාධ්‍යයේ විරල අවතල කාච</td></tr>
+        <tr><td><b>අපසාරී <span class="en" style="font-style:italic;">Concave</span></b></td><td>සාමාන්‍ය අවතල කාච</td><td>ගහන මාධ්‍යයේ විරල උත්තල කාච</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>තුනී කාච සූත්‍රය <span class="en">Thin Lens Formula</span></h3>
+    <div class="fcard">
+      <div class="flabel">Thin Lens Formula (sign convention: v & u along light path = negative; opposite = positive)</div>
+      <div class="fexpr">1/v − 1/u = 1/f</div>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>රේඛීය විශාලනය <span class="en">Linear Magnification</span></h3>
+    <div class="fcard">
+      <div class="flabel">Linear Magnification</div>
+      <div class="fexpr">m = v/u = h(image) / h(object)</div>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>වැදගත් ප්‍රස්ථාර <span class="en">Important Graphs</span></h3>
+    <div class="chips">
+      <span class="chip">v vs u</span><span class="chip">1/v vs 1/u</span><span class="chip">uv vs (u+v)</span>
+      <span class="chip">m vs v</span><span class="chip">m vs u</span><span class="chip">(u+v) vs u</span>
+    </div>
+    <p class="note" style="margin-top:8px;"><b>Conjugate points condition:</b> දිශ්‍යකව ප්‍රතිබිම්බයක් තිරයක වැටීමට නම් වස්තුව හා තිරය අතර දුර <b>u + v ≥ 4f</b> විය යුතුය. u + v = 4f දී පමණක් තනි conjugate point එකක් ලැබේ.</p>
+    <div class="diagram">
+      <svg viewBox="0 0 260 130">
+        <line x1="20" y1="110" x2="240" y2="110" stroke="#6b7488" stroke-width="1"/>
+        <line x1="20" y1="20" x2="20" y2="110" stroke="#6b7488" stroke-width="1"/>
+        <path d="M20,105 C 60,95 90,60 130,40 C 170,25 200,20 235,18" fill="none" stroke="#7c9cff" stroke-width="2"/>
+        <text x="230" y="125" fill="#6b7488" font-size="10">u</text>
+        <text x="8" y="20" fill="#6b7488" font-size="10">1/v</text>
+      </svg>
+      <div class="cap">1/v vs 1/u ප්‍රස්ථාරය — y-අන්තඃඛණ්ඩය = 1/f</div>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>කාච බලය <span class="en">Power of a Lens</span></h3>
+    <div class="fcard">
+      <div class="flabel">Power (f in metres, P in Diopters)</div>
+      <div class="fexpr">P = −1/f</div>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>ස්පර්ශිත කාච ඒකාබද්ධ කිරීම <span class="en">Combination of Lenses in Contact</span></h3>
+    <div class="fcard">
+      <div class="flabel">Combined Focal Length</div>
+      <div class="fexpr">1/f = 1/f₁ + 1/f₂ + 1/f₃</div>
+    </div>
+  </div>
+
+  <details class="accordion">
+    <summary><span class="tag">MCQ</span> විශේෂ අවස්ථා — Special MCQ Cases <span class="chev">▾</span></summary>
+    <div class="acc-body">
+      <ul>
+        <li><b>Virtual objects forming real images:</b> අභිසාරී කාචයක් වෙත අභිසාරී වන කිරණ මාලාවක් (තවත් කාච/දර්පණයකින් පසුව) පතිත වූ විට, ප්‍රතිබිම්බය සත්‍ය වුවත් වස්තුව ආභාසික (virtual object, u ධන) විය හැක.</li>
+        <li><b>කැපූ කාච (Cutting lenses):</b> කාචයක් අර්ධ වශයෙන් කැපුවද එහි කේන්ද්‍රීය දුර (f) වෙනස් නොවේ — නමුත් රූප තීව්‍රතාව (intensity) අඩු වේ.</li>
+        <li><b>Multi-refractive index materials:</b> කාචයක් විවිධ වර්තනාංක සහිත ස්ථර දෙකකින් සෑදුනහොත්, සම්පූර්ණ කාච බලය එක් එක් පෘෂ්ඨයේ දායකත්වයන් එකතු කර ගණනය කරන්න (lens maker's approach එක් එක් පෘෂ්ඨයට වෙන වෙනම යොදන්න).</li>
+        <li>සලකුණු සම්මුතිය (sign convention) නිතරම එකම ආකාරයෙන් යොදන්න — u සැමවිටම ඍණ ලෙස ගැනීම වඩාත් ආරක්ෂිතයි.</li>
+      </ul>
+    </div>
+  </details>
+</section>
+
+<!-- ================= SECTION 5 ================= -->
+<section class="section" id="s5" data-search="eye optical instruments microscope telescope myopia hypermetropia presbyopia astigmatism angular magnification near point far point asa upakarana">
+  <div class="section-head">
+    <span class="idx">05</span>
+    <h2>ඇස සහ ප්‍රකාශ උපකරණ <span class="en">Eye &amp; Optical Instruments</span></h2>
+  </div>
+
+  <div class="block">
+    <h3>දෘෂ්ටි කෝණය සහ කෝණික විශාලනය <span class="en">Visual Angle &amp; Angular Magnification</span></h3>
+    <div class="fcard">
+      <div class="flabel">Angular Magnification</div>
+      <div class="fexpr">M = α′ / α</div>
+      <div class="fnote">α′ — උපකරණය සමඟ දෘෂ්ටි කෝණය · α — නිරායුධ ඇසින් දෘෂ්ටි කෝණය</div>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>සරල අන්වීක්ෂය <span class="en">Simple Microscope</span></h3>
+    <div class="fgrid two">
+      <div class="fcard">
+        <div class="flabel">Normal Adjustment</div>
+        <div class="fexpr">M = D/f + 1</div>
+      </div>
+      <div class="fcard">
+        <div class="flabel">Inverted / Infinity Adjustment</div>
+        <div class="fexpr">M = D/f</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>සංයුක්ත අන්වීක්ෂය <span class="en">Compound Microscope</span></h3>
+    <div class="fcard">
+      <div class="flabel">Normal Adjustment</div>
+      <div class="fexpr">M = mₒ × mₑ</div>
+      <div class="fnote">mₒ — වස්තු කාචයේ විශාලනය · mₑ — නේත්‍ර කාචයේ (eyepiece) කෝණික විශාලනය</div>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>ජ්‍යෝතිර්වේදී දුරේක්ෂය <span class="en">Astronomical Telescope</span></h3>
+    <p class="note">Normal adjustment: වස්තු කාච හා නේත්‍ර කාචයේ නාභි එකට වැටේ.</p>
+    <div class="fgrid two">
+      <div class="fcard">
+        <div class="flabel">Length</div>
+        <div class="fexpr">L = fₒ + fₑ</div>
+      </div>
+      <div class="fcard">
+        <div class="flabel">Magnification</div>
+        <div class="fexpr">M = fₒ / fₑ</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>මානව ඇස <span class="en">The Human Eye</span></h3>
+    <div class="mtable" style="overflow-x:auto;display:block;">
+      <table style="width:100%;border-collapse:collapse;">
+        <tr><th>අවස්ථාව</th><th>ඇසේ ක්‍රියාව</th></tr>
+        <tr><td>දුර වස්තු නැරඹීම <span class="en" style="font-style:italic;">(far viewing)</span></td><td>අක්ෂි පේශි ලිහිල් වේ, කාච නාභි දුර උපරිම</td></tr>
+        <tr><td>ළඟ වස්තු නැරඹීම <span class="en" style="font-style:italic;">(near viewing)</span></td><td>අක්ෂි පේශි හැකිලේ, කාච නාභි දුර අවම</td></tr>
+      </table>
+    </div>
+    <p class="note" style="margin-top:8px;">කෝර්නියාව (cornea) හා ස්ඵටික කාචය (crystalline lens) එකට ආලෝකය දෘෂ්ටි විතානය (retina) මතට නාභිගත කරයි. <b>ළඟ ලක්ෂ්‍යය D = 25cm</b>, <b>දුර ලක්ෂ්‍යය = අනන්තය</b>.</p>
+  </div>
+
+  <div class="block">
+    <h3>දෘෂ්ටි දෝෂ සහ නිවැරදි කිරීම <span class="en">Vision Defects &amp; Corrective Lenses</span></h3>
+    <div class="mtable" style="overflow-x:auto;display:block;">
+      <table style="width:100%;border-collapse:collapse;">
+        <tr><th>දෝෂය</th><th>ලක්ෂණය</th><th>නිවැරදි කාචය</th></tr>
+        <tr><td>අවිදුර දෘෂ්ටිකත්වය <span class="en" style="font-style:italic;">Myopia</span></td><td>දුර වස්තු නොපැහැදිලි; දුර ලක්ෂ්‍යය සිමිත</td><td>අපසාරී (concave) කාච</td></tr>
+        <tr><td>දුර දෘෂ්ටිකත්වය <span class="en" style="font-style:italic;">Hypermetropia</span></td><td>ළඟ වස්තු නොපැහැදිලි; ළඟ ලක්ෂ්‍යය 25cm ට වඩා දුර</td><td>අභිසාරී (convex) කාච</td></tr>
+        <tr><td>මහලු ඇස <span class="en" style="font-style:italic;">Presbyopia</span></td><td>වයස්ගත වීමත් සමඟ නාභි දුර සීරුමාරු කිරීමේ හැකියාව අඩුවීම</td><td>Bifocal / convex කාච</td></tr>
+        <tr><td>විෂම දෘෂ්ටිකත්වය <span class="en" style="font-style:italic;">Astigmatism</span></td><td>කෝර්නියාවේ අසමාන වක්‍රතාව නිසා සියලු දිශාවල එකසේ නාභිගත නොවීම</td><td>සිලින්ඩරාකාර (cylindrical) කාච</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <details class="accordion">
+    <summary><span class="tag">MCQ</span> අමතර උපක්‍රම — Eye &amp; Instruments Tricks <span class="chev">▾</span></summary>
+    <div class="acc-body">
+      <ul>
+        <li>Normal adjustment යනු අවසාන ප්‍රතිබිම්බය ළඟ ලක්ෂ්‍යයේ (D) හෝ අනන්තයේ (infinity) සෑදීමයි — ප්‍රශ්නය කුමන එකදැයි හොඳින් කියවන්න.</li>
+        <li>Telescope සහ Microscope දෙකේම M සූත්‍ර similar පෙනුනත්, D භාවිතා වන්නේ Microscope වලදී පමණි (Telescope හි M = fₒ/fₑ, D නැත).</li>
+        <li>Compound microscope හි M = mₒ × mₑ; mₑ ගණනය කිරීමේදී Normal/Infinity adjustment අනුව D/fₑ හෝ D/fₑ + 1 යොදන්න.</li>
+        <li>Long-sightedness (hypermetropia) නිවැරදි කිරීමට අවශ්‍ය කාච බලය ගණනය කිරීමේදී, ළඟ ලක්ෂ්‍යයේ ප්‍රතිබිම්බය සෑදෙන ලෙස කාචයට ඉලක්ක කරන්න.</li>
+      </ul>
+    </div>
+  </details>
+</section>
+
+<footer>
+  <div class="spectrum-bar"></div>
+  Logical Physics for G.C.E. A/L — Dr. Darshana Ukuwela<br>
+  Offline interactive summary · Optics (ආලෝකය)
+</footer>
+
+<button class="fab" id="fabTop" aria-label="Top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+</button>
+
+<script>
+(function(){
+  var burgerBtn = document.getElementById('burgerBtn');
+  var drawer = document.getElementById('drawer');
+  var scrim = document.getElementById('scrim');
+  var drawerNav = document.getElementById('drawerNav');
+  var themeBtn = document.getElementById('themeBtn');
+  var themeIcon = document.getElementById('themeIcon');
+  var html = document.documentElement;
+  var searchInput = document.getElementById('searchInput');
+  var searchEmpty = document.getElementById('searchEmpty');
+  var sections = Array.prototype.slice.call(document.querySelectorAll('.section'));
+  var fab = document.getElementById('fabTop');
+
+  function openDrawer(){ drawer.classList.add('open'); scrim.classList.add('open'); }
+  function closeDrawer(){ drawer.classList.remove('open'); scrim.classList.remove('open'); }
+  burgerBtn.addEventListener('click', openDrawer);
+  scrim.addEventListener('click', closeDrawer);
+  drawerNav.addEventListener('click', function(e){
+    var a = e.target.closest('a');
+    if(a){ closeDrawer(); }
+  });
+
+  var MOON = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>';
+  var SUN = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+
+  function setTheme(t){
+    html.setAttribute('data-theme', t);
+    themeIcon.innerHTML = (t === 'dark') ? MOON : SUN;
+  }
+  setTheme('dark');
+  themeBtn.addEventListener('click', function(){
+    var cur = html.getAttribute('data-theme');
+    setTheme(cur === 'dark' ? 'light' : 'dark');
+  });
+
+  // search filter
+  function normalize(s){ return (s||'').toLowerCase(); }
+  searchInput.addEventListener('input', function(){
+    var q = normalize(searchInput.value.trim());
+    var anyVisible = false;
+    sections.forEach(function(sec){
+      if(!q){
+        sec.classList.remove('hide');
+        anyVisible = true;
+        return;
+      }
+      var haystack = normalize(sec.getAttribute('data-search') + ' ' + sec.textContent);
+      var match = haystack.indexOf(q) !== -1;
+      sec.classList.toggle('hide', !match);
+      if(match) anyVisible = true;
+    });
+    searchEmpty.classList.toggle('hide', anyVisible || !q);
+  });
+
+  // scroll spy + fab
+  window.addEventListener('scroll', function(){
+    fab.classList.toggle('show', window.scrollY > 500);
+    var navH = 58;
+    var pos = window.scrollY + navH + 20;
+    var current = null;
+    sections.forEach(function(sec){
+      if(sec.offsetTop <= pos) current = sec.id;
+    });
+    drawerNav.querySelectorAll('a').forEach(function(a){
+      a.classList.toggle('active', a.getAttribute('data-target') === current);
+    });
+  }, {passive:true});
+
+  fab.addEventListener('click', function(){
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+})();
+</script>
+</body>
+</html>

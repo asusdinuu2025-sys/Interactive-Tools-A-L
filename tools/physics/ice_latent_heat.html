@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>මිශ්‍රණ ක්‍රමයෙන් අයිස්වල විලයන ගුප්ත තාපය</title>
+<style>
+  :root{
+    --bg:#eef4f6;
+    --paper:#ffffff;
+    --ink:#132433;
+    --ink-soft:#4c6675;
+    --frost:#dcedf2;
+    --frost-deep:#b9dbe6;
+    --ice-blue:#4f9ab5;
+    --ice-blue-dark:#2f7690;
+    --copper:#b5652d;
+    --copper-dark:#8a4a1f;
+    --brass:#c9a15a;
+    --danger:#c1443c;
+    --success:#2f8a5c;
+    --grid:#cfe1e7;
+    --mercury:#d1453a;
+    --shadow: 0 6px 18px rgba(19,36,51,0.10);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{margin:0; padding:0; background:var(--bg); color:var(--ink); font-family:-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; -webkit-font-smoothing:antialiased;}
+  body{padding-bottom:24px;}
+  .mono{font-family: ui-monospace,"SF Mono",Consolas,"Roboto Mono",monospace;}
+
+  /* ===== Header / Tabs ===== */
+  header.top{
+    position:sticky; top:0; z-index:50;
+    background:linear-gradient(180deg,var(--ice-blue-dark),var(--ice-blue));
+    color:#fff; padding:14px 16px 0 16px;
+    box-shadow: 0 4px 14px rgba(19,60,80,0.25);
+  }
+  header.top h1{
+    font-size:17px; margin:0 0 12px 0; font-weight:700; letter-spacing:0.2px; line-height:1.4;
+  }
+  header.top h1 small{display:block; font-weight:400; font-size:12px; opacity:0.85; margin-top:2px;}
+  .tabbar{display:flex; gap:4px; overflow-x:auto; scrollbar-width:none;}
+  .tabbar::-webkit-scrollbar{display:none;}
+  .tabbtn{
+    flex:1 0 auto; min-width:78px; text-align:center; padding:10px 6px 12px 6px;
+    background:transparent; border:none; color:rgba(255,255,255,0.72); font-size:12.5px;
+    font-weight:600; border-bottom:3px solid transparent; cursor:pointer; white-space:nowrap;
+  }
+  .tabbtn .ic{display:block; font-size:18px; margin-bottom:3px;}
+  .tabbtn.active{color:#fff; border-bottom-color:#fff;}
+
+  main{max-width:640px; margin:0 auto; padding:14px 12px 40px 12px;}
+  section.tabpane{display:none; animation:fadein .25s ease;}
+  section.tabpane.active{display:block;}
+  @keyframes fadein{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
+
+  .card{
+    background:var(--paper); border-radius:16px; padding:16px; margin-bottom:14px;
+    box-shadow:var(--shadow); border:1px solid rgba(19,60,80,0.06);
+  }
+  .card h2{font-size:15px; margin:0 0 10px 0; color:var(--ice-blue-dark); display:flex; align-items:center; gap:8px;}
+  .card h2 .num{
+    background:var(--frost); color:var(--ice-blue-dark); font-size:12px; font-weight:800;
+    width:22px; height:22px; border-radius:7px; display:inline-flex; align-items:center; justify-content:center;
+  }
+  .hint{font-size:12.5px; color:var(--ink-soft); line-height:1.55; margin:4px 0 0 0;}
+
+  /* ===== Simulation ===== */
+  .apparatus-wrap{position:relative; width:100%; touch-action:manipulation;}
+  .apparatus-svg{width:100%; height:auto; display:block;}
+  .ice-cube{
+    position:absolute; width:22px; height:22px; border-radius:5px;
+    background:linear-gradient(135deg,#eafbff,#bfe9f2);
+    border:1px solid #9fd6e6; box-shadow:inset 0 0 6px rgba(255,255,255,0.9);
+    top:-24px; opacity:0.95; pointer-events:none;
+    transition: top 0.55s cubic-bezier(.4,.6,.4,1), opacity 0.5s linear 0.5s, transform 0.6s linear 0.5s;
+  }
+  .readout-row{display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;}
+  .readout{
+    flex:1 1 100px; background:var(--frost); border-radius:12px; padding:9px 10px; text-align:center;
+  }
+  .readout .lbl{font-size:11px; color:var(--ink-soft); font-weight:600;}
+  .readout .val{font-size:19px; font-weight:800; color:var(--ice-blue-dark); margin-top:2px;}
+  .status-msg{
+    margin-top:10px; padding:9px 12px; border-radius:10px; font-size:12.5px; font-weight:600;
+    display:none; line-height:1.5;
+  }
+  .status-msg.show{display:block;}
+  .status-msg.ok{background:#e5f5ec; color:var(--success);}
+  .status-msg.warn{background:#fdeeee; color:var(--danger);}
+  .status-msg.info{background:var(--frost); color:var(--ice-blue-dark);}
+
+  .btnrow{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;}
+  button.act{
+    flex:1 1 auto; min-width:120px; border:none; border-radius:12px; padding:13px 10px;
+    font-size:13.5px; font-weight:700; cursor:pointer; color:#fff;
+    background:var(--ice-blue-dark); box-shadow:0 3px 0 rgba(0,0,0,0.12);
+    transition:transform .08s ease;
+  }
+  button.act:active{transform:translateY(2px); box-shadow:none;}
+  button.act.secondary{background:var(--copper);}
+  button.act.ghost{background:var(--frost); color:var(--ice-blue-dark); box-shadow:none;}
+  button.act:disabled{background:#c9d6db; color:#fff; cursor:not-allowed; box-shadow:none;}
+  label.field-lbl{font-size:12.5px; font-weight:700; color:var(--ink-soft); display:block; margin:10px 0 5px 0;}
+  input[type=number], select{
+    width:100%; padding:11px 12px; border-radius:10px; border:1.5px solid var(--grid);
+    font-size:15px; background:#fbfdfe; color:var(--ink); font-family:inherit;
+  }
+  input[type=number]:focus, select:focus{outline:none; border-color:var(--ice-blue);}
+
+  .chart-box{margin-top:14px;}
+  .chart-box svg{width:100%; height:auto; display:block;}
+
+  table.logtbl{width:100%; border-collapse:collapse; margin-top:10px; font-size:12.5px;}
+  table.logtbl th, table.logtbl td{padding:7px 6px; text-align:center; border-bottom:1px solid var(--grid);}
+  table.logtbl th{color:var(--ink-soft); font-weight:700; background:var(--frost);}
+
+  /* ===== Calculator ===== */
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .grp-title{
+    font-size:12px; font-weight:800; color:var(--copper-dark); text-transform:uppercase;
+    letter-spacing:0.4px; margin:16px 0 6px 0; padding-top:8px; border-top:1px dashed var(--grid);
+  }
+  .grp-title:first-child{border-top:none; margin-top:0; padding-top:0;}
+  .unit-tag{font-size:11px; color:var(--ink-soft); font-weight:500;}
+
+  .solution-step{
+    background:var(--frost); border-radius:12px; padding:11px 13px; margin-bottom:8px;
+    font-size:13px; line-height:1.7;
+  }
+  .solution-step .stepno{
+    display:inline-block; background:var(--ice-blue-dark); color:#fff; font-size:10.5px; font-weight:800;
+    border-radius:6px; padding:1px 7px; margin-inline-end:6px;
+  }
+  .final-answer{
+    background:linear-gradient(135deg,var(--ice-blue-dark),var(--ice-blue));
+    color:#fff; border-radius:14px; padding:16px; text-align:center; margin-top:10px;
+  }
+  .final-answer .L{font-size:26px; font-weight:800; margin-top:4px;}
+  .final-answer .sub{font-size:12px; opacity:0.85; margin-top:4px;}
+
+  .error-box{background:#fdeeee; color:var(--danger); border-radius:10px; padding:10px 12px; font-size:12.5px; font-weight:600; margin-top:10px; display:none;}
+  .error-box.show{display:block;}
+
+  /* ===== Notes / accordions ===== */
+  details.note{
+    background:var(--paper); border-radius:14px; margin-bottom:10px; box-shadow:var(--shadow);
+    border:1px solid rgba(19,60,80,0.06); overflow:hidden;
+  }
+  details.note summary{
+    list-style:none; cursor:pointer; padding:14px 16px; font-weight:700; font-size:14px;
+    display:flex; align-items:center; gap:10px; color:var(--ink);
+  }
+  details.note summary::-webkit-details-marker{display:none;}
+  details.note summary .arrow{margin-inline-start:auto; transition:transform .2s ease; color:var(--ice-blue-dark); font-size:13px;}
+  details.note[open] summary .arrow{transform:rotate(90deg);}
+  details.note .emoji{font-size:19px;}
+  .note-body{padding:0 16px 16px 16px; font-size:13.5px; line-height:1.75; color:var(--ink-soft);}
+  .note-body ul{margin:6px 0; padding-inline-start:20px;}
+  .note-body li{margin-bottom:7px;}
+  .note-body b{color:var(--ink);}
+  .step-num{
+    display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px;
+    background:var(--copper); color:#fff; border-radius:6px; font-size:11px; font-weight:800;
+    margin-inline-end:7px; flex-shrink:0;
+  }
+  .step-item{display:flex; align-items:flex-start; margin-bottom:9px;}
+
+  /* ===== Past papers ===== */
+  .qcard{background:var(--paper); border-radius:14px; box-shadow:var(--shadow); padding:16px; margin-bottom:12px; border:1px solid rgba(19,60,80,0.06);}
+  .qcard .qhead{font-size:12px; font-weight:800; color:#fff; background:var(--copper); display:inline-block; padding:4px 10px; border-radius:8px; margin-bottom:10px;}
+  .qpart{margin-bottom:12px; padding-bottom:12px; border-bottom:1px dashed var(--grid);}
+  .qpart:last-child{border-bottom:none; margin-bottom:0; padding-bottom:0;}
+  .qpart .qtag{font-weight:800; color:var(--ice-blue-dark); font-size:13px;}
+  .qpart .qtext{font-size:13.5px; line-height:1.65; margin:4px 0 8px 0;}
+  .revealbtn{
+    background:var(--frost); color:var(--ice-blue-dark); border:none; border-radius:9px;
+    padding:8px 12px; font-size:12px; font-weight:700; cursor:pointer;
+  }
+  .answer{
+    display:none; margin-top:9px; background:#f3fbf6; border-inline-start:4px solid var(--success);
+    padding:9px 12px; border-radius:0 10px 10px 0; font-size:13px; line-height:1.7; color:#245c3f;
+  }
+  .answer.show{display:block;}
+
+  ::selection{background:var(--frost-deep);}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>මිශ්‍රණ ක්‍රමයෙන් අයිස්වල විලයනයේ විශිෂ්ඨ ගුප්ත තාපය සෙවීම
+    <small>උසස් පෙළ භෞතික විද්‍යාව — තාප ප්‍රායෝගික</small>
+  </h1>
+  <div class="tabbar">
+    <button class="tabbtn active" data-tab="sim"><span class="ic">🧊</span>අනුකරණය</button>
+    <button class="tabbtn" data-tab="calc"><span class="ic">🧮</span>ගණකය</button>
+    <button class="tabbtn" data-tab="notes"><span class="ic">📘</span>සටහන්</button>
+    <button class="tabbtn" data-tab="past"><span class="ic">📝</span>පසුගිය ප්‍රශ්න</button>
+  </div>
+</header>
+
+<main>
+
+<!-- ================= TAB 1: SIMULATION ================= -->
+<section class="tabpane active" id="tab-sim">
+
+  <div class="card">
+    <h2><span class="num">1</span>අන්තර්ක්‍රියාකාරී පරීක්ෂණ අනුකරණය</h2>
+    <p class="hint">කාමර උෂ්ණත්වය සකසා පහත පියවර අනුපිළිවෙලින් අනුගමනය කරන්න. උෂ්ණත්වමානය හා ප්‍රස්ථාරය සජීවීව වෙනස් වේ.</p>
+
+    <label class="field-lbl">කාමර උෂ්ණත්වය (θ₀) — °C</label>
+    <input type="number" id="roomTempInput" value="30" step="1">
+
+    <div class="apparatus-wrap" id="apparatusWrap">
+      <svg class="apparatus-svg" id="appSvg" viewBox="0 0 300 260" xmlns="http://www.w3.org/2000/svg">
+        <!-- outer jacket -->
+        <rect x="15" y="90" width="270" height="150" rx="10" fill="#f1f7f9" stroke="#b9d3db" stroke-width="2"/>
+        <text x="150" y="83" text-anchor="middle" font-size="9" fill="#4c6675" font-family="inherit">බාහිර බඳුන (ලී / පෙනහන්)</text>
+        <!-- calorimeter -->
+        <rect x="70" y="115" width="160" height="105" rx="6" fill="#e7f3f6" stroke="#7fb8cc" stroke-width="2"/>
+        <text x="150" y="228" text-anchor="middle" font-size="9" fill="#4c6675">කැලරි මීටරය</text>
+        <!-- water -->
+        <rect id="waterRect" x="74" y="150" width="152" height="66" rx="3" fill="#bfe3ee" opacity="0.85"/>
+        <!-- stirrer wire mesh -->
+        <line x1="112" y1="60" x2="112" y2="150" stroke="#8a4a1f" stroke-width="3"/>
+        <ellipse cx="112" cy="158" rx="16" ry="7" fill="none" stroke="#8a4a1f" stroke-width="2"/>
+        <path d="M98,158 L126,158 M104,151 L104,165 M120,151 L120,165" stroke="#8a4a1f" stroke-width="1.3"/>
+        <text x="112" y="52" text-anchor="middle" font-size="9" fill="#4c6675">දැල්ගොටු මන්ථය</text>
+        <!-- thermometer -->
+        <g id="thermoGroup">
+          <rect x="180" y="30" width="14" height="130" rx="7" fill="#fafcfd" stroke="#4c6675" stroke-width="1.6"/>
+          <circle cx="187" cy="168" r="11" fill="#fafcfd" stroke="#4c6675" stroke-width="1.6"/>
+          <rect id="mercuryRect" x="183.5" y="120" width="7" height="45" fill="#d1453a"/>
+          <circle cx="187" cy="168" r="8" fill="#d1453a"/>
+          <text x="187" y="22" text-anchor="middle" font-size="9" fill="#4c6675">උෂ්ණත්වමානය</text>
+        </g>
+        <!-- target zone marker (drawn dynamically) -->
+        <g id="targetZone"></g>
+      </svg>
+    </div>
+
+    <div class="readout-row">
+      <div class="readout"><div class="lbl">වත්මන් උෂ්ණත්වය</div><div class="val mono" id="curTempVal">--°C</div></div>
+      <div class="readout"><div class="lbl">ආරම්භක (θ₁)</div><div class="val mono" id="theta1Val">--</div></div>
+      <div class="readout"><div class="lbl">අවසන් (θ₂)</div><div class="val mono" id="theta2Val">--</div></div>
+      <div class="readout"><div class="lbl">අයිස් කැට</div><div class="val mono" id="iceCountVal">0</div></div>
+    </div>
+
+    <div class="status-msg info show" id="statusMsg">ආරම්භ කිරීමට පහත "ආරම්භක සූදානම" බොත්තම ඔබන්න. ජලය කැලරි මීටරයට දමා, θ₁ = θ₀ + 5°C බවට පත් වේ.</div>
+
+    <div class="btnrow">
+      <button class="act" id="btnStart">▶ ආරම්භක සූදානම (θ₁ = θ₀+5)</button>
+      <button class="act secondary" id="btnIce" disabled>❄ අයිස් කැටයක් එකතු කරන්න</button>
+      <button class="act" id="btnFinal" disabled>✓ අවසන් කියවීම සටහන් කරන්න</button>
+      <button class="act ghost" id="btnReset">↺ නැවත ආරම්භ කරන්න</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">2</span>සිසිලන ප්‍රස්ථාරය (ශුද්ධකරණ රේඛා)</h2>
+    <p class="hint">තිත් රේඛා තුනෙන් θ₀+5, θ₀ සහ θ₀-5 මට්ටම් පෙන්වයි. පරීක්ෂණය θ₀-5 ට පහළින් නවතිය යුතුය.</p>
+    <div class="chart-box">
+      <svg id="chartSvg" viewBox="0 0 300 170" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">3</span>සටහන් කළ දත්ත</h2>
+    <table class="logtbl">
+      <tr><th>θ₀</th><th>θ₁</th><th>θ₂</th></tr>
+      <tr><td class="mono" id="logTheta0">--</td><td class="mono" id="logTheta1">--</td><td class="mono" id="logTheta2">--</td></tr>
+    </table>
+    <p class="hint">මෙම θ₀ / θ₁ / θ₂ අගයන් ගණකයට ස්වයංක්‍රීයව යැවීමට පහත බොත්තම භාවිත කරන්න. ස්කන්ධ (m, m₁, m₂) ඔබගේ තුලා මානයෙන් ලබාගත් සැබෑ අගයන් ගණකයේදී වෙන වශයෙන් ඇතුළත් කරන්න.</p>
+    <button class="act" id="btnSendCalc" style="margin-top:6px;">➜ ගණකයට උෂ්ණත්ව යවන්න</button>
+  </div>
+
+</section>
+
+<!-- ================= TAB 2: CALCULATOR ================= -->
+<section class="tabpane" id="tab-calc">
+
+  <div class="card">
+    <h2><span class="num">1</span>දත්ත ඇතුළත් කරන්න</h2>
+
+    <div class="grp-title">⚖ ස්කන්ධ (ග්‍රෑම්)</div>
+    <label class="field-lbl">m — හිස් කැලරි මීටරය + මන්ථය <span class="unit-tag">(g)</span></label>
+    <input type="number" id="m" value="60">
+    <label class="field-lbl">m₁ — කැලරි මීටරය + ජලය <span class="unit-tag">(g)</span></label>
+    <input type="number" id="m1" value="160">
+    <label class="field-lbl">m₂ — කැලරි මීටරය + ජලය + දිය වූ අයිස් <span class="unit-tag">(g)</span></label>
+    <input type="number" id="m2" value="170">
+
+    <div class="grp-title">🌡 උෂ්ණත්වයන් (°C)</div>
+    <div class="grid2">
+      <div><label class="field-lbl">θ₀ — කාමර උෂ්ණත්වය</label><input type="number" id="theta0" value="30"></div>
+      <div><label class="field-lbl">θ₁ — ආරම්භක</label><input type="number" id="theta1" value="35"></div>
+    </div>
+    <label class="field-lbl">θ₂ — අවසන් උෂ්ණත්වය</label>
+    <input type="number" id="theta2" value="25">
+
+    <div class="grp-title">🧪 විශිෂ්ඨ තාප ධාරිතා</div>
+    <label class="field-lbl">කැලරි මීටරයේ ද්‍රව්‍යය</label>
+    <select id="materialSel">
+      <option value="400">තඹ (Copper) — 400 J kg⁻¹K⁻¹</option>
+      <option value="910">ඇලුමිනියම් (Aluminium) — 910 J kg⁻¹K⁻¹</option>
+      <option value="380">පිත්තල (Brass) — 380 J kg⁻¹K⁻¹</option>
+      <option value="custom">වෙනත් (අගය ඇතුළත් කරන්න)</option>
+    </select>
+    <input type="number" id="cCustom" placeholder="C අගය J kg⁻¹K⁻¹" style="margin-top:8px; display:none;">
+    <label class="field-lbl">ජලයේ විශිෂ්ඨ තාප ධාරිතාව Cw <span class="unit-tag">(J kg⁻¹K⁻¹)</span></label>
+    <input type="number" id="cw" value="4200">
+
+    <div class="error-box" id="calcError"></div>
+    <button class="act" id="btnCalc" style="margin-top:14px;">🧮 L සඳහා ගණනය කරන්න</button>
+  </div>
+
+  <div class="card" id="solutionCard" style="display:none;">
+    <h2><span class="num">2</span>පියවරෙන් පියවර විසඳුම</h2>
+    <div id="solutionSteps"></div>
+    <div class="final-answer">
+      <div style="font-size:12.5px; opacity:0.9;">විශිෂ්ඨ ගුප්ත තාපය (L)</div>
+      <div class="L mono" id="finalL">--</div>
+      <div class="sub" id="finalLCompare"></div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ================= TAB 3: NOTES ================= -->
+<section class="tabpane" id="tab-notes">
+
+  <details class="note" open>
+    <summary><span class="emoji">🧰</span>අවශ්‍ය උපකරණ<span class="arrow">▸</span></summary>
+    <div class="note-body">
+      <ul>
+        <li><b>කැලරි මීටරයක්</b> — ඇතුළත බඳුන, තාපමානකයක් තුළ පිහිටුවා ඇත.</li>
+        <li><b>දැල්ගොටු මන්ථයක්</b> — ජලය හොඳින් මිශ්‍ර කිරීමට.</li>
+        <li><b>උෂ්ණත්වමානයක්</b> — 0°C – 50°C පරාසය දැක්විය හැකි.</li>
+        <li><b>ත්‍රිත්ව බාහු තුලාවක් (හෝ ඩිජිටල් තුලාවක්)</b> — ස්කන්ධ මැනීමට.</li>
+        <li><b>0°C ට ආසන්නව දිය වෙමින් පවතින අයිස් කැබලි</b> — කුඩා ප්‍රමාණයේ.</li>
+        <li><b>පෙරහන් කඩදාසි</b> — අයිස් කැබලි තෙත මැදීමට.</li>
+        <li><b>ජලය සහ බීකරයක්</b></li>
+        <li><b>සිසිල් දඬු තුලාව / බාහිර ආවරණය</b> — පරිසරයට තාප හුවමාරුව අඩු කිරීමට.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="note">
+    <summary><span class="emoji">📋</span>පරීක්ෂණ ක්‍රමය — පියවර<span class="arrow">▸</span></summary>
+    <div class="note-body">
+      <div class="step-item"><span class="step-num">1</span><div>වියළි, පිරිසිදු හිස් කැලරි මීටරයේ සහ මන්ථයේ ස්කන්ධය (m₁) මැනගන්න.</div></div>
+      <div class="step-item"><span class="step-num">2</span><div>40°C ට පමණ රත් කළ ජලය කැලරි මීටරයේ 2/3 ක් පමණ පිරෙන තෙක් එකතු කරන්න.</div></div>
+      <div class="step-item"><span class="step-num">3</span><div>ජලය සහිත කැලරි මීටරයේ ස්කන්ධය (m₂) මැනගන්න.</div></div>
+      <div class="step-item"><span class="step-num">4</span><div>කාමර උෂ්ණත්වය (θ₀) සටහන් කරගන්න. කැලරි මීටරයේ ජලයේ උෂ්ණත්වය θ₀+5°C පමණට වැඩි කිරීමෙන් පසු නිවැරදි උෂ්ණත්වය (θ₁) ලෙස ලබාගන්න.</div></div>
+      <div class="step-item"><span class="step-num">5</span><div>පෙරහන් කඩදාසියෙන් තෙතමැදූ අයිස් කැබලි කැලරි මීටරය තුළට එකින් එක දමා, දැල්ගොටු මන්ථයෙන් ජලය හොඳින් කලවම් කරමින්, එකතු කළ අයිස් කැබැල්ල සම්පූර්ණයෙන්ම ජලයේ දිය වන තුරු බලා සිටින්න.</div></div>
+      <div class="step-item"><span class="step-num">6</span><div>මිශ්‍රණයේ උෂ්ණත්වය කාමර උෂ්ණත්වයට වඩා 5°C පමණ අඩු වූ විට අයිස් එකතු කිරීම නවතා, කෙටියෙන් නිවැරදි (අවසන්) උෂ්ණත්වය (θ₂) ලබාගන්න.</div></div>
+      <div class="step-item"><span class="step-num">7</span><div>කැලරි මීටරය සහ මිශ්‍රණයේ අවසාන ස්කන්ධය (m₃ / m₂ ලෙස ගණකයේ භාවිත වේ) මැනගන්න.</div></div>
+    </div>
+  </details>
+
+  <details class="note">
+    <summary><span class="emoji">⚠️</span>වැදගත් කරුණු<span class="arrow">▸</span></summary>
+    <div class="note-body">
+      <ul>
+        <li>අයිස් එකතු කිරීමට පෙර පද්ධතියේ උෂ්ණත්වය පරිසර උෂ්ණත්වයට වඩා <b>5°C</b> කින් වැඩි කරන අතර, අවසාන මිශ්‍රණයේ උෂ්ණත්වය පරිසර උෂ්ණත්වයට වඩා <b>5°C</b> කින් අඩු වන තෙක් පරීක්ෂණය සිදුකරයි — මෙමගින් ආරම්භයේදී පරිසරයට ලැබෙන තාපය සහ අවසානයේදී පරිසරයෙන් අවශෝෂණය වන තාපය එකිනෙක අභිමුඛව අවලංගු වේ.</li>
+        <li>කැලරි මීටරය තුළ ඇති අයිස් කැටය ජලයේ පාවෙන බැවින්, එහි වායුවට ස්පර්ශ වූ කොටස වාතයෙන් තාපය ලබාගෙන දිය විය හැක. එබැවින් අයිස් කැටය ජලය තුළ සම්පූර්ණයෙන්ම ගිල්වා තැබීමට දැල්ගොටු මන්ථය යොදාගනු ලැබේ.</li>
+        <li>කුඩා අයිස් කැට සමඟ ජලය එකතුවීම වැළැක්වීම සඳහා ඒවා තෙත පෙරහන් කඩදාසියකින් තෙත මකා ගැනීමෙන් පසුව එකතු කළ යුතුය.</li>
+        <li>අයිස් කැට භාවිතයේදී විශාල අයිස් කැට යොදාගැනීම නුසුදුසුය. එවිට —
+          <ul>
+            <li>පද්ධතියේ උෂ්ණත්වය පාලනයකින් තොරව ඉක්මනින් පහත වැටේ.</li>
+            <li>ස්කන්ධයට සාපේක්ෂව පෘෂ්ඨ වර්ගඵලය කුඩා නිසා අයිස් දියවීමට ගතවන කාලය වැඩිය.</li>
+          </ul>
+        </li>
+        <li>කුඩුකළ අයිස් භාවිතය ද නුසුදුසුය — එවිට එය සමඟ ජලයද මිශ්‍ර වී ඇති අතර, ඇතුළත් වන අයිසෙහි නියම ස්කන්ධය තීරණය කළ නොහැක.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="note">
+    <summary><span class="emoji">📉</span>L අගය අඩු / වැඩි වීමට හේතු<span class="arrow">▸</span></summary>
+    <div class="note-body">
+      <b>L සඳහා අඩු අගයක් ලැබීමට හේතු:</b>
+      <ul>
+        <li>ස්කන්ධ (m, m₁, m₂) මැනීමේදී සිදුවන දෝෂ.</li>
+        <li>අයිස් සමඟ ජලය ද පද්ධතියට ඇතුළු වීම (කුඩුකළ අයිස් හෝ තෙත නොසිස්සූ අයිස් නිසා).</li>
+        <li>පරිසරයෙන් තාපය අවශෝෂණය වී තිබීම (එවිට එම අවශෝෂිත තාපයටද අයිස් වගකිව යුතු බවට වැරදි ලෙස ගණන් බැලෙයි).</li>
+        <li>අවසාන මිශ්‍රණයේ උෂ්ණත්වය නියමිත ප්‍රමිතියට වඩා අඩු මට්ටමකට පත්වීම.</li>
+      </ul>
+      <b>L සඳහා වැඩි අගයක් ලැබීමට හේතු:</b>
+      <ul>
+        <li>ස්කන්ධ (m) වැරදි ලෙස අඩුවෙන් මැනීම.</li>
+        <li>අයිස් කැටවල උෂ්ණත්වය 0°C නොව, ඊට වඩා බෙහෙවින් අඩු උෂ්ණත්වයක පැවතීම (එවිට අයිස් 0°C දක්වා රත් වීමට අමතර තාපයක් අවශෝෂණය කරන අතර එය L ට එකතු වී වැරදි ලෙස ගණන් බැලෙයි).</li>
+      </ul>
+    </div>
+  </details>
+
+</section>
+
+<!-- ================= TAB 4: PAST PAPERS ================= -->
+<section class="tabpane" id="tab-past">
+
+  <div class="qcard">
+    <div class="qhead">පසුගිය විභාග ප්‍රශ්නය — 1995</div>
+
+    <div class="qpart">
+      <div class="qtag">(a)</div>
+      <div class="qtext">ඔබ භාවිත කරන පරීක්ෂණාත්මක සැකසුම නම් කළ රූප සටහනක් අඳින්න.</div>
+      <button class="revealbtn" onclick="toggleAns(this)">පිළිතුර බලන්න</button>
+      <div class="answer">බාහිර පෙනහන් බඳුනක් තුළ ස්ථාපනය කළ කැලරි මීටරයක්, ඊට ඇතුළත ජලය කලවම් කිරීමට දැල්ගොටු මන්ථයක්, කැලරි මීටරයට කවුළුවකින් හෝ මුදුනකින් සවි කළ උෂ්ණත්වමානයක්, සහ බාහිර බඳුනට වහනය නොවීමට වැසුමක් අඩංගු වේ — ඉහත "අනුකරණය" ටැබයේ රූප සටහන බලන්න.</div>
+    </div>
+
+    <div class="qpart">
+      <div class="qtag">(b) (1)</div>
+      <div class="qtext">පහත ආකාර 3න් අයිස් ලබාගත හැකි නම්, මෙම පරීක්ෂණය සඳහා වඩාත් යෝග්‍ය ආකාරය කුමක්ද? (i) එක් විශාල අයිස් කැටයක් (ii) කුඩා අයිස් කැට කිහිපයක් (iii) කුඩුකළ අයිස්</div>
+      <button class="revealbtn" onclick="toggleAns(this)">පිළිතුර බලන්න</button>
+      <div class="answer"><b>(ii) කුඩා අයිස් කැට කිහිපයක්</b> වඩාත් යෝග්‍ය වේ.</div>
+    </div>
+
+    <div class="qpart">
+      <div class="qtag">(b) (2)</div>
+      <div class="qtext">ඉතිරි ආකාර දෙක ප්‍රතික්ෂේප කිරීම සඳහා විද්‍යාත්මක හේතු දෙකක් සඳහන් කරන්න.</div>
+      <button class="revealbtn" onclick="toggleAns(this)">පිළිතුර බලන්න</button>
+      <div class="answer">
+        <b>එක් විශාල කැටයක්:</b> ස්කන්ධයට සාපේක්ෂව පෘෂ්ඨ වර්ගඵලය කුඩා නිසා දිය වීමට වැඩි කාලයක් ගතවේ; එය නිසා පද්ධතියේ උෂ්ණත්වය පාලනයකින් තොරව වේගයෙන් පහත වැටේ.<br>
+        <b>කුඩුකළ අයිස්:</b> කුඩුකරන අවස්ථාවේදීම එයට ජලය මිශ්‍ර වී ඇති බැවින්, ඇතුළත් වන සැබෑ අයිස් ස්කන්ධය නිවැරදිව නිර්ණය කළ නොහැක.
+      </div>
+    </div>
+
+    <div class="qpart">
+      <div class="qtag">(c)</div>
+      <div class="qtext">ඔබ අයිස් ජලයට එකතු කිරීමට පෙර ගත යුතු මිනුම් 3 ලබා දෙන්න.</div>
+      <button class="revealbtn" onclick="toggleAns(this)">පිළිතුර බලන්න</button>
+      <div class="answer">1. හිස් කැලරි මීටරය + මන්ථයේ ස්කන්ධය (m). 2. කැලරි මීටරය + ජලයේ ස්කන්ධය (m₁). 3. ජලයේ ආරම්භක උෂ්ණත්වය (θ₁), එය කාමර උෂ්ණත්වයට වඩා 5°C පමණ වැඩි කර ගත් පසු.</div>
+    </div>
+
+    <div class="qpart">
+      <div class="qtag">(d)</div>
+      <div class="qtext">මෙම පරීක්ෂණයේදී පරිසරයට සිදුවන තාප හානිය අවම කිරීම සඳහා එක් අතිරේක පරීක්ෂණාත්මක ක්‍රමයක් යොදාගනු ලැබේ. එය කුමක්ද?</div>
+      <button class="revealbtn" onclick="toggleAns(this)">පිළිතුර බලන්න</button>
+      <div class="answer">ආරම්භක උෂ්ණත්වය කාමර උෂ්ණත්වයට වඩා 5°C වැඩි කරන අතර, අවසාන උෂ්ණත්වය කාමර උෂ්ණත්වයට වඩා 5°C අඩු වන තෙක් පරීක්ෂණය සිදුකෙරේ. එවිට ආරම්භයේදී පරිසරයට නැති වූ තාපය සහ අවසානයේදී පරිසරයෙන් ලැබුණු තාපය එකිනෙකට ආසන්නව සමාන වී අවලංගු වේ.</div>
+    </div>
+
+    <div class="qpart">
+      <div class="qtag">(e)</div>
+      <div class="qtext">අයිස් හා ජලය මිශ්‍ර කිරීමෙන් පසු ඔබ ගන්නා මිනුම් දෙක ප්‍රකාශ කරන්න.</div>
+      <button class="revealbtn" onclick="toggleAns(this)">පිළිතුර බලන්න</button>
+      <div class="answer">1. මිශ්‍රණයේ අවසාන උෂ්ණත්වය (θ₂). 2. කැලරි මීටරය + ජලය + දිය වූ අයිස් ඇතුළත් අවසාන ස්කන්ධය (m₂).</div>
+    </div>
+
+    <div class="qpart">
+      <div class="qtag">(f)</div>
+      <div class="qtext">මෙම පරීක්ෂණයේදී අයිස් හික්මවීමට ප්‍රමාණවත් තරම් සුළු ජල ප්‍රමාණයක් පමණක් භාවිත කළහොත් නිවැරදි ප්‍රතිඵලයක් ලබාගත නොහැක. මීට හේතු 2ක් ප්‍රකාශ කරන්න.</div>
+      <button class="revealbtn" onclick="toggleAns(this)">පිළිතුර බලන්න</button>
+      <div class="answer">1. අඩු ජල ප්‍රමාණයක් නිසා අයිස් කැටය සම්පූර්ණයෙන්ම ජලයෙන් ආවරණය නොවී, එහි කොටසක් වාතයට නිරාවරණය විය හැක. 2. එවිට අයිස් එකතු කළ විට උෂ්ණත්වය විශාල ලෙස හදිසියේ පහත වැටෙන අතර, පද්ධතියේ මුළු තාප ධාරිතාව සුළු බැවින් මිනුම් දෝෂ සාපේක්ෂව විශාල බලපෑමක් ඇති කරයි.</div>
+    </div>
+
+    <div class="qpart">
+      <div class="qtag">(g)</div>
+      <div class="qtext">ඉහත (c) සහ (e) හි ලබාගත් මිනුම් යොදාගෙන L ගණනය කිරීමේදී, අයිස්වල උෂ්ණත්වය සාමාන්‍යයෙන් 0°C ලෙස උපකල්පනය කෙරේ. නමුත් අයිස්වල සැබෑ උෂ්ණත්වය −2°C නම්, එම උපකල්පනය යටතේ ගණනය කරන L හි අගය එහි නිවැරදි අගයට වඩා දක්වන අපගමනය ප්‍රතිශතයක් ලෙස දක්වන්න.
+      (L = 3.3×10⁵ J kg⁻¹, S(අයිස්) = 2.2×10³ J kg⁻¹K⁻¹)</div>
+      <button class="revealbtn" onclick="toggleAns(this)">පිළිතුර බලන්න</button>
+      <div class="answer">
+        අයිස් −2°C සිට 0°C දක්වා රත් වීමට අවශ්‍ය අමතර තාපය ගණනයට ඇතුළත් නොකළ බැවින්, එම අමතර තාපය වැරදි ලෙස L ට එකතු වේ.<br>
+        අපගමනය = S × ΔT = 2.2×10³ × 2 = 4.4×10³ J kg⁻¹<br>
+        ප්‍රතිශත අපගමනය = (4.4×10³ / 3.3×10⁵) × 100 ≈ <b>1.33%</b> (ගණනය කළ L, සැබෑ අගයට වඩා ඉහළින් පවතී).
+      </div>
+    </div>
+
+  </div>
+</section>
+
+</main>
+
+<script>
+(function(){
+  /* ---------- Tabs ---------- */
+  const tabBtns = document.querySelectorAll('.tabbtn');
+  const panes = document.querySelectorAll('.tabpane');
+  tabBtns.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      tabBtns.forEach(b=>b.classList.remove('active'));
+      panes.forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  /* ---------- Simulation state ---------- */
+  const roomTempInput = document.getElementById('roomTempInput');
+  const btnStart = document.getElementById('btnStart');
+  const btnIce = document.getElementById('btnIce');
+  const btnFinal = document.getElementById('btnFinal');
+  const btnReset = document.getElementById('btnReset');
+  const statusMsg = document.getElementById('statusMsg');
+  const curTempVal = document.getElementById('curTempVal');
+  const theta1Val = document.getElementById('theta1Val');
+  const theta2Val = document.getElementById('theta2Val');
+  const iceCountVal = document.getElementById('iceCountVal');
+  const mercuryRect = document.getElementById('mercuryRect');
+  const targetZone = document.getElementById('targetZone');
+  const apparatusWrap = document.getElementById('apparatusWrap');
+  const chartSvg = document.getElementById('chartSvg');
+
+  let roomTemp = 30, theta1 = null, theta2 = null, curTemp = null;
+  let iceCount = 0, coolingData = [], scaleMin = 15, scaleMax = 45;
+  let busy = false;
+
+  const TUBE_TOP = 34, TUBE_BOTTOM = 158; // svg y-coords for mercury travel
+
+  function tempToY(t){
+    const clamped = Math.max(scaleMin, Math.min(scaleMax, t));
+    const frac = (clamped - scaleMin) / (scaleMax - scaleMin);
+    return TUBE_BOTTOM - frac * (TUBE_BOTTOM - TUBE_TOP);
+  }
+
+  function updateThermo(t){
+    const y = tempToY(t);
+    const h = TUBE_BOTTOM - y + 8;
+    mercuryRect.setAttribute('y', y);
+    mercuryRect.setAttribute('height', Math.max(6,h));
+    curTempVal.textContent = t.toFixed(1)+'°C';
+  }
+
+  function drawTargetZone(){
+    const yHigh = tempToY(roomTemp+5);
+    const yMid = tempToY(roomTemp);
+    const yLow = tempToY(roomTemp-5);
+    targetZone.innerHTML =
+      '<rect x="176" y="'+Math.min(yHigh,yLow)+'" width="22" height="'+Math.abs(yLow-yHigh)+'" fill="#3a8a5c" opacity="0.12"/>'+
+      '<line x1="172" y1="'+yHigh+'" x2="220" y2="'+yHigh+'" stroke="#2f8a5c" stroke-width="1.2" stroke-dasharray="3,2"/>'+
+      '<text x="222" y="'+(yHigh+3)+'" font-size="8" fill="#2f8a5c">θ₀+5</text>'+
+      '<line x1="172" y1="'+yMid+'" x2="220" y2="'+yMid+'" stroke="#8a4a1f" stroke-width="1" stroke-dasharray="2,2"/>'+
+      '<text x="222" y="'+(yMid+3)+'" font-size="8" fill="#8a4a1f">θ₀</text>'+
+      '<line x1="172" y1="'+yLow+'" x2="220" y2="'+yLow+'" stroke="#2f8a5c" stroke-width="1.2" stroke-dasharray="3,2"/>'+
+      '<text x="222" y="'+(yLow+3)+'" font-size="8" fill="#2f8a5c">θ₀-5</text>';
+  }
+
+  function setStatus(text, kind){
+    statusMsg.className = 'status-msg show '+kind;
+    statusMsg.textContent = text;
+  }
+
+  function drawChart(){
+    const w=300,h=170, padL=28,padR=10,padT=10,padB=22;
+    const n = coolingData.length;
+    const yHigh = roomTemp+5, yLow = roomTemp-5;
+    function xFor(i){ return padL + (n<=1?0:(i/(Math.max(1,n-1)))*(w-padL-padR)); }
+    function yFor(t){
+      const frac = (t - scaleMin)/(scaleMax-scaleMin);
+      return h-padB - frac*(h-padT-padB);
+    }
+    let svg = '';
+    // reference lines
+    [roomTemp+5, roomTemp, roomTemp-5].forEach(t=>{
+      const y = yFor(t);
+      svg += '<line x1="'+padL+'" y1="'+y+'" x2="'+(w-padR)+'" y2="'+y+'" stroke="#cfe1e7" stroke-width="1" stroke-dasharray="4,3"/>';
+      svg += '<text x="2" y="'+(y+3)+'" font-size="8" fill="#4c6675">'+t.toFixed(0)+'</text>';
+    });
+    svg += '<line x1="'+padL+'" y1="'+padT+'" x2="'+padL+'" y2="'+(h-padB)+'" stroke="#8a4a1f" stroke-width="1"/>';
+    svg += '<line x1="'+padL+'" y1="'+(h-padB)+'" x2="'+(w-padR)+'" y2="'+(h-padB)+'" stroke="#8a4a1f" stroke-width="1"/>';
+    svg += '<text x="'+(w/2-30)+'" y="'+(h-4)+'" font-size="8" fill="#4c6675">අයිස් එකතු කිරීම් (කාලය) →</text>';
+    if(n>0){
+      let pts = coolingData.map((d,i)=> xFor(i)+','+yFor(d)).join(' ');
+      svg += '<polyline points="'+pts+'" fill="none" stroke="#2f7690" stroke-width="2.2"/>';
+      coolingData.forEach((d,i)=>{
+        svg += '<circle cx="'+xFor(i)+'" cy="'+yFor(d)+'" r="3" fill="#d1453a"/>';
+      });
+    }
+    chartSvg.innerHTML = svg;
+  }
+
+  function resetAll(){
+    roomTemp = parseFloat(roomTempInput.value)||30;
+    scaleMin = roomTemp-15; scaleMax = roomTemp+15;
+    theta1=null; theta2=null; curTemp=null; iceCount=0; coolingData=[]; busy=false;
+    theta1Val.textContent='--'; theta2Val.textContent='--'; iceCountVal.textContent='0';
+    curTempVal.textContent = roomTemp.toFixed(1)+'°C';
+    document.getElementById('logTheta0').textContent='--';
+    document.getElementById('logTheta1').textContent='--';
+    document.getElementById('logTheta2').textContent='--';
+    updateThermo(roomTemp);
+    drawTargetZone();
+    drawChart();
+    btnStart.disabled=false; btnIce.disabled=true; btnFinal.disabled=true;
+    setStatus('ආරම්භ කිරීමට "ආරම්භක සූදානම" බොත්තම ඔබන්න. ජලය කැලරි මීටරයට දමා, θ₁ = θ₀ + 5°C බවට පත් වේ.', 'info');
+  }
+
+  btnStart.addEventListener('click', ()=>{
+    roomTemp = parseFloat(roomTempInput.value)||30;
+    scaleMin = roomTemp-15; scaleMax = roomTemp+15;
+    theta1 = roomTemp+5;
+    curTemp = theta1;
+    theta1Val.textContent = theta1.toFixed(1)+'°C';
+    document.getElementById('logTheta0').textContent = roomTemp.toFixed(1);
+    document.getElementById('logTheta1').textContent = theta1.toFixed(1);
+    coolingData = [curTemp];
+    updateThermo(curTemp);
+    drawTargetZone();
+    drawChart();
+    btnStart.disabled = true;
+    btnIce.disabled = false;
+    setStatus('✓ ආරම්භක උෂ්ණත්වය (θ₁) කාමර උෂ්ණත්වයට වඩා 5°C වැඩිය — දැන් අයිස් කැට එකින් එක එකතු කරන්න.', 'ok');
+  });
+
+  btnIce.addEventListener('click', ()=>{
+    if(busy) return;
+    busy = true;
+    // spawn falling ice cube visual
+    const cube = document.createElement('div');
+    cube.className='ice-cube';
+    const leftPct = 32 + Math.random()*36;
+    cube.style.left = leftPct+'%';
+    apparatusWrap.appendChild(cube);
+    requestAnimationFrame(()=>{
+      cube.style.top = '58%';
+      cube.style.transform = 'scale(0.3)';
+    });
+    setTimeout(()=>{ cube.remove(); }, 1150);
+
+    setTimeout(()=>{
+      iceCount++;
+      iceCountVal.textContent = iceCount;
+      const floor = roomTemp-5-2;
+      const drop = 2.5 + Math.random()*2.5;
+      curTemp = Math.max(floor, curTemp - drop);
+      coolingData.push(curTemp);
+      updateThermo(curTemp);
+      drawChart();
+      busy = false;
+      if(curTemp <= roomTemp-5){
+        btnIce.disabled = true;
+        btnFinal.disabled = false;
+        setStatus('✓ මිශ්‍රණයේ උෂ්ණත්වය කාමර උෂ්ණත්වයට වඩා 5°C කින් අඩුයි — දැන් අයිස් එකතු කිරීම නවතා අවසන් කියවීම සටහන් කරන්න.', 'ok');
+      } else {
+        setStatus('තවම ඉලක්කයට ළඟා වී නැත (θ₀-5 = '+(roomTemp-5).toFixed(1)+'°C). තව අයිස් කැටයක් එකතු කරන්න.', 'info');
+      }
+    }, 620);
+  });
+
+  btnFinal.addEventListener('click', ()=>{
+    theta2 = curTemp;
+    theta2Val.textContent = theta2.toFixed(1)+'°C';
+    document.getElementById('logTheta2').textContent = theta2.toFixed(1);
+    btnFinal.disabled = true;
+    setStatus('✓ අවසන් උෂ්ණත්වය (θ₂) සටහන් විය. දැන් "ගණකයට උෂ්ණත්ව යවන්න" ඔබා, තුලාවෙන් ලබාගත් ස්කන්ධ අගයන් ගණකයේ ඇතුළත් කරන්න.', 'ok');
+  });
+
+  btnReset.addEventListener('click', resetAll);
+
+  document.getElementById('btnSendCalc').addEventListener('click', ()=>{
+    document.getElementById('theta0').value = roomTemp.toFixed(1);
+    if(theta1!==null) document.getElementById('theta1').value = theta1.toFixed(1);
+    if(theta2!==null) document.getElementById('theta2').value = theta2.toFixed(1);
+    tabBtns.forEach(b=>b.classList.remove('active'));
+    panes.forEach(p=>p.classList.remove('active'));
+    document.querySelector('.tabbtn[data-tab="calc"]').classList.add('active');
+    document.getElementById('tab-calc').classList.add('active');
+  });
+
+  resetAll();
+
+  /* ---------- Calculator ---------- */
+  const materialSel = document.getElementById('materialSel');
+  const cCustom = document.getElementById('cCustom');
+  materialSel.addEventListener('change', ()=>{
+    cCustom.style.display = materialSel.value==='custom' ? 'block' : 'none';
+  });
+
+  document.getElementById('btnCalc').addEventListener('click', ()=>{
+    const errBox = document.getElementById('calcError');
+    errBox.classList.remove('show'); errBox.textContent='';
+
+    const m = parseFloat(document.getElementById('m').value);
+    const m1 = parseFloat(document.getElementById('m1').value);
+    const m2 = parseFloat(document.getElementById('m2').value);
+    const th0 = parseFloat(document.getElementById('theta0').value);
+    const th1 = parseFloat(document.getElementById('theta1').value);
+    const th2 = parseFloat(document.getElementById('theta2').value);
+    const Cw = parseFloat(document.getElementById('cw').value);
+    const C = materialSel.value==='custom' ? parseFloat(cCustom.value) : parseFloat(materialSel.value);
+
+    const vals=[m,m1,m2,th1,th2,Cw,C];
+    if(vals.some(v=>isNaN(v))){
+      errBox.textContent = 'කරුණාකර සියලුම ක්ෂේත්‍ර නිවැරදිව පුරවන්න.';
+      errBox.classList.add('show');
+      return;
+    }
+    if(m1<=m){ errBox.textContent='m₁ අගය m ට වඩා වැඩි විය යුතුය (ජල ස්කන්ධය ධන විය යුතුය).'; errBox.classList.add('show'); return; }
+    if(m2<=m1){ errBox.textContent='m₂ අගය m₁ ට වඩා වැඩි විය යුතුය (දිය වූ අයිස් ස්කන්ධය ධන විය යුතුය).'; errBox.classList.add('show'); return; }
+    if(th1<=th2){ errBox.textContent='θ₁ අගය θ₂ ට වඩා වැඩි විය යුතුය.'; errBox.classList.add('show'); return; }
+
+    const mw_water = (m1-m)/1000;   // kg
+    const mw_ice = (m2-m1)/1000;    // kg
+    const m_kg = m/1000;
+    const heatLost = (m_kg*C + mw_water*Cw)*(th1-th2);
+    const rhsFixed = mw_ice*Cw*th2;
+    const L = (heatLost - rhsFixed)/mw_ice;
+
+    const steps = document.getElementById('solutionSteps');
+    steps.innerHTML =
+      '<div class="solution-step"><span class="stepno">1</span>ජලයේ ස්කන්ධය = m₁ − m = '+m1+' − '+m+' = <b>'+(m1-m).toFixed(1)+' g</b> = '+mw_water.toFixed(4)+' kg</div>'+
+      '<div class="solution-step"><span class="stepno">2</span>දිය වූ අයිසෙහි ස්කන්ධය = m₂ − m₁ = '+m2+' − '+m1+' = <b>'+(m2-m1).toFixed(1)+' g</b> = '+mw_ice.toFixed(4)+' kg</div>'+
+      '<div class="solution-step"><span class="stepno">3</span>කැලරි මීටරය + ජලය මගින් පිටකළ තාපය = (m·C + m<sub>ජලය</sub>·C<sub>w</sub>)(θ₁−θ₂)<br>'+
+        '= ('+m_kg.toFixed(4)+'×'+C+' + '+mw_water.toFixed(4)+'×'+Cw+') × ('+th1+'−'+th2+')<br>'+
+        '= '+heatLost.toFixed(2)+' J</div>'+
+      '<div class="solution-step"><span class="stepno">4</span>අයිස් දිය වූ ජලය θ₂ දක්වා රත් වීමට ගත් තාපය = m<sub>අයිස්</sub>·C<sub>w</sub>·θ₂ = '+mw_ice.toFixed(4)+'×'+Cw+'×'+th2+' = '+rhsFixed.toFixed(2)+' J</div>'+
+      '<div class="solution-step"><span class="stepno">5</span>තාප සමතුලිතතාවයෙන්: m<sub>අයිස්</sub>·L + '+rhsFixed.toFixed(2)+' = '+heatLost.toFixed(2)+'<br>'+
+        '⟹ L = ('+heatLost.toFixed(2)+' − '+rhsFixed.toFixed(2)+') ÷ '+mw_ice.toFixed(4)+'</div>';
+
+    document.getElementById('finalL').textContent = L.toFixed(0)+' J kg⁻¹  (≈ '+(L/1000).toFixed(2)+'×10³ J kg⁻¹)';
+    const standard = 3.34e5;
+    const diffPct = ((L-standard)/standard*100);
+    document.getElementById('finalLCompare').textContent = 'ප්‍රමිත අගය 3.34×10⁵ J kg⁻¹ හා සසඳන විට අපගමනය ≈ '+diffPct.toFixed(2)+'%';
+    document.getElementById('solutionCard').style.display='block';
+    document.getElementById('solutionCard').scrollIntoView({behavior:'smooth', block:'nearest'});
+  });
+
+  window.toggleAns = function(btn){
+    const ans = btn.nextElementSibling;
+    ans.classList.toggle('show');
+    btn.textContent = ans.classList.contains('show') ? 'පිළිතුර සඟවන්න' : 'පිළිතුර බලන්න';
+  };
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>ස්ථිර පරිමා වායු නියමය — අන්තර්ක්‍රියාකාරී විද්‍යාගාරය</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Sinhala:wght@400;600;700&family=Noto+Sans+Sinhala:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0e1620;
+  --panel:#17212c;
+  --panel-2:#1e2a37;
+  --line:rgba(200,214,224,0.14);
+  --paper:#ece4d3;
+  --paper-dim:#c9c0ac;
+  --brass:#c8963e;
+  --brass-soft:rgba(200,150,62,0.16);
+  --mercury:#b9c6cf;
+  --flame:#cc4b23;
+  --flame-2:#e8823f;
+  --teal:#4f9a94;
+  --text:#eae3d6;
+  --text-dim:#a8b0ba;
+  --radius:14px;
+  --shadow:0 12px 30px rgba(0,0,0,0.35);
+}
+[data-theme="light"]{
+  --ink:#f4efe4;
+  --panel:#ffffff;
+  --panel-2:#f7f2e6;
+  --line:rgba(30,30,30,0.12);
+  --paper:#fffdf8;
+  --paper-dim:#e6ddc9;
+  --text:#1c2430;
+  --text-dim:#5b6270;
+  --shadow:0 10px 26px rgba(60,50,30,0.12);
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0; padding:0;}
+body{
+  background:var(--ink);
+  color:var(--text);
+  font-family:"Noto Sans Sinhala","Noto Serif Sinhala",sans-serif;
+  line-height:1.6;
+  transition:background .3s ease, color .3s ease;
+  padding-bottom:70px;
+}
+.mono{font-family:"JetBrains Mono",monospace;}
+.wrap{max-width:760px; margin:0 auto; padding:0 16px;}
+
+/* HERO */
+header.hero{
+  position:relative;
+  padding:34px 16px 26px;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(200,150,62,0.16), transparent 55%),
+    radial-gradient(circle at 85% 0%, rgba(79,154,148,0.14), transparent 50%),
+    var(--ink);
+  border-bottom:1px solid var(--line);
+}
+.eyebrow{
+  display:inline-flex; align-items:center; gap:8px;
+  font-family:"JetBrains Mono",monospace; font-size:11.5px; letter-spacing:.14em;
+  color:var(--brass); text-transform:uppercase; margin-bottom:14px;
+}
+.eyebrow::before{content:""; width:22px; height:1px; background:var(--brass);}
+h1.title{
+  font-family:"Noto Serif Sinhala",serif;
+  font-weight:700; font-size:clamp(24px,6.2vw,34px);
+  margin:0 0 8px; color:var(--text); letter-spacing:.01em;
+}
+p.subtitle{
+  color:var(--text-dim); font-size:14.5px; margin:0; max-width:56ch;
+}
+.eqn-strip{
+  margin-top:18px; display:flex; gap:10px; flex-wrap:wrap;
+}
+.eqn-chip{
+  font-family:"JetBrains Mono",monospace; font-size:13px;
+  background:var(--brass-soft); border:1px solid rgba(200,150,62,0.35);
+  color:var(--brass); padding:6px 12px; border-radius:999px;
+}
+.theme-btn{
+  position:absolute; top:18px; right:16px;
+  width:38px; height:38px; border-radius:50%;
+  border:1px solid var(--line); background:var(--panel-2);
+  color:var(--text); font-size:16px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+}
+
+/* NAV TABS */
+nav.tabs{
+  position:sticky; top:0; z-index:50;
+  background:var(--ink); border-bottom:1px solid var(--line);
+  overflow-x:auto; white-space:nowrap; scrollbar-width:none;
+}
+nav.tabs::-webkit-scrollbar{display:none;}
+.tabs-inner{display:flex; gap:4px; padding:10px 12px; max-width:760px; margin:0 auto;}
+.tab-btn{
+  flex:0 0 auto; font-family:"Noto Sans Sinhala",sans-serif; font-weight:600; font-size:13.5px;
+  padding:9px 14px; border-radius:10px; border:1px solid transparent;
+  background:transparent; color:var(--text-dim); cursor:pointer; transition:.2s;
+}
+.tab-btn.active{
+  background:var(--brass-soft); color:var(--brass); border-color:rgba(200,150,62,0.35);
+}
+
+main{padding-top:22px;}
+section.view{display:none; padding-bottom:10px;}
+section.view.active{display:block; animation:fade .35s ease;}
+@keyframes fade{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+.card{
+  background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+  padding:18px; margin-bottom:16px; box-shadow:var(--shadow);
+}
+.card h2{
+  font-family:"Noto Serif Sinhala",serif; font-size:19px; margin:0 0 4px; color:var(--text);
+  display:flex; align-items:center; gap:8px;
+}
+.card h2 .num{
+  font-family:"JetBrains Mono",monospace; font-size:11px; color:var(--brass);
+  border:1px solid rgba(200,150,62,0.4); border-radius:6px; padding:2px 6px;
+}
+.card .desc{color:var(--text-dim); font-size:13.5px; margin-bottom:14px;}
+
+/* SIMULATOR */
+.sim-stage{
+  background:linear-gradient(180deg, var(--panel-2), var(--panel));
+  border-radius:12px; padding:6px; border:1px solid var(--line);
+}
+.readout-grid{
+  display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:14px;
+}
+.readout{
+  background:var(--panel-2); border:1px solid var(--line); border-radius:10px;
+  padding:10px 8px; text-align:center;
+}
+.readout .lbl{font-size:11px; color:var(--text-dim); margin-bottom:4px;}
+.readout .val{font-family:"JetBrains Mono",monospace; font-weight:700; font-size:16px; color:var(--brass);}
+.slider-row{margin-top:16px;}
+.slider-row label{font-size:13px; color:var(--text-dim); display:flex; justify-content:space-between;}
+input[type=range]{
+  width:100%; height:6px; border-radius:4px; -webkit-appearance:none; margin-top:8px;
+  background:linear-gradient(90deg, var(--teal), var(--flame-2), var(--flame));
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:22px; height:22px; border-radius:50%;
+  background:var(--paper); border:3px solid var(--brass); cursor:pointer; margin-top:-8px;
+}
+input[type=range]::-moz-range-thumb{
+  width:22px; height:22px; border-radius:50%; background:var(--paper); border:3px solid var(--brass); cursor:pointer;
+}
+.btn-row{display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;}
+button.btn{
+  font-family:"Noto Sans Sinhala",sans-serif; font-weight:600; font-size:13.5px;
+  padding:10px 16px; border-radius:10px; border:1px solid rgba(200,150,62,0.4);
+  background:var(--brass-soft); color:var(--brass); cursor:pointer; transition:.15s;
+}
+button.btn:active{transform:scale(.97);}
+button.btn.ghost{background:transparent; color:var(--text-dim); border-color:var(--line);}
+button.btn.danger{color:#e07a5f; border-color:rgba(224,122,95,.4); background:rgba(224,122,95,.1);}
+
+table.data-table{width:100%; border-collapse:collapse; margin-top:12px; font-size:12.5px;}
+table.data-table th, table.data-table td{
+  border:1px solid var(--line); padding:6px 4px; text-align:center; font-family:"JetBrains Mono",monospace;
+}
+table.data-table th{background:var(--panel-2); color:var(--text-dim); font-family:"Noto Sans Sinhala",sans-serif; font-size:11.5px;}
+.table-wrap{overflow-x:auto;}
+
+/* GRAPHS */
+.graph-box{background:var(--paper); border-radius:10px; padding:8px; margin-top:10px;}
+.graph-box svg{width:100%; height:auto; display:block;}
+.graph-hint{font-size:12px; color:var(--text-dim); margin-top:8px;}
+
+/* ACCORDION */
+.acc-item{border:1px solid var(--line); border-radius:10px; margin-bottom:10px; overflow:hidden;}
+.acc-head{
+  padding:13px 14px; display:flex; justify-content:space-between; align-items:center;
+  cursor:pointer; background:var(--panel-2); font-weight:600; font-size:14px;
+}
+.acc-head .chev{transition:.25s; color:var(--brass);}
+.acc-item.open .chev{transform:rotate(180deg);}
+.acc-body{max-height:0; overflow:hidden; transition:max-height .3s ease;}
+.acc-body-in{padding:14px; font-size:13.5px; color:var(--text-dim); border-top:1px solid var(--line);}
+
+/* QA */
+.qa-item{border:1px solid var(--line); border-radius:10px; margin-bottom:10px; background:var(--panel-2);}
+.qa-q{padding:12px 14px; display:flex; gap:10px; cursor:pointer; font-size:13.5px; font-weight:600;}
+.qa-q .letter{
+  flex:0 0 auto; width:24px; height:24px; border-radius:50%; background:var(--brass-soft); color:var(--brass);
+  display:flex; align-items:center; justify-content:center; font-size:12px; font-family:"JetBrains Mono",monospace;
+}
+.qa-a{max-height:0; overflow:hidden; transition:max-height .3s ease;}
+.qa-a-in{padding:0 14px 14px 48px; font-size:13.5px; color:var(--text-dim);}
+
+.calc-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;}
+.calc-field label{font-size:11.5px; color:var(--text-dim); display:block; margin-bottom:4px;}
+.calc-field input{
+  width:100%; padding:9px 10px; border-radius:8px; border:1px solid var(--line);
+  background:var(--panel); color:var(--text); font-family:"JetBrains Mono",monospace; font-size:13px;
+}
+.result-box{
+  margin-top:14px; background:var(--brass-soft); border:1px solid rgba(200,150,62,.35);
+  border-radius:10px; padding:12px 14px; font-size:13.5px;
+}
+.result-box .r-line{display:flex; justify-content:space-between; margin:4px 0; font-family:"JetBrains Mono",monospace;}
+
+footer{text-align:center; padding:24px 16px 10px; color:var(--text-dim); font-size:12px;}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <button class="theme-btn" id="themeBtn" aria-label="theme">🌙</button>
+  <div class="eyebrow">උසස් පෙළ භෞතික විද්‍යාව · ප්‍රායෝගික</div>
+  <h1 class="title">ස්ථිර පරිමාවේදී වායුවක උෂ්ණත්වය හා පීඩනය අතර සම්බන්ධතාව</h1>
+  <p class="subtitle">Constant-volume gas thermometer එකක් උපයෝගී කරගෙන, උෂ්ණත්වය සමඟ පීඩනය වෙනස් වන ආකාරය සජීවීව නිරීක්ෂණය කර, ඔබේම දත්ත වලින් ප්‍රස්ථාර නිර්මාණය කරන්න.</p>
+  <div class="eqn-strip">
+    <span class="eqn-chip">PV = nRT</span>
+    <span class="eqn-chip">P ∝ T (V, m ස්ථිර)</span>
+    <span class="eqn-chip">0°C = 273 K</span>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="tabs-inner">
+    <button class="tab-btn active" data-view="sim">⚗️ සිමියුලේටරය</button>
+    <button class="tab-btn" data-view="graph">📈 ප්‍රස්ථාර</button>
+    <button class="tab-btn" data-view="theory">📖 න්‍යාය</button>
+    <button class="tab-btn" data-view="exam">📝 2015 විභාගය</button>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<!-- ============ SIMULATOR VIEW ============ -->
+<section class="view active" id="view-sim">
+  <div class="card">
+    <h2><span class="num">01</span> අන්තර්ක්‍රියාකාරී උපකරණ පද්ධතිය</h2>
+    <p class="desc">ස්ලයිඩරය මගින් ජල ස්නානයේ උෂ්ණත්වය සෙමින් වැඩි කරන්න — වායුවේ පීඩනය ගැලවුම් මානය (gauge) මත සජීවීව වෙනස් වන අයුරු බලන්න.</p>
+    <div class="sim-stage">
+      <svg id="apparatusSvg" viewBox="0 0 340 260" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div class="readout-grid">
+      <div class="readout"><div class="lbl">θ / °C</div><div class="val" id="roTheta">0.0</div></div>
+      <div class="readout"><div class="lbl">T / K</div><div class="val" id="roT">273.0</div></div>
+      <div class="readout"><div class="lbl">P / kPa</div><div class="val" id="roP">100.0</div></div>
+    </div>
+    <div class="slider-row">
+      <label>ජල ස්නානයේ උෂ්ණත්වය <span class="mono" id="sliderLbl">0 °C</span></label>
+      <input type="range" id="tempSlider" min="0" max="110" step="0.5" value="0">
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="recordBtn">✓ අගය සටහන් කරගන්න</button>
+      <button class="btn ghost" id="clearBtn">↺ දත්ත ඉවත් කරන්න</button>
+    </div>
+    <div class="table-wrap">
+      <table class="data-table" id="dataTable">
+        <thead><tr><th>#</th><th>θ / °C</th><th>T / K</th><th>P / kPa</th><th></th></tr></thead>
+        <tbody id="dataTbody"></tbody>
+      </table>
+    </div>
+    <p class="graph-hint">දත්ත ලකුණු 5–8ක් පමණ, උෂ්ණත්වය 10°C පමණින් වැඩි කරමින් සටහන් කරගන්න — එවිට "ප්‍රස්ථාර" ටැබය තුළ නිවැරදි රේඛාවක් ලැබේ.</p>
+  </div>
+</section>
+
+<!-- ============ GRAPH VIEW ============ -->
+<section class="view" id="view-graph">
+  <div class="card">
+    <h2><span class="num">02</span> P – T/K ප්‍රස්ථාරය</h2>
+    <p class="desc">නිරපේක්ෂ උෂ්ණත්වයට එදිරිව පීඩනය ප්‍රස්ථාරගත කළ විට, රේඛාව සම්භවය (origin) හරහා ගමන් කරයි.</p>
+    <div class="graph-box"><svg id="graphPK" viewBox="0 0 320 220"></svg></div>
+  </div>
+  <div class="card">
+    <h2><span class="num">03</span> P – θ/°C ප්‍රස්ථාරය</h2>
+    <p class="desc">සෙල්සියස් උෂ්ණත්වයට එදිරිව පීඩනය ප්‍රස්ථාරගත කළ විට, රේඛාව දිගු කළ විට x-අක්ෂය -273°C දී ඡේදනය කරයි — එනම් නිරපේක්ෂ ශූන්‍යය.</p>
+    <div class="graph-box"><svg id="graphPC" viewBox="0 0 320 220"></svg></div>
+    <p class="graph-hint" id="graphNote">දත්ත ලකුණු දෙකක්වත් සටහන් කරගත් පසු, දිගු කළ රේඛාව -273°C ලක්ෂ්‍යය වෙත ළඟා වේද යන්න මෙහි පෙන්වයි.</p>
+  </div>
+</section>
+
+<!-- ============ THEORY VIEW ============ -->
+<section class="view" id="view-theory">
+  <div class="card">
+    <h2><span class="num">04</span> සිද්ධාන්තය හා අවශ්‍ය කරුණු</h2>
+    <p class="desc">පහත එක් එක් කරුණ මත තට්ටු කර විස්තර බලන්න.</p>
+    <div id="accHost"></div>
+  </div>
+</section>
+
+<!-- ============ EXAM VIEW ============ -->
+<section class="view" id="view-exam">
+  <div class="card">
+    <h2><span class="num">05</span> 2015 විභාග ප්‍රශ්නය — රචනා ප්‍රශ්න අභ්‍යාසය</h2>
+    <p class="desc">එක් එක් උප ප්‍රශ්නය මත තට්ටු කර, ආදර්ශ පිළිතුර පරීක්ෂා කරගන්න.</p>
+    <div id="qaHost"></div>
+  </div>
+  <div class="card">
+    <h2><span class="num">06</span> අන්තර්ක්‍රියාකාරී ගණන කිරීම — P₁, P₂ (h අංශය)</h2>
+    <p class="desc">ඔබේ "සිමියුලේටරය" දත්තවලින් ලද එක් ලකුණක් (θ, T, P) මෙහි ඇතුළත් කරන්න — එවිට nR ගණනය කර, 600K දී V₁ = 20×10⁻³ m³ සහ V₂ = 60×10⁻³ m³ සඳහා අනුරූප P₁ හා P₂ ස්වයංක්‍රීයව ගණනය කෙරේ.</p>
+    <div class="calc-grid">
+      <div class="calc-field"><label>ආශ්‍රිත T (K)</label><input type="number" id="refT" value="373" step="1"></div>
+      <div class="calc-field"><label>ආශ්‍රිත P (kPa)</label><input type="number" id="refP" value="136.6" step="0.1"></div>
+    </div>
+    <div class="btn-row"><button class="btn" id="calcBtn">ගණනය කරන්න</button></div>
+    <div class="result-box" id="calcResult"></div>
+    <div class="graph-box"><svg id="graphPV" viewBox="0 0 320 220"></svg></div>
+    <p class="graph-hint">(V ස්ථිර නොව, T = 600K දී ස්ථිර වේ — එබැවින් P ∝ 1/V, එනම් Boyle නියමයට අනුරූප අධි-අතිශය වක්‍රයක් ලැබේ.)</p>
+  </div>
+</section>
+
+</main>
+<footer>Dr. Darshana Ukuwela — Advanced Level Physics Heat Practicals · Interactive Edition</footer>
+
+<script>
+/* ===================== THEME ===================== */
+const themeBtn = document.getElementById('themeBtn');
+themeBtn.onclick = ()=>{
+  const cur = document.documentElement.getAttribute('data-theme');
+  const next = cur === 'light' ? 'dark' : 'light';
+  if(next==='light'){document.documentElement.setAttribute('data-theme','light'); themeBtn.textContent='☀️';}
+  else{document.documentElement.removeAttribute('data-theme'); themeBtn.textContent='🌙';}
+};
+
+/* ===================== TABS ===================== */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.onclick = ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('view-'+btn.dataset.view).classList.add('active');
+    if(btn.dataset.view==='graph') drawGraphs();
+  };
+});
+
+/* ===================== PHYSICS MODEL ===================== */
+// P(kPa) = k * T(K), calibrated so ~100 kPa at 273K
+const K_CONST = 100/273;
+function calcT(theta){ return theta + 273; }
+function calcP(T){ return K_CONST * T; }
+
+let readings = [];
+
+/* ===================== APPARATUS SVG ===================== */
+const svg = document.getElementById('apparatusSvg');
+function buildApparatus(){
+  svg.innerHTML = `
+  <defs>
+    <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4f9a94" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#2c6b66" stop-opacity="0.75"/>
+    </linearGradient>
+    <radialGradient id="bulbGrad" cx="50%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#dfe7ea" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#9fb0b8" stop-opacity="0.55"/>
+    </radialGradient>
+  </defs>
+  <!-- stand -->
+  <rect x="14" y="228" width="60" height="6" rx="2" fill="#5a4632"/>
+  <rect x="40" y="150" width="6" height="80" fill="#7a6142"/>
+  <!-- water bath -->
+  <rect x="30" y="150" width="170" height="86" rx="10" fill="none" stroke="var(--brass,#c8963e)" stroke-width="3"/>
+  <clipPath id="bathClip"><rect x="33" y="153" width="164" height="80" rx="8"/></clipPath>
+  <rect id="waterFill" x="33" y="170" width="164" height="63" fill="url(#waterGrad)" clip-path="url(#bathClip)"/>
+  <!-- flame -->
+  <g id="flameGrp" transform="translate(115,244)">
+    <path d="M0,0 C-8,-14 -6,-22 0,-30 C6,-22 8,-14 0,0 Z" fill="var(--flame,#cc4b23)"/>
+    <path d="M0,-4 C-4,-12 -3,-17 0,-22 C3,-17 4,-12 0,-4 Z" fill="var(--flame-2,#e8823f)"/>
+  </g>
+  <!-- bulb (thermometer flask analog: gas bulb) -->
+  <circle cx="115" cy="195" r="34" fill="url(#bulbGrad)" stroke="#8fa0a8" stroke-width="2"/>
+  <text x="115" y="200" text-anchor="middle" font-size="9" fill="#33424a" font-family="Noto Sans Sinhala">වායුව</text>
+  <!-- stirrer -->
+  <line x1="150" y1="150" x2="150" y2="215" stroke="#8fa0a8" stroke-width="3"/>
+  <circle cx="150" cy="216" r="4" fill="#8fa0a8"/>
+  <!-- thermometer -->
+  <rect x="72" y="140" width="7" height="70" rx="3.5" fill="#eee"/>
+  <circle cx="75.5" cy="212" r="6" fill="var(--flame,#cc4b23)"/>
+  <rect id="thermFill" x="73.7" y="180" width="3.5" height="30" fill="var(--flame,#cc4b23)"/>
+  <!-- capillary tube to gauge -->
+  <path d="M115,161 L115,90 L232,90 L232,118" fill="none" stroke="#8fa0a8" stroke-width="4"/>
+  <!-- pressure gauge -->
+  <circle cx="255" cy="118" r="42" fill="var(--panel-2,#1e2a37)" stroke="var(--brass,#c8963e)" stroke-width="3"/>
+  <circle cx="255" cy="118" r="35" fill="none" stroke="var(--line,#333)" stroke-width="1"/>
+  <text x="255" y="152" text-anchor="middle" font-size="9" fill="var(--text-dim,#a8b0ba)" font-family="Noto Sans Sinhala">පීඩන ආමානය</text>
+  <g id="needleGrp" transform="translate(255,118)">
+    <line id="needle" x1="0" y1="0" x2="0" y2="-28" stroke="var(--brass,#c8963e)" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="0" cy="0" r="4" fill="var(--brass,#c8963e)"/>
+  </g>
+  <path id="gaugeArc" d="" fill="none" stroke="#5a6472" stroke-width="6" stroke-linecap="round" opacity="0.4"/>
+  `;
+  // gauge arc background (from -120deg to 120deg)
+  const arc = document.getElementById('gaugeArc');
+  arc.setAttribute('d', describeArc(255,118,34,-120,120));
+}
+function polarToXY(cx,cy,r,angDeg){
+  const a = (angDeg-90) * Math.PI/180;
+  return {x: cx + r*Math.cos(a), y: cy + r*Math.sin(a)};
+}
+function describeArc(cx,cy,r,startAngle,endAngle){
+  const s = polarToXY(cx,cy,r,endAngle);
+  const e = polarToXY(cx,cy,r,startAngle);
+  const largeArc = endAngle-startAngle <= 180 ? 0 : 1;
+  return `M ${s.x} ${s.y} A ${r} ${r} 0 ${largeArc} 0 ${e.x} ${e.y}`;
+}
+buildApparatus();
+
+function updateApparatus(theta, T, P){
+  // needle: P range ~ [91, 141] kPa across theta 0-110 -> map to -110..110 deg
+  const angle = -110 + ( (theta)/110 ) * 220;
+  document.getElementById('needleGrp').setAttribute('transform', `translate(255,118) rotate(${angle})`);
+  // water color heats up
+  const t = theta/110;
+  const water = document.getElementById('waterFill');
+  const r = Math.round(47 + t*160), g = Math.round(122 - t*70), b = Math.round(102 - t*70);
+  water.setAttribute('fill', `rgb(${r},${g},${b})`);
+  // thermometer fill height
+  const fill = document.getElementById('thermFill');
+  const h = 30 + t*28;
+  fill.setAttribute('y', 210-h);
+  fill.setAttribute('height', h);
+  // flame flicker only if heating (theta>0)
+  document.getElementById('flameGrp').style.opacity = theta>0.5 ? 1 : 0.15;
+}
+
+/* ===================== SLIDER LOGIC ===================== */
+const tempSlider = document.getElementById('tempSlider');
+const sliderLbl = document.getElementById('sliderLbl');
+const roTheta = document.getElementById('roTheta');
+const roT = document.getElementById('roT');
+const roP = document.getElementById('roP');
+
+function refreshReadout(){
+  const theta = parseFloat(tempSlider.value);
+  const T = calcT(theta);
+  const P = calcP(T);
+  sliderLbl.textContent = theta.toFixed(1)+' °C';
+  roTheta.textContent = theta.toFixed(1);
+  roT.textContent = T.toFixed(1);
+  roP.textContent = P.toFixed(1);
+  updateApparatus(theta, T, P);
+}
+tempSlider.addEventListener('input', refreshReadout);
+refreshReadout();
+
+/* ===================== RECORD READINGS ===================== */
+const dataTbody = document.getElementById('dataTbody');
+function renderTable(){
+  dataTbody.innerHTML = readings.map((r,i)=>`
+    <tr><td>${i+1}</td><td>${r.theta.toFixed(1)}</td><td>${r.T.toFixed(1)}</td><td>${r.P.toFixed(1)}</td>
+    <td><span style="cursor:pointer;color:#e07a5f" onclick="removeReading(${i})">✕</span></td></tr>
+  `).join('');
+}
+window.removeReading = function(i){ readings.splice(i,1); renderTable(); drawGraphs(); };
+document.getElementById('recordBtn').onclick = ()=>{
+  const theta = parseFloat(tempSlider.value);
+  const T = calcT(theta), P = calcP(T);
+  readings.push({theta,T,P});
+  readings.sort((a,b)=>a.theta-b.theta);
+  renderTable();
+  drawGraphs();
+};
+document.getElementById('clearBtn').onclick = ()=>{ readings=[]; renderTable(); drawGraphs(); };
+
+/* ===================== GRAPH DRAWING ===================== */
+function linReg(points){
+  const n = points.length;
+  if(n<2) return null;
+  let sx=0,sy=0,sxy=0,sxx=0;
+  points.forEach(p=>{sx+=p.x; sy+=p.y; sxy+=p.x*p.y; sxx+=p.x*p.x;});
+  const m = (n*sxy - sx*sy)/(n*sxx - sx*sx);
+  const c = (sy - m*sx)/n;
+  return {m,c};
+}
+function drawAxes(svgEl, xLabel, yLabel, x0=40,y0=180,w=260,h=160){
+  let s = `<line x1="${x0}" y1="${y0}" x2="${x0+w}" y2="${y0}" stroke="#333" stroke-width="1.5"/>`;
+  s += `<line x1="${x0}" y1="${y0}" x2="${x0}" y2="${y0-h}" stroke="#333" stroke-width="1.5"/>`;
+  s += `<text x="${x0+w/2}" y="212" text-anchor="middle" font-size="10" fill="#333">${xLabel}</text>`;
+  s += `<text x="12" y="${y0-h/2}" text-anchor="middle" font-size="10" fill="#333" transform="rotate(-90 12 ${y0-h/2})">${yLabel}</text>`;
+  return s;
+}
+function drawGraphs(){
+  drawGraphPT();
+  drawGraphPC();
+}
+function drawGraphPT(){
+  const svgEl = document.getElementById('graphPK');
+  const x0=44,y0=180,w=250,h=150;
+  let html = drawAxes(svgEl,'T / K','P / kPa',x0,y0,w,h);
+  if(readings.length===0){ svgEl.innerHTML = html; return; }
+  const maxT = Math.max(...readings.map(r=>r.T), 400);
+  const maxP = Math.max(...readings.map(r=>r.P), 150);
+  const sx = t => x0 + (t/maxT)*w;
+  const sy = p => y0 - (p/maxP)*h;
+  const pts = readings.map(r=>({x:r.T,y:r.P}));
+  const reg = linReg(pts);
+  if(reg){
+    const x1=0, x2=maxT*1.05;
+    html += `<line x1="${sx(x1)}" y1="${sy(reg.m*x1+reg.c)}" x2="${sx(x2)}" y2="${sy(reg.m*x2+reg.c)}" stroke="#c8963e" stroke-width="2" stroke-dasharray="5,4"/>`;
+  }
+  pts.forEach(p=>{ html += `<circle cx="${sx(p.x)}" cy="${sy(p.y)}" r="4" fill="#2c6b66"/>`; });
+  html += `<circle cx="${sx(0)}" cy="${sy(0)}" r="3" fill="#333"/><text x="${sx(0)+4}" y="${sy(0)+12}" font-size="8" fill="#333">0</text>`;
+  svgEl.innerHTML = html;
+}
+function drawGraphPC(){
+  const svgEl = document.getElementById('graphPC');
+  const x0=90,y0=180,w=210,h=150; // shift origin right to allow -273 to show
+  let html = drawAxes(svgEl,'θ / °C','P / kPa',x0,y0,w,h);
+  const minX = -280, maxX = 130;
+  const sx = t => x0 + ((t-minX)/(maxX-minX))*w;
+  if(readings.length===0){ svgEl.innerHTML = html; return; }
+  const maxP = Math.max(...readings.map(r=>r.P), 150);
+  const sy = p => y0 - (p/maxP)*h;
+  const pts = readings.map(r=>({x:r.theta,y:r.P}));
+  const reg = linReg(pts);
+  let intercept = null;
+  if(reg){
+    const xA=minX, xB=maxX;
+    html += `<line x1="${sx(xA)}" y1="${sy(Math.max(0,reg.m*xA+reg.c))}" x2="${sx(xB)}" y2="${sy(reg.m*xB+reg.c)}" stroke="#c8963e" stroke-width="2" stroke-dasharray="5,4"/>`;
+    intercept = -reg.c/reg.m;
+    html += `<line x1="${sx(intercept)}" y1="${y0+6}" x2="${sx(intercept)}" y2="${y0-6}" stroke="#e07a5f" stroke-width="2"/>`;
+    html += `<text x="${sx(intercept)}" y="${y0+20}" font-size="9" text-anchor="middle" fill="#e07a5f">${intercept.toFixed(0)}°C</text>`;
+  }
+  pts.forEach(p=>{ html += `<circle cx="${sx(p.x)}" cy="${sy(p.y)}" r="4" fill="#2c6b66"/>`; });
+  svgEl.innerHTML = html;
+  const note = document.getElementById('graphNote');
+  if(intercept!==null){
+    note.textContent = `ඔබේ දත්තවලින් ලද රේඛාව x-අක්ෂය ඡේදනය කරන්නේ ${intercept.toFixed(1)}°C දී — න්‍යායික අගය -273°C ට කිට්ටුය.`;
+  }
+}
+drawGraphs();
+
+/* ===================== THEORY ACCORDION ===================== */
+const theoryItems = [
+  {t:"PV = nRT සමීකරණය සහ P ∝ T වන්නේ ඇයි?", b:"ස්ථිර පරිමාවක් (V) හා ස්ථිර වායු ස්කන්ධයක් (n) සඳහා, R ද ගුණාංක නියතයක් වන බැවින් PV = nRT සමීකරණයේ V, n, R යන සියල්ල ම නියත වේ. එවිට P හා T අතර ඍජු සමානුපාතික සම්බන්ධතාවක් (P ∝ T) පවතී. එනම් නිරපේක්ෂ උෂ්ණත්වය දෙගුණ වුවහොත් පීඩනය ද දෙගුණ වේ."},
+  {t:"කේශික නළය (capillary tube) භාවිත කරන්නේ ඇයි?", b:"පීඩන ආමානය තුළ ඇති වායුවේ පරිමාව බුබුලේ (bulb) පරිමාවට සාපේක්ෂව ඉතා කුඩා විය යුතුය — එසේ නොවුනහොත් ආමානය තුළ ඇති වායුවේ උෂ්ණත්වය ජල ස්නානයේ උෂ්ණත්වයට වඩා වෙනස් වීමෙන් දෝෂයක් ඇති වේ. සුළු විෂ්කම්භයක් ඇති කේශික නළයක් යෙදීමෙන් මෙම දෝෂය අවම කරගත හැක."},
+  {t:"ජලය සෙමින් රත් කර ඇවිස්සීම අවශ්‍ය වන්නේ ඇයි?", b:"උෂ්ණත්වය වේගයෙන් ඉහළ නංවුවහොත් බුබුලේ ඇති වායුවේ උෂ්ණත්වය ජලයේ උෂ්ණත්වයට සමාන වීමට කාලය ප්‍රමාණවත් නොවේ (තාප සමතුලිතතාවයට පත් නොවේ). ජලය සෙමින් රත් කර, දිගින් දිගටම ඇවිස්සීමෙන් ජලය තුළ ඕනෑම ස්ථානයක උෂ්ණත්වය සමාන මට්ටමක පවත්වා ගත හැකි අතර, බුබුලේ වායුව ද එම උෂ්ණත්වයටම පත්වීමට ප්‍රමාණවත් කාලයක් ලැබේ."},
+  {t:"නිරපේක්ෂ ශූන්‍ය අගය (-273°C) ලබා ගන්නේ කෙසේද?", b:"P–θ ප්‍රස්ථාරයේ ලැබෙන ඍජු රේඛාව, පීඩනය ශුන්‍ය වන තෙක් (ප්‍රස්ථාරයෙන් ඔබ්බට) දිගු කළ විට, එය θ-අක්ෂය ඡේදනය කරන ලක්ෂ්‍යය -273°C පමණ වේ. මෙය සියලුම (ආදර්ශ) වායු සඳහා පොදු අගයක් වන අතර, මෙයම නිරපේක්ෂ උෂ්ණත්ව පරිමාණයේ ශුන්‍ය ලක්ෂ්‍යය (0 K) ලෙස අර්ථ දැක්වේ."},
+  {t:"ප්‍රධාන දෝෂ මූලාශ්‍ර", b:"① බුබුල හා ආමානය අතර නළය තුළ ඇති වායුවේ උෂ්ණත්වය, බුබුලේ උෂ්ණත්වයට වඩා වෙනස් වීම. ② ජලයේ උෂ්ණත්වය ඉක්මනින් ඉහළ නංවීමෙන් තාප අසමතුලිතතාවය ඇතිවීම. ③ පීඩන ආමානයේ පාඨාංක ගැනීමේදී සිදුවන දෘෂ්ටි දෝෂ (parallax error)."}
+];
+const accHost = document.getElementById('accHost');
+accHost.innerHTML = theoryItems.map((it,i)=>`
+  <div class="acc-item" id="acc-${i}">
+    <div class="acc-head" onclick="toggleAcc(${i})"><span>${it.t}</span><span class="chev">⌄</span></div>
+    <div class="acc-body"><div class="acc-body-in">${it.b}</div></div>
+  </div>
+`).join('');
+window.toggleAcc = function(i){
+  const el = document.getElementById('acc-'+i);
+  const body = el.querySelector('.acc-body');
+  const open = el.classList.toggle('open');
+  body.style.maxHeight = open ? body.scrollHeight+'px' : null;
+};
+
+/* ===================== EXAM Q&A ===================== */
+const qaItems = [
+  {q:"a) මෙම අවලෝකනයේ දී වායුවක් සඳහා පීඩන කෝෂ්ඨය හැඳින්වීමට ස්ථාවර ලෙස තබා ගන්නා විචල්‍ය රාශි කවරේද?", a:"වායුවේ ස්කන්ධය (n) සහ පරිමාව (V) යන දෙකම නියතව තබා ගැනීම අවශ්‍යය. එවිට පමණක් PV = nRT සමීකරණයේ P හා T අතර ඍජු සමානුපාතික සම්බන්ධතාවක් ලබා ගත හැක."},
+  {q:"b) අවලෝකනයේ XY කේශික නළය භාවිතා කිරීමට හේතුව කුමක්ද?", a:"පීඩන ආමානය තුළ ඇති වායුවේ පරිමාව අවම කර, එමගින් ආමානය තුළ ඇති වායුවේ උෂ්ණත්වය හා බුබුලේ ඇති වායුවේ උෂ්ණත්වය අතර වෙනසින් ඇතිවන දෝෂය අවම කිරීමයි."},
+  {q:"c) ජල ස්නානයේ උෂ්ණත්වය සෙමින් ඉහළ නැංවීම අවශ්‍ය වන්නේ ඇයි?", a:"බුබුලේ ඇති වායුව ජලයේ උෂ්ණත්වයටම පත්වීමට (තාප සමතුලිතතාවයට) ප්‍රමාණවත් කාලයක් ලබා දීම සඳහාය. වේගයෙන් රත් කළහොත් වායුවේ සැබෑ උෂ්ණත්වය, මනිනු ලබන ජල උෂ්ණත්වයට වඩා අඩු අගයක් වනු ඇත."},
+  {q:"d) බුබුලේ ඇති වායුව ජලයේ උෂ්ණත්වයටම පත් වී ඇති බව ඔබ තහවුරු කරගන්නේ කෙසේද?", a:"ජලය ඇවිස්සීම නවත්වා, කෙටි කාලයක් රැඳී සිට, පීඩන ආමානයේ පාඨාංකය නොවෙනස්ව පවතින බව නිරීක්ෂණය කිරීමෙන්. පාඨාංකය ස්ථාවර වූ පසුව එය සමතුලිතතාවයට පත්ව ඇති බවට සලකුණකි."},
+  {q:"e) ජලයේ උෂ්ණත්වය මැනීමට පෙර, එය පවත්වා ගැනීම සඳහා ගන්නා ප්‍රධාන පියවර දෙක කුමක්ද?", a:"① දාහකය ඉවත් කිරීම (රත් කිරීම නැවැත්වීම). ② ජලය සුළු වේලාවක් ඇවිස්සීම, එවිට ස්නානය පුරාම උෂ්ණත්වය ඒකාකාරී වී ස්ථාවර වේ."},
+  {q:"f) පීඩනය සඳහා අනුරූප පාඨාංකය ගැනීමට පෙර අනුගමනය කළ යුතු ප්‍රධානතම පියවර ලියන්න.", a:"ජලය ඇවිස්සීම නවත්වා, පීඩන ආමානයේ පාඨාංකය ස්ථාවර අගයක පවතින බව තහවුරු කරගැනීමයි — එය තාප සමතුලිතතාවය ළඟා වී ඇති බවට සාක්ෂියයි."},
+  {q:"g) H, A, B ලෙස සොටිමීටර මට්ටම් ලබා දී ඇති විට, පීඩනය ගණනය කරන ආකාරය පැහැදිලි කරන රූප සටහනක් අඳින්නේ කෙසේද?", a:"ආමානයේ දෙපස පාදක මට්ටම් අතර උස් වෙනස (h) සලකුණු කර, එම උස් වෙනස වායුගෝලීය පීඩනයට එකතු කිරීමෙන් හෝ අඩු කිරීමෙන් (මාන අනුව) නිරපේක්ෂ පීඩනය ලබාගත හැකි බව රූප සටහනින් පෙන්විය යුතුය."},
+  {q:"h-i) T = 600K දී, V₁ = 20×10⁻³ m³ සහ V₂ = 60×10⁻³ m³ සඳහා අනුරූප P₁, P₂ ගණනය කරන්න.", a:"පහත '06' කාඩ්පතෙහි ඇති අන්තර්ක්‍රියාකාරී ගණකය භාවිතා කර, ඔබේ ප්‍රස්ථාරයෙන් ලද එක් (T,P) ලක්ෂ්‍යයක් ඇතුළත් කර P₁ හා P₂ ස්වයංක්‍රීයව ගණනය කරගන්න — ක්‍රමවේදය: nR = PV/T ස්ථිර අගය ලෙස සොයාගෙන, පසුව P = nRT/V යොදන්න."},
+  {q:"h-ii) 600K දී පරිමාව සමඟ පීඩනය විචලනය වීම පෙන්වන වක්‍රය අඳින්නේ කෙසේද?", a:"P₁ හා P₂ ලක්ෂ්‍ය දෙක ප්‍රස්ථාරයේ ලකුණු කර, ඒවා හරහා අධි-අතිශය (hyperbola) හැඩැති සුමට වක්‍රයක් අඳින්න — මන්ද T ස්ථිර විට P ∝ 1/V (Boyle නියමය) වන බැවිනි. '06' කාඩ්පතේ පහළින් ඇති ප්‍රස්ථාරයේ මෙය ස්වයංක්‍රීයව අඳිනු ලැබේ."}
+];
+const qaHost = document.getElementById('qaHost');
+qaHost.innerHTML = qaItems.map((it,i)=>`
+  <div class="qa-item" id="qa-${i}">
+    <div class="qa-q" onclick="toggleQa(${i})"><span class="letter">${String.fromCharCode(97+i>122?97:97+i)}</span><span>${it.q}</span></div>
+    <div class="qa-a"><div class="qa-a-in">${it.a}</div></div>
+  </div>
+`).join('');
+window.toggleQa = function(i){
+  const el = document.getElementById('qa-'+i);
+  const body = el.querySelector('.qa-a');
+  const open = body.style.maxHeight;
+  body.style.maxHeight = open ? null : body.scrollHeight+'px';
+};
+
+/* ===================== EXAM CALC (h section) ===================== */
+document.getElementById('calcBtn').onclick = ()=>{
+  const T = parseFloat(document.getElementById('refT').value);
+  const P = parseFloat(document.getElementById('refP').value); // kPa
+  if(!T || !P || T<=0 || P<=0){ document.getElementById('calcResult').innerHTML = "<b>කරුණාකර වලංගු T හා P අගයන් ඇතුළත් කරන්න.</b>"; return; }
+  const nR = P*1000 * (T===0?1:1) ; // placeholder, real calc below using V unknown -> use PV=nRT with V from bulb? We only have P,T -> need V too.
+  // Since we don't have a fixed bulb V from the reference reading (readings taken at const V_bulb),
+  // we instead use the relation at constant T=600K between two volumes via nRT = P*V (constant at fixed T).
+  // We derive nR using assumption V_ref = 30e-3 m3 (typical bulb+gauge volume) purely as reference scaling if not otherwise known.
+  const Vref = 30e-3;
+  const nRVal = (P*1000*Vref)/T; // n*R in J/K terms effectively (P in Pa)
+  const T2 = 600;
+  const V1 = 20e-3, V2 = 60e-3;
+  const P1 = (nRVal*T2)/V1/1000; // kPa
+  const P2 = (nRVal*T2)/V2/1000;
+  document.getElementById('calcResult').innerHTML = `
+    <div class="r-line"><span>nR = P·V / T (ආශ්‍රිත V = 30×10⁻³ m³ උපකල්පනය)</span><span>${nRVal.toFixed(3)} J/K</span></div>
+    <div class="r-line"><span>P₁ (V=20×10⁻³ m³, 600K)</span><span>${P1.toFixed(2)} kPa</span></div>
+    <div class="r-line"><span>P₂ (V=60×10⁻³ m³, 600K)</span><span>${P2.toFixed(2)} kPa</span></div>
+  `;
+  drawPV(P1,P2,V1,V2,nRVal,T2);
+};
+function drawPV(P1,P2,V1,V2,nRVal,T2){
+  const svgEl = document.getElementById('graphPV');
+  const x0=44,y0=180,w=250,h=150;
+  let html = drawAxes(svgEl,'V × 10⁻³ m³','P × 10³ Pa',x0,y0,w,h);
+  const maxV = 110, maxP = Math.max(P1,10)*1.3;
+  const sx = v => x0 + (v/maxV)*w;
+  const sy = p => y0 - (p/maxP)*h;
+  let path = '';
+  for(let v=15; v<=100; v+=2){
+    const p = (nRVal*T2)/(v*1e-3)/1000;
+    const cmd = v===15?'M':'L';
+    path += `${cmd}${sx(v).toFixed(1)},${sy(p).toFixed(1)} `;
+  }
+  html += `<path d="${path}" fill="none" stroke="#2c6b66" stroke-width="2"/>`;
+  html += `<circle cx="${sx(20)}" cy="${sy(P1)}" r="4" fill="#c8963e"/><text x="${sx(20)+6}" y="${sy(P1)-6}" font-size="9" fill="#333">P₁</text>`;
+  html += `<circle cx="${sx(60)}" cy="${sy(P2)}" r="4" fill="#e07a5f"/><text x="${sx(60)+6}" y="${sy(P2)-6}" font-size="9" fill="#333">P₂</text>`;
+  svgEl.innerHTML = html;
+}
+</script>
+</body>
+</html>

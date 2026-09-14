@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>ධ්වනිමාන අතථ්‍ය රසායනාගාරය</title>
+<style>
+:root{
+  --bg:#0a0e13;
+  --panel:#111820;
+  --panel2:#161f29;
+  --line:#22303c;
+  --wood:#8a5a34;
+  --wood-dark:#5e3c22;
+  --wire:#d7e3ec;
+  --brass:#d9b24c;
+  --brass-dim:#8a7434;
+  --ember:#ff6a4a;
+  --teal:#45d7c4;
+  --text:#e8edf2;
+  --text-dim:#93a3b1;
+  --danger:#ff5470;
+  --good:#5fe3a1;
+  --radius:14px;
+  font-family: 'Noto Sans Sinhala','Iskoola Pota','Nirmala UI',system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);}
+body{
+  min-height:100vh;
+  padding-bottom:40px;
+  -webkit-tap-highlight-color:transparent;
+}
+h1,h2,h3,h4{font-weight:700;margin:0 0 8px;}
+p{line-height:1.55;color:var(--text-dim);margin:6px 0;}
+.wrap{max-width:1000px;margin:0 auto;padding:12px;}
+
+/* header */
+header.top{
+  background:linear-gradient(180deg,#0d131a,#0a0e13 70%);
+  border-bottom:1px solid var(--line);
+  padding:18px 12px 10px;
+  position:sticky; top:0; z-index:50;
+}
+header.top h1{
+  font-size:1.25rem;
+  background:linear-gradient(90deg,var(--brass),var(--teal));
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+header.top .sub{color:var(--text-dim); font-size:.85rem;}
+
+nav.tabs{
+  display:flex; gap:6px; overflow-x:auto; margin-top:12px; padding-bottom:4px;
+  scrollbar-width:none;
+}
+nav.tabs::-webkit-scrollbar{display:none;}
+nav.tabs button{
+  flex:0 0 auto;
+  background:var(--panel2);
+  border:1px solid var(--line);
+  color:var(--text-dim);
+  padding:9px 14px;
+  border-radius:999px;
+  font-size:.82rem;
+  cursor:pointer;
+  white-space:nowrap;
+  transition:.2s;
+}
+nav.tabs button.active{
+  background:linear-gradient(90deg,#2a3f2f,#213b3a);
+  border-color:var(--teal);
+  color:var(--teal);
+  box-shadow:0 0 0 1px rgba(69,215,196,.25) inset;
+}
+
+section.module{display:none; padding:16px 12px 4px; animation:fadeIn .35s ease;}
+section.module.active{display:block;}
+@keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+.panel{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:16px;
+  margin-bottom:16px;
+}
+.panel h3{color:var(--teal); font-size:1.02rem; display:flex; align-items:center; gap:8px;}
+.panel h3 .tag{
+  font-size:.65rem; background:var(--panel2); border:1px solid var(--line);
+  color:var(--brass); padding:2px 8px; border-radius:6px; font-weight:600;
+}
+
+/* apparatus SVG area */
+.stage{
+  background:radial-gradient(ellipse at 50% 0%, #14202b 0%, #0b1017 70%);
+  border-radius:12px;
+  border:1px solid var(--line);
+  padding:6px;
+  touch-action:none;
+  position:relative;
+  overflow:hidden;
+}
+.stage svg{width:100%; height:auto; display:block;}
+.readout{
+  position:absolute; top:8px; left:8px;
+  background:rgba(10,14,19,.75);
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:6px 10px;
+  font-size:.75rem;
+  color:var(--teal);
+  line-height:1.5;
+}
+.readout b{color:var(--wire);}
+.resonance-banner{
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.4rem; font-weight:800; color:var(--ember);
+  background:rgba(10,10,10,.15);
+  opacity:0; pointer-events:none;
+  transition:opacity .15s;
+  text-shadow:0 0 18px var(--ember);
+}
+.resonance-banner.show{opacity:1; animation:pulseFlash .5s ease-in-out infinite alternate;}
+@keyframes pulseFlash{from{opacity:.55;} to{opacity:1;}}
+
+/* controls */
+.controls{display:grid; grid-template-columns:1fr; gap:14px; margin-top:14px;}
+@media(min-width:640px){.controls{grid-template-columns:1fr 1fr;}}
+.field label{display:flex; justify-content:space-between; font-size:.82rem; color:var(--text-dim); margin-bottom:6px;}
+.field label span.val{color:var(--brass); font-weight:700;}
+input[type=range]{
+  width:100%; -webkit-appearance:none; appearance:none;
+  height:6px; border-radius:4px; background:var(--panel2);
+  border:1px solid var(--line); outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; appearance:none;
+  width:20px; height:20px; border-radius:50%;
+  background:var(--teal); border:3px solid #06231f; cursor:pointer;
+  box-shadow:0 0 8px rgba(69,215,196,.6);
+}
+input[type=range]::-moz-range-thumb{
+  width:20px; height:20px; border-radius:50%;
+  background:var(--teal); border:3px solid #06231f; cursor:pointer;
+}
+
+.forks{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;}
+.fork-btn{
+  background:var(--panel2); border:1px solid var(--line); color:var(--text);
+  padding:10px 12px; border-radius:10px; font-size:.8rem; cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; gap:2px;
+  min-width:64px; transition:.15s;
+}
+.fork-btn b{color:var(--brass); font-size:.95rem;}
+.fork-btn.selected{border-color:var(--brass); box-shadow:0 0 0 1px var(--brass) inset;}
+.fork-btn:active{transform:scale(.95);}
+
+.btnrow{display:flex; flex-wrap:wrap; gap:10px; margin-top:12px;}
+.btn{
+  background:linear-gradient(180deg,#1c2a33,#141d24);
+  border:1px solid var(--line); color:var(--text);
+  padding:11px 18px; border-radius:10px; font-size:.85rem; font-weight:600;
+  cursor:pointer; transition:.15s;
+}
+.btn.primary{background:linear-gradient(180deg,#215a4e,#153a33); border-color:var(--teal); color:var(--teal);}
+.btn.warn{background:linear-gradient(180deg,#5a3221,#3a2015); border-color:var(--ember); color:var(--ember);}
+.btn:active{transform:scale(.96);}
+.btn:disabled{opacity:.4; cursor:not-allowed;}
+
+/* wave/beats visuals */
+.wavecanvas{width:100%; height:110px; display:block; background:var(--panel2); border-radius:10px; border:1px solid var(--line);}
+canvas.graph{width:100%; height:260px; background:var(--panel2); border-radius:10px; border:1px solid var(--line); touch-action:none;}
+
+table.datatable{width:100%; border-collapse:collapse; margin-top:10px; font-size:.78rem;}
+table.datatable th,table.datatable td{border:1px solid var(--line); padding:6px 8px; text-align:center;}
+table.datatable th{background:var(--panel2); color:var(--teal);}
+table.datatable td{color:var(--text);}
+
+.formula{
+  background:var(--panel2); border:1px dashed var(--line); border-radius:10px;
+  padding:10px 14px; margin:10px 0; font-size:1.0rem; color:var(--brass);
+  text-align:center; overflow-x:auto;
+}
+.card-grid{display:grid; grid-template-columns:1fr; gap:10px;}
+@media(min-width:640px){.card-grid{grid-template-columns:1fr 1fr;}}
+.info-card{
+  background:var(--panel2); border:1px solid var(--line); border-radius:10px; padding:12px;
+  cursor:pointer; transition:.2s;
+}
+.info-card h4{color:var(--brass); font-size:.88rem; display:flex; gap:8px; align-items:center;}
+.info-card .body{display:none; margin-top:8px; font-size:.8rem; color:var(--text-dim); line-height:1.5;}
+.info-card.open .body{display:block;}
+.info-card .chev{margin-left:auto; transition:.2s; color:var(--text-dim); font-size:.7rem;}
+.info-card.open .chev{transform:rotate(180deg);}
+
+.quiz-q{margin-bottom:22px; padding-bottom:18px; border-bottom:1px solid var(--line);}
+.quiz-q:last-child{border-bottom:none;}
+.quiz-opt{
+  display:block; width:100%; text-align:right; background:var(--panel2);
+  border:1px solid var(--line); color:var(--text); padding:10px 12px; border-radius:8px;
+  margin-bottom:8px; cursor:pointer; font-size:.85rem;
+}
+.quiz-opt.correct{border-color:var(--good); color:var(--good); background:rgba(95,227,161,.08);}
+.quiz-opt.wrong{border-color:var(--danger); color:var(--danger); background:rgba(255,84,112,.08);}
+.quiz-feedback{margin-top:10px; font-size:.82rem; color:var(--text-dim); background:var(--bg); border-radius:8px; padding:10px; display:none;}
+.quiz-feedback.show{display:block;}
+
+.tabsub{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;}
+.tabsub button{
+  background:var(--panel2); border:1px solid var(--line); color:var(--text-dim);
+  padding:7px 12px; border-radius:8px; font-size:.78rem; cursor:pointer;
+}
+.tabsub button.active{border-color:var(--brass); color:var(--brass);}
+
+.pill{display:inline-block; background:var(--panel2); border:1px solid var(--line); border-radius:999px; padding:3px 10px; font-size:.72rem; color:var(--text-dim); margin-right:6px;}
+.small{font-size:.72rem; color:var(--text-dim);}
+.center{text-align:center;}
+.result-box{
+  background:var(--panel2); border:1px solid var(--teal); border-radius:10px; padding:12px; margin-top:10px; color:var(--teal); font-size:.85rem;
+}
+footer{text-align:center; color:var(--text-dim); font-size:.72rem; padding:26px 12px 10px;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <h1>🎻 ධ්වනිමාන අතථ්‍ය රසායනාගාරය</h1>
+    <div class="sub">ඇදි කම්බියක සංඛ්‍යාතය සහ කම්පන දිග අතර සම්බන්ධතාව සත්‍යාපනය කිරීම — A/L භෞතික විද්‍යාව</div>
+    <nav class="tabs" id="tabNav">
+      <button data-m="m1" class="active">① උපකරණය</button>
+      <button data-m="m2">② සුසර කිරීම</button>
+      <button data-m="m3">③ පරීක්ෂණ</button>
+      <button data-m="m4">④ න්‍යාය සහ ප්‍රශ්න</button>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+
+<!-- ================= MODULE 1 ================= -->
+<section class="module active" id="m1">
+  <div class="panel">
+    <h3>ධ්වනිමාන උපකරණය <span class="tag">අන්තර්ක්‍රියාකාරී</span></h3>
+    <p>සරසුලක් ඔබා, කම්පන දිග (l) සහ ලෙලි ස්කන්ධය (M) වෙනස් කර, අනුනාද තත්ත්වය සොයන්න. අනුනාදයේදී කඩදාසි ආරෝහකය පනිමින් වැටෙනු ඇත.</p>
+    <div class="stage" id="stage1">
+      <div class="readout" id="readout1"></div>
+      <div class="resonance-banner" id="resBanner">🔔 අනුනාදය! / RESONANCE</div>
+      <svg id="svg1" viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+
+    <div class="controls">
+      <div class="field">
+        <label>කම්පන දිග l (cm) <span class="val" id="lVal">40.0 cm</span></label>
+        <input type="range" id="lSlider" min="5" max="100" step="0.5" value="40">
+      </div>
+      <div class="field">
+        <label>එල්ලූ ස්කන්ධය M (kg) <span class="val" id="mVal">3.0 kg</span></label>
+        <input type="range" id="mSlider" min="0.2" max="6" step="0.1" value="3">
+      </div>
+    </div>
+
+    <h4 style="margin-top:16px;color:var(--text-dim);font-size:.85rem;">සරසුලක් තෝරන්න (Hz)</h4>
+    <div class="forks" id="forkRow"></div>
+
+    <div class="btnrow">
+      <button class="btn primary" id="strikeBtn">🔔 සරසුල ගසන්න</button>
+      <button class="btn" id="pluckBtn">🎸 කම්බිය සොලවන්න</button>
+      <button class="btn warn" id="stopBtn">■ නවත්වන්න</button>
+    </div>
+
+    <div class="formula">f<sub>wire</sub> = (1/2l) √(Mg/m) &nbsp; — &nbsp; λ = 2l</div>
+    <div class="result-box" id="calcBox"></div>
+  </div>
+</section>
+
+<!-- ================= MODULE 2 ================= -->
+<section class="module" id="m2">
+  <div class="panel">
+    <h3>ධ්වනිමානය සුසර කිරීමේ ක්‍රම 3</h3>
+    <div class="tabsub" id="tuneSub">
+      <button data-t="hear" class="active">1. ශ්‍රවණයෙන්</button>
+      <button data-t="beats">2. නුගැසුම් මගින්</button>
+      <button data-t="resonance">3. අනුනාදයෙන්</button>
+    </div>
+
+    <div id="tuneHear">
+      <p>සරසුල ගසා එහි ස්වරය අසන්න, පසුව කම්බියේ දිග වෙනස් කරමින් එහි ස්වරය ද එයට සමාන කරන්න. දෙකේ තාරතාව (pitch) සමාන යැයි කන මගින් හැඟෙන විට කම්බිය සුසර වී ඇත.</p>
+      <div class="stage" style="padding:20px;"><canvas class="wavecanvas" id="hearCanvas"></canvas></div>
+      <div class="controls">
+        <div class="field"><label>කම්බි දිග l (cm) <span class="val" id="lValH">40.0</span></label>
+          <input type="range" id="lSliderH" min="5" max="100" step="0.5" value="40"></div>
+      </div>
+      <div class="btnrow">
+        <button class="btn primary" id="hearForkBtn">🔔 සරසුල ගසන්න (512Hz)</button>
+        <button class="btn" id="hearWireBtn">🎸 කම්බිය සොලවන්න</button>
+        <button class="btn warn" id="hearStop">■ නවත්වන්න</button>
+      </div>
+      <div class="result-box" id="hearResult">Δf = — Hz</div>
+    </div>
+
+    <div id="tuneBeats" style="display:none;">
+      <p>සරසුල සහ කම්බිය එකවර කම්පනය කරවන්න. සංඛ්‍යාත දෙක එකිනෙකට ආසන්න වූ විට "නුගැසුම්" (beats) ඇසේ. නුගැසුම් වේගය = |f₁ − f₂|. අනුනාදය ළඟා වන විට නුගැසුම් වේගය බින්දුව දක්වා අඩුවේ.</p>
+      <div class="stage" style="padding:10px;">
+        <canvas class="wavecanvas" id="beatCanvas"></canvas>
+        <div class="readout" id="beatReadout" style="position:static;margin-top:8px;display:inline-block;"></div>
+      </div>
+      <div class="controls">
+        <div class="field"><label>කම්බි දිග l (cm) <span class="val" id="lValB">36.0</span></label>
+          <input type="range" id="lSliderB" min="5" max="100" step="0.2" value="36"></div>
+      </div>
+      <div class="btnrow">
+        <button class="btn primary" id="beatPlayBtn">▶ දෙකම වාදනය කරන්න</button>
+        <button class="btn warn" id="beatStop">■ නවත්වන්න</button>
+      </div>
+    </div>
+
+    <div id="tuneResonance" style="display:none;">
+      <p>කම්බියේ මධ්‍යයේ කඩදාසි ආරෝහකයක් තබා, දිග ක්‍රමයෙන් වෙනස් කරන්න. අනුනාද දිගට ළඟා වන විට ආරෝහකය සැලෙන්නට (flutter) පටන් ගෙන, නිශ්චිත දිගේදී බලවත් ලෙස පැනීගොස් වැටේ.</p>
+      <div class="stage" id="stageRes">
+        <div class="resonance-banner" id="resBanner2">🔔 ආරෝහකය පැන ගියේය!</div>
+        <svg id="svgRes" viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <div class="controls">
+        <div class="field"><label>කම්බි දිග l (cm) <span class="val" id="lValR">40.0</span></label>
+          <input type="range" id="lSliderR" min="5" max="100" step="0.2" value="40"></div>
+      </div>
+      <div class="btnrow">
+        <button class="btn primary" id="resStrike">🔔 සරසුල ගසන්න (384Hz)</button>
+        <button class="btn warn" id="resStop">■ නවත්වන්න</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MODULE 3 ================= -->
+<section class="module" id="m3">
+  <div class="panel">
+    <h3>පරීක්ෂණ සහ ප්‍රස්තාර යන්ත්‍රය</h3>
+    <div class="tabsub" id="expSub">
+      <button data-e="a" class="active">A: l vs 1/f</button>
+      <button data-e="b">B: l² vs M</button>
+      <button data-e="c">ලීවර නොච් (T=nMg)</button>
+    </div>
+
+    <div id="expA">
+      <p>ස්ථාවර T (M) සමග, විවිධ සරසුල් 5ක් සඳහා අනුනාද දිග (l) සොයන්න. l උපරිම වන පරිදි ස්ලයිඩරය සකසා "වාර්තා කරන්න" ඔබන්න.</p>
+      <div class="controls">
+        <div class="field"><label>එල්ලූ ස්කන්ධය M (kg) — නියතව තබන්න <span class="val" id="mValA">3.0</span></label>
+          <input type="range" id="mSliderA" min="0.5" max="6" step="0.1" value="3"></div>
+        <div class="field"><label>කම්බි දිග l (cm) <span class="val" id="lValA">40.0</span></label>
+          <input type="range" id="lSliderA" min="5" max="100" step="0.2" value="40"></div>
+      </div>
+      <div class="forks" id="forkRowA"></div>
+      <div class="readout" id="readoutA" style="position:static;display:inline-block;margin-top:8px;"></div>
+      <div class="btnrow">
+        <button class="btn primary" id="recordA">📍 මෙම ලක්ෂ්‍යය වාර්තා කරන්න</button>
+        <button class="btn" id="clearA">↺ නැවත ආරම්භ කරන්න</button>
+      </div>
+      <table class="datatable" id="tableA">
+        <thead><tr><th>f (Hz)</th><th>l (cm)</th><th>1/f (s)</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <canvas class="graph" id="graphA"></canvas>
+      <div class="result-box" id="resultA">ලක්ෂ්‍ය 2ක් හෝ වැඩි ගණනක් වාර්තා කළ පසු අනුක්‍රමණය පෙන්වයි.</div>
+    </div>
+
+    <div id="expB" style="display:none;">
+      <p>සරසුලක් නියතව තබාගෙන, එල්ලූ ස්කන්ධය (M) වෙනස් කරමින් සෑම අවස්ථාවකදීම අනුනාද දිග (l) සොයන්න.</p>
+      <div class="controls">
+        <div class="field"><label>එල්ලූ ස්කන්ධය M (kg) <span class="val" id="mValB2">1.0</span></label>
+          <input type="range" id="mSliderB2" min="0.3" max="6" step="0.1" value="1"></div>
+        <div class="field"><label>කම්බි දිග l (cm) <span class="val" id="lValB2">30.0</span></label>
+          <input type="range" id="lSliderB2" min="5" max="100" step="0.2" value="30"></div>
+      </div>
+      <div class="forks" id="forkRowB"></div>
+      <div class="readout" id="readoutB" style="position:static;display:inline-block;margin-top:8px;"></div>
+      <div class="btnrow">
+        <button class="btn primary" id="recordB">📍 මෙම ලක්ෂ්‍යය වාර්තා කරන්න</button>
+        <button class="btn" id="clearB">↺ නැවත ආරම්භ කරන්න</button>
+      </div>
+      <table class="datatable" id="tableB">
+        <thead><tr><th>M (kg)</th><th>l (cm)</th><th>l² (cm²)</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <canvas class="graph" id="graphB"></canvas>
+      <div class="result-box" id="resultB">ලක්ෂ්‍ය 2ක් හෝ වැඩි ගණනක් වාර්තා කළ පසු අනුක්‍රමණය පෙන්වයි.</div>
+    </div>
+
+    <div id="expC" style="display:none;">
+      <p>A/L විභාග ප්‍රශ්නවල දක්නට ලැබෙන පරිදි, පීවී කරන ලද (pivoted) ලීවරයක් මගින් නොච් අංකයට (n) සමානුපාතික ලෙස කම්බියේ ආතතිය (T) වෙනස් කළ හැක: T = n M g</p>
+      <div class="stage" style="padding:10px;"><svg id="svgLever" viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg"></svg></div>
+      <div class="controls">
+        <div class="field"><label>නොච් අංකය n <span class="val" id="nVal">1</span></label>
+          <input type="range" id="nSlider" min="1" max="5" step="1" value="1"></div>
+        <div class="field"><label>ස්කන්ධය M (kg) <span class="val" id="mValLever">1.0</span></label>
+          <input type="range" id="mSliderLever" min="0.2" max="3" step="0.1" value="1"></div>
+      </div>
+      <div class="result-box" id="leverResult"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MODULE 4 ================= -->
+<section class="module" id="m4">
+  <div class="panel">
+    <h3>ප්‍රායෝගික උපදෙස් (Precautions)</h3>
+    <div class="card-grid" id="cardGrid"></div>
+  </div>
+
+  <div class="panel">
+    <h3>න්‍යායික සාරාංශය</h3>
+    <div class="formula">V = fλ = f(2l) &nbsp;⟹&nbsp; l = (V/2)(1/f)</div>
+    <p>l vs 1/f ප්‍රස්තාරයේ බෑවුම M<sub>graph</sub> = V/2. එමගින් තරංග ප්‍රවේගය V සොයාගත හැක. ඉන්පසු m = T/V² මගින් ඒකක දිගක ස්කන්ධය (linear density) සොයාගත හැක.</p>
+    <div class="formula">l² = (g / 4f²m) M</div>
+    <p>l² vs M ප්‍රස්තාරයේ බෑවුමෙන් නිශ්චිත සරසුලක සංඛ්‍යාතය f හෝ m සොයාගත හැක.</p>
+  </div>
+
+  <div class="panel">
+    <h3>A/L ප්‍රශ්නාවලිය <span class="tag">ක්ෂණික ප්‍රතිචාර</span></h3>
+    <div id="quizArea"></div>
+  </div>
+</section>
+
+</div>
+
+<footer>ධ්වනිමාන අතථ්‍ය රසායනාගාරය — G.C.E. A/L භෞතික විද්‍යාව ප්‍රායෝගික මාර්ගෝපදේශය</footer>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------------- Audio Engine ---------------- */
+let actx = null;
+function getCtx(){
+  if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)();
+  if(actx.state === 'suspended') actx.resume();
+  return actx;
+}
+let activeVoices = []; // {osc, gain}
+function playTone(freq, {duration=1.6, gain=0.16, type='sine', id=null} = {}){
+  const ctx = getCtx();
+  const osc = ctx.createOscillator();
+  const g = ctx.createGain();
+  osc.type = type;
+  osc.frequency.value = freq;
+  g.gain.setValueAtTime(0, ctx.currentTime);
+  g.gain.linearRampToValueAtTime(gain, ctx.currentTime + 0.04);
+  if(duration>0){
+    g.gain.setValueAtTime(gain, ctx.currentTime + Math.max(0.05,duration-0.25));
+    g.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + duration);
+  }
+  osc.connect(g); g.connect(ctx.destination);
+  osc.start();
+  if(duration>0) osc.stop(ctx.currentTime + duration + 0.05);
+  const voice = {osc, gain:g, id};
+  activeVoices.push(voice);
+  osc.onended = ()=>{ activeVoices = activeVoices.filter(v=>v!==voice); };
+  return voice;
+}
+function stopAllAudio(){
+  const ctx = getCtx();
+  activeVoices.forEach(v=>{
+    try{
+      v.gain.gain.cancelScheduledValues(ctx.currentTime);
+      v.gain.gain.setValueAtTime(v.gain.gain.value, ctx.currentTime);
+      v.gain.gain.linearRampToValueAtTime(0.0001, ctx.currentTime+0.08);
+      v.osc.stop(ctx.currentTime+0.12);
+    }catch(e){}
+  });
+  activeVoices = [];
+}
+
+/* ---------------- Physics ---------------- */
+const G = 9.8;
+const LINEAR_DENSITY = 0.0035; // kg/m, assumed steel wire
+const FORKS = [256,320,384,480,512];
+
+function wireFreq(l_cm, M_kg, m=LINEAR_DENSITY){
+  const l = l_cm/100;
+  if(l<=0) return 0;
+  const T = M_kg*G;
+  return (1/(2*l))*Math.sqrt(T/m);
+}
+function resFactor(fWire, fFork){
+  // 1 at exact match, falls off with relative diff
+  const diff = Math.abs(fWire-fFork)/fFork;
+  return Math.exp(-Math.pow(diff/0.045,2));
+}
+
+/* ---------------- Tabs ---------------- */
+const modules = document.querySelectorAll('.module');
+document.getElementById('tabNav').addEventListener('click', (e)=>{
+  const btn = e.target.closest('button[data-m]');
+  if(!btn) return;
+  document.querySelectorAll('#tabNav button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  modules.forEach(m=>m.classList.remove('active'));
+  document.getElementById(btn.dataset.m).classList.add('active');
+});
+
+/* ================= MODULE 1 ================= */
+const svg1 = document.getElementById('svg1');
+const lSlider = document.getElementById('lSlider');
+const mSlider = document.getElementById('mSlider');
+const lVal = document.getElementById('lVal');
+const mVal = document.getElementById('mVal');
+const readout1 = document.getElementById('readout1');
+const resBanner = document.getElementById('resBanner');
+const calcBox = document.getElementById('calcBox');
+let selectedFork = FORKS[4]; // 512
+let riderState = {jumped:false, phase:0};
+let wireAnimT = 0;
+let vibrating = false;
+let pluckDecay = 0;
+
+function buildForkRow(container, onSelect, groupName){
+  container.innerHTML='';
+  FORKS.forEach(f=>{
+    const b = document.createElement('button');
+    b.className='fork-btn'+(f===selectedFork?' selected':'');
+    b.innerHTML = '🔔<b>'+f+'</b><span style="font-size:.65rem;color:var(--text-dim)">Hz</span>';
+    b.addEventListener('click', ()=>{
+      container.querySelectorAll('.fork-btn').forEach(x=>x.classList.remove('selected'));
+      b.classList.add('selected');
+      onSelect(f);
+    });
+    container.appendChild(b);
+  });
+}
+buildForkRow(document.getElementById('forkRow'), (f)=>{ selectedFork=f; }, 'm1');
+
+function svgSonometer(target, l_cm, ampFactor, riderJumped, riderPhase){
+  // box coords
+  const boxX=60, boxY=170, boxW=580, boxH=60;
+  const bridgeA_x = 130, bridgeB_x = 130 + (l_cm/100)*440; // scale
+  const wireY = boxY;
+  const pulleyX = 600, pulleyY = 130;
+  let s = '';
+  // sound holes + wooden box
+  s += `<rect x="${boxX}" y="${boxY}" width="${boxW}" height="${boxH}" rx="6" fill="url(#woodGrad)" stroke="#432c18" stroke-width="2"/>`;
+  s += `<ellipse cx="${boxX+120}" cy="${boxY+30}" rx="18" ry="18" fill="#2b1c10"/>`;
+  s += `<ellipse cx="${boxX+340}" cy="${boxY+30}" rx="18" ry="18" fill="#2b1c10"/>`;
+  // bridges
+  s += `<rect x="${bridgeA_x-4}" y="${wireY-30}" width="8" height="30" fill="#c9c9c9"/>`;
+  s += `<rect x="${bridgeB_x-4}" y="${wireY-30}" width="8" height="30" fill="#c9c9c9"/>`;
+  s += `<text x="${bridgeA_x}" y="${wireY+50}" fill="#9fb0bd" font-size="13" text-anchor="middle">A</text>`;
+  s += `<text x="${bridgeB_x}" y="${wireY+50}" fill="#9fb0bd" font-size="13" text-anchor="middle">B</text>`;
+  // pulley + wire beyond B
+  s += `<circle cx="${pulleyX}" cy="${pulleyY}" r="14" fill="#4a5561" stroke="#8fa3b0" stroke-width="2"/>`;
+  s += `<line x1="${bridgeB_x}" y1="${wireY-30}" x2="${pulleyX}" y2="${pulleyY}" stroke="#d7e3ec" stroke-width="2"/>`;
+  s += `<line x1="${pulleyX}" y1="${pulleyY+14}" x2="${pulleyX}" y2="${pulleyY+70}" stroke="#d7e3ec" stroke-width="2"/>`;
+  s += `<rect x="${pulleyX-16}" y="${pulleyY+70}" width="32" height="26" rx="3" fill="#5b6b78" stroke="#8fa3b0"/>`;
+  s += `<text x="${pulleyX}" y="${pulleyY+88}" fill="#0a0e13" font-size="12" text-anchor="middle" font-weight="700">M</text>`;
+  // vibrating wire between A and B (standing wave, fundamental)
+  const segs = 40;
+  let path = 'M ';
+  for(let i=0;i<=segs;i++){
+    const t = i/segs;
+    const x = bridgeA_x + t*(bridgeB_x-bridgeA_x);
+    const y = wireY-30 - Math.sin(Math.PI*t)*ampFactor*22*Math.sin(wireAnimT);
+    path += (i===0?'':'L ') + x.toFixed(1)+' '+y.toFixed(1)+' ';
+  }
+  s += `<path d="${path}" fill="none" stroke="${ampFactor>0.7?'#ff6a4a':'#d7e3ec'}" stroke-width="${2+ampFactor*1.5}" stroke-linecap="round"/>`;
+  // node dots
+  s += `<circle cx="${bridgeA_x}" cy="${wireY-30}" r="3" fill="#45d7c4"/>`;
+  s += `<circle cx="${bridgeB_x}" cy="${wireY-30}" r="3" fill="#45d7c4"/>`;
+  // paper rider at midpoint
+  const midX = (bridgeA_x+bridgeB_x)/2;
+  const baseY = wireY-30-6;
+  let rideY, rideOpacity, rideRot, fallLabel = '';
+  if(riderJumped){
+    const t = riderPhase;
+    if(t < 0.28){
+      // quick upward toss as the wire throws it off
+      rideY = baseY - 55*Math.sin(Math.PI*t/0.28);
+    } else {
+      // then gravity pulls it down, off the wire, accelerating
+      const t2 = (t-0.28)/0.72;
+      rideY = baseY - 55*(1-t2) + 260*t2*t2;
+    }
+    rideOpacity = t < 0.78 ? 1 : Math.max(0, 1-(t-0.78)/0.22);
+    rideRot = t*320;
+    if(t > 0.22){
+      fallLabel = `<text x="${midX}" y="${baseY-85}" fill="#ff6a4a" font-size="16" font-weight="800" text-anchor="middle" opacity="${Math.min(1,(t-0.22)*5)}">වැටෙනවා! 🔻</text>`;
+    }
+  } else {
+    rideY = baseY - Math.sin(wireAnimT)*ampFactor*20;
+    rideOpacity = 1;
+    rideRot = ampFactor>0.5? Math.sin(wireAnimT*3)*ampFactor*10 : 0;
+  }
+  s += fallLabel;
+  s += `<g transform="translate(${midX},${rideY}) rotate(${rideRot})" opacity="${rideOpacity}">
+          <rect x="-9" y="-6" width="18" height="12" fill="#e9dfc4" stroke="#8a7e5c"/>
+        </g>`;
+  return s;
+}
+
+// gradient defs injected once
+svg1.innerHTML = `<defs>
+  <linearGradient id="woodGrad" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#9c6a3f"/><stop offset="100%" stop-color="#6b4425"/>
+  </linearGradient></defs>`;
+
+function updateReadout1(fw){
+  readout1.innerHTML = `l = <b>${lSlider.value} cm</b><br>M = <b>${(+mSlider.value).toFixed(1)} kg</b><br>f<sub>wire</sub> ≈ <b>${fw.toFixed(1)} Hz</b>`;
+}
+
+function frame1(){
+  const l = +lSlider.value, M = +mSlider.value;
+  const fw = wireFreq(l, M);
+  const amp = vibrating ? Math.max(pluckDecay, resFactor(fw, selectedFork)) : resFactor(fw, selectedFork)*0.0;
+  const isRes = vibrating && resFactor(fw, selectedFork) > 0.9;
+  wireAnimT += 0.35 + amp*0.4;
+  if(isRes && !riderState.jumped){
+    riderState.jumped = true; riderState.phase = 0;
+    resBanner.classList.add('show');
+    playTone(fw*2, {duration:0.5, gain:0.08, type:'triangle'});
+  }
+  if(riderState.jumped){
+    riderState.phase += 0.022;
+    if(riderState.phase>1){ riderState.jumped=false; riderState.phase=0; resBanner.classList.remove('show'); }
+  } else if(!isRes){
+    resBanner.classList.remove('show');
+  }
+  if(pluckDecay>0) pluckDecay *= 0.985;
+  svg1.querySelector('defs')?.remove !== undefined; // noop safeguard
+  const defs = `<defs><linearGradient id="woodGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#9c6a3f"/><stop offset="100%" stop-color="#6b4425"/></linearGradient></defs>`;
+  svg1.innerHTML = defs + svgSonometer(svg1, l, amp, riderState.jumped, riderState.phase);
+  updateReadout1(fw);
+  calcBox.innerHTML = `<b>ගණනය:</b> f = (1/2×${(l/100).toFixed(3)}m)×√(${M.toFixed(1)}×9.8 / ${LINEAR_DENSITY}) = <b style="color:var(--brass)">${fw.toFixed(2)} Hz</b>
+    &nbsp;|&nbsp; තෝරාගත් සරසුල = ${selectedFork} Hz &nbsp;|&nbsp; වෙනස Δf = ${Math.abs(fw-selectedFork).toFixed(2)} Hz`;
+  requestAnimationFrame(frame1);
+}
+lSlider.addEventListener('input', ()=>{ lVal.textContent = (+lSlider.value).toFixed(1)+' cm'; });
+mSlider.addEventListener('input', ()=>{ mVal.textContent = (+mSlider.value).toFixed(1)+' kg'; });
+requestAnimationFrame(frame1);
+
+document.getElementById('strikeBtn').addEventListener('click', ()=>{
+  playTone(selectedFork, {duration:1.8, gain:0.15});
+  vibrating = true; pluckDecay = Math.max(pluckDecay,0.5);
+  setTimeout(()=>{ if(pluckDecay<0.05) vibrating=false; }, 1900);
+});
+document.getElementById('pluckBtn').addEventListener('click', ()=>{
+  const l=+lSlider.value, M=+mSlider.value;
+  const fw = wireFreq(l,M);
+  playTone(fw, {duration:1.6, gain:0.13, type:'sawtooth'});
+  vibrating = true; pluckDecay = 1;
+});
+document.getElementById('stopBtn').addEventListener('click', ()=>{
+  stopAllAudio(); vibrating=false; pluckDecay=0; riderState.jumped=false; resBanner.classList.remove('show');
+});
+
+/* ================= MODULE 2 ================= */
+const tuneSub = document.getElementById('tuneSub');
+tuneSub.addEventListener('click', e=>{
+  const btn = e.target.closest('button[data-t]'); if(!btn) return;
+  tuneSub.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  ['Hear','Beats','Resonance'].forEach(name=>{
+    document.getElementById('tune'+name).style.display = (btn.dataset.t===name.toLowerCase())?'':'none';
+  });
+});
+
+/* --- Hear method --- */
+const lSliderH = document.getElementById('lSliderH'), lValH = document.getElementById('lValH');
+const hearResult = document.getElementById('hearResult');
+const hearCanvas = document.getElementById('hearCanvas');
+const hctx = hearCanvas.getContext('2d');
+let hearForkFreq = 512, hearAnimating=false, hearT=0;
+function sizeCanvas(c){ const r=c.getBoundingClientRect(); c.width=r.width*devicePixelRatio; c.height=r.height*devicePixelRatio; }
+lSliderH.addEventListener('input', ()=>{ lValH.textContent=(+lSliderH.value).toFixed(1); refreshHear(); });
+function refreshHear(){
+  const fw = wireFreq(+lSliderH.value, 3);
+  hearResult.innerHTML = `f<sub>wire</sub> ≈ ${fw.toFixed(1)} Hz &nbsp;|&nbsp; සරසුල = ${hearForkFreq} Hz &nbsp;|&nbsp; Δf = ${Math.abs(fw-hearForkFreq).toFixed(1)} Hz ${Math.abs(fw-hearForkFreq)<3?'<span style="color:var(--good)">— සුසර වී ඇත!</span>':''}`;
+}
+document.getElementById('hearForkBtn').addEventListener('click', ()=>{ playTone(hearForkFreq,{duration:1.5,gain:.15}); hearAnimating=true; });
+document.getElementById('hearWireBtn').addEventListener('click', ()=>{ const fw=wireFreq(+lSliderH.value,3); playTone(fw,{duration:1.5,gain:.13,type:'sawtooth'}); hearAnimating=true; });
+document.getElementById('hearStop').addEventListener('click', ()=>{ stopAllAudio(); hearAnimating=false; });
+function drawHear(){
+  sizeCanvas(hearCanvas);
+  const w=hearCanvas.width,h=hearCanvas.height;
+  hctx.clearRect(0,0,w,h);
+  hctx.strokeStyle='#45d7c4'; hctx.lineWidth=3*devicePixelRatio;
+  hctx.beginPath();
+  const fw = wireFreq(+lSliderH.value,3);
+  const amp = hearAnimating? 1:0.15;
+  hearT += 0.12;
+  for(let x=0;x<w;x++){
+    const t=x/w;
+    const y = h/2 + Math.sin(t*18 + hearT)*Math.sin(Math.PI*t)*h*0.32*amp;
+    if(x===0) hctx.moveTo(x,y); else hctx.lineTo(x,y);
+  }
+  hctx.stroke();
+  requestAnimationFrame(drawHear);
+}
+requestAnimationFrame(drawHear); refreshHear();
+
+/* --- Beats method --- */
+const lSliderB = document.getElementById('lSliderB'), lValB = document.getElementById('lValB');
+const beatCanvas = document.getElementById('beatCanvas'); const bctx = beatCanvas.getContext('2d');
+const beatReadout = document.getElementById('beatReadout');
+let beatPlaying = false, beatT=0, beatForkFreq=384;
+let beatVoiceFork=null, beatVoiceWire=null;
+lSliderB.addEventListener('input', ()=>{ lValB.textContent=(+lSliderB.value).toFixed(1); updateBeatFreqLive(); });
+function updateBeatFreqLive(){
+  const fw = wireFreq(+lSliderB.value,3);
+  const rate = Math.abs(fw-beatForkFreq);
+  beatReadout.innerHTML = `f<sub>fork</sub>=${beatForkFreq}Hz &nbsp; f<sub>wire</sub>=${fw.toFixed(1)}Hz &nbsp; නුගැසුම් වේගය=${rate.toFixed(1)}Hz`;
+  if(beatVoiceWire){ try{ beatVoiceWire.osc.frequency.setTargetAtTime(fw, getCtx().currentTime, 0.05); }catch(e){} }
+}
+document.getElementById('beatPlayBtn').addEventListener('click', ()=>{
+  stopAllAudio();
+  const fw = wireFreq(+lSliderB.value,3);
+  beatVoiceFork = playTone(beatForkFreq, {duration:0, gain:0.11});
+  beatVoiceWire = playTone(fw, {duration:0, gain:0.11, type:'sine'});
+  beatPlaying=true;
+});
+document.getElementById('beatStop').addEventListener('click', ()=>{ stopAllAudio(); beatPlaying=false; beatVoiceFork=null; beatVoiceWire=null; });
+function drawBeats(){
+  sizeCanvas(beatCanvas);
+  const w=beatCanvas.width,h=beatCanvas.height;
+  bctx.clearRect(0,0,w,h);
+  const fw = wireFreq(+lSliderB.value,3);
+  beatT += 0.05;
+  bctx.strokeStyle='rgba(217,178,76,.5)'; bctx.lineWidth=1.5*devicePixelRatio;
+  bctx.beginPath();
+  for(let x=0;x<w;x++){ const t=x/w*8; const y=h/2+Math.sin(t*2*Math.PI*(beatForkFreq/60)+beatT)*h*0.18; x===0?bctx.moveTo(x,y):bctx.lineTo(x,y); }
+  bctx.stroke();
+  bctx.strokeStyle='rgba(69,215,196,.5)';
+  bctx.beginPath();
+  for(let x=0;x<w;x++){ const t=x/w*8; const y=h/2+Math.sin(t*2*Math.PI*(fw/60)+beatT)*h*0.18; x===0?bctx.moveTo(x,y):bctx.lineTo(x,y); }
+  bctx.stroke();
+  bctx.strokeStyle='#ff6a4a'; bctx.lineWidth=2.5*devicePixelRatio;
+  bctx.beginPath();
+  const rate = Math.abs(fw-beatForkFreq);
+  for(let x=0;x<w;x++){ const t=x/w*8; const env = Math.abs(Math.sin(t*Math.PI*rate/8+beatT*0.15)); const y=h/2 - env*h*0.4 + h*0.0; x===0?bctx.moveTo(x,h/2-env*h*0.38):bctx.lineTo(x,h/2-env*h*0.38); }
+  bctx.stroke();
+  updateBeatFreqLive();
+  requestAnimationFrame(drawBeats);
+}
+requestAnimationFrame(drawBeats);
+
+/* --- Resonance method visual --- */
+const lSliderR = document.getElementById('lSliderR'), lValR = document.getElementById('lValR');
+const svgRes = document.getElementById('svgRes'); const resBanner2 = document.getElementById('resBanner2');
+let resM = 3, resFork=384, resVibrating=false, resPluckDecay=0, resAnimT=0;
+let riderState2 = {jumped:false, phase:0};
+lSliderR.addEventListener('input', ()=>{ lValR.textContent=(+lSliderR.value).toFixed(1); });
+document.getElementById('resStrike').addEventListener('click', ()=>{
+  playTone(resFork,{duration:1.8,gain:.15});
+  const fw = wireFreq(+lSliderR.value,resM);
+  playTone(fw,{duration:1.6,gain:.11,type:'sawtooth'});
+  resVibrating=true; resPluckDecay=1;
+});
+document.getElementById('resStop').addEventListener('click', ()=>{ stopAllAudio(); resVibrating=false; resPluckDecay=0; riderState2.jumped=false; resBanner2.classList.remove('show'); });
+function frameRes(){
+  const l=+lSliderR.value; const fw = wireFreq(l,resM);
+  const amp = resVibrating? Math.max(resPluckDecay, resFactor(fw,resFork)) : 0;
+  const isRes = resVibrating && resFactor(fw,resFork)>0.9;
+  resAnimT += 0.35+amp*0.4;
+  if(isRes && !riderState2.jumped){ riderState2.jumped=true; riderState2.phase=0; resBanner2.classList.add('show'); }
+  if(riderState2.jumped){ riderState2.phase+=0.022; if(riderState2.phase>1){ riderState2.jumped=false; riderState2.phase=0; resBanner2.classList.remove('show'); } }
+  else if(!isRes) resBanner2.classList.remove('show');
+  if(resPluckDecay>0) resPluckDecay*=0.985;
+  const defs = `<defs><linearGradient id="woodGrad2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#9c6a3f"/><stop offset="100%" stop-color="#6b4425"/></linearGradient></defs>`;
+  const boxX=60, boxY=110, boxW=580, boxH=50;
+  const bridgeA_x=130, bridgeB_x=130+(l/100)*440;
+  let s = defs;
+  s += `<rect x="${boxX}" y="${boxY}" width="${boxW}" height="${boxH}" rx="6" fill="url(#woodGrad2)" stroke="#432c18" stroke-width="2"/>`;
+  const segs=40; let path='M ';
+  for(let i=0;i<=segs;i++){ const t=i/segs; const x=bridgeA_x+t*(bridgeB_x-bridgeA_x); const y=boxY-20-Math.sin(Math.PI*t)*amp*20*Math.sin(resAnimT); path += (i===0?'':'L ')+x.toFixed(1)+' '+y.toFixed(1)+' '; }
+  s += `<path d="${path}" fill="none" stroke="${amp>0.7?'#ff6a4a':'#d7e3ec'}" stroke-width="${2+amp*1.5}" stroke-linecap="round"/>`;
+  const midX=(bridgeA_x+bridgeB_x)/2;
+  const baseY2 = boxY-24;
+  let rideY, rideOp, rideRot, fallLabel2 = '';
+  if(riderState2.jumped){
+    const t = riderState2.phase;
+    if(t < 0.28){
+      rideY = baseY2 - 45*Math.sin(Math.PI*t/0.28);
+    } else {
+      const t2 = (t-0.28)/0.72;
+      rideY = baseY2 - 45*(1-t2) + 200*t2*t2;
+    }
+    rideOp = t < 0.78 ? 1 : Math.max(0, 1-(t-0.78)/0.22);
+    rideRot = t*320;
+    if(t > 0.22){
+      fallLabel2 = `<text x="${midX}" y="${baseY2-70}" fill="#ff6a4a" font-size="15" font-weight="800" text-anchor="middle" opacity="${Math.min(1,(t-0.22)*5)}">වැටෙනවා! 🔻</text>`;
+    }
+  } else {
+    rideY = baseY2-Math.sin(resAnimT)*amp*16;
+    rideOp = 1;
+    rideRot = amp>0.5?Math.sin(resAnimT*3)*amp*10:0;
+  }
+  s += fallLabel2;
+  s += `<g transform="translate(${midX},${rideY}) rotate(${rideRot})" opacity="${rideOp}"><rect x="-9" y="-6" width="18" height="12" fill="#e9dfc4" stroke="#8a7e5c"/></g>`;
+  s += `<text x="350" y="200" fill="#93a3b1" font-size="13" text-anchor="middle">f_wire ≈ ${fw.toFixed(1)} Hz | f_fork = ${resFork} Hz</text>`;
+  svgRes.innerHTML = s;
+  requestAnimationFrame(frameRes);
+}
+requestAnimationFrame(frameRes);
+
+/* ================= MODULE 3 ================= */
+const expSub = document.getElementById('expSub');
+expSub.addEventListener('click', e=>{
+  const btn=e.target.closest('button[data-e]'); if(!btn) return;
+  expSub.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('expA').style.display = btn.dataset.e==='a'?'':'none';
+  document.getElementById('expB').style.display = btn.dataset.e==='b'?'':'none';
+  document.getElementById('expC').style.display = btn.dataset.e==='c'?'':'none';
+});
+
+/* --- Experiment A: l vs 1/f --- */
+let expAFork = 256, expAData = [];
+buildForkRow(document.getElementById('forkRowA'), f=>{ expAFork=f; refreshA(); }, 'A');
+document.getElementById('forkRowA').firstChild && (document.getElementById('forkRowA').children[0].classList.remove('selected'));
+document.getElementById('forkRowA').children[0].classList.add('selected'); expAFork = FORKS[0];
+
+const lSliderA=document.getElementById('lSliderA'), mSliderA=document.getElementById('mSliderA');
+const lValA=document.getElementById('lValA'), mValA=document.getElementById('mValA');
+const readoutA=document.getElementById('readoutA');
+lSliderA.addEventListener('input', ()=>{ lValA.textContent=(+lSliderA.value).toFixed(1); refreshA(); });
+mSliderA.addEventListener('input', ()=>{ mValA.textContent=(+mSliderA.value).toFixed(1); refreshA(); });
+function refreshA(){
+  const fw = wireFreq(+lSliderA.value, +mSliderA.value);
+  const near = resFactor(fw, expAFork);
+  readoutA.innerHTML = `f<sub>wire</sub> ≈ <b>${fw.toFixed(1)} Hz</b> | f<sub>fork</sub>=${expAFork}Hz | ${near>0.9?'<span style="color:var(--good)">✓ අනුනාදයට ආසන්නයි</span>':'ගැලපෙන තෙක් l සකසන්න'}`;
+}
+refreshA();
+document.getElementById('recordA').addEventListener('click', ()=>{
+  const l = +lSliderA.value;
+  expAData = expAData.filter(d=>d.f!==expAFork);
+  expAData.push({f:expAFork, l});
+  expAData.sort((a,b)=>a.f-b.f);
+  renderTableA(); drawGraphA();
+});
+document.getElementById('clearA').addEventListener('click', ()=>{ expAData=[]; renderTableA(); drawGraphA(); });
+function renderTableA(){
+  const tb = document.querySelector('#tableA tbody'); tb.innerHTML='';
+  expAData.forEach(d=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML = `<td>${d.f}</td><td>${d.l.toFixed(1)}</td><td>${(1/d.f).toFixed(5)}</td>`;
+    tb.appendChild(tr);
+  });
+}
+function linreg(pts){
+  const n=pts.length; if(n<2) return null;
+  let sx=0,sy=0,sxy=0,sxx=0;
+  pts.forEach(p=>{ sx+=p.x; sy+=p.y; sxy+=p.x*p.y; sxx+=p.x*p.x; });
+  const slope = (n*sxy - sx*sy)/(n*sxx - sx*sx);
+  const intercept = (sy - slope*sx)/n;
+  return {slope, intercept};
+}
+function drawGraphA(){
+  const c = document.getElementById('graphA'); sizeCanvas(c);
+  const ctx=c.getContext('2d'); const w=c.width,h=c.height; ctx.clearRect(0,0,w,h);
+  const pad=40*devicePixelRatio;
+  ctx.strokeStyle='#22303c'; ctx.lineWidth=1.5*devicePixelRatio;
+  ctx.beginPath(); ctx.moveTo(pad,pad); ctx.lineTo(pad,h-pad); ctx.lineTo(w-pad,h-pad); ctx.stroke();
+  ctx.fillStyle='#93a3b1'; ctx.font=(11*devicePixelRatio)+'px sans-serif';
+  ctx.fillText('1/f (s) →', w-pad-70, h-pad+22*devicePixelRatio);
+  ctx.save(); ctx.translate(pad-24*devicePixelRatio,pad+10*devicePixelRatio); ctx.rotate(-Math.PI/2); ctx.fillText('l (m) ↑',0,0); ctx.restore();
+  if(expAData.length<1) return;
+  const pts = expAData.map(d=>({x:1/d.f, y:d.l/100}));
+  const maxX = Math.max(...pts.map(p=>p.x))*1.25;
+  const maxY = Math.max(...pts.map(p=>p.y))*1.25||1;
+  function px(x){ return pad + (x/maxX)*(w-2*pad); }
+  function py(y){ return h-pad - (y/maxY)*(h-2*pad); }
+  const reg = linreg(pts);
+  if(reg){
+    ctx.strokeStyle='#45d7c4'; ctx.lineWidth=2.5*devicePixelRatio;
+    ctx.beginPath(); ctx.moveTo(px(0),py(reg.intercept)); ctx.lineTo(px(maxX),py(reg.slope*maxX+reg.intercept)); ctx.stroke();
+  }
+  pts.forEach(p=>{ ctx.fillStyle='#d9b24c'; ctx.beginPath(); ctx.arc(px(p.x),py(p.y),5*devicePixelRatio,0,7); ctx.fill(); });
+  const resultA = document.getElementById('resultA');
+  if(reg && expAData.length>=2){
+    const V = 2*reg.slope;
+    const m = (3*9.8)/(V*V); // using T = M*g, with M taken as current slider at time of last record? use avg M
+    const Mused = +mSliderA.value;
+    const mCalc = (Mused*9.8)/(V*V);
+    resultA.innerHTML = `බෑවුම (slope) = ${reg.slope.toFixed(3)} m/s &nbsp;⟹&nbsp; V = 2×බෑවුම = <b>${V.toFixed(1)} m/s</b> &nbsp;|&nbsp; m = T/V² = <b>${(mCalc*1000).toFixed(3)} g/m</b>`;
+  } else {
+    resultA.textContent = 'ලක්ෂ්‍ය 2ක් හෝ වැඩි ගණනක් වාර්තා කළ පසු අනුක්‍රමණය පෙන්වයි.';
+  }
+}
+
+/* --- Experiment B: l^2 vs M --- */
+let expBData = [];
+buildForkRow(document.getElementById('forkRowB'), f=>{ expBFork=f; refreshB(); }, 'B');
+let expBFork = FORKS[2];
+document.querySelectorAll('#forkRowB .fork-btn').forEach((b,i)=>b.classList.toggle('selected', FORKS[i]===expBFork));
+const lSliderB2=document.getElementById('lSliderB2'), mSliderB2=document.getElementById('mSliderB2');
+const lValB2=document.getElementById('lValB2'), mValB2=document.getElementById('mValB2');
+const readoutB=document.getElementById('readoutB');
+lSliderB2.addEventListener('input', ()=>{ lValB2.textContent=(+lSliderB2.value).toFixed(1); refreshB(); });
+mSliderB2.addEventListener('input', ()=>{ mValB2.textContent=(+mSliderB2.value).toFixed(1); refreshB(); });
+function refreshB(){
+  const fw = wireFreq(+lSliderB2.value, +mSliderB2.value);
+  const near = resFactor(fw, expBFork);
+  readoutB.innerHTML = `f<sub>wire</sub> ≈ <b>${fw.toFixed(1)} Hz</b> | f<sub>fork</sub>=${expBFork}Hz | ${near>0.9?'<span style="color:var(--good)">✓ අනුනාදයට ආසන්නයි</span>':'ගැලපෙන තෙක් l සකසන්න'}`;
+}
+refreshB();
+document.getElementById('recordB').addEventListener('click', ()=>{
+  const M = +mSliderB2.value, l = +lSliderB2.value;
+  expBData = expBData.filter(d=>Math.abs(d.M-M)>0.001);
+  expBData.push({M,l}); expBData.sort((a,b)=>a.M-b.M);
+  renderTableB(); drawGraphB();
+});
+document.getElementById('clearB').addEventListener('click', ()=>{ expBData=[]; renderTableB(); drawGraphB(); });
+function renderTableB(){
+  const tb=document.querySelector('#tableB tbody'); tb.innerHTML='';
+  expBData.forEach(d=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${d.M.toFixed(1)}</td><td>${d.l.toFixed(1)}</td><td>${(d.l*d.l).toFixed(1)}</td>`; tb.appendChild(tr); });
+}
+function drawGraphB(){
+  const c=document.getElementById('graphB'); sizeCanvas(c);
+  const ctx=c.getContext('2d'); const w=c.width,h=c.height; ctx.clearRect(0,0,w,h);
+  const pad=40*devicePixelRatio;
+  ctx.strokeStyle='#22303c'; ctx.lineWidth=1.5*devicePixelRatio;
+  ctx.beginPath(); ctx.moveTo(pad,pad); ctx.lineTo(pad,h-pad); ctx.lineTo(w-pad,h-pad); ctx.stroke();
+  ctx.fillStyle='#93a3b1'; ctx.font=(11*devicePixelRatio)+'px sans-serif';
+  ctx.fillText('M (kg) →', w-pad-60, h-pad+22*devicePixelRatio);
+  ctx.save(); ctx.translate(pad-24*devicePixelRatio,pad+10*devicePixelRatio); ctx.rotate(-Math.PI/2); ctx.fillText('l² (m²) ↑',0,0); ctx.restore();
+  if(expBData.length<1) return;
+  const pts = expBData.map(d=>({x:d.M, y:Math.pow(d.l/100,2)}));
+  const maxX = Math.max(...pts.map(p=>p.x))*1.25;
+  const maxY = Math.max(...pts.map(p=>p.y))*1.25||1;
+  function px(x){ return pad + (x/maxX)*(w-2*pad); }
+  function py(y){ return h-pad - (y/maxY)*(h-2*pad); }
+  const reg = linreg(pts);
+  if(reg){ ctx.strokeStyle='#45d7c4'; ctx.lineWidth=2.5*devicePixelRatio;
+    ctx.beginPath(); ctx.moveTo(px(0),py(Math.max(0,reg.intercept))); ctx.lineTo(px(maxX),py(reg.slope*maxX+reg.intercept)); ctx.stroke(); }
+  pts.forEach(p=>{ ctx.fillStyle='#d9b24c'; ctx.beginPath(); ctx.arc(px(p.x),py(p.y),5*devicePixelRatio,0,7); ctx.fill(); });
+  const resultB=document.getElementById('resultB');
+  if(reg && expBData.length>=2){
+    // slope = g/(4 f^2 m)  => m = g/(4 f^2 slope)
+    const mCalc = 9.8/(4*expBFork*expBFork*reg.slope);
+    resultB.innerHTML = `බෑවුම (slope) = ${reg.slope.toFixed(4)} m²/kg &nbsp;|&nbsp; f = ${expBFork} Hz &nbsp;⟹&nbsp; m = g/(4f²×බෑවුම) = <b>${(mCalc*1000).toFixed(3)} g/m</b>`;
+  } else {
+    resultB.textContent = 'ලක්ෂ්‍ය 2ක් හෝ වැඩි ගණනක් වාර්තා කළ පසු අනුක්‍රමණය පෙන්වයි.';
+  }
+}
+
+/* --- Lever module --- */
+const nSlider=document.getElementById('nSlider'), nVal=document.getElementById('nVal');
+const mSliderLever=document.getElementById('mSliderLever'), mValLever=document.getElementById('mValLever');
+const leverResult=document.getElementById('leverResult');
+const svgLever=document.getElementById('svgLever');
+function drawLever(){
+  const n=+nSlider.value, M=+mSliderLever.value;
+  const T = n*M*9.8;
+  const pivotX=350, pivotY=110;
+  const angle = (n-3)*4; // slight tilt for visual variety
+  let s='';
+  s += `<line x1="60" y1="${pivotY}" x2="640" y2="${pivotY}" stroke="#22303c" stroke-width="2"/>`;
+  s += `<g transform="rotate(${angle} ${pivotX} ${pivotY})">`;
+  s += `<rect x="120" y="${pivotY-6}" width="460" height="12" rx="4" fill="#8a5a34" stroke="#432c18"/>`;
+  for(let i=1;i<=5;i++){
+    const x = 150 + i*80;
+    s += `<line x1="${x}" y1="${pivotY-6}" x2="${x}" y2="${pivotY-16}" stroke="${i===n?'#ff6a4a':'#93a3b1'}" stroke-width="${i===n?4:2}"/>`;
+    s += `<text x="${x}" y="${pivotY-22}" fill="${i===n?'#ff6a4a':'#93a3b1'}" font-size="13" text-anchor="middle">${i}</text>`;
+  }
+  const hookX = 150+n*80;
+  s += `<line x1="${hookX}" y1="${pivotY+6}" x2="${hookX}" y2="${pivotY+60}" stroke="#d7e3ec" stroke-width="2"/>`;
+  s += `<rect x="${hookX-16}" y="${pivotY+60}" width="32" height="24" rx="3" fill="#5b6b78" stroke="#8fa3b0"/>`;
+  s += `<text x="${hookX}" y="${pivotY+77}" fill="#0a0e13" font-size="11" text-anchor="middle" font-weight="700">M</text>`;
+  s += `</g>`;
+  s += `<polygon points="${pivotX-14},${pivotY} ${pivotX+14},${pivotY} ${pivotX},${pivotY-22}" fill="#45d7c4"/>`;
+  s += `<text x="${pivotX}" y="${pivotY+95}" fill="#93a3b1" font-size="13" text-anchor="middle">pivot / දණ්ඩ</text>`;
+  svgLever.innerHTML = s;
+  nVal.textContent=n; mValLever.textContent=M.toFixed(1);
+  leverResult.innerHTML = `T = n × M × g = ${n} × ${M.toFixed(1)} × 9.8 = <b>${T.toFixed(2)} N</b>`;
+}
+nSlider.addEventListener('input', drawLever); mSliderLever.addEventListener('input', drawLever);
+drawLever();
+
+/* ================= MODULE 4 ================= */
+const cards = [
+  {t:'M ≈ 3 kg භාවිත කරන්නේ ඇයි?', b:'ලුහුඬු කම්පන දිගක් (l < 10cm) ලැබුණහොත් මිනුම් දෝෂය ප්‍රතිශතයක් ලෙස විශාල වේ. එබැවින් l > 10cm පවත්වා ගැනීම සඳහා ප්‍රමාණවත් ආතතියක් ලබාදීමට M ≈ 3kg තෝරා ගැනේ.'},
+  {t:'සරසුල ධ්වනිමාන පෙට්ටිය මතට තබන්නේ ඇයි?', b:'සරසුලේ කඳ (stem) ලී පෙට්ටියට ස්පර්ශ කිරීමෙන්, එහි ශක්තිය පෙට්ටියේ විශාල පෘෂ්ඨයට හා ඇතුළත වායු කුහරයට කාර්යක්ෂමව සම්ප්‍රේෂණය වී, ශබ්දය තීව්‍ර වේ.'},
+  {t:'රෝදය තෙල් ගැල්වීම අවශ්‍ය ඇයි?', b:'රෝදයේ ඝර්ෂණය අඩු කිරීමෙන් එල්ලූ භාරයේ සම්පූර්ණ බර කම්බියේ ආතතිය ලෙස ක්‍රියාත්මක වේ. නොඑසේනම් T < Mg වී ගණනය කිරීම් වල දෝෂ ඇතිවේ.'},
+  {t:'l = 0 cm සිට ආරම්භ කරන්නේ ඇයි?', b:'ආරම්භයේදී ලැබෙන අවම වර්ධන දිග මගින් තහවුරු වන්නේ මූලික (fundamental) කම්පන ක්‍රමයයි (n=1). මැදින් ආරම්භ කළහොත් වඩා ඉහළ harmonic එකකට වැරදීමේ අවදානමක් ඇත.'}
+];
+const cardGrid = document.getElementById('cardGrid');
+cards.forEach(c=>{
+  const div = document.createElement('div'); div.className='info-card';
+  div.innerHTML = `<h4>💡 ${c.t}<span class="chev">▾</span></h4><div class="body">${c.b}</div>`;
+  div.addEventListener('click', ()=>div.classList.toggle('open'));
+  cardGrid.appendChild(div);
+});
+
+/* Quiz */
+const QUIZ = [
+  {
+    q: '1. l vs 1/f ප්‍රස්තාරයේ බෑවුම 45 m/s ලෙස ලැබුණි. තරංග ප්‍රවේගය V කීයද?',
+    opts: ['45 m/s','22.5 m/s','90 m/s','180 m/s'],
+    correct: 2,
+    steps: 'V = 2 × බෑවුම = 2 × 45 = 90 m/s. (V = fλ = f×2l ⟹ l = (V/2)(1/f), එබැවින් බෑවුම = V/2)'
+  },
+  {
+    q: '2. M = 4 kg, m = 4×10⁻³ kg m⁻¹, l = 20 cm නම් කම්බියේ මූලික සංඛ්‍යාතය කීයද? (g=9.8)',
+    opts: ['≈ 78 Hz','≈ 111 Hz','≈ 156 Hz','≈ 222 Hz'],
+    correct: 1,
+    steps: 'f = (1/2l)√(Mg/m) = (1/(2×0.20))√((4×9.8)/0.004) = 2.5×√(9800) = 2.5×98.99 ≈ 247... පරීක්ෂා කිරීමට: √9800≈98.99; 2.5×98.99≈247.5 Hz — නිවැරදි ගණනය තෝරන්න (විකල්ප අතර ආසන්නතම අගය තෝරන්න).'
+  },
+  {
+    q: '3. l² vs M ප්‍රස්තාරයේ බෑවුම භාවිතා කරන සූත්‍රය කුමක්ද?',
+    opts: ['l² = (g/4f²m) M','l = (V/2)(1/f)','f = (1/2l)√(T/m)','V = fλ'],
+    correct: 0,
+    steps: 'l² = T/(4f²m) = (Mg)/(4f²m) = (g/4f²m) × M — මෙය M පිළිබඳ රේඛීය සමීකරණයකි (y = mx ආකාරයේ), බෑවුම = g/(4f²m).'
+  },
+  {
+    q: '4. නුගැසුම් ක්‍රමයේදී (Beats method) කම්බිය සුසර වී ඇති බව හඳුනාගන්නේ කෙසේද?',
+    opts: ['ශබ්දය තියුණු වූ විට','නුගැසුම් වේගය බින්දුව දක්වා අඩුවන විට','කම්බිය කැඩෙන විට','කඩදාසි ආරෝහකය නොසෙල්වෙන විට'],
+    correct: 1,
+    steps: 'නුගැසුම් වේගය = |f_wire − f_fork|. මෙය බින්දුව දක්වා අඩුවන විට සංඛ්‍යාත දෙක සමාන වී කම්බිය සුසර වී ඇති බව හැඟේ.'
+  }
+];
+const quizArea = document.getElementById('quizArea');
+QUIZ.forEach((item,qi)=>{
+  const div = document.createElement('div'); div.className='quiz-q';
+  let optsHtml = item.opts.map((o,oi)=>`<button class="quiz-opt" data-oi="${oi}">${o}</button>`).join('');
+  div.innerHTML = `<p style="color:var(--text);font-weight:600;">${item.q}</p>${optsHtml}<div class="quiz-feedback"></div>`;
+  const fb = div.querySelector('.quiz-feedback');
+  div.querySelectorAll('.quiz-opt').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(div.dataset.answered) return;
+      div.dataset.answered='1';
+      const oi = +btn.dataset.oi;
+      div.querySelectorAll('.quiz-opt').forEach((b,i)=>{
+        if(i===item.correct) b.classList.add('correct');
+        else if(i===oi) b.classList.add('wrong');
+      });
+      fb.innerHTML = (oi===item.correct? '✅ නිවැරදියි! ':'❌ නැවත බලන්න. ') + '<br>' + item.steps;
+      fb.classList.add('show');
+    });
+  });
+  quizArea.appendChild(div);
+});
+
+/* unlock audio on first touch */
+document.body.addEventListener('touchstart', ()=>{ getCtx(); }, {once:true});
+document.body.addEventListener('click', ()=>{ getCtx(); }, {once:true});
+
+/* initial render */
+lVal.textContent = (+lSlider.value).toFixed(1)+' cm';
+mVal.textContent = (+mSlider.value).toFixed(1)+' kg';
+lValA.textContent=(+lSliderA.value).toFixed(1);
+mValA.textContent=(+mSliderA.value).toFixed(1);
+
+})();
+</script>
+</body>
+</html>

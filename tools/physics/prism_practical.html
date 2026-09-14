@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ප්‍රිස්ම අපගමන පරීක්ෂණය</title>
+<style>
+  :root{
+    --bg:#0c1120;
+    --bg2:#121a2e;
+    --panel:#161f36;
+    --panel-line:#28324d;
+    --ink:#e7ecf7;
+    --ink-dim:#93a1c2;
+    --ink-faint:#5c6890;
+    --cyan:#7fd6f2;
+    --amber:#f5b942;
+    --violet:#9b7cf0;
+    --red:#ef6262;
+    --green:#61d6a0;
+    --spec1:#ef6262; --spec2:#f5b942; --spec3:#eef07c; --spec4:#61d6a0; --spec5:#7fd6f2; --spec6:#7c8cf0; --spec7:#9b7cf0;
+    --radius:16px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans Sinhala","Iskoola Pota",system-ui,sans-serif;
+    overscroll-behavior-y:contain;
+  }
+  body{
+    background:
+      radial-gradient(1200px 600px at 50% -10%, #1b2846 0%, transparent 60%),
+      linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+    min-height:100vh;
+    padding-bottom:40px;
+  }
+  .specbar{height:5px;width:100%;background:linear-gradient(90deg,var(--spec1),var(--spec2),var(--spec3),var(--spec4),var(--spec5),var(--spec6),var(--spec7));}
+
+  header{padding:18px 18px 14px; text-align:center; position:relative;}
+  header .eyebrow{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; font-size:11px; letter-spacing:.14em; color:var(--ink-faint); text-transform:uppercase;}
+  header h1{font-family:Georgia,"Noto Serif Sinhala",serif; font-size:22px; margin:6px 0 4px; font-weight:700; color:var(--ink); line-height:1.35;}
+  header p.sub{font-size:13px; color:var(--ink-dim); margin:0; line-height:1.5;}
+
+  nav.tabs{display:flex; gap:6px; padding:0 12px 12px; position:sticky; top:0; z-index:30; background:linear-gradient(180deg, var(--bg) 60%, transparent); padding-top:8px;}
+  nav.tabs button{
+    flex:1; padding:11px 4px; border-radius:12px; border:1px solid var(--panel-line);
+    background:var(--panel); color:var(--ink-dim); font-size:13px; font-weight:600;
+    font-family:inherit; cursor:pointer; transition:.15s;
+  }
+  nav.tabs button.active{background:linear-gradient(135deg,#22314f,#1a2540); color:var(--cyan); border-color:var(--cyan);}
+  nav.tabs button:active{transform:scale(.97);}
+
+  main{padding:0 14px; max-width:640px; margin:0 auto;}
+  .view{display:none; animation:fadein .25s ease;}
+  .view.active{display:block;}
+  @keyframes fadein{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .card{background:var(--panel); border:1px solid var(--panel-line); border-radius:var(--radius); padding:16px; margin-bottom:14px;}
+  .card h2{margin:0 0 4px; font-size:15px; color:var(--cyan); font-family:Georgia,serif;}
+  .card h2 .num{font-family:ui-monospace,monospace; color:var(--ink-faint); font-size:12px; margin-right:6px;}
+  .card p.hint{font-size:12.5px; color:var(--ink-dim); margin:0 0 10px; line-height:1.5;}
+
+  canvas{width:100%; display:block; border-radius:12px; background:#0a0f1c; border:1px solid var(--panel-line);}
+
+  .status-badge{display:none; align-items:center; gap:8px; margin-top:10px; padding:9px 12px; border-radius:10px; font-size:13px; font-weight:600;}
+  .status-badge.show{display:flex;}
+  .status-badge.min{background:rgba(245,185,66,.13); color:var(--amber); border:1px solid rgba(245,185,66,.35);}
+  .status-badge.tir{background:rgba(239,98,98,.13); color:var(--red); border:1px solid rgba(239,98,98,.35);}
+  .dot{width:8px;height:8px;border-radius:50%;background:currentColor;flex:none;box-shadow:0 0 8px currentColor;}
+
+  .slider-row{margin:14px 0;}
+  .slider-row .lbl{display:flex; justify-content:space-between; align-items:baseline; font-size:13px; color:var(--ink-dim); margin-bottom:6px;}
+  .slider-row .lbl b{color:var(--ink); font-size:13px;}
+  .slider-row .val{font-family:ui-monospace,monospace; color:var(--cyan); font-size:15px; font-weight:700;}
+  input[type=range]{
+    -webkit-appearance:none; width:100%; height:6px; border-radius:4px;
+    background:linear-gradient(90deg,var(--panel-line),var(--panel-line));
+    outline:none;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:26px; height:26px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #cdeeff, var(--cyan) 60%);
+    border:2px solid #0a0f1c; box-shadow:0 0 0 4px rgba(127,214,242,.15); cursor:pointer;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:26px; height:26px; border-radius:50%; background:var(--cyan); border:2px solid #0a0f1c; cursor:pointer;
+  }
+
+  .readout-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:12px;}
+  .readout{background:#0e1526; border:1px solid var(--panel-line); border-radius:10px; padding:9px 6px; text-align:center;}
+  .readout .k{font-size:10.5px; color:var(--ink-faint); letter-spacing:.03em;}
+  .readout .v{font-family:ui-monospace,monospace; font-size:16px; color:var(--ink); font-weight:700; margin-top:2px;}
+  .readout.hi .v{color:var(--amber);}
+
+  .seg{display:flex; background:#0e1526; border:1px solid var(--panel-line); border-radius:10px; padding:3px; margin-bottom:12px;}
+  .seg button{flex:1; border:none; background:transparent; color:var(--ink-dim); padding:9px 4px; border-radius:8px; font-family:inherit; font-size:13px; font-weight:600; cursor:pointer;}
+  .seg button.active{background:var(--panel); color:var(--cyan); box-shadow:0 0 0 1px var(--panel-line) inset;}
+
+  .field{margin-bottom:12px;}
+  .field label{display:block; font-size:12.5px; color:var(--ink-dim); margin-bottom:5px;}
+  .field input[type=number]{
+    width:100%; background:#0e1526; border:1px solid var(--panel-line); border-radius:10px;
+    padding:11px 12px; color:var(--ink); font-size:16px; font-family:ui-monospace,monospace; outline:none;
+  }
+  .field input[type=number]:focus{border-color:var(--cyan);}
+
+  .btn{display:block; width:100%; padding:13px; border-radius:12px; border:none; cursor:pointer;
+    background:linear-gradient(135deg,#3fb8dd,#7fd6f2); color:#04121c; font-weight:700; font-size:14.5px; font-family:inherit;}
+  .btn:active{transform:scale(.985);}
+
+  .steps{margin-top:14px; background:#0e1526; border:1px solid var(--panel-line); border-radius:12px; padding:14px;}
+  .steps .step{padding:8px 0; border-bottom:1px dashed var(--panel-line); font-size:13.5px; color:var(--ink-dim); line-height:1.6;}
+  .steps .step:last-child{border-bottom:none;}
+  .steps .step b{color:var(--ink);}
+  .steps .eq{font-family:ui-monospace,monospace; color:var(--cyan); font-size:14px;}
+  .result-box{margin-top:12px; text-align:center; padding:16px; border-radius:12px; background:rgba(127,214,242,.08); border:1px solid rgba(127,214,242,.3);}
+  .result-box .big{font-family:ui-monospace,monospace; font-size:26px; color:var(--cyan); font-weight:800;}
+  .result-box .lbl{font-size:12px; color:var(--ink-dim); margin-top:2px;}
+
+  .accordion{border:1px solid var(--panel-line); border-radius:12px; overflow:hidden; margin-bottom:10px; background:#0e1526;}
+  .accordion .ahead{padding:13px 14px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; font-size:14px; font-weight:700; color:var(--ink);}
+  .accordion .ahead .chev{color:var(--cyan); transition:transform .2s; font-size:13px;}
+  .accordion.open .ahead .chev{transform:rotate(90deg);}
+  .accordion .abody{max-height:0; overflow:hidden; transition:max-height .25s ease;}
+  .accordion.open .abody{max-height:2000px;}
+  .abody-inner{padding:0 14px 14px; font-size:13.5px; color:var(--ink-dim); line-height:1.75;}
+  .abody-inner ol,.abody-inner ul{margin:4px 0 8px; padding-inline-start:20px;}
+  .abody-inner li{margin-bottom:6px;}
+  .abody-inner .tag{display:inline-block; font-family:ui-monospace,monospace; font-size:11px; color:var(--amber); background:rgba(245,185,66,.1); padding:1px 6px; border-radius:5px; margin-inline-end:4px;}
+
+  .legend{display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; font-size:11.5px; color:var(--ink-dim);}
+  .legend span{display:flex; align-items:center; gap:5px;}
+  .legend i{width:14px; height:2px; display:inline-block; border-radius:2px;}
+
+  footer{text-align:center; padding:20px 14px 6px; font-size:11px; color:var(--ink-faint);}
+</style>
+</head>
+<body>
+<div class="specbar"></div>
+<header>
+  <div class="eyebrow">Advanced Level · Physics · P6</div>
+  <h1>වීදුරු ප්‍රිස්මයක අපගමන පරීක්ෂණය</h1>
+  <p class="sub">පතන කෝණය අනුව අපගමන කෝණය වෙනස් වන අයුරු සහ අවම අපගමන කෝණය (D) අන්තර්ක්‍රියාශීලීව ගවේෂණය කරන්න</p>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-view="sim">සිමියුලේෂන්</button>
+  <button class="tab-btn" data-view="graph">ප්‍රස්තාරය</button>
+  <button class="tab-btn" data-view="calc">ගණකය</button>
+  <button class="tab-btn" data-view="theory">න්‍යාය</button>
+</nav>
+
+<main>
+
+  <!-- ================= SIMULATION VIEW ================= -->
+  <section class="view active" id="view-sim">
+    <div class="card">
+      <h2><span class="num">01</span>කිරණ මාර්ග සිමියුලේෂනය</h2>
+      <p class="hint">i අගය වෙනස් කර, ප්‍රිස්මය තුළින් කිරණය කෙසේ ගමන් කරන්නේද යන්න බලන්න. AB මුහුණතේදී වර්තනය වී, AC මුහුණතින් නික්මේ.</p>
+      <canvas id="rayCanvas"></canvas>
+      <div class="legend">
+        <span><i style="background:var(--cyan)"></i>පතන / නික්මෙන කිරණ</span>
+        <span><i style="background:var(--amber)"></i>අභ්‍යන්තර කිරණය</span>
+        <span><i style="background:var(--ink-faint); height:1px; border-top:1px dashed var(--ink-faint); background:none;"></i>අභිලම්භය (normal)</span>
+      </div>
+      <div class="status-badge min" id="badgeMin"><span class="dot"></span><span>අවම අපගමන අවස්ථාව! i ≈ e — අභ්‍යන්තර කිරණය පාදකයට (BC) සමාන්තරයි</span></div>
+      <div class="status-badge tir" id="badgeTir"><span class="dot"></span><span>AC මුහුණතේදී සම්පූර්ණ අභ්‍යන්තර පරාවර්තනය සිදුවේ — i අගය වැඩි කරන්න</span></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="num">02</span>පාලක</h2>
+      <div class="slider-row">
+        <div class="lbl"><b>පතන කෝණය (i)</b><span class="val" id="valI">45°</span></div>
+        <input type="range" id="sliderI" min="20" max="75" step="1" value="45">
+      </div>
+      <div class="slider-row">
+        <div class="lbl"><b>ප්‍රිස්ම කෝණය (A)</b><span class="val" id="valA">60°</span></div>
+        <input type="range" id="sliderA" min="40" max="70" step="1" value="60">
+      </div>
+      <div class="slider-row">
+        <div class="lbl"><b>වර්තන දර්ශකය (n)</b><span class="val" id="valN">1.50</span></div>
+        <input type="range" id="sliderN" min="1.40" max="1.70" step="0.01" value="1.50">
+      </div>
+
+      <div class="readout-grid">
+        <div class="readout"><div class="k">r₁ (AB)</div><div class="v" id="outR1">–</div></div>
+        <div class="readout"><div class="k">r₂ (AC)</div><div class="v" id="outR2">–</div></div>
+        <div class="readout"><div class="k">e (නික්මෙන)</div><div class="v" id="outE">–</div></div>
+        <div class="readout hi"><div class="k">d (අපගමනය)</div><div class="v" id="outD">–</div></div>
+        <div class="readout"><div class="k">i + e</div><div class="v" id="outIE">–</div></div>
+        <div class="readout"><div class="k">r₁ + r₂</div><div class="v" id="outR1R2">–</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= GRAPH VIEW ================= -->
+  <section class="view" id="view-graph">
+    <div class="card">
+      <h2><span class="num">03</span>d - i ප්‍රස්තාරය</h2>
+      <p class="hint">තෝරාගත් A සහ n අගයන් සඳහා, පතන කෝණය (i) සමඟ අපගමන කෝණය (d) වෙනස් වනආකාරය. වක්‍රයේ පහළම ලක්ෂ්‍යය අවම අපගමනය (D) ලබාදෙයි.</p>
+      <canvas id="graphCanvas"></canvas>
+      <div class="legend">
+        <span><i style="background:var(--cyan)"></i>d–i වක්‍රය</span>
+        <span><i style="background:var(--amber)"></i>වර්තමාන ලක්ෂ්‍යය</span>
+        <span><i style="background:var(--green)"></i>අවම ලක්ෂ්‍යය (I, D)</span>
+      </div>
+      <div class="readout-grid" style="margin-top:14px; grid-template-columns:repeat(2,1fr);">
+        <div class="readout hi"><div class="k">අවම අපගමනය D</div><div class="v" id="gDmin">–</div></div>
+        <div class="readout hi"><div class="k">අනුරූප කෝණය I</div><div class="v" id="gImin">–</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2><span class="num">✎</span>ප්‍රස්තාරයෙන් නිගමනය</h2>
+      <p class="hint" style="margin-bottom:0;">සැබෑ පරීක්ෂණයේදී, ලකුණු තැබූ i,d යුගල ග්‍රැෆ් කඩදාසියක ඇඳ, වක්‍රයට ස්පර්ශකයක් අඳිමින් හෝ වක්‍රයේ පහළම ලක්ෂ්‍යය කියවා D සහ I අගයන් තීරණය කරයි. එයින් පසුව <span class="eq" style="color:var(--cyan)">n = sin((A+D)/2) / sin(A/2)</span> මගින් වර්තන දර්ශකය ගණනය කරයි.</p>
+    </div>
+  </section>
+
+  <!-- ================= CALCULATOR VIEW ================= -->
+  <section class="view" id="view-calc">
+    <div class="card">
+      <h2><span class="num">04</span>වර්තන දර්ශක ගණකය</h2>
+      <p class="hint">ප්‍රිස්ම සූත්‍රය භාවිතයෙන් වර්තන දර්ශකය (n) හෝ අවම අපගමනය (D) පියවරෙන් පියවර ගණනය කරන්න.</p>
+      <div class="seg">
+        <button class="seg-btn active" data-mode="findN">A, D → n</button>
+        <button class="seg-btn" data-mode="findD">A, n → D</button>
+      </div>
+
+      <div class="field">
+        <label>ප්‍රිස්ම කෝණය A (°)</label>
+        <input type="number" id="calcA" value="60" step="0.1">
+      </div>
+      <div class="field" id="fieldD">
+        <label>අවම අපගමන කෝණය D (°)</label>
+        <input type="number" id="calcD" value="42" step="0.1">
+      </div>
+      <div class="field" id="fieldN" style="display:none;">
+        <label>වර්තන දර්ශකය n</label>
+        <input type="number" id="calcN" value="1.50" step="0.001">
+      </div>
+
+      <button class="btn" id="calcBtn">ගණනය කරන්න</button>
+
+      <div class="steps" id="calcSteps" style="display:none;"></div>
+      <div class="result-box" id="calcResult" style="display:none;">
+        <div class="big" id="calcBig">–</div>
+        <div class="lbl" id="calcLbl">–</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= THEORY VIEW ================= -->
+  <section class="view" id="view-theory">
+    <div class="card">
+      <h2><span class="num">§</span>න්‍යාය, ක්‍රමවේදය සහ නිරීක්ෂණ</h2>
+      <p class="hint">පහත මාතෘකා තට්ටු කර විස්තර බලන්න.</p>
+
+      <div class="accordion open" data-acc>
+        <div class="ahead"><span>අවශ්‍ය උපකරණ</span><span class="chev">▸</span></div>
+        <div class="abody"><div class="abody-inner">
+          <ul>
+            <li>වර්තන කෝණය 60° ක් පමණ වන වීදුරු ප්‍රිස්මයක්</li>
+            <li>අඳින පුවරුවක් (drawing board)</li>
+            <li>සුදු කඩදාසියක්</li>
+            <li>ඇල්පිනස් 4ක් (P₁, P₂, P₃, P₄)</li>
+            <li>මිලිමීටර් පරිමාණ මිනුම් පටියක් / රූලරයක්, ප්‍රොට්‍රැක්ටරයක්</li>
+          </ul>
+        </div></div>
+      </div>
+
+      <div class="accordion" data-acc>
+        <div class="ahead"><span>පරීක්ෂණ ක්‍රමවේදය</span><span class="chev">▸</span></div>
+        <div class="abody"><div class="abody-inner">
+          <ol>
+            <li>කඩදාසිය පුවරුව මත සිර කර, එහි මැදින් සරල රේඛාවක් (XY) අඳින්න.</li>
+            <li>XY රේඛාව මත ලක්ෂ්‍යයක් සලකුණු කර, ඊට 0°,20°,30°,40°,45°,50°,60° යනාදී විවිධ කෝණ සාදන PQ රේඛා පිළිවෙළින් අඳින්න (මේවා පතන කිරණයේ දිශාව නියෝජනය කරයි).</li>
+            <li>ප්‍රිස්මයේ එක් මුහුණතක් (AB) XY රේඛාව මත වන පරිදි තබා, එහි මායිම කඩදාසියේ සලකුණු කරන්න.</li>
+            <li>PQ රේඛාව මත, හැකි තරම් දුරින් P₁ සහ P₂ ඇල්පිනස් දෙක සිරසේ සිටුවන්න.</li>
+            <li>ප්‍රිස්මයේ අනෙක් මුහුණතින් (AC) බලා, P₁ සහ P₂ හි ප්‍රතිබිම්භ එකකට එකක් සැඟවෙන පරිදි P₃, P₄ ඇල්පිනස් දෙක සිටුවන්න.</li>
+            <li>ප්‍රිස්මයේ මායිම් නැවත සලකුණු කර, ප්‍රිස්මය ඉවත් කරන්න. P₃, P₄ හරහා රේඛාවක් අඳින, එය ප්‍රිස්ම මායිම (AC) හමුවන ලක්ෂ්‍යය R ලෙසත්, එම රේඛාව RS ලෙසත් නම් කරන්න — මෙයයි නික්මෙන කිරණය.</li>
+            <li>PQ රේඛාව දිගු කර RS රේඛාව සමඟ ඡේදනය වන තෙක් අඳින්න. මේ දෙක අතර කෝණය මනිනු ලබන්නේ අපගමන කෝණය (d) ලෙසය.</li>
+            <li>එසේම, එක් එක් මුහුණතේදී අභිලම්භයට සාපේක්ෂව කෝණ මැන ගැනීමට වඩා පහසු වන පරිදි, මුහුණතට (පෘෂ්ඨයට) සාපේක්ෂ කෝණය (θ) මනිනු ලැබේ; අභිලම්භ කෝණය = 90° − θ.</li>
+            <li>මෙලෙස එක් එක් i අගය සඳහා d අගය ලබාගෙන, i එදිරිව d ප්‍රස්තාරයක් අඳින්න.</li>
+          </ol>
+          <p style="margin-top:6px;">එක් පතන කිරණයක් සඳහා <span class="tag">2 පාඨාංක</span> ලැබේ (θ සහ 90−θ ආකාරයෙන්). පරීක්ෂණය 5 වතාවක් සිදු කිරීමෙන් <span class="tag">පතන කෝණ 5</span> සහ <span class="tag">අපගමන කෝණ 5</span> ලැබේ.</p>
+        </div></div>
+      </div>
+
+      <div class="accordion" data-acc>
+        <div class="ahead"><span>වැදගත් නිරීක්ෂණ</span><span class="chev">▸</span></div>
+        <div class="abody"><div class="abody-inner">
+          <ol>
+            <li>පතන කෝණය (i) වෙනස් කරන විට අපගමන කෝණය (d) ද වෙනස් වේ.</li>
+            <li>පතන කෝණය ක්‍රමයෙන් වැඩි කරගෙන යන විට, මුලදී අපගමන කෝණය අඩු වේ.</li>
+            <li>යම් නිශ්චිත පතන කෝණයකදී අපගමන කෝණය අවම අගයක් ගනී — මෙය <b>අවම අපගමන කෝණය (D)</b> ලෙස හඳුන්වයි.</li>
+            <li>පතන කෝණය තවදුරටත් වැඩි කරගෙන යන විට අපගමන කෝණය නැවත වැඩි වේ (එනම් d–i වක්‍රය U හැඩැති වේ).</li>
+            <li>එක් අපගමන අගයක් සඳහා (D හැර) පතන කෝණ දෙකක් තිබිය හැක — මේවා කිරණ ප්‍රතිවර්ත්‍යතාවය අනුව එකිනෙකට i සහ e ලෙස සම්බන්ධ වේ.</li>
+            <li>අවම අපගමන අවස්ථාවේදී පමණක් එක් පතන කෝණයක් ම පවතී — එනම් එහිදී පතන කෝණය සහ නික්මෙන කෝණය සමාන වේ (i = e), සහ ප්‍රිස්මය තුළ ඇති කිරණය පාදකයට (BC) සමාන්තර වේ.</li>
+          </ol>
+        </div></div>
+      </div>
+
+      <div class="accordion" data-acc>
+        <div class="ahead"><span>ප්‍රායෝගික වැදගත් කරුණු / දෝෂ</span><span class="chev">▸</span></div>
+        <div class="abody"><div class="abody-inner">
+          <ul>
+            <li><b>90 − θ ඇයි මනින්නේද?</b> — අභිලම්භය අඳිනවා වෙනුවට, පෘෂ්ඨය සමඟ සාදන කෝණය (θ) මැන, ඉන් 90° අඩු කිරීමෙන් අභිලම්භ කෝණය ලබාගැනීම වඩා නිරවද්‍යව සහ පහසුවෙන් කළ හැක.</li>
+            <li><b>අවම අපගමන කෝණය සෘජුව මැනීම නිවැරදි නොවන්නේ ඇයි?</b> — එම අවස්ථාව පරීක්ෂණයේ සැබෑ පාඨාංකයක් ලෙස නොගනී; එය ලබාගන්නේ ප්‍රස්තාරය හරහා පමණි.</li>
+            <li><b>ප්‍රස්තාරයේ සීමාව</b> — වක්‍රය අවම ලක්ෂ්‍යය අසල තිරස් අතට පැතලි (curve) බැවින්, එම කලාපයේදී අගයන් නිරවද්‍යව කියවීම දුෂ්කර වේ.</li>
+            <li><b>ස්පෙක්ට්‍රෝමීටරය වඩා නිරවද්‍ය වන්නේ ඇයි?</b> — එහි වෘත්තාකාර පරිමාණය (circular scale) සහ වර්නියර් ආධාරයෙන් කෝණ ඉතා නිරවද්‍යව කියවිය හැකි බැවින්, ඇල්පින් ක්‍රමයට වඩා නිරවද්‍ය ප්‍රතිඵල ලබාදෙයි.</li>
+          </ul>
+        </div></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>i = පතන කෝණය · e = නික්මෙන කෝණය · d = අපගමන කෝණය · A = ප්‍රිස්ම කෝණය · D = අවම අපගමනය</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- state ---------------- */
+  const state = { i: 45, A: 60, n: 1.50 };
+
+  /* ---------------- tabs ---------------- */
+  const tabBtns = document.querySelectorAll(".tab-btn");
+  const views = { sim:"view-sim", graph:"view-graph", calc:"view-calc", theory:"view-theory" };
+  tabBtns.forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      tabBtns.forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      Object.values(views).forEach(id=>document.getElementById(id).classList.remove("active"));
+      document.getElementById(views[btn.dataset.view]).classList.add("active");
+      if(btn.dataset.view==="graph") drawGraph();
+      if(btn.dataset.view==="sim") drawSim();
+    });
+  });
+
+  /* ---------------- accordion ---------------- */
+  document.querySelectorAll("[data-acc]").forEach(acc=>{
+    acc.querySelector(".ahead").addEventListener("click", ()=>{
+      acc.classList.toggle("open");
+    });
+  });
+
+  /* ---------------- vector helpers ---------------- */
+  const V = {
+    sub:(a,b)=>({x:a.x-b.x,y:a.y-b.y}),
+    add:(a,b)=>({x:a.x+b.x,y:a.y+b.y}),
+    scale:(a,s)=>({x:a.x*s,y:a.y*s}),
+    dot:(a,b)=>a.x*b.x+a.y*b.y,
+    len:(a)=>Math.hypot(a.x,a.y),
+    norm:(a)=>{const l=Math.hypot(a.x,a.y)||1; return {x:a.x/l,y:a.y/l};},
+    neg:(a)=>({x:-a.x,y:-a.y})
+  };
+  const toRad = d=>d*Math.PI/180;
+  const toDeg = r=>r*180/Math.PI;
+
+  function outwardNormal(dir, interiorRef, P){
+    const p1={x:dir.y,y:-dir.x}, p2={x:-dir.y,y:dir.x};
+    const toInt = V.sub(interiorRef,P);
+    return V.dot(p1,toInt) < 0 ? p1 : p2;
+  }
+
+  function solve2x2(a,b,c,d,e,f){
+    // a*s + b*u = e ; c*s + d*u = f
+    const det = a*d-b*c;
+    if(Math.abs(det) < 1e-9) return null;
+    return { s:(e*d-b*f)/det, u:(a*f-e*c)/det };
+  }
+
+  /* ---------------- optics (scalar, exact Snell's law) ---------------- */
+  function computeOptics(i_deg, A_deg, n){
+    const i = toRad(i_deg), A = toRad(A_deg);
+    const sinR1 = Math.sin(i)/n;
+    const r1 = Math.asin(Math.min(1,Math.max(-1,sinR1)));
+    const r2 = A - r1;
+    if(r2 < 0) return {tir:true, r1:toDeg(r1), r2:toDeg(r2)};
+    const sinE = n*Math.sin(r2);
+    if(sinE > 1) return {tir:true, r1:toDeg(r1), r2:toDeg(r2)};
+    const e = Math.asin(sinE);
+    const d = i_deg + toDeg(e) - A_deg;
+    return {tir:false, r1:toDeg(r1), r2:toDeg(r2), e:toDeg(e), d};
+  }
+
+  function minDeviation(A_deg, n){
+    const A = toRad(A_deg);
+    const sinI = n*Math.sin(A/2);
+    if(sinI>1) return null;
+    const iMin = toDeg(Math.asin(sinI));
+    const D = 2*iMin - A_deg;
+    return {iMin, D};
+  }
+
+  /* ---------------- geometry for drawing ---------------- */
+  function trianglePoints(A_deg, W, H){
+    const half = toRad(A_deg/2);
+    const apex = {x:W/2, y:H*0.11};
+    const L = H*0.62;
+    const B = {x: apex.x - L*Math.sin(half), y: apex.y + L*Math.cos(half)};
+    const C = {x: apex.x + L*Math.sin(half), y: apex.y + L*Math.cos(half)};
+    return {apex,B,C};
+  }
+
+  /* ---------------- canvas setup (HiDPI) ---------------- */
+  function setupCanvas(canvas, cssH){
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = canvas.parentElement.clientWidth - 32; // approx card padding compensation not needed, use clientWidth of canvas
+    const w = canvas.clientWidth || cssW;
+    canvas.width = w*dpr;
+    canvas.height = cssH*dpr;
+    canvas.style.height = cssH+"px";
+    const ctx = canvas.getContext("2d");
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    return {ctx, W:canvas.clientWidth, H:cssH};
+  }
+
+  function dashedLine(ctx,p1,p2,color,width,dash){
+    ctx.save();
+    ctx.strokeStyle=color; ctx.lineWidth=width||1;
+    ctx.setLineDash(dash||[5,4]);
+    ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.stroke();
+    ctx.restore();
+  }
+  function solidLine(ctx,p1,p2,color,width,arrow){
+    ctx.save();
+    ctx.strokeStyle=color; ctx.lineWidth=width||2; ctx.lineCap="round";
+    ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.stroke();
+    if(arrow){
+      const ang = Math.atan2(p2.y-p1.y,p2.x-p1.x);
+      const sz=7;
+      ctx.beginPath();
+      ctx.moveTo(p2.x,p2.y);
+      ctx.lineTo(p2.x-sz*Math.cos(ang-0.4), p2.y-sz*Math.sin(ang-0.4));
+      ctx.lineTo(p2.x-sz*Math.cos(ang+0.4), p2.y-sz*Math.sin(ang+0.4));
+      ctx.closePath(); ctx.fillStyle=color; ctx.fill();
+    }
+    ctx.restore();
+  }
+  function dot(ctx,p,color,r){
+    ctx.beginPath(); ctx.arc(p.x,p.y,r||3.5,0,7); ctx.fillStyle=color; ctx.fill();
+  }
+  function label(ctx,p,text,color,size,align){
+    ctx.save();
+    ctx.fillStyle=color||"#e7ecf7";
+    ctx.font=(size||12)+"px ui-monospace,Menlo,monospace";
+    ctx.textAlign=align||"center";
+    ctx.fillText(text,p.x,p.y);
+    ctx.restore();
+  }
+  function arcBetween(ctx,center,v1,v2,radius,color){
+    let a1 = Math.atan2(v1.y,v1.x), a2 = Math.atan2(v2.y,v2.x);
+    let diff = a2-a1;
+    while(diff> Math.PI) diff-=2*Math.PI;
+    while(diff<-Math.PI) diff+=2*Math.PI;
+    ctx.save();
+    ctx.strokeStyle=color; ctx.lineWidth=1.6;
+    ctx.beginPath();
+    ctx.arc(center.x,center.y,radius,a1, a1+diff, diff<0);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  /* ---------------- ray tracing + draw ---------------- */
+  const simCanvas = document.getElementById("rayCanvas");
+
+  function drawSim(){
+    if(!document.getElementById("view-sim").classList.contains("active")) return;
+    const {ctx,W,H} = setupCanvas(simCanvas, 340);
+    ctx.clearRect(0,0,W,H);
+
+    const {i,A,n} = state;
+    const {apex,B,C} = trianglePoints(A,W,H);
+
+    // prism fill
+    ctx.beginPath();
+    ctx.moveTo(apex.x,apex.y); ctx.lineTo(B.x,B.y); ctx.lineTo(C.x,C.y); ctx.closePath();
+    const grad = ctx.createLinearGradient(0,0,0,H);
+    grad.addColorStop(0,"rgba(127,214,242,0.10)");
+    grad.addColorStop(1,"rgba(127,214,242,0.03)");
+    ctx.fillStyle=grad; ctx.fill();
+    ctx.strokeStyle="rgba(127,214,242,0.55)"; ctx.lineWidth=1.6; ctx.stroke();
+
+    label(ctx,{x:apex.x,y:apex.y-10},"A","#9db3d8",13);
+    label(ctx,{x:B.x-14,y:B.y+4},"B","#9db3d8",13);
+    label(ctx,{x:C.x+14,y:C.y+4},"C","#9db3d8",13);
+
+    const uAB = V.norm(V.sub(B,apex));
+    const TdirAB = V.norm(V.sub(apex,B));
+    const N1 = outwardNormal(uAB, C, apex);
+
+    const uAC = V.norm(V.sub(C,apex));
+    const TdirAC = V.norm(V.sub(apex,C));
+    const N2 = outwardNormal(uAC, B, apex);
+
+    const P1 = V.add(apex, V.scale(V.sub(B,apex), 0.52));
+
+    const opt = computeOptics(i,A,n);
+    const iRad = toRad(i);
+
+    // incident direction (unit, direction of travel toward P1)
+    const d0 = V.add(V.scale(N1,-Math.cos(iRad)), V.scale(TdirAB, Math.sin(iRad)));
+    const source = V.sub(P1, V.scale(d0, 150));
+
+    // normals (visual, dashed) at P1
+    dashedLine(ctx, V.sub(P1,V.scale(N1,-34)), V.add(P1,V.scale(N1,34)), "rgba(150,165,200,0.5)",1,[4,4]);
+
+    // incident ray
+    solidLine(ctx, source, P1, "#7fd6f2", 2.2, false);
+    dot(ctx, V.add(source, V.scale(d0,40)), "#7fd6f2", 3);
+    dot(ctx, V.add(source, V.scale(d0,90)), "#7fd6f2", 3);
+    label(ctx, V.add(source,{x:-4,y:-10}), "P₁", "#7fd6f2", 11);
+    label(ctx, V.add(source,{x:46,y:-16}), "P₂", "#7fd6f2", 11);
+
+    const r1Rad = toRad(opt.r1);
+    const T1 = V.add(V.scale(N1,-Math.cos(r1Rad)), V.scale(TdirAB, Math.sin(r1Rad)));
+
+    // find P2 on AC
+    const segDir = V.sub(C,apex);
+    const rhs = V.sub(apex,P1);
+    const sol = solve2x2(T1.x, -segDir.x, T1.y, -segDir.y, rhs.x, rhs.y);
+    let P2 = null;
+    if(sol && sol.s>0){ P2 = V.add(P1, V.scale(T1, sol.s)); }
+    if(!P2) P2 = V.add(apex, V.scale(segDir,0.5));
+
+    // internal ray P1->P2, highlighted amber if near minimum deviation
+    const md = minDeviation(A,n);
+    const nearMin = md && Math.abs(i-md.iMin) < 1.2;
+    solidLine(ctx, P1, P2, nearMin? "#f5b942" : "#f5b942aa", 2.2, false);
+
+    dashedLine(ctx, V.sub(P2,V.scale(N2,-34)), V.add(P2,V.scale(N2,34)), "rgba(150,165,200,0.5)",1,[4,4]);
+
+    let statusMin=false, statusTir=false;
+
+    if(opt.tir){
+      statusTir=true;
+      const Trefl = V.sub(T1, V.scale(N2, 2*V.dot(T1,N2)));
+      const P2b = V.add(P2, V.scale(Trefl, 90));
+      solidLine(ctx, P2, P2b, "#ef6262", 2, true);
+      label(ctx, V.add(P2b,{x:0,y:14}), "TIR", "#ef6262", 12);
+    } else {
+      const eRad = toRad(opt.e);
+      const tSign = Math.sign(V.dot(T1,TdirAC)) || 1;
+      const Temit = V.add(V.scale(N2, Math.cos(eRad)), V.scale(TdirAC, tSign*Math.sin(eRad)));
+      const P3 = V.add(P2, V.scale(Temit, 150));
+      solidLine(ctx, P2, P3, "#7fd6f2", 2.2, true);
+      dot(ctx, V.add(P2, V.scale(Temit,55)), "#7fd6f2", 3);
+      dot(ctx, V.add(P2, V.scale(Temit,105)), "#7fd6f2", 3);
+      label(ctx, V.add(P2,V.add(V.scale(Temit,55),{x:8,y:-8})), "P₃", "#7fd6f2", 11);
+      label(ctx, V.add(P2,V.add(V.scale(Temit,105),{x:8,y:-8})), "P₄", "#7fd6f2", 11);
+      statusMin = nearMin;
+    }
+
+    dot(ctx,P1,"#f5b942",3.5);
+    dot(ctx,P2,"#f5b942",3.5);
+
+    // readouts
+    document.getElementById("outR1").textContent = opt.r1.toFixed(1)+"°";
+    document.getElementById("outR2").textContent = opt.tir? "–" : opt.r2.toFixed(1)+"°";
+    document.getElementById("outE").textContent = opt.tir? "–" : opt.e.toFixed(1)+"°";
+    document.getElementById("outD").textContent = opt.tir? "–" : opt.d.toFixed(1)+"°";
+    document.getElementById("outIE").textContent = opt.tir? "–" : (i+opt.e).toFixed(1)+"°";
+    document.getElementById("outR1R2").textContent = opt.tir? opt.r1.toFixed(1)+"°*" : (opt.r1+opt.r2).toFixed(1)+"°";
+
+    document.getElementById("badgeMin").classList.toggle("show", !!statusMin);
+    document.getElementById("badgeTir").classList.toggle("show", !!statusTir);
+  }
+
+  /* ---------------- graph ---------------- */
+  const graphCanvas = document.getElementById("graphCanvas");
+  function drawGraph(){
+    if(!document.getElementById("view-graph").classList.contains("active")) return;
+    const {ctx,W,H} = setupCanvas(graphCanvas, 260);
+    ctx.clearRect(0,0,W,H);
+    const {A,n,i} = state;
+
+    const pts = [];
+    for(let ii=15; ii<=80; ii+=0.5){
+      const o = computeOptics(ii,A,n);
+      if(!o.tir) pts.push({i:ii, d:o.d});
+    }
+    if(pts.length<2) return;
+
+    const iMinArr = Math.min(...pts.map(p=>p.i)), iMaxArr = Math.max(...pts.map(p=>p.i));
+    const dMinArr = Math.min(...pts.map(p=>p.d)), dMaxArr = Math.max(...pts.map(p=>p.d));
+    const pad = (dMaxArr-dMinArr)*0.15 || 2;
+    const dLo = dMinArr-pad, dHi = dMaxArr+pad;
+
+    const marginL=42, marginR=14, marginT=14, marginB=28;
+    const plotW = W-marginL-marginR, plotH = H-marginT-marginB;
+
+    const X = v => marginL + (v-iMinArr)/(iMaxArr-iMinArr)*plotW;
+    const Y = v => marginT + plotH - (v-dLo)/(dHi-dLo)*plotH;
+
+    // axes
+    ctx.strokeStyle="rgba(150,165,200,0.35)"; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(marginL,marginT); ctx.lineTo(marginL,marginT+plotH); ctx.lineTo(marginL+plotW,marginT+plotH); ctx.stroke();
+    ctx.fillStyle="#93a1c2"; ctx.font="10px ui-monospace,monospace"; ctx.textAlign="center";
+    ctx.fillText("i (°) →", marginL+plotW/2, H-6);
+    ctx.save(); ctx.translate(12,marginT+plotH/2); ctx.rotate(-Math.PI/2); ctx.fillText("d (°)",0,0); ctx.restore();
+
+    // curve
+    ctx.beginPath();
+    pts.forEach((p,idx)=>{
+      const x=X(p.i), y=Y(p.d);
+      if(idx===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    });
+    ctx.strokeStyle="#7fd6f2"; ctx.lineWidth=2.4; ctx.stroke();
+
+    // min point
+    const md = minDeviation(A,n);
+    if(md){
+      const mx=X(md.iMin), my=Y(md.D);
+      dashedLine(ctx,{x:mx,y:marginT+plotH},{x:mx,y:my},"rgba(97,214,160,0.6)",1,[3,3]);
+      dashedLine(ctx,{x:marginL,y:my},{x:mx,y:my},"rgba(97,214,160,0.6)",1,[3,3]);
+      dot(ctx,{x:mx,y:my},"#61d6a0",4.5);
+      label(ctx,{x:mx,y:my-10},"D,I","#61d6a0",11);
+      document.getElementById("gDmin").textContent = md.D.toFixed(1)+"°";
+      document.getElementById("gImin").textContent = md.iMin.toFixed(1)+"°";
+    }
+
+    // current point
+    const cur = computeOptics(i,A,n);
+    if(!cur.tir){
+      const cx=X(i), cy=Y(cur.d);
+      dot(ctx,{x:cx,y:cy},"#f5b942",5);
+    }
+  }
+
+  /* ---------------- wire sliders ---------------- */
+  const sliderI=document.getElementById("sliderI"), sliderA=document.getElementById("sliderA"), sliderN=document.getElementById("sliderN");
+  const valI=document.getElementById("valI"), valA=document.getElementById("valA"), valN=document.getElementById("valN");
+
+  function refresh(){
+    valI.textContent = state.i+"°";
+    valA.textContent = state.A+"°";
+    valN.textContent = state.n.toFixed(2);
+    drawSim();
+    drawGraph();
+  }
+  sliderI.addEventListener("input", e=>{ state.i=+e.target.value; refresh(); });
+  sliderA.addEventListener("input", e=>{ state.A=+e.target.value; refresh(); });
+  sliderN.addEventListener("input", e=>{ state.n=+e.target.value; refresh(); });
+
+  window.addEventListener("resize", ()=>{ drawSim(); drawGraph(); });
+
+  /* ---------------- calculator ---------------- */
+  const segBtns = document.querySelectorAll(".seg-btn");
+  const fieldD = document.getElementById("fieldD"), fieldN = document.getElementById("fieldN");
+  let calcMode = "findN";
+  segBtns.forEach(b=>{
+    b.addEventListener("click", ()=>{
+      segBtns.forEach(x=>x.classList.remove("active"));
+      b.classList.add("active");
+      calcMode = b.dataset.mode;
+      fieldD.style.display = calcMode==="findN" ? "block":"none";
+      fieldN.style.display = calcMode==="findD" ? "block":"none";
+      document.getElementById("calcSteps").style.display="none";
+      document.getElementById("calcResult").style.display="none";
+    });
+  });
+
+  document.getElementById("calcBtn").addEventListener("click", ()=>{
+    const A = parseFloat(document.getElementById("calcA").value);
+    const stepsBox = document.getElementById("calcSteps");
+    const resBox = document.getElementById("calcResult");
+    if(isNaN(A) || A<=0 || A>=180){ alert("A අගය නිවැරදිව ඇතුළත් කරන්න (0-180)"); return; }
+
+    if(calcMode==="findN"){
+      const D = parseFloat(document.getElementById("calcD").value);
+      if(isNaN(D)){ alert("D අගය ඇතුළත් කරන්න"); return; }
+      const Arad=toRad(A), Drad=toRad(D);
+      const n = Math.sin((Arad+Drad)/2)/Math.sin(Arad/2);
+      stepsBox.innerHTML = `
+        <div class="step">සූත්‍රය: <span class="eq">n = sin[(A + D)/2] / sin(A/2)</span></div>
+        <div class="step">අගයන් ආදේශ කිරීම: <span class="eq">n = sin[(${A}° + ${D}°)/2] / sin(${A}°/2)</span></div>
+        <div class="step"><span class="eq">n = sin(${((A+D)/2).toFixed(2)}°) / sin(${(A/2).toFixed(2)}°)</span></div>
+        <div class="step"><span class="eq">n = ${Math.sin((Arad+Drad)/2).toFixed(4)} / ${Math.sin(Arad/2).toFixed(4)}</span></div>`;
+      stepsBox.style.display="block";
+      document.getElementById("calcBig").textContent = n.toFixed(3);
+      document.getElementById("calcLbl").textContent = "වර්තන දර්ශකය (n)";
+      resBox.style.display="block";
+    } else {
+      const n = parseFloat(document.getElementById("calcN").value);
+      if(isNaN(n) || n<=1){ alert("n අගය 1 ට වඩා විය යුතුය"); return; }
+      const md = minDeviation(A,n);
+      if(!md){
+        stepsBox.innerHTML = `<div class="step">මෙම A සහ n සංයෝජනය සඳහා අවම අපගමනයක් නොපවතී (sin i > 1). A හෝ n අඩු කර බලන්න.</div>`;
+        stepsBox.style.display="block";
+        resBox.style.display="none";
+        return;
+      }
+      stepsBox.innerHTML = `
+        <div class="step">අවම අපගමන අවස්ථාවේදී: <span class="eq">r₁ = r₂ = A/2 = ${(A/2).toFixed(2)}°</span></div>
+        <div class="step">Snell's Law: <span class="eq">sin(I) = n × sin(A/2) = ${n} × sin(${(A/2).toFixed(2)}°)</span></div>
+        <div class="step"><span class="eq">I = sin⁻¹(${(n*Math.sin(toRad(A/2))).toFixed(4)}) = ${md.iMin.toFixed(2)}°</span></div>
+        <div class="step">සූත්‍රය: <span class="eq">D = 2I − A = 2(${md.iMin.toFixed(2)}°) − ${A}°</span></div>`;
+      stepsBox.style.display="block";
+      document.getElementById("calcBig").textContent = md.D.toFixed(2)+"°";
+      document.getElementById("calcLbl").textContent = "අවම අපගමන කෝණය (D) · I = "+md.iMin.toFixed(2)+"°";
+      resBox.style.display="block";
+    }
+  });
+
+  /* ---------------- init ---------------- */
+  refresh();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>වර්ණාවලිමානය — A/L භෞතික විද්‍යා ප්‍රායෝගික</title>
+<style>
+:root{
+  --bg:#0d1117;
+  --panel:#151b23;
+  --panel-2:#1c232d;
+  --border:#2a323d;
+  --text:#e8edf3;
+  --muted:#8b96a5;
+  --brass:#d4a54a;
+  --brass-dim:#8a6f37;
+  --violet:#8b6bf0;
+  --blue:#4f8cf7;
+  --green:#3fd07a;
+  --yellow:#f2d94e;
+  --orange:#f2a24e;
+  --red:#f2604e;
+  --sodium:#ffcf4a;
+  --font-display:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --font-body:"Segoe UI",system-ui,-apple-system,Helvetica,Arial,sans-serif;
+  --font-mono:"SF Mono","Consolas","Courier New",monospace;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    radial-gradient(1200px 600px at 15% -10%, rgba(139,107,240,0.10), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, rgba(79,140,247,0.08), transparent 55%),
+    var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  line-height:1.55;
+  min-height:100vh;
+}
+::selection{background:var(--brass);color:#1a1305;}
+a{color:var(--brass);}
+
+.app{max-width:1180px;margin:0 auto;padding:0 20px 80px;}
+
+/* ---------- HERO ---------- */
+.hero{
+  padding:56px 0 30px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:28px;
+  position:relative;
+}
+.hero-eyebrow{
+  font-family:var(--font-mono);
+  letter-spacing:.14em;
+  font-size:12px;
+  color:var(--brass);
+  text-transform:uppercase;
+  margin-bottom:14px;
+}
+.hero h1{
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:clamp(32px,5vw,54px);
+  margin:0 0 10px;
+  letter-spacing:.01em;
+}
+.hero p.sub{
+  color:var(--muted);
+  font-size:16px;
+  max-width:640px;
+  margin:0 0 26px;
+}
+.spectrum-bar{
+  height:10px;
+  border-radius:6px;
+  width:100%;
+  max-width:520px;
+  background:linear-gradient(90deg,
+    var(--violet),var(--blue),var(--green),var(--yellow),var(--orange),var(--red));
+  box-shadow:0 0 24px rgba(139,107,240,.25);
+}
+.hero-diagram{
+  position:absolute;
+  right:0;
+  top:40px;
+  width:260px;
+  opacity:.9;
+}
+@media (max-width:860px){ .hero-diagram{display:none;} }
+
+/* ---------- TABS ---------- */
+.tabs{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  position:sticky;
+  top:0;
+  z-index:50;
+  background:rgba(13,17,23,0.92);
+  backdrop-filter:blur(6px);
+  padding:12px 0;
+  margin-bottom:28px;
+  border-bottom:1px solid var(--border);
+}
+.tab-btn{
+  font-family:var(--font-mono);
+  font-size:13px;
+  letter-spacing:.03em;
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--muted);
+  padding:10px 16px;
+  border-radius:8px;
+  cursor:pointer;
+  transition:all .15s ease;
+}
+.tab-btn:hover{color:var(--text);border-color:var(--brass-dim);}
+.tab-btn.active{
+  color:#151109;
+  background:var(--brass);
+  border-color:var(--brass);
+  font-weight:600;
+}
+.tab-btn:focus-visible{outline:2px solid var(--brass);outline-offset:2px;}
+
+.tab-panel{display:none;animation:fadein .25s ease;}
+.tab-panel.active{display:block;}
+@keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+/* ---------- SECTIONS / CARDS ---------- */
+h2.section-title{
+  font-family:var(--font-display);
+  font-size:28px;
+  font-weight:600;
+  margin:0 0 6px;
+  color:var(--text);
+}
+p.section-desc{color:var(--muted);margin:0 0 22px;max-width:760px;}
+
+.card{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:22px;
+  margin-bottom:22px;
+}
+.card h3{
+  font-family:var(--font-display);
+  font-size:20px;
+  margin:0 0 12px;
+  color:var(--brass);
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.card h3 .step-no{
+  font-family:var(--font-mono);
+  font-size:12px;
+  background:var(--panel-2);
+  border:1px solid var(--border);
+  color:var(--muted);
+  padding:3px 8px;
+  border-radius:20px;
+}
+.grid-2{display:grid;grid-template-columns:1.1fr 1fr;gap:24px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+@media (max-width:860px){ .grid-2,.grid-3{grid-template-columns:1fr;} }
+
+.parts-list{list-style:none;margin:0;padding:0;display:grid;gap:8px;}
+.parts-list li{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+  padding:10px 12px;
+  background:var(--panel-2);
+  border:1px solid var(--border);
+  border-radius:8px;
+  cursor:pointer;
+  transition:border-color .15s;
+}
+.parts-list li:hover, .parts-list li.active{border-color:var(--brass);}
+.parts-list .dot{
+  width:10px;height:10px;border-radius:50%;flex:0 0 auto;margin-top:5px;
+}
+.parts-list b{color:var(--text);}
+.parts-list span.desc{color:var(--muted);font-size:13px;display:block;}
+
+svg text{font-family:var(--font-body);}
+canvas{display:block;max-width:100%;background:#0a0e13;border-radius:10px;border:1px solid var(--border);}
+
+.controls{display:flex;flex-direction:column;gap:16px;margin-top:14px;}
+.control-row{display:flex;flex-direction:column;gap:6px;}
+.control-row label{
+  font-size:13px;color:var(--muted);
+  display:flex;justify-content:space-between;
+  font-family:var(--font-mono);
+}
+.control-row label .val{color:var(--brass);}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;
+  width:100%;height:6px;border-radius:4px;
+  background:var(--panel-2);
+  border:1px solid var(--border);
+  cursor:pointer;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:18px;height:18px;border-radius:50%;
+  background:var(--brass);border:2px solid #1a1305;
+  cursor:pointer;margin-top:-1px;
+}
+input[type=range]::-moz-range-thumb{
+  width:18px;height:18px;border-radius:50%;
+  background:var(--brass);border:2px solid #1a1305;cursor:pointer;
+}
+.btn-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;}
+button.btn{
+  font-family:var(--font-body);
+  font-size:14px;
+  background:var(--panel-2);
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:9px 14px;
+  border-radius:8px;
+  cursor:pointer;
+  transition:all .15s;
+}
+button.btn:hover{border-color:var(--brass);color:var(--brass);}
+button.btn.primary{background:var(--brass);color:#1a1305;border-color:var(--brass);font-weight:600;}
+button.btn.primary:hover{filter:brightness(1.08);color:#1a1305;}
+button.btn:focus-visible{outline:2px solid var(--brass);outline-offset:2px;}
+
+.status-pill{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--font-mono);font-size:13px;
+  padding:6px 12px;border-radius:20px;
+  background:var(--panel-2);border:1px solid var(--border);color:var(--muted);
+  margin-top:10px;
+}
+.status-pill.good{color:var(--green);border-color:var(--green);}
+.status-pill .led{width:8px;height:8px;border-radius:50%;background:currentColor;}
+
+.readout{
+  font-family:var(--font-mono);
+  background:var(--panel-2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:14px 16px;
+  margin-top:14px;
+  font-size:14px;
+}
+.readout .line{display:flex;justify-content:space-between;padding:3px 0;}
+.readout .line b{color:var(--brass);}
+
+/* number inputs (calculator) */
+.field{display:flex;flex-direction:column;gap:5px;}
+.field label{font-size:13px;color:var(--muted);}
+.field .inline-inputs{display:flex;gap:8px;align-items:center;}
+input[type=number], input[type=text]{
+  background:var(--panel-2);
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:8px 10px;
+  border-radius:8px;
+  font-family:var(--font-mono);
+  font-size:14px;
+  width:100%;
+}
+input[type=number]:focus, input[type=text]:focus{outline:2px solid var(--brass);border-color:var(--brass);}
+.deg-min{display:flex;gap:6px;align-items:center;}
+.deg-min input{width:70px;}
+.deg-min span{color:var(--muted);font-family:var(--font-mono);}
+
+.result-box{
+  margin-top:16px;
+  background:linear-gradient(135deg, rgba(212,165,74,.08), rgba(139,107,240,.06));
+  border:1px solid var(--brass-dim);
+  border-radius:10px;
+  padding:16px;
+  font-family:var(--font-mono);
+}
+.result-box .big{font-size:22px;color:var(--brass);font-weight:700;}
+
+details.qa{
+  background:var(--panel-2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:12px 16px;
+  margin-bottom:12px;
+}
+details.qa summary{cursor:pointer;color:var(--text);font-weight:600;}
+details.qa summary:hover{color:var(--brass);}
+details.qa .answer{margin-top:10px;color:var(--muted);font-family:var(--font-mono);font-size:14px;white-space:pre-line;}
+
+.tag-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.tag{
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.05em;
+  background:var(--panel-2);border:1px solid var(--border);color:var(--muted);
+  padding:3px 9px;border-radius:20px;text-transform:uppercase;
+}
+
+footer.note{
+  color:var(--muted);
+  font-size:12.5px;
+  border-top:1px solid var(--border);
+  margin-top:40px;padding-top:20px;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .tab-panel{animation:none;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-eyebrow">A/L භෞතික විද්‍යා · ප්‍රායෝගික අංක 06</div>
+    <h1>වර්ණාවලිමානය</h1>
+    <p class="sub">The Spectrometer — දුරේක්ෂය, සමාන්තරකය සහ ප්‍රිස්ම මේසය සීරුමාරු කිරීමේ සිට, ප්‍රිස්ම කෝණය සහ අවම අපගමන කෝණය මැනීම දක්වා, අන්තර්ක්‍රියාකාරී සිමියුලේෂන මගින් හදාරන්න.</p>
+    <div class="spectrum-bar"></div>
+  </div>
+
+  <!-- TABS -->
+  <nav class="tabs" role="tablist" aria-label="ප්‍රධාන අංශ">
+    <button class="tab-btn active" data-tab="overview">කොටස් හඳුනාගැනීම</button>
+    <button class="tab-btn" data-tab="adjust">සීරුමාරු කිරීම්</button>
+    <button class="tab-btn" data-tab="sim">සිමියුලේෂන</button>
+    <button class="tab-btn" data-tab="calc">ගණනය කිරීම් සහ ප්‍රශ්න</button>
+  </nav>
+
+  <!-- ================= TAB 1: OVERVIEW ================= -->
+  <section id="tab-overview" class="tab-panel active">
+    <h2 class="section-title">වර්ණාවලිමානයේ කොටස්</h2>
+    <p class="section-desc">වම් පසින් ඇති ලැයිස්තුවෙන් කොටසක් ක්ලික් කරන්න — දකුණේ රූප සටහනේ අදාළ කොටස උද්දීපනය වේ.</p>
+
+    <div class="card">
+      <div class="grid-2">
+        <ul class="parts-list" id="partsList">
+          <li data-part="collimator" class="active"><span class="dot" style="background:var(--blue)"></span><div><b>සමාන්තරකය (Collimator)</b><span class="desc">ඉස්කුරුප්පු S3 (විවරය), S4 (දුර) — විචලනය වන ප්‍රභවයේ එළිය සමාන්තර කිරණ කැබැල්ලක් බවට පත් කරයි.</span></div></li>
+          <li data-part="prism"><span class="dot" style="background:var(--violet)"></span><div><b>ප්‍රිස්ම මේසය</b><span class="desc">P, Q, R ලෙවල් ඉස්කුරුප්පු තුනෙන් සිරස් අක්ෂයට ලම්බකව මට්ටම් කෙරේ; C කේන්ද්‍රය.</span></div></li>
+          <li data-part="telescope"><span class="dot" style="background:var(--brass)"></span><div><b>දුරේක්ෂය (Telescope)</b><span class="desc">S1 (අක්ෂි කාචය), S2 (වස්තු කාචය) — යරි ලීතු (crosswires) සහ දුරස්ථ රූපය මනාව පෙනෙන සේ සීරුමාරු කෙරේ.</span></div></li>
+          <li data-part="mainscale"><span class="dot" style="background:var(--green)"></span><div><b>ප්‍රධාන මාපකය</b><span class="desc">දුරේක්ෂය භ්‍රමණය වන කෝණය අංශක වශයෙන් කියවේ (360°).</span></div></li>
+          <li data-part="vernier"><span class="dot" style="background:var(--yellow)"></span><div><b>වර්නියර් මාපක (2ක්)</b><span class="desc">ප්‍රධාන මාපකයට එරෙහිව 180°ට ප්‍රතිවිරුද්ධව ස්ථානගත වී ඇති අතර, විනාඩි (') නිරවද්‍යතාවෙන් කියවීම් ලබාදෙයි.</span></div></li>
+          <li data-part="levelling"><span class="dot" style="background:var(--red)"></span><div><b>ලෙවල් ඉස්කුරුප්පු a, b, c</b><span class="desc">ප්‍රිස්ම මේසය මට්ටම් කිරීමට යොදන තුන් ඉස්කුරුප්පු.</span></div></li>
+        </ul>
+        <div>
+          <svg id="overviewSvg" viewBox="0 0 420 280" width="100%" role="img" aria-label="වර්ණාවලිමානයේ රූප සටහන">
+            <!-- base -->
+            <rect x="10" y="240" width="400" height="14" rx="4" fill="#20272f" stroke="#2a323d"/>
+            <!-- collimator -->
+            <g id="p-collimator">
+              <rect x="20" y="120" width="120" height="24" rx="4" fill="#1c232d" stroke="#4f8cf7" stroke-width="2"/>
+              <circle cx="30" cy="132" r="5" fill="#4f8cf7"/>
+              <text x="30" y="110" fill="#8b96a5" font-size="11">සමාන්තරකය</text>
+            </g>
+            <!-- prism table -->
+            <g id="p-prism">
+              <circle cx="210" cy="132" r="46" fill="#1c232d" stroke="#8b6bf0" stroke-width="2"/>
+              <polygon points="210,100 234,150 186,150" fill="#262034" stroke="#8b6bf0" stroke-width="1.5"/>
+              <circle cx="210" cy="95" r="3" fill="#f2604e"/>
+              <circle cx="180" cy="160" r="3" fill="#f2604e"/>
+              <circle cx="240" cy="160" r="3" fill="#f2604e"/>
+              <text x="176" y="70" fill="#8b96a5" font-size="11">ප්‍රිස්ම මේසය</text>
+            </g>
+            <!-- telescope -->
+            <g id="p-telescope">
+              <rect x="280" y="105" width="120" height="24" rx="4" fill="#1c232d" stroke="#d4a54a" stroke-width="2" transform="rotate(-18 340 117)"/>
+              <text x="300" y="80" fill="#8b96a5" font-size="11">දුරේක්ෂය</text>
+            </g>
+            <!-- main scale ring -->
+            <g id="p-mainscale">
+              <circle cx="210" cy="132" r="70" fill="none" stroke="#3fd07a" stroke-width="1.5" stroke-dasharray="2 3"/>
+              <text x="270" y="205" fill="#8b96a5" font-size="11">ප්‍රධාන මාපකය</text>
+            </g>
+            <!-- vernier marks -->
+            <g id="p-vernier">
+              <rect x="200" y="60" width="20" height="6" fill="#f2d94e"/>
+              <rect x="200" y="198" width="20" height="6" fill="#f2d94e"/>
+              <text x="130" y="205" fill="#8b96a5" font-size="11">වර්නියර්</text>
+            </g>
+            <!-- levelling screws -->
+            <g id="p-levelling">
+              <circle cx="180" cy="176" r="6" fill="#f2604e"/>
+              <circle cx="240" cy="176" r="6" fill="#f2604e"/>
+              <circle cx="210" cy="90" r="6" fill="#f2604e"/>
+              <text x="140" y="235" fill="#8b96a5" font-size="11">a, b, c ඉස්කුරුප්පු</text>
+            </g>
+            <!-- stand -->
+            <rect x="195" y="230" width="30" height="10" fill="#20272f"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TAB 2: ADJUSTMENTS ================= -->
+  <section id="tab-adjust" class="tab-panel">
+    <h2 class="section-title">සීරුමාරු කිරීම් (Adjustments)</h2>
+    <p class="section-desc">ඕනෑම වර්ණාවලිමාන පරීක්ෂණයකට පෙර, පහත මූලික සීරුමාරු තුන අනුපිළිවෙළින් සිදු කළ යුතුය. සිලයිඩර වලින් සීරුමාරුව ප්‍රගුණ කරන්න.</p>
+
+    <!-- A: Telescope -->
+    <div class="card">
+      <h3><span class="step-no">01</span> දුරේක්ෂය සීරුමාරු කිරීම</h3>
+      <p style="color:var(--muted);margin-top:0;">S1 (අක්ෂි කාචය) කරකවා යරි ලීතු (crosswires) තියුණුව පෙනෙන සේ සකසන්න, පසුව S2 කරකවා දුරස්ථ වස්තුවක රූපය crosswires තලයේ පැහැදිලිව/සමපාතව පෙනෙන සේ සකසන්න.</p>
+      <div class="grid-2">
+        <canvas id="telAdjustCanvas" width="420" height="260"></canvas>
+        <div class="controls">
+          <div class="control-row">
+            <label>S1 — අක්ෂි කාච නාභිගත කිරීම (crosswire clarity) <span class="val" id="s1val">40</span></label>
+            <input type="range" id="s1slider" min="0" max="100" value="40">
+          </div>
+          <div class="control-row">
+            <label>S2 — වස්තු කාච නාභිගත කිරීම (image sharpness) <span class="val" id="s2val">30</span></label>
+            <input type="range" id="s2slider" min="0" max="100" value="30">
+          </div>
+          <div class="status-pill" id="telStatus"><span class="led"></span> සීරුමාරු කරමින්...</div>
+          <p style="color:var(--muted);font-size:13px;">ඉලක්කය: දෙකම 45–55 පරාසයේ තබා crosswires සහ දුරස්ථ රූපය දෙකම එකවර තියුණුව පෙනෙන ලෙස (parallax රහිතව) සකසන්න.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- B: Collimator -->
+    <div class="card">
+      <h3><span class="step-no">02</span> සමාන්තරකය සීරුමාරු කිරීම</h3>
+      <p style="color:var(--muted);margin-top:0;">S3 මගින් විවරයේ (slit) පළල පාලනය කරන අතර S4 මගින් විවරය සහ කාචය අතර දුර සීරුමාරු කර, විවරයෙන් පිටවන කිරණ සමාන්තර වන සේ සකසයි. දුරේක්ෂය සමාන්තරකයට යොමු කර, විවරයේ තියුණු, පටු, සිරස් රූපයක් crosswires මතට එනතුරු S4 සීරුමාරු කරන්න.</p>
+      <div class="grid-2">
+        <canvas id="collAdjustCanvas" width="420" height="220"></canvas>
+        <div class="controls">
+          <div class="control-row">
+            <label>S3 — විවරයේ පළල (Slit width) <span class="val" id="s3val">55</span></label>
+            <input type="range" id="s3slider" min="5" max="100" value="55">
+          </div>
+          <div class="control-row">
+            <label>S4 — විවරය/කාච දුර (Focus) <span class="val" id="s4val">25</span></label>
+            <input type="range" id="s4slider" min="0" max="100" value="25">
+          </div>
+          <div class="status-pill" id="collStatus"><span class="led"></span> සීරුමාරු කරමින්...</div>
+          <p style="color:var(--muted);font-size:13px;">ඉලක්කය: විවරය පටු (20–40) සහ S4 පරාසය 45–55 වන විට කිරණ සමාන්තර වේ.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- C: Prism table -->
+    <div class="card">
+      <h3><span class="step-no">03</span> ප්‍රිස්ම මේසය මට්ටම් කිරීම</h3>
+      <p style="color:var(--muted);margin-top:0;">P, Q, R ඉස්කුරුප්පු තුනට සමාන්තරව ප්‍රිස්මය තබා, දුරේක්ෂය T₁ සහ T₂ ස්ථාන දෙකේදීම විවරයේ ප්‍රතිබිම්බය දෘෂ්ටි ක්ෂේත්‍රයේ මධ්‍යයට ගෙන එනතුරු b, c (T₂ සඳහා) සහ පසුව a (T₁ සඳහා) ඉස්කුරුප්පු සීරුමාරු කරන්න.</p>
+      <div class="grid-2">
+        <canvas id="levelCanvas" width="420" height="240"></canvas>
+        <div class="controls">
+          <div class="control-row"><label>ඉස්කුරුප්පු a <span class="val" id="aval">50</span></label><input type="range" id="aslider" min="0" max="100" value="50"></div>
+          <div class="control-row"><label>ඉස්කුරුප්පු b <span class="val" id="bval">50</span></label><input type="range" id="bslider" min="0" max="100" value="50"></div>
+          <div class="control-row"><label>ඉස්කුරුප්පු c <span class="val" id="cval">50</span></label><input type="range" id="cslider" min="0" max="100" value="50"></div>
+          <div class="status-pill" id="levelStatus"><span class="led"></span> මට්ටම් කරමින්...</div>
+          <p style="color:var(--muted);font-size:13px;">ඉලක්කය: T₁ සහ T₂ දෙපැත්තේම ප්‍රතිබිම්බය මධ්‍ය රේඛාවට (0 මට්ටමට) ගෙන එන්න — a, b, c තුනම 50 ආසන්නයේ තබන්න.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TAB 3: SIMULATIONS ================= -->
+  <section id="tab-sim" class="tab-panel">
+    <h2 class="section-title">අන්තර්ක්‍රියාකාරී සිමියුලේෂන</h2>
+    <p class="section-desc">දෘෂ්ටි ක්ෂේත්‍රය, ප්‍රිස්ම කෝණය සහ අවම අපගමන කෝණය සජීවීව අත්හදා බලන්න.</p>
+
+    <!-- Field of view -->
+    <div class="card">
+      <h3>දෘෂ්ටි ක්ෂේත්‍රය — Crosshair View</h3>
+      <div class="grid-2">
+        <canvas id="fovCanvas" width="420" height="300"></canvas>
+        <div class="controls">
+          <div class="control-row"><label>සිරස් අපගමනය (Vertical shift) <span class="val" id="fovVvalDisp">0</span></label><input type="range" id="fovV" min="-60" max="60" value="0"></div>
+          <div class="control-row"><label>තිරස් අපගමනය (Horizontal shift) <span class="val" id="fovHvalDisp">0</span></label><input type="range" id="fovH" min="-60" max="60" value="0"></div>
+          <div class="control-row"><label>ඇල වීම (Tilt angle°) <span class="val" id="fovTvalDisp">0</span></label><input type="range" id="fovT" min="-30" max="30" value="0"></div>
+          <div class="control-row"><label>නාභිගත කිරීම (Focus blur) <span class="val" id="fovFvalDisp">0</span></label><input type="range" id="fovF" min="0" max="20" value="0"></div>
+          <button class="btn primary" id="fovReset">නිවැරදි ස්ථානයට සකසන්න</button>
+          <p style="color:var(--muted);font-size:13px;">ඉලක්කය: විවරයේ රූපය (කහ රේඛාව) crosswires දෙක මධ්‍යයේ, සිරස්ව, කැපී පෙනෙන ලෙස ගෙන එන්න.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prism angle -->
+    <div class="card">
+      <h3>ප්‍රිස්ම කෝණය A සෙවීම</h3>
+      <p style="color:var(--muted);margin-top:0;">සමාන්තර කිරණ පොකුරක් ප්‍රිස්මයේ A ශීර්ෂය මතට යවා, AB සහ AC පෘෂ්ඨවලින් අර්ධ පරාවර්තනය වන කිරණ දුරේක්ෂය මගින් T₁ සහ T₂ ස්ථානවලදී ග්‍රහණය කරගනී. T₁, T₂ දුරේක්ෂ කෝණ දෙක අතර වෙනසෙන් අඩක් ලෙස ප්‍රතිබිම්බ කෝණය ගණනය කෙරේ (එය 2A ට සමාන වේ).</p>
+      <div class="grid-2">
+        <canvas id="prismAngleCanvas" width="420" height="320"></canvas>
+        <div class="controls">
+          <div class="control-row"><label>T₁ දුරේක්ෂ කෝණය° <span class="val" id="t1valDisp">40</span></label><input type="range" id="t1slider" min="10" max="80" value="40"></div>
+          <div class="control-row"><label>T₂ දුරේක්ෂ කෝණය° <span class="val" id="t2valDisp">140</span></label><input type="range" id="t2slider" min="100" max="170" value="140"></div>
+          <div class="readout" id="prismAreadout">
+            <div class="line">2A (T₁ සහ T₂ අතර කෝණය) = <b id="twoA">100.0°</b></div>
+            <div class="line">ප්‍රිස්ම කෝණය A = <b id="Aout">50.0°</b></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Minimum deviation -->
+    <div class="card">
+      <h3>අවම අපගමන කෝණය (D) සහ වර්තනාංකය (n)</h3>
+      <div class="grid-2">
+        <div>
+          <canvas id="devGraphCanvas" width="420" height="280"></canvas>
+          <div class="controls">
+            <div class="control-row"><label>ආපතන කෝණය i° <span class="val" id="ivalDisp">45</span></label><input type="range" id="islider" min="5" max="85" value="45"></div>
+            <div class="control-row"><label>ප්‍රිස්ම කෝණය A° <span class="val" id="AsimValDisp">60</span></label><input type="range" id="Asim" min="30" max="80" value="60"></div>
+            <div class="control-row"><label>වර්තනාංකය n (ප්‍රිස්ම ද්‍රව්‍යය) <span class="val" id="nsimValDisp">1.50</span></label><input type="range" id="nsim" min="130" max="180" value="150"></div>
+          </div>
+        </div>
+        <div>
+          <canvas id="dispersionCanvas" width="420" height="280"></canvas>
+          <div class="btn-row">
+            <button class="btn primary" id="lightWhite">සුදු එළිය (White)</button>
+            <button class="btn" id="lightSodium">සෝඩියම් (Monochromatic)</button>
+          </div>
+          <div class="readout" id="devReadout">
+            <div class="line">වත්මන් අපගමනය d = <b id="dOut">--°</b></div>
+            <div class="line">අවම අපගමනය D<sub>m</sub> (ගණනය කළ) = <b id="DmOut">--°</b></div>
+            <div class="line">n = sin((A+D<sub>m</sub>)/2) / sin(A/2) = <b id="nOut">--</b></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TAB 4: CALCULATIONS & QUESTIONS ================= -->
+  <section id="tab-calc" class="tab-panel">
+    <h2 class="section-title">ගණනය කිරීම් සහ ප්‍රශ්න</h2>
+
+    <!-- Calculator 1: Prism angle from vernier readings -->
+    <div class="card">
+      <h3>ගණක යන්ත්‍රය 1 — වර්නියර් කියවීම්වලින් ප්‍රිස්ම කෝණය A</h3>
+      <p style="color:var(--muted);margin-top:0;">T₁ සහ T₂ ස්ථාන දෙකෙහි වර්නියර් කියවීම් (අංශක° සහ විනාඩි') ඇතුළත් කරන්න.</p>
+      <div class="grid-3">
+        <div class="field">
+          <label>T₁ කියවීම</label>
+          <div class="deg-min"><input type="number" id="t1deg" value="3" min="0" max="360"><span>°</span><input type="number" id="t1min" value="16" min="0" max="59"><span>'</span></div>
+        </div>
+        <div class="field">
+          <label>T₂ කියවීම</label>
+          <div class="deg-min"><input type="number" id="t2deg" value="223" min="0" max="360"><span>°</span><input type="number" id="t2min" value="46" min="0" max="59"><span>'</span></div>
+        </div>
+        <div class="field">
+          <label>&nbsp;</label>
+          <button class="btn primary" id="calcAbtn">ප්‍රිස්ම කෝණය A ගණනය කරන්න</button>
+        </div>
+      </div>
+      <div class="result-box" id="calcAresult">
+        <div>2A = |T₁ − T₂| = <span id="rTwoA">--</span></div>
+        <div class="big">A = <span id="rA">--</span></div>
+      </div>
+    </div>
+
+    <!-- Calculator 2: n from A and Dm -->
+    <div class="card">
+      <h3>ගණක යන්ත්‍රය 2 — වර්තනාංකය n</h3>
+      <p style="color:var(--muted);margin-top:0;">ප්‍රිස්ම කෝණය A සහ අවම අපගමන කෝණය D<sub>m</sub> ඇතුළත් කර n ගණනය කරන්න.</p>
+      <div class="grid-3">
+        <div class="field"><label>ප්‍රිස්ම කෝණය A (°)</label><input type="number" id="Ain" value="60" step="0.1"></div>
+        <div class="field"><label>අවම අපගමන කෝණය D<sub>m</sub> (°)</label><input type="number" id="Dmin" value="38" step="0.1"></div>
+        <div class="field"><label>&nbsp;</label><button class="btn primary" id="calcNbtn">n ගණනය කරන්න</button></div>
+      </div>
+      <div class="result-box" id="calcNresult">
+        <div>n = sin((A + D<sub>m</sub>)/2) / sin(A/2)</div>
+        <div class="big">n = <span id="rN">--</span></div>
+      </div>
+    </div>
+
+    <!-- Past paper practice -->
+    <div class="card">
+      <h3>පැරණි විභාග ප්‍රශ්න අභ්‍යාස</h3>
+
+      <details class="qa" open>
+        <div class="tag-row"><span class="tag">1982</span><span class="tag">ප්‍රිස්ම කෝණය</span></div>
+        <summary>(1) සහ (2) ස්ථාන දෙකේදී වර්නියර් මාපක කියවීම් 03°12' සහ 240°42' නම්, ප්‍රිස්ම කෝණයේ අගය කුමක්ද?</summary>
+        <div class="answer">2A = |240°42' − 03°12'| = 237°30'
+A = 118°45'
+(සටහන: ප්‍රතිබිම්භ දෙක අතර සම්පූර්ණ කෝණය 2A වන අතර, එය ප්‍රිස්මයේ සත්‍ය ශීර්ෂ කෝණයට අනුරූප වන පරිදි අවශ්‍ය නම් 360° න් අඩු කර සකසන්න.)</div>
+      </details>
+
+      <details class="qa">
+        <div class="tag-row"><span class="tag">1989</span><span class="tag">ප්‍රිස්ම කෝණය</span></div>
+        <summary>දුරේක්ෂයේ ස්ථාන දෙකක ලබාගත් පාඨාංක 300°15' සහ 59°20' නම්, ප්‍රිස්මයේ ප්‍රත්‍යක් කෝණය කොපමණද?</summary>
+        <div class="answer">දෙපාඨාංක අතර කෝණය = 300°15' − 59°20' = 240°55'
+මෙය ප්‍රාථමික අගය බැවින්, ප්‍රත්‍යක් (reflex) නොවන කෝණය = 360° − 240°55' = 119°05' → 2A
+එබැවින් A = 59°32.5' ආසන්නව 59°33'</div>
+      </details>
+
+      <details class="qa">
+        <div class="tag-row"><span class="tag">1994</span><span class="tag">වර්තන කෝණය</span></div>
+        <summary>සමාන්තරකයේ ස්ථාන දෙකේ පාඨාංක 3°16' සහ ප්‍රිස්ම මේසයේ පිහිටීම 223°46' නම්, අවම අපගමන කෝණය ගණනය කරන්න.</summary>
+        <div class="answer">මූලික දුරේක්ෂ ස්ථානය (සමාන්තරකයට කෙළින්ම) සහ අපගමනය වූ ස්ථානය අතර වෙනසෙන් D ලබාගනී:
+D = |223°46' − 3°16'| = 220°30' → 360° න් අඩුකර සත්‍ය අගය ලබාගන්න: 360° − 220°30' = 139°30' (මෙය ප්‍රශ්නයේ සන්දර්භයට අනුව සකසන්න)
+මෙයින් A සහ n සඳහා ඉහත සූත්‍රය යොදන්න.</div>
+      </details>
+
+      <details class="qa">
+        <div class="tag-url">
+        </div>
+        <div class="tag-row"><span class="tag">1998</span><span class="tag">D<sub>m</sub> ගණනය</span></div>
+        <summary>ප්‍රිස්ම කෝණය A = 3°16', C සහ B එක් එල්ලේ තැබූ විට පාඨාංක 223°46' නම්, අවම අපගමන කෝණය ගණනය කරන්න (i සමඟ d අපගමන කෝණය වෙනස්වන ආකාරය ද සලකා බලන්න).</summary>
+        <div class="answer">"සිමියුලේෂන" පටිත්තෙහි i–d ප්‍රස්ථාරය භාවිතා කර, d අවම වන ලක්ෂ්‍යය (dd/di = 0) හඳුනාගෙන D<sub>m</sub> අගය කියවා ගන්න. එම අගය සහ A ප්‍රිස්ම කෝණය ගණක යන්ත්‍රය 2 හි යොදා n සොයන්න.</div>
+      </details>
+
+      <details class="qa">
+        <div class="tag-row"><span class="tag">2006</span><span class="tag">සෝඩියම් එළිය</span></div>
+        <summary>සෝඩියම් වර්ණාවලියේ තරංග ආයාමය සඳහා අවම අපගමන කෝණය තීරණය කිරීමේදී, සෝඩියම් ලාම්පුවක් වෙනුවට සුදු ආලෝක ප්‍රභවයක් භාවිත කළ හැකි යැයි එක් සිසුවෙකු තර්ක කරයි. මෙය නිවැරදිද? හේතු දක්වන්න.</summary>
+        <div class="answer">නැත, එය සම්පූර්ණයෙන් නිවැරදි නොවේ. සුදු ආලෝකය භාවිත කළහොත් එහි විවිධ තරංග ආයාම සඳහා විවිධ අපගමන කෝණ ඇති වී වර්ණවලින් යුත් පටියක් (spectrum) ලැබෙන අතර, එක් නිශ්චිත තරංග ආයාමයක අවම අපගමන කෝණය නිරවද්‍යව මැනිය නොහැක. නිශ්චිත, තනි වර්ණයක අවම අපගමන කෝණය සොයාගැනීමට ඒකවර්ණ ප්‍රභවයක් (සෝඩියම් වැනි) අවශ්‍යයි.</div>
+      </details>
+    </div>
+  </section>
+
+  <footer class="note">
+    මූලාශ්‍රය: Advanced Level PHYSICS — Physics Practicals, Dr. Darshana Ukuwela · මෙම පිටුව අන්තර්ක්‍රියාකාරී අධ්‍යාපනික අරමුණු සඳහා නිර්මාණය කර ඇත.
+  </footer>
+</div>
+
+<script>
+/* ============ TAB SWITCHING ============ */
+const tabBtns = document.querySelectorAll('.tab-btn');
+const panels = document.querySelectorAll('.tab-panel');
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.classList.remove('active'));
+    panels.forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+  });
+});
+
+/* ============ OVERVIEW: parts highlight ============ */
+const partGroups = {
+  collimator: document.getElementById('p-collimator'),
+  prism: document.getElementById('p-prism'),
+  telescope: document.getElementById('p-telescope'),
+  mainscale: document.getElementById('p-mainscale'),
+  vernier: document.getElementById('p-vernier'),
+  levelling: document.getElementById('p-levelling'),
+};
+function clearHighlight(){
+  Object.values(partGroups).forEach(g=>{ if(g) g.style.filter=''; g.style.opacity = 0.35; });
+}
+clearHighlight();
+partGroups.collimator.style.opacity = 1;
+document.querySelectorAll('#partsList li').forEach(li=>{
+  li.addEventListener('click', ()=>{
+    document.querySelectorAll('#partsList li').forEach(l=>l.classList.remove('active'));
+    li.classList.add('active');
+    clearHighlight();
+    const key = li.dataset.part;
+    if(partGroups[key]){
+      partGroups[key].style.opacity = 1;
+      partGroups[key].style.filter = 'drop-shadow(0 0 6px rgba(212,165,74,.8))';
+    }
+  });
+});
+
+/* ============ HELPERS ============ */
+function deg2rad(d){ return d*Math.PI/180; }
+function clearCanvas(ctx,c){ ctx.clearRect(0,0,c.width,c.height); }
+
+/* ============ ADJUSTMENT A: TELESCOPE ============ */
+const telCanvas = document.getElementById('telAdjustCanvas');
+const telCtx = telCanvas.getContext('2d');
+const s1slider = document.getElementById('s1slider');
+const s2slider = document.getElementById('s2slider');
+const s1val = document.getElementById('s1val');
+const s2val = document.getElementById('s2val');
+const telStatus = document.getElementById('telStatus');
+
+function drawTelAdjust(){
+  clearCanvas(telCtx, telCanvas);
+  const w = telCanvas.width, h = telCanvas.height;
+  telCtx.fillStyle = '#0a0e13'; telCtx.fillRect(0,0,w,h);
+
+  // scope tube background circle (field of view)
+  const cx=w/2, cy=h/2, r=100;
+  telCtx.save();
+  telCtx.beginPath(); telCtx.arc(cx,cy,r,0,Math.PI*2); telCtx.clip();
+  telCtx.fillStyle = '#12181f'; telCtx.fillRect(0,0,w,h);
+
+  const s1 = parseInt(s1slider.value); // crosswire clarity target ~50
+  const s2 = parseInt(s2slider.value); // image sharpness target ~50
+
+  // crosswire blur based on distance from 50
+  const cwBlur = Math.abs(s1-50)/6;
+  telCtx.strokeStyle = 'rgba(232,237,243,'+Math.max(0.15,1-cwBlur/8)+')';
+  telCtx.lineWidth = 1.5;
+  telCtx.filter = 'blur('+cwBlur+'px)';
+  telCtx.beginPath(); telCtx.moveTo(cx-r,cy); telCtx.lineTo(cx+r,cy); telCtx.stroke();
+  telCtx.beginPath(); telCtx.moveTo(cx,cy-r); telCtx.lineTo(cx,cy+r); telCtx.stroke();
+  telCtx.filter='none';
+
+  // distant object image (a small "tower") blur based on s2
+  const imgBlur = Math.abs(s2-50)/4;
+  telCtx.filter = 'blur('+imgBlur+'px)';
+  telCtx.fillStyle = 'rgba(212,165,74,0.85)';
+  telCtx.fillRect(cx-6, cy-60, 12, 70);
+  telCtx.beginPath(); telCtx.moveTo(cx-10,cy-60); telCtx.lineTo(cx,cy-80); telCtx.lineTo(cx+10,cy-60); telCtx.closePath(); telCtx.fill();
+  telCtx.filter='none';
+
+  telCtx.restore();
+  telCtx.strokeStyle = '#2a323d'; telCtx.lineWidth=3;
+  telCtx.beginPath(); telCtx.arc(cx,cy,r,0,Math.PI*2); telCtx.stroke();
+
+  telCtx.fillStyle = '#8b96a5'; telCtx.font='12px sans-serif'; telCtx.textAlign='center';
+  telCtx.fillText('දෘෂ්ටි ක්ෂේත්‍රය (Telescope view)', cx, h-14);
+
+  const ok1 = Math.abs(s1-50)<=8, ok2 = Math.abs(s2-50)<=8;
+  telStatus.className = 'status-pill' + ((ok1&&ok2)?' good':'');
+  telStatus.innerHTML = '<span class="led"></span> ' + ((ok1&&ok2) ? 'නිවැරදිව සීරුමාරු කර ඇත ✓' : 'සීරුමාරු කරමින්...');
+}
+s1slider.addEventListener('input', ()=>{ s1val.textContent=s1slider.value; drawTelAdjust(); });
+s2slider.addEventListener('input', ()=>{ s2val.textContent=s2slider.value; drawTelAdjust(); });
+drawTelAdjust();
+
+/* ============ ADJUSTMENT B: COLLIMATOR ============ */
+const collCanvas = document.getElementById('collAdjustCanvas');
+const collCtx = collCanvas.getContext('2d');
+const s3slider = document.getElementById('s3slider');
+const s4slider = document.getElementById('s4slider');
+const s3val = document.getElementById('s3val');
+const s4val = document.getElementById('s4val');
+const collStatus = document.getElementById('collStatus');
+
+function drawCollAdjust(){
+  clearCanvas(collCtx, collCanvas);
+  const w=collCanvas.width, h=collCanvas.height;
+  collCtx.fillStyle='#0a0e13'; collCtx.fillRect(0,0,w,h);
+  const cx=w/2, cy=h/2, r=90;
+  collCtx.save();
+  collCtx.beginPath(); collCtx.arc(cx,cy,r,0,Math.PI*2); collCtx.clip();
+  collCtx.fillStyle='#12181f'; collCtx.fillRect(0,0,w,h);
+
+  collCtx.strokeStyle='rgba(232,237,243,0.5)'; collCtx.lineWidth=1;
+  collCtx.beginPath(); collCtx.moveTo(cx-r,cy); collCtx.lineTo(cx+r,cy); collCtx.stroke();
+  collCtx.beginPath(); collCtx.moveTo(cx,cy-r); collCtx.lineTo(cx,cy+r); collCtx.stroke();
+
+  const s3 = parseInt(s3slider.value); // slit width, target 20-40
+  const s4 = parseInt(s4slider.value); // focus, target 45-55
+  const sw = Math.max(3, s3*0.5);
+  const blur = Math.abs(s4-50)/4;
+  collCtx.filter = 'blur('+blur+'px)';
+  collCtx.fillStyle = '#f2d94e';
+  collCtx.fillRect(cx-sw/2, cy-r+8, sw, 2*r-16);
+  collCtx.filter='none';
+
+  collCtx.restore();
+  collCtx.strokeStyle='#2a323d'; collCtx.lineWidth=3;
+  collCtx.beginPath(); collCtx.arc(cx,cy,r,0,Math.PI*2); collCtx.stroke();
+  collCtx.fillStyle='#8b96a5'; collCtx.font='12px sans-serif'; collCtx.textAlign='center';
+  collCtx.fillText('විවරයේ රූපය (Slit image through eyepiece)', cx, h-14);
+
+  const ok3 = s3>=15 && s3<=45, ok4 = Math.abs(s4-50)<=8;
+  collStatus.className='status-pill'+((ok3&&ok4)?' good':'');
+  collStatus.innerHTML = '<span class="led"></span> ' + ((ok3&&ok4)?'සමාන්තර කිරණ කැබැල්ල ලැබේ ✓':'සීරුමාරු කරමින්...');
+}
+s3slider.addEventListener('input', ()=>{ s3val.textContent=s3slider.value; drawCollAdjust(); });
+s4slider.addEventListener('input', ()=>{ s4val.textContent=s4slider.value; drawCollAdjust(); });
+drawCollAdjust();
+
+/* ============ ADJUSTMENT C: PRISM TABLE LEVELLING ============ */
+const levelCanvas = document.getElementById('levelCanvas');
+const levelCtx = levelCanvas.getContext('2d');
+const aslider=document.getElementById('aslider'), bslider=document.getElementById('bslider'), cslider=document.getElementById('cslider');
+const aval=document.getElementById('aval'), bval=document.getElementById('bval'), cval=document.getElementById('cval');
+const levelStatus = document.getElementById('levelStatus');
+
+function drawLevel(){
+  clearCanvas(levelCtx, levelCanvas);
+  const w=levelCanvas.width, h=levelCanvas.height;
+  levelCtx.fillStyle='#0a0e13'; levelCtx.fillRect(0,0,w,h);
+
+  const a=parseInt(aslider.value), b=parseInt(bslider.value), c=parseInt(cslider.value);
+  // offset for T1 depends mainly on screw a; offset for T2 depends on b & c average
+  const offT1 = (a-50)*0.6;
+  const offT2 = ((b+c)/2 - 50)*0.6;
+
+  // Two mini "views" side by side representing T1 and T2
+  [{label:'T₁ දෘෂ්ටිය', cx: w*0.28, off: offT1},{label:'T₂ දෘෂ්ටිය', cx: w*0.72, off: offT2}].forEach(v=>{
+    const cy=h/2, r=80;
+    levelCtx.save();
+    levelCtx.beginPath(); levelCtx.arc(v.cx,cy,r,0,Math.PI*2); levelCtx.clip();
+    levelCtx.fillStyle='#12181f'; levelCtx.fillRect(0,0,w,h);
+    levelCtx.strokeStyle='rgba(232,237,243,0.5)'; levelCtx.lineWidth=1;
+    levelCtx.beginPath(); levelCtx.moveTo(v.cx-r,cy); levelCtx.lineTo(v.cx+r,cy); levelCtx.stroke();
+    levelCtx.beginPath(); levelCtx.moveTo(v.cx,cy-r); levelCtx.lineTo(v.cx,cy+r); levelCtx.stroke();
+    // slit image line, shifted vertically by v.off
+    levelCtx.strokeStyle='#f2d94e'; levelCtx.lineWidth=3;
+    levelCtx.beginPath(); levelCtx.moveTo(v.cx-r+10, cy+v.off); levelCtx.lineTo(v.cx+r-10, cy+v.off); levelCtx.stroke();
+    levelCtx.restore();
+    levelCtx.strokeStyle='#2a323d'; levelCtx.lineWidth=3;
+    levelCtx.beginPath(); levelCtx.arc(v.cx,cy,r,0,Math.PI*2); levelCtx.stroke();
+    levelCtx.fillStyle='#8b96a5'; levelCtx.font='12px sans-serif'; levelCtx.textAlign='center';
+    levelCtx.fillText(v.label, v.cx, cy+r+22);
+  });
+
+  const ok = Math.abs(offT1)<=6 && Math.abs(offT2)<=6;
+  levelStatus.className='status-pill'+(ok?' good':'');
+  levelStatus.innerHTML='<span class="led"></span> '+(ok?'ප්‍රිස්ම මේසය මට්ටම් වී ඇත ✓':'මට්ටම් කරමින්...');
+}
+[aslider,bslider,cslider].forEach((s,i)=>{
+  s.addEventListener('input', ()=>{
+    aval.textContent=aslider.value; bval.textContent=bslider.value; cval.textContent=cslider.value;
+    drawLevel();
+  });
+});
+drawLevel();
+
+/* ============ SIM: FIELD OF VIEW ============ */
+const fovCanvas = document.getElementById('fovCanvas');
+const fovCtx = fovCanvas.getContext('2d');
+const fovV=document.getElementById('fovV'), fovH=document.getElementById('fovH'), fovT=document.getElementById('fovT'), fovF=document.getElementById('fovF');
+const fovVvalDisp=document.getElementById('fovVvalDisp'), fovHvalDisp=document.getElementById('fovHvalDisp'), fovTvalDisp=document.getElementById('fovTvalDisp'), fovFvalDisp=document.getElementById('fovFvalDisp');
+
+function drawFov(){
+  clearCanvas(fovCtx, fovCanvas);
+  const w=fovCanvas.width, h=fovCanvas.height;
+  fovCtx.fillStyle='#0a0e13'; fovCtx.fillRect(0,0,w,h);
+  const cx=w/2, cy=h/2, r=130;
+  fovCtx.save();
+  fovCtx.beginPath(); fovCtx.arc(cx,cy,r,0,Math.PI*2); fovCtx.clip();
+  fovCtx.fillStyle='#12181f'; fovCtx.fillRect(0,0,w,h);
+
+  // crosswires
+  fovCtx.strokeStyle='rgba(232,237,243,0.6)'; fovCtx.lineWidth=1.4;
+  fovCtx.beginPath(); fovCtx.moveTo(cx-r,cy); fovCtx.lineTo(cx+r,cy); fovCtx.stroke();
+  fovCtx.beginPath(); fovCtx.moveTo(cx,cy-r); fovCtx.lineTo(cx,cy+r); fovCtx.stroke();
+
+  const v=parseInt(fovV.value), hh=parseInt(fovH.value), t=parseInt(fovT.value), f=parseInt(fovF.value);
+  fovCtx.save();
+  fovCtx.translate(cx+hh, cy+v);
+  fovCtx.rotate(deg2rad(t));
+  fovCtx.filter='blur('+f/2+'px)';
+  fovCtx.fillStyle='#f2d94e';
+  fovCtx.fillRect(-r+15, -3, 2*r-30, 6);
+  fovCtx.filter='none';
+  fovCtx.restore();
+
+  fovCtx.restore();
+  fovCtx.strokeStyle='#2a323d'; fovCtx.lineWidth=3;
+  fovCtx.beginPath(); fovCtx.arc(cx,cy,r,0,Math.PI*2); fovCtx.stroke();
+  fovCtx.fillStyle='#8b96a5'; fovCtx.font='12px sans-serif'; fovCtx.textAlign='center';
+  fovCtx.fillText('විවරයේ රූපය — කහ රේඛාව', cx, h-12);
+}
+[fovV,fovH,fovT,fovF].forEach(s=>s.addEventListener('input', ()=>{
+  fovVvalDisp.textContent=fovV.value; fovHvalDisp.textContent=fovH.value;
+  fovTvalDisp.textContent=fovT.value; fovFvalDisp.textContent=fovF.value;
+  drawFov();
+}));
+document.getElementById('fovReset').addEventListener('click', ()=>{
+  fovV.value=0; fovH.value=0; fovT.value=0; fovF.value=0;
+  fovVvalDisp.textContent=0; fovHvalDisp.textContent=0; fovTvalDisp.textContent=0; fovFvalDisp.textContent=0;
+  drawFov();
+});
+drawFov();
+
+/* ============ SIM: PRISM ANGLE ============ */
+const prismAngleCanvas = document.getElementById('prismAngleCanvas');
+const paCtx = prismAngleCanvas.getContext('2d');
+const t1slider=document.getElementById('t1slider'), t2slider=document.getElementById('t2slider');
+const t1valDisp=document.getElementById('t1valDisp'), t2valDisp=document.getElementById('t2valDisp');
+const twoA=document.getElementById('twoA'), Aout=document.getElementById('Aout');
+
+function drawPrismAngle(){
+  clearCanvas(paCtx, prismAngleCanvas);
+  const w=prismAngleCanvas.width, h=prismAngleCanvas.height;
+  paCtx.fillStyle='#0a0e13'; paCtx.fillRect(0,0,w,h);
+  const cx=w/2, cy=h/2+30, R=110;
+
+  // dial circle (main scale)
+  paCtx.strokeStyle='#2a323d'; paCtx.lineWidth=2;
+  paCtx.beginPath(); paCtx.arc(cx,cy,R,0,Math.PI*2); paCtx.stroke();
+  for(let d=0; d<360; d+=10){
+    const a=deg2rad(d-90);
+    const x1=cx+Math.cos(a)*(R-6), y1=cy+Math.sin(a)*(R-6);
+    const x2=cx+Math.cos(a)*R, y2=cy+Math.sin(a)*R;
+    paCtx.strokeStyle='#3a4552'; paCtx.lineWidth=1;
+    paCtx.beginPath(); paCtx.moveTo(x1,y1); paCtx.lineTo(x2,y2); paCtx.stroke();
+  }
+
+  // prism at center (apex up)
+  paCtx.beginPath();
+  paCtx.moveTo(cx, cy-40);
+  paCtx.lineTo(cx-40, cy+20);
+  paCtx.lineTo(cx+40, cy+20);
+  paCtx.closePath();
+  paCtx.fillStyle='rgba(139,107,240,0.18)';
+  paCtx.strokeStyle='#8b6bf0'; paCtx.lineWidth=2;
+  paCtx.fill(); paCtx.stroke();
+  paCtx.fillStyle='#8b96a5'; paCtx.font='11px sans-serif';
+  paCtx.fillText('A', cx-4, cy-44);
+  paCtx.fillText('B', cx-52, cy+34);
+  paCtx.fillText('C', cx+46, cy+34);
+
+  // incident beam from collimator (from left, horizontal) into apex
+  paCtx.strokeStyle='#4f8cf7'; paCtx.lineWidth=2;
+  paCtx.beginPath(); paCtx.moveTo(cx-160, cy-10); paCtx.lineTo(cx, cy-40); paCtx.stroke();
+
+  const t1 = parseInt(t1slider.value);
+  const t2 = parseInt(t2slider.value);
+
+  // T1 reflected ray
+  let a1 = deg2rad(t1-90);
+  let x1 = cx+Math.cos(a1)*R, y1=cy+Math.sin(a1)*R;
+  paCtx.strokeStyle='#f2604e'; paCtx.lineWidth=2;
+  paCtx.beginPath(); paCtx.moveTo(cx,cy-40); paCtx.lineTo(x1,y1); paCtx.stroke();
+  paCtx.fillStyle='#f2604e';
+  paCtx.beginPath(); paCtx.arc(x1,y1,5,0,Math.PI*2); paCtx.fill();
+  paCtx.fillText('T\u2081 ('+t1+'°)', x1+8, y1);
+
+  // T2 reflected ray
+  let a2 = deg2rad(t2-90);
+  let x2 = cx+Math.cos(a2)*R, y2=cy+Math.sin(a2)*R;
+  paCtx.strokeStyle='#3fd07a'; paCtx.lineWidth=2;
+  paCtx.beginPath(); paCtx.moveTo(cx,cy-40); paCtx.lineTo(x2,y2); paCtx.stroke();
+  paCtx.fillStyle='#3fd07a';
+  paCtx.beginPath(); paCtx.arc(x2,y2,5,0,Math.PI*2); paCtx.fill();
+  paCtx.fillText('T\u2082 ('+t2+'°)', x2+8, y2);
+
+  const two_a = Math.abs(t2-t1);
+  const A = two_a/2;
+  twoA.textContent = two_a.toFixed(1)+'°';
+  Aout.textContent = A.toFixed(1)+'°';
+}
+[t1slider,t2slider].forEach(s=>s.addEventListener('input', ()=>{
+  t1valDisp.textContent=t1slider.value; t2valDisp.textContent=t2slider.value;
+  drawPrismAngle();
+}));
+drawPrismAngle();
+
+/* ============ SIM: MIN DEVIATION GRAPH + DISPERSION ============ */
+const devGraphCanvas = document.getElementById('devGraphCanvas');
+const devCtx = devGraphCanvas.getContext('2d');
+const islider=document.getElementById('islider'), Asim=document.getElementById('Asim'), nsim=document.getElementById('nsim');
+const ivalDisp=document.getElementById('ivalDisp'), AsimValDisp=document.getElementById('AsimValDisp'), nsimValDisp=document.getElementById('nsimValDisp');
+const dOut=document.getElementById('dOut'), DmOut=document.getElementById('DmOut'), nOut=document.getElementById('nOut');
+
+// deviation d(i) for given A (deg), n
+function deviation(iDeg, ADeg, n){
+  const i = deg2rad(iDeg), A = deg2rad(ADeg);
+  const sinR1 = Math.sin(i)/n;
+  if(Math.abs(sinR1) > 1) return null;
+  const r1 = Math.asin(sinR1);
+  const r2 = A - r1;
+  const sinI2 = n*Math.sin(r2);
+  if(Math.abs(sinI2) > 1) return null;
+  const i2 = Math.asin(sinI2);
+  const d = (i + i2) - A;
+  return d*180/Math.PI;
+}
+
+function drawDevGraph(){
+  clearCanvas(devCtx, devGraphCanvas);
+  const w=devGraphCanvas.width, h=devGraphCanvas.height;
+  devCtx.fillStyle='#0a0e13'; devCtx.fillRect(0,0,w,h);
+  const A = parseInt(Asim.value);
+  const n = parseInt(nsim.value)/100;
+  const padL=50, padR=20, padT=20, padB=36;
+  const plotW=w-padL-padR, plotH=h-padT-padB;
+
+  // axes
+  devCtx.strokeStyle='#3a4552'; devCtx.lineWidth=1;
+  devCtx.beginPath(); devCtx.moveTo(padL,padT); devCtx.lineTo(padL,h-padB); devCtx.lineTo(w-padR,h-padB); devCtx.stroke();
+  devCtx.fillStyle='#8b96a5'; devCtx.font='11px sans-serif'; devCtx.textAlign='center';
+  devCtx.fillText('ආපතන කෝණය i (°)', w/2, h-8);
+  devCtx.save(); devCtx.translate(14, h/2); devCtx.rotate(-Math.PI/2); devCtx.fillText('අපගමන කෝණය d (°)', 0,0); devCtx.restore();
+
+  // compute curve
+  let minD = 999, minI = 0;
+  const pts = [];
+  for(let ii=5; ii<=85; ii++){
+    const d = deviation(ii, A, n);
+    if(d!==null){
+      pts.push([ii,d]);
+      if(d<minD){ minD=d; minI=ii; }
+    }
+  }
+  if(pts.length===0) return;
+  const dMinRange = Math.min(...pts.map(p=>p[1]));
+  const dMaxRange = Math.max(...pts.map(p=>p[1]));
+  function X(ii){ return padL + (ii-5)/(85-5)*plotW; }
+  function Y(d){ return h-padB - (d-dMinRange)/(dMaxRange-dMinRange+0.0001)*plotH; }
+
+  devCtx.strokeStyle='#4f8cf7'; devCtx.lineWidth=2;
+  devCtx.beginPath();
+  pts.forEach((p,idx)=>{ if(idx===0) devCtx.moveTo(X(p[0]),Y(p[1])); else devCtx.lineTo(X(p[0]),Y(p[1])); });
+  devCtx.stroke();
+
+  // min point
+  devCtx.fillStyle='#3fd07a';
+  devCtx.beginPath(); devCtx.arc(X(minI), Y(minD), 5, 0, Math.PI*2); devCtx.fill();
+  devCtx.fillStyle='#3fd07a'; devCtx.font='11px sans-serif'; devCtx.textAlign='left';
+  devCtx.fillText('D\u2098 = '+minD.toFixed(1)+'° (i='+minI+'°)', X(minI)+8, Y(minD)-8);
+
+  // current i marker
+  const i = parseInt(islider.value);
+  const d = deviation(i, A, n);
+  if(d!==null){
+    devCtx.fillStyle='#f2d94e';
+    devCtx.beginPath(); devCtx.arc(X(i), Y(d), 5, 0, Math.PI*2); devCtx.fill();
+    dOut.textContent = d.toFixed(1)+'°';
+  } else {
+    dOut.textContent = '— (අභ්‍යන්තර පූර්ණ පරාවර්තනය)';
+  }
+  DmOut.textContent = minD.toFixed(1)+'°';
+  const nCalc = Math.sin(deg2rad((A+minD)/2)) / Math.sin(deg2rad(A/2));
+  nOut.textContent = nCalc.toFixed(3);
+}
+[islider,Asim,nsim].forEach(s=>s.addEventListener('input', ()=>{
+  ivalDisp.textContent=islider.value; AsimValDisp.textContent=Asim.value; nsimValDisp.textContent=(nsim.value/100).toFixed(2);
+  drawDevGraph();
+}));
+drawDevGraph();
+
+/* dispersion canvas */
+const dispersionCanvas = document.getElementById('dispersionCanvas');
+const dispCtx = dispersionCanvas.getContext('2d');
+let lightMode = 'white';
+function drawDispersion(){
+  clearCanvas(dispCtx, dispersionCanvas);
+  const w=dispersionCanvas.width, h=dispersionCanvas.height;
+  dispCtx.fillStyle='#0a0e13'; dispCtx.fillRect(0,0,w,h);
+  const apexX=w*0.42, apexY=h*0.28, baseY=h*0.72, halfBase=90;
+  // prism
+  dispCtx.beginPath();
+  dispCtx.moveTo(apexX, apexY);
+  dispCtx.lineTo(apexX-halfBase, baseY);
+  dispCtx.lineTo(apexX+halfBase, baseY);
+  dispCtx.closePath();
+  dispCtx.fillStyle='rgba(139,107,240,0.12)';
+  dispCtx.strokeStyle='#8b6bf0'; dispCtx.lineWidth=2;
+  dispCtx.fill(); dispCtx.stroke();
+
+  // incident ray
+  const inX = 20, inY = h*0.45, hitX = apexX-30, hitY = baseY-70;
+  dispCtx.strokeStyle = lightMode==='white' ? '#e8edf3' : '#ffcf4a';
+  dispCtx.lineWidth=2.5;
+  dispCtx.beginPath(); dispCtx.moveTo(inX,inY); dispCtx.lineTo(hitX,hitY); dispCtx.stroke();
+
+  const colors = lightMode==='white'
+    ? ['#8b6bf0','#4f8cf7','#3fd07a','#f2d94e','#f2a24e','#f2604e']
+    : ['#ffcf4a'];
+
+  const spreadDeg = lightMode==='white' ? 14 : 0;
+  const baseAngle = 18; // deg downward from horizontal
+  colors.forEach((col, idx)=>{
+    const n = colors.length;
+    const off = n===1?0:(idx-(n-1)/2)/((n-1)/2) * spreadDeg/2;
+    const ang = deg2rad(baseAngle+off);
+    const len = 190;
+    const ex = hitX + Math.cos(ang)*len;
+    const ey = hitY + Math.sin(ang)*len;
+    dispCtx.strokeStyle = col; dispCtx.lineWidth=2.2;
+    dispCtx.beginPath(); dispCtx.moveTo(hitX,hitY); dispCtx.lineTo(ex,ey); dispCtx.stroke();
+  });
+
+  dispCtx.fillStyle='#8b96a5'; dispCtx.font='12px sans-serif'; dispCtx.textAlign='center';
+  dispCtx.fillText(lightMode==='white' ? 'සුදු එළිය → වර්ණවලින් යුත් වර්ණාවලිය' : 'සෝඩියම් → තනි (ඒකවර්ණ) කිරණයක්', w/2, h-14);
+}
+document.getElementById('lightWhite').addEventListener('click', ()=>{ lightMode='white'; drawDispersion();
+  document.getElementById('lightWhite').classList.add('primary'); document.getElementById('lightSodium').classList.remove('primary');});
+document.getElementById('lightSodium').addEventListener('click', ()=>{ lightMode='sodium'; drawDispersion();
+  document.getElementById('lightSodium').classList.add('primary'); document.getElementById('lightWhite').classList.remove('primary');});
+drawDispersion();
+
+/* ============ CALCULATOR 1: Prism angle from vernier readings ============ */
+document.getElementById('calcAbtn').addEventListener('click', ()=>{
+  const t1d = parseFloat(document.getElementById('t1deg').value)||0;
+  const t1m = parseFloat(document.getElementById('t1min').value)||0;
+  const t2d = parseFloat(document.getElementById('t2deg').value)||0;
+  const t2m = parseFloat(document.getElementById('t2min').value)||0;
+  const t1 = t1d + t1m/60;
+  const t2 = t2d + t2m/60;
+  let diff = Math.abs(t2-t1);
+  if(diff>180) diff = 360-diff; // handle wrap-around for reflex angle
+  const A = diff/2;
+  function toDM(x){
+    const d = Math.floor(x);
+    const m = Math.round((x-d)*60);
+    return d+"° "+m+"'";
+  }
+  document.getElementById('rTwoA').textContent = toDM(diff);
+  document.getElementById('rA').textContent = toDM(A);
+});
+
+/* ============ CALCULATOR 2: n from A, Dm ============ */
+document.getElementById('calcNbtn').addEventListener('click', ()=>{
+  const A = parseFloat(document.getElementById('Ain').value);
+  const Dm = parseFloat(document.getElementById('Dmin').value);
+  const n = Math.sin(deg2rad((A+Dm)/2)) / Math.sin(deg2rad(A/2));
+  document.getElementById('rN').textContent = n.toFixed(4);
+});
+
+</script>
+</body>
+</html>

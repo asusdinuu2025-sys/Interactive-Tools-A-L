@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>මිශ්‍රණ ක්‍රමයෙන් ජලයේ විශිෂ්ඨ ගුප්ත තාපය — අන්තර්ක්‍රියාකාරී</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;500;600;700;800&family=Noto+Serif+Sinhala:wght@500;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#11181c;
+    --bg-deep:#0c1215;
+    --surface:#1a2328;
+    --surface-2:#212c32;
+    --line: rgba(159,200,209,0.14);
+    --steam:#9fc8d1;
+    --steam-dim: rgba(159,200,209,0.45);
+    --ember:#e8622c;
+    --ember-dim: rgba(232,98,44,0.28);
+    --brass:#cda24e;
+    --brass-dim: rgba(205,162,78,0.25);
+    --text:#eef0ea;
+    --text-dim:#93a3a8;
+    --text-faint:#5f6f74;
+    --good:#7fc99a;
+    --bad:#e2666a;
+    --radius: 18px;
+    --serif: "Noto Serif Sinhala","Noto Sans Sinhala",serif;
+    --sans: "Noto Sans Sinhala", system-ui, sans-serif;
+    --mono: "JetBrains Mono", monospace;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(159,200,209,0.10), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 0%, rgba(232,98,44,0.08), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    min-height:100vh;
+    padding-bottom:90px;
+    overflow-x:hidden;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
+  }
+
+  /* ---------- Header ---------- */
+  header.top{
+    position:relative;
+    padding:34px 20px 26px;
+    overflow:hidden;
+    border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg, rgba(159,200,209,0.05), transparent);
+  }
+  .eyebrow{
+    font-family:var(--mono);
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    font-size:11px;
+    color:var(--steam);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:10px;
+  }
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--ember); box-shadow:0 0 10px var(--ember); animation:pulse 2.2s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1} 50%{opacity:0.35}}
+  h1.title{
+    font-family:var(--serif);
+    font-weight:700;
+    font-size:25px;
+    line-height:1.32;
+    margin:0 0 8px;
+    max-width:560px;
+    color:var(--text);
+  }
+  header.top p.sub{
+    font-size:14px;
+    color:var(--text-dim);
+    max-width:520px;
+    margin:0;
+    line-height:1.6;
+  }
+  .steamwrap{
+    position:absolute;
+    top:8px; left:-30px;
+    width:160px; height:160px;
+    pointer-events:none;
+    opacity:0.9;
+  }
+  .curl{
+    position:absolute;
+    bottom:0;
+    width:5px;
+    border-radius:6px;
+    background:linear-gradient(180deg, transparent, var(--steam-dim));
+    filter:blur(1px);
+    animation: rise 5.5s ease-in infinite;
+  }
+  @keyframes rise{
+    0%{ height:0; opacity:0; transform:translateX(0) rotate(0deg);}
+    12%{opacity:0.7;}
+    100%{ height:150px; opacity:0; transform:translateX(24px) rotate(6deg);}
+  }
+
+  /* ---------- Nav (bottom tabs) ---------- */
+  nav.tabs{
+    position:fixed; bottom:0; left:0; right:0;
+    display:flex;
+    background:rgba(17,24,28,0.92);
+    backdrop-filter:blur(14px);
+    border-top:1px solid var(--line);
+    z-index:50;
+    padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+  }
+  nav.tabs button{
+    flex:1;
+    background:none; border:none;
+    color:var(--text-faint);
+    font-family:var(--sans);
+    font-size:10px;
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    padding:8px 2px 6px;
+    cursor:pointer;
+    border-radius:12px;
+    transition:color .2s ease;
+  }
+  nav.tabs button .ic{font-size:19px; line-height:1;}
+  nav.tabs button.active{color:var(--steam);}
+  nav.tabs button.active .ic{ filter: drop-shadow(0 0 6px var(--steam-dim)); }
+  nav.tabs button:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible{
+    outline:2px solid var(--brass); outline-offset:2px;
+  }
+
+  main{max-width:760px; margin:0 auto; padding:20px 16px 12px;}
+  section.panel{display:none; animation:fadein .35s ease;}
+  section.panel.active{display:block;}
+  @keyframes fadein{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:translateY(0)}}
+
+  h2.sectitle{
+    font-family:var(--serif);
+    font-size:19px;
+    margin:6px 0 14px;
+    color:var(--text);
+    display:flex; align-items:center; gap:10px;
+  }
+  h2.sectitle .num{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--bg);
+    background:var(--steam);
+    padding:3px 8px;
+    border-radius:20px;
+  }
+  p.leadtext{font-size:13.4px; color:var(--text-dim); line-height:1.7; margin-bottom:16px;}
+
+  /* card */
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    margin-bottom:12px;
+    overflow:hidden;
+  }
+  .card .head{
+    display:flex; align-items:center; gap:12px;
+    padding:14px 16px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .card .icon{
+    width:38px; height:38px; flex:none;
+    border-radius:10px;
+    background:var(--surface-2);
+    display:flex; align-items:center; justify-content:center;
+    font-size:18px;
+  }
+  .card .head .label{flex:1; font-weight:600; font-size:14.5px;}
+  .card .head .chev{color:var(--text-faint); transition:transform .25s ease; font-size:13px;}
+  .card.open .head .chev{transform:rotate(90deg); color:var(--steam);}
+  .card .body{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .35s ease;
+  }
+  .card.open .body{max-height:900px;}
+  .card .body .inner{
+    padding:0 16px 16px 66px;
+    font-size:13.6px;
+    line-height:1.75;
+    color:var(--text-dim);
+  }
+  .card .body .inner b{color:var(--text); font-weight:600;}
+  .badge{
+    display:inline-flex; align-items:center; gap:5px;
+    font-family:var(--mono);
+    font-size:12px;
+    background:var(--brass-dim);
+    color:var(--brass);
+    padding:2px 8px;
+    border-radius:6px;
+    margin:0 2px;
+  }
+  .badge.hot{background:var(--ember-dim); color:var(--ember);}
+  .badge.cool{background:var(--steam-dim); color:var(--steam);}
+
+  /* ===================== SECTION 1: SIMULATION ===================== */
+  .sim-wrap{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:14px 12px 16px;
+    margin-bottom:14px;
+  }
+  .sim-controls{
+    display:flex; align-items:center; gap:10px; margin-bottom:10px; flex-wrap:wrap;
+  }
+  .burnbtn{
+    display:flex; align-items:center; gap:8px;
+    background:var(--surface-2); border:1px solid var(--line);
+    color:var(--text); font-family:var(--sans); font-weight:700; font-size:13.5px;
+    padding:11px 18px; border-radius:12px; cursor:pointer;
+  }
+  .burnbtn .flicon{font-size:16px;}
+  .burnbtn.on{
+    background:linear-gradient(135deg, var(--ember), #c94a1e);
+    border-color:transparent; color:#fff;
+    box-shadow:0 8px 20px -8px rgba(232,98,44,0.6);
+  }
+  .sim-hint{font-size:11.5px; color:var(--text-faint); flex:1; min-width:160px;}
+  .pressure-meter{
+    display:flex; align-items:center; gap:8px; font-family:var(--mono); font-size:11px; color:var(--text-dim);
+    background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:8px 10px;
+  }
+  .pressure-bar{width:70px; height:8px; border-radius:6px; background:rgba(159,200,209,0.15); overflow:hidden;}
+  .pressure-fill{height:100%; width:0%; background:linear-gradient(90deg, var(--steam), var(--ember)); transition:width .25s linear;}
+
+  .diagram-frame{
+    width:100%;
+    border-radius:14px;
+    background:radial-gradient(ellipse at 30% 20%, rgba(159,200,209,0.06), transparent 60%), var(--bg-deep);
+    border:1px solid var(--line);
+    overflow:hidden;
+  }
+  svg#appSvg{width:100%; height:auto; display:block;}
+  svg#appSvg text{font-family:var(--sans); fill:var(--text-dim);}
+  .lbl{font-size:13px; fill:var(--text-dim);}
+  .lbl-strong{font-size:12.5px; fill:var(--steam); font-weight:700; font-family:var(--mono);}
+
+  .hotspot{cursor:pointer;}
+  .hotspot circle.ring{fill:none; stroke:var(--steam); stroke-width:1.6; opacity:0.85; animation:hspulse 2.4s ease-out infinite;}
+  .hotspot circle.core{fill:var(--surface); stroke:var(--brass); stroke-width:1.6;}
+  .hotspot text{fill:var(--brass); font-family:var(--mono); font-weight:700; font-size:12px; text-anchor:middle; dominant-baseline:central;}
+  .hotspot.selected circle.core{fill:var(--brass); }
+  .hotspot.selected text{fill:var(--bg-deep);}
+  @keyframes hspulse{
+    0%{ transform:scale(1); opacity:0.9;}
+    70%{ transform:scale(1.9); opacity:0;}
+    100%{ transform:scale(1.9); opacity:0;}
+  }
+
+  .flame path{transform-origin:center bottom;}
+  .flame{animation-play-state:paused;}
+  .flame path.f1{animation:flicker1 0.42s ease-in-out infinite; animation-play-state:inherit;}
+  .flame path.f2{animation:flicker2 0.55s ease-in-out infinite; animation-play-state:inherit;}
+  #appSvg.heating .flame{animation-play-state:running;}
+  @keyframes flicker1{0%,100%{transform:scaleY(1) scaleX(1) translateY(0);} 50%{transform:scaleY(1.12) scaleX(0.92) translateY(-2px);}}
+  @keyframes flicker2{0%,100%{transform:scaleY(1) skewX(0deg);} 50%{transform:scaleY(0.9) skewX(3deg);}}
+
+  .bubble{opacity:0; animation:bubbleUp 2.6s ease-in infinite; animation-play-state:paused;}
+  #appSvg.heating .bubble{animation-play-state:running;}
+  @keyframes bubbleUp{
+    0%{ transform:translateY(0); opacity:0;}
+    10%{opacity:0.8;}
+    90%{opacity:0.3;}
+    100%{ transform:translateY(-46px); opacity:0;}
+  }
+
+  .particle{opacity:0; animation-play-state:paused;}
+  #appSvg.heating .particle{animation-play-state:running;}
+  .p1{animation:flowPath1 3.2s linear infinite;}
+  .p2{animation:flowPath1 3.2s linear infinite; animation-delay:0.8s;}
+  .p3{animation:flowPath1 3.2s linear infinite; animation-delay:1.6s;}
+  .p4{animation:flowPath1 3.2s linear infinite; animation-delay:2.4s;}
+  @keyframes flowPath1{
+    0%{  transform:translate(0px,0px); opacity:0;}
+    6%{  opacity:0.95;}
+    26%{ transform:translate(70px,-38px); opacity:0.95;}
+    46%{ transform:translate(150px,-30px); opacity:0.95;}
+    62%{ transform:translate(150px,10px); opacity:0.9;}
+    80%{ transform:translate(190px,-58px); opacity:0.9;}
+    96%{ transform:translate(260px,-92px); opacity:0.5;}
+    100%{transform:translate(280px,-100px); opacity:0;}
+  }
+
+  .droplet{animation:dropfall 2.8s ease-in infinite; animation-play-state:paused; opacity:0;}
+  #appSvg.heating .droplet{animation-play-state:running;}
+  @keyframes dropfall{
+    0%{ transform:translateY(-6px); opacity:0;}
+    8%{opacity:0.9;}
+    85%{opacity:0.6;}
+    100%{ transform:translateY(20px); opacity:0;}
+  }
+
+  .steamcurl{opacity:0; animation:curlrise 3.4s ease-out infinite; animation-play-state:paused;}
+  #appSvg.heating .steamcurl{animation-play-state:running;}
+  @keyframes curlrise{
+    0%{transform:translateY(0) scale(0.7); opacity:0;}
+    20%{opacity:0.55;}
+    100%{transform:translateY(-34px) scale(1.3); opacity:0;}
+  }
+
+  .warnflash{opacity:0;}
+  .warnflash.show{animation:warnpulse 0.9s ease-in-out infinite;}
+  @keyframes warnpulse{0%,100%{opacity:0.15;} 50%{opacity:0.9;}}
+
+  .sim-banner{
+    margin-top:10px; padding:10px 14px; border-radius:12px; font-size:12.8px; line-height:1.6;
+    display:none; align-items:center; gap:8px;
+  }
+  .sim-banner.show{display:flex; animation:fadein .3s ease;}
+  .sim-banner.warn{background:rgba(226,102,106,0.14); color:var(--bad); border:1px solid rgba(226,102,106,0.35);}
+  .sim-banner.info{background:rgba(159,200,209,0.10); color:var(--steam); border:1px solid var(--line);}
+  .sim-banner.safe{background:rgba(127,201,154,0.12); color:var(--good); border:1px solid rgba(127,201,154,0.3);}
+
+  .legend-row{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px;}
+  @media(min-width:480px){.legend-row{grid-template-columns:1fr 1fr 1fr;}}
+  .legend-item{
+    display:flex; align-items:center; gap:8px;
+    background:var(--surface-2); border:1px solid var(--line); border-radius:10px;
+    padding:9px 10px; cursor:pointer; font-size:12px; text-align:right;
+  }
+  .legend-item .lnum{
+    width:22px; height:22px; border-radius:50%; background:var(--surface); border:1.5px solid var(--brass);
+    color:var(--brass); font-family:var(--mono); font-size:11px; font-weight:700;
+    display:flex; align-items:center; justify-content:center; flex:none;
+  }
+  .legend-item.active{border-color:var(--steam);}
+  .legend-item.active .lnum{background:var(--steam); border-color:var(--steam); color:var(--bg-deep);}
+
+  .app-detail{
+    margin-top:12px; background:var(--surface-2); border:1px solid var(--line);
+    border-radius:14px; padding:14px 16px; font-size:13.5px; line-height:1.7; color:var(--text-dim);
+    display:none;
+  }
+  .app-detail.show{display:block; animation:fadein .3s ease;}
+  .app-detail .t{color:var(--steam); font-weight:700; margin-bottom:6px; display:block; font-size:14px;}
+
+  /* procedure steps */
+  .steps{position:relative; padding-left:26px;}
+  .steps::before{content:""; position:absolute; left:9px; top:6px; bottom:6px; width:2px; background:linear-gradient(180deg, var(--steam-dim), var(--ember-dim));}
+  .step{position:relative; margin-bottom:18px;}
+  .step:last-child{margin-bottom:0;}
+  .step .marker{
+    position:absolute; left:-26px; top:0; width:20px; height:20px; border-radius:50%;
+    background:var(--surface-2); border:2px solid var(--steam);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--mono); font-size:10.5px; color:var(--steam); font-weight:700;
+  }
+  .step .txt{
+    background:var(--surface); border:1px solid var(--line); border-radius:12px;
+    padding:12px 14px; font-size:13.6px; line-height:1.7; color:var(--text-dim);
+  }
+  .step .txt b{color:var(--text);}
+
+  /* cooling correction gauge */
+  .gauge-wrap{
+    background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:16px; margin-bottom:16px;
+  }
+  .gauge-title{font-size:13px; font-weight:700; margin-bottom:12px; color:var(--text);}
+  .gauge-track{
+    position:relative; height:14px; border-radius:8px;
+    background:linear-gradient(90deg, var(--steam) 0%, var(--steam) 42%, var(--surface-2) 42%, var(--surface-2) 58%, var(--ember) 58%, var(--ember) 100%);
+    margin:18px 4px 8px;
+  }
+  .gauge-marker{
+    position:absolute; top:-9px; width:2px; height:32px; background:var(--text);
+  }
+  .gauge-marker.tr{left:50%; transform:translateX(-1px);}
+  .gauge-marker.t1{left:42%;}
+  .gauge-marker.t2{left:58%;}
+  .gauge-labels{display:flex; justify-content:space-between; font-family:var(--mono); font-size:10.5px; color:var(--text-faint); margin-top:14px;}
+  .gauge-legend{display:flex; gap:14px; font-size:11.5px; color:var(--text-dim); margin-top:10px; flex-wrap:wrap;}
+  .gauge-legend span{display:flex; align-items:center; gap:5px;}
+  .gauge-legend i{width:10px; height:10px; border-radius:3px; display:inline-block;}
+
+  /* formula box */
+  .formula{
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:16px;
+    font-family:var(--mono);
+    font-size:13.5px;
+    color:var(--brass);
+    text-align:center;
+    line-height:2;
+    overflow-x:auto;
+    white-space:nowrap;
+  }
+  .formula .plain{
+    font-family:var(--sans); color:var(--text-dim); font-size:12.5px; white-space:normal; display:block; margin-bottom:8px;
+  }
+
+  /* calculator */
+  .calc-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:6px;}
+  .field{display:flex; flex-direction:column; gap:5px;}
+  .field label{font-size:11.5px; color:var(--text-dim);}
+  .field label .sym{color:var(--steam); font-family:var(--mono);}
+  .field input{
+    background:var(--surface-2); border:1px solid var(--line); border-radius:10px;
+    padding:10px 10px; color:var(--text); font-family:var(--mono); font-size:14px;
+  }
+  .runbtn{
+    width:100%; margin-top:10px; padding:14px; border:none; border-radius:14px;
+    background:linear-gradient(135deg, var(--ember), #c94a1e);
+    color:#fff; font-weight:700; font-size:14.5px; cursor:pointer;
+    box-shadow:0 8px 20px -8px rgba(232,98,44,0.6);
+  }
+  .runbtn:active{transform:scale(0.985);}
+  .result{
+    margin-top:14px; border-radius:14px; border:1px solid var(--line);
+    background:var(--surface-2); padding:14px 16px; display:none;
+  }
+  .result.show{display:block; animation:fadein .3s ease;}
+  .result .big{font-family:var(--mono); font-size:24px; color:var(--good); font-weight:700;}
+  .result .big span{font-size:13px; color:var(--text-dim); font-weight:400;}
+  .breakdown{margin-top:10px; font-size:12.8px; color:var(--text-dim); line-height:2.1;}
+  .breakdown .ln{display:flex; justify-content:space-between; border-bottom:1px dashed var(--line); padding:2px 0;}
+  .breakdown .ln b{color:var(--text); font-family:var(--mono); font-weight:600;}
+  .accuracy{margin-top:10px; font-size:12.5px; padding:8px 10px; border-radius:10px;}
+  .accuracy.ok{background:rgba(127,201,154,0.12); color:var(--good);}
+  .accuracy.warn{background:rgba(226,102,106,0.12); color:var(--bad);}
+
+  /* quiz */
+  .qcard{background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:16px; margin-bottom:14px;}
+  .qnum{font-family:var(--mono); font-size:11.5px; color:var(--steam); margin-bottom:6px;}
+  .qtext{font-size:14.5px; font-weight:600; margin-bottom:12px; line-height:1.6;}
+  .opt{
+    display:block; width:100%; text-align:right; background:var(--surface-2);
+    border:1px solid var(--line); color:var(--text); border-radius:10px;
+    padding:11px 14px; margin-bottom:8px; font-family:var(--sans); font-size:13.5px;
+    cursor:pointer; line-height:1.5;
+  }
+  .opt:hover{border-color:var(--steam-dim);}
+  .opt.correct{border-color:var(--good); background:rgba(127,201,154,0.14); color:var(--good);}
+  .opt.wrong{border-color:var(--bad); background:rgba(226,102,106,0.14); color:var(--bad);}
+  .opt[disabled]{cursor:default;}
+  .explain{
+    display:none; margin-top:10px; padding:12px 14px; border-radius:10px;
+    background:var(--surface-2); font-size:13px; color:var(--text-dim); line-height:1.7;
+    border-inline-start:3px solid var(--brass);
+  }
+  .explain.show{display:block; animation:fadein .3s ease;}
+  .scorebar{
+    position:sticky; top:0; z-index:5; background:var(--surface); border:1px solid var(--line);
+    border-radius:14px; padding:10px 16px; display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:14px; font-size:13px; color:var(--text-dim);
+  }
+  .scorebar b{color:var(--brass); font-family:var(--mono);}
+  .resetq{background:none; border:1px solid var(--line); color:var(--text-dim); border-radius:8px; padding:5px 10px; font-size:12px; cursor:pointer;}
+
+  .note{
+    font-size:12.5px; color:var(--text-faint); line-height:1.7; margin-top:16px; padding:12px 14px;
+    border-left:3px solid var(--steam-dim); background:rgba(159,200,209,0.04); border-radius:0 10px 10px 0;
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="steamwrap" aria-hidden="true">
+    <div class="curl" style="left:20px; animation-delay:0s;"></div>
+    <div class="curl" style="left:45px; animation-delay:1.3s;"></div>
+    <div class="curl" style="left:70px; animation-delay:2.6s;"></div>
+    <div class="curl" style="left:95px; animation-delay:0.7s;"></div>
+  </div>
+  <div class="eyebrow"><span class="dot"></span> A/L PHYSICS · තාප ප්‍රායෝගික · අන්තර්ක්‍රියාකාරී</div>
+  <h1 class="title">මිශ්‍රණ ක්‍රමයෙන් ජලයේ විශිෂ්ඨ ගුප්ත තාපය සෙවීම</h1>
+  <p class="sub">Method of Mixtures — Specific Latent Heat of Vaporization. සජීවී උපකරණ අනුකරණය, ක්‍රමවේදය, න්‍යාය සහ ගණකය එකම තැනකින්.</p>
+</header>
+
+<main>
+
+  <!-- SECTION 1: SIMULATION -->
+  <section class="panel active" id="panel-1">
+    <h2 class="sectitle"><span class="num">01</span> අන්තර්ක්‍රියාකාරී උපකරණ ඇටවුම</h2>
+    <p class="leadtext">දාහකය දල්වා හුමාල ජනකයේ පීඩනය ඉහළ යාම නරඹන්න. උපකරණයේ ඕනෑම කොටසක් ස්පර්ශ කර එහි භූමිකාව කියවන්න.</p>
+
+    <div class="sim-wrap">
+      <div class="sim-controls">
+        <button class="burnbtn" id="burnToggle"><span class="flicon">🔥</span><span id="burnLabel">දාහකය දල්වන්න</span></button>
+        <div class="pressure-meter">
+          පීඩනය
+          <div class="pressure-bar"><div class="pressure-fill" id="pressureFill"></div></div>
+        </div>
+        <div class="sim-hint">A නළය තුළ ජලය ඉහළට යාම නිරීක්ෂණය කරන්න — එය පීඩන අනතුරු සංඥාවකි.</div>
+      </div>
+
+      <div class="diagram-frame">
+        <svg id="appSvg" viewBox="0 0 900 430" xmlns="http://www.w3.org/2000/svg">
+          <!-- ground -->
+          <line x1="10" y1="400" x2="890" y2="400" stroke="rgba(159,200,209,0.18)" stroke-width="2"/>
+
+          <!-- ===== Bunsen burner ===== -->
+          <g>
+            <rect x="82" y="380" width="36" height="16" rx="2" fill="#2a343a" stroke="var(--line)"/>
+            <rect x="95" y="345" width="10" height="38" fill="#3a464c"/>
+            <g class="flame">
+              <path class="f1" d="M100 345 C 90 325, 92 308, 100 296 C 108 308, 110 325, 100 345 Z" fill="var(--ember)" opacity="0.9"/>
+              <path class="f2" d="M100 340 C 94 328, 95 316, 100 308 C 105 316, 106 328, 100 340 Z" fill="#ffd27a" opacity="0.85"/>
+            </g>
+          </g>
+
+          <!-- ===== Steam generator (boiler) ===== -->
+          <g>
+            <path d="M60 345 Q60 260 100 250 Q140 260 140 345 Z" fill="#243138" stroke="var(--steam-dim)" stroke-width="1.5"/>
+            <clipPath id="genClip"><path d="M64 343 Q64 280 100 272 Q136 280 136 343 Z"/></clipPath>
+            <g clip-path="url(#genClip)">
+              <rect x="60" y="300" width="80" height="50" fill="#1c4b57" opacity="0.85"/>
+              <circle class="bubble" cx="85" cy="335" r="3" fill="var(--steam)" style="animation-delay:0s"/>
+              <circle class="bubble" cx="100" cy="340" r="2.4" fill="var(--steam)" style="animation-delay:0.6s"/>
+              <circle class="bubble" cx="115" cy="333" r="3.2" fill="var(--steam)" style="animation-delay:1.2s"/>
+              <circle class="bubble" cx="95" cy="345" r="2" fill="var(--steam)" style="animation-delay:1.8s"/>
+            </g>
+            <text x="100" y="418" text-anchor="middle" class="lbl">හුමාල ජනකය</text>
+          </g>
+
+          <!-- ===== Safety Tube A ===== -->
+          <g>
+            <rect x="63" y="120" width="12" height="132" fill="#141b1e" stroke="var(--steam-dim)" stroke-width="1.2"/>
+            <clipPath id="tubeAClip"><rect x="64" y="121" width="10" height="130"/></clipPath>
+            <g clip-path="url(#tubeAClip)">
+              <rect id="tubeAWater" x="64" y="240" width="10" height="12" fill="#2f7f8f"/>
+            </g>
+            <line x1="63" y1="120" x2="75" y2="120" stroke="var(--steam-dim)" stroke-width="1.2"/>
+            <text x="69" y="108" text-anchor="middle" class="lbl-strong">A</text>
+            <text x="69" y="266" text-anchor="middle" class="lbl" font-size="11">නළය</text>
+          </g>
+
+          <!-- manometer / thermometer knob on generator -->
+          <g>
+            <circle cx="132" cy="258" r="7" fill="none" stroke="var(--brass)" stroke-width="1.6"/>
+            <line x1="132" y1="258" x2="136" y2="253" stroke="var(--brass)" stroke-width="1.4"/>
+          </g>
+
+          <!-- ===== Pipe B ===== -->
+          <g>
+            <path id="pipeB" d="M140 262 C 190 250, 230 250, 290 240" fill="none" stroke="#3a464c" stroke-width="9" stroke-linecap="round"/>
+            <path d="M140 262 C 190 250, 230 250, 290 240" fill="none" stroke="var(--steam-dim)" stroke-width="9" stroke-linecap="round" opacity="0.35"/>
+            <text x="215" y="228" text-anchor="middle" class="lbl">B නළය</text>
+          </g>
+
+          <!-- ===== Steam trap ===== -->
+          <g>
+            <rect x="290" y="220" width="90" height="110" rx="10" fill="#212c32" stroke="var(--steam-dim)" stroke-width="1.5"/>
+            <path d="M300 246 Q335 300 300 320" fill="none" stroke="var(--text-faint)" stroke-width="1.2" stroke-dasharray="3 3"/>
+            <!-- entry from B -->
+            <circle cx="300" cy="242" r="3" fill="var(--steam)"/>
+            <!-- droplets falling -->
+            <circle class="droplet" cx="318" cy="250" r="2.6" fill="#5fb1c2" style="animation-delay:.1s"/>
+            <circle class="droplet" cx="330" cy="255" r="2.2" fill="#5fb1c2" style="animation-delay:.8s"/>
+            <circle class="droplet" cx="322" cy="260" r="2.8" fill="#5fb1c2" style="animation-delay:1.5s"/>
+            <!-- condensed pool -->
+            <path d="M298 312 Q335 322 362 312 L362 322 Q335 330 298 322 Z" fill="#2f7f8f" opacity="0.7"/>
+            <!-- curved dry-steam exit tube -->
+            <path id="trapExit" d="M355 236 C 372 236, 372 300, 358 300" fill="none" stroke="#3a464c" stroke-width="7" stroke-linecap="round"/>
+            <text x="335" y="345" text-anchor="middle" class="lbl">හුමාල හබකය</text>
+            <text x="335" y="240" text-anchor="middle" class="lbl" font-size="10" fill="var(--text-faint)">වියළි ↑ · තෙත් ↓</text>
+          </g>
+
+          <!-- ===== connecting tube from trap to calorimeter ===== -->
+          <g>
+            <path id="pipeToCal" d="M358 300 C 400 330, 440 335, 500 320" fill="none" stroke="#3a464c" stroke-width="8" stroke-linecap="round"/>
+          </g>
+
+          <!-- ===== Asbestos screen ===== -->
+          <g>
+            <rect x="452" y="150" width="12" height="250" fill="#4a4640" stroke="var(--line)"/>
+            <rect x="452" y="150" width="12" height="250" fill="url(#screenTex)" opacity="0.5"/>
+            <pattern id="screenTex" width="6" height="6" patternUnits="userSpaceOnUse">
+              <path d="M0 6 L6 0" stroke="#2c2925" stroke-width="1"/>
+            </pattern>
+            <text x="458" y="415" text-anchor="middle" class="lbl" font-size="11">ඇස්බැස්ටස් තිරය</text>
+          </g>
+
+          <!-- ===== Calorimeter ===== -->
+          <g>
+            <path d="M500 330 L500 380 Q500 396 516 396 L620 396 Q636 396 636 380 L636 330 Z" fill="#232f36" stroke="var(--steam-dim)" stroke-width="1.5"/>
+            <rect x="494" y="318" width="148" height="14" rx="4" fill="#2a363d" stroke="var(--line)"/>
+            <clipPath id="calClip"><path d="M504 332 L504 380 Q504 390 514 390 L622 390 Q632 390 632 380 L632 332 Z"/></clipPath>
+            <g clip-path="url(#calClip)">
+              <rect x="500" y="350" width="140" height="46" fill="#1c4b57" opacity="0.85"/>
+            </g>
+            <!-- stirrer -->
+            <line x1="545" y1="270" x2="545" y2="365" stroke="#c9c4b8" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="545" cy="266" r="7" fill="none" stroke="#c9c4b8" stroke-width="3"/>
+            <line x1="538" y1="360" x2="552" y2="360" stroke="#c9c4b8" stroke-width="3" stroke-linecap="round"/>
+            <!-- thermometer -->
+            <line x1="590" y1="272" x2="590" y2="378" stroke="#e6e2d6" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="590" cy="382" r="6" fill="var(--ember)"/>
+            <rect x="587" y="345" width="6" height="34" fill="var(--ember)"/>
+            <text x="568" y="415" text-anchor="middle" class="lbl">කැලරි මීටරය</text>
+          </g>
+
+          <!-- steam curls above calorimeter once steam enters -->
+          <g>
+            <path class="steamcurl" d="M515 322 q6 -14 -2 -22" fill="none" stroke="var(--steam)" stroke-width="2" stroke-linecap="round" style="animation-delay:0s"/>
+            <path class="steamcurl" d="M525 322 q6 -14 -2 -22" fill="none" stroke="var(--steam)" stroke-width="2" stroke-linecap="round" style="animation-delay:1.1s"/>
+            <path class="steamcurl" d="M535 322 q6 -14 -2 -22" fill="none" stroke="var(--steam)" stroke-width="2" stroke-linecap="round" style="animation-delay:2.2s"/>
+          </g>
+
+          <!-- ===== flowing steam particles along generator -> B -> trap -> calorimeter ===== -->
+          <g transform="translate(140,246)">
+            <circle class="particle p1" r="3.4" fill="var(--steam)"/>
+            <circle class="particle p2" r="3" fill="var(--steam)"/>
+            <circle class="particle p3" r="3.6" fill="var(--steam)"/>
+            <circle class="particle p4" r="2.8" fill="var(--steam)"/>
+          </g>
+
+          <!-- warning flash overlay near Tube A -->
+          <rect class="warnflash" id="warnFlash" x="40" y="90" width="70" height="170" rx="10" fill="var(--bad)"/>
+
+          <!-- ===== HOTSPOTS ===== -->
+          <g class="hotspot" data-key="generator" transform="translate(100,300)">
+            <circle class="ring" r="16"/><circle class="core" r="13"/><text dy="1">1</text>
+          </g>
+          <g class="hotspot" data-key="tubeA" transform="translate(69,160)">
+            <circle class="ring" r="14"/><circle class="core" r="12"/><text dy="1">2</text>
+          </g>
+          <g class="hotspot" data-key="pipeB" transform="translate(215,248)">
+            <circle class="ring" r="14"/><circle class="core" r="12"/><text dy="1">3</text>
+          </g>
+          <g class="hotspot" data-key="trap" transform="translate(335,280)">
+            <circle class="ring" r="15"/><circle class="core" r="13"/><text dy="1">4</text>
+          </g>
+          <g class="hotspot" data-key="asbestos" transform="translate(458,220)">
+            <circle class="ring" r="14"/><circle class="core" r="12"/><text dy="1">5</text>
+          </g>
+          <g class="hotspot" data-key="calorimeter" transform="translate(610,355)">
+            <circle class="ring" r="15"/><circle class="core" r="13"/><text dy="1">6</text>
+          </g>
+          <g class="hotspot" data-key="thermo" transform="translate(590,300)">
+            <circle class="ring" r="13"/><circle class="core" r="11"/><text dy="1" font-size="10">7</text>
+          </g>
+        </svg>
+      </div>
+
+      <div class="sim-banner" id="simBanner"></div>
+
+      <div class="legend-row" id="legendRow"></div>
+      <div class="app-detail" id="appDetail"></div>
+    </div>
+  </section>
+
+  <!-- SECTION 2: PROCEDURE -->
+  <section class="panel" id="panel-2">
+    <h2 class="sectitle"><span class="num">02</span> පරීක්ෂණ ක්‍රමවේදය</h2>
+
+    <div class="gauge-wrap">
+      <div class="gauge-title">සිසිලන නිවැරදි කිරීමේ දර්ශකය (Cooling Correction Gauge)</div>
+      <div class="gauge-track">
+        <div class="gauge-marker t1"></div>
+        <div class="gauge-marker tr"></div>
+        <div class="gauge-marker t2"></div>
+      </div>
+      <div class="gauge-labels">
+        <span>θ₁ = T_R − 5°C</span>
+        <span>T_R (කාමර උෂ්ණත්වය)</span>
+        <span>θ₂ = T_R + 5°C</span>
+      </div>
+      <div class="gauge-legend">
+        <span><i style="background:var(--steam);"></i> ආරම්භයේ පරිසරයෙන් තාපය ලැබේ</span>
+        <span><i style="background:var(--ember);"></i> අවසානයේ පරිසරයට තාපය නැතිවේ</span>
+      </div>
+    </div>
+
+    <div class="steps" id="stepsList"></div>
+  </section>
+
+  <!-- SECTION 3: THEORY -->
+  <section class="panel" id="panel-3">
+    <h2 class="sectitle"><span class="num">03</span> සිද්ධාන්ත, ප්‍රවේශම් සහ දෝෂ</h2>
+    <div id="theoryCards"></div>
+  </section>
+
+  <!-- SECTION 4: CALCULATOR -->
+  <section class="panel" id="panel-4">
+    <h2 class="sectitle"><span class="num">04</span> ගණනය කිරීම සහ සජීවී ගණකය</h2>
+
+    <div class="formula">
+      <span class="plain">තාප සමතුලිතතාවය: ජලය සහ කැලරි මීටරය ලබාගත් තාපය = හුමාලය ද්‍රවීකරණය වීමේදී මුදාවු තාපය + ලැබූ ජලය 100°C සිට θ₂ දක්වා සිසිලන විට මුදාවු තාපය</span>
+      [m_w c_w + m_c c_c] (θ₂ − θ₁) = m_s L_v + m_s c_w (100 − θ₂)
+    </div>
+
+    <div class="card open" style="margin-top:14px;">
+      <div class="head" style="cursor:default;">
+        <div class="icon">⚖️</div>
+        <div class="label">දත්ත ඇතුළත් කරන්න (ග්‍රෑම් / °C)</div>
+      </div>
+      <div class="body" style="max-height:none;">
+        <div class="inner" style="padding:0 16px 16px 16px;">
+          <div class="calc-grid">
+            <div class="field">
+              <label>කැලරි මීටරය + මන්ථය <span class="sym">m₁ (g)</span></label>
+              <input type="number" id="m1" placeholder="e.g. 62.5" inputmode="decimal">
+            </div>
+            <div class="field">
+              <label>කැලරි මීටරය + ජලය <span class="sym">m₂ (g)</span></label>
+              <input type="number" id="m2" placeholder="e.g. 142.5" inputmode="decimal">
+            </div>
+            <div class="field">
+              <label>+ ද්‍රවීකෘත හුමාලය <span class="sym">m₃ (g)</span></label>
+              <input type="number" id="m3" placeholder="e.g. 144.8" inputmode="decimal">
+            </div>
+            <div class="field">
+              <label>ආරම්භක උෂ්ණත්වය <span class="sym">θ₁ (°C)</span></label>
+              <input type="number" id="t1" placeholder="e.g. 22.0" inputmode="decimal">
+            </div>
+            <div class="field">
+              <label>අවසාන උෂ්ණත්වය <span class="sym">θ₂ (°C)</span></label>
+              <input type="number" id="t2" placeholder="e.g. 32.0" inputmode="decimal">
+            </div>
+            <div class="field">
+              <label>කැලරි මීටරයේ විශිෂ්ඨ තාපය <span class="sym">c_c (J/g°C)</span></label>
+              <input type="number" id="cc" value="0.39" step="0.01" inputmode="decimal">
+            </div>
+          </div>
+          <div class="field">
+            <label>ජලයේ විශිෂ්ඨ තාපය <span class="sym">c_w (J/g°C)</span></label>
+            <input type="number" id="cw" value="4.20" step="0.01" inputmode="decimal">
+          </div>
+          <button class="runbtn" id="calcBtn">L_v ගණනය කරන්න</button>
+
+          <div class="result" id="calcResult">
+            <div class="big" id="lvBig">—</div>
+            <div class="breakdown" id="breakdown"></div>
+            <div class="accuracy" id="accuracyBox"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="note">නිවැරදි අගය ≈ 2260 J/g (2.26 × 10⁶ J/kg) ට ආසන්න විය යුතුය. විශාල අපගමනයක් ඇත්නම් — කැලරි මීටරයේ පරිවාරණය, තුෂාර අංකයට වඩා පහළින් සිසිලනය, හෝ හුමාල හබකයේ ක්‍රියාකාරිත්වය පරීක්ෂා කරන්න.</p>
+  </section>
+
+  <!-- SECTION 5: QUIZ -->
+  <section class="panel" id="panel-5">
+    <h2 class="sectitle"><span class="num">05</span> ස්වයං ඇගයීම් ප්‍රශ්නාවලිය</h2>
+    <div class="scorebar">
+      <span>ලකුණු: <b id="scoreTxt">0 / 0</b></span>
+      <button class="resetq" id="resetQuiz">යළි ආරම්භ කරන්න</button>
+    </div>
+    <div id="quizList"></div>
+  </section>
+
+</main>
+
+<nav class="tabs" id="tabs">
+  <button class="active" data-p="1"><span class="ic">🧪</span>අනුකරණය</button>
+  <button data-p="2"><span class="ic">📋</span>ක්‍රමවේදය</button>
+  <button data-p="3"><span class="ic">🛡️</span>ප්‍රවේශම්</button>
+  <button data-p="4"><span class="ic">🧮</span>ගණකය</button>
+  <button data-p="5"><span class="ic">✅</span>ප්‍රශ්නාවලිය</button>
+</nav>
+
+<script>
+/* ---------------- Tab navigation ---------------- */
+const tabBtns = document.querySelectorAll('#tabs button');
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    document.getElementById('panel-'+btn.dataset.p).classList.add('active');
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+});
+
+/* ================= SECTION 1: Simulation ================= */
+const apparatusInfo = {
+  generator: {ic:"🔥", t:"හුමාල ජනකය (බොයිලේරුව)", d:"පහළින් දාහකයක් මගින් ජලය නොකඩවා රත් කර, ඒකාකාර හුමාල ධාරාවක් නිපදවයි. ජනකය මතුපිට මැනෝමීටරයක්/උෂ්ණත්වමානයක් යොදා පීඩනය වායුගෝලීය පීඩනයට ආසන්නව පවතින බව තහවුරු කරගැනීමෙන්, හුමාලය 100°C දී ඇතැයි උපකල්පනය කළ හැක."},
+  tubeA: {ic:"🧯", t:"A ආරක්ෂක නළය", d:"ජනකය තුළ පීඩනය අනවශ්‍ය ලෙස ඉහළ ගියහොත් පිපිරීමේ අවදානමක් ඇත. A නළය ජනකය තුළම ජලයට කිමිද සිටින නිසා, පීඩනය වැඩි වූ විට ජලය නළය දිගේ ඉහළට තල්ලු වී පෙනී යාම නිරීක්ෂකයාට <b>දාහකය ඉවත් කිරීමට ලබා දෙන දෘශ්‍ය සංඥාවකි</b>. නළය ජනකයෙන් පිටතට <span class='badge'>30 cm</span> පමණ උසට දිගු වී පවතී."},
+  pipeB: {ic:"📏", t:"B නළය", d:"ජනකයේ සිට හබකයට හුමාලය ගෙන යන මෙම නළය හැකි තරම් <b>තුනී, කෙටි සහ හොඳින් පරිවාරණය</b> කර ඇත — එමගින් හබකයට ළඟා වීමට පෙර හුමාලය ද්‍රවීකරණය වී පරිසරයට තාපය නැතිවීම වළක්වයි. එහි වම් පහළ කෙළවර සැමවිටම ජල මට්ටමට වඩා ඉහළින් තිබිය යුතුය."},
+  trap: {ic:"💧", t:"හුමාල හබකය (Steam Trap)", d:"ජනකයෙන් එන හුමාලයේ සමහර කොටසක් මගදී ද්‍රවීකරණය වී තෙත් බිංදු ලෙස පවතී. බර හා අඩු ශක්ති තෙත් බිංදු හබකයේ පහළ රැස්වන අතර, ඉහළ ශක්තියෙන් යුත් <b>වියළි හුමාලය</b> පමණක් නැමුණු වීදුරු නළය හරහා ඉහළට නැඟී කැලරි මීටරයට ළඟා වේ. මෙය අත්‍යවශ්‍ය වන්නේ තෙත් හුමාලයේ ස්කන්ධය ද ගණනයට ඇතුළත් වුවහොත් L_v අගය වැරදි ලෙස අඩු වන බැවිනි."},
+  asbestos: {ic:"🛡️", t:"ඇස්බැස්ටස් තිරය", d:"හුමාල ජනකයෙන් නිකුත්වන තාප විකිරණය කැලරි මීටරයට ළඟා වීම වළක්වා, එමගින් ඇතිවිය හැකි අමතර උෂ්ණත්ව ඉහළ යාමේ දෝෂය ඉවත් කරයි. තිරය සැමවිටම ජනකය සහ කැලරි මීටරය අතර තබනු ලැබේ."},
+  calorimeter: {ic:"⚗️", t:"කැලරි මීටරය (මන්ථය සමඟ)", d:"ජලයේ සහ ද්‍රවීකෘත හුමාලයේ තාපය රඳවා ගන්නා ප්‍රධාන භාජනය. බාහිර වායු ආවරණය (jacket) මගින් වට පිටාවෙන් සිදුවන තාප හුවමාරුව අවම කරයි. මන්ථය මගින් ජලය අඛණ්ඩව කලවම් කර මුළු පරිමාව පුරා ඒකාකාර උෂ්ණත්වයක් පවත්වා ගනී."},
+  thermo: {ic:"🌡️", t:"උෂ්ණත්වමානය", d:"θ₁ (ආරම්භක) සහ θ₂ (අවසාන උපරිම) උෂ්ණත්ව නිවැරදිව මැනීමට යොදාගනී. සියලු ගණනය කිරීම් මෙම කියවීම් දෙක මතම රඳා පවතී."},
+};
+const legendOrder = ["generator","tubeA","pipeB","trap","asbestos","calorimeter","thermo"];
+const legendRow = document.getElementById('legendRow');
+const appDetail = document.getElementById('appDetail');
+
+legendOrder.forEach((key,i)=>{
+  const info = apparatusInfo[key];
+  const el = document.createElement('div');
+  el.className='legend-item';
+  el.dataset.key = key;
+  el.innerHTML = `<span class="lnum">${i+1}</span><span>${info.ic} ${info.t}</span>`;
+  el.addEventListener('click', ()=> selectComponent(key));
+  legendRow.appendChild(el);
+});
+
+function selectComponent(key){
+  const info = apparatusInfo[key];
+  document.querySelectorAll('.hotspot').forEach(h=>h.classList.toggle('selected', h.dataset.key===key));
+  document.querySelectorAll('.legend-item').forEach(l=>l.classList.toggle('active', l.dataset.key===key));
+  appDetail.innerHTML = `<span class="t">${info.ic} ${info.t}</span>${info.d}`;
+  appDetail.classList.add('show');
+}
+document.querySelectorAll('.hotspot').forEach(h=>{
+  h.addEventListener('click', ()=> selectComponent(h.dataset.key));
+});
+
+/* --- heating toggle + pressure simulation --- */
+const svg = document.getElementById('appSvg');
+const burnBtn = document.getElementById('burnToggle');
+const burnLabel = document.getElementById('burnLabel');
+const pressureFill = document.getElementById('pressureFill');
+const tubeAWater = document.getElementById('tubeAWater');
+const warnFlash = document.getElementById('warnFlash');
+const simBanner = document.getElementById('simBanner');
+
+let heating = false;
+let pressureLevel = 0; // 0 to 1
+let pressureTimer = null;
+const WATER_BASE_Y = 240, WATER_BASE_H = 12, MAX_RISE = 120; // px tube A can rise
+
+function setBanner(msg, cls){
+  simBanner.textContent = msg;
+  simBanner.className = 'sim-banner show ' + cls;
+}
+function clearBanner(){ simBanner.className = 'sim-banner'; simBanner.textContent=''; }
+
+function updateTubeA(){
+  const h = WATER_BASE_H + pressureLevel*MAX_RISE;
+  const y = 252 - h;
+  tubeAWater.setAttribute('y', y);
+  tubeAWater.setAttribute('height', h);
+  pressureFill.style.width = (pressureLevel*100).toFixed(0)+'%';
+}
+
+function startHeating(){
+  heating = true;
+  svg.classList.add('heating');
+  burnBtn.classList.add('on');
+  burnLabel.textContent = 'දාහකය නිවන්න';
+  setBanner('හුමාල ජනකය රත් වෙමින් පවතී — A නළයේ ජලය ක්‍රමයෙන් ඉහළට යනු නිරීක්ෂණය කරන්න.', 'info');
+  if(pressureTimer) clearInterval(pressureTimer);
+  pressureTimer = setInterval(()=>{
+    pressureLevel = Math.min(1, pressureLevel + 0.02);
+    updateTubeA();
+    if(pressureLevel > 0.78 && pressureLevel < 0.995){
+      warnFlash.classList.add('show');
+      setBanner('⚠️ පීඩනය අනතුරුදායක මට්ටමකට ළඟා වෙමින්! A නළයේ ජලය මතුපිටට ළඟාවීමට පෙර දාහකය ඉවත් කළ යුතුය.', 'warn');
+    }
+    if(pressureLevel >= 1){
+      clearInterval(pressureTimer);
+      warnFlash.classList.remove('show');
+      setBanner('A නළයෙන් ජලය පිටතට විසිරී ගියේය — මෙය හරියටම දාහකය වහාම ඉවත් කළ යුතු බවට ලැබෙන සංඥාවයි! දාහකය ස්වයංක්‍රීයව නිවේ.', 'warn');
+      setTimeout(stopHeating, 1400);
+    }
+  }, 220);
+}
+
+function stopHeating(){
+  heating = false;
+  svg.classList.remove('heating');
+  burnBtn.classList.remove('on');
+  burnLabel.textContent = 'දාහකය දල්වන්න';
+  warnFlash.classList.remove('show');
+  if(pressureTimer) clearInterval(pressureTimer);
+  const cooldown = setInterval(()=>{
+    pressureLevel = Math.max(0, pressureLevel - 0.05);
+    updateTubeA();
+    if(pressureLevel<=0){ clearInterval(cooldown); clearBanner(); }
+  }, 90);
+}
+
+burnBtn.addEventListener('click', ()=>{
+  if(heating){ stopHeating(); } else { startHeating(); }
+});
+updateTubeA();
+
+/* ---------------- Section 2: Procedure ---------------- */
+const steps = [
+  "කැලරි මීටරය සහ මන්ථය එකට තුලනය කර ස්කන්ධය <b>m₁</b> ලෙස වාර්තා කරන්න.",
+  "කැලරි මීටරයෙන් <b>2/3</b> ක් පමණ ජලයෙන් පුරවා, නැවත ස්කන්ධය <b>m₂</b> ලෙස වාර්තා කරන්න.",
+  "කැලරි මීටරය අයිස් සහිත බීකරයේ තබා සිසිල් වීමට ඉඩ දෙන්න. එම අතරතුර හුමාල ජනකයේ ජලය රත් කර ඒකාකාර හුමාල ධාරාවක් නිපදවන්න.",
+  "කාමර උෂ්ණත්වය <b>T_R</b> සටහන් කරගන්න. කැලරි මීටරය T_R ට වඩා <span class='badge cool'>6°C</span> පමණ සිසිල් වූ පසු බීකරයෙන් ඉවතට ගෙන, පිටත මතුපිට හොඳින් පිසදමන්න.",
+  "ජලයේ උෂ්ණත්වය කාමර උෂ්ණත්වයට වඩා <span class='badge cool'>5°C</span> අඩු වූ විට, එම ආරම්භක උෂ්ණත්වය <b>θ₁</b> ලෙස නිවැරදිව සටහන් කරගන්න.",
+  "වහාම හුමාල හබකය හරහා එන වියළි හුමාලය ජල මතුපිටට යවා, අඛණ්ඩව මන්ථනය කරන්න.",
+  "ජලය හොඳින් කලවම් කරමින්, උෂ්ණත්වය කාමර උෂ්ණත්වයට වඩා <span class='badge hot'>5°C</span> වැඩි වන තෙක් හුමාලය යවන්න. එම අවසාන උපරිම උෂ්ණත්වය <b>θ₂</b> ලෙස සටහන් කරන්න.",
+  "අවසාන වශයෙන් කැලරි මීටරය + ජලය + ද්‍රවීකෘත හුමාලය එකතුවේ ස්කන්ධය <b>m₃</b> ලෙස තුලනය කර වාර්තා කරන්න."
+];
+const stepsList = document.getElementById('stepsList');
+steps.forEach((s,i)=>{
+  const el = document.createElement('div');
+  el.className='step';
+  el.innerHTML = `<div class="marker">${i+1}</div><div class="txt">${s}</div>`;
+  stepsList.appendChild(el);
+});
+
+/* ---------------- Section 3: Theory / precautions ---------------- */
+const theory = [
+  {ic:"🌡️", label:"පරිසරයට තාපය හානිවීම වැළැක්වීම (සිසිලන නිවැරදි කිරීම)",
+   d:`පරීක්ෂණය පුරාම කැලරි මීටරය සහ පරිසරය අතර යම් තාප හුවමාරුවක් සිදුවේ. මෙම දෝෂය අවම කිරීමට ජලය ආරම්භයේදී කාමර උෂ්ණත්වයට වඩා <span class="badge cool">5°C</span> තරමින් සිසිල් කර, හුමාලය එකතු කිරීමෙන් උෂ්ණත්වය කාමර උෂ්ණත්වයට වඩා එම ප්‍රමාණයෙන්ම <span class="badge hot">5°C</span> ඉහළට යැවෙන තෙක් පමණක් යවනු ලැබේ. මුල් අර්ධයේදී පරිසරයෙන් තාපය ලැබෙන අතර, දෙවන අර්ධයේදී පරිසරයට තාපය නැතිවේ — මේ දෙක එකිනෙක අහෝසි වීමෙන් සම්පූර්ණ දෝෂය ආසන්න වශයෙන් ශුන්‍ය වේ. <b>වැදගත් අවවාදයයි:</b> ආරම්භක උෂ්ණත්වය කිසිසේත් තුෂාර අංකයට (dew point) වඩා පහළට සිසිල් නොකළ යුතුය. එසේ වුවහොත් කැලරි මීටරය මතුපිට වායු තෙතමනය ද්‍රවීකරණය වී අමතර ස්කන්ධයක් සමඟ මිශ්‍ර වී ප්‍රතිඵලය දූෂණය කරයි.`},
+  {ic:"🧯", label:"A ආරක්ෂක නළයේ කාර්යය",
+   d:`හුමාල ජනකය තුළ පීඩනය අනවශ්‍ය ලෙස ඉහළ ගියහොත් පිපිරීමේ අවදානමක් ඇත. A නළය ජනකය තුළම ජලයට කිමිද සිටින නිසා, පීඩනය වැඩි වූ විට ජලය A නළය දිගේ ඉහළට තල්ලු වී පිටතට විසිර යාම නිරීක්ෂකයාට පෙනී යයි — එය <b>දාහකය ඉවත් කිරීමට ලබා දෙන දෘශ්‍ය සංඥාවකි</b>. A නළය ජනකයෙන් පිටතට <span class="badge">30 cm</span> පමණ උස දිගු වී පවතී.`},
+  {ic:"💧", label:"හුමාල හබකයේ (Steam Trap) ක්‍රියාකාරිත්වය",
+   d:`ජනකයෙන් එන හුමාලයේ සමහර කොටසක් මගදීම ද්‍රවීකරණය වී තෙත් බිංදු ලෙස පවතී. මෙම බර හා ශක්තියෙන් අඩු බිංදු හබකයේ පහළ රැස්වේ. ඉහළ ශක්තියෙන් යුත් සැබෑ 'වියළි' හුමාලය පමණක් නැමුණු වීදුරු නළය හරහා ඉහළට නැඟී කැලරි මීටරයට ළඟා වේ. මෙය අත්‍යවශ්‍ය වන්නේ, තෙත් හුමාලයේ ස්කන්ධය ද ගණනයට ඇතුළත් වුවහොත් L_v අගය වැරදි ලෙස අඩු වන බැවිනි.`},
+  {ic:"📏", label:"B නළය සහ ඇස්බැස්ටස් තිරයේ වැදගත්කම",
+   d:`ජනකයේ සිට හබකයට හුමාලය ගෙන යන B නළය හැකි තරම් <b>තුනී, කෙටි සහ හොඳින් පරිවාරණය</b> කර ඇත — එමගින් හබකයට ළඟා වීමට පෙර හුමාලය ද්‍රවීකරණය වී පරිසරයට තාපය නැතිවීම වළක්වයි. එහි වම් පහළ කෙළවර සැමවිටම ජල මට්ටමට වඩා ඉහළින් තිබිය යුතුය. එමෙන්ම, ජනකයෙන් නිකුත්වන තාප විකිරණය කැලරි මීටරයට ළඟා නොවීමට <b>ඇස්බැස්ටස් තිරය</b> දෙක අතර තබනු ලැබේ.`},
+  {ic:"⚖️", label:"ස්කන්ධ මැනීමේ නිවැරදිතාවය",
+   d:`ජලයේ විශිෂ්ඨ ගුප්ත තාපය (L_v ≈ 2260 J/g) ඉතා විශාල අගයක් වන බැවින්, කුඩා තාප ප්‍රමාණයක් හුවමාරු කිරීමට ප්‍රමාණවත් වන්නේ ඉතා කුඩා හුමාල ස්කන්ධයකි (m₃ − m₂). මෙම කුඩා අගය නිවැරදිව මැනීමට සාමාන්‍ය තුලාවකට වඩා සංවේදී <b>ත්‍රික/චතුරස්‍ර බාහු තුලාවක්</b> හෝ තුනී බිත්ති සහිත කන්ඩෙන්සරයක් අවශ්‍ය වේ.`},
+];
+const theoryWrap = document.getElementById('theoryCards');
+theory.forEach((th,i)=>{
+  const card = document.createElement('div');
+  card.className='card';
+  card.innerHTML = `
+    <div class="head">
+      <div class="icon">${th.ic}</div>
+      <div class="label">${th.label}</div>
+      <div class="chev">▸</div>
+    </div>
+    <div class="body"><div class="inner">${th.d}</div></div>
+  `;
+  card.querySelector('.head').addEventListener('click', ()=> card.classList.toggle('open'));
+  theoryWrap.appendChild(card);
+});
+theoryWrap.firstElementChild.classList.add('open');
+
+/* ---------------- Section 4: Calculator ---------------- */
+document.getElementById('calcBtn').addEventListener('click', ()=>{
+  const m1 = parseFloat(document.getElementById('m1').value);
+  const m2 = parseFloat(document.getElementById('m2').value);
+  const m3 = parseFloat(document.getElementById('m3').value);
+  const t1 = parseFloat(document.getElementById('t1').value);
+  const t2 = parseFloat(document.getElementById('t2').value);
+  const cc = parseFloat(document.getElementById('cc').value);
+  const cw = parseFloat(document.getElementById('cw').value);
+
+  const resBox = document.getElementById('calcResult');
+  const bd = document.getElementById('breakdown');
+  const acc = document.getElementById('accuracyBox');
+
+  if([m1,m2,m3,t1,t2,cc,cw].some(v=>isNaN(v))){
+    resBox.classList.add('show');
+    document.getElementById('lvBig').textContent = "සියලු අගයන් ඇතුළත් කරන්න";
+    bd.innerHTML=''; acc.className='accuracy warn'; acc.textContent='සියලුම ක්ෂේත්‍ර සම්පූර්ණ කළ යුතුයි.';
+    return;
+  }
+  const mw = m2 - m1;
+  const ms = m3 - m2;
+  const dtheta = t2 - t1;
+
+  if(ms<=0 || mw<=0 || dtheta<=0){
+    resBox.classList.add('show');
+    document.getElementById('lvBig').textContent = "දත්ත පරීක්ෂා කරන්න";
+    bd.innerHTML='';
+    acc.className='accuracy warn';
+    acc.textContent='m₃ > m₂ > m₁ සහ θ₂ > θ₁ විය යුතුය.';
+    return;
+  }
+
+  const heatGained = (mw*cw + m1*cc) * dtheta;
+  const coolingOfCondensed = ms*cw*(100 - t2);
+  const Lv = (heatGained - coolingOfCondensed) / ms;
+
+  document.getElementById('lvBig').innerHTML = Lv.toFixed(1) + ' <span>J/g  (≈ '+(Lv/1000).toFixed(3)+' × 10³ J/g)</span>';
+
+  bd.innerHTML = `
+    <div class="ln"><span>ජල ස්කන්ධය m_w = m₂ − m₁</span><b>${mw.toFixed(2)} g</b></div>
+    <div class="ln"><span>හුමාල ස්කන්ධය m_s = m₃ − m₂</span><b>${ms.toFixed(3)} g</b></div>
+    <div class="ln"><span>උෂ්ණත්ව වෙනස Δθ = θ₂ − θ₁</span><b>${dtheta.toFixed(1)} °C</b></div>
+    <div class="ln"><span>ලැබූ තාපය (ජලය+කැලරි මීටරය)</span><b>${heatGained.toFixed(1)} J</b></div>
+    <div class="ln"><span>ලැබූ ජලය සිසිලනයේදී මුදාවු තාපය</span><b>${coolingOfCondensed.toFixed(1)} J</b></div>
+    <div class="ln"><span>L_v = [ලැබූ − සිසිලන තාපය] ÷ m_s</span><b>${Lv.toFixed(1)} J/g</b></div>
+  `;
+
+  const diffPct = Math.abs(Lv-2260)/2260*100;
+  if(diffPct < 15){
+    acc.className='accuracy ok';
+    acc.textContent = `නිවැරදි අගය (2260 J/g) ට ආසන්නයි — අපගමනය ${diffPct.toFixed(1)}%.`;
+  } else {
+    acc.className='accuracy warn';
+    acc.textContent = `නිවැරදි අගයෙන් ${diffPct.toFixed(1)}% ක් අපගමනය වී ඇත. හුමාල හබකය, පරිවාරණය සහ සිසිලන නිවැරදි කිරීම නැවත පරීක්ෂා කරන්න.`;
+  }
+  resBox.classList.add('show');
+});
+
+/* ---------------- Section 5: Quiz ---------------- */
+const quiz = [
+  {q:"A ආරක්ෂක නළයේ ප්‍රධාන කාර්යය කුමක්ද?",
+   opts:["ජලය පිරිසිදු කිරීම","ජනකයේ පීඩනය අධික වූ විට එය නිරීක්ෂණය කර දාහකය ඉවත් කිරීමට ඉඩ දීමෙන් පිපිරීම වළක්වයි","හුමාලයේ උෂ්ණත්වය මැනීම","මන්ථනය සඳහා"],
+   correct:1,
+   explain:"පීඩනය ඉහළ ගිය විට A නළය දිගේ ජලය ඉහළට තල්ලු වී පෙනී යාම නිරීක්ෂකයාට දාහකය ඉවත් කිරීමට ලබා දෙන දෘශ්‍ය සංඥාවකි. එය නොමැති නම් ජනකය තුළ පීඩනය අධික වී පිපිරීමේ අවදානමක් ඇත."},
+  {q:"හුමාල හබකයේ (Steam Trap) කාර්යභාරය කුමක්ද?",
+   opts:["හුමාලය සිසිල් කිරීම","තෙත් (condensed) හුමාල බිංදු සහ වියළි උසස් ශක්ති හුමාලය වෙන් කිරීම","ජලයේ ස්කන්ධය මැනීම","කැලරි මීටරය ආරක්ෂා කිරීම"],
+   correct:1,
+   explain:"බර හා අඩු ශක්ති තෙත් බිංදු හබකයේ පහළ රැස්වන අතර, ඉහළ ශක්තියෙන් යුත් වියළි හුමාලය පමණක් නැමුණු නළය හරහා ඉහළට ගොස් කැලරි මීටරයට ළඟා වේ. මෙයින් ප්‍රතිඵලයේ නිරවද්‍යතාවය ඉහළ යයි."},
+  {q:"ආරම්භයේදී කැලරි මීටරය කාමර උෂ්ණත්වයට වඩා සිසිල් කරන්නේ ඇයි?",
+   opts:["හුමාලය වේගයෙන් ද්‍රවීකරණය කිරීමට","පරිසරය සමඟ තාප හුවමාරුවේ දෝෂය අවම කිරීමට (සිසිලන නිවැරදි කිරීම)","උෂ්ණත්වමානය නිවැරදිව ක්‍රියා කිරීමට","ජලය උතුරා යාම වළක්වන්නට"],
+   correct:1,
+   explain:"ආරම්භයේ 5°C සිසිල් කර, අවසානයේ 5°C උණුසුම් වීමට ඉඩ දීමෙන් පරිසරයට/පරිසරයෙන් සිදුවන තාප හුවමාරුවේ දෝෂ දෙක එකිනෙක අහෝසි වී, පිරිසිදු ප්‍රතිඵලයක් ලැබේ."},
+  {q:"'තුෂාර අංකය' (dew point) සම්බන්ධ අවවාදය කුමක්ද?",
+   opts:["ජලය තුෂාර අංකයට වඩා රත් කළ යුතුය","ආරම්භක උෂ්ණත්වය තුෂාර අංකයට වඩා පහළට සිසිල් නොකළ යුතුය — එසේ නම් වායු තෙතමනය කැලරි මීටරය මතුපිට ද්‍රවීකරණය වී ස්කන්ධය දූෂණය කරයි","තුෂාර අංකය සෑම විටම 100°C වේ","තුෂාර අංකයට කිසිදු බලපෑමක් නැත"],
+   correct:1,
+   explain:"උෂ්ණත්වය තුෂාර අංකයට වඩා පහළට ගියහොත් වායුගෝලීය තෙතමනය කැලරි මීටරයේ පිටත මතුපිට ද්‍රවීකරණය වී, එය ස්කන්ධ මිනුම් සමඟ අවුල් වී දෝෂයක් ඇති කරයි."},
+  {q:"ඇස්බැස්ටස් තිරයේ අරමුණ කුමක්ද?",
+   opts:["හුමාලය පෙරීම","හුමාල ජනකයෙන් නිකුත්වන තාප විකිරණය කැලරි මීටරයට ළඟා වීම වැළැක්වීම","කැලරි මීටරය සිසිල් කිරීම","ජලය මැනීම"],
+   correct:1,
+   explain:"ජනකය රත් වී ඇති බැවින් තාප විකිරණයක් නිකුත් කරයි. එය කැලරි මීටරයට ළඟා වුවහොත් ජලයේ උෂ්ණත්වය අමතරව ඉහළ ගොස් ප්‍රතිඵලය දූෂණය වේ. තිරය මෙය අවහිර කරයි."},
+  {q:"හුමාල ස්කන්ධය (m₃ − m₂) මැනීමට ත්‍රික බාහු තුලාවක් වැනි නිරවද්‍ය උපකරණයක් අවශ්‍ය වන්නේ ඇයි?",
+   opts:["හුමාලය බර නිසා","L_v ඉතා විශාල අගයක් නිසා, කුඩා තාප හුවමාරුවකට පවා කුඩා හුමාල ස්කන්ධයක් ප්‍රමාණවත් බැවින්","තුලාව මිල අඩු නිසා","ජලය අධික ලෙස වාෂ්ප වන නිසා"],
+   correct:1,
+   explain:"ජලයේ විශිෂ්ඨ ගුප්ත තාපය ඉතා විශාල (≈2260 J/g) බැවින්, කුඩා හුමාල ස්කන්ධයක් පවා විශාල තාප ප්‍රමාණයක් මුදාහරියි. එම නිසා m₃−m₂ අගය ඉතා කුඩා වන අතර එය නිවැරදිව මැනීමට සංවේදී තුලාවක් අවශ්‍යයි."},
+];
+
+let score = 0, answered = 0;
+const quizList = document.getElementById('quizList');
+function renderQuiz(){
+  quizList.innerHTML='';
+  score=0; answered=0;
+  quiz.forEach((qq,qi)=>{
+    const card = document.createElement('div');
+    card.className='qcard';
+    card.innerHTML = `
+      <div class="qnum">ප්‍රශ්නය ${qi+1} / ${quiz.length}</div>
+      <div class="qtext">${qq.q}</div>
+      <div class="opts"></div>
+      <div class="explain" id="exp-${qi}">${qq.explain}</div>
+    `;
+    const optsWrap = card.querySelector('.opts');
+    qq.opts.forEach((op,oi)=>{
+      const b = document.createElement('button');
+      b.className='opt';
+      b.textContent = op;
+      b.addEventListener('click', ()=>{
+        if(b.disabled) return;
+        const allOpts = optsWrap.querySelectorAll('.opt');
+        allOpts.forEach(o=>o.disabled=true);
+        if(oi===qq.correct){
+          b.classList.add('correct');
+          score++;
+        } else {
+          b.classList.add('wrong');
+          allOpts[qq.correct].classList.add('correct');
+        }
+        answered++;
+        document.getElementById(`exp-${qi}`).classList.add('show');
+        updateScore();
+      });
+      optsWrap.appendChild(b);
+    });
+    quizList.appendChild(card);
+  });
+  updateScore();
+}
+function updateScore(){
+  document.getElementById('scoreTxt').textContent = `${score} / ${quiz.length}`;
+}
+document.getElementById('resetQuiz').addEventListener('click', renderQuiz);
+renderQuiz();
+</script>
+</body>
+</html>

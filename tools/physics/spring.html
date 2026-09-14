@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>සුරුට්ටු දුන්න — දුනු නියතය සෙවීම</title>
+<style>
+  :root{
+    --bg:#141922;
+    --panel:#1c2330;
+    --panel-2:#242c3d;
+    --paper:#efe4c8;
+    --paper-2:#e6d8b4;
+    --paper-line:#cdb98a;
+    --ink:#2c2418;
+    --ink-soft:#5a4d38;
+    --brass:#b8863c;
+    --brass-light:#d9ac66;
+    --teal:#5c8b7d;
+    --teal-light:#7fada0;
+    --light:#eee7d6;
+    --light-dim:#a8a89a;
+    --red:#a8503a;
+    --green:#6fa07a;
+    --line:#333d4f;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--light);
+    font-family:'Noto Sans Sinhala','Iskoola Pota','Nirmala UI','Yaldevi',sans-serif;
+    line-height:1.6;
+    -webkit-tap-highlight-color:transparent;
+    overflow-x:hidden;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:0 16px 90px;}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    padding:38px 16px 30px;
+    background:
+      radial-gradient(1100px 400px at 50% -120px, #2a3345 0%, transparent 60%),
+      linear-gradient(180deg,#171d28,#141922 70%);
+    border-bottom:1px solid var(--line);
+    text-align:center;
+  }
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:12px;letter-spacing:.14em;color:var(--brass-light);
+    border:1px solid var(--brass);border-radius:20px;padding:5px 14px;
+    text-transform:uppercase;font-family:'Courier New',monospace;
+  }
+  .eyebrow::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--brass-light);box-shadow:0 0 8px var(--brass-light);}
+  h1.title{
+    font-size:clamp(24px,6vw,36px);
+    margin:16px 0 6px;
+    color:var(--light);
+    font-weight:700;
+  }
+  .subtitle{color:var(--light-dim);font-size:clamp(14px,3.6vw,17px);max-width:560px;margin:0 auto;}
+  .hero-formula{
+    margin-top:22px;display:inline-block;background:var(--panel);
+    border:1px solid var(--line);border-radius:12px;padding:14px 26px;
+    font-family:'Courier New',monospace;font-size:clamp(18px,5vw,24px);color:var(--brass-light);
+  }
+
+  /* ---------- NAV ---------- */
+  nav.tabs{
+    position:sticky;top:0;z-index:50;
+    display:flex;gap:2px;background:var(--panel);
+    border-bottom:1px solid var(--line);
+    overflow-x:auto;scrollbar-width:none;
+  }
+  nav.tabs::-webkit-scrollbar{display:none;}
+  nav.tabs button{
+    flex:1 1 auto;white-space:nowrap;
+    background:transparent;border:none;color:var(--light-dim);
+    padding:14px 14px;font-size:14px;font-family:inherit;font-weight:600;
+    border-bottom:3px solid transparent;cursor:pointer;
+  }
+  nav.tabs button.active{color:var(--brass-light);border-bottom-color:var(--brass);}
+
+  section{display:none;padding-top:26px;animation:fade .35s ease;}
+  section.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+  h2.sec-title{
+    font-size:clamp(19px,5vw,24px);color:var(--light);margin:0 0 4px;
+    display:flex;align-items:baseline;gap:10px;
+  }
+  h2.sec-title span.no{font-family:'Courier New',monospace;color:var(--brass-light);font-size:14px;border:1px solid var(--brass);border-radius:6px;padding:2px 8px;}
+  .sec-desc{color:var(--light-dim);font-size:14px;margin:0 0 18px;}
+
+  /* ---------- PAPER CARD (theory) ---------- */
+  .paper{
+    background:
+      repeating-linear-gradient(180deg, transparent 0 31px, var(--paper-line) 31px 32px),
+      var(--paper);
+    color:var(--ink);
+    border-radius:var(--radius);
+    padding:22px 20px 22px 26px;
+    margin-bottom:18px;
+    box-shadow:0 10px 30px rgba(0,0,0,.35), inset 0 0 0 1px rgba(0,0,0,.06);
+    position:relative;
+  }
+  .paper::before{
+    content:"";position:absolute;left:14px;top:0;bottom:0;width:2px;background:var(--red);opacity:.35;
+  }
+  .paper h3{margin:0 0 8px;font-size:17px;color:var(--ink);}
+  .paper h3 .tag{
+    display:inline-block;background:var(--brass);color:#221a0d;font-size:11px;
+    font-weight:700;padding:2px 8px;border-radius:5px;margin-inline-end:8px;
+    font-family:'Courier New',monospace;letter-spacing:.05em;
+  }
+  .paper p{margin:0 0 10px;font-size:15px;color:var(--ink-soft);}
+  .paper ul{margin:0 0 10px;padding-inline-start:20px;font-size:15px;color:var(--ink-soft);}
+  .paper li{margin-bottom:5px;}
+
+  .apparatus-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0 6px;}
+  .apparatus-item{
+    background:var(--paper-2);border:1px solid var(--paper-line);border-radius:10px;
+    padding:10px 12px;font-size:14px;display:flex;align-items:center;gap:8px;color:var(--ink);
+  }
+  .apparatus-item .ic{font-size:18px;}
+
+  /* formula block */
+  .formula-box{
+    background:#12161f;border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;margin:14px 0;display:flex;flex-wrap:wrap;gap:22px;align-items:center;justify-content:center;
+  }
+  .formula{font-family:'Courier New',monospace;font-size:clamp(16px,4.6vw,20px);color:var(--brass-light);display:flex;align-items:center;gap:8px;}
+  .frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 3px;font-size:.85em;}
+  .frac .num{padding:0 4px;border-bottom:1.5px solid var(--brass-light);}
+  .frac .den{padding:0 4px;}
+  .sqrt{position:relative;padding:2px 6px 2px 14px;border-top:1.5px solid var(--brass-light);}
+  .sqrt::before{content:"√";position:absolute;left:-3px;top:-9px;font-size:1.3em;}
+  .formula-note{font-size:12.5px;color:var(--light-dim);text-align:center;width:100%;font-family:inherit;}
+
+  .caution{
+    background:#3a2a1c;border:1px solid #6b4b2a;border-radius:10px;color:#f2d9b8;
+    padding:12px 14px;font-size:13.5px;display:flex;gap:10px;margin-top:6px;
+  }
+  .caution .ic{font-size:18px;}
+
+  /* ---------- SIMULATION PANEL ---------- */
+  .instrument{
+    background:linear-gradient(180deg,var(--panel-2),var(--panel));
+    border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px;margin-bottom:16px;
+    box-shadow:0 10px 30px rgba(0,0,0,.4);
+  }
+  .nameplate{
+    display:flex;justify-content:space-between;align-items:center;
+    border-bottom:1px dashed var(--line);padding-bottom:10px;margin-bottom:14px;
+  }
+  .nameplate .k-readout{font-family:'Courier New',monospace;color:var(--brass-light);font-size:14px;text-align:end;}
+  .nameplate .k-readout b{font-size:18px;display:block;color:var(--light);}
+
+  .sim-stage{
+    display:grid;grid-template-columns:1fr auto;gap:6px;background:#0e121a;border-radius:10px;
+    padding:8px;border:1px solid var(--line);
+  }
+  canvas#springCanvas{width:100%;height:340px;display:block;border-radius:6px;background:
+      linear-gradient(180deg,#10151f,#0b0e14);}
+
+  .controls-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;}
+  .mass-picker{display:flex;flex-wrap:wrap;gap:8px;flex:1 1 220px;}
+  .mass-btn{
+    flex:1 1 60px;background:var(--panel);border:1px solid var(--line);color:var(--light);
+    padding:10px 4px;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;
+  }
+  .mass-btn.active{background:var(--brass);color:#221a0d;border-color:var(--brass-light);}
+
+  .btn{
+    background:var(--teal);color:#0e1a16;border:none;border-radius:9px;padding:11px 16px;
+    font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;
+  }
+  .btn.secondary{background:var(--panel);color:var(--light);border:1px solid var(--line);}
+  .btn.red{background:var(--red);color:#2a120b;}
+  .btn:active{transform:scale(.97);}
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
+
+  .stopwatch-box{
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+    background:#0e121a;border:1px solid var(--line);border-radius:10px;
+    padding:14px 16px;margin-top:14px;flex-wrap:wrap;
+  }
+  .sw-time{font-family:'Courier New',monospace;font-size:clamp(26px,8vw,34px);color:var(--green);}
+  .sw-count{font-family:'Courier New',monospace;font-size:14px;color:var(--light-dim);}
+  .sw-count b{color:var(--brass-light);font-size:20px;}
+  .sw-buttons{display:flex;gap:8px;flex-wrap:wrap;}
+
+  .record-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center;}
+  .record-row .btn{flex:1 1 auto;}
+
+  table.data-table{width:100%;border-collapse:collapse;margin-top:14px;font-size:13.5px;}
+  table.data-table th, table.data-table td{
+    border:1px solid var(--line);padding:8px 6px;text-align:center;color:var(--light);
+  }
+  table.data-table th{background:#10151f;color:var(--brass-light);font-weight:700;font-size:12.5px;}
+  table.data-table tr:nth-child(even) td{background:#191f2b;}
+  .del-row{color:var(--red);cursor:pointer;font-weight:700;}
+
+  .result-banner{
+    margin-top:14px;background:#12251f;border:1px solid #234337;border-radius:10px;
+    padding:14px;color:var(--green);font-family:'Courier New',monospace;font-size:14px;
+    display:none;
+  }
+  .result-banner.show{display:block;}
+
+  canvas#graphCanvas{width:100%;height:220px;display:block;background:#0e121a;border-radius:8px;margin-top:12px;border:1px solid var(--line);}
+
+  /* ---------- CALCULATOR ---------- */
+  .calc-card{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px;margin-bottom:16px;
+  }
+  .field-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;}
+  .field{flex:1 1 130px;display:flex;flex-direction:column;gap:6px;}
+  .field label{font-size:12.5px;color:var(--light-dim);}
+  .field input, .field select{
+    background:#0e121a;border:1px solid var(--line);color:var(--light);
+    border-radius:8px;padding:11px 10px;font-size:16px;font-family:'Courier New',monospace;
+  }
+  .field input:focus, .field select:focus{outline:2px solid var(--brass);}
+
+  .steps{margin-top:8px;}
+  .step{
+    display:flex;gap:10px;padding:10px 0;border-top:1px dashed var(--line);
+    font-family:'Courier New',monospace;font-size:14px;color:var(--light);align-items:baseline;
+  }
+  .step .n{color:var(--brass-light);font-weight:700;min-width:20px;}
+  .step .lbl{color:var(--light-dim);font-family:inherit;min-width:130px;font-size:13px;}
+
+  .final-k{
+    margin-top:12px;text-align:center;background:#12251f;border:1px solid #234337;border-radius:10px;
+    padding:16px;font-family:'Courier New',monospace;
+  }
+  .final-k .v{font-size:clamp(24px,7vw,32px);color:var(--green);font-weight:700;}
+  .final-k .u{color:var(--light-dim);font-size:13px;}
+
+  .toggle-method{display:flex;gap:8px;margin-bottom:14px;}
+  .toggle-method button{
+    flex:1;background:#0e121a;border:1px solid var(--line);color:var(--light-dim);
+    padding:10px;border-radius:9px;font-family:inherit;font-size:13.5px;cursor:pointer;
+  }
+  .toggle-method button.active{background:var(--teal);color:#0e1a16;font-weight:700;border-color:var(--teal);}
+
+  footer{text-align:center;color:var(--light-dim);font-size:12px;padding:24px 16px;}
+
+  @media (max-width:480px){
+    .apparatus-grid{grid-template-columns:1fr;}
+    .stopwatch-box{flex-direction:column;align-items:stretch;text-align:center;}
+    .sw-buttons{justify-content:center;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    section{animation:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <span class="eyebrow">A/L Physics · Practical 02</span>
+  <h1 class="title">සුරුට්ටු දුන්නක දුනු නියතය</h1>
+  <p class="subtitle">ඉහිත ලබාගත් පාඨාංක ඇසුරෙන් m යනු T² ප්‍රස්ථාරගත කර, දුනු නියතය (k) සහ දුනු ස්කන්ධය (m₀) සොයාගැනීම</p>
+  <div class="hero-formula">T = 2π <span class="sqrt">m / k</span></div>
+</div>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="theory">📖 න්‍යාය</button>
+  <button class="tab-btn" data-tab="sim">🧪 විද්‍යාගාරය</button>
+  <button class="tab-btn" data-tab="calc">🧮 ගණකය</button>
+</nav>
+
+<div class="wrap">
+
+  <!-- ===================== THEORY ===================== -->
+  <section id="theory" class="active">
+    <h2 class="sec-title"><span class="no">01</span> න්‍යාය සහ කෙටි සටහන්</h2>
+    <p class="sec-desc">පත්‍රිකාවේ දැක්වෙන අවශ්‍ය උපකරණ, ක්‍රමය සහ සමීකරණ පහත සාරාංශගත කර ඇත.</p>
+
+    <div class="paper">
+      <h3><span class="tag">අවශ්‍ය උපකරණ</span></h3>
+      <div class="apparatus-grid">
+        <div class="apparatus-item"><span class="ic">🌀</span> සර්පිල දුන්නක්</div>
+        <div class="apparatus-item"><span class="ic">🔩</span> අල්පෙනෙන්තුවක් (Retort Stand)</div>
+        <div class="apparatus-item"><span class="ic">⚖️</span> 50g බැගින් පර කට්ටලයක්</div>
+        <div class="apparatus-item"><span class="ic">⏱️</span> විරාම ඔරලෝසුවක් (Stopwatch)</div>
+      </div>
+    </div>
+
+    <div class="paper">
+      <h3><span class="tag">ක්‍රමය</span></h3>
+      <p>දුන්නෙහි කෙළවරට m = 50g, 100g, 150g ... ලෙස ස්කන්ධ එකින් එක එල්ලා, එක් එක් අවස්ථාවේදී විතතිය <b>e</b> සහ දෝලන 50ක් ගැනීමට ගතවන කාලය මැන ගන්න. ලබාගත් පාඨාංක ඇසුරින් m එදිරිව T² ප්‍රස්ථාරගත කරන්න.</p>
+      <ul>
+        <li>ස්කන්ධය එක් එක් අවස්ථාවේදී දුන්න සමතුලිතව රැඳී ඇති බව සහතික කරගන්න.</li>
+        <li>දෝලන ගණන වැඩි ගණනක් (උදා: 20 හෝ 50) ගෙන කාලය මැනීමෙන් ප්‍රතිශත දෝෂය අවම කරගත හැක.</li>
+        <li>එක් එක් ස්කන්ධයක් සඳහා පරීක්ෂණය තුන් වතාවක් පමණ පුනරාවර්තනය කර සාමාන්‍යය ගන්න.</li>
+      </ul>
+      <div class="formula-box">
+        <div class="formula">අනුක්‍රමණය = <span class="frac"><span class="num">4π²</span><span class="den">k</span></span></div>
+      </div>
+      <p>T² m ට සමානුපාතික බැවින්, T² එදිරිව m ප්‍රස්ථාරයේ අනුක්‍රමණයෙන් දුනු නියතය (k) සොයාගත හැක.</p>
+    </div>
+
+    <div class="paper">
+      <h3><span class="tag">දුන්නේ ස්කන්ධය සලකා බැලීම</span></h3>
+      <p>මෙහිදී භාවිතා කළ දුන්නේ ස්කන්ධය ශුන්‍ය නොවන බැවින්, ඍජු රේඛීය සරල ප්‍රස්ථාරයක් ලබාගැනීමට එය සැලකිල්ලට ගත යුතුය. දුන්නේ ස්කන්ධය m₀ නම්,</p>
+      <div class="formula-box">
+        <div class="formula">T² = <span class="frac"><span class="num">4π²</span><span class="den">k</span></span> m + <span class="frac"><span class="num">4π² m₀</span><span class="den">3k</span></span></div>
+      </div>
+      <p>මෙම සමීකරණය y = mx + c ආකෘතියේ වන අතර, C/m අගයෙන් ද දුනු නියතය සෙවිය හැක. ප්‍රස්ථාරයේ y-අන්තඡේදනයෙන් (intercept) දුන්නේ ඵලදායී ස්කන්ධය m₀/3 ලෙස ලබාගත හැක.</p>
+    </div>
+
+    <div class="paper">
+      <h3><span class="tag">වෙනත් ක්‍රමයක් — ස්ථිතික විතතිය</span></h3>
+      <p>සර්පිල දුන්නක සමතුලිත පිහිටුමේදී, mg = ke වන බැවින්,</p>
+      <div class="formula-box">
+        <div class="formula">T = 2π <span class="sqrt">e / g</span></div>
+        <div class="formula">T² = <span class="frac"><span class="num">4π²</span><span class="den">g</span></span> e</div>
+      </div>
+      <p>විවිධ e අගයන් සඳහා T මැන T² එදිරිව e ප්‍රස්ථාරයෙන් g හෝ ප්‍රස්ථාරයේ අනුක්‍රමණයෙන් g සොයාගත හැක.</p>
+      <div class="caution">
+        <span class="ic">⚠️</span>
+        <span>e යනු නිදහස් අවස්ථාවේ සිට විතතිය දැක්විය යුතුය. දුන්න වෙනස් කිරීමකදී, සමතුලිත පිහිටුමේ ඇති ස්කන්ධය වෙනස් වීමට ඉඩ ඇති බැවින් මෙය නම් සමතුලිත පිහිටුම (natural length) සතුටින් තහවුරු කරගත යුතුය.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SIMULATION ===================== -->
+  <section id="sim">
+    <h2 class="sec-title"><span class="no">02</span> අන්තර්ක්‍රියාකාරී විද්‍යාගාරය</h2>
+    <p class="sec-desc">බර වෙනස් කරන්න, දුන්න මුදාහරින්න, විරාම ඔරලෝසුවෙන් දෝලන කාලය මැන ගන්න — සැබෑ අත්හදා බැලීමක් මෙන්.</p>
+
+    <div class="instrument">
+      <div class="nameplate">
+        <div>
+          <div style="font-size:12px;color:var(--light-dim);font-family:'Courier New',monospace;">දුනු නියතය (සිමියුලේෂන්)</div>
+          <div style="font-size:14px;color:var(--brass-light);font-family:'Courier New',monospace;">දුනු-බර පද්ධතිය — k ඔබම සොයාගන්න</div>
+        </div>
+        <div class="k-readout">
+          විතතිය<br><b id="extReadout">0.0 cm</b>
+        </div>
+      </div>
+
+      <div class="sim-stage">
+        <canvas id="springCanvas" width="640" height="340"></canvas>
+      </div>
+
+      <div class="controls-row">
+        <div class="mass-picker" id="massPicker">
+          <button class="mass-btn active" data-mass="50">50g</button>
+          <button class="mass-btn" data-mass="100">100g</button>
+          <button class="mass-btn" data-mass="150">150g</button>
+          <button class="mass-btn" data-mass="200">200g</button>
+          <button class="mass-btn" data-mass="250">250g</button>
+        </div>
+      </div>
+      <div class="controls-row">
+        <button class="btn" id="releaseBtn">🌀 දුන්න මුදාහරින්න</button>
+        <button class="btn secondary" id="stillBtn">⏸ නිශ්චලව තබන්න</button>
+      </div>
+
+      <div class="stopwatch-box">
+        <div>
+          <div class="sw-time" id="swTime">00.00 s</div>
+          <div class="sw-count">ගණන් කළ දෝලන: <b id="swCount">0</b></div>
+        </div>
+        <div class="sw-buttons">
+          <button class="btn" id="swStart">▶ ආරම්භය</button>
+          <button class="btn secondary" id="swTick">➕ දෝලනයක්</button>
+          <button class="btn red" id="swReset">⟲ යළි සකසන්න</button>
+        </div>
+      </div>
+
+      <div class="record-row">
+        <button class="btn secondary" id="recordBtn">📥 පාඨාංකය වගුවට එකතු කරන්න (m, T²)</button>
+        <button class="btn secondary" id="autoRecordBtn">⚡ මෙම බරට නියැදි පාඨාංකයක් ස්වයංක්‍රීයව ගන්න</button>
+      </div>
+      <div id="rowCountHint" style="font-size:12.5px;color:var(--light-dim);margin-top:6px;">දැනට පාඨාංක 0 ක් ඇත — ප්‍රස්ථාරය පෙන්වීමට අවම වශයෙන් වෙනස් m අගයන් 2ක් අවශ්‍යයි.</div>
+
+      <table class="data-table" id="dataTable">
+        <thead>
+          <tr><th>#</th><th>m (g)</th><th>දෝලන (n)</th><th>කාලය t (s)</th><th>T (s)</th><th>T² (s²)</th><th></th></tr>
+        </thead>
+        <tbody id="dataBody"></tbody>
+      </table>
+
+      <div class="record-row" style="margin-top:10px;">
+        <button class="btn" id="calcKGraphBtn">📈 T² එදිරිව m ප්‍රස්ථාරයෙන් k සොයන්න</button>
+      </div>
+      <canvas id="graphCanvas" width="640" height="220" style="display:none;"></canvas>
+      <div class="result-banner" id="graphResult"></div>
+    </div>
+  </section>
+
+  <!-- ===================== CALCULATOR ===================== -->
+  <section id="calc">
+    <h2 class="sec-title"><span class="no">03</span> පියවරෙන් පියවර ගණකය</h2>
+    <p class="sec-desc">ඔබේ අත්හදාබැලීමේ අගයන් ඇතුළත් කර, දුනු නියතය (k) ගණනය කරගන්න.</p>
+
+    <div class="calc-card">
+      <div class="toggle-method">
+        <button class="method-btn active" data-method="static">ස්ථිතික ක්‍රමය (m, e)</button>
+        <button class="method-btn" data-method="graph">T² ක්‍රමය (m, T)</button>
+      </div>
+
+      <!-- STATIC METHOD -->
+      <div id="staticMethod">
+        <div class="field-row">
+          <div class="field">
+            <label>ස්කන්ධය m (g)</label>
+            <input type="number" id="stM" placeholder="උදා: 100" inputmode="decimal">
+          </div>
+          <div class="field">
+            <label>විතතිය e (cm)</label>
+            <input type="number" id="stE" placeholder="උදා: 8.3" inputmode="decimal">
+          </div>
+        </div>
+        <button class="btn" id="stCalcBtn" style="width:100%;">ගණනය කරන්න</button>
+        <div class="steps" id="stSteps"></div>
+        <div class="final-k" id="stFinal" style="display:none;">
+          <div class="v" id="stFinalVal">—</div>
+          <div class="u">දුනු නියතය, k = mg / e</div>
+        </div>
+      </div>
+
+      <!-- T-SQUARED METHOD -->
+      <div id="graphMethod" style="display:none;">
+        <div class="field-row">
+          <div class="field">
+            <label>ස්කන්ධය m (g)</label>
+            <input type="number" id="gzM" placeholder="උදා: 150" inputmode="decimal">
+          </div>
+          <div class="field">
+            <label>දෝලන ගණන n</label>
+            <input type="number" id="gzN" placeholder="උදා: 20" inputmode="decimal">
+          </div>
+          <div class="field">
+            <label>මුළු කාලය t (s)</label>
+            <input type="number" id="gzT" placeholder="උදා: 11.4" inputmode="decimal">
+          </div>
+        </div>
+        <button class="btn" id="gzCalcBtn" style="width:100%;">ගණනය කරන්න</button>
+        <div class="steps" id="gzSteps"></div>
+        <div class="final-k" id="gzFinal" style="display:none;">
+          <div class="v" id="gzFinalVal">—</div>
+          <div class="u">දුනු නියතය, k = 4π² m / T²</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="paper">
+      <h3><span class="tag">සටහන</span></h3>
+      <p>නිරවද්‍ය ප්‍රතිඵලයක් සඳහා, T² ක්‍රමයේදී විවිධ m අගයන් කිහිපයක් සඳහා ලබාගත් දත්ත T² එදිරිව m ලෙස ප්‍රස්ථාරගත කර, එහි අනුක්‍රමණයෙන් (slope = 4π²/k) k ගණනය කිරීම වඩාත් නිවැරදිය — ඉහත "විද්‍යාගාරය" පටිත්තෙහි එය ස්වයංක්‍රීයව සිදු කරගත හැක.</p>
+    </div>
+  </section>
+
+</div>
+
+<footer>Advanced Level Physics · Practical — Dr. Darshana Ukuwela | ස්වයං-ඇතුළත් HTML සම්පත</footer>
+
+<script>
+(function(){
+  "use strict";
+  const G = 9.8;
+  const K_TRUE = 12.0; // N/m, hidden simulation spring constant (chosen so extension stays on the visible ruler)
+  const M0 = 0.03; // kg, hidden spring's own effective mass (for realism, not required by calculators)
+
+  /* ---------------- TAB NAV ---------------- */
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  const sections = document.querySelectorAll('section');
+  tabBtns.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      tabBtns.forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      sections.forEach(s=>s.classList.remove('active'));
+      document.getElementById(btn.dataset.tab).classList.add('active');
+      window.scrollTo({top:0, behavior:'smooth'});
+      // canvases inside a hidden section have zero size, so re-measure now that the tab is visible
+      if(btn.dataset.tab === 'sim'){
+        requestAnimationFrame(()=>{ resizeCanvas(); });
+      }
+    });
+  });
+
+  /* ---------------- SPRING SIMULATION ---------------- */
+  const canvas = document.getElementById('springCanvas');
+  const ctx = canvas.getContext('2d');
+  let cw=640, ch=340;
+  function resizeCanvas(){
+    const rect = canvas.getBoundingClientRect();
+    const scale = window.devicePixelRatio || 1;
+    cw = rect.width; ch = rect.height;
+    canvas.width = cw*scale; canvas.height = ch*scale;
+    ctx.setTransform(scale,0,0,scale,0,0);
+  }
+  window.addEventListener('resize', resizeCanvas);
+
+  let currentMassG = 50;
+  let oscillating = false;
+  let startTime = 0;
+  let animId = null;
+
+  const PX_PER_CM = 7; // ruler scale
+  const NATURAL_LEN_PX = 90; // spring natural length in px
+
+  function equilibriumExtM(massG){
+    const m = massG/1000;
+    return (m*G)/K_TRUE; // meters
+  }
+
+  function currentExtensionPx(t){
+    const m = currentMassG/1000;
+    const eEq = equilibriumExtM(currentMassG); // meters
+    if(!oscillating) return eEq*100*PX_PER_CM;
+    const omega = Math.sqrt(K_TRUE/(m+M0/3));
+    const amplitude = eEq*0.55;
+    const damping = Math.exp(-0.05*t);
+    const e = eEq + amplitude*Math.cos(omega*t)*damping;
+    return Math.max(4, e*100*PX_PER_CM);
+  }
+
+  function drawSpring(extPx){
+    ctx.clearRect(0,0,cw,ch);
+    const topY = 22;
+    const supportW = 120;
+    const centerX = cw*0.38;
+
+    // ceiling / stand
+    ctx.fillStyle = '#3a4257';
+    ctx.fillRect(centerX-supportW/2, topY-10, supportW, 10);
+    ctx.strokeStyle = '#556080'; ctx.lineWidth=2;
+    for(let i=0;i<6;i++){
+      ctx.beginPath();
+      ctx.moveTo(centerX-supportW/2+8+i*20, topY);
+      ctx.lineTo(centerX-supportW/2+18+i*20, topY-10);
+      ctx.stroke();
+    }
+    // stand pole
+    ctx.fillStyle = '#2c3346';
+    ctx.fillRect(cw*0.10, topY-10, 10, ch-60);
+    ctx.fillRect(cw*0.10-30, ch-70, 70, 10);
+
+    const coilTopY = topY;
+    const coilBottomY = coilTopY + NATURAL_LEN_PX + extPx;
+    const coils = 12;
+    const coilW = 26;
+
+    ctx.strokeStyle = getComputedColor();
+    ctx.lineWidth = 3;
+    ctx.lineCap='round';
+    ctx.beginPath();
+    ctx.moveTo(centerX, coilTopY);
+    const segLen = (coilBottomY-coilTopY)/coils;
+    for(let i=0;i<coils;i++){
+      const y1 = coilTopY + i*segLen;
+      const y2 = y1 + segLen/2;
+      const y3 = y1 + segLen;
+      const dir = (i%2===0)? 1 : -1;
+      ctx.quadraticCurveTo(centerX+dir*coilW, y2, centerX, y3);
+    }
+    ctx.stroke();
+
+    // mass block
+    const blockW = 64, blockH = 40;
+    ctx.fillStyle = '#8a6a3a';
+    ctx.fillRect(centerX-blockW/2, coilBottomY, blockW, blockH);
+    ctx.strokeStyle = '#4d3a1e'; ctx.lineWidth=2;
+    ctx.strokeRect(centerX-blockW/2, coilBottomY, blockW, blockH);
+    ctx.fillStyle = '#efe4c8';
+    ctx.font = '13px monospace';
+    ctx.textAlign='center';
+    ctx.fillText(currentMassG+'g', centerX, coilBottomY+blockH/2+5);
+
+    // pointer to ruler
+    const rulerX = cw*0.68;
+    ctx.strokeStyle = '#c0533a'; ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.moveTo(centerX+blockW/2, coilBottomY+blockH/2);
+    ctx.lineTo(rulerX-6, coilBottomY+blockH/2);
+    ctx.stroke();
+    ctx.fillStyle='#c0533a';
+    ctx.beginPath();
+    ctx.moveTo(rulerX-6, coilBottomY+blockH/2-5);
+    ctx.lineTo(rulerX+2, coilBottomY+blockH/2);
+    ctx.lineTo(rulerX-6, coilBottomY+blockH/2+5);
+    ctx.fill();
+
+    // ruler
+    ctx.strokeStyle = '#465066'; ctx.fillStyle='#465066';
+    ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.moveTo(rulerX, topY);
+    ctx.lineTo(rulerX, ch-20);
+    ctx.stroke();
+    ctx.font='10px monospace';
+    ctx.textAlign='left';
+    for(let cm=0; cm<=30; cm++){
+      const y = coilTopY + cm*PX_PER_CM;
+      if(y>ch-20) break;
+      const long = cm%5===0;
+      ctx.beginPath();
+      ctx.moveTo(rulerX, y);
+      ctx.lineTo(rulerX+(long?12:6), y);
+      ctx.stroke();
+      if(long) ctx.fillText(cm+'', rulerX+16, y+3);
+    }
+
+    // extension readout
+    const extCm = (extPx/PX_PER_CM).toFixed(1);
+    document.getElementById('extReadout').textContent = extCm+' cm';
+  }
+
+  function getComputedColor(){
+    return '#d9ac66';
+  }
+
+  let simStart = performance.now();
+  function loop(){
+    const t = (performance.now()-simStart)/1000;
+    const extPx = currentExtensionPx(t);
+    drawSpring(extPx);
+    animId = requestAnimationFrame(loop);
+  }
+
+  resizeCanvas();
+  loop();
+
+  document.querySelectorAll('.mass-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.mass-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      currentMassG = parseFloat(btn.dataset.mass);
+      oscillating = false;
+      simStart = performance.now();
+    });
+  });
+
+  document.getElementById('releaseBtn').addEventListener('click', ()=>{
+    oscillating = true;
+    simStart = performance.now();
+  });
+  document.getElementById('stillBtn').addEventListener('click', ()=>{
+    oscillating = false;
+    simStart = performance.now();
+  });
+
+  /* ---------------- STOPWATCH ---------------- */
+  let swRunning = false;
+  let swStartTs = 0;
+  let swElapsed = 0;
+  let swCount = 0;
+  let swInterval = null;
+
+  function formatTime(sec){
+    return sec.toFixed(2).padStart(5,'0')+' s';
+  }
+  function updateSwDisplay(){
+    const disp = swRunning ? (swElapsed + (performance.now()-swStartTs)/1000) : swElapsed;
+    document.getElementById('swTime').textContent = formatTime(disp);
+    document.getElementById('swCount').textContent = swCount;
+  }
+
+  document.getElementById('swStart').addEventListener('click', function(){
+    if(!swRunning){
+      swRunning = true;
+      swStartTs = performance.now();
+      this.textContent = '⏹ නවතන්න';
+      swInterval = setInterval(updateSwDisplay, 40);
+    } else {
+      swRunning = false;
+      swElapsed += (performance.now()-swStartTs)/1000;
+      this.textContent = '▶ ආරම්භය';
+      clearInterval(swInterval);
+      updateSwDisplay();
+    }
+  });
+  document.getElementById('swTick').addEventListener('click', ()=>{
+    swCount++;
+    document.getElementById('swCount').textContent = swCount;
+  });
+  document.getElementById('swReset').addEventListener('click', ()=>{
+    swRunning=false; swElapsed=0; swCount=0;
+    clearInterval(swInterval);
+    document.getElementById('swStart').textContent='▶ ආරම්භය';
+    updateSwDisplay();
+  });
+
+  /* ---------------- DATA TABLE / RECORD ---------------- */
+  const dataRows = []; // {m_g, n, t, T, T2}
+  const dataBody = document.getElementById('dataBody');
+
+  function renderTable(){
+    dataBody.innerHTML = '';
+    dataRows.forEach((r,idx)=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${idx+1}</td><td>${r.m_g}</td><td>${r.n}</td><td>${r.t.toFixed(2)}</td><td>${r.T.toFixed(3)}</td><td>${r.T2.toFixed(3)}</td><td class="del-row" data-idx="${idx}">✕</td>`;
+      dataBody.appendChild(tr);
+    });
+    document.querySelectorAll('.del-row').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        dataRows.splice(parseInt(el.dataset.idx),1);
+        renderTable();
+      });
+    });
+  }
+
+  document.getElementById('recordBtn').addEventListener('click', ()=>{
+    const n = swCount;
+    const t = swRunning ? (swElapsed + (performance.now()-swStartTs)/1000) : swElapsed;
+    if(n<1 || t<=0){
+      alert('කරුණාකර පළමුව විරාම ඔරලෝසුව ආරම්භ කර, දෝලන කිහිපයක් ගණන් කර, පසුව නවත්වන්න.');
+      return;
+    }
+    const T = t/n;
+    const T2 = T*T;
+    dataRows.push({m_g: currentMassG, n, t, T, T2});
+    renderTable();
+    // reset stopwatch for next trial
+    swRunning=false; swElapsed=0; swCount=0;
+    clearInterval(swInterval);
+    document.getElementById('swStart').textContent='▶ ආරම්භය';
+    updateSwDisplay();
+  });
+
+  /* ---------------- GRAPH + k CALCULATION ---------------- */
+  document.getElementById('calcKGraphBtn').addEventListener('click', ()=>{
+    if(dataRows.length < 2){
+      alert('අවම වශයෙන් m අගයන් දෙකක් සඳහා පාඨාංක වගුවට එකතු කරන්න.');
+      return;
+    }
+    // least squares fit: T2 = slope*m + intercept  (m in kg)
+    const xs = dataRows.map(r=>r.m_g/1000);
+    const ys = dataRows.map(r=>r.T2);
+    const nPts = xs.length;
+    const sumX = xs.reduce((a,b)=>a+b,0);
+    const sumY = ys.reduce((a,b)=>a+b,0);
+    const sumXY = xs.reduce((a,x,i)=>a+x*ys[i],0);
+    const sumXX = xs.reduce((a,x)=>a+x*x,0);
+    const slope = (nPts*sumXY - sumX*sumY)/(nPts*sumXX - sumX*sumX);
+    const intercept = (sumY - slope*sumX)/nPts;
+    const k = (4*Math.PI*Math.PI)/slope;
+    const m0 = (intercept*3*k)/(4*Math.PI*Math.PI);
+
+    const banner = document.getElementById('graphResult');
+    banner.classList.add('show');
+    banner.innerHTML =
+      `අනුක්‍රමණය (slope) = ${slope.toFixed(4)} s²/kg<br>`+
+      `k = 4π² / slope = ${k.toFixed(2)} N/m<br>`+
+      `y-අන්තඡේදනය = ${intercept.toFixed(4)} s²  →  ඇස්තමේන්තුගත දුන්නේ ස්කන්ධය m₀ ≈ ${(m0*1000).toFixed(1)} g`;
+
+    graphCanvas.style.display = 'block';
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{ drawGraph(xs, ys, slope, intercept); });
+    });
+  });
+
+  const graphCanvas = document.getElementById('graphCanvas');
+  const gctx = graphCanvas.getContext('2d');
+  function drawGraph(xs, ys, slope, intercept){
+    const rect = graphCanvas.getBoundingClientRect();
+    const scale = window.devicePixelRatio||1;
+    const W = Math.max(rect.width, 280);
+    const H = Math.max(rect.height, 200);
+    graphCanvas.width = W*scale;
+    graphCanvas.height = H*scale;
+    graphCanvas.style.width = W+'px';
+    graphCanvas.style.height = H+'px';
+    gctx.setTransform(scale,0,0,scale,0,0);
+    gctx.clearRect(0,0,W,H);
+
+    const pad = 40;
+    const maxX = Math.max(...xs)*1.2;
+    const maxY = Math.max(...ys)*1.2;
+    function px(x){ return pad + (x/maxX)*(W-pad-16); }
+    function py(y){ return H-pad - (y/maxY)*(H-pad-16); }
+
+    // axes
+    gctx.strokeStyle='#465066'; gctx.lineWidth=1.5;
+    gctx.beginPath();
+    gctx.moveTo(pad, 10); gctx.lineTo(pad, H-pad); gctx.lineTo(W-10, H-pad);
+    gctx.stroke();
+    gctx.fillStyle='#a8a89a'; gctx.font='11px monospace';
+    gctx.fillText('m (kg)', W-50, H-pad+16);
+    gctx.save();
+    gctx.translate(12,20);
+    gctx.fillText('T² (s²)', 0,0);
+    gctx.restore();
+
+    // best fit line
+    gctx.strokeStyle='#d9ac66'; gctx.lineWidth=2;
+    gctx.beginPath();
+    gctx.moveTo(px(0), py(intercept));
+    gctx.lineTo(px(maxX), py(slope*maxX+intercept));
+    gctx.stroke();
+
+    // points
+    gctx.fillStyle='#6fa07a';
+    xs.forEach((x,i)=>{
+      gctx.beginPath();
+      gctx.arc(px(x), py(ys[i]), 4, 0, Math.PI*2);
+      gctx.fill();
+    });
+  }
+
+  /* ---------------- CALCULATOR TAB ---------------- */
+  document.querySelectorAll('.method-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.method-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const m = btn.dataset.method;
+      document.getElementById('staticMethod').style.display = m==='static'?'block':'none';
+      document.getElementById('graphMethod').style.display = m==='graph'?'block':'none';
+    });
+  });
+
+  document.getElementById('stCalcBtn').addEventListener('click', ()=>{
+    const mG = parseFloat(document.getElementById('stM').value);
+    const eCm = parseFloat(document.getElementById('stE').value);
+    const stepsEl = document.getElementById('stSteps');
+    const finalEl = document.getElementById('stFinal');
+    if(isNaN(mG) || isNaN(eCm) || eCm<=0){
+      stepsEl.innerHTML = '<div class="step" style="color:#c0533a;">කරුණාකර වලංගු ස්කන්ධ සහ විතති අගයන් ඇතුළත් කරන්න.</div>';
+      finalEl.style.display='none';
+      return;
+    }
+    const mKg = mG/1000;
+    const eM = eCm/100;
+    const k = (mKg*G)/eM;
+    stepsEl.innerHTML = `
+      <div class="step"><span class="n">1</span><span class="lbl">ස්කන්ධය m =</span> ${mG} g = ${mKg} kg</div>
+      <div class="step"><span class="n">2</span><span class="lbl">විතතිය e =</span> ${eCm} cm = ${eM} m</div>
+      <div class="step"><span class="n">3</span><span class="lbl">බලය F = mg =</span> ${(mKg*G).toFixed(4)} N</div>
+      <div class="step"><span class="n">4</span><span class="lbl">k = F / e =</span> ${(mKg*G).toFixed(4)} / ${eM} = ${k.toFixed(2)} N/m</div>
+    `;
+    finalEl.style.display='block';
+    document.getElementById('stFinalVal').textContent = k.toFixed(2)+' N/m';
+  });
+
+  document.getElementById('gzCalcBtn').addEventListener('click', ()=>{
+    const mG = parseFloat(document.getElementById('gzM').value);
+    const n = parseFloat(document.getElementById('gzN').value);
+    const t = parseFloat(document.getElementById('gzT').value);
+    const stepsEl = document.getElementById('gzSteps');
+    const finalEl = document.getElementById('gzFinal');
+    if(isNaN(mG) || isNaN(n) || isNaN(t) || n<=0 || t<=0){
+      stepsEl.innerHTML = '<div class="step" style="color:#c0533a;">කරුණාකර වලංගු අගයන් ඇතුළත් කරන්න.</div>';
+      finalEl.style.display='none';
+      return;
+    }
+    const mKg = mG/1000;
+    const T = t/n;
+    const T2 = T*T;
+    const k = (4*Math.PI*Math.PI*mKg)/T2;
+    stepsEl.innerHTML = `
+      <div class="step"><span class="n">1</span><span class="lbl">ස්කන්ධය m =</span> ${mG} g = ${mKg} kg</div>
+      <div class="step"><span class="n">2</span><span class="lbl">එක් දෝලනයක කාලය T = t/n =</span> ${t} / ${n} = ${T.toFixed(4)} s</div>
+      <div class="step"><span class="n">3</span><span class="lbl">T² =</span> ${T2.toFixed(4)} s²</div>
+      <div class="step"><span class="n">4</span><span class="lbl">k = 4π²m / T² =</span> ${k.toFixed(2)} N/m</div>
+    `;
+    finalEl.style.display='block';
+    document.getElementById('gzFinalVal').textContent = k.toFixed(2)+' N/m';
+  });
+
+  updateSwDisplay();
+})();
+</script>
+</body>
+</html>

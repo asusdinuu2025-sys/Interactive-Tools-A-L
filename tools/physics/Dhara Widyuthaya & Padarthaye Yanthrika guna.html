@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>භෞතික විද්‍යා පුනරීක්ෂණ පොත | Ohm to Surface Tension</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1117;
+    --surface:#161C24;
+    --surface-2:#1E2730;
+    --line:#2A3540;
+    --ink:#E9EDF1;
+    --ink-dim:#93A2AE;
+    --amber:#F2A93B;
+    --amber-ink:#3A2705;
+    --violet:#A78BFA;
+    --violet-ink:#241B3D;
+    --teal:#45C4B0;
+    --teal-ink:#04211D;
+    --sky:#5AA9E6;
+    --sky-ink:#081E30;
+    --accent: var(--amber);
+    --accent-ink: var(--amber-ink);
+    --shadow: 0 12px 30px -14px rgba(0,0,0,.55);
+    --radius: 16px;
+  }
+  html[data-theme="light"]{
+    --bg:#F4F2EC;
+    --surface:#FFFFFF;
+    --surface-2:#EEEBE1;
+    --line:#DCD6C8;
+    --ink:#1A1F24;
+    --ink-dim:#65605A;
+    --shadow: 0 10px 24px -14px rgba(60,50,30,.25);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Noto Sans Sinhala','Space Grotesk',sans-serif;
+    line-height:1.55;
+    transition:background .35s ease,color .35s ease;
+    overflow-x:hidden;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  ::selection{background:var(--accent);color:var(--accent-ink);}
+
+  /* ---------- background trace ---------- */
+  .circuit-bg{
+    position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.35;
+  }
+  html[data-theme="light"] .circuit-bg{opacity:.18;}
+  .circuit-bg path{
+    fill:none; stroke:var(--accent); stroke-width:1.4;
+    stroke-dasharray:8 10; opacity:.55;
+    animation:flow 6s linear infinite;
+  }
+  @keyframes flow{ to{ stroke-dashoffset:-360; } }
+  .circuit-bg circle{ fill:var(--accent); opacity:.7; }
+
+  /* ---------- header ---------- */
+  header{
+    position:relative; z-index:2;
+    padding:34px 20px 22px;
+    max-width:1080px; margin:0 auto;
+  }
+  .top-row{
+    display:flex; justify-content:space-between; align-items:flex-start; gap:14px;
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.72rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent); font-weight:700;
+  }
+  h1{
+    font-size:clamp(1.6rem,4.6vw,2.5rem);
+    margin:.25em 0 .15em; font-weight:800; letter-spacing:.01em;
+  }
+  header p.sub{ color:var(--ink-dim); margin:0; max-width:60ch; font-size:.98rem;}
+  .theme-btn{
+    flex-shrink:0;
+    background:var(--surface); border:1px solid var(--line); color:var(--ink);
+    width:46px;height:46px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer; font-size:1.15rem; box-shadow:var(--shadow);
+    transition:transform .2s ease, border-color .2s ease;
+  }
+  .theme-btn:active{transform:scale(.9);}
+
+  /* ---------- tabs ---------- */
+  nav.tabs{
+    position:sticky; top:0; z-index:5;
+    display:flex; gap:8px; overflow-x:auto;
+    padding:12px 16px; margin-bottom:6px;
+    background:linear-gradient(var(--bg) 78%, transparent);
+    backdrop-filter:blur(6px);
+    scrollbar-width:none;
+  }
+  nav.tabs::-webkit-scrollbar{display:none;}
+  .tab-btn{
+    flex:0 0 auto;
+    font-family:'Noto Sans Sinhala',sans-serif; font-weight:600; font-size:.92rem;
+    padding:10px 18px; border-radius:999px; border:1.5px solid var(--line);
+    background:var(--surface); color:var(--ink-dim); cursor:pointer;
+    white-space:nowrap; transition:all .22s ease;
+  }
+  .tab-btn .num{font-family:'JetBrains Mono',monospace;font-size:.72rem;margin-inline-end:6px;opacity:.7;}
+  .tab-btn.active{ color:var(--tab-ink); background:var(--tab-color); border-color:var(--tab-color); box-shadow:var(--shadow);}
+
+  main{ position:relative; z-index:2; max-width:1080px; margin:0 auto; padding:6px 18px 80px;}
+  section.chapter{ display:none; animation:fadein .4s ease; }
+  section.chapter.active{ display:block; }
+  @keyframes fadein{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
+
+  .chapter-head{
+    display:flex; align-items:center; gap:12px; margin:20px 0 18px;
+    padding-bottom:14px; border-bottom:2px solid var(--chapter-color);
+  }
+  .chip{
+    width:44px;height:44px;border-radius:12px; flex-shrink:0;
+    background:var(--chapter-color); color:var(--chapter-ink);
+    display:flex;align-items:center;justify-content:center;font-size:1.3rem;
+  }
+  .chapter-head h2{margin:0;font-size:1.35rem;font-weight:800;}
+  .chapter-head span{display:block;color:var(--ink-dim);font-size:.85rem;font-family:'JetBrains Mono',monospace;}
+
+  .grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(270px,1fr)); gap:14px; margin-bottom:26px; }
+  .card{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:16px 18px; box-shadow:var(--shadow);
+  }
+  .card h3{
+    margin:0 0 8px; font-size:.98rem; font-weight:700;
+    display:flex; align-items:center; gap:8px;
+  }
+  .card h3 .tag{
+    font-family:'JetBrains Mono',monospace; font-size:.68rem; font-weight:700;
+    background:var(--chapter-color); color:var(--chapter-ink);
+    padding:2px 7px; border-radius:6px; letter-spacing:.03em;
+  }
+  .card ul{ margin:6px 0 0; padding-inline-start:20px; font-size:.92rem; }
+  .card li{ margin-bottom:5px; }
+  .card li::marker{ color:var(--chapter-color); }
+  .formula{
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:1.02rem;
+    background:var(--surface-2); border:1px dashed var(--line);
+    border-radius:10px; padding:9px 12px; margin:8px 0; display:inline-block;
+  }
+  .formula-row{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;}
+  .note{ font-size:.84rem; color:var(--ink-dim); margin-top:6px; }
+  .divider-label{
+    font-family:'JetBrains Mono',monospace; font-size:.72rem; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--chapter-color); font-weight:700;
+    margin:26px 0 10px; display:flex; align-items:center; gap:10px;
+  }
+  .divider-label::after{ content:""; flex:1; height:1px; background:var(--line); }
+
+  table.compare{ width:100%; border-collapse:collapse; font-size:.86rem; }
+  table.compare th, table.compare td{ border:1px solid var(--line); padding:8px 9px; text-align:center; }
+  table.compare th{ background:var(--surface-2); font-weight:700; }
+
+  /* ---------- calculators ---------- */
+  .calc{
+    background:var(--surface); border:1px solid var(--chapter-color); border-radius:var(--radius);
+    padding:20px; margin:18px 0 28px; box-shadow:var(--shadow);
+  }
+  .calc-head{ display:flex; align-items:center; gap:10px; margin-bottom:4px; }
+  .calc-head .ico{
+    width:36px;height:36px;border-radius:10px;background:var(--chapter-color);color:var(--chapter-ink);
+    display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;
+  }
+  .calc-head h4{ margin:0; font-size:1.02rem; font-weight:800; }
+  .calc-head p{margin:2px 0 0;font-size:.82rem;color:var(--ink-dim);}
+  .calc-body{ margin-top:14px; }
+  .field-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; }
+  .field{ display:flex; flex-direction:column; gap:5px; }
+  .field label{ font-size:.78rem; color:var(--ink-dim); font-weight:600; }
+  .field input, .field select{
+    font-family:'JetBrains Mono',monospace; font-size:1rem;
+    padding:11px 12px; border-radius:10px; border:1.5px solid var(--line);
+    background:var(--surface-2); color:var(--ink); width:100%;
+    -webkit-appearance:none;
+  }
+  .field input:focus, .field select:focus{ outline:2px solid var(--chapter-color); outline-offset:1px; }
+  .btn-row{ display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; }
+  button.solve{
+    font-family:'Noto Sans Sinhala',sans-serif; font-weight:700; font-size:.92rem;
+    padding:12px 20px; border-radius:10px; border:none; cursor:pointer;
+    background:var(--chapter-color); color:var(--chapter-ink);
+    min-height:44px; transition:transform .15s ease, filter .15s ease;
+  }
+  button.solve:active{ transform:scale(.96); }
+  button.ghost{
+    font-family:'Noto Sans Sinhala',sans-serif; font-weight:600; font-size:.86rem;
+    padding:12px 16px; border-radius:10px; cursor:pointer; min-height:44px;
+    background:transparent; border:1.5px solid var(--line); color:var(--ink-dim);
+  }
+  .result{
+    margin-top:14px; padding:14px 16px; border-radius:10px;
+    background:var(--surface-2); border-left:4px solid var(--chapter-color);
+    font-size:.94rem; min-height:20px;
+  }
+  .result strong{font-family:'JetBrains Mono',monospace;font-size:1.08rem;}
+  .row-item{
+    display:flex; align-items:center; gap:8px; background:var(--surface-2);
+    border:1px solid var(--line); border-radius:10px; padding:8px 10px; margin-bottom:8px;
+  }
+  .row-item input{ flex:1; }
+  .row-item button{
+    background:none; border:none; color:#e15b5b; font-size:1.1rem; cursor:pointer; min-width:32px;
+  }
+
+  footer{
+    max-width:1080px; margin:0 auto; padding:24px 20px 60px; position:relative; z-index:2;
+    color:var(--ink-dim); font-size:.8rem; text-align:center; border-top:1px solid var(--line);
+  }
+
+  @media (max-width:640px){
+    header{padding:24px 14px 14px;}
+    main{padding:4px 12px 70px;}
+    .grid{grid-template-columns:1fr;}
+    .chapter-head h2{font-size:1.15rem;}
+    .field-grid{grid-template-columns:repeat(auto-fit,minmax(120px,1fr));}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .circuit-bg path{animation:none;}
+    section.chapter{animation:none;}
+  }
+</style>
+</head>
+<body>
+
+<svg class="circuit-bg" viewBox="0 0 400 800" preserveAspectRatio="none" aria-hidden="true">
+  <path d="M0,80 H140 V220 H400" />
+  <path d="M0,420 H90 V560 H260 V680 H400" />
+  <path d="M400,120 H300 V320 H0" />
+  <circle cx="140" cy="80" r="4"/>
+  <circle cx="90" cy="420" r="4"/>
+  <circle cx="300" cy="120" r="4"/>
+</svg>
+
+<header>
+  <div class="top-row">
+    <div>
+      <div class="eyebrow">A/L Physics · Quick Revision Circuit</div>
+      <h1>ධාරාව සිට පෘෂ්ඨික ආතතිය දක්වා</h1>
+      <p class="sub">ධාරා විද්‍යුතය, ප්‍රත්‍යස්ථතාව, දුස්ස්‍රාවීතාව සහ පෘෂ්ඨික ආතතිය — සියලු සූත්‍ර, කෙටි සටහන් සහ අන්තර්ක්‍රියාකාරී කැල්කියුලේටර් එකම තැනකින්.</p>
+    </div>
+    <button class="theme-btn" id="themeToggle" aria-label="Toggle dark/light mode">🌓</button>
+  </div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab-btn" data-target="ce" data-color="--amber" data-ink="--amber-ink"><span class="num">01</span>ධාරා විද්‍යුතය</button>
+  <button class="tab-btn" data-target="pe" data-color="--violet" data-ink="--violet-ink"><span class="num">02</span>ප්‍රත්‍යස්ථතාව</button>
+  <button class="tab-btn" data-target="pv" data-color="--teal" data-ink="--teal-ink"><span class="num">03</span>දුස්ස්‍රාවීතාව</button>
+  <button class="tab-btn" data-target="ps" data-color="--sky" data-ink="--sky-ink"><span class="num">04</span>පෘෂ්ඨික ආතතිය</button>
+</nav>
+
+<main>
+
+<!-- ================= CURRENT ELECTRICITY ================= -->
+<section class="chapter" id="ce" style="--chapter-color:var(--amber); --chapter-ink:var(--amber-ink);">
+  <div class="chapter-head">
+    <div class="chip">⚡</div>
+    <div><h2>ධාරා විද්‍යුතය</h2><span>Current Electricity</span></div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h3><span class="tag">CE 01–02</span>ධාරාව</h3>
+      <div class="formula">I = Q / t</div>
+      <ul>
+        <li>ඒකක: A , C s⁻¹</li>
+        <li>ආරෝපණ ගලායාමේ සීඝ්‍රතාවයයි ධාරාව.</li>
+        <li>සම්මත ධාරාවේ දිශාව = ධන ආරෝපණ ගලායන දිශාව</li>
+        <li>MCQ සඳහා පමණි: I = Qf (f = සංඛ්‍යාතය)</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3><span class="tag">CE 03</span>ජ්‍යාවීය ප්‍රවේගය</h3>
+      <div class="formula">V = I / (Ane)</div>
+      <div class="formula">ΔV = ρl / (Ane)</div>
+      <ul>
+        <li>V - ජ්‍යාවීය ප්‍රවේගය, n - e⁻ ඝනත්වය, e - ඉලෙක්ට්‍රෝන ආරෝපණය</li>
+        <li>සන්නායකයක e⁻ ධන-සෘණ අන්තයන් අතර zig-zag ලෙස ගමන් කරයි.</li>
+        <li>"මධ්‍යන ජ්‍යාවීය ප්‍රවේගය" ලෙස හැඳින්වේ.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3><span class="tag">CE 04</span>ධාරා ඝනත්වය (J)</h3>
+      <div class="formula">J = I / A = Vne</div>
+      <ul>
+        <li>ඒකක: A m⁻²</li>
+        <li>දෛශිකයකි (Vector).</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3><span class="tag">CE 05</span>ඕම් නියමය</h3>
+      <div class="formula">V = IR</div>
+      <ul>
+        <li>උෂ්ණත්වය ඇතුළු අනෙකුත් භෞතික සාධක ස්ථාවර නම් සන්නායකයක් තුළින් ගලන ධාරාව, එහි කෙළවර වෝල්ටියතාවට සමානුපාතික වේ.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3><span class="tag">CE 06–09</span>ප්‍රතිරෝධය, ප්‍රතිරෝධකතාව</h3>
+      <div class="formula">R = ρl / A</div>
+      <div class="formula-row">
+        <span class="formula">σ = 1/ρ</span>
+        <span class="formula">G = 1/R</span>
+      </div>
+      <ul>
+        <li>ρ - ප්‍රතිරෝධකතාව (Ωm), σ - සන්නායකතාව (Ω⁻¹m⁻¹, Sm⁻¹)</li>
+        <li>G - ධාරානුකූලතාව (Ω⁻¹, S)</li>
+        <li>R යනු ද්‍රව්‍යයේ මානයන් (l, A) මත රඳා පවතින ලක්ෂණයකි; ρ ද්‍රව්‍ය ස්වභාවය පමණක් නිරූපණය කරයි.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3><span class="tag">CE 10</span>J සහ E සම්බන්ධය</h3>
+      <div class="formula">J = Eσ</div>
+      <ul>
+        <li>ඕමීය ද්‍රව්‍යයක ඕම් නියමයෙන් පැන නගින සමීකරණයකි.</li>
+        <li>ස්ථිතික විද්‍යුත් ක්ෂේත්‍රයක අභ්‍යන්තරයේ E ක්ෂේත්‍රයක් නොපවතී; පරිපථයක ධාරාව ගමන් කිරීමට E අවශ්‍යයි.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3><span class="tag">CE 11–12</span>ප්‍රතිරෝධයේ උෂ්ණත්ව සංගුණකය</h3>
+      <div class="formula">R<sub>θ</sub> = R₀(1 + αθ)</div>
+      <ul>
+        <li>1°C කින් උෂ්ණත්වය වැඩි කළ විට, ප්‍රතිරෝධයේ සිදුවන සාපේක්ෂ වෙනසයි α.</li>
+        <li>අර්ධ සන්නායකවල α (-) අගයක් ගනියි.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3><span class="tag">CE 13–14</span>සන්නායක වර්ග</h3>
+      <ul>
+        <li><strong>ඕමීය සන්නායක:</strong> ඕම් නියමය පිළිපදියි (V ∝ I). උදා: ලෝහ සන්නායක.</li>
+        <li><strong>අඕමීය සන්නායක:</strong> V ∝ I නොවේ. උදා: සුෘතිකා බල්බය, ඩයෝඩය.</li>
+      </ul>
+      <p class="note">ρ, σ: පරිවාරක → සුපිරි සන්නායක දක්වා ρ අඩුවෙයි, σ වැඩිවෙයි. උෂ්ණත්වය සමඟ: පරිවාරක/අර්ධ සන්නායකවල T↑ → ρ↓; සාමාන්‍ය සන්නායකවල T↑ → ρ↑; සුපිරි සන්නායකවල θ→0 ට ආසන්නව ρ→0.</p>
+    </div>
+  </div>
+
+  <div class="divider-label">ඕම්ස් නියම කැල්කියුලේටරය</div>
+  <div class="calc">
+    <div class="calc-head">
+      <div class="ico">V</div>
+      <div><h4>V = IR විසඳුම්කරු</h4><p>ඕනෑම අගය දෙකක් ලබා දී තුන්වැන්න සොයන්න (හිස්ව තබන්න)</p></div>
+    </div>
+    <div class="calc-body">
+      <div class="field-grid">
+        <div class="field"><label>වෝල්ටියතාව V (V)</label><input type="number" id="ohmV" placeholder="උදා: 12"></div>
+        <div class="field"><label>ධාරාව I (A)</label><input type="number" id="ohmI" placeholder="උදා: 2"></div>
+        <div class="field"><label>ප්‍රතිරෝධය R (Ω)</label><input type="number" id="ohmR" placeholder="හිස්ව තබන්න"></div>
+      </div>
+      <div class="btn-row">
+        <button class="solve" onclick="solveOhm()">ගණනය කරන්න</button>
+        <button class="ghost" onclick="clearFields(['ohmV','ohmI','ohmR'],'ohmResult')">මකන්න</button>
+      </div>
+      <div class="result" id="ohmResult">අගයන් දෙකක් ඇතුළත් කරන්න…</div>
+    </div>
+  </div>
+
+  <div class="divider-label">ශ්‍රේණිගත / සමාන්තරගත ප්‍රතිරෝධ කැල්කියුලේටරය</div>
+  <div class="calc">
+    <div class="calc-head">
+      <div class="ico">R</div>
+      <div><h4>සමක ප්‍රතිරෝධය (R<sub>eq</sub>)</h4><p>ප්‍රතිරෝධ එකතු කර සම්බන්ධ ක්‍රමය තෝරන්න</p></div>
+    </div>
+    <div class="calc-body">
+      <div class="field" style="max-width:220px;margin-bottom:12px;">
+        <label>සම්බන්ධ ක්‍රමය</label>
+        <select id="resMode">
+          <option value="series">ශ්‍රේණිගත (Series)</option>
+          <option value="parallel">සමාන්තරගත (Parallel)</option>
+        </select>
+      </div>
+      <div id="resList"></div>
+      <div class="btn-row">
+        <button class="ghost" onclick="addResistor()">+ ප්‍රතිරෝධයක් එකතු කරන්න</button>
+        <button class="solve" onclick="solveResistors()">R<sub>eq</sub> ගණනය කරන්න</button>
+      </div>
+      <div class="result" id="resResult">ප්‍රතිරෝධ අගයන් ඇතුළත් කර ගණනය කරන්න…</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h3><span class="tag">CE 19–20</span>සමක ප්‍රතිරෝධය</h3>
+      <div class="formula">ශ්‍රේණිගත: R<sub>eq</sub> = R₁+R₂+R₃</div>
+      <div class="formula">සමාන්තරගත: 1/R<sub>eq</sub> = 1/R₁+1/R₂+1/R₃</div>
+      <ul>
+        <li>ශ්‍රේණිගත: ධාරාව එකම, R<sub>eq</sub> > R<sub>max</sub></li>
+        <li>සමාන්තරගත: ΔV එකම, R<sub>eq</sub> < R<sub>min</sub></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="tag">CE 29</span>ජූල්ගේ තාපන නියමය</h3>
+      <div class="formula-row">
+        <span class="formula">Q = I²Rt</span>
+        <span class="formula">P = VI = I²R = V²/R</span>
+      </div>
+      <ul><li>ලෝහ සන්නායකයක් තුළින් ධාරාවක් ගලායාමේදී මුදා හරින තාප ශක්තිය, ධාරාවේ වර්ගයටත් ප්‍රතිරෝධයටත් සමානුපාතිකයි.</li></ul>
+    </div>
+    <div class="card">
+      <h3><span class="tag">CE 30–37</span>කෝෂ (Cells)</h3>
+      <ul>
+        <li><strong>emf (E):</strong> ආරෝපණය කිරීමේ හැකියාව</li>
+        <li>r - කෝෂයේ අභ්‍යන්තර ප්‍රතිරෝධය</li>
+      </ul>
+      <div class="formula-row">
+        <span class="formula">ධාරාවට - V = E − Ir</span>
+        <span class="formula">ධාරාවක් නොගලයි - V = E</span>
+        <span class="formula">ධාරාව ලැබෙයි - V = E + Ir</span>
+      </div>
+      <div class="formula">I<sub>max</sub> = E/r (R = 0 විට)</div>
+    </div>
+    <div class="card">
+      <h3><span class="tag">CE 38–39</span>ක්ෂමතාව / කාර්යක්ෂමතාව</h3>
+      <div class="formula">η = R / (R+r) × 100%</div>
+      <ul><li>පරිපථයක ක්ෂමතාව ලෙස හැඳින්වෙන්නේ බාහිර ප්‍රතිරෝධයෙන් කරන ක්ෂමතාවයි.</li>
+      <li>R = r විට ප්‍රයෝජනවත් ක්ෂමතාව උපරිමයි (η = 50%)</li></ul>
+    </div>
+    <div class="card">
+      <h3><span class="tag">CE 41–42</span>කෝෂ පද්ධති</h3>
+      <div class="formula-row">
+        <span class="formula">ශ්‍රේණිගත: E<sub>All</sub>=E₁+E₂+…, r<sub>All</sub>=r₁+r₂+…</span>
+        <span class="formula">සමාන්තරගත (සමාන කෝෂ n): E<sub>All</sub>=E, r<sub>All</sub>=r/n</span>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="tag">CE 45–48</span>කර්චෝෆ්ගේ නියම</h3>
+      <ul>
+        <li><strong>1 වන නියමය</strong> (ආරෝපණ සංරක්ෂණය): සන්ධියකට ඇතුල් වන ධාරා එකතුව = පිට වන ධාරා එකතුව</li>
+        <li><strong>2 වන නියමය</strong> (ශක්ති සංරක්ෂණය): සංවෘත පරිපථයක emf එකතුව = IR වැටීම් එකතුව</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="tag">CE 49</span>වීන්ස්ටන් සේකුව</h3>
+      <div class="formula">R<sub>P</sub>/R<sub>Q</sub> = R<sub>R</sub>/R<sub>S</sub></div>
+      <ul><li>ගැල්වනෝමීටරයේ ධාරාව 0 විට පරිපථය සමතුලිතයි.</li>
+      <li>ප්‍රතිරෝධයක් තිබුණහොත් ධාරාවක් නොගලයි යැයි කිව නොහැක.</li></ul>
+    </div>
+    <div class="card">
+      <h3><span class="tag">CE 55–65</span>ගැල්වනෝමීටරය → ඇමීටරය / වෝල්ට්මීටරය</h3>
+      <ul>
+        <li><strong>ඇමීටරය</strong> සෑදීමට: G ට සමාන්තරව අඩු shunt ප්‍රතිරෝධයක් යොදයි (පරාසය වැඩිකිරීමට).</li>
+        <li><strong>වෝල්ට්මීටරය</strong> සෑදීමට: G ට ශ්‍රේණිගතව විශාල ප්‍රතිරෝධයක් යොදයි (පරාසය වැඩිකිරීමට).</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="tag">CE 66–74</span>මීටර සේකුව</h3>
+      <div class="formula">P/Q = l / (100−l)</div>
+      <ul>
+        <li>P - දන්නා ප්‍රතිරෝධය, Q - නොදන්නා ප්‍රතිරෝධය</li>
+        <li>G හි 0 විචලනය පසාද යතුරු තන්ත්‍රයට අනුපාතව ලැබෙයි.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="tag">CE 75–81</span>විභවමානය (Potentiometer)</h3>
+      <div class="formula">k = V<sub>AB</sub> / L (විභව අනුක්‍රමණය)</div>
+      <ul>
+        <li>වෝල්ට්මීටරයට වඩා නිරවද්‍ය — ධාරාවක් නොගලා emf මැනීමට හැකි වේ.</li>
+        <li>E ∝ l (ශුන්‍ය විචලන දිග)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="divider-label">Stokes-style terminal velocity — ⚡ Rheostat vs Potential Divider</div>
+  <div class="grid">
+    <div class="card">
+      <h3><span class="tag">CE 52–53</span>රියෝස්ටැට් Vs විභව බෙදුම</h3>
+      <ul>
+        <li>ධාරාවක් නියාමනය කිරීමට → ශ්‍රේණිගත ප්‍රතිරෝධකයක් (rheostat)</li>
+        <li>විභවයක් 0 සිට උපරිමය දක්වා පරාසයේ වෙනස් කිරීමට → විභව බෙදුම් ක්‍රමය (potential divider)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="tag">CE 43</span>විභව බෙදුම් සමීකරණය</h3>
+      <div class="formula">V₂ = (V₀ / R<sub>eq</sub>) × R₂</div>
+    </div>
+    <div class="card">
+      <h3><span class="tag">CE 44</span>ධාරා බෙදුම</h3>
+      <div class="formula">I₂ = I × [ (1/R₂) / (1/R₁+1/R₂+1/R₃) ]</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ELASTICITY ================= -->
+<section class="chapter" id="pe" style="--chapter-color:var(--violet); --chapter-ink:var(--violet-ink);">
+  <div class="chapter-head">
+    <div class="chip">🌀</div>
+    <div><h2>ප්‍රත්‍යස්ථතාව</h2><span>Elasticity</span></div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h3><span class="tag">P/E 01</span>ප්‍රත්‍යස්ථතාව</h3>
+      <ul><li>බලයක් යෙදූ විට හැඩය/දිග වෙනස් වී, ඒ බලය ඉවත් කළ විට නැවත ආරම්භික දිගට හෝ හැඩයට පැමිණෙන ද්‍රව්‍ය ලක්ෂණයයි.</li></ul>
+    </div>
+    <div class="card">
+      <h3><span class="tag">P/E 02</span>විකෘතිය (Strain)</h3>
+      <div class="formula">විකෘතිය = දිගෙහි වෙනස / ආරම්භක දිග</div>
+      <p class="note">ඒකක නැත (dimensionless)</p>
+    </div>
+    <div class="card">
+      <h3><span class="tag">P/E 03</span>ප්‍රතාවබලය (Stress)</h3>
+      <div class="formula">ප්‍රතාවබලය = ලම්භක බලය / වර්ගඵලය</div>
+      <p class="note">ඒකක: N m⁻² / Pa</p>
+    </div>
+    <div class="card">
+      <h3><span class="tag">P/E 04–06</span>යන්ග්ගේ මාපාංකය Y</h3>
+      <div class="formula">(F/A) = Y (e/L)</div>
+      <div class="formula">k = YA / L</div>
+      <ul>
+        <li>Y - ප්‍රත්‍යස්ථ ද්‍රව්‍යයෙන් ද්‍රව්‍යයට වෙනස්වන ලක්ෂණයකි.</li>
+        <li>k - දෘඪතා නියතය (spring constant), ප්‍රත්‍යස්ථතා සීමාව තුළ F ∝ e</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="tag">P/E 08–10</span>ප්‍රත්‍යස්ථතා විභව ශක්තිය</h3>
+      <div class="formula-row">
+        <span class="formula">W = ½Fx</span>
+        <span class="formula">W = ½kx²</span>
+        <span class="formula">W = ½ F²/k</span>
+      </div>
+      <p class="note">1/2F යනු 0 සිට F දක්වා වැඩිවන බලයේ මධ්‍යන අගය බැවිනි.</p>
+      <div class="formula">ඒකක පරිමාවක විකෘති ශක්තිය = ½ × ප්‍රතාවබලය × විකෘතිය</div>
+    </div>
+    <div class="card">
+      <h3><span class="tag">P/E 12</span>සමාන්තර ස්ප්‍රින්</h3>
+      <div class="formula">ශ්‍රේණිගත: 1/k<sub>eq</sub> = 1/k₁ + 1/k₂</div>
+      <div class="formula">සමාන්තරගත: k<sub>eq</sub> = k₁ + k₂</div>
+    </div>
+  </div>
+
+  <div class="divider-label">Stress–Strain Graph — ලක්ෂ්‍ය විග්‍රහය (P/E 13–14)</div>
+  <div class="card" style="margin-bottom:24px;">
+    <table class="compare">
+      <thead><tr><th>ලක්ෂ්‍යය</th><th>සමානුපාතිකත්වය</th><th>හුක්ගේ නියමය</th><th>විශේෂය</th></tr></thead>
+      <tbody>
+        <tr><td>A – සමානුපාත සීමාව</td><td>(F/A) ∝ (e/L)</td><td>✔</td><td>අනුකුමණයෙන් Y ලැබේ</td></tr>
+        <tr><td>B – ප්‍රත්‍යස්ථ සීමාව</td><td>—</td><td>✘</td><td>(F/A) ∝ (e/L) නොවුනද ප්‍රත්‍යස්ථ වේ</td></tr>
+        <tr><td>C – අවනති ලක්ෂ්‍යය (Yield)</td><td>—</td><td>✘</td><td>තන්තු ඇදීම, ස්ථීර විකෘතියක් ඇතිවෙයි</td></tr>
+        <tr><td>D – භේදක බලය</td><td>—</td><td>✘</td><td>දරාගත හැකි උපරිම ප්‍රතාවබලය</td></tr>
+        <tr><td>E – භේදක ලක්ෂ්‍යය</td><td>—</td><td>✘</td><td>ප්‍රත්‍යස්ථතාවලට වඩා අඩු ලක්ෂ්‍යයේ කැඩේ</td></tr>
+      </tbody>
+    </table>
+    <p class="note">වැදගත්: σ ඇතිවන ≥ σ භේදක නම් කැඩී යයි. ග්‍රේෆිත දුඩුවලදී දැඩිමේ හැකියාව අඩුම නම් ආරක්ෂාව අඩුයි (එයාගේ භේදක ප්‍රතාවබලයට තමා දැඩිය හැකි උපරිම).</p>
+  </div>
+
+  <div class="divider-label">යන්ග්ගේ මාපාංකය / ස්ප්‍රින් ශක්ති කැල්කියුලේටරය</div>
+  <div class="calc">
+    <div class="calc-head">
+      <div class="ico">Y</div>
+      <div><h4>Y = (F/A)/(e/L) විසඳුම්කරු</h4><p>දිග (L), වර්ගඵලය (A), බලය (F) සහ දිග විස්තාරය (e) ලබා දෙන්න</p></div>
+    </div>
+    <div class="calc-body">
+      <div class="field-grid">
+        <div class="field"><label>බලය F (N)</label><input type="number" id="peF" placeholder="උදා: 50"></div>
+        <div class="field"><label>වර්ගඵලය A (mm²)</label><input type="number" id="peA" placeholder="උදා: 2"></div>
+        <div class="field"><label>ආරම්භක දිග L (m)</label><input type="number" id="peL" placeholder="උදා: 1.5"></div>
+        <div class="field"><label>දිග වෙනස e (mm)</label><input type="number" id="peE" placeholder="උදා: 0.6"></div>
+      </div>
+      <div class="btn-row">
+        <button class="solve" onclick="solveYoung()">Y, k සහ ශක්තිය ගණනය කරන්න</button>
+        <button class="ghost" onclick="clearFields(['peF','peA','peL','peE'],'peResult')">මකන්න</button>
+      </div>
+      <div class="result" id="peResult">සියලු අගයන් ඇතුළත් කරන්න…</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= VISCOSITY ================= -->
+<section class="chapter" id="pv" style="--chapter-color:var(--teal); --chapter-ink:var(--teal-ink);">
+  <div class="chapter-head">
+    <div class="chip">💧</div>
+    <div><h2>දුස්ස්‍රාවීතාව</h2><span>Viscosity</span></div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h3><span class="tag">P/V 01–02</span>දුස්ස්‍රාවීතාව</h3>
+      <ul>
+        <li>ද්‍රව ස්තරවල ඇතිවන සර්පණය සීමාකරන දුස්ස්‍රාවීතාව</li>
+        <li>වැඩි උදා: පැණි (ලේසියෙන් නොගලයි) | අඩු උදා: ජලය</li>
+        <li>ස්ටෝක්ස් සමීකරණය → ගෝලාකාර වස්තු ගමන් | පොයිසියල් සමීකරණය → නලයක ගැලීම</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="tag">P/V 03–04</span>ස්ටෝක්ස් නියමය</h3>
+      <div class="formula">F = 6πηrV</div>
+      <div class="formula">V<sub>c</sub> = 2r²g(d−ρ) / 9η</div>
+      <ul>
+        <li>F - ගෝලය මත දුස්ස්‍රාවී බලය, V - වේගය, d - ගෝලයේ ඝනත්වය, ρ - ද්‍රවයේ ඝනත්වය</li>
+        <li>ආන්තික ප්‍රවේගයේදී (V<sub>c</sub>) net බලය = 0</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="tag">P/V 06</span>පොයිසියල් සමීකරණය</h3>
+      <div class="formula">V/t = πa⁴(ΔP) / (8ηl)</div>
+      <ul><li>a - නලයේ අරය, l - දිග, ΔP - පීඩන අන්තරය</li></ul>
+    </div>
+    <div class="card">
+      <h3><span class="tag">P/V 07–08</span>ශ්‍රේණිගත / සමාන්තරගත ගැලීම</h3>
+      <div class="formula">ශ්‍රේණිගත: ΔP<sub>T</sub> = ΔP₁ + ΔP₂ (V/t එකම)</div>
+      <div class="formula">සමාන්තරගත: (V/t)<sub>T</sub> = (V/t)₁ + (V/t)₂ (ΔP එකම)</div>
+    </div>
+    <div class="card">
+      <h3><span class="tag">P/V 11–13</span>ස්පර්ශීය පීඩනය & η</h3>
+      <div class="formula">η = (F/A) / (ΔV/d)</div>
+      <p class="note">ඒකකය: N s m⁻² / Pa s. උෂ්ණත්වය වැඩිවනවිට ද්‍රව හි η අඩුවෙයි, වායුවල η වැඩිවෙයි.</p>
+    </div>
+  </div>
+
+  <div class="divider-label">ආන්තික ප්‍රවේගය (Terminal Velocity) කැල්කියුලේටරය</div>
+  <div class="calc">
+    <div class="calc-head">
+      <div class="ico">V<sub>c</sub></div>
+      <div><h4>V<sub>c</sub> = 2r²g(d−ρ)/9η</h4><p>ගෝලයක් ද්‍රවයක් තුළින් වැටෙන ආන්තික ප්‍රවේගය සොයන්න</p></div>
+    </div>
+    <div class="calc-body">
+      <div class="field-grid">
+        <div class="field"><label>අරය r (mm)</label><input type="number" id="vR" placeholder="උදා: 1.5"></div>
+        <div class="field"><label>ගෝල ඝනත්වය d (kg/m³)</label><input type="number" id="vD" placeholder="උදා: 7800"></div>
+        <div class="field"><label>ද්‍රව ඝනත්වය ρ (kg/m³)</label><input type="number" id="vRho" placeholder="උදා: 960"></div>
+        <div class="field"><label>දුස්ස්‍රාවීතාව η (Pa·s)</label><input type="number" id="vEta" placeholder="උදා: 1.2"></div>
+        <div class="field"><label>g (m/s²)</label><input type="number" id="vG" value="9.81"></div>
+      </div>
+      <div class="btn-row">
+        <button class="solve" onclick="solveTerminal()">V<sub>c</sub> ගණනය කරන්න</button>
+        <button class="ghost" onclick="clearFields(['vR','vD','vRho','vEta'],'vResult')">මකන්න</button>
+      </div>
+      <div class="result" id="vResult">අගයන් ඇතුළත් කරන්න…</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SURFACE TENSION ================= -->
+<section class="chapter" id="ps" style="--chapter-color:var(--sky); --chapter-ink:var(--sky-ink);">
+  <div class="chapter-head">
+    <div class="chip">🫧</div>
+    <div><h2>පෘෂ්ඨික ආතතිය</h2><span>Surface Tension</span></div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h3><span class="tag">P/S 01–05</span>පෘෂ්ඨික ආතති බලය</h3>
+      <div class="formula">F = Tl</div>
+      <ul>
+        <li>T - පෘෂ්ඨික ආතති සංගුණකය, ඒකකය N m⁻¹</li>
+        <li>සංසක්ති බලය (cohesive) - එකම ද්‍රව්‍යයේ අණු අතර, ආසක්ති බලය (adhesive) - වෙනස් ද්‍රව්‍ය අතර</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="tag">P/S 06</span>T රඳා පවතින සාධක</h3>
+      <ul>
+        <li>අපද්‍රව්‍ය මට්ටම</li>
+        <li>උෂ්ණත්වය (↑ උෂ්ණත්වය → ↓ T, අන්තර අණුක ආකර්ෂණය අඩුවෙන නිසා)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="tag">P/S 08</span>ස්පර්ශ කෝණය θ</h3>
+      <ul>
+        <li>0°–90°: ආසක්ති > සංසක්ති (උදා: වීදුරු–ජලය) → තෙත් කරයි</li>
+        <li>90°–180°: සංසක්ති > ආසක්ති (උදා: ඉහළින්/පාරාදිය) → තෙත් නොකරයි</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="tag">P/S 16–19</span>වෘත්ත පටලය</h3>
+      <div class="formula-row">
+        <span class="formula">පටලයක් (2 පෘෂ්ඨ): ΔP = 4T/r</span>
+        <span class="formula">බින්දුවක් (1 පෘෂ්ඨ): ΔP = 2T/r</span>
+      </div>
+      <p class="note">CE28 mnemonic: රබර් බැලූන් වැනි විස්තාරණයට ΔP අවශ්‍ය කරන පීඩනයයි.</p>
+    </div>
+    <div class="card">
+      <h3><span class="tag">P/S 20–25</span>කේශික ආරෝහණය/අවරෝහණය</h3>
+      <div class="formula">hρg = 2T cosθ / r</div>
+      <ul>
+        <li>θ &lt; 90° → ආරෝහණය (h ධන) | θ &gt; 90° → අවරෝහණය</li>
+        <li>g = 0 (චන්ද්‍රිකාවක, අභ්‍යවකාශයේ) → සම්පූර්ණ නළය පුරාම ද්‍රවය තදින් ඇදේ</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="tag">P/S 26–29</span>පෘෂ්ඨික ශක්තිය</h3>
+      <div class="formula-row">
+        <span class="formula">W = EA</span>
+        <span class="formula">T = E (සංඛ්‍යාත්මකව සමාන)</span>
+      </div>
+      <ul><li>E - පෘෂ්ඨික ශක්ති සංගුණකය, A - වර්ගඵල වැඩිවීම</li></ul>
+    </div>
+    <div class="card">
+      <h3><span class="tag">P/S 32–33</span>බුබුළු එකතුවීම</h3>
+      <ul>
+        <li>බුබුළු දෙකක් ඒකාබද්ධ වූ විට: පෘෂ්ඨික ශක්තිය අඩුවීම = 0 (බැලූ සමතුලිතතාවට)</li>
+        <li>බින්දු දෙකක් ඒකාබද්ධ වූ විට: පෘෂ්ඨික E↓, u(ආන්තරික ශක්තිය)↑, T↑</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="divider-label">බුබුළු/බින්දු අතිරික්ත පීඩන + කේශික ආරෝහණ කැල්කියුලේටරය</div>
+  <div class="calc">
+    <div class="calc-head">
+      <div class="ico">ΔP</div>
+      <div><h4>අතිරික්ත පීඩනය (ΔP)</h4><p>ද්‍රව බින්දුවක් හෝ සබන් බුබුළක් තෝරන්න</p></div>
+    </div>
+    <div class="calc-body">
+      <div class="field-grid">
+        <div class="field">
+          <label>වර්ගය</label>
+          <select id="bubbleType">
+            <option value="1">ද්‍රව බින්දුව / වෘත්තාකාර මතුපිට (1 පෘෂ්ඨ) — ΔP = 2T/r</option>
+            <option value="2">සබන් බුබුළ (2 පෘෂ්ඨ) — ΔP = 4T/r</option>
+          </select>
+        </div>
+        <div class="field"><label>T (N/m)</label><input type="number" id="bT" placeholder="උදා: 0.072"></div>
+        <div class="field"><label>අරය r (mm)</label><input type="number" id="bR" placeholder="උදා: 2"></div>
+      </div>
+      <div class="btn-row">
+        <button class="solve" onclick="solveBubble()">ΔP ගණනය කරන්න</button>
+        <button class="ghost" onclick="clearFields(['bT','bR'],'bResult')">මකන්න</button>
+      </div>
+      <div class="result" id="bResult">අගයන් ඇතුළත් කරන්න…</div>
+    </div>
+  </div>
+
+  <div class="calc">
+    <div class="calc-head">
+      <div class="ico">h</div>
+      <div><h4>hρg = 2T cosθ / r</h4><p>කේශික නලයක ආරෝහණ / අවරෝහණ උස</p></div>
+    </div>
+    <div class="calc-body">
+      <div class="field-grid">
+        <div class="field"><label>T (N/m)</label><input type="number" id="cT" placeholder="උදා: 0.072"></div>
+        <div class="field"><label>θ (degrees)</label><input type="number" id="cTheta" placeholder="උදා: 0"></div>
+        <div class="field"><label>ρ (kg/m³)</label><input type="number" id="cRho" placeholder="උදා: 1000"></div>
+        <div class="field"><label>නලයේ අරය r (mm)</label><input type="number" id="cR" placeholder="උදා: 0.3"></div>
+        <div class="field"><label>g (m/s²)</label><input type="number" id="cG" value="9.81"></div>
+      </div>
+      <div class="btn-row">
+        <button class="solve" onclick="solveCapillary()">h ගණනය කරන්න</button>
+        <button class="ghost" onclick="clearFields(['cT','cTheta','cRho','cR'],'cResult')">මකන්න</button>
+      </div>
+      <div class="result" id="cResult">අගයන් ඇතුළත් කරන්න…</div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p>මෙම පොත Sci-LiNK ධාරා විද්‍යුතය, ප්‍රත්‍යස්ථතාව, දුස්ස්‍රාවීතාව සහ පෘෂ්ඨික ආතතිය සටහන් ඇසුරෙන් සකසන ලද පුනරීක්ෂණ මාර්ගෝපදේශයකි. ප්‍රශ්න විසඳීමට පෙර සියලුම සූත්‍ර තමන්ම ව්‍යුත්පන්න කර බලන්න.</p>
+</footer>
+
+<script>
+  // ---------- theme ----------
+  const root = document.documentElement;
+  const themeBtn = document.getElementById('themeToggle');
+  function applyTheme(t){ root.setAttribute('data-theme', t); localStorage.setItem('pn-theme', t); }
+  const saved = localStorage.getItem('pn-theme');
+  if(saved){ applyTheme(saved); }
+  else if(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches){ applyTheme('light'); }
+  themeBtn.addEventListener('click', ()=>{
+    const cur = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    applyTheme(cur === 'dark' ? '' : 'light');
+  });
+  // simpler toggle logic override
+  themeBtn.onclick = ()=>{
+    const isLight = root.getAttribute('data-theme') === 'light';
+    applyTheme(isLight ? '' : 'light');
+  };
+
+  // ---------- tabs ----------
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  const chapters = document.querySelectorAll('.chapter');
+  function activateTab(btn){
+    tabBtns.forEach(b=>{
+      b.classList.remove('active');
+      b.style.removeProperty('--tab-color');
+      b.style.removeProperty('--tab-ink');
+    });
+    btn.classList.add('active');
+    btn.style.setProperty('--tab-color', getComputedStyle(root).getPropertyValue(btn.dataset.color));
+    btn.style.setProperty('--tab-ink', getComputedStyle(root).getPropertyValue(btn.dataset.ink));
+    chapters.forEach(c=>c.classList.remove('active'));
+    document.getElementById(btn.dataset.target).classList.add('active');
+  }
+  tabBtns.forEach(b=> b.addEventListener('click', ()=> activateTab(b)) );
+  activateTab(tabBtns[0]);
+
+  // ---------- helpers ----------
+  function clearFields(ids, resultId){
+    ids.forEach(id=> document.getElementById(id).value = '');
+    if(resultId) document.getElementById(resultId).textContent = 'අගයන් ඇතුළත් කරන්න…';
+  }
+  function fmt(n){
+    if(!isFinite(n)) return '—';
+    if(Math.abs(n) >= 1000 || (Math.abs(n) < 0.001 && n !== 0)) return n.toExponential(3);
+    return Math.round(n * 10000)/10000;
+  }
+
+  // ---------- Ohm's law ----------
+  function solveOhm(){
+    const V = parseFloat(document.getElementById('ohmV').value);
+    const I = parseFloat(document.getElementById('ohmI').value);
+    const R = parseFloat(document.getElementById('ohmR').value);
+    const out = document.getElementById('ohmResult');
+    const has = [!isNaN(V), !isNaN(I), !isNaN(R)];
+    const count = has.filter(Boolean).length;
+    if(count < 2){ out.innerHTML = 'අවම වශයෙන් අගයන් <strong>2ක්</strong> ඇතුළත් කරන්න.'; return; }
+    if(isNaN(R)){ out.innerHTML = `ප්‍රතිරෝධය <strong>R = ${fmt(V/I)} Ω</strong>`; }
+    else if(isNaN(I)){ out.innerHTML = `ධාරාව <strong>I = ${fmt(V/R)} A</strong>`; }
+    else { out.innerHTML = `වෝල්ටියතාව <strong>V = ${fmt(I*R)} V</strong>`; }
+  }
+
+  // ---------- resistor network ----------
+  let resCount = 0;
+  function addResistor(){
+    resCount++;
+    const wrap = document.createElement('div');
+    wrap.className = 'row-item';
+    wrap.innerHTML = `<span class="mono" style="min-width:22px;">R${resCount}</span>
+      <input type="number" placeholder="Ω අගය" class="resInput">
+      <button onclick="this.parentElement.remove()">✕</button>`;
+    document.getElementById('resList').appendChild(wrap);
+  }
+  addResistor(); addResistor();
+  function solveResistors(){
+    const vals = Array.from(document.querySelectorAll('.resInput'))
+      .map(i=>parseFloat(i.value)).filter(v=>!isNaN(v) && v>0);
+    const out = document.getElementById('resResult');
+    if(vals.length < 1){ out.textContent = 'අවම වශයෙන් ප්‍රතිරෝධයක් අගයක් ඇතුළත් කරන්න.'; return; }
+    const mode = document.getElementById('resMode').value;
+    let req;
+    if(mode === 'series'){ req = vals.reduce((a,b)=>a+b,0); }
+    else { req = 1/ vals.reduce((a,b)=>a + 1/b, 0); }
+    out.innerHTML = `${mode==='series'?'ශ්‍රේණිගත':'සමාන්තරගත'} සම්බන්ධතාවයේ සමක ප්‍රතිරෝධය: <strong>R<sub>eq</sub> = ${fmt(req)} Ω</strong>`;
+  }
+
+  // ---------- Young's modulus ----------
+  function solveYoung(){
+    const F = parseFloat(document.getElementById('peF').value);
+    const A_mm2 = parseFloat(document.getElementById('peA').value);
+    const L = parseFloat(document.getElementById('peL').value);
+    const e_mm = parseFloat(document.getElementById('peE').value);
+    const out = document.getElementById('peResult');
+    if([F,A_mm2,L,e_mm].some(isNaN)){ out.textContent = 'සියලු අගයන් ඇතුළත් කරන්න.'; return; }
+    const A = A_mm2 * 1e-6; // m^2
+    const e = e_mm * 1e-3; // m
+    const stress = F/A;
+    const strain = e/L;
+    const Y = stress/strain;
+    const k = Y*A/L;
+    const energy = 0.5*F*e;
+    out.innerHTML = `ප්‍රතාවබලය = <strong>${fmt(stress)} Pa</strong> · විකෘතිය = <strong>${fmt(strain)}</strong><br>
+      Y = <strong>${fmt(Y)} Pa</strong> · k = <strong>${fmt(k)} N/m</strong> · ගබඩා වූ ශක්තිය W = <strong>${fmt(energy)} J</strong>`;
+  }
+
+  // ---------- terminal velocity ----------
+  function solveTerminal(){
+    const r_mm = parseFloat(document.getElementById('vR').value);
+    const d = parseFloat(document.getElementById('vD').value);
+    const rho = parseFloat(document.getElementById('vRho').value);
+    const eta = parseFloat(document.getElementById('vEta').value);
+    const g = parseFloat(document.getElementById('vG').value) || 9.81;
+    const out = document.getElementById('vResult');
+    if([r_mm,d,rho,eta].some(isNaN)){ out.textContent = 'සියලු අගයන් ඇතුළත් කරන්න.'; return; }
+    const r = r_mm/1000;
+    const vc = (2*r*r*g*(d-rho))/(9*eta);
+    out.innerHTML = `ආන්තික ප්‍රවේගය <strong>V<sub>c</sub> = ${fmt(vc)} m/s</strong>` +
+      (vc<0 ? ' <br><span class="note">(ඍණ අගය → ගෝලය ඉහළට ගැලපෙයි, d &lt; ρ)</span>' : '');
+  }
+
+  // ---------- bubble / drop excess pressure ----------
+  function solveBubble(){
+    const T = parseFloat(document.getElementById('bT').value);
+    const r_mm = parseFloat(document.getElementById('bR').value);
+    const type = document.getElementById('bubbleType').value;
+    const out = document.getElementById('bResult');
+    if([T,r_mm].some(isNaN)){ out.textContent = 'T සහ r අගයන් ඇතුළත් කරන්න.'; return; }
+    const r = r_mm/1000;
+    const dp = (type === '2' ? 4*T/r : 2*T/r);
+    out.innerHTML = `අතිරික්ත පීඩනය <strong>ΔP = ${fmt(dp)} Pa</strong> (${type==='2' ? '4T/r' : '2T/r'})`;
+  }
+
+  // ---------- capillary rise ----------
+  function solveCapillary(){
+    const T = parseFloat(document.getElementById('cT').value);
+    const thetaDeg = parseFloat(document.getElementById('cTheta').value);
+    const rho = parseFloat(document.getElementById('cRho').value);
+    const r_mm = parseFloat(document.getElementById('cR').value);
+    const g = parseFloat(document.getElementById('cG').value) || 9.81;
+    const out = document.getElementById('cResult');
+    if([T,thetaDeg,rho,r_mm].some(isNaN)){ out.textContent = 'සියලු අගයන් ඇතුළත් කරන්න.'; return; }
+    const r = r_mm/1000;
+    const theta = thetaDeg * Math.PI/180;
+    const h = (2*T*Math.cos(theta))/(r*rho*g);
+    out.innerHTML = `<strong>h = ${fmt(h*1000)} mm</strong> (${(h>=0)?'ආරෝහණය':'අවරෝහණය'})`;
+  }
+</script>
+</body>
+</html>

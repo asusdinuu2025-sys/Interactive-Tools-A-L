@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>U-නළ ප්‍රායෝගික අධ්‍යයනය — ද්‍රව සාපේක්ෂ ඝනත්වය</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Sinhala:wght@500;600;700&family=Noto+Sans+Sinhala:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --bg:#F3EEDF;
+  --surface:#FFFFFF;
+  --surface-2:#EAE3CC;
+  --ink:#1E2A32;
+  --muted:#726C5B;
+  --line:#D9D0B4;
+  --water:#2E6F9E;
+  --water-deep:#1E4E72;
+  --oil:#CE9A3E;
+  --oil-deep:#A97620;
+  --brass:#8C6A3A;
+  --good:#3F7D52;
+  --bad:#B24C4C;
+  --shadow: 0 1px 2px rgba(30,42,50,.06), 0 6px 20px rgba(30,42,50,.08);
+  --radius: 14px;
+  --serif: 'Noto Serif Sinhala', serif;
+  --sans: 'Noto Sans Sinhala', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+.theme-dark{
+  --bg:#101820;
+  --surface:#161F29;
+  --surface-2:#1D2732;
+  --ink:#EAE4D4;
+  --muted:#98A0A8;
+  --line:#2A3542;
+  --water:#71B4E3;
+  --water-deep:#4A8FC0;
+  --oil:#E7B45C;
+  --oil-deep:#C68E36;
+  --brass:#C9A46A;
+  --good:#63B57F;
+  --bad:#E38585;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--sans);
+  transition:background .35s ease, color .35s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+body::before{
+  content:"";
+  position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size:34px 34px;
+  opacity:.35;
+}
+h1,h2,h3,.disp{font-family:var(--serif); letter-spacing:.2px;}
+.mono{font-family:var(--mono);}
+button{font-family:var(--sans);}
+:focus-visible{outline:3px solid var(--water); outline-offset:2px;}
+
+/* ============ LAYOUT ============ */
+.app{position:relative; z-index:1; max-width:980px; margin:0 auto; padding:0 16px 90px;}
+header.top{
+  position:sticky; top:0; z-index:20;
+  background:linear-gradient(180deg, var(--bg) 78%, transparent);
+  padding:14px 0 6px;
+}
+.headbar{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+  padding:12px 16px; box-shadow:var(--shadow);
+}
+.brand{display:flex; flex-direction:column; gap:2px; min-width:0;}
+.brand .eyebrow{
+  font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--brass); font-weight:600;
+}
+.brand h1{margin:0; font-size:19px; font-weight:700; line-height:1.25;}
+.brand h1 span{color:var(--water); font-family:var(--mono); font-weight:600;}
+.theme-toggle{
+  flex:none; width:44px; height:44px; border-radius:50%;
+  border:1px solid var(--line); background:var(--surface-2); color:var(--ink);
+  display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px;
+  transition:transform .25s ease, background .25s ease;
+}
+.theme-toggle:active{transform:scale(.9);}
+
+nav.tabs{
+  display:flex; gap:8px; margin-top:10px; overflow-x:auto; padding-bottom:2px;
+  scrollbar-width:none;
+}
+nav.tabs::-webkit-scrollbar{display:none;}
+.tab-btn{
+  flex:none; border:1px solid var(--line); background:var(--surface);
+  color:var(--muted); font-weight:600; font-size:13.5px;
+  padding:10px 16px; border-radius:999px; cursor:pointer; white-space:nowrap;
+  display:flex; align-items:center; gap:7px;
+  transition:all .2s ease;
+}
+.tab-btn .n{
+  font-family:var(--mono); font-size:10.5px; width:18px; height:18px; border-radius:50%;
+  background:var(--surface-2); display:flex; align-items:center; justify-content:center;
+}
+.tab-btn.active{background:var(--ink); color:var(--bg); border-color:var(--ink);}
+.tab-btn.active .n{background:var(--water); color:#fff;}
+
+main{margin-top:16px;}
+section.panel{display:none; animation:fadeUp .35s ease;}
+section.panel.active{display:block;}
+@keyframes fadeUp{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+.card{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+  box-shadow:var(--shadow); padding:18px; margin-bottom:16px;
+}
+.card h2{margin:0 0 4px; font-size:17px; display:flex; align-items:center; gap:8px;}
+.card .sub{color:var(--muted); font-size:13px; margin:0 0 14px;}
+.section-title{
+  display:flex; align-items:baseline; gap:10px; margin:26px 0 12px;
+}
+.section-title .idx{font-family:var(--mono); color:var(--water); font-weight:700; font-size:13px;}
+.section-title h2{margin:0; font-size:20px;}
+
+/* ============ SIMULATOR ============ */
+.sim-grid{display:grid; grid-template-columns:1fr; gap:16px;}
+@media(min-width:760px){.sim-grid{grid-template-columns: 1.05fr 1fr;}}
+
+.tube-wrap{
+  background:radial-gradient(circle at 30% 0%, var(--surface-2), var(--surface) 70%);
+  border:1px solid var(--line); border-radius:var(--radius); padding:8px;
+  display:flex; flex-direction:column; align-items:center;
+}
+.eqn-live{
+  font-family:var(--mono); font-size:13px; text-align:center; padding:8px 10px;
+  color:var(--muted); min-height:20px;
+}
+.eqn-live b{color:var(--ink);}
+.eqn-live .balance{color:var(--good); font-weight:700;}
+
+.sliders{display:flex; flex-direction:column; gap:16px;}
+.slider-row{display:flex; flex-direction:column; gap:6px;}
+.slider-row .lbl{display:flex; justify-content:space-between; align-items:baseline; font-size:13.5px;}
+.slider-row .lbl b{font-weight:600;}
+.slider-row .lbl .val{font-family:var(--mono); font-weight:700; padding:2px 8px; border-radius:6px; background:var(--surface-2);}
+.val.water{color:var(--water-deep);}
+.val.oil{color:var(--oil-deep);}
+input[type=range]{
+  -webkit-appearance:none; width:100%; height:6px; border-radius:4px; background:var(--line); outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:22px; height:22px; border-radius:50%;
+  background:var(--water); border:3px solid var(--surface); box-shadow:0 1px 4px rgba(0,0,0,.3); cursor:pointer;
+}
+input[type=range].oil-slider::-webkit-slider-thumb{background:var(--oil);}
+input[type=range]::-moz-range-thumb{
+  width:22px; height:22px; border-radius:50%; background:var(--water); border:3px solid var(--surface); cursor:pointer;
+}
+input[type=range].oil-slider::-moz-range-thumb{background:var(--oil);}
+
+.readout-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px;}
+.readout{
+  background:var(--surface-2); border-radius:10px; padding:10px 12px; text-align:center;
+}
+.readout .k{font-size:11px; color:var(--muted); font-family:var(--mono); text-transform:uppercase; letter-spacing:.06em;}
+.readout .v{font-size:20px; font-weight:700; font-family:var(--mono); margin-top:2px;}
+.readout.hilite{background:linear-gradient(135deg, var(--water), var(--water-deep)); color:#fff;}
+.readout.hilite .k{color:rgba(255,255,255,.85);}
+
+.btn{
+  border:none; border-radius:10px; padding:11px 16px; font-weight:600; font-size:14px; cursor:pointer;
+  display:inline-flex; align-items:center; gap:8px; transition:transform .15s ease, filter .15s ease;
+}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--ink); color:var(--bg);}
+.btn-primary:hover{filter:brightness(1.15);}
+.btn-ghost{background:var(--surface-2); color:var(--ink);}
+.btn-row{display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;}
+
+table{width:100%; border-collapse:collapse; font-size:13px; margin-top:10px;}
+th,td{padding:7px 8px; text-align:center; border-bottom:1px solid var(--line); font-family:var(--mono);}
+th{color:var(--muted); font-weight:600; font-size:11.5px; text-transform:uppercase; letter-spacing:.04em;}
+td.rd-cell{color:var(--good); font-weight:700;}
+.empty-note{color:var(--muted); font-size:13px; text-align:center; padding:16px 4px;}
+
+.graph-legend{display:flex; gap:16px; font-size:12px; margin-top:8px; flex-wrap:wrap; color:var(--muted);}
+.graph-legend span{display:flex; align-items:center; gap:6px;}
+.dot{width:9px; height:9px; border-radius:50%; display:inline-block;}
+.dot.pt{background:var(--oil-deep);}
+.dot.fit{background:var(--water);}
+
+/* ============ THEORY CARDS ============ */
+.theory-card{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+  margin-bottom:12px; overflow:hidden; box-shadow:var(--shadow);
+}
+.theory-head{
+  display:flex; align-items:center; gap:12px; padding:16px 16px; cursor:pointer; user-select:none;
+}
+.theory-head .ic{
+  flex:none; width:38px; height:38px; border-radius:10px; background:var(--surface-2);
+  display:flex; align-items:center; justify-content:center; font-size:18px;
+}
+.theory-head h3{margin:0; font-size:15px; flex:1;}
+.theory-head .chev{color:var(--muted); transition:transform .25s ease; flex:none;}
+.theory-card.open .chev{transform:rotate(180deg);}
+.theory-body{max-height:0; overflow:hidden; transition:max-height .35s ease;}
+.theory-body-inner{padding:0 16px 18px 66px; color:var(--muted); font-size:14px; line-height:1.75;}
+.theory-body-inner b{color:var(--ink);}
+.theory-body-inner .formula{
+  display:inline-block; background:var(--surface-2); color:var(--ink); font-family:var(--mono);
+  padding:2px 8px; border-radius:6px; margin:2px 0;
+}
+.theory-body-inner ul{margin:8px 0; padding-inline-start:18px;}
+
+/* ============ QUIZ ============ */
+.q-card{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+  padding:18px; margin-bottom:16px; box-shadow:var(--shadow);
+}
+.q-tag{
+  font-family:var(--mono); font-size:11px; color:var(--brass); background:var(--surface-2);
+  display:inline-block; padding:3px 9px; border-radius:6px; margin-bottom:8px; font-weight:600;
+}
+.q-title{font-weight:700; font-size:15.5px; margin:0 0 10px; line-height:1.6;}
+.q-body{font-size:14px; color:var(--muted); line-height:1.7; margin-bottom:12px;}
+.q-body b{color:var(--ink);}
+.mcq-opts{display:flex; flex-direction:column; gap:8px; margin-bottom:12px;}
+.mcq-opt{
+  text-align:right; border:1px solid var(--line); background:var(--surface-2); color:var(--ink);
+  padding:10px 14px; border-radius:10px; cursor:pointer; font-size:14px; font-family:var(--mono);
+  transition:all .18s ease; direction:ltr;
+}
+.mcq-opt:hover{border-color:var(--water);}
+.mcq-opt.correct{background:color-mix(in srgb, var(--good) 18%, var(--surface)); border-color:var(--good); color:var(--good); font-weight:700;}
+.mcq-opt.wrong{background:color-mix(in srgb, var(--bad) 18%, var(--surface)); border-color:var(--bad); color:var(--bad);}
+.mcq-opt[disabled]{cursor:default;}
+.steps{border-top:1px dashed var(--line); margin-top:10px; padding-top:10px;}
+.step{display:none; padding:8px 0; font-size:14px; color:var(--ink); line-height:1.75; border-bottom:1px solid var(--line);}
+.step:last-child{border-bottom:none;}
+.step.show{display:block; animation:fadeUp .3s ease;}
+.step .tag{font-family:var(--mono); font-size:11px; color:var(--water); font-weight:700; margin-inline-end:6px;}
+.step .formula{display:inline-block; background:var(--surface-2); font-family:var(--mono); padding:2px 8px; border-radius:6px;}
+.ans-final{
+  margin-top:10px; background:linear-gradient(135deg, var(--water), var(--water-deep)); color:#fff;
+  padding:12px 14px; border-radius:10px; font-family:var(--mono); font-weight:700; font-size:14px; display:none;
+}
+.ans-final.show{display:block; animation:fadeUp .3s ease;}
+
+footer.foot{text-align:center; color:var(--muted); font-size:12px; margin-top:30px; padding-bottom:20px;}
+.pill-note{
+  display:flex; gap:10px; align-items:flex-start; background:var(--surface-2); border-radius:10px;
+  padding:10px 12px; font-size:12.5px; color:var(--muted); margin-top:12px; line-height:1.6;
+}
+.pill-note .ic{flex:none;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="top">
+    <div class="headbar">
+      <div class="brand">
+        <span class="eyebrow">A/L Physics · Hydrostatics</span>
+        <h1>U-නළ <span>ρ</span> ප්‍රායෝගිකය</h1>
+      </div>
+      <button class="theme-toggle" id="themeToggle" aria-label="තේමාව මාරු කරන්න">🌙</button>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button class="tab-btn active" data-tab="sim"><span class="n">1</span> සිමියුලේටරය</button>
+      <button class="tab-btn" data-tab="theory"><span class="n">2</span> න්‍යාය සහ ආරක්ෂණ</button>
+      <button class="tab-btn" data-tab="quiz"><span class="n">3</span> ප්‍රශ්න විසඳුම</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ===================== TAB 1: SIMULATOR ===================== -->
+    <section class="panel active" id="panel-sim">
+      <div class="card">
+        <h2>🧪 U-නළ අන්තර්ක්‍රියාකාරී විද්‍යාගාරය</h2>
+        <p class="sub">c,h (ජලය) සහ f;,a (තෙල) අණුමිශ්‍ර ද්‍රව දෙකක් U-නළයක තබා, අන්තර්පෘෂ්ඨයේ පීඩන සමතුලිතතාවයෙන් තෙල් ද්‍රවයේ සාපේක්ෂ ඝනත්වය සොයන අයුරු සජීවීව නිරීක්ෂණය කරන්න.</p>
+
+        <div class="sim-grid">
+          <div class="tube-wrap">
+            <svg id="tubeSvg" viewBox="0 0 320 380" style="width:100%; max-width:340px;"></svg>
+            <div class="eqn-live" id="eqnLive"></div>
+          </div>
+
+          <div>
+            <div class="sliders">
+              <div class="slider-row">
+                <div class="lbl"><b>ජලයේ ඝනත්වය ρ<sub>w</sub></b><span class="val water" id="rhoWVal">1000 kg/m³</span></div>
+                <input type="range" id="rhoW" min="900" max="1150" step="5" value="1000">
+              </div>
+              <div class="slider-row">
+                <div class="lbl"><b>තෙලේ ඝනත්වය ρ<sub>o</sub></b><span class="val oil" id="rhoOVal">850 kg/m³</span></div>
+                <input type="range" class="oil-slider" id="rhoO" min="700" max="1000" step="5" value="850">
+              </div>
+              <div class="slider-row">
+                <div class="lbl"><b>එකතු කළ තෙල් තීරයේ උස h<sub>o</sub></b><span class="val oil" id="hOVal">10.0 cm</span></div>
+                <input type="range" class="oil-slider" id="hO" min="2" max="26" step="0.5" value="10">
+              </div>
+            </div>
+
+            <div class="readout-grid">
+              <div class="readout">
+                <div class="k">h<sub>o</sub> — තෙල් තීරයේ උස</div>
+                <div class="v" id="outHo">10.0 cm</div>
+              </div>
+              <div class="readout hilite">
+                <div class="k">h<sub>w</sub> — ගණනය කළ ජල උස</div>
+                <div class="v" id="outHw">8.5 cm</div>
+              </div>
+            </div>
+
+            <div class="btn-row">
+              <button class="btn btn-primary" id="logBtn">＋ කියවීම සටහන් කරන්න</button>
+              <button class="btn btn-ghost" id="clearBtn">🗑 වගුව හිස් කරන්න</button>
+            </div>
+
+            <div class="pill-note"><span class="ic">💡</span><span>සටහන: නිවැරදි පරීක්ෂණයේදී ඝනත්වය වැඩි ජලය පළමුව නළයට දමා, පසුව තෙල් තීරයේ h<sub>o</sub> අගය මදින් මදින් වෙනස් කරමින් සමතුලිත h<sub>w</sub> අගය කියවා ගනී.</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>📊 h<sub>w</sub> එදිරිව h<sub>o</sub> ප්‍රස්තාරය</h2>
+        <p class="sub">සටහන් කළ එක් එක් කියවීම (h<sub>o</sub>, h<sub>w</sub>) ලක්ෂ්‍යයක් ලෙස සටහන් වන අතර, සම්භවය හරහා යන හොඳම රේඛාවේ බෑවුම (slope = y = mx හි m) මගින් සාපේක්ෂ ඝනත්වය ලැබේ.</p>
+        <svg id="graphSvg" viewBox="0 0 320 260" style="width:100%; max-width:460px; display:block; margin:0 auto;"></svg>
+        <div class="graph-legend">
+          <span><i class="dot pt"></i> කියවීම</span>
+          <span><i class="dot fit"></i> හොඳම රේඛාව (y = m·x)</span>
+        </div>
+        <div class="readout-grid" style="margin-top:14px;">
+          <div class="readout">
+            <div class="k">මැනූ බෑවුම (m = h<sub>w</sub>/h<sub>o</sub>)</div>
+            <div class="v" id="slopeOut">—</div>
+          </div>
+          <div class="readout">
+            <div class="k">සැබෑ අගය (ρ<sub>o</sub>/ρ<sub>w</sub>)</div>
+            <div class="v" id="trueOut">0.850</div>
+          </div>
+        </div>
+        <table id="dataTable">
+          <thead><tr><th>#</th><th>h<sub>o</sub> (cm)</th><th>h<sub>w</sub> (cm)</th><th>සාපේක්ෂ ඝනත්වය</th></tr></thead>
+          <tbody id="dataBody"></tbody>
+        </table>
+        <div class="empty-note" id="emptyNote">තවම කියවීම් සටහන් කර නැත — ඉහත "කියවීම සටහන් කරන්න" බොත්තම ඔබන්න.</div>
+      </div>
+    </section>
+
+    <!-- ===================== TAB 2: THEORY ===================== -->
+    <section class="panel" id="panel-theory">
+      <div class="section-title"><span class="idx">02 ·</span><h2>න්‍යාය සහ ප්‍රායෝගික ආරක්ෂණ ක්‍රම</h2></div>
+      <div id="theoryList"></div>
+    </section>
+
+    <!-- ===================== TAB 3: QUIZ ===================== -->
+    <section class="panel" id="panel-quiz">
+      <div class="section-title"><span class="idx">03 ·</span><h2>පසුගිය විභාග ප්‍රශ්න — පියවර පියවරින් විසඳුම</h2></div>
+      <div id="quizList"></div>
+    </section>
+  </main>
+
+  <footer class="foot">U-නළ හයිඩ්‍රොස්ටැටික්ස් ප්‍රායෝගිකය · A/L භෞතික විද්‍යාව · අන්තර්ක්‍රියාකාරී අධ්‍යයන මෙවලම</footer>
+</div>
+
+<script>
+/* ============================================================
+   THEME TOGGLE
+============================================================ */
+const themeToggle = document.getElementById('themeToggle');
+themeToggle.addEventListener('click', ()=>{
+  document.body.classList.toggle('theme-dark');
+  themeToggle.textContent = document.body.classList.contains('theme-dark') ? '☀️' : '🌙';
+});
+
+/* ============================================================
+   TABS
+============================================================ */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+});
+
+/* ============================================================
+   U-TUBE PHYSICS SIMULATOR
+============================================================ */
+const rhoWEl = document.getElementById('rhoW');
+const rhoOEl = document.getElementById('rhoO');
+const hOEl   = document.getElementById('hO');
+const svg    = document.getElementById('tubeSvg');
+const NS = "http://www.w3.org/2000/svg";
+
+let readings = [];
+
+function svgEl(tag, attrs){
+  const e = document.createElementNS(NS, tag);
+  for(const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+
+// geometry constants
+const TUBE_TOP = 30, TUBE_BOTTOM = 330, ARM_W = 46;
+const LX = 60, RX = 214; // left/right arm x-start
+const NEUTRAL_Y = 230;   // water level when hO = 0
+const SCALE = 5.4;       // px per cm
+
+function render(){
+  const rhoW = parseFloat(rhoWEl.value);
+  const rhoO = parseFloat(rhoOEl.value);
+  const hO   = parseFloat(hOEl.value);
+  const hW   = (rhoO/rhoW) * hO;
+
+  document.getElementById('rhoWVal').textContent = rhoW.toFixed(0)+' kg/m³';
+  document.getElementById('rhoOVal').textContent = rhoO.toFixed(0)+' kg/m³';
+  document.getElementById('hOVal').textContent = hO.toFixed(1)+' cm';
+  document.getElementById('outHo').textContent = hO.toFixed(1)+' cm';
+  document.getElementById('outHw').textContent = hW.toFixed(2)+' cm';
+
+  const delta = (hW*SCALE)/2;
+  const yLeftWater = NEUTRAL_Y - delta;         // left arm water surface (rises)
+  const yInterface = NEUTRAL_Y + delta;         // right arm oil-water interface (falls)
+  const yOilTop = yInterface - hO*SCALE;
+
+  const eqn = document.getElementById('eqnLive');
+  eqn.innerHTML = `P<sub>A</sub> = ρ<sub>w</sub>·g·h<sub>w</sub> &nbsp;=&nbsp; P<sub>B</sub> = ρ<sub>o</sub>·g·h<sub>o</sub> &nbsp;·&nbsp; <span class="balance">සමතුලිතයි ✓</span>`;
+
+  drawTube(yLeftWater, yInterface, yOilTop);
+  updateGraph(rhoW, rhoO);
+}
+
+function tick(y, len, side){
+  return svgEl('line', {x1: side==='L'? LX-6 : RX+ARM_W, y1:y, x2: side==='L'? LX : RX+ARM_W+6, y2:y, stroke:'var(--muted)', 'stroke-width':1});
+}
+
+function drawTube(yLeftWater, yInterface, yOilTop){
+  svg.innerHTML = '';
+  const g = svgEl('g', {});
+
+  // glass outline (U shape) via path
+  const path = `M ${LX} ${TUBE_TOP}
+                L ${LX} ${TUBE_BOTTOM-30}
+                Q ${LX} ${TUBE_BOTTOM} ${LX+30} ${TUBE_BOTTOM}
+                L ${RX+ARM_W-30} ${TUBE_BOTTOM}
+                Q ${RX+ARM_W} ${TUBE_BOTTOM} ${RX+ARM_W} ${TUBE_BOTTOM-30}
+                L ${RX+ARM_W} ${TUBE_TOP}`;
+  g.appendChild(svgEl('path', {d:path, fill:'none', stroke:'var(--line)', 'stroke-width':10, 'stroke-linecap':'round'}));
+  g.appendChild(svgEl('path', {d:path, fill:'none', stroke:'var(--surface)', 'stroke-width':6, 'stroke-linecap':'round'}));
+
+  // ruler ticks every 2cm from bottom pool up
+  for(let c=0; c<=30; c+=2){
+    const y = TUBE_BOTTOM-40 - c*SCALE;
+    if(y < TUBE_TOP+5) continue;
+    g.appendChild(tick(y,6,'L'));
+    g.appendChild(tick(y,6,'R'));
+    if(c%10===0){
+      const lbl = svgEl('text', {x:LX-10, y:y+3, 'font-size':'7', fill:'var(--muted)', 'text-anchor':'end', 'font-family':'var(--mono)'});
+      lbl.textContent = c;
+      g.appendChild(lbl);
+    }
+  }
+
+  // bottom connecting water (always full)
+  const poolPath = `M ${LX} ${TUBE_BOTTOM-32}
+                L ${LX} ${TUBE_BOTTOM-30}
+                Q ${LX} ${TUBE_BOTTOM} ${LX+30} ${TUBE_BOTTOM}
+                L ${RX+ARM_W-30} ${TUBE_BOTTOM}
+                Q ${RX+ARM_W} ${TUBE_BOTTOM} ${RX+ARM_W} ${TUBE_BOTTOM-30}
+                L ${RX+ARM_W} ${TUBE_BOTTOM-32} Z`;
+  g.appendChild(svgEl('path', {d:poolPath, fill:'var(--water)', opacity:'0.9'}));
+
+  // left arm water (fills from yLeftWater to bottom)
+  g.appendChild(svgEl('rect', {x:LX, y:yLeftWater, width:ARM_W, height:(TUBE_BOTTOM-yLeftWater), fill:'var(--water)', opacity:'0.9'}));
+  g.appendChild(svgEl('line', {x1:LX, y1:yLeftWater, x2:LX+ARM_W, y2:yLeftWater, stroke:'var(--water-deep)', 'stroke-width':2}));
+
+  // right arm water (from interface to bottom)
+  g.appendChild(svgEl('rect', {x:RX, y:yInterface, width:ARM_W, height:(TUBE_BOTTOM-yInterface), fill:'var(--water)', opacity:'0.9'}));
+
+  // right arm oil (from oilTop to interface)
+  g.appendChild(svgEl('rect', {x:RX, y:yOilTop, width:ARM_W, height:(yInterface-yOilTop), fill:'var(--oil)', opacity:'0.92'}));
+  g.appendChild(svgEl('line', {x1:RX, y1:yOilTop, x2:RX+ARM_W, y2:yOilTop, stroke:'var(--oil-deep)', 'stroke-width':2}));
+  g.appendChild(svgEl('line', {x1:RX, y1:yInterface, x2:RX+ARM_W, y2:yInterface, stroke:'var(--water-deep)', 'stroke-width':1.4, 'stroke-dasharray':'2,2'}));
+
+  // dashed level-comparison line across (AB reference)
+  g.appendChild(svgEl('line', {x1:LX-14, y1:yLeftWater, x2:RX+ARM_W+14, y2:yLeftWater, stroke:'var(--brass)', 'stroke-width':1, 'stroke-dasharray':'4,3', opacity:'.6'}));
+
+  // labels A / B
+  const la = svgEl('text', {x:LX+ARM_W/2, y:yLeftWater-8, 'font-size':'10', fill:'var(--water-deep)', 'text-anchor':'middle', 'font-weight':'700'});
+  la.textContent = 'A';
+  g.appendChild(la);
+  const lb = svgEl('text', {x:RX+ARM_W/2, y:yInterface-8, 'font-size':'10', fill:'var(--oil-deep)', 'text-anchor':'middle', 'font-weight':'700'});
+  lb.textContent = 'B';
+  g.appendChild(lb);
+
+  // h_w bracket (left arm rise) & h_o bracket (right oil column)
+  g.appendChild(bracket(LX-20, NEUTRAL_Y, yLeftWater, 'h_w/2', 'var(--water-deep)'));
+  g.appendChild(bracket(RX+ARM_W+20, yInterface, yOilTop, 'h_o', 'var(--oil-deep)'));
+
+  // labels
+  const wl = svgEl('text', {x:LX+ARM_W/2, y:16, 'font-size':'9', fill:'var(--water-deep)', 'text-anchor':'middle', 'font-weight':'700'});
+  wl.textContent = 'ජලය arm';
+  g.appendChild(wl);
+  const ol = svgEl('text', {x:RX+ARM_W/2, y:16, 'font-size':'9', fill:'var(--oil-deep)', 'text-anchor':'middle', 'font-weight':'700'});
+  ol.textContent = 'තෙල+ජලය arm';
+  g.appendChild(ol);
+
+  svg.appendChild(g);
+}
+
+function bracket(x, y1, y2, label, color){
+  const g = svgEl('g', {});
+  const top = Math.min(y1,y2), bot = Math.max(y1,y2);
+  g.appendChild(svgEl('line', {x1:x, y1:top, x2:x, y2:bot, stroke:color, 'stroke-width':1.4}));
+  g.appendChild(svgEl('line', {x1:x-4, y1:top, x2:x+4, y2:top, stroke:color, 'stroke-width':1.4}));
+  g.appendChild(svgEl('line', {x1:x-4, y1:bot, x2:x+4, y2:bot, stroke:color, 'stroke-width':1.4}));
+  const t = svgEl('text', {x:x, y:(top+bot)/2+3, 'font-size':'8', fill:color, 'text-anchor':'middle', 'font-family':'var(--mono)'});
+  t.textContent = label;
+  g.appendChild(t);
+  return g;
+}
+
+[rhoWEl, rhoOEl, hOEl].forEach(el=>el.addEventListener('input', render));
+
+/* ---- logging & graph ---- */
+const graphSvg = document.getElementById('graphSvg');
+const dataBody = document.getElementById('dataBody');
+const emptyNote = document.getElementById('emptyNote');
+
+document.getElementById('logBtn').addEventListener('click', ()=>{
+  const rhoW = parseFloat(rhoWEl.value);
+  const rhoO = parseFloat(rhoOEl.value);
+  const hO   = parseFloat(hOEl.value);
+  const hW   = (rhoO/rhoW) * hO;
+  readings.push({hO, hW});
+  renderTable();
+  updateGraph(rhoW, rhoO);
+});
+document.getElementById('clearBtn').addEventListener('click', ()=>{
+  readings = [];
+  renderTable();
+  updateGraph(parseFloat(rhoWEl.value), parseFloat(rhoOEl.value));
+});
+
+function renderTable(){
+  dataBody.innerHTML = '';
+  emptyNote.style.display = readings.length ? 'none' : 'block';
+  readings.forEach((r,i)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${i+1}</td><td>${r.hO.toFixed(1)}</td><td>${r.hW.toFixed(2)}</td><td class="rd-cell">${(r.hW/r.hO).toFixed(3)}</td>`;
+    dataBody.appendChild(tr);
+  });
+}
+
+function updateGraph(rhoW, rhoO){
+  graphSvg.innerHTML = '';
+  const W=320,H=260, m=34;
+  const maxX = 30, maxY = 30;
+  const px = v => m + (v/maxX)*(W-m-14);
+  const py = v => (H-m) - (v/maxY)*(H-m-14);
+
+  // axes
+  graphSvg.appendChild(svgEl('line',{x1:m,y1:H-m,x2:W-14,y2:H-m,stroke:'var(--line)','stroke-width':1.4}));
+  graphSvg.appendChild(svgEl('line',{x1:m,y1:H-m,x2:m,y2:14,stroke:'var(--line)','stroke-width':1.4}));
+  for(let v=0; v<=maxX; v+=10){
+    const t = svgEl('text',{x:px(v),y:H-m+14,'font-size':'8','text-anchor':'middle',fill:'var(--muted)','font-family':'var(--mono)'});
+    t.textContent=v; graphSvg.appendChild(t);
+  }
+  for(let v=0; v<=maxY; v+=10){
+    const t = svgEl('text',{x:m-8,y:py(v)+3,'font-size':'8','text-anchor':'end',fill:'var(--muted)','font-family':'var(--mono)'});
+    t.textContent=v; graphSvg.appendChild(t);
+  }
+  const xl = svgEl('text',{x:W/2,y:H-6,'font-size':'9','text-anchor':'middle',fill:'var(--muted)'}); xl.textContent='h_o (cm)'; graphSvg.appendChild(xl);
+  const yl = svgEl('text',{x:12,y:H/2,'font-size':'9','text-anchor':'middle',fill:'var(--muted)',transform:`rotate(-90 12 ${H/2})`}); yl.textContent='h_w (cm)'; graphSvg.appendChild(yl);
+
+  // theoretical line
+  const trueSlope = rhoO/rhoW;
+  graphSvg.appendChild(svgEl('line',{x1:px(0),y1:py(0),x2:px(maxX),y2:py(maxX*trueSlope>maxY?maxY/trueSlope:maxX), stroke:'var(--line)','stroke-width':1,'stroke-dasharray':'3,3'}));
+
+  // points
+  readings.forEach(r=>{
+    graphSvg.appendChild(svgEl('circle',{cx:px(r.hO), cy:py(r.hW), r:4, fill:'var(--oil-deep)', stroke:'var(--surface)', 'stroke-width':1}));
+  });
+
+  // best fit through origin
+  let slope = null;
+  if(readings.length){
+    let sxy=0, sxx=0;
+    readings.forEach(r=>{ sxy += r.hO*r.hW; sxx += r.hO*r.hO; });
+    slope = sxy/sxx;
+    graphSvg.appendChild(svgEl('line',{x1:px(0), y1:py(0), x2:px(maxX), y2:py(Math.min(maxX*slope, maxY)), stroke:'var(--water)', 'stroke-width':2}));
+  }
+
+  document.getElementById('slopeOut').textContent = slope!==null ? slope.toFixed(3) : '—';
+  document.getElementById('trueOut').textContent = trueSlope.toFixed(3);
+}
+
+render();
+
+/* ============================================================
+   THEORY CONTENT
+============================================================ */
+const theoryData = [
+  {ic:'⚖️', title:'ඝනත්වය වැඩි ද්‍රවය මුලින්ම දැමීම', body:`
+    U-නළයට අණුමිශ්‍ර ද්‍රව දෙකක් වත් කිරීමේදී <b>ඝනත්වය වැඩි ද්‍රවය (සාමාන්‍යයෙන් ජලය) මුලින්ම</b> දැමිය යුතුය.
+    ඊට හේතුව, ඝනත්වය අඩු ද්‍රවය මුලින් දමා පසුව ඝන ද්‍රවය එකතු කළහොත්, ඝන ද්‍රවය පහළට කිඳා බැස අඩු ඝන ද්‍රවය දෙපස නළවලම ඉහළට තල්ලු වී මිශ්‍ර වීමට ඉඩ ඇත.
+    එසේ නොවී පැහැදිලි අන්තර්පෘෂ්ඨයක් ලබා ගැනීමට නම් ඝන ද්‍රවය පළමුව නළය පුරා පිරවිය යුතුය.`},
+  {ic:'📏', title:'නළයේ විෂ්කම්භය තෝරා ගැනීම (0.8–1 cm)', body:`
+    U-නළයේ අභ්‍යන්තර විෂ්කම්භය <span class="formula">0.8 cm – 1 cm</span> පරාසයේ තිබිය යුතුය.
+    <ul>
+      <li>නළය <b>ඉතා පටු</b> නම් — කේශාකර්ෂණ බලය (capillarity) නිසා ද්‍රව මට්ටම කෘතිමව ඉහළ/පහළ වී මැනුම් දෝෂයක් ඇති කරයි.</li>
+      <li>නළය <b>ඉතා පළල්</b> නම් — නිවැරදි කියවීමක් ලබා ගැනීමට වැඩි ද්‍රව පරිමාවක් අවශ්‍ය වන අතර, පරීක්ෂණයේ ප්‍රායෝගිකත්වය අඩු වේ.</li>
+    </ul>`},
+  {ic:'📐', title:'උස > 10 cm තබා ගැනීම — දෝෂ අවම කිරීම', body:`
+    මීටර් රුලයකින් උස මැනීමේදී සිදුවන පරිමාණ දෝෂය (least count error) 1%ට වඩා අඩුවෙන් තබා ගැනීමට, මනින උස <span class="formula">10 cm</span>ට වඩා වැඩි විය යුතුය.
+    h<sub>w</sub>ρ<sub>w</sub> = h<sub>o</sub>ρ<sub>o</sub> සමීකරණයට අනුව h අනුපාතය ρ අනුපාතයට ප්‍රතිලෝම වන බැවින්, ඝනත්ව අනුපාතය ජලයට ආසන්න ද්‍රවයක් සඳහා h අනුපාතය ඉතා විශාල විය හැක — එවිට කුඩා h අගයන් මැනීමේ දෝෂය විශාල බලපෑමක් ඇති කරයි.`},
+  {ic:'🧴', title:'සීමාව — මිශ්‍ර වන ද්‍රව සඳහා', body:`
+    මෙම ක්‍රමය සෘජුව භාවිතා කළ හැක්කේ <b>එකිනෙකට මිශ්‍ර නොවන ද්‍රව දෙකක් (immiscible)</b> සඳහා පමණි.
+    ජලය සමඟ මිශ්‍ර වන ද්‍රවයක සාපේක්ෂ ඝනත්වය සෙවීමට නම්, ජලය හා එම ද්‍රවය යන දෙකටම මිශ්‍ර නොවන <b>තෙවන උදාසීන ද්‍රවයක්</b> (reference liquid) භාවිතා කර, පරීක්ෂණය දෙවතාවක් සිදු කළ යුතුය — වරක් ජලය/තෙවන ද්‍රවය සඳහාත්, තවත් වරක් අදාළ ද්‍රවය/තෙවන ද්‍රවය සඳහාත්.`},
+  {ic:'🧼', title:'නළය සකස් කිරීමේ පිළිවෙළ', body:`
+    පරීක්ෂණයට පෙර නළය පිරිසිදු කිරීම නිරවද්‍යතාවයට බෙහෙවින් බලපායි. පිළිවෙළ:
+    <ul>
+      <li>තනුක ක්ෂාරයකින් සෝදා</li>
+      <li>තනුක අම්ලයකින් සෝදා</li>
+      <li>ආසුත ජලයෙන් සේදීම</li>
+      <li>වායු ප්‍රවාහයේ වියළීම</li>
+    </ul>
+    මින් නළයේ අභ්‍යන්තර පෘෂ්ඨයේ ග්‍රීස්/අපිරිසිදුකම ඉවත් වී, කේශාකර්ෂණ බලයේ අවිනිශ්චිතතාවය අවම වේ.`},
+  {ic:'🔁', title:'කියවීම් ගැනීමේදී — ජලය එකතු කිරීමේ බලපෑම', body:`
+    සමතුලිතතාවයට පත් වූ පසු අන්තර්පෘෂ්ඨයේ ස්ථානය සකස් කිරීමට <b>h<sub>o</sub> (තෙල් ප්‍රමාණය) වෙනස් කළ යුතුමය</b>; නමුත් ඊට අමතරව <b>ජලය</b> එකතු කළහොත් දෙපස ම මට්ටම ඉහළට යනු මිස h<sub>w</sub> අගයේ වෙනසක් සිදු නොවේ (ඝනත්වය අඩු ද්‍රවය එකතු කිරීමකි).
+    එබැවින් එක් එක් h<sub>o</sub> අගයකට අනුරූප h<sub>w</sub> අගය නිරීක්ෂණය කිරීමෙන් කියවීම් මාලාවක් ගොඩනඟා, ප්‍රස්තාරයෙන් සාපේක්ෂ ඝනත්වය ගණනය කරයි.`},
+];
+
+const theoryList = document.getElementById('theoryList');
+theoryData.forEach((t,i)=>{
+  const card = document.createElement('div');
+  card.className = 'theory-card';
+  card.innerHTML = `
+    <div class="theory-head">
+      <div class="ic">${t.ic}</div>
+      <h3>${i+1}. ${t.title}</h3>
+      <div class="chev">▾</div>
+    </div>
+    <div class="theory-body"><div class="theory-body-inner">${t.body}</div></div>`;
+  const head = card.querySelector('.theory-head');
+  const body = card.querySelector('.theory-body');
+  head.addEventListener('click', ()=>{
+    const isOpen = card.classList.contains('open');
+    document.querySelectorAll('.theory-card').forEach(c=>{c.classList.remove('open'); c.querySelector('.theory-body').style.maxHeight=null;});
+    if(!isOpen){ card.classList.add('open'); body.style.maxHeight = body.scrollHeight+'px'; }
+  });
+  theoryList.appendChild(card);
+});
+
+/* ============================================================
+   QUIZ CONTENT
+============================================================ */
+const quizData = [
+  { tag:'1989 A/L · පසුගිය ප්‍රශ්නය', title:'01. X සහ Y ද්‍රව — AB රේඛාවේ පීඩන සමතුලිතතාවය',
+    body:`ඒකාකාර විෂ්කම්භයක් (1 cm) ඇති U-නළයක එකිනෙකට මිශ්‍ර නොවන X සහ Y ද්‍රව දෙකක් ඇත. AB තිරස් රේඛාවට සාපේක්ෂව X සහ Y ද්‍රව තීරවල උස පිළිවෙළින් <b>20 cm</b> සහ <b>16 cm</b> වේ. Y හි ඝනත්වය <b>1000 kg/m³</b> නම්, X හි ඝනත්වය සොයන්න. තවද, (i) Y ද්‍රවයෙන් තවත් 6 cm පමණ දකුණු අත් නළයට එකතු කළහොත්, සහ (ii) X ද්‍රවයෙන් 6 cm ප්‍රමාණයක් වම් අත් නළයෙන් ඉවත් කළහොත් — අන්තර්පෘෂ්ඨයේ ස්ථානය AB රේඛාවට සාපේක්ෂව කෙසේ වෙනස් වේද?`,
+    steps:[
+      `<span class="tag">01</span> AB රේඛාව යනු පීඩන සමතුලිත මට්ටමයි — එහිදී දෙපස ම ද්‍රව තීරවල පීඩනය සමාන වේ: <span class="formula">ρ_X · g · h_X = ρ_Y · g · h_Y</span>`,
+      `<span class="tag">02</span> අගය ආදේශ කිරීම: <span class="formula">ρ_X × 20 = 1000 × 16</span>`,
+      `<span class="tag">03</span> විසඳුම: <span class="formula">ρ_X = 16000/20 = 800 kg/m³</span> — එනම් X හි සාපේක්ෂ ඝනත්වය 0.8`,
+      `<span class="tag">04</span> (i) Y ද්‍රවයෙන් තවත් 6 cm එකතු කළ විට: නළයේ හරස්කඩ එකම බැවින්, එකතු කළ Y පරිමාව සමානව බෙදී අන්තර්පෘෂ්ඨය පහළට තල්ලු කරයි. නව සමතුලිතතාවයේදී AB රේඛාවට වඩා පහළින් අලුත් සමතුලිත මට්ටමක් ඇති වන අතර, X තීරයේ උස වැඩි වී Y තීරයේ (එකතු කළ 6cm ඇතුළුව) උසද අනුරූපව වෙනස් වේ. සමීකරණය: ρ_X(h_X+x) = ρ_Y(h_Y+6+x) ආකාරයට නව x විස්ථාපනය සොයා ගත හැක.`,
+      `<span class="tag">05</span> (ii) X ද්‍රවයෙන් 6 cm ඉවත් කර Y වෙත එකතු කළ විට: දැන් X තීරයේ ඝනත්වය අඩු බැවින්, Y පැත්තට ද්‍රවය මාරු වීමෙන් අන්තර්පෘෂ්ඨය Y පැත්තට වඩාත් නැඹුරු වේ. දෙඅවස්ථාවේදීම නිශ්චිත සංඛ්‍යාත්මක විස්ථාපනය සෙවීමට නළයේ හරස්කඩ වර්ගඵලය හා මුල් රූප සටහනේ දළ මානයන් අවශ්‍ය වේ — ක්‍රමවේදය ඉහත සමීකරණය මගින් දැක්වේ.`
+    ],
+    final:'ρ_X = 800 kg/m³ (සාපේක්ෂ ඝනත්වය 0.8); (i) සහ (ii) හි විස්ථාපනය ඉහත සමීකරණ ක්‍රමයෙන් සොයාගත හැක.'
+  },
+  { tag:'MCQ · මිශ්‍ර ද්‍රව', title:'02. රසදිය මගින් වෙන් කළ ජලය සහ තෙල් තීර',
+    body:`U-නළයක් රසදිය මගින් කොටස් දෙකකට වෙන් කර ඇති අතර, එක් අත් නළයකට ජලයද අනෙක් අතට තෙල් වර්ගයක්ද වත් කර ඇත. රූපයේ පරිදි ජල තීරයේ උස 10 cm ද, තෙල් තීරයේ උස 12.5 cm ද වේ. රසදිය මට්ටම දෙපසම එකසමාන නම්, තෙලේ සාපේක්ෂ ඝනත්වය කුමක්ද?`,
+    mcq:['0.8','1.0','1.6','1.25','ඉහත කිසිවක් නොවේ'], correct:0,
+    steps:[
+      `<span class="tag">01</span> රසදිය මට්ටම දෙපස ම සමාන බැවින්, එම මට්ටමේදී පීඩනයන් සමතුලිත වේ: <span class="formula">ρ_w · g · h_w = ρ_o · g · h_o</span>`,
+      `<span class="tag">02</span> ආදේශ කිරීම: <span class="formula">1000 × 10 = ρ_o × 12.5</span>`,
+      `<span class="tag">03</span> විසඳුම: <span class="formula">ρ_o = 10000/12.5 = 800 kg/m³</span> → සාපේක්ෂ ඝනත්වය = 0.8`
+    ],
+    final:'නිවැරදි පිළිතුර: (1) 0.8'
+  },
+  { tag:'MCQ · ද්‍රව තුනක් — න්‍යාස ගැටලුව', title:'03. ρ₁, ρ₂, ρ₃ ඝනත්ති සහිත ද්‍රව තුනක් — සම්බන්ධතාවය',
+    body:`ර්‍යවිශේෂී හැඩැති භාජනයක ρ₁, ρ₂, ρ₃ ඝනත්ති සහිත එකිනෙකට මිශ්‍ර නොවන ද්‍රව 3ක් ඇත. රූපයේ දැක්වෙන පරිදි H₁ = 15 cm සහ H₂ = 10 cm උස් අනුව ද්‍රව මට්ටම් සකස් වී ඇත. පීඩන සමතුලිතතා විශ්ලේෂණයෙන් ρ₁, ρ₂, ρ₃ අතර නිවැරදි සම්බන්ධතාවය කුමක්ද?`,
+    mcq:['3r₁ = 2r₃ + r₂','r₃ = 2r₁ + 3r₂','r₃ = 3r₁ + 2r₂','2r₃ = 3r₁ + r₂','r₃ = r₁ + r₂'], correct:3,
+    steps:[
+      `<span class="tag">01</span> විවිධ ද්‍රව මට්ටම් අතර පීඩන සමතුලිතතා ලක්ෂ්‍ය දෙකකදී (එකිනෙකට වෙනස් උස් මට්ටම්වල) පීඩන සමීකරණ ලිවීමෙන් ρ අගයන් සම්බන්ධ කළ හැක.`,
+      `<span class="tag">02</span> H₁ = 15 cm සහ H₂ = 10 cm උස් අනුපාතය 3∶2 වන බැවින්, සමතුලිත සමීකරණ දෙකෙන් ρ₁, ρ₂, ρ₃ අතර රේඛීය සම්බන්ධතාවයක් ලැබේ.`,
+      `<span class="tag">03</span> මෙම උස් අනුපාතය යෙදූ විට ලැබෙන සම්බන්ධතාවය: <span class="formula">2ρ₃ = 3ρ₁ + ρ₂</span> ආකෘතියට සරල වේ.`
+    ],
+    final:'නිවැරදි පිළිතුර: (4) 2r₃ = 3r₁ + r₂  — (රූප සටහනේ නිශ්චිත මානයන්ට අනුව සත්‍යාපනය කරන්න)'
+  },
+  { tag:'2020 A/L · සත්‍ය/අසත්‍ය විශ්ලේෂණය', title:'04. P, Q ලක්ෂ්‍ය — ජලය/තෙල් අන්තර්පෘෂ්ඨයේ පීඩනය',
+    body:`U-නළයක දෙපස ම ජලය සහ පොල් තෙල් වත් කර ඇත. ජල-තෙල් අන්තර්පෘෂ්ඨය නළයේ මධ්‍යයේ පිහිටා ඇති බව උපකල්පනය කර, P සහ Q ලක්ෂ්‍ය (එකම තිරස් මට්ටමේ පිහිටි) සලකා පහත ප්‍රකාශ පරීක්ෂා කරන්න:
+    <br>(A) P ලක්ෂ්‍යයේ පීඩනය = Q ලක්ෂ්‍යයේ පීඩනය
+    <br>(B) h₁ρ_w = h₂ρ_o
+    <br>(C) h₃ρ_w = h₄ρ_o`,
+    mcq:['(A) පමණක් සත්‍ය වේ','(B) පමණක් සත්‍ය වේ','(A) සහ (B) පමණක් සත්‍ය වේ','(B) සහ (C) පමණක් සත්‍ය වේ','(A), (B) සහ (C) සියල්ලම සත්‍ය වේ'], correct:2,
+    steps:[
+      `<span class="tag">01</span> P සහ Q එකම තිරස් මට්ටමේ, එකම සම්බන්ධිත ද්‍රව පද්ධතියේ පිහිටා ඇති බැවින්, හයිඩ්‍රොස්ටැටික් මූලධර්මයට අනුව <span class="formula">P_P = P_Q</span> — එබැවින් (A) සත්‍යයි.`,
+      `<span class="tag">02</span> h₁ සහ h₂ යනු පීඩන සමතුලිත මට්ටමට ඉහළින් ඇති ජල/තෙල් තීරවල උස් නම්, <span class="formula">h₁ρ_w = h₂ρ_o</span> යන සමීකරණය එම නිශ්චිත මට්ටමේදී සත්‍ය වේ — එබැවින් (B) ද සත්‍යයි.`,
+      `<span class="tag">03</span> h₃, h₄ මනිනු ලබන්නේ පීඩන සමතුලිත මට්ටමින් නොවන වෙනත් සුළු මට්ටමකින් නම්, එම මට්ටමේදී පීඩන සමීකරණය කෙලින්ම h₃ρ_w = h₄ρ_o ලෙස ලිවිය නොහැක — එබැවින් (C) අසත්‍යයි.`
+    ],
+    final:'නිවැරදි පිළිතුර: (3) (A) සහ (B) පමණක් සත්‍ය වේ'
+  },
+  { tag:'MCQ · ද්‍රව තුනක් — නළය තිරස් කිරීම', title:'05. ρ, 2ρ, 3ρ ද්‍රව තීරයේ x සෙවීම',
+    body:`ρ, 2ρ, 3ρ ඝනත්ති සහිත ද්‍රව තුනක් l උසකින් සෑදුනු සිරස් නළයක (I) පුරවා පසුව එම නළය තිරස්ව හරවා (II) ස්ථානගත කරයි. නව සමතුලිත මට්ටමේදී ස්ථාන මාරුව නිරූපණය කරන x අගය l ට සාපේක්ෂව සොයන්න.`,
+    mcq:['l/2','l/3','l/2√3','3l/4','3l/2'], correct:3,
+    steps:[
+      `<span class="tag">01</span> මුල් සිරස් අවස්ථාවේදී ද්‍රව තුනෙහිම එකතුව ඇති සම්පූර්ණ බර, දෙවන අවස්ථාවේ තිරස් නළය තුළ නැවත සමතුලිත වීමේදී පීඩන-උස සමීකරණ මගින් සම්බන්ධ වේ.`,
+      `<span class="tag">02</span> ඝනත්ති 1∶2∶3 අනුපාතයේ තිබෙන බැවින්, බර මධ්‍යයේ ස්ථාන මාරුව ඝනත්ති-බර සාධක අනුව ගණනය කළ යුතුය.`,
+      `<span class="tag">03</span> මෙම සමානුපාතික බර විශ්ලේෂණයෙන් <span class="formula">x = 3l/4</span> ලෙස ලැබේ.`
+    ],
+    final:'නිවැරදි පිළිතුර: (4) 3l/4  — (රූප සටහනේ නිශ්චිත වින්‍යාසයට අනුව සත්‍යාපනය කරන්න)'
+  },
+  { tag:'2001 A/L · ත්වරණය වන පද්ධතිය', title:'06. තිරස්ව ත්වරණය වන U-නළයක ද්‍රව මට්ටම් වෙනස',
+    body:`U-නළයක ද්‍රවයක් ඇති අතර, නළය තිරස් දිශාවට a නියත ත්වරණයකින් චලනය කරයි. නළයේ දෙපස අත් අතර තිරස් දුර l නම්, ත්වරණය නිසා ඇති වන දෙපස ද්‍රව මට්ටම් අතර උස වෙනස (Δh) සොයන්න.`,
+    mcq:['la/g','lg/a','l(g+a)/g','lg/(a+g)','l(a+g)/a'], correct:0,
+    steps:[
+      `<span class="tag">01</span> තිරස් ත්වරණයක් ඇති පද්ධතියක ද්‍රවයේ නිදහස් පෘෂ්ඨය තිරස් අක්ෂයට ආනත වේ. ත්වරණයට ප්‍රතිවිරුද්ධ දිශාවට ව්‍යාජ බලයක් (pseudo-force) ක්‍රියා කරන බව සලකා විශ්ලේෂණය කරයි.`,
+      `<span class="tag">02</span> ද්‍රව මතුපිට ආනතියේ ස්පර්ශක අනුපාතය: <span class="formula">tanθ = a/g</span>`,
+      `<span class="tag">03</span> දෙපස අත් අතර තිරස් දුර l නම්, උස වෙනස: <span class="formula">Δh = l · tanθ = l·a/g</span>`
+    ],
+    final:'නිවැරදි පිළිතුර: (1) la/g'
+  },
+];
+
+const quizList = document.getElementById('quizList');
+quizData.forEach((q,qi)=>{
+  const card = document.createElement('div');
+  card.className='q-card';
+  let mcqHtml = '';
+  if(q.mcq){
+    mcqHtml = `<div class="mcq-opts">` + q.mcq.map((opt,oi)=>
+      `<button class="mcq-opt" data-i="${oi}">(${oi+1}) ${opt}</button>`
+    ).join('') + `</div>`;
+  }
+  const stepsHtml = q.steps.map(s=>`<div class="step">${s}</div>`).join('');
+  card.innerHTML = `
+    <span class="q-tag">${q.tag}</span>
+    <p class="q-title">${q.title}</p>
+    <div class="q-body">${q.body}</div>
+    ${mcqHtml}
+    <div class="btn-row">
+      <button class="btn btn-primary step-btn">පියවර 1 පෙන්වන්න</button>
+      <button class="btn btn-ghost reset-btn" style="display:none;">නැවත සකසන්න</button>
+    </div>
+    <div class="steps">${stepsHtml}</div>
+    <div class="ans-final">🏁 ${q.final}</div>`;
+  quizList.appendChild(card);
+
+  // MCQ interaction
+  if(q.mcq){
+    card.querySelectorAll('.mcq-opt').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        if(btn.disabled) return;
+        card.querySelectorAll('.mcq-opt').forEach(b=>b.disabled=true);
+        const i = parseInt(btn.dataset.i);
+        if(i===q.correct) btn.classList.add('correct');
+        else{
+          btn.classList.add('wrong');
+          card.querySelectorAll('.mcq-opt')[q.correct].classList.add('correct');
+        }
+      });
+    });
+  }
+
+  // step reveal
+  const stepEls = card.querySelectorAll('.step');
+  const stepBtn = card.querySelector('.step-btn');
+  const resetBtn = card.querySelector('.reset-btn');
+  const finalEl = card.querySelector('.ans-final');
+  let shown = 0;
+  stepBtn.addEventListener('click', ()=>{
+    if(shown < stepEls.length){
+      stepEls[shown].classList.add('show');
+      shown++;
+      if(shown < stepEls.length){
+        stepBtn.textContent = `පියවර ${shown+1} පෙන්වන්න`;
+      } else {
+        stepBtn.style.display='none';
+        finalEl.classList.add('show');
+        resetBtn.style.display='inline-flex';
+      }
+    }
+  });
+  resetBtn.addEventListener('click', ()=>{
+    stepEls.forEach(s=>s.classList.remove('show'));
+    finalEl.classList.remove('show');
+    shown=0;
+    stepBtn.textContent='පියවර 1 පෙන්වන්න';
+    stepBtn.style.display='inline-flex';
+    resetBtn.style.display='none';
+    if(q.mcq){
+      card.querySelectorAll('.mcq-opt').forEach(b=>{b.disabled=false; b.classList.remove('correct','wrong');});
+    }
+  });
+});
+</script>
+</body>
+</html>

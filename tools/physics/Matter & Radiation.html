@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<title>තාප විකිරණය | Matters &amp; Radiations — A/L Physics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+Sinhala:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --bg:#0a0c10;
+  --bg-soft:#0f1319;
+  --surface:#141a22;
+  --surface-2:#1b2330;
+  --border:#263041;
+  --text:#eaeef3;
+  --muted:#8b96a8;
+  --muted-2:#5c6779;
+  --teal:#31d6c1;
+  --teal-dim:#1a4f49;
+  --amber:#f5a623;
+  --amber-dim:#4a3413;
+  --red:#f0495a;
+  --red-dim:#4a1c22;
+  --violet:#9b8cf6;
+  --radius:16px;
+  --radius-sm:10px;
+  --shadow:0 10px 30px -12px rgba(0,0,0,.55);
+  --font-display:'Space Grotesk', 'Noto Sans Sinhala', sans-serif;
+  --font-body:'Noto Sans Sinhala','Space Grotesk', sans-serif;
+  --font-mono:'JetBrains Mono', monospace;
+}
+[data-theme="light"]{
+  --bg:#f3f1ea;
+  --bg-soft:#ece9e0;
+  --surface:#ffffff;
+  --surface-2:#f2f0e8;
+  --border:#dcd7c8;
+  --text:#181a1e;
+  --muted:#5b5f66;
+  --muted-2:#8a8d92;
+  --teal:#0f8f80;
+  --teal-dim:#d7f2ee;
+  --amber:#b5720a;
+  --amber-dim:#faeacb;
+  --red:#c62839;
+  --red-dim:#fbdde0;
+  --violet:#5d4bd0;
+  --shadow:0 10px 24px -12px rgba(30,25,10,.25);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+  transition:background .25s ease,color .25s ease;
+}
+h1,h2,h3,h4,.disp{font-family:var(--font-display);letter-spacing:.2px;}
+.mono{font-family:var(--font-mono);}
+::selection{background:var(--teal);color:#04231f;}
+a{color:inherit;}
+button{font-family:inherit;}
+
+/* ============ LAYOUT SHELL ============ */
+.app-shell{
+  max-width:760px;
+  margin:0 auto;
+  min-height:100vh;
+  background:var(--bg);
+  position:relative;
+  padding-bottom:86px;
+}
+.topbar{
+  position:sticky; top:0; z-index:40;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:10px;
+  padding:14px 16px;
+  background:linear-gradient(180deg, var(--bg) 60%, rgba(10,12,16,0));
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border);
+}
+.brand{display:flex; align-items:center; gap:10px;}
+.brand-mark{
+  width:34px;height:34px;border-radius:9px;
+  background:conic-gradient(from 210deg, var(--teal), var(--amber), var(--red), var(--teal));
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 0 1px var(--border), 0 6px 16px -6px rgba(49,214,193,.5);
+  flex-shrink:0;
+}
+.brand-mark svg{width:18px;height:18px;}
+.brand-text{line-height:1.15;}
+.brand-text .t1{font-size:11px; letter-spacing:1.5px; color:var(--muted); text-transform:uppercase; font-family:var(--font-display);}
+.brand-text .t2{font-size:16px; font-weight:700;}
+.theme-toggle{
+  width:40px;height:40px;border-radius:50%;
+  border:1px solid var(--border); background:var(--surface);
+  color:var(--text); display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+}
+.theme-toggle svg{width:18px;height:18px;}
+
+main{padding:0 16px;}
+.view{display:none; animation:fadeIn .35s ease;}
+.view.active{display:block;}
+@keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+/* ============ HERO ============ */
+.hero{
+  margin-top:14px;
+  padding:22px 18px 20px;
+  border-radius:var(--radius);
+  background:linear-gradient(160deg, var(--surface) 0%, var(--surface-2) 100%);
+  border:1px solid var(--border);
+  box-shadow:var(--shadow);
+  position:relative;
+  overflow:hidden;
+}
+.hero .eyebrow{
+  font-family:var(--font-display); font-size:11px; letter-spacing:2px; text-transform:uppercase;
+  color:var(--teal); display:flex; align-items:center; gap:6px; margin-bottom:8px;
+}
+.hero .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--teal); box-shadow:0 0 10px var(--teal); animation:pulse 1.8s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.25;}}
+.hero h1{font-size:26px; line-height:1.25; margin:0 0 8px; font-weight:700;}
+.hero p{color:var(--muted); font-size:14.5px; line-height:1.6; margin:0 0 16px;}
+.hero-canvas-wrap{
+  border:1px solid var(--border); border-radius:var(--radius-sm);
+  background:var(--bg-soft); padding:8px 10px 4px; position:relative;
+}
+.hero-canvas-wrap .cap{display:flex; justify-content:space-between; font-size:10.5px; color:var(--muted-2); font-family:var(--font-mono); padding:2px 2px 6px;}
+canvas{display:block; width:100%; touch-action:none;}
+.hero-quick{display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:16px;}
+.qbtn{
+  border:1px solid var(--border); background:var(--surface-2);
+  border-radius:var(--radius-sm); padding:12px; text-align:right; cursor:pointer;
+  color:var(--text); font-size:13px; font-weight:600; display:flex; flex-direction:column; gap:6px;
+}
+.qbtn small{color:var(--muted); font-weight:400; font-size:11.5px;}
+.qbtn:active{transform:scale(.98);}
+
+/* ============ SECTION HEADERS ============ */
+.section-head{margin:26px 0 12px; display:flex; align-items:baseline; gap:8px;}
+.section-head h2{font-size:19px; margin:0; font-weight:700;}
+.section-head .tag{font-size:11px; color:var(--muted-2); font-family:var(--font-mono);}
+
+/* ============ CARDS ============ */
+.card{
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  padding:16px; margin-bottom:16px; box-shadow:var(--shadow);
+}
+.card h3{margin:0 0 4px; font-size:16px; display:flex; align-items:center; gap:8px;}
+.card h3 .swatch{width:8px;height:8px;border-radius:2px; flex-shrink:0;}
+.card .sub{color:var(--muted); font-size:12.5px; margin:0 0 14px;}
+.formula-box{
+  background:var(--bg-soft); border:1px dashed var(--border); border-radius:var(--radius-sm);
+  padding:10px 12px; font-family:var(--font-mono); font-size:13.5px; color:var(--teal);
+  display:flex; flex-wrap:wrap; gap:14px; margin-bottom:14px;
+}
+[data-theme="light"] .formula-box{color:var(--teal);}
+.formula-box span.f{color:var(--text); font-weight:600;}
+
+.field{margin-bottom:14px;}
+.field-label{display:flex; justify-content:space-between; font-size:12.5px; color:var(--muted); margin-bottom:6px;}
+.field-label b{color:var(--text); font-family:var(--font-mono); font-weight:600;}
+input[type=range]{
+  -webkit-appearance:none; width:100%; height:6px; border-radius:4px;
+  background:var(--surface-2); border:1px solid var(--border); outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:20px; height:20px; border-radius:50%;
+  background:var(--teal); cursor:pointer; border:3px solid var(--bg);
+  box-shadow:0 0 0 1px var(--teal);
+}
+input[type=range]::-moz-range-thumb{
+  width:20px; height:20px; border-radius:50%; background:var(--teal); border:3px solid var(--bg); cursor:pointer;
+}
+select, input[type=number]{
+  width:100%; padding:10px 12px; border-radius:var(--radius-sm); border:1px solid var(--border);
+  background:var(--surface-2); color:var(--text); font-size:14px; font-family:var(--font-mono);
+}
+.row2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.results{display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:14px;}
+.result-box{
+  background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm);
+  padding:10px 12px;
+}
+.result-box .lbl{font-size:11px; color:var(--muted); margin-bottom:4px;}
+.result-box .val{font-family:var(--font-mono); font-size:15px; font-weight:700; color:var(--teal);}
+.result-box.warn .val{color:var(--red);}
+.result-box.ok .val{color:var(--amber);}
+.alert{
+  margin-top:10px; padding:10px 12px; border-radius:var(--radius-sm); font-size:12.5px;
+  border:1px solid var(--red); background:var(--red-dim); color:var(--red); display:none; align-items:center; gap:8px;
+}
+.alert.show{display:flex;}
+.alert.good{border-color:var(--teal); background:var(--teal-dim); color:var(--teal);}
+
+/* ============ SIMULATOR SPECIFIC ============ */
+.sim-canvas-wrap{border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--bg-soft); padding:10px; margin-bottom:14px;}
+.legend{display:flex; gap:14px; flex-wrap:wrap; font-size:11.5px; color:var(--muted); margin-top:8px;}
+.legend span{display:flex; align-items:center; gap:6px;}
+.legend i{width:10px;height:10px;border-radius:2px; display:inline-block;}
+.meter{height:14px; border-radius:8px; background:var(--surface-2); border:1px solid var(--border); overflow:hidden; margin-top:8px;}
+.meter-fill{height:100%; width:0%; background:linear-gradient(90deg, var(--teal), var(--amber)); transition:width .25s ease;}
+
+/* ============ ACCORDION / FLASHCARDS ============ */
+.acc{border:1px solid var(--border); border-radius:var(--radius); background:var(--surface); margin-bottom:12px; overflow:hidden; box-shadow:var(--shadow);}
+.acc-head{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:15px 16px; cursor:pointer; user-select:none;
+}
+.acc-head .left{display:flex; align-items:center; gap:10px;}
+.acc-head .num{
+  font-family:var(--font-mono); font-size:11px; color:var(--bg); background:var(--teal);
+  width:26px;height:26px;border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-weight:700;
+}
+.acc-head h3{margin:0; font-size:15px;}
+.acc-head .chev{transition:transform .25s ease; color:var(--muted); flex-shrink:0;}
+.acc.open .chev{transform:rotate(180deg);}
+.acc-body{max-height:0; overflow:hidden; transition:max-height .35s ease;}
+.acc-body-inner{padding:0 16px 16px; color:var(--muted); font-size:13.5px; line-height:1.75;}
+.acc-body-inner ul{margin:0; padding-right:0; padding-left:18px;}
+.acc-body-inner li{margin-bottom:8px;}
+.acc-body-inner li b{color:var(--text);}
+.acc-body-inner .mini-formula{
+  display:inline-block; font-family:var(--font-mono); background:var(--bg-soft); color:var(--teal);
+  border:1px solid var(--border); padding:1px 7px; border-radius:6px; font-size:12.5px; margin:0 2px;
+}
+
+/* ============ QUIZ ============ */
+.quiz-card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px; margin-bottom:16px; box-shadow:var(--shadow);}
+.quiz-q{font-size:14.5px; font-weight:600; margin:0 0 12px; line-height:1.6;}
+.quiz-opt{
+  display:block; width:100%; text-align:right; padding:11px 14px; margin-bottom:8px;
+  border:1px solid var(--border); background:var(--surface-2); color:var(--text);
+  border-radius:var(--radius-sm); font-size:13.5px; cursor:pointer; transition:all .15s ease;
+}
+.quiz-opt:active{transform:scale(.99);}
+.quiz-opt.correct{border-color:var(--teal); background:var(--teal-dim); color:var(--teal); font-weight:700;}
+.quiz-opt.wrong{border-color:var(--red); background:var(--red-dim); color:var(--red); font-weight:700;}
+.quiz-opt[disabled]{cursor:default;}
+.quiz-explain{
+  display:none; margin-top:10px; padding:10px 12px; background:var(--bg-soft); border-radius:var(--radius-sm);
+  font-size:12.5px; color:var(--muted); border:1px solid var(--border); line-height:1.6;
+}
+.quiz-explain.show{display:block;}
+.quiz-score{
+  position:sticky; bottom:86px; margin:16px 0; padding:12px 16px; border-radius:var(--radius-sm);
+  background:var(--surface-2); border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;
+  font-size:13px; color:var(--muted);
+}
+.quiz-score b{color:var(--amber); font-family:var(--font-mono); font-size:15px;}
+.reset-btn{
+  border:1px solid var(--border); background:transparent; color:var(--text); padding:7px 14px;
+  border-radius:20px; font-size:12px; cursor:pointer;
+}
+
+/* ============ BOTTOM NAV ============ */
+.bottomnav{
+  position:fixed; left:0; right:0; bottom:0; z-index:50;
+  max-width:760px; margin:0 auto;
+  display:grid; grid-template-columns:repeat(5,1fr);
+  background:var(--surface); border-top:1px solid var(--border);
+  padding:8px 6px calc(8px + env(safe-area-inset-bottom));
+  box-shadow:0 -8px 24px -10px rgba(0,0,0,.4);
+}
+.nav-btn{
+  display:flex; flex-direction:column; align-items:center; gap:4px; padding:6px 2px;
+  background:transparent; border:none; color:var(--muted-2); cursor:pointer; border-radius:12px; font-size:10.5px;
+}
+.nav-btn svg{width:20px; height:20px;}
+.nav-btn.active{color:var(--teal);}
+.nav-btn.active .nav-ico{background:var(--teal-dim); box-shadow:inset 0 0 0 1px var(--teal);}
+.nav-ico{width:34px;height:26px;border-radius:9px; display:flex; align-items:center; justify-content:center;}
+
+footer.credit{text-align:center; color:var(--muted-2); font-size:11px; padding:22px 0 6px;}
+
+@media (min-width:600px){
+  .row2{grid-template-columns:1fr 1fr 1fr;}
+  .results{grid-template-columns:repeat(4,1fr);}
+}
+</style>
+</head>
+<body data-theme="dark">
+<div class="app-shell">
+
+  <!-- ============ TOP BAR ============ -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8" stroke="#05100e" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="3" fill="#05100e"/></svg>
+      </div>
+      <div class="brand-text">
+        <div class="t1">A/L Physics · Unit Revision</div>
+        <div class="t2">තාප විකිරණය සහ අංශු භෞතිකය</div>
+      </div>
+    </div>
+    <button class="theme-toggle" id="themeBtn" aria-label="Theme toggle">
+      <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v1M12 20v1M4.2 4.2l.7.7M19.1 19.1l.7.7M3 12h1M20 12h1M4.2 19.8l.7-.7M19.1 4.9l.7-.7"/><circle cx="12" cy="12" r="5"/></svg>
+    </button>
+  </div>
+
+  <main>
+    <!-- ================================================================= -->
+    <!-- VIEW: HOME -->
+    <!-- ================================================================= -->
+    <section class="view active" id="view-home">
+      <div class="hero">
+        <div class="eyebrow"><span class="dot"></span> LIVE SIMULATION</div>
+        <h1>නොපෙනෙන විකිරණය — දැන් ඇස ඉදිරියේ</h1>
+        <p>සෑම කෘෂ්ණ වස්තුවක්ම නිකුත් කරන තාප විකිරණයේ වර්ණාවලිය පහත පෙන්වන්නේ ප්ලෑන්ක්ගේ නියමය අනුව සජීවීවය. උෂ්ණත්වය වැඩි වන විට එය කෙසේ මාරු වේදැයි නරඹන්න — මෙයම තමයි මේ පාඩමේ හදවත.</p>
+        <div class="hero-canvas-wrap">
+          <canvas id="heroCanvas" height="150"></canvas>
+          <div class="cap"><span>100nm</span><span id="heroTLabel" class="mono">T = 4000K</span><span>3000nm</span></div>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <div class="field-label"><span>උෂ්ණත්වය (Temperature)</span><b id="heroTVal">4000 K</b></div>
+          <input type="range" id="heroT" min="1000" max="6500" step="50" value="4000">
+        </div>
+        <div class="hero-quick">
+          <button class="qbtn" data-goto="view-calc"><span>🧮 කැල්කියුලේටර</span><small>සූත්‍ර 4ක් සජීවීව</small></button>
+          <button class="qbtn" data-goto="view-sim"><span>🔬 සිමියුලේටර</span><small>ග්‍රැෆ් 3ක්</small></button>
+          <button class="qbtn" data-goto="view-cards"><span>🗂️ ෆ්ලෑෂ්කාඩ්</span><small>මාතෘකා 4ක්</small></button>
+          <button class="qbtn" data-goto="view-quiz"><span>✅ ක්විස් එක</span><small>ප්‍රශ්න 5ක්</small></button>
+        </div>
+      </div>
+
+      <div class="section-head"><h2>මාතෘකා සිතියම</h2><span class="tag">TOPIC MAP</span></div>
+      <div class="card">
+        <ul style="margin:0; padding-right:0; padding-left:18px; color:var(--muted); font-size:13.5px; line-height:2;">
+          <li><b style="color:var(--text)">තාප විකිරණය</b> — කෘෂ්ණ වස්තු, ස්ටෙෆාන්ගේ නියමය, වීන්ගේ විස්ථාපන නියමය</li>
+          <li><b style="color:var(--text)">ප්‍රකාශ විද්‍යුත් ආචරණය</b> — අයින්ස්ටයින්ගේ සමීකරණය, දේහලීය සංඛ්‍යාතය, නිශේධන විභවය</li>
+          <li><b style="color:var(--text)">X-කිරණ සහ ද-බ්‍රෝයි කල්පිතය</b> — X-කිරණ නිෂ්පාදනය, වර්ණාවලිය, ද්‍රව්‍යයේ තරංග ස්වභාවය</li>
+          <li><b style="color:var(--text)">විකිරණශීලීතාව සහ අංශු භෞතිකය</b> — α/β/γ ක්ෂය වීම, අර්ධ ආයු කාලය, ක්වාක් සහ ලෙප්ටෝන</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- VIEW: CALCULATORS -->
+    <!-- ================================================================= -->
+    <section class="view" id="view-calc">
+      <div class="section-head"><h2>සජීවී කැල්කියුලේටර</h2><span class="tag">CALCULATORS</span></div>
+
+      <!-- Stefan-Boltzmann -->
+      <div class="card">
+        <h3><span class="swatch" style="background:var(--amber)"></span>ස්ටෙෆාන්ගේ නියමය</h3>
+        <p class="sub">කෘෂ්ණ වස්තුවක් විසින් විමෝචනය කරන විකිරණශීලී බලය සහ තීව්‍රතාව ගණනය කරන්න.</p>
+        <div class="formula-box"><span><span class="f">I</span> = σT⁴</span><span><span class="f">P</span> = eσT⁴A</span><span>σ = 5.67×10⁻⁸</span></div>
+
+        <div class="field">
+          <div class="field-label"><span>උෂ්ණත්වය T</span><b id="sbTVal">1500 K</b></div>
+          <input type="range" id="sbT" min="200" max="3000" step="10" value="1500">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>විමෝචක ශක්තිය e (0 = කැඩපත, 1 = කෘෂ්ණ වස්තු)</span><b id="sbEVal">1.00</b></div>
+          <input type="range" id="sbE" min="0" max="1" step="0.01" value="1">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>පෘෂ්ඨ වර්ගඵලය A (m²)</span></div>
+          <input type="number" id="sbA" value="1" step="0.1" min="0.01">
+        </div>
+        <div class="results">
+          <div class="result-box"><div class="lbl">තීව්‍රතාව I (W/m²)</div><div class="val mono" id="sbI">—</div></div>
+          <div class="result-box"><div class="lbl">බලය P (W)</div><div class="val mono" id="sbP">—</div></div>
+        </div>
+      </div>
+
+      <!-- Photoelectric -->
+      <div class="card">
+        <h3><span class="swatch" style="background:var(--teal)"></span>අයින්ස්ටයින්ගේ ප්‍රකාශ විද්‍යුත් සමීකරණය</h3>
+        <p class="sub">ලෝහයක් තෝරා, ආලෝකයේ තරංග ආයාමය වෙනස් කරන්න.</p>
+        <div class="formula-box"><span><span class="f">hf</span> = φ + K<sub>max</sub></span><span><span class="f">eV</span><sub>s</sub> = K<sub>max</sub></span></div>
+
+        <div class="field">
+          <div class="field-label"><span>ලෝහය</span></div>
+          <select id="peMetal">
+            <option value="1.9">සීසියම් (Cs) — φ = 1.9 eV</option>
+            <option value="2.3" selected>සෝඩියම් (Na) — φ = 2.3 eV</option>
+            <option value="2.3">පොටෑසියම් (K) — φ = 2.3 eV</option>
+            <option value="4.3">සින්ක් (Zn) — φ = 4.3 eV</option>
+            <option value="4.7">තඹ (Cu) — φ = 4.7 eV</option>
+            <option value="6.35">ප්ලැටිනම් (Pt) — φ = 6.35 eV</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="field-label"><span>තරංග ආයාමය λ</span><b id="peLamVal">400 nm</b></div>
+          <input type="range" id="peLam" min="100" max="800" step="1" value="400">
+        </div>
+        <div class="results">
+          <div class="result-box"><div class="lbl">ෆෝටෝන ශක්තිය E (eV)</div><div class="val mono" id="peE">—</div></div>
+          <div class="result-box"><div class="lbl">දේහලීය තරංග ආයාමය λ₀</div><div class="val mono" id="peLam0">—</div></div>
+          <div class="result-box" id="peKBox"><div class="lbl">K<sub>max</sub> (eV)</div><div class="val mono" id="peK">—</div></div>
+          <div class="result-box" id="peVBox"><div class="lbl">නිශේධන විභවය V<sub>s</sub> (V)</div><div class="val mono" id="peV">—</div></div>
+        </div>
+        <div class="alert" id="peAlert"><span>⚠️</span><span>f &lt; f₀ — දේහලීය සංඛ්‍යාතයට වඩා අඩුයි. ඉලෙක්ට්‍රෝන කිසිසේත් විමෝචනය නොවේ (තීව්‍රතාව වැඩි කළත්!).</span></div>
+      </div>
+
+      <!-- de Broglie -->
+      <div class="card">
+        <h3><span class="swatch" style="background:var(--violet)"></span>ද-බ්‍රෝයි තරංග ආයාමය</h3>
+        <p class="sub">ගමන් කරන අංශුවක ස්කන්ධය සහ ප්‍රවේගය දී එහි තරංග ස්වභාවය සොයන්න.</p>
+        <div class="formula-box"><span><span class="f">λ</span> = h / mv</span></div>
+        <div class="row2">
+          <div class="field">
+            <div class="field-label"><span>ස්කන්ධය (kg)</span></div>
+            <select id="dbMass">
+              <option value="9.11e-31" selected>ඉලෙක්ට්‍රෝනය (9.11×10⁻³¹)</option>
+              <option value="1.673e-27">ප්‍රෝටෝනය (1.673×10⁻²⁷)</option>
+              <option value="1.675e-27">නියුට්‍රෝනය (1.675×10⁻²⁷)</option>
+              <option value="custom">අභිරුචි…</option>
+            </select>
+          </div>
+          <div class="field">
+            <div class="field-label"><span>ප්‍රවේගය v (m/s)</span></div>
+            <input type="number" id="dbV" value="2000000" step="1000">
+          </div>
+        </div>
+        <div class="field" id="dbCustomWrap" style="display:none;">
+          <div class="field-label"><span>අභිරුචි ස්කන්ධය (kg)</span></div>
+          <input type="number" id="dbCustomMass" value="1e-27" step="any">
+        </div>
+        <div class="results" style="grid-template-columns:1fr;">
+          <div class="result-box"><div class="lbl">ද-බ්‍රෝයි තරංග ආයාමය λ</div><div class="val mono" id="dbLam">—</div></div>
+        </div>
+      </div>
+
+      <!-- Half-life -->
+      <div class="card">
+        <h3><span class="swatch" style="background:var(--red)"></span>විකිරණශීලී ක්ෂය වීම</h3>
+        <p class="sub">අර්ධ ආයු කාලය මත පදනම්ව, කාලයත් සමඟ ඉතිරි නියුක්ලියස් ගණන බලන්න.</p>
+        <div class="formula-box"><span><span class="f">N</span> = N₀e<sup>-λt</sup></span><span>t<sub>½</sub> = 0.693/λ</span></div>
+        <div class="row2">
+          <div class="field">
+            <div class="field-label"><span>ආරම්භක ප්‍රමාණය N₀</span></div>
+            <input type="number" id="hlN0" value="1000" min="1">
+          </div>
+          <div class="field">
+            <div class="field-label"><span>අර්ධ ආයු කාලය (s)</span></div>
+            <input type="number" id="hlHalf" value="10" min="0.1" step="0.1">
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label"><span>ගත වූ කාලය t</span><b id="hlTVal">0 s</b></div>
+          <input type="range" id="hlT" min="0" max="100" step="0.5" value="0">
+        </div>
+        <div class="sim-canvas-wrap"><canvas id="hlCanvas" height="140"></canvas></div>
+        <div class="results">
+          <div class="result-box"><div class="lbl">ක්ෂය නියතය λ (s⁻¹)</div><div class="val mono" id="hlLambda">—</div></div>
+          <div class="result-box"><div class="lbl">ඉතිරි N(t)</div><div class="val mono" id="hlN">—</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- VIEW: SIMULATORS -->
+    <!-- ================================================================= -->
+    <section class="view" id="view-sim">
+      <div class="section-head"><h2>සජීවී සිමියුලේටර</h2><span class="tag">SIMULATIONS</span></div>
+
+      <!-- Blackbody -->
+      <div class="card">
+        <h3><span class="swatch" style="background:var(--amber)"></span>කෘෂ්ණ වස්තු වර්ණාවලිය (Wien's Law)</h3>
+        <p class="sub">උෂ්ණත්වය වැඩි වන විට λ<sub>m</sub> කෙටි තරංග ආයාම දෙසට මාරු වන ආකාරය බලන්න.</p>
+        <div class="sim-canvas-wrap"><canvas id="bbCanvas" height="200"></canvas></div>
+        <div class="field">
+          <div class="field-label"><span>උෂ්ණත්වය T</span><b id="bbTVal">3000 K</b></div>
+          <input type="range" id="bbT" min="1000" max="6500" step="50" value="3000">
+        </div>
+        <div class="results">
+          <div class="result-box"><div class="lbl">λ<sub>m</sub> (peak)</div><div class="val mono" id="bbLamM">—</div></div>
+          <div class="result-box"><div class="lbl">λ<sub>m</sub>T (Wien නියතය)</div><div class="val mono" id="bbConst">2.898×10⁻³ m·K</div></div>
+        </div>
+      </div>
+
+      <!-- Photoelectric visual -->
+      <div class="card">
+        <h3><span class="swatch" style="background:var(--teal)"></span>ප්‍රකාශ විද්‍යුත් ආචරණය — දෘශ්‍ය</h3>
+        <p class="sub">ෆෝටෝන ලෝහ පෘෂ්ඨයට වදින විට, සංඛ්‍යාතය ප්‍රමාණවත් නම් පමණක් ඉලෙක්ට්‍රෝන පිට වී ධාරාව ගලයි.</p>
+        <div class="sim-canvas-wrap"><canvas id="peCanvas" height="200"></canvas></div>
+        <div class="field">
+          <div class="field-label"><span>ලෝහය</span></div>
+          <select id="peSimMetal">
+            <option value="1.9">සීසියම් (Cs) — φ = 1.9 eV</option>
+            <option value="2.3" selected>සෝඩියම් (Na) — φ = 2.3 eV</option>
+            <option value="4.3">සින්ක් (Zn) — φ = 4.3 eV</option>
+            <option value="4.7">තඹ (Cu) — φ = 4.7 eV</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="field-label"><span>ආලෝකයේ තරංග ආයාමය λ</span><b id="peSimLamVal">400 nm</b></div>
+          <input type="range" id="peSimLam" min="100" max="800" step="1" value="400">
+        </div>
+        <div>
+          <div class="field-label"><span>ධාරාව (Current)</span><b id="peSimStatus">—</b></div>
+          <div class="meter"><div class="meter-fill" id="peSimMeter"></div></div>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--amber)"></i> ෆෝටෝන</span>
+          <span><i style="background:var(--teal)"></i> ඉලෙක්ට්‍රෝන</span>
+          <span><i style="background:var(--muted-2)"></i> ලෝහ පෘෂ්ඨය</span>
+        </div>
+      </div>
+
+      <!-- X-ray -->
+      <div class="card">
+        <h3><span class="swatch" style="background:var(--violet)"></span>X-කිරණ වර්ණාවලි සිමියුලේටරය</h3>
+        <p class="sub">නළයේ වෝල්ටීයතාව වැඩි වන විට λ<sub>min</sub> අඩු වන අතර, ප්‍රමාණවත් වෝල්ටීයතාවකදී ලක්ෂණික රේඛා පෙනී යයි.</p>
+        <div class="sim-canvas-wrap"><canvas id="xrCanvas" height="200"></canvas></div>
+        <div class="field">
+          <div class="field-label"><span>නල වෝල්ටීයතාව V</span><b id="xrVVal">50 kV</b></div>
+          <input type="range" id="xrV" min="15" max="120" step="1" value="50">
+        </div>
+        <div class="field">
+          <div class="field-label"><span>ෆිලමන්ට් ධාරාව (තීව්‍රතාව)</span><b id="xrIVal">50%</b></div>
+          <input type="range" id="xrI" min="10" max="100" step="1" value="50">
+        </div>
+        <div class="results">
+          <div class="result-box"><div class="lbl">λ<sub>min</sub></div><div class="val mono" id="xrLamMin">—</div></div>
+          <div class="result-box"><div class="lbl">ලක්ෂණික රේඛා</div><div class="val mono" id="xrChar">—</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- VIEW: FLASHCARDS -->
+    <!-- ================================================================= -->
+    <section class="view" id="view-cards">
+      <div class="section-head"><h2>ඉක්මන් සමාලෝචන කාඩ්පත්</h2><span class="tag">FLASHCARDS</span></div>
+
+      <div class="acc" data-acc>
+        <div class="acc-head"><div class="left"><div class="num">01</div><h3>තාප විකිරණය සහ කෘෂ්ණ වස්තු</h3></div><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div>
+        <div class="acc-body"><div class="acc-body-inner"><ul>
+          <li>තාපය පැතිරෙන ආකාර 3ක්: <b>සන්නයනය</b>, <b>සංවහනය</b> (දෘශ්‍ය මාධ්‍යයක් අවශ්‍යයි), සහ <b>විකිරණය</b> (දෘශ්‍ය මාධ්‍යයක් අවශ්‍ය නොවේ — සූර්ය කිරණ පෘථිවියට එන්නේ මෙසේය).</li>
+          <li><b>කෘෂ්ණ වස්තුවක්</b> යනු තමා වෙත වැටෙන සියලුම විකිරණ (කිසිදු පරාවර්තනයකින් තොරව) සම්පූර්ණයෙන් අවශෝෂණය කරන, සහ ඕනෑම උෂ්ණත්වයකදී විකිරණය කළ හැකි උපරිම ප්‍රමාණය විමෝචනය කරන පරමාදර්ශී වස්තුවකි.</li>
+          <li>විකිරණ ක්ෂමතාව: <span class="mini-formula">P = E/t</span>. විකිරණ තීව්‍රතාව: <span class="mini-formula">I = E/(At) = P/A</span>.</li>
+          <li><b>ස්ටෙෆාන්ගේ නියමය</b>: කෘෂ්ණ වස්තුවක් විමෝචනය කරන තීව්‍රතාව එහි නිරපේක්ෂ උෂ්ණත්වයේ සිව්වන බලයට සමානුපාතිකයි — <span class="mini-formula">I = σT⁴</span>. කෘෂ්ණ නොවන වස්තු සඳහා විමෝචක ශක්තිය (e) එකතු කර <span class="mini-formula">P = eσT⁴A</span> ලෙසත්, <span class="mini-formula">I = eσT⁴</span> ලෙසත් ලියැවේ.</li>
+          <li><b>වීන්ගේ විස්ථාපන නියමය</b>: කෘෂ්ණ වස්තුවකින් විමෝචනය වන විකිරණ වර්ණාවලියේ උපරිම තීව්‍රතාවක් සහිත තරංග ආයාමය (λ<sub>m</sub>) වස්තුවේ නිරපේක්ෂ උෂ්ණත්වයට ප්‍රතිලෝමව සමානුපාතික වේ — <span class="mini-formula">λmT = නියතය (2.898×10⁻³ m·K)</span>. උෂ්ණත්වය වැඩි වන විට λ<sub>m</sub> අඩු වේ (කෙටි තරංග ආයාම දෙසට මාරු වේ).</li>
+          <li>උෂ්ණත්වය වැඩි වන විට: වර්ණාවලි ග්‍රැෆයේ (i) λ<sub>m</sub> අඩුවේ, (ii) නිශ්චිත λ අගයකදී I වැඩිවේ, (iii) වක්‍රය යටතේ වර්ගඵලය (එනම් මුළු I) වැඩිවේ — මෙය ස්ටෙෆාන්ගේ නියමයට අනුරූප වේ.</li>
+          <li><b>ප්ලෑන්ක්ගේ කල්පිතය</b>: පරමාණුක දෝලකවලට ලබාගත හැක්කේ පූර්ණ සංඛ්‍යා ගුණාකාරයක ශක්ති අගයන් පමණි — <span class="mini-formula">E = nhf</span> (h = ප්ලෑන්ක්ගේ නියතය).</li>
+        </ul></div></div>
+      </div>
+
+      <div class="acc" data-acc>
+        <div class="acc-head"><div class="left"><div class="num">02</div><h3>ප්‍රකාශ විද්‍යුත් ආචරණය</h3></div><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div>
+        <div class="acc-body"><div class="acc-body-inner"><ul>
+          <li>ලෝහ පෘෂ්ඨයකට ප්‍රමාණවත් සංඛ්‍යාතයක් සහිත ආලෝකයක් (හෝ පට වැඩි විද්‍යුත් චුම්බක තරංග) වැටුණු විට එහි ඉලෙක්ට්‍රෝන ("ෆෝටෝ ඉලෙක්ට්‍රෝන") නිදහස් වීම <b>ප්‍රකාශ විද්‍යුත් ආචරණය</b> නම් වේ. එය තරංග න්‍යායෙන් පැහැදිලි කළ නොහැකි වූ නිසා අයින්ස්ටයින් ෆෝටෝන (ක්වොන්ටම්) න්‍යාය යෝජනා කළේය.</li>
+          <li><b>කාර්ය ශ්‍රිතය φ</b>: ලෝහයක ඇති ඉලෙක්ට්‍රෝනයක් සම්පූර්ණයෙන් නිදහස් කිරීමට අවශ්‍ය අවම ශක්තියයි (ඒකකය eV හෝ J).</li>
+          <li><b>දේහලීය සංඛ්‍යාතය f₀</b>: ඉලෙක්ට්‍රෝන විමෝචනය සිදුවීමට අවශ්‍ය අවම සංඛ්‍යාතයයි — <span class="mini-formula">φ = hf₀</span>. f &lt; f₀ නම් තීව්‍රතාව කොතරම් වැඩි කළත් ඉලෙක්ට්‍රෝන කිසිසේත් නිදහස් නොවේ (A ➜ 0).</li>
+          <li><b>අයින්ස්ටයින්ගේ සමීකරණය</b>: <span class="mini-formula">hf = φ + K_max</span> — ෆෝටෝන ශක්තියෙන් කාර්ය ශ්‍රිතය අඩු කළ විට ඉතිරි ශක්තිය ඉලෙක්ට්‍රෝනයේ උපරිම චාලක ශක්තිය බවට පත් වේ.</li>
+          <li><b>නිශේධන විභවය V<sub>s</sub></b>: ඉලෙක්ට්‍රෝන ධාරාව බිංදුවට පත් කිරීමට අවශ්‍ය අගතික විභවයයි — <span class="mini-formula">eVs = K_max</span>.</li>
+          <li>වැදගත් ග්‍රැෆ්: (i) I vs V — නිශ්චිත f දී තීව්‍රතාව වැඩි කිරීමෙන් සන්තෘප්ත ධාරාව වැඩිවේ, නමුත් V<sub>s</sub> වෙනස් නොවේ. (ii) K<sub>max</sub> vs f — සරල රේඛාවක් (y = mx − c ස්වරූපයෙන්), බෑවුම = h, y-අන්තඃඛණ්ඩය = −φ.</li>
+        </ul></div></div>
+      </div>
+
+      <div class="acc" data-acc>
+        <div class="acc-head"><div class="left"><div class="num">03</div><h3>X-කිරණ සහ පදාර්ථයේ තරංග ස්වභාවය</h3></div><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div>
+        <div class="acc-body"><div class="acc-body-inner"><ul>
+          <li><b>X-කිරණ නිෂ්පාදනය</b>: රික්ත නලයක ඇති කැතෝඩයකින් (රත් වූ ෆිලමන්ට්) විමෝචනය වන ඉලෙක්ට්‍රෝන, විශාල විභව අන්තරයකින් (~10⁴–10⁵ V) ත්වරණය කර ලෝහ ඇනෝඩයකට (ටංස්ටන් වැනි) ගැටෙන විට හදිසි අඩුවීමකදී X-කිරණ විමෝචනය වේ.</li>
+          <li><b>ගුණාංග</b>: X-කිරණ විද්‍යුත් චුම්බක තරංග වන අතර ආලෝකයේ ප්‍රවේගයෙන් ගමන් කරයි, ආරෝපණයක් නැත, ගමන් කිරීමට මාධ්‍යයක් අවශ්‍ය නොවේ, ස්ථිතික දුලිසින් විවර්තනය කළ හැක, විනිවිද යාමේ හැකියාව වැඩිය.</li>
+          <li><b>වර්ණාවලිය</b>: රේඛීය (Continuous) වර්ණාවලියක් සහ සංතතික (Characteristic) රේඛා දෙකම එකට පෙනී යයි. λ<sub>min</sub> යනු ඉලෙක්ට්‍රෝනයක සම්පූර්ණ ශක්තිය එක් ෆෝටෝනයක් බවට පත් වූ විටෙහි අවම තරංග ආයාමයයි — <span class="mini-formula">eV = hf_max = hc/λmin</span>.</li>
+          <li>නල වෝල්ටීයතාව (V) වැඩි කළ විට λ<sub>min</sub> අඩුවේ (බලවත් X-කිරණ). ෆිලමන්ට් ධාරාව වැඩි කළ විට වර්ණාවලියේ මුළු තීව්‍රතාව වැඩිවේ (λ<sub>min</sub> වෙනස් නොවේ).</li>
+          <li><b>ද-බ්‍රෝයි කල්පිතය</b>: ගමන්තාව P = mv ඇති ඕනෑම අංශුවකට තරංග ස්වභාවයක්ද ඇති අතර, ඊට අනුරූප තරංග ආයාමය <span class="mini-formula">λ = h/P = h/mv = h/√(2mEk)</span> මගින් දෙනු ලැබේ.</li>
+        </ul></div></div>
+      </div>
+
+      <div class="acc" data-acc>
+        <div class="acc-head"><div class="left"><div class="num">04</div><h3>විකිරණශීලීතාව සහ අංශු භෞතික විද්‍යාව</h3></div><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div>
+        <div class="acc-body"><div class="acc-body-inner"><ul>
+          <li>අස්ථායි පරමාණුක න්‍යෂ්ටි ස්වයංසිද්ධව විකිරණ පිට කර ස්ථායි තත්ත්වයට පත්වීම <b>විකිරණශීලීතාව</b> නම් වේ. එහි ප්‍රධාන ආකාර 3ක්: <b>α අංශු</b> (He න්‍යෂ්ටිය), <b>β අංශු</b> (β⁻/β⁺), සහ <b>γ කිරණ</b> (A, N වෙනස් නොවී ශක්තිය පමණක් අඩුවන).</li>
+          <li>β⁻ ක්ෂය වීම: <span class="mini-formula">n → p + β⁻ + ν̄e</span>. β⁺ ක්ෂය වීම: <span class="mini-formula">p → n + β⁺ + νe</span>.</li>
+          <li><b>ක්ෂය නියතය (λ)</b> ක්ෂය වීමේ සම්භාවිතාව නියෝජනය කරයි: <span class="mini-formula">N = N₀e^(−λt)</span>.</li>
+          <li><b>අර්ධ ආයු කාලය (t<sub>½</sub>)</b>: මූලික නියුක්ලියස් සංඛ්‍යාව අඩකින් අඩුවීමට ගතවන කාලයයි — <span class="mini-formula">t½ = 0.693/λ</span>.</li>
+          <li><b>සක්‍රියතාව (Activity, A)</b>: තත්පරයකට සිදුවන ක්ෂය වීම් සංඛ්‍යාව — <span class="mini-formula">A = A₀e^(−λt)</span>. SI ඒකකය Bq (1 Ci = 3.7×10¹⁰ Bq).</li>
+          <li><b>මාත්‍රාව (Dose)</b>: විකිරණයේ ද්‍රව්‍යයක් මගින් අවශෝෂණය කරගත් ශක්තිය — ඒකකය Gy (1 Gy = 1 J/kg; 1 rad = 10⁻² Gy).</li>
+          <li><b>අංශු භෞතික විද්‍යාව</b>: මූලික අංශු 12ක් — ක්වාක් 06ක් (u,c,t,d,s,b) සහ ලෙප්ටෝන 06ක් (e,μ,τ,νe,νμ,ντ). බැරියෝන (ක්වාක් 3ක්, උදා: ප්‍රෝටෝන = uud, නියුට්‍රෝන = udd) සහ මීසෝන (ක්වාක් 1ක් + ප්‍රති-ක්වාක් 1ක්) වශයෙන් හැඩ්‍රෝන වර්ග දෙකකි.</li>
+          <li><b>මූලික බල 4</b>, ප්‍රබලතාව අනුව වැඩිවන පිළිවෙළින්: ගුරුත්වාකර්ෂණ බලය &lt; දුර්වල න්‍යෂ්ටික බලය &lt; විද්‍යුත් චුම්භක බලය &lt; ප්‍රබල න්‍යෂ්ටික බලය.</li>
+        </ul></div></div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- VIEW: QUIZ -->
+    <!-- ================================================================= -->
+    <section class="view" id="view-quiz">
+      <div class="section-head"><h2>ස්වයං-තක්සේරු ක්විස් එක</h2><span class="tag">5 QUESTIONS</span></div>
+      <div id="quizContainer"></div>
+      <div class="quiz-score">
+        <span>ලකුණු: <b id="quizScore">0</b> / 5</span>
+        <button class="reset-btn" id="quizReset">නැවත උත්සාහ කරන්න</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ BOTTOM NAV ============ -->
+  <nav class="bottomnav">
+    <button class="nav-btn active" data-goto="view-home">
+      <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v9a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1v-9"/></svg></span>
+      මුල් පිටුව
+    </button>
+    <button class="nav-btn" data-goto="view-calc">
+      <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg></span>
+      සූත්‍ර
+    </button>
+    <button class="nav-btn" data-goto="view-sim">
+      <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v6L4 20a1 1 0 001 2h14a1 1 0 001-2L15 8V2"/><path d="M8.5 15h7"/></svg></span>
+      සිමියුලේටර
+    </button>
+    <button class="nav-btn" data-goto="view-cards">
+      <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="14" rx="2"/><path d="M7 21h11a2 2 0 002-2V8"/></svg></span>
+      කාඩ්
+    </button>
+    <button class="nav-btn" data-goto="view-quiz">
+      <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></span>
+      ක්විස්
+    </button>
+  </nav>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============ CONSTANTS ============ */
+const SIGMA = 5.67e-8;
+const H = 6.626e-34;
+const C = 3e8;
+const K_B = 1.381e-23;
+const E_CHARGE = 1.602e-19;
+const HC_EV_NM = 1240; // eV*nm
+
+/* ============ HELPERS ============ */
+const $ = (id) => document.getElementById(id);
+function fmt(num, digits=3){
+  if(num === null || num === undefined || isNaN(num)) return "—";
+  if(Math.abs(num) !== 0 && (Math.abs(num) < 1e-3 || Math.abs(num) >= 1e5)){
+    return num.toExponential(digits-1);
+  }
+  return Number(num.toPrecision(digits)).toString();
+}
+function dpi(canvas){
+  const ratio = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  const w = rect.width || canvas.clientWidth || 300;
+  const h = canvas.height;
+  canvas.width = w*ratio;
+  canvas.height = h*ratio;
+  canvas.style.height = h+"px";
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(ratio,0,0,ratio,0,0);
+  return {ctx, w, h};
+}
+function cssVar(name){ return getComputedStyle(document.body).getPropertyValue(name).trim(); }
+
+/* ============ NAVIGATION ============ */
+const views = document.querySelectorAll(".view");
+const navBtns = document.querySelectorAll(".nav-btn");
+function goto(id){
+  views.forEach(v=>v.classList.toggle("active", v.id===id));
+  navBtns.forEach(b=>b.classList.toggle("active", b.dataset.goto===id));
+  window.scrollTo({top:0, behavior:"smooth"});
+  requestAnimationFrame(redrawAll);
+}
+document.querySelectorAll("[data-goto]").forEach(el=>{
+  el.addEventListener("click", ()=>goto(el.dataset.goto));
+});
+
+/* ============ THEME TOGGLE ============ */
+const themeBtn = $("themeBtn");
+themeBtn.addEventListener("click", ()=>{
+  const cur = document.body.getAttribute("data-theme");
+  const next = cur === "dark" ? "light" : "dark";
+  document.body.setAttribute("data-theme", next);
+  requestAnimationFrame(redrawAll);
+});
+
+/* ============ ACCORDION ============ */
+document.querySelectorAll("[data-acc]").forEach(acc=>{
+  const head = acc.querySelector(".acc-head");
+  const body = acc.querySelector(".acc-body");
+  head.addEventListener("click", ()=>{
+    const isOpen = acc.classList.contains("open");
+    document.querySelectorAll("[data-acc]").forEach(a=>{
+      a.classList.remove("open");
+      a.querySelector(".acc-body").style.maxHeight = null;
+    });
+    if(!isOpen){
+      acc.classList.add("open");
+      body.style.maxHeight = body.scrollHeight + "px";
+    }
+  });
+});
+
+/* ================================================================= */
+/* PLANCK'S LAW (shared by hero + blackbody simulator)                */
+/* ================================================================= */
+function planckB(lambdaM, T){
+  const l5 = Math.pow(lambdaM,5);
+  const exponent = (H*C)/(lambdaM*K_B*T);
+  if(exponent > 700) return 0;
+  return (2*H*C*C)/(l5*(Math.exp(exponent)-1));
+}
+function drawPlanckCurve(canvas, T, opts={}){
+  const {ctx, w, h} = dpi(canvas);
+  ctx.clearRect(0,0,w,h);
+  const padL=8, padR=8, padT=14, padB=6;
+  const lamMinNM=100, lamMaxNM=3000;
+  const N=160;
+  // compute max across a reference high temp so scale stays stable-ish, but normalize per-curve for visibility
+  let maxB=0;
+  const pts=[];
+  for(let i=0;i<=N;i++){
+    const lamNM = lamMinNM + (lamMaxNM-lamMinNM)*i/N;
+    const b = planckB(lamNM*1e-9, T);
+    pts.push(b);
+    if(b>maxB) maxB=b;
+  }
+  const teal = cssVar('--teal') || '#31d6c1';
+  const amber = cssVar('--amber') || '#f5a623';
+  const border = cssVar('--border') || '#26303f';
+  const muted = cssVar('--muted-2') || '#5c6779';
+
+  // grid
+  ctx.strokeStyle = border; ctx.lineWidth=1;
+  for(let g=0; g<=4; g++){
+    const y = padT + (h-padT-padB)*g/4;
+    ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(w-padR,y); ctx.stroke();
+  }
+  // curve
+  ctx.beginPath();
+  let peakX=0, peakY=0, peakVal=-1;
+  for(let i=0;i<=N;i++){
+    const x = padL + (w-padL-padR)*i/N;
+    const norm = maxB>0 ? pts[i]/maxB : 0;
+    const y = h-padB - norm*(h-padT-padB);
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    if(pts[i]>peakVal){ peakVal=pts[i]; peakX=x; peakY=y; }
+  }
+  const grad = ctx.createLinearGradient(0,0,w,0);
+  grad.addColorStop(0, amber);
+  grad.addColorStop(0.5, teal);
+  grad.addColorStop(1, '#7c8ff0');
+  ctx.strokeStyle = grad;
+  ctx.lineWidth=2.4;
+  ctx.lineJoin='round';
+  ctx.stroke();
+  // fill under curve
+  ctx.lineTo(w-padR, h-padB); ctx.lineTo(padL, h-padB); ctx.closePath();
+  ctx.fillStyle = teal + '22';
+  ctx.fill();
+
+  // peak marker
+  ctx.beginPath();
+  ctx.setLineDash([3,3]);
+  ctx.strokeStyle = muted;
+  ctx.moveTo(peakX, padT); ctx.lineTo(peakX, h-padB);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.beginPath();
+  ctx.arc(peakX, peakY, 4, 0, Math.PI*2);
+  ctx.fillStyle = '#fff';
+  ctx.fill();
+  ctx.lineWidth=2; ctx.strokeStyle = amber; ctx.stroke();
+
+  return { lamM: 2.898e-3/T };
+}
+
+/* --- Hero canvas (decorative, auto-synced to slider) --- */
+const heroT = $("heroT");
+function renderHero(){
+  const T = parseFloat(heroT.value);
+  $("heroTVal").textContent = T + " K";
+  $("heroTLabel").textContent = "T = " + T + "K";
+  drawPlanckCurve($("heroCanvas"), T);
+}
+heroT.addEventListener("input", renderHero);
+
+/* --- Blackbody simulator canvas --- */
+const bbT = $("bbT");
+function renderBB(){
+  const T = parseFloat(bbT.value);
+  $("bbTVal").textContent = T + " K";
+  const res = drawPlanckCurve($("bbCanvas"), T);
+  const lamNM = res.lamM*1e9;
+  $("bbLamM").textContent = fmt(lamNM,4) + " nm";
+}
+bbT.addEventListener("input", renderBB);
+
+/* ================================================================= */
+/* STEFAN-BOLTZMANN CALCULATOR                                        */
+/* ================================================================= */
+const sbT=$("sbT"), sbE=$("sbE"), sbA=$("sbA");
+function renderStefan(){
+  const T=parseFloat(sbT.value), e=parseFloat(sbE.value), A=parseFloat(sbA.value)||0;
+  $("sbTVal").textContent = T + " K";
+  $("sbEVal").textContent = e.toFixed(2);
+  const I = SIGMA*Math.pow(T,4);
+  const P = e*SIGMA*Math.pow(T,4)*A;
+  $("sbI").textContent = fmt(I) + " W/m²";
+  $("sbP").textContent = fmt(P) + " W";
+}
+[sbT,sbE,sbA].forEach(el=>el.addEventListener("input", renderStefan));
+
+/* ================================================================= */
+/* PHOTOELECTRIC CALCULATOR                                           */
+/* ================================================================= */
+const peMetal=$("peMetal"), peLam=$("peLam");
+function renderPhoto(){
+  const phi = parseFloat(peMetal.value);
+  const lam = parseFloat(peLam.value);
+  $("peLamVal").textContent = lam + " nm";
+  const E = HC_EV_NM/lam; // eV
+  const lam0 = HC_EV_NM/phi; // nm
+  $("peE").textContent = fmt(E) + " eV";
+  $("peLam0").textContent = fmt(lam0) + " nm";
+  const Kmax = E - phi;
+  const alert = $("peAlert");
+  if(Kmax <= 0){
+    $("peK").textContent = "0";
+    $("peV").textContent = "0";
+    $("peKBox").classList.add("warn");
+    $("peVBox").classList.add("warn");
+    alert.classList.add("show");
+  } else {
+    $("peK").textContent = fmt(Kmax) + " eV";
+    $("peV").textContent = fmt(Kmax) + " V";
+    $("peKBox").classList.remove("warn");
+    $("peVBox").classList.remove("warn");
+    alert.classList.remove("show");
+  }
+}
+[peMetal,peLam].forEach(el=>el.addEventListener("input", renderPhoto));
+
+/* ================================================================= */
+/* DE BROGLIE CALCULATOR                                               */
+/* ================================================================= */
+const dbMass=$("dbMass"), dbV=$("dbV"), dbCustomWrap=$("dbCustomWrap"), dbCustomMass=$("dbCustomMass");
+dbMass.addEventListener("change", ()=>{
+  dbCustomWrap.style.display = dbMass.value==="custom" ? "block":"none";
+  renderDeBroglie();
+});
+function renderDeBroglie(){
+  const m = dbMass.value==="custom" ? parseFloat(dbCustomMass.value) : parseFloat(dbMass.value);
+  const v = parseFloat(dbV.value);
+  if(!m || !v){ $("dbLam").textContent="—"; return; }
+  const lam = H/(m*v);
+  $("dbLam").textContent = fmt(lam) + " m";
+}
+[dbV,dbCustomMass].forEach(el=>el.addEventListener("input", renderDeBroglie));
+
+/* ================================================================= */
+/* HALF-LIFE DECAY CALCULATOR                                         */
+/* ================================================================= */
+const hlN0=$("hlN0"), hlHalf=$("hlHalf"), hlT=$("hlT");
+function renderHalfLife(){
+  const N0=parseFloat(hlN0.value)||0, half=parseFloat(hlHalf.value)||1, t=parseFloat(hlT.value);
+  const lambda = 0.693/half;
+  hlT.max = Math.max(50, half*6);
+  $("hlTVal").textContent = fmt(t,3) + " s";
+  const N = N0*Math.exp(-lambda*t);
+  $("hlLambda").textContent = fmt(lambda) + " s⁻¹";
+  $("hlN").textContent = fmt(N,4);
+  drawDecayCurve(N0, lambda, t);
+}
+function drawDecayCurve(N0, lambda, tNow){
+  const canvas=$("hlCanvas");
+  const {ctx,w,h}=dpi(canvas);
+  ctx.clearRect(0,0,w,h);
+  const padL=30, padR=10, padT=10, padB=20;
+  const tMax = Math.max(tNow*1.15, 5/lambda, 1);
+  const border=cssVar('--border'), muted=cssVar('--muted-2'), red=cssVar('--red'), text=cssVar('--text');
+  ctx.strokeStyle=border; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(padL,padT); ctx.lineTo(padL,h-padB); ctx.lineTo(w-padR,h-padB); ctx.stroke();
+  ctx.fillStyle=muted; ctx.font="10px monospace";
+  ctx.fillText("N",6,padT+8);
+  ctx.fillText("t →", w-30, h-6);
+  // curve
+  ctx.beginPath();
+  const N_ = 100;
+  for(let i=0;i<=N_;i++){
+    const t = tMax*i/N_;
+    const N = N0*Math.exp(-lambda*t);
+    const x = padL + (w-padL-padR)*(t/tMax);
+    const y = h-padB - (N/N0)*(h-padT-padB);
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  }
+  ctx.strokeStyle = cssVar('--teal'); ctx.lineWidth=2.2; ctx.stroke();
+  // marker at tNow
+  const Nnow = N0*Math.exp(-lambda*tNow);
+  const mx = padL + (w-padL-padR)*(tNow/tMax);
+  const my = h-padB - (Nnow/N0)*(h-padT-padB);
+  ctx.beginPath(); ctx.setLineDash([3,3]); ctx.strokeStyle=muted;
+  ctx.moveTo(mx,padT); ctx.lineTo(mx,h-padB); ctx.stroke(); ctx.setLineDash([]);
+  ctx.beginPath(); ctx.arc(mx,my,4.5,0,Math.PI*2); ctx.fillStyle=red; ctx.fill();
+}
+[hlN0,hlHalf,hlT].forEach(el=>el.addEventListener("input", renderHalfLife));
+
+/* ================================================================= */
+/* PHOTOELECTRIC VISUAL SIMULATOR (canvas + rAF loop)                 */
+/* ================================================================= */
+const peSimMetal=$("peSimMetal"), peSimLam=$("peSimLam");
+let peState = { phi: 2.3, lam: 400, photons: [], electrons: [] };
+function peInitParticles(){
+  peState.photons = [];
+  for(let i=0;i<6;i++){
+    peState.photons.push({x: 30+i*45+Math.random()*10, y: -Math.random()*150, speed: 2.2+Math.random()*0.6});
+  }
+  peState.electrons = [];
+}
+peInitParticles();
+function peUpdateParams(){
+  peState.phi = parseFloat(peSimMetal.value);
+  peState.lam = parseFloat(peSimLam.value);
+  $("peSimLamVal").textContent = peState.lam + " nm";
+}
+[peSimMetal, peSimLam].forEach(el=>el.addEventListener("input", peUpdateParams));
+peUpdateParams();
+
+function peFrame(){
+  const canvas = $("peCanvas");
+  if(document.getElementById("view-sim").classList.contains("active")){
+    const {ctx,w,h} = dpi(canvas);
+    ctx.clearRect(0,0,w,h);
+    const plateY = h-30;
+    const E = HC_EV_NM/peState.lam;
+    const Kmax = E - peState.phi;
+    const emitting = Kmax > 0;
+
+    // plate
+    ctx.fillStyle = cssVar('--surface-2');
+    ctx.fillRect(0, plateY, w, 20);
+    ctx.strokeStyle = cssVar('--border'); ctx.strokeRect(0, plateY, w, 20);
+    // hatch pattern
+    ctx.strokeStyle = cssVar('--muted-2'); ctx.lineWidth=1;
+    for(let x=-20;x<w;x+=14){ ctx.beginPath(); ctx.moveTo(x,plateY); ctx.lineTo(x+14,plateY+20); ctx.stroke(); }
+
+    // photons falling
+    const amber = cssVar('--amber');
+    peState.photons.forEach(p=>{
+      p.y += p.speed * (0.6 + peState.lam/500);
+      if(p.y > plateY){
+        p.y = -Math.random()*80;
+        p.x = 20 + Math.random()*(w-40);
+        if(emitting && peState.electrons.length < 40){
+          peState.electrons.push({x:p.x, y:plateY, vy:-(2+Math.sqrt(Math.max(Kmax,0.05))*2.4), vx:(Math.random()-0.5)*1.6, life:1});
+        }
+      }
+      // draw wavy photon
+      ctx.strokeStyle = amber; ctx.lineWidth = 2;
+      ctx.beginPath();
+      for(let i=0;i<16;i++){
+        const yy = p.y - 16 + i;
+        const xx = p.x + Math.sin(i*0.9)*4;
+        if(i===0) ctx.moveTo(xx,yy); else ctx.lineTo(xx,yy);
+      }
+      ctx.stroke();
+      ctx.beginPath(); ctx.arc(p.x, p.y, 2.2, 0, Math.PI*2); ctx.fillStyle=amber; ctx.fill();
+    });
+
+    // electrons
+    const teal = cssVar('--teal');
+    peState.electrons = peState.electrons.filter(e2=>e2.y > -10 && e2.life>0);
+    peState.electrons.forEach(e2=>{
+      e2.x += e2.vx; e2.y += e2.vy; e2.life -= 0.01;
+      ctx.beginPath(); ctx.arc(e2.x, e2.y, 3, 0, Math.PI*2);
+      ctx.fillStyle = teal; ctx.globalAlpha = Math.max(e2.life,0); ctx.fill(); ctx.globalAlpha=1;
+    });
+
+    // status + meter
+    const status = emitting ? ("ධාරාව ගලයි (Kmax=" + fmt(Kmax,3) + " eV)") : "ධාරාවක් නැත — f < f₀";
+    $("peSimStatus").textContent = status;
+    const pct = emitting ? Math.min(100, 20 + Kmax*20) : 0;
+    $("peSimMeter").style.width = pct + "%";
+    if(!emitting){ $("peSimMeter").style.background = cssVar('--muted-2'); }
+    else { $("peSimMeter").style.background = 'linear-gradient(90deg, var(--teal), var(--amber))'; }
+  }
+  requestAnimationFrame(peFrame);
+}
+requestAnimationFrame(peFrame);
+
+/* ================================================================= */
+/* X-RAY SPECTRUM SIMULATOR                                           */
+/* ================================================================= */
+const xrV=$("xrV"), xrI=$("xrI");
+const XR_KALPHA_PM = 71, XR_KBETA_PM = 63; // representative target lines (pm)
+function renderXray(){
+  const V_kV = parseFloat(xrV.value);
+  const V = V_kV*1000;
+  const intensityScale = parseFloat(xrI.value)/100;
+  $("xrVVal").textContent = V_kV + " kV";
+  $("xrIVal").textContent = xrI.value + "%";
+
+  const lamMinM = (H*C)/(E_CHARGE*V);
+  const lamMinPM = lamMinM*1e12;
+  $("xrLamMin").textContent = fmt(lamMinPM,4) + " pm";
+
+  const showChar = lamMinPM < XR_KALPHA_PM;
+  $("xrChar").textContent = showChar ? "දෘශ්‍යමානයි" : "දිස් නොවේ (V ↑ අවශ්‍යයි)";
+
+  drawXraySpectrum(lamMinPM, intensityScale, showChar);
+}
+function drawXraySpectrum(lamMinPM, intensityScale, showChar){
+  const canvas=$("xrCanvas");
+  const {ctx,w,h}=dpi(canvas);
+  ctx.clearRect(0,0,w,h);
+  const padL=34, padR=10, padT=14, padB=22;
+  const pmMin=10, pmMax=140;
+  const border=cssVar('--border'), muted=cssVar('--muted-2'), violet=cssVar('--violet'), text=cssVar('--text');
+
+  ctx.strokeStyle=border; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(padL,padT); ctx.lineTo(padL,h-padB); ctx.lineTo(w-padR,h-padB); ctx.stroke();
+  ctx.fillStyle=muted; ctx.font="10px monospace";
+  ctx.fillText("I", 6, padT+8);
+  ctx.fillText("λ (pm) →", w-70, h-6);
+
+  function xOf(pm){ return padL + (w-padL-padR)*((pm-pmMin)/(pmMax-pmMin)); }
+
+  // continuous spectrum (rises sharply from lamMin then decays)
+  ctx.beginPath();
+  const N=140;
+  let started=false;
+  for(let i=0;i<=N;i++){
+    const pm = pmMin + (pmMax-pmMin)*i/N;
+    let val=0;
+    if(pm >= lamMinPM){
+      const d = pm - lamMinPM;
+      val = intensityScale * (d/(d+6)) * Math.exp(-d/55) ;
+    }
+    const x = xOf(pm);
+    const y = h-padB - val*(h-padT-padB)*1.4;
+    if(pm>=lamMinPM){
+      if(!started){ ctx.moveTo(x, h-padB); started=true; }
+      ctx.lineTo(x,y);
+    }
+  }
+  ctx.lineTo(xOf(pmMax), h-padB);
+  ctx.closePath();
+  ctx.fillStyle = violet + '33';
+  ctx.fill();
+  ctx.strokeStyle = violet; ctx.lineWidth=2; ctx.stroke();
+
+  // cutoff marker
+  ctx.beginPath(); ctx.setLineDash([3,3]); ctx.strokeStyle=muted;
+  ctx.moveTo(xOf(lamMinPM), padT); ctx.lineTo(xOf(lamMinPM), h-padB); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle=text; ctx.font="9px monospace";
+  ctx.fillText("λmin", xOf(lamMinPM)-12, padT+10);
+
+  // characteristic lines
+  if(showChar){
+    const amber = cssVar('--amber');
+    [[XR_KALPHA_PM,1.0],[XR_KBETA_PM,0.55]].forEach(([pm,rel])=>{
+      const x = xOf(pm);
+      const peakH = (h-padT-padB)*0.9*rel*intensityScale + 20;
+      ctx.beginPath(); ctx.moveTo(x,h-padB); ctx.lineTo(x,h-padB-peakH);
+      ctx.strokeStyle=amber; ctx.lineWidth=3; ctx.stroke();
+    });
+  }
+}
+[xrV,xrI].forEach(el=>el.addEventListener("input", renderXray));
+
+/* ================================================================= */
+/* QUIZ                                                                */
+/* ================================================================= */
+const QUIZ = [
+  {
+    q:"1. පරමාදර්ශී කෘෂ්ණ වස්තුවක විශේෂ ලක්ෂණය කුමක්ද?",
+    options:[
+      "තමා වෙත වැටෙන සියලුම විකිරණ අවශෝෂණය කර, උපරිම විකිරණ ප්‍රමාණය විමෝචනය කරයි",
+      "ආලෝකය සම්පූර්ණයෙන්ම පරාවර්තනය කරයි",
+      "එය හොඳ විද්‍යුත් සන්නායකයක් වේ",
+      "එය කිසිදු විකිරණයක් විමෝචනය නොකරයි"
+    ],
+    correct:0,
+    explain:"කෘෂ්ණ වස්තුවක් යනු පරාවර්තනයකින් තොරව සියලුම විකිරණ අවශෝෂණය කරන, සහ එම උෂ්ණත්වයේදී විමෝචනය කළ හැකි උපරිම විකිරණ ප්‍රමාණය නිකුත් කරන පරමාදර්ශී මාදිලියකි."
+  },
+  {
+    q:"2. වීන්ගේ විස්ථාපන නියමයට අනුව, කෘෂ්ණ වස්තුවක උෂ්ණත්වය වැඩි වන විට λm සිදුවන වෙනස කුමක්ද?",
+    options:["λm වැඩි වේ","λm අඩු වේ","λm වෙනස් නොවේ","λm ශුන්‍ය වේ"],
+    correct:1,
+    explain:"λmT = නියතයක් බැවින්, T වැඩි වන විට λm අඩුවී වර්ණාවලියේ උපරිමය කෙටි තරංග ආයාම දෙසට මාරු වේ."
+  },
+  {
+    q:"3. ප්‍රකාශ විද්‍යුත් ආචරණයේදී ආලෝකයේ සංඛ්‍යාතය (f) ලෝහයේ දේහලීය සංඛ්‍යාතයට (f₀) වඩා අඩුනම් සිදුවන්නේ කුමක්ද?",
+    options:[
+      "තීව්‍රතාව වැඩි කළහොත් ඉලෙක්ට්‍රෝන විමෝචනය වේ",
+      "තීව්‍රතාව කොතරම් වැඩි කළත් ඉලෙක්ට්‍රෝන කිසිසේත් විමෝචනය නොවේ",
+      "ඉලෙක්ට්‍රෝන ප්‍රමාද වී විමෝචනය වේ",
+      "ධාරාව හදිසියේ වැඩි වේ"
+    ],
+    correct:1,
+    explain:"f < f₀ නම් එක් ෆෝටෝනයක ශක්තිය කාර්ය ශ්‍රිතයට වඩා අඩු බැවින්, තීව්‍රතාව (ෆෝටෝන ගණන) වැඩි කළත් එකදු ඉලෙක්ට්‍රෝනයක්වත් විමෝචනය නොවේ."
+  },
+  {
+    q:"4. X-කිරණ නළයේ ත්වරණ වෝල්ටීයතාව (V) වැඩි කළ විට λmin (අවම තරංග ආයාමය) සිදුවන වෙනස කුමක්ද?",
+    options:["λmin වැඩි වේ","λmin අඩු වේ","λmin වෙනස් නොවේ","λmin අනන්ත වේ"],
+    correct:1,
+    explain:"eV = hc/λmin බැවින්, V වැඩි වන විට λmin ප්‍රතිලෝමව අඩුවේ — එනම් වඩාත් බලවත් (කෙටි තරංග ආයාම) X-කිරණ නිපදවේ."
+  },
+  {
+    q:"5. විකිරණශීලී නියුක්ලියසයක අර්ධ ආයු කාලය (t½) මගින් අදහස් කරන්නේ කුමක්ද?",
+    options:[
+      "නියුක්ලියසය සම්පූර්ණයෙන්ම ක්ෂය වීමට ගතවන කාලය",
+      "මුල් නියුක්ලියස් සංඛ්‍යාව අඩකින් අඩුවීමට ගතවන කාලය",
+      "එක් නියුක්ලියසයක් සෑදීමට ගතවන කාලය",
+      "ක්ෂය නියතයට (λ) සමාන කාලය"
+    ],
+    correct:1,
+    explain:"t½ = 0.693/λ. එය මුල් නියුක්ලියස් සංඛ්‍යාව (හෝ සක්‍රියතාව) හරියටම අඩකින් අඩුවීමට ගතවන කාලයයි — නියුක්ලියස් සංඛ්‍යාව කිසි විටෙකත් සම්පූර්ණයෙන් ශුන්‍ය නොවේ."
+  }
+];
+let quizAnswered = new Array(QUIZ.length).fill(false);
+let quizScore = 0;
+
+function buildQuiz(){
+  const container = $("quizContainer");
+  container.innerHTML = "";
+  QUIZ.forEach((item, qi)=>{
+    const card = document.createElement("div");
+    card.className = "quiz-card";
+    const qEl = document.createElement("p");
+    qEl.className = "quiz-q";
+    qEl.textContent = item.q;
+    card.appendChild(qEl);
+    const explain = document.createElement("div");
+    explain.className = "quiz-explain";
+    explain.textContent = item.explain;
+    item.options.forEach((opt, oi)=>{
+      const btn = document.createElement("button");
+      btn.className = "quiz-opt";
+      btn.textContent = opt;
+      btn.addEventListener("click", ()=>{
+        if(quizAnswered[qi]) return;
+        quizAnswered[qi] = true;
+        const allOpts = card.querySelectorAll(".quiz-opt");
+        allOpts.forEach((b,bi)=>{
+          b.setAttribute("disabled","true");
+          if(bi === item.correct) b.classList.add("correct");
+        });
+        if(oi !== item.correct) btn.classList.add("wrong");
+        else quizScore++;
+        explain.classList.add("show");
+        $("quizScore").textContent = quizScore;
+      });
+      card.appendChild(btn);
+    });
+    card.appendChild(explain);
+    container.appendChild(card);
+  });
+}
+buildQuiz();
+$("quizReset").addEventListener("click", ()=>{
+  quizAnswered = new Array(QUIZ.length).fill(false);
+  quizScore = 0;
+  $("quizScore").textContent = "0";
+  buildQuiz();
+});
+
+/* ================================================================= */
+/* INITIAL RENDER + RESIZE                                             */
+/* ================================================================= */
+function redrawAll(){
+  renderHero();
+  renderStefan();
+  renderPhoto();
+  renderDeBroglie();
+  renderHalfLife();
+  renderBB();
+  renderXray();
+}
+window.addEventListener("resize", ()=>requestAnimationFrame(redrawAll));
+redrawAll();
+
+})();
+</script>
+</body>
+</html>

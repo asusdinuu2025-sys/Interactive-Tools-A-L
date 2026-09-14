@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>සිසිලන ක්‍රමය | Newton's Law of Cooling — A/L Physics Lab</title>
+<style>
+  :root{
+    --bg:#0f172a;
+    --bg-panel:#131f38;
+    --bg-panel-2:#0c1729;
+    --bg-raised:#1a2b4d;
+    --line:#233252;
+    --line-soft:#1b2740;
+    --text:#e7edf7;
+    --text-dim:#93a3bf;
+    --text-faint:#5d6f92;
+    --cyan:#22d3ee;
+    --cyan-dim:#0e6c85;
+    --amber:#f5b544;
+    --amber-dim:#8a5f10;
+    --emerald:#34d399;
+    --emerald-dim:#0f6b4d;
+    --red:#f87171;
+    --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Sinhala", "Iskoola Pota", Roboto, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Consolas, monospace;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 15% -10%, #142544 0%, transparent 60%),
+      radial-gradient(900px 500px at 110% 10%, #102a2f 0%, transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--font-ui);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--cyan-dim); color:#fff;}
+  .app{max-width:920px; margin:0 auto; padding:0 0 60px;}
+
+  /* ===== Header ===== */
+  header.topbar{
+    padding:22px 16px 16px;
+    border-bottom:1px solid var(--line-soft);
+    position:relative;
+    overflow:hidden;
+  }
+  header.topbar::before{
+    content:"";
+    position:absolute; inset:0;
+    background:linear-gradient(120deg, rgba(34,211,238,.08), transparent 40%, rgba(245,181,68,.06));
+    pointer-events:none;
+  }
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:.18em;
+    color:var(--cyan);
+    text-transform:uppercase;
+    display:flex; align-items:center; gap:8px;
+  }
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--emerald); box-shadow:0 0 8px var(--emerald); animation:pulse 2.2s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1} 50%{opacity:.35}}
+  h1.si{
+    font-size:22px;
+    line-height:1.35;
+    margin:8px 0 2px;
+    font-weight:800;
+    letter-spacing:.01em;
+  }
+  h1.en{
+    font-size:13px;
+    font-weight:500;
+    color:var(--text-dim);
+    margin:0 0 2px;
+  }
+  .subtitle{
+    font-size:12.5px;
+    color:var(--text-faint);
+    margin-top:6px;
+  }
+
+  /* ===== Tabs ===== */
+  nav.tabs{
+    position:sticky; top:0; z-index:40;
+    display:flex; gap:6px;
+    padding:10px 12px;
+    background:rgba(15,23,42,.92);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line-soft);
+    overflow-x:auto;
+    scrollbar-width:none;
+  }
+  nav.tabs::-webkit-scrollbar{display:none;}
+  .tab-btn{
+    flex:0 0 auto;
+    display:flex; flex-direction:column; align-items:flex-start; gap:1px;
+    padding:8px 13px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:var(--bg-panel);
+    color:var(--text-dim);
+    font-family:var(--font-ui);
+    cursor:pointer;
+    font-size:12.5px;
+    white-space:nowrap;
+    transition:all .18s ease;
+  }
+  .tab-btn .tab-num{font-family:var(--font-mono); font-size:9.5px; color:var(--text-faint); letter-spacing:.1em;}
+  .tab-btn.active{
+    background:linear-gradient(160deg, var(--bg-raised), var(--bg-panel));
+    border-color:var(--cyan-dim);
+    color:var(--text);
+    box-shadow:0 0 0 1px rgba(34,211,238,.15) inset, 0 4px 14px -6px rgba(34,211,238,.25);
+  }
+  .tab-btn.active .tab-num{color:var(--cyan);}
+
+  main{padding:16px;}
+  .module{display:none; animation:fadein .25s ease;}
+  .module.active{display:block;}
+  @keyframes fadein{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;}}
+
+  /* ===== Cards ===== */
+  .card{
+    background:linear-gradient(180deg, var(--bg-panel), var(--bg-panel-2));
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:16px;
+    margin-bottom:14px;
+    position:relative;
+  }
+  .card-title{
+    font-size:14px; font-weight:700; margin:0 0 4px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .card-title .en{font-weight:400; color:var(--text-faint); font-size:11.5px;}
+  .card-sub{font-size:12px; color:var(--text-dim); margin:0 0 12px; line-height:1.55;}
+  .accent-cyan{color:var(--cyan);}
+  .accent-amber{color:var(--amber);}
+  .accent-emerald{color:var(--emerald);}
+
+  /* ===== Module 1: Apparatus ===== */
+  .apparatus-wrap{position:relative;}
+  svg.diagram{width:100%; height:auto; display:block; touch-action:manipulation;}
+  .hotspot{cursor:pointer;}
+  .hotspot circle.ring{fill:rgba(34,211,238,.12); stroke:var(--cyan); stroke-width:1.4; transition:all .2s;}
+  .hotspot.active circle.ring{fill:rgba(245,181,68,.22); stroke:var(--amber);}
+  .hotspot circle.dot{fill:var(--cyan);}
+  .hotspot.active circle.dot{fill:var(--amber);}
+  .hotspot text.num{font-family:var(--font-mono); font-size:9px; fill:#03151f; font-weight:700;}
+
+  .info-panel{
+    margin-top:12px; padding:12px 13px;
+    border-radius:10px;
+    background:var(--bg-raised);
+    border:1px solid var(--cyan-dim);
+    font-size:12.5px; line-height:1.6;
+    display:none;
+  }
+  .info-panel.show{display:block; animation:fadein .2s ease;}
+  .info-panel .label{color:var(--amber); font-weight:700; font-size:12.5px; margin-bottom:4px;}
+  .info-panel .why{color:var(--text-dim); margin-top:6px; padding-top:6px; border-top:1px dashed var(--line);}
+  .hint-row{display:flex; align-items:center; gap:6px; font-size:11px; color:var(--text-faint); margin-top:10px;}
+  .hint-row svg{width:13px;height:13px;flex:0 0 auto;}
+
+  .toggle-row{display:flex; gap:8px; margin-bottom:12px;}
+  .seg-btn{
+    flex:1; padding:9px 6px; text-align:center;
+    border-radius:9px; border:1px solid var(--line);
+    background:var(--bg-panel-2); color:var(--text-dim);
+    font-size:12px; cursor:pointer; transition:all .15s;
+  }
+  .seg-btn.active{background:var(--bg-raised); border-color:var(--emerald-dim); color:var(--emerald);}
+  .seg-btn.wrong-active{background:var(--bg-raised); border-color:#7a2c2c; color:var(--red);}
+
+  /* ===== Controls (sliders) ===== */
+  .ctrl{margin-bottom:14px;}
+  .ctrl-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;}
+  .ctrl-label{font-size:12px; color:var(--text-dim);}
+  .ctrl-val{font-family:var(--font-mono); font-size:14px; color:var(--cyan); font-weight:700;}
+  input[type=range]{
+    width:100%; -webkit-appearance:none; appearance:none;
+    height:5px; border-radius:3px; background:var(--line);
+    outline:none;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; appearance:none;
+    width:20px; height:20px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #fff, var(--cyan) 60%);
+    border:2px solid #06222b;
+    box-shadow:0 2px 6px rgba(0,0,0,.4);
+    cursor:pointer; margin-top:-1px;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:18px; height:18px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #fff, var(--cyan) 60%);
+    border:2px solid #06222b; cursor:pointer;
+  }
+  .ctrl-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    padding:10px 16px; border-radius:10px; border:1px solid var(--cyan-dim);
+    background:linear-gradient(160deg, #163247, #0f2635);
+    color:var(--cyan); font-family:var(--font-ui); font-size:12.5px; font-weight:600;
+    cursor:pointer; transition:all .15s;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn.amber{border-color:var(--amber-dim); background:linear-gradient(160deg, #3a2a10, #26200c); color:var(--amber);}
+  .btn.emerald{border-color:var(--emerald-dim); background:linear-gradient(160deg, #10352a, #0c2a1f); color:var(--emerald);}
+  .btn.ghost{background:transparent; border-color:var(--line); color:var(--text-dim);}
+  .btn-row{display:flex; gap:8px; flex-wrap:wrap; margin:10px 0;}
+
+  /* Digital readout - signature element */
+  .readout-strip{
+    display:flex; gap:8px; margin:12px 0; flex-wrap:wrap;
+  }
+  .readout{
+    flex:1; min-width:100px;
+    background:#020a13;
+    border:1px solid #0d3a45;
+    border-radius:9px;
+    padding:8px 10px;
+    box-shadow:inset 0 0 12px rgba(34,211,238,.06);
+  }
+  .readout .rl{font-size:9px; letter-spacing:.12em; color:var(--text-faint); font-family:var(--font-mono); text-transform:uppercase;}
+  .readout .rv{
+    font-family:var(--font-mono); font-size:20px; font-weight:700;
+    color:var(--cyan); text-shadow:0 0 10px rgba(34,211,238,.5);
+    letter-spacing:.02em;
+  }
+  .readout .ru{font-size:10px; color:var(--text-faint); font-family:var(--font-mono);}
+  .readout.amber .rv{color:var(--amber); text-shadow:0 0 10px rgba(245,181,68,.5);}
+  .readout.emerald .rv{color:var(--emerald); text-shadow:0 0 10px rgba(52,211,153,.5);}
+
+  canvas{width:100%; display:block; border-radius:10px; background:#081428; border:1px solid var(--line-soft); touch-action:none;}
+
+  .mirror-box{
+    margin-top:10px; padding:10px 12px; border-radius:10px;
+    background:var(--bg-panel-2); border:1px dashed var(--line);
+    font-size:11.5px; color:var(--text-dim); line-height:1.55;
+  }
+  .mirror-status{
+    display:inline-flex; align-items:center; gap:6px; margin-top:6px;
+    font-family:var(--font-mono); font-size:11px; font-weight:700;
+  }
+  .mirror-status .led{width:8px;height:8px;border-radius:50%; background:var(--text-faint);}
+  .mirror-status.ok .led{background:var(--emerald); box-shadow:0 0 8px var(--emerald);}
+  .mirror-status.ok{color:var(--emerald);}
+
+  table.data-table{width:100%; border-collapse:collapse; font-size:11.5px; margin-top:8px;}
+  table.data-table th, table.data-table td{
+    padding:6px 6px; text-align:center; border-bottom:1px solid var(--line-soft);
+    font-family:var(--font-mono);
+  }
+  table.data-table th{color:var(--text-faint); font-weight:500; font-size:10px; text-transform:uppercase; letter-spacing:.05em;}
+  table.data-table td{color:var(--text);}
+  table.data-table tr:last-child td{border-bottom:none;}
+
+  /* Module 3 */
+  .mass-inputs{display:grid; grid-template-columns:1fr; gap:12px;}
+  .formula-box{
+    background:var(--bg-panel-2); border:1px solid var(--line);
+    border-radius:10px; padding:14px; margin:12px 0;
+    font-family:var(--font-mono); font-size:12.5px; text-align:center; color:var(--cyan);
+    overflow-x:auto;
+  }
+  .steps{font-size:12px; line-height:2; color:var(--text-dim);}
+  .steps .step-eq{font-family:var(--font-mono); color:var(--text); display:block; margin:2px 0 8px; font-size:12px; overflow-x:auto; white-space:nowrap;}
+  .result-box{
+    margin-top:12px; padding:14px; border-radius:12px;
+    background:linear-gradient(160deg, #123a2c, #0d2a20);
+    border:1px solid var(--emerald-dim);
+    text-align:center;
+  }
+  .result-box .rlabel{font-size:11px; color:var(--text-dim); letter-spacing:.05em;}
+  .result-box .rval{font-family:var(--font-mono); font-size:26px; font-weight:800; color:var(--emerald); margin-top:2px;}
+  .result-box .rval .unit{font-size:14px; color:var(--text-dim); font-weight:400;}
+
+  .legend{display:flex; gap:16px; margin-top:8px; flex-wrap:wrap;}
+  .legend-item{display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--text-dim);}
+  .legend-swatch{width:16px; height:3px; border-radius:2px;}
+
+  /* Module 4 */
+  .qa-card{
+    background:var(--bg-panel-2); border:1px solid var(--line);
+    border-radius:12px; padding:13px 14px; margin-bottom:10px;
+  }
+  .qa-num{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:22px; height:22px; border-radius:6px;
+    background:var(--bg-raised); color:var(--amber);
+    font-family:var(--font-mono); font-size:11px; font-weight:700;
+    margin-right:8px; flex:0 0 auto;
+  }
+  .qa-head{display:flex; align-items:flex-start; margin-bottom:8px;}
+  .qa-text{font-size:13px; line-height:1.6;}
+  .qa-text .en{display:block; font-size:11px; color:var(--text-faint); margin-top:2px;}
+  .qa-reveal-btn{
+    margin-top:4px; font-size:11.5px; padding:6px 12px; border-radius:8px;
+    border:1px solid var(--line); background:transparent; color:var(--amber);
+    cursor:pointer; font-family:var(--font-ui);
+  }
+  .qa-answer{
+    display:none; margin-top:10px; padding:10px 12px; border-radius:9px;
+    background:var(--bg-raised); border-left:3px solid var(--emerald);
+    font-size:12px; line-height:1.65; color:var(--text);
+  }
+  .qa-answer.show{display:block; animation:fadein .2s ease;}
+  .qa-answer .en{color:var(--text-dim); display:block; margin-top:4px; font-size:11px;}
+
+  .self-test-input{
+    width:100%; padding:8px 10px; margin-top:6px;
+    background:var(--bg-panel-2); border:1px solid var(--line); border-radius:8px;
+    color:var(--text); font-family:var(--font-ui); font-size:12.5px;
+  }
+  .self-test-input:focus{outline:none; border-color:var(--cyan-dim);}
+
+  footer.foot{
+    text-align:center; padding:24px 16px 40px; color:var(--text-faint); font-size:11px; line-height:1.8;
+  }
+  footer.foot .lab{font-family:var(--font-mono); color:var(--text-dim);}
+
+  @media (min-width:680px){
+    .ctrl-grid{grid-template-columns:1fr 1fr;}
+    .mass-inputs{grid-template-columns:1fr 1fr 1fr;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001s !important; transition-duration:.001s !important;}
+  }
+
+  .caption{font-size:10.5px; color:var(--text-faint); text-align:center; margin-top:6px; font-family:var(--font-mono);}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <div class="eyebrow"><span class="dot"></span> A/L PHYSICS · HEAT PRACTICAL · INTERACTIVE LAB</div>
+    <h1 class="si">නිව්ටන්ගේ සිසිලන නියමය සහ සිසිලන ක්‍රමයෙන් ද්‍රවයක විශිෂ්ට තාප ධාරිතාව සෙවීම</h1>
+    <h1 class="en">Newton's Law of Cooling &amp; Specific Heat Capacity by Method of Cooling</h1>
+    <div class="subtitle">4 ඉන්ටරැක්ටිව් මොඩියුල — උපකරණ, සිසිලන වක්‍රය, ගණනය, ප්‍රශ්න පත්‍රය</div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="m1"><span class="tab-num">MODULE 01</span>උපකරණ රූපසටහන</button>
+    <button class="tab-btn" data-tab="m2"><span class="tab-num">MODULE 02</span>සිසිලන වක්‍රය</button>
+    <button class="tab-btn" data-tab="m3"><span class="tab-num">MODULE 03</span>විශිෂ්ට තාප ධාරිතාව</button>
+    <button class="tab-btn" data-tab="m4"><span class="tab-num">MODULE 04</span>ප්‍රශ්න පත්‍රය</button>
+  </nav>
+
+  <main>
+
+    <!-- ============ MODULE 1 ============ -->
+    <section id="m1" class="module active">
+
+      <div class="card">
+        <p class="card-title">උපකරණ සැකසුම <span class="en">Apparatus Setup</span></p>
+        <p class="card-sub">රූපයේ ඇති කොටස් මත ටැප් කර එහි කාර්යය සහ ප්‍රවේශම් ගැන දැනගන්න. <span style="color:var(--text-faint)">Tap any labelled part of the diagram to reveal its function &amp; precaution.</span></p>
+
+        <div class="apparatus-wrap">
+          <svg class="diagram" viewBox="0 0 340 400" xmlns="http://www.w3.org/2000/svg">
+            <!-- outer support stand -->
+            <line x1="70" y1="14" x2="270" y2="14" stroke="#4b5b7d" stroke-width="4" stroke-linecap="round"/>
+            <line x1="90" y1="14" x2="90" y2="40" stroke="#4b5b7d" stroke-width="3"/>
+            <!-- outer jacket vessel -->
+            <path d="M55 90 L55 330 Q55 345 70 345 L250 345 Q265 345 265 330 L265 90" fill="#0d2e39" stroke="#1c5666" stroke-width="2"/>
+            <!-- water jacket fill -->
+            <path d="M60 150 L60 328 Q60 340 70 340 L250 340 Q260 340 260 328 L260 150 Z" fill="#123f4d" opacity="0.85"/>
+            <!-- wavy water surface -->
+            <path d="M60 150 Q75 145 90 150 T120 150 T150 150 T180 150 T210 150 T240 150 T260 150" fill="none" stroke="#2a7f96" stroke-width="1.6" opacity="0.7"/>
+
+            <!-- cork / wood bridge supports -->
+            <rect x="55" y="140" width="24" height="9" fill="#8a5a2e" rx="2"/>
+            <rect x="241" y="140" width="24" height="9" fill="#8a5a2e" rx="2"/>
+
+            <!-- inner calorimeter -->
+            <rect x="112" y="105" width="96" height="150" rx="6" fill="#1a2b4d" stroke="#3a5a86" stroke-width="2"/>
+            <!-- calorimeter liquid -->
+            <rect x="118" y="150" width="84" height="99" fill="#3a2a12" opacity="0.9"/>
+            <path d="M118 150 Q135 145 152 150 T186 150 T202 150" fill="none" stroke="#f5b544" stroke-width="1.5" opacity="0.8"/>
+
+            <!-- lid -->
+            <rect x="108" y="97" width="104" height="10" rx="3" fill="#4b5b7d"/>
+
+            <!-- suspension threads -->
+            <line x1="90" y1="14" x2="118" y2="97" stroke="#5d6f92" stroke-width="1.3"/>
+            <line x1="90" y1="14" x2="202" y2="97" stroke="#5d6f92" stroke-width="1.3"/>
+
+            <!-- thermometer -->
+            <rect x="154" y="55" width="7" height="130" rx="3.5" fill="#e7edf7" stroke="#8a97b8" stroke-width="1"/>
+            <circle cx="157.5" cy="188" r="6.5" fill="#f87171"/>
+            <rect x="154.5" y="150" width="6" height="35" fill="#f87171"/>
+
+            <!-- stirrer -->
+            <line x1="122" y1="60" x2="122" y2="240" stroke="#c7cfe0" stroke-width="3" stroke-linecap="round"/>
+            <path d="M112 235 L132 235 L122 250 Z" fill="#c7cfe0"/>
+            <circle cx="122" cy="60" r="6" fill="#c7cfe0"/>
+
+            <!-- HOTSPOTS -->
+            <g class="hotspot" data-id="stand" transform="translate(90,14)">
+              <circle class="ring" r="13"/><circle class="dot" r="6"/><text class="num" x="-3" y="3">1</text>
+            </g>
+            <g class="hotspot" data-id="thermo" transform="translate(157,70)">
+              <circle class="ring" r="13"/><circle class="dot" r="6"/><text class="num" x="-3" y="3">2</text>
+            </g>
+            <g class="hotspot" data-id="stirrer" transform="translate(122,205)">
+              <circle class="ring" r="13"/><circle class="dot" r="6"/><text class="num" x="-3" y="3">3</text>
+            </g>
+            <g class="hotspot" data-id="lid" transform="translate(210,101)">
+              <circle class="ring" r="13"/><circle class="dot" r="6"/><text class="num" x="-3" y="3">4</text>
+            </g>
+            <g class="hotspot" data-id="calorimeter" transform="translate(205,200)">
+              <circle class="ring" r="13"/><circle class="dot" r="6"/><text class="num" x="-3" y="3">5</text>
+            </g>
+            <g class="hotspot" data-id="jacket" transform="translate(62,300)">
+              <circle class="ring" r="13"/><circle class="dot" r="6"/><text class="num" x="-3" y="3">6</text>
+            </g>
+            <g class="hotspot" data-id="bridge" transform="translate(253,144)">
+              <circle class="ring" r="13"/><circle class="dot" r="6"/><text class="num" x="-3" y="3">7</text>
+            </g>
+          </svg>
+        </div>
+
+        <div id="infoPanel" class="info-panel"></div>
+        <div class="hint-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>
+          ඉහත අංක 1–7 මත ටැප් කරන්න · Tap markers 1–7 above
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="card-title">ද්‍රව මට්ටම <span class="en">Liquid Fill Level</span></p>
+        <p class="card-sub">කැලරිමීටරයේ නිවැරදි හා වැරදි ද්‍රව මට්ටම් සසඳන්න.</p>
+        <div class="toggle-row">
+          <button class="seg-btn active" id="btnLevelCorrect">✓ නිවැරදි මට්ටම<br><span style="font-size:10px">1cm below rim</span></button>
+          <button class="seg-btn" id="btnLevelWrong">✗ වැරදි මට්ටම<br><span style="font-size:10px">Filled to brim</span></button>
+        </div>
+        <svg viewBox="0 0 300 140" style="width:100%; height:auto; display:block;">
+          <rect x="90" y="10" width="120" height="120" rx="6" fill="#1a2b4d" stroke="#3a5a86" stroke-width="2"/>
+          <rect id="levelFill" x="96" y="24" width="108" height="100" fill="#3a2a12"/>
+          <line id="rimMark" x1="90" y1="24" x2="210" y2="24" stroke="var(--emerald)" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <text id="levelCaption" x="150" y="8" text-anchor="middle" fill="var(--emerald)" font-size="9" font-family="ui-monospace">1cm gap for stirring</text>
+        </svg>
+        <div id="levelExplain" class="info-panel show" style="margin-top:8px;">
+          <span class="label">✓ නිවැරදි</span> ද්‍රවය මුඛයේ සිට 1cm පමණ පහළින් පුරවන්නේ, මන්ථනය කරන විට ද්‍රවය ඉතිරී නොයාමටත්, තාපය ඒකාකාරව බෙදී යාමට ප්‍රමාණවත් අවකාශයක් ලබා දීමටත්ය.
+          <div class="why en">Filling to ~1cm below the rim leaves room for stirring without spillage while keeping the liquid volume high enough for uniform heat distribution.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ MODULE 2 ============ -->
+    <section id="m2" class="module">
+
+      <div class="card">
+        <p class="card-title">සිසිලන වක්‍ර සිමියුලේටරය <span class="en">Cooling Curve Simulator</span></p>
+        <p class="card-sub">ආරම්භක උෂ්ණත්වය (θ₀) සහ කාමර උෂ්ණත්වය (θ_R) සකසා සිසිලන ක්‍රියාවලිය නරඹන්න.</p>
+
+        <div class="ctrl-grid">
+          <div class="ctrl">
+            <div class="ctrl-head"><span class="ctrl-label">ආරම්භක උෂ්ණත්වය θ₀</span><span class="ctrl-val" id="valTheta0">78°C</span></div>
+            <input type="range" id="rangeTheta0" min="60" max="95" value="78" step="1">
+          </div>
+          <div class="ctrl">
+            <div class="ctrl-head"><span class="ctrl-label">කාමර උෂ්ණත්වය θ_R</span><span class="ctrl-val" id="valThetaR">28°C</span></div>
+            <input type="range" id="rangeThetaR" min="20" max="34" value="28" step="1">
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn emerald" id="btnPlay">▶ ආරම්භ කරන්න · Start</button>
+          <button class="btn ghost" id="btnReset">↺ යළි සකසන්න · Reset</button>
+        </div>
+
+        <div class="readout-strip">
+          <div class="readout"><div class="rl">TIME t</div><div class="rv" id="roTime">00.0</div><div class="ru">min</div></div>
+          <div class="readout amber"><div class="rl">TEMP θ</div><div class="rv" id="roTemp">78.0</div><div class="ru">°C</div></div>
+          <div class="readout emerald"><div class="rl">EXCESS θ−θ_R</div><div class="rv" id="roExcess">50.0</div><div class="ru">°C</div></div>
+        </div>
+
+        <canvas id="canvasCurve" width="640" height="300"></canvas>
+        <div class="caption">θ (°C) — vertical axis · t (min) — horizontal axis</div>
+      </div>
+
+      <div class="card">
+        <p class="card-title">ස්පර්ශකය සහ මිරර් ක්‍රමය <span class="en">Tangent via Mirror Method</span></p>
+        <p class="card-sub">තල දර්පණය භ්‍රමණය කර වක්‍රයේ පිළිබිඹුව බාධාවකින් තොරව දිගටම පෙනෙන කෝණයට සකසන්න — එවිට දර්පණයට ලම්බකව ඇත්තේ ස්පර්ශකයයි.</p>
+
+        <div class="ctrl">
+          <div class="ctrl-head"><span class="ctrl-label">වක්‍රය මත ලක්ෂ්‍යය (t)</span><span class="ctrl-val" id="valTpick">4.0 min</span></div>
+          <input type="range" id="rangeTpick" min="0" max="1" value="0.3" step="0.001">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-head"><span class="ctrl-label">දර්පණ කෝණය · Mirror angle</span><span class="ctrl-val" id="valMirror">0°</span></div>
+          <input type="range" id="rangeMirror" min="-85" max="85" value="0" step="1">
+        </div>
+
+        <canvas id="canvasMirror" width="640" height="260"></canvas>
+
+        <div class="mirror-box">
+          දර්පණයේ පිළිබිඹු වක්‍රය, සැබෑ වක්‍රයට කිසිදු කෝණයක් / විරාමයක් නොමැතිව සම්බන්ධ වන විට දර්පණය <b>සම්මුඛ තලයට</b> ඇත. එවිට එයට ලම්බකව ඇද ඇති රතු රේඛාව ස්පර්ශකයයි.
+          <div class="mirror-status" id="mirrorStatus"><span class="led"></span><span id="mirrorStatusText">කෝණය සකසන්න · adjust the angle</span></div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn amber" id="btnRecordPoint">＋ මෙම ලක්ෂ්‍යය සටහන් කරන්න · Record point</button>
+          <button class="btn ghost" id="btnClearPoints">✕ මකන්න · Clear</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="card-title">සත්‍යාපන ප්‍රස්තාරය <span class="en">dθ/dt vs (θ−θ_R)</span></p>
+        <p class="card-sub">සටහන් කළ ලක්ෂ්‍ය සරල රේඛාවක් ලෙස මූලාරම්භය හරහා ගමන් කරන බව නිරීක්ෂණය කරන්න — මෙය නිව්ටන්ගේ සිසිලන නියමය සත්‍යාපනය කරයි.</p>
+        <canvas id="canvasVerify" width="640" height="260"></canvas>
+        <div class="caption">x: θ−θ_R (°C) &nbsp;·&nbsp; y: −dθ/dt (°C/min)</div>
+        <table class="data-table" id="verifyTable">
+          <thead><tr><th>#</th><th>t (min)</th><th>θ (°C)</th><th>θ−θ_R</th><th>|dθ/dt|</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ MODULE 3 ============ -->
+    <section id="m3" class="module">
+
+      <div class="card">
+        <p class="card-title">ද්විත්ව සිසිලන වක්‍ර <span class="en">Water vs Test Liquid</span></p>
+        <p class="card-sub">එකම කැලරිමීටරයෙන්, එකම කාමර උෂ්ණත්වයේදී, ජලය සහ පරීක්ෂණ ද්‍රවය (ඇනිලින්/පොල්තෙල්) සිසිල් වන ආකාරය සසඳන්න. ජලයේ විශිෂ්ට තාප ධාරිතාව වැඩි නිසා එහි වක්‍රය ඉහළින් පිහිටයි.</p>
+        <canvas id="canvasDual" width="640" height="280"></canvas>
+        <div class="legend">
+          <div class="legend-item"><span class="legend-swatch" style="background:var(--cyan)"></span>ජලය · Water (C_w = 4.20 J/g°C)</div>
+          <div class="legend-item"><span class="legend-swatch" style="background:var(--amber)"></span>ද්‍රවය · Liquid (unknown C_l)</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="card-title">ස්කන්ධ දත්ත <span class="en">Mass Data (g)</span></p>
+        <div class="mass-inputs">
+          <div class="ctrl">
+            <div class="ctrl-head"><span class="ctrl-label">m₁ — හිස් කැලරිමීටරය</span><span class="ctrl-val" id="valM1">42 g</span></div>
+            <input type="range" id="rangeM1" min="20" max="80" value="42" step="1">
+          </div>
+          <div class="ctrl">
+            <div class="ctrl-head"><span class="ctrl-label">m₂ — කැලරිමීටරය + ජලය</span><span class="ctrl-val" id="valM2">92 g</span></div>
+            <input type="range" id="rangeM2" min="60" max="160" value="92" step="1">
+          </div>
+          <div class="ctrl">
+            <div class="ctrl-head"><span class="ctrl-label">m₃ — කැලරිමීටරය + ද්‍රවය</span><span class="ctrl-val" id="valM3">102 g</span></div>
+            <input type="range" id="rangeM3" min="60" max="170" value="102" step="1">
+          </div>
+        </div>
+
+        <div class="ctrl-grid">
+          <div class="ctrl">
+            <div class="ctrl-head"><span class="ctrl-label">θ₁ (ඉහළ පාඨාංකය)</span><span class="ctrl-val" id="valTh1">70°C</span></div>
+            <input type="range" id="rangeTh1" min="55" max="85" value="70" step="1">
+          </div>
+          <div class="ctrl">
+            <div class="ctrl-head"><span class="ctrl-label">θ₂ (පහළ පාඨාංකය)</span><span class="ctrl-val" id="valTh2">50°C</span></div>
+            <input type="range" id="rangeTh2" min="35" max="65" value="50" step="1">
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn cyan btn" id="btnMeasure" style="border-color:var(--cyan-dim); color:var(--cyan);">⏱ t_w, t_l මැනගන්න · Measure cooling times</button>
+        </div>
+
+        <div class="readout-strip">
+          <div class="readout"><div class="rl">t_w (WATER)</div><div class="rv" id="roTw">—</div><div class="ru">s</div></div>
+          <div class="readout amber"><div class="rl">t_l (LIQUID)</div><div class="rv" id="roTl">—</div><div class="ru">s</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="card-title">ගණන් ලකුණු පුවරුව <span class="en">Calculation Dashboard</span></p>
+        <div class="formula-box">
+          (m₁c_c + (m₂−m₁)c_w)(θ₁−θ₂) / t_w &nbsp;=&nbsp; (m₁c_c + (m₃−m₁)c_l)(θ₁−θ₂) / t_l
+        </div>
+        <div class="steps" id="stepsBox">t_w සහ t_l මැනගන්න ගණනය බලන්න · measure times above to see the working.</div>
+        <div class="result-box" id="resultBox" style="display:none;">
+          <div class="rlabel">ද්‍රවයේ විශිෂ්ට තාප ධාරිතාව · SPECIFIC HEAT CAPACITY C_l</div>
+          <div class="rval" id="resultVal">—<span class="unit"> J g⁻¹ °C⁻¹</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ MODULE 4 ============ -->
+    <section id="m4" class="module">
+      <div class="card">
+        <p class="card-title">ව්‍යුහගත ප්‍රශ්න <span class="en">Structured Practice Questions</span></p>
+        <p class="card-sub">එකින් එක උත්තර දී, පසුව "පිළිතුර පෙන්වන්න" ටැප් කර සරි කරගන්න.</p>
+      </div>
+
+      <div class="card qa-card">
+        <div class="qa-head"><span class="qa-num">01</span>
+          <div class="qa-text">නිව්ටන්ගේ සිසිලන නියමය වලංගු වීමට අවශ්‍ය කොන්දේසි දෙකක් ලියන්න.
+            <span class="en">State two conditions necessary for Newton's Law of Cooling to hold.</span></div>
+        </div>
+        <textarea class="self-test-input" rows="2" placeholder="ඔබේ පිළිතුර මෙහි ලියන්න..."></textarea>
+        <button class="qa-reveal-btn">පිළිතුර පෙන්වන්න · Reveal answer</button>
+        <div class="qa-answer">
+          1) වස්තුවේ අතිරික්ත උෂ්ණත්වය (θ−θ_R) එතරම් විශාල නොවිය යුතුය (සාමාන්‍යයෙන් 30°C ට වඩා අඩු).<br>
+          2) වස්තුව අවට වායුවේ නිරන්තර හා මෘදු සංචලනයකට (thin, uniform draft) නිරාවරණය විය යුතුය — එනම් තුනී, ඒකාකාර වාත ස්තරයක් හරහා සිසිල් විය යුතුය.
+          <span class="en">1) The excess temperature (θ−θ_R) must be small (typically &lt;30°C). 2) The object must lose heat through a thin, steady layer of moving air (natural convection), not strong draughts.</span>
+        </div>
+      </div>
+
+      <div class="card qa-card">
+        <div class="qa-head"><span class="qa-num">02</span>
+          <div class="qa-text">ස්ථාවර උෂ්ණත්ව ජල ආවරණයේ (constant temperature water jacket) අරමුණ කුමක්ද?
+            <span class="en">What is the purpose of the constant-temperature outer water jacket?</span></div>
+        </div>
+        <textarea class="self-test-input" rows="2" placeholder="ඔබේ පිළිතුර මෙහි ලියන්න..."></textarea>
+        <button class="qa-reveal-btn">පිළිතුර පෙන්වන්න · Reveal answer</button>
+        <div class="qa-answer">
+          කැලරිමීටරය තාපය නිකුත් කරන විට එය වටා ඇති වාතය රත් වී θ_R ඉහළ යා හැක. ජල ආවරණය ඒ තාපය ක්ෂණිකව අවශෝෂණය කර, කැලරිමීටරය වටා ඇති පරිසර උෂ්ණත්වය නියතව තබයි — එමගින් සිසිලන අනුපාතය කැලරිමීටරයේ අතිරික්ත උෂ්ණත්වයට පමණක් රඳා පවතින බව සහතික කරයි.
+          <span class="en">It keeps the surrounding air temperature (θ_R) constant by absorbing the heat lost, so the cooling rate depends only on the calorimeter's excess temperature — as Newton's Law requires.</span>
+        </div>
+      </div>
+
+      <div class="card qa-card">
+        <div class="qa-head"><span class="qa-num">03</span>
+          <div class="qa-text">පරීක්ෂණය අතරතුර ද්‍රවය නිරන්තරයෙන් මන්ථනය කළ යුත්තේ ඇයි?
+            <span class="en">Why must the liquid be stirred continuously during the experiment?</span></div>
+        </div>
+        <textarea class="self-test-input" rows="2" placeholder="ඔබේ පිළිතුර මෙහි ලියන්න..."></textarea>
+        <button class="qa-reveal-btn">පිළිතුර පෙන්වන්න · Reveal answer</button>
+        <div class="qa-answer">
+          මන්ථනය කිරීමෙන් ද්‍රවය පුරාම උෂ්ණත්වය ඒකාකාරව බෙදී යයි. එසේ නොවුනහොත් උෂ්ණත්වමානය ස්ථානීය (local) අගයක් පමණක් පෙන්වන අතර, එය ද්‍රවයේ සාමාන්‍ය උෂ්ණත්වය නිවැරදිව නිරූපණය නොකරයි.
+          <span class="en">Stirring ensures a uniform temperature throughout the liquid so the thermometer reads a true average, not a local hot/cold spot.</span>
+        </div>
+      </div>
+
+      <div class="card qa-card">
+        <div class="qa-head"><span class="qa-num">04</span>
+          <div class="qa-text">θ vs t ප්‍රස්තාරයේ සිට θ_R (කාමර උෂ්ණත්වය) හඳුනාගන්නේ කෙසේද?
+            <span class="en">How is θ_R identified from the θ vs t graph?</span></div>
+        </div>
+        <textarea class="self-test-input" rows="2" placeholder="ඔබේ පිළිතුර මෙහි ලියන්න..."></textarea>
+        <button class="qa-reveal-btn">පිළිතුර පෙන්වන්න · Reveal answer</button>
+        <div class="qa-answer">
+          දිගු කාලයක් ගතවත්ම වක්‍රය ක්ෂිතිජ රේඛාවකට සමීප වී, y-අක්ෂය (θ) මත ස්ථාවර අගයක් ගනී. එම asymptotic අගය θ_R වේ — එනම් ද්‍රවය කාමර උෂ්ණත්වයට සමාන වූ පසු තවදුරටත් සිසිල් නොවේ.
+          <span class="en">θ_R is the horizontal asymptote the curve approaches — the temperature never drops below room temperature.</span>
+        </div>
+      </div>
+
+      <div class="card qa-card">
+        <div class="qa-head"><span class="qa-num">05</span>
+          <div class="qa-text">dθ/dt vs (θ−θ_R) ප්‍රස්තාරය මූලාරම්භය හරහා යන සරල රේඛාවක් වීමෙන් තහවුරු වන්නේ කුමක්ද?
+            <span class="en">What does a straight line through the origin on the dθ/dt vs (θ−θ_R) graph confirm?</span></div>
+        </div>
+        <textarea class="self-test-input" rows="2" placeholder="ඔබේ පිළිතුර මෙහි ලියන්න..."></textarea>
+        <button class="qa-reveal-btn">පිළිතුර පෙන්වන්න · Reveal answer</button>
+        <div class="qa-answer">
+          එය dθ/dt ∝ (θ−θ_R) බව, එනම් සිසිලන අනුපාතය අතිරික්ත උෂ්ණත්වයට සෘජු අනුලෝමව සමානුපාතික බව සත්‍යාපනය කරයි — නිව්ටන්ගේ සිසිලන නියමයම එයයි.
+          <span class="en">It confirms dθ/dt ∝ (θ−θ_R) — the direct proportionality that is Newton's Law of Cooling itself.</span>
+        </div>
+      </div>
+
+      <div class="card qa-card">
+        <div class="qa-head"><span class="qa-num">06</span>
+          <div class="qa-text">ජලය හා පරීක්ෂණ ද්‍රවය සඳහා එකම කැලරිමීටරය, එකම θ₁→θ₂ පරාසය සහ එකම කාමර උෂ්ණත්වය භාවිතා කරන්නේ ඇයි?
+            <span class="en">Why must the same calorimeter, the same θ₁→θ₂ range, and the same room temperature be used for both liquids?</span></div>
+        </div>
+        <textarea class="self-test-input" rows="2" placeholder="ඔබේ පිළිතුර මෙහි ලියන්න..."></textarea>
+        <button class="qa-reveal-btn">පිළිතුර පෙන්වන්න · Reveal answer</button>
+        <div class="qa-answer">
+          එකම මතුපිට වර්ගඵලය, එකම සාමාන්‍ය අතිරික්ත උෂ්ණත්වය ((θ₁+θ₂)/2 − θ_R) සහ එකම පරිසරය තිබීමෙන්, දෙඅවස්ථා දෙකේදීම තාප හානි වීමේ අනුපාතය (dQ/dt) සමාන වේ. එවිට සංසන්දනය සාධාරණීකරණය කළ හැක.
+          <span class="en">Keeping these identical ensures the rate of heat loss (dQ/dt) is the same in both trials, since it depends only on surface area and mean excess temperature — making the comparison valid.</span>
+        </div>
+      </div>
+
+      <div class="card qa-card">
+        <div class="qa-head"><span class="qa-num">07</span>
+          <div class="qa-text">Q/t = mcθ/t යන සම්බන්ධතාවයෙන් ආරම්භ කර, ද්‍රවයේ විශිෂ්ට තාප ධාරිතාව C_l සඳහා ප්‍රකාශනයක් ව්‍යුත්පන්න කරන්න.
+            <span class="en">Starting from Q/t = mcθ/t, derive an expression for the liquid's specific heat capacity C_l.</span></div>
+        </div>
+        <button class="qa-reveal-btn">පිළිතුර පෙන්වන්න · Reveal answer</button>
+        <div class="qa-answer">
+          දෙඅවස්ථාවේදීම dQ/dt සමාන බැවින්:<br>
+          (m₁c_c + (m₂−m₁)c_w)(θ₁−θ₂)/t_w = (m₁c_c + (m₃−m₁)c_l)(θ₁−θ₂)/t_l<br>
+          ⇒ C_l = [ (m₁c_c + (m₂−m₁)c_w) × (t_l/t_w) − m₁c_c ] / (m₃−m₁)
+          <span class="en">Setting the two heat-loss rates equal and solving for C_l gives the boxed expression above — used directly in Module 3's calculator.</span>
+        </div>
+      </div>
+
+      <div class="card qa-card">
+        <div class="qa-head"><span class="qa-num">08</span>
+          <div class="qa-text">ජලයේ C_w > ද්‍රවයේ C_l නම්, ද්‍රවයේ සිසිලන වක්‍රය ජලයේ වක්‍රයට සාපේක්ෂව කොහේ පිහිටයිද?
+            <span class="en">If C_w &gt; C_l, where does the liquid's cooling curve lie relative to water's?</span></div>
+        </div>
+        <textarea class="self-test-input" rows="2" placeholder="ඔබේ පිළිතුර මෙහි ලියන්න..."></textarea>
+        <button class="qa-reveal-btn">පිළිතුර පෙන්වන්න · Reveal answer</button>
+        <div class="qa-answer">
+          එකම ස්කන්ධයක් සඳහා විශිෂ්ට තාප ධාරිතාව අඩු ද්‍රවයක ගබඩා වන තාප ශක්තිය අඩුය — එබැවින් එය වඩා ඉක්මනින් සිසිල් වේ. එහි ප්‍රස්තාරය ජලයේ වක්‍රයට වඩා පහළින්, එනම් වේගයෙන් θ_R වෙත ළඟා වන ලෙස පිහිටයි.
+          <span class="en">A lower specific heat capacity means less stored thermal energy for the same mass, so the liquid cools faster — its curve sits below (and approaches θ_R quicker than) water's curve.</span>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <footer class="foot">
+    <div class="lab">OFFLINE LAB SIMULATOR · NO EXTERNAL DEPENDENCIES</div>
+    A/L Physics · Heat Practicals — Newton's Law of Cooling &amp; Specific Heat Capacity by Method of Cooling
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============ TAB SWITCHING ============ */
+  var tabBtns = document.querySelectorAll(".tab-btn");
+  var modules = document.querySelectorAll(".module");
+  tabBtns.forEach(function(btn){
+    btn.addEventListener("click", function(){
+      tabBtns.forEach(function(b){ b.classList.remove("active"); });
+      modules.forEach(function(m){ m.classList.remove("active"); });
+      btn.classList.add("active");
+      document.getElementById(btn.dataset.tab).classList.add("active");
+    });
+  });
+
+  /* ============ MODULE 1: apparatus hotspots ============ */
+  var apparatusInfo = {
+    stand: {
+      label: "1. පරිවාරක තුනී නූල් / ආධාරකය · Insulating suspension thread",
+      body: "කැලරිමීටරය ලෝහ ආධාරකයෙන් තුනී නූලකින් එල්ලෙයි, එමගින් ආධාරකය හරහා තාපය සන්නයනය වීම වළක්වයි.",
+      why: "Why: A thread (rather than a metal rod) prevents heat conducting away through the support, so heat is lost only to the surrounding air."
+    },
+    thermo: {
+      label: "2. උෂ්ණත්වමානය (−10° – 100°C) · Thermometer",
+      body: "පියනේ මධ්‍යයේ ඇති සිදුරකින් දමා බල්බය ද්‍රවයේ මධ්‍යයේ, බඳුනේ බිත්තියට හෝ පතුලට නොස්පර්ශව තබයි.",
+      why: "Why: Centring the bulb avoids contact with the vessel walls, which would give a false (localised) reading instead of the liquid's true temperature."
+    },
+    stirrer: {
+      label: "3. තඹ මන්ථය · Copper stirrer",
+      body: "පරීක්ෂණය පුරාවටම මෘදුව හා නිරන්තරව චලනය කර ද්‍රවය පුරා උෂ්ණත්වය ඒකාකාර කරයි.",
+      why: "Why: Continuous gentle stirring keeps the temperature uniform throughout the liquid so the thermometer reading is representative."
+    },
+    lid: {
+      label: "4. පරිවාරක පියන · Insulating lid",
+      body: "පියන මන්ථය හා උෂ්ණත්වමානය සඳහා පමණක් සිදුරු දෙකක් සහිතව මුඛය වසයි, වාෂ්පීකරණයෙන් තාප හානිය අවම කරයි.",
+      why: "Why: Closing the mouth minimises heat loss through evaporation, so almost all heat loss is via the vessel's outer surface as required by the theory."
+    },
+    calorimeter: {
+      label: "5. පොලිශ් තඹ කැලරිමීටරය · Polished copper calorimeter",
+      body: "බාහිර පෘෂ්ඨය දීප්තිමත්ව පොලිශ් කර ඇත.",
+      why: "Why polished: A shiny surface reduces heat loss by radiation, so the calorimeter loses heat mainly through the thin air layer by natural convection — matching the assumptions of Newton's Law."
+    },
+    jacket: {
+      label: "6. ස්ථාවර උෂ්ණත්ව ජල ආවරණය · Constant-temperature water jacket",
+      body: "විශාල බාහිර භාජනයේ ඇති ජලය කැලරිමීටරයෙන් නිකුත් වන තාපය අවශෝෂණය කර, එය වටා ඇති පරිසර උෂ්ණත්වය (θ_R) නියතව තබයි.",
+      why: "Why: Without this jacket, the surrounding air would slowly warm up as heat escapes, raising θ_R and violating the constant-environment assumption of the law."
+    },
+    bridge: {
+      label: "7. කරලි / දැව පාලම් · Cork / wood bridges",
+      body: "බාහිර භාජනයේ මුඛය මතට කැලරිමීටරය එල්ලා තබා ගැනීමට කරලි කැබලි යොදා ගනී, එමගින් දෙබඳුන අතර ඒකාකාර වායු පරතරයක් පවත්වා ගනී.",
+      why: "Why: Cork/wood are poor conductors, so they support the calorimeter without providing an extra path for heat to escape."
+    }
+  };
+
+  var hotspots = document.querySelectorAll(".hotspot");
+  var infoPanel = document.getElementById("infoPanel");
+  hotspots.forEach(function(hs){
+    hs.addEventListener("click", function(){
+      hotspots.forEach(function(h){ h.classList.remove("active"); });
+      hs.classList.add("active");
+      var d = apparatusInfo[hs.dataset.id];
+      infoPanel.innerHTML = '<div class="label">' + d.label + '</div>' + d.body + '<div class="why">' + d.why + '</div>';
+      infoPanel.classList.add("show");
+    });
+  });
+
+  /* liquid level toggle */
+  var btnCorrect = document.getElementById("btnLevelCorrect");
+  var btnWrong = document.getElementById("btnLevelWrong");
+  var levelFill = document.getElementById("levelFill");
+  var rimMark = document.getElementById("rimMark");
+  var levelCaption = document.getElementById("levelCaption");
+  var levelExplain = document.getElementById("levelExplain");
+
+  function setLevelCorrect(){
+    btnCorrect.classList.add("active"); btnCorrect.classList.remove("wrong-active");
+    btnWrong.classList.remove("active");
+    levelFill.setAttribute("y", "24"); levelFill.setAttribute("height", "100");
+    rimMark.setAttribute("y1","24"); rimMark.setAttribute("y2","24");
+    levelCaption.textContent = "1cm gap for stirring";
+    levelCaption.setAttribute("fill","var(--emerald)");
+    levelExplain.innerHTML = '<span class="label">✓ නිවැරදි</span> ද්‍රවය මුඛයේ සිට 1cm පමණ පහළින් පුරවන්නේ, මන්ථනය කරන විට ද්‍රවය ඉතිරී නොයාමටත්, තාපය ඒකාකාරව බෙදී යාමට ප්‍රමාණවත් අවකාශයක් ලබා දීමටත්ය.<div class="why en">Filling to ~1cm below the rim leaves room for stirring without spillage while keeping the liquid volume high enough for uniform heat distribution.</div>';
+  }
+  function setLevelWrong(){
+    btnWrong.classList.add("active"); btnWrong.classList.add("wrong-active");
+    btnCorrect.classList.remove("active");
+    levelFill.setAttribute("y", "12"); levelFill.setAttribute("height", "112");
+    rimMark.setAttribute("y1","12"); rimMark.setAttribute("y2","12");
+    levelCaption.textContent = "overfilled — will spill";
+    levelCaption.setAttribute("fill","var(--red)");
+    levelExplain.innerHTML = '<span class="label" style="color:var(--red)">✗ වැරදි</span> මුඛය දක්වාම පුරවා ඇති විට මන්ථනය කරන විට ද්‍රවය පිටතට ඉතිරී යයි — ස්කන්ධය වෙනස් වී ගණනය වැරදි වේ.<div class="why en">Filling to the brim causes spillage during stirring, changing the liquid mass and invalidating the mass measurements used in the calculation.</div>';
+  }
+  btnCorrect.addEventListener("click", setLevelCorrect);
+  btnWrong.addEventListener("click", setLevelWrong);
+
+  /* ============ MODULE 2: cooling curve simulator ============ */
+  var theta0 = 78, thetaR = 28;
+  var K = 0.09; // decay constant per minute (Newton's law)
+  var TMAX = 22; // minutes shown
+
+  var rangeTheta0 = document.getElementById("rangeTheta0");
+  var rangeThetaR = document.getElementById("rangeThetaR");
+  var valTheta0 = document.getElementById("valTheta0");
+  var valThetaR = document.getElementById("valThetaR");
+
+  function theta(t){ return thetaR + (theta0 - thetaR) * Math.exp(-K * t); }
+  function dthetadt(t){ return -K * (theta0 - thetaR) * Math.exp(-K * t); }
+
+  rangeTheta0.addEventListener("input", function(){
+    theta0 = parseFloat(rangeTheta0.value);
+    valTheta0.textContent = theta0 + "°C";
+    drawCurve(); resetPlay();
+  });
+  rangeThetaR.addEventListener("input", function(){
+    thetaR = parseFloat(rangeThetaR.value);
+    valThetaR.textContent = thetaR + "°C";
+    drawCurve(); resetPlay();
+  });
+
+  var canvasCurve = document.getElementById("canvasCurve");
+  var ctxCurve = canvasCurve.getContext("2d");
+
+  function fitCanvas(canvas){
+    var ratio = window.devicePixelRatio || 1;
+    var w = canvas.clientWidth || canvas.width;
+    var h = canvas.width ? (canvas.height / canvas.width) * w : canvas.height;
+    // keep aspect from the width/height attrs
+    var aspect = canvas.getAttribute("data-aspect");
+    if(!aspect){ aspect = canvas.height / canvas.width; canvas.setAttribute("data-aspect", aspect); }
+    h = w * aspect;
+    canvas.width = w * ratio; canvas.height = h * ratio;
+    canvas.style.height = h + "px";
+    var ctx = canvas.getContext("2d");
+    ctx.setTransform(ratio,0,0,ratio,0,0);
+    return {w:w, h:h};
+  }
+
+  function plotAxes(ctx, w, h, pad, xlab, ylab){
+    ctx.clearRect(0,0,w,h);
+    ctx.strokeStyle = "#233252"; ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, h-pad.b); ctx.lineTo(w-pad.r, h-pad.b);
+    ctx.stroke();
+    ctx.fillStyle = "#5d6f92"; ctx.font = "10px ui-monospace, monospace";
+    ctx.fillText(ylab, pad.l+4, pad.t+10);
+    ctx.fillText(xlab, w-pad.r-40, h-6);
+  }
+
+  function drawCurve(){
+    var dim = fitCanvas(canvasCurve);
+    var w = dim.w, h = dim.h;
+    var pad = {l:40, r:14, t:14, b:24};
+    plotAxes(ctxCurve, w, h, pad, "t (min)", "θ (°C)");
+    var yMax = Math.max(theta0, 100) + 4, yMin = Math.min(thetaR - 4, 20);
+
+    function X(t){ return pad.l + (t/TMAX) * (w - pad.l - pad.r); }
+    function Y(th){ return (h-pad.b) - ((th - yMin)/(yMax - yMin)) * (h - pad.t - pad.b); }
+
+    // theta_R dashed line
+    ctxCurve.strokeStyle = "#f5b544"; ctxCurve.setLineDash([4,4]); ctxCurve.lineWidth = 1;
+    ctxCurve.beginPath(); ctxCurve.moveTo(X(0), Y(thetaR)); ctxCurve.lineTo(X(TMAX), Y(thetaR)); ctxCurve.stroke();
+    ctxCurve.setLineDash([]);
+    ctxCurve.fillStyle = "#f5b544"; ctxCurve.font = "10px ui-monospace, monospace";
+    ctxCurve.fillText("θ_R", X(TMAX)-24, Y(thetaR)-4);
+
+    // curve
+    ctxCurve.strokeStyle = "#22d3ee"; ctxCurve.lineWidth = 2.2;
+    ctxCurve.beginPath();
+    for(var t=0; t<=TMAX; t+=0.1){
+      var x = X(t), y = Y(theta(t));
+      if(t===0) ctxCurve.moveTo(x,y); else ctxCurve.lineTo(x,y);
+    }
+    ctxCurve.stroke();
+
+    // moving marker
+    if(playState.running || playState.t > 0){
+      var mx = X(playState.t), my = Y(theta(playState.t));
+      ctxCurve.fillStyle = "#f87171";
+      ctxCurve.beginPath(); ctxCurve.arc(mx,my,5,0,Math.PI*2); ctxCurve.fill();
+    }
+    canvasCurve._X = X; canvasCurve._Y = Y; canvasCurve._pad = pad;
+  }
+
+  var playState = {running:false, t:0, raf:null, lastTs:null};
+  var roTime = document.getElementById("roTime"), roTemp = document.getElementById("roTemp"), roExcess = document.getElementById("roExcess");
+
+  function updateReadouts(){
+    var th = theta(playState.t);
+    roTime.textContent = playState.t.toFixed(1);
+    roTemp.textContent = th.toFixed(1);
+    roExcess.textContent = (th - thetaR).toFixed(1);
+  }
+
+  function playLoop(ts){
+    if(!playState.lastTs) playState.lastTs = ts;
+    var dt = (ts - playState.lastTs) / 1000; // seconds real time
+    playState.lastTs = ts;
+    playState.t += dt * 1.4; // simulate speed: 1.4 min per real second
+    if(playState.t >= TMAX){ playState.t = TMAX; playState.running = false; }
+    updateReadouts();
+    drawCurve();
+    if(playState.running){ playState.raf = requestAnimationFrame(playLoop); }
+  }
+
+  document.getElementById("btnPlay").addEventListener("click", function(){
+    if(playState.running) return;
+    playState.running = true; playState.lastTs = null;
+    playState.raf = requestAnimationFrame(playLoop);
+  });
+  function resetPlay(){
+    playState.running = false;
+    if(playState.raf) cancelAnimationFrame(playState.raf);
+    playState.t = 0; playState.lastTs = null;
+    updateReadouts(); drawCurve();
+  }
+  document.getElementById("btnReset").addEventListener("click", resetPlay);
+
+  /* ---- mirror / tangent module ---- */
+  var canvasMirror = document.getElementById("canvasMirror");
+  var ctxMirror = canvasMirror.getContext("2d");
+  var rangeTpick = document.getElementById("rangeTpick");
+  var rangeMirror = document.getElementById("rangeMirror");
+  var valTpick = document.getElementById("valTpick");
+  var valMirror = document.getElementById("valMirror");
+  var mirrorStatus = document.getElementById("mirrorStatus");
+  var mirrorStatusText = document.getElementById("mirrorStatusText");
+
+  var recordedPoints = [];
+
+  function currentTpick(){
+    return parseFloat(rangeTpick.value) * TMAX;
+  }
+
+  function idealTangentAngleDeg(t){
+    // slope in data units: dθ/dt. We need the angle in *screen/plot pixel* space to compare to mirror slider,
+    // but for pedagogy we just present degrees derived from the analytic slope, scaled for a natural visual range.
+    var slope = dthetadt(t); // negative, °C/min
+    // convert to an on-screen-like angle using an aspect scale factor so it visually matches the plot
+    var scaled = Math.atan(slope * 3.0) * 180/Math.PI;
+    return scaled;
+  }
+
+  function drawMirror(){
+    var dim = fitCanvas(canvasMirror);
+    var w = dim.w, h = dim.h;
+    var pad = {l:40, r:14, t:14, b:24};
+    plotAxes(ctxMirror, w, h, pad, "t (min)", "θ (°C)");
+    var yMax = Math.max(theta0, 100) + 4, yMin = Math.min(thetaR - 4, 20);
+    function X(t){ return pad.l + (t/TMAX) * (w - pad.l - pad.r); }
+    function Y(th){ return (h-pad.b) - ((th - yMin)/(yMax - yMin)) * (h - pad.t - pad.b); }
+
+    // curve
+    ctxMirror.strokeStyle = "#22d3ee"; ctxMirror.lineWidth = 2;
+    ctxMirror.beginPath();
+    for(var t=0; t<=TMAX; t+=0.1){
+      var x = X(t), y = Y(theta(t));
+      if(t===0) ctxMirror.moveTo(x,y); else ctxMirror.lineTo(x,y);
+    }
+    ctxMirror.stroke();
+
+    var tp = currentTpick();
+    var px = X(tp), py = Y(theta(tp));
+
+    // mirror line (amber) at chosen angle through point
+    var mAngle = parseFloat(rangeMirror.value) * Math.PI/180;
+    var mLen = 70;
+    ctxMirror.strokeStyle = "#f5b544"; ctxMirror.lineWidth = 3; ctxMirror.lineCap = "round";
+    ctxMirror.beginPath();
+    ctxMirror.moveTo(px - mLen*Math.cos(mAngle), py - mLen*Math.sin(mAngle));
+    ctxMirror.lineTo(px + mLen*Math.cos(mAngle), py + mLen*Math.sin(mAngle));
+    ctxMirror.stroke();
+
+    // ideal tangent (perpendicular to correct mirror position) - shown faint always, bright when matched
+    var idealAngleDeg = idealTangentAngleDeg(tp);
+    var idealMirrorAngleDeg = idealAngleDeg + 90; // mirror perpendicular to tangent
+    // normalize to [-90,90]
+    while(idealMirrorAngleDeg > 90) idealMirrorAngleDeg -= 180;
+    while(idealMirrorAngleDeg < -90) idealMirrorAngleDeg += 180;
+
+    var diff = Math.abs(parseFloat(rangeMirror.value) - idealMirrorAngleDeg);
+    diff = Math.min(diff, 180-diff);
+    var matched = diff < 4;
+
+    // tangent line (red), drawn perpendicular to actual mirror slider (what user thinks is tangent)
+    var tAngle = mAngle + Math.PI/2;
+    var tLen = 90;
+    ctxMirror.strokeStyle = matched ? "#34d399" : "#f87171";
+    ctxMirror.lineWidth = 2;
+    ctxMirror.setLineDash(matched ? [] : [5,4]);
+    ctxMirror.beginPath();
+    ctxMirror.moveTo(px - tLen*Math.cos(tAngle), py - tLen*Math.sin(tAngle));
+    ctxMirror.lineTo(px + tLen*Math.cos(tAngle), py + tLen*Math.sin(tAngle));
+    ctxMirror.stroke();
+    ctxMirror.setLineDash([]);
+
+    // point
+    ctxMirror.fillStyle = "#e7edf7";
+    ctxMirror.beginPath(); ctxMirror.arc(px,py,4.5,0,Math.PI*2); ctxMirror.fill();
+
+    if(matched){
+      mirrorStatus.classList.add("ok");
+      mirrorStatusText.textContent = "✓ පිළිබිඹුව අඛණ්ඩයි — ස්පර්ශකය හමු විය · reflection continuous — tangent found";
+    } else {
+      mirrorStatus.classList.remove("ok");
+      mirrorStatusText.textContent = "කෝණය සකසන්න · adjust the mirror angle (Δ" + diff.toFixed(0) + "°)";
+    }
+
+    canvasMirror._matched = matched;
+    canvasMirror._slopeAtT = dthetadt(tp);
+    canvasMirror._tp = tp;
+  }
+
+  rangeTpick.addEventListener("input", function(){
+    valTpick.textContent = currentTpick().toFixed(1) + " min";
+    drawMirror();
+  });
+  rangeMirror.addEventListener("input", function(){
+    valMirror.textContent = rangeMirror.value + "°";
+    drawMirror();
+  });
+
+  /* verification plot */
+  var canvasVerify = document.getElementById("canvasVerify");
+  var ctxVerify = canvasVerify.getContext("2d");
+  var verifyTbody = document.querySelector("#verifyTable tbody");
+
+  function drawVerify(){
+    var dim = fitCanvas(canvasVerify);
+    var w = dim.w, h = dim.h;
+    var pad = {l:44, r:14, t:14, b:24};
+    plotAxes(ctxVerify, w, h, pad, "θ−θ_R", "|dθ/dt|");
+
+    var maxX = Math.max(20, theta0 - thetaR + 5);
+    var maxY = Math.max(2, K*(theta0-thetaR) + 0.5);
+    function X(v){ return pad.l + (v/maxX) * (w-pad.l-pad.r); }
+    function Y(v){ return (h-pad.b) - (v/maxY) * (h-pad.t-pad.b); }
+
+    // theoretical line
+    ctxVerify.strokeStyle = "#233252"; ctxVerify.lineWidth = 1.5; ctxVerify.setLineDash([3,3]);
+    ctxVerify.beginPath(); ctxVerify.moveTo(X(0),Y(0)); ctxVerify.lineTo(X(maxX), Y(K*maxX));
+    ctxVerify.stroke(); ctxVerify.setLineDash([]);
+
+    // recorded points
+    ctxVerify.fillStyle = "#34d399";
+    recordedPoints.forEach(function(p){
+      var x = X(p.excess), y = Y(p.rate);
+      ctxVerify.beginPath(); ctxVerify.arc(x,y,5,0,Math.PI*2); ctxVerify.fill();
+    });
+  }
+
+  document.getElementById("btnRecordPoint").addEventListener("click", function(){
+    var tp = canvasMirror._tp !== undefined ? canvasMirror._tp : currentTpick();
+    var th = theta(tp);
+    var rate = Math.abs(dthetadt(tp));
+    recordedPoints.push({t:tp, theta:th, excess: th-thetaR, rate: rate});
+    drawVerify();
+    renderVerifyTable();
+  });
+  document.getElementById("btnClearPoints").addEventListener("click", function(){
+    recordedPoints = [];
+    drawVerify(); renderVerifyTable();
+  });
+  function renderVerifyTable(){
+    verifyTbody.innerHTML = "";
+    recordedPoints.forEach(function(p, i){
+      var tr = document.createElement("tr");
+      tr.innerHTML = "<td>"+(i+1)+"</td><td>"+p.t.toFixed(1)+"</td><td>"+p.theta.toFixed(1)+"</td><td>"+p.excess.toFixed(1)+"</td><td>"+p.rate.toFixed(2)+"</td>";
+      verifyTbody.appendChild(tr);
+    });
+  }
+
+  /* ============ MODULE 3 ============ */
+  var Cc = 0.39; // copper specific heat J/g°C
+  var Cw = 4.20; // water
+  var trueCl = 2.17; // "true" liquid specific heat used to synthesize realistic times (e.g. aniline-like)
+  var hA = 5.2; // heat-loss coefficient proxy (J/°C/s) shared by both trials -> determines k = hA/(mc_total)
+
+  var m1v = 42, m2v = 92, m3v = 102, th1v = 70, th2v = 50;
+
+  var rangeM1=document.getElementById("rangeM1"), rangeM2=document.getElementById("rangeM2"), rangeM3=document.getElementById("rangeM3");
+  var rangeTh1=document.getElementById("rangeTh1"), rangeTh2=document.getElementById("rangeTh2");
+  var valM1=document.getElementById("valM1"), valM2=document.getElementById("valM2"), valM3=document.getElementById("valM3");
+  var valTh1=document.getElementById("valTh1"), valTh2=document.getElementById("valTh2");
+  var roTw=document.getElementById("roTw"), roTl=document.getElementById("roTl");
+
+  function clampMasses(){
+    if(m2v <= m1v) m2v = m1v+5;
+    if(m3v <= m1v) m3v = m1v+5;
+  }
+
+  rangeM1.addEventListener("input", function(){ m1v=parseFloat(rangeM1.value); valM1.textContent=m1v+" g"; clampMasses(); syncMassLabels(); drawDual(); });
+  rangeM2.addEventListener("input", function(){ m2v=parseFloat(rangeM2.value); valM2.textContent=m2v+" g"; drawDual(); });
+  rangeM3.addEventListener("input", function(){ m3v=parseFloat(rangeM3.value); valM3.textContent=m3v+" g"; drawDual(); });
+  rangeTh1.addEventListener("input", function(){ th1v=parseFloat(rangeTh1.value); valTh1.textContent=th1v+"°C"; if(th2v>=th1v){th2v=th1v-5; rangeTh2.value=th2v; valTh2.textContent=th2v+"°C";} drawDual(); });
+  rangeTh2.addEventListener("input", function(){ th2v=parseFloat(rangeTh2.value); valTh2.textContent=th2v+"°C"; if(th2v>=th1v){th1v=th2v+5; rangeTh1.value=th1v; valTh1.textContent=th1v+"°C";} drawDual(); });
+
+  function syncMassLabels(){ valM1.textContent=m1v+" g"; }
+
+  var roomTemp3 = 28;
+
+  function kFor(mass, c){
+    var C_total = m1v*Cc + (mass-m1v)*c; // J/°C
+    return hA / C_total * 60; // per minute
+  }
+
+  function thetaCurve(t, kk, startTh){ return roomTemp3 + (startTh-roomTemp3)*Math.exp(-kk*t); }
+
+  var canvasDual = document.getElementById("canvasDual");
+  var ctxDual = canvasDual.getContext("2d");
+
+  function drawDual(){
+    var dim = fitCanvas(canvasDual);
+    var w = dim.w, h = dim.h;
+    var pad = {l:40, r:14, t:14, b:24};
+    plotAxes(ctxDual, w, h, pad, "t (min)", "θ (°C)");
+
+    var startTh = Math.max(th1v+8, 82);
+    var kw = kFor(m2v, Cw);
+    var kl = kFor(m3v, trueCl);
+    var tmax3 = 30;
+    var yMax = startTh+4, yMin = roomTemp3-4;
+    function X(t){ return pad.l + (t/tmax3) * (w-pad.l-pad.r); }
+    function Y(th){ return (h-pad.b) - ((th-yMin)/(yMax-yMin)) * (h-pad.t-pad.b); }
+
+    // theta1/theta2 guide lines
+    ctxDual.strokeStyle = "#233252"; ctxDual.setLineDash([3,3]); ctxDual.lineWidth=1;
+    [th1v, th2v].forEach(function(thv){
+      ctxDual.beginPath(); ctxDual.moveTo(X(0), Y(thv)); ctxDual.lineTo(X(tmax3), Y(thv)); ctxDual.stroke();
+    });
+    ctxDual.setLineDash([]);
+    ctxDual.fillStyle = "#5d6f92"; ctxDual.font="9px ui-monospace,monospace";
+    ctxDual.fillText("θ1", X(tmax3)-20, Y(th1v)-3);
+    ctxDual.fillText("θ2", X(tmax3)-20, Y(th2v)-3);
+
+    function drawOne(kk, color){
+      ctxDual.strokeStyle = color; ctxDual.lineWidth = 2.2;
+      ctxDual.beginPath();
+      for(var t=0;t<=tmax3;t+=0.15){
+        var x=X(t), y=Y(thetaCurve(t,kk,startTh));
+        if(t===0) ctxDual.moveTo(x,y); else ctxDual.lineTo(x,y);
+      }
+      ctxDual.stroke();
+    }
+    drawOne(kw, "#22d3ee");
+    drawOne(kl, "#f5b544");
+
+    canvasDual._kw = kw; canvasDual._kl = kl; canvasDual._startTh = startTh;
+  }
+
+  function timeToReach(kk, startTh, targetTh){
+    // theta(t) = roomTemp3 + (startTh-roomTemp3) e^{-k t} => t = -1/k * ln( (target-room)/(start-room) )
+    var num = (targetTh - roomTemp3) / (startTh - roomTemp3);
+    if(num <= 0) return null;
+    return -Math.log(num) / kk; // minutes
+  }
+
+  document.getElementById("btnMeasure").addEventListener("click", function(){
+    drawDual();
+    var kw = canvasDual._kw, kl = canvasDual._kl, startTh = canvasDual._startTh;
+    var t1w = timeToReach(kw, startTh, th1v), t2w = timeToReach(kw, startTh, th2v);
+    var t1l = timeToReach(kl, startTh, th1v), t2l = timeToReach(kl, startTh, th2v);
+    if(t1w===null||t2w===null||t1l===null||t2l===null){ return; }
+    var tw = (t2w - t1w) * 60; // seconds
+    var tl = (t2l - t1l) * 60;
+    roTw.textContent = tw.toFixed(0);
+    roTl.textContent = tl.toFixed(0);
+    computeCl(tw, tl);
+  });
+
+  var stepsBox = document.getElementById("stepsBox");
+  var resultBox = document.getElementById("resultBox");
+  var resultVal = document.getElementById("resultVal");
+
+  function computeCl(tw, tl){
+    clampMasses();
+    var mwPart = m1v*Cc + (m2v-m1v)*Cw;
+    var Cl = (mwPart * (tl/tw) - m1v*Cc) / (m3v-m1v);
+    stepsBox.innerHTML =
+      "m₁c_c + (m₂−m₁)c_w = " + m1v + "×" + Cc + " + (" + m2v + "−" + m1v + ")×" + Cw + " = " + mwPart.toFixed(2) + " J/°C" +
+      '<span class="step-eq">= ' + mwPart.toFixed(2) + '</span>' +
+      "t_l / t_w = " + tl.toFixed(0) + " / " + tw.toFixed(0) + " = " + (tl/tw).toFixed(3) +
+      '<span class="step-eq">= ' + (tl/tw).toFixed(3) + '</span>' +
+      "C_l = [ " + mwPart.toFixed(2) + " × " + (tl/tw).toFixed(3) + " − " + (m1v*Cc).toFixed(2) + " ] / (" + m3v + "−" + m1v + ")" +
+      '<span class="step-eq">C_l = ' + Cl.toFixed(3) + ' J g⁻¹ °C⁻¹</span>';
+    resultVal.innerHTML = Cl.toFixed(3) + '<span class="unit"> J g⁻¹ °C⁻¹</span>';
+    resultBox.style.display = "block";
+  }
+
+  /* ============ MODULE 4: reveal answers ============ */
+  document.querySelectorAll(".qa-reveal-btn").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var ans = btn.nextElementSibling;
+      ans.classList.toggle("show");
+      btn.textContent = ans.classList.contains("show") ? "පිළිතුර සඟවන්න · Hide answer" : "පිළිතුර පෙන්වන්න · Reveal answer";
+    });
+  });
+
+  /* ============ INIT ============ */
+  function initAll(){
+    setLevelCorrect();
+    drawCurve(); updateReadouts();
+    drawMirror();
+    drawVerify(); renderVerifyTable();
+    drawDual();
+  }
+  window.addEventListener("resize", function(){
+    drawCurve(); drawMirror(); drawVerify(); drawDual();
+  });
+  initAll();
+
+})();
+</script>
+</body>
+</html>

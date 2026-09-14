@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>ඉලෙක්ට්‍රොනික විද්‍යාව | A/L භෞතික විද්‍යාව</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080d16;
+  --bg-elev:#0e1524;
+  --surface:#131b2e;
+  --surface-2:#1a2540;
+  --border:#25335a;
+  --border-soft:#1c2846;
+  --text:#eef3fb;
+  --text-dim:#9fb0cf;
+  --text-faint:#647episode;
+  --teal:#2dd9c4;
+  --teal-dim:#1a8f80;
+  --blue:#5b8cff;
+  --amber:#f5b942;
+  --red:#ff5f7e;
+  --green:#3ee089;
+  --purple:#b389f9;
+  --radius:16px;
+  --radius-sm:10px;
+  --font-si:'Noto Sans Sinhala',sans-serif;
+  --font-num:'Space Grotesk',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-si);
+  min-height:100vh;
+  overflow-x:hidden;
+  padding-bottom:78px;
+  position:relative;
+}
+body::before{
+  content:"";
+  position:fixed; inset:0;
+  background-image:
+    radial-gradient(circle at 15% 8%, rgba(45,217,196,0.08), transparent 40%),
+    radial-gradient(circle at 85% 92%, rgba(91,140,255,0.10), transparent 45%),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 42px),
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 42px);
+  pointer-events:none;
+  z-index:0;
+}
+.app{position:relative; z-index:1; max-width:640px; margin:0 auto;}
+
+/* ===== TOP RAIL (signature element) ===== */
+.top-rail{
+  position:sticky; top:0; z-index:50;
+  background:linear-gradient(180deg, var(--bg-elev) 0%, rgba(14,21,36,0.96) 100%);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border-soft);
+}
+.rail-strip{
+  height:5px; width:100%;
+  background:linear-gradient(90deg, transparent, var(--teal) 20%, var(--blue) 50%, var(--teal) 80%, transparent);
+  background-size:200% 100%;
+  animation:railflow 5s linear infinite;
+  opacity:.65;
+}
+@keyframes railflow{ to{ background-position:-200% 0; } }
+.topbar{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 16px;
+}
+.brand{display:flex; align-items:center; gap:10px;}
+.brand-mark{
+  width:38px; height:38px; border-radius:10px;
+  background:linear-gradient(135deg, var(--surface-2), var(--surface));
+  border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
+.brand-title{font-family:var(--font-num); font-weight:700; font-size:15px; letter-spacing:.3px; line-height:1.1;}
+.brand-sub{font-size:11px; color:var(--text-dim); margin-top:1px;}
+.icon-btn{
+  width:40px; height:40px; border-radius:10px;
+  background:var(--surface); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--teal); cursor:pointer;
+  transition:transform .15s ease, background .15s ease;
+}
+.icon-btn:active{transform:scale(.92); background:var(--surface-2);}
+
+/* ===== NAV TABS (section sub-nav) ===== */
+.section-pill-row{
+  display:flex; gap:8px; padding:0 16px 12px; overflow-x:auto;
+}
+.section-pill{
+  flex-shrink:0; padding:7px 13px; border-radius:999px; font-size:12.5px;
+  border:1px solid var(--border); background:var(--surface); color:var(--text-dim);
+  white-space:nowrap; cursor:pointer; transition:.15s;
+}
+.section-pill.active{ background:var(--teal); color:#04231f; border-color:var(--teal); font-weight:600; }
+
+/* ===== MAIN CONTENT ===== */
+main{ padding:18px 16px 24px; }
+.view{ display:none; animation:fadein .35s ease; }
+.view.active{ display:block; }
+@keyframes fadein{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+.hero-card{
+  border-radius:var(--radius);
+  padding:20px;
+  margin-bottom:18px;
+  position:relative; overflow:hidden;
+  border:1px solid var(--border);
+  background:linear-gradient(135deg, var(--surface-2) 0%, var(--surface) 70%);
+}
+.hero-card .pin-row{position:absolute; top:0; left:16px; display:flex; gap:6px;}
+.pin{width:6px; height:10px; border-radius:0 0 3px 3px; background:var(--accent-color, var(--teal)); opacity:.8;}
+.hero-eyebrow{font-family:var(--font-mono); font-size:11px; color:var(--teal); letter-spacing:1.5px; text-transform:uppercase;}
+.hero-title{font-size:22px; font-weight:700; margin:6px 0 8px; line-height:1.35;}
+.hero-desc{font-size:13.5px; color:var(--text-dim); line-height:1.7;}
+
+h2.section-h{
+  font-size:16px; font-weight:700; margin:26px 0 12px;
+  display:flex; align-items:center; gap:8px;
+  color:var(--text);
+}
+h2.section-h .tag-dot{width:8px; height:8px; border-radius:2px; background:var(--teal); flex-shrink:0;}
+h3.sub-h{ font-size:14px; font-weight:600; margin:16px 0 8px; color:var(--teal);}
+
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:16px;
+  margin-bottom:12px;
+  position:relative;
+}
+.card .pin-row{position:absolute; top:-1px; left:14px; display:flex; gap:5px;}
+.card p{font-size:13.5px; line-height:1.85; color:var(--text); margin:0 0 8px;}
+.card p:last-child{margin-bottom:0;}
+.card ul{margin:6px 0; padding-inline-start:20px;}
+.card li{font-size:13.5px; line-height:1.85; color:var(--text); margin-bottom:4px;}
+.formula-box{
+  font-family:var(--font-mono); font-size:14px; color:var(--teal);
+  background:var(--bg-elev); border:1px solid var(--border-soft);
+  border-radius:var(--radius-sm); padding:10px 14px; margin:8px 0;
+  display:inline-block; min-width:60%; text-align:center;
+}
+.note-box{
+  background:rgba(245,185,66,0.08); border:1px solid rgba(245,185,66,0.35);
+  border-radius:var(--radius-sm); padding:10px 12px; font-size:12.5px; color:var(--amber);
+  margin-top:10px; line-height:1.7;
+}
+.compare-table{width:100%; border-collapse:collapse; font-size:12.5px; margin-top:6px;}
+.compare-table th{ background:var(--surface-2); color:var(--teal); padding:8px 6px; text-align:left; font-weight:600; border-bottom:1px solid var(--border);}
+.compare-table td{ padding:7px 6px; border-bottom:1px solid var(--border-soft); color:var(--text-dim);}
+.compare-table tr:last-child td{border-bottom:none;}
+
+.grid2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.chip-list{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;}
+.chip{ background:var(--surface-2); border:1px solid var(--border); border-radius:999px; padding:5px 11px; font-size:12px; color:var(--text-dim);}
+
+/* accordion for device list */
+.accordion-item{ border:1px solid var(--border); border-radius:var(--radius-sm); margin-bottom:8px; overflow:hidden; background:var(--bg-elev);}
+.accordion-head{ padding:12px 14px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; font-size:13.5px; font-weight:600;}
+.accordion-head .chevron{ transition:transform .2s ease; color:var(--teal); }
+.accordion-item.open .chevron{ transform:rotate(180deg); }
+.accordion-body{ max-height:0; overflow:hidden; transition:max-height .3s ease; padding:0 14px;}
+.accordion-item.open .accordion-body{ padding:0 14px 14px; }
+.accordion-body p, .accordion-body li{font-size:13px; color:var(--text-dim); line-height:1.8;}
+
+/* ===== TOOL / CALCULATOR ===== */
+.tool-card{
+  background:var(--surface); border:1px solid var(--teal-dim);
+  border-radius:var(--radius); padding:16px; margin:14px 0 20px;
+}
+.tool-title{ display:flex; align-items:center; gap:8px; font-weight:700; font-size:14px; color:var(--teal); margin-bottom:12px;}
+.field-row{ display:flex; flex-direction:column; gap:4px; margin-bottom:10px;}
+.field-row label{ font-size:12px; color:var(--text-dim);}
+.field-row input, .field-row select{
+  background:var(--bg-elev); border:1px solid var(--border); color:var(--text);
+  border-radius:var(--radius-sm); padding:10px 12px; font-size:14px; font-family:var(--font-num);
+  outline:none; width:100%;
+}
+.field-row input:focus, .field-row select:focus{ border-color:var(--teal); }
+.seg-control{ display:flex; background:var(--bg-elev); border:1px solid var(--border); border-radius:var(--radius-sm); padding:3px; margin-bottom:10px;}
+.seg-btn{ flex:1; text-align:center; padding:8px 4px; font-size:12.5px; border-radius:8px; cursor:pointer; color:var(--text-dim); transition:.15s;}
+.seg-btn.active{ background:var(--teal); color:#04231f; font-weight:700;}
+.btn-primary{
+  width:100%; padding:11px; border-radius:var(--radius-sm); border:none;
+  background:linear-gradient(135deg, var(--teal), var(--blue)); color:#04121a;
+  font-weight:700; font-size:13.5px; cursor:pointer; font-family:var(--font-si);
+  margin-top:4px;
+}
+.btn-primary:active{ transform:scale(.98); }
+.result-box{
+  margin-top:12px; background:var(--bg-elev); border:1px dashed var(--border);
+  border-radius:var(--radius-sm); padding:12px; font-size:13px;
+}
+.result-row{ display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid var(--border-soft); font-family:var(--font-num);}
+.result-row:last-child{ border-bottom:none; }
+.result-row .rlabel{ color:var(--text-dim); font-family:var(--font-si); font-size:12.5px;}
+.result-row .rval{ color:var(--teal); font-weight:700;}
+
+/* truth table tool */
+.io-toggle-row{ display:flex; gap:10px; justify-content:center; margin:12px 0;}
+.bit-toggle{
+  width:52px; height:52px; border-radius:12px; background:var(--bg-elev); border:1px solid var(--border);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer;
+}
+.bit-toggle .bit-label{ font-size:10px; color:var(--text-dim);}
+.bit-toggle .bit-val{ font-family:var(--font-num); font-weight:700; font-size:18px; color:var(--text);}
+.bit-toggle.on{ background:rgba(45,217,196,0.15); border-color:var(--teal);}
+.bit-toggle.on .bit-val{ color:var(--teal); }
+.out-display{
+  text-align:center; margin:10px auto; width:90px; height:90px; border-radius:16px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  background:var(--bg-elev); border:2px solid var(--border);
+}
+.out-display .bit-val{ font-size:34px; }
+.out-display.on{ border-color:var(--green); box-shadow:0 0 22px rgba(62,224,137,.25);}
+.out-display.on .bit-val{ color:var(--green);}
+.mini-truth{ width:100%; border-collapse:collapse; margin-top:14px; font-size:13px;}
+.mini-truth th,.mini-truth td{ text-align:center; padding:6px 4px; border-bottom:1px solid var(--border-soft); font-family:var(--font-num);}
+.mini-truth th{ color:var(--teal); }
+.mini-truth tr.current-row{ background:rgba(91,140,255,0.12); }
+
+/* SVG wrap */
+.svg-wrap{ background:var(--bg-elev); border:1px solid var(--border-soft); border-radius:var(--radius-sm); padding:10px; margin:10px 0; overflow-x:auto;}
+.svg-wrap svg{ display:block; margin:0 auto; max-width:100%; height:auto; }
+.svg-caption{ text-align:center; font-size:11px; color:var(--text-faint); margin-top:4px;}
+
+/* ===== QUIZ ===== */
+.quiz-card{
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  padding:16px; margin-bottom:14px;
+}
+.quiz-progress{ font-family:var(--font-mono); font-size:11px; color:var(--text-dim); margin-bottom:8px;}
+.quiz-q{ font-size:14px; font-weight:600; margin-bottom:12px; line-height:1.7;}
+.quiz-opt{
+  display:block; width:100%; text-align:right; padding:11px 14px; margin-bottom:8px;
+  background:var(--bg-elev); border:1px solid var(--border); border-radius:var(--radius-sm);
+  color:var(--text); font-size:13px; font-family:var(--font-si); cursor:pointer; transition:.15s;
+}
+.quiz-opt:active{ transform:scale(.98); }
+.quiz-opt.correct{ border-color:var(--green); background:rgba(62,224,137,0.12); color:var(--green); font-weight:600;}
+.quiz-opt.wrong{ border-color:var(--red); background:rgba(255,95,126,0.12); color:var(--red); font-weight:600;}
+.quiz-opt.disabled{ pointer-events:none; opacity:.65; }
+.quiz-explain{
+  margin-top:10px; padding:11px 12px; border-radius:var(--radius-sm); font-size:12.5px; line-height:1.8;
+  background:rgba(91,140,255,0.08); border:1px solid rgba(91,140,255,0.3); color:var(--text-dim); display:none;
+}
+.quiz-explain.show{ display:block; }
+.quiz-nextbtn{
+  margin-top:12px; width:100%; padding:10px; border-radius:var(--radius-sm); border:1px solid var(--teal);
+  background:transparent; color:var(--teal); font-weight:700; font-size:13px; cursor:pointer; display:none;
+}
+.quiz-nextbtn.show{ display:block; }
+.quiz-score{ text-align:center; padding:20px 10px; }
+.quiz-score .big-num{ font-family:var(--font-num); font-size:42px; font-weight:700; color:var(--teal);}
+.quiz-restart{
+  margin-top:14px; padding:10px 20px; border-radius:999px; border:none;
+  background:var(--teal); color:#04231f; font-weight:700; cursor:pointer;
+}
+
+/* ===== BOTTOM NAV ===== */
+.bottom-nav{
+  position:fixed; bottom:0; left:0; right:0; z-index:60;
+  background:rgba(14,21,36,0.92); backdrop-filter:blur(14px);
+  border-top:1px solid var(--border-soft);
+  display:flex;
+}
+.bottom-nav .navmax{ max-width:640px; margin:0 auto; display:flex; width:100%;}
+.nav-btn{
+  flex:1; display:flex; flex-direction:column; align-items:center; gap:3px;
+  padding:9px 4px 10px; color:var(--text-faint); background:none; border:none; cursor:pointer;
+  font-family:var(--font-si);
+}
+.nav-btn svg{ width:21px; height:21px; }
+.nav-btn span{ font-size:10.5px; }
+.nav-btn.active{ color:var(--teal); }
+.nav-btn.active svg{ filter:drop-shadow(0 0 6px rgba(45,217,196,.5)); }
+
+/* ===== DRAWER (formula sheet) ===== */
+.drawer-overlay{
+  position:fixed; inset:0; background:rgba(3,6,12,0.6); z-index:80; opacity:0; pointer-events:none; transition:opacity .25s;
+}
+.drawer-overlay.open{ opacity:1; pointer-events:auto; }
+.drawer{
+  position:fixed; right:0; top:0; bottom:0; width:88%; max-width:380px; z-index:90;
+  background:var(--bg-elev); border-left:1px solid var(--border);
+  transform:translateX(100%); transition:transform .3s ease;
+  overflow-y:auto; padding:18px;
+}
+.drawer.open{ transform:translateX(0); }
+.drawer-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;}
+.drawer-head h3{ font-size:15px; margin:0; }
+.formula-search{
+  width:100%; padding:10px 12px; border-radius:var(--radius-sm); border:1px solid var(--border);
+  background:var(--surface); color:var(--text); font-size:13px; margin-bottom:14px; font-family:var(--font-si);
+}
+.fsheet-group{ margin-bottom:16px; }
+.fsheet-group h4{ font-size:12px; color:var(--teal); text-transform:uppercase; letter-spacing:1px; margin:0 0 8px; font-family:var(--font-mono);}
+.fsheet-item{ display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border-soft); gap:10px;}
+.fsheet-item .fname{ font-size:12px; color:var(--text-dim); flex:1;}
+.fsheet-item .fval{ font-family:var(--font-mono); font-size:12.5px; color:var(--text); white-space:nowrap;}
+.fsheet-item.hidden{ display:none; }
+
+/* utility */
+.two-col-imgs{ display:flex; gap:10px; }
+.two-col-imgs .svg-wrap{ flex:1; }
+::selection{ background:var(--teal); color:#04231f; }
+@media(min-width:640px){
+  .grid2{ grid-template-columns:1fr 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOP RAIL -->
+  <div class="top-rail">
+    <div class="rail-strip"></div>
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 12h4l2-7 4 14 2-7h4" stroke="#2dd9c4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div>
+          <div class="brand-title">ඉලෙක්ට්‍රොනික විද්‍යාව</div>
+          <div class="brand-sub">A/L භෞතික විද්‍යාව • අන්තර්ක්‍රියාකාරී නිබන්ධනය</div>
+        </div>
+      </div>
+      <div class="icon-btn" onclick="openDrawer()" aria-label="සූත්‍ර පත්‍රිකාව">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M11 4a7 7 0 105.6 11.2l4.2 4.2M11 4a7 7 0 016.7 9.05M11 4v0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+    </div>
+    <div class="section-pill-row" id="pillRow"></div>
+  </div>
+
+  <main id="mainContent">
+    <!-- Views injected by JS -->
+  </main>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <div class="navmax" id="bottomNav"></div>
+</nav>
+
+<!-- DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <h3>⚡ ඉක්මන් සූත්‍ර පත්‍රිකාව</h3>
+    <div class="icon-btn" onclick="closeDrawer()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </div>
+  </div>
+  <input class="formula-search" id="formulaSearch" placeholder="සූත්‍රයක් සොයන්න... (උදා: rms, β, gain)" oninput="filterFormulas()">
+  <div id="formulaList"></div>
+</div>
+
+<script>
+/* =========================================================
+   DATA
+========================================================= */
+const SECTIONS = [
+  {id:'diode', label:'ඩයෝඩ', icon:`<path d="M4 12h6l2-4v8l2-4h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`},
+  {id:'transistor', label:'ට්‍රාන්සිස්ටර්', icon:`<rect x="4" y="4" width="16" height="16" rx="3" stroke="currentColor" stroke-width="2"/><path d="M9 8v8M15 8v3l-4 1v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>`},
+  {id:'opamp', label:'කාරකාත්මක වර්ධක', icon:`<path d="M5 6v12l14-6z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>`},
+  {id:'logic', label:'තාර්කික ද්වාර', icon:`<path d="M4 8v8h4a5 5 0 000-8H4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="18" cy="12" r="1.6" fill="currentColor"/>`}
+];
+
+/* FORMULA SHEET DATA */
+const FORMULAS = [
+  {group:'ඩයෝඩ', name:'Si බාධක විභවය', val:'0.6 – 0.7 V'},
+  {group:'ඩයෝඩ', name:'Ge බාධක විභවය', val:'0.2 – 0.3 V'},
+  {group:'ඩයෝඩ', name:'RMS (සම්පූර්ණ / ඉතා අඩු ලය)', val:'Vrms = Vmax/√2'},
+  {group:'ඩයෝඩ', name:'Vrms — අර්ධ තරංග සුමටනය', val:'Vrms = Vmax/π'},
+  {group:'ඩයෝඩ', name:'Vrms — පූර්ණ තරංග සුමටනය', val:'Vrms = 2Vmax/π'},
+  {group:'ඩයෝඩ', name:'ප්‍රායෝගික ඩයෝඩ ප්‍රතිදානය', val:'V0max = Vi max − Vp'},
+  {group:'ඩයෝඩ', name:'Si ඩයෝඩ සමග ප්‍රතිදානය', val:'Vmax ≈ Vin max − 0.7 V'},
+  {group:'ට්‍රාන්සිස්ටර්', name:'ධාරා සම්බන්ධතාව', val:'IE = IB + IC'},
+  {group:'ට්‍රාන්සිස්ටර්', name:'ධාරා ලාභය β (beta)', val:'β = IC / IB'},
+  {group:'ට්‍රාන්සිස්ටර්', name:'ධාරා ලාභය α (alpha)', val:'α = IC / IE'},
+  {group:'ට්‍රාන්සිස්ටර්', name:'β සහ α අතර සම්බන්ධතාව', val:'α = β/(β+1)'},
+  {group:'ට්‍රාන්සිස්ටර්', name:'VCE සමීකරණය', val:'VCE = VCC − ICRC'},
+  {group:'ට්‍රාන්සිස්ටර්', name:'උපරිම ධාරාව (Y අක්ෂය)', val:'ICmax = VCC / RC'},
+  {group:'ට්‍රාන්සිස්ටර්', name:'නිවාත ලක්ෂ්‍යය (Q-point)', val:'VCE = VCC / 2'},
+  {group:'කාරකාත්මක වර්ධක', name:'විවෘත පුඩු ලාභය', val:'A = V0 / ΔVin'},
+  {group:'කාරකාත්මක වර්ධක', name:'ස්වර්ණමය නීතිය 1', val:'V+ − V− = 0'},
+  {group:'කාරකාත්මක වර්ධක', name:'ස්වර්ණමය නීතිය 2', val:'Iin = 0'},
+  {group:'කාරකාත්මක වර්ධක', name:'අපවර්තන නොවන ලාභය', val:'Vout/Vin = (Rf/R) + 1'},
+  {group:'කාරකාත්මක වර්ධක', name:'අපවර්තන ලාභය', val:'Vout/Vin = −Rf/R'},
+  {group:'තාර්කික ද්වාර', name:'AND', val:'F = A·B'},
+  {group:'තාර්කික ද්වාර', name:'OR', val:'F = A+B'},
+  {group:'තාර්කික ද්වාර', name:'NAND', val:'F = (A·B)̄'},
+  {group:'තාර්කික ද්වාර', name:'NOR', val:'F = (A+B)̄'},
+  {group:'තාර්කික ද්වාර', name:'De Morgan I', val:'(A·B)̄ = Ā + B̄'},
+  {group:'තාර්කික ද්වාර', name:'De Morgan II', val:'(A+B)̄ = Ā · B̄'}
+];
+
+/* =========================================================
+   QUIZ DATA (per section)
+========================================================= */
+const QUIZ = {
+diode:[
+ {q:'Si ඩයෝඩයක සාමාන්‍ය බාධක විභවය පමණ කොපමණද?',
+  opts:['0.2–0.3 V','0.6–0.7 V','1.4 V','5 V'], ans:1,
+  exp:'සිලිකන් (Si) ඩයෝඩයක බාධක විභවය 0.6V සිට 0.7V අතර වේ. ජර්මේනියම් (Ge) ඩයෝඩයක එය 0.2–0.3V පමණි.'},
+ {q:'p-n සන්ධියක් පෙර නැඹුරු කළ විට සිදුවන්නේ කුමක්ද?',
+  opts:['හායක පෙදෙස පුළුල් වේ','හායක පෙදෙස පටු වී ධාරාවක් ගලයි','ධාරාව සම්පූර්ණයෙන් නවතී','විභව අන්තරය වැඩි වේ'], ans:1,
+  exp:'පෙර නැඹුරු කිරීමේදී (p ට (+), n ට (−)) බාහිර විභවය අභ්‍යන්තර බාධක විභවයට එරෙහිව ක්‍රියා කර හායක පෙද�ස පටු කර ධාරාවක් ගලා යාමට ඉඩ දෙයි.'},
+ {q:'පූර්ණ තරංග (bridge) සෘජුකරණයේදී භාවිත වන ඩයෝඩ ගණන කීයද?',
+  opts:['1','2','4','8'], ans:2,
+  exp:'Bridge rectifier පරිපථයක ඩයෝඩ 4ක් (D1, D2, D3, D4) අන්තර්ග්‍රහණය වී ඇති අතර, එක් අර්ධ චක්‍රයකදී ඩයෝඩ දෙකක් පෙර නැඹුරු වී ධාරාව සන්නයනය කරයි.'},
+ {q:'පූර්ණ තරංග සුමටනයකින් පසු Vrms ලබාදෙන සූත්‍රය කුමක්ද?',
+  opts:['Vrms = Vmax/√2','Vrms = Vmax/π','Vrms = 2Vmax/π','Vrms = Vmax'], ans:2,
+  exp:'පූර්ණ තරංග සුමටනයේ (full-wave rectified) Vrms = 2Vmax/π වේ. සම්පූර්ණ AC සංඥාවක් සඳහා Vrms = Vmax/√2 බව සැලකිල්ලට ගන්න.'},
+ {q:'සෙනර් ඩයෝඩය සාමාන්‍යයෙන් වෝල්ටියතා නියාමනය සඳහා ක්‍රියා කරන්නේ කුමන නැඹුරුවකදීද?',
+  opts:['පෙර නැඹුරුව','පසු නැඹුරුව (බිඳවැටීමේ කලාපය)','නැඹුරුවක් නොමැතිව','AC නැඹුරුවකදී'], ans:1,
+  exp:'සෙනර් ඩයෝඩය එහි නියත බිඳවැටීමේ විභවය (Vz) වෙත පසු නැඹුරුවෙන් ක්‍රියාත්මක කර ස්ථාවර ප්‍රතිදාන වෝල්ටියතාවක් ලබාදීමට යොදා ගැනේ.'}
+],
+transistor:[
+ {q:'npn ට්‍රාන්සිස්ටරයක Emitter කලාපය සාමාන්‍යයෙන් සකස් වන්නේ කෙසේද?',
+  opts:['සැහැල්ලුවෙන් මාතෘකා කළ p කලාපයක්','දැඩිව මාතෘකා කළ n කලාපයක්','දැඩිව මාතෘකා කළ p කලාපයක්','මාතෘකා නොකළ intrinsic කලාපයක්'], ans:1,
+  exp:'Emitter කලාපය දැඩිව (heavily) මාතෘකා කළ n-type ද්‍රව්‍යයකින් සෑදේ, එමගින් වැඩි ප්‍රමාණයක් ඉලෙක්ට්‍රෝන Base වෙත එන්නත් කිරීමට හැකි වේ.'},
+ {q:'IB = 20 µA, β = 100 නම් IC කීයද?',
+  opts:['0.2 mA','2 mA','20 mA','0.02 mA'], ans:1,
+  exp:'IC = β × IB = 100 × 20µA = 2000µA = 2 mA.'},
+ {q:'ට්‍රාන්සිස්ටරයක "නිවාත ලක්ෂ්‍යය" (Q-point) සාමාන්‍යයෙන් තෝරන්නේ කුමන කොන්දේසියටද?',
+  opts:['VCE = 0','VCE = VCC','VCE = VCC/2','IC = 0'], ans:2,
+  exp:'AC සංඥා වර්ධකයක උපරිම symmetrical output swing එකක් ලබා ගැනීම සඳහා Q-point එක VCE = VCC/2 ලෙස තෝරනු ලැබේ, එමගින් signal එක clip නොවී ඉහළ හා පහළ දෙදිශාවටම equally swing විය හැක.'},
+ {q:'JFET එකක "Pinch-off" (කැපුම) වෝල්ටියතාවෙන් පසු IDS හැසිරෙන්නේ කෙසේද?',
+  opts:['ඉතා ඉක්මනින් වැඩි වේ','පාහේ ස්ථාවර වී VDS මත රඳා නොපවතී','බින්දුවට වැටේ','අවිනිශ්චිතව උච්චාවචනය වේ'], ans:1,
+  exp:'Active (saturation) කලාපයේදී IDS, VGS මගින් පාලනය වන අතර VDS වැඩිවීමෙන් වෙනස් නොවී පාහේ ස්ථාවරව පවතී — මෙය JFET එකක ප්‍රධාන වර්ධක ලක්ෂණයකි.'},
+ {q:'ට්‍රාන්සිස්ටරයක "සන්තෘප්ත කලාපය" (saturation) හඳුනාගත හැක්කේ කෙසේද?',
+  opts:['IC, IB සමග රේඛීයව වැඩි වීමෙන්','IC උපරිම අගයට ළඟා වී නියතව පැවතීමෙන්','IC = 0 වීමෙන්','VCE = VCC වීමෙන්'], ans:1,
+  exp:'සන්තෘප්ත කලාපයේදී IB තවදුරටත් වැඩි කළත් IC ආසන්නව නියතව පවතී (උපරිම අගය ළඟා වී ඇති බැවින්), namut තවමත් සුළු ධාරා ලාභයක් පවතී.'}
+],
+opamp:[
+ {q:'ස්වර්ණමය නීතිය 1 කුමක්ද?',
+  opts:['Iin = 0','V+ − V− = 0 (Virtual short)','A = ∞','Vout = ∞'], ans:1,
+  exp:'ස්වර්ණමය නීතිය 1 පවසන්නේ negative feedback ඇති ideal op-amp එකක inverting හා non-inverting input අතර විභව අන්තරය ශුන්‍ය බවයි (Virtual short/ground).'},
+ {q:'Ideal op-amp එකක input impedance (ප්‍රදාන ප්‍රතිරෝධය) කොපමණද?',
+  opts:['ශුන්‍ය','ඉතා කුඩා','අනන්තය (∞)','1 kΩ'], ans:2,
+  exp:'Ideal op-amp එකක input impedance අනන්තය ලෙස සලකනු ලබන අතර, එමගින් input terminal වෙත ධාරාවක් නොගලයි (Iin = 0).'},
+ {q:'Inverting amplifier එකක Rf = 20kΩ, R = 4kΩ නම් ලාභය කීයද?',
+  opts:['5','-5','24','0.2'], ans:1,
+  exp:'Inverting gain = −Rf/R = −20/4 = −5. සෘණ ලකුණ ප්‍රතිදානය input එකට ප්‍රතිවිරුද්ධ ලක්ෂණයෙන් (180° phase shift) ඇති බව පෙන්වයි.'},
+ {q:'Op-amp එකක ප්‍රායෝගික සන්තෘප්ත පරාසය (ΔVin) පමණ කොපමණද?',
+  opts:['±150 µV','±15 V','±1 mV','±150 mV'], ans:0,
+  exp:'ප්‍රායෝගික op-amp එකක input signal ΔVin, −150µV සහ +150µV අතර සීමා වූ විට පමණක් output එක ප්‍රතිපාදනාත්මකව (linear) වෙනස් වේ; එයට වඩා වැඩි නම් output එක saturate වේ.'},
+ {q:'Non-inverting amplifier සමීකරණය කුමක්ද?',
+  opts:['Vout/Vin = −Rf/R','Vout/Vin = Rf/R','Vout/Vin = (Rf/R)+1','Vout/Vin = R/Rf'], ans:2,
+  exp:'Non-inverting configuration එකේ ලාභය Vout/Vin = (Rf/R) + 1 වන අතර, එය සැමවිටම 1ට වඩා වැඩි (හෝ සමාන) අගයක් ගනී.'}
+],
+logic:[
+ {q:'AND gate එකක ප්‍රතිදානය 1 වන්නේ කවදාද?',
+  opts:['ඕනෑම ප්‍රදානයක් 1 වූ විට','සියලුම ප්‍රදාන 1 වූ විට පමණි','සියලුම ප්‍රදාන 0 වූ විට','ප්‍රදාන දෙක සමාන නොවූ විට'], ans:1,
+  exp:'AND gate එකේ F = A·B වන අතර, A සහ B යන දෙකම 1 වූ විට පමණක් F = 1 වේ.'},
+ {q:'NAND gate එකක Boolean සමීකරණය කුමක්ද?',
+  opts:['F = A+B','F = A·B','F = (A·B)̄','F = (A+B)̄'], ans:2,
+  exp:'NAND යනු AND ද්වාරයක ප්‍රතිදානය NOT ද්වාරයකට ලබාදීමෙන් සාදන ලද universal gate එකකි: F = (A·B)̄.'},
+ {q:'De Morgan\u2019s Theorem අනුව (A+B)̄ ට සමාන වන්නේ කුමක්ද?',
+  opts:['Ā + B̄','Ā · B̄','A·B','A+B'], ans:1,
+  exp:'De Morgan\u2019s Theorem: (A+B)̄ = Ā · B̄. එනම් OR ද්වාරයක NOT එක, NOT කළ input දෙකක AND ට සමාන වේ.'},
+ {q:'NAND ද්වාර දෙකකින් නිර්මාණය කළ S-R Flip-Flop එකක S=1, R=1 විට Q අගය කුමක්ද?',
+  opts:['0','1','පෙර අගය රඳවා ගනී','අවිනිශ්චිත / තහනම් තත්වය'], ans:3,
+  exp:'NAND-based SR latch එකක S=1 සහ R=1 (active-low ආදානයන් 0,0 ට සමාන) එකවර යෙදූ විට Q සහ Q̄ දෙකම එකම අගයක් ගනී — මෙය තහනම් (invalid/forbidden) තත්වයකි.'},
+ {q:'Ex-OR (XOR) ද්වාරයක ප්‍රතිදානය 1 වන්නේ කවදාද?',
+  opts:['ප්‍රදාන දෙකම සමාන වූ විට','ප්‍රදාන දෙකම 0 වූ විට','ප්‍රදාන දෙක එකිනෙකට වෙනස් වූ විට (එකක් පමණක් 1)','ප්‍රදාන දෙකම 1 වූ විට'], ans:2,
+  exp:'XOR ද්වාරය "විශේෂිත OR" ලෙසද හැඳින්වේ: F = A⊕B, එය 1 වන්නේ A සහ B අතර හරියටම එකක් පමණක් 1 වූ විටය.'}
+]
+};
+
+/* =========================================================
+   RENDER: NAV
+========================================================= */
+const bottomNav = document.getElementById('bottomNav');
+const pillRow = document.getElementById('pillRow');
+SECTIONS.forEach((s,i)=>{
+  const btn = document.createElement('button');
+  btn.className = 'nav-btn'+(i===0?' active':'');
+  btn.id = 'navbtn-'+s.id;
+  btn.onclick = ()=>showSection(s.id);
+  btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none">${s.icon}</svg><span>${s.label}</span>`;
+  bottomNav.appendChild(btn);
+
+  const pill = document.createElement('div');
+  pill.className = 'section-pill'+(i===0?' active':'');
+  pill.id = 'pill-'+s.id;
+  pill.textContent = s.label;
+  pill.onclick = ()=>showSection(s.id);
+  pillRow.appendChild(pill);
+});
+
+function showSection(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('navbtn-'+id).classList.add('active');
+  document.querySelectorAll('.section-pill').forEach(b=>b.classList.remove('active'));
+  document.getElementById('pill-'+id).classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* =========================================================
+   DRAWER
+========================================================= */
+function openDrawer(){
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawerOverlay').classList.add('open');
+}
+function closeDrawer(){
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+}
+function renderFormulas(){
+  const listEl = document.getElementById('formulaList');
+  const groups = {};
+  FORMULAS.forEach(f=>{ (groups[f.group] = groups[f.group]||[]).push(f); });
+  let html='';
+  Object.keys(groups).forEach(g=>{
+    html += `<div class="fsheet-group"><h4>${g}</h4>`;
+    groups[g].forEach(f=>{
+      html += `<div class="fsheet-item" data-search="${(f.name+f.val).toLowerCase()}"><div class="fname">${f.name}</div><div class="fval">${f.val}</div></div>`;
+    });
+    html += `</div>`;
+  });
+  listEl.innerHTML = html;
+}
+function filterFormulas(){
+  const q = document.getElementById('formulaSearch').value.toLowerCase();
+  document.querySelectorAll('.fsheet-item').forEach(el=>{
+    el.classList.toggle('hidden', q && !el.dataset.search.includes(q));
+  });
+}
+renderFormulas();
+
+/* =========================================================
+   SVG DIAGRAM LIBRARY
+========================================================= */
+const SVGS = {
+diodeSymbol:`<svg viewBox="0 0 220 90" width="220" height="90">
+  <line x1="10" y1="45" x2="80" y2="45" stroke="#5b8cff" stroke-width="2.5"/>
+  <polygon points="80,20 80,70 140,45" fill="none" stroke="#2dd9c4" stroke-width="2.5"/>
+  <line x1="140" y1="20" x2="140" y2="70" stroke="#2dd9c4" stroke-width="2.5"/>
+  <line x1="140" y1="45" x2="210" y2="45" stroke="#5b8cff" stroke-width="2.5"/>
+  <text x="80" y="14" fill="#9fb0cf" font-size="12" font-family="monospace">A (ඇනෝඩය)</text>
+  <text x="140" y="88" fill="#9fb0cf" font-size="12" font-family="monospace" text-anchor="end">K (කැතෝඩය)</text>
+</svg>`,
+pnJunction:`<svg viewBox="0 0 260 130" width="260" height="130">
+  <rect x="20" y="20" width="100" height="80" fill="rgba(91,140,255,0.15)" stroke="#5b8cff" stroke-width="1.5"/>
+  <rect x="120" y="20" width="100" height="80" fill="rgba(45,217,196,0.15)" stroke="#2dd9c4" stroke-width="1.5"/>
+  <text x="70" y="65" fill="#5b8cff" font-size="18" text-anchor="middle" font-weight="700">p</text>
+  <text x="170" y="65" fill="#2dd9c4" font-size="18" text-anchor="middle" font-weight="700">n</text>
+  <text x="70" y="15" fill="#9fb0cf" font-size="11" text-anchor="middle">කුහර (majority)</text>
+  <text x="170" y="15" fill="#9fb0cf" font-size="11" text-anchor="middle">ඉලෙක්ට්‍රෝන (majority)</text>
+  <rect x="100" y="20" width="40" height="80" fill="rgba(255,255,255,0.05)"/>
+  <text x="120" y="118" fill="#f5b942" font-size="11" text-anchor="middle">හායක පෙදෙස (Depletion layer)</text>
+</svg>`,
+forwardBias:`<svg viewBox="0 0 260 140" width="260" height="140">
+  <rect x="60" y="30" width="140" height="60" fill="none" stroke="#25335a" stroke-width="1.5" rx="6"/>
+  <line x1="10" y1="60" x2="60" y2="60" stroke="#eef3fb" stroke-width="2"/>
+  <text x="35" y="50" fill="#3ee089" font-size="14" text-anchor="middle">+</text>
+  <line x1="200" y1="60" x2="250" y2="60" stroke="#eef3fb" stroke-width="2"/>
+  <text x="228" y="50" fill="#ff5f7e" font-size="14" text-anchor="middle">−</text>
+  <polygon points="105,40 105,80 145,60" fill="none" stroke="#2dd9c4" stroke-width="2.5"/>
+  <line x1="145" y1="40" x2="145" y2="80" stroke="#2dd9c4" stroke-width="2.5"/>
+  <line x1="60" y1="60" x2="105" y2="60" stroke="#eef3fb" stroke-width="2"/>
+  <line x1="145" y1="60" x2="200" y2="60" stroke="#eef3fb" stroke-width="2"/>
+  <path d="M170 60 l8 -5 M178 60 l8 -5 M186 60 l8 -5" stroke="#3ee089" stroke-width="2" fill="none">
+    <animate attributeName="opacity" values="0.2;1;0.2" dur="1.2s" repeatCount="indefinite"/>
+  </path>
+  <text x="130" y="115" fill="#9fb0cf" font-size="11" text-anchor="middle">පෙර නැඹුරුව — ධාරාව ගලයි</text>
+</svg>`,
+reverseBias:`<svg viewBox="0 0 260 140" width="260" height="140">
+  <rect x="60" y="30" width="140" height="60" fill="none" stroke="#25335a" stroke-width="1.5" rx="6"/>
+  <line x1="10" y1="60" x2="60" y2="60" stroke="#eef3fb" stroke-width="2"/>
+  <text x="35" y="50" fill="#ff5f7e" font-size="14" text-anchor="middle">−</text>
+  <line x1="200" y1="60" x2="250" y2="60" stroke="#eef3fb" stroke-width="2"/>
+  <text x="228" y="50" fill="#3ee089" font-size="14" text-anchor="middle">+</text>
+  <polygon points="105,40 105,80 145,60" fill="none" stroke="#ff5f7e" stroke-width="2.5"/>
+  <line x1="145" y1="40" x2="145" y2="80" stroke="#ff5f7e" stroke-width="2.5"/>
+  <line x1="60" y1="60" x2="105" y2="60" stroke="#eef3fb" stroke-width="2"/>
+  <line x1="145" y1="60" x2="200" y2="60" stroke="#eef3fb" stroke-width="2"/>
+  <text x="130" y="115" fill="#9fb0cf" font-size="11" text-anchor="middle">පසු නැඹුරුව — ධාරාව නොගලයි (ක්ෂුද්‍ර ධාරාව හැර)</text>
+</svg>`,
+halfwave:`<svg viewBox="0 0 280 150" width="280" height="150">
+  <path d="M10 75 q15 -35 30 0 t30 0 t30 0" fill="none" stroke="#5b8cff" stroke-width="2"/>
+  <polygon points="130,55 130,95 165,75" fill="none" stroke="#2dd9c4" stroke-width="2.5"/>
+  <line x1="165" y1="55" x2="165" y2="95" stroke="#2dd9c4" stroke-width="2.5"/>
+  <line x1="100" y1="75" x2="130" y2="75" stroke="#eef3fb" stroke-width="2"/>
+  <line x1="165" y1="75" x2="195" y2="75" stroke="#eef3fb" stroke-width="2"/>
+  <line x1="195" y1="45" x2="195" y2="105" stroke="#eef3fb" stroke-width="2"/>
+  <text x="205" y="78" fill="#9fb0cf" font-size="11">RL</text>
+  <path d="M215 75 q10 -22 20 0 M235 105 l0 -30" fill="none" stroke="#f5b942" stroke-width="2"/>
+  <text x="140" y="135" fill="#9fb0cf" font-size="11" text-anchor="middle">අර්ධ තරංග සෘජුකරණය</text>
+</svg>`,
+bridge:`<svg viewBox="0 0 260 200" width="260" height="200">
+  <path d="M10 40 q10 -20 20 0 t20 0" fill="none" stroke="#5b8cff" stroke-width="2"/>
+  <line x1="55" y1="40" x2="85" y2="40" stroke="#eef3fb" stroke-width="1.6"/>
+  <line x1="55" y1="120" x2="85" y2="120" stroke="#eef3fb" stroke-width="1.6"/>
+  <line x1="85" y1="40" x2="85" y2="120" stroke="#eef3fb" stroke-width="0" />
+  <!-- diamond bridge -->
+  <line x1="85" y1="80" x2="130" y2="40" stroke="#eef3fb" stroke-width="1.6"/>
+  <line x1="85" y1="80" x2="130" y2="120" stroke="#eef3fb" stroke-width="1.6"/>
+  <line x1="130" y1="40" x2="175" y2="80" stroke="#eef3fb" stroke-width="1.6"/>
+  <line x1="130" y1="120" x2="175" y2="80" stroke="#eef3fb" stroke-width="1.6"/>
+  <polygon points="98,60 98,72 112,66" fill="none" stroke="#2dd9c4" stroke-width="2" transform="rotate(45 105 66)"/>
+  <polygon points="98,88 98,100 112,94" fill="none" stroke="#2dd9c4" stroke-width="2" transform="rotate(-45 105 94)"/>
+  <polygon points="148,60 148,72 162,66" fill="none" stroke="#2dd9c4" stroke-width="2" transform="rotate(-45 155 66)"/>
+  <polygon points="148,88 148,100 162,94" fill="none" stroke="#2dd9c4" stroke-width="2" transform="rotate(45 155 94)"/>
+  <line x1="175" y1="80" x2="210" y2="80" stroke="#eef3fb" stroke-width="1.6"/>
+  <line x1="210" y1="45" x2="210" y2="115" stroke="#eef3fb" stroke-width="1.6"/>
+  <text x="220" y="83" fill="#9fb0cf" font-size="11">RL</text>
+  <line x1="130" y1="40" x2="130" y2="10" stroke="#eef3fb" stroke-width="1.6"/>
+  <line x1="130" y1="120" x2="130" y2="150" stroke="#eef3fb" stroke-width="1.6"/>
+  <text x="130" y="175" fill="#9fb0cf" font-size="11" text-anchor="middle">පූර්ණ තරංග (Bridge) සෘජුකරණය</text>
+</svg>`,
+zener:`<svg viewBox="0 0 260 150" width="260" height="150">
+  <line x1="10" y1="60" x2="60" y2="60" stroke="#eef3fb" stroke-width="1.6"/>
+  <rect x="55" y="30" width="20" height="60" fill="none" stroke="#25335a" stroke-width="1.2"/>
+  <text x="65" y="25" fill="#9fb0cf" font-size="10" text-anchor="middle">Rs</text>
+  <line x1="75" y1="60" x2="130" y2="60" stroke="#eef3fb" stroke-width="1.6"/>
+  <path d="M130 40 L130 80 L150 60 Z M150 40 l-6 8 M150 80 l-6 -8" fill="none" stroke="#f5b942" stroke-width="2.2"/>
+  <line x1="130" y1="90" x2="130" y2="115" stroke="#eef3fb" stroke-width="1.6"/>
+  <line x1="150" y1="90" x2="150" y2="115" stroke="#eef3fb" stroke-width="0"/>
+  <line x1="150" y1="60" x2="190" y2="60" stroke="#eef3fb" stroke-width="1.6"/>
+  <line x1="190" y1="40" x2="190" y2="80" stroke="#eef3fb" stroke-width="1.6"/>
+  <text x="200" y="63" fill="#9fb0cf" font-size="11">RL (Vo)</text>
+  <line x1="130" y1="115" x2="190" y2="115" stroke="#eef3fb" stroke-width="1.6"/>
+  <line x1="10" y1="115" x2="10" y2="60" stroke="#eef3fb" stroke-width="1.6"/>
+  <line x1="10" y1="115" x2="130" y2="115" stroke="#eef3fb" stroke-width="1.6"/>
+  <text x="130" y="140" fill="#9fb0cf" font-size="11" text-anchor="middle">සෙනර් වෝල්ටියතා නියාමකය</text>
+</svg>`,
+npn:`<svg viewBox="0 0 160 160" width="160" height="160">
+  <circle cx="80" cy="80" r="60" fill="none" stroke="#25335a" stroke-width="1.2"/>
+  <line x1="45" y1="80" x2="70" y2="80" stroke="#eef3fb" stroke-width="2"/>
+  <line x1="70" y1="55" x2="70" y2="105" stroke="#eef3fb" stroke-width="2.4"/>
+  <line x1="70" y1="63" x2="105" y2="40" stroke="#eef3fb" stroke-width="2"/>
+  <line x1="70" y1="97" x2="105" y2="120" stroke="#eef3fb" stroke-width="2"/>
+  <polygon points="90,110 105,120 96,102" fill="#eef3fb"/>
+  <line x1="105" y1="40" x2="105" y2="20" stroke="#eef3fb" stroke-width="2"/>
+  <line x1="105" y1="120" x2="105" y2="140" stroke="#eef3fb" stroke-width="2"/>
+  <text x="30" y="84" fill="#9fb0cf" font-size="12">B</text>
+  <text x="108" y="18" fill="#9fb0cf" font-size="12">C</text>
+  <text x="108" y="150" fill="#9fb0cf" font-size="12">E</text>
+  <text x="80" y="152" fill="#2dd9c4" font-size="13" text-anchor="middle" font-weight="700">npn</text>
+</svg>`,
+pnp:`<svg viewBox="0 0 160 160" width="160" height="160">
+  <circle cx="80" cy="80" r="60" fill="none" stroke="#25335a" stroke-width="1.2"/>
+  <line x1="45" y1="80" x2="70" y2="80" stroke="#eef3fb" stroke-width="2"/>
+  <line x1="70" y1="55" x2="70" y2="105" stroke="#eef3fb" stroke-width="2.4"/>
+  <line x1="70" y1="63" x2="105" y2="40" stroke="#eef3fb" stroke-width="2"/>
+  <line x1="70" y1="97" x2="105" y2="120" stroke="#eef3fb" stroke-width="2"/>
+  <polygon points="78,72 62,68 73,84" fill="#eef3fb"/>
+  <line x1="105" y1="40" x2="105" y2="20" stroke="#eef3fb" stroke-width="2"/>
+  <line x1="105" y1="120" x2="105" y2="140" stroke="#eef3fb" stroke-width="2"/>
+  <text x="30" y="84" fill="#9fb0cf" font-size="12">B</text>
+  <text x="108" y="18" fill="#9fb0cf" font-size="12">C</text>
+  <text x="108" y="150" fill="#9fb0cf" font-size="12">E</text>
+  <text x="80" y="152" fill="#b389f9" font-size="13" text-anchor="middle" font-weight="700">pnp</text>
+</svg>`,
+outputChar:`<svg viewBox="0 0 260 180" width="260" height="180">
+  <line x1="35" y1="20" x2="35" y2="150" stroke="#9fb0cf" stroke-width="1.4"/>
+  <line x1="35" y1="150" x2="240" y2="150" stroke="#9fb0cf" stroke-width="1.4"/>
+  <text x="12" y="24" fill="#9fb0cf" font-size="10">IC/mA</text>
+  <text x="220" y="168" fill="#9fb0cf" font-size="10">VCE/V</text>
+  <path d="M35 130 L220 128" stroke="#2dd9c4" stroke-width="2" fill="none"/>
+  <path d="M35 105 L200 100" stroke="#5b8cff" stroke-width="2" fill="none"/>
+  <path d="M35 78 L170 72" stroke="#f5b942" stroke-width="2" fill="none"/>
+  <path d="M35 50 L140 45" stroke="#ff5f7e" stroke-width="2" fill="none"/>
+  <text x="225" y="130" fill="#2dd9c4" font-size="9">IB=10µA</text>
+  <text x="205" y="102" fill="#5b8cff" font-size="9">IB=20µA</text>
+  <text x="175" y="74" fill="#f5b942" font-size="9">IB=30µA</text>
+  <text x="145" y="47" fill="#ff5f7e" font-size="9">IB=40µA</text>
+</svg>`,
+loadline:`<svg viewBox="0 0 260 180" width="260" height="180">
+  <line x1="35" y1="20" x2="35" y2="150" stroke="#9fb0cf" stroke-width="1.4"/>
+  <line x1="35" y1="150" x2="240" y2="150" stroke="#9fb0cf" stroke-width="1.4"/>
+  <text x="8" y="24" fill="#9fb0cf" font-size="10">IC(sat)</text>
+  <text x="215" y="168" fill="#9fb0cf" font-size="10">VCC</text>
+  <line x1="35" y1="30" x2="220" y2="150" stroke="#f5b942" stroke-width="2.2"/>
+  <circle cx="127" cy="90" r="4.5" fill="#2dd9c4"/>
+  <text x="134" y="88" fill="#2dd9c4" font-size="11" font-weight="700">Q</text>
+  <line x1="127" y1="150" x2="127" y2="90" stroke="#2dd9c4" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="35" y1="90" x2="127" y2="90" stroke="#2dd9c4" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="130" y="164" fill="#9fb0cf" font-size="9">VCC/2</text>
+</svg>`,
+jfet:`<svg viewBox="0 0 170 160" width="170" height="160">
+  <rect x="60" y="45" width="16" height="70" fill="none" stroke="#eef3fb" stroke-width="2"/>
+  <line x1="68" y1="45" x2="68" y2="20" stroke="#eef3fb" stroke-width="2"/>
+  <line x1="68" y1="115" x2="68" y2="140" stroke="#eef3fb" stroke-width="2"/>
+  <line x1="40" y1="80" x2="60" y2="80" stroke="#eef3fb" stroke-width="2"/>
+  <polygon points="55,74 55,86 44,80" fill="#eef3fb"/>
+  <text x="72" y="18" fill="#9fb0cf" font-size="11">D</text>
+  <text x="72" y="150" fill="#9fb0cf" font-size="11">S</text>
+  <text x="15" y="84" fill="#9fb0cf" font-size="11">G</text>
+  <text x="85" y="150" fill="#2dd9c4" font-size="12" font-weight="700">n-JFET</text>
+</svg>`,
+opampSymbol:`<svg viewBox="0 0 220 130" width="220" height="130">
+  <polygon points="60,20 60,100 150,60" fill="none" stroke="#2dd9c4" stroke-width="2.4"/>
+  <line x1="20" y1="35" x2="60" y2="35" stroke="#eef3fb" stroke-width="2"/>
+  <line x1="20" y1="85" x2="60" y2="85" stroke="#eef3fb" stroke-width="2"/>
+  <line x1="150" y1="60" x2="200" y2="60" stroke="#eef3fb" stroke-width="2"/>
+  <text x="65" y="40" fill="#5b8cff" font-size="16">−</text>
+  <text x="65" y="92" fill="#f5b942" font-size="16">+</text>
+  <text x="8" y="39" fill="#9fb0cf" font-size="10">V1</text>
+  <text x="8" y="89" fill="#9fb0cf" font-size="10">V2</text>
+  <text x="185" y="52" fill="#9fb0cf" font-size="10">Vo</text>
+</svg>`,
+gates:{
+NOT:`<svg viewBox="0 0 140 80" width="140" height="80"><line x1="10" y1="40" x2="45" y2="40" stroke="#eef3fb" stroke-width="2"/><polygon points="45,20 45,60 90,40" fill="none" stroke="#2dd9c4" stroke-width="2.2"/><circle cx="96" cy="40" r="6" fill="none" stroke="#2dd9c4" stroke-width="2.2"/><line x1="102" y1="40" x2="130" y2="40" stroke="#eef3fb" stroke-width="2"/><text x="15" y="33" fill="#9fb0cf" font-size="11">A</text><text x="115" y="33" fill="#9fb0cf" font-size="11">F</text></svg>`,
+OR:`<svg viewBox="0 0 140 80" width="140" height="80"><line x1="10" y1="28" x2="40" y2="28" stroke="#eef3fb" stroke-width="2"/><line x1="10" y1="52" x2="40" y2="52" stroke="#eef3fb" stroke-width="2"/><path d="M35 15 Q60 40 35 65 Q55 65 90 40 Q55 15 35 15Z" fill="none" stroke="#2dd9c4" stroke-width="2.2"/><line x1="90" y1="40" x2="130" y2="40" stroke="#eef3fb" stroke-width="2"/><text x="15" y="22" fill="#9fb0cf" font-size="11">A</text><text x="15" y="66" fill="#9fb0cf" font-size="11">B</text><text x="112" y="34" fill="#9fb0cf" font-size="11">F</text></svg>`,
+AND:`<svg viewBox="0 0 140 80" width="140" height="80"><line x1="10" y1="28" x2="45" y2="28" stroke="#eef3fb" stroke-width="2"/><line x1="10" y1="52" x2="45" y2="52" stroke="#eef3fb" stroke-width="2"/><path d="M45 15 L70 15 A25 25 0 0 1 70 65 L45 65 Z" fill="none" stroke="#2dd9c4" stroke-width="2.2"/><line x1="95" y1="40" x2="130" y2="40" stroke="#eef3fb" stroke-width="2"/><text x="15" y="22" fill="#9fb0cf" font-size="11">A</text><text x="15" y="66" fill="#9fb0cf" font-size="11">B</text><text x="112" y="34" fill="#9fb0cf" font-size="11">F</text></svg>`,
+NOR:`<svg viewBox="0 0 150 80" width="150" height="80"><line x1="10" y1="28" x2="40" y2="28" stroke="#eef3fb" stroke-width="2"/><line x1="10" y1="52" x2="40" y2="52" stroke="#eef3fb" stroke-width="2"/><path d="M35 15 Q60 40 35 65 Q55 65 90 40 Q55 15 35 15Z" fill="none" stroke="#2dd9c4" stroke-width="2.2"/><circle cx="96" cy="40" r="6" fill="none" stroke="#2dd9c4" stroke-width="2.2"/><line x1="102" y1="40" x2="135" y2="40" stroke="#eef3fb" stroke-width="2"/><text x="15" y="22" fill="#9fb0cf" font-size="11">A</text><text x="15" y="66" fill="#9fb0cf" font-size="11">B</text><text x="118" y="34" fill="#9fb0cf" font-size="11">F</text></svg>`,
+NAND:`<svg viewBox="0 0 150 80" width="150" height="80"><line x1="10" y1="28" x2="45" y2="28" stroke="#eef3fb" stroke-width="2"/><line x1="10" y1="52" x2="45" y2="52" stroke="#eef3fb" stroke-width="2"/><path d="M45 15 L70 15 A25 25 0 0 1 70 65 L45 65 Z" fill="none" stroke="#2dd9c4" stroke-width="2.2"/><circle cx="101" cy="40" r="6" fill="none" stroke="#2dd9c4" stroke-width="2.2"/><line x1="107" y1="40" x2="135" y2="40" stroke="#eef3fb" stroke-width="2"/><text x="15" y="22" fill="#9fb0cf" font-size="11">A</text><text x="15" y="66" fill="#9fb0cf" font-size="11">B</text><text x="118" y="34" fill="#9fb0cf" font-size="11">F</text></svg>`,
+XOR:`<svg viewBox="0 0 150 80" width="150" height="80"><line x1="10" y1="28" x2="38" y2="28" stroke="#eef3fb" stroke-width="2"/><line x1="10" y1="52" x2="38" y2="52" stroke="#eef3fb" stroke-width="2"/><path d="M28 15 Q53 40 28 65" fill="none" stroke="#2dd9c4" stroke-width="2"/><path d="M35 15 Q60 40 35 65 Q55 65 90 40 Q55 15 35 15Z" fill="none" stroke="#2dd9c4" stroke-width="2.2"/><line x1="90" y1="40" x2="130" y2="40" stroke="#eef3fb" stroke-width="2"/><text x="15" y="22" fill="#9fb0cf" font-size="11">A</text><text x="15" y="66" fill="#9fb0cf" font-size="11">B</text><text x="112" y="34" fill="#9fb0cf" font-size="11">F</text></svg>`,
+XNOR:`<svg viewBox="0 0 155 80" width="155" height="80"><line x1="10" y1="28" x2="38" y2="28" stroke="#eef3fb" stroke-width="2"/><line x1="10" y1="52" x2="38" y2="52" stroke="#eef3fb" stroke-width="2"/><path d="M28 15 Q53 40 28 65" fill="none" stroke="#2dd9c4" stroke-width="2"/><path d="M35 15 Q60 40 35 65 Q55 65 90 40 Q55 15 35 15Z" fill="none" stroke="#2dd9c4" stroke-width="2.2"/><circle cx="96" cy="40" r="6" fill="none" stroke="#2dd9c4" stroke-width="2.2"/><line x1="102" y1="40" x2="135" y2="40" stroke="#eef3fb" stroke-width="2"/><text x="15" y="22" fill="#9fb0cf" font-size="11">A</text><text x="15" y="66" fill="#9fb0cf" font-size="11">B</text><text x="118" y="34" fill="#9fb0cf" font-size="11">F</text></svg>`
+}
+};
+
+/* =========================================================
+   VIEW BUILDERS
+========================================================= */
+const mainContent = document.getElementById('mainContent');
+
+function accordion(items){
+  return items.map((it,i)=>`
+    <div class="accordion-item" id="acc-${it.id}">
+      <div class="accordion-head" onclick="toggleAcc('${it.id}')">
+        <span>${it.title}</span>
+        <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="accordion-body"><div style="padding-top:10px">${it.body}</div></div>
+    </div>`).join('');
+}
+function toggleAcc(id){
+  const el = document.getElementById('acc-'+id);
+  const wasOpen = el.classList.contains('open');
+  el.classList.toggle('open');
+  const body = el.querySelector('.accordion-body');
+  body.style.maxHeight = (!wasOpen) ? body.scrollHeight+40+'px' : '0px';
+}
+
+/* ---------- VIEW 1: DIODE ---------- */
+mainContent.innerHTML += `
+<div class="view active" id="view-diode">
+  <div class="hero-card" style="--accent-color:#2dd9c4">
+    <div class="pin-row"><div class="pin"></div><div class="pin"></div><div class="pin"></div></div>
+    <div class="hero-eyebrow">Section 01 · Diodes</div>
+    <div class="hero-title">ඩයෝඩ සහ අර්ධ සන්නායක</div>
+    <div class="hero-desc">අභ්‍යන්තර (intrinsic) හා බාහිර (extrinsic) අර්ධ සන්නායක වල හැසිරීම, p-n සන්ධියේ ක්‍රියාකාරිත්වය, සහ ඩයෝඩ භාවිත සමඟ ප්‍රායෝගික පරිපථ ගවේෂණය කරන්න.</div>
+  </div>
+
+  <h2 class="section-h"><span class="tag-dot"></span>අර්ධ සන්නායක වර්ග</h2>
+  <div class="card">
+    <p><b>අභ්‍යන්තර අර්ධ සන්නායක</b> — සංයුජතා 4ක් වූ Si/Ge වැනි මූලද්‍රව්‍යයකින් සමන්විත, පිරිසිදු අර්ධ සන්නායකයකි. උෂ්ණත්වය සමඟ පමණක් ප්‍රතිරෝධකත්වය වෙනස් වේ.</p>
+    <p><b>බාහිර අර්ධ සන්නායක</b> — වෙනස් සංයුජතාවක් සහිත මූලද්‍රව්‍යයක් (impurity) මිශ්‍ර කිරීමෙන් (doping) සකසන ලද අර්ධ සන්නායකයකි.</p>
+    <div class="grid2" style="margin-top:10px">
+      <div class="card" style="margin:0; background:var(--bg-elev)">
+        <b style="color:var(--blue)">n-type</b>
+        <ul><li>සංයුජතා 5ක් — දායක අවශිष्ट (P, As)</li><li>බහුතරය: ඉලෙක්ට්‍රෝන</li><li>සුළුතරය: කුහර</li></ul>
+      </div>
+      <div class="card" style="margin:0; background:var(--bg-elev)">
+        <b style="color:var(--teal)">p-type</b>
+        <ul><li>සංයුජතා 3ක් — ග්‍රාහක අශුද්ධි (B, Ga)</li><li>බහුතරය: කුහර</li><li>සුළුතරය: ඉලෙක්ට්‍රෝන</li></ul>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section-h"><span class="tag-dot"></span>p-n සන්ධිය හා නැඹුරුව</h2>
+  <div class="card">
+    <p>p හා n කලාප එකට එකතු වූ විට, විසරණය හේතුවෙන් සන්ධිය අසල <b>හායක පෙදෙසක්</b> (depletion layer) සහ එහි ප්‍රතිඵලයක් ලෙස <b>බාධක විභවයක්</b> (barrier potential) ඇති වේ.</p>
+    <div class="svg-wrap">${SVGS.pnJunction}</div>
+    <div class="chip-list">
+      <span class="chip">Si → 0.6 – 0.7 V</span>
+      <span class="chip">Ge → 0.2 – 0.3 V</span>
+    </div>
+  </div>
+
+  <div class="two-col-imgs">
+    <div class="card" style="margin:0">
+      <h3 class="sub-h" style="margin-top:0">පෙර නැඹුරුව</h3>
+      <div class="svg-wrap">${SVGS.forwardBias}</div>
+      <p style="font-size:12.5px">බාහිර විභවය බාධක විභවයට වඩා වැඩි නම් හායක පෙදෙස පටු වී ධාරාව ගලයි.</p>
+    </div>
+    <div class="card" style="margin:0">
+      <h3 class="sub-h" style="margin-top:0">පසු නැඹුරුව</h3>
+      <div class="svg-wrap">${SVGS.reverseBias}</div>
+      <p style="font-size:12.5px">හායක පෙදෙස පුළුල් වී ධාරාව නොගලයි (සුළුතර වාහක ක්ෂුද්‍ර ධාරාවක් හැර). අධික විභවයකදී <b>බිඳවැටීම</b> සිදුවේ.</p>
+    </div>
+  </div>
+
+  <h2 class="section-h"><span class="tag-dot"></span>V-I ලාක්ෂණික වක්‍ර</h2>
+  <div class="card">
+    <p>ඩයෝඩයක VI ලාක්ෂණිකය ආකාර 3කින් නිරූපණය කළ හැක: <b>ideal</b> (switch), <b>practical</b> (barrier potential සමග), සහ <b>near-ideal</b> (approximate).</p>
+    <div class="note-box">ප්‍රායෝගික ඩයෝඩයක ප්‍රතිදානය: V<sub>0max</sub> = V<sub>i max</sub> − V<sub>p</sub> (V<sub>p</sub> = බාධක විභවය)</div>
+  </div>
+
+  <h2 class="section-h"><span class="tag-dot"></span>සෘජුකරණය (Rectification)</h2>
+  <div class="card">
+    <h3 class="sub-h" style="margin-top:0">1. අර්ධ තරංග සෘජුකරණය</h3>
+    <div class="svg-wrap">${SVGS.halfwave}</div>
+    <p>ප්‍රදානයේ එක් අර්ධ චක්‍රයක් පමණක් ප්‍රතිදානය කරයි. සරල නමුත් ඉතා අකාර්යක්ෂමයි.</p>
+    <div class="formula-box">V_rms = V_max / π</div>
+
+    <h3 class="sub-h">2. පූර්ණ තරංග (Bridge) සෘජුකරණය</h3>
+    <div class="svg-wrap">${SVGS.bridge}</div>
+    <p>ඩයෝඩ 4කින් සමන්විත පරිපථයක් මගින් සම්පූර්ණ තරංගයම එකම දිශාවකට හරවනු ලැබේ.</p>
+    <div class="formula-box">V_rms = 2V_max / π</div>
+  </div>
+
+  <div class="card">
+    <h3 class="sub-h" style="margin-top:0">3. සුමටනය (Smoothing)</h3>
+    <p>සෘජුකරණයෙන් ලැබෙන "රැලි සහිත" (ripple) ප්‍රතිදානය, capacitor එකක් සමාන්තරව යොදා උච්චාවචනය අවම කරයි.</p>
+    <h3 class="sub-h">4. සෙනර් වෝල්ටියතා යාමනය</h3>
+    <div class="svg-wrap">${SVGS.zener}</div>
+    <div class="formula-box" style="font-size:13px">R_s මත වෝල්ටියතාව = V_S − V_Z</div>
+  </div>
+
+  <h2 class="section-h"><span class="tag-dot"></span>විශේෂ ඩයෝඩ වර්ග</h2>
+  <div class="card">
+    ${accordion([
+      {id:'led', title:'💡 LED (ආලෝක විමෝචක ඩයෝඩය)', body:'පෙර නැඹුරු කළ විට ක්‍රියාත්මක වේ. ඉලෙක්ට්‍රෝන හා කුහර නැවත සංයෝජනයේදී නිදහස් වන ශක්තිය ආලෝකය ලෙස පිටවේ.'},
+      {id:'photo', title:'📷 ප්‍රතාග ඩයෝඩය (Photodiode)', body:'පසු නැඹුරුවේ ක්‍රියාත්මක වේ. ආලෝකය වැඩිවන විට සන්නායකතාව වැඩි වේ (ධාරාව වැඩි වේ). ආලෝක ප්‍රාරක්ෂක සහ සූර්ය පැනල වල භාවිතා වේ.'},
+      {id:'zenerd', title:'⚡ සෙනර් ඩයෝඩය', body:'පසු නැඹුරුවේ නියත බිඳවැටීමේ විභවයක් (V_Z) ඇති කිරීම සඳහා විශේෂයෙන් නිර්මාණය කර ඇත. පරිපථයේ නියත වෝල්ටියතාවක් පවත්වා ගැනීමට යොදාගනී.'}
+    ])}
+  </div>
+
+  <div class="tool-card">
+    <div class="tool-title">🔧 සෘජුකරණ ගණකය (Rectifier Calculator)</div>
+    <div class="seg-control" id="rectSeg">
+      <div class="seg-btn active" data-v="half" onclick="setRectType('half')">අර්ධ තරංග</div>
+      <div class="seg-btn" data-v="full" onclick="setRectType('full')">පූර්ණ තරංග</div>
+    </div>
+    <div class="field-row">
+      <label>ශිඛර වෝල්ටියතාව V_max (V)</label>
+      <input type="number" id="rectVmax" placeholder="උදා: 10" value="10">
+    </div>
+    <div class="field-row">
+      <label>ඩයෝඩ බාධක විභවය V_p (V) — විකල්ප</label>
+      <input type="number" id="rectVp" placeholder="උදා: 0.7" value="0.7">
+    </div>
+    <button class="btn-primary" onclick="calcRect()">ගණනය කරන්න</button>
+    <div class="result-box" id="rectResult" style="display:none"></div>
+  </div>
+
+  <h2 class="section-h"><span class="tag-dot"></span>ඉක්මන් ප්‍රශ්නාවලිය</h2>
+  <div id="quizhost-diode"></div>
+</div>`;
+
+/* ---------- VIEW 2: TRANSISTOR ---------- */
+mainContent.innerHTML += `
+<div class="view" id="view-transistor">
+  <div class="hero-card" style="--accent-color:#5b8cff">
+    <div class="pin-row"><div class="pin"></div><div class="pin"></div><div class="pin"></div></div>
+    <div class="hero-eyebrow">Section 02 · Transistors</div>
+    <div class="hero-title">ට්‍රාන්සිස්ටර් — BJT සහ FET</div>
+    <div class="hero-desc">ද්වීත්‍රැව සන්ධි ට්‍රාන්සිස්ටරය (BJT) හා ක්ෂේත්‍ර ආචරණ ට්‍රාන්සිස්ටරය (FET) හි ව්‍යුහය, බයස් කිරීම, සහ වර්ධක/ස්විචයක ලෙස භාවිතය.</div>
+  </div>
+
+  <h2 class="section-h"><span class="tag-dot"></span>npn BJT ට්‍රාන්සිස්ටරය</h2>
+  <div class="two-col-imgs">
+    <div class="card" style="margin:0"><div class="svg-wrap">${SVGS.npn}</div></div>
+    <div class="card" style="margin:0"><div class="svg-wrap">${SVGS.pnp}</div></div>
+  </div>
+  <div class="card">
+    <ul>
+      <li><b>Base (B)</b> — සැහැල්ලුවෙන් මාතෘකා කළ, ඉතා තුනී p කලාපය</li>
+      <li><b>Emitter (E)</b> — දැඩිව මාතෘකා කළ n කලාපය (වාහක එන්නත් කරයි)</li>
+      <li><b>Collector (C)</b> — n කලාපය, E ට වඩා විශාල, එකතු කරගැනීම සඳහා</li>
+    </ul>
+    <div class="formula-box">I_E = I_B + I_C</div>
+    <div class="note-box">නැඹුරු කිරීමට: BE සන්ධිය <b>පෙර නැඹුරු</b>, BC සන්ධිය <b>පසු නැඹුරු</b> විය යුතුය (Active mode).</div>
+  </div>
+
+  <h2 class="section-h"><span class="tag-dot"></span>ධාරා ලාභ (α, β, γ)</h2>
+  <div class="card">
+    <table class="compare-table">
+      <tr><th>ලාභය</th><th>සූත්‍රය</th><th>අර්ථය</th></tr>
+      <tr><td>α</td><td>I_C / I_E</td><td>1ට ආසන්න (< 1)</td></tr>
+      <tr><td>β</td><td>I_C / I_B</td><td>ඉතා විශාල (ධාරා වර්ධනය)</td></tr>
+      <tr><td>γ</td><td>I_E / I_B</td><td>β + 1</td></tr>
+    </table>
+  </div>
+
+  <h2 class="section-h"><span class="tag-dot"></span>ට්‍රාන්සිස්ටර වින්‍යාස</h2>
+  <div class="card">
+    <div class="chip-list">
+      <span class="chip">පොදු පාදම (Common Base)</span>
+      <span class="chip">පොදු විමෝචකය (Common Emitter)</span>
+      <span class="chip">පොදු සංග්‍රාහකය (Common Collector)</span>
+    </div>
+    <p style="margin-top:10px">A/L විෂය නිර්දේශයේ වඩාත් වැදගත් වන්නේ <b>පොදු විමෝචක (CE)</b> වින්‍යාසයයි — වර්ධක පරිපථ බහුතරයක් මෙයින් සකසා ඇත.</p>
+  </div>
+
+  <h2 class="section-h"><span class="tag-dot"></span>ලාක්ෂණික වක්‍ර</h2>
+  <div class="card">
+    <h3 class="sub-h" style="margin-top:0">ප්‍රතිදාන ලාක්ෂණිකය (Output Characteristics)</h3>
+    <div class="svg-wrap">${SVGS.outputChar}</div>
+    <div class="grid2" style="margin-top:8px">
+      <div class="card" style="margin:0; background:var(--bg-elev)"><b style="color:var(--text)">කපා හැරි කලාපය</b><p style="font-size:12px">I_B=0, I_C≈0. BE ඡන්ධිය පෙර නැඹුරු නොවේ.</p></div>
+      <div class="card" style="margin:0; background:var(--bg-elev)"><b style="color:var(--text)">ක්‍රියාකාරී කලාපය</b><p style="font-size:12px">I_C = βI_B. වර්ධකයක් ලෙස භාවිතා වේ.</p></div>
+      <div class="card" style="margin:0; background:var(--bg-elev)"><b style="color:var(--text)">සන්තෘප්ත කලාපය</b><p style="font-size:12px">I_C උපරිම අගයට ළඟා වී නියතව පවතී.</p></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 class="sub-h" style="margin-top:0">භාර රේඛාව හා නිවාත ලක්ෂ්‍යය (Q-point)</h3>
+    <div class="svg-wrap">${SVGS.loadline}</div>
+    <div class="formula-box">I_C = −(1/R_L)V_CE + V_CC/R_L</div>
+    <p>AC සංඥා වර්ධකයක උපරිම symmetrical swing එකක් සඳහා නිවාත ලක්ෂ්‍යය V_CE = V_CC/2 ට තෝරනු ලැබේ.</p>
+    <div class="chip-list">
+      <span class="chip">AC සංඥා වර්ධකය</span>
+      <span class="chip">ට්‍රාන්සිස්ටරය ස්විචයක් ලෙස</span>
+    </div>
+  </div>
+
+  <h2 class="section-h"><span class="tag-dot"></span>JFET — ක්ෂේත්‍ර ආචරණ ට්‍රාන්සිස්ටරය</h2>
+  <div class="card">
+    <div class="svg-wrap">${SVGS.jfet}</div>
+    <ul>
+      <li><b>Gate (G)</b> — වෝල්ටියතාව මගින් ධාරාව පාලනය කරයි</li>
+      <li><b>Drain (D)</b> — ධාරාව පිටවන පැත්ත</li>
+      <li><b>Source (S)</b> — ධාරාව ඇතුල් වන පැත්ත</li>
+    </ul>
+    <div class="note-box">GS සන්ධිය සැමවිටම <b>පසු නැඹුරු</b> හෝ බයස් නොවිය යුතුය — GS පසු නැඹුරු බැවින් I_G ≈ 0 වේ.</div>
+    <table class="compare-table" style="margin-top:10px">
+      <tr><th>කලාපය</th><th>විස්තරය</th></tr>
+      <tr><td>ඕමීය කලාපය</td><td>I_DS, V_DS සමඟ රේඛීයව වැඩි වේ</td></tr>
+      <tr><td>ක්‍රියාකාරී කලාපය</td><td>I_DS, V_GS මගින් පාලනය වේ (V_DS මත රඳා නොපවතී)</td></tr>
+      <tr><td>කපා හැරි කලාපය</td><td>V_GS ප්‍රමාණවත් සෘණ නම් I_DS ≈ 0</td></tr>
+    </table>
+  </div>
+
+  <div class="tool-card">
+    <div class="tool-title">🔧 BJT ක්‍රියාකාරී ලක්ෂ්‍ය ගණකය</div>
+    <div class="field-row">
+      <label>පාදක ධාරාව I_B (µA)</label>
+      <input type="number" id="bjtIB" placeholder="උදා: 20" value="20">
+    </div>
+    <div class="field-row">
+      <label>ධාරා ලාභය β</label>
+      <input type="number" id="bjtBeta" placeholder="උදා: 100" value="100">
+    </div>
+    <button class="btn-primary" onclick="calcBJT()">ගණනය කරන්න</button>
+    <div class="result-box" id="bjtResult" style="display:none"></div>
+  </div>
+
+  <h2 class="section-h"><span class="tag-dot"></span>ඉක්මන් ප්‍රශ්නාවලිය</h2>
+  <div id="quizhost-transistor"></div>
+</div>`;
+
+/* ---------- VIEW 3: OP-AMP ---------- */
+mainContent.innerHTML += `
+<div class="view" id="view-opamp">
+  <div class="hero-card" style="--accent-color:#f5b942">
+    <div class="pin-row"><div class="pin"></div><div class="pin"></div><div class="pin"></div></div>
+    <div class="hero-eyebrow">Section 03 · Op-Amps</div>
+    <div class="hero-title">කාරකාත්මක වර්ධක</div>
+    <div class="hero-desc">Ideal Op-Amp සංකල්පය, ස්වර්ණමය නීති, සහ inverting/non-inverting closed-loop වර්ධක සකස් කිරීම.</div>
+  </div>
+
+  <h2 class="section-h"><span class="tag-dot"></span>Op-Amp ග්‍රාහක සහ සංකේතය</h2>
+  <div class="card">
+    <div class="svg-wrap">${SVGS.opampSymbol}</div>
+    <ul>
+      <li><b>Inverting input (−)</b> — V₁</li>
+      <li><b>Non-inverting input (+)</b> — V₂</li>
+      <li><b>Power supply terminals</b> — ±V₃</li>
+      <li><b>Output</b> — V₀</li>
+    </ul>
+    <div class="formula-box">සැමවිටම: V₀ ≤ V₃ (සැපයුම් විභවයට වඩා වැඩි විය නොහැක)</div>
+  </div>
+
+  <h2 class="section-h"><span class="tag-dot"></span>Ideal vs Practical Op-Amp</h2>
+  <div class="card">
+    <table class="compare-table">
+      <tr><th>ලක්ෂණය</th><th>ප්‍රායෝගික</th><th>පරිපූර්ණ</th></tr>
+      <tr><td>වෝල්ටියතා ලාභය</td><td>10⁵ – 10¹⁰</td><td>∞</td></tr>
+      <tr><td>ප්‍රදාන ධාරාව</td><td>ඉතා කුඩා</td><td>0</td></tr>
+      <tr><td>ප්‍රදාන ප්‍රතිරෝධය</td><td>ඉතා විශාල</td><td>∞</td></tr>
+      <tr><td>ප්‍රතිදාන ප්‍රතිරෝධය</td><td>ඉතා කුඩා</td><td>0</td></tr>
+      <tr><td>ප්‍රතිදාන ධාරාව</td><td>අවශ්‍ය පරිදි ගලයි</td><td>—</td></tr>
+      <tr><td>කලාප පළල</td><td>විශාල</td><td>∞</td></tr>
+    </table>
+  </div>
+
+  <h2 class="section-h"><span class="tag-dot"></span>විවෘත පුඩු ලාභය සහ සන්තෘප්තිය</h2>
+  <div class="card">
+    <div class="formula-box">A = V₀ / ΔVin</div>
+    <p>ΔVin, −150µV සහ +150µV අතර පවතින විට පමණක් ප්‍රතිදානය රේඛීයව (linear) වෙනස් වේ — මෙය <b>ක්‍රියාකාරී කලාපය</b> ලෙස හැඳින්වේ. එයට වඩා විශාල ΔVin අගයන් සඳහා ප්‍රතිදානය සන්තෘප්ත වී ±V₃ ට ළඟා වේ.</p>
+  </div>
+
+  <h2 class="section-h"><span class="tag-dot"></span>ස්වර්ණමය නීති (Golden Rules)</h2>
+  <div class="card">
+    <div class="grid2">
+      <div class="card" style="margin:0; background:var(--bg-elev)">
+        <b style="color:var(--teal)">නීතිය 1</b>
+        <div class="formula-box" style="width:100%; box-sizing:border-box">ΔV = 0</div>
+        <p style="font-size:12px">negative feedback ඇති විට inputs දෙක අතර විභව අන්තරය ශුන්‍යයට සමාන (Virtual short).</p>
+      </div>
+      <div class="card" style="margin:0; background:var(--bg-elev)">
+        <b style="color:var(--teal)">නීතිය 2</b>
+        <div class="formula-box" style="width:100%; box-sizing:border-box">I_in = 0</div>
+        <p style="font-size:12px">ප්‍රදාන ප්‍රතිරෝධය අනන්තය බැවින් ප්‍රදාන ධාරාව ශුන්‍ය වේ.</p>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section-h"><span class="tag-dot"></span>Closed-Loop වර්ධක</h2>
+  <div class="card">
+    <h3 class="sub-h" style="margin-top:0">අපවර්තනය නොවන වර්ධකය (Non-Inverting)</h3>
+    <div class="formula-box">Vout / Vin = (Rf / R) + 1</div>
+    <p style="font-size:12.5px">V₂ ප්‍රතිපෝෂණය කර V₁ හුනන V₂ ට වෝල්ටියතා සංඛ්‍යාව ලබාදෙයි. ප්‍රතිදානය ප්‍රදානය සමගම එකම phase එකේ පවතී.</p>
+    <h3 class="sub-h">අපවර්තනය වන වර්ධකය (Inverting)</h3>
+    <div class="formula-box">Vout / Vin = −Rf / R</div>
+    <p style="font-size:12.5px">V₁ ප්‍රතිපෝෂණය කර V₂ භූගත කර V₁ ට වෝල්ටියතා සංඛ්‍යාව ලබාදෙයි. ප්‍රතිදානය 180° කලා වෙනසකින් යුක්තය.</p>
+  </div>
+
+  <div class="tool-card">
+    <div class="tool-title">🔧 Op-Amp ලාභ ගණකය</div>
+    <div class="seg-control" id="opampSeg">
+      <div class="seg-btn active" data-v="inv" onclick="setOpampType('inv')">Inverting</div>
+      <div class="seg-btn" data-v="noninv" onclick="setOpampType('noninv')">Non-Inverting</div>
+    </div>
+    <div class="field-row">
+      <label>ප්‍රතිපෝෂණ ප්‍රතිරෝධය R_f (kΩ)</label>
+      <input type="number" id="opRf" placeholder="උදා: 20" value="20">
+    </div>
+    <div class="field-row">
+      <label>ප්‍රදාන ප්‍රතිරෝධය R (kΩ)</label>
+      <input type="number" id="opR" placeholder="උදා: 4" value="4">
+    </div>
+    <div class="field-row">
+      <label>ප්‍රදාන වෝල්ටියතාව Vin (V) — විකල්ප</label>
+      <input type="number" id="opVin" placeholder="උදා: 1" value="1">
+    </div>
+    <button class="btn-primary" onclick="calcOpamp()">ගණනය කරන්න</button>
+    <div class="result-box" id="opampResult" style="display:none"></div>
+  </div>
+
+  <h2 class="section-h"><span class="tag-dot"></span>ඉක්මන් ප්‍රශ්නාවලිය</h2>
+  <div id="quizhost-opamp"></div>
+</div>`;
+
+/* ---------- VIEW 4: LOGIC GATES ---------- */
+mainContent.innerHTML += `
+<div class="view" id="view-logic">
+  <div class="hero-card" style="--accent-color:#b389f9">
+    <div class="pin-row"><div class="pin"></div><div class="pin"></div><div class="pin"></div></div>
+    <div class="hero-eyebrow">Section 04 · Logic Gates</div>
+    <div class="hero-title">තාර්කික ද්වාර හා Flip-Flops</div>
+    <div class="hero-desc">Analog/Digital සංඥා, මූලික තාර්කික ද්වාර, De Morgan ප්‍රමේය, සර්වලේඛ ද්වාර, සහ SR Flip-Flop මතක පරිපථ.</div>
+  </div>
+
+  <h2 class="section-h"><span class="tag-dot"></span>Analog vs Digital</h2>
+  <div class="card">
+    <div class="grid2">
+      <div class="card" style="margin:0; background:var(--bg-elev)"><b style="color:var(--blue)">ප්‍රතිසම (Analog)</b><p style="font-size:12.5px">කාලය සමග සන්තතිකව විචලනය වන විද්‍යුත් සංඥා (උදා: sine wave)</p></div>
+      <div class="card" style="margin:0; background:var(--bg-elev)"><b style="color:var(--teal)">සංඛ්‍යාංක (Digital)</b><p style="font-size:12.5px">නිශ්චිත අගයන් දෙකකින් (0 සහ 1) සමන්විත සංඥා</p></div>
+    </div>
+  </div>
+
+  <h2 class="section-h"><span class="tag-dot"></span>මූලික තාර්කික ද්වාර</h2>
+  <div class="card">
+    ${accordion([
+      {id:'not', title:'NOT ද්වාරය — F = Ā', body:`<div class="svg-wrap">${SVGS.gates.NOT}</div><table class="compare-table"><tr><th>A</th><th>F</th></tr><tr><td>0</td><td>1</td></tr><tr><td>1</td><td>0</td></tr></table>`},
+      {id:'or', title:'OR ද්වාරය — F = A+B', body:`<div class="svg-wrap">${SVGS.gates.OR}</div><table class="compare-table"><tr><th>A</th><th>B</th><th>F</th></tr><tr><td>0</td><td>0</td><td>0</td></tr><tr><td>0</td><td>1</td><td>1</td></tr><tr><td>1</td><td>0</td><td>1</td></tr><tr><td>1</td><td>1</td><td>1</td></tr></table>`},
+      {id:'and', title:'AND ද්වාරය — F = A·B', body:`<div class="svg-wrap">${SVGS.gates.AND}</div><table class="compare-table"><tr><th>A</th><th>B</th><th>F</th></tr><tr><td>0</td><td>0</td><td>0</td></tr><tr><td>0</td><td>1</td><td>0</td></tr><tr><td>1</td><td>0</td><td>0</td></tr><tr><td>1</td><td>1</td><td>1</td></tr></table>`},
+      {id:'nor', title:'NOR ද්වාරය — F = (A+B)̄', body:`<div class="svg-wrap">${SVGS.gates.NOR}</div><table class="compare-table"><tr><th>A</th><th>B</th><th>F</th></tr><tr><td>0</td><td>0</td><td>1</td></tr><tr><td>0</td><td>1</td><td>0</td></tr><tr><td>1</td><td>0</td><td>0</td></tr><tr><td>1</td><td>1</td><td>0</td></tr></table>`},
+      {id:'nand', title:'NAND ද්වාරය — F = (A·B)̄', body:`<div class="svg-wrap">${SVGS.gates.NAND}</div><table class="compare-table"><tr><th>A</th><th>B</th><th>F</th></tr><tr><td>0</td><td>0</td><td>1</td></tr><tr><td>0</td><td>1</td><td>1</td></tr><tr><td>1</td><td>0</td><td>1</td></tr><tr><td>1</td><td>1</td><td>0</td></tr></table>`},
+      {id:'xor', title:'Ex-OR ද්වාරය — F = A⊕B', body:`<div class="svg-wrap">${SVGS.gates.XOR}</div><table class="compare-table"><tr><th>A</th><th>B</th><th>F</th></tr><tr><td>0</td><td>0</td><td>0</td></tr><tr><td>0</td><td>1</td><td>1</td></tr><tr><td>1</td><td>0</td><td>1</td></tr><tr><td>1</td><td>1</td><td>0</td></tr></table>`},
+      {id:'xnor', title:'Ex-NOR ද්වාරය — F = (A⊕B)̄', body:`<div class="svg-wrap">${SVGS.gates.XNOR}</div><table class="compare-table"><tr><th>A</th><th>B</th><th>F</th></tr><tr><td>0</td><td>0</td><td>1</td></tr><tr><td>0</td><td>1</td><td>0</td></tr><tr><td>1</td><td>0</td><td>0</td></tr><tr><td>1</td><td>1</td><td>1</td></tr></table>`}
+    ])}
+  </div>
+
+  <h2 class="section-h"><span class="tag-dot"></span>De Morgan ප්‍රමේය සහ බූලීය සර්වසාමයන්</h2>
+  <div class="card">
+    <div class="formula-box">(A·B)̄ = Ā + B̄</div>
+    <div class="formula-box">(A+B)̄ = Ā · B̄</div>
+    <table class="compare-table" style="margin-top:10px">
+      <tr><th>සර්වසාමය</th><th></th></tr>
+      <tr><td>A·1 = A</td><td>A+1 = 1</td></tr>
+      <tr><td>A·0 = 0</td><td>A+0 = A</td></tr>
+      <tr><td>A·A = A</td><td>A+A = A</td></tr>
+      <tr><td>A·Ā = 0</td><td>A+Ā = 1</td></tr>
+      <tr><td>A·B = B·A</td><td>A+B = B+A</td></tr>
+      <tr><td>A·(B+C) = A·B + A·C</td><td>A·B+A·C = A·(B+C)</td></tr>
+    </table>
+  </div>
+
+  <h2 class="section-h"><span class="tag-dot"></span>සර්වලේඛ ද්වාර (Universal Gates)</h2>
+  <div class="card">
+    <p><b>NAND</b> සහ <b>NOR</b> ද්වාර "සර්වලේඛ ද්වාර" ලෙස හැඳින්වේ — ඕනෑම තාර්කික ද්වාරයක් මෙම ද්වාර දෙකෙන් ඕනෑම එකක් පමණක් භාවිතයෙන් නිර්මාණය කළ හැක.</p>
+    <div class="note-box">උදාහරණයක් ලෙස: NAND ද්වාරයක ප්‍රදාන දෙකම එකට සම්බන්ධ කිරීමෙන් NOT ද්වාරයක් ලබාගත හැක.</div>
+  </div>
+
+  <h2 class="section-h"><span class="tag-dot"></span>SR Flip-Flop (පිළිපොළ)</h2>
+  <div class="card">
+    <p>පිළිපොළ, පරිපථ මතකයක් ලෙස ක්‍රියා කරන අතර, ද්වාර මගින් සාදා ගත හැක. ප්‍රදාන 2ක් (S, R) සහ ප්‍රතිදාන 2ක් (Q, Q̄) ඇත.</p>
+    <table class="compare-table">
+      <tr><th>ආකාරය</th><th>S</th><th>R</th><th>ප්‍රතිඵලය</th></tr>
+      <tr><td rowspan="3">NOR-based</td><td>1</td><td>0</td><td>SET (Q=1)</td></tr>
+      <tr><td>0</td><td>1</td><td>RESET (Q=0)</td></tr>
+      <tr><td>1</td><td>1</td><td>තහනම් තත්වය</td></tr>
+    </table>
+    <div class="note-box">NAND-based SR latch එකක active-low ලක්ෂණ නිසා S=1,R=1 (NOR base) හෝ S̄=0,R̄=0 (NAND base) අවස්ථා තහනම් වේ.</div>
+  </div>
+
+  <div class="tool-card">
+    <div class="tool-title">🔧 තාර්කික ද්වාර ගණකය — සජීවී</div>
+    <div class="field-row">
+      <label>ද්වාරය තෝරන්න</label>
+      <select id="gateSelect" onchange="renderGateTool()">
+        <option value="NOT">NOT</option>
+        <option value="OR">OR</option>
+        <option value="AND">AND</option>
+        <option value="NOR">NOR</option>
+        <option value="NAND">NAND</option>
+        <option value="XOR">Ex-OR</option>
+        <option value="XNOR">Ex-NOR</option>
+      </select>
+    </div>
+    <div class="io-toggle-row" id="gateToggleRow"></div>
+    <div class="out-display" id="gateOutDisplay">
+      <div class="bit-label">F</div>
+      <div class="bit-val" id="gateOutVal">0</div>
+    </div>
+    <table class="mini-truth" id="gateTruthTable"></table>
+  </div>
+
+  <div class="tool-card">
+    <div class="tool-title">🔧 SR Flip-Flop අනුකරණය (NOR-based)</div>
+    <p style="font-size:12.5px; color:var(--text-dim); margin-bottom:10px">S සහ R බොත්තම් ස්පර්ශ කර Q හි මතක ක්‍රියාකාරිත්වය නිරීක්ෂණය කරන්න.</p>
+    <div class="io-toggle-row" id="srToggleRow"></div>
+    <div style="display:flex; gap:12px; justify-content:center; margin-top:12px">
+      <div class="out-display" style="width:76px;height:76px"><div class="bit-label">Q</div><div class="bit-val" id="srQVal">0</div></div>
+      <div class="out-display" style="width:76px;height:76px"><div class="bit-label">Q̄</div><div class="bit-val" id="srQbarVal">1</div></div>
+    </div>
+    <div id="srStateMsg" style="text-align:center; margin-top:10px; font-size:12.5px; color:var(--text-dim)"></div>
+  </div>
+
+  <h2 class="section-h"><span class="tag-dot"></span>ඉක්මන් ප්‍රශ්නාවලිය</h2>
+  <div id="quizhost-logic"></div>
+</div>`;
+
+/* =========================================================
+   CALCULATORS
+========================================================= */
+let rectType = 'half';
+function setRectType(t){
+  rectType = t;
+  document.querySelectorAll('#rectSeg .seg-btn').forEach(b=>b.classList.toggle('active', b.dataset.v===t));
+}
+function calcRect(){
+  const vmax = parseFloat(document.getElementById('rectVmax').value)||0;
+  const vp = parseFloat(document.getElementById('rectVp').value)||0;
+  const vOut = Math.max(vmax - vp, 0);
+  const vrms = rectType==='half' ? vmax/Math.PI : (2*vmax)/Math.PI;
+  const vavg = rectType==='half' ? vmax/Math.PI : (2*vmax)/Math.PI;
+  const box = document.getElementById('rectResult');
+  box.style.display='block';
+  box.innerHTML = `
+    <div class="result-row"><span class="rlabel">වර්ගය</span><span class="rval">${rectType==='half'?'අර්ධ තරංග':'පූර්ණ තරංග (Bridge)'}</span></div>
+    <div class="result-row"><span class="rlabel">ප්‍රායෝගික ශිඛර ප්‍රතිදානය (Vmax − Vp)</span><span class="rval">${vOut.toFixed(3)} V</span></div>
+    <div class="result-row"><span class="rlabel">V_rms</span><span class="rval">${vrms.toFixed(3)} V</span></div>
+    <div class="result-row"><span class="rlabel">සූත්‍රය</span><span class="rval" style="font-size:11.5px">${rectType==='half'?'Vmax/π':'2Vmax/π'}</span></div>
+  `;
+}
+
+function calcBJT(){
+  const ib = parseFloat(document.getElementById('bjtIB').value)||0; // µA
+  const beta = parseFloat(document.getElementById('bjtBeta').value)||0;
+  const icUA = beta*ib;      // µA
+  const icMA = icUA/1000;    // mA
+  const ibMA = ib/1000;
+  const ieMA = ibMA + icMA;
+  const alpha = ieMA>0 ? icMA/ieMA : 0;
+  const box = document.getElementById('bjtResult');
+  box.style.display='block';
+  box.innerHTML = `
+    <div class="result-row"><span class="rlabel">සංග්‍රාහක ධාරාව I_C</span><span class="rval">${icMA.toFixed(4)} mA</span></div>
+    <div class="result-row"><span class="rlabel">විමෝචක ධාරාව I_E</span><span class="rval">${ieMA.toFixed(4)} mA</span></div>
+    <div class="result-row"><span class="rlabel">ධාරා ලාභය α</span><span class="rval">${alpha.toFixed(4)}</span></div>
+    <div class="result-row"><span class="rlabel">ධාරා ලාභය β (ලබාදුන්)</span><span class="rval">${beta}</span></div>
+  `;
+}
+
+let opampType = 'inv';
+function setOpampType(t){
+  opampType = t;
+  document.querySelectorAll('#opampSeg .seg-btn').forEach(b=>b.classList.toggle('active', b.dataset.v===t));
+}
+function calcOpamp(){
+  const rf = parseFloat(document.getElementById('opRf').value)||0;
+  const r = parseFloat(document.getElementById('opR').value)||1;
+  const vin = parseFloat(document.getElementById('opVin').value)||0;
+  const gain = opampType==='inv' ? -(rf/r) : (rf/r)+1;
+  const vout = gain*vin;
+  const box = document.getElementById('opampResult');
+  box.style.display='block';
+  box.innerHTML = `
+    <div class="result-row"><span class="rlabel">වින්‍යාසය</span><span class="rval">${opampType==='inv'?'Inverting':'Non-Inverting'}</span></div>
+    <div class="result-row"><span class="rlabel">ලාභය (Gain)</span><span class="rval">${gain.toFixed(3)}</span></div>
+    <div class="result-row"><span class="rlabel">ප්‍රතිදාන වෝල්ටියතාව Vout</span><span class="rval">${vout.toFixed(3)} V</span></div>
+    <div class="result-row"><span class="rlabel">සූත්‍රය</span><span class="rval" style="font-size:11px">${opampType==='inv'?'−Rf/R':'(Rf/R)+1'}</span></div>
+  `;
+}
+
+/* =========================================================
+   LOGIC GATE TOOL
+========================================================= */
+const gateFns = {
+  NOT: (a)=> a?0:1,
+  OR: (a,b)=> (a||b)?1:0,
+  AND:(a,b)=> (a&&b)?1:0,
+  NOR:(a,b)=> (a||b)?0:1,
+  NAND:(a,b)=>(a&&b)?0:1,
+  XOR:(a,b)=> (a!==b)?1:0,
+  XNOR:(a,b)=>(a===b)?1:0
+};
+let gateInputs = {A:0,B:0};
+function renderGateTool(){
+  const gate = document.getElementById('gateSelect').value;
+  const isUnary = gate==='NOT';
+  const row = document.getElementById('gateToggleRow');
+  row.innerHTML = '';
+  ['A'].concat(isUnary?[]:['B']).forEach(k=>{
+    const div = document.createElement('div');
+    div.className = 'bit-toggle'+(gateInputs[k]?' on':'');
+    div.innerHTML = `<div class="bit-label">${k}</div><div class="bit-val">${gateInputs[k]}</div>`;
+    div.onclick = ()=>{ gateInputs[k] = gateInputs[k]?0:1; renderGateTool(); };
+    row.appendChild(div);
+  });
+  const out = gateFns[gate](gateInputs.A, gateInputs.B);
+  const outDisp = document.getElementById('gateOutDisplay');
+  outDisp.classList.toggle('on', !!out);
+  document.getElementById('gateOutVal').textContent = out;
+
+  // truth table
+  const tbl = document.getElementById('gateTruthTable');
+  let rowsHtml = '';
+  if(isUnary){
+    rowsHtml += `<tr><th>A</th><th>F</th></tr>`;
+    [0,1].forEach(a=>{
+      const f = gateFns[gate](a);
+      const cur = (a===gateInputs.A);
+      rowsHtml += `<tr class="${cur?'current-row':''}"><td>${a}</td><td>${f}</td></tr>`;
+    });
+  } else {
+    rowsHtml += `<tr><th>A</th><th>B</th><th>F</th></tr>`;
+    [0,1].forEach(a=>{
+      [0,1].forEach(b=>{
+        const f = gateFns[gate](a,b);
+        const cur = (a===gateInputs.A && b===gateInputs.B);
+        rowsHtml += `<tr class="${cur?'current-row':''}"><td>${a}</td><td>${b}</td><td>${f}</td></tr>`;
+      });
+    });
+  }
+  tbl.innerHTML = rowsHtml;
+}
+renderGateTool();
+
+/* SR FLIP-FLOP (NOR based latch, with memory) */
+let srState = {S:0, R:0, Q:0, Qbar:1};
+function renderSR(){
+  const row = document.getElementById('srToggleRow');
+  row.innerHTML = '';
+  ['S','R'].forEach(k=>{
+    const div = document.createElement('div');
+    div.className = 'bit-toggle'+(srState[k]?' on':'');
+    div.innerHTML = `<div class="bit-label">${k}</div><div class="bit-val">${srState[k]}</div>`;
+    div.onclick = ()=>{
+      srState[k] = srState[k]?0:1;
+      updateSRLogic();
+      renderSR();
+    };
+    row.appendChild(div);
+  });
+  document.getElementById('srQVal').textContent = srState.Q;
+  document.getElementById('srQbarVal').textContent = srState.Qbar;
+  let msg = '';
+  if(srState.S===1 && srState.R===0) msg = 'SET තත්වය — Q = 1';
+  else if(srState.S===0 && srState.R===1) msg = 'RESET තත්වය — Q = 0';
+  else if(srState.S===0 && srState.R===0) msg = 'රඳවා ගැනීමේ තත්වය (Hold) — පෙර අගය මතකයේ පවතී';
+  else msg = '⚠️ තහනම් තත්වය (Forbidden State) — S=R=1 වලංගු නොවේ';
+  document.getElementById('srStateMsg').textContent = msg;
+}
+function updateSRLogic(){
+  const {S,R} = srState;
+  if(S===1 && R===0){ srState.Q=1; srState.Qbar=0; }
+  else if(S===0 && R===1){ srState.Q=0; srState.Qbar=1; }
+  else if(S===0 && R===0){ /* hold previous */ }
+  else { srState.Q = srState.Q; srState.Qbar = srState.Qbar; } // forbidden - display kept, marked invalid
+}
+renderSR();
+
+/* =========================================================
+   QUIZ ENGINE
+========================================================= */
+function buildQuiz(sectionId){
+  const questions = QUIZ[sectionId];
+  const host = document.getElementById('quizhost-'+sectionId);
+  let idx = 0, score = 0;
+
+  function renderQ(){
+    if(idx >= questions.length){
+      host.innerHTML = `
+        <div class="quiz-card quiz-score">
+          <div style="font-size:13px;color:var(--text-dim)">ඔබගේ ලකුණු</div>
+          <div class="big-num">${score} / ${questions.length}</div>
+          <button class="quiz-restart" onclick="restartQuiz_${sectionId}()">නැවත උත්සාහ කරන්න</button>
+        </div>`;
+      return;
+    }
+    const q = questions[idx];
+    host.innerHTML = `
+      <div class="quiz-card">
+        <div class="quiz-progress">ප්‍රශ්නය ${idx+1} / ${questions.length}</div>
+        <div class="quiz-q">${q.q}</div>
+        <div id="optsWrap-${sectionId}"></div>
+        <div class="quiz-explain" id="explain-${sectionId}">${q.exp}</div>
+        <button class="quiz-nextbtn" id="nextbtn-${sectionId}" onclick="nextQuestion_${sectionId}()">${idx===questions.length-1? 'ප්‍රතිඵලය බලන්න →':'ඊළඟ ප්‍රශ්නය →'}</button>
+      </div>`;
+    const optsWrap = document.getElementById('optsWrap-'+sectionId);
+    q.opts.forEach((opt,i)=>{
+      const b = document.createElement('button');
+      b.className = 'quiz-opt';
+      b.textContent = opt;
+      b.onclick = ()=>{
+        const correct = i===q.ans;
+        if(correct) score++;
+        document.querySelectorAll('#optsWrap-'+sectionId+' .quiz-opt').forEach((el,j)=>{
+          el.classList.add('disabled');
+          if(j===q.ans) el.classList.add('correct');
+          else if(j===i) el.classList.add('wrong');
+        });
+        document.getElementById('explain-'+sectionId).classList.add('show');
+        document.getElementById('nextbtn-'+sectionId).classList.add('show');
+      };
+      optsWrap.appendChild(b);
+    });
+  }
+  window['nextQuestion_'+sectionId] = function(){ idx++; renderQ(); };
+  window['restartQuiz_'+sectionId] = function(){ idx=0; score=0; renderQ(); };
+  renderQ();
+}
+Object.keys(QUIZ).forEach(buildQuiz);
+</script>
+</body>
+</html>

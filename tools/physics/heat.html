@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>තාපය — A/L භෞතික විද්‍යාව | ස්වයං අධ්‍යයන මෙවලම</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+Sinhala:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0c11;
+    --surface:#12151d;
+    --surface-2:#191e2a;
+    --surface-3:#212739;
+    --border:#262c3d;
+    --ember:#ff6b35;
+    --ember-soft:rgba(255,107,53,0.14);
+    --ember-line:rgba(255,107,53,0.35);
+    --ice:#4fc3e8;
+    --ice-soft:rgba(79,195,232,0.14);
+    --ice-line:rgba(79,195,232,0.35);
+    --text:#eef1f6;
+    --muted:#8a91a6;
+    --muted-2:#5f6478;
+    --mono:'JetBrains Mono', monospace;
+    --display:'Space Grotesk','Noto Sans Sinhala',sans-serif;
+    --body:'Inter','Noto Sans Sinhala',sans-serif;
+    --si:'Noto Sans Sinhala',sans-serif;
+    --radius:14px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(255,107,53,0.10), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 0%, rgba(79,195,232,0.08), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--body), var(--si);
+    line-height:1.6;
+    min-height:100vh;
+    padding-bottom:60px;
+  }
+  ::selection{background:var(--ember-soft); color:#fff;}
+  ::-webkit-scrollbar{width:10px; height:10px;}
+  ::-webkit-scrollbar-track{background:var(--bg);}
+  ::-webkit-scrollbar-thumb{background:var(--surface-3); border-radius:10px;}
+  ::-webkit-scrollbar-thumb:hover{background:var(--muted-2);}
+
+  a{color:var(--ember);}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    max-width:1180px; margin:0 auto; padding:36px 24px 20px;
+    display:grid; grid-template-columns:1.3fr 1fr; gap:32px; align-items:center;
+  }
+  @media (max-width:860px){ .hero{grid-template-columns:1fr; padding-top:24px;} }
+  .eyebrow{
+    font-family:var(--mono); font-size:12px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--ember); display:flex; align-items:center; gap:8px; margin-bottom:14px;
+  }
+  .eyebrow::before{content:''; width:22px; height:1px; background:var(--ember);}
+  .hero h1{
+    font-family:var(--display); font-weight:700; font-size:clamp(38px,6vw,64px);
+    letter-spacing:-0.02em; line-height:1.02;
+    background:linear-gradient(120deg,#fff 10%, var(--ember) 60%, var(--ice) 110%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .hero p.sub{
+    margin-top:16px; color:var(--muted); font-size:16px; max-width:52ch;
+  }
+  .hero .meta-row{ display:flex; gap:10px; margin-top:22px; flex-wrap:wrap; }
+  .chip{
+    font-family:var(--mono); font-size:12px; padding:7px 12px; border-radius:20px;
+    border:1px solid var(--border); color:var(--muted); background:var(--surface);
+  }
+
+  /* thermometer widget */
+  .thermo-card{
+    background:linear-gradient(180deg, var(--surface), var(--surface-2));
+    border:1px solid var(--border); border-radius:var(--radius);
+    padding:22px 24px; display:flex; gap:22px; align-items:center;
+    box-shadow:0 20px 60px -30px rgba(0,0,0,0.6);
+  }
+  .thermo-visual{ flex-shrink:0; width:70px; }
+  .thermo-readouts{ flex:1; display:flex; flex-direction:column; gap:10px; }
+  .readout{ display:flex; justify-content:space-between; align-items:baseline; font-family:var(--mono); }
+  .readout .rlabel{ font-size:11px; color:var(--muted); letter-spacing:.08em; }
+  .readout .rval{ font-size:21px; font-weight:600; }
+  .readout .rval.ember{color:var(--ember);}
+  .readout .rval.ice{color:var(--ice);}
+  input[type=range]{
+    -webkit-appearance:none; width:100%; height:4px; border-radius:4px;
+    background:linear-gradient(90deg, var(--ice), var(--ember)); outline:none; margin-top:6px;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:16px; height:16px; border-radius:50%;
+    background:#fff; border:3px solid var(--ember); cursor:pointer;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:16px; height:16px; border-radius:50%; background:#fff; border:3px solid var(--ember); cursor:pointer;
+  }
+  .slider-cap{ font-size:11px; color:var(--muted-2); font-family:var(--mono); display:flex; justify-content:space-between; margin-top:4px;}
+
+  /* ---------- TABS ---------- */
+  .tabs-wrap{ position:sticky; top:0; z-index:50; background:rgba(10,12,17,0.88); backdrop-filter:blur(14px); border-bottom:1px solid var(--border); }
+  .tabs{
+    max-width:1180px; margin:0 auto; padding:12px 24px; display:flex; gap:8px; overflow-x:auto;
+    scrollbar-width:none;
+  }
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab-btn{
+    font-family:var(--si); font-size:14px; font-weight:500; color:var(--muted);
+    background:transparent; border:1px solid transparent; padding:9px 16px; border-radius:10px;
+    cursor:pointer; white-space:nowrap; transition:.15s ease; display:flex; align-items:center; gap:8px;
+  }
+  .tab-btn .num{ font-family:var(--mono); font-size:11px; color:var(--muted-2); }
+  .tab-btn:hover{ color:var(--text); background:var(--surface); }
+  .tab-btn.active{ color:#fff; background:var(--ember-soft); border-color:var(--ember-line); }
+  .tab-btn.active .num{ color:var(--ember); }
+
+  /* ---------- MAIN ---------- */
+  main{ max-width:1180px; margin:0 auto; padding:30px 24px 10px; }
+  .panel{ display:none; animation:fadeIn .35s ease; }
+  .panel.active{ display:block; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  .panel-head{ margin-bottom:22px; }
+  .panel-head h2{ font-family:var(--display); font-size:28px; font-weight:600; }
+  .panel-head p{ color:var(--muted); margin-top:6px; font-size:14.5px; max-width:70ch; }
+
+  /* accordion */
+  .accordion{ display:flex; flex-direction:column; gap:10px; }
+  .acc-item{
+    border:1px solid var(--border); border-radius:var(--radius); background:var(--surface); overflow:hidden;
+  }
+  .acc-head{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:16px 20px; cursor:pointer; user-select:none;
+  }
+  .acc-head:hover{ background:var(--surface-2); }
+  .acc-title{ display:flex; align-items:center; gap:12px; }
+  .acc-title .tag{
+    font-family:var(--mono); font-size:11px; color:var(--ember); background:var(--ember-soft);
+    border:1px solid var(--ember-line); padding:3px 8px; border-radius:6px; flex-shrink:0;
+  }
+  .acc-title h3{ font-family:var(--si); font-size:16px; font-weight:600; }
+  .acc-chevron{ color:var(--muted); transition:transform .25s ease; flex-shrink:0; }
+  .acc-item.open .acc-chevron{ transform:rotate(180deg); color:var(--ember); }
+  .acc-body{ max-height:0; overflow:hidden; transition:max-height .35s ease; }
+  .acc-item.open .acc-body{ max-height:3000px; }
+  .acc-inner{ padding:0 20px 20px; color:var(--muted); font-size:14.5px; }
+  .acc-inner p{ margin-bottom:10px; }
+  .acc-inner ul{ margin:8px 0 8px 20px; }
+  .acc-inner li{ margin-bottom:6px; }
+  .acc-inner strong{ color:var(--text); }
+
+  /* equation blocks */
+  .eq{
+    font-family:var(--mono); background:var(--surface-2); border:1px solid var(--border);
+    border-left:3px solid var(--ember); border-radius:8px; padding:12px 16px; margin:10px 0;
+    color:#fff; font-size:15.5px; overflow-x:auto; letter-spacing:0.01em;
+  }
+  .eq.ice-eq{ border-left-color:var(--ice); }
+  .eq-note{ font-family:var(--body); font-size:12.5px; color:var(--muted-2); margin-top:4px; }
+  sup, sub{ font-size:0.68em; }
+
+  .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:700px){ .grid-2{grid-template-columns:1fr;} }
+
+  .info-card{
+    border:1px solid var(--border); background:var(--surface-2); border-radius:10px; padding:14px 16px;
+  }
+  .info-card .k{ font-family:var(--mono); font-size:11px; color:var(--ice); letter-spacing:.06em; }
+  .info-card .v{ margin-top:4px; font-size:14px; color:var(--text); }
+
+  /* table */
+  table.svp{ width:100%; border-collapse:collapse; font-family:var(--mono); font-size:12.5px; margin-top:8px;}
+  table.svp caption{ text-align:left; font-family:var(--body); color:var(--muted); font-size:12.5px; margin-bottom:6px;}
+  table.svp th, table.svp td{ border:1px solid var(--border); padding:6px 8px; text-align:center; }
+  table.svp th{ background:var(--surface-3); color:var(--ice); font-weight:600; }
+  table.svp td{ color:var(--muted); }
+  .table-scroll{ overflow-x:auto; }
+
+  /* mini svg graph */
+  .graph-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:12px; }
+  @media (max-width:800px){ .graph-row{grid-template-columns:1fr;} }
+  .graph-card{ background:var(--surface-2); border:1px solid var(--border); border-radius:10px; padding:12px; text-align:center; }
+  .graph-card svg{ width:100%; height:auto; }
+  .graph-card .cap{ font-family:var(--mono); font-size:11px; color:var(--muted); margin-top:6px; }
+
+  /* calculators */
+  .calc-card{
+    border:1px solid var(--border); background:linear-gradient(180deg, var(--surface), var(--surface-2));
+    border-radius:var(--radius); padding:24px;
+  }
+  .calc-card + .calc-card{ margin-top:20px; }
+  .calc-title{ display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+  .calc-title h3{ font-family:var(--display); font-size:19px; }
+  .badge{ font-family:var(--mono); font-size:10.5px; padding:3px 9px; border-radius:20px; border:1px solid var(--ice-line); color:var(--ice); background:var(--ice-soft); }
+  .calc-desc{ color:var(--muted); font-size:13.5px; margin-bottom:18px; }
+  .field-row{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+  @media (max-width:600px){ .field-row{grid-template-columns:1fr;} }
+  .field label{ display:block; font-family:var(--mono); font-size:11.5px; color:var(--muted); margin-bottom:6px; }
+  .field input, .field select{
+    width:100%; background:var(--surface-3); border:1px solid var(--border); color:var(--text);
+    padding:10px 12px; border-radius:8px; font-family:var(--mono); font-size:14px; outline:none;
+  }
+  .field input:focus, .field select:focus{ border-color:var(--ember); }
+  .result-box{
+    margin-top:6px; background:var(--ember-soft); border:1px solid var(--ember-line); border-radius:10px;
+    padding:16px 18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;
+  }
+  .result-box .rb-label{ font-family:var(--mono); font-size:12px; color:var(--muted); }
+  .result-box .rb-value{ font-family:var(--display); font-size:26px; font-weight:700; color:var(--ember); }
+  .rh-meter{ height:10px; border-radius:6px; background:var(--surface-3); overflow:hidden; margin-top:12px; }
+  .rh-meter-fill{ height:100%; background:linear-gradient(90deg, var(--ice), var(--ember)); width:0%; transition:width .4s ease; }
+
+  .btn{
+    font-family:var(--si); font-size:13.5px; font-weight:600; background:var(--ember); color:#1a0d05;
+    border:none; padding:10px 18px; border-radius:8px; cursor:pointer; transition:.15s;
+  }
+  .btn:hover{ filter:brightness(1.1); transform:translateY(-1px); }
+  .btn.ghost{ background:transparent; border:1px solid var(--border); color:var(--muted); }
+  .btn.ghost:hover{ color:var(--text); border-color:var(--muted-2); }
+
+  canvas{ display:block; width:100%; background:#05070b; border-radius:10px; border:1px solid var(--border); }
+  .sim-layout{ display:grid; grid-template-columns:1fr 300px; gap:18px; margin-top:16px; }
+  @media (max-width:820px){ .sim-layout{grid-template-columns:1fr;} }
+  .sim-readout{ display:flex; flex-direction:column; gap:10px; }
+  .sim-law-tag{ font-family:var(--mono); font-size:12px; text-align:center; padding:8px; border-radius:8px; background:var(--surface-3); color:var(--ice); margin-top:10px;}
+
+  footer{ max-width:1180px; margin:40px auto 0; padding:20px 24px; border-top:1px solid var(--border); color:var(--muted-2); font-size:12.5px; text-align:center; }
+
+  .practical-meta{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;}
+  .pm-chip{ font-family:var(--mono); font-size:11px; color:var(--muted); background:var(--surface-3); padding:4px 10px; border-radius:6px; }
+</style>
+</head>
+<body>
+
+<!-- ================= HERO ================= -->
+<div class="hero">
+  <div>
+    <div class="eyebrow">A/L භෞතික විද්‍යාව • ඒකකය 04</div>
+    <h1>තාපය</h1>
+    <p class="sub">තාපමිතිය සිට තාප සම්ප්‍රේෂණය දක්වා — සම්පූර්ණ විෂය නිර්දේශය එක් තැනකින්, සූත්‍ර, න්‍යාය, ප්‍රස්ථාර සහ ප්‍රායෝගික පරීක්ෂණ සමඟින්.</p>
+    <div class="meta-row">
+      <span class="chip">θ → සෙල්සියස්</span>
+      <span class="chip">T → කෙල්වින්</span>
+      <span class="chip">7 කොටස්</span>
+      <span class="chip">අන්තර්ක්‍රියාකාරී මෙවලම් 2ක්</span>
+    </div>
+  </div>
+
+  <div class="thermo-card">
+    <div class="thermo-visual">
+      <svg viewBox="0 0 70 220" width="70" height="220">
+        <rect x="27" y="10" width="16" height="160" rx="8" fill="#191e2a" stroke="#262c3d" stroke-width="1.5"/>
+        <circle cx="35" cy="190" r="20" fill="#191e2a" stroke="#262c3d" stroke-width="1.5"/>
+        <rect id="thermoFill" x="30" y="150" width="10" height="20" rx="5" fill="url(#tGrad)"/>
+        <circle cx="35" cy="190" r="14" fill="url(#tGradBulb)"/>
+        <defs>
+          <linearGradient id="tGrad" x1="0" y1="1" x2="0" y2="0">
+            <stop offset="0%" stop-color="#ff6b35"/>
+            <stop offset="100%" stop-color="#4fc3e8"/>
+          </linearGradient>
+          <radialGradient id="tGradBulb">
+            <stop offset="0%" stop-color="#ff6b35"/>
+            <stop offset="100%" stop-color="#e8501a"/>
+          </radialGradient>
+        </defs>
+        <g stroke="#5f6478" stroke-width="1">
+          <line x1="43" y1="20" x2="48" y2="20"/><line x1="43" y1="55" x2="48" y2="55"/>
+          <line x1="43" y1="90" x2="48" y2="90"/><line x1="43" y1="125" x2="48" y2="125"/>
+          <line x1="43" y1="160" x2="48" y2="160"/>
+        </g>
+      </svg>
+    </div>
+    <div class="thermo-readouts">
+      <div class="readout"><span class="rlabel">CELSIUS θ</span><span class="rval ember" id="valC">25.0 °C</span></div>
+      <div class="readout"><span class="rlabel">KELVIN T = θ + 273.15</span><span class="rval" id="valK">298.15 K</span></div>
+      <div class="readout"><span class="rlabel">FAHRENHEIT</span><span class="rval ice" id="valF">77.0 °F</span></div>
+      <input type="range" id="tempSlider" min="-50" max="150" value="25" step="0.5">
+      <div class="slider-cap"><span>−50 °C</span><span>ස්ලයිඩරය ඇද උෂ්ණත්වය වෙනස් කරන්න</span><span>150 °C</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= TABS ================= -->
+<div class="tabs-wrap">
+  <div class="tabs" id="tabBar">
+    <button class="tab-btn active" data-tab="t1"><span class="num">01</span> තාපමිතිය සහ ප්‍රසාරණය</button>
+    <button class="tab-btn" data-tab="t2"><span class="num">02</span> තාප ප්‍රමාණය සහ අවස්ථා විපර්යාස</button>
+    <button class="tab-btn" data-tab="t3"><span class="num">03</span> පරිපූර්ණ වායු නියම</button>
+    <button class="tab-btn" data-tab="t4"><span class="num">04</span> ආර්ද්‍රතාවය</button>
+    <button class="tab-btn" data-tab="t5"><span class="num">05</span> තාපය සම්ප්‍රේෂණය</button>
+    <button class="tab-btn" data-tab="t6"><span class="num">06</span> ප්‍රායෝගික පරීක්ෂණ</button>
+    <button class="tab-btn" data-tab="t7"><span class="num">07</span> අන්තර්ක්‍රියාකාරී මෙවලම්</button>
+  </div>
+</div>
+
+<main>
+
+<!-- ============ TAB 1 ============ -->
+<section class="panel active" id="t1">
+  <div class="panel-head">
+    <h2>තාපමිතිය සහ ද්‍රව්‍යවල තාප ප්‍රසාරණය</h2>
+    <p>උෂ්ණත්වය මැනීමේ මූලික සිද්ධාන්තයේ සිට ඝන හා ද්‍රව ප්‍රසාරණය දක්වා.</p>
+  </div>
+  <div class="accordion">
+
+    <div class="acc-item open">
+      <div class="acc-head"><div class="acc-title"><span class="tag">1.1</span><h3>තාපමිතික සමීකරණය</h3></div><span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <p>තාපමිතික ගුණයක් (X) භාවිතා කර, එහි අගය <strong>X₀</strong> (ශුද්ධ අයිස් ලක්ෂ්‍යයේදී) සහ <strong>X₁₀₀</strong> (වාෂ්ප ලක්ෂ්‍යයේදී) දන්නා විට, ඕනෑම උෂ්ණත්වයක් θ ගණනය කළ හැක.</p>
+        <div class="eq">θ &nbsp;=&nbsp; [ (X<sub>θ</sub> − X₀) / (X₁₀₀ − X₀) ] × 100 %</div>
+        <p class="eq-note">X = ප්‍රතිරෝධය, පීඩනය, පරිමාව, e.m.f. වැනි උෂ්ණත්වය සමඟ රේඛීයව වෙනස්වන ඕනෑම භෞතික ගුණයක් විය හැක.</p>
+        <p>නිරපේක්ෂ (කෙල්වින්) පරිමාණයට පරිවර්තනය:</p>
+        <div class="eq ice-eq">T (K) &nbsp;=&nbsp; θ (°C) + 273.15</div>
+        <p class="eq-note">ඉහත හෙඩරයේ ඇති ස්ලයිඩරය භාවිතයෙන් මෙම සම්බන්ධතාවය සජීවීව නිරීක්ෂණය කරන්න.</p>
+      </div></div>
+    </div>
+
+    <div class="acc-item">
+      <div class="acc-head"><div class="acc-title"><span class="tag">1.2</span><h3>ඝන ද්‍රව්‍යවල තාප ප්‍රසාරණය</h3></div><span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <p>උෂ්ණත්වය θ කින් වැඩිවීමේදී ඝන ද්‍රව්‍යයක අවකාශීය මානයන් තුනම ප්‍රසාරණය වේ:</p>
+        <div class="grid-2">
+          <div class="info-card">
+            <div class="k">රේඛීය ප්‍රසාරණය</div>
+            <div class="eq" style="margin:8px 0 4px;">L<sub>θ</sub> = L₀(1 + αθ)</div>
+            <div class="eq" style="margin:0;">α = ΔL / (L₀Δθ)</div>
+          </div>
+          <div class="info-card">
+            <div class="k">වර්ගඵල ප්‍රසාරණය</div>
+            <div class="eq" style="margin:8px 0 4px;">A<sub>θ</sub> = A₀(1 + βθ)</div>
+            <div class="eq" style="margin:0;">β ≈ 2α</div>
+          </div>
+        </div>
+        <div class="info-card" style="margin-top:12px;">
+          <div class="k">පරිමා ප්‍රසාරණය</div>
+          <div class="eq" style="margin:8px 0 4px;">V<sub>θ</sub> = V₀(1 + γθ)</div>
+          <div class="eq" style="margin:0;">γ ≈ 3α</div>
+        </div>
+        <p style="margin-top:12px;">α (රේඛීය ප්‍රසාරණතාව), β (වර්ගඵල ප්‍රසාරණතාව), γ (පරිමා ප්‍රසාරණතාව) යනු එක් ද්‍රව්‍යයකට අනන්‍ය නියතයන් වන අතර, β ≈ 2α සහ γ ≈ 3α යන සම්බන්ධතා අයිසොට්‍රොපික (සමගුණික) ද්‍රව්‍ය සඳහා පමණක් වලංගු වේ.</p>
+      </div></div>
+    </div>
+
+    <div class="acc-item">
+      <div class="acc-head"><div class="acc-title"><span class="tag">1.3</span><h3>ද්‍රවවල ප්‍රසාරණය — දෘශ්‍ය හා සත්‍ය ප්‍රසාරණතාව</h3></div><span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <p>ද්‍රවයක් වීදුරු කූඩුවක තබා රත් කරන විට, කූඩුවත් ප්‍රසාරණය වන බැවින්, පෙනෙන පරිමා වෙනස (දෘශ්‍ය ප්‍රසාරණය) ද්‍රවයේ සත්‍ය පරිමා වෙනසට වඩා අඩුය.</p>
+        <div class="eq">γ<sub>r</sub> &nbsp;=&nbsp; γ<sub>a</sub> + γ<sub>g</sub></div>
+        <ul>
+          <li><strong>γ<sub>r</sub></strong> — ද්‍රවයේ සත්‍ය පරිමා ප්‍රසාරණතාව (Real cubic expansivity)</li>
+          <li><strong>γ<sub>a</sub></strong> — දෘශ්‍ය පරිමා ප්‍රසාරණතාව (Apparent — කූඩුව සමඟ සාපේක්ෂව නිරීක්ෂණය වන අගය)</li>
+          <li><strong>γ<sub>g</sub></strong> — වීදුරු කූඩුවේ පරිමා ප්‍රසාරණතාව (γ<sub>g</sub> ≈ 3α<sub>glass</sub>)</li>
+        </ul>
+        <p class="eq-note">"weight thermometer" ක්‍රමයේදී, γ<sub>a</sub> ලබාගැනීම සඳහා: ස්කන්ධ අලාභය භාවිතා කර γ<sub>a</sub> = (m₀ − m<sub>θ</sub>) / (m₀ θ) ආසන්න වශයෙන් ගණනය කළ හැක.</p>
+      </div></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ TAB 2 ============ -->
+<section class="panel" id="t2">
+  <div class="panel-head">
+    <h2>තාප ප්‍රමාණය, තිත්ත තාපය සහ අවස්ථා විපර්යාස</h2>
+    <p>විශිෂ්ට තාප ධාරිතාව, ගුප්ත තාපය සහ තාපමිතික මූලධර්මය.</p>
+  </div>
+  <div class="accordion">
+
+    <div class="acc-item open">
+      <div class="acc-head"><div class="acc-title"><span class="tag">2.1</span><h3>තාප ප්‍රමාණය (Heat Capacity)</h3></div><span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <p>ද්‍රව්‍යයක උෂ්ණත්වය Δθ කින් වෙනස් කිරීමට අවශ්‍ය තාප ප්‍රමාණය:</p>
+        <div class="grid-2">
+          <div class="info-card"><div class="k">විශිෂ්ට තාප ධාරිතාව භාවිතයෙන්</div><div class="eq">Q = mcΔθ</div></div>
+          <div class="info-card"><div class="k">තාප ධාරිතාව භාවිතයෙන්</div><div class="eq">Q = CΔθ</div></div>
+        </div>
+        <p style="margin-top:12px;"><strong>c</strong> = විශිෂ්ට තාප ධාරිතාව (kg⁻¹ K⁻¹ ඒකකයෙන් — 1 kg ස්කන්ධයක උෂ්ණත්වය 1 K කින් වැඩිකිරීමට අවශ්‍ය තාපය). <strong>C</strong> = තාප ධාරිතාව (m × c) — වස්තුවේ මුළු ස්කන්ධයටම අදාළ අගය.</p>
+      </div></div>
+    </div>
+
+    <div class="acc-item">
+      <div class="acc-head"><div class="acc-title"><span class="tag">2.2</span><h3>අවස්ථා විපර්යාසය සහ ගුප්ත තාපය</h3></div><span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <p>ද්‍රව්‍යයක අවස්ථාව (ඝන→ද්‍රව→වායු) වෙනස්වන අවස්ථාවේදී උෂ්ණත්වය නියතව පවතී — සම්පූර්ණ තාපයම අණු අතර බන්ධන බිඳීමට/සෑදීමට යොදාගැනේ.</p>
+        <div class="eq">Q = mL</div>
+        <p class="eq-note">L = විශිෂ්ට ගුප්ත තාපය (specific latent heat) — විලයනය (fusion) සඳහා L<sub>f</sub>, වාෂ්පීකරණය (vaporisation) සඳහා L<sub>v</sub>.</p>
+        <ul>
+          <li><strong>විශිෂ්ට විලයන ගුප්ත තාපය</strong> — 1 kg ඝන ද්‍රව්‍යයක් නියත උෂ්ණත්වයේදී එම ස්කන්ධයේම ද්‍රවයක් බවට හැරවීමට අවශ්‍ය තාපය.</li>
+          <li><strong>විශිෂ්ට වාෂ්පීකරණ ගුප්ත තාපය</strong> — 1 kg ද්‍රවයක් නියත උෂ්ණත්වයේදී එම ස්කන්ධයේම වාෂ්පයක් බවට හැරවීමට අවශ්‍ය තාපය.</li>
+        </ul>
+      </div></div>
+    </div>
+
+    <div class="acc-item">
+      <div class="acc-head"><div class="acc-title"><span class="tag">2.3</span><h3>තාපමිතික මූලධර්මය</h3></div><span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <p>පරිවරණය කළ පද්ධතියක් තුළ (energy exchange පිටතට සිදු නොවන), උණුසුම් වස්තුවකින් පිටකෙරෙන තාපය, සිසිල් වස්තුවකින් අවශෝෂණය කරන තාපයට සමාන වේ:</p>
+        <div class="eq ice-eq">පිටකෙරෙන තාපය &nbsp;=&nbsp; අවශෝෂණය කරන තාපය</div>
+        <p style="margin-top:10px;"><strong>උදාහරණයක්:</strong> කැලරිමීටරයක් තුළ ජලයට උණුසුම් ලෝහ කැබැල්ලක් දමන විට —</p>
+        <div class="eq">m<sub>ලෝහ</sub>c<sub>ලෝහ</sub>(θ<sub>1</sub> − θ<sub>c</sub>) &nbsp;=&nbsp; (m<sub>ජලය</sub>c<sub>ජලය</sub> + C<sub>කැලරිමීටරය</sub>)(θ<sub>c</sub> − θ<sub>2</sub>)</div>
+        <p class="eq-note">θ₁ = ලෝහයේ මුල් උෂ්ණත්වය, θ₂ = ජලයේ මුල් උෂ්ණත්වය, θ<sub>c</sub> = අවසාන (සමතුලිත) උෂ්ණත්වය.</p>
+      </div></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ TAB 3 ============ -->
+<section class="panel" id="t3">
+  <div class="panel-head">
+    <h2>පරිපූර්ණ වායු නියම සහ චාලක වාදය</h2>
+    <p>බොයිල්, චාල්ස් සහ පීඩන නියමයන් සිට වායුවක චාලක අණුක ආකෘතිය දක්වා.</p>
+  </div>
+  <div class="accordion">
+
+    <div class="acc-item open">
+      <div class="acc-head"><div class="acc-title"><span class="tag">3.1</span><h3>මූලික වායු නියම (නියත ස්කන්ධයක් සඳහා)</h3></div><span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <div class="grid-2">
+          <div class="info-card"><div class="k">බොයිල් නියමය (T නියතයි)</div><div class="eq">PV = K</div></div>
+          <div class="info-card"><div class="k">චාල්ස් නියමය (P නියතයි)</div><div class="eq">V / T = K</div></div>
+        </div>
+        <div class="info-card" style="margin-top:12px;"><div class="k">පීඩන නියමය (V නියතයි)</div><div class="eq">P / T = K</div></div>
+        <div class="graph-row">
+          <div class="graph-card">
+            <svg viewBox="0 0 200 140"><polyline points="20,20 30,35 45,55 70,80 110,105 160,120" fill="none" stroke="#ff6b35" stroke-width="2.5"/><line x1="20" y1="120" x2="20" y2="10" stroke="#5f6478"/><line x1="20" y1="120" x2="190" y2="120" stroke="#5f6478"/><text x="95" y="135" fill="#8a91a6" font-size="10">V</text><text x="5" y="65" fill="#8a91a6" font-size="10">P</text></svg>
+            <div class="cap">P–V ප්‍රස්ථාරය (හයිපර්බෝලා)</div>
+          </div>
+          <div class="graph-card">
+            <svg viewBox="0 0 200 140"><line x1="20" y1="120" x2="180" y2="20" stroke="#4fc3e8" stroke-width="2.5"/><line x1="20" y1="120" x2="20" y2="10" stroke="#5f6478"/><line x1="20" y1="120" x2="190" y2="120" stroke="#5f6478"/><text x="95" y="135" fill="#8a91a6" font-size="10">T (K)</text><text x="5" y="65" fill="#8a91a6" font-size="10">V</text></svg>
+            <div class="cap">V–T ප්‍රස්ථාරය (මුල් ලක්ෂ්‍යය හරහා)</div>
+          </div>
+          <div class="graph-card">
+            <svg viewBox="0 0 200 140"><line x1="20" y1="120" x2="180" y2="20" stroke="#ff6b35" stroke-width="2.5"/><line x1="20" y1="120" x2="20" y2="10" stroke="#5f6478"/><line x1="20" y1="120" x2="190" y2="120" stroke="#5f6478"/><text x="95" y="135" fill="#8a91a6" font-size="10">T (K)</text><text x="5" y="65" fill="#8a91a6" font-size="10">P</text></svg>
+            <div class="cap">P–T ප්‍රස්ථාරය (මුල් ලක්ෂ්‍යය හරහා)</div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="acc-item">
+      <div class="acc-head"><div class="acc-title"><span class="tag">3.2</span><h3>පරිපූර්ණ වායු සමීකරණය</h3></div><span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <div class="eq">PV = nRT = NkT</div>
+        <ul>
+          <li><strong>n</strong> — වායුවේ මවුල ගණන</li>
+          <li><strong>R</strong> — සාර්වත්‍රික වායු නියතය (≈ 8.31 J mol⁻¹ K⁻¹)</li>
+          <li><strong>N</strong> — වායු අණු ගණන</li>
+          <li><strong>k</strong> — බෝල්ට්ස්මාන් නියතය (k = R / N<sub>A</sub> ≈ 1.38 × 10⁻²³ J K⁻¹)</li>
+        </ul>
+        <p class="eq-note">මෙය පරිපූර්ණ වායුවක්‌ සඳහා පමණි — අඩු පීඩනවලදී සහ ඉහළ උෂ්ණත්වවලදී සැබෑ වායු, පරිපූර්ණ වායු චර්යාවට ආසන්න වේ.</p>
+      </div></div>
+    </div>
+
+    <div class="acc-item">
+      <div class="acc-head"><div class="acc-title"><span class="tag">3.3</span><h3>වායුවල චාලක වාදය (Kinetic Theory)</h3></div><span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <p>වායුවක් සෑදී ඇත්තේ අඛණ්ඩව අහඹු ලෙස චලනය වන අණු විශාල ගණනකින් වන අතර, කන්ටේනර් බිත්තියේ ඇති වන පීඩනය, අණු බිත්තියට ගැටීමෙන් ඇතිවේ:</p>
+        <div class="eq">P &nbsp;=&nbsp; ⅓ ρ (c<sub>rms</sub>)² &nbsp;=&nbsp; ⅓ (Nm / V) (c<sub>rms</sub>)²</div>
+        <div class="grid-2" style="margin-top:12px;">
+          <div class="info-card"><div class="k">එක් අණුවක මධ්‍යන්‍ය චාලක ශක්තිය</div><div class="eq">E = ³⁄₂ kT</div></div>
+          <div class="info-card"><div class="k">මවුලයක මුළු චාලක ශක්තිය</div><div class="eq">E = ³⁄₂ RT</div></div>
+        </div>
+        <p style="margin-top:12px;">මූල මධ්‍යන්‍ය වර්ග ප්‍රවේගය (r.m.s. velocity):</p>
+        <div class="eq ice-eq">c<sub>rms</sub> &nbsp;=&nbsp; √(3kT / m) &nbsp;=&nbsp; √(3RT / M) &nbsp;=&nbsp; √(3P / ρ)</div>
+        <p class="eq-note">m = එක් අණුවක ස්කන්ධය, M = මවුලික ස්කන්ධය, ρ = ඝනත්වය. නිරීක්ෂණය: c<sub>rms</sub> ∝ √T — එනම් උෂ්ණත්වය වැඩිවන විට අණු වේගවත්ව චලනය වේ.</p>
+      </div></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ TAB 4 ============ -->
+<section class="panel" id="t4">
+  <div class="panel-head">
+    <h2>ආර්ද්‍රතාවය සහ ද්‍රවීකරණය</h2>
+    <p>වායුගෝලීය ජල වාෂ්ප ප්‍රමාණය ප්‍රකාශ කිරීමේ ක්‍රම.</p>
+  </div>
+  <div class="accordion">
+
+    <div class="acc-item open">
+      <div class="acc-head"><div class="acc-title"><span class="tag">4.1</span><h3>සාපේක්ෂ ආර්ද්‍රතාවය (R.H.)</h3></div><span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <div class="eq">R.H. &nbsp;=&nbsp; ( දී ඇති උෂ්ණත්වයේ වාතයේ ඇති ජල වාෂ්ප ස්කන්ධය / එම උෂ්ණත්වයේදීම වාතය සංතෘප්ත කිරීමට අවශ්‍ය ජල වාෂ්ප ස්කන්ධය ) × 100 %</div>
+        <p style="margin:10px 0;">පීඩන ඇසුරෙන් (බහුලව භාවිත වන ආකාරය):</p>
+        <div class="eq ice-eq">R.H. &nbsp;=&nbsp; (f / F) × 100 %</div>
+        <p class="eq-note">f = වර්තමානයේ පවතින ජල වාෂ්ප අර්ධ පීඩනය. F = එම උෂ්ණත්වයේදී සංතෘප්ත ජල වාෂ්ප පීඩනය (S.V.P.).</p>
+        <p style="margin-top:10px;">ද්‍රවීකරණ (dew point) උෂ්ණත්වය දැන ගත් විට:</p>
+        <div class="eq">R.H. &nbsp;=&nbsp; ( ද්‍රවීකරණ උෂ්ණත්වයේ S.V.P. / පවතින උෂ්ණත්වයේ S.V.P. ) × 100 %</div>
+        <p class="eq-note">ද්‍රවීකරණ ලක්ෂ්‍යය (dew point) යනු, පවතින ජල වාෂ්ප ප්‍රමාණයම වායුව සංතෘප්ත කිරීමට ප්‍රමාණවත් වන උෂ්ණත්වයයි — එනම් f (පවතින පීඩනය) = එම උෂ්ණත්වයේ S.V.P.</p>
+      </div></div>
+    </div>
+
+    <div class="acc-item">
+      <div class="acc-head"><div class="acc-title"><span class="tag">4.2</span><h3>සංතෘප්ත ජල වාෂ්ප පීඩන වගුව (S.V.P.)</h3></div><span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <p>0 °C සිට 40 °C දක්වා ජලයේ ආසන්න S.V.P. අගය (mmHg) — 7 වන කොටසේ R.H. Calculator එකෙන් මෙම වගුවම ස්වයංක්‍රීයව භාවිතා වේ.</p>
+        <div class="table-scroll">
+        <table class="svp" id="svpPreview">
+          <caption>θ (°C) → S.V.P (mmHg) — සම්පූර්ණ වගුව Calculator එකේදී යොදාගැනේ</caption>
+          <thead><tr id="svpHeadRow"></tr></thead>
+          <tbody><tr id="svpBodyRow"></tr></tbody>
+        </table>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="acc-item">
+      <div class="acc-head"><div class="acc-title"><span class="tag">4.3</span><h3>ද්‍රවීකරණය සහ පිනි ලක්ෂ්‍යය</h3></div><span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <p>වායුවක් සිසිල් කරන විට, එහි උෂ්ණත්වය ද්‍රවීකරණ ලක්ෂ්‍යයට ළඟාවන විට, ජල වාෂ්ප ඝනීභවනය වී පිනි (dew) ලෙස පිහිටයි. සීතල දිනවල හිම/පිනි වැටීම මෙයට උදාහරණයකි.</p>
+        <p>සාපේක්ෂ ආර්ද්‍රතාවය 100% වන විට වායුව සම්පූර්ණයෙන්ම සංතෘප්ත වේ — එවිට පවතින උෂ්ණත්වයම ද්‍රවීකරණ ලක්ෂ්‍යයයි.</p>
+      </div></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ TAB 5 ============ -->
+<section class="panel" id="t5">
+  <div class="panel-head">
+    <h2>තාපය සම්ප්‍රේෂණය (Conduction)</h2>
+    <p>ස්ථාවර අවස්ථා තාප ප්‍රවාහය සහ තාප ප්‍රතිරෝධය.</p>
+  </div>
+  <div class="accordion">
+
+    <div class="acc-item open">
+      <div class="acc-head"><div class="acc-title"><span class="tag">5.1</span><h3>තාප සන්නායකතා සීඝ්‍රතාවය</h3></div><span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <p>ස්ථාවර අවස්ථාවක (steady state) දී, ඝනකම d සහ හරස්කඩ වර්ගඵලය A වන ද්‍රව්‍ය තට්ටුවක් හරහා ගමන් කරන තාප ධාරාව:</p>
+        <div class="eq">Q / t &nbsp;=&nbsp; k A (θ₁ − θ₂) / d</div>
+        <p class="eq-note">k = ද්‍රව්‍යයේ තාප සන්නායකතාව (W m⁻¹ K⁻¹). θ₁, θ₂ = තට්ටුවේ දෙපස උෂ්ණත්ව (θ₁ > θ₂).</p>
+      </div></div>
+    </div>
+
+    <div class="acc-item">
+      <div class="acc-head"><div class="acc-title"><span class="tag">5.2</span><h3>තාප ප්‍රතිරෝධය (Thermal Resistance)</h3></div><span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <p>විද්‍යුත් පරිපථවලට සමානව, තාප ප්‍රවාහයද "තාප ප්‍රතිරෝධයක්" හරහා ගමන් කරන ධාරාවක් ලෙස සැලකිය හැක:</p>
+        <div class="eq">R<sub>th</sub> &nbsp;=&nbsp; d / (kA) &nbsp;&nbsp;⟹&nbsp;&nbsp; I<sub>th</sub> &nbsp;=&nbsp; Δθ / R<sub>th</sub></div>
+        <p class="eq-note">Δθ = "තාප විභව අන්තරය" (θ₁−θ₂) ට සමාන කාර්යභාරයක් ඉටු කරයි; I<sub>th</sub> = තාප ධාරාව (Q/t)</p>
+        <p style="margin-top:12px;"><strong>ශ්‍රේණි සම්බන්ධතාවය (Series):</strong> ස්ථර දෙකක් (ප්‍රතිරෝධ R₁, R₂) ශ්‍රේණියෙන් සම්බන්ධ කළ විට, මුළු ප්‍රතිරෝධය R = R₁ + R₂. ස්ථාවර අවස්ථාවේදී දෙපරිද්දෙන්ම එකම තාප ධාරාව ගමන් කරයි.</p>
+        <p><strong>සන්ධි උෂ්ණත්වය (Interface Temperature θ<sub>i</sub>):</strong> ස්ථර දෙකක් අතර මායිම් උෂ්ණත්වය, දෙපස ධාරාව සමාන කිරීමෙන් ලබාගත හැක —</p>
+        <div class="eq ice-eq">k₁A(θ₁ − θ<sub>i</sub>)/d₁ &nbsp;=&nbsp; k₂A(θ<sub>i</sub> − θ₂)/d₂</div>
+        <p class="eq-note">මෙම සමීකරණය θᵢ සඳහා විසඳීමෙන් ස්ථර දෙකේ මායිම් උෂ්ණත්වය සොයාගත හැක.</p>
+      </div></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ TAB 6 — PRACTICALS ============ -->
+<section class="panel" id="t6">
+  <div class="panel-head">
+    <h2>ප්‍රායෝගික පරීක්ෂණ (Practicals)</h2>
+    <p>විෂය නිර්දේශයට අදාළ ප්‍රධාන රසායනාගාර පරීක්ෂණ — ක්‍රමවේදය සහ සූත්‍ර සාරාංශය.</p>
+  </div>
+  <div class="accordion">
+
+    <div class="acc-item open">
+      <div class="acc-head"><div class="acc-title"><span class="tag">P1</span><h3>විශිෂ්ට තාප ධාරිතාව නිර්ණය කිරීම — මිශ්‍රණ ක්‍රමය</h3></div><span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <div class="practical-meta"><span class="pm-chip">කැලරිමීටරය</span><span class="pm-chip">තාපමිතික මූලධර්මය</span></div>
+        <p><strong>මූලධර්මය:</strong> දන්නා විශිෂ්ට තාප ධාරිතාවකින් යුත් ජලය තුළට, උණුසුම් කරන ලද ලෝහ කැබැල්ලක් දමා, තාපමිතික මූලධර්මය යොදා ලෝහයේ විශිෂ්ට තාප ධාරිතාව සොයාගැනීම.</p>
+        <p><strong>ක්‍රමවේදය (සාරාංශය):</strong></p>
+        <ul>
+          <li>ලෝහ කැබැල්ලේ ස්කන්ධය m<sub>m</sub> මනින්න, එය නිශ්චිත කාලයක් උතුරන වතුර නාන කුටියක තබා θ₁ දක්වා රත් කරන්න.</li>
+          <li>කැලරිමීටරයේ (ස්කන්ධය m<sub>c</sub>) ජලය m<sub>w</sub> ක් දමා ආරම්භක උෂ්ණත්වය θ₂ වාර්තා කරන්න.</li>
+          <li>උණුසුම් ලෝහය ඉක්මණින් ජලයට මාරු කර, කැළැඹීම (stirring) කරමින් උපරිම (සමතුලිත) උෂ්ණත්වය θ<sub>c</sub> වාර්තා කරන්න.</li>
+        </ul>
+        <div class="eq">m<sub>m</sub> c<sub>m</sub> (θ₁ − θ<sub>c</sub>) &nbsp;=&nbsp; (m<sub>w</sub> c<sub>w</sub> + m<sub>c</sub> c<sub>c</sub>)(θ<sub>c</sub> − θ₂)</div>
+        <p class="eq-note">c<sub>m</sub> සඳහා විසඳන්න. c<sub>c</sub> = කැලරිමීටරයේ ද්‍රව්‍යයේ (සාමාන්‍යයෙන් තඹ/ඇලුමිනියම්) විශිෂ්ට තාප ධාරිතාව.</p>
+      </div></div>
+    </div>
+
+    <div class="acc-item">
+      <div class="acc-head"><div class="acc-title"><span class="tag">P2</span><h3>ලීස් තැටි ක්‍රමය — දුර්වල සන්නායකයක තාප සන්නායකතාව (k)</h3></div><span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <div class="practical-meta"><span class="pm-chip">Lees' Disc</span><span class="pm-chip">ස්ථාවර අවස්ථා ක්‍රමය</span></div>
+        <p><strong>භාවිතය:</strong> රබර්, වීදුරු, කාඩ්බෝඩ් වැනි දුර්වල තාප සන්නායක ද්‍රව්‍යවල k සොයාගැනීමට.</p>
+        <p><strong>සැකසුම:</strong> පරීක්ෂණයට ලක්වන තහඩුව (ඝනකම d, අරය r) පිත්තල තැටියක් සහ වාෂ්ප කුටියක් අතර තබා, ස්ථාවර අවස්ථාවට පත්වන තෙක් රැඳී, θ₁ (ඉහළ, වාෂ්ප කුටියේ) සහ θ₂ (පහළ, පිත්තල තැටියේ) මනිනු ලැබේ.</p>
+        <p><strong>සිසිලන අනුපාතය:</strong> පසුව තහඩුව ඉවත් කර, පිත්තල තැටිය θ₂ අවට උෂ්ණත්වයේදී සිසිල් වන වේගය (dθ/dt) වාර්තා කරයි (Newton's law of cooling ඇසුරෙන්).</p>
+        <div class="eq">k &nbsp;=&nbsp; [ m c (dθ/dt) d ] &nbsp;/&nbsp; [ A (θ₁ − θ₂) ]</div>
+        <p class="eq-note">A = පිත්තල තැටියේ එළියට නිරාවරණය වූ ඵලදායී වර්ගඵලය ≈ πr² + πrd (පහළ මුහුණත + පැති වක්‍ර මතුපිට). m, c = පිත්තල තැටියේ ස්කන්ධය හා විශිෂ්ට තාප ධාරිතාව.</p>
+      </div></div>
+    </div>
+
+    <div class="acc-item">
+      <div class="acc-head"><div class="acc-title"><span class="tag">P3</span><h3>සර්ල් ක්‍රමය — හොඳ සන්නායකයක තාප සන්නායකතාව (k)</h3></div><span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <div class="practical-meta"><span class="pm-chip">Searle's Apparatus</span><span class="pm-chip">තඹ දණ්ඩ</span></div>
+        <p><strong>භාවිතය:</strong> තඹ වැනි හොඳ තාප සන්නායකයක් සඳහා. දණ්ඩේ එක් කෙළවරක් වාෂ්පයෙන් රත් කරමින්, අනෙක් කෙළවර දිගේ ජලය ගලා යාමට සලසා ස්ථාවර අවස්ථාවක් ලබාගනී.</p>
+        <p><strong>මනින අගයන්:</strong> දණ්ඩ දිගේ L දුරකින් වෙන් වූ ලක්ෂ්‍ය දෙකක උෂ්ණත්ව θ₁, θ₂; සිසිලන ජලයේ ඇතුල්වන/පිටවන උෂ්ණත්ව θ₃, θ₄; සහ ජල ප්‍රවාහ අනුපාතය (dm/dt).</p>
+        <div class="eq">k &nbsp;=&nbsp; [ (dm/dt) c<sub>w</sub> (θ₄ − θ₃) L ] &nbsp;/&nbsp; [ A (θ₁ − θ₂) ]</div>
+        <p class="eq-note">A = දණ්ඩේ හරස්කඩ වර්ගඵලය, c<sub>w</sub> = ජලයේ විශිෂ්ට තාප ධාරිතාව. දණ්ඩ පරිවරණය කිරීම (lagging) අතුරු තාප හානිය අවම කිරීමට වැදගත් වේ.</p>
+      </div></div>
+    </div>
+
+    <div class="acc-item">
+      <div class="acc-head"><div class="acc-title"><span class="tag">P4</span><h3>ලෝහ දඬුවක රේඛීය ප්‍රසාරණතාව (α) නිර්ණය කිරීම</h3></div><span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <div class="practical-meta"><span class="pm-chip">Pullinger's Apparatus</span><span class="pm-chip">මයික්‍රෝමීටර්</span></div>
+        <p><strong>ක්‍රමවේදය:</strong> දඬුවේ මුල් දිග L₀ සහ මුල් උෂ්ණත්වය θ₀ (කාමර උෂ්ණත්වය) මනින්න. දඬුව වාෂ්ප කවචයක් තුළින් රත් කර, ස්ථාවර උෂ්ණත්වයකට (θ, සාමාන්‍යයෙන් 100°C) පත් කරන්න. දිග වර්ධනය ΔL මයික්‍රෝමීටර් screw gauge එකකින් මනින්න.</p>
+        <div class="eq">α &nbsp;=&nbsp; ΔL / (L₀ Δθ)</div>
+        <p class="eq-note">විවිධ දිග (L₀) සහ Δθ අගයන් සඳහා පරීක්ෂණය පුනරාවර්තනය කර α හි සාමාන්‍ය අගය ගණනය කිරීමෙන් නිරවද්‍යතාව වැඩි කරගත හැක.</p>
+      </div></div>
+    </div>
+
+    <div class="acc-item">
+      <div class="acc-head"><div class="acc-title"><span class="tag">P5</span><h3>ද්‍රවයක දෘශ්‍ය සහ සත්‍ය ප්‍රසාරණතා නිර්ණය කිරීම</h3></div><span class="acc-chevron">▾</span></div>
+      <div class="acc-body"><div class="acc-inner">
+        <div class="practical-meta"><span class="pm-chip">Weight Thermometer</span><span class="pm-chip">Dilatometer</span></div>
+        <p><strong>ක්‍රමවේදය:</strong> ග්‍රැඩුවේටඩ් වීදුරු බල්බයක් (dilatometer) ද්‍රවයෙන් පුරවා විවිධ උෂ්ණත්ව (θ) වලදී ද්‍රවයේ පෙනෙන පරිමා වෙනස (කේශනාලයේ මට්ටම) වාර්තා කරන්න.</p>
+        <div class="eq">γ<sub>a</sub> &nbsp;≈&nbsp; ΔV<sub>පෙනෙන</sub> / (V₀ Δθ)</div>
+        <p>වීදුරු කූඩුවේ පරිමා ප්‍රසාරණතාව (γ<sub>g</sub>, වෙනම පරීක්ෂණයකින් හෝ දත්තයකින් දන්නා) එකතු කිරීමෙන් සත්‍ය අගය ලබාගනී:</p>
+        <div class="eq ice-eq">γ<sub>r</sub> = γ<sub>a</sub> + γ<sub>g</sub></div>
+      </div></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ TAB 7 — INTERACTIVE TOOLS ============ -->
+<section class="panel" id="t7">
+  <div class="panel-head">
+    <h2>අන්තර්ක්‍රියාකාරී මෙවලම්</h2>
+    <p>සංකල්ප සජීවීව අත්හදා බැලීමට කැල්කියුලේටර දෙකක්.</p>
+  </div>
+
+  <!-- RH Calculator -->
+  <div class="calc-card">
+    <div class="calc-title"><h3>💧 සාපේක්ෂ ආර්ද්‍රතා කැල්කියුලේටරය</h3><span class="badge">R.H. Calculator</span></div>
+    <p class="calc-desc">කාමර උෂ්ණත්වය සහ ද්‍රවීකරණ (dew point) උෂ්ණත්වය ඇතුළත් කරන්න — S.V.P. වගුව ඇසුරෙන් සාපේක්ෂ ආර්ද්‍රතාවය ස්වයංක්‍රීයව ගණනය කෙරේ.</p>
+    <div class="field-row">
+      <div class="field">
+        <label for="rhRoomTemp">කාමර උෂ්ණත්වය (°C)</label>
+        <input type="number" id="rhRoomTemp" value="27" min="0" max="40" step="0.5">
+      </div>
+      <div class="field">
+        <label for="rhDewTemp">ද්‍රවීකරණ උෂ්ණත්වය — Dew Point (°C)</label>
+        <input type="number" id="rhDewTemp" value="20" min="0" max="40" step="0.5">
+      </div>
+    </div>
+    <div class="result-box">
+      <div>
+        <div class="rb-label">සාපේක්ෂ ආර්ද්‍රතාවය</div>
+        <div class="rb-value" id="rhResult">— %</div>
+      </div>
+      <div style="font-family:var(--mono); font-size:12px; color:var(--muted); text-align:right;" id="rhFormulaOut">F(dew) / F(room) × 100</div>
+    </div>
+    <div class="rh-meter"><div class="rh-meter-fill" id="rhMeterFill"></div></div>
+  </div>
+
+  <!-- Ideal Gas Simulator -->
+  <div class="calc-card">
+    <div class="calc-title"><h3>🧪 පරිපූර්ණ වායු නියම සිමියුලේටරය</h3><span class="badge">Ideal Gas Simulator</span></div>
+    <p class="calc-desc">ආරම්භක P₁, V₁, T₁ අගයන් සකසන්න, පසුව නියත සාධකය තෝරා අනෙක් අගය වෙනස් කරන්න — තුන්වන අගය ස්වයංක්‍රීයව ගණනය වී, අණු කොටුව තුළ සජීවීව චලනය වේ.</p>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="gasFixed">නියත සාධකය</label>
+        <select id="gasFixed">
+          <option value="T">T නියතයි → බොයිල් නියමය (PV = K)</option>
+          <option value="P">P නියතයි → චාල්ස් නියමය (V/T = K)</option>
+          <option value="V">V නියතයි → පීඩන නියමය (P/T = K)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="gasChange">වෙනස් කරන සාධකය</label>
+        <input type="range" id="gasChange" min="30" max="170" value="100">
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field"><label for="gasP1">P₁ (kPa)</label><input type="number" id="gasP1" value="100" min="10"></div>
+      <div class="field"><label for="gasV1">V₁ (L)</label><input type="number" id="gasV1" value="10" min="1"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label for="gasT1">T₁ (K)</label><input type="number" id="gasT1" value="300" min="1"></div>
+      <div class="field"><button class="btn ghost" id="gasReset" style="margin-top:22px; width:100%;">යළි සකසන්න</button></div>
+    </div>
+
+    <div class="sim-layout">
+      <canvas id="gasCanvas" width="600" height="320"></canvas>
+      <div class="sim-readout">
+        <div class="info-card"><div class="k">P₂</div><div class="v" id="gasP2Out" style="font-family:var(--mono); font-size:20px; color:var(--ember);">—</div></div>
+        <div class="info-card"><div class="k">V₂</div><div class="v" id="gasV2Out" style="font-family:var(--mono); font-size:20px; color:var(--text);">—</div></div>
+        <div class="info-card"><div class="k">T₂</div><div class="v" id="gasT2Out" style="font-family:var(--mono); font-size:20px; color:var(--ice);">—</div></div>
+        <div class="sim-law-tag" id="gasLawTag">PV = K</div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+</main>
+
+<footer>තාපය — A/L භෞතික විද්‍යාව ස්වයං අධ්‍යයන මෙවලම · පිරිසිදු HTML/CSS/JS වලින් නිර්මාණය කර ඇත · බාහිර ලයිබ්‍රරි නොමැත</footer>
+
+<script>
+// ================= TAB SWITCHING =================
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ================= ACCORDION =================
+document.querySelectorAll('.acc-head').forEach(head=>{
+  head.addEventListener('click', ()=>{
+    head.parentElement.classList.toggle('open');
+  });
+});
+
+// ================= HERO THERMOMETER =================
+const tempSlider = document.getElementById('tempSlider');
+const valC = document.getElementById('valC');
+const valK = document.getElementById('valK');
+const valF = document.getElementById('valF');
+const thermoFill = document.getElementById('thermoFill');
+
+function updateThermo(){
+  const c = parseFloat(tempSlider.value);
+  const k = c + 273.15;
+  const f = c*9/5 + 32;
+  valC.textContent = c.toFixed(1) + ' °C';
+  valK.textContent = k.toFixed(2) + ' K';
+  valF.textContent = f.toFixed(1) + ' °F';
+  // fill height proportional within -50..150 range mapped to bulb column (y 20 to 160)
+  const minC=-50, maxC=150;
+  const frac = (c - minC) / (maxC - minC);
+  const topY = 160 - frac*140; // from 160 (bottom) to 20 (top)
+  thermoFill.setAttribute('y', topY);
+  thermoFill.setAttribute('height', 190 - topY);
+}
+tempSlider.addEventListener('input', updateThermo);
+updateThermo();
+
+// ================= S.V.P TABLE (0-40 C, mmHg) =================
+const svpTable = {
+  0:4.58,1:4.93,2:5.29,3:5.69,4:6.10,5:6.54,6:7.01,7:7.51,8:8.05,9:8.61,
+  10:9.21,11:9.84,12:10.52,13:11.23,14:11.99,15:12.79,16:13.63,17:14.53,18:15.48,19:16.48,
+  20:17.54,21:18.65,22:19.83,23:21.07,24:22.38,25:23.76,26:25.21,27:26.74,28:28.35,29:30.04,
+  30:31.82,31:33.70,32:35.66,33:37.73,34:39.90,35:42.18,36:44.56,37:47.07,38:49.69,39:52.44,40:55.32
+};
+function svpAt(t){
+  t = Math.max(0, Math.min(40, t));
+  const lo = Math.floor(t), hi = Math.ceil(t);
+  if(lo===hi) return svpTable[lo];
+  const frac = t - lo;
+  return svpTable[lo] + (svpTable[hi]-svpTable[lo])*frac;
+}
+// build preview table (every 5 degrees)
+(function(){
+  const head = document.getElementById('svpHeadRow');
+  const body = document.getElementById('svpBodyRow');
+  head.innerHTML = '<th>θ (°C)</th>';
+  body.innerHTML = '<td>S.V.P (mmHg)</td>';
+  for(let t=0; t<=40; t+=5){
+    head.innerHTML += `<th>${t}</th>`;
+    body.innerHTML += `<td>${svpTable[t].toFixed(2)}</td>`;
+  }
+})();
+
+// ================= R.H. CALCULATOR =================
+const rhRoomTemp = document.getElementById('rhRoomTemp');
+const rhDewTemp = document.getElementById('rhDewTemp');
+const rhResult = document.getElementById('rhResult');
+const rhFormulaOut = document.getElementById('rhFormulaOut');
+const rhMeterFill = document.getElementById('rhMeterFill');
+
+function updateRH(){
+  const room = parseFloat(rhRoomTemp.value);
+  const dew = parseFloat(rhDewTemp.value);
+  if(isNaN(room) || isNaN(dew)){ rhResult.textContent = '— %'; return; }
+  const Froom = svpAt(room);
+  const Fdew = svpAt(dew);
+  let rh = (Fdew/Froom)*100;
+  rh = Math.max(0, Math.min(100, rh));
+  rhResult.textContent = rh.toFixed(1) + ' %';
+  rhFormulaOut.textContent = `F(${dew}°C)=${Fdew.toFixed(2)} / F(${room}°C)=${Froom.toFixed(2)} × 100`;
+  rhMeterFill.style.width = rh.toFixed(1) + '%';
+}
+rhRoomTemp.addEventListener('input', updateRH);
+rhDewTemp.addEventListener('input', updateRH);
+updateRH();
+
+// ================= IDEAL GAS SIMULATOR =================
+const gasFixed = document.getElementById('gasFixed');
+const gasChange = document.getElementById('gasChange');
+const gasP1 = document.getElementById('gasP1');
+const gasV1 = document.getElementById('gasV1');
+const gasT1 = document.getElementById('gasT1');
+const gasP2Out = document.getElementById('gasP2Out');
+const gasV2Out = document.getElementById('gasV2Out');
+const gasT2Out = document.getElementById('gasT2Out');
+const gasLawTag = document.getElementById('gasLawTag');
+const gasReset = document.getElementById('gasReset');
+const canvas = document.getElementById('gasCanvas');
+const ctx = canvas.getContext('2d');
+
+let particles = [];
+const NUM_PARTICLES = 45;
+function initParticles(){
+  particles = [];
+  for(let i=0;i<NUM_PARTICLES;i++){
+    particles.push({
+      x: Math.random(), y: Math.random(),
+      vx: (Math.random()-0.5), vy: (Math.random()-0.5)
+    });
+  }
+}
+initParticles();
+
+let currentP2=100, currentV2=10, currentT2=300, boxFrac=1, speedFactor=1;
+
+function computeGas(){
+  const P1 = parseFloat(gasP1.value)||100;
+  const V1 = parseFloat(gasV1.value)||10;
+  const T1 = parseFloat(gasT1.value)||300;
+  const law = gasFixed.value;
+  const pct = parseFloat(gasChange.value)/100; // 0.3 .. 1.7
+
+  let P2,V2,T2;
+  if(law==='T'){ // Boyle's: PV=K, T const
+    V2 = V1*pct;
+    P2 = (P1*V1)/V2;
+    T2 = T1;
+    gasLawTag.textContent = 'බොයිල් නියමය: P₁V₁ = P₂V₂ = ' + (P1*V1).toFixed(0);
+  } else if(law==='P'){ // Charles': V/T=K, P const
+    T2 = T1*pct;
+    V2 = (V1/T1)*T2;
+    P2 = P1;
+    gasLawTag.textContent = 'චාල්ස් නියමය: V₁/T₁ = V₂/T₂ = ' + (V1/T1).toFixed(3);
+  } else { // pressure law: P/T=K, V const
+    T2 = T1*pct;
+    P2 = (P1/T1)*T2;
+    V2 = V1;
+    gasLawTag.textContent = 'පීඩන නියමය: P₁/T₁ = P₂/T₂ = ' + (P1/T1).toFixed(3);
+  }
+  currentP2=P2; currentV2=V2; currentT2=T2;
+  gasP2Out.textContent = P2.toFixed(1) + ' kPa';
+  gasV2Out.textContent = V2.toFixed(2) + ' L';
+  gasT2Out.textContent = T2.toFixed(1) + ' K';
+
+  // box size reflects V2/V1, particle speed reflects sqrt(T2/T1)
+  boxFrac = Math.max(0.35, Math.min(1, V2/Math.max(V1,0.001)));
+  speedFactor = Math.sqrt(Math.max(0.2, T2/Math.max(T1,1)));
+}
+
+[gasFixed, gasChange, gasP1, gasV1, gasT1].forEach(el=>{
+  el.addEventListener('input', computeGas);
+});
+gasReset.addEventListener('click', ()=>{
+  gasP1.value=100; gasV1.value=10; gasT1.value=300; gasChange.value=100; gasFixed.value='T';
+  computeGas();
+});
+computeGas();
+
+function drawSim(){
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0,0,w,h);
+  // box dimensions (width scales with boxFrac, height fixed)
+  const margin = 30;
+  const maxBoxW = w - margin*2;
+  const boxW = maxBoxW * (0.4 + 0.6*boxFrac);
+  const boxH = h - margin*2;
+  const boxX = margin;
+  const boxY = margin;
+
+  // box outline
+  ctx.strokeStyle = '#4fc3e8';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(boxX, boxY, boxW, boxH);
+  ctx.fillStyle = 'rgba(79,195,232,0.04)';
+  ctx.fillRect(boxX, boxY, boxW, boxH);
+
+  // particles
+  ctx.fillStyle = '#ff6b35';
+  particles.forEach(p=>{
+    p.x += p.vx*0.004*speedFactor;
+    p.y += p.vy*0.004*speedFactor;
+    if(p.x<0||p.x>1) p.vx*=-1;
+    if(p.y<0||p.y>1) p.vy*=-1;
+    p.x = Math.max(0,Math.min(1,p.x));
+    p.y = Math.max(0,Math.min(1,p.y));
+    const px = boxX + p.x*boxW;
+    const py = boxY + p.y*boxH;
+    ctx.beginPath();
+    ctx.arc(px, py, 3.5, 0, Math.PI*2);
+    ctx.fill();
+  });
+
+  // labels
+  ctx.fillStyle = '#8a91a6';
+  ctx.font = '11px monospace';
+  ctx.fillText('V ∝ box width  ·  speed ∝ √T', boxX, h-8);
+
+  requestAnimationFrame(drawSim);
+}
+drawSim();
+</script>
+</body>
+</html>

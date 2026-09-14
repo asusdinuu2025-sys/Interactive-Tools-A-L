@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>යාන්ත්‍ර විද්‍යාව — Mechanics Sci-LiNK</title>
+
+<!-- KaTeX -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --ink:#0E1B2E;
+  --ink2:#16273F;
+  --paper:#F5F1E8;
+  --paper2:#EDE6D6;
+  --amber:#F2A93B;
+  --amber-deep:#C9821E;
+  --teal:#2FA6A6;
+  --line:#D8CFB8;
+  --line-dark:#25384F;
+  --text:#182233;
+  --text-soft:#4B5A70;
+  --card:#FFFFFF;
+  --sim:#E1556B;
+  --shadow: 0 1px 2px rgba(20,20,10,.06), 0 6px 20px rgba(20,20,10,.06);
+  --radius: 14px;
+  --maxw: 880px;
+}
+[data-theme="dark"]{
+  --paper:#0E1729;
+  --paper2:#0A1220;
+  --text:#EAE6D9;
+  --text-soft:#9FAEC2;
+  --card:#132038;
+  --line:#25384F;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--paper);
+  color:var(--text);
+  font-family:'Noto Sans Sinhala','Space Grotesk',sans-serif;
+  transition:background .3s ease, color .3s ease;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+.code-mono{font-family:'JetBrains Mono',monospace;}
+
+/* ===== Header ===== */
+header.top{
+  position:sticky; top:0; z-index:50;
+  background:var(--paper);
+  border-bottom:1px solid var(--line);
+  backdrop-filter:blur(6px);
+}
+.top-inner{
+  max-width:var(--maxw); margin:0 auto; padding:14px 16px 10px;
+}
+.brand{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+}
+.brand-title{
+  display:flex; flex-direction:column; line-height:1.05;
+}
+.brand-title .eyebrow{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10.5px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--amber-deep);
+  font-weight:700;
+}
+.brand-title h1{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:21px; margin:2px 0 0; font-weight:700; letter-spacing:-.01em;
+  color:var(--text);
+}
+.brand-title h1 span{color:var(--amber-deep);}
+
+.icon-btns{display:flex; gap:8px;}
+.icon-btn{
+  width:38px;height:38px; border-radius:10px; border:1px solid var(--line);
+  background:var(--card); color:var(--text); font-size:16px;
+  display:flex; align-items:center; justify-content:center; cursor:pointer;
+  transition:transform .15s ease, background .2s;
+}
+.icon-btn:hover{transform:translateY(-1px);}
+.icon-btn.active{ background:var(--amber); border-color:var(--amber-deep); color:#241505;}
+
+.searchwrap{
+  margin-top:12px; position:relative;
+}
+.searchwrap input{
+  width:100%; padding:11px 14px 11px 38px; border-radius:11px;
+  border:1px solid var(--line); background:var(--card); color:var(--text);
+  font-size:14.5px; font-family:inherit; outline:none;
+}
+.searchwrap input:focus{border-color:var(--amber-deep);}
+.searchwrap svg{position:absolute; left:12px; top:50%; transform:translateY(-50%); opacity:.55;}
+
+.tabs{
+  display:flex; gap:6px; overflow-x:auto; margin-top:12px; padding-bottom:10px;
+  scrollbar-width:thin;
+}
+.tabs::-webkit-scrollbar{height:5px;}
+.tabs::-webkit-scrollbar-thumb{background:var(--line); border-radius:10px;}
+.tab-btn{
+  flex:0 0 auto;
+  padding:8px 13px; border-radius:999px; border:1px solid var(--line);
+  background:var(--card); color:var(--text-soft); font-size:13px; font-weight:600;
+  cursor:pointer; white-space:nowrap; font-family:'Noto Sans Sinhala',sans-serif;
+  transition:all .15s ease;
+}
+.tab-btn .num{font-family:'JetBrains Mono',monospace; font-size:10.5px; opacity:.6; margin-right:5px;}
+.tab-btn.active{
+  background:var(--ink); color:var(--paper); border-color:var(--ink);
+}
+[data-theme="dark"] .tab-btn.active{ background:var(--amber); color:#241505; border-color:var(--amber);}
+.tab-btn.calc.active{background:var(--teal); border-color:var(--teal); color:#04231f;}
+
+/* ===== Layout ===== */
+main{max-width:var(--maxw); margin:0 auto; padding:18px 16px 80px;}
+
+.chapter-head{
+  display:flex; align-items:baseline; gap:10px; margin:6px 0 16px;
+}
+.chapter-head .chnum{
+  font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--amber-deep); font-weight:700;
+}
+.chapter-head h2{
+  font-family:'Space Grotesk',sans-serif; font-size:22px; margin:0; font-weight:700;
+}
+.chapter-head .en{
+  font-size:12.5px; color:var(--text-soft); font-style:italic;
+}
+
+.revision-banner{
+  display:flex; align-items:center; justify-content:space-between;
+  background:linear-gradient(120deg, var(--amber) 0%, var(--teal) 130%);
+  color:#1c1206; border-radius:12px; padding:10px 14px; margin-bottom:16px;
+  font-size:13px; font-weight:600;
+}
+.revision-banner button{
+  background:#1c1206; color:#fff; border:none; padding:6px 12px; border-radius:8px;
+  font-size:12px; cursor:pointer; font-weight:700;
+}
+
+.card{
+  background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+  padding:14px 16px 15px; margin-bottom:12px; box-shadow:var(--shadow);
+  position:relative; overflow:hidden;
+}
+.card::before{
+  content:""; position:absolute; left:0; top:0; bottom:0; width:4px;
+  background:var(--accent, var(--amber));
+}
+.card-top{display:flex; align-items:center; gap:8px; margin-bottom:6px; flex-wrap:wrap;}
+.badge{
+  font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700;
+  background:var(--paper2); color:var(--accent, var(--amber-deep));
+  padding:3px 8px; border-radius:6px; border:1px solid var(--line);
+}
+.card h3{
+  font-size:15.5px; margin:0; font-weight:700; line-height:1.35; flex:1;
+}
+.card p.note{
+  font-size:13.5px; color:var(--text-soft); margin:6px 0 8px; line-height:1.55;
+}
+.formula-box{
+  background:var(--paper2); border-radius:10px; padding:10px 12px; margin-top:6px;
+  font-size:14.5px; overflow-x:auto;
+  transition:filter .2s ease, opacity .2s ease;
+}
+.formula-box.katex-display{margin:0;}
+.hide-toggle{
+  display:none; align-items:center; gap:6px; font-size:12px; font-weight:700;
+  color:var(--text-soft); background:none; border:1px dashed var(--line);
+  padding:5px 10px; border-radius:8px; cursor:pointer; margin-top:8px;
+}
+body.revision-mode .hide-toggle{display:inline-flex;}
+body.revision-mode .formula-box{ filter:blur(7px); opacity:.5; user-select:none; cursor:pointer;}
+body.revision-mode .card.revealed .formula-box{filter:none; opacity:1;}
+
+.hidden{display:none !important;}
+.empty-state{
+  text-align:center; padding:50px 20px; color:var(--text-soft); font-size:14px;
+}
+
+/* ===== Calculators ===== */
+.calc-card{
+  background:var(--card); border:1px solid var(--line); border-radius:16px;
+  padding:18px; margin-bottom:18px; box-shadow:var(--shadow);
+}
+.calc-card h3{
+  font-family:'Space Grotesk',sans-serif; font-size:17px; margin:0 0 4px;
+  display:flex; align-items:center; gap:8px;
+}
+.calc-card .sub{font-size:12.5px; color:var(--text-soft); margin-bottom:14px;}
+.field-row{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;}
+.field{flex:1; min-width:110px;}
+.field label{
+  display:block; font-size:11.5px; color:var(--text-soft); margin-bottom:4px; font-weight:600;
+}
+.field input, .field select{
+  width:100%; padding:9px 10px; border-radius:8px; border:1px solid var(--line);
+  background:var(--paper2); color:var(--text); font-size:14px; font-family:'JetBrains Mono',monospace;
+}
+.calc-btn{
+  background:var(--ink); color:var(--paper); border:none; padding:10px 18px;
+  border-radius:9px; font-weight:700; font-size:13.5px; cursor:pointer; margin-top:4px;
+  font-family:'Noto Sans Sinhala',sans-serif;
+}
+[data-theme="dark"] .calc-btn{background:var(--amber); color:#241505;}
+.result-box{
+  margin-top:14px; background:var(--paper2); border-radius:10px; padding:12px 14px;
+  font-size:14.5px; min-height:20px; border-left:4px solid var(--teal);
+}
+.result-box.empty{color:var(--text-soft); font-size:13px;}
+
+footer.foot{
+  text-align:center; padding:20px; font-size:12px; color:var(--text-soft);
+}
+
+/* ===== Simulations ===== */
+.tab-btn.sim.active{background:var(--sim,#E1556B); border-color:var(--sim,#E1556B); color:#2a0510;}
+.sim-canvas-wrap{
+  background:var(--paper2); border-radius:12px; padding:6px; margin-bottom:12px;
+  border:1px solid var(--line); overflow:hidden;
+}
+.sim-canvas-wrap canvas{ width:100%; height:auto; display:block; border-radius:8px; background:transparent; }
+.sim-controls{display:flex; gap:8px; margin:10px 0; flex-wrap:wrap;}
+.sim-btn{
+  background:var(--ink); color:var(--paper); border:none; padding:9px 16px; border-radius:9px;
+  font-weight:700; font-size:13px; cursor:pointer; font-family:'Noto Sans Sinhala',sans-serif;
+}
+[data-theme="dark"] .sim-btn{background:var(--sim,#E1556B); color:#2a0510;}
+.sim-btn.secondary{background:transparent; border:1px solid var(--line); color:var(--text);}
+.readout{
+  display:flex; flex-wrap:wrap; gap:10px 18px; font-family:'JetBrains Mono',monospace;
+  font-size:12.5px; background:var(--paper2); border-radius:10px; padding:9px 12px; margin-top:8px;
+}
+.readout b{color:var(--sim,#E1556B);}
+.bar-meter-row{display:flex; align-items:center; gap:8px; margin-top:6px; font-size:12px;}
+.bar-meter-row .lbl{width:34px; font-weight:700; font-family:'JetBrains Mono',monospace;}
+.bar-meter{flex:1; height:14px; border-radius:7px; background:var(--line); overflow:hidden;}
+.bar-fill{height:100%; border-radius:7px; transition:width .05s linear;}
+.status-pill{
+  display:inline-block; font-size:11.5px; font-weight:700; padding:3px 10px; border-radius:999px;
+  background:var(--paper2); border:1px solid var(--line); margin-bottom:6px;
+}
+.status-pill.warn{background:#F2A93B; color:#241505; border-color:#C9821E;}
+.status-pill.ok{background:#2FA6A6; color:#04231f; border-color:#1B9C85;}
+
+@media(min-width:640px){
+  .brand-title h1{font-size:24px;}
+  .card h3{font-size:16.5px;}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <div class="brand-title">
+        <span class="eyebrow">Sci·LiNK — Darshana Ukuwela</span>
+        <h1>යාන්ත්‍ර<span>විද්‍යාව</span></h1>
+      </div>
+      <div class="icon-btns">
+        <button class="icon-btn" id="revisionToggle" title="MCQ Revision Mode">🎯</button>
+        <button class="icon-btn" id="themeToggle" title="Dark / Light">🌙</button>
+      </div>
+    </div>
+
+    <div class="searchwrap">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="searchBox" placeholder="සොයන්න... e.g. M/V05, friction, R = , ωt">
+    </div>
+
+    <div class="tabs" id="tabBar"></div>
+  </div>
+</header>
+
+<main id="mainArea"></main>
+
+<footer class="foot">Sci-LiNK Physics Shortcuts · Mechanics only · built for quick MCQ revision</footer>
+
+<script>
+/* ===================== DATA ===================== */
+const chapters = [
+{id:'vectors', num:'01', accent:'#F2A93B', si:'දෛශික', en:'Vectors', items:[
+  {code:'M/V01', title:'දෛශික රාශියක මූලික ලක්ෂණ', note:'විශාලත්වයක්, දිශාවක්, ක්‍රියා ලක්ෂ්‍යක් පවතී.'},
+  {code:'M/V02', title:'දෛශික 02ක් සමාන වීමට', note:'සමජාතීය විය යුතුය. මූලික ලක්ෂණ 03ම (විශාලත්වය, දිශාව, ක්‍රියා ලක්ෂ්‍යය) සමාන විය යුතුය.'},
+  {code:'M/V05', title:'ආනත දෛශික 02ක සම්පුෂ්ජයන්ත්‍රය (Parallelogram Law)', tex:'R=\\sqrt{P^2+Q^2+2PQ\\cos\\theta}\\qquad \\alpha=\\tan^{-1}\\!\\left(\\dfrac{Q\\sin\\theta}{P+Q\\cos\\theta}\\right)'},
+  {code:'M/V06', title:'ආනත දෛශික 02ක අන්තරය (Triangle Law)', tex:'D=\\sqrt{P^2+Q^2-2PQ\\cos\\theta}\\qquad \\beta=\\tan^{-1}\\!\\left(\\dfrac{Q\\sin\\theta}{P-Q\\cos\\theta}\\right)'},
+  {code:'M/V08', title:'දෛශික විඝටනය (Resolution)', tex:'V_x=V\\cos\\theta \\qquad V_y=V\\sin\\theta', note:'කෝණය තියෙන පැත්තට cos යොදන්න.'},
+  {code:'M/V09', title:'v2ක R හි පිහිටීම', note:'එකම/ආනත දිශාවේ: P=Q නම් (P,Q අතර) මැදින්; P≤Q නම් විශාලයට ආසන්නව. විරුද්ධ දිශාවේ: P=Q නම් R=0; P≠Q නම් විශාලයට ආසන්නව, පිටතින්.'},
+  {code:'M/V10', title:'දෛශික 03ක් R=0 වීමට', note:'සමාන්තර නම්: c=a+b (විශාලත්ව පමණි). ආනත/කෝණික නම් (ත්‍රිකෝණයක් සෑදිය හැක): a+b≥c.'},
+  {code:'M/V11', title:'දෛශික දෙකක සම්පුෂ්ජ/අන්තර සීමා', tex:'|P-Q|\\le R \\le |P+Q| \\qquad |P-Q|\\le D \\le |P+Q|'},
+  {code:'M/V12', title:'ආනත දෛශික 02ක විශේෂ අවස්ථාව — θ=90°', tex:'R=D=\\sqrt{P^2+Q^2}\\qquad \\alpha=\\beta=\\tan^{-1}\\!\\left(\\dfrac{Q}{P}\\right)', note:'P⊥Q විට.'},
+  {code:'M/V13', title:'P=Q=F විශේෂ අවස්ථාව', tex:'R=2F\\cos\\!\\left(\\dfrac{\\theta}{2}\\right)\\qquad D=2F\\sin\\!\\left(\\dfrac{\\theta}{2}\\right)', note:'α=θ/2,  β=90°−θ/2 (MCQ only).'},
+  {code:'M/V14', title:'θ, R, D වගුව (P=Q=F විට)', note:'θ=0°→R=2F,D=0 | θ=60°→R=√3F,D=F | θ=90°→R=√2F,D=√2F | θ=120°→R=F,D=√3F | θ=180°→R=0,D=2F'},
+  {code:'M/V16', title:'R හි දිශාව සොයාගැනීම', note:'R↑ නම් X̅=0,R=Y↑ · R→ නම් Y↑=0,R=X̅ · R=0 නම් X̅=Y↑=0'},
+  {code:'M/V17', title:'දෛශික ගුණ කිරීම (ස්කේලර, දෛශික ගුණිතය)', note:'F×2=2F (දෛශිකයක් ලෙසම) · F×අදිශ=වෙනත් දෛශිකයක් · අදිශ×අදිශ=වෙනත් අදිශයක්'},
+]},
+
+{id:'motion', num:'02', accent:'#2FA6A6', si:'චලිතය', en:'Motion', items:[
+  {code:'M/L01', title:'ඒකක පරිවර්තනය', tex:'km\\,h^{-1}\\times\\dfrac{5}{18}=m\\,s^{-1}'},
+  {code:'M/L02', title:'සාමාන්‍ය ප්‍රවේගය', tex:'\\text{සාමාන්‍ය ප්‍රවේගය}=\\dfrac{\\text{මුළු විස්ථාපනය}}{\\text{මුළු කාලය}}'},
+  {code:'M/L03', title:'ක්ෂණික ප්‍රවේගය', tex:'V_o=\\dfrac{\\varepsilon d}{t}', note:'නිශ්චලව සිටියේ නම් එම කාලය ද සලකනු ලැබේ.'},
+  {code:'M/L04', title:'සාමාන්‍ය ප්‍රවේගය (දෛශික)', tex:'\\vec{V_a}=\\dfrac{\\varepsilon S}{t}=\\dfrac{(u+V)}{2}'},
+  {code:'M/L05', title:'සමාන දුරක් ගමන් කිරීම — Harmonic Mean', tex:'v_A=\\dfrac{2v_1v_2}{v_1+v_2}', note:'විස්ථාපනය සමාන විට.'},
+  {code:'M/L06', title:'සමාන කාලයක් ගමන් කිරීම — Arithmetic Mean', tex:'v_A=\\dfrac{v_1+v_2}{2}', note:'Δt සමාන විට.'},
+  {code:'M/L07', title:'චලිත සමීකරණ (රේඛීය චලිතයට පමණි, a ස්ථාවර විය යුතුය)', tex:'v=u+at \\qquad S=\\left(\\dfrac{u+v}{2}\\right)t \\qquad v^2=u^2+2as \\qquad S=ut+\\tfrac12at^2 \\qquad S=vt-\\tfrac12at^2'},
+  {code:'M/L11', title:'සමාන කාල පරාස තුළ විස්ථාපන අනුපාතය', tex:'1:3:5:7:\\dots', note:'ස්ථිතික සිට ඒකාකාර ත්වරණයෙන් ගමන් ගන්නා විට.'},
+  {code:'M/L12', title:'තත්පරයක් අවසානයේ මුළු විස්ථාපන අනුපාතය', tex:'1:4:9:16:\\dots'},
+  {code:'M/L14', title:'උඩ දමන ලද වස්තුවක උපරිම උස (projectile)', tex:'h_{max}=\\dfrac{u^2\\sin^2\\theta}{2g}'},
+  {code:'M/L15', title:'ත්‍රිරස් පරාසය (Range)', tex:'R=\\dfrac{u^2\\sin2\\theta}{g}'},
+  {code:'M/L16', title:'සම්පුෂ්ජ ප්‍රවේගය', tex:'v_T=\\sqrt{v_x^2+v_y^2}'},
+  {code:'M/L17', title:'45° ප්‍රක්ෂිප්ත වස්තුවක H සහ R', tex:'\\dfrac{H}{R}=\\dfrac{\\tan\\theta}{4}', note:'45° ප්‍රක්ෂේපණයේදී R=4h.'},
+  {code:'M/L19', title:'සිරස් උඩ දැමීම', tex:'h_{max}=\\dfrac{u^2}{2g}\\qquad t_{h_{max}}=\\dfrac{u}{g}'},
+  {code:'M/L20', title:'45°දී උපරිම ත්‍රිරස් පරාසය', tex:'R_{max}=\\dfrac{u^2}{g}'},
+  {code:'M/L21-22', title:'45° ප්‍රක්ෂේපණයේ ශක්ති/සංරචක සම්බන්ධතා', tex:'E_1=2E_2 \\qquad u\\cos45^\\circ=u\\sin45^\\circ\\Rightarrow u_x=u_y'},
+  {code:'M/L27', title:'සාපේක්ෂ ප්‍රවේගය (Relative Velocity)', tex:'\\vec{v}_{AB}=\\vec{v}_{AE}+\\vec{v}_{EB}'},
+  {code:'M/L29-31', title:'සාපේක්ෂ ප්‍රවේග — v_h', note:'V_h = සම්පුෂ්ජ V හි h ගත ~ අවම දුර, කාලය වැඩි · h සම්පුෂ්ජයෙන් උපරිම v, අවම t.'},
+  {code:'M/L33-36', title:'චලිත ප්‍රස්තාර: s-t, v-t, a-t', note:'s-t → බෑවුම=ප්‍රවේගය · v-t → බෑවුම=ත්වරණය, area=විස්ථාපනය · a-t → area=ප්‍රවේග වෙනස.'},
+  {code:'M/L37', title:'ගුරුත්ව ආනතියක වස්තුවක් හා නිදහස් වැටෙන වස්තුවක්', note:'aA=g, aB=g sinθ → aA>aB, tA<tB. A සහ B පොළොවේ වදින විට V සමාන: V=√(2gh).'},
+]},
+
+{id:'force-eq', num:'03', accent:'#C9821E', si:'බල සමතුලිතතාවය', en:'Force Equilibrium', items:[
+  {code:'M/F12', title:'බල සුර්ණය (Torque)', tex:'\\tau_0=Fd', note:'ඒකක: Nm ✓ / J (ඡුල්) ✗. දකුණතේ නීතියෙන් දිශාව ලැබේ.'},
+  {code:'M/F15', title:'බල යුග්මය (Couple)', tex:'\\tau=Fd', note:'ඒක රේඛීය නොවන, සමාන/ප්‍රතිවිරුද්ධ, ∥ බල යුගලයකි.'},
+  {code:'M/F16', title:'සම්පුෂ්ජ බලය චලනය (Balancing Moments)', tex:'\\dfrac{a}{b}=\\dfrac{F_b}{F_a}\\qquad (F_a>F_b)'},
+  {code:'M/F01 (Lami)', title:'ලාමි ප්‍රමේයය — එක ලක්ෂීය බල 03ක් යටතේ වස්තුවක් සමතුලිත නම්', tex:'\\dfrac{F_1}{\\sin\\beta}=\\dfrac{F_2}{\\sin\\alpha}=\\dfrac{F_3}{\\sin\\theta}=K'},
+  {code:'M/F17', title:'සූර්ණ මූලධර්මය', note:'එක් තලයක බල පද්ධතියක සලකන ලද ඕනෑම ලක්ෂණයක් වටා බලයන්ගේ සූර්ණ වල ඊජ ෆෙතිය, එම ලක්ෂ්‍යය වටා සම්පුෂ්ජයේ සූර්ණයට සමාන වේ.'},
+  {code:'M/F18', title:'බල Δ ප්‍රමේයය', note:'වස්තුවක් මත ක්‍රියාත්මක වන ඒක ලක්ෂීය බල 03ක් විශාලත්වයෙන් හා දිශාවෙන් Δ අනුපිළිවෙලින් ගත් පාද මගින් නිරූපණය කළ හැකි නම්, එම බල 03 යටතේ පද්ධතිය සමතුලිත වේ.'},
+  {code:'M/F24', title:'සමතුලිතතාව පිරික්සීම (ලක්ෂ්‍ය)', note:'01: X̅=Y↑=0, G=0 → සමතුලිතය. 02: G1=G2=G3=0 → සමතුලිතය (පළමු ලක්ෂ්‍ය 02 හා තැබූ රේඛාව නොපිහිටින වෙනත් ලක්ෂ්‍යයක් G3 සඳහා ගැනීම.)'},
+  {code:'M/F32', title:'බාහු අසමාන තුරාදික පාඨාංකය (False Balance)', tex:'M=\\sqrt{m_1m_2}'},
+]},
+
+{id:'friction-cg', num:'04', accent:'#8E6E53', si:'ඝර්ෂණය, ගුරුත්ව කේන්ද්‍රය', en:'Friction & Center of Gravity', items:[
+  {code:'M/FR04', title:'ඝර්ෂණයේ වර්ග', note:'ස්ථිතික (ස්වයං-සීරුමාරු): F_ස්ථි=F_යෙදූ (F≤μsR). සීමාකාරී: F_සීමා=μsR. ගතික: F_ගතික=μkR (එකාකාර v ගමන් වන විට F_යෙදූ=F_ගතික).'},
+  {code:'M/FR05', title:'μs > μk', tex:'F_{සීමාකාරී} > F_{ගතික}\\ \\therefore\\ \\mu_{සීමාකාරී} > \\mu_{ගතික}'},
+  {code:'M/FR06', title:'μ රඳා පවතින කරුණු', note:'μ ∝ රළු ගතිය (surface nature). ඒකක/මානක නැත. μ=0 නම් සුමට (ඝර්ෂණ බලයක් නැත). v මත රඳා නොපවතී.'},
+  {code:'M/FR11', title:'ආනත බලයක් යෙදූ විට (block on surface)', tex:'F_{iS}=\\mu R \\qquad R=P (\\text{බැවින්})\\qquad \\uparrow F_{iS}=\\mu\\uparrow P'},
+  {code:'M/FR12', title:'ආනත තලයක ඝර්ෂණය — 3 අවස්ථා', note:'තවම ස්ථිතික: F=mg sinθ (F∝sinθ). සීමාකාරී: F=mg sinα, μ=tanα. චලනය වන: F=μmg cosβ (F∝cosβ).'},
+  {code:'M/FR13/14', title:'ලිස්සයාම vs පෙරළීම', tex:'\\mu = \\tan\\alpha \\qquad \\tan\\theta=\\dfrac{a}{h}', note:'tan⁻¹(μs) < tan⁻¹(a/h) → ලිස්සයි. tan⁻¹(a/h) < tan⁻¹(μs) → පෙරළෙයි.'},
+  {code:'M/FR15', title:'A මත B (ඉහළ) තැබූ බ්ලොක් — උපරිම ත්වරණය', tex:'a_{max}=\\mu_s\\, g'},
+  {code:'M/FR16-18', title:'ඝර්ෂණයේ භාවිතය', note:'ඇවිදීම/බයිසිකලය: elleum/driven රෝද මත සර්ෂණ බලය චලිත දිශාවට, driving රෝද මත ප්‍රතිවිරුද්ධව. 4-wheel ක්‍රියාවලදී සියලු රෝද මත ඝර්ෂණය චලිත දිශාවට විරුද්ධව.'},
+  {code:'M/G03/04', title:'ගුරුත්ව කේන්ද්‍රය (G) — අංශු පද්ධතිය', note:'අංශු අතර සමාන වෙනසක් ඇතිවිට G වෙනස් වේ (∝ ⊥ දූර). අංශු අතර වෙනසක් නොමැති විට G වෙනස් නොවේ.'},
+  {code:'M/G07', title:'ඒකාකාර වස්තුවක m ∝ L / m ∝ A', note:'ඒකාකාර දණ්ඩක් m∝L (m=ρLA). ඒකාකාර තහඩුවක m∝A (m=ρAt).'},
+  {code:'M/G16', title:'කොටසක් කැපූ වස්තුවක G', tex:'G_{ඉතිරි}=G_{මුළු}-G_{ඉවත්}'},
+  {code:'M/G17', title:'සමතුලිතතාවේ විවිධ අවස්ථා', note:'ස්ථායී: G පහළින්, mgh අවම, අවුල් වූ විට G ඉහළට යයි. අස්ථායී: G ඉහළින්, mgh උපරිම. උදාසීන: G ම‍ත සමානව පිහිටයි.'},
+]},
+
+{id:'newton', num:'05', accent:'#4C6B9A', si:'නිව්ටන් නියම', en:"Newton's Laws", items:[
+  {code:'M/N01', title:'පළමු නියමය', note:'බාහිර අසමතුලිත බලයක් නොමැති නම් විරාමයේ හෝ ඒකාකාර ප්‍රවේගයෙන් වේ.'},
+  {code:'M/N04', title:'දෙවන නියමය', tex:'F=ma \\qquad F\\propto\\dfrac{mv-mu}{t}'},
+  {code:'M/N06/07', title:'තුන්වන නියමය — ක්‍රියා ප්‍රතික්‍රියා යුගලය', note:'|F1|=|F2|, විරුද්ධ දිශා, විශාලත්වයෙන් සමාන, එකවේලීයයි, වස්තු දෙකක් මත ඇතිවේ.'},
+  {code:'M/N08 (ලිෆ්ට් — 1)', title:'සිරස් චලිතය — ලිෆ්ට් තුළ බර (For MCQ)', tex:'R=m(g\\pm a)', note:'ඉහළට ත්වරණය(+): R=m(g+a). පහළට ත්වරණය(-): R=m(g-a).'},
+  {code:'M/N08 (2 — Atwood)', title:'සුමට රෝද සහිත සරල කප්පිය (Atwood Machine)', tex:'F=ma \\qquad Mg-mg=(M+m)a \\qquad a=\\dfrac{(M-m)}{(M+m)}g'},
+  {code:'M/N10-11', title:'සුමට ආනත බලයක් සමග ලිස්සීම (frictionless incline)', tex:'a=g\\tan\\theta \\ (\\text{ලක්ෂ්‍ය ආනතව}) \\qquad a=g\\sin\\theta \\ (\\text{තලය ආනතව})'},
+  {code:'M/N13', title:'තරල ප්‍රාවාහක බලය (MCQ only)', tex:'F=\\rho A V^2'},
+  {code:'M/N14/15', title:'ආවේගය (Impulse)', tex:'I=Ft=mv-mu', note:'ඒකක Ns, kgms⁻¹. F-t ප්‍රස්තාරයේ area=I.'},
+  {code:'M/N16', title:'දාම වශයෙන් සිටින කූරුල්ලො (Connected blocks)', note:'T1>T2>T3... ස්ථන්ධන ත්වරණය කිරීමට වැඩි බලයක් අවශ්‍ය නිසා (front block ට වැඩි T).'},
+  {code:'M/N17', title:'හෙලිකොප්ටරයක සංසිද්ධිය', tex:'F=\\rho A v^2', note:'තටුව මගින් වාතය මත බලය, වාතය මගින් තටුව මත ප්‍රතික්‍රියා බලය.'},
+  {code:'M/N18', title:'කූඩුවක සිටින කුරුල්ලො — R1=R2', tex:'R_1=R_2=(M+m)g'},
+]},
+
+{id:'momentum', num:'06', accent:'#B15A6E', si:'රේඛීය ගම්‍යතා සංස්ථිතිය', en:'Conservation of Linear Momentum', items:[
+  {code:'M/M01', title:'රේඛීය ගම්‍යතා සංස්ථිති නියමය', tex:'\\text{(බාහිර අසමතුලිත බලය = 0 විට)}\\quad p_{fmr}=p_{miq}'},
+  {code:'M/M08', title:'ප්‍රත්‍යාස්ථ ගැටුමක් — ගම්‍යතා හා ශක්ති සංස්ථිතික', tex:'m_1(u_1-v_1)=m_2(v_2-u_2)\\qquad m_1(u_1^2-v_1^2)=m_2(v_2^2-u_2^2)'},
+  {code:'M/M09', title:'ප්‍රත්‍යාස්ථ ගැටුමකින් පසු ප්‍රවේග', tex:'v_1=\\left(\\dfrac{m_1-m_2}{m_1+m_2}\\right)u_1+\\left(\\dfrac{2m_2}{m_1+m_2}\\right)u_2'},
+  {code:'M/M09b', title:'', tex:'v_2=\\left(\\dfrac{2m_1}{m_1+m_2}\\right)u_1+\\left(\\dfrac{m_2-m_1}{m_1+m_2}\\right)u_2'},
+  {code:'M/M06', title:'ප්‍රවේග හුවමාරු වීම', note:'ස්කන්ධ සමාන, ගැටුම ප්‍රත්‍යාස්ථ, රේඛීය ගැටුමක් වීම අවශ්‍යයි → ප්‍රවේග අන්‍යෝන්‍ය හුවමාරු වේ (u1↔u2).'},
+  {code:'M/M10', title:'ප්‍රත්‍යාස්ථ/අප්‍රත්‍යාස්ථ/පූර්ණ අප්‍රත්‍යාස්ථ ගැටුම්', note:'දෘණ ශක්ති උපරිම ප්‍රත්‍ය. විචලනය→ දෘණ මත ප්‍රතය. විචලනය → පද්ධතියේ රේ.ග.ස අවමයි.'},
+  {code:'M/M13', title:'ස්කන්ධය එකතු වන පද්ධතියක ගම්‍යතාව', tex:'P_{fmr}=(M+m)v \\qquad P_{miq}=mv+Mv'},
+  {code:'M/M15', title:'ස්මසෑම (Explosion)', note:'මුල් පද්ධතියම සැලකූ විට මෙවිට ඇති වන්නේ අභ්‍යන්තර බලයකි (රේ.ග.ස. එවිටත් වලංගුයි).'},
+  {code:'M/M17', title:'ගැටුම විසඳීමේදී', note:'අවශ්‍ය නම් එකිනෙකට ලම්භක දිශා 2කට රේ.ග.ස. දමන්න.'},
+]},
+
+{id:'work-energy', num:'07', accent:'#5A8A3E', si:'කාර්යය, ශක්තිය, ක්ෂමතාවය', en:'Work, Energy & Power', items:[
+  {code:'M/WEP01/02', title:'කාර්යය', tex:'W=FS \\qquad W=S\\times F\\cos\\theta', note:'θ = තිරස සමග කෝණය. ලම්භක බලයකින් කාර්යය සිදු නොකරයි.'},
+  {code:'M/WEP03', title:'ඒකකය', tex:'\\text{Nm} = J'},
+  {code:'M/WEP06', title:'ශක්ති ඒකක පරිවර්තන', tex:'1\\,KWh=36\\times10^5\\,J \\qquad 1\\,eV=1.6\\times10^{-19}\\,J \\qquad 1\\,Cal=4.2\\,J'},
+  {code:'M/WEP07/08', title:'(+)/(-) කාර්යය', note:'(+) කාර්යය → වස්තුවේ E↑. (-) කාර්යය → වස්තුවේ E↓ (බලයට විරුද්ධ ගමන් කිරීම).'},
+  {code:'M/WEP13', title:'යාන්ත්‍රික ශක්ති සංස්ථිති නියමය', tex:'E_P+E_K=k \\ \\text{(ස්ථාවර)}'},
+  {code:'M/WEP14/15', title:'චාන්ත්‍රික ශක්ති සූත්‍ර', tex:'E_K=\\tfrac12mV^2=\\tfrac12PV=\\tfrac12\\dfrac{P^2}{m}\\qquad E_P=mgh'},
+  {code:'M/WEP18-21', title:'ප්‍රත්‍යස්ථාවී විභව ශක්තිය (Spring PE)', tex:'F=-Ke \\qquad W=\\tfrac12Fe=\\tfrac12Ke^2=\\tfrac12\\dfrac{F^2}{K}', note:'F-e ප්‍රස්තාරයේ area = ප්‍රත්‍යා.වි.ශක්තිය, බෑවුම=k.'},
+  {code:'M/WEP26', title:'ක්ෂමතාවය (Power)', tex:'P=\\dfrac{E}{t}', note:'ඒකක: Js⁻¹ / Hp / W.'},
+  {code:'M/WEP29/30', title:'උපරිම ප්‍රවේගයේදී', tex:'F_{ප්‍රකර්ෂණ}=F_{ප්‍රතිරෝධී}\\ (a=0) \\qquad P=F_g V'},
+  {code:'M/WEP31', title:'කාර්යක්ෂමතාවය', tex:'\\eta=\\dfrac{\\text{ප්‍රයෝජන කාර්යය}}{\\text{ලබාදුන් ශක්තිය}}\\times100\\%'},
+  {code:'M/WEP22', title:'ඉහළ විසි කර පහළට වැටෙන වස්තුවක් — ශක්ති ප්‍රස්තාර', note:'E_total ස්ථාවරව පවතී; Ep+Ek=E_total සෑම විටම.'},
+]},
+
+{id:'rotational', num:'08', accent:'#7A5CA3', si:'භ්‍රමණ චලිතය', en:'Rotational Motion', items:[
+  {code:'M/R01/02', title:'කේණික චලිතය — s = rθ', tex:'s=r\\theta \\qquad \\pi\\,\\text{rad}=180^\\circ'},
+  {code:'M/R04-07', title:'කෝණික ප්‍රවේගය (ω)', tex:'\\omega=\\dfrac{\\Delta\\theta}{t}=\\dfrac{2\\pi}{T}=2\\pi f \\qquad \\theta=\\omega t\\ (\\text{ඒකාකාර}\\ \\omega)'},
+  {code:'M/R14-17', title:'කෝණික ත්වරණය (α) සහ ස්පර්ශීය ත්වරණය', tex:'\\alpha=\\dfrac{\\Delta\\omega}{t} \\qquad a_t=r\\alpha'},
+  {code:'M/R08', title:'ස්පර්ශීය ප්‍රවේගය', tex:'V=r\\omega'},
+  {code:'M/R18-22', title:'කෝණික චලිත සමීකරණ', tex:'\\omega_2=\\omega_1+\\alpha t\\quad \\theta=\\left(\\dfrac{\\omega_1+\\omega_2}{2}\\right)t\\quad \\theta=\\omega_1t+\\tfrac12\\alpha t^2\\quad \\omega_2^2=\\omega_1^2+2\\alpha\\theta'},
+  {code:'M/R33-38', title:'ජඩත්ව සුර්ණය (Moment of Inertia)', note:'ලක්ෂ්‍යාකාර/තුනී වළල්ල: I=Mr² · තැටිය/ඝන සිලින්ඩරය: I=½Mr² · ඝන ගෝලය: I=2/5Mr² · කුහර ගෝලය: I=2/3Mr² · දණ්ඩ (මධ්‍ය ඔස්සේ): I=1/12ML² · දණ්ඩ (කෙළවර ඔස්සේ): I=1/3ML²'},
+  {code:'M/R39', title:'කොටසක් ඉවත් කළ වස්තුවක I', tex:'I_{ඉතිරි}=I_{මුළු}-I_{ඉවත}'},
+  {code:'M/R40', title:'විභ්‍රමණ අරය', tex:'I=Mk^2'},
+  {code:'M/R41', title:'කෝණික ගම්‍යතාව (L)', tex:'L=mvr=I\\omega'},
+  {code:'M/R43-46', title:'ආඝූර්ණය (Torque) — කෝණික දෙවන නියමය', tex:'\\tau=I\\alpha=Fr'},
+  {code:'M/R49', title:'භ්‍රමණ ගතික ශක්තිය', tex:'E=\\tfrac12L\\omega=\\tfrac12\\dfrac{L^2}{I}=\\tfrac12I\\omega^2'},
+  {code:'M/R50/51', title:'භ්‍රමණ කාර්යය සහ ක්ෂමතාව', tex:'W=\\tau\\theta \\qquad P=\\tau\\omega'},
+  {code:'M/R57', title:'ආනතියක් දිගේ පෙරළෙන වස්තුවක ත්වරණය', tex:'a=\\dfrac{g\\sin\\theta}{1+C}', note:'C = අවශ්‍ය කරන ජඩත්ව සුර්ණයේ අවකමැත්ත (I=Cmr²).'},
+  {code:'M/R59', title:'රේඛීය චලිත සමීකරණය දාළා a සොයන්න', note:'↑a නම් වැඩි ශක්තියක් N%uKhට → f.g.å/re.g.å > 1. ↓a නම් අඩු ශක්තියක් → f.g.å/re.g.å < 1.'},
+  {code:'M/R63', title:'කෝණික ගම්‍යතා සංස්ථිතිය', tex:'I_1\\omega_1=I_2\\omega_2', note:'බාහිර අසමතුලිත ව්‍යාවර්තයක් නොමැති නම්.'},
+  {code:'M/R60', title:'රුඑ ආනත තලයක වස්තුවක් නොලිස්සා පෙරළීමට පැවතිය හැකි උපරිම ආනතිය', tex:'F_s=\\mu\\,mg\\cos\\theta', note:'θ↑ → cosθ↓ → Fs↓ (සීමාකාරී අවස්ථාවේ).'},
+]},
+
+{id:'circular', num:'09', accent:'#3E7FB1', si:'වෘත්ත චලිතය', en:'Circular Motion', items:[
+  {code:'M/C01-08', title:'මූලික සූත්‍ර', tex:'s=r\\theta \\qquad \\omega=\\dfrac{2\\pi}{T}=2\\pi f \\qquad V=r\\omega \\qquad a_r=\\dfrac{V^2}{r}=r\\omega^2=V\\omega'},
+  {code:'M/C09', title:'සම්පුෂ්ජ ත්වරණය', tex:'a_{සම්පුෂ්ජ}=\\sqrt{a_r^2+a_t^2}', note:'ඒකාකාර ප්‍රවේගවලදී at=0, a_සම්පුෂ්ජ=ar.'},
+  {code:'M/C12', title:'කේතු අවලම්බය (Conical Pendulum)', tex:'\\tan\\theta=\\dfrac{V^2}{rg}'},
+  {code:'M/C13', title:'සුමට ආනත වංගුව (Frictionless banked road)', tex:'\\tan\\theta=\\dfrac{V^2}{rg}'},
+  {code:'M/C16', title:'භ්‍රමණය වන මේසයක වස්තුවක උපරිම ප්‍රවේගය', tex:'V_{max}=\\sqrt{\\mu_s r g}'},
+  {code:'M/C17', title:'රළු තිරස් වංගුව', tex:'V_{max}=\\sqrt{\\mu_s r g}', note:'μs සහ r වැඩිකළ හැක.'},
+  {code:'M/C22/23', title:'ඝර්ෂණය සහිත ආනත වංගුවක උපරිම/අවම ප්‍රවේග', tex:'V_{max}=\\sqrt{rg\\left(\\dfrac{\\tan\\theta+\\mu_s}{1-\\mu_s\\tan\\theta}\\right)}\\qquad V_{min}=\\sqrt{rg\\left(\\dfrac{\\tan\\theta-\\mu_s}{1+\\mu_s\\tan\\theta}\\right)}'},
+  {code:'M/C26/30', title:'සිරස් වෘත්ත චලිතය — Vmin, Vmax, Top point', tex:'T=0,\\ V=\\sqrt{rg}\\ \\text{(Wmssu Wfiao S)}'},
+  {code:'M/C34/35', title:'ර‍ුඑ තලයක වස්තුවක් නොලිස්සා ලූප් එකක් සම්පූර්ණ කිරීමට අවම උස', tex:'h_{min}=\\dfrac{5}{2}r', note:'A ලක්ෂ්‍යයේදී R=0 → mg=mv²/r → v²=rg.'},
+  {code:'M/C25', title:'මාරක ළිඳක මෝටර් රථයක චලිතය (Death well)', tex:'V_{max}=\\sqrt{\\mu_s rg}', note:'ලංඝන Fs=mg → සමතුලිතතාවය.'},
+  {code:'M/C20', title:'දුන්නකට සම්බන්ධ කර ඇති අංශුවක වෘත්තාකාර චලිතය', tex:'Ke=m\\!\\left(\\dfrac{V^2}{d_1+e}\\right)'},
+]},
+
+{id:'hydrostatics', num:'10', accent:'#2D7DD2', si:'ද්‍රවස්ථිතිය', en:'Hydrostatics', items:[
+  {code:'M/H02', title:'සාපේක්ෂ ඝනත්වය', tex:'D=\\dfrac{\\rho_l}{\\rho_w}'},
+  {code:'M/H03/04', title:'ඝනත්වය — ස්කන්ධ අනුපාතය', tex:'D=\\dfrac{m}{m_w}'},
+  {code:'M/H08/09', title:'ස්තර ගණනාවක් සහිත ද්‍රවස්ථිතික පීඩනය', tex:'P=h\\rho g \\qquad P=h_1\\rho_1g+h_2\\rho_2g+h_3\\rho_3g'},
+  {code:'M/H10', title:'නිරපේක්ෂ පීඩනය', tex:'P=\\pi+h\\rho g', note:'π = වායුගෝලීය පීඩනය = 76 cmHg = 1 atm.'},
+  {code:'M/H21', title:'පැස්කල්ගේ පීඩන සම්ප්‍රේෂණ මූලධර්මය', tex:'F\\propto A', note:'බාහිර පීඩනය සෑම තැනකම සමානව දෙනු ලැබේ (encedge fluid).'},
+  {code:'M/H23/24', title:'උඩුකුරු තෙරපුම (Upthrust)', tex:'u=F_2-F_1=V\\rho g', note:'g=ත්වරණය, V=ගිලුණු පරිමාව/විස්ථාපිත තරල පරිමාව.'},
+  {code:'M/H25', title:'ආකිමිඩීස් නියමය', note:'නිශ්චල, සමජාතීය, අසම්පීඩ්‍ය තරලයක ගිලුණු වස්තුවක් මත ක්‍රියාකරන u, විස්ථාපිත තරල පරිමාවේ බරට සමාන වේ.'},
+  {code:'M/H26/27', title:'ප්ලවම් නියමය', tex:'u=mg', note:'නිශ්චල, අසම්පීඩ්‍ය, සමජාතීය තරලයක ගිලී ඇති විට.'},
+  {code:'M/H35', title:'u තලය — ඉස්සෙල්ලාම නලයට දාන්නේ සාන්ද්‍රතාව වැඩි ද්‍රවය එනම් නැති වුනොත්', note:'d=0.8cm/1cm ratio (density comparison illustration).'},
+  {code:'M/H36-39', title:'බැරෝමීටර සහ හෙයාර් උපකරණ', tex:'h_1\\rho_1=h_2\\rho_2\\qquad \\rho\\propto\\dfrac{1}{h}'},
+  {code:'M/H42', title:'ඝනත්ව කුප්පිය (Specific Gravity Bottle)', tex:'D=\\dfrac{\\text{වස්තුවේ ස්කන්ධය}}{\\text{එම පරිමාවේම ජල ස්කන්ධය}}'},
+]},
+
+{id:'fluid-dynamics', num:'11', accent:'#1B9C85', si:'තරලගති විද්‍යාව', en:'Fluid Dynamics', items:[
+  {code:'M/F01-03', title:'ප්‍රවාහ වර්ග', note:'ආනාකූල (streamline), අනවතර (uniform velocity at a point), අඛණ්ඩතාවේ ලක්ෂණ.'},
+  {code:'M/F06', title:'අඛණ්ඩතාවේ සමීකරණය (Equation of Continuity)', tex:'A_1V_1=A_2V_2'},
+  {code:'M/F07', title:'බර්නූලි ප්‍රමේයය', tex:'P+\\rho gh+\\tfrac12\\rho V^2=K', note:'ස්ථිතික පීඩනය + ගණිත පීඩනය + චාලක පීඩනය = නියතයකි.'},
+  {code:'M/F09/10', title:'ගැටළු විසඳීමේදී — ද්‍රව/වායු ප්‍රවේගය', tex:'V_1=\\sqrt{2\\Delta hg}\\qquad V_1=\\sqrt{\\dfrac{2\\Delta hdg}{\\rho}}'},
+  {code:'M/F11/12', title:'පිටෝ නළය (Pitot Tube)', tex:'V_1=\\sqrt{2\\Delta hg}\\qquad V_1=\\sqrt{\\dfrac{2\\Delta hdg}{\\rho}}'},
+  {code:'M/F17', title:'ගුවන් යානයක වළිතය — ලිෆ්ට් බලය', tex:'L=\\Delta P\\,A=\\tfrac12 m\\left(V_{x1}^2-V_{y1}^2\\right)A', note:'V↑ → Ek↑ → P↓ (ඉහළ දිගේ). L≥mg විට යානය ඉහළ යයි.'},
+  {code:'M/F20', title:'සයිෆනයක ක්‍රියාකාරීත්වය', tex:'V=\\sqrt{2gh_2}'},
+  {code:'M/F21/22', title:'ටැංකියක සිදුරකින් තරලයක් වැගිරීම — පරාසය', tex:'R=2\\sqrt{h_1\\times h_2}=2\\sqrt{h(H-h)}\\qquad R_{max}=H\\ (h_1=h_2=\\tfrac{H}{2})'},
+  {code:'M/F32', title:'සිරස් නළයක් තුළින් ගලන ද්‍රව ප්‍රවාහය', tex:'A_A=A_B\\Rightarrow V_A=V_B\\Rightarrow P_B>P_A', note:'Bernoulli + උස වෙනස (ρgh) අනුව.'},
+  {code:'M/F33', title:'වාතය තුළ ඉහත ජලකදන් වැටෙන විට', tex:'P_A=P_B=\\pi', note:'(වායුගෝලීයට විවෘත නිසා).'},
+  {code:'M/F34', title:'තිරස් නළයක් තුළින් ඒකාකාර ප්‍රවාහයක්', note:'A, V, Ep, Ek, P සියල්ල ස්ථානය දිගේ නොවෙනස්ව පවතී.'},
+]},
+];
+
+/* ===================== CALCULATORS ===================== */
+const calcTab = {id:'calculators', num:'✦', si:'ගණකාරක', en:'Calculators'};
+
+/* ===================== RENDER ===================== */
+const tabBar = document.getElementById('tabBar');
+const mainArea = document.getElementById('mainArea');
+let activeTab = chapters[0].id;
+let searchTerm = '';
+
+function buildTabs(){
+  tabBar.innerHTML = '';
+  chapters.forEach(ch=>{
+    const b = document.createElement('button');
+    b.className = 'tab-btn' + (ch.id===activeTab? ' active':'');
+    b.innerHTML = `<span class="num">${ch.num}</span>${ch.si}`;
+    b.onclick = ()=>{ activeTab = ch.id; render(); };
+    tabBar.appendChild(b);
+  });
+  const cb = document.createElement('button');
+  cb.className = 'tab-btn calc' + (activeTab==='calculators'? ' active':'');
+  cb.innerHTML = `<span class="num">✦</span>ගණකාරක`;
+  cb.onclick = ()=>{ activeTab='calculators'; render(); };
+  tabBar.appendChild(cb);
+
+  const sb = document.createElement('button');
+  sb.className = 'tab-btn sim' + (activeTab==='simulations'? ' active':'');
+  sb.innerHTML = `<span class="num">🧪</span>සිමියුලේෂන්`;
+  sb.onclick = ()=>{ activeTab='simulations'; render(); };
+  tabBar.appendChild(sb);
+}
+
+function matches(item, ch, term){
+  if(!term) return true;
+  const hay = (item.code+' '+item.title+' '+(item.note||'')+' '+(item.tex||'')+' '+ch.si+' '+ch.en).toLowerCase();
+  return hay.includes(term.toLowerCase());
+}
+
+function renderChapter(ch){
+  const wrap = document.createElement('div');
+  const revisionBanner = document.createElement('div');
+  if(document.body.classList.contains('revision-mode')){
+    revisionBanner.className = 'revision-banner';
+    revisionBanner.innerHTML = `<span>🎯 MCQ Revision — සූත්‍රය මත click කර පෙන්වන්න</span>`;
+    wrap.appendChild(revisionBanner);
+  }
+
+  const head = document.createElement('div');
+  head.className = 'chapter-head';
+  head.innerHTML = `<span class="chnum">${ch.num}</span><h2>${ch.si}</h2><span class="en">${ch.en}</span>`;
+  wrap.appendChild(head);
+
+  const filtered = ch.items.filter(it=>matches(it, ch, searchTerm));
+  if(filtered.length===0){
+    const e = document.createElement('div');
+    e.className='empty-state';
+    e.textContent = 'මෙම පරිච්ඡේදයේ ගැළපෙන ප්‍රතිඵල නොමැත.';
+    wrap.appendChild(e);
+  }
+
+  filtered.forEach((it,idx)=>{
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.setProperty('--accent', ch.accent);
+    let inner = `<div class="card-top"><span class="badge">${it.code}</span><h3>${it.title}</h3></div>`;
+    if(it.note) inner += `<p class="note">${it.note}</p>`;
+    if(it.tex) inner += `<div class="formula-box tex">\\[${it.tex}\\]</div>`;
+    if(it.tex) inner += `<button class="hide-toggle">👁 පෙන්වන්න / සඟවන්න</button>`;
+    card.innerHTML = inner;
+    if(it.tex){
+      card.addEventListener('click', (e)=>{
+        if(document.body.classList.contains('revision-mode')){
+          card.classList.toggle('revealed');
+        }
+      });
+    }
+    wrap.appendChild(card);
+  });
+
+  return wrap;
+}
+
+/* ---------- calculators ---------- */
+function renderCalculators(){
+  const wrap = document.createElement('div');
+  wrap.innerHTML = `<div class="chapter-head"><span class="chnum">✦</span><h2>යාන්ත්‍ර ගණකාරක</h2><span class="en">Mechanics Calculators</span></div>`;
+
+  // 1. Vector resultant
+  const c1 = document.createElement('div');
+  c1.className='calc-card';
+  c1.innerHTML = `
+    <h3>🧭 දෛශික සම්පුෂ්ජය (Vector Resultant)</h3>
+    <div class="sub">R = √(P² + Q² + 2PQ cosθ) — ආනත දෛශික 02ක් සඳහා</div>
+    <div class="field-row">
+      <div class="field"><label>P</label><input type="number" id="vp" value="5"></div>
+      <div class="field"><label>Q</label><input type="number" id="vq" value="4"></div>
+      <div class="field"><label>θ (degrees)</label><input type="number" id="vtheta" value="60"></div>
+    </div>
+    <button class="calc-btn" id="vcalcBtn">ගණනය කරන්න</button>
+    <div class="result-box empty" id="vresult">ප්‍රතිඵලය මෙහි පෙන්වයි…</div>
+  `;
+  wrap.appendChild(c1);
+
+  // 2. Friction limit
+  const c2 = document.createElement('div');
+  c2.className='calc-card';
+  c2.innerHTML = `
+    <h3>🧱 සීමාකාරී ඝර්ෂණය (Friction Limit)</h3>
+    <div class="sub">F = μR — වස්තුවක් චලනය කිරීමට අවශ්‍ය අවම බලය</div>
+    <div class="field-row">
+      <div class="field"><label>μ (coefficient)</label><input type="number" step="0.01" id="fmu" value="0.4"></div>
+      <div class="field"><label>m (kg)</label><input type="number" id="fm" value="10"></div>
+      <div class="field"><label>g (ms⁻²)</label><input type="number" id="fg" value="9.8"></div>
+    </div>
+    <button class="calc-btn" id="fcalcBtn">ගණනය කරන්න</button>
+    <div class="result-box empty" id="fresult">ප්‍රතිඵලය මෙහි පෙන්වයි…</div>
+  `;
+  wrap.appendChild(c2);
+
+  // 3. Projectile / motion equations
+  const c3 = document.createElement('div');
+  c3.className='calc-card';
+  c3.innerHTML = `
+    <h3>🚀 ප්‍රක්ෂේපණ චලිතය (Projectile Motion)</h3>
+    <div class="sub">h_max = u²sin²θ/2g,  R = u²sin2θ/g,  T = 2u sinθ/g</div>
+    <div class="field-row">
+      <div class="field"><label>u (ms⁻¹)</label><input type="number" id="pu" value="20"></div>
+      <div class="field"><label>θ (degrees)</label><input type="number" id="ptheta" value="45"></div>
+      <div class="field"><label>g (ms⁻²)</label><input type="number" id="pg" value="9.8"></div>
+    </div>
+    <button class="calc-btn" id="pcalcBtn">ගණනය කරන්න</button>
+    <div class="result-box empty" id="presult">ප්‍රතිඵලය මෙහි පෙන්වයි…</div>
+  `;
+  wrap.appendChild(c3);
+
+  // 4. equations of motion (SUVAT) solver
+  const c4 = document.createElement('div');
+  c4.className='calc-card';
+  c4.innerHTML = `
+    <h3>📐 චලිත සමීකරණ (u, v, a, s, t)</h3>
+    <div class="sub">දන්නා අගය 3ක් යොදන්න (හිස්ව තැබූ 2 ක් ගණනය කෙරේ). v=u+at, s=ut+½at², v²=u²+2as</div>
+    <div class="field-row">
+      <div class="field"><label>u</label><input type="number" id="su"></div>
+      <div class="field"><label>v</label><input type="number" id="sv"></div>
+      <div class="field"><label>a</label><input type="number" id="sa"></div>
+      <div class="field"><label>t</label><input type="number" id="st"></div>
+    </div>
+    <button class="calc-btn" id="scalcBtn">ගණනය කරන්න</button>
+    <div class="result-box empty" id="sresult">u, v, a, t වලින් ඕනෑම 3ක් සපයන්න…</div>
+  `;
+  wrap.appendChild(c4);
+
+  return wrap;
+}
+
+function attachCalcListeners(){
+  const vBtn = document.getElementById('vcalcBtn');
+  if(vBtn) vBtn.onclick = ()=>{
+    const P=parseFloat(document.getElementById('vp').value)||0;
+    const Q=parseFloat(document.getElementById('vq').value)||0;
+    const th=(parseFloat(document.getElementById('vtheta').value)||0)*Math.PI/180;
+    const R=Math.sqrt(P*P+Q*Q+2*P*Q*Math.cos(th));
+    const alpha = Math.atan2(Q*Math.sin(th), P+Q*Math.cos(th))*180/Math.PI;
+    const box=document.getElementById('vresult');
+    box.classList.remove('empty');
+    box.innerHTML = `<b>R = ${R.toFixed(3)}</b> &nbsp; | &nbsp; α (P සිට) = ${alpha.toFixed(2)}°`;
+  };
+
+  const fBtn = document.getElementById('fcalcBtn');
+  if(fBtn) fBtn.onclick = ()=>{
+    const mu=parseFloat(document.getElementById('fmu').value)||0;
+    const m=parseFloat(document.getElementById('fm').value)||0;
+    const g=parseFloat(document.getElementById('fg').value)||9.8;
+    const R=m*g;
+    const F=mu*R;
+    const box=document.getElementById('fresult');
+    box.classList.remove('empty');
+    box.innerHTML = `සාමාන්‍ය ප්‍රතික්‍රියාව R = mg = <b>${R.toFixed(2)} N</b><br>සීමාකාරී ඝර්ෂණය F = μR = <b>${F.toFixed(2)} N</b>`;
+  };
+
+  const pBtn = document.getElementById('pcalcBtn');
+  if(pBtn) pBtn.onclick = ()=>{
+    const u=parseFloat(document.getElementById('pu').value)||0;
+    const th=(parseFloat(document.getElementById('ptheta').value)||0)*Math.PI/180;
+    const g=parseFloat(document.getElementById('pg').value)||9.8;
+    const hmax = (u*u*Math.sin(th)*Math.sin(th))/(2*g);
+    const R = (u*u*Math.sin(2*th))/g;
+    const T = (2*u*Math.sin(th))/g;
+    const box=document.getElementById('presult');
+    box.classList.remove('empty');
+    box.innerHTML = `h_max = <b>${hmax.toFixed(2)} m</b> &nbsp;|&nbsp; Range R = <b>${R.toFixed(2)} m</b> &nbsp;|&nbsp; Time of flight T = <b>${T.toFixed(2)} s</b>`;
+  };
+
+  const sBtn = document.getElementById('scalcBtn');
+  if(sBtn) sBtn.onclick = ()=>{
+    let u=document.getElementById('su').value, v=document.getElementById('sv').value,
+        a=document.getElementById('sa').value, t=document.getElementById('st').value;
+    u=u===''?null:parseFloat(u); v=v===''?null:parseFloat(v);
+    a=a===''?null:parseFloat(a); t=t===''?null:parseFloat(t);
+    const box=document.getElementById('sresult');
+    box.classList.remove('empty');
+    const known=[u,v,a,t].filter(x=>x!==null).length;
+    if(known<3){ box.innerHTML='අවම වශයෙන් අගයන් 3ක් යොදන්න.'; return; }
+    // solve missing value
+    if(u===null && v!==null && a!==null && t!==null) u = v - a*t;
+    else if(v===null && u!==null && a!==null && t!==null) v = u + a*t;
+    else if(a===null && u!==null && v!==null && t!==null) a = (v-u)/t;
+    else if(t===null && u!==null && v!==null && a!==null) t = (v-u)/a;
+    const s = (u!==null && v!==null && t!==null) ? ((u+v)/2)*t : null;
+    box.innerHTML = `u=<b>${u!==null?u.toFixed(2):'-'}</b>, v=<b>${v!==null?v.toFixed(2):'-'}</b>, a=<b>${a!==null?a.toFixed(2):'-'}</b>, t=<b>${t!==null?t.toFixed(2):'-'}</b>` + (s!==null? ` &nbsp;|&nbsp; s = <b>${s.toFixed(2)} m</b>`:'');
+  };
+}
+
+let simAnimFrames = [];
+function stopAllSims(){
+  simAnimFrames.forEach(id=>cancelAnimationFrame(id));
+  simAnimFrames = [];
+}
+
+function render(){
+  stopAllSims();
+  buildTabs();
+  mainArea.innerHTML = '';
+  if(activeTab==='calculators'){
+    mainArea.appendChild(renderCalculators());
+    attachCalcListeners();
+    return;
+  }
+  if(activeTab==='simulations'){
+    mainArea.appendChild(renderSimulations());
+    initAllSims();
+    return;
+  }
+  const ch = chapters.find(c=>c.id===activeTab);
+  mainArea.appendChild(renderChapter(ch));
+  if(window.renderMathInElement){
+    renderMathInElement(mainArea, {
+      delimiters:[{left:"\\[", right:"\\]", display:true},{left:"\\(", right:"\\)", display:false}],
+      throwOnError:false
+    });
+  }
+}
+
+/* ===================== SIMULATIONS ===================== */
+function renderSimulations(){
+  const wrap = document.createElement('div');
+  wrap.innerHTML = `<div class="chapter-head"><span class="chnum">🧪</span><h2>යාන්ත්‍ර සිමියුලේෂන්</h2><span class="en">Interactive Simulations</span></div>`;
+
+  // 1. Projectile motion
+  const s1 = document.createElement('div');
+  s1.className = 'calc-card';
+  s1.innerHTML = `
+    <h3>🚀 ප්‍රක්ෂේපණ චලිතය</h3>
+    <div class="sub">u සහ θ වෙනස් කර ත්‍රිරස් පථය සජීවීව බලන්න</div>
+    <div class="field-row">
+      <div class="field"><label>u (ms⁻¹)</label><input type="number" id="simPu" value="22" min="1" max="45"></div>
+      <div class="field"><label>θ (°)</label><input type="number" id="simPtheta" value="50" min="5" max="85"></div>
+      <div class="field"><label>g (ms⁻²)</label><input type="number" id="simPg" value="9.8" step="0.1"></div>
+    </div>
+    <div class="sim-canvas-wrap"><canvas id="simProjCanvas" width="600" height="260"></canvas></div>
+    <div class="sim-controls">
+      <button class="sim-btn" id="simProjPlay">▶ ධාවනය</button>
+      <button class="sim-btn secondary" id="simProjReset">↺ යළි සකසන්න</button>
+    </div>
+    <div class="readout" id="simProjReadout">t=0.00s  x=0.00m  y=0.00m</div>
+  `;
+  wrap.appendChild(s1);
+
+  // 2. Incline with friction
+  const s2 = document.createElement('div');
+  s2.className='calc-card';
+  s2.innerHTML = `
+    <h3>🧱 ආනත තලය + ඝර්ෂණය</h3>
+    <div class="sub">θ, μ වෙනස් කර බ්ලොක් එක ලිස්සයිද / ස්ථිතිකව රැඳේද බලන්න</div>
+    <div class="field-row">
+      <div class="field"><label>θ (°)</label><input type="number" id="simIncTheta" value="30" min="0" max="70"></div>
+      <div class="field"><label>μ</label><input type="number" id="simIncMu" step="0.05" value="0.25" min="0" max="1.2"></div>
+    </div>
+    <div class="sim-canvas-wrap"><canvas id="simIncCanvas" width="600" height="260"></canvas></div>
+    <div class="sim-controls">
+      <button class="sim-btn" id="simIncPlay">▶ ධාවනය</button>
+      <button class="sim-btn secondary" id="simIncReset">↺ යළි සකසන්න</button>
+    </div>
+    <div id="simIncStatus"></div>
+    <div class="readout" id="simIncReadout">a = —</div>
+  `;
+  wrap.appendChild(s2);
+
+  // 3. Atwood machine
+  const s3 = document.createElement('div');
+  s3.className='calc-card';
+  s3.innerHTML = `
+    <h3>⚖️ Atwood යන්ත්‍රය (සුමට කප්පිය)</h3>
+    <div class="sub">M, m වෙනස් කර පද්ධතියේ ත්වරණය බලන්න — a = (M−m)g/(M+m)</div>
+    <div class="field-row">
+      <div class="field"><label>M (kg)</label><input type="number" id="simAtM" value="6" min="0.5" step="0.5"></div>
+      <div class="field"><label>m (kg)</label><input type="number" id="simAtm" value="4" min="0.5" step="0.5"></div>
+    </div>
+    <div class="sim-canvas-wrap"><canvas id="simAtCanvas" width="600" height="260"></canvas></div>
+    <div class="sim-controls">
+      <button class="sim-btn" id="simAtPlay">▶ ධාවනය</button>
+      <button class="sim-btn secondary" id="simAtReset">↺ යළි සකසන්න</button>
+    </div>
+    <div class="readout" id="simAtReadout">a = —   T = —</div>
+  `;
+  wrap.appendChild(s3);
+
+  // 4. 1D Collisions
+  const s4 = document.createElement('div');
+  s4.className='calc-card';
+  s4.innerHTML = `
+    <h3>💥 රේඛීය ගැටුම් සිමියුලේෂනය</h3>
+    <div class="sub">ප්‍රත්‍යාස්ථ (elastic) හෝ පූර්ණ අප්‍රත්‍යාස්ථ (inelastic) ගැටුමක් තෝරන්න</div>
+    <div class="field-row">
+      <div class="field"><label>m₁ (kg)</label><input type="number" id="simColM1" value="2" min="0.5" step="0.5"></div>
+      <div class="field"><label>u₁ (ms⁻¹)</label><input type="number" id="simColU1" value="4" step="0.5"></div>
+      <div class="field"><label>m₂ (kg)</label><input type="number" id="simColM2" value="3" min="0.5" step="0.5"></div>
+      <div class="field"><label>u₂ (ms⁻¹)</label><input type="number" id="simColU2" value="-1" step="0.5"></div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>ගැටුම් වර්ගය</label>
+        <select id="simColType">
+          <option value="elastic">ප්‍රත්‍යාස්ථ (Elastic)</option>
+          <option value="inelastic">පූර්ණ අප්‍රත්‍යාස්ථ (Inelastic)</option>
+        </select>
+      </div>
+    </div>
+    <div class="sim-canvas-wrap"><canvas id="simColCanvas" width="600" height="200"></canvas></div>
+    <div class="sim-controls">
+      <button class="sim-btn" id="simColPlay">▶ ධාවනය</button>
+      <button class="sim-btn secondary" id="simColReset">↺ යළි සකසන්න</button>
+    </div>
+    <div class="readout" id="simColReadout">ගැටුමට පෙර: v₁=u₁, v₂=u₂</div>
+  `;
+  wrap.appendChild(s4);
+
+  // 5. Spring SHM
+  const s5 = document.createElement('div');
+  s5.className='calc-card';
+  s5.innerHTML = `
+    <h3>🌀 වසන්තයේ දෝලනය (SHM) — Ep/Ek</h3>
+    <div class="sub">k, m, A වෙනස් කර Ep + Ek = නියතය බලන්න</div>
+    <div class="field-row">
+      <div class="field"><label>k (N/m)</label><input type="number" id="simSpK" value="40" min="1" step="1"></div>
+      <div class="field"><label>m (kg)</label><input type="number" id="simSpM" value="2" min="0.2" step="0.2"></div>
+      <div class="field"><label>A (m)</label><input type="number" id="simSpA" value="0.35" min="0.05" step="0.05"></div>
+    </div>
+    <div class="sim-canvas-wrap"><canvas id="simSpCanvas" width="600" height="260"></canvas></div>
+    <div class="sim-controls">
+      <button class="sim-btn" id="simSpPlay">▶ ධාවනය</button>
+      <button class="sim-btn secondary" id="simSpReset">↺ යළි සකසන්න</button>
+    </div>
+    <div class="bar-meter-row"><span class="lbl">Ep</span><div class="bar-meter"><div class="bar-fill" id="simSpEpBar" style="width:0%;background:#F2A93B"></div></div></div>
+    <div class="bar-meter-row"><span class="lbl">Ek</span><div class="bar-meter"><div class="bar-fill" id="simSpEkBar" style="width:0%;background:#2FA6A6"></div></div></div>
+    <div class="readout" id="simSpReadout">T = — s   ω = — rad/s</div>
+  `;
+  wrap.appendChild(s5);
+
+  return wrap;
+}
+
+function initAllSims(){
+  initProjectileSim();
+  initInclineSim();
+  initAtwoodSim();
+  initCollisionSim();
+  initSpringSim();
+}
+
+/* ---- 1. Projectile ---- */
+function initProjectileSim(){
+  const canvas = document.getElementById('simProjCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height, groundY = H - 30;
+  let running=false, t=0, trail=[];
+
+  function paramsAndCompute(){
+    const u = parseFloat(document.getElementById('simPu').value)||20;
+    const thetaDeg = parseFloat(document.getElementById('simPtheta').value)||45;
+    const g = parseFloat(document.getElementById('simPg').value)||9.8;
+    const theta = thetaDeg*Math.PI/180;
+    const T = (2*u*Math.sin(theta))/g;
+    const R = (u*u*Math.sin(2*theta))/g;
+    const hmax = (u*u*Math.sin(theta)*Math.sin(theta))/(2*g);
+    const px = Math.max(3, Math.min(18, (W-60)/Math.max(R,1)));
+    return {u,theta,g,T,R,hmax,px};
+  }
+
+  function draw(p){
+    ctx.clearRect(0,0,W,H);
+    // ground
+    ctx.strokeStyle = getCss('--line'); ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(0,groundY); ctx.lineTo(W,groundY); ctx.stroke();
+    // launch point
+    const x0=30;
+    // trajectory guide (dashed max height / range)
+    ctx.strokeStyle='rgba(150,150,150,.35)'; ctx.setLineDash([4,4]);
+    const hmaxPx = groundY - p.hmax*p.px;
+    ctx.beginPath(); ctx.moveTo(0,hmaxPx); ctx.lineTo(W,hmaxPx); ctx.stroke();
+    ctx.setLineDash([]);
+    // trail
+    ctx.strokeStyle = getCss('--sim') || '#E1556B'; ctx.lineWidth=2;
+    ctx.beginPath();
+    trail.forEach((pt,i)=>{ i===0? ctx.moveTo(pt.x,pt.y): ctx.lineTo(pt.x,pt.y); });
+    ctx.stroke();
+    // ball
+    if(trail.length){
+      const last = trail[trail.length-1];
+      ctx.fillStyle = getCss('--sim') || '#E1556B';
+      ctx.beginPath(); ctx.arc(last.x,last.y,7,0,Math.PI*2); ctx.fill();
+    }
+  }
+
+  function reset(){
+    running=false; t=0; trail=[];
+    const p = paramsAndCompute();
+    draw(p);
+    document.getElementById('simProjReadout').innerHTML =
+      `t=<b>0.00</b>s &nbsp; h_max=<b>${p.hmax.toFixed(2)}</b>m &nbsp; R=<b>${p.R.toFixed(2)}</b>m &nbsp; T=<b>${p.T.toFixed(2)}</b>s`;
+  }
+
+  function step(){
+    const p = paramsAndCompute();
+    if(t> p.T){ running=false; return; }
+    const x = p.u*Math.cos(p.theta)*t;
+    const y = p.u*Math.sin(p.theta)*t - 0.5*p.g*t*t;
+    const cx = 30 + x*p.px, cy = groundY - Math.max(y,0)*p.px;
+    trail.push({x:cx,y:cy});
+    draw(p);
+    document.getElementById('simProjReadout').innerHTML =
+      `t=<b>${t.toFixed(2)}</b>s &nbsp; x=<b>${x.toFixed(2)}</b>m &nbsp; y=<b>${Math.max(y,0).toFixed(2)}</b>m &nbsp; h_max=<b>${p.hmax.toFixed(2)}</b>m &nbsp; R=<b>${p.R.toFixed(2)}</b>m`;
+    t += 0.035;
+    if(running){ const id = requestAnimationFrame(step); simAnimFrames.push(id); }
+  }
+
+  document.getElementById('simProjPlay').onclick = ()=>{
+    if(running) return;
+    if(t===0) trail=[];
+    running=true; step();
+  };
+  document.getElementById('simProjReset').onclick = reset;
+  reset();
+}
+
+/* ---- 2. Incline + Friction ---- */
+function initInclineSim(){
+  const canvas = document.getElementById('simIncCanvas');
+  const ctx = canvas.getContext('2d');
+  const W=canvas.width, H=canvas.height;
+  let running=false, t=0;
+
+  function compute(){
+    const thetaDeg = parseFloat(document.getElementById('simIncTheta').value)||30;
+    const mu = parseFloat(document.getElementById('simIncMu').value)||0.25;
+    const theta = thetaDeg*Math.PI/180;
+    const g=9.8;
+    const willMove = Math.tan(theta) > mu;
+    const a = willMove ? g*(Math.sin(theta)-mu*Math.cos(theta)) : 0;
+    return {thetaDeg,theta,mu,willMove,a};
+  }
+
+  const baseX=40, baseY=H-30, inclineLen=460;
+
+  function draw(p, s){
+    ctx.clearRect(0,0,W,H);
+    const topX = baseX, topY = baseY - inclineLen*Math.sin(p.theta);
+    const botX = baseX + inclineLen*Math.cos(p.theta), botY = baseY;
+    // incline triangle
+    ctx.fillStyle='rgba(150,150,150,.15)';
+    ctx.beginPath(); ctx.moveTo(topX,topY); ctx.lineTo(botX,botY); ctx.lineTo(topX,botY); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle=getCss('--text-soft'); ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(topX,topY); ctx.lineTo(botX,botY); ctx.lineTo(topX,botY); ctx.closePath(); ctx.stroke();
+    // block position along incline (distance s from top)
+    const bx = topX + s*Math.cos(p.theta);
+    const by = topY + s*Math.sin(p.theta);
+    const size=22;
+    ctx.save();
+    ctx.translate(bx,by); ctx.rotate(p.theta);
+    ctx.fillStyle = getCss('--sim')||'#E1556B';
+    ctx.fillRect(-size/2,-size,size,size);
+    ctx.restore();
+    // angle label
+    ctx.fillStyle = getCss('--text'); ctx.font='13px sans-serif';
+    ctx.fillText(p.thetaDeg.toFixed(0)+'°', topX+30, botY-8);
+  }
+
+  function reset(){
+    running=false; t=0;
+    const p = compute();
+    draw(p,0);
+    const statusEl = document.getElementById('simIncStatus');
+    if(p.willMove){
+      statusEl.innerHTML = `<span class="status-pill warn">⚠ ලිස්සයි (tanθ > μ)</span>`;
+    } else {
+      statusEl.innerHTML = `<span class="status-pill ok">✔ ස්ථිතිකව රැඳේ (tanθ ≤ μ)</span>`;
+    }
+    document.getElementById('simIncReadout').innerHTML = p.willMove
+      ? `a = g(sinθ − μcosθ) = <b>${p.a.toFixed(2)}</b> ms⁻²`
+      : `a = 0 ms⁻² (ස්ථිතික ඝර්ෂණය ප්‍රමාණවත්)`;
+  }
+
+  function step(){
+    const p = compute();
+    if(!p.willMove){ running=false; return; }
+    const s = 0.5*p.a*t*t;
+    const maxS = inclineLen - 15;
+    if(s >= maxS){ draw(p,maxS); running=false; return; }
+    draw(p,s);
+    document.getElementById('simIncReadout').innerHTML =
+      `a=<b>${p.a.toFixed(2)}</b> ms⁻² &nbsp; t=<b>${t.toFixed(2)}</b>s &nbsp; s=<b>${s.toFixed(2)}</b>m`;
+    t += 0.03;
+    if(running){ const id=requestAnimationFrame(step); simAnimFrames.push(id); }
+  }
+
+  document.getElementById('simIncPlay').onclick = ()=>{
+    if(running) return;
+    const p = compute();
+    if(!p.willMove){ return; }
+    t=0; running=true; step();
+  };
+  document.getElementById('simIncReset').onclick = reset;
+  reset();
+}
+
+/* ---- 3. Atwood Machine ---- */
+function initAtwoodSim(){
+  const canvas = document.getElementById('simAtCanvas');
+  const ctx = canvas.getContext('2d');
+  const W=canvas.width, H=canvas.height;
+  let running=false, t=0;
+
+  function compute(){
+    const M = parseFloat(document.getElementById('simAtM').value)||5;
+    const m = parseFloat(document.getElementById('simAtm').value)||4;
+    const g=9.8;
+    const a = ((M-m)/(M+m))*g;
+    const T = (2*M*m*g)/(M+m);
+    return {M,m,g,a,T};
+  }
+
+  const pulleyX=W/2, pulleyY=40, pulleyR=22, ropeDrop=170;
+
+  function draw(p, disp){
+    ctx.clearRect(0,0,W,H);
+    // stand
+    ctx.strokeStyle=getCss('--text-soft'); ctx.lineWidth=3;
+    ctx.beginPath(); ctx.moveTo(pulleyX,10); ctx.lineTo(pulleyX,pulleyY); ctx.stroke();
+    // pulley
+    ctx.beginPath(); ctx.arc(pulleyX,pulleyY,pulleyR,0,Math.PI*2); ctx.stroke();
+    const leftX=pulleyX-70, rightX=pulleyX+70;
+    // M goes down if M>m => disp positive moves M down, m up
+    const My = pulleyY+ropeDrop*0.4 + disp;
+    const my = pulleyY+ropeDrop*0.4 - disp;
+    ctx.beginPath(); ctx.moveTo(leftX,pulleyY); ctx.lineTo(leftX,My); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(rightX,pulleyY); ctx.lineTo(rightX,my); ctx.stroke();
+    const sizeM = 20+Math.min(p.M,20)*1.2, sizem = 20+Math.min(p.m,20)*1.2;
+    ctx.fillStyle='#4C6B9A';
+    ctx.fillRect(leftX-sizeM/2, My, sizeM, sizeM);
+    ctx.fillStyle=getCss('--text'); ctx.font='12px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('M='+p.M+'kg', leftX, My+sizeM+16);
+    ctx.fillStyle='#C9821E';
+    ctx.fillRect(rightX-sizem/2, my, sizem, sizem);
+    ctx.fillStyle=getCss('--text');
+    ctx.fillText('m='+p.m+'kg', rightX, my+sizem+16);
+    ctx.textAlign='left';
+  }
+
+  function reset(){
+    running=false; t=0;
+    const p = compute();
+    draw(p,0);
+    document.getElementById('simAtReadout').innerHTML =
+      `a = <b>${p.a.toFixed(2)}</b> ms⁻² &nbsp; T = <b>${p.T.toFixed(2)}</b> N &nbsp; ${p.a>0? '(M පහළට)': p.a<0? '(m පහළට)':'(සමතුලිත)'}`;
+  }
+
+  function step(){
+    const p = compute();
+    const disp = 0.5*Math.abs(p.a)*t*t*(p.a>=0?1:-1);
+    const maxDisp = 60;
+    if(Math.abs(disp) >= maxDisp){ draw(p, maxDisp*Math.sign(p.a||1)); running=false; return; }
+    draw(p, disp);
+    t += 0.03;
+    if(running){ const id=requestAnimationFrame(step); simAnimFrames.push(id); }
+  }
+
+  document.getElementById('simAtPlay').onclick = ()=>{ if(running) return; t=0; running=true; step(); };
+  document.getElementById('simAtReset').onclick = reset;
+  reset();
+}
+
+/* ---- 4. 1D Collisions ---- */
+function initCollisionSim(){
+  const canvas = document.getElementById('simColCanvas');
+  const ctx = canvas.getContext('2d');
+  const W=canvas.width, H=canvas.height, groundY=H-40;
+  let running=false;
+  let x1=90, x2=470, v1=0, v2=0, collided=false, m1=2, m2=3;
+
+  function radiusOf(m){ return 12 + Math.min(m,10)*2.2; }
+
+  function readInputs(){
+    m1 = parseFloat(document.getElementById('simColM1').value)||2;
+    m2 = parseFloat(document.getElementById('simColM2').value)||3;
+    v1 = parseFloat(document.getElementById('simColU1').value)||0;
+    v2 = parseFloat(document.getElementById('simColU2').value)||0;
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle=getCss('--line'); ctx.beginPath(); ctx.moveTo(0,groundY); ctx.lineTo(W,groundY); ctx.stroke();
+    const r1=radiusOf(m1), r2=radiusOf(m2);
+    ctx.fillStyle='#4C6B9A';
+    ctx.beginPath(); ctx.arc(x1,groundY-r1,r1,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle=getCss('--text'); ctx.font='12px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('m₁='+m1, x1, groundY-r1*2-8);
+    ctx.fillStyle='#C9821E';
+    ctx.beginPath(); ctx.arc(x2,groundY-r2,r2,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle=getCss('--text');
+    ctx.fillText('m₂='+m2, x2, groundY-r2*2-8);
+    ctx.textAlign='left';
+  }
+
+  function reset(){
+    running=false; collided=false;
+    readInputs();
+    x1=90; x2=470;
+    draw();
+    document.getElementById('simColReadout').innerHTML = `ගැටුමට පෙර: v₁=<b>${v1}</b> ms⁻¹, v₂=<b>${v2}</b> ms⁻¹`;
+  }
+
+  function step(){
+    const r1=radiusOf(m1), r2=radiusOf(m2);
+    x1 += v1*0.4; x2 += v2*0.4;
+    if(!collided && x2-x1 <= r1+r2){
+      collided = true;
+      const type = document.getElementById('simColType').value;
+      if(type==='elastic'){
+        const nv1 = ((m1-m2)/(m1+m2))*v1 + ((2*m2)/(m1+m2))*v2;
+        const nv2 = ((2*m1)/(m1+m2))*v1 + ((m2-m1)/(m1+m2))*v2;
+        v1=nv1; v2=nv2;
+        document.getElementById('simColReadout').innerHTML =
+          `ගැටුමෙන් පසු (ප්‍රත්‍යාස්ථ): v₁=<b>${v1.toFixed(2)}</b> ms⁻¹, v₂=<b>${v2.toFixed(2)}</b> ms⁻¹`;
+      } else {
+        const common = (m1*v1+m2*v2)/(m1+m2);
+        v1=common; v2=common;
+        document.getElementById('simColReadout').innerHTML =
+          `ගැටුමෙන් පසු (අප්‍රත්‍යාස්ථ): v = <b>${common.toFixed(2)}</b> ms⁻¹ (එකට ගමන් කරයි)`;
+      }
+    }
+    // bounds
+    if(x1<20) {x1=20; v1=Math.abs(v1);}
+    if(x2>W-20){x2=W-20; v2=-Math.abs(v2);}
+    draw();
+    if(running){ const id=requestAnimationFrame(step); simAnimFrames.push(id); }
+  }
+
+  document.getElementById('simColPlay').onclick = ()=>{
+    if(running) return;
+    if(!collided && x1===90 && x2===470) readInputs();
+    running=true; step();
+  };
+  document.getElementById('simColReset').onclick = reset;
+  reset();
+}
+
+/* ---- 5. Spring SHM ---- */
+function initSpringSim(){
+  const canvas = document.getElementById('simSpCanvas');
+  const ctx = canvas.getContext('2d');
+  const W=canvas.width, H=canvas.height;
+  let running=false, t=0;
+
+  function compute(){
+    const k = parseFloat(document.getElementById('simSpK').value)||40;
+    const m = parseFloat(document.getElementById('simSpM').value)||2;
+    const A = parseFloat(document.getElementById('simSpA').value)||0.3;
+    const omega = Math.sqrt(k/m);
+    const T = 2*Math.PI/omega;
+    return {k,m,A,omega,T};
+  }
+
+  const anchorY=20, pxPerM=250, eqY=140;
+
+  function drawSpring(x0,y0,x1,y1,coils){
+    const dx=x1-x0, dy=y1-y0, len=Math.hypot(dx,dy);
+    const nx=-dy/len, ny=dx/len;
+    ctx.beginPath(); ctx.moveTo(x0,y0);
+    const segs=coils*2;
+    for(let i=1;i<segs;i++){
+      const f=i/segs;
+      const amp = (i%2===0)? 0 : 14;
+      ctx.lineTo(x0+dx*f+nx*amp, y0+dy*f+ny*amp);
+    }
+    ctx.lineTo(x1,y1);
+    ctx.stroke();
+  }
+
+  function draw(p, x){
+    ctx.clearRect(0,0,W,H);
+    const cx = W/2;
+    const massY = eqY + x*pxPerM;
+    ctx.strokeStyle = getCss('--text-soft'); ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(cx-60,anchorY); ctx.lineTo(cx+60,anchorY); ctx.stroke();
+    ctx.strokeStyle = getCss('--sim')||'#E1556B'; ctx.lineWidth=2;
+    drawSpring(cx,anchorY,cx,massY-24,10);
+    ctx.fillStyle=getCss('--sim')||'#E1556B';
+    ctx.fillRect(cx-26,massY-24,52,48);
+    // equilibrium dashed line
+    ctx.strokeStyle='rgba(150,150,150,.4)'; ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(cx-90,eqY); ctx.lineTo(cx+90,eqY); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  function reset(){
+    running=false; t=0;
+    const p = compute();
+    draw(p, p.A);
+    document.getElementById('simSpReadout').innerHTML = `T = <b>${p.T.toFixed(2)}</b> s &nbsp; ω = <b>${p.omega.toFixed(2)}</b> rad/s`;
+    document.getElementById('simSpEpBar').style.width='100%';
+    document.getElementById('simSpEkBar').style.width='0%';
+  }
+
+  function step(){
+    const p = compute();
+    const x = p.A*Math.cos(p.omega*t);
+    const v = -p.A*p.omega*Math.sin(p.omega*t);
+    const Ep = 0.5*p.k*x*x;
+    const Ek = 0.5*p.m*v*v;
+    const Emax = 0.5*p.k*p.A*p.A;
+    draw(p,x);
+    document.getElementById('simSpEpBar').style.width = Math.min(100,(Ep/Emax)*100)+'%';
+    document.getElementById('simSpEkBar').style.width = Math.min(100,(Ek/Emax)*100)+'%';
+    document.getElementById('simSpReadout').innerHTML =
+      `T=<b>${p.T.toFixed(2)}</b>s &nbsp; x=<b>${x.toFixed(3)}</b>m &nbsp; Ep=<b>${Ep.toFixed(2)}</b>J &nbsp; Ek=<b>${Ek.toFixed(2)}</b>J`;
+    t += 0.02;
+    if(running){ const id=requestAnimationFrame(step); simAnimFrames.push(id); }
+  }
+
+  document.getElementById('simSpPlay').onclick = ()=>{ if(running) return; running=true; step(); };
+  document.getElementById('simSpReset').onclick = reset;
+  reset();
+}
+
+function getCss(varName){
+  return getComputedStyle(document.body).getPropertyValue(varName).trim();
+}
+
+/* ===================== SEARCH ===================== */
+document.getElementById('searchBox').addEventListener('input', (e)=>{
+  searchTerm = e.target.value.trim();
+  if(searchTerm && activeTab==='calculators') activeTab = chapters[0].id;
+  if(searchTerm){
+    // if searching, show results across ALL chapters combined
+    renderSearchResults(searchTerm);
+  } else {
+    render();
+  }
+});
+
+function renderSearchResults(term){
+  buildTabs();
+  mainArea.innerHTML = '';
+  const head = document.createElement('div');
+  head.className='chapter-head';
+  head.innerHTML = `<h2>🔎 සෙවුම් ප්‍රතිඵල</h2><span class="en">"${term}"</span>`;
+  mainArea.appendChild(head);
+
+  let count=0;
+  chapters.forEach(ch=>{
+    ch.items.forEach(it=>{
+      if(matches(it, ch, term)){
+        count++;
+        const card=document.createElement('div');
+        card.className='card';
+        card.style.setProperty('--accent', ch.accent);
+        let inner = `<div class="card-top"><span class="badge">${it.code}</span><h3>${it.title}</h3></div>`;
+        inner += `<p class="note" style="opacity:.7">${ch.si} · ${ch.en}</p>`;
+        if(it.note) inner += `<p class="note">${it.note}</p>`;
+        if(it.tex) inner += `<div class="formula-box tex">\\[${it.tex}\\]</div>`;
+        card.innerHTML = inner;
+        mainArea.appendChild(card);
+      }
+    });
+  });
+  if(count===0){
+    const e=document.createElement('div');
+    e.className='empty-state';
+    e.textContent='ගැළපෙන ප්‍රතිඵල හමු නොවීය. වෙනත් වචනයක් උත්සාහ කරන්න.';
+    mainArea.appendChild(e);
+  }
+  if(window.renderMathInElement){
+    renderMathInElement(mainArea, {
+      delimiters:[{left:"\\[", right:"\\]", display:true},{left:"\\(", right:"\\)", display:false}],
+      throwOnError:false
+    });
+  }
+}
+
+/* ===================== THEME & REVISION MODE ===================== */
+const themeToggle = document.getElementById('themeToggle');
+themeToggle.onclick = ()=>{
+  const cur = document.documentElement.getAttribute('data-theme');
+  if(cur==='dark'){
+    document.documentElement.removeAttribute('data-theme');
+    themeToggle.textContent='🌙';
+    localStorage.setItem('mech-theme','light');
+  } else {
+    document.documentElement.setAttribute('data-theme','dark');
+    themeToggle.textContent='☀️';
+    localStorage.setItem('mech-theme','dark');
+  }
+};
+if(localStorage.getItem('mech-theme')==='dark'){
+  document.documentElement.setAttribute('data-theme','dark');
+  themeToggle.textContent='☀️';
+}
+
+const revisionToggle = document.getElementById('revisionToggle');
+revisionToggle.onclick = ()=>{
+  document.body.classList.toggle('revision-mode');
+  revisionToggle.classList.toggle('active');
+  render();
+};
+
+/* ===================== INIT ===================== */
+render();
+</script>
+</body>
+</html>
