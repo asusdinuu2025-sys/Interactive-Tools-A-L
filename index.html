@@ -24,6 +24,160 @@
     <section class="hero">
       <h1>Study-Lab for G.C.E A/L Sri Lanka</h1>
       <p class="subtitle">Interactive Tools for Advanced Level Students</p>
+
+      <!-- ========================================================= -->
+<!--              STUDY LAB LK - VISITOR COUNTER              -->
+<!--        START: DO NOT MIX WITH MAIN WEBSITE CODE         -->
+<!-- ========================================================= -->
+
+<div class="student-counter">
+
+  <div class="counter-icon">👥</div>
+
+  <div class="counter-content">
+    <div class="counter-number" id="studentCount">0+</div>
+    <div class="counter-label">Students Visited Study Lab LK</div>
+  </div>
+
+</div>
+
+<style>
+.student-counter {
+  max-width: 520px;
+  margin: 0 auto 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+
+  padding: 18px 24px;
+
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(18,58,106,.72),
+      rgba(7,29,64,.82)
+    );
+
+  border: 1px solid rgba(105,190,255,.20);
+
+  box-shadow:
+    0 15px 35px rgba(0,0,0,.20),
+    0 0 30px rgba(0,130,255,.08),
+    inset 0 1px 0 rgba(255,255,255,.06);
+
+  backdrop-filter: blur(12px);
+
+  text-align: left;
+}
+
+.counter-icon {
+  width: 54px;
+  height: 54px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 15px;
+
+  font-size: 27px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(65,160,255,.16),
+      rgba(105,80,255,.15)
+    );
+
+  border: 1px solid rgba(110,190,255,.22);
+
+  box-shadow:
+    0 0 22px rgba(0,135,255,.12);
+}
+
+.counter-number {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+
+  color: #8bdcff;
+
+  text-shadow:
+    0 0 18px rgba(60,190,255,.25);
+}
+
+.counter-label {
+  margin-top: 6px;
+
+  color: #91abc8;
+
+  font-size: 13px;
+}
+
+@media (max-width: 600px) {
+
+  .student-counter {
+    margin-left: 8px;
+    margin-right: 8px;
+    padding: 16px 18px;
+  }
+
+  .counter-number {
+    font-size: 24px;
+  }
+
+  .counter-label {
+    font-size: 12px;
+  }
+
+}
+</style>
+
+<script>
+(function () {
+
+  /* CHANGE ONLY THIS NUMBER */
+  const studentCount = 143;
+
+  const counter = document.getElementById("studentCount");
+
+  if (!counter) return;
+
+  const duration = 1600;
+  const startTime = performance.now();
+
+  function animateCounter(currentTime) {
+
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+
+    const eased = 1 - Math.pow(1 - progress, 3);
+
+    const value = Math.floor(studentCount * eased);
+
+    counter.textContent = value.toLocaleString() + "+";
+
+    if (progress < 1) {
+      requestAnimationFrame(animateCounter);
+    } else {
+      counter.textContent = studentCount.toLocaleString() + "+";
+    }
+  }
+
+  requestAnimationFrame(animateCounter);
+
+})();
+</script>
+
+<!-- ========================================================= -->
+<!--               STUDY LAB LK - COUNTER END                 -->
+<!--          END: MAIN WEBSITE CODE CONTINUES BELOW          -->
+<!-- ========================================================= -->
+      
     </section>
 
     <section class="card-grid" aria-label="Subjects">
