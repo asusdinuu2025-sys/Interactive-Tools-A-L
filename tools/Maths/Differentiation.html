@@ -1,0 +1,180 @@
+```html
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A/L Differentiation - අවකලනය</title>
+
+<style>
+body{
+    margin:0;
+    font-family:"Noto Sans Sinhala","Iskoola Pota",Arial,sans-serif;
+    background:#f4f6f8;
+    color:#222;
+}
+.container{
+    max-width:950px;
+    margin:auto;
+    padding:30px 20px;
+}
+header,.card{
+    background:white;
+    border-radius:18px;
+    padding:25px;
+    margin-bottom:20px;
+    box-shadow:0 4px 15px rgba(0,0,0,.08);
+}
+header{text-align:center}
+h1{margin:0}
+.subtitle{color:#666}
+.formula{
+    background:#f0f2f5;
+    border-radius:12px;
+    padding:18px;
+    margin:12px 0;
+    text-align:center;
+    font-family:"Times New Roman",serif;
+    font-size:24px;
+}
+.example{
+    background:#eaf5ff;
+    border-left:5px solid #2196f3;
+    padding:18px;
+    border-radius:8px;
+}
+button{
+    border:0;
+    border-radius:20px;
+    padding:10px 18px;
+    background:#222;
+    color:white;
+    cursor:pointer;
+}
+.dark{
+    background:#121212;
+    color:#eee;
+}
+.dark header,.dark .card{background:#1e1e1e}
+.dark .formula{background:#2b2b2b}
+.dark .example{background:#162b3b}
+.dark .subtitle{color:#aaa}
+.dark button{background:white;color:#222}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+<h1>📘 අවකලනය (Differentiation)</h1>
+<p class="subtitle">G.C.E. Advanced Level Combined Mathematics</p>
+<button onclick="darkMode()">🌙 / ☀️</button>
+</header>
+
+<div class="card">
+<h2>1. මූලික අවකලන සූත්‍ර</h2>
+
+<div class="formula">
+d/dx (xⁿ) = nxⁿ⁻¹
+</div>
+
+<div class="formula">
+d/dx (c) = 0
+</div>
+
+<div class="formula">
+d/dx (eˣ) = eˣ
+</div>
+
+<div class="formula">
+d/dx (ln x) = 1/x
+</div>
+</div>
+
+<div class="card">
+<h2>2. ත්‍රිකෝණමිතික ශ්‍රිත</h2>
+
+<div class="formula">
+d/dx(sin x) = cos x
+</div>
+
+<div class="formula">
+d/dx(cos x) = −sin x
+</div>
+
+<div class="formula">
+d/dx(tan x) = sec²x
+</div>
+
+<div class="formula">
+d/dx(cot x) = −cosec²x
+</div>
+</div>
+
+<div class="card">
+<h2>3. Product Rule</h2>
+
+<div class="formula">
+d/dx(uv) = u(dv/dx) + v(du/dx)
+</div>
+</div>
+
+<div class="card">
+<h2>4. Quotient Rule</h2>
+
+<div class="formula">
+d/dx(u/v) =
+[v(du/dx) − u(dv/dx)] / v²
+</div>
+</div>
+
+<div class="card">
+<h2>5. Chain Rule</h2>
+
+<div class="formula">
+dy/dx = dy/du × du/dx
+</div>
+</div>
+
+<div class="card">
+<h2>6. උදාහරණය</h2>
+
+<div class="example">
+<strong>y = x³ + 4x² − 5x + 2</strong>
+
+<br><br>
+
+dy/dx = 3x² + 8x − 5
+</div>
+</div>
+
+<div class="card">
+<h2>7. ස්පර්ශකයේ බෑවුම</h2>
+
+<div class="formula">
+Gradient = dy/dx
+</div>
+
+<p>
+යම් ලක්ෂ්‍යයකදී වක්‍රයේ ස්පර්ශකයේ බෑවුම සොයා ගැනීමට
+එම ලක්ෂ්‍යයේදී dy/dx හි අගය ලබා ගනී.
+</p>
+</div>
+
+<footer style="text-align:center;color:#777;padding:20px">
+Designed By Dinusha Hemal ツ
+</footer>
+
+</div>
+
+<script>
+function darkMode(){
+    document.body.classList.toggle("dark");
+}
+</script>
+
+</body>
+</html>
+```
