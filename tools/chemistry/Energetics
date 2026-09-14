@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>G.C.E. A/L Chemistry — Energetics | ශක්ති විද්‍යාව</title>
+<style>
+:root{
+  --bg:#f5f7fb; --card:#fff; --text:#172033; --muted:#5f6b7a;
+  --line:#dfe5ee; --accent:#2457d6; --accent2:#153a96;
+  --good:#117a49; --bad:#b42318; --warn:#8a5a00;
+  --shadow:0 10px 30px rgba(20,35,70,.08);
+}
+body.dark{
+  --bg:#0d1117; --card:#161b22; --text:#e6edf3; --muted:#9da7b3;
+  --line:#303844; --accent:#6d96ff; --accent2:#9db8ff;
+  --good:#4bd18b; --bad:#ff8178; --warn:#e6b84f;
+  --shadow:0 10px 30px rgba(0,0,0,.28);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Noto Sans Sinhala","Nirmala UI","Iskoola Pota",Arial,sans-serif;line-height:1.7}
+header{background:linear-gradient(135deg,#152b63,#2457d6);color:white;padding:42px 20px}
+.wrap{max-width:1120px;margin:auto}
+h1{font-size:clamp(28px,5vw,48px);margin:0 0 8px}
+h2{font-size:28px;margin:0 0 14px}
+h3{font-size:20px;margin:20px 0 8px}
+p{margin:8px 0}
+.small{font-size:14px;color:var(--muted)}
+header .small{color:#dfe8ff}
+nav{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 3px 12px rgba(0,0,0,.04)}
+.navin{display:flex;gap:8px;overflow:auto;padding:9px 12px}
+.navin a{white-space:nowrap;text-decoration:none;color:#26344e;padding:8px 12px;border-radius:9px}
+.navin a:hover{background:#edf2ff;color:var(--accent)}
+main{padding:28px 16px 70px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:var(--shadow);margin:18px 0}
+.formula{background:#f0f4ff;border-left:5px solid var(--accent);padding:14px 16px;border-radius:8px;font-family:Cambria,serif;font-size:20px;margin:12px 0}
+.tag{display:inline-block;padding:3px 9px;border-radius:999px;background:#eaf0ff;color:var(--accent2);font-size:13px;font-weight:700}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:15px}
+th,td{border:1px solid var(--line);padding:9px;text-align:left;vertical-align:top}
+th{background:#f1f4f9}
+input,select{width:100%;padding:10px 11px;border:1px solid #cbd4e1;border-radius:8px;font:inherit;background:var(--card);color:var(--text)}
+body.dark input,body.dark select{border-color:#46505d}
+label{display:block;font-weight:700;margin-top:10px}
+button{border:0;border-radius:9px;padding:10px 15px;background:var(--accent);color:white;font:inherit;font-weight:700;cursor:pointer;margin-top:12px}
+button:hover{background:var(--accent2)}
+.result{margin-top:13px;padding:12px 14px;border-radius:9px;background:#f2f5f9;min-height:42px}
+.good{color:var(--good);font-weight:700}.bad{color:var(--bad);font-weight:700}.warn{color:var(--warn);font-weight:700}
+.row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media(max-width:650px){.row{grid-template-columns:1fr}}
+details{border:1px solid var(--line);border-radius:10px;padding:10px 13px;margin:9px 0;background:#fff}
+summary{font-weight:700;cursor:pointer}
+ul{padding-left:24px}
+.note{background:#fff8df;border:1px solid #efd77c;padding:13px;border-radius:10px}
+footer{background:#172033;color:#dce4f5;padding:25px 16px}
+footer a{color:#bcd0ff}
+.themeBtn{margin:0 0 0 auto;padding:8px 13px;background:transparent;color:var(--text);border:1px solid var(--line);white-space:nowrap}
+.themeBtn:hover{background:#edf2ff;color:var(--accent2)}
+body.dark .themeBtn:hover{background:#222a35}
+.footer-links{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:18px}
+.footer-link{display:inline-block;text-decoration:none;border:1px solid #71809a;border-radius:10px;padding:8px 15px;color:#fff;font-weight:700}
+.footer-link:hover{background:#26344e}
+hr{border:0;border-top:1px solid var(--line);margin:25px 0}
+</style>
+</head>
+<body>
+<header>
+<div class="wrap">
+  <div class="tag">G.C.E. (A/L) CHEMISTRY — UNIT 5</div>
+  <h1>ශක්ති විද්‍යාව — Energetics</h1>
+  <p>තාපය, එන්තැල්පි වෙනස්වීම (ΔH), හෙස් නියමය, බෝන්–හේබර් චක්‍රය, එන්ට්‍රොපිය සහ ගිබ්ස් නිදහස් ශක්තිය.</p>
+  <p class="small"> Chemistry Resource Book — Unit 5: Energetics .</p>
+</div>
+</header>
+
+<nav><div class="wrap navin">
+<a href="#basics">මූලික සංකල්ප</a><a href="#heat">තාපය සහ ΔH</a><a href="#types">එන්තැල්පි වෙනස්වීම්</a>
+<a href="#හෙස්">හෙස්</a><a href="#බෝන්">බෝන්–හේබර්</a><a href="#එන්ට්‍රොපි">එන්ට්‍රොපි</a>
+<a href="#ගිබ්ස්">ගිබ්ස්</a><a href="#calc">ගණක</a><button class="themeBtn" id="themeBtn" onclick="toggleTheme()">☾ Dark mode / ☀ Light Mode</button>
+</div></nav>
+
+<main class="wrap">
+
+<section id="basics" class="card">
+<h2>1. Thermochemistry මූලික සංකල්ප</h2>
+<div class="grid">
+<div>
+<h3>පද්ධතිය (System)</h3>
+<p>අධ්‍යයනය කරන විශ්වයේ/ද්‍රව්‍යයේ කොටස <b>system</b> වේ.</p>
+<h3>පරිසරය (Surroundings)</h3>
+<p>System එකට අයත් නොවන, එය සමඟ අන්තර්ක්‍රියා කළ හැකි ඉතිරි කොටස.</p>
+<h3>සීමාව (Boundary)</h3>
+<p>System සහ surroundings වෙන් කරන සීමාව.</p>
+</div>
+<div>
+<h3>පද්ධති වර්ග</h3>
+<table><tr><th>වර්ගය</th><th>හුවමාරුව</th></tr>
+<tr><td>විවෘත පද්ධති</td><td>ද්‍රව්‍ය + ශක්තිය</td></tr>
+<tr><td>සංවෘත පද්ධති</td><td>ශක්තිය පමණක්; ද්‍රව්‍ය නොවේ</td></tr>
+<tr><td>ඒකලිත පද්ධති</td><td>ද්‍රව්‍යවත් ශක්තියවත් නොවේ</td></tr>
+</table>
+
+</div>
+</div>
+<hr>
+<h3>පද්ධතියේ ගුණ</h3>
+<table>
+<tr><th>අන්වීක්ෂීය ගුණ</th><td>අණු/අයන මට්ටමේ ගුණ.</td></tr>
+<tr><th>මහෙක්ෂීය ගුණ</th><td>විශාල පරිමාණයෙන් මැනිය හැකි ගුණ.</td></tr>
+<tr><th>විත්ති ගුණ</th><td>පද්ධතියේ ද්‍රව්‍ය ප්‍රමාණය මත රඳා පවතී.</td></tr>
+<tr><th>ඝටනා ගුණ</th><td>ද්‍රව්‍ය ප්‍රමාණය මත රඳා නොපවතී.</td></tr>
+</table>
+</section>
+
+<section id="heat" class="card">
+<h2>2. එන්තැල්පිය (H) සහ තාපය (q)</h2>
+<p>ස්ථිර පීඩනයකදී, පද්ධතියේ උෂ්ණත්ව වෙනස් වීම  එන්තැල්පියයි.</p>
+<div class="formula">ΔH = H(ඵල) − H(ප්‍රතික්රියක)</div>
+<p><b>ΔH &lt; 0</b> → තාපදායක (Exothermic): පද්ධතියෙන් surroundings වෙත තාපය නිකුත් වේ.<br>
+<b>ΔH &gt; 0</b> → තාපාවශෝෂක (Endothermic): surroundings වලින් පද්ධතියට තාපය අවශෝෂණය වේ.</p>
+
+<h3>විශිෂ්ට තාප ධාරිතාව සහ තාප ධාරිතාව</h3>
+<div class="formula">C = mc &nbsp;&nbsp;&nbsp;&nbsp; q = mcΔT</div>
+<ul>
+<li><b>c</b> = specific heat capacity; J g⁻¹ °C⁻¹ (හෝ J g⁻¹ K⁻¹)</li>
+<li><b>C</b> = heat capacity; J °C⁻¹ (හෝ J K⁻¹)</li>
+<li><b>m</b> = mass in g</li>
+<li><b>ΔT</b> = T<sub>final</sub> − T<sub>initial</sub></li>
+</ul>
+<div class="note"><b>Sign convention:</b> q සහ ΔH සඳහා endothermic → +; exothermic → −.</div>
+</section>
+
+<section id="types" class="card">
+<h2>3. එන්තැල්පි වෙනස්වීම්</h2>
+<p>  එන්තැල්පි විපර්යාස:</p>
+<div class="grid">
+<div>
+<ul>
+<li>සම්මත සෑදීමේ එන්තැල්පිය, ΔHf°<sub>f</sub></li>
+<li>සම්මත දහන එන්තැල්පිය, ΔHc°<sub>c</sub></li>
+<li>සම්මත බන්ධන වියෝජන එන්තැල්පිය, ΔHb°</li>
+<li>සම්මත උදාසීනීකරණ එන්තැල්පිය, ΔHn°</li>
+<li>සම්මත සද්‍රාවණ එන්තැල්පිය, ΔHsol°</li>
+<li>සම්මත ජලීයකරණ එන්තැල්පිය, ΔHhyd°</li>
+<li>සම්මත ද්‍රාව්‍යකරණ එන්තැල්පිය, ΔHdis°</li>
+</ul>
+</div>
+<div>
+<ul>
+<li>සම්මත ඌර්ධ්වපාතන එන්තැල්පිය, ΔH°sub</li>
+<li>සම්මත වාෂ්පීකරණ එන්තැල්පිය, ΔH°vap</li>
+<li>සම්මත විලයන එන්තැල්පිය, ΔH°fus</li>
+<li>සම්මත පරමාණුකරණ එන්තැල්පිය, ΔH°at</li>
+<li>සම්මත පළමු අයනීකරණ එන්තැල්පිය, ΔH°IE1</li>
+<li>සම්මත ඉලෙක්ට්‍රෝනකරණ එන්තැල්පිය, ΔH°eg</li>
+<li>සම්මත දැලිස් එන්තැල්පිය, ΔH°lat</li>
+</ul>
+</div>
+</div>
+
+<details><summary>සම්මත සෑදීමේ එන්තැල්පිය — ΔH°f</summary>
+<p>Standard states වල මූලද්‍රව්‍යවල reference forms වලින් සංයෝගයක <b>mol 1ක්</b> සෑදීමේදී ඇතිවන එන්තැල්පි විපර්යාස.</p>
+<p>Reference form එකේ ඇති pure element සඳහා ΔH°f = 0.</p>
+<p>උදා: H₂(g), O₂(g), N₂(g), C(graphite) වැනි reference forms.</p>
+</details>
+<details><summary>සම්මත දහන එන්තැල්පිය — ΔH°c</summary>
+<p>Standard state හි මූලද්‍රව්‍යයක හෝ සංයෝගයක <b>mol 1ක්</b> excess oxygen සමඟ සම්පූර්ණයෙන් දහනය වී standard-state ඵල ලබාදෙන විට ඇතිවන එන්තැල්පි change.</p>
+</details>
+<details><summary>තාප රසායනික සමීකරණ</summary>
+<p>සමතුලිත chemical equation එක + ΔH අගය. Coefficients මඟින් reaction එකේ mol ප්‍රමාණ නිරූපණය කරයි. Equation එක reverse කළ විට ΔH හි ලකුණ මාරු වේ. Equation එක k ගුණයකින් ගුණ කළ විට ΔH ද k ගුණ වේ. Physical states සඳහන් කිරීම වැදගත්ය.</p>
+</details>
+</section>
+
+<section id="හෙස්" class="card">
+<h2>4. හෙස් නියමය</h2>
+<p><b>හෙස් නියමය:</b> ක්‍රියාවලියක් අදියර කිහිපයකින් සිදු වුවද, සමස්ත එන්තැල්පි change එක එම අදියරවල එන්තැල්පි changes එකතුවට සමාන වේ.</p>
+<div class="formula">ΔH(overall) = Σ ΔH(steps)</div>
+<h3>හෙස් equation වෙනස් කිරීමේ නීති</h3>
+<table><tr><th>කරන වෙනස</th><th>ΔH වෙත වෙනස</th></tr>
+<tr><td>Equation එක reverse කිරීම</td><td>ΔH හි ලකුණ මාරු කරන්න</td></tr>
+<tr><td>Equation එක k ගුණයකින් ගුණ කිරීම</td><td>ΔH × k</td></tr>
+<tr><td>Equations එකතු කිරීම</td><td>ΔH values එකතු කරන්න</td></tr>
+</table>
+<h3>Formation enthalpies මඟින් ΔH°reaction</h3>
+<div class="formula">ΔH°<sub>rxn</sub> = Σ νΔH°<sub>f</sub>(ඵල) − Σ νΔH°<sub>f</sub>(ප්‍රතික්රියක)</div>
+<p>ν = balanced equation එකේ stoichiometric coefficient.</p>
+</section>
+
+<section id="බෝන් හේබර්" class="card">
+<h2>5. දැලිස් එන්තැල්පිය සහ බෝන්–හේබර් චක්‍රය</h2>
+<p>බෝන්-හේබර් චක්‍රය හෙස් නියමය මත පදනම් වේ. අයනික ඝන ද්‍රව්‍යයක් සෑදීමේදී උර්ද්වාපතනය/පරමාණුකරණය, අයනීකරණය, ඉලෙක්ට්‍රෝනකරණය සහ දැලිස් එන්තල්පිය/වියෝජන පියවර භාවිතා කරයි.</p>
+<div class="formula">ΔH°<sub>f</sub> = ΔH°<sub>sub/atom</sub> + ΔH°<sub>atom</sub> + ΔH°<sub>IE</sub> + ΔH°<sub>EG</sub> + ΔH°<sub>lattice formation</sub></div>
+</section>
+
+<section id="එන්ට්‍රොපි" class="card">
+<h2>6. එන්ට්‍රොපිය (S)</h2>
+<p>එන්ට්‍රොපි යනු system එකේ disorder/randomness මැනීමට භාවිතා කරන state function එකකි. ඒකකය <b>J K⁻¹ mol⁻¹</b>.</p>
+<div class="formula">ΔS°<sub>rxn</sub> = ΣS°(ඵල) − ΣS°(ප්‍රතික්රියක)</div>
+<p>Stoichiometric coefficients මඟින් standard molar එන්ට්‍රොපි values ගුණ කළ යුතුය.</p>
+<ul>
+<li>Gas mol ගණන වැඩි වීම සාමාන්‍යයෙන් ΔS° + වීමට හේතු වේ.</li>
+<li>Gas mol ගණන අඩු වීම සාමාන්‍යයෙන් ΔS° - වීමට හේතු වේ.</li>
+</ul>
+</section>
+
+<section id="ගිබ්ස්" class="card">
+<h2>7. ගිබ්ස් නිදහස් ශක්තිය සහ ස්වයංසිද්ධතාව</h2>
+<div class="formula">ΔG° = ΔH° − TΔS°</div>
+<p><b>T</b> Kelvin වලින් ගත යුතුය. ΔH kJ mol⁻¹ නම් ΔS J K⁻¹ mol⁻¹ අගය kJ වලට පරිවර්තනය කළ යුතුය: ΔS ÷ 1000.</p>
+<table>
+<tr><th>ΔH°</th><th>ΔS°</th><th> ස්වයංසිද්ධතාව </th></tr>
+<tr><td>−</td><td>+</td><td>සියලු උෂ්ණත්වවල ස්වයංසිද්ධ වේ </td></tr>
+<tr><td>+</td><td>+</td><td>ඉහළ උෂ්ණත්වවල ස්වයංසිද්ධ වේ </td></tr>
+<tr><td>−</td><td>−</td><td>අඩු උෂ්ණත්වවල ස්වයංසිද්ධ වේ</td></tr>
+<tr><td>+</td><td>−</td><td>සියලු උෂ්ණත්වවල ස්වයංසිද්ධ නොවේ</td></tr>
+</table>
+<p>ස්ථිර උෂ්ණත්වය සහ පීඩනය යටතේ: <b>ΔG° &lt; 0</b> ස්වයංසිද්ධ වේ, <b>ΔG° = 0</b> සමතුලිතතාව, <b>ΔG° &gt; 0</b> ස්වයංසිද්ධ නොවේ.</p>
+</section>
+
+<section id="calc">
+<h2 style="margin-top:35px">8. Energetics සම්පූර්ණ ගණක</h2>
+<p class="small">Input boxes වල units හරියට තෝරන්න. ගණක formula-based; chemical equation balancing එක ස්වයංක්‍රීයව නොකරයි.</p>
+
+<div class="grid">
+
+<div class="card">
+<h3>① Heat: q = mcΔT</h3>
+<div class="row">
+<div><label>Mass m (g)<input id="q_m" type="number" step="any" value="100"></label></div>
+<div><label>Specific heat c (J g⁻¹ K⁻¹)<input id="q_c" type="number" step="any" value="4.184"></label></div>
+</div>
+<div class="row">
+<div><label>Initial T (°C)<input id="q_ti" type="number" step="any" value="25"></label></div>
+<div><label>Final T (°C)<input id="q_tf" type="number" step="any" value="35"></label></div>
+</div>
+<button onclick="calcQ()">q ගණනය කරන්න</button>
+<div class="result" id="q_out"></div>
+</div>
+
+<div class="card">
+<h3>② Calorimetry → ΔH</h3>
+<p class="small">Reaction heat = − heat absorbed by solution/calorimeter.</p>
+<div class="row">
+<div><label>Mass of solution (g)<input id="cal_m" type="number" step="any" value="100"></label></div>
+<div><label>c (J g⁻¹ K⁻¹)<input id="cal_c" type="number" step="any" value="4.184"></label></div>
+</div>
+<div class="row">
+<div><label>ΔT (K or °C)<input id="cal_dt" type="number" step="any" value="6"></label></div>
+<div><label>Reaction amount n (mol)<input id="cal_n" type="number" step="any" value="0.05"></label></div>
+</div>
+<label>Calorimeter heat capacity Ccal (J K⁻¹), if known<input id="cal_C" type="number" step="any" value="0"></label>
+<button onclick="calcCal()">ΔH ගණනය කරන්න</button>
+<div class="result" id="cal_out"></div>
+</div>
+
+<div class="card">
+<h3>③ ΔH°reaction from ΔH°f</h3>
+<p>Enter product and reactant totals directly as ΣνΔH°f.</p>
+<div class="row">
+<div><label>Σ ඵල (kJ mol⁻¹)<input id="hf_p" type="number" step="any" value="-965"></label></div>
+<div><label>Σ ප්‍රතික්රියක (kJ mol⁻¹)<input id="hf_r" type="number" step="any" value="-500"></label></div>
+</div>
+<button onclick="calcHF()">ΔH ගණනය කරන්න°rxn</button>
+<div class="result" id="hf_out"></div>
+</div>
+
+<div class="card">
+<h3>④ Bond dissociation එන්තැල්පි method</h3>
+<p class="small">Average bond එන්තැල්පි method: energy required to break bonds − energy released in forming bonds.</p>
+<div class="row">
+<div><label>Σ bonds broken (kJ mol⁻¹)<input id="bb" type="number" step="any" value="1000"></label></div>
+<div><label>Σ bonds formed (kJ mol⁻¹)<input id="bf" type="number" step="any" value="1200"></label></div>
+</div>
+<button onclick="calcBond()">ΔH ගණනය කරන්න</button>
+<div class="result" id="bond_out"></div>
+</div>
+
+<div class="card">
+<h3>⑤ හෙස් නියමය step calculator</h3>
+<p class="small">Each row: equation multiplier × its ΔH. Reverse කිරීම සඳහා multiplier එක negative කරන්න.</p>
+<table id="හෙස්Table">
+<tr><th>Multiplier</th><th>ΔH (kJ mol⁻¹)</th><th></th></tr>
+<tr><td><input class="hm" type="number" step="any" value="1"></td><td><input class="hv" type="number" step="any" value="-100"></td><td><button onclick="removeහෙස්(this)">×</button></td></tr>
+<tr><td><input class="hm" type="number" step="any" value="1"></td><td><input class="hv" type="number" step="any" value="50"></td><td><button onclick="removeහෙස්(this)">×</button></td></tr>
+</table>
+<button onclick="addහෙස්()">+ අදියරක් එක් කරන්න</button>
+<button onclick="calcහෙස්()">සම්පූර්ණ ΔH ගණනය කරන්න</button>
+<div class="result" id="හෙස්_out"></div>
+</div>
+
+<div class="card">
+<h3>⑥ බෝන්–හේබර්: lattice dissociation එන්තැල්පි</h3>
+<p class="small">For a 1:1 ionic compound and the five-step scheme used in the NIE example.</p>
+<label>ΔH°f of ionic solid (kJ mol⁻¹)<input id="bh_f" type="number" step="any" value="-594.1"></label>
+<div class="row">
+<div><label>Sublimation / atomization (kJ mol⁻¹)<input id="bh_sub" type="number" step="any" value="155.2"></label></div>
+<div><label>Atomization of non-metal (kJ mol⁻¹)<input id="bh_at" type="number" step="any" value="75.3"></label></div>
+</div>
+<div class="row">
+<div><label>Ionization energy (kJ mol⁻¹)<input id="bh_ie" type="number" step="any" value="520"></label></div>
+<div><label>Electron gain එන්තැල්පි (kJ mol⁻¹)<input id="bh_eg" type="number" step="any" value="-328"></label></div>
+</div>
+<button onclick="calcබෝන්()">දැලිස් එන්තැල්පිය ගණනය කරන්න</button>
+<div class="result" id="bh_out"></div>
+</div>
+
+<div class="card">
+<h3>⑦ ΔS°reaction</h3>
+<p>Enter ΣνS° ඵල and ප්‍රතික්රියක.</p>
+<div class="row">
+<div><label>Σ ඵල S° (J K⁻¹ mol⁻¹)<input id="s_p" type="number" step="any" value="213.7"></label></div>
+<div><label>Σ ප්‍රතික්රියක S° (J K⁻¹ mol⁻¹)<input id="s_r" type="number" step="any" value="299.5"></label></div>
+</div>
+<button onclick="calcS()">ΔS° ගණනය කරන්න</button>
+<div class="result" id="s_out"></div>
+</div>
+
+<div class="card">
+<h3>⑧ ගිබ්ස් free energy: ΔG° = ΔH° − TΔS°</h3>
+<div class="row">
+<div><label>ΔH° (kJ mol⁻¹)<input id="g_h" type="number" step="any" value="-283"></label></div>
+<div><label>ΔS° (J K⁻¹ mol⁻¹)<input id="g_s" type="number" step="any" value="-86.6"></label></div>
+</div>
+<label>Temperature T (K)<input id="g_t" type="number" step="any" value="298.15"></label>
+<button onclick="calcG()">ΔG° ගණනය කරන්න</button>
+<div class="result" id="g_out"></div>
+</div>
+
+<div class="card">
+<h3>⑨ ΔH for a reaction extent</h3>
+<p class="small">If ΔH° is given per mole of reaction and ξ moles of reaction occur:</p>
+<div class="formula">ΔH = ΔH° × ξ</div>
+<div class="row">
+<div><label>ΔH° (kJ mol⁻¹)<input id="ex_h" type="number" step="any" value="-483.7"></label></div>
+<div><label>Reaction extent ξ (mol)<input id="ex_x" type="number" step="any" value="2"></label></div>
+</div>
+<button onclick="calcExtent()">ΔH ගණනය කරන්න</button>
+<div class="result" id="ex_out"></div>
+</div>
+
+</div>
+</section>
+
+<footer>
+<div class="wrap">
+<b>ශක්ති විද්‍යාව — G.C.E. (A/L) Chemistry</b><br>
+Click On E-Tools To Join Our Telegram Channel<div class="footer-links">
+  <a class="footer-link" href="https://t.me/dinusha_official" target="_blank" rel="noopener noreferrer">Designed by Dinusha ツ</a>
+  <a class="footer-link" href="https://t.me/htmlstudytools" target="_blank" rel="noopener noreferrer">E-tools</a>
+</div>
+</div>
+</footer>
+
+<script>
+
+function applyTheme(theme){
+  document.body.classList.toggle('dark', theme === 'dark');
+  localStorage.setItem('energetics-theme', theme);
+}
+function toggleTheme(){
+  applyTheme(document.body.classList.contains('dark') ? 'light' : 'dark');
+}
+(function(){
+  const saved=localStorage.getItem('energetics-theme');
+  if(saved) applyTheme(saved);
+})();
+
+function n(id){return parseFloat(document.getElementById(id).value)}
+function fmt(x){return Number.isFinite(x)?x.toFixed(4).replace(/\.?0+$/,''): 'Invalid input'}
+
+function calcQ(){
+ let q=n('q_m')*n('q_c')*(n('q_tf')-n('q_ti'));
+ document.getElementById('q_out').innerHTML=`<b>ΔT = ${fmt(n('q_tf')-n('q_ti'))} K</b><br>q = <b>${fmt(q)} J</b> = <b>${fmt(q/1000)} kJ</b><br><span class="${q>=0?'good':'bad'}">${q>=0?'තාපය අවශෝෂණය වේ — endothermic':'තාපය නිකුත් වේ — exothermic'}</span>`;
+}
+function calcCal(){
+ let m=n('cal_m'), c=n('cal_c'), dt=n('cal_dt'), C=n('cal_C'), mol=n('cal_n');
+ let q=(m*c+C)*dt, qr=-q, dh=qr/mol/1000;
+ document.getElementById('cal_out').innerHTML=`q<sub>surroundings</sub> = <b>${fmt(q)} J</b><br>q<sub>reaction</sub> = <b>${fmt(qr)} J</b><br>ΔH = q<sub>reaction</sub>/n = <b>${fmt(dh)} kJ mol⁻¹</b><br><span class="${dh<0?'good':'bad'}">${dh<0?'තාපදායක (Exothermic)':'තාපශෝෂක (Endothermic)'}</span>`;
+}
+function calcHF(){
+ let v=n('hf_p')-n('hf_r');
+ document.getElementById('hf_out').innerHTML=`ΔH°<sub>rxn</sub> = <b>${fmt(v)} kJ mol⁻¹</b><br><span class="${v<0?'good':'bad'}">${v<0?'තාපදායක (Exothermic)':'තාපශෝෂක (Endothermic)'}</span>`;
+}
+function calcBond(){
+ let v=n('bb')-n('bf');
+ document.getElementById('bond_out').innerHTML=`ΔH ≈ <b>${fmt(v)} kJ mol⁻¹</b><br><span class="${v<0?'good':'bad'}">${v<0?'තාපදායක (Exothermic)':'තාපශෝෂක (Endothermic)'}</span>`;
+}
+function addහෙස්(){
+ let tr=document.createElement('tr');
+ tr.innerHTML=`<td><input class="hm" type="number" step="any" value="1"></td><td><input class="hv" type="number" step="any" value="0"></td><td><button onclick="removeහෙස්(this)">×</button></td>`;
+ document.getElementById('හෙස්Table').appendChild(tr);
+}
+function removeහෙස්(btn){btn.closest('tr').remove()}
+function calcහෙස්(){
+ let ms=[...document.querySelectorAll('.hm')], vs=[...document.querySelectorAll('.hv')];
+ let total=0;
+ for(let i=0;i<ms.length;i++) total+=parseFloat(ms[i].value)*parseFloat(vs[i].value);
+ document.getElementById('හෙස්_out').innerHTML=`Σ(multiplier × ΔH) = <b>${fmt(total)} kJ mol⁻¹</b>`;
+}
+function calcබෝන්(){
+ let hf=n('bh_f'), sub=n('bh_sub'), at=n('bh_at'), ie=n('bh_ie'), eg=n('bh_eg');
+ let formation=hf-sub-at-ie-eg;
+ let diss=-formation;
+ document.getElementById('bh_out').innerHTML=`Lattice formation එන්තැල්පි = <b>${fmt(formation)} kJ mol⁻¹</b><br>Lattice dissociation එන්තැල්පි = <b>${fmt(diss)} kJ mol⁻¹</b><br><span class="good">Dissociation value is positive.</span>`;
+}
+function calcS(){
+ let v=n('s_p')-n('s_r');
+ document.getElementById('s_out').innerHTML=`ΔS°<sub>rxn</sub> = <b>${fmt(v)} J K⁻¹ mol⁻¹</b>`;
+}
+function calcG(){
+ let H=n('g_h'), S=n('g_s')/1000, T=n('g_t');
+ let G=H-T*S;
+ let state=G<0?'දී ඇති T සහ සම්මත තත්ත්ව යටතේ ස්වයංසිද්ධ වේ':(G>0?'දී ඇති T සහ සම්මත තත්ත්ව යටතේ ස්වයංසිද්ධ නොවේ':'සමතුලිතතාව');
+ document.getElementById('g_out').innerHTML=`ΔG° = <b>${fmt(G)} kJ mol⁻¹</b><br><span class="${G<0?'good':G>0?'bad':'warn'}">${state}</span>`;
+}
+function calcExtent(){
+ let v=n('ex_h')*n('ex_x');
+ document.getElementById('ex_out').innerHTML=`ΔH = <b>${fmt(v)} kJ</b>`;
+}
+calcQ();calcCal();calcHF();calcBond();calcහෙස්();calcබෝන්();calcS();calcG();calcExtent();
+</script>
+</body>
+</html>
