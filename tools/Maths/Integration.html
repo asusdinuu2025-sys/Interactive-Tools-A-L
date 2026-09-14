@@ -1,0 +1,176 @@
+```html
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A/L Integration - අනුකලනය</title>
+
+<style>
+body{
+    margin:0;
+    font-family:"Noto Sans Sinhala","Iskoola Pota",Arial,sans-serif;
+    background:#f5f7fa;
+    color:#222;
+}
+.container{
+    max-width:950px;
+    margin:auto;
+    padding:30px 20px;
+}
+header,.card{
+    background:white;
+    padding:25px;
+    margin-bottom:20px;
+    border-radius:18px;
+    box-shadow:0 4px 15px rgba(0,0,0,.08);
+}
+header{text-align:center}
+.subtitle{color:#666}
+.formula{
+    background:#f0f2f5;
+    padding:18px;
+    margin:12px 0;
+    border-radius:10px;
+    text-align:center;
+    font-family:"Times New Roman",serif;
+    font-size:23px;
+}
+.example{
+    background:#eef8ee;
+    border-left:5px solid #35a854;
+    padding:18px;
+    border-radius:8px;
+}
+button{
+    border:0;
+    padding:10px 18px;
+    border-radius:20px;
+    background:#222;
+    color:white;
+    cursor:pointer;
+}
+.dark{
+    background:#121212;
+    color:#eee;
+}
+.dark header,.dark .card{background:#1e1e1e}
+.dark .formula{background:#292929}
+.dark .example{background:#18301d}
+.dark button{background:white;color:#222}
+.dark .subtitle{color:#aaa}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+<h1>∫ අනුකලනය (Integration)</h1>
+<p class="subtitle">G.C.E. Advanced Level Combined Mathematics</p>
+<button onclick="toggleDark()">🌙 / ☀️</button>
+</header>
+
+<div class="card">
+<h2>1. මූලික අනුකලන සූත්‍ර</h2>
+
+<div class="formula">
+∫xⁿ dx = xⁿ⁺¹/(n+1) + C
+</div>
+
+<div class="formula">
+∫1 dx = x + C
+</div>
+
+<div class="formula">
+∫eˣ dx = eˣ + C
+</div>
+
+<div class="formula">
+∫1/x dx = ln|x| + C
+</div>
+</div>
+
+<div class="card">
+<h2>2. ත්‍රිකෝණමිතික අනුකලන</h2>
+
+<div class="formula">
+∫sin x dx = −cos x + C
+</div>
+
+<div class="formula">
+∫cos x dx = sin x + C
+</div>
+
+<div class="formula">
+∫sec²x dx = tan x + C
+</div>
+
+<div class="formula">
+∫cosec²x dx = −cot x + C
+</div>
+</div>
+
+<div class="card">
+<h2>3. නිශ්චිත අනුකලනය</h2>
+
+<div class="formula">
+∫ₐᵇ f(x) dx = F(b) − F(a)
+</div>
+
+<p>
+මෙහි F(x) යනු f(x) හි ප්‍රතිව්‍යුත්පන්නයයි.
+</p>
+</div>
+
+<div class="card">
+<h2>4. උදාහරණය</h2>
+
+<div class="example">
+
+<strong>සොයන්න:</strong>
+
+<br><br>
+
+∫(3x² + 4x + 2) dx
+
+<br><br>
+
+<strong>විසඳුම:</strong>
+
+<div class="formula">
+= x³ + 2x² + 2x + C
+</div>
+
+</div>
+</div>
+
+<div class="card">
+<h2>5. වක්‍රයක් යට ප්‍රදේශය</h2>
+
+<p>
+x = a සිට x = b දක්වා වක්‍රය යට ප්‍රදේශය:
+</p>
+
+<div class="formula">
+Area = ∫ₐᵇ y dx
+</div>
+
+</div>
+
+<footer style="text-align:center;color:#777;padding:20px">
+Designed By Dinusha Hemal ツ
+</footer>
+
+</div>
+
+<script>
+function toggleDark(){
+    document.body.classList.toggle("dark");
+}
+</script>
+
+</body>
+</html>
+```
