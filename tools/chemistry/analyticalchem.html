@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>අකාබනික රසායන විද්‍යා මූලාශ්‍ර</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --surface3: #243048;
+    --border: #2a3a55;
+    --accent: #38bdf8;
+    --accent2: #818cf8;
+    --accent3: #34d399;
+    --gold: #fbbf24;
+    --red: #f87171;
+    --orange: #fb923c;
+    --text: #e2e8f0;
+    --text-muted: #94a3b8;
+    --text-dim: #64748b;
+    --white-ppt: #f1f5f9;
+    --yellow-ppt: #fef08a;
+    --black-ppt: #1e1e1e;
+    --pale-yellow: #fefce8;
+    --cream-ppt: #fef3c7;
+    --green-ppt: #4ade80;
+    --blue-ppt: #60a5fa;
+    --red-ppt: #f87171;
+    --brown-ppt: #92400e;
+    --reddish-ppt: #dc2626;
+    --shadow: 0 4px 24px rgba(0,0,0,0.5);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans Sinhala', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow);
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .logo {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600; font-size: 13px;
+    color: #fff; flex-shrink: 0;
+  }
+
+  h1 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1.3;
+  }
+  h1 span {
+    display: block;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  /* ─── SEARCH ─── */
+  .search-wrap {
+    position: relative;
+  }
+  .search-wrap svg {
+    position: absolute; left: 12px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-dim);
+    width: 16px; height: 16px;
+  }
+  #searchInput {
+    width: 100%;
+    padding: 10px 12px 10px 36px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Noto Sans Sinhala', sans-serif;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  #searchInput:focus { border-color: var(--accent); }
+  #searchInput::placeholder { color: var(--text-dim); }
+
+  /* ─── SEARCH RESULTS ─── */
+  #searchResults {
+    display: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin: 8px 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  #searchResults.active { display: block; }
+  .search-result-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .search-result-item:last-child { border-bottom: none; }
+  .search-result-item:active { background: var(--surface2); }
+  .sr-label { font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+  .sr-title { font-size: 14px; font-weight: 600; }
+  .sr-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ─── NAV TABS ─── */
+  .nav-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 12px 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    flex-shrink: 0;
+    padding: 8px 14px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--text-muted);
+    font-family: 'Noto Sans Sinhala', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .tab-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #0a0e1a;
+    font-weight: 700;
+  }
+
+  /* ─── MAIN CONTENT ─── */
+  main { padding: 16px; }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ─── SECTION HEADING ─── */
+  .section-heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .section-heading .badge {
+    width: 8px; height: 28px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .section-heading h2 {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .section-heading p {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* ─── CARDS ─── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .card-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .formula-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    background: var(--surface3);
+    border: 1px solid var(--border);
+    padding: 3px 8px;
+    border-radius: 6px;
+    color: var(--accent);
+  }
+
+  /* ─── TABLE ─── */
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+  table {
+    width: 100%;
+    min-width: 340px;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+  thead tr {
+    background: var(--surface3);
+  }
+  th {
+    padding: 10px 12px;
+    text-align: left;
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--surface2); }
+
+  .mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+  sub, sup { font-size: 0.75em; }
+
+  /* ─── PRECIPITATE BADGES ─── */
+  .ppt {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 2px 0;
+    line-height: 1.4;
+  }
+  .ppt-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .ppt.white  { background: #e2e8f0; color: #1e293b; border: 1px solid #cbd5e1; }
+  .ppt.white .ppt-dot  { background: #f8fafc; border: 1px solid #94a3b8; }
+  .ppt.black  { background: #1e293b; color: #e2e8f0; border: 1px solid #334155; }
+  .ppt.black .ppt-dot  { background: #000; }
+  .ppt.yellow { background: #713f12; color: #fef9c3; border: 1px solid #92400e; }
+  .ppt.yellow .ppt-dot { background: #fde047; }
+  .ppt.pale-yellow { background: #78350f; color: #fef3c7; border: 1px solid #92400e; }
+  .ppt.pale-yellow .ppt-dot { background: #fef08a; }
+  .ppt.cream  { background: #78350f; color: #fef3c7; border: 1px solid #a16207; }
+  .ppt.cream .ppt-dot  { background: #fef9c3; border: 1px solid #ca8a04; }
+  .ppt.green  { background: #14532d; color: #bbf7d0; border: 1px solid #166534; }
+  .ppt.green .ppt-dot  { background: #4ade80; }
+  .ppt.blue   { background: #1e3a8a; color: #bfdbfe; border: 1px solid #1d4ed8; }
+  .ppt.blue .ppt-dot   { background: #60a5fa; }
+  .ppt.red    { background: #7f1d1d; color: #fecaca; border: 1px solid #991b1b; }
+  .ppt.red .ppt-dot    { background: #f87171; }
+  .ppt.brown  { background: #451a03; color: #fed7aa; border: 1px solid #7c2d12; }
+  .ppt.brown .ppt-dot  { background: #92400e; }
+  .ppt.reddish-brown { background: #3b0f0f; color: #fca5a5; border: 1px solid #7f1d1d; }
+  .ppt.reddish-brown .ppt-dot { background: #b91c1c; }
+  .ppt.orange { background: #431407; color: #fed7aa; border: 1px solid #9a3412; }
+  .ppt.orange .ppt-dot { background: #fb923c; }
+  .ppt.purple { background: #3b0764; color: #e9d5ff; border: 1px solid #6b21a8; }
+  .ppt.purple .ppt-dot { background: #a855f7; }
+  .ppt.pink { background: #701a75; color: #fbcfe8; border: 1px solid #9d181d; }
+  .ppt.pink .ppt-dot { background: #eb81e5; }
+  .ppt.none   { background: transparent; color: var(--text-muted); font-style: italic; font-weight: 400; }
+
+  /* ─── ANION TESTS ─── */
+  .anion-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .anion-header {
+    background: var(--surface3);
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .anion-formula {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .anion-name {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .anion-body { padding: 12px 14px; }
+  .anion-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .anion-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .anion-label {
+    font-size: 11px;
+    color: var(--accent2);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    min-width: 60px;
+    margin-top: 2px;
+  }
+  .anion-detail { font-size: 13px; flex: 1; }
+
+  /* ─── PERIOD 3 ─── */
+  .p3-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .p3-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+  }
+  .p3-element {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 4px;
+  }
+  .p3-name { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; }
+  .p3-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    margin: 2px;
+  }
+  .tag-basic { background: #1e3a8a; color: #bfdbfe; }
+  .tag-ampho { background: #4c1d95; color: #ddd6fe; }
+  .tag-acidic { background: #7f1d1d; color: #fecaca; }
+  .tag-ionic { background: #14532d; color: #bbf7d0; }
+  .tag-covalent { background: #78350f; color: #fef3c7; }
+
+  /* ─── GAS CARDS ─── */
+  .gas-card {
+    background: var(--surface);
+    border-left: 4px solid var(--accent);
+    border-radius: 0 14px 14px 0;
+    border-top: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+  .gas-card.acidic-gas { border-left-color: var(--red); }
+  .gas-card.basic-gas { border-left-color: var(--green-ppt); }
+  .gas-card.neutral-gas { border-left-color: var(--accent2); }
+
+  .gas-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    gap: 10px;
+  }
+  .gas-formula-big {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .gas-tags { display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; }
+  .gas-tag {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+  .odor-tag { background: var(--surface3); color: var(--text-muted); }
+  .acid-tag { background: #7f1d1d; color: #fecaca; }
+  .base-tag { background: #14532d; color: #bbf7d0; }
+  .neut-tag { background: #1e3a8a; color: #bfdbfe; }
+  .watermixing-tag { background: #1e40af; color: #bfdbfe;}
+  .bleach-tag { background: #78350f; color: #fef3c7; }
+  .color-tag { background: var(--accent); color: #0a0e1a; }
+
+  .gas-tests {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .gas-test {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 12.5px;
+  }
+  .gas-test-reagent {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--gold);
+    font-size: 11px;
+    margin-bottom: 3px;
+    font-weight: 600;
+  }
+
+  /* ─── HALIDE ─── */
+  .solubility-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .sol-yes { color: #4ade80; }
+  .sol-partial { color: #fbbf24; }
+  .sol-no { color: #f87171; }
+  .sol-icon { width: 8px; height: 8px; border-radius: 50%; }
+  .sol-yes .sol-icon { background: #4ade80; }
+  .sol-partial .sol-icon { background: #fbbf24; }
+  .sol-no .sol-icon { background: #f87171; }
+
+  /* ─── CATION GROUP ─── */
+  .group-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .group-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .group-number {
+    width: 34px; height: 34px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+  .g1 { background: linear-gradient(135deg, #38bdf8, #0ea5e9); color: #000; }
+  .g2 { background: linear-gradient(135deg, #f87171, #dc2626); color: #fff; }
+  .g3 { background: linear-gradient(135deg, #4ade80, #16a34a); color: #000; }
+  .g4 { background: linear-gradient(135deg, #fbbf24, #d97706); color: #000; }
+  .g5 { background: linear-gradient(135deg, #a78bfa, #7c3aed); color: #fff; }
+  .g6 { background: linear-gradient(135deg, #94a3b8, #475569); color: #fff; }
+
+  .group-info h3 { font-size: 14px; font-weight: 700; }
+  .group-info p { font-size: 12px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+
+  .group-body { padding: 12px 14px; }
+  .ppt-list { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  /* ─── FLOATING BACK ─── */
+  #backToTop {
+    position: fixed;
+    bottom: 20px; right: 16px;
+    width: 44px; height: 44px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: none;
+    align-items: center; justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(56,189,248,0.4);
+    z-index: 200;
+    border: none;
+    color: #000;
+  }
+  #backToTop.visible { display: flex; }
+
+  /* ─── HIGHLIGHT ─── */
+  .highlight { background: rgba(56,189,248,0.15); border-radius: 3px; }
+
+  .info-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--surface3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+
+  hr.divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 12px 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-top">
+    <div class="logo">⚗️</div>
+    <div>
+      <h1>අකාබනික රසායන විද්‍යාව <span>Inorganic Chemistry Reference • Grade 12/13 vivan (25/26)</span></h1>
+    </div>
+  </div>
+  <div class="search-wrap">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+    <input type="text" id="searchInput" placeholder="සොයන්න... (e.g. Pb²⁺, SO₂, AgCl)" autocomplete="off" spellcheck="false">
+  </div>
+</header>
+
+<!-- SEARCH RESULTS -->
+<div id="searchResults"></div>
+
+<!-- NAV TABS -->
+<div class="nav-tabs">
+  <button class="tab-btn active" onclick="switchTab('gases')">🧪 වායු</button>
+  <button class="tab-btn" onclick="switchTab('cations')">⚗️ කැටායන</button>
+  <button class="tab-btn" onclick="switchTab('anions')">🔬 ඇනායන</button>
+  <button class="tab-btn" onclick="switchTab('halides')">🧂 හැලයිඩ</button>
+  <button class="tab-btn" onclick="switchTab('period3')">📊 3 වන කාලය</button>
+</div>
+
+<main>
+
+<!-- ══════════════════════════════════════════
+     SECTION 1: GAS IDENTIFICATION
+══════════════════════════════════════════ -->
+<div id="sec-gases" class="section active">
+  <div class="section-heading">
+    <div class="badge" style="background:linear-gradient(#38bdf8,#818cf8)"></div>
+    <div><h2>වායු හඳුනා ගැනීම</h2><p>Gas Identification Tests</p></div>
+  </div>
+
+  <!-- SO2 -->
+  <div class="gas-card acidic-gas" data-search="SO2 sulfur dioxide සල්ෆර් ඩයොක්සයිඩ්">
+    <div class="gas-top">
+      <div>
+        <div class="gas-formula-big">SO<sub>2</sub></div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">සල්ෆර් ඩයොක්සයිඩ්</div>
+      </div>
+      <div class="gas-tags">
+        <span class="gas-tag odor-tag">🌋 කටුක ගන්දය</span>
+        <span class="gas-tag watermixing-tag">💧 ජලය සමග හොදින්  දියවේ</span>
+        <span class="gas-tag acid-tag">දුර්වල අම්ලීය</span>
+        <span class="gas-tag bleach-tag">විරංජක ගුන ඇත</span>
+        <span class="gas-tag color-tag">🎨 අවර්න </span>
+      </div>
+    </div>
+    <div class="gas-tests">
+      <div class="gas-test">
+        <div class="gas-test-reagent">➤ KMnO₄ (දිලිසෙන දම් පාට)</div>
+        <div>ද්‍රාවණය <strong>වර්ණ නාශකය</strong> (දම් → විවර්ණ). SO₂ ක්ෂයකාරකයක් ලෙස ක්‍රියා කරයි.</div>
+      </div>
+      <div class="gas-test">
+        <div class="gas-test-reagent">➤ K₂Cr₂O₇ (තනු H₂SO₄ සමඟ) විවර්ණ කර අවක්ශේප</div>
+        <div>කහ-තැඹිලි → <span class="ppt green" style="display:inline-flex"><span class="ppt-dot"></span>කොළ පාට</span> (Cr³⁺ සෑදේ)</div>
+      </div>
+      <div class="gas-test">
+        <div class="gas-test-reagent">➤ ලිත්මස් කඩදාසි</div>
+        <div>රතු තෙත ලිත්මස් → <strong>රතු ම</strong> (SO₂ ජලයේ දිය වූ විට H₂SO₃ සෑදේ)</div>
+      </div>
+      <div class="gas-test">
+        <div class="gas-test-reagent">➤  Pb(CH₃COO)₂</div>
+        <div> සුදු අවක්ශේප (පෙරහන් කඩදාසියේ නොපෙනේ)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- H2S -->
+  <div class="gas-card acidic-gas" data-search="H2S hydrogen sulfide හයිඩ්‍රජන් සල්ෆයිඩ්">
+    <div class="gas-top">
+      <div>
+        <div class="gas-formula-big">H<sub>2</sub>S</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">හයිඩ්‍රජන් සල්ෆයිඩ්</div>
+      </div>
+      <div class="gas-tags">
+        <span class="gas-tag odor-tag">නරක් වූ බිත්තර</span>
+        <span class="gas-tag watermixing-tag">💧 ජලය සමග හොදින්  දියවේ</span>
+        <span class="gas-tag acid-tag">දුර්වල අම්ලීය</span>
+        <span class="gas-tag bleach-tag">විරංජක ගුන නැත</span>
+        <span class="gas-tag color-tag">🎨 අවර්න </span>
+      </div>
+    </div>
+    <div class="gas-tests">
+      <div class="gas-test">
+        <div class="gas-test-reagent">➤ Lead Acetate (Pb(CH₃COO)₂ ඇසිටේට්)පෙරහන් කඩදාසි</div>
+        <div><span class="ppt white" style="display:inline-flex"><span class="ppt-dot"></span>සුදු PbSO₃</span> → <span class="ppt black" style="display:inline-flex"><span class="ppt-dot"></span>කළු PbS</span> – නිශ්‌චිත පරීක්ෂාව</div>
+      </div>
+      <div class="gas-test">
+        <div class="gas-test-reagent">➤ K₂Cr₂O₇ (තනු H₂SO₄ සමඟ) විවර්ණ කර අවක්ශේප</div>
+        <div>කහ → <span class="ppt green" style="display:inline-flex"><span class="ppt-dot"></span>කොළ Cr³⁺</span> (SO₂ ට වඩා ශක්‍යතාව අඩු)</div>
+      </div>
+      <div class="gas-test">
+        <div class="gas-test-reagent">➤ FeCl₃ ද්‍රාවණය H₂SO₄</div>
+        <div>කහ FeCl₃ <strong>තෙත</strong> කරයි (Fe³⁺ → Fe²⁺ අඩු කිරීම)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CO2 -->
+  <div class="gas-card neutral-gas" data-search="CO2 carbon dioxide කාබන් ඩයොක්සයිඩ්">
+    <div class="gas-top">
+      <div>
+        <div class="gas-formula-big">CO<sub>2</sub></div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">කාබන් ඩයොක්සයිඩ්</div>
+      </div>
+      <div class="gas-tags">
+        <span class="gas-tag odor-tag">🌋 ගන්දයක් නැත</span>
+        <span class="gas-tag watermixing-tag">💧 ජලය සමග මද වශයෙන් දියවේ</span>
+        <span class="gas-tag acid-tag">දුබල භාෂ්මික</span>
+        <span class="gas-tag bleach-tag">විරංජක ගුන නැත</span>
+        <span class="gas-tag color-tag">🎨 අවර්න </span>
+      </div>
+    </div>
+    <div class="gas-tests">
+      <div class="gas-test">
+        <div class="gas-test-reagent">➤ Ca(OH)₂ (හුණු ජලය) - ප්‍රධාන පරීක්ෂාව</div>
+        <div><span class="ppt white" style="display:inline-flex"><span class="ppt-dot"></span>සුදු CaCO₃ අවක්ෂේපය</span> – "හුණු ජලය කිරිදිය වේ"</div>
+        <div style="margin-top:4px;font-size:12px;color:var(--text-muted)">CO₂ + Ca(OH)₂ → CaCO₃↓ + H₂O</div>
+        <div style="margin-top:4px;font-size:12px;color:var(--accent2)">🔁 අතිරේක CO₂ → Ca(HCO₃)₂ (ද්‍රාව්‍ය) – අවක්ෂේපය නැවත දිය වේ</div>
+      </div>
+      <div class="gas-test">
+        <div class="gas-test-reagent">➤ Lead Acetate (Pb(CH₃COO)₂ ඇසිටේට්)පෙරහන් කඩදාසි</div>
+        <div><span class="ppt white" style="display:inline-flex"><span class="ppt-dot"></span>සුදු PbCO₃</div>
+      </div>
+      <div class="gas-test">
+        <div class="gas-test-reagent">➤ නිල් ලිත්මස් කඩදාසි</div>
+        <div> H₂O + CO₂ → <strong>රතු</strong> (H₂CO₃ සෑදේ)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NH3 -->
+  <div class="gas-card basic-gas" data-search="NH3 ammonia ඇමෝනියා">
+    <div class="gas-top">
+      <div>
+        <div class="gas-formula-big">NH<sub>3</sub></div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">ඇමෝනියා</div>
+      </div>
+      <div class="gas-tags">
+        <span class="gas-tag odor-tag">කටුක ගන්දය</span>
+        <span class="gas-tag watermixing-tag">💧 ජලය සමග මද වශයෙන් දියවේ</span>
+        <span class="gas-tag acid-tag">දුබල භාෂ්මික</span>
+        <span class="gas-tag bleach-tag">විරංජක ගුන නැත</span>
+        <span class="gas-tag color-tag">🎨 අවර්න </span>
+      </div>
+    </div>
+    <div class="gas-tests">
+      <div class="gas-test">
+        <div class="gas-test-reagent">➤ රතු ලිත්මස් කඩදාසි</div>
+        <div>රතු → <strong>නිල්</strong> (ක්ෂාරීය pH) – ප්‍රධාන, ඉක්මන් පරීක්ෂාව</div>
+      </div>
+      <div class="gas-test">
+        <div class="gas-test-reagent">➤ HCl ​(සාන්ද්‍ර) ෆියුම් සමඟ</div>
+        <div><span class="ppt white" style="display:inline-flex"><span class="ppt-dot"></span>සුදු NH₄Cl දුම</span> – NH₃ + HCl → NH₄Cl</div>
+      </div>
+      <div class="gas-test">
+        <div class="gas-test-reagent">➤ NH₃ ජලය සමග</div>
+        <div><span style="display:inline-flex">H₂O + NH₃ → NH₄OH</span></div>
+      </div>
+      <div class="gas-test">
+        <div class="gas-test-reagent">➤ Nessler's Reagent (K₂[HgI₄])</div>
+        <div><span class="ppt brown" style="display:inline-flex"><span class="ppt-dot"></span>දුඹුරු-කහ</span> අවක්ෂේපය – NH₃ ට ඉතා සංවේදී</div>
+      </div>
+      <div class="gas-test">
+        <div class="gas-test-reagent">➤ CuSO₄ ද්‍රාවණය</div>
+        <div>ශෙකිත CuSO₄ → <span class="ppt blue" style="display:inline-flex"><span class="ppt-dot"></span>ගැඹුරු නිල් [Cu(NH₃)₄]²⁺</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NO2 -->
+  <div class="gas-card acidic-gas" data-search="NO2 nitrogen dioxide නයිට්‍රජන් ඩයොක්සයිඩ්">
+    <div class="gas-top">
+      <div>
+        <div class="gas-formula-big">NO<sub>2</sub></div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">නයිට්‍රජන් ඩයොක්සයිඩ්</div>
+      </div>
+      <div class="gas-tags">
+        <span class="gas-tag odor-tag">කටුක ගන්දය</span>
+        <span class="gas-tag watermixing-tag">💧 ජලය සමග මද වශයෙන් දියවේ</span>
+        <span class="gas-tag acid-tag">ප්‍රබල භාෂ්මික</span>
+        <span class="gas-tag bleach-tag">විරංජක ගුන නැත</span>
+        <span class="gas-tag color-tag">🎨 දුඹුරු </span>
+      </div>
+    </div>
+    <div class="gas-tests">
+      <div class="gas-test">
+        <div class="gas-test-reagent">➤ වර්ණය (ප්‍රධාන)</div>
+        <div>⚠️ <span style="color:#fb923c;font-weight:700;">දුඹුරු-රතු</span> වාතය – NO₂ ගෑස් ස්වභාවිකව දර්ශනීය</div>
+      </div>
+      <div class="gas-test">
+        <div class="gas-test-reagent">➤ ලිත්මස් කඩදාසි</div>
+        <div>නිල් → <strong>රතු</strong> (ජලය සමඟ HNO₃ + HNO₂ සෑදේ)</div>
+      </div>
+      <div class="gas-test">
+        <div class="gas-test-reagent">➤ FeSO₄ (brown ring test)</div>
+        <div>NO₂ ← NO → <strong>දුඹුරු මුදු</strong> [Fe(NO)]SO₄ සෑදීම</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /sec-gases -->
+
+
+<!-- ══════════════════════════════════════════
+     SECTION 2: CATION GROUPS
+══════════════════════════════════════════ -->
+<div id="sec-cations" class="section">
+  <div class="section-heading">
+    <div class="badge" style="background:linear-gradient(#f87171,#fbbf24)"></div>
+    <div><h2>කැටායන කාණ්ඩ (1–6)</h2><p>Systematic Qualitative Analysis</p></div>
+  </div>
+
+  <!-- Group 1 -->
+  <div class="group-card" data-search="Group 1 Ag Pb Hg AgCl PbCl2 Hg2Cl2">
+    <div class="group-header">
+      <div class="group-number g1">I</div>
+      <div class="group-info">
+        <h3>1 වන කාණ්ඩය – තනුක  HCl</h3>
+        <p>Reagent: dilute HCl</p>
+      </div>
+    </div>
+    <div class="group-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>කැටායන</th><th>ඇවිද්‍යාව / Formula</th><th>අවක්ෂේප වර්ණය</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="mono">Ag⁺</span></td>
+              <td><span class="mono">AgCl</span></td>
+              <td><span class="ppt white"><span class="ppt-dot"></span>සුදු</span></td>
+            </tr>
+            <tr>
+              <td><span class="mono">Pb²⁺</span></td>
+              <td><span class="mono">PbCl₂</span></td>
+              <td><span class="ppt white"><span class="ppt-dot"></span>සුදු</span></td>
+            </tr>
+            <tr>
+              <td><span class="mono">Hg₂²⁺</span></td>
+              <td><span class="mono">Hg₂Cl₂</span></td>
+              <td><span class="ppt white"><span class="ppt-dot"></span>සුදු</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Group 2 -->
+  <div class="group-card" data-search="Group 2 Cu Pb Bi Cd As Sb Sn CuS PbS Bi2S3 CdS As2S3 Sb2S3 SnS">
+    <div class="group-header">
+      <div class="group-number g2">II</div>
+      <div class="group-info">
+        <h3>2 වන කාණ්ඩය – H₂S (තනුක HCl සමඟ)</h3>
+        <p>Reagent: H₂S in acidic medium</p>
+      </div>
+    </div>
+    <div class="group-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>කැටායන</th><th>Formula</th><th>වර්ණය</th></tr></thead>
+          <tbody>
+            <tr><td><span class="mono">Hg²⁺</span></td><td><span class="mono">HgS</span></td><td><span class="ppt black"><span class="ppt-dot"></span>කළු</span></td></tr>
+            <tr><td><span class="mono">Cu²⁺</span></td><td><span class="mono">CuS</span></td><td><span class="ppt black"><span class="ppt-dot"></span>කළු</span></td></tr>
+            <tr><td><span class="mono">Pb²⁺</span></td><td><span class="mono">PbS</span></td><td><span class="ppt black"><span class="ppt-dot"></span>කළු</span></td></tr>
+            <tr><td><span class="mono">Bi³⁺</span></td><td><span class="mono">Bi₂S₃</span></td><td><span class="ppt black"><span class="ppt-dot"></span>කළු</span></td></tr>
+            <tr><td><span class="mono">Sn⁴⁺</span></td><td><span class="mono">SnS₂</span></td><td><span class="ppt yellow"><span class="ppt-dot"></span>කහ</span></td></tr>
+            <tr><td><span class="mono">Cd²⁺</span></td><td><span class="mono">CdS</span></td><td><span class="ppt yellow"><span class="ppt-dot"></span>කහ</span></td></tr>
+            <tr><td><span class="mono">As³⁺</span></td><td><span class="mono">As₂S₃</span></td><td><span class="ppt yellow"><span class="ppt-dot"></span>කහ</span></td></tr >
+            <tr><td><span class="mono">Sb³⁺</span></td><td><span class="mono">Sb₂S₃</span></td><td><span class="ppt orange"><span class="ppt-dot"></span>තැඹිලි</span></td></tr>
+            <tr><td><span class="mono">Sn²⁺</span></td><td><span class="mono">SnS</span></td><td><span class="ppt brown"><span class="ppt-dot"></span>දුඹුරු</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Group 3 -->
+  <div class="group-card" data-search="Group 3 Fe Al Cr Fe(OH)3 Al(OH)3 Cr(OH)3 reddish brown white green">
+    <div class="group-header">
+      <div class="group-number g3">III</div>
+      <div class="group-info">
+        <h3>3 වන කාණ්ඩය – NH₄OH + NH₄Cl</h3>
+        <p>Reagent: NH₃ solution in buffered medium</p>
+      </div>
+    </div>
+    <div class="group-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>කැටායන</th><th>Formula</th><th>වර්ණය</th></tr></thead>
+          <tbody>
+            <tr><td><span class="mono">Fe³⁺</span></td><td><span class="mono">Fe(OH)₃</span></td><td><span class="ppt reddish-brown"><span class="ppt-dot"></span>රතු-දුඹුරු</span></td></tr>
+            <tr><td><span class="mono">Fe²⁺</span></td><td><span class="mono">Fe(OH)₂</span></td><td><span class="ppt green"><span class="ppt-dot"></span>කොළ (හෝ සුදු)</span></td></tr>
+            <tr><td><span class="mono">Al³⁺</span></td><td><span class="mono">Al(OH)₃</span></td><td><span class="ppt white"><span class="ppt-dot"></span>සුදු (ජෙලටිනිය)</span></td></tr>
+            <tr><td><span class="mono">Cr³⁺</span></td><td><span class="mono">Cr(OH)₃</span></td><td><span class="ppt green"><span class="ppt-dot"></span>නිල් කොළ</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="info-chip">💡 Fe(OH)₃ — ශෙකිත SCN⁻ සමඟ <span style="color:#f87171">රතු [Fe(SCN)]²⁺</span> සාධනය</div>
+    </div>
+  </div>
+
+  <!-- Group 4 -->
+  <div class="group-card" data-search="Group 4 Ni Co Mn Zn NiS CoS MnS ZnS black pink white">
+    <div class="group-header">
+      <div class="group-number g4">IV</div>
+      <div class="group-info">
+        <h3>4 වන කාණ්ඩය – H₂S (ක්ෂාරීය)</h3>
+        <p>Reagent: H₂S in NH₃ medium</p>
+      </div>
+    </div>
+    <div class="group-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>කැටායන</th><th>Formula</th><th>වර්ණය</th></tr></thead>
+          <tbody>
+            <tr><td><span class="mono">Ni²⁺</span></td><td><span class="mono">NiS</span></td><td><span class="ppt black"><span class="ppt-dot"></span>කළු</span></td></tr>
+            <tr><td><span class="mono">Co²⁺</span></td><td><span class="mono">CoS</span></td><td><span class="ppt black"><span class="ppt-dot"></span>කළු</span></td></tr>
+            <tr><td><span class="mono">Mn²⁺</span></td><td><span class="mono">MnS</span></td><td><span class="ppt pink"><span class="ppt-dot"></span>රෝස</span></td></tr>
+            <tr><td><span class="mono">Zn²⁺</span></td><td><span class="mono">ZnS</span></td><td><span class="ppt white"><span class="ppt-dot"></span>සුදු</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Group 5 -->
+  <div class="group-card" data-search="Group 5 Ba Sr Ca BaSO4 SrSO4 CaSO4">
+    <div class="group-header">
+      <div class="group-number g5">V</div>
+      <div class="group-info">
+        <h3>5 වන කාණ්ඩය – (NH₄)₂CO₃ / (NH₄)₂SO₄</h3>
+        <p>Reagent: Ammonium carbonate</p>
+      </div>
+    </div>
+    <div class="group-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>කැටායන</th><th>Formula</th><th>වර්ණය</th></tr></thead>
+          <tbody>
+            <tr><td><span class="mono">Ba²⁺</span></td><td><span class="mono">BaCO₃</span></td><td><span class="ppt white"><span class="ppt-dot"></span>සුදු</span></td></tr>
+            <tr><td><span class="mono">Sr²⁺</span></td><td><span class="mono">SrCO₃</span></td><td><span class="ppt white"><span class="ppt-dot"></span>සුදු</span></td></tr>
+            <tr><td><span class="mono">Ca²⁺</span></td><td><span class="mono">CaCO₃</span></td><td><span class="ppt white"><span class="ppt-dot"></span>සුදු</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Group 6 -->
+  <div class="group-card" data-search="Group 6 Mg  Mg(OH)2 white">
+    <div class="group-header">
+      <div class="group-number g6">VI</div>
+      <div class="group-info">
+        <h3>6 වන කාණ්ඩය – හයිඩ්රොක්සික්විනෝලින්</h3>
+        <p>Soluble group: Na⁺, K⁺, Mg²⁺, NH₄⁺</p>
+      </div>
+    </div>
+    <div class="group-body">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>කැටායන</th><th>හඳුනා ගැනීමේ ක්‍රමය</th><th>ප්‍රතිඵලය</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="mono">Mg²⁺</span></td>
+              <td>හයිඩ්රොක්සික්විනෝලින් </td>
+              <td><span class="ppt green"><span class="ppt-dot"></span>කහ කොල</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /sec-cations -->
+
+
+<!-- ══════════════════════════════════════════
+     SECTION 3: ANION TESTS
+══════════════════════════════════════════ -->
+<div id="sec-anions" class="section">
+  <div class="section-heading">
+    <div class="badge" style="background:linear-gradient(#34d399,#38bdf8)"></div>
+    <div><h2>ඇනායන පරීක්ෂා</h2><p>Anion Identification Tests</p></div>
+  </div>
+
+  <!-- CO3 2- -->
+  <div class="anion-card" data-search="CO3 carbonate කාබනේට්">
+    <div class="anion-header">
+      <div>
+        <div class="anion-formula">CO₃²⁻</div>
+        <div class="anion-name">කාබනේට් අයනය</div>
+      </div>
+    </div>
+    <div class="anion-body">
+      <div class="anion-row">
+        <div class="anion-label">ජනනය</div>
+        <div class="anion-detail">තනුක  HCl/H₂SO₄ + CO₃²⁻ → CO₂ ගෑස් + H₂O</div>
+      </div>
+      <div class="anion-row">
+        <div class="anion-label">CO₂ පරීක්ෂා</div>
+        <div class="anion-detail">Ca(OH)₂ (හුණු ජලය) → <span class="ppt white"><span class="ppt-dot"></span>සුදු CaCO₃</span> "කිරි" (" milky")</div>
+      </div>
+      <div class="anion-row">
+        <div class="anion-label">සමීකරණය</div>
+        <div class="anion-detail mono" style="font-size:12px">CO₃²⁻ + 2HCl → CO₂ + H₂O + 2Cl⁻<br>CO₂ + Ca(OH)₂ → CaCO₃↓ + H₂O</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SO3 2- -->
+  <div class="anion-card" data-search="SO3 sulfite සල්ෆයිට්">
+    <div class="anion-header">
+      <div>
+        <div class="anion-formula">SO₃²⁻</div>
+        <div class="anion-name">සල්ෆයිට් අයනය</div>
+      </div>
+    </div>
+    <div class="anion-body">
+      <div class="anion-row">
+        <div class="anion-label">ජනනය</div>
+        <div class="anion-detail">තනුක HCl + SO₃²⁻ → SO₂ ගෑස් (දරුණු දුගඳ)</div>
+      </div>
+      <div class="anion-row">
+        <div class="anion-label">SO₂ පරීක්ෂා</div>
+        <div class="anion-detail">
+          ① KMnO₄ (දම්) → <strong>තනුක</strong> (Mn²⁺)<br>
+          ② K₂Cr₂O₇ (HCl) → <span class="ppt green"><span class="ppt-dot"></span>කොළ Cr³⁺</span>
+        </div>
+      </div>
+      <div class="anion-row">
+        <div class="anion-label">CO₃ ලෙස?</div>
+        <div class="anion-detail">SO₂ ← CO₂ ට වෙනස් — KMnO₄ තනුක කරයි; CO₂ තනුක නොකරයි</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S2O3 2- -->
+  <div class="anion-card" data-search="S2O3 thiosulfate thiosulphate තයෝසල්ෆේට්">
+    <div class="anion-header">
+      <div>
+        <div class="anion-formula">S₂O₃²⁻</div>
+        <div class="anion-name">තයෝසල්ෆේට් අයනය</div>
+      </div>
+    </div>
+    <div class="anion-body">
+      <div class="anion-row">
+        <div class="anion-label">HCl සමඟ</div>
+        <div class="anion-detail">
+          S₂O₃²⁻ + 2HCl → S↓ + SO₂ + H₂O + 2Cl⁻<br>
+          <span class="ppt pale-yellow" style="margin-top:4px"><span class="ppt-dot"></span>කහ-සුදු S↓</span> + SO₂ ගෑස් (දරුණු දුගඳ) — <em>දෙකම සැකිලි!</em>
+        </div>
+      </div>
+      <div class="anion-row">
+        <div class="anion-label">AgNO₃ සමඟ</div>
+        <div class="anion-detail"><span class="ppt white"><span class="ppt-dot"></span>සුදු Ag₂S₂O₃</span> → SO₃(G)(ස්වයංසිද්ධ) + <span class="ppt black"><span class="ppt-dot"></span>කළු Ag₂S</span> (ශීඝ්‍රයෙන් වෙනස)</div>
+      </div>
+      <div class="anion-row">
+        <div class="anion-label">Pb(CH₃COO)₂ සමඟ</div>
+        <div class="anion-detail"><span class="ppt white"><span class="ppt-dot"></span>සුදු PbS₂O₃</span> → SO₃(G) Δ + <span class="ppt black"><span class="ppt-dot"></span>කළු PbS</span> (ශීඝ්‍රයෙන් වෙනස)</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- NO2- -->
+  <div class="anion-card" data-search="NO2- nitrite නයිට්‍රයිට්">
+    <div class="anion-header">
+      <div>
+        <div class="anion-formula">NO₂⁻</div>
+        <div class="anion-name">නයිට්‍රයිට් අයනය</div>
+      </div>
+    </div>
+    <div class="anion-body">
+      <div class="anion-row">
+        <div class="anion-label">HCl සමඟ</div>
+        <div class="anion-detail">
+          NO₂⁻ + HCl → HNO₂ → NO + NO₂ (ශීඝ්‍)<br>
+          <span style="color:#fb923c">දුඹුරු-රතු NO₂ ගෑස්</span> නිකුත් වේ
+        </div>
+      </div>
+      <div class="anion-row">
+        <div class="anion-label">KMnO₄ සමඟ</div>
+        <div class="anion-detail">NO₂⁻ (ක්ෂයකාරකය) → KMnO₄ <strong>ශෙකිත</strong> කරයි (Mn²⁺)</div>
+      </div>
+      <div class="anion-row">
+        <div class="anion-label">Brown Ring</div>
+        <div class="anion-detail">FeSO₄ + H₂SO₄ + NO₂⁻ → <span class="ppt brown"><span class="ppt-dot"></span>දුඹුරු [Fe(NO)]SO₄</span></div>
+      </div>
+      <div class="anion-row">
+        <div class="anion-label">NO₃⁻ ලෙස? HCl  X / </div>
+        <div class="anion-detail">NO₂⁻ ← HCl සමඟ ශීඝ්‍ර. / NO₃⁻ ← තනුක  H₂SO₄ + FeSO₄ දුබුරු වලය (සාන්ද්‍ර H₂SO₄ අවශ්‍ය)/ NO₂⁻ ද්රාවනය දුබුරු කරයි</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Halide extra in anions -->
+  <div class="anion-card" data-search="Cl- Br- I- halide chloride bromide iodide ක්ලෝරයිඩ් බ්‍රෝමයිඩ් අයොඩයිඩ්">
+    <div class="anion-header">
+      <div>
+        <div class="anion-formula">Cl⁻ / Br⁻ / I⁻</div>
+        <div class="anion-name">හැලයිඩ් අයන</div>
+      </div>
+    </div>
+    <div class="anion-body">
+      <div class="anion-row">
+        <div class="anion-label">AgNO₃ සමඟ</div>
+        <div class="anion-detail">
+          Cl⁻ → <span class="ppt white"><span class="ppt-dot"></span>සුදු AgCl</span><br>
+          Br⁻ → <span class="ppt pale-yellow"><span class="ppt-dot"></span>ලා-කහ AgBr</span><br>
+          I⁻ → <span class="ppt yellow"><span class="ppt-dot"></span>කහ AgI</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /sec-anions -->
+
+
+<!-- ══════════════════════════════════════════
+     SECTION 4: HALIDE SOLUBILITY
+══════════════════════════════════════════ -->
+<div id="sec-halides" class="section">
+  <div class="section-heading">
+    <div class="badge" style="background:linear-gradient(#fbbf24,#f87171)"></div>
+    <div><h2>හැලයිඩ ද්‍රාව්‍යතාව</h2><p>AgX Solubility in NH₃</p></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span>රිදී හැලයිඩ ඇමෝනියා ද්‍රාව්‍යතාව</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Formula</th>
+            <th>වර්ණය</th>
+            <th>තනුක NH₃</th>
+            <th>සාන්ද්‍ර NH₃</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="mono">AgCl</span></td>
+            <td><span class="ppt white"><span class="ppt-dot"></span>සුදු</span></td>
+            <td><span class="solubility-indicator sol-yes"><span class="sol-icon"></span>ද්‍රාව්‍ය</span></td>
+            <td><span class="solubility-indicator sol-yes"><span class="sol-icon"></span>ද්‍රාව්‍ය</span></td>
+          </tr>
+          <tr>
+            <td><span class="mono">AgBr</span></td>
+            <td><span class="ppt pale-yellow"><span class="ppt-dot"></span>ලා-කහ</span></td>
+            <td><span class="solubility-indicator sol-no"><span class="sol-icon"></span>ද්‍රාවණය නොවේ</span></td>
+            <td><span class="solubility-indicator sol-partial"><span class="sol-icon"></span>සුළු ද්‍රාවය</span></td>
+          </tr>
+          <tr>
+            <td><span class="mono">AgI</span></td>
+            <td><span class="ppt yellow"><span class="ppt-dot"></span>කහ</span></td>
+            <td><span class="solubility-indicator sol-no"><span class="sol-icon"></span>ද්‍රාවණය නොවේ</span></td>
+            <td><span class="solubility-indicator sol-no"><span class="sol-icon"></span>ද්‍රාවණය නොවේ</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="info-chip">💡 AgCl → [Ag(NH₃)₂]⁺ + Cl⁻ (d²sp³ සංකීර්ණය)</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">ද්‍රාව්‍යතා නිශ්‌චිතාව (Ksp) – සාපේක්ෂ</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Formula</th><th>Ksp (ආසන්නව)</th><th>ද්‍රාව්‍යතා පිළිවෙල</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="mono">AgCl</span></td>
+            <td><span class="mono">1.8 × 10⁻¹⁰</span></td>
+            <td>⬆️ වැඩිම ද්‍රාව්‍ය</td>
+          </tr>
+          <tr>
+            <td><span class="mono">AgBr</span></td>
+            <td><span class="mono">5.0 × 10⁻¹³</span></td>
+            <td>↔️ අතරමැදි</td>
+          </tr>
+          <tr>
+            <td><span class="mono">AgI</span></td>
+            <td><span class="mono">8.5 × 10⁻¹⁷</span></td>
+            <td>⬇️ අඩුම ද්‍රාව්‍ය</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">හෙලොජන් ක්‍රියාකාරිත්වය</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Halogen</th><th>ශෙකිතකාරක ශක්‍යතාව</th><th>HX දුර්වල ශ්‍රේණිය</th></tr></thead>
+        <tbody>
+          <tr><td><span class="mono">F₂</span></td><td>⬆️ ප්‍රබල</td><td>HF – දුර්වල අම්ල</td></tr>
+          <tr><td><span class="mono">Cl₂</span></td><td></td><td>HCl – තනුක අම්ල</td></tr>
+          <tr><td><span class="mono">Br₂</span></td><td></td><td>HBr – තනුක අම්ල</td></tr>
+          <tr><td><span class="mono">I₂</span></td><td>⬇️ දුර්වල</td><td>HI – ප්‍රබල අම්ල</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div><!-- /sec-halides -->
+
+
+<!-- ══════════════════════════════════════════
+     SECTION 5: PERIOD 3 TRENDS
+══════════════════════════════════════════ -->
+<div id="sec-period3" class="section">
+  <div class="section-heading">
+    <div class="badge" style="background:linear-gradient(#818cf8,#34d399)"></div>
+    <div><h2>3 වන කාල ප්‍රවණතා</h2><p>Period 3 Trends: Oxides, Hydroxides, Chlorides</p></div>
+  </div>
+
+  <!-- Elements Grid -->
+  <div class="p3-grid" style="grid-template-columns:repeat(4,1fr)">
+    <div class="p3-card"><div class="p3-element">Na</div><div class="p3-name">සෝඩියම්</div><span class="p3-tag tag-basic">ශීඝ්‍ර</span></div>
+    <div class="p3-card"><div class="p3-element">Mg</div><div class="p3-name">මැග්නීසියම්</div><span class="p3-tag tag-basic">ශීඝ්‍ර</span></div>
+    <div class="p3-card"><div class="p3-element">Al</div><div class="p3-name">ඇලුමිනියම්</div><span class="p3-tag tag-ampho">ද්විඅයනික</span></div>
+    <div class="p3-card"><div class="p3-element">Si</div><div class="p3-name">සිලිකන්</div><span class="p3-tag tag-acidic">අම්ලීය</span></div>
+    <div class="p3-card"><div class="p3-element">P</div><div class="p3-name">පොස්ෆරස්</div><span class="p3-tag tag-acidic">අම්ලීය</span></div>
+    <div class="p3-card"><div class="p3-element">S</div><div class="p3-name">සල්ෆර්</div><span class="p3-tag tag-acidic">ශීඝ්‍ර</span></div>
+    <div class="p3-card"><div class="p3-element">Cl</div><div class="p3-name">ක්ලෝරීන්</div><span class="p3-tag tag-acidic">ශීඝ්‍ර</span></div>
+    <div class="p3-card"><div class="p3-element">Ar</div><div class="p3-name">ආගොන්</div><span class="p3-tag" style="background:#1e293b;color:#94a3b8">අලස</span></div>
+  </div>
+
+  <!-- Oxides Table -->
+  <div class="section-heading" style="margin-top:8px">
+    <div class="badge" style="background:#f87171;width:6px"></div>
+    <div><h2 style="font-size:15px">ඔක්සයිඩ ස්වභාවය</h2></div>
+  </div>
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>ඔක්සයිඩ</th><th>ස්වභාවය</th><th>ජලය සමඟ</th><th>pH</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="mono">Na₂O</span></td>
+            <td><span class="p3-tag tag-basic">ශීඝ්‍ර</span></td>
+            <td>NaOH (ශීඝ්‍ර)</td>
+            <td><span class="mono" style="color:#4ade80">14</span></td>
+          </tr>
+          <tr>
+            <td><span class="mono">MgO</span></td>
+            <td><span class="p3-tag tag-basic">ශීඝ්‍ර</span></td>
+            <td>Mg(OH)₂ (දුර්වල)</td>
+            <td><span class="mono" style="color:#86efac">~9</span></td>
+          </tr>
+          <tr>
+            <td><span class="mono">Al₂O₃</span></td>
+            <td><span class="p3-tag tag-ampho">ද්විඅයනික</span></td>
+            <td>ශෙකිත නොවේ (pH 7)</td>
+            <td><span class="mono" style="color:#94a3b8">~7</span></td>
+          </tr>
+          <tr>
+            <td><span class="mono">SiO₂</span></td>
+            <td><span class="p3-tag tag-acidic">ශීඝ්‍ර</span></td>
+            <td>H₂SiO₃ (ඉතා දුර්වල)</td>
+            <td><span class="mono" style="color:#fca5a5">~5</span></td>
+          </tr>
+          <tr>
+            <td><span class="mono">P₄O₁₀</span></td>
+            <td><span class="p3-tag tag-acidic">ශෛඝ්‍ර</span></td>
+            <td>H₃PO₄</td>
+            <td><span class="mono" style="color:#f87171">~3</span></td>
+          </tr>
+          <tr>
+            <td><span class="mono">SO₃</span></td>
+            <td><span class="p3-tag tag-acidic">ශෛඝ්‍ර</span></td>
+            <td>H₂SO₄ (ශෛඝ්‍ර)</td>
+            <td><span class="mono" style="color:#dc2626">~1</span></td>
+          </tr>
+          <tr>
+            <td><span class="mono">Cl₂O₇</span></td>
+            <td><span class="p3-tag tag-acidic">ශෛඝ්‍ර</span></td>
+            <td>HClO₄</td>
+            <td><span class="mono" style="color:#b91c1c">&lt;1</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="info-chip">📈 ප්‍රවණතාව: Na → Cl ශෛඝ්‍ර → ශෛඝ්‍ර (ශෛඝ්‍ර → ශෛඝ්‍ර pH ↓)</div>
+  </div>
+
+  <!-- Hydroxides Table -->
+   <div class="section-heading" style="margin-top:8px">
+    <div class="badge" style="background:#f87171;width:6px"></div>
+    <div><h2 style="font-size:15px">හයිඩ්‍රොක්සයිඩයේ ස්වභාවය</h2></div>
+  </div>
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>හයිඩ්‍රොක්සයිඩ</th><th>ස්වභාවය</th><th>HCl සමඟ</th><th>NaOH සමඟ</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="mono">NaOH</span></td>
+            <td><span class="p3-tag tag-basic">ප්‍රබල භාස්මික</span></td>
+            <td>✅ ක්‍රියා කරයි</td>
+            <td>❌ නොකරයි</td>
+          </tr>
+          <tr>
+            <td><span class="mono">Mg(OH)₂</span></td>
+            <td><span class="p3-tag tag-basic">භාස්මික</span></td>
+            <td>✅ ක්‍රියා කරයි</td>
+            <td>❌ නොකරයි</td>
+          </tr>
+          <tr>
+            <td><span class="mono">Al(OH)₃</span></td>
+            <td><span class="p3-tag tag-ampho">උභයගුණී</span></td>
+            <td>✅ ක්‍රියා කරයි</td>
+            <td>✅ AlO₂⁻ සෑදේ</td>
+          </tr>
+          <tr>
+            <td><span class="mono">Si(OH)₄</span></td>
+            <td><span class="p3-tag tag-acidic">ඉතා දුර්වල ආම්ලික</span></td>
+            <td>❌ නොකරයි</td>
+            <td>✅ SiO₄⁴⁻</td>
+          </tr>
+          <tr>
+            <td><span class="mono">H₃PO₄</span></td>
+            <td><span class="p3-tag tag-acidic">දුර්වල ආම්ලික</span></td>
+            <td>❌ නොකරයි</td>
+            <td>✅ PO₄³⁻</td>
+          </tr>
+          <tr>
+            <td><span class="mono">H₂SO₄</span></td>
+            <td><span class="p3-tag tag-acidic" style="background:#6b1212">ආම්ලික</span></td>
+            <td>❌ නොකරයි</td>
+            <td>✅ SO₄²⁻</td>
+          </tr>
+          <tr>
+            <td><span class="mono">HClO₄</span></td>
+            <td><span class="p3-tag tag-acidic" style="background:#6b1212">ප්‍රබල ආම්ලික</span></td>
+            <td>❌ නොකරයි</td>
+            <td>✅ ClO₄⁻</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Chlorides Table -->
+  <div class="section-heading" style="margin-top:8px">
+    <div class="badge" style="background:#34d399;width:6px"></div>
+    <div><h2 style="font-size:15px">ක්ලෝරයිඩ ස්වභාවය</h2></div>
+  </div>
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>ක්ලෝරයිඩ</th><th>බන්ධන</th><th>ජල හයිඩ්‍රොලිසිස්</th><th>pH ආසන්නව</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="mono">NaCl</span></td>
+            <td><span class="p3-tag tag-ionic">ආයනික</span></td>
+            <td>මධ්‍යස්ථ</td>
+            <td><span class="mono" style="color:#94a3b8">~7</span></td>
+          </tr>
+          <tr>
+            <td><span class="mono">MgCl₂</span></td>
+            <td><span class="p3-tag tag-ionic">ආයනික</span></td>
+            <td>ඉතා දුර්වල ආම්ලික</td>
+            <td><span class="mono" style="color:#86efac">~6.5</span></td>
+          </tr>
+          <tr>
+            <td><span class="mono">AlCl₃</span></td>
+            <td><span class="p3-tag tag-covalent">සහසංයෝජිත</span></td>
+            <td>ආම්ලික</td>
+            <td><span class="mono" style="color:#fca5a5">~3</span></td>
+          </tr>
+          <tr>
+            <td><span class="mono">SiCl₄</span></td>
+            <td><span class="p3-tag tag-covalent">සහසංයෝජිත</span></td>
+            <td>ආම්ලික</td>
+            <td><span class="mono" style="color:#f87171">~2</span></td>
+          </tr>
+          <tr>
+            <td><span class="mono">PCl₅</span></td>
+            <td><span class="p3-tag tag-covalent">සහසංයෝජිත</span></td>
+            <td>ආම්ලික</td>
+            <td><span class="mono" style="color:#f87171">~2</span></td>
+          </tr>
+          <tr>
+            <td><span class="mono">SCl₂</span></td>
+            <td><span class="p3-tag tag-covalent">සහසංයෝජිත</span></td>
+            <td>ආම්ලික</td>
+            <td><span class="mono" style="color:#dc2626">~1</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="info-chip">📈 Na → Cl: ආයනික → සහසංයෝජිත; pH ↓ (ශෛඝ්‍ර → ශෛඝ්‍ර)</div>
+  </div>
+
+</div><!-- /sec-period3 -->
+
+</main>
+
+<!-- BACK TO TOP -->
+<button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+</button>
+
+<script>
+// ─── TAB SWITCHING ───────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ─── SEARCH DATA ─────────────────────────────────
+const searchIndex = [
+  // Gases
+  { key:'SO2 SO₂ සල්ෆර් ඩයොක්සයිඩ් sulfur dioxide kdmno4 k2cr2o7', title:'SO₂ – සල්ෆර් ඩයොක්සයිඩ්', sub:'KMnO₄ ශෙකිත • K₂Cr₂O₇ → කොළ • Lead Acetate', tab:'gases', section:'sec-gases', label:'🧪 වායු' },
+  { key:'H2S H₂S හයිඩ්‍රජන් සල්ෆයිඩ් hydrogen sulfide lead acetate කූනු බිත්තර', title:'H₂S – හයිඩ්‍රජන් සල්ෆයිඩ්', sub:'Lead Acetate → කළු PbS • K₂Cr₂O₇ → කොළ', tab:'gases', section:'sec-gases', label:'🧪 වායු' },
+  { key:'CO2 CO₂ කාබන් ඩයොක්සයිඩ් carbon dioxide lime water හුණු', title:'CO₂ – කාබන් ඩයොක්සයිඩ්', sub:'Ca(OH)₂ → CaCO₃↓ (කිරිදිය) • ලිත්මස් රතු', tab:'gases', section:'sec-gases', label:'🧪 වායු' },
+  { key:'NH3 NH₃ ඇමෝනියා ammonia litmus nessler copper', title:'NH₃ – ඇමෝනියා', sub:'ශෙකිත රතු → නිල් • HCl → NH₄Cl සුදු දුම • Nessler', tab:'gases', section:'sec-gases', label:'🧪 වායු' },
+  { key:'NO2 NO₂ නයිට්‍රජන් ඩයොක්සයිඩ් nitrogen dioxide brown reddish', title:'NO₂ – නයිට්‍රජන් ඩයොක්සයිඩ්', sub:'දුඹුරු-රතු ගෑස් • ලිත්මස් → රතු • Brown Ring FeSO₄', tab:'gases', section:'sec-gases', label:'🧪 වායු' },
+
+  // Cations
+  { key:'Ag+ Ag AgCl silver chloride group 1 HCl', title:'Ag⁺ – Silver (1 වන කාණ්ඩය)', sub:'AgCl → සුදු • NH₃ ශෙකිත • K₂CrO₄ → PbCrO₄ කහ', tab:'cations', section:'sec-cations', label:'⚗️ කැටායන' },
+  { key:'Pb2+ Pb PbCl2 PbS lead group 1 2', title:'Pb²⁺ – Lead', sub:'HCl → PbCl₂ සුදු • H₂S → PbS කළු • K₂CrO₄ → PbCrO₄ කහ', tab:'cations', section:'sec-cations', label:'⚗️ කැටායන' },
+  { key:'Cu2+ Cu CuS copper group 2 black', title:'Cu²⁺ – Copper (2 වන කාණ්ඩය)', sub:'H₂S → CuS කළු • NH₃ → [Cu(NH₃)₄]²⁺ ගැඹුරු නිල්', tab:'cations', section:'sec-cations', label:'⚗️ කැටායන' },
+  { key:'Fe3+ Fe iron group 3 reddish brown SCN hydroxide', title:'Fe³⁺ – Iron(III) (3 වන කාණ්ඩය)', sub:'Fe(OH)₃ → රතු-දුඹුරු • SCN⁻ → [Fe(SCN)]²⁺ රතු', tab:'cations', section:'sec-cations', label:'⚗️ කැටායන' },
+  { key:'Al3+ Al aluminum group 3 white gelatinous hydroxide', title:'Al³⁺ – Aluminium (3 වන කාණ්ඩය)', sub:'Al(OH)₃ → සුදු ජෙලැටිනස් • ද්විඅයනික', tab:'cations', section:'sec-cations', label:'⚗️ කැටායන' },
+  { key:'Mn2+ Mn manganese group 4 MnS white', title:'Mn²⁺ – Manganese (4 වන කාණ්ඩය)', sub:'MnS → සුදු/ශාම', tab:'cations', section:'sec-cations', label:'⚗️ කැටායන' },
+  { key:'Zn2+ Zn zinc group 4 ZnS white', title:'Zn²⁺ – Zinc (4 වන කාණ්ඩය)', sub:'ZnS → සුදු', tab:'cations', section:'sec-cations', label:'⚗️ කැටායන' },
+  { key:'Ba2+ Ba barium group 5 BaSO4 BaCO3 white', title:'Ba²⁺ – Barium (5 වන කාණ්ඩය)', sub:'BaCO₃ → සුදු • H₂SO₄ → BaSO₄ NH₃ ල ශෙකිත නොවේ', tab:'cations', section:'sec-cations', label:'⚗️ කැටායන' },
+  { key:'Na+ sodium flame yellow group 6', title:'Na⁺ – Sodium (6 වන කාණ්ඩය)', sub:'ගිනිදාල → කහ-තැඹිලි', tab:'cations', section:'sec-cations', label:'⚗️ කැටායන' },
+  { key:'K+ potassium flame purple violet group 6', title:'K⁺ – Potassium (6 වන කාණ්ඩය)', sub:'ගිනිදාල → දම්-ජම්බු', tab:'cations', section:'sec-cations', label:'⚗️ කැටායන' },
+  { key:'NH4+ ammonium nessler NaOH heat ammonia', title:'NH₄⁺ – Ammonium (6 වන කාණ්ඩය)', sub:'NaOH + තාප → NH₃ • Nessler → දුඹුරු', tab:'cations', section:'sec-cations', label:'⚗️ කැටායන' },
+
+  // Anions
+  { key:'CO3 CO₃ carbonate කාබනේට් lime water CaCO3', title:'CO₃²⁻ – Carbonate', sub:'HCl → CO₂ • Ca(OH)₂ → CaCO₃ සුදු', tab:'anions', section:'sec-anions', label:'🔬 ඇනායන' },
+  { key:'SO3 SO₃ sulfite සල්ෆයිට් KMnO4 K2Cr2O7', title:'SO₃²⁻ – Sulfite', sub:'HCl → SO₂ • KMnO₄ ශෙකිත • K₂Cr₂O₇ → කොළ', tab:'anions', section:'sec-anions', label:'🔬 ඇනායන' },
+  { key:'S2O3 S₂O₃ thiosulfate AgNO3 yellow sulfur', title:'S₂O₃²⁻ – Thiosulfate', sub:'HCl → S↓ කහ + SO₂ • AgNO₃ → සුදු → කළු Ag₂S', tab:'anions', section:'sec-anions', label:'🔬 ඇනායන' },
+  { key:'S2- S₂ sulfide lead acetate PbS black hydrogen sulfide', title:'S²⁻ – Sulfide', sub:'HCl → H₂S • Lead Acetate → PbS කළු', tab:'anions', section:'sec-anions', label:'🔬 ඇනායන' },
+  { key:'NO2- NO₂⁻ nitrite KMnO4 brown ring FeSO4', title:'NO₂⁻ – Nitrite', sub:'HCl → NO₂ (දුඹුරු) • KMnO₄ ශෙකිත • Brown Ring', tab:'anions', section:'sec-anions', label:'🔬 ඇනායන' },
+
+  // Halides
+  { key:'AgCl silver chloride white soluble NH3 ammonia', title:'AgCl – Silver Chloride', sub:'සුදු • දිලිහෙන NH₃ ල ශෙකිත • Ksp 1.8×10⁻¹⁰', tab:'halides', section:'sec-halides', label:'🧂 හැලයිඩ' },
+  { key:'AgBr silver bromide pale yellow cream NH3', title:'AgBr – Silver Bromide', sub:'ශාම-කහ • සාන්ද්‍ර NH₃ ල සුළු ශෙකිත • Ksp 5.0×10⁻¹³', tab:'halides', section:'sec-halides', label:'🧂 හැලයිඩ' },
+  { key:'AgI silver iodide yellow insoluble NH3', title:'AgI – Silver Iodide', sub:'කහ • NH₃ ල ශෙකිත නොවේ • Ksp 8.5×10⁻¹⁷', tab:'halides', section:'sec-halides', label:'🧂 හැලයිඩ' },
+
+  // Period 3
+  { key:'Na2O NaOH sodium oxide hydroxide basic period 3', title:'Na₂O / NaOH – Sodium', sub:'ශෛඝ්‍ර භාෂ්ම • pH~14 • ආයනික', tab:'period3', section:'sec-period3', label:'📊 3 වන කාලය' },
+  { key:'Al2O3 AlCl3 Al(OH)3 aluminium amphoteric period 3', title:'Al₂O₃ / Al(OH)₃ / AlCl₃ – Aluminium', sub:'ද්විඅයනික • HCl + NaOH දෙකෙහිම ක්‍රියා කරයි', tab:'period3', section:'sec-period3', label:'📊 3 වන කාලය' },
+  { key:'SiO2 SiCl4 silicon covalent acidic period 3', title:'SiO₂ / SiCl₄ – Silicon', sub:'සහසංයෝජිත • දුර්වල අම්ලීය ඔක්සයිඩ', tab:'period3', section:'sec-period3', label:'📊 3 වන කාලය' },
+];
+
+// ─── SEARCH LOGIC ──────────────────────────────
+const input = document.getElementById('searchInput');
+const resultsBox = document.getElementById('searchResults');
+
+input.addEventListener('input', function() {
+  const q = this.value.trim().toLowerCase();
+  if (q.length < 1) { resultsBox.classList.remove('active'); resultsBox.innerHTML=''; return; }
+  const found = searchIndex.filter(item =>
+    item.key.toLowerCase().includes(q) ||
+    item.title.toLowerCase().includes(q) ||
+    item.sub.toLowerCase().includes(q)
+  ).slice(0, 6);
+
+  if (!found.length) {
+    resultsBox.innerHTML = '<div class="search-result-item"><div class="sr-label">ප්‍රතිඵල</div><div class="sr-title" style="color:var(--text-muted)">සොයාගත නොහැකි</div></div>';
+    resultsBox.classList.add('active');
+    return;
+  }
+  resultsBox.innerHTML = found.map(item => `
+    <div class="search-result-item" onclick="goTo('${item.tab}','${item.section}')">
+      <div class="sr-label">${item.label}</div>
+      <div class="sr-title">${item.title}</div>
+      <div class="sr-sub">${item.sub}</div>
+    </div>
+  `).join('');
+  resultsBox.classList.add('active');
+});
+
+function goTo(tab, section) {
+  // Switch tabs
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(section).classList.add('active');
+  const tabs = {gases:0,cations:1,anions:2,halides:3,period3:4};
+  document.querySelectorAll('.tab-btn')[tabs[tab]].classList.add('active');
+  resultsBox.classList.remove('active');
+  input.value = '';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// Close search on outside click
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('header')) resultsBox.classList.remove('active');
+});
+
+// ─── BACK TO TOP ──────────────────────────────
+window.addEventListener('scroll', function() {
+  const btn = document.getElementById('backToTop');
+  if (window.scrollY > 300) btn.classList.add('visible');
+  else btn.classList.remove('visible');
+});
+</script>
+</body>
+</html>
