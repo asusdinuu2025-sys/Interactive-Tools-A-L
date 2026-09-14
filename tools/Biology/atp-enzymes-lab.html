@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ATP සහ එන්සයිම — අන්තර්ක්‍රියාකාරී විද්‍යා විද්‍යාගාරය</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef2f4; --surface:#ffffff; --surface2:#f4f7f8; --text:#16222b; --sub:#516472;
+  --teal:#12876f; --amber:#c2740f; --rose:#b83a5c; --line:#dbe3e7;
+  --shadow:0 8px 24px rgba(20,40,50,.08);
+  --radius:18px;
+}
+[data-theme="dark"]{
+  --bg:#0e151d; --surface:#182330; --surface2:#131c26; --text:#e9f1f5; --sub:#93a7b3;
+  --teal:#49d8c0; --amber:#f2a154; --rose:#ef7a97; --line:#25333f;
+  --shadow:0 8px 28px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:'Noto Sans Sinhala',sans-serif;
+  transition:background .3s,color .3s;
+  padding-bottom:60px;
+  -webkit-tap-highlight-color:transparent;
+}
+.mono{font-family:'JetBrains Mono',monospace;}
+.wrap{max-width:520px;margin:0 auto;padding:0 14px;}
+
+/* header */
+header{
+  position:sticky; top:0; z-index:50;
+  background:var(--surface); border-bottom:1px solid var(--line);
+  backdrop-filter:blur(6px);
+}
+.head-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;max-width:520px;margin:0 auto;}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand h1{font-size:16px;margin:0;font-weight:700;line-height:1.25;}
+.brand .sub{font-size:11px;color:var(--sub);margin-top:1px;}
+#logoSvg{width:38px;height:38px;flex-shrink:0;}
+.theme-btn{
+  width:40px;height:40px;border-radius:50%;border:1px solid var(--line);
+  background:var(--surface2); display:flex;align-items:center;justify-content:center;
+  cursor:pointer; font-size:18px;
+}
+
+/* nav pills */
+.navbar{display:flex;gap:8px;overflow-x:auto;padding:10px 14px 12px;max-width:520px;margin:0 auto;scrollbar-width:none;}
+.navbar::-webkit-scrollbar{display:none;}
+.navpill{
+  flex:0 0 auto; font-size:12.5px; padding:7px 13px; border-radius:999px;
+  background:var(--surface2); color:var(--sub); border:1px solid var(--line);
+  white-space:nowrap; cursor:pointer; font-weight:600;
+}
+.navpill.active{background:var(--teal);color:#fff;border-color:var(--teal);}
+
+/* cards */
+section.card{
+  background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow);
+  margin:16px 0; overflow:hidden; border:1px solid var(--line);
+}
+.card > summary, .card-head{
+  list-style:none; cursor:pointer; padding:16px 16px; display:flex; align-items:center; gap:10px;
+  font-weight:700; font-size:15.5px;
+}
+.card > summary::-webkit-details-marker{display:none;}
+.card-num{
+  width:26px;height:26px;border-radius:8px;background:var(--teal);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;
+  font-family:'JetBrains Mono',monospace;
+}
+.card-body{padding:2px 16px 20px;}
+.eyebrow{font-size:11px;letter-spacing:.06em;color:var(--sub);font-weight:700;text-transform:uppercase;font-family:'JetBrains Mono',monospace;}
+p.note{font-size:13.5px;line-height:1.75;color:var(--sub);margin:6px 0 14px;}
+.chip{
+  display:inline-block;font-size:11.5px;padding:3px 9px;border-radius:7px;
+  background:var(--surface2);color:var(--sub);margin-right:6px;margin-bottom:6px;border:1px solid var(--line);
+}
+h3.mini{font-size:13px;margin:14px 0 8px;color:var(--sub);font-weight:700;}
+
+/* buttons & toggles */
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;}
+button.act{
+  border:none;border-radius:12px;padding:10px 16px;font-size:13.5px;font-weight:700;
+  background:var(--teal);color:#fff;cursor:pointer;font-family:'Noto Sans Sinhala',sans-serif;
+}
+button.act.secondary{background:var(--surface2);color:var(--text);border:1px solid var(--line);}
+button.act.rose{background:var(--rose);}
+button.act.amber{background:var(--amber);}
+.switch2{display:flex;background:var(--surface2);border-radius:12px;padding:4px;border:1px solid var(--line);margin:10px 0;}
+.switch2 button{
+  flex:1;border:none;background:transparent;padding:9px 8px;border-radius:9px;font-size:12.5px;font-weight:700;
+  color:var(--sub);cursor:pointer;font-family:'Noto Sans Sinhala',sans-serif;
+}
+.switch2 button.on{background:var(--teal);color:#fff;}
+
+/* svg stage */
+.stage{
+  background:var(--surface2); border-radius:14px; padding:8px; margin:10px 0;
+  display:flex; align-items:center; justify-content:center; border:1px solid var(--line);
+}
+.stage svg{width:100%;height:auto;display:block;}
+.readout{
+  display:flex; justify-content:space-between; align-items:center; gap:8px;
+  background:var(--surface2); border-radius:12px; padding:10px 14px; margin-top:8px; border:1px solid var(--line);
+}
+.readout .val{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--teal);font-size:15px;}
+.readout .lbl{font-size:12px;color:var(--sub);}
+
+/* sliders */
+.slider-block{margin:14px 0;}
+.slider-block label{font-size:13px;font-weight:700;display:flex;justify-content:space-between;}
+input[type=range]{
+  width:100%; margin:10px 0 4px; accent-color:var(--teal); height:4px;
+}
+.status-tag{
+  display:inline-block;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:8px;margin-top:6px;
+}
+.status-tag.good{background:rgba(18,135,111,.15);color:var(--teal);}
+.status-tag.bad{background:rgba(184,58,92,.15);color:var(--rose);}
+
+/* flashcards */
+.fc-controls{display:flex;justify-content:space-between;align-items:center;margin:8px 0 12px;}
+.fc-counter{font-size:12px;color:var(--sub);font-family:'JetBrains Mono',monospace;}
+.flashcard{
+  perspective:1200px; height:150px; margin:10px 0; cursor:pointer;
+}
+.fc-inner{
+  position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d;
+}
+.flashcard.flip .fc-inner{transform:rotateY(180deg);}
+.fc-face{
+  position:absolute;inset:0;backface-visibility:hidden;border-radius:14px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:14px;
+  border:1px solid var(--line);
+}
+.fc-front{background:var(--teal);color:#fff;}
+.fc-front .term{font-size:17px;font-weight:800;}
+.fc-front .term-en{font-size:11px;opacity:.85;margin-top:4px;font-family:'JetBrains Mono',monospace;}
+.fc-back{background:var(--surface2);color:var(--text);transform:rotateY(180deg);font-size:13px;line-height:1.6;}
+
+/* footer */
+footer{text-align:center;font-size:11.5px;color:var(--sub);margin-top:26px;padding:0 20px;}
+.hero-svg-wrap{position:relative;}
+.pulse-ring{animation:pulseR 2.4s ease-out infinite;}
+@keyframes pulseR{0%{opacity:.5;r:20;}100%{opacity:0;r:46;}}
+.bond-break{transition:all .6s cubic-bezier(.4,0,.2,1);}
+.spark{opacity:0;transition:opacity .2s;}
+.spark.show{opacity:1;}
+@keyframes floataway{0%{transform:translate(0,0);opacity:1;}100%{transform:translate(38px,-26px);opacity:0;}}
+.pi-fly.fly{animation:floataway 1s forwards;}
+.morph{transition:d .5s ease;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="head-row">
+    <div class="brand">
+      <svg id="logoSvg" viewBox="0 0 60 60"><circle cx="30" cy="30" r="27" fill="none" stroke="var(--teal)" stroke-width="2" class="pulse-ring"/><circle cx="30" cy="30" r="10" fill="var(--teal)"/><circle cx="30" cy="14" r="6" fill="var(--amber)"/><circle cx="42" cy="26" r="6" fill="var(--amber)"/><circle cx="38" cy="42" r="6" fill="var(--amber)"/></svg>
+      <div><h1>ATP සහ එන්සයිම</h1><div class="sub">අන්තර්ක්‍රියාකාරී අණුක විද්‍යාගාරය</div></div>
+    </div>
+    <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
+  </div>
+  <div class="navbar" id="navbar">
+    <div class="navpill active" data-t="s1">ATP</div>
+    <div class="navpill" data-t="s2">එන්සයිම ක්‍රියාකාරීත්වය</div>
+    <div class="navpill" data-t="s3">Ea ප්‍රස්ථාරය</div>
+    <div class="navpill" data-t="s4">බලපාන සාධක</div>
+    <div class="navpill" data-t="s5">ප්‍රතිරෝධක</div>
+    <div class="navpill" data-t="s6">ප්‍රතිසංශ්ලේෂණය</div>
+    <div class="navpill" data-t="s7">පුනරීක්ෂණය</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<!-- SECTION 1: ATP -->
+<section class="card" id="s1">
+<details open>
+<summary class="card-head"><span class="card-num">01</span> ATP ජලවිච්ඡේදනය සහ සංශ්ලේෂණය</summary>
+<div class="card-body">
+<div class="eyebrow">Adenosine Triphosphate</div>
+<p class="note">ATP හි ඇඩිනීන් + රයිබෝස් (ඇඩිනොසීන්) වලට පොස්පේට් කාණ්ඩ 3ක් ඉහළ ශක්ති බන්ධන මගින් සම්බන්ධ වී ඇත. අන්තිම පොස්පේට් බන්ධනය බිඳී ADP + Piව බවට පත් වන විට ශක්තිය නිදහස් වේ.</p>
+
+<div class="stage">
+<svg id="atpSvg" viewBox="0 0 300 150">
+  <!-- adenine -->
+  <polygon points="30,40 55,25 80,40 72,65 38,65" fill="#7cc9bb" stroke="var(--text)" stroke-width="1" opacity="0.9"/>
+  <text x="55" y="48" font-size="9" text-anchor="middle" fill="#0e2a24" font-weight="700">ඇඩිනීන්</text>
+  <!-- ribose -->
+  <polygon points="85,55 100,45 115,55 110,73 90,73" fill="#f4cf8b" stroke="var(--text)" stroke-width="1"/>
+  <text x="100" y="90" font-size="8" text-anchor="middle" fill="var(--sub)">රයිබෝස්</text>
+  <!-- bond line to phosphates -->
+  <line x1="115" y1="58" x2="140" y2="58" stroke="var(--text)" stroke-width="2"/>
+  <!-- phosphates -->
+  <g id="pAlpha"><circle cx="150" cy="58" r="16" fill="#a7c4e8" stroke="var(--text)"/><text x="150" y="62" font-size="10" text-anchor="middle" font-weight="700">α</text></g>
+  <line id="bondAB" x1="166" y1="58" x2="188" y2="58" stroke="var(--text)" stroke-width="3" class="bond-break"/>
+  <g id="pBeta"><circle cx="204" cy="58" r="16" fill="#a7c4e8" stroke="var(--text)"/><text x="204" y="62" font-size="10" text-anchor="middle" font-weight="700">β</text></g>
+  <line id="bondBG" x1="220" y1="58" x2="242" y2="58" stroke="var(--text)" stroke-width="3" class="bond-break"/>
+  <g id="pGamma" class="bond-break pi-fly"><circle cx="258" cy="58" r="16" fill="#f2a9b8" stroke="var(--text)"/><text x="258" y="62" font-size="10" text-anchor="middle" font-weight="700">γ</text></g>
+  <text id="atpLabel" x="150" y="115" font-size="13" text-anchor="middle" font-weight="800" fill="var(--teal)">ATP</text>
+  <text id="sparkTxt" class="spark mono" x="150" y="135" font-size="11" text-anchor="middle" fill="var(--amber)" font-weight="700">⚡ -30.5 kJ/mol ශක්තිය නිදහස්</text>
+</svg>
+</div>
+
+<div class="btnrow">
+<button class="act rose" onclick="breakBond()">⚡ බන්ධනය බිඳින්න (Hydrolysis)</button>
+<button class="act secondary" onclick="resetAtp()">↺ ප්‍රතිස්ථාපනය (Synthesis)</button>
+</div>
+<div class="readout">
+  <div><div class="lbl">තත්ත්වය</div><div class="val" id="atpState">ATP (සම්පූර්ණ)</div></div>
+  <div><div class="lbl">ශක්තිය</div><div class="val" id="atpEnergy">—</div></div>
+</div>
+
+<h3 class="mini">ශක්ති සම්බන්ධීකරණය (Energy Coupling)</h3>
+<p class="note">ATP ජලවිච්ඡේදනය (exergonic) අවශ්‍ය ශක්තිය අවශෝෂණය කරන (endergonic) ප්‍රතික්‍රියාවක් සමඟ සම්බන්ධ කිරීමෙන් සෛලීය ක්‍රියාවලි ක්‍රියාත්මක කරයි.</p>
+<div class="switch2"><button id="cpl-off" class="on" onclick="setCoupling(false)">වෙන්ව</button><button id="cpl-on" onclick="setCoupling(true)">සම්බන්ධිත</button></div>
+<div class="stage">
+<svg viewBox="0 0 300 90">
+  <rect x="20" y="55" width="60" height="20" rx="4" fill="#f2a9b8" opacity=".9"/><text x="50" y="69" font-size="9" text-anchor="middle" font-weight="700">ATP→ADP+Pi</text>
+  <text x="140" y="30" font-size="18" id="cplArrow" text-anchor="middle">➜</text>
+  <rect id="blockBox" x="220" y="55" width="60" height="20" rx="4" fill="#a7c4e8" opacity=".9"/><text x="250" y="69" font-size="9" text-anchor="middle" font-weight="700">ප්‍රතික්‍රියාව</text>
+  <text id="cplNote" x="150" y="15" font-size="10" text-anchor="middle" fill="var(--sub)">ශක්තිය අහිමි වේ — ප්‍රතික්‍රියාව සිදු නොවේ</text>
+</svg>
+</div>
+
+<h3 class="mini">ATP හි ශක්ති භාවිත</h3>
+<div>
+<span class="chip">යාන්ත්‍රික ශක්තිය — පේශි සංකෝචනය</span>
+<span class="chip">රසායනික ශක්තිය — සංයෝග සංශ්ලේෂණය</span>
+<span class="chip">විද්‍යුත් ශක්තිය — ස්නායු ආවේග සම්ප්‍රේෂණය</span>
+<span class="chip">තාපය — දේහ උෂ්ණත්වය පවත්වාගැනීම</span>
+<span class="chip">ආලෝකය — ජෛව ප්‍රභාව (bioluminescence)</span>
+</div>
+</div>
+</details>
+</section>
+
+<!-- SECTION 2: Enzyme action -->
+<section class="card" id="s2">
+<details>
+<summary class="card-head"><span class="card-num">02</span> එන්සයිම ක්‍රියාකාරීත්වය සහ සක්‍රිය ස්ථානය</summary>
+<div class="card-body">
+<p class="note">එන්සයිම ප්‍රතික්‍රියා උත්ප්‍රේරණය කරන ජෛව උත්ප්‍රේරක (බොහෝවිට ගෝලීය ප්‍රෝටීන). උපස්තරය සක්‍රිය ස්ථානයට බැඳී එන්සයිම-උපස්තර සංකීර්ණය සාදයි: E + S → ES → E + P</p>
+<div class="switch2">
+<button id="lock-btn" class="on" onclick="setModel('lock')">අගුල්-යතුරු ආකෘතිය</button>
+<button id="induced-btn" onclick="setModel('induced')">ප්‍රේරිත යෝග්‍යතා ආකෘතිය</button>
+</div>
+<div class="stage">
+<svg viewBox="0 0 300 150">
+  <path id="enzShape" class="morph" d="M30,90 Q20,50 70,45 Q120,40 130,80 Q135,110 100,120 Q60,125 30,90 Z" fill="#7cc9bb" stroke="var(--text)"/>
+  <path id="activeSite" class="morph" d="M85,60 L105,55 L115,80 L95,95 Z" fill="var(--surface)" stroke="var(--rose)" stroke-width="2"/>
+  <g id="substrate" class="bond-break"><rect x="180" y="60" width="30" height="30" rx="6" fill="#f2a9b8" stroke="var(--text)"/><text x="195" y="80" font-size="9" text-anchor="middle" font-weight="700">S</text></g>
+  <text x="70" y="140" font-size="11" text-anchor="middle" fill="var(--sub)">එන්සයිම</text>
+  <text id="essLabel" x="220" y="20" font-size="12" text-anchor="middle" font-weight="800" fill="var(--teal)"></text>
+</svg>
+</div>
+<div class="btnrow">
+<button class="act" onclick="dockSubstrate()">➜ උපස්තරය බන්ධනය කරන්න</button>
+<button class="act secondary" onclick="undockSubstrate()">↺ නිෂ්පාදන මුදා හරින්න</button>
+</div>
+<div class="readout"><div><div class="lbl">අදියර</div><div class="val" id="essState">E + S (නිදහස්)</div></div></div>
+<p class="note" style="margin-top:10px">ලොක්-යතුරු ආකෘතියේදී සක්‍රිය ස්ථානය දෘඪ හැඩයක් ගනී. ප්‍රේරිත යෝග්‍යතා ආකෘතියේදී උපස්තරය බැඳුණු පසු සක්‍රිය ස්ථානයේ හැඩය තරමක් වෙනස් වී (morph) උපස්තරයට වඩාත් සුදුසු ලෙස හැඩගැසේ.</p>
+</div>
+</details>
+</section>
+
+<!-- SECTION 3: activation energy -->
+<section class="card" id="s3">
+<details>
+<summary class="card-head"><span class="card-num">03</span> සක්‍රියන ශක්තිය (Eₐ) ප්‍රස්ථාරය</summary>
+<div class="card-body">
+<p class="note">එන්සයිම ප්‍රතික්‍රියාවක් උත්ප්‍රේරණය කරන විට අවශ්‍ය සක්‍රියන ශක්තිය (Eₐ) අඩු කරයි — නමුත් ප්‍රතික්‍රියාවේ මුළු ශක්ති වෙනස (ΔG) වෙනස් නොවේ.</p>
+<div class="switch2"><button id="noenz-btn" class="on" onclick="setEnzCurve(false)">එන්සයිමයකින් තොරව</button><button id="wenz-btn" onclick="setEnzCurve(true)">එන්සයිම සමඟ</button></div>
+<div class="stage">
+<svg viewBox="0 0 300 160">
+  <line x1="30" y1="140" x2="280" y2="140" stroke="var(--sub)" stroke-width="1"/>
+  <line x1="30" y1="20" x2="30" y2="140" stroke="var(--sub)" stroke-width="1"/>
+  <text x="155" y="155" font-size="9" text-anchor="middle" fill="var(--sub)">ප්‍රතික්‍රියාවේ ප්‍රගතිය ➜</text>
+  <text x="14" y="80" font-size="9" fill="var(--sub)" transform="rotate(-90 14 80)">ශක්තිය</text>
+  <path id="ea-curve" class="morph" d="M40,120 Q90,110 120,30 Q150,40 260,120" fill="none" stroke="var(--rose)" stroke-width="3"/>
+  <line x1="40" y1="120" x2="40" y2="120" stroke="var(--sub)" stroke-dasharray="3,3"/>
+  <text id="eaLabel" x="140" y="45" font-size="10" text-anchor="middle" font-weight="800" fill="var(--rose)">Eₐ (එන්සයිමයකින් තොරව)</text>
+  <text x="55" y="112" font-size="8" fill="var(--sub)">ප්‍රතික්‍රියක</text>
+  <text x="240" y="112" font-size="8" fill="var(--sub)">ඵල</text>
+</svg>
+</div>
+<div class="readout"><div><div class="lbl">සාපේක්ෂ Eₐ</div><div class="val" id="eaVal">100%</div></div><div><div class="lbl">ප්‍රතික්‍රියා වේගය</div><div class="val" id="rateVal">මන්දගාමී</div></div></div>
+</div>
+</details>
+</section>
+
+<!-- SECTION 4: factors -->
+<section class="card" id="s4">
+<details>
+<summary class="card-head"><span class="card-num">04</span> එන්සයිම ක්‍රියාකාරීත්වයට බලපාන සාධක</summary>
+<div class="card-body">
+
+<h3 class="mini">1. උෂ්ණත්වය</h3>
+<div class="stage"><svg viewBox="0 0 300 110" id="tempSvg">
+<line x1="25" y1="95" x2="285" y2="95" stroke="var(--sub)"/><line x1="25" y1="10" x2="25" y2="95" stroke="var(--sub)"/>
+<path id="tempCurve" d="" fill="none" stroke="var(--teal)" stroke-width="2.5"/>
+<circle id="tempDot" cx="90" cy="30" r="6" fill="var(--amber)"/>
+</svg></div>
+<div class="slider-block"><label>උෂ්ණත්වය <span id="tempV" class="mono">37°C</span></label>
+<input type="range" id="tempSlider" min="0" max="90" value="37" oninput="updateTemp(this.value)"></div>
+<span class="status-tag good" id="tempTag">ප්‍රශස්ත පරාසය</span>
+
+<h3 class="mini">2. pH අගය</h3>
+<div class="stage"><svg viewBox="0 0 300 110" id="phSvg">
+<line x1="25" y1="95" x2="285" y2="95" stroke="var(--sub)"/><line x1="25" y1="10" x2="25" y2="95" stroke="var(--sub)"/>
+<path id="phCurve" d="M25,90 Q75,10 110,90" fill="none" stroke="var(--teal)" stroke-width="2.5"/>
+<circle id="phDot" cx="70" cy="20" r="6" fill="var(--amber)"/>
+</svg></div>
+<div class="switch2"><button id="pep-btn" class="on" onclick="setEnzType('pepsin')">පෙප්සින් (Optimal pH 2)</button><button id="tryp-btn" onclick="setEnzType('trypsin')">ට්‍රිප්සින් (Optimal pH 8)</button></div>
+<div class="slider-block"><label>pH අගය <span id="phV" class="mono">2.0</span></label>
+<input type="range" id="phSlider" min="0" max="14" step="0.5" value="2" oninput="updatePh(this.value)"></div>
+<span class="status-tag good" id="phTag">ප්‍රශස්ත pH</span>
+
+<h3 class="mini">3. උපස්තර සාන්ද්‍රණය (Vmax)</h3>
+<div class="stage"><svg viewBox="0 0 300 110" id="subSvg">
+<line x1="25" y1="95" x2="285" y2="95" stroke="var(--sub)"/><line x1="25" y1="10" x2="25" y2="95" stroke="var(--sub)"/>
+<path id="subCurve" d="" fill="none" stroke="var(--teal)" stroke-width="2.5"/>
+<line x1="25" y1="12" x2="285" y2="12" stroke="var(--sub)" stroke-dasharray="3,3"/>
+<text x="270" y="9" font-size="8" fill="var(--sub)">Vmax</text>
+<circle id="subDot" cx="35" cy="88" r="6" fill="var(--amber)"/>
+</svg></div>
+<div class="slider-block"><label>උපස්තර සාන්ද්‍රණය <span id="subV" class="mono">5%</span></label>
+<input type="range" id="subSlider" min="0" max="100" value="5" oninput="updateSub(this.value)"></div>
+<span class="status-tag good" id="subTag">සක්‍රිය ස්ථාන අඩුවෙන් පිරී ඇත</span>
+</div>
+</details>
+</section>
+
+<!-- SECTION 5: inhibition -->
+<section class="card" id="s5">
+<details>
+<summary class="card-head"><span class="card-num">05</span> එන්සයිම ප්‍රතිරෝධක</summary>
+<div class="card-body">
+<div class="switch2"><button id="comp-btn" class="on" onclick="setInhib('comp')">තරඟකාරී</button><button id="noncomp-btn" onclick="setInhib('noncomp')">තරඟකාරී නොවන</button></div>
+<div class="stage">
+<svg viewBox="0 0 300 150">
+  <path id="ihEnz" class="morph" d="M40,100 Q30,55 90,50 Q145,45 150,90 Q152,120 110,130 Q65,133 40,100 Z" fill="#7cc9bb" stroke="var(--text)"/>
+  <path id="ihActive" class="morph" d="M95,65 L118,60 L128,88 L105,102 Z" fill="var(--surface)" stroke="var(--rose)" stroke-width="2"/>
+  <g id="ihSub"><rect x="200" y="65" width="26" height="26" rx="6" fill="#a7c4e8" stroke="var(--text)"/><text x="213" y="82" font-size="8" text-anchor="middle" font-weight="700">S</text></g>
+  <g id="ihInhib"><polygon points="0,0 20,0 20,20 0,20" fill="var(--rose)" stroke="var(--text)" transform="translate(200,20)"/><text x="213" y="34" font-size="8" text-anchor="middle" font-weight="700" fill="#fff">I</text></g>
+  <text id="ihLabel" x="150" y="15" font-size="11" text-anchor="middle" font-weight="700" fill="var(--rose)"></text>
+</svg>
+</div>
+<div class="btnrow"><button class="act rose" onclick="attachInhib()">ප්‍රතිරෝධකය බන්ධනය කරන්න</button><button class="act secondary" onclick="removeInhib()">↺ ඉවත් කරන්න</button></div>
+<p class="note" id="ihDesc" style="margin-top:10px">තරඟකාරී ප්‍රතිරෝධකයේ හැඩය උපස්තරයට සමාන බැවින් සක්‍රිය ස්ථානය සඳහා උපස්තරය සමඟ තරඟ කරයි.</p>
+
+<h3 class="mini">ඇලෝස්ටරික නියාමනය</h3>
+<p class="note">ඇලෝස්ටරික සක්‍රියකයක් හෝ නිශේධකයක් සක්‍රිය ස්ථානය නොවන වෙනත් ස්ථානයකට බැඳී එන්සයිමයේ හැඩය සහ ක්‍රියාකාරීත්වය මතුපිටින් වෙනස් කරයි. <b>ප්‍රතිපෝෂී නිශේධනය</b> — පරිවෘත්තීය මාර්ගයක අවසාන නිෂ්පාදිතය මුල් එන්සයිමයට නිශේධකයක් ලෙස බැඳී අතිරික්ත නිෂ්පාදනය නවත්වයි.</p>
+</div>
+</details>
+</section>
+
+<!-- SECTION 6: ATP synthesis pathways -->
+<section class="card" id="s6">
+<details>
+<summary class="card-head"><span class="card-num">06</span> ATP සංශ්ලේෂණය වන ආකාර 3</summary>
+<div class="card-body">
+<p class="note">ජීවී සෛල තුළ ATP හට ගැනීම ක්‍රම 3කින් සිදුවේ:</p>
+<div class="btnrow" style="flex-direction:column;gap:10px;">
+<div class="readout"><div><div class="lbl">1</div><div class="val" style="font-size:13px">උපස්තර මට්ටමේ පොස්පොරයිලීකරණය</div></div></div>
+<div class="readout"><div><div class="lbl">2</div><div class="val" style="font-size:13px">ඔක්සිකාරක පොස්පොරයිලීකරණය (ETC)</div></div></div>
+<div class="readout"><div><div class="lbl">3</div><div class="val" style="font-size:13px">ප්‍රභා පොස්පොරයිලීකරණය (ආලෝකය)</div></div></div>
+</div>
+</div>
+</details>
+</section>
+
+<!-- SECTION 7: flashcards -->
+<section class="card" id="s7">
+<details>
+<summary class="card-head"><span class="card-num">07</span> පුනරීක්ෂණ ෆ්ලෑෂ්කාඩ්</summary>
+<div class="card-body">
+<div class="fc-controls">
+  <span class="fc-counter" id="fcCounter">1 / 12</span>
+  <button class="act secondary" onclick="shuffleCards()">🔀 මාරු කරන්න</button>
+</div>
+<div class="flashcard" id="flashcard" onclick="flipCard()">
+  <div class="fc-inner">
+    <div class="fc-face fc-front"><div class="term" id="fcTerm">—</div><div class="term-en" id="fcTermEn">—</div></div>
+    <div class="fc-face fc-back" id="fcDef">—</div>
+  </div>
+</div>
+<div class="btnrow"><button class="act secondary" onclick="prevCard()">◀ පෙර</button><button class="act" onclick="nextCard()">ඊළඟ ▶</button></div>
+</div>
+</details>
+</section>
+
+</div>
+
+<footer>ඡායාරූප සම්පත් පොත (ජීව විද්‍යාව - උසස් පෙළ) මූලාශ්‍රයෙන් සකසන ලදී • ස්පර්ශ කර ඉගෙන ගන්න</footer>
+
+<script>
+/* ---------- theme ---------- */
+let dark=false;
+function toggleTheme(){
+  dark=!dark;
+  document.documentElement.setAttribute('data-theme', dark?'dark':'light');
+  document.getElementById('themeBtn').textContent = dark?'☀️':'🌙';
+}
+
+/* ---------- nav scroll ---------- */
+document.querySelectorAll('.navpill').forEach(p=>{
+  p.onclick=()=>{
+    document.querySelectorAll('.navpill').forEach(x=>x.classList.remove('active'));
+    p.classList.add('active');
+    const sec=document.getElementById(p.dataset.t);
+    sec.querySelector('details').open=true;
+    sec.scrollIntoView({behavior:'smooth',block:'start'});
+  };
+});
+
+/* ---------- ATP hydrolysis ---------- */
+let atpBroken=false;
+function breakBond(){
+  if(atpBroken) return;
+  atpBroken=true;
+  document.getElementById('bondBG').style.opacity=0;
+  document.getElementById('pGamma').classList.add('fly');
+  document.getElementById('sparkTxt').classList.add('show');
+  document.getElementById('atpLabel').textContent='ADP';
+  document.getElementById('atpState').textContent='ADP + Pi';
+  document.getElementById('atpEnergy').textContent='-30.5 kJ/mol';
+}
+function resetAtp(){
+  atpBroken=false;
+  document.getElementById('bondBG').style.opacity=1;
+  document.getElementById('pGamma').classList.remove('fly');
+  document.getElementById('sparkTxt').classList.remove('show');
+  document.getElementById('atpLabel').textContent='ATP';
+  document.getElementById('atpState').textContent='ATP (සම්පූර්ණ)';
+  document.getElementById('atpEnergy').textContent='—';
+}
+let coupled=false;
+function setCoupling(v){
+  coupled=v;
+  document.getElementById('cpl-off').classList.toggle('on',!v);
+  document.getElementById('cpl-on').classList.toggle('on',v);
+  const box=document.getElementById('blockBox');
+  const note=document.getElementById('cplNote');
+  const arrow=document.getElementById('cplArrow');
+  if(v){ box.setAttribute('y',25); note.textContent='ATP හි ශක්තිය අභිග්‍රහණය කර endergonic ප්‍රතික්‍රියාව ක්‍රියාත්මක වේ'; arrow.textContent='⚡➜'; }
+  else { box.setAttribute('y',55); note.textContent='ශක්තිය අහිමි වේ — ප්‍රතික්‍රියාව සිදු නොවේ'; arrow.textContent='✕'; }
+}
+
+/* ---------- enzyme model ---------- */
+let curModel='lock', docked=false;
+function setModel(m){
+  curModel=m;
+  document.getElementById('lock-btn').classList.toggle('on',m==='lock');
+  document.getElementById('induced-btn').classList.toggle('on',m==='induced');
+  if(docked) dockSubstrate(true);
+}
+function dockSubstrate(refresh){
+  docked=true;
+  document.getElementById('substrate').setAttribute('transform','translate(-85,15)');
+  document.getElementById('essLabel').textContent='ES සංකීර්ණය';
+  document.getElementById('essState').textContent='ES (එන්සයිම-උපස්තර සංකීර්ණය)';
+  const as=document.getElementById('activeSite');
+  if(curModel==='induced'){ as.setAttribute('d','M82,58 L108,52 L120,82 L92,98 Z'); }
+  else { as.setAttribute('d','M85,60 L105,55 L115,80 L95,95 Z'); }
+}
+function undockSubstrate(){
+  docked=false;
+  document.getElementById('substrate').setAttribute('transform','translate(0,0)');
+  document.getElementById('essLabel').textContent='';
+  document.getElementById('essState').textContent='E + P (නිෂ්පාදන මුදා හරින ලදී)';
+  document.getElementById('activeSite').setAttribute('d','M85,60 L105,55 L115,80 L95,95 Z');
+}
+
+/* ---------- activation energy ---------- */
+let enzOn=false;
+function setEnzCurve(v){
+  enzOn=v;
+  document.getElementById('noenz-btn').classList.toggle('on',!v);
+  document.getElementById('wenz-btn').classList.toggle('on',v);
+  const curve=document.getElementById('ea-curve');
+  const lbl=document.getElementById('eaLabel');
+  if(v){
+    curve.setAttribute('d','M40,120 Q90,105 115,80 Q140,70 260,120');
+    curve.setAttribute('stroke','var(--teal)');
+    lbl.textContent='Eₐ (එන්සයිම සමඟ) — අඩුයි'; lbl.setAttribute('y','78'); lbl.setAttribute('fill','var(--teal)');
+    document.getElementById('eaVal').textContent='45%';
+    document.getElementById('rateVal').textContent='වේගවත්';
+  } else {
+    curve.setAttribute('d','M40,120 Q90,110 120,30 Q150,40 260,120');
+    curve.setAttribute('stroke','var(--rose)');
+    lbl.textContent='Eₐ (එන්සයිමයකින් තොරව)'; lbl.setAttribute('y','45'); lbl.setAttribute('fill','var(--rose)');
+    document.getElementById('eaVal').textContent='100%';
+    document.getElementById('rateVal').textContent='මන්දගාමී';
+  }
+}
+
+/* ---------- shared curve helper ----------
+   Every chart below draws its path AND moves its dot from the exact same
+   function, so the marker can never drift off the line. */
+function drawCurve(pathEl, xFunc, yFunc, min, max, steps){
+  let d='';
+  for(let i=0;i<=steps;i++){
+    const v=min+(max-min)*i/steps;
+    const x=xFunc(v), y=yFunc(v);
+    d+=(i===0?'M':'L')+x.toFixed(1)+','+y.toFixed(1)+' ';
+  }
+  pathEl.setAttribute('d', d.trim());
+}
+
+/* ---------- temperature ----------
+   Bell curve peaking at 37°C; falls off faster above the peak to reflect
+   denaturation (protein breakdown is quicker/harsher than simple slowing). */
+function tempX(v){ return 25 + (v/90)*260; }
+function tempRate(v){ const sigma = v<=37?16:11; return Math.exp(-((v-37)**2)/(2*sigma*sigma)); }
+function tempY(v){ return 90 - tempRate(v)*78; }
+function drawTempCurve(){ drawCurve(document.getElementById('tempCurve'), tempX, tempY, 0, 90, 60); }
+function updateTemp(v){
+  v=+v;
+  document.getElementById('tempV').textContent=v+'°C';
+  document.getElementById('tempDot').setAttribute('cx', tempX(v));
+  document.getElementById('tempDot').setAttribute('cy', tempY(v));
+  const tag=document.getElementById('tempTag');
+  if(v>=30 && v<=42){ tag.textContent='ප්‍රශස්ත උෂ්ණත්වය'; tag.className='status-tag good'; }
+  else if(v>42){ tag.textContent='විකෘතිය — 3D ව්‍යුහය බිඳී ඇත'; tag.className='status-tag bad'; }
+  else { tag.textContent='අඩු ක්‍රියාකාරීත්වය (මන්ද අණුක චලිතය)'; tag.className='status-tag bad'; }
+}
+
+/* ---------- pH ----------
+   Same Gaussian idea, centred on whichever enzyme's optimum pH is selected. */
+let enzType='pepsin';
+function phOptimum(){ return enzType==='pepsin'?2:8; }
+function phSigma(){ return enzType==='pepsin'?1.3:1.6; }
+function phX(v){ return 25 + (v/14)*260; }
+function phRate(v){ const o=phOptimum(), s=phSigma(); return Math.exp(-((v-o)**2)/(2*s*s)); }
+function phY(v){ return 90 - phRate(v)*78; }
+function drawPhCurve(){ drawCurve(document.getElementById('phCurve'), phX, phY, 0, 14, 60); }
+function setEnzType(t){
+  enzType=t;
+  document.getElementById('pep-btn').classList.toggle('on',t==='pepsin');
+  document.getElementById('tryp-btn').classList.toggle('on',t==='trypsin');
+  document.getElementById('phSlider').value = phOptimum();
+  drawPhCurve();
+  updatePh(document.getElementById('phSlider').value);
+}
+function updatePh(v){
+  v=+v;
+  document.getElementById('phV').textContent=(+v).toFixed(1);
+  document.getElementById('phDot').setAttribute('cx', phX(v));
+  document.getElementById('phDot').setAttribute('cy', phY(v));
+  const optimum=phOptimum(), dist=Math.abs(v-optimum);
+  const tag=document.getElementById('phTag');
+  if(dist<=1){ tag.textContent='ප්‍රශස්ත pH ('+optimum+')'; tag.className='status-tag good'; }
+  else { tag.textContent='ප්‍රශස්ත pH ('+optimum+') වලින් බැහැරව — ක්‍රියාකාරීත්වය අඩුයි'; tag.className='status-tag bad'; }
+}
+
+/* ---------- substrate conc (Michaelis–Menten saturation) ---------- */
+function subX(v){ return 25 + (v/100)*260; }
+function subRate(v){ const km=20; return v/(km+v); }
+function subY(v){ return 90 - subRate(v)*78; }
+function drawSubCurve(){ drawCurve(document.getElementById('subCurve'), subX, subY, 0, 100, 60); }
+function updateSub(v){
+  v=+v;
+  document.getElementById('subV').textContent=v+'%';
+  document.getElementById('subDot').setAttribute('cx', subX(v));
+  document.getElementById('subDot').setAttribute('cy', subY(v));
+  const tag=document.getElementById('subTag');
+  if(v<30){ tag.textContent='සක්‍රිය ස්ථාන අඩුවෙන් පිරී ඇත — වේගය සරල රේඛීයව වැඩිවේ'; tag.className='status-tag good'; }
+  else if(v<70){ tag.textContent='සක්‍රිය ස්ථාන ක්‍රමයෙන් සන්තෘප්තව'; tag.className='status-tag good'; }
+  else { tag.textContent='සන්තෘප්තිය (Vmax ළඟා විය) — සියලු සක්‍රිය ස්ථාන පිරී ඇත'; tag.className='status-tag bad'; }
+}
+
+/* ---------- inhibition ---------- */
+let inhibMode='comp', inhibOn=false;
+function setInhib(m){
+  inhibMode=m;
+  document.getElementById('comp-btn').classList.toggle('on',m==='comp');
+  document.getElementById('noncomp-btn').classList.toggle('on',m==='noncomp');
+  document.getElementById('ihDesc').textContent = m==='comp'
+    ? 'තරඟකාරී ප්‍රතිරෝධකයේ හැඩය උපස්තරයට සමාන බැවින් සක්‍රිය ස්ථානය සඳහා උපස්තරය සමඟ තරඟ කරයි.'
+    : 'තරඟකාරී නොවන ප්‍රතිරෝධකය ඇලෝස්ටරික ස්ථානයකට බැඳී සක්‍රිය ස්ථානයේ හැඩය වෙනස් කරයි, එමගින් උපස්තරයට නිසි ලෙස බැඳිය නොහැක.';
+  if(inhibOn) attachInhib();
+}
+function attachInhib(){
+  inhibOn=true;
+  const inh=document.getElementById('ihInhib');
+  const active=document.getElementById('ihActive');
+  const sub=document.getElementById('ihSub');
+  if(inhibMode==='comp'){
+    inh.setAttribute('transform','translate(-100,45)');
+    sub.setAttribute('transform','translate(0,0)');
+    active.setAttribute('d','M95,65 L118,60 L128,88 L105,102 Z');
+    document.getElementById('ihLabel').textContent='තරඟකාරී ප්‍රතිරෝධකය සක්‍රිය ස්ථානය අවහිර කරයි';
+  } else {
+    inh.setAttribute('transform','translate(-155,-5)');
+    active.setAttribute('d','M100,72 L125,72 L130,90 L108,96 Z');
+    document.getElementById('ihLabel').textContent='ඇලෝස්ටරික ස්ථානයට බැඳී සක්‍රිය ස්ථානයේ හැඩය වෙනස් කරයි';
+  }
+}
+function removeInhib(){
+  inhibOn=false;
+  document.getElementById('ihInhib').setAttribute('transform','translate(0,0)');
+  document.getElementById('ihActive').setAttribute('d','M95,65 L118,60 L128,88 L105,102 Z');
+  document.getElementById('ihLabel').textContent='';
+}
+
+/* ---------- flashcards ---------- */
+const cards=[
+ {t:'ATP',e:'Adenosine Triphosphate',d:'ඇඩිනොසීන් + පොස්පේට් 3ක්. ජලවිච්ඡේදනයේදී 30.5 kJ/mol ශක්තිය නිදහස් කරයි.'},
+ {t:'ADP',e:'Adenosine Diphosphate',d:'ATP ජලවිච්ඡේදනයෙන් සෑදෙන පොස්පේට් දෙකක් සහිත අණුව.'},
+ {t:'සක්‍රිය ස්ථානය',e:'Active Site',d:'උපස්තරය බන්ධනය වී ප්‍රතික්‍රියාව උත්ප්‍රේරණය වන එන්සයිමයේ විශේෂිත කලාපය.'},
+ {t:'ප්‍රේරිත යෝග්‍යතාව',e:'Induced Fit',d:'උපස්තරය බන්ධනය වන විට සක්‍රිය ස්ථානයේ හැඩය තරමක් වෙනස් වී වඩාත් හොඳින් ගැලපෙන ආකෘතිය.'},
+ {t:'තරඟකාරී ප්‍රතිරෝධකය',e:'Competitive Inhibitor',d:'උපස්තරයට සමාන හැඩයක් ඇති, සක්‍රිය ස්ථානය සඳහා තරඟ කරන අණුව.'},
+ {t:'තරඟකාරී නොවන ප්‍රතිරෝධකය',e:'Non-Competitive Inhibitor',d:'ඇලෝස්ටරික ස්ථානයට බැඳී සක්‍රිය ස්ථානයේ හැඩය වෙනස් කරන අණුව.'},
+ {t:'සක්‍රියන ශක්තිය',e:'Activation Energy (Eₐ)',d:'ප්‍රතික්‍රියාවක් ආරම්භ වීමට අවශ්‍ය අවම ශක්තිය. එන්සයිම මගින් අඩු කරයි.'},
+ {t:'විකෘතිය',e:'Denaturation',d:'ඉහළ උෂ්ණත්වයේ හෝ අන්ත pH හිදී එන්සයිමයේ 3D ව්‍යුහය බිඳී ක්‍රියාකාරීත්වය නැති වීම.'},
+ {t:'ප්‍රතිපෝෂී නිශේධනය',e:'Feedback Inhibition',d:'පරිවෘත්තීය මාර්ගයක අවසාන නිෂ්පාදිතය මුල් එන්සයිමයට නිශේධකයක් ලෙස ක්‍රියා කිරීම.'},
+ {t:'සහයෝගිතාව',e:'Cooperativity',d:'උපස්තර අණුවක් එක් උපඒකකයකට බැඳීමෙන් අනෙකුත් උපඒකකවල ක්‍රියාකාරීත්වය උත්තේජනය වීම.'},
+ {t:'සහසාධක',e:'Cofactors',d:'එන්සයිම ක්‍රියාකාරීත්වයට අවශ්‍ය අකාබනික අයන (Zn²⁺, Fe²⁺, Cu²⁺) හෝ කාබනික සහඑන්සයිම (NAD⁺, FAD).'},
+ {t:'උපස්තර සන්තෘප්තිය',e:'Substrate Saturation (Vmax)',d:'සියලු සක්‍රිය ස්ථාන පිරී ඇති විට උපස්තර සාන්ද්‍රණය තවත් වැඩි කළත් ප්‍රතික්‍රියා වේගය වැඩි නොවේ.'}
+];
+let order=[...cards.keys()], idx=0, flipped=false;
+function renderCard(){
+  const c=cards[order[idx]];
+  document.getElementById('fcTerm').textContent=c.t;
+  document.getElementById('fcTermEn').textContent=c.e;
+  document.getElementById('fcDef').textContent=c.d;
+  document.getElementById('fcCounter').textContent=(idx+1)+' / '+cards.length;
+  document.getElementById('flashcard').classList.remove('flip'); flipped=false;
+}
+function flipCard(){ flipped=!flipped; document.getElementById('flashcard').classList.toggle('flip',flipped); }
+function nextCard(){ idx=(idx+1)%cards.length; renderCard(); }
+function prevCard(){ idx=(idx-1+cards.length)%cards.length; renderCard(); }
+function shuffleCards(){ order.sort(()=>Math.random()-0.5); idx=0; renderCard(); }
+renderCard();
+
+/* ---------- initial chart draw ---------- */
+drawTempCurve(); updateTemp(37);
+drawPhCurve(); updatePh(2);
+drawSubCurve(); updateSub(5);
+
+</script>
+</body>
+</html>

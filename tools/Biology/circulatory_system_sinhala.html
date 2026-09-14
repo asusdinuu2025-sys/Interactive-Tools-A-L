@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#070c14">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>මානව රුධිර සංසරණ පද්ධතිය | අන්තර්ක්‍රියාකාරී ඉගෙනුම් එන්ජිම</title>
+<style>
+:root{
+  --bg-0:#070c14;
+  --bg-1:#0d1626;
+  --bg-2:#131f36;
+  --panel:#101b30;
+  --panel-2:#16233d;
+  --line:#263a5c;
+  --text:#e8edf7;
+  --text-dim:#93a3c2;
+  --oxy:#ff4d5e;
+  --oxy-dim:#7a2530;
+  --deoxy:#3a86ff;
+  --deoxy-dim:#1c3a66;
+  --lymph:#c8e04a;
+  --conduct:#ffd93d;
+  --accent:#5ee7c8;
+  --gold:#f0a83a;
+  --radius:16px;
+  --serif:'Georgia','Noto Serif Sinhala',serif;
+  --sans:'Segoe UI',-apple-system,'Noto Sans Sinhala',sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;height:100%;}
+html,body{margin:0;padding:0;background:var(--bg-0);color:var(--text);font-family:var(--sans);overflow-x:hidden;overflow-y:auto;width:100%;max-width:100vw;-webkit-overflow-scrolling:touch;}
+body{
+  background:
+    radial-gradient(circle at 15% 8%, rgba(58,134,255,0.10), transparent 45%),
+    radial-gradient(circle at 85% 92%, rgba(255,77,94,0.10), transparent 45%),
+    var(--bg-0);
+  min-height:100vh;
+  min-height:100dvh;
+  padding-bottom:calc(40px + env(safe-area-inset-bottom));
+  touch-action:pan-y;
+}
+/* Restrict tap-behavior tuning to interactive controls only, so it never fights page scroll */
+.btn,.tab-btn,.opt,.vessel-card,.cell-card,.lymph-zoom-btn,.cycle-btn,input[type=range]{touch-action:manipulation;}
+nav{-webkit-overflow-scrolling:touch;}
+.diagram-wrap,.diagram-wrap svg{touch-action:pan-y;}
+/* ---- HEADER ---- */
+header{
+  position:sticky; top:0; z-index:50;
+  background:rgba(7,12,20,0.92); backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+  padding:calc(12px + env(safe-area-inset-top)) 16px 10px;
+}
+.title-row{display:flex; align-items:center; gap:10px;}
+.heart-icon{width:34px;height:34px;flex-shrink:0;}
+h1{
+  font-family:var(--serif); font-size:1.15rem; margin:0; line-height:1.3;
+  background:linear-gradient(90deg,var(--oxy),var(--gold));
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.subtitle{font-size:0.72rem;color:var(--text-dim);margin-top:2px;}
+nav{display:flex; gap:8px; overflow-x:auto; margin-top:12px; padding-bottom:4px; scrollbar-width:none; -webkit-overflow-scrolling:touch; scroll-snap-type:x proximity;}
+nav::-webkit-scrollbar{display:none;}
+.tab-btn{
+  flex-shrink:0; padding:10px 14px; border-radius:100px; border:1px solid var(--line);
+  background:var(--panel); color:var(--text-dim); font-size:0.78rem; font-weight:600;
+  white-space:nowrap; cursor:pointer; transition:all .2s; min-height:42px; scroll-snap-align:start;
+}
+.tab-btn.active{
+  background:linear-gradient(135deg,var(--oxy),#b02a3a); color:#fff; border-color:transparent;
+  box-shadow:0 4px 14px rgba(255,77,94,0.35);
+}
+main{padding:16px; max-width:900px; margin:0 auto; padding-left:calc(16px + env(safe-area-inset-left)); padding-right:calc(16px + env(safe-area-inset-right));}
+.module{display:none; animation:fadein .35s ease;}
+.module.active{display:block;}
+@keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+.card{
+  background:linear-gradient(180deg,var(--panel),var(--panel-2));
+  border:1px solid var(--line); border-radius:var(--radius);
+  padding:16px; margin-bottom:16px;
+}
+.card h2{
+  font-family:var(--serif); font-size:1.05rem; margin:0 0 4px;
+  color:var(--text); display:flex; align-items:center; gap:8px;
+}
+.card h2 .en{font-size:0.68rem;color:var(--text-dim);font-weight:400;}
+.card p.desc{font-size:0.83rem; color:var(--text-dim); line-height:1.6; margin:6px 0 14px;}
+.badge{
+  display:inline-block; font-size:0.62rem; padding:2px 8px; border-radius:100px;
+  background:rgba(94,231,200,0.15); color:var(--accent); border:1px solid rgba(94,231,200,0.3);
+  margin-bottom:8px; font-weight:700; letter-spacing:.03em;
+}
+
+/* buttons */
+.btn-row{display:flex; flex-wrap:wrap; gap:8px; margin:10px 0;}
+.btn{
+  padding:11px 14px; border-radius:10px; border:1px solid var(--line);
+  background:var(--bg-2); color:var(--text); font-size:0.78rem; font-weight:600;
+  cursor:pointer; transition:.2s; min-height:44px; line-height:1.3;
+}
+.btn:active{transform:scale(.96);}
+@media (hover:hover){ .btn:hover{border-color:var(--gold);} }
+.btn.primary{background:linear-gradient(135deg,var(--oxy),#b02a3a); border:none; color:#fff;}
+.btn.primary2{background:linear-gradient(135deg,var(--deoxy),#1c3a66); border:none; color:#fff;}
+.btn.active-state{outline:2px solid var(--gold); background:var(--gold); color:#1a1200;}
+
+svg{width:100%; height:auto; display:block;}
+.diagram-wrap{background:#050a12; border-radius:12px; padding:8px; border:1px solid var(--line); position:relative; overflow:hidden;}
+
+.legend{display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; font-size:0.7rem; color:var(--text-dim);}
+.legend span{display:inline-flex; align-items:center; gap:5px;}
+.dot{width:10px;height:10px;border-radius:50%; display:inline-block;}
+
+.info-box{
+  background:rgba(94,231,200,0.06); border:1px solid rgba(94,231,200,0.25);
+  border-radius:10px; padding:10px 12px; font-size:0.8rem; margin-top:10px; line-height:1.6;
+}
+.info-box b{color:var(--accent);}
+.warn-box{background:rgba(255,217,61,0.07); border:1px solid rgba(255,217,61,0.3); border-radius:10px; padding:10px 12px; font-size:0.8rem; margin-top:10px; line-height:1.6;}
+.warn-box b{color:var(--conduct);}
+
+/* slider */
+.slider-wrap{margin:14px 0;}
+.slider-label{display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-dim); margin-bottom:6px;}
+input[type=range]{
+  width:100%; -webkit-appearance:none; height:6px; border-radius:4px;
+  background:var(--bg-2); outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:22px;height:22px;border-radius:50%;
+  background:var(--gold); cursor:pointer; border:3px solid #1a1200;
+  box-shadow:0 0 10px rgba(240,168,58,0.6);
+}
+
+/* Table */
+.vs-table{width:100%; border-collapse:collapse; font-size:0.78rem; margin-top:10px;}
+.vs-table th,.vs-table td{padding:8px 6px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top;}
+.vs-table th{color:var(--gold); font-size:0.72rem; font-weight:700;}
+.vs-table td.feat{color:var(--text-dim); width:30%;}
+
+.tabgrid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:10px;}
+.vessel-card{background:var(--bg-2); border:1px solid var(--line); border-radius:10px; padding:8px; text-align:center; cursor:pointer; transition:.2s;}
+.vessel-card.sel{border-color:var(--gold); background:rgba(240,168,58,0.1);}
+.vessel-card svg{height:50px;}
+.vessel-card .name{font-size:0.72rem; font-weight:700; margin-top:4px;}
+
+/* blood cell grid */
+.cellgrid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:10px;}
+@media(min-width:600px){.cellgrid{grid-template-columns:repeat(3,1fr);}}
+.cell-card{background:var(--bg-2); border:1px solid var(--line); border-radius:10px; padding:10px; cursor:pointer; transition:.2s;}
+.cell-card:active{transform:scale(.97);}
+.cell-card .cname{font-size:0.8rem; font-weight:700; margin-bottom:4px;}
+.cell-card .cdesc{font-size:0.7rem; color:var(--text-dim); line-height:1.5; display:none;}
+.cell-card.open .cdesc{display:block;}
+.cell-visual{width:100%; height:44px; display:flex; align-items:center; justify-content:center;}
+
+/* quiz */
+.quiz-q{margin-bottom:22px; padding-bottom:16px; border-bottom:1px dashed var(--line);}
+.quiz-q:last-child{border:none;}
+.qnum{font-size:0.7rem; color:var(--gold); font-weight:700; margin-bottom:4px;}
+.qtext{font-size:0.88rem; margin-bottom:10px; line-height:1.5;}
+.opt{
+  display:block; width:100%; text-align:left; padding:12px; margin-bottom:8px;
+  border-radius:10px; border:1px solid var(--line); background:var(--bg-2);
+  color:var(--text); font-size:0.8rem; cursor:pointer; min-height:44px; line-height:1.4;
+}
+.opt.correct{border-color:#4caf50; background:rgba(76,175,80,0.15); color:#8fe89c;}
+.opt.wrong{border-color:var(--oxy); background:rgba(255,77,94,0.15); color:#ff9aa2;}
+.opt:disabled{cursor:default;}
+.explain{display:none; font-size:0.76rem; color:var(--text-dim); margin-top:6px; padding:8px 10px; background:rgba(255,255,255,0.03); border-radius:8px; line-height:1.6;}
+.explain.show{display:block;}
+.score-box{text-align:center; font-family:var(--serif); font-size:1.3rem; padding:14px; background:var(--bg-2); border-radius:12px; margin-top:10px; display:none;}
+.score-box.show{display:block;}
+
+/* pulse / heartbeat animation classes */
+@keyframes beat{
+  0%{transform:scale(1);} 15%{transform:scale(1.06);} 30%{transform:scale(0.99);} 45%{transform:scale(1.03);} 60%{transform:scale(1);} 100%{transform:scale(1);}
+}
+.beating{animation:beat 0.8s ease-in-out infinite;}
+.beating-slow{animation:beat 1.6s ease-in-out infinite;}
+
+@keyframes glowpulse{
+  0%,100%{opacity:.3;} 50%{opacity:1;}
+}
+.sanode-glow{animation:glowpulse 1s ease-in-out infinite;}
+
+footer{text-align:center; color:var(--text-dim); font-size:0.68rem; padding:20px 10px calc(10px + env(safe-area-inset-bottom));}
+
+/* ================= MOBILE OPTIMIZATION ================= */
+
+/* Small phones (< 400px) */
+@media (max-width:400px){
+  h1{font-size:1.02rem;}
+  .subtitle{font-size:0.66rem;}
+  main{padding:12px;}
+  .card{padding:13px; border-radius:13px;}
+  .card h2{font-size:0.95rem;}
+  .card p.desc{font-size:0.79rem;}
+  .btn{font-size:0.73rem; padding:10px 11px;}
+  .tabgrid{gap:6px;}
+  .vessel-card svg{height:40px;}
+  .vessel-card .name{font-size:0.66rem;}
+  .vs-table{font-size:0.71rem;}
+  .cellgrid{gap:8px;}
+  .cell-card{padding:8px;}
+  .cname{font-size:0.75rem;}
+  .qtext{font-size:0.83rem;}
+  .score-box{font-size:1.05rem;}
+}
+
+/* Very narrow phones (< 340px, e.g. small Android/iPhone SE) */
+@media (max-width:340px){
+  .tabgrid{grid-template-columns:repeat(3,1fr); gap:5px;}
+  .cellgrid{grid-template-columns:repeat(2,1fr);}
+  .btn-row{gap:6px;}
+  .btn{width:100%;}
+}
+
+/* Landscape phones — compact sticky header so content isn't crowded out */
+@media (max-height:480px) and (orientation:landscape){
+  header{padding:calc(8px + env(safe-area-inset-top)) 14px 6px;}
+  .title-row{gap:8px;}
+  .heart-icon{width:26px;height:26px;}
+  h1{font-size:0.92rem;}
+  .subtitle{display:none;}
+  nav{margin-top:8px;}
+  .tab-btn{padding:7px 12px; min-height:36px; font-size:0.72rem;}
+  main{padding:10px;}
+  .card{padding:12px; margin-bottom:12px;}
+  .diagram-wrap{max-height:46vh;}
+  .diagram-wrap svg{max-height:44vh; width:auto; margin:0 auto;}
+}
+
+/* Larger tablets — allow multi-column card layout for readability */
+@media (min-width:700px){
+  main{padding:22px;}
+  .btn-row{gap:10px;}
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion:reduce){
+  .beating, .beating-slow, .sanode-glow, .module{animation:none !important;}
+}
+
+/* Prevent any element from forcing horizontal scroll */
+img, svg, .card, .diagram-wrap, table{max-width:100%;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-row">
+    <svg class="heart-icon beating" viewBox="0 0 24 24"><path fill="#ff4d5e" d="M12 21s-7.5-4.6-10-9.4C.4 8 2 4.5 5.6 3.8 8 3.3 10.3 4.6 12 7c1.7-2.4 4-3.7 6.4-3.2C22 4.5 23.6 8 22 11.6 19.5 16.4 12 21 12 21z"/></svg>
+    <div>
+      <h1>මානව රුධිර සංසරණ පද්ධතිය</h1>
+      <div class="subtitle">Human Circulatory &amp; Lymphatic System — අන්තර්ක්‍රියාකාරී ඉගෙනුම් සිමියුලේටරය</div>
+    </div>
+  </div>
+  <nav id="tabNav">
+    <button class="tab-btn active" data-mod="m1">🫀 හෘදය සහ හෘද චක්‍රය</button>
+    <button class="tab-btn" data-mod="m2">🔄 දෙගුණ සංසරණය</button>
+    <button class="tab-btn" data-mod="m3">🟢 වසා පද්ධතිය</button>
+    <button class="tab-btn" data-mod="m4">🩸 රුධිර වාහිනී සහ රුධිරය</button>
+    <button class="tab-btn" data-mod="m5">📝 ප්‍රශ්නාවලිය</button>
+  </nav>
+</header>
+
+<main>
+
+<!-- ============ MODULE 1 ============ -->
+<section class="module active" id="m1">
+
+  <div class="card">
+    <span class="badge">MODULE 1</span>
+    <h2>හෘදයේ ව්‍යුහය <span class="en">Heart Anatomy</span></h2>
+    <p class="desc">හෘදය කුටීර 4කින් සමන්විතයි — කර්ණික 2ක් (ඉහළ) සහ කෝෂික 2ක් (පහළ). කපාට මගින් රුධිරය එක් දිශාවකට පමණක් ගලා යාම සහතික කරයි. පහත රූපයේ කොටසක් ස්පර්ශ කර විස්තර බලන්න.</p>
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 400 380" id="heartSvg">
+        <!-- vessels -->
+        <path d="M150 20 Q140 60 150 90" stroke="var(--deoxy)" stroke-width="22" fill="none" stroke-linecap="round"/>
+        <path d="M230 20 Q245 60 235 90" stroke="var(--oxy)" stroke-width="20" fill="none" stroke-linecap="round"/>
+        <path d="M120 30 Q110 55 130 85" stroke="var(--deoxy)" stroke-width="14" fill="none" stroke-linecap="round"/>
+        <path d="M270 30 Q280 55 260 85" stroke="var(--oxy)" stroke-width="12" fill="none" stroke-linecap="round"/>
+        <!-- heart body -->
+        <g class="beating" style="transform-origin:200px 220px;">
+        <path d="M100 120 Q100 90 140 90 Q190 90 200 130 Q210 90 260 90 Q300 90 300 130 Q300 200 200 300 Q100 200 100 120 Z" fill="#3a1418" stroke="#5c1c22" stroke-width="2" data-part="body"/>
+        <!-- chambers -->
+        <rect x="118" y="105" width="70" height="70" rx="14" fill="var(--deoxy-dim)" stroke="var(--deoxy)" stroke-width="2" data-part="RA"/>
+        <rect x="212" y="100" width="70" height="70" rx="14" fill="var(--oxy-dim)" stroke="var(--oxy)" stroke-width="2" data-part="LA"/>
+        <rect x="130" y="185" width="80" height="95" rx="16" fill="var(--deoxy-dim)" stroke="var(--deoxy)" stroke-width="2" data-part="RV"/>
+        <rect x="212" y="180" width="85" height="105" rx="16" fill="var(--oxy-dim)" stroke="var(--oxy)" stroke-width="2" data-part="LV"/>
+        <!-- valves -->
+        <ellipse cx="170" cy="182" rx="20" ry="6" fill="#fff" opacity="0.85" data-part="TV"/>
+        <ellipse cx="252" cy="178" rx="20" ry="6" fill="#fff" opacity="0.85" data-part="MV"/>
+        <rect x="140" y="95" width="30" height="8" fill="#fff" opacity="0.85" data-part="PV"/>
+        <rect x="228" y="90" width="30" height="8" fill="#fff" opacity="0.85" data-part="AV"/>
+        </g>
+      </svg>
+    </div>
+    <div class="legend">
+      <span><span class="dot" style="background:var(--deoxy)"></span> අවඝෝෂිත රුධිරය (Deoxygenated)</span>
+      <span><span class="dot" style="background:var(--oxy)"></span> ඔක්සිජන්යුත රුධිරය (Oxygenated)</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn" data-p="RA">දකුණු කර්ණිකාව (RA)</button>
+      <button class="btn" data-p="LA">වම් කර්ණිකාව (LA)</button>
+      <button class="btn" data-p="RV">දකුණු කෝෂිකාව (RV)</button>
+      <button class="btn" data-p="LV">වම් කෝෂිකාව (LV)</button>
+      <button class="btn" data-p="TV">ත්‍රිකුස්ප කපාටය (Tricuspid)</button>
+      <button class="btn" data-p="MV">ද්විකුස්ප කපාටය (Mitral)</button>
+      <button class="btn" data-p="PV">පුඵ්ඵුසීය අර්ධචන්ද්‍ර කපාටය</button>
+      <button class="btn" data-p="AV">මහා ධමනි අර්ධචන්ද්‍ර කපාටය</button>
+    </div>
+    <div class="info-box" id="partInfo"><b>ඉඟිය:</b> ඉහත බොත්තමක් ස්පර්ශ කර හෘද කොටසක් ගැන දැනගන්න.</div>
+  </div>
+
+  <div class="card">
+    <span class="badge">CONDUCTION SYSTEM</span>
+    <h2>උත්තේජන සන්නායක පද්ධතිය <span class="en">Cardiac Conduction</span></h2>
+    <p class="desc">SA ගැටය (Pacemaker) විද්‍යුත් ආවේගය ජනනය කරයි → කර්ණික මාංශ පේශි හරහා පැතිරෙයි → AV ගැටයේදී ​ස්වල්ප වේලාවක් (0.1s) ප්‍රමාද වේ → His කදම්භය → Purkinje තන්තු → කෝෂික සංකෝචනය.</p>
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 400 340" id="conductSvg">
+        <path d="M100 100 Q100 80 130 80 Q170 80 180 110 Q190 80 230 80 Q270 80 270 110 Q270 170 190 260 Q100 170 100 100 Z" fill="#101826" stroke="#26405c" stroke-width="2"/>
+        <rect x="112" y="95" width="60" height="55" rx="10" fill="#0d1f2e" stroke="#26405c"/>
+        <rect x="198" y="90" width="60" height="55" rx="10" fill="#0d1f2e" stroke="#26405c"/>
+        <rect x="122" y="160" width="65" height="80" rx="12" fill="#0d1f2e" stroke="#26405c"/>
+        <rect x="198" y="155" width="72" height="90" rx="12" fill="#0d1f2e" stroke="#26405c"/>
+        <!-- SA node -->
+        <circle cx="150" cy="105" r="9" fill="var(--conduct)" id="saNode" class="sanode-glow"/>
+        <text x="150" y="88" fill="var(--conduct)" font-size="10" text-anchor="middle">SA</text>
+        <!-- AV node -->
+        <circle cx="185" cy="150" r="8" fill="var(--conduct)" id="avNode" opacity="0.25"/>
+        <text x="185" y="142" fill="var(--conduct)" font-size="9" text-anchor="middle">AV</text>
+        <!-- bundle of His path -->
+        <path id="hisPath" d="M185 158 L185 200" stroke="var(--conduct)" stroke-width="3" opacity="0.25"/>
+        <!-- purkinje fibers -->
+        <path id="purk1" d="M185 200 Q150 220 135 230" stroke="var(--conduct)" stroke-width="2" fill="none" opacity="0.25"/>
+        <path id="purk2" d="M185 200 Q220 220 240 230" stroke="var(--conduct)" stroke-width="2" fill="none" opacity="0.25"/>
+        <path id="purk3" d="M185 200 Q160 235 150 245" stroke="var(--conduct)" stroke-width="2" fill="none" opacity="0.25"/>
+        <path id="purk4" d="M185 200 Q215 235 235 250" stroke="var(--conduct)" stroke-width="2" fill="none" opacity="0.25"/>
+        <text x="200" y="300" fill="var(--text-dim)" font-size="11" text-anchor="middle" id="conductLabel">SA ගැටයෙන් ආරම්භ වේ...</text>
+      </svg>
+    </div>
+    <div class="btn-row">
+      <button class="btn primary" id="playConduct">▶ සන්නායක අනුක්‍රමය ධාවනය කරන්න</button>
+    </div>
+    <div class="info-box"><b>මතක තබාගන්න:</b> AV ගැටයේ ප්‍රමාදය (0.1s) නිසා කර්ණික සම්පූර්ණයෙන් හිස් වීමට පෙර කෝෂික සංකෝචනය ආරම්භ නොවේ.</div>
+  </div>
+
+  <div class="card">
+    <span class="badge">CARDIAC CYCLE</span>
+    <h2>හෘද චක්‍රයේ පියවර <span class="en">Cardiac Cycle — 0.8s</span></h2>
+    <p class="desc">එක් සම්පූර්ණ හෘද චක්‍රයක් තත්පර 0.8ක් ගනී: කර්ණික ආකුංචනය (0.1s) → කෝෂික ආකුංචනය (0.3s) → පූර්ණ හෘත් විස්තාරය (0.4s).</p>
+    <div class="btn-row">
+      <button class="btn cycle-btn active-state" data-stage="0">1️⃣ කර්ණික ආකුංචනය</button>
+      <button class="btn cycle-btn" data-stage="1">2️⃣ කෝෂික ආකුංචනය</button>
+      <button class="btn cycle-btn" data-stage="2">3️⃣ පූර්ණ හෘත් විස්තාරය</button>
+    </div>
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 400 200" id="cycleSvg">
+        <rect x="30" y="30" width="150" height="140" rx="12" fill="#101826" stroke="#26405c"/>
+        <text x="105" y="20" fill="var(--text-dim)" font-size="11" text-anchor="middle">වම් පැත්ත</text>
+        <rect id="cyc-LA" x="55" y="45" width="100" height="45" rx="8" fill="var(--oxy-dim)" stroke="var(--oxy)" stroke-width="2"/>
+        <text x="105" y="70" fill="#fff" font-size="10" text-anchor="middle">LA</text>
+        <rect id="cyc-LV" x="55" y="100" width="100" height="60" rx="8" fill="var(--oxy-dim)" stroke="var(--oxy)" stroke-width="2"/>
+        <text x="105" y="132" fill="#fff" font-size="10" text-anchor="middle">LV</text>
+
+        <rect x="220" y="30" width="150" height="140" rx="12" fill="#101826" stroke="#26405c"/>
+        <text x="295" y="20" fill="var(--text-dim)" font-size="11" text-anchor="middle">දකුණු පැත්ත</text>
+        <rect id="cyc-RA" x="245" y="45" width="100" height="45" rx="8" fill="var(--deoxy-dim)" stroke="var(--deoxy)" stroke-width="2"/>
+        <text x="295" y="70" fill="#fff" font-size="10" text-anchor="middle">RA</text>
+        <rect id="cyc-RV" x="245" y="100" width="100" height="60" rx="8" fill="var(--deoxy-dim)" stroke="var(--deoxy)" stroke-width="2"/>
+        <text x="295" y="132" fill="#fff" font-size="10" text-anchor="middle">RV</text>
+      </svg>
+    </div>
+    <div class="info-box" id="cycleInfo">කර්ණික සංකෝචනය වී රුධිරය කෝෂික තුළට තල්ලු කරයි. AV කපාට විවෘතව ඇත.</div>
+  </div>
+
+</section>
+
+<!-- ============ MODULE 2 ============ -->
+<section class="module" id="m2">
+
+  <div class="card">
+    <span class="badge">MODULE 2</span>
+    <h2>දෙගුණ සංසරණය <span class="en">Double Circulation</span></h2>
+    <p class="desc">මානව රුධිර සංසරණය මාර්ග දෙකකින් යුක්තයි: <b style="color:var(--deoxy)">පුඵ්ඵුසීය සංසරණය</b> (හෘදය ↔ පෙනහළු) සහ <b style="color:var(--oxy)">දේහ සංසරණය</b> (හෘදය ↔ ශරීරයේ අනෙකුත් අවයව). "රුධිරාණුවක් අනුගමනය කරන්න" බොත්තම ඔබන්න.</p>
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 340 380" id="doubleCircSvg">
+        <!-- lungs -->
+        <ellipse cx="110" cy="60" rx="55" ry="45" fill="#241832" stroke="var(--deoxy)" stroke-width="1.5" opacity="0.6"/>
+        <ellipse cx="230" cy="60" rx="55" ry="45" fill="#241832" stroke="var(--deoxy)" stroke-width="1.5" opacity="0.6"/>
+        <text x="170" y="30" fill="var(--text-dim)" font-size="11" text-anchor="middle">පෙනහළු (Lungs)</text>
+        <!-- heart -->
+        <circle cx="170" cy="190" r="42" fill="#2a1218" stroke="var(--oxy)" stroke-width="2"/>
+        <text x="170" y="194" fill="#fff" font-size="11" text-anchor="middle">හෘදය</text>
+        <!-- body -->
+        <rect x="110" y="290" width="120" height="70" rx="14" fill="#182418" stroke="var(--accent)" stroke-width="1.5" opacity="0.6"/>
+        <text x="170" y="330" fill="var(--text-dim)" font-size="11" text-anchor="middle">ශරීර පටක (Body Tissues)</text>
+        <!-- pulmonary path (blue up, red down) -->
+        <path d="M150 155 Q100 120 108 100" stroke="var(--deoxy)" stroke-width="6" fill="none"/>
+        <path d="M232 100 Q245 130 195 155" stroke="var(--oxy)" stroke-width="6" fill="none"/>
+        <!-- systemic path -->
+        <path d="M195 225 Q235 260 200 290" stroke="var(--oxy)" stroke-width="7" fill="none"/>
+        <path d="M140 290 Q100 260 145 225" stroke="var(--deoxy)" stroke-width="7" fill="none"/>
+        <circle id="rbcTrack" cx="150" cy="155" r="7" fill="var(--conduct)" stroke="#a67c00" stroke-width="1.5"/>
+      </svg>
+    </div>
+    <div class="legend">
+      <span><span class="dot" style="background:var(--deoxy)"></span> පුඵ්ඵුසීය සංසරණය (Pulmonary)</span>
+      <span><span class="dot" style="background:var(--oxy)"></span> දේහ සංසරණය (Systemic)</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn primary" id="trackRBC">🔴 රුධිරාණුවක් අනුගමනය කරන්න</button>
+    </div>
+    <div class="info-box" id="trackInfo">බොත්තම ඔබා රුධිරාණුවේ සම්පූර්ණ ගමන නරඹන්න: හෘදය → පෙනහළු → හෘදය → ශරීරය → හෘදය.</div>
+  </div>
+
+  <div class="card">
+    <span class="badge">CAPILLARY EXCHANGE</span>
+    <h2>කේශනාලිකා තුළ ද්‍රව හුවමාරුව <span class="en">Capillary Exchange</span></h2>
+    <p class="desc">ධමනි කෙළවරේදී <b>ජලස්ථිතික පීඩනය</b> (Hydrostatic) වැඩි නිසා ද්‍රව, පෝෂක සහ O₂ පටක වෙත පිටවෙයි. සිර කෙළවරේදී <b>පරාසෘති පීඩනය</b> (Osmotic) බලපෑම නිසා ද්‍රවය සහ අපද්‍රව්‍ය නැවත රුධිරයට ඇදී එයි.</p>
+    <div class="slider-wrap">
+      <div class="slider-label"><span>ධමනි කෙළවර</span><span id="capPosLabel">ස්ථානය</span><span>සිර කෙළවර</span></div>
+      <input type="range" id="capSlider" min="0" max="100" value="0">
+    </div>
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 400 160">
+        <path d="M20 80 Q200 40 380 80" stroke="#555" stroke-width="26" fill="none" opacity="0.25"/>
+        <path d="M20 80 Q200 40 380 80" stroke="var(--oxy)" stroke-width="10" fill="none" id="capTube1"/>
+        <path d="M20 90 Q200 130 380 90" stroke="#555" stroke-width="26" fill="none" opacity="0.15"/>
+        <ellipse cx="200" cy="60" rx="150" ry="55" fill="#182418" opacity="0.3"/>
+        <text x="60" y="35" fill="var(--oxy)" font-size="10">ධමනි කෙළවර</text>
+        <text x="300" y="35" fill="var(--deoxy)" font-size="10">සිර කෙළවර</text>
+        <g id="exchangeParticles"></g>
+        <circle id="capMarker" cx="20" cy="80" r="8" fill="var(--gold)"/>
+      </svg>
+    </div>
+    <div class="info-box" id="capInfo">ස්ලයිඩරය ගමන් කරවා කේශනාලිකාවේ විවිධ ස්ථානවල ද්‍රව චලනය නරඹන්න.</div>
+  </div>
+
+</section>
+
+<!-- ============ MODULE 3 ============ -->
+<section class="module" id="m3">
+
+  <div class="card">
+    <span class="badge">MODULE 3</span>
+    <h2>වසා පද්ධතියේ ක්‍රියාකාරීත්වය <span class="en">Lymphatic System</span></h2>
+    <p class="desc">කේශනාලිකා වලින් පිටවන අතිරික්ත අන්තරාල තරලය, අන්ධ අන්තයක් සහිත වසා කේශනාලිකා තුළට ඇතුල් වී <b style="color:var(--lymph)">වසා තරලය</b> බවට පත් වේ. එය වසා වාහිනී හරහා ගමන් කර, වසා ගැටිති හරහා පෙරී, යළිත් අවසානයේ subclavian ශිරා හරහා රුධිර සංසරණයට එකතු වේ.</p>
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 380 260" id="lymphSvg">
+        <!-- capillary bed -->
+        <rect x="20" y="30" width="90" height="60" rx="10" fill="var(--oxy-dim)" stroke="var(--oxy)" stroke-width="1.5"/>
+        <text x="65" y="20" fill="var(--text-dim)" font-size="9" text-anchor="middle">රුධිර කේශනාලිකාව</text>
+        <!-- tissue space -->
+        <rect x="20" y="100" width="90" height="55" rx="10" fill="#1c2418" stroke="var(--accent)" stroke-width="1" opacity="0.7"/>
+        <text x="65" y="130" fill="var(--text-dim)" font-size="8" text-anchor="middle">අන්තරාල තරලය</text>
+        <!-- lymph capillary blind end -->
+        <path d="M120 130 Q160 110 200 130" stroke="var(--lymph)" stroke-width="8" fill="none" stroke-linecap="round" id="lymphCap"/>
+        <text x="160" y="100" fill="var(--lymph)" font-size="9" text-anchor="middle">වසා කේශනාලිකාව (අන්ධ අන්තය)</text>
+        <!-- lymph vessel -->
+        <path d="M200 130 Q240 130 240 90" stroke="var(--lymph)" stroke-width="7" fill="none" id="lymphVessel1"/>
+        <path d="M240 90 L240 55" stroke="var(--lymph)" stroke-width="7" id="lymphVessel2"/>
+        <!-- lymph node -->
+        <ellipse cx="240" cy="40" rx="26" ry="18" fill="#2a3320" stroke="var(--lymph)" stroke-width="2" id="lymphNode"/>
+        <text x="240" y="25" fill="var(--lymph)" font-size="9" text-anchor="middle">වසා ගැටිය</text>
+        <!-- to subclavian -->
+        <path d="M266 40 Q310 40 320 70" stroke="var(--lymph)" stroke-width="6" fill="none" id="lymphVessel3"/>
+        <circle cx="330" cy="90" r="20" fill="var(--deoxy-dim)" stroke="var(--deoxy)" stroke-width="2"/>
+        <text x="330" y="93" fill="#fff" font-size="8" text-anchor="middle">Subclavian ශිරාව</text>
+        <!-- moving particles container -->
+        <g id="lymphParticles"></g>
+      </svg>
+    </div>
+    <div class="legend">
+      <span><span class="dot" style="background:var(--oxy)"></span> රුධිරය</span>
+      <span><span class="dot" style="background:var(--lymph)"></span> වසා තරලය</span>
+      <span><span class="dot" style="background:var(--deoxy)"></span> ශිරා රුධිරය</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn primary" id="playLymph">▶ වසා තරල ගමන ධාවනය කරන්න</button>
+    </div>
+    <div class="info-box" id="lymphInfo">වසා ගැටිය තුළ මැක්‍රොෆේජ් සහ ලිම්ෆොසයිට් (T/B සෛල) මගින් රෝගජනක පෙරනු ලබයි.</div>
+  </div>
+
+  <div class="card">
+    <span class="badge">LYMPH NODE ZOOM</span>
+    <h2>වසා ගැටියේ ව්‍යුහය සහ ප්‍රතිශක්තිකරණ කාර්යභාරය</h2>
+    <p class="desc">වසා ගැටිය තුළ රෝගජනක (බැක්ටීරියා/වෛරස්) පෙරීම සිදුවේ. පහත බොත්තම් ස්පර්ශ කර ක්‍රියාවලිය බලන්න.</p>
+    <div class="btn-row">
+      <button class="btn lymph-zoom-btn active-state" data-step="0">1️⃣ රෝගජනක පැමිණීම</button>
+      <button class="btn lymph-zoom-btn" data-step="1">2️⃣ මැක්‍රොෆේජ් ග්‍රහණය</button>
+      <button class="btn lymph-zoom-btn" data-step="2">3️⃣ ලිම්ෆොසයිට් ක්‍රියාකාරීත්වය</button>
+    </div>
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 300 180">
+        <ellipse cx="150" cy="90" rx="130" ry="75" fill="#1a2415" stroke="var(--lymph)" stroke-width="2"/>
+        <g id="nodeZoomContent"></g>
+      </svg>
+    </div>
+    <div class="info-box" id="nodeZoomInfo">රෝගජනක වසා තරලය සමඟ ගැටිය තුළට ගමන් කරයි.</div>
+  </div>
+
+</section>
+
+<!-- ============ MODULE 4 ============ -->
+<section class="module" id="m4">
+
+  <div class="card">
+    <span class="badge">MODULE 4</span>
+    <h2>රුධිර වාහිනී සංසන්දනය <span class="en">Artery vs Vein vs Capillary</span></h2>
+    <p class="desc">වර්ගය ස්පර්ශ කර ව්‍යුහාත්මක වෙනස්කම් සසඳන්න.</p>
+    <div class="tabgrid">
+      <div class="vessel-card sel" data-v="artery">
+        <svg viewBox="0 0 60 50"><circle cx="30" cy="25" r="18" fill="none" stroke="var(--oxy)" stroke-width="6"/><circle cx="30" cy="25" r="8" fill="var(--oxy-dim)"/></svg>
+        <div class="name">ධමනිය (Artery)</div>
+      </div>
+      <div class="vessel-card" data-v="vein">
+        <svg viewBox="0 0 60 50"><circle cx="30" cy="25" r="18" fill="none" stroke="var(--deoxy)" stroke-width="3"/><circle cx="30" cy="25" r="13" fill="var(--deoxy-dim)"/></svg>
+        <div class="name">ශිරාව (Vein)</div>
+      </div>
+      <div class="vessel-card" data-v="capillary">
+        <svg viewBox="0 0 60 50"><circle cx="30" cy="25" r="8" fill="none" stroke="var(--accent)" stroke-width="1.5"/></svg>
+        <div class="name">කේශනාලිකාව (Capillary)</div>
+      </div>
+    </div>
+    <table class="vs-table">
+      <tr><th>ලක්ෂණය</th><th id="vsColName">ධමනිය</th></tr>
+      <tr><td class="feat">ලුමීන විශාලත්වය</td><td id="vsLumen">කුඩාය</td></tr>
+      <tr><td class="feat">බිත්ති ඝනකම</td><td id="vsWall">ඝන (මාංශ පේශි + ප්‍රත්‍යාස්ථ තන්තු වැඩි)</td></tr>
+      <tr><td class="feat">කපාට</td><td id="vsValve">නොමැත</td></tr>
+      <tr><td class="feat">රුධිර පීඩනය</td><td id="vsPressure">ඉහළ (120 mmHg පමණ)</td></tr>
+      <tr><td class="feat">රුධිර ප්‍රවාහ දිශාව</td><td id="vsDir">හෘදයෙන් පිටතට</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <span class="badge">BLOOD COMPOSITION</span>
+    <h2>රුධිරයේ සංයුතිය <span class="en">Blood Components</span></h2>
+    <p class="desc">රුධිරය ප්ලාස්මාව (55%) සහ නිශ්චිත සෛල (45%) වලින් සමන්විතයි. සෛලයක් ස්පර්ශ කර විස්තර බලන්න.</p>
+    <div class="cellgrid">
+      <div class="cell-card" data-c="plasma">
+        <div class="cell-visual"><svg width="40" height="40" viewBox="0 0 40 40"><rect x="4" y="4" width="32" height="32" rx="6" fill="#f0a83a" opacity="0.3" stroke="#f0a83a"/></svg></div>
+        <div class="cname">ප්ලාස්මාව (Plasma) — 55%</div>
+        <div class="cdesc">ජලය, ප්‍රෝටීන (ඇල්බියුමින්, ග්ලෝබියුලින්, ෆයිබ්‍රිනොජන්), පෝෂක, හෝමෝන හා අපද්‍රව්‍ය අඩංගු කහ පැහැති තරලය.</div>
+      </div>
+      <div class="cell-card" data-c="rbc">
+        <div class="cell-visual"><svg width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="15" fill="var(--oxy)"/><ellipse cx="20" cy="20" rx="8" ry="4" fill="#5c1c22"/></svg></div>
+        <div class="cname">රතු රුධිරාණු (RBC) — 4-6 million/mm³</div>
+        <div class="cdesc">නියුක්ලියස් රහිත, මුදුඛාකාර සෛල. හීමොග්ලොබින් මගින් O₂ පරිවහනය කරයි. ආයු කාලය දින 120.</div>
+      </div>
+      <div class="cell-card" data-c="wbc">
+        <div class="cell-visual"><svg width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="15" fill="#e8edf7" opacity="0.85"/><circle cx="15" cy="17" r="5" fill="#3a4a6c"/><circle cx="24" cy="22" r="5" fill="#3a4a6c"/></svg></div>
+        <div class="cname">ශ්වේත රුධිරාණු (WBC) — 5 වර්ග</div>
+        <div class="cdesc">නියුට්‍රොෆිල්, බැසෝෆිල්, ඉයොසිනොෆිල්, මොනොසයිට්, ලිම්ෆොසයිට් (T/B). ශරීරය ආරක්ෂා කිරීම හා ප්‍රතිශක්තිකරණ ප්‍රතිචාරය.</div>
+      </div>
+      <div class="cell-card" data-c="platelet">
+        <div class="cell-visual"><svg width="40" height="40" viewBox="0 0 40 40"><ellipse cx="20" cy="20" rx="10" ry="6" fill="var(--gold)"/></svg></div>
+        <div class="cname">පට්ටිකා (Platelets)</div>
+        <div class="cdesc">ඇටමිදුළු සෛලවලින් බිඳී යයි. නියුක්ලියස් නැත. රුධිර කැටි ගැසීමේ ප්‍රධාන කාර්යභාරය දරයි.</div>
+      </div>
+      <div class="cell-card" data-c="clot">
+        <div class="cell-visual"><svg width="40" height="40" viewBox="0 0 40 40"><path d="M8 30 Q20 5 32 30" stroke="var(--oxy)" stroke-width="3" fill="none"/></svg></div>
+        <div class="cname">රුධිර කැටි ගැසීම (Clotting)</div>
+        <div class="cdesc">පට්ටිකා → ප්‍රොත්‍රොම්බින් → ත්‍රොම්බින් → ෆයිබ්‍රිනොජන් → ෆයිබ්‍රින් (කැටිය). Ca²⁺ සහ විටමින් K අවශ්‍යයි.</div>
+      </div>
+      <div class="cell-card" data-c="group">
+        <div class="cell-visual"><svg width="40" height="40" viewBox="0 0 40 40"><text x="20" y="26" fill="var(--accent)" font-size="14" text-anchor="middle" font-weight="bold">AB</text></svg></div>
+        <div class="cname">රුධිර කාණ්ඩ — ABO / Rh</div>
+        <div class="cdesc">A, B, AB, O කාණ්ඩ ප්‍රතිදේහජනක මත පදනම් වේ. Rh+ / Rh- ද වැදගත්. O කාණ්ඩය සර්වදායක; AB සර්ව ප්‍රතිග්‍රාහක.</div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ============ MODULE 5 ============ -->
+<section class="module" id="m5">
+  <div class="card">
+    <span class="badge">MODULE 5</span>
+    <h2>A/L ප්‍රශ්නාවලිය <span class="en">Self-Assessment Quiz</span></h2>
+    <p class="desc">පිළිතුරු තෝරා ක්ෂණික පැහැදිලි කිරීම් ලබා ගන්න.</p>
+    <div id="quizContainer"></div>
+    <button class="btn primary" id="submitQuiz" style="width:100%;margin-top:6px;">✓ ලකුණු පරීක්ෂා කරන්න</button>
+    <div class="score-box" id="scoreBox"></div>
+  </div>
+</section>
+
+</main>
+
+<footer>A/L ජීව විද්‍යාව — රුධිර සංසරණ හා වසා පද්ධති අන්තර්ක්‍රියාකාරී ඉගෙනුම් මෙවලම</footer>
+
+<script>
+// ---------- TAB NAVIGATION ----------
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.module').forEach(m=>m.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.mod).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+});
+
+// ---------- MODULE 1: Heart part info ----------
+const partData = {
+  RA:"<b>දකුණු කර්ණිකාව (Right Atrium):</b> ශරීරයෙන් පැමිණෙන අවඝෝෂිත රුධිරය මහා ශිරා (Vena Cava) හරහා ලැබේ.",
+  LA:"<b>වම් කර්ණිකාව (Left Atrium):</b> පෙනහළුවලින් ඔක්සිජන්යුත රුධිරය පුඵ්ඵුසීය ශිරා හරහා ලැබේ.",
+  RV:"<b>දකුණු කෝෂිකාව (Right Ventricle):</b> අවඝෝෂිත රුධිරය පුඵ්ඵුසීය ධමනිය හරහා පෙනහළු වෙත පොම්ප කරයි.",
+  LV:"<b>වම් කෝෂිකාව (Left Ventricle):</b> බිත්තිය ඝනතම — ඔක්සිජන්යුත රුධිරය මහා ධමනිය හරහා මුළු ශරීරයටම පොම්ප කරයි.",
+  TV:"<b>ත්‍රිකුස්ප කපාටය (Tricuspid Valve):</b> RA සහ RV අතර පිහිටයි. පත්‍ර 3කින් යුක්තයි.",
+  MV:"<b>ද්විකුස්ප කපාටය (Mitral/Bicuspid Valve):</b> LA සහ LV අතර පිහිටයි. පත්‍ර 2කින් යුක්තයි.",
+  PV:"<b>පුඵ්ඵුසීය අර්ධචන්ද්‍ර කපාටය:</b> RV සහ පුඵ්ඵුසීය ධමනිය අතර පිහිටයි.",
+  AV:"<b>මහා ධමනි අර්ධචන්ද්‍ර කපාටය:</b> LV සහ මහා ධමනිය (Aorta) අතර පිහිටයි."
+};
+document.querySelectorAll('[data-p]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.getElementById('partInfo').innerHTML = partData[btn.dataset.p];
+    const el = document.querySelector(`[data-part="${btn.dataset.p}"]`);
+    if(el){
+      el.style.filter="brightness(1.6) drop-shadow(0 0 8px gold)";
+      setTimeout(()=>el.style.filter="",900);
+    }
+  });
+});
+
+// ---------- MODULE 1: Conduction animation ----------
+let conductPlaying = false;
+document.getElementById('playConduct').addEventListener('click', ()=>{
+  if(conductPlaying) return;
+  conductPlaying = true;
+  const label = document.getElementById('conductLabel');
+  const sa = document.getElementById('saNode');
+  const av = document.getElementById('avNode');
+  const his = document.getElementById('hisPath');
+  const purks = [purk1,purk2,purk3,purk4].map(id=>id); // placeholder
+  const purkEls = ['purk1','purk2','purk3','purk4'].map(id=>document.getElementById(id));
+
+  [av,his,...purkEls].forEach(el=>el.style.opacity=0.25);
+  label.textContent = "SA ගැටය ආවේගය ජනනය කරයි (Pacemaker)";
+  sa.style.filter = "brightness(2) drop-shadow(0 0 10px gold)";
+
+  setTimeout(()=>{
+    label.textContent = "ආවේගය කර්ණික මාංශ පේශි හරහා පැතිරේ → කර්ණික සංකෝචනය";
+  },500);
+
+  setTimeout(()=>{
+    av.style.opacity = 1;
+    av.style.filter = "brightness(2) drop-shadow(0 0 10px gold)";
+    label.textContent = "AV ගැටයේදී ආවේගය ප්‍රමාද වේ (0.1s)";
+  },1200);
+
+  setTimeout(()=>{
+    his.style.opacity = 1;
+    label.textContent = "His කදම්භය හරහා ආවේගය පහළට ගමන් කරයි";
+  },2000);
+
+  setTimeout(()=>{
+    purkEls.forEach(el=>el.style.opacity=1);
+    label.textContent = "Purkinje තන්තු → කෝෂික සංකෝචනය ඇතිවේ";
+  },2600);
+
+  setTimeout(()=>{
+    sa.style.filter="";
+    av.style.filter="";
+    label.textContent = "සම්පූර්ණයි! නැවත ධාවනය කිරීමට ඔබන්න.";
+    conductPlaying = false;
+  },3800);
+});
+
+// ---------- MODULE 1: Cardiac cycle stepper ----------
+const cycleData = [
+  {info:"කර්ණික සංකෝචනය වී රුධිරය කෝෂික තුළට තල්ලු කරයි. AV කපාට විවෘතව ඇත. (0.1s)",
+    LA:{h:20,y:70}, LV:{h:65,y:95}, RA:{h:20,y:70}, RV:{h:65,y:95}},
+  {info:"කෝෂික සංකෝචනය වී රුධිරය මහා ධමනිය/පුඵ්ඵුසීය ධමනිය හරහා පිටතට තල්ලු කරයි. Semilunar කපාට විවෘතව ඇත. (0.3s)",
+    LA:{h:45,y:45}, LV:{h:30,y:130}, RA:{h:45,y:45}, RV:{h:30,y:130}},
+  {info:"පූර්ණ හෘත් විස්තාරය — කර්ණික සහ කෝෂික දෙකම ලිහිල් වී රුධිරයෙන් නැවත පිරේ. (0.4s)",
+    LA:{h:45,y:45}, LV:{h:60,y:100}, RA:{h:45,y:45}, RV:{h:60,y:100}}
+];
+function applyCycle(idx){
+  const d = cycleData[idx];
+  ['LA','LV','RA','RV'].forEach(ch=>{
+    const el = document.getElementById('cyc-'+ch);
+    el.setAttribute('height', d[ch].h);
+    el.setAttribute('y', d[ch].y);
+  });
+  document.getElementById('cycleInfo').textContent = d.info;
+}
+document.querySelectorAll('.cycle-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.cycle-btn').forEach(b=>b.classList.remove('active-state'));
+    btn.classList.add('active-state');
+    applyCycle(parseInt(btn.dataset.stage));
+  });
+});
+applyCycle(0);
+
+// ---------- MODULE 2: Track RBC ----------
+const rbcPathPulm = [ [150,155],[125,135],[108,100],[108,80],[150,60],[195,60],[232,90],[232,100],[195,155] ]; // heart->lung->heart
+const rbcPathSys = [ [195,225],[220,250],[200,290],[170,325],[140,290],[120,250],[145,225] ]; // heart->body->heart
+function animatePath(points, duration, onDone){
+  const el = document.getElementById('rbcTrack');
+  let i=0;
+  const stepTime = duration/points.length;
+  function step(){
+    if(i>=points.length){ if(onDone) onDone(); return; }
+    el.setAttribute('cx',points[i][0]);
+    el.setAttribute('cy',points[i][1]);
+    i++;
+    setTimeout(step, stepTime);
+  }
+  step();
+}
+let trackingNow=false;
+document.getElementById('trackRBC').addEventListener('click',()=>{
+  if(trackingNow) return;
+  trackingNow=true;
+  const info = document.getElementById('trackInfo');
+  info.textContent="හෘදයෙන් පෙනහළු වෙත ගමන් කරයි (පුඵ්ඵුසීය ධමනිය — අවඝෝෂිත රුධිරය)...";
+  document.getElementById('rbcTrack').setAttribute('fill','var(--deoxy)');
+  animatePath(rbcPathPulm, 2200, ()=>{
+    info.textContent="පෙනහළුවල ඔක්සිජන් ලබාගෙන හෘදයට නැවත පැමිණේ (ඔක්සිජන්යුත රුධිරය)...";
+    document.getElementById('rbcTrack').setAttribute('fill','var(--oxy)');
+    setTimeout(()=>{
+      info.textContent="දැන් හෘදයෙන් ශරීර පටක වෙත ගමන් කරයි (මහා ධමනිය)...";
+      animatePath(rbcPathSys, 2200, ()=>{
+        info.textContent="පටකවල O₂ බෙදා දී, CO₂ රැගෙන අවඝෝෂිත රුධිරය ලෙස හෘදයට නැවත පැමිණේ. චක්‍රය සම්පූර්ණයි! 🔄";
+        document.getElementById('rbcTrack').setAttribute('fill','var(--deoxy)');
+        trackingNow=false;
+      });
+    },400);
+  });
+});
+
+// ---------- MODULE 2: Capillary exchange slider ----------
+const capSlider = document.getElementById('capSlider');
+const capMarker = document.getElementById('capMarker');
+const capInfo = document.getElementById('capInfo');
+const capPosLabel = document.getElementById('capPosLabel');
+function updateCap(){
+  const v = parseInt(capSlider.value);
+  const x = 20 + (v/100)*360;
+  const yBase = 80 - Math.sin((v/100)*Math.PI)*40;
+  capMarker.setAttribute('cx',x);
+  capMarker.setAttribute('cy',yBase);
+  const container = document.getElementById('exchangeParticles');
+  container.innerHTML='';
+  if(v<40){
+    capPosLabel.textContent="ධමනි කෙළවර";
+    capInfo.innerHTML = "<b>ජලස්ථිතික පීඩනය ඉහළ:</b> ද්‍රවය, පෝෂක සහ O₂ රුධිරයෙන් පටක තුළට පිටවේ (පිටතට ගමන් කරන ඊතල).";
+    for(let i=0;i<4;i++){
+      const c = document.createElementNS("http://www.w3.org/2000/svg","circle");
+      c.setAttribute("cx", x+10+i*8); c.setAttribute("cy", yBase-25-i*3); c.setAttribute("r",3);
+      c.setAttribute("fill","var(--oxy)"); container.appendChild(c);
+    }
+  } else if(v>60){
+    capPosLabel.textContent="සිර කෙළවර";
+    capInfo.innerHTML = "<b>පරාසෘති පීඩනය ප්‍රමුඛ:</b> ප්ලාස්මා ප්‍රෝටීන නිසා ද්‍රවය හා අපද්‍රව්‍ය නැවත රුධිරයට ඇදී එයි (ඇතුළට ගමන් කරන ඊතල).";
+    for(let i=0;i<4;i++){
+      const c = document.createElementNS("http://www.w3.org/2000/svg","circle");
+      c.setAttribute("cx", x-10-i*8); c.setAttribute("cy", yBase-25-i*3); c.setAttribute("r",3);
+      c.setAttribute("fill","var(--deoxy)"); container.appendChild(c);
+    }
+  } else {
+    capPosLabel.textContent="මධ්‍ය කලාපය";
+    capInfo.innerHTML = "<b>සමතුලිතතා ලක්ෂ්‍යය:</b> මෙහිදී ජලස්ථිතික සහ පරාසෘති පීඩන දළ වශයෙන් සමාන වේ.";
+  }
+}
+capSlider.addEventListener('input',updateCap);
+updateCap();
+
+// ---------- MODULE 3: Lymph animation ----------
+function makeLymphParticle(cx,cy,color){
+  const c = document.createElementNS("http://www.w3.org/2000/svg","circle");
+  c.setAttribute("cx",cx); c.setAttribute("cy",cy); c.setAttribute("r",4);
+  c.setAttribute("fill",color);
+  document.getElementById('lymphParticles').appendChild(c);
+  return c;
+}
+document.getElementById('playLymph').addEventListener('click', function(){
+  const info = document.getElementById('lymphInfo');
+  document.getElementById('lymphParticles').innerHTML='';
+  info.textContent = "අතිරික්ත අන්තරාල තරලය වසා කේශනාලිකාවේ අන්ධ අන්තය තුළට ඇතුල් වේ...";
+  const path = [[65,128],[120,130],[160,120],[200,130],[240,130],[240,90],[240,55],[240,40],[266,40],[300,50],[320,70],[330,90]];
+  const p = makeLymphParticle(65,128,'var(--lymph)');
+  let i=0;
+  function step(){
+    if(i>=path.length){
+      info.textContent = "වසා තරලය Subclavian ශිරාව හරහා නැවත රුධිර සංසරණයට එකතු වේ! ✅";
+      return;
+    }
+    p.setAttribute('cx',path[i][0]);
+    p.setAttribute('cy',path[i][1]);
+    if(i===5){ info.textContent="වසා වාහිනිය හරහා ගමන් කරයි..."; }
+    if(i===8){ info.textContent="වසා ගැටිය තුළින් පෙරී රෝගජනක ඉවත් කරයි..."; p.setAttribute('fill','#e0f070'); }
+    if(i===11){ p.setAttribute('fill','var(--deoxy)'); }
+    i++;
+    setTimeout(step,220);
+  }
+  step();
+});
+
+// ---------- MODULE 3: Lymph node zoom ----------
+const nodeSteps = [
+  {info:"රෝගජනක (බැක්ටීරියා) වසා තරලය සමඟ ගැටිය තුළට ගමන් කරයි.",
+   draw:`<circle cx="110" cy="90" r="6" fill="#c85050"/><circle cx="130" cy="70" r="6" fill="#c85050"/><circle cx="100" cy="60" r="6" fill="#c85050"/>`},
+  {info:"මැක්‍රොෆේජ් (Macrophages) රෝගජනක ග්‍රහණය කර විනාශ කරයි (Phagocytosis).",
+   draw:`<circle cx="150" cy="80" r="18" fill="#8fae4a" opacity="0.85"/><circle cx="150" cy="80" r="6" fill="#c85050" opacity="0.5"/><text x="150" y="115" fill="var(--lymph)" font-size="9" text-anchor="middle">මැක්‍රොෆේජය</text>`},
+  {info:"ලිම්ෆොසයිට් (T/B සෛල) ප්‍රතිදේහ නිපදවා විශේෂිත ප්‍රතිශක්ති ප්‍රතිචාරයක් ගොඩනගයි.",
+   draw:`<circle cx="120" cy="95" r="10" fill="#4a9ae8"/><text x="120" y="120" fill="#4a9ae8" font-size="8" text-anchor="middle">T සෛලය</text><circle cx="180" cy="95" r="10" fill="#e0a83a"/><text x="180" y="120" fill="#e0a83a" font-size="8" text-anchor="middle">B සෛලය</text>`}
+];
+function setNodeStep(idx){
+  document.getElementById('nodeZoomContent').innerHTML = nodeSteps[idx].draw;
+  document.getElementById('nodeZoomInfo').textContent = nodeSteps[idx].info;
+}
+document.querySelectorAll('.lymph-zoom-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.lymph-zoom-btn').forEach(b=>b.classList.remove('active-state'));
+    btn.classList.add('active-state');
+    setNodeStep(parseInt(btn.dataset.step));
+  });
+});
+setNodeStep(0);
+
+// ---------- MODULE 4: Vessel comparison ----------
+const vesselData = {
+  artery:{name:"ධමනිය", lumen:"කුඩාය", wall:"ඝන (මාංශ පේශි + ප්‍රත්‍යාස්ථ තන්තු වැඩි)", valve:"නොමැත", pressure:"ඉහළ (120 mmHg පමණ)", dir:"හෘදයෙන් පිටතට"},
+  vein:{name:"ශිරාව", lumen:"විශාලය", wall:"තුනී (මාංශ පේශි අඩුය)", valve:"ඇත (ආපසු ගලායාම වළක්වයි)", pressure:"පහළ", dir:"හෘදය දෙසට"},
+  capillary:{name:"කේශනාලිකාව", lumen:"ඉතා කුඩාය (RBC එකින් එක ගමන් කරයි)", wall:"ඉතා තුනී (එක් පටක ස්තරයක්)", valve:"නොමැත", pressure:"අඩුම, හුවමාරුවට ඉඩ සලසයි", dir:"ධමනියේ සිට ශිරාව දෙසට"}
+};
+document.querySelectorAll('.vessel-card').forEach(card=>{
+  card.addEventListener('click',()=>{
+    document.querySelectorAll('.vessel-card').forEach(c=>c.classList.remove('sel'));
+    card.classList.add('sel');
+    const d = vesselData[card.dataset.v];
+    document.getElementById('vsColName').textContent = d.name;
+    document.getElementById('vsLumen').textContent = d.lumen;
+    document.getElementById('vsWall').textContent = d.wall;
+    document.getElementById('vsValve').textContent = d.valve;
+    document.getElementById('vsPressure').textContent = d.pressure;
+    document.getElementById('vsDir').textContent = d.dir;
+  });
+});
+
+// ---------- MODULE 4: Cell cards toggle ----------
+document.querySelectorAll('.cell-card').forEach(card=>{
+  card.addEventListener('click',()=>card.classList.toggle('open'));
+});
+
+// ---------- MODULE 5: QUIZ ----------
+const quizData = [
+  {q:"හෘද චක්‍රයේ SA ගැටයෙන් AV ගැටය වෙත ආවේගය ගමන් කිරීමේදී ඇතිවන ප්‍රමාදය කුමන කාරණය සඳහාද?",
+   opts:["කර්ණික සම්පූර්ණයෙන් හිස් වීමට කාලය ලබාදීම","කෝෂික ලේ පිරවීම වළක්වයි","හෘද ස්පන්දන වේගය අඩු කිරීම","වායු හුවමාරුව සඳහා"],
+   correct:0, exp:"AV ගැටයේ 0.1s ප්‍රමාදය නිසා කර්ණික සම්පූර්ණයෙන් සංකෝචනය වී රුධිරය කෝෂික තුළට මුළුමනින්ම ගලායාමට කාලය ලැබේ, පසුව පමණක් කෝෂික සංකෝචනය ආරම්භ වේ."},
+  {q:"එක් සම්පූර්ණ හෘද චක්‍රයක් සඳහා ගතවන කාලය කුමක්ද?",
+   opts:["0.1 තත්පර","0.3 තත්පර","0.8 තත්පර","1.5 තත්පර"],
+   correct:2, exp:"හෘද චක්‍රය: කර්ණික සංකෝචනය (0.1s) + කෝෂික සංකෝචනය (0.3s) + පූර්ණ හෘත් විස්තාරය (0.4s) = 0.8 තත්පර."},
+  {q:"කේශනාලිකාවේ ධමනි කෙළවරේදී ප්‍රධාන වශයෙන් ක්‍රියාත්මක වන පීඩනය කුමක්ද?",
+   opts:["පරාසෘති පීඩනය","ජලස්ථිතික පීඩනය","වායුගෝලීය පීඩනය","අභ්‍යන්තර පීඩනය"],
+   correct:1, exp:"ධමනි කෙළවරේදී රුධිරයේ ජලස්ථිතික පීඩනය වැඩි නිසා ද්‍රවය, පෝෂක සහ O₂ පටක තුළට පිටවේ."},
+  {q:"වසා පද්ධතියේ ප්‍රධාන කාර්යභාරයක් නොවන්නේ කුමක්ද?",
+   opts:["අතිරික්ත අන්තරාල තරලය රුධිරයට ආපසු ලබාදීම","රෝගජනකවලින් ශරීරය ආරක්ෂා කිරීම","O₂ සෘජුව පටකවලට ප්‍රවාහනය කිරීම","මේද අවශෝෂණයට සහාය වීම"],
+   correct:2, exp:"O₂ ප්‍රවාහනය රුධිරයේ RBC මගින් සිදු කරන කාර්යයකි, එය වසා පද්ධතියේ කාර්යයක් නොවේ."},
+  {q:"රුධිර කාණ්ඩ 4න් (A, B, AB, O) සර්වදායකයා (universal donor) ලෙස සැලකෙන්නේ කවරදැයි?",
+   opts:["AB කාණ්ඩය","A කාණ්ඩය","B කාණ්ඩය","O කාණ්ඩය"],
+   correct:3, exp:"O රුධිර කාණ්ඩයේ පුද්ගලයන්ගේ රතු රුධිරාණුවල A හෝ B ප්‍රතිදේහජනක නොමැති නිසා, එය සියලුම කාණ්ඩවලට ලබා දිය හැක."}
+];
+const quizContainer = document.getElementById('quizContainer');
+quizData.forEach((item,qi)=>{
+  const div = document.createElement('div');
+  div.className='quiz-q';
+  div.innerHTML = `<div class="qnum">ප්‍රශ්නය ${qi+1}</div><div class="qtext">${item.q}</div>`;
+  item.opts.forEach((opt,oi)=>{
+    const b = document.createElement('button');
+    b.className='opt'; b.textContent=opt;
+    b.dataset.q=qi; b.dataset.o=oi;
+    b.addEventListener('click',()=>{
+      if(b.parentElement.dataset.answered) return;
+      div.dataset.answered="1";
+      const allOpts = div.querySelectorAll('.opt');
+      allOpts.forEach(o=>o.disabled=true);
+      if(oi===item.correct){ b.classList.add('correct'); div.dataset.correct="1"; }
+      else{
+        b.classList.add('wrong');
+        allOpts[item.correct].classList.add('correct');
+      }
+      div.querySelector('.explain').classList.add('show');
+    });
+    div.appendChild(b);
+  });
+  const exp = document.createElement('div');
+  exp.className='explain';
+  exp.innerHTML = `<b>පැහැදිලි කිරීම:</b> ${item.exp}`;
+  div.appendChild(exp);
+  quizContainer.appendChild(div);
+});
+document.getElementById('submitQuiz').addEventListener('click',()=>{
+  let score=0;
+  document.querySelectorAll('.quiz-q').forEach(q=>{ if(q.dataset.correct==="1") score++; });
+  const box = document.getElementById('scoreBox');
+  box.classList.add('show');
+  box.innerHTML = `ඔබේ ලකුණු: ${score} / ${quizData.length} ${score===quizData.length? '🏆 විශිෂ්ටයි!' : score>=3 ? '👍 හොඳයි!' : '📖 නැවත සමාලෝචනය කරන්න'}`;
+  box.scrollIntoView({behavior:'smooth',block:'center'});
+});
+</script>
+</body>
+</html>

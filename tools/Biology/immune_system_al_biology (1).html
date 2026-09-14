@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>ප්‍රතිශක්ති පද්ධතිය — අන්තර්ක්‍රියාකාරී ඉගෙනුම</title>
+<style>
+:root{
+  --bg:#0b1220;
+  --bg2:#111d2e;
+  --card:#152238;
+  --card2:#1b2c47;
+  --line:#26374f;
+  --text:#e7edf5;
+  --muted:#93a4bd;
+  --yellow:#f4c542;   /* pathogen */
+  --cyan:#3fd0e0;     /* T-cell */
+  --green:#4fd68c;    /* B-cell */
+  --purple:#b48cf2;   /* antibody */
+  --red:#f0645f;      /* inflammatory */
+  --orange:#f2954a;
+  --radius:16px;
+  --shadow:0 8px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;height:100%;}
+html,body{margin:0;padding:0;overflow-x:hidden;width:100%;touch-action:pan-y;}
+body{
+  background:radial-gradient(1200px 800px at 10% -10%, #16273f 0%, var(--bg) 55%);
+  color:var(--text);
+  font-family:"Noto Sans Sinhala","Iskoola Pota","Nirmala UI","Segoe UI",system-ui,sans-serif;
+  min-height:100vh;
+  min-height:100dvh;
+  padding-bottom:calc(78px + env(safe-area-inset-bottom));
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  -webkit-font-smoothing:antialiased;
+}
+.app-header{
+  position:sticky;top:0;z-index:50;
+  background:linear-gradient(180deg, rgba(11,18,32,.97), rgba(11,18,32,.9));
+  backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--line);
+  padding:calc(10px + env(safe-area-inset-top)) 16px 10px;
+  padding-left:calc(16px + env(safe-area-inset-left));
+  padding-right:calc(16px + env(safe-area-inset-right));
+}
+.app-header h1{
+  margin:0;font-size:19px;font-weight:800;letter-spacing:.2px;
+  display:flex;align-items:center;gap:10px;
+}
+.app-header .sub{color:var(--muted);font-size:12.5px;margin-top:3px;}
+.logo-pulse{
+  width:30px;height:30px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%, var(--cyan), #0d5560 70%);
+  box-shadow:0 0 0 0 rgba(63,208,224,.6);
+  animation:pulse 2.4s infinite;
+  flex:0 0 auto;
+}
+@keyframes pulse{
+  0%{box-shadow:0 0 0 0 rgba(63,208,224,.55);}
+  70%{box-shadow:0 0 0 12px rgba(63,208,224,0);}
+  100%{box-shadow:0 0 0 0 rgba(63,208,224,0);}
+}
+.tabs-desktop{display:none;}
+main{
+  max-width:920px;margin:0 auto;
+  padding:14px 14px 20px;
+  padding-left:calc(14px + env(safe-area-inset-left));
+  padding-right:calc(14px + env(safe-area-inset-right));
+  overflow-wrap:break-word;word-break:break-word;
+}
+.module{display:none;animation:fadeIn .35s ease;}
+.module.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+h2.mtitle{
+  font-size:17px;margin:4px 0 4px;display:flex;align-items:center;gap:8px;
+}
+h2.mtitle .tag{
+  font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;
+  background:var(--card2);color:var(--muted);border:1px solid var(--line);
+}
+p.lead{color:var(--muted);font-size:13.5px;line-height:1.6;margin:2px 0 16px;}
+
+.card{
+  background:linear-gradient(180deg,var(--card),var(--card2));
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:14px;margin-bottom:16px;
+  box-shadow:var(--shadow);
+}
+.card h3{margin:0 0 8px;font-size:15px;display:flex;align-items:center;gap:8px;}
+.card h3 .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;}
+.card p{font-size:13.5px;line-height:1.7;color:#cfd9ea;margin:6px 0;}
+.card p b{color:var(--text);}
+
+.pillrow{display:flex;flex-wrap:wrap;gap:9px;margin:10px 0;}
+.pill,.stepbtn,.tabbtn,.qopt,.bpart,.receptor-zone,.epitope-piece,input[type=range]{touch-action:manipulation;}
+.pill{
+  background:var(--bg2);border:1px solid var(--line);color:var(--text);
+  padding:11px 14px;min-height:44px;display:inline-flex;align-items:center;
+  border-radius:20px;font-size:12.5px;cursor:pointer;line-height:1.3;
+  transition:.15s;user-select:none;
+}
+.pill:active{transform:scale(.95);}
+.pill.on{background:var(--cyan);color:#04222a;border-color:var(--cyan);font-weight:700;}
+.pill.on.red{background:var(--red);color:#2a0908;border-color:var(--red);}
+.pill.on.green{background:var(--green);color:#062a17;border-color:var(--green);}
+.pill.on.purple{background:var(--purple);color:#20123a;border-color:var(--purple);}
+.pill.on.yellow{background:var(--yellow);color:#2a2004;border-color:var(--yellow);}
+
+.svgwrap{
+  background:#0a121f;border:1px solid var(--line);border-radius:12px;
+  padding:6px;margin:10px 0;overflow:hidden;
+}
+svg{width:100%;height:auto;display:block;}
+
+.stepbar{display:flex;align-items:center;gap:10px;margin:10px 0;}
+.stepbar input[type=range]{flex:1;accent-color:var(--cyan);height:22px;}
+.stepbtn{
+  background:var(--cyan);color:#04222a;border:none;border-radius:10px;
+  padding:12px 16px;min-height:44px;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap;
+}
+.stepbtn.secondary{background:var(--card2);color:var(--text);border:1px solid var(--line);}
+.stepbtn:active{transform:scale(.96);}
+.steplabel{
+  text-align:center;font-size:13px;font-weight:700;color:var(--cyan);min-height:18px;margin-top:2px;
+}
+.stepdesc{font-size:13px;color:#cfd9ea;background:var(--bg2);border-radius:10px;padding:10px 12px;line-height:1.7;border:1px solid var(--line);}
+
+.grid2{display:grid;grid-template-columns:1fr;gap:10px;}
+@media(min-width:640px){.grid2{grid-template-columns:1fr 1fr;}}
+
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11.5px;color:var(--muted);margin-top:6px;}
+.legend span{display:inline-flex;align-items:center;gap:5px;}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block;}
+
+.badge{font-size:11px;padding:2px 7px;border-radius:8px;background:var(--bg2);border:1px solid var(--line);color:var(--muted);}
+
+/* nav bottom */
+.tabbar{
+  position:fixed;bottom:0;left:0;right:0;z-index:60;
+  display:flex;background:rgba(17,29,46,.98);backdrop-filter:blur(8px);
+  border-top:1px solid var(--line);
+  padding:6px calc(4px + env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom)) calc(4px + env(safe-area-inset-right));
+}
+.tabbtn{
+  flex:1;background:none;border:none;color:var(--muted);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  min-height:52px;padding:6px 2px;font-size:10.5px;font-weight:600;cursor:pointer;border-radius:10px;
+}
+.tabbtn:active{background:rgba(255,255,255,.06);}
+.tabbtn .ic{font-size:19px;}
+.tabbtn.active{color:var(--cyan);background:rgba(63,208,224,.08);}
+
+/* Landscape phones: shrink tabbar into a slim row & tighten paddings */
+@media (max-height:430px) and (orientation:landscape){
+  body{padding-bottom:calc(56px + env(safe-area-inset-bottom));}
+  .app-header{padding-top:6px;padding-bottom:6px;}
+  .app-header h1{font-size:16px;}
+  .app-header .sub{display:none;}
+  .tabbar{padding-top:2px;}
+  .tabbtn{min-height:40px;font-size:9.5px;flex-direction:row;gap:4px;}
+  .tabbtn .ic{font-size:15px;}
+}
+
+/* Very narrow phones (e.g. 320–360px) */
+@media (max-width:359px){
+  main{padding-left:10px;padding-right:10px;}
+  .card{padding:11px;}
+  h2.mtitle{font-size:15.5px;}
+  p.lead{font-size:12.5px;}
+  .pill{font-size:11.5px;padding:10px 11px;}
+}
+
+/* Module 1 barrier diagram */
+.barrier-body{position:relative;}
+.bpart{cursor:pointer;}
+.bpart:hover{opacity:.85;}
+.binfo{
+  margin-top:10px;background:var(--bg2);border:1px solid var(--line);border-radius:10px;
+  padding:10px 12px;font-size:12.5px;color:#cfd9ea;line-height:1.6;min-height:52px;
+}
+
+/* epitope module */
+.receptor-zone{cursor:pointer;transition:.2s;}
+.receptor-zone.bound{filter:drop-shadow(0 0 6px var(--green));}
+.epitope-piece{cursor:grab;}
+.epitope-piece.matched{opacity:0;pointer-events:none;}
+.msg-box{
+  margin-top:8px;font-size:13px;padding:9px 12px;border-radius:10px;
+  background:var(--bg2);border:1px solid var(--line);min-height:20px;
+}
+.msg-box.good{border-color:var(--green);color:var(--green);}
+.msg-box.bad{border-color:var(--red);color:var(--red);}
+
+/* quiz */
+.qopt{
+  display:block;width:100%;text-align:right;background:var(--bg2);border:1px solid var(--line);
+  color:var(--text);padding:13px 14px;min-height:46px;border-radius:10px;margin:8px 0;font-size:13.5px;
+  line-height:1.4;cursor:pointer;font-family:inherit;
+}
+.qopt:active:not(:disabled){transform:scale(.98);}
+.qopt.correct{background:rgba(79,214,140,.18);border-color:var(--green);color:var(--green);font-weight:700;}
+.qopt.wrong{background:rgba(240,100,95,.18);border-color:var(--red);color:var(--red);}
+.qexp{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.6;display:none;background:var(--bg2);padding:8px 10px;border-radius:8px;}
+.qexp.show{display:block;}
+.qcard{margin-bottom:18px;}
+.qnum{font-size:12px;color:var(--cyan);font-weight:800;}
+
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:8px;border-radius:10px;}
+.matrix-table{width:100%;min-width:520px;border-collapse:collapse;font-size:12px;}
+.matrix-table th,.matrix-table td{border:1px solid var(--line);padding:9px 7px;text-align:right;}
+.matrix-table th{background:var(--bg2);color:var(--cyan);font-size:11.5px;position:sticky;top:0;}
+.matrix-table tr.hide{display:none;}
+
+.score-box{
+  text-align:center;font-size:15px;font-weight:800;color:var(--yellow);
+  background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;display:none;
+}
+.score-box.show{display:block;}
+
+canvas{width:100%;height:auto;display:block;background:#0a121f;border-radius:10px;}
+
+.note{
+  font-size:11.5px;color:var(--muted);background:var(--bg2);border-right:3px solid var(--yellow);
+  padding:8px 10px;border-radius:6px;margin-top:8px;
+}
+::selection{background:var(--cyan);color:#04222a;}
+button{font-family:inherit;}
+@media (prefers-reduced-motion:reduce){
+  .logo-pulse{animation:none;}
+  .module{animation:none;}
+  *{transition-duration:.01ms !important;}
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <h1><span class="logo-pulse"></span> මිනිසාගේ ප්‍රතිශක්ති පද්ධතිය</h1>
+  <div class="sub">අ.පො.ස. (උසස් පෙළ) ජීව විද්‍යාව — පිටු 224–234 · අන්තර්ක්‍රියාකාරී මාධ්‍යය</div>
+</header>
+
+<main>
+
+  <!-- ================= MODULE 1 ================= -->
+  <section class="module active" id="mod1">
+    <h2 class="mtitle">1️⃣ සහජ ප්‍රතිශක්තිය <span class="tag">Innate Immunity</span></h2>
+    <p class="lead">ශරීරයට ඇතුළු වන ඕනෑම ව්‍යාධිජනකයකට එකසේ ප්‍රතිචාර දක්වන, උපත සිටම පවතින ප්‍රථම ආරක්ෂණ රේඛාව.</p>
+
+    <div class="card">
+      <h3><span class="dot" style="background:var(--orange)"></span> බාහිර ආරක්ෂණය — ස්පර්ශ කර බලන්න</h3>
+      <p>ශරීරයේ එක් එක් කොටස තුළ ක්‍රියාත්මක වන භෞතික හා රසායනික බාධක පහත රූපයේ සලකුණු කර ඇත. එක් එක් කොටස ස්පර්ශ කර විස්තරය බලන්න.</p>
+      <div class="svgwrap barrier-body">
+        <svg viewBox="0 0 340 300" xmlns="http://www.w3.org/2000/svg">
+          <!-- body silhouette -->
+          <ellipse cx="170" cy="55" rx="34" ry="38" fill="#2a3c58" stroke="#3a4f70"/>
+          <rect x="130" y="90" width="80" height="120" rx="26" fill="#233350" stroke="#3a4f70"/>
+          <rect x="90" y="100" width="34" height="95" rx="16" fill="#233350" stroke="#3a4f70"/>
+          <rect x="216" y="100" width="34" height="95" rx="16" fill="#233350" stroke="#3a4f70"/>
+          <rect x="140" y="205" width="26" height="80" rx="12" fill="#233350" stroke="#3a4f70"/>
+          <rect x="174" y="205" width="26" height="80" rx="12" fill="#233350" stroke="#3a4f70"/>
+
+          <!-- skin -->
+          <circle class="bpart" data-b="skin" cx="230" cy="150" r="16" fill="var(--orange)" opacity="0.85"/>
+          <text x="230" y="154" font-size="11" text-anchor="middle" fill="#1a0f02" font-weight="700">🖐</text>
+
+          <!-- eyes / tears -->
+          <circle class="bpart" data-b="tears" cx="158" cy="45" r="12" fill="var(--cyan)" opacity="0.9"/>
+          <text x="158" y="49" font-size="10" text-anchor="middle">👁</text>
+
+          <!-- mouth / stomach acid -->
+          <circle class="bpart" data-b="stomach" cx="170" cy="150" r="15" fill="var(--yellow)" opacity="0.9"/>
+          <text x="170" y="154" font-size="10" text-anchor="middle" fill="#2a2004" font-weight="700">胃</text>
+
+          <!-- respiratory / mucous -->
+          <circle class="bpart" data-b="mucous" cx="180" cy="70" r="13" fill="var(--purple)" opacity="0.9"/>
+          <text x="180" y="74" font-size="10" text-anchor="middle">👃</text>
+
+          <!-- skin flora -->
+          <circle class="bpart" data-b="flora" cx="140" cy="180" r="14" fill="var(--green)" opacity="0.9"/>
+          <text x="140" y="184" font-size="10" text-anchor="middle">🦠</text>
+        </svg>
+      </div>
+      <div class="binfo" id="binfo">👆 ඉහත රූපයේ වර්ණවත් කවයන් මත ස්පර්ශ කර, එම ආරක්ෂණ ක්‍රමය ගැන කියවන්න.</div>
+    </div>
+
+    <div class="card">
+      <h3><span class="dot" style="background:var(--red)"></span> ප්‍රදාහක ප්‍රතිචාර සමීකරණය <span class="badge">රූපය 5.31</span></h3>
+      <p>කටුවක් ඇනීමෙන් හෝ ආසාදනයකින් අනතුරුව සිදුවන පියවර 4ම, පියවරෙන් පියවර නරඹන්න.</p>
+      <div class="svgwrap">
+        <svg viewBox="0 0 340 200" id="inflSvg" xmlns="http://www.w3.org/2000/svg">
+          <!-- skin layers -->
+          <rect x="0" y="0" width="340" height="55" fill="#3a2a20"/>
+          <rect x="0" y="55" width="340" height="18" fill="#5a4030"/>
+          <rect x="0" y="73" width="340" height="127" fill="#2a1c30"/>
+          <!-- injury -->
+          <line x1="170" y1="0" x2="170" y2="55" stroke="#8b5a2b" stroke-width="6" id="splinter"/>
+          <!-- blood vessel -->
+          <path id="vessel" d="M40,140 C120,120 220,120 300,140" stroke="var(--red)" stroke-width="10" fill="none" opacity="0.7"/>
+          <!-- mast cell -->
+          <circle id="mastcell" cx="170" cy="110" r="10" fill="#c04a8a"/>
+          <text x="170" y="98" font-size="8" fill="var(--muted)" text-anchor="middle">කුඹ සෛල</text>
+          <!-- histamine dots (hidden initially) -->
+          <g id="histamine" opacity="0">
+            <circle cx="150" cy="105" r="2.5" fill="var(--yellow)"/>
+            <circle cx="190" cy="108" r="2.5" fill="var(--yellow)"/>
+            <circle cx="165" cy="120" r="2.5" fill="var(--yellow)"/>
+            <circle cx="180" cy="95" r="2.5" fill="var(--yellow)"/>
+          </g>
+          <!-- neutrophils traveling (hidden initially) -->
+          <g id="neutrophils" opacity="0">
+            <circle cx="90" cy="140" r="7" fill="#f5f5f5"/>
+            <circle cx="250" cy="140" r="7" fill="#f5f5f5"/>
+            <circle cx="170" cy="150" r="7" fill="#f5f5f5"/>
+          </g>
+          <!-- macrophage engulfing (hidden) -->
+          <g id="macro" opacity="0">
+            <circle cx="170" cy="130" r="17" fill="#8a5fd6"/>
+            <circle cx="176" cy="125" r="4" fill="var(--yellow)"/>
+            <text x="170" y="160" font-size="8" fill="var(--muted)" text-anchor="middle">මහා භක්ෂාණු</text>
+          </g>
+        </svg>
+      </div>
+      <div class="stepbar">
+        <button class="stepbtn secondary" onclick="inflStep(-1)">◀ පෙර</button>
+        <input type="range" id="inflRange" min="0" max="3" value="0" oninput="setInflStep(this.value)">
+        <button class="stepbtn" onclick="inflStep(1)">ඊළඟ ▶</button>
+      </div>
+      <div class="steplabel" id="inflStepLabel">පියවර 1/4</div>
+      <div class="stepdesc" id="inflDesc"></div>
+      <div class="legend">
+        <span><i style="background:#c04a8a"></i>කුඹ සෛල</span>
+        <span><i style="background:var(--yellow)"></i>හිස්ටමින්</span>
+        <span><i style="background:#f5f5f5"></i>නියුට්‍රොෆිල</span>
+        <span><i style="background:#8a5fd6"></i>මහා භක්ෂාණු</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3><span class="dot" style="background:var(--cyan)"></span> අභ්‍යන්තර ආරක්ෂණය</h3>
+      <div class="pillrow">
+        <div class="pill on" onclick="showInternal('nk',this)">ස්වාභාවික නාශක සෛල</div>
+        <div class="pill" onclick="showInternal('interferon',this)">ඉන්ටර්ෆෙරෝන්</div>
+        <div class="pill" onclick="showInternal('complement',this)">අනුපූරක ප්‍රෝටීන</div>
+        <div class="pill" onclick="showInternal('fever',this)">උණ</div>
+      </div>
+      <div class="stepdesc" id="internalDesc"></div>
+    </div>
+  </section>
+
+  <!-- ================= MODULE 2 ================= -->
+  <section class="module" id="mod2">
+    <h2 class="mtitle">2️⃣ අනුවර්තී ප්‍රතිශක්තිය <span class="tag">Adaptive Immunity</span></h2>
+    <p class="lead">විශේෂිත ප්‍රතිදේහ ජනකයකට පමණක් ප්‍රතිචාර දක්වන, මතකය සහිත ආරක්ෂණ පද්ධතිය.</p>
+
+    <div class="card">
+      <h3><span class="dot" style="background:var(--yellow)"></span> එපිටෝප — ප්‍රතිග්‍රාහක බැඳීම <span class="badge">රූපය 5.32</span></h3>
+      <p>ව්‍යාධිජනකයා මත ඇති <b>එපිටෝප</b> ටිකක් ඇද T සෛලයේ (නිල් පැහැ) හෝ B සෛලයේ (කොළ පැහැ) ගැළපෙන ප්‍රතිග්‍රාහකය මතට දමන්න.</p>
+      <div class="svgwrap">
+        <svg viewBox="0 0 340 170" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="60" cy="85" r="34" fill="#3a3010" stroke="var(--yellow)" stroke-width="2"/>
+          <text x="60" y="89" font-size="9" fill="var(--yellow)" text-anchor="middle">ව්‍යාධිජනකයා</text>
+          <circle class="epitope-piece" id="ep-tri" data-shape="tri" cx="90" cy="60" r="7" fill="var(--yellow)" stroke="#fff" stroke-width="1"/>
+          <circle class="epitope-piece" id="ep-sq" data-shape="sq" cx="95" cy="100" r="7" fill="var(--yellow)" stroke="#fff" stroke-width="1"/>
+
+          <circle class="receptor-zone" id="rec-t" data-shape="tri" cx="220" cy="55" r="26" fill="#0d3e46" stroke="var(--cyan)" stroke-width="2"/>
+          <text x="220" y="59" font-size="9" fill="var(--cyan)" text-anchor="middle">T සෛල</text>
+
+          <circle class="receptor-zone" id="rec-b" data-shape="sq" cx="220" cy="120" r="26" fill="#0d3e28" stroke="var(--green)" stroke-width="2"/>
+          <text x="220" y="124" font-size="9" fill="var(--green)" text-anchor="middle">B සෛල</text>
+        </svg>
+      </div>
+      <div class="pillrow">
+        <div class="pill" onclick="tryBind('tri','rec-t')">▲ එපිටෝප → T සෛල</div>
+        <div class="pill" onclick="tryBind('tri','rec-b')">▲ එපිටෝප → B සෛල</div>
+        <div class="pill" onclick="tryBind('sq','rec-t')">■ එපිටෝප → T සෛල</div>
+        <div class="pill" onclick="tryBind('sq','rec-b')">■ එපිටෝප → B සෛල</div>
+      </div>
+      <div class="msg-box" id="bindMsg">ගැළපෙන හැඩය තෝරන්න — එපිටෝපය එහි විශේෂිත ප්‍රතිග්‍රාහකයට පමණක් බැඳේ.</div>
+    </div>
+
+    <div class="card">
+      <h3><span class="dot" style="background:var(--cyan)"></span> සෛල මාධ්‍ය ප්‍රතිශක්ති ප්‍රතිචාරය</h3>
+      <p class="lead" style="margin-bottom:6px;">APC → Helper T → Cytotoxic T → ආසාදිත සෛල විනාශය</p>
+      <div class="svgwrap">
+        <svg viewBox="0 0 340 130" id="cellSvg" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="45" cy="65" r="22" fill="#7a5fd6" id="c-apc"/>
+          <text x="45" y="95" font-size="8" fill="var(--muted)" text-anchor="middle">APC</text>
+          <circle cx="140" cy="65" r="20" fill="var(--cyan)" opacity="0.25" id="c-helper"/>
+          <text x="140" y="95" font-size="8" fill="var(--muted)" text-anchor="middle">Helper T</text>
+          <circle cx="235" cy="65" r="20" fill="var(--cyan)" opacity="0.25" id="c-cyto"/>
+          <text x="235" y="95" font-size="8" fill="var(--muted)" text-anchor="middle">Cytotoxic T</text>
+          <circle cx="310" cy="65" r="18" fill="var(--red)" opacity="0.25" id="c-target"/>
+          <text x="310" y="95" font-size="8" fill="var(--muted)" text-anchor="middle">ආසාදිත සෛල</text>
+          <path d="M67,65 L118,65" stroke="var(--line)" stroke-width="3" id="arr1"/>
+          <path d="M160,65 L215,65" stroke="var(--line)" stroke-width="3" id="arr2"/>
+          <path d="M255,65 L290,65" stroke="var(--line)" stroke-width="3" id="arr3"/>
+        </svg>
+      </div>
+      <div class="stepbar">
+        <button class="stepbtn secondary" onclick="cellStep(-1)">◀</button>
+        <button class="stepbtn" onclick="cellStep(1)">ඊළඟ පියවර ▶</button>
+      </div>
+      <div class="stepdesc" id="cellDesc">ආරම්භය: ආසාදිත සෛලයක් හඳුනා ගැනීමට APC සූදානම්.</div>
+    </div>
+
+    <div class="card">
+      <h3><span class="dot" style="background:var(--green)"></span> දේහ තරල මාධ්‍ය ප්‍රතිශක්ති ප්‍රතිචාරය</h3>
+      <p class="lead" style="margin-bottom:6px;">B සෛල හඳුනාගැනීම → ප්ලාස්ම/මතක B සෛල → ප්‍රතිදේහ නිකුත් වීම</p>
+      <div class="svgwrap">
+        <svg viewBox="0 0 340 130" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="45" cy="65" r="20" fill="var(--green)" opacity="0.35" id="b-b"/>
+          <text x="45" y="95" font-size="8" fill="var(--muted)" text-anchor="middle">B සෛල</text>
+          <circle cx="150" cy="65" r="22" fill="var(--purple)" opacity="0.25" id="b-plasma"/>
+          <text x="150" y="95" font-size="8" fill="var(--muted)" text-anchor="middle">ප්ලාස්ම සෛල</text>
+          <circle cx="150" cy="30" r="10" fill="var(--green)" opacity="0.25" id="b-memory"/>
+          <text x="150" y="14" font-size="7" fill="var(--muted)" text-anchor="middle">මතක B සෛල</text>
+          <g id="antibodies" opacity="0">
+            <path d="M240,55 l6,-8 l6,8 M246,47 l0,10" stroke="var(--purple)" stroke-width="2" fill="none"/>
+            <path d="M270,65 l6,-8 l6,8 M276,57 l0,10" stroke="var(--purple)" stroke-width="2" fill="none"/>
+            <path d="M255,80 l6,-8 l6,8 M261,72 l0,10" stroke="var(--purple)" stroke-width="2" fill="none"/>
+          </g>
+          <text x="300" y="65" font-size="8" fill="var(--muted)" text-anchor="middle" id="ab-label" opacity="0">ප්‍රතිදේහ</text>
+        </svg>
+      </div>
+      <div class="stepbar">
+        <button class="stepbtn secondary" onclick="humoralStep(-1)">◀</button>
+        <button class="stepbtn" onclick="humoralStep(1)">ඊළඟ පියවර ▶</button>
+      </div>
+      <div class="stepdesc" id="humoralDesc">ආරම්භය: B සෛලය එහි ප්‍රතිග්‍රාහකය හරහා නිශ්චිත ප්‍රතිදේහ ජනකයක් හඳුනා ගනී.</div>
+    </div>
+
+    <div class="card">
+      <h3><span class="dot" style="background:var(--purple)"></span> ප්‍රතිදේහ ක්‍රියාකාරිත්වය</h3>
+      <div class="pillrow">
+        <div class="pill on" onclick="setAbMode('neutralize',this)">උදාසීන කිරීම</div>
+        <div class="pill" onclick="setAbMode('agglutinate',this)">එකතු කිරීම (Agglutination)</div>
+        <div class="pill" onclick="setAbMode('opsonize',this)">භක්ෂණය සලකුණු කිරීම (Opsonization)</div>
+      </div>
+      <div class="svgwrap">
+        <svg viewBox="0 0 340 140" id="abSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <div class="stepdesc" id="abDesc"></div>
+    </div>
+  </section>
+
+  <!-- ================= MODULE 3 ================= -->
+  <section class="module" id="mod3">
+    <h2 class="mtitle">3️⃣ ප්‍රතිශක්ති විද්‍යාත්මක මතකය <span class="tag">Immunological Memory</span></h2>
+    <p class="lead">මතක T/B සෛල නිසා ද්විතීයික ප්‍රතිචාරය වඩා වේගවත් හා ප්‍රබලයි.</p>
+
+    <div class="card">
+      <h3><span class="dot" style="background:var(--yellow)"></span> ප්‍රාථමික vs ද්විතීයික ප්‍රතිචාරය</h3>
+      <div class="pillrow">
+        <div class="pill on" id="expBtn1" onclick="setExposure(1)">පළමු නිරාවරණය</div>
+        <div class="pill" id="expBtn2" onclick="setExposure(2)">දෙවන නිරාවරණය</div>
+      </div>
+      <canvas id="memChart" width="600" height="260"></canvas>
+      <div class="stepdesc" id="memDesc"></div>
+    </div>
+
+    <div class="card">
+      <h3><span class="dot" style="background:var(--green)"></span> ප්‍රතිශක්ති වර්ගීකරණ අභ්‍යාස මැට්‍රික්සය</h3>
+      <div class="pillrow">
+        <div class="pill on" onclick="filterMatrix('all',this)">සියල්ල</div>
+        <div class="pill" onclick="filterMatrix('active',this)">සක්‍රිය</div>
+        <div class="pill" onclick="filterMatrix('passive',this)">අක්‍රිය</div>
+      </div>
+      <div class="table-scroll">
+      <table class="matrix-table" id="matrixTable">
+        <tr><th>වර්ගය</th><th>නිර්වචනය</th><th>උදාහරණය</th><th>මතකය</th></tr>
+        <tr class="active"><td>ස්වාභාවික සක්‍රිය</td><td>ස්වාභාවික ආසාදනයට ප්‍රතිචාර ලෙස ශරීරය විසින්ම ප්‍රතිදේහ නිපදවීම</td><td>වසූරිය සුවය ලැබීම</td><td>දිගු කාලීන ✅</td></tr>
+        <tr class="active"><td>කෘත්‍රිම සක්‍රිය</td><td>එන්නත්කරණයෙන් ශරීරය විසින්ම ප්‍රතිදේහ නිපදවීමට යොමු කිරීම</td><td>BCG, පෝලියෝ එන්නත්</td><td>දිගු කාලීන ✅</td></tr>
+        <tr class="passive"><td>ස්වාභාවික අක්‍රිය</td><td>වෙනත් පුද්ගලයෙකුගේ (මවගේ) ප්‍රතිදේහ ලැබීම</td><td>මව සිට කලලයට/මව්කිරි හරහා</td><td>කෙටි කාලීන ❌</td></tr>
+        <tr class="passive"><td>කෘත්‍රිම අක්‍රිය</td><td>සකස් කරන ලද ප්‍රතිදේහ එන්නත් කිරීම</td><td>ටිටනස් නාශක සෙරුමය, විෂ නාශකය</td><td>කෙටි කාලීන ❌</td></tr>
+      </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MODULE 4 ================= -->
+  <section class="module" id="mod4">
+    <h2 class="mtitle">4️⃣ ස්වයං-ඇගයීම් ප්‍රශ්නාවලිය <span class="tag">A/L Quiz</span></h2>
+    <p class="lead">ප්‍රශ්න 5ක් — පිළිතුරු තෝරා ක්ෂණික පැහැදිලි කිරීම් ලබාගන්න.</p>
+    <div id="quizArea"></div>
+    <div class="score-box" id="scoreBox"></div>
+  </section>
+
+</main>
+
+<nav class="tabbar">
+  <button class="tabbtn active" data-m="mod1" onclick="showModule('mod1',this)"><span class="ic">🛡️</span>සහජ</button>
+  <button class="tabbtn" data-m="mod2" onclick="showModule('mod2',this)"><span class="ic">🧬</span>අනුවර්තී</button>
+  <button class="tabbtn" data-m="mod3" onclick="showModule('mod3',this)"><span class="ic">📈</span>මතකය</button>
+  <button class="tabbtn" data-m="mod4" onclick="showModule('mod4',this)"><span class="ic">📝</span>ප්‍රශ්නාවලිය</button>
+</nav>
+
+<script>
+/* ---------- NAV ---------- */
+function showModule(id, btn){
+  document.querySelectorAll('.module').forEach(m=>m.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(id==='mod3'){ setTimeout(()=>{ fitCanvasDPR(); drawChart(); }, 30); }
+}
+
+/* ---------- MODULE 1: Barrier info ---------- */
+const barrierInfo = {
+  skin:'<b>සම (Skin):</b> විශේෂිත සෛල ස්ථර හා ලේයාවලින් සමන්විත භෞතික බාධකයක්. සෙබෝරික ග්‍රන්ථි වලින් නිකුත් වන අම්ලික ලේයාව බැක්ටීරියා වර්ධනය වළක්වයි.',
+  tears:'<b>කඳුළු (Tears):</b> ලයිසෝසයිම් එන්සයිමය අඩංගු වන අතර, එය බැක්ටීරියා සෛල බිත්ති විනාශ කරයි. ඇසේ මතුපිට සෝදා හැරීමෙන්ද ආරක්ෂාව සපයයි.',
+  stomach:'<b>ආමාශ අම්ලය (Stomach acid):</b> අධික ආම්ලික pH පරිසරයක් නිර්මාණය කර, ආහාර සමඟ ඇතුළු වන බොහෝ බැක්ටීරියා විනාශ කරයි.',
+  mucous:'<b>ශ්ලේෂ්මල පටල (Mucous membranes):</b> ශ්වසන මාර්ගයේ ඇති කෙස් හා හසුරුවන ශ්ලේෂ්මල ස්ථරය දූවිලි හා ක්ෂුද්‍රජීවීන් හසුකර ගනී.',
+  flora:'<b>ස්වභාවික ක්ෂුද්‍රජීවී (Normal flora):</b> සමේ හා බඩවැලේ පවතින හානිකර නොවන ක්ෂුද්‍රජීවීන් ආහාර හා ස්ථානය සඳහා තරඟ කර ව්‍යාධිජනක වර්ධනය වළක්වයි.'
+};
+document.querySelectorAll('.bpart').forEach(el=>{
+  el.addEventListener('click',()=>{document.getElementById('binfo').innerHTML = barrierInfo[el.dataset.b];});
+});
+
+/* Inflammatory response steps */
+const inflSteps = [
+  "පියවර 1: කටුවක් ඇනීම හෝ ව්‍යාධිජනකයෙකු ඇතුළු වීමෙන් පටක හානියක් සිදුවේ. හානියට ලක් වූ සෛල හා කුඹ සෛල (Mast cells) සක්‍රිය වේ.",
+  "පියවර 2: කුඹ සෛල හිස්ටමින් (Histamine) නිදහස් කරයි — මෙය ප්‍රදාහයේ ප්‍රථම රසායනික සංඥාවයි.",
+  "පියවර 3: හිස්ටමින් නිසා රුධිර වාහිනී විස්තාරණය (Vasodilation) වී පාරගම්‍යතාව වැඩිවේ — රතුවීම, උණුසුම හා ඉදිමීම ඇතිවේ.",
+  "පියවර 4: නියුට්‍රොෆිල හා මහා භක්ෂාණු (Macrophages) රුධිර වාහිනී තුරන් කර පටකයට ගමන් කර (Diapedesis) ව්‍යාධිජනකයන් භක්ෂණය කරයි (Phagocytosis)."
+];
+let inflIdx=0;
+function setInflStep(v){
+  inflIdx = parseInt(v);
+  document.getElementById('inflRange').value = inflIdx;
+  document.getElementById('inflStepLabel').textContent = 'පියවර '+(inflIdx+1)+'/4';
+  document.getElementById('inflDesc').textContent = inflSteps[inflIdx];
+  const hist=document.getElementById('histamine'), neu=document.getElementById('neutrophils'), mac=document.getElementById('macro'), ves=document.getElementById('vessel');
+  hist.setAttribute('opacity', inflIdx>=1?1:0);
+  ves.setAttribute('stroke-width', inflIdx>=2?16:10);
+  neu.setAttribute('opacity', inflIdx>=2?1:0);
+  mac.setAttribute('opacity', inflIdx>=3?1:0);
+}
+function inflStep(d){ let n=inflIdx+d; if(n<0)n=0; if(n>3)n=3; setInflStep(n); }
+setInflStep(0);
+
+/* internal defenses */
+const internalInfo = {
+  nk:'<b>ස්වාභාවික නාශක සෛල (Natural Killer cells):</b> රුධිරයේ හා ප්ලීහාවේ පවතින වසා සෛල වර්ගයක්. වයිරස් ආසාදිත සහ පිළිකා සෛල, විශේෂිත නොවන ලෙසින්ම, රසායන ද්‍රව්‍ය මුදාහැර විනාශ කරයි.',
+  interferon:'<b>ඉන්ටර්ෆෙරෝන් (Interferons):</b> වයිරස් ආසාදනයට ලක් වූ සෛල මගින් නිපදවෙන ප්‍රෝටීන. යාබද සෛල වෙත ගොස් ඒවා තුළ "ප්‍රතිවයිරස් තත්ත්වයක්" උත්පාදනය කර වයිරස් ප්‍රතිනිර්මාණය අවහිර කරයි.',
+  complement:'<b>අනුපූරක ප්‍රෝටීන (Complement proteins):</b> රුධිර ප්ලාස්මාවේ පවතින ප්‍රෝටීන කාණ්ඩයක්. සක්‍රිය වූ විට ව්‍යාධිජනක සෛල බිත්තියේ සිදුරු ඇති කර, ඔප්සොනීකරණය සිදු කර, ප්‍රදාහය උත්තේජනය කරයි.',
+  fever:'<b>උණ (Fever):</b> රසායනික ද්‍රව්‍ය (pyrogens) මගින් ශරීරයේ උෂ්ණත්වය ඉහළ නංවා, එමගින් හෂ සෛල ක්‍රියාකාරිත්වය වර්ධනය කර බැක්ටීරියා/වයිරස වර්ධනය මන්දගාමී කරයි.'
+};
+function showInternal(k, el){
+  document.querySelectorAll('#mod1 .card:last-child .pill').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('internalDesc').innerHTML = internalInfo[k];
+}
+showInternal('nk', document.querySelector('#mod1 .card:last-child .pill'));
+
+/* ---------- MODULE 2: Epitope binding ---------- */
+function tryBind(shape, recId){
+  const msg = document.getElementById('bindMsg');
+  const rec = document.getElementById(recId);
+  const correct = (shape==='tri' && recId==='rec-t') || (shape==='sq' && recId==='rec-b');
+  if(correct){
+    rec.classList.add('bound');
+    document.getElementById('ep-'+shape).classList.add('matched');
+    msg.className='msg-box good';
+    msg.innerHTML = (recId==='rec-t'
+      ? '✅ නිවැරදියි! මෙම එපිටෝපය T සෛලයේ ප්‍රතිග්‍රාහකයට නිශ්චිතව බැඳී, සෛල මාධ්‍ය ප්‍රතිශක්ති ප්‍රතිචාරය ආරම්භ කරයි.'
+      : '✅ නිවැරදියි! මෙම එපිටෝපය B සෛලයේ ප්‍රතිග්‍රාහකයට නිශ්චිතව බැඳී, දේහ තරල මාධ්‍ය ප්‍රතිශක්ති ප්‍රතිචාරය ආරම්භ කරයි.');
+  } else {
+    msg.className='msg-box bad';
+    msg.textContent = '❌ නොගැලපේ — එපිටෝප එකක් එහි විශේෂිත ප්‍රතිග්‍රාහකයට පමණක් බැඳේ (Lock-and-key principle). නැවත උත්සාහ කරන්න.';
+  }
+}
+
+/* cell-mediated pathway steps */
+const cellSteps = [
+  "ආරම්භය: ප්‍රතිදේහ ජනක ඉදිරිපත් කරන සෛලය (APC) ආගන්තුක ප්‍රෝටීන කැබලි ඉදිරිපත් කරයි.",
+  "පියවර 1: APC සිය MHC මතුපිට ප්‍රතිදේහ ජනකය ඉදිරිපත් කරයි — Helper T සෛලය එය හඳුනා ගනී.",
+  "පියවර 2: Helper T සෛලය සක්‍රිය වී සයිටොකයින් නිකුත් කර, Cytotoxic T සෛල සක්‍රිය කරයි.",
+  "පියවර 3: Cytotoxic T සෛලය ආසාදිත/පිළිකා සෛලය හඳුනාගෙන Perforin/Granzyme මුදාහැර එය විනාශ කරයි."
+];
+let cellIdx=0;
+function cellStep(d){
+  cellIdx = Math.max(0, Math.min(3, cellIdx+d));
+  document.getElementById('cellDesc').textContent = cellSteps[cellIdx];
+  document.getElementById('c-helper').setAttribute('opacity', cellIdx>=1?1:0.25);
+  document.getElementById('c-cyto').setAttribute('opacity', cellIdx>=2?1:0.25);
+  document.getElementById('c-target').setAttribute('opacity', cellIdx>=3?1:0.25);
+  document.getElementById('arr1').setAttribute('stroke', cellIdx>=1?'var(--cyan)':'var(--line)');
+  document.getElementById('arr2').setAttribute('stroke', cellIdx>=2?'var(--cyan)':'var(--line)');
+  document.getElementById('arr3').setAttribute('stroke', cellIdx>=3?'var(--red)':'var(--line)');
+}
+
+/* humoral pathway steps */
+const humoralSteps = [
+  "ආරම්භය: B සෛලය එහි ප්‍රතිග්‍රාහකය හරහා නිශ්චිත ප්‍රතිදේහ ජනකයක් හඳුනා ගනී.",
+  "පියවර 1: B සෛලය ප්‍රගුණනය වී ප්ලාස්ම සෛල හා මතක B සෛල බවට වෙනස් වේ.",
+  "පියවර 2: ප්ලාස්ම සෛල විශාල ප්‍රමාණයේ ප්‍රතිදේහ නිපදවා රුධිරයට හා දේහ තරලයට මුදා හරියි.",
+  "පියවර 3: මතක B සෛල දිගු කාලයක් පවතී — නැවත ආසාදනයකදී වේගවත් ප්‍රතිචාරයක් ලබා දෙයි."
+];
+let humIdx=0;
+function humoralStep(d){
+  humIdx = Math.max(0, Math.min(3, humIdx+d));
+  document.getElementById('humoralDesc').textContent = humoralSteps[humIdx];
+  document.getElementById('b-plasma').setAttribute('opacity', humIdx>=1?1:0.25);
+  document.getElementById('b-memory').setAttribute('opacity', humIdx>=1?1:0.25);
+  document.getElementById('antibodies').setAttribute('opacity', humIdx>=2?1:0);
+  document.getElementById('ab-label').setAttribute('opacity', humIdx>=2?1:0);
+}
+
+/* antibody mechanics */
+const abSvg = document.getElementById('abSvg');
+const abDescTxt = {
+  neutralize:"<b>උදාසීන කිරීම (Neutralization):</b> ප්‍රතිදේහ ව්‍යාධිජනකයේ ක්‍රියාකාරී ස්ථානයට බැඳී, එය සෛලයට බැඳීමට ඇති හැකියාව අවහිර කරයි.",
+  agglutinate:"<b>එකතු කිරීම (Agglutination):</b> එක් ප්‍රතිදේහයක් ව්‍යාධිජනකයන් කිහිපයකට එකවර බැඳී ඒවා පොකුරු ලෙස එකතු කර, ඉවත් කිරීම පහසු කරයි.",
+  opsonize:"<b>භක්ෂණය සලකුණු කිරීම (Opsonization):</b> ප්‍රතිදේහ ව්‍යාධිජනකයා වටා ආවරණය වී, මහා භක්ෂාණු වඩාත් පහසුවෙන් හඳුනාගෙන ගිල දැමීමට සලකුණු කරයි."
+};
+function drawAb(mode){
+  abSvg.innerHTML='';
+  const ns='http://www.w3.org/2000/svg';
+  function Y(x,y,color){
+    return `<path d="M${x},${y} l8,-11 l8,11 M${x+8},${y-11} l0,14" stroke="${color}" stroke-width="2.4" fill="none"/>`;
+  }
+  function pathogen(x,y,color){ return `<circle cx="${x}" cy="${y}" r="14" fill="${color}" opacity="0.85"/>`; }
+  let html='';
+  if(mode==='neutralize'){
+    html += pathogen(170,70,'var(--yellow)');
+    html += Y(160,50,'var(--purple)');
+    html += `<text x="170" y="110" font-size="9" fill="var(--muted)" text-anchor="middle">ප්‍රතිදේහ බැඳී ක්‍රියාකාරී ස්ථානය අවහිර කරයි</text>`;
+  } else if(mode==='agglutinate'){
+    html += pathogen(110,60,'var(--yellow)') + pathogen(160,90,'var(--yellow)') + pathogen(200,55,'var(--yellow)') + pathogen(230,85,'var(--yellow)');
+    html += `<path d="M118,65 L200,60 M155,80 L225,80" stroke="var(--purple)" stroke-width="2.5"/>`;
+    html += `<text x="170" y="125" font-size="9" fill="var(--muted)" text-anchor="middle">ව්‍යාධිජනකයන් පොකුරු ලෙස එකට බඳී</text>`;
+  } else {
+    html += pathogen(170,70,'var(--yellow)');
+    html += Y(150,50,'var(--purple)') + Y(178,42,'var(--purple)') + Y(190,66,'var(--purple)');
+    html += `<circle cx="260" cy="70" r="20" fill="#8a5fd6" opacity="0.85"/><text x="260" y="100" font-size="8" fill="var(--muted)" text-anchor="middle">මහා භක්ෂාණු</text>`;
+    html += `<path d="M186,70 L242,70" stroke="var(--muted)" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#arrow)"/>`;
+    html += `<text x="170" y="125" font-size="9" fill="var(--muted)" text-anchor="middle">ලේබල් කළ ව්‍යාධිජනකයා පහසුවෙන් හඳුනා ගැනේ</text>`;
+  }
+  abSvg.innerHTML = html;
+  document.getElementById('abDesc').innerHTML = abDescTxt[mode];
+}
+function setAbMode(mode, el){
+  document.querySelectorAll('#mod2 .card:last-child .pill').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  drawAb(mode);
+}
+drawAb('neutralize');
+cellStep(0); humoralStep(0);
+
+/* ---------- MODULE 3: Memory chart ---------- */
+const memCanvas = document.getElementById('memChart');
+const ctx = memCanvas.getContext('2d');
+let exposureMode = 1;
+function fitCanvasDPR(){
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = memCanvas.clientWidth || 600;
+  const cssH = Math.round(cssW * (260/600));
+  memCanvas.style.height = cssH + 'px';
+  memCanvas.width = Math.round(cssW * dpr);
+  memCanvas.height = Math.round(cssH * dpr);
+  ctx.setTransform(dpr * (600/cssW), 0, 0, dpr * (600/cssW), 0, 0);
+}
+const memText = {
+  1:"පළමු නිරාවරණයේදී (ප්‍රාථමික ප්‍රතිචාරය) ප්‍රතිදේහ මට්ටම වැඩිවීමට කාලයක් ගතවේ (Lag phase) — මන්ද ප්‍රතිශක්ති පද්ධතියට නව ප්‍රතිදේහ ජනකය හඳුනාගෙන B/T සෛල ප්‍රගුණනය කිරීමට කාලය අවශ්‍ය බැවිනි.",
+  2:"දෙවන නිරාවරණයේදී (ද්විතීයික ප්‍රතිචාරය) දැනටමත් පවතින මතක T හා B සෛල හේතුවෙන් ප්‍රතිචාරය ඉතා වේගවත් හා ප්‍රබල වේ — ඉහළ ප්‍රතිදේහ මට්ටමක් කෙටි කලකින් ලබා ගනී."
+};
+function drawChart(){
+  const w=memCanvas.width, h=memCanvas.height;
+  ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle='#26374f'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(50,20); ctx.lineTo(50,230); ctx.lineTo(580,230); ctx.stroke();
+  ctx.fillStyle='#93a4bd'; ctx.font='11px sans-serif';
+  ctx.fillText('ප්‍රතිදේහ මට්ටම', 8, 30);
+  ctx.fillText('කාලය', 550, 248);
+
+  function curve(points,color,lw){
+    ctx.strokeStyle=color; ctx.lineWidth=lw; ctx.beginPath();
+    points.forEach((p,i)=>{ i===0?ctx.moveTo(p[0],p[1]):ctx.lineTo(p[0],p[1]); });
+    ctx.stroke();
+  }
+  // primary response always shown faint
+  const primary=[[50,225],[150,222],[220,210],[300,150],[380,110],[460,140],[560,175]];
+  curve(primary, exposureMode===1 ? 'var(--yellow)'.replace('var(--yellow)','#f4c542') : '#4a4530', exposureMode===1?3:1.5);
+
+  if(exposureMode===2){
+    const secondary=[[50,225],[110,220],[160,120],[230,45],[320,35],[420,60],[560,95]];
+    curve(secondary,'#3fd0e0',3);
+    ctx.fillStyle='#3fd0e0'; ctx.font='11px sans-serif'; ctx.fillText('ද්විතීයික ප්‍රතිචාරය', 340, 30);
+    ctx.fillStyle='#f4c542'; ctx.fillText('ප්‍රාථමික ප්‍රතිචාරය', 380, 155);
+  } else {
+    ctx.fillStyle='#f4c542'; ctx.font='11px sans-serif'; ctx.fillText('ප්‍රාථමික ප්‍රතිචාරය', 380, 100);
+  }
+  document.getElementById('memDesc').textContent = memText[exposureMode];
+}
+function setExposure(n){
+  exposureMode=n;
+  document.getElementById('expBtn1').classList.toggle('on', n===1);
+  document.getElementById('expBtn2').classList.toggle('on', n===2);
+  drawChart();
+}
+fitCanvasDPR(); drawChart();
+let resizeT;
+window.addEventListener('resize', ()=>{
+  clearTimeout(resizeT);
+  resizeT = setTimeout(()=>{ fitCanvasDPR(); drawChart(); }, 150);
+});
+window.addEventListener('orientationchange', ()=>{ setTimeout(()=>{ fitCanvasDPR(); drawChart(); }, 250); });
+
+/* matrix filter */
+function filterMatrix(kind, el){
+  document.querySelectorAll('#mod3 .card:last-child .pill').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  document.querySelectorAll('#matrixTable tr').forEach(row=>{
+    if(row.children[0].tagName==='TH') return;
+    row.classList.toggle('hide', kind!=='all' && !row.classList.contains(kind));
+  });
+}
+
+/* ---------- MODULE 4: Quiz ---------- */
+const quizData = [
+  {
+    q:"1. පහත සඳහන් ඒවායින් සහජ ප්‍රතිශක්තියේ බාහිර ආරක්ෂණයට අයත් නොවන්නේ කුමක්ද?",
+    opts:["සමේ pH", "ලයිසෝසයිම්", "ස්වාභාවික නාශක සෛල", "ශ්ලේෂ්මල පටල"],
+    correct:2,
+    exp:"ස්වාභාවික නාශක සෛල (NK cells) අභ්‍යන්තර ආරක්ෂණයට අයත් වේ — එනම් සෛල මට්ටමින් ක්‍රියාත්මක වන යාන්ත්‍රණයකි. සම, ලයිසෝසයිම් හා ශ්ලේෂ්මල පටල බාහිර/භෞතික බාධක වේ."
+  },
+  {
+    q:"2. අනුපූරක ප්‍රෝටීන (Complement proteins) පිළිබඳ නිවැරදි ප්‍රකාශය කුමක්ද?",
+    opts:["ඒවා ප්ලාස්ම සෛල මගින් නිපදවෙන ප්‍රතිදේහයකි","ඒවා ව්‍යාධිජනක සෛල බිත්ති විනාශ කර, ඔප්සොනීකරණයට දායක වේ","ඒවා T සෛල මගින් පමණක් නිපදවේ","ඒවා ශරීරයේ උෂ්ණත්වය පාලනය කරයි"],
+    correct:1,
+    exp:"අනුපූරක ප්‍රෝටීන රුධිර ප්ලාස්මාවේ ස්වභාවිකව පවතින අතර, සක්‍රිය වූ විට ව්‍යාධිජනක සෛල බිත්තියේ සිදුරු ඇති කිරීම, ඔප්සොනීකරණය, සහ ප්‍රදාහය උත්තේජනය කිරීම වැනි කාර්යයන් සිදු කරයි."
+  },
+  {
+    q:"3. Helper T සෛලයේ ප්‍රධාන කාර්යභාරය කුමක්ද?",
+    opts:["ආසාදිත සෛල සෘජුවම විනාශ කිරීම","ප්‍රතිදේහ සෘජුවම නිපදවීම","Cytotoxic T සහ B සෛල ක්‍රියාකාරී කිරීමට උපකාර කිරීම","බැක්ටීරියා සෘජුවම භක්ෂණය කිරීම"],
+    correct:2,
+    exp:"Helper T සෛලය APC මගින් ඉදිරිපත් කරන ලද ප්‍රතිදේහ ජනකය හඳුනාගෙන, සයිටොකයින් නිකුත් කිරීමෙන් Cytotoxic T සෛල හා B සෛල යන දෙකම ක්‍රියාකාරී කිරීමට උපකාරී වේ. සෛල සෘජුවම විනාශ කරන්නේ Cytotoxic T සෛලයයි."
+  },
+  {
+    q:"4. BCG එන්නත මගින් ලබා දෙන ප්‍රතිශක්තිය කුමන වර්ගයටද අයත් වන්නේ?",
+    opts:["ස්වාභාවික සක්‍රිය ප්‍රතිශක්තිය","කෘත්‍රිම සක්‍රිය ප්‍රතිශක්තිය","ස්වාභාවික අක්‍රිය ප්‍රතිශක්තිය","කෘත්‍රිම අක්‍රිය ප්‍රතිශක්තිය"],
+    correct:1,
+    exp:"BCG, පෝලියෝ වැනි එන්නත් මගින් දුර්වල/මිය ගිය ව්‍යාධිජනකයන් ශරීරයට හඳුන්වා දී, ශරීරයම ප්‍රතිදේහ නිපදවීමට යොමු කරයි — එබැවින් එය කෘත්‍රිම සක්‍රිය ප්‍රතිශක්තියකි. එය දිගු කාලීන මතකයක් ලබා දෙයි."
+  },
+  {
+    q:"5. ටිටනස් නාශක සෙරුමය (Anti-tetanus serum) ලබා දීමෙන් ලැබෙන ප්‍රතිශක්තියේ ලක්ෂණය කුමක්ද?",
+    opts:["දිගු කාලීන මතකයක් ලබා දේ","කෙටි කාලීන වන අතර, ශරීරයේ B/T සෛල සක්‍රිය නොවේ","එය ස්වාභාවික සක්‍රිය ප්‍රතිශක්තියකි","එය මතක සෛල නිපදවීම උත්තේජනය කරයි"],
+    correct:1,
+    exp:"ටිටනස් නාශක සෙරුමය කෘත්‍රිම අක්‍රිය ප්‍රතිශක්තියකි — සූදානම් කළ ප්‍රතිදේහ සෘජුවම ලබා දෙන අතර, ලබන්නාගේ T/B සෛල මේ සඳහා සක්‍රිය නොවන බැවින් මතක සෛල නිපදවෙන්නේ නැත. එබැවින් ආරක්ෂාව තාවකාලිකයි."
+  }
+];
+let answered = 0, score=0;
+function buildQuiz(){
+  const area=document.getElementById('quizArea');
+  area.innerHTML='';
+  quizData.forEach((item,qi)=>{
+    const div=document.createElement('div');
+    div.className='card qcard';
+    let optsHtml='';
+    item.opts.forEach((o,oi)=>{
+      optsHtml += `<button class="qopt" data-qi="${qi}" data-oi="${oi}" onclick="answerQ(this)">${o}</button>`;
+    });
+    div.innerHTML = `<div class="qnum">ප්‍රශ්නය ${qi+1}/5</div><h3 style="font-size:14px;margin-top:4px;">${item.q}</h3>${optsHtml}<div class="qexp" id="exp-${qi}">${item.exp}</div>`;
+    area.appendChild(div);
+  });
+}
+function answerQ(btn){
+  const qi = btn.dataset.qi, oi=parseInt(btn.dataset.oi);
+  const card = btn.closest('.qcard');
+  if(card.dataset.done) return;
+  card.dataset.done='1';
+  const opts = card.querySelectorAll('.qopt');
+  const correctIdx = quizData[qi].correct;
+  opts.forEach((o,i)=>{
+    o.disabled=true;
+    if(i===correctIdx) o.classList.add('correct');
+    else if(i===oi) o.classList.add('wrong');
+  });
+  document.getElementById('exp-'+qi).classList.add('show');
+  answered++;
+  if(oi===correctIdx) score++;
+  if(answered===quizData.length){
+    const sb=document.getElementById('scoreBox');
+    sb.classList.add('show');
+    sb.textContent = `ලකුණු: ${score} / ${quizData.length} — ${score>=4?'විශිෂ්ටයි! 🎉':score>=3?'හොඳයි, තව පුහුණු වන්න 💪':'නැවත මොඩියුල් සමාලෝචනය කරන්න 📘'}`;
+  }
+}
+buildQuiz();
+</script>
+</body>
+</html>

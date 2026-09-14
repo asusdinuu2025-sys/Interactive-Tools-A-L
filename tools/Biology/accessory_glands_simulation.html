@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ආශ්‍රිත ග්‍රන්ථි සහ ජීර්ණය යාමනය | අන්තර්ක්‍රියාශීලී අනුකරණය</title>
+<style>
+:root{
+  --bg:#0a1512;
+  --bg-2:#0f1e19;
+  --panel:#122420;
+  --panel-2:#16302a;
+  --line:#254038;
+  --text:#e8f0ec;
+  --muted:#8fa89e;
+  --gold:#e3a83b;     /* bile / enzyme */
+  --gold-dim:#7a5a20;
+  --teal:#3fc9b8;     /* nervous signal */
+  --teal-dim:#1d5750;
+  --blood:#d1573f;    /* blood / hormonal */
+  --blood-dim:#5c2a1f;
+  --blue:#4f8fd1;     /* portal vein / insulin */
+  --green:#6fbf6a;    /* glucagon */
+  --font-head:"Iskoola Pota","Noto Sans Sinhala","Nirmala UI",sans-serif;
+  --font-body:"Noto Sans Sinhala","Iskoola Pota","Nirmala UI",sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+html,body{margin:0;padding:0;overflow-x:hidden;width:100%;}
+body{
+  background:
+    radial-gradient(ellipse at 20% -10%, #163a30 0%, transparent 55%),
+    radial-gradient(ellipse at 100% 0%, #2a1f14 0%, transparent 45%),
+    var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  line-height:1.6;
+  min-height:100vh;
+}
+::selection{background:var(--gold);color:#111;}
+h1,h2,h3,h4{font-family:var(--font-head);margin:0 0 8px 0;font-weight:700;}
+p{margin:0 0 10px 0;color:var(--muted);}
+button{font-family:var(--font-body);cursor:pointer;}
+
+/* ---------- HEADER ---------- */
+header.top{
+  padding:18px 5vw 14px;
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(20,45,38,.6),transparent);
+  position:sticky;top:0;z-index:50;
+  backdrop-filter:blur(10px);
+}
+header.top .eyebrow{
+  color:var(--gold);font-size:.72rem;letter-spacing:.1em;
+  text-transform:uppercase;margin-bottom:4px;font-weight:600;
+}
+header.top h1{font-size:clamp(1.15rem,4.4vw,1.9rem);color:#fff;line-height:1.3;}
+header.top .sub{color:var(--muted);font-size:clamp(.82rem,2.6vw,.92rem);max-width:70ch;}
+
+nav.tabs{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:6px;
+  margin-top:14px;
+}
+nav.tabs button{
+  background:var(--panel);
+  border:1px solid var(--line);
+  color:var(--muted);
+  padding:10px 8px;
+  border-radius:10px;
+  font-size:.8rem;
+  font-weight:600;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  transition:.2s;
+  min-height:44px;
+  text-align:center;
+  white-space:normal;
+  line-height:1.15;
+}
+nav.tabs button .num{
+  width:22px;height:22px;border-radius:50%;
+  background:var(--panel-2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.75rem;color:var(--muted);
+  border:1px solid var(--line);
+}
+nav.tabs button.active{
+  color:#fff;border-color:var(--gold);
+  background:linear-gradient(135deg,var(--panel-2),var(--panel));
+  box-shadow:0 0 0 1px var(--gold-dim), 0 6px 18px -8px rgba(227,168,59,.4);
+}
+nav.tabs button.active .num{background:var(--gold);color:#1a1204;border-color:var(--gold);}
+nav.tabs button:hover{color:#fff;}
+@media(max-width:480px){
+  nav.tabs{grid-template-columns:repeat(2,1fr);}
+  nav.tabs button{flex-direction:column;font-size:.74rem;padding:8px 4px;gap:4px;}
+}
+
+/* ---------- LAYOUT ---------- */
+main{padding:28px 5vw 80px;max-width:1300px;margin:0 auto;}
+.module{display:none;animation:fadeIn .4s ease;}
+.module.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+.section-title{display:flex;align-items:baseline;gap:10px;margin-bottom:6px;flex-wrap:wrap;}
+.section-title .tag{
+  font-size:.72rem;color:var(--bg);background:var(--teal);
+  padding:3px 9px;border-radius:6px;font-weight:700;letter-spacing:.04em;
+}
+.grid2{display:grid;grid-template-columns:1.3fr 1fr;gap:22px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+@media(max-width:900px){.grid2{grid-template-columns:1fr;} .grid3{grid-template-columns:1fr 1fr;}}
+@media(max-width:600px){.grid3{grid-template-columns:1fr;}}
+
+.panel{
+  background:linear-gradient(160deg,var(--panel),var(--bg-2));
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:20px;
+  max-width:100%;
+  overflow:hidden;
+}
+.panel h3{color:#fff;font-size:1.05rem;}
+
+.btnrow{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0;}
+.btn{
+  background:var(--panel-2);
+  border:1px solid var(--line);
+  color:var(--text);
+  padding:11px 14px;
+  border-radius:9px;
+  font-size:.86rem;
+  font-weight:600;
+  transition:.15s;
+  min-height:44px;
+}
+.btn:hover{border-color:var(--gold);color:#fff;transform:translateY(-1px);}
+.btn.primary{background:linear-gradient(135deg,var(--gold),#b8791f);color:#1a1204;border:none;}
+.btn.primary:hover{filter:brightness(1.1);}
+.btn.teal{background:linear-gradient(135deg,var(--teal),#1d8f80);color:#052622;border:none;}
+.btn.blood{background:linear-gradient(135deg,var(--blood),#8a3324);color:#fff;border:none;}
+.btn.active-btn{outline:2px solid #fff;outline-offset:1px;}
+
+.info-box{
+  margin-top:14px;
+  padding:14px 16px;
+  background:var(--panel-2);
+  border-left:3px solid var(--gold);
+  border-radius:8px;
+  font-size:.9rem;
+  min-height:24px;
+}
+.info-box b{color:#fff;}
+.info-box.empty{color:var(--muted);font-style:italic;border-left-color:var(--line);}
+
+svg{width:100%;height:auto;display:block;}
+.hot{cursor:pointer;transition:.15s;}
+.hot:hover{filter:brightness(1.35);}
+.hotlabel{fill:var(--text);font-size:11px;font-family:var(--font-body);pointer-events:none;}
+
+.pulse{animation:pulseAnim 1.4s ease-in-out infinite;}
+@keyframes pulseAnim{0%,100%{opacity:1;}50%{opacity:.35;}}
+
+.flowdot{opacity:0;}
+.flowing .flowdot{opacity:1;}
+
+/* enzyme chips */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+.chip{
+  background:var(--panel-2);border:1px solid var(--line);
+  border-radius:20px;padding:5px 12px;font-size:.78rem;color:var(--muted);
+  transition:.5s;
+}
+.chip.active{color:#1a1204;background:var(--gold);border-color:var(--gold);font-weight:700;}
+
+/* toggle segmented */
+.segmented{display:flex;background:var(--panel-2);border-radius:10px;padding:4px;border:1px solid var(--line);margin-bottom:14px;width:100%;max-width:420px;}
+.segmented button{flex:1;}
+.segmented button{
+  border:none;background:transparent;color:var(--muted);
+  padding:10px 14px;border-radius:7px;font-size:.82rem;font-weight:600;
+  min-height:40px;
+}
+.segmented button.active{background:var(--teal);color:#052622;}
+
+/* flip cards */
+.flipcard{
+  perspective:1000px;height:170px;
+}
+.flipcard-inner{
+  position:relative;width:100%;height:100%;
+  transition:transform .55s cubic-bezier(.4,.2,.2,1);
+  transform-style:preserve-3d;
+}
+.flipcard.flipped .flipcard-inner{transform:rotateY(180deg);}
+.flipcard-face{
+  position:absolute;inset:0;backface-visibility:hidden;
+  border-radius:14px;padding:14px;
+  display:flex;flex-direction:column;justify-content:center;
+  border:1px solid var(--line);
+}
+.flipcard-front{
+  background:linear-gradient(160deg,var(--panel-2),var(--panel));
+  align-items:center;text-align:center;
+}
+.flipcard-front .ic{font-size:1.8rem;margin-bottom:6px;}
+.flipcard-front .ti{color:#fff;font-weight:700;font-size:.92rem;}
+.flipcard-back{
+  background:linear-gradient(160deg,#1c3b32,#0f2620);
+  transform:rotateY(180deg);
+  font-size:.8rem;color:var(--text);
+}
+.flipcard-back b{color:var(--gold);}
+.hint{font-size:.7rem;color:var(--muted);text-align:center;margin-top:8px;}
+
+/* regulation */
+.reg-wrap{display:grid;grid-template-columns:1fr 1.1fr;gap:22px;}
+@media(max-width:950px){.reg-wrap{grid-template-columns:1fr;}}
+.trigger-card{
+  background:var(--panel-2);border:1px solid var(--line);border-radius:12px;
+  padding:12px 14px;margin-bottom:10px;cursor:pointer;transition:.2s;
+  min-height:44px;
+}
+.trigger-card:hover{border-color:var(--gold);}
+.trigger-card.on{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal-dim);}
+.trigger-card .tt{font-weight:700;color:#fff;font-size:.9rem;}
+.trigger-card .ts{font-size:.78rem;color:var(--muted);}
+
+/* quiz */
+.quiz-q{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px;}
+.quiz-q .qtitle{color:#fff;font-weight:700;margin-bottom:10px;}
+.quiz-opt{
+  display:block;width:100%;text-align:right;
+  background:var(--panel);border:1px solid var(--line);color:var(--text);
+  padding:12px 14px;border-radius:8px;margin-bottom:8px;font-size:.86rem;
+  min-height:44px;line-height:1.4;
+}
+.quiz-opt:hover{border-color:var(--gold);}
+.quiz-opt.correct{background:#1f4a2c;border-color:var(--green);color:#fff;}
+.quiz-opt.wrong{background:#4a1f1f;border-color:var(--blood);color:#fff;}
+.quiz-opt[disabled]{cursor:default;}
+#quizScore{font-family:var(--font-head);font-size:1.2rem;color:var(--gold);}
+
+footer{text-align:center;color:var(--muted);font-size:.78rem;padding:30px 0 10px;}
+
+/* ---------- MOBILE REFINEMENTS ---------- */
+@media(max-width:700px){
+  main{padding:20px 4vw 60px;}
+  .panel{padding:16px;border-radius:14px;}
+  h2{font-size:1.15rem;}
+  .panel h3{font-size:.98rem;}
+  p{font-size:.88rem;}
+  .btnrow{gap:8px;}
+  .btn{font-size:.8rem;padding:10px 12px;flex:1 1 auto;text-align:center;}
+  .info-box{font-size:.86rem;padding:12px 14px;}
+  .hotlabel{font-size:9.5px;}
+  .chip{padding:8px 12px;font-size:.74rem;min-height:36px;display:inline-flex;align-items:center;}
+  .quiz-q{padding:14px;}
+  .quiz-q .qtitle{font-size:.9rem;}
+  .flipcard{height:190px;}
+  .flipcard-front .ic{font-size:1.5rem;}
+  .flipcard-front .ti{font-size:.82rem;}
+  .flipcard-back{font-size:.74rem;padding:12px;}
+  #quizScore{font-size:1.05rem;}
+}
+@media(max-width:420px){
+  header.top{padding:14px 4vw 12px;}
+  header.top h1{font-size:1.05rem;}
+  .trigger-card .tt{font-size:.84rem;}
+  .trigger-card .ts{font-size:.72rem;}
+}
+@media(hover:none){
+  .btn:hover,.trigger-card:hover,nav.tabs button:hover{transform:none;}
+}
+
+/* histology cell shapes helper */
+.acinus{fill:#3a6b5c;stroke:#7fc9b3;stroke-width:1;}
+.duct{fill:none;stroke:var(--gold);stroke-width:4;stroke-linecap:round;}
+.islet{fill:#274d78;stroke:#7fb3ec;stroke-width:1;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="eyebrow">අ.පො.ස (උ/පෙළ) ජීව විද්‍යාව · 05 පාඩම</div>
+  <h1>ආහාර ජීර්ණ පද්ධතියේ ආශ්‍රිත ග්‍රන්ථි සහ ජීර්ණය යාමනය වීම</h1>
+  <div class="sub">අග්න්‍යාශය, අක්මාව සහ ඒවායේ පටක විද්‍යාව — ස්නායුක සහ අන්තඃසර්ග යාමනය අන්තර්ක්‍රියාශීලීව ඉගෙන ගන්න. පහත මාතෘකා අනුපිළිවෙලින් ක්ලික් කර ඉදිරියට යන්න.</div>
+  <nav class="tabs">
+    <button data-m="m1" class="active"><span class="num">1</span> අග්න්‍යාශය</button>
+    <button data-m="m2"><span class="num">2</span> අක්මාව</button>
+    <button data-m="m3"><span class="num">3</span> ජීර්ණය යාමනය</button>
+    <button data-m="m4"><span class="num">4</span> ස්වයං-ඇගයීම</button>
+  </nav>
+</header>
+
+<main>
+
+<!-- ============ MODULE 1 : PANCREAS ============ -->
+<section class="module active" id="m1">
+  <div class="section-title"><span class="tag">MODULE 1</span><h2>අග්න්‍යාශයේ ව්‍යූහය හා කෘත්‍යය</h2></div>
+  <p>අග්න්‍යාශය ග්‍රහණියට යාබදව පිහිටි මිශ්‍ර ග්‍රන්ථියකි. පහත රූපයේ කොටස් මත ක්ලික් කර ඒවායේ කාර්යභාරය සොයා බලන්න.</p>
+
+  <div class="grid2">
+    <div class="panel">
+      <h3>අන්තර්ක්‍රියාශීලී රූප සටහන</h3>
+      <svg viewBox="0 0 560 320" id="pancDiagram">
+        <!-- liver/gallbladder -->
+        <path d="M40 60 Q30 40 60 35 Q100 25 120 45 Q135 60 120 80 Q100 95 70 90 Q45 85 40 60 Z" fill="#6b3a2a" stroke="#a15a3f" stroke-width="1.5" class="hot" data-k="liver"/>
+        <text x="55" y="58" class="hotlabel">අක්මාව</text>
+        <path d="M95 80 Q110 95 100 115 Q92 130 78 125 Q68 118 72 100 Q78 85 95 80 Z" fill="#2f5c3a" stroke="#5fae72" stroke-width="1.5" class="hot" data-k="gallbladder"/>
+        <text x="60" y="140" class="hotlabel">පිත්තාශය</text>
+        <path id="bileDuctPath" d="M100 118 C 130 150, 190 165, 240 178" fill="none" stroke="#5fae72" stroke-width="4" stroke-linecap="round" class="hot" data-k="bileduct"/>
+        <text x="140" y="150" class="hotlabel">පොදු පිත්ත නාලය</text>
+
+        <!-- pancreas body -->
+        <path d="M230 175 Q260 140 320 145 Q400 148 440 175 Q470 190 455 215 Q430 235 380 225 Q330 218 300 210 Q250 205 230 175 Z"
+          fill="#c98a52" stroke="#e6ac6f" stroke-width="1.5" class="hot" data-k="body"/>
+        <text x="290" y="185" class="hotlabel" fill="#2a1806">ශරීරය (Body)</text>
+
+        <path d="M420 178 Q460 172 480 190 Q495 205 478 220 Q460 230 438 218 Z"
+          fill="#b97a45" stroke="#e6ac6f" stroke-width="1.5" class="hot" data-k="tail"/>
+        <text x="440" y="210" class="hotlabel" fill="#2a1806">වලය (Tail)</text>
+
+        <path d="M235 172 Q210 165 205 190 Q202 210 225 215 Q250 218 255 195 Q252 178 235 172 Z"
+          fill="#d99a5f" stroke="#e6ac6f" stroke-width="1.5" class="hot" data-k="head"/>
+        <text x="180" y="235" class="hotlabel">හිස (Head)</text>
+
+        <!-- pancreatic duct -->
+        <path id="pancDuctPath" d="M470 195 C 400 205, 320 200, 250 195 C 245 200, 242 205, 240 208" fill="none" stroke="#f2c879" stroke-width="3" stroke-dasharray="5 4" class="hot" data-k="duct"/>
+        <text x="330" y="240" class="hotlabel">අග්න්‍යාශ නාලය</text>
+
+        <!-- duodenum -->
+        <path d="M232 210 Q210 250 235 290 Q255 315 290 305 Q300 260 280 230 Q260 205 232 210 Z"
+          fill="#7a4a8f" stroke="#b087c9" stroke-width="1.5" class="hot" data-k="duodenum"/>
+        <text x="215" y="300" class="hotlabel">ග්‍රහණිය (Duodenum)</text>
+
+        <!-- ampulla marker -->
+        <circle cx="240" cy="200" r="6" fill="#fff" class="hot pulse" data-k="ampulla"/>
+        <text x="248" y="180" class="hotlabel" fill="#fff">හෙපටෝපැන්ක්‍රියාටික් ඇම්පුලාව</text>
+
+        <!-- flowing juice animation dots -->
+        <g id="juiceFlow" class="flowing" style="display:none">
+          <circle r="4" fill="#f2c879"><animateMotion dur="1.6s" repeatCount="indefinite" path="M470 195 C 400 205, 320 200, 250 195 C 245 200, 242 205, 240 208"/></circle>
+          <circle r="4" fill="#5fae72"><animateMotion dur="1.6s" begin="0.4s" repeatCount="indefinite" path="M100 118 C 130 150, 190 165, 240 178"/></circle>
+        </g>
+      </svg>
+      <div class="btnrow">
+        <button class="btn primary" id="flowBtn">🔄 ස්‍රාවී ප්‍රවාහය අනුකරණය කරන්න</button>
+      </div>
+      <div class="info-box empty" id="pancInfo">රූපයේ ඕනෑම කොටසක් ක්ලික් කර විස්තර බලන්න.</div>
+    </div>
+
+    <div class="panel">
+      <h3>අග්න්‍යාශයේ පටක විද්‍යාව (Histology)</h3>
+      <div class="segmented" id="histoSeg">
+        <button data-h="exo" class="active">බාහිර ස්‍රාවී කොටස</button>
+        <button data-h="endo">අභ්‍යන්තර ස්‍රාවී කොටස</button>
+      </div>
+
+      <div id="exoView">
+        <svg viewBox="0 0 300 180">
+          <g id="aciniGroup">
+            <circle cx="70" cy="60" r="26" class="acinus"/>
+            <circle cx="130" cy="45" r="24" class="acinus"/>
+            <circle cx="120" cy="100" r="27" class="acinus"/>
+            <circle cx="190" cy="70" r="25" class="acinus"/>
+            <circle cx="60" cy="120" r="22" class="acinus"/>
+            <path class="duct" d="M60 60 Q140 90 260 90"/>
+          </g>
+          <text x="20" y="150" class="hotlabel">බද්‍රිකා (Acini) → අග්න්‍යාශ නාලය</text>
+          <g id="enzFlow" style="display:none">
+            <circle r="4" fill="#f2c879"><animateMotion dur="1.4s" repeatCount="indefinite" path="M60 60 Q140 90 260 90"/></circle>
+          </g>
+        </svg>
+        <p style="margin-top:6px;">බද්‍රිකා සෛල මගින් <b style="color:var(--text)">අග්න්‍යාශික යුෂය</b> ස්‍රාවය කරයි. පහත එන්සයිම ක්ලික් කර ග්‍රහණියේදී සිදුවන සක්‍රීයකරණය බලන්න:</p>
+        <div class="chips" id="enzChips">
+          <div class="chip" data-e="amylase">ඇමයිලේස්</div>
+          <div class="chip" data-e="lipase">ලයිපේස්</div>
+          <div class="chip" data-e="nuclease">නිෂ්ක්‍රීය නියුක්ලියේස්</div>
+          <div class="chip" data-e="trypsinogen">ට්‍රිප්සිනොජන්</div>
+          <div class="chip" data-e="chymotrypsinogen">කයිමොට්‍රිප්සිනොජන්</div>
+        </div>
+        <div class="info-box empty" id="enzInfo">එන්සයිමයක් ක්ලික් කර එහි ක්‍රියාකාරීත්වය බලන්න.</div>
+      </div>
+
+      <div id="endoView" style="display:none">
+        <svg viewBox="0 0 300 180">
+          <circle cx="150" cy="70" r="46" fill="#274d78" stroke="#7fb3ec" stroke-width="1.5"/>
+          <circle cx="130" cy="55" r="10" class="islet" data-cell="alpha" id="cellAlpha" style="cursor:pointer;" fill="#c9793f"/>
+          <circle cx="165" cy="60" r="9" class="islet" data-cell="beta" id="cellBeta" style="cursor:pointer;" fill="#4f8fd1"/>
+          <circle cx="150" cy="88" r="8" class="islet" fill="#4f8fd1" data-cell="beta"/>
+          <circle cx="120" cy="85" r="7" class="islet" fill="#c9793f" data-cell="alpha"/>
+          <text x="105" y="140" class="hotlabel">ලැන්ගර්හැන් දීපිකා</text>
+          <path d="M40 150 Q150 175 260 150" fill="none" stroke="#8a2f2f" stroke-width="5" opacity="0.6"/>
+          <text x="120" y="168" class="hotlabel" fill="#e8b3ab">රුධිර නාලය</text>
+          <g id="hormFlow" style="display:none">
+            <circle r="4" fill="#4f8fd1" id="insulinDot"><animateMotion dur="1.3s" repeatCount="indefinite" path="M150 88 Q150 130 150 150"/></circle>
+          </g>
+        </svg>
+        <p style="margin-top:4px">α (ඇල්ෆා) සහ β (බීටා) සෛල ක්ලික් කර ඒවායේ හෝමෝන බලන්න — මේවා නාලයකින් තොරව <b style="color:var(--text)">සෘජුවම රුධිරයට</b> ස්‍රාවය වේ.</p>
+        <div class="info-box empty" id="isletInfo">α හෝ β සෛලයක් ක්ලික් කරන්න.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MODULE 2 : LIVER ============ -->
+<section class="module" id="m2">
+  <div class="section-title"><span class="tag">MODULE 2</span><h2>අක්මාවේ ව්‍යූහය, පටක විද්‍යාව හා කෘත්‍යයන්</h2></div>
+
+  <div class="grid2">
+    <div class="panel">
+      <h3>අක්මා අනුඛණ්ඩිකාව (Liver Lobule)</h3>
+      <svg viewBox="0 0 340 300" id="lobuleSvg">
+        <polygon points="170,20 280,80 280,200 170,260 60,200 60,80" fill="#2a4a3f" stroke="#4d7a68" stroke-width="1.5"/>
+        <!-- hepatocyte texture -->
+        <g opacity="0.55">
+          <polygon points="170,20 200,40 190,65 150,65 140,40" fill="#3a6656" stroke="#5c8f7c" stroke-width="0.6"/>
+          <polygon points="280,80 260,95 235,80 245,55 270,55" fill="#3a6656" stroke="#5c8f7c" stroke-width="0.6"/>
+          <polygon points="280,200 255,210 235,190 250,165 270,170" fill="#3a6656" stroke="#5c8f7c" stroke-width="0.6"/>
+          <polygon points="170,260 145,240 155,215 190,215 200,240" fill="#3a6656" stroke="#5c8f7c" stroke-width="0.6"/>
+          <polygon points="60,200 80,190 100,205 90,230 65,225" fill="#3a6656" stroke="#5c8f7c" stroke-width="0.6"/>
+          <polygon points="60,80 85,70 100,90 80,110 60,105" fill="#3a6656" stroke="#5c8f7c" stroke-width="0.6"/>
+        </g>
+        <!-- central vein -->
+        <circle cx="170" cy="140" r="26" fill="#8a2f2f" stroke="#d1573f" stroke-width="2" class="hot" data-k="centralvein"/>
+        <text x="140" y="145" class="hotlabel" fill="#fff">මධ්‍ය ශිරාව</text>
+
+        <!-- portal triads at 3 alternating corners -->
+        <g class="hot" data-k="triad1"><circle cx="170" cy="20" r="7" fill="#d1573f"/><circle cx="180" cy="20" r="5" fill="#4f8fd1"/><circle cx="175" cy="30" r="5" fill="#e3a83b"/></g>
+        <g class="hot" data-k="triad2"><circle cx="280" cy="200" r="7" fill="#d1573f"/><circle cx="270" cy="205" r="5" fill="#4f8fd1"/><circle cx="270" cy="192" r="5" fill="#e3a83b"/></g>
+        <g class="hot" data-k="triad3"><circle cx="60" cy="80" r="7" fill="#d1573f"/><circle cx="52" cy="88" r="5" fill="#4f8fd1"/><circle cx="52" cy="75" r="5" fill="#e3a83b"/></g>
+        <text x="182" y="14" class="hotlabel">යාකෘතික ත්‍රිකෝණය</text>
+        <text x="10" y="88" class="hotlabel">(ධමනිය • ශිරාව • පිත්ත නාලය)</text>
+
+        <!-- sinusoid paths (corners to center) -->
+        <path id="sinu1" d="M170 30 Q170 90 170 114" fill="none" stroke="#c9793f" stroke-width="3" opacity="0.7"/>
+        <path id="sinu2" d="M270 195 Q220 170 194 150" fill="none" stroke="#c9793f" stroke-width="3" opacity="0.7"/>
+        <path id="sinu3" d="M70 85 Q120 110 146 128" fill="none" stroke="#c9793f" stroke-width="3" opacity="0.7"/>
+        <text x="230" y="130" class="hotlabel">කෝටරාභ (Sinusoids)</text>
+
+        <!-- kupffer cell -->
+        <path d="M210 145 l6 -6 l4 4 l6 -4 l2 6 l-6 4 l2 6 l-6 -2 l-4 6 l-2 -6 l-6 2 z" fill="#e3a83b" class="hot" data-k="kupffer" id="kupfferCell"/>
+        <text x="215" y="170" class="hotlabel">කුප්ෆර් සෛල</text>
+
+        <g id="bloodFlow" style="display:none">
+          <circle r="3.5" fill="#d1573f"><animateMotion dur="1.5s" repeatCount="indefinite" path="M170 30 Q170 90 170 114"/></circle>
+          <circle r="3.5" fill="#4f8fd1"><animateMotion dur="1.5s" begin=".3s" repeatCount="indefinite" path="M270 195 Q220 170 194 150"/></circle>
+          <circle r="3.5" fill="#d1573f"><animateMotion dur="1.5s" begin=".6s" repeatCount="indefinite" path="M70 85 Q120 110 146 128"/></circle>
+        </g>
+      </svg>
+      <div class="btnrow">
+        <button class="btn blood" id="bloodBtn">🩸 රුධිර ප්‍රවාහය අනුකරණය කරන්න</button>
+      </div>
+      <div class="info-box empty" id="lobuleInfo">රූපයේ ලේබල් කළ කොටසක් ක්ලික් කරන්න.</div>
+    </div>
+
+    <div class="panel">
+      <h3>පිත්තදිය ස්‍රාවය හා ගබඩා කිරීම</h3>
+      <svg viewBox="0 0 320 170">
+        <rect x="10" y="15" width="70" height="40" rx="6" fill="#6b3a2a" stroke="#a15a3f"/>
+        <text x="20" y="40" class="hotlabel">අක්මා සෛල</text>
+        <path d="M80 35 Q120 20 150 35" fill="none" stroke="#e3a83b" stroke-width="3"/>
+        <text x="85" y="18" class="hotlabel" style="font-size:9px">පිත්ත කේශනාලිකා</text>
+        <rect x="150" y="20" width="60" height="30" rx="6" fill="#3a2f14" stroke="#e3a83b"/>
+        <text x="155" y="40" class="hotlabel" style="font-size:9px">පිත්ත නාලය</text>
+        <path d="M210 35 Q240 50 245 80" fill="none" stroke="#e3a83b" stroke-width="3"/>
+        <ellipse cx="255" cy="100" rx="30" ry="35" fill="#2f5c3a" stroke="#5fae72" stroke-width="2"/>
+        <text x="225" y="145" class="hotlabel">පිත්තාශය (ගබඩාව)</text>
+        <path d="M245 132 Q200 155 130 150" fill="none" stroke="#e3a83b" stroke-width="3"/>
+        <path d="M130 150 Q90 150 60 140 Q40 130 40 110" fill="none" stroke="#7a4a8f" stroke-width="10" opacity="0.5"/>
+        <text x="20" y="120" class="hotlabel">ග්‍රහණිය</text>
+        <g id="bileFlow2" style="display:none">
+          <circle r="4" fill="#e3a83b"><animateMotion dur="2s" repeatCount="indefinite" path="M80 35 Q120 20 150 35 Q150 20 210 35 Q240 50 245 80 Q255 100 245 132 Q200 155 130 150 Q90 150 60 140 Q40 130 40 110"/></circle>
+        </g>
+      </svg>
+      <div class="btnrow">
+        <button class="btn primary" id="bileBtn1">🟡 පිත්තදිය නිපදවීම (අක්මාව→ගබඩාව)</button>
+        <button class="btn primary" id="bileBtn2">🍽️ ආහාර ලැබූ විට මුදාහැරීම (තෙලෝදකරණය)</button>
+      </div>
+      <div class="info-box empty" id="bileInfo">බොත්තමක් ක්ලික් කර පිත්තදියේ ගමන්මග බලන්න.</div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:22px;">
+    <h3>අක්මාවේ ප්‍රධාන කෘත්‍යයන් — කාඩ්පත ක්ලික් කර හරවන්න</h3>
+    <div class="grid3" id="funcCards"></div>
+  </div>
+</section>
+
+<!-- ============ MODULE 3 : REGULATION ============ -->
+<section class="module" id="m3">
+  <div class="section-title"><span class="tag">MODULE 3</span><h2>ජීර්ණය යාමනය වීම — ස්නායුක හා අන්තඃසර්ග</h2></div>
+  <p>පහත ඇති තත්ත්වයන් (uppurudu) මත ක්ලික් කර ශරීරයේ ප්‍රතිචාරය සජීවීව නරඹන්න.</p>
+
+  <div class="reg-wrap">
+    <div class="panel">
+      <h3>උත්තේජක තෝරන්න</h3>
+      <div class="trigger-card" data-t="nerve">
+        <div class="tt">👁️ ආහාරයේ රූපය / ගන්ධය / රසය</div>
+        <div class="ts">ස්නායුක යාමනය — වේගස් ස්නායුව</div>
+      </div>
+      <div class="trigger-card" data-t="gastrin">
+        <div class="tt">🫃 ආමාශය දිගහැරීම (ආහාර ඇතුල්වීම)</div>
+        <div class="ts">හෝමෝන — ගැස්ට්‍රින්</div>
+      </div>
+      <div class="trigger-card" data-t="secretin">
+        <div class="tt">🧪 ග්‍රහණියේ අම්ලීය කයිම්</div>
+        <div class="ts">හෝමෝන — සක්‍රිටින්</div>
+      </div>
+      <div class="trigger-card" data-t="cck">
+        <div class="tt">🥑 ග්‍රහණියේ මේද / ඇමයිනෝ අම්ල</div>
+        <div class="ts">හෝමෝන — කොලිසිස්ටොකයිනින් (CCK)</div>
+      </div>
+      <div class="info-box empty" id="regInfo">තත්ත්වයක් ක්ලික් කර ප්‍රතිචාරය බලන්න.</div>
+    </div>
+
+    <div class="panel">
+      <h3>සජීවී ප්‍රතිචාර සිතියම</h3>
+      <svg viewBox="0 0 340 380">
+        <!-- brain -->
+        <circle cx="170" cy="30" r="24" fill="#2a4a5a" stroke="#5fa8c9" stroke-width="1.5" id="organBrain"/>
+        <text x="145" y="8" class="hotlabel">මොළය</text>
+        <!-- esophagus / stomach -->
+        <path d="M170 54 L170 90" stroke="#555" stroke-width="6"/>
+        <ellipse cx="150" cy="140" rx="45" ry="55" fill="#7a4a3a" stroke="#c98a52" stroke-width="1.5" id="organStomach"/>
+        <text x="118" y="90" class="hotlabel">ආමාශය</text>
+        <!-- duodenum -->
+        <path d="M150 195 Q130 230 160 250 Q190 265 200 235" fill="none" stroke="#7a4a8f" stroke-width="14" stroke-linecap="round" id="organDuo"/>
+        <text x="205" y="255" class="hotlabel">ග්‍රහණිය</text>
+        <!-- pancreas -->
+        <ellipse cx="245" cy="230" rx="42" ry="16" fill="#c98a52" stroke="#e6ac6f" stroke-width="1.5" id="organPanc"/>
+        <text x="255" y="205" class="hotlabel">අග්න්‍යාශය</text>
+        <!-- liver + gallbladder -->
+        <path d="M55 150 Q40 130 65 115 Q100 100 120 125 Q130 145 105 158 Q75 168 55 150 Z" fill="#6b3a2a" stroke="#a15a3f" stroke-width="1.5" id="organLiver"/>
+        <text x="35" y="105" class="hotlabel">අක්මාව</text>
+        <ellipse cx="95" cy="170" rx="14" ry="18" fill="#2f5c3a" stroke="#5fae72" stroke-width="1.5" id="organGB"/>
+        <text x="55" y="195" class="hotlabel">පිත්තාශය</text>
+
+        <!-- nerve path (dashed) brain->stomach -->
+        <path id="pathNerve" d="M170 54 Q175 90 155 100" fill="none" stroke="#3fc9b8" stroke-width="2.5" stroke-dasharray="4 4" opacity="0.35"/>
+        <!-- blood path stomach area -> pancreas/liver etc via generic loop -->
+        <path id="pathGastrin" d="M150 190 Q150 150 150 140" fill="none" stroke="#d1573f" stroke-width="2.5" opacity="0.35"/>
+        <path id="pathSecretin" d="M175 240 Q210 235 235 225" fill="none" stroke="#d1573f" stroke-width="2.5" opacity="0.35"/>
+        <path id="pathCCK1" d="M180 245 Q140 200 100 175" fill="none" stroke="#d1573f" stroke-width="2.5" opacity="0.35"/>
+        <path id="pathCCK2" d="M175 240 Q210 235 235 225" fill="none" stroke="#e3a83b" stroke-width="2.5" opacity="0.35"/>
+
+        <g id="pulseGroup"></g>
+      </svg>
+      <div class="chips" style="margin-top:6px;">
+        <div class="chip" id="legendNerve">— ස්නායුක සංඥාව</div>
+        <div class="chip" id="legendHorm">— හෝමෝන (රුධිරය ඔස්සේ)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MODULE 4 : QUIZ ============ -->
+<section class="module" id="m4">
+  <div class="section-title"><span class="tag">MODULE 4</span><h2>ස්වයං-ඇගයීම ප්‍රශ්නාවලිය</h2></div>
+  <p>ප්‍රශ්න 5කින් සමන්විතයි. සියලු ප්‍රශ්නවලට පිළිතුරු දෙන්න.</p>
+  <div id="quizWrap"></div>
+  <div class="panel" style="text-align:center;">
+    <div id="quizScore">ලකුණු: 0 / 5</div>
+    <div class="btnrow" style="justify-content:center;">
+      <button class="btn primary" id="resetQuiz">🔁 නැවත ආරම්භ කරන්න</button>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>අන්තර්ක්‍රියාශීලී ජීව විද්‍යා අනුකරණය · ආශ්‍රිත ග්‍රන්ථි සහ ජීර්ණය යාමනය · අධ්‍යාපනික භාවිතය සඳහා</footer>
+
+<script>
+/* ---------------- NAV ---------------- */
+const tabs = document.querySelectorAll('nav.tabs button');
+const modules = document.querySelectorAll('.module');
+tabs.forEach(t=>t.addEventListener('click',()=>{
+  tabs.forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  modules.forEach(m=>m.classList.remove('active'));
+  document.getElementById(t.dataset.m).classList.add('active');
+}));
+
+/* ---------------- MODULE 1 : PANCREAS ---------------- */
+const pancData = {
+  liver:"අක්මාව: පිත්තදිය නිපදවන ශරීරයේ විශාලතම ග්‍රන්ථිය. ජීර්ණයට අවශ්‍ය පිත්තදිය මෙතැනින් නිපදවේ.",
+  gallbladder:"පිත්තාශය: අක්මාව මගින් නිපදවන පිත්තදිය තාවකාලිකව ගබඩා කර සාන්ද්‍රණය කරයි.",
+  bileduct:"පොදු පිත්ත නාලය: පිත්තාශයේ පිත්තදිය ග්‍රහණියට ගෙන යයි; අග්න්‍යාශ නාලය සමග එක්ව හෙපටෝපැන්ක්‍රියාටික් ඇම්පුලාවෙන් විවෘත වේ.",
+  head:"හිස (Head): ග්‍රහණියේ 'C' ලූපය තුළ රැඳී ඇති පළල් කොටස.",
+  body:"ශරීරය (Body): අග්න්‍යාශයේ මධ්‍ය කොටස; බාහිර හා අභ්‍යන්තර ස්‍රාවී පටක දෙකම අඩංගු වේ.",
+  tail:"වලය (Tail): ප්ලීහාව අසලට විහිදෙන පටු කොටස.",
+  duct:"අග්න්‍යාශ නාලය: බද්‍රිකා මගින් නිපදවන අග්න්‍යාශික යුෂය රැස්කර ග්‍රහණියට ගෙනයයි.",
+  duodenum:"ග්‍රහණිය (Duodenum): අග්න්‍යාශික යුෂය හා පිත්තදිය එකට එකතුවී ජීර්ණය සිදුවන ප්‍රධාන ස්ථානය.",
+  ampulla:"හෙපටෝපැන්ක්‍රියාටික් ඇම්පුලාව: අග්න්‍යාශ නාලය සහ පොදු පිත්ත නාලය එකට එකතුවී ග්‍රහණියට විවෘත වන ස්ථානය."
+};
+document.querySelectorAll('#pancDiagram .hot').forEach(el=>{
+  el.addEventListener('click',()=>{
+    const k = el.dataset.k;
+    const box = document.getElementById('pancInfo');
+    box.classList.remove('empty');
+    box.innerHTML = "<b>"+ (pancData[k]||"") .split(':')[0]+":</b>" + pancData[k].split(':').slice(1).join(':');
+  });
+});
+document.getElementById('flowBtn').addEventListener('click',function(){
+  const g = document.getElementById('juiceFlow');
+  const showing = g.style.display !== 'none';
+  g.style.display = showing ? 'none':'block';
+  this.classList.toggle('active-btn', !showing);
+  const box = document.getElementById('pancInfo');
+  box.classList.remove('empty');
+  box.innerHTML = showing ? "ප්‍රවාහ අනුකරණය නවත්වන ලදී." :
+   "<b>ප්‍රවාහය:</b> අග්න්‍යාශික යුෂය (රන්වන්) සහ පිත්තදිය (කොළ) හෙපටෝපැන්ක්‍රියාටික් ඇම්පුලාව හරහා ග්‍රහණියට ගලායයි.";
+});
+
+/* histology toggle */
+document.querySelectorAll('#histoSeg button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#histoSeg button').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  const exo = b.dataset.h==='exo';
+  document.getElementById('exoView').style.display = exo?'block':'none';
+  document.getElementById('endoView').style.display = exo?'none':'block';
+}));
+
+const enzData = {
+  amylase:"ඇමයිලේස්: පිෂ්ඨය → මෝල්ටෝස් බවට ජලවිච්ඡේදනය කරයි. සක්‍රීය ස්වරූපයෙන්ම ස්‍රාවය වේ.",
+  lipase:"ලයිපේස්: ලිපිඩ (මේද) → ග්ලිසරෝල් හා මේද අම්ල බවට ජලවිච්ඡේදනය කරයි. සක්‍රීය ස්වරූපයෙන්ම ස්‍රාවය වේ.",
+  nuclease:"නිෂ්ක්‍රීය නියුක්ලියේස්: නියුක්ලියික් අම්ල ජීර්ණය කරයි; ග්‍රහණියේදී සක්‍රීය කරනු ලැබේ.",
+  trypsinogen:"ට්‍රිප්සිනොජන් (නිෂ්ක්‍රීය): ග්‍රහණිය බිත්තියේ එන්ටරොකයිනේස් මගින් <b style='color:var(--gold)'>ට්‍රිප්සින්</b> ලෙස සක්‍රීය කෙරේ → ප්‍රෝටීන ජීර්ණය කරයි.",
+  chymotrypsinogen:"කයිමොට්‍රිප්සිනොජන් (නිෂ්ක්‍රීය): සක්‍රීය ට්‍රිප්සින් මගින් <b style='color:var(--gold)'>කයිමොට්‍රිප්සින්</b> ලෙස සක්‍රීය කෙරේ → ප්‍රෝටීන ජීර්ණය කරයි."
+};
+document.querySelectorAll('#enzChips .chip').forEach(c=>c.addEventListener('click',()=>{
+  document.querySelectorAll('#enzChips .chip').forEach(x=>x.classList.remove('active'));
+  c.classList.add('active');
+  const box = document.getElementById('enzInfo');
+  box.classList.remove('empty');
+  box.innerHTML = enzData[c.dataset.e];
+  const ef = document.getElementById('enzFlow');
+  ef.style.display='block';
+}));
+
+const isletData = {
+  alpha:"α (ඇල්ෆා) සෛල: <b style='color:var(--gold)'>ග්ලූකගන්</b> හෝමෝනය ස්‍රාවය කරයි → රුධිර ග්ලූකෝස් මට්ටම ඉහළ නංවයි (ග්ලයිකජන් බිඳවැටීම උත්තේජනය කරයි).",
+  beta:"β (බීටා) සෛල: <b style='color:var(--gold)'>ඉන්සියුලින්</b> හෝමෝනය ස්‍රාවය කරයි → රුධිර ග්ලූකෝස් මට්ටම පහත හෙළයි (සෛල තුලට ග්ලූකෝස් ග්‍රහණය හා ග්ලයිකජන් සෑදීම උත්තේජනය කරයි)."
+};
+document.querySelectorAll('.islet').forEach(c=>c.addEventListener('click',()=>{
+  const box = document.getElementById('isletInfo');
+  box.classList.remove('empty');
+  box.innerHTML = isletData[c.dataset.cell];
+  document.getElementById('hormFlow').style.display='block';
+}));
+
+/* ---------------- MODULE 2 : LIVER ---------------- */
+const lobuleData = {
+  centralvein:"මධ්‍ය ශිරාව: අනුඛණ්ඩිකාවේ මධ්‍යයේ පිහිටා ඇත; සියලුම කෝටරාභවලින් රුධිරය මෙයට එකතු වී විශාල ශිරාවලට ගමන් කරයි.",
+  triad1:"යාකෘතික ත්‍රිකෝණය: යාකෘතික ධමනි ශාඛාව (රතු), යාකෘතික ද්වාරික ශිරා ශාඛාව (නිල්) සහ පිත්ත නාලය (රන්වන්) එකට පිහිටයි.",
+  triad2:"යාකෘතික ත්‍රිකෝණය: යාකෘතික ධමනි ශාඛාව, ද්වාරික ශිරා ශාඛාව සහ පිත්ත නාලය අනුඛණ්ඩිකාවේ කෙළවර කොන් හයෙන් එකකි.",
+  triad3:"යාකෘතික ත්‍රිකෝණය: ඔක්සිජන් සහිත රුධිරය (ධමනියෙන්) සහ පෝෂක සහිත රුධිරය (ද්වාරික ශිරාවෙන්) කෝටරාභ වෙත ඇතුල් වන ස්ථානය.",
+  kupffer:"කුප්ෆර් සෛල: කෝටරාභ බිත්තියේ ඇති විශේෂිත භක්ෂක සෛල; රුධිරයේ බැක්ටීරියා හා පරණ රුධිර සෛල ෆැගොසයිටෝසිස් කරයි."
+};
+document.querySelectorAll('#lobuleSvg .hot').forEach(el=>{
+  el.addEventListener('click',()=>{
+    const box = document.getElementById('lobuleInfo');
+    box.classList.remove('empty');
+    box.innerHTML = lobuleData[el.dataset.k];
+    if(el.dataset.k==='kupffer'){
+      el.style.transition='transform .3s';
+      el.style.transform='scale(1.6)';
+      setTimeout(()=>{el.style.transform='scale(1)';},400);
+    }
+  });
+});
+document.getElementById('bloodBtn').addEventListener('click',function(){
+  const g = document.getElementById('bloodFlow');
+  const showing = g.style.display!=='none';
+  g.style.display = showing?'none':'block';
+  this.classList.toggle('active-btn', !showing);
+  const box = document.getElementById('lobuleInfo');
+  box.classList.remove('empty');
+  box.innerHTML = showing? "රුධිර ප්‍රවාහ අනුකරණය නවත්වන ලදී." :
+    "<b>රුධිර ප්‍රවාහය:</b> ධමනි හා ද්වාරික ශිරා රුධිරය කෝටරාභ තුළ මිශ්‍ර වී මධ්‍ය ශිරාව දෙසට ගලායයි; ගමන් කරද්දී කුප්ෆර් සෛල මගින් පිරිසිදු කරනු ලැබේ.";
+});
+
+document.getElementById('bileBtn1').addEventListener('click',function(){
+  document.getElementById('bileFlow2').style.display='block';
+  const box=document.getElementById('bileInfo');
+  box.classList.remove('empty');
+  box.innerHTML="<b>නිපදවීම:</b> අක්මා සෛල (hepatocytes) පිත්තදිය නිපදවා පිත්ත කේශනාලිකා → පිත්ත නාලය හරහා පිත්තාශයට යවා ගබඩා කර සාන්ද්‍රණය කරයි.";
+});
+document.getElementById('bileBtn2').addEventListener('click',function(){
+  document.getElementById('bileFlow2').style.display='block';
+  const box=document.getElementById('bileInfo');
+  box.classList.remove('empty');
+  box.innerHTML="<b>මුදාහැරීම (තෙලෝදකරණය):</b> ග්‍රහණියේ මේද පැමිණි විට CCK හෝමෝනය මගින් පිත්තාශය හැකිලීමට සලස්වා පිත්තදිය ග්‍රහණියට මුදාහරී — මේද කුඩා බිංදු බවට තෙලෝදකරණය (Emulsification) කර ලයිපේස් ක්‍රියාකාරීත්වයට පහසුකම් සලසයි.";
+});
+
+const funcCards = [
+  {ic:"🍬",t:"කාබෝහයිඩ්‍රේට් පරිවෘත්තීය",d:"අතිරික්ත ග්ලූකෝස් ග්ලයිකජන් ලෙස ගබඩා කරයි (ග්ලයිකජනසිස්); අවශ්‍ය විට නැවත ග්ලූකෝස් බවට හරවයි (ග්ලයිකජනොලිසිස්)."},
+  {ic:"🧈",t:"ලිපිඩ පරිවෘත්තීය",d:"මේද අම්ල ඔක්සිකරණය, කොලෙස්ටෙරෝල් හා ලිපොප්‍රෝටීන සංස්ලේෂණය සිදු කරයි."},
+  {ic:"🧬",t:"ඩීඇමිනීකරණය",d:"අතිරික්ත ඇමයිනෝ අම්ලවලින් ඇමයිනෝ කාණ්ඩය ඉවත් කර යූරියා බවට පරිවර්තනය කරයි."},
+  {ic:"☠️",t:"විෂහරණය",d:"මත්පැන්, ඖෂධ හා අනෙකුත් විෂ ද්‍රව්‍ය රුධිරයෙන් ඉවත් කර හානිකර නොවන ස්වරූපයට පත් කරයි."},
+  {ic:"🗄️",t:"ගබඩා කිරීම",d:"ග්ලයිකජන්, විටමින් A, D, E, K සහ B12, යකඩ (Fe) හා තඹ (Cu) ගබඩා කරයි."},
+  {ic:"🔥",t:"තාප උත්පාදනය",d:"අධික පරිවෘත්තීය ක්‍රියාකාරකම් හේතුවෙන් සිරුරේ තාපය නිපදවන ප්‍රධාන අවයවයකි."}
+];
+const fc = document.getElementById('funcCards');
+funcCards.forEach(f=>{
+  const div = document.createElement('div');
+  div.className='flipcard';
+  div.innerHTML = `<div class="flipcard-inner">
+    <div class="flipcard-face flipcard-front"><div class="ic">${f.ic}</div><div class="ti">${f.t}</div><div class="hint">ක්ලික් කරන්න</div></div>
+    <div class="flipcard-face flipcard-back">${f.d}</div>
+  </div>`;
+  div.addEventListener('click',()=>div.classList.toggle('flipped'));
+  fc.appendChild(div);
+});
+
+/* ---------------- MODULE 3 : REGULATION ---------------- */
+const regData = {
+  nerve:{
+    text:"<b>ස්නායුක යාමනය:</b> ආහාරයේ රූපය, ගන්ධය හෝ රසය → මොළය මගින් හඳුනාගනී → වේගස් ස්නායුව ඔස්සේ ආමාශයට ස්නායු ආවේගය යවනු ලැබේ → ලවණ රසය හා ආමාශ යුෂ ස්‍රාවය ආරම්භ වේ.",
+    paths:['pathNerve'], organs:['organBrain','organStomach']
+  },
+  gastrin:{
+    text:"<b>ගැස්ට්‍රින්:</b> ආහාර ආමාශයට ඇතුල්වී එහි බිත්ති දිගහැරෙන විට ආමාශ බිත්තියෙන් ගැස්ට්‍රින් හෝමෝනය රුධිරයට ස්‍රාවය වේ → රුධිරය ඔස්සේ නැවත ආමාශයට පැමිණ ආමාශ යුෂ ස්‍රාවය හා ආමාශ චලනය උත්තේජනය කරයි.",
+    paths:['pathGastrin'], organs:['organStomach']
+  },
+  secretin:{
+    text:"<b>සක්‍රිටින්:</b> අම්ලීය කයිම් ග්‍රහණියට පැමිණි විට සක්‍රිටින් හෝමෝනය රුධිරයට ස්‍රාවය වේ → අග්න්‍යාශය උත්තේජනය කර බයිකාබනේට් සමෘද්ධ අග්න්‍යාශික යුෂය ස්‍රාවය කරවයි (අම්ලය උදාසීන කිරීමට) සහ ආමාශ චලනය අවහිර කරයි.",
+    paths:['pathSecretin'], organs:['organDuo','organPanc']
+  },
+  cck:{
+    text:"<b>කොලිසිස්ටොකයිනින් (CCK):</b> මේද හා ඇමයිනෝ අම්ල ග්‍රහණියට පැමිණි විට CCK රුධිරයට ස්‍රාවය වේ → පිත්තාශය හැකිලීමට (පිත්තදිය මුදාහැරීමට) සහ අග්න්‍යාශයෙන් එන්සයිම සමෘද්ධ යුෂය ස්‍රාවය කිරීමට උත්තේජනය කරයි.",
+    paths:['pathCCK1','pathCCK2'], organs:['organDuo','organGB','organPanc']
+  }
+};
+document.querySelectorAll('.trigger-card').forEach(card=>{
+  card.addEventListener('click',()=>{
+    document.querySelectorAll('.trigger-card').forEach(c=>c.classList.remove('on'));
+    card.classList.add('on');
+    const d = regData[card.dataset.t];
+    const box = document.getElementById('regInfo');
+    box.classList.remove('empty');
+    box.innerHTML = d.text;
+    // reset all paths & organ glow
+    document.querySelectorAll('#m3 svg path[id^="path"]').forEach(p=>{p.style.opacity=0.35; p.classList.remove('pulse');});
+    ['organBrain','organStomach','organDuo','organPanc','organLiver','organGB'].forEach(id=>{
+      document.getElementById(id).style.filter='none';
+    });
+    d.paths.forEach(pid=>{
+      const p = document.getElementById(pid);
+      p.style.opacity=1;
+      p.classList.add('pulse');
+    });
+    d.organs.forEach(oid=>{
+      document.getElementById(oid).style.filter='drop-shadow(0 0 8px #e3a83b)';
+    });
+  });
+});
+
+/* ---------------- MODULE 4 : QUIZ ---------------- */
+const quiz = [
+  {q:"අග්න්‍යාශයේ බද්‍රිකා (Acini) මගින් ස්‍රාවය කරන ට්‍රිප්සිනොජන් සක්‍රීය කරනු ලබන්නේ කුමන එන්සයිමය මගිනි ද?",
+   opts:["ලයිපේස්","එන්ටරොකයිනේස්","ඇමයිලේස්","පෙප්සින්"], a:1},
+  {q:"රුධිර ග්ලූකෝස් මට්ටම ඉහළ නංවන හෝමෝනය ලැන්ගර්හැන් දීපිකාවේ කුමන සෛල මගින් ස්‍රාවය වේද?",
+   opts:["β (බීටා) සෛල","α (ඇල්ෆා) සෛල","කුප්ෆර් සෛල","අක්මා සෛල"], a:1},
+  {q:"අක්මා අනුඛණ්ඩිකාවේ මධ්‍යයේ පිහිටා ඇති ව්‍යුහය කුමක්ද?",
+   opts:["යාකෘතික ධමනිය","මධ්‍ය ශිරාව","පිත්ත නාලය","ද්වාරික ශිරාව"], a:1},
+  {q:"ග්‍රහණියේ අම්ලීය කයිම් හේතුවෙන් ස්‍රාවය වී අග්න්‍යාශයෙන් බයිකාබනේට් ස්‍රාවය උත්තේජනය කරන හෝමෝනය කුමක්ද?",
+   opts:["ගැස්ට්‍රින්","කොලිසිස්ටොකයිනින්","සක්‍රිටින්","ඉන්සියුලින්"], a:2},
+  {q:"පිත්තාශය හැකිලීමට සලස්වා පිත්තදිය ග්‍රහණියට මුදාහරින හෝමෝනය කුමක්ද?",
+   opts:["සක්‍රිටින්","ගැස්ට්‍රින්","ග්ලූකගන්","කොලිසිස්ටොකයිනින් (CCK)"], a:3}
+];
+let score=0, answered=new Array(quiz.length).fill(false);
+const qWrap = document.getElementById('quizWrap');
+quiz.forEach((item,qi)=>{
+  const div = document.createElement('div');
+  div.className='quiz-q';
+  div.innerHTML = `<div class="qtitle">${qi+1}. ${item.q}</div>` +
+   item.opts.map((o,oi)=>`<button class="quiz-opt" data-q="${qi}" data-o="${oi}">${o}</button>`).join('');
+  qWrap.appendChild(div);
+});
+qWrap.addEventListener('click',(e)=>{
+  if(!e.target.classList.contains('quiz-opt')) return;
+  const qi = +e.target.dataset.q, oi = +e.target.dataset.o;
+  if(answered[qi]) return;
+  answered[qi]=true;
+  const correct = quiz[qi].a;
+  const btns = qWrap.querySelectorAll(`.quiz-opt[data-q="${qi}"]`);
+  btns.forEach(b=>{
+    b.disabled = true;
+    if(+b.dataset.o === correct) b.classList.add('correct');
+    else if(+b.dataset.o === oi) b.classList.add('wrong');
+  });
+  if(oi===correct) score++;
+  document.getElementById('quizScore').textContent = `ලකුණු: ${score} / ${quiz.length}`;
+});
+document.getElementById('resetQuiz').addEventListener('click',()=>{
+  score=0; answered=new Array(quiz.length).fill(false);
+  document.getElementById('quizScore').textContent = `ලකුණු: 0 / ${quiz.length}`;
+  qWrap.innerHTML='';
+  quiz.forEach((item,qi)=>{
+    const div = document.createElement('div');
+    div.className='quiz-q';
+    div.innerHTML = `<div class="qtitle">${qi+1}. ${item.q}</div>` +
+     item.opts.map((o,oi)=>`<button class="quiz-opt" data-q="${qi}" data-o="${oi}">${o}</button>`).join('');
+    qWrap.appendChild(div);
+  });
+});
+</script>
+</body>
+</html>

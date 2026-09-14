@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="si" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>සංවේදක ව්‍යුහ | Interactive Bio Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a1620; --bg2:#0f2434; --card:#132b3d; --card2:#0e2231; --text:#eaf3f5; --dim:#8fabbb;
+  --accent:#f2b134; --accent2:#3fcf9e; --accent3:#ef6f6c; --border:#22415a; --shadow:0 8px 24px rgba(0,0,0,.35);
+}
+html[data-theme="light"]{
+  --bg:#f3f8f7; --bg2:#ffffff; --card:#ffffff; --card2:#eef5f4; --text:#122430; --dim:#54707c;
+  --accent:#c9791f; --accent2:#0e8a70; --accent3:#c65350; --border:#d7e4e2; --shadow:0 8px 20px rgba(20,50,60,.08);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Noto Sans Sinhala',sans-serif;transition:background .3s,color .3s;-webkit-tap-highlight-color:transparent}
+.eng{font-family:'Space Grotesk',sans-serif}
+header{position:sticky;top:0;z-index:50;background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(6px)}
+header h1{font-size:15px;margin:0;line-height:1.3}
+header h1 small{display:block;font-size:11px;color:var(--dim);font-family:'Space Grotesk'}
+#themeBtn{background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:20px;padding:8px 12px;font-size:16px;cursor:pointer}
+nav#tabs{display:flex;gap:8px;overflow-x:auto;padding:10px 14px;background:var(--bg2);border-bottom:1px solid var(--border);scrollbar-width:none}
+nav#tabs::-webkit-scrollbar{display:none}
+.tabBtn{flex:0 0 auto;background:var(--card);border:1px solid var(--border);color:var(--dim);padding:9px 14px;border-radius:24px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:.2s}
+.tabBtn.active{background:var(--accent2);color:#04211a;border-color:var(--accent2)}
+main{max-width:720px;margin:0 auto;padding:14px 12px 60px}
+.module{display:none;animation:fade .35s ease}
+.module.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
+.card h2{margin:0 0 4px;font-size:17px;display:flex;align-items:center;gap:8px}
+.card h2 .eyebrow{font-family:'Space Grotesk';font-size:11px;color:var(--accent);background:rgba(242,177,52,.12);padding:2px 8px;border-radius:8px;font-weight:700}
+.card p.desc{color:var(--dim);font-size:13px;margin:4px 0 12px;line-height:1.6}
+svg{width:100%;height:auto;display:block;touch-action:manipulation}
+.hotspot{cursor:pointer}
+.hotspot circle{transition:r .2s}
+.hotspot:hover circle,.hotspot.sel circle{stroke:var(--accent);stroke-width:3}
+.infoBox{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-top:10px;font-size:13.5px;line-height:1.6;min-height:52px}
+.infoBox b{color:var(--accent2)}
+.slider-row{display:flex;align-items:center;gap:10px;margin:10px 0}
+.slider-row label{font-size:12px;color:var(--dim);flex:0 0 56px}
+input[type=range]{flex:1;accent-color:var(--accent2)}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.chip{background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 12px;border-radius:10px;font-size:12.5px;cursor:pointer;font-weight:600}
+.chip.on{background:var(--accent2);color:#04211a;border-color:var(--accent2)}
+.playBtn{background:var(--accent);color:#241700;border:none;padding:9px 16px;border-radius:10px;font-weight:700;cursor:pointer;font-size:13px}
+details{border:1px solid var(--border);border-radius:12px;margin-bottom:10px;background:var(--card2);overflow:hidden}
+summary{padding:11px 14px;font-weight:600;cursor:pointer;font-size:13.5px;list-style:none;display:flex;justify-content:space-between}
+summary::-webkit-details-marker{display:none}
+summary:after{content:'+';color:var(--accent);font-size:18px}
+details[open] summary:after{content:'–'}
+details .body{padding:0 14px 14px;font-size:13.2px;color:var(--dim);line-height:1.7}
+.stepline{display:flex;gap:4px;margin:10px 0}
+.stepline .dot{flex:1;height:5px;border-radius:3px;background:var(--border)}
+.stepline .dot.on{background:var(--accent2)}
+.flip-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.flipcard{perspective:800px;height:92px}
+.flipcard .inner{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d;cursor:pointer}
+.flipcard.flip .inner{transform:rotateY(180deg)}
+.flipcard .face{position:absolute;inset:0;backface-visibility:hidden;border-radius:12px;display:flex;align-items:center;justify-content:center;text-align:center;padding:8px;font-size:12.5px;font-weight:600}
+.flipcard .front{background:var(--card2);border:1px solid var(--border)}
+.flipcard .back{background:var(--accent2);color:#04211a;transform:rotateY(180deg);font-weight:500;font-size:11.5px}
+.pulse{animation:pulse 1s ease infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.moveDot{animation:travel 1.6s linear infinite}
+@keyframes travel{0%{offset-distance:0%}100%{offset-distance:100%}}
+footer{text-align:center;color:var(--dim);font-size:11px;padding:20px 0;font-family:'Space Grotesk'}
+.small{font-size:11.5px;color:var(--dim)}
+</style>
+</head>
+<body>
+<header>
+  <h1>සංවේදක ව්‍යුහ හා ක්‍රියාකාරීත්වය<small class="eng">Interactive Sensory Systems Lab</small></h1>
+  <button id="themeBtn" onclick="toggleTheme()">🌙</button>
+</header>
+<nav id="tabs">
+  <button class="tabBtn active" data-mod="eye">👁 ඇස</button>
+  <button class="tabBtn" data-mod="ear">👂 කන</button>
+  <button class="tabBtn" data-mod="smelltaste">👃 ඝ්‍රාණ/රස</button>
+  <button class="tabBtn" data-mod="skin">🖐 සම</button>
+  <button class="tabBtn" data-mod="defects">🔍 දෘෂ්ටි ආබාධ</button>
+  <button class="tabBtn" data-mod="quiz">🧠 පුනරීක්ෂණය</button>
+</nav>
+<main>
+
+<!-- ================= EYE MODULE ================= -->
+<section class="module active" id="mod-eye">
+  <div class="card">
+    <h2><span class="eyebrow">01</span> ඇසේ මූලික ව්‍යුහය</h2>
+    <p class="desc">කොටසක් ස්පර්ශ කර විස්තර බලන්න.</p>
+    <svg viewBox="0 0 400 240" id="eyeSvg">
+      <ellipse cx="200" cy="120" rx="150" ry="90" fill="none" stroke="var(--border)" stroke-width="2"/>
+      <path d="M50 120 A150 90 0 0 1 60 70" fill="none" stroke="#7fb3c9" stroke-width="6"/>
+      <g class="hotspot" data-k="cornea"><path d="M45 95 A35 45 0 0 0 45 145" fill="none" stroke="#8fd6e8" stroke-width="5"/><circle cx="45" cy="120" r="14" fill="transparent"/></g>
+      <g class="hotspot" data-k="iris"><path d="M62 100 A25 25 0 0 0 62 140" fill="#3fcf9e" opacity=".5"/><circle cx="62" cy="120" r="12" fill="transparent"/></g>
+      <circle cx="60" cy="120" r="7" fill="#04141c"/>
+      <g class="hotspot" data-k="lens"><ellipse cx="82" cy="120" rx="10" ry="26" fill="#f2b134" opacity=".55"/><circle cx="82" cy="120" r="12" fill="transparent"/></g>
+      <g class="hotspot" data-k="retina"><path d="M330 45 A150 90 0 0 1 330 195" fill="none" stroke="#ef6f6c" stroke-width="7"/><circle cx="345" cy="120" r="12" fill="transparent"/></g>
+      <g class="hotspot" data-k="fovea"><circle cx="330" cy="120" r="6" fill="#ffd76a"/><circle cx="330" cy="120" r="12" fill="transparent"/></g>
+      <g class="hotspot" data-k="blindspot"><circle cx="330" cy="90" r="6" fill="#9fabbb"/><circle cx="330" cy="90" r="12" fill="transparent"/></g>
+      <g class="hotspot" data-k="opticnerve"><path d="M345 120 L395 120" stroke="#8fabbb" stroke-width="6"/><circle cx="380" cy="120" r="12" fill="transparent"/></g>
+      <text x="45" y="165" font-size="10" fill="var(--dim)" text-anchor="middle">කනීනිකාව</text>
+      <text x="62" y="60" font-size="10" fill="var(--dim)" text-anchor="middle">තාරා මණ්ඩලය</text>
+      <text x="90" y="165" font-size="10" fill="var(--dim)" text-anchor="middle">ස්වච්ඡය</text>
+      <text x="330" y="205" font-size="10" fill="var(--dim)" text-anchor="middle">දෘෂ්ටි විතානය</text>
+      <text x="330" y="70" font-size="9" fill="var(--dim)" text-anchor="middle">කහ ලපය</text>
+      <text x="330" y="215" font-size="9" fill="var(--dim)" text-anchor="middle">අන්ධ ලපය</text>
+      <text x="380" y="105" font-size="9" fill="var(--dim)" text-anchor="middle">දෘෂ්ටික ස්නායුව</text>
+    </svg>
+    <div class="infoBox" id="eyeInfo">ඕනෑම කොටසක් ස්පර්ශ කරන්න — විස්තරය මෙහි පෙන්වයි.</div>
+  </div>
+
+  <div class="card">
+    <h2><span class="eyebrow">02</span> සුසරණය (Accommodation)</h2>
+    <p class="desc">දුර/සමීප වස්තු අතර දෘෂ්ටිය වෙනස් වන ආකාරය බලන්න.</p>
+    <svg viewBox="0 0 300 130" id="accSvg">
+      <circle cx="150" cy="65" r="40" fill="none" stroke="var(--accent3)" stroke-width="5" id="ciliary"/>
+      <line x1="112" y1="40" x2="140" y2="60" stroke="var(--dim)" stroke-width="2" id="lig1"/>
+      <line x1="112" y1="90" x2="140" y2="70" stroke="var(--dim)" stroke-width="2" id="lig2"/>
+      <line x1="188" y1="40" x2="160" y2="60" stroke="var(--dim)" stroke-width="2" id="lig3"/>
+      <line x1="188" y1="90" x2="160" y2="70" stroke="var(--dim)" stroke-width="2" id="lig4"/>
+      <ellipse cx="150" cy="65" rx="10" ry="24" fill="var(--accent2)" id="lensShape"/>
+    </svg>
+    <div class="slider-row"><label class="small">දුර ← → සමීප</label><input type="range" id="accSlider" min="0" max="100" value="20" oninput="updateAccommodation(this.value)"></div>
+    <div class="infoBox" id="accInfo"></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="eyebrow">03</span> ප්‍රභාග්‍රාහක ක්‍රියාවලිය (Photoreception)</h2>
+    <p class="desc">"ඊළඟ පියවර" ක්ලික් කර ආලෝකය ස්නායු ආවේගයක් බවට පත්වන අයුරු බලන්න.</p>
+    <svg viewBox="0 0 320 90">
+      <text x="10" y="20" font-size="11" fill="var(--dim)">ආලෝකය</text>
+      <text x="10" y="45" id="lb0" font-size="11" fill="var(--text)">→ දණ්ඩ/කේතු සෛල</text>
+      <text x="10" y="60" id="lb1" font-size="11" fill="var(--dim)">රොඩොප්සින් බිඳීම</text>
+      <text x="10" y="75" id="lb2" font-size="11" fill="var(--dim)">ද්විඝුව සෛල → ගැංග්ලියම් සෛල → දෘෂ්ටික ස්නායුව</text>
+      <circle id="photonDot" cx="20" cy="15" r="5" fill="var(--accent)"/>
+    </svg>
+    <div class="stepline" id="photoSteps"></div>
+    <div class="infoBox" id="photoInfo">1 වන පියවර: ආලෝක ෆෝටෝන එය දෘෂ්ටි විතානයේ දණ්ඩ/කේතු සෛලවලට හැපෙයි.</div>
+    <div class="btnrow"><button class="playBtn" onclick="nextPhoto()">ඊළඟ පියවර ▶</button></div>
+  </div>
+</section>
+
+<!-- ================= EAR MODULE ================= -->
+<section class="module" id="mod-ear">
+  <div class="card">
+    <h2><span class="eyebrow">01</span> කනෙහි ව්‍යුහය</h2>
+    <p class="desc">බාහිර, මැද සහ ඇතුළු කන ස්පර්ශ කරන්න.</p>
+    <svg viewBox="0 0 380 160" id="earSvg">
+      <path d="M20 80 Q10 40 50 40 Q90 40 90 80 Q90 110 60 110" fill="none" stroke="var(--dim)" stroke-width="4" class="hotspot" data-k="pinna"/>
+      <rect x="90" y="72" width="70" height="16" fill="#7fb3c9" opacity=".4" class="hotspot" data-k="canal"/>
+      <line x1="160" y1="55" x2="160" y2="105" stroke="var(--accent3)" stroke-width="4" class="hotspot" data-k="eardrum"/>
+      <circle cx="180" cy="70" r="7" fill="var(--accent)" class="hotspot" data-k="malleus"/>
+      <circle cx="195" cy="80" r="6" fill="var(--accent)" class="hotspot" data-k="incus"/>
+      <circle cx="210" cy="70" r="5" fill="var(--accent)" class="hotspot" data-k="stapes"/>
+      <circle cx="255" cy="55" r="22" fill="none" stroke="var(--dim)" stroke-width="3" class="hotspot" data-k="semicircular"/>
+      <path d="M230 90 q30 -10 55 10 q10 30 -20 40 q-30 6 -35 -25 q-3 -18 0 -25 Z" fill="none" stroke="var(--accent2)" stroke-width="4" class="hotspot" data-k="cochlea"/>
+      <line x1="290" y1="90" x2="340" y2="90" stroke="var(--dim)" stroke-width="3" class="hotspot" data-k="cochnerve"/>
+      <text x="45" y="130" font-size="9" fill="var(--dim)" text-anchor="middle">බාහිර කන</text>
+      <text x="180" y="130" font-size="9" fill="var(--dim)" text-anchor="middle">මැද කන</text>
+      <text x="280" y="130" font-size="9" fill="var(--dim)" text-anchor="middle">ඇතුළු කන</text>
+    </svg>
+    <div class="infoBox" id="earInfo">ඕනෑම කොටසක් ස්පර්ශ කරන්න.</div>
+  </div>
+
+  <div class="card">
+    <h2><span class="eyebrow">02</span> ශබ්ද තරංග → ශ්‍රවණය (Animation)</h2>
+    <p class="desc">Play කර සම්පූර්ණ මාර්ගය අනුගමනය කරන්න.</p>
+    <svg viewBox="0 0 320 70">
+      <circle cx="30" cy="35" r="0" stroke="var(--accent)" stroke-width="2" fill="none" id="wave1"/>
+      <circle cx="30" cy="35" r="0" stroke="var(--accent)" stroke-width="2" fill="none" id="wave2"/>
+      <line x1="90" y1="15" x2="90" y2="55" stroke="var(--dim)" stroke-width="4" id="drumLine"/>
+      <circle cx="130" cy="35" r="6" fill="var(--dim)" id="oss1"/>
+      <circle cx="150" cy="35" r="6" fill="var(--dim)" id="oss2"/>
+      <circle cx="170" cy="35" r="6" fill="var(--dim)" id="oss3"/>
+      <path d="M200 15 q20 -8 40 0 q10 25 -15 35 q-25 5 -30 -20 Z" fill="none" stroke="var(--dim)" stroke-width="3" id="cochleaShape"/>
+      <line x1="255" y1="35" x2="300" y2="35" stroke="var(--dim)" stroke-width="3" id="nerveLine"/>
+    </svg>
+    <div class="stepline" id="soundSteps"></div>
+    <div class="infoBox" id="soundInfo">Play ඔබා ශබ්ද මාර්ගය බලන්න: තරංග→ටිම්පනික් පටලය→ඔසිකල්ස්→ඕවල් කවුළුව→කොක්ලියා→හෙයාර් සෛල→ස්නායු ආවේගය.</div>
+    <div class="btnrow"><button class="playBtn" onclick="playSound()">▶ Play</button></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="eyebrow">03</span> සංඛ්‍යාතය සහ බැසිලර පටලය</h2>
+    <p class="desc">සංඛ්‍යාතය වෙනස් කර, කම්පනය වන ස්ථානය බලන්න.</p>
+    <svg viewBox="0 0 300 60">
+      <polygon points="20,30 280,15 280,45" fill="none" stroke="var(--border)" stroke-width="2"/>
+      <circle id="freqDot" cx="40" cy="27" r="7" fill="var(--accent2)"/>
+    </svg>
+    <div class="slider-row"><label class="small">20Hz–20kHz</label><input type="range" id="freqSlider" min="20" max="20000" value="1000" oninput="updateFreq(this.value)"></div>
+    <div class="infoBox" id="freqInfo"></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="eyebrow">04</span> සමතුලිතතා අවයවය</h2>
+    <p class="desc">හිස නැමීමේ මට්ටම වෙනස් කර එන්ඩොලිම්ෆ චලනය බලන්න.</p>
+    <svg viewBox="0 0 260 100">
+      <ellipse cx="60" cy="50" rx="45" ry="22" fill="none" stroke="var(--dim)" stroke-width="2" transform="rotate(20 60 50)"/>
+      <ellipse cx="130" cy="50" rx="45" ry="22" fill="none" stroke="var(--dim)" stroke-width="2" transform="rotate(-30 130 50)"/>
+      <ellipse cx="95" cy="30" rx="45" ry="22" fill="none" stroke="var(--dim)" stroke-width="2" transform="rotate(80 95 30)"/>
+      <circle id="endoDot" cx="60" cy="50" r="6" fill="var(--accent3)"/>
+      <rect x="200" y="20" width="40" height="60" rx="8" fill="none" stroke="var(--border)" stroke-width="2"/>
+      <circle id="otolithDot" cx="220" cy="40" r="5" fill="var(--accent)"/>
+    </svg>
+    <div class="slider-row"><label class="small">හිස නැමීම</label><input type="range" id="tiltSlider" min="-100" max="100" value="0" oninput="updateTilt(this.value)"></div>
+    <div class="infoBox" id="tiltInfo">අර්ධ වෘත්තාකාර නාල කෝණික චලනය අනාවරණය කරන අතර, ඕටලිත් අවයව රේඛීය ත්වරණය අනාවරණය කරයි.</div>
+  </div>
+</section>
+
+<!-- ================= SMELL & TASTE ================= -->
+<section class="module" id="mod-smelltaste">
+  <div class="card">
+    <h2><span class="eyebrow">01</span> ඝ්‍රාණ පුඤ්ජිකාව</h2>
+    <p class="desc">"Sniff" ඔබා අණු ග්‍රාහක සිලියා වෙත බැඳෙන ආකාරය බලන්න.</p>
+    <svg viewBox="0 0 300 110">
+      <rect x="10" y="10" width="280" height="30" fill="none" stroke="var(--border)" stroke-width="2"/>
+      <g id="cilia">
+        <line x1="30" y1="40" x2="30" y2="20" stroke="var(--accent2)" stroke-width="2"/>
+        <line x1="60" y1="40" x2="60" y2="18" stroke="var(--accent2)" stroke-width="2"/>
+        <line x1="90" y1="40" x2="90" y2="22" stroke="var(--accent2)" stroke-width="2"/>
+        <line x1="120" y1="40" x2="120" y2="19" stroke="var(--accent2)" stroke-width="2"/>
+      </g>
+      <circle id="mol1" cx="30" cy="95" r="5" fill="var(--accent)"/>
+      <circle id="mol2" cx="90" cy="95" r="5" fill="var(--accent)"/>
+      <line x1="150" y1="25" x2="220" y2="25" stroke="var(--dim)" stroke-width="2"/>
+      <circle cx="230" cy="25" r="10" fill="none" stroke="var(--dim)" stroke-width="2"/>
+      <text x="230" y="50" font-size="8" fill="var(--dim)" text-anchor="middle">ඝ්‍රාණ බල්බය</text>
+    </svg>
+    <div class="infoBox" id="smellInfo">වායුගත රසායනික අණු ඝ්‍රාණ ග්‍රාහක සෛලවල සිලියා වෙත බැඳී ක්‍රියා විභවයක් ජනනය කරයි.</div>
+    <div class="btnrow"><button class="playBtn" onclick="sniff()">👃 Sniff</button></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="eyebrow">02</span> රස මුකුළුව සහ රස පහ</h2>
+    <p class="desc">රසයක් තෝරන්න.</p>
+    <svg viewBox="0 0 180 120">
+      <path d="M60 10 Q30 10 30 45 L30 90 Q30 110 60 110 Q90 110 90 90 L90 45 Q90 10 60 10 Z" fill="none" stroke="var(--border)" stroke-width="2"/>
+      <circle cx="60" cy="30" r="6" fill="var(--accent3)"/>
+      <line x1="52" y1="40" x2="52" y2="70" stroke="var(--accent2)" stroke-width="2"/>
+      <line x1="60" y1="40" x2="60" y2="75" stroke="var(--accent2)" stroke-width="2"/>
+      <line x1="68" y1="40" x2="68" y2="70" stroke="var(--accent2)" stroke-width="2"/>
+      <line x1="60" y1="78" x2="60" y2="105" stroke="var(--dim)" stroke-width="3"/>
+    </svg>
+    <div class="btnrow" id="tasteBtns">
+      <button class="chip" onclick="taste('sweet')">පැණි රස</button>
+      <button class="chip" onclick="taste('salt')">ලුණු රස</button>
+      <button class="chip" onclick="taste('sour')">ඇඹුල් රස</button>
+      <button class="chip" onclick="taste('bitter')">තිත්ත රස</button>
+      <button class="chip" onclick="taste('umami')">උමාමි රස</button>
+    </div>
+    <div class="infoBox" id="tasteInfo">රසායනික සංයෝග ලවණීය තරලයේ දිය වී රස මුකුළුවේ රස රෝම වෙත ළඟාවේ.</div>
+  </div>
+</section>
+
+<!-- ================= SKIN MODULE ================= -->
+<section class="module" id="mod-skin">
+  <div class="card">
+    <h2><span class="eyebrow">01</span> සමේ ස්පර්ශ ග්‍රාහක</h2>
+    <p class="desc">උත්තේජකයක් තෝරන්න — අදාළ ග්‍රාහකය දීප්තිමත් වේ.</p>
+    <svg viewBox="0 0 320 150">
+      <rect x="0" y="0" width="320" height="35" fill="#e7c9a3" opacity=".25"/>
+      <rect x="0" y="35" width="320" height="115" fill="#c98a5a" opacity=".12"/>
+      <text x="6" y="14" font-size="8" fill="var(--dim)">ඨස්ම (Epidermis)</text>
+      <text x="6" y="145" font-size="8" fill="var(--dim)">හම (Dermis)</text>
+      <circle id="r-free" cx="40" cy="20" r="6" fill="var(--dim)"/>
+      <circle id="r-meissner" cx="110" cy="45" r="8" fill="var(--dim)"/>
+      <circle id="r-ruffini" cx="190" cy="65" r="9" fill="var(--dim)"/>
+      <circle id="r-krause" cx="240" cy="55" r="7" fill="var(--dim)"/>
+      <ellipse id="r-pacinian" cx="270" cy="115" rx="16" ry="10" fill="var(--dim)"/>
+      <text x="40" y="35" font-size="7" fill="var(--dim)" text-anchor="middle">නිදහස් අන්ත</text>
+      <text x="110" y="65" font-size="7" fill="var(--dim)" text-anchor="middle">මයිස්නර්</text>
+      <text x="190" y="85" font-size="7" fill="var(--dim)" text-anchor="middle">රෆිනි</text>
+      <text x="240" y="45" font-size="7" fill="var(--dim)" text-anchor="middle">ක්‍රවුස්</text>
+      <text x="270" y="140" font-size="7" fill="var(--dim)" text-anchor="middle">පැසිනියන්</text>
+    </svg>
+    <div class="btnrow">
+      <button class="chip" onclick="stim('pain')">වේදනාව</button>
+      <button class="chip" onclick="stim('touch')">ස්පර්ශය</button>
+      <button class="chip" onclick="stim('warm')">උණුසුම</button>
+      <button class="chip" onclick="stim('cold')">සීතලය</button>
+      <button class="chip" onclick="stim('pressure')">පීඩනය</button>
+    </div>
+    <div class="infoBox" id="skinInfo">උත්තේජකයක් ක්ලික් කරන්න.</div>
+  </div>
+</section>
+
+<!-- ================= VISION DEFECTS ================= -->
+<section class="module" id="mod-defects">
+  <div class="card">
+    <h2><span class="eyebrow">01</span> දෘෂ්ටි ආබාධ</h2>
+    <div class="btnrow">
+      <button class="chip on" data-d="myopia" onclick="setDefect('myopia')">අසමීපදෘෂ්ටිකතාව</button>
+      <button class="chip" data-d="hyper" onclick="setDefect('hyper')">දුරදෘෂ්ටිකතාව</button>
+      <button class="chip" data-d="astig" onclick="setDefect('astig')">ඇස්තිග්මතාව</button>
+    </div>
+    <svg viewBox="0 0 300 120" id="defSvg">
+      <ellipse cx="180" cy="60" rx="60" ry="40" fill="none" stroke="var(--border)" stroke-width="2"/>
+      <line x1="240" y1="45" x2="120" y2="45" stroke="var(--accent)" stroke-width="1.5" id="ray1"/>
+      <line x1="240" y1="60" x2="120" y2="60" stroke="var(--accent)" stroke-width="1.5" id="ray2"/>
+      <line x1="240" y1="75" x2="120" y2="75" stroke="var(--accent)" stroke-width="1.5" id="ray3"/>
+      <line x1="240" y1="30" x2="240" y2="90" stroke="var(--accent3)" stroke-width="4" id="retinaLine"/>
+      <circle id="focusPt" cx="150" cy="60" r="4" fill="var(--accent2)"/>
+      <g id="lensCorrection"></g>
+    </svg>
+    <div class="btnrow"><button class="chip" id="corrBtn" onclick="toggleCorrection()">නිවැරදි කාචය එක් කරන්න</button></div>
+    <div class="infoBox" id="defInfo"></div>
+  </div>
+</section>
+
+<!-- ================= QUIZ ================= -->
+<section class="module" id="mod-quiz">
+  <div class="card">
+    <h2><span class="eyebrow">01</span> ෆ්ලෑෂ්කාඩ් පුනරීක්ෂණය</h2>
+    <p class="desc">කාඩ්පතක් ස්පර්ශ කර පෙරළන්න.</p>
+    <div class="flip-grid" id="flipGrid"></div>
+  </div>
+</section>
+
+</main>
+<footer>Sri Lanka Bio Resource Book · 5.3 සංවේදක ව්‍යුහ — Interactive Simulator</footer>
+
+<script>
+// ---------- THEME ----------
+function toggleTheme(){
+  const html=document.documentElement;
+  const cur=html.getAttribute('data-theme');
+  const next = cur==='dark'?'light':'dark';
+  html.setAttribute('data-theme',next);
+  document.getElementById('themeBtn').textContent = next==='dark'?'🌙':'☀️';
+}
+
+// ---------- TABS ----------
+document.querySelectorAll('.tabBtn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tabBtn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.module').forEach(m=>m.classList.remove('active'));
+    document.getElementById('mod-'+btn.dataset.mod).classList.add('active');
+  });
+});
+
+// ---------- EYE HOTSPOTS ----------
+const eyeInfo={
+  cornea:'<b>කනීනිකාව:</b> ආලෝකය ඇසට ඇතුළු වන පාරදෘෂ්‍ය ස්ථීර ස්ථරය. ආලෝකය වර්තනය කිරීමේ ප්‍රධාන කාර්යභාරය මෙයින් සිදුවේ.',
+  iris:'<b>තාරා මණ්ඩලය:</b> ශිෂ්‍යතාවේ ප්‍රමාණය පාලනය කරන වර්ණවත් මාංශපේශී වළල්ල — ඇසට ඇතුළු වන ආලෝක ප්‍රමාණය සීමා කරයි.',
+  lens:'<b>ස්වච්ඡය:</b> සිලියරි මාංශපේශි මගින් හැඩය වෙනස් කරමින් රූපය දෘෂ්ටි විතානය මත නිවැරදිව කේන්ද්‍රගත කරයි (සුසරණය).',
+  retina:'<b>දෘෂ්ටි විතානය:</b> ආලෝක සංවේදී දණ්ඩ සහ කේතු සෛල අඩංගු, රූපය පිහිටන ස්ථරය. ආලෝකය ස්නායු ආවේග බවට පත් කරයි.',
+  fovea:'<b>කහ ලපය (Fovea):</b> කේතු සෛල වඩාත් සංකේන්ද්‍රිත වූ ප්‍රදේශය — වඩාත් තියුණු දෘෂ්ටියක් ලැබෙන ස්ථානය.',
+  blindspot:'<b>අන්ධ ලපය:</b> දෘෂ්ටික ස්නායුව දෘෂ්ටි විතානයෙන් පිටවන ස්ථානය. මෙහි ප්‍රභාග්‍රාහක සෛල නොමැත.',
+  opticnerve:'<b>දෘෂ්ටික ස්නායුව:</b> ගැංග්ලියම් සෛලවලින් උපත ලබන ස්නායු ආවේග මොළයට රැගෙන යයි.'
+};
+document.querySelectorAll('#eyeSvg .hotspot').forEach(el=>{
+  el.addEventListener('click',()=>{
+    document.querySelectorAll('#eyeSvg .hotspot').forEach(h=>h.classList.remove('sel'));
+    el.classList.add('sel');
+    document.getElementById('eyeInfo').innerHTML=eyeInfo[el.dataset.k];
+  });
+});
+
+// ---------- ACCOMMODATION ----------
+function updateAccommodation(v){
+  v=+v;
+  const cRad = 40 - (v/100)*14; // ciliary contracts when near
+  document.getElementById('ciliary').setAttribute('r',cRad);
+  const lensRx = 10 + (v/100)*10; // lens more convex near
+  document.getElementById('lensShape').setAttribute('rx',lensRx);
+  const slack = v/100;
+  ['lig1','lig2','lig3','lig4'].forEach(id=>{
+    document.getElementById(id).style.strokeDasharray = slack>0.5 ? '3,3':'none';
+  });
+  document.getElementById('accInfo').innerHTML = v<50
+    ? '<b>දුර වස්තුව:</b> සිලියරි මාංශපේශි ලිහිල් වේ → දෘෂ්ටික ස්නායුව තද වේ → ස්වච්ඡය සමතලා වේ.'
+    : '<b>සමීප වස්තුව:</b> සිලියරි මාංශපේශි හැකිලේ → දෘෂ්ටික ස්නායුව ලිහිල් වේ → ස්වච්ඡය මගින් වඩාත් උත්තල හැඩයක් ගනී.';
+}
+updateAccommodation(20);
+
+// ---------- PHOTORECEPTION STEPS ----------
+const photoSteps=[
+  'ආලෝක ෆෝටෝන දෘෂ්ටි විතානයේ දණ්ඩ/කේතු සෛල වෙත පතිත වේ.',
+  'ෆෝටෝන අවශෝෂණය නිසා රොඩොප්සින් (යෂ්ටි වර්ණකය) බිඳ වැටේ.',
+  'මෙම රසායනික වෙනස ස්නායු ආවේගයක් උත්පාදනය කරයි.',
+  'ආවේගය ද්විඝුව සෛල වෙත සම්ප්‍රේෂණය වේ.',
+  'ගැංග්ලියම් සෛල ආවේගය රැස්කර දෘෂ්ටික ස්නායු තන්තු බවට සකසයි.',
+  'දෘෂ්ටික ස්නායුව හරහා ආවේගය මොළයේ පශ්චාත් කපාල බණ්ඩිකාව වෙත ළඟාවේ.'
+];
+let photoIdx=0;
+function renderPhotoSteps(){
+  const c=document.getElementById('photoSteps');
+  c.innerHTML='';
+  photoSteps.forEach((_,i)=>{
+    const d=document.createElement('div');
+    d.className='dot'+(i<=photoIdx?' on':'');
+    c.appendChild(d);
+  });
+}
+function nextPhoto(){
+  photoIdx=(photoIdx+1)%photoSteps.length;
+  document.getElementById('photoInfo').textContent=(photoIdx+1)+' වන පියවර: '+photoSteps[photoIdx];
+  renderPhotoSteps();
+}
+renderPhotoSteps();
+
+// ---------- EAR HOTSPOTS ----------
+const earInfo={
+  pinna:'<b>කර්ණශබ්ද පත්‍රය (Pinna):</b> ශබ්ද තරංග රැස්කර කන් කවුළුව වෙත මාර්ගගත කරයි.',
+  canal:'<b>බාහිර ශ්‍රවණ නාලය:</b> ශබ්ද තරංග ටිම්පනික් පටලය දක්වා රැගෙන යන නාලය.',
+  eardrum:'<b>ටිම්පනික් පටලය:</b> ශබ්ද තරංග මගින් කම්පනය වන පටල — කම්පනය යාන්ත්‍රික ශක්තියක් බවට පත් කරයි.',
+  malleus:'<b>මැලියස්:</b> ටිම්පනික් පටලයට සම්බන්ධ පළමු ඔසිකලය.',
+  incus:'<b>ඉන්කස්:</b> මැලියස් සහ ස්ටේපිස් අතර සම්බන්ධක ඔසිකලය.',
+  stapes:'<b>ස්ටේපිස්:</b> ඕවල් කවුළුවට කම්පනය සම්ප්‍රේෂණය කරන අවසාන ඔසිකලය — කම්පනය විස්තාරණය කරයි.',
+  semicircular:'<b>අර්ධ වෘත්තාකාර නාල:</b> හිසේ කෝණික චලනය අනාවරණය කර සමතුලිතතාවය පවත්වා ගනී.',
+  cochlea:'<b>කර්ණශබ්බය (Cochlea):</b> ශබ්ද තරංග ස්නායු ආවේග බවට පරිවර්තනය වන සර්පිලාකාර අවයවය.',
+  cochnerve:'<b>ශ්‍රවණ ස්නායුව:</b> කොර්ටි අවයවයෙන් ලද ආවේග මොළය වෙත රැගෙන යයි.'
+};
+document.querySelectorAll('#earSvg .hotspot').forEach(el=>{
+  el.addEventListener('click',()=>{
+    document.getElementById('earInfo').innerHTML=earInfo[el.dataset.k];
+  });
+});
+
+// ---------- SOUND ANIMATION ----------
+const soundStepsTxt=[
+  'ශබ්ද තරංග වාතය හරහා ගමන් කරයි.',
+  'තරංග ටිම්පනික් පටලය කම්පනය කරයි.',
+  'ඔසිකල් (මැලියස්-ඉන්කස්-ස්ටේපිස්) කම්පනය විස්තාරණය කරයි.',
+  'ඕවල් කවුළුව හරහා කම්පනය කොක්ලියා තුළට යයි.',
+  'කොක්ලියාවේ තරලය චලනය වී කෝර්ටි අවයවයේ රෝම සෛල නැමේ.',
+  'ස්නායු ආවේගය ශ්‍රවණ ස්නායුව හරහා මොළයට යයි.'
+];
+let soundStep=0, soundTimer=null;
+function renderSoundSteps(){
+  const c=document.getElementById('soundSteps');c.innerHTML='';
+  soundStepsTxt.forEach((_,i)=>{const d=document.createElement('div');d.className='dot'+(i<=soundStep?' on':'');c.appendChild(d);});
+}
+function playSound(){
+  if(soundTimer) clearInterval(soundTimer);
+  soundStep=0;
+  document.getElementById('wave1').setAttribute('r',0);
+  document.getElementById('wave2').setAttribute('r',0);
+  soundTimer=setInterval(()=>{
+    document.getElementById('soundInfo').textContent=(soundStep+1)+'. '+soundStepsTxt[soundStep];
+    renderSoundSteps();
+    if(soundStep===0){ animateWave(); }
+    if(soundStep===1){ document.getElementById('drumLine').style.transform='scaleY(1.3)'; document.getElementById('drumLine').style.transformOrigin='center'; }
+    if(soundStep===2){ ['oss1','oss2','oss3'].forEach(id=>document.getElementById(id).classList.add('pulse')); }
+    if(soundStep===3){ document.getElementById('cochleaShape').style.stroke='var(--accent2)'; }
+    if(soundStep===4){ document.getElementById('cochleaShape').classList.add('pulse'); }
+    if(soundStep===5){ document.getElementById('nerveLine').style.stroke='var(--accent)'; document.getElementById('nerveLine').style.strokeWidth='5'; }
+    soundStep++;
+    if(soundStep>=soundStepsTxt.length){
+      clearInterval(soundTimer);
+      setTimeout(()=>{
+        document.getElementById('drumLine').style.transform='none';
+        ['oss1','oss2','oss3'].forEach(id=>document.getElementById(id).classList.remove('pulse'));
+        document.getElementById('cochleaShape').classList.remove('pulse');
+        document.getElementById('cochleaShape').style.stroke='var(--dim)';
+        document.getElementById('nerveLine').style.stroke='var(--dim)';
+        document.getElementById('nerveLine').style.strokeWidth='3';
+      },1200);
+    }
+  },900);
+}
+function animateWave(){
+  let r=0;
+  const iv=setInterval(()=>{
+    r+=4;
+    document.getElementById('wave1').setAttribute('r',r);
+    document.getElementById('wave2').setAttribute('r',Math.max(0,r-15));
+    document.getElementById('wave1').style.opacity=Math.max(0,1-r/60);
+    document.getElementById('wave2').style.opacity=Math.max(0,1-(r-15)/60);
+    if(r>70) clearInterval(iv);
+  },40);
+}
+renderSoundSteps();
+
+// ---------- FREQUENCY ----------
+function updateFreq(v){
+  v=+v;
+  const logMin=Math.log(20), logMax=Math.log(20000);
+  const t=(Math.log(v)-logMin)/(logMax-logMin); // 0..1
+  const x = 260 - t*220; // high freq near base (x=260,narrow/stiff), low freq near apex (x=40)
+  document.getElementById('freqDot').setAttribute('cx',x);
+  document.getElementById('freqInfo').innerHTML = t>0.6
+    ? '<b>ඉහළ සංඛ්‍යාතය:</b> කර්ණශබ්බයේ පාදම (oval window ආසන්නයේ) ඇති තද/පටු කලාපය කම්පනය වේ.'
+    : (t<0.35 ? '<b>පහළ සංඛ්‍යාතය:</b> කර්ණශබ්බයේ මුදුන (apex) ඇති ලිහිල්/පළල් කලාපය කම්පනය වේ.' : '<b>මධ්‍ය සංඛ්‍යාතය:</b> බැසිලර පටලයේ මධ්‍ය කලාපය කම්පනය වේ.');
+}
+updateFreq(1000);
+
+// ---------- BALANCE ----------
+function updateTilt(v){
+  v=+v;
+  const ang = (v/100)*40;
+  document.getElementById('endoDot').setAttribute('cx',60+ (v/100)*30);
+  document.getElementById('endoDot').setAttribute('cy',50 - (v/100)*10);
+  document.getElementById('otolithDot').setAttribute('cy', 40 + (v/100)*20);
+  document.getElementById('tiltInfo').innerHTML = Math.abs(v)<10
+    ? 'හිස සමතලයේ ඇත — එන්ඩොලිම්ෆ චලනයක් අවම වේ.'
+    : '<b>එන්ඩොලිම්ෆ චලනය:</b> හිස නැමීමේදී අර්ධ වෘත්තාකාර නාලවල තරලය චලනය වී රෝම සෛල නැමේ; ඕටලිත් අවයවවල කැල්සියම් කාබනේට් අංශු (ඕටලිත්) ගුරුත්වාකර්ෂණයට අනුව මාරු වී රේඛීය චලනය අනාවරණය කරයි.';
+}
+updateTilt(0);
+
+// ---------- SMELL ----------
+function sniff(){
+  const m1=document.getElementById('mol1'), m2=document.getElementById('mol2');
+  [m1,m2].forEach((m,i)=>{
+    m.style.transition='cy 1s ease, opacity 1s';
+    setTimeout(()=>{ m.setAttribute('cy', 22); m.style.opacity=0; },i*150);
+  });
+  document.getElementById('cilia').classList.add('pulse');
+  document.getElementById('smellInfo').innerHTML='<b>බන්ධනය සිදුවෙමින්:</b> අණු සිලියා මත ග්‍රාහකවලට බැඳී ක්‍රියා විභවයක් ජනනය කරයි → ඝ්‍රාණ බල්බය හරහා මොළයට යයි.';
+  setTimeout(()=>{
+    [m1,m2].forEach((m,i)=>{ m.setAttribute('cy',95); m.style.opacity=1; });
+    document.getElementById('cilia').classList.remove('pulse');
+  },1800);
+}
+
+// ---------- TASTE ----------
+const tasteInfo={
+  sweet:'<b>පැණි රස:</b> සීනි වැනි කාබෝහයිඩ්‍රේට් අණු G-protein සම්බන්ධක ග්‍රාහක වෙත බැඳේ.',
+  salt:'<b>ලුණු රස:</b> Na⁺ අයන සෘජුවම අයන නාල හරහා රස සෛල උත්තේජනය කරයි.',
+  sour:'<b>ඇඹුල් රස:</b> H⁺ අයන (ආම්ලිකතාවය) මගින් රස සෛල උත්තේජනය වේ.',
+  bitter:'<b>තිත්ත රස:</b> විවිධ (බොහෝ විට විෂ සහිත) රසායනික සංයෝග විශේෂිත ග්‍රාහක වෙත බැඳේ.',
+  umami:'<b>උමාමි රස (Savoury):</b> ග්ලූටමේට් වැනි ඇමයිනෝ අම්ල හඳුනාගනී.'
+};
+function taste(k){
+  document.querySelectorAll('#tasteBtns .chip').forEach(b=>b.classList.remove('on'));
+  event.target.classList.add('on');
+  document.getElementById('tasteInfo').innerHTML=tasteInfo[k];
+}
+
+// ---------- SKIN ----------
+const skinMap={pain:'r-free',touch:'r-meissner',warm:'r-krause',cold:'r-ruffini',pressure:'r-pacinian'};
+const skinInfo={
+  pain:'<b>නිදහස් ස්නායු අන්ත:</b> හානිදායක උත්තේජක (වේදනාව) අනාවරණය කරයි.',
+  touch:'<b>මයිස්නර් දේහාණු:</b> සියුම් ස්පර්ශය සහ සැහැල්ලු පීඩනය අනාවරණය කරයි — ඇඟිලි වැනි ස්ථානවල ඝනීභූතව ඇත.',
+  warm:'<b>ක්‍රවුස් අන්ත බල්බ:</b> සීතල හඳුනා ගනී (සමහර විට උණුසුම් ග්‍රාහක ලෙසද සලකයි).',
+  cold:'<b>රෆිනි දේහාණු:</b> උණුසුම හා සම විස්තාරණය (stretching) හඳුනා ගනී.',
+  pressure:'<b>පැසිනියන් දේහාණු:</b> ගැඹුරු පීඩනය සහ කම්පනය අනාවරණය කරයි — වේගයෙන් අනුවර්තනය වේ.'
+};
+function stim(k){
+  Object.values(skinMap).forEach(id=>{
+    const el=document.getElementById(id);
+    el.setAttribute('fill','var(--dim)');
+    el.classList.remove('pulse');
+  });
+  const target=document.getElementById(skinMap[k]);
+  target.setAttribute('fill','var(--accent2)');
+  target.classList.add('pulse');
+  document.getElementById('skinInfo').innerHTML=skinInfo[k];
+}
+
+// ---------- VISION DEFECTS ----------
+let currentDefect='myopia', corrected=false;
+const defectTxt={
+  myopia:'<b>අසමීපදෘෂ්ටිකතාව (Myopia):</b> රූපය දෘෂ්ටි විතානයට පෙර කේන්ද්‍රගත වේ (ඇස ඉතා දිගු හෝ කනීනිකාව ඉතා තියුණු). දුර වස්තු අපැහැදිලි වේ.',
+  hyper:'<b>දුරදෘෂ්ටිකතාව (Hypermetropia):</b> රූපය දෘෂ්ටි විතානයට පසුව කේන්ද්‍රගත වේ (ඇස ඉතා කෙටි). සමීප වස්තු අපැහැදිලි වේ.',
+  astig:'<b>ඇස්තිග්මතාව:</b> කනීනිකාවේ අසමාන වක්‍රතාව නිසා විවිධ දිශාවලට රූප විකෘතව පෙනේ. සිලින්ඩ්‍රාකාර කාච මගින් නිවැරදි කරයි.'
+};
+function setDefect(d){
+  currentDefect=d; corrected=false;
+  document.querySelectorAll('#mod-defects .chip').forEach(b=>b.classList.remove('on'));
+  document.querySelector('#mod-defects .chip[data-d="'+d+'"]').classList.add('on');
+  document.getElementById('lensCorrection').innerHTML='';
+  document.getElementById('corrBtn').textContent='නිවැරදි කාචය එක් කරන්න';
+  const fx = d==='myopia'?150:(d==='hyper'?230:190);
+  document.getElementById('focusPt').setAttribute('cx',fx);
+  document.getElementById('defInfo').innerHTML=defectTxt[d];
+}
+function toggleCorrection(){
+  corrected=!corrected;
+  const g=document.getElementById('lensCorrection');
+  if(corrected){
+    if(currentDefect==='myopia'){
+      g.innerHTML='<path d="M90 35 Q100 60 90 85 Q80 60 90 35 Z" fill="none" stroke="var(--accent)" stroke-width="3"/>';
+      document.getElementById('focusPt').setAttribute('cx',240);
+      document.getElementById('defInfo').innerHTML+='<br><b>අවතල කාචය</b> එකතු කිරීමෙන් රූපය දෘෂ්ටි විතානය මතට යළි යොමු කරයි.';
+    } else if(currentDefect==='hyper'){
+      g.innerHTML='<path d="M85 35 Q100 60 85 85 Q100 60 85 35 Z" fill="none" stroke="var(--accent)" stroke-width="3"/><path d="M95 35 Q80 60 95 85" fill="none" stroke="var(--accent)" stroke-width="3"/>';
+      document.getElementById('focusPt').setAttribute('cx',240);
+      document.getElementById('defInfo').innerHTML+='<br><b>උත්තල කාචය</b> එකතු කිරීමෙන් රූපය දෘෂ්ටි විතානය මතට ඉදිරියට ගෙන එයි.';
+    } else {
+      document.getElementById('defInfo').innerHTML+='<br><b>සිලින්ඩ්‍රාකාර කාචය</b> එකතු කිරීමෙන් විවිධ අක්ෂවල අසමාන වර්තනය සමතුලිත කරයි.';
+    }
+    document.getElementById('corrBtn').textContent='කාචය ඉවත් කරන්න';
+  } else {
+    g.innerHTML='';
+    setDefect(currentDefect);
+  }
+}
+setDefect('myopia');
+
+// ---------- QUIZ ----------
+const terms=[
+  ['කනීනිකාව','ආලෝකය ඇසට ඇතුළු කරන පාරදෘෂ්‍ය ස්ථීර ස්ථරය'],
+  ['තාරා මණ්ඩලය','ශිෂ්‍යතාවේ ප්‍රමාණය පාලනය කරන වර්ණවත් මාංශපේශිය'],
+  ['ස්වච්ඡය','රූපය දෘෂ්ටි විතානය මත කේන්ද්‍රගත කරන කාචය'],
+  ['දෘෂ්ටි විතානය','දණ්ඩ/කේතු සෛල ඇති ආලෝක සංවේදී ස්ථරය'],
+  ['කහ ලපය','කේතු සෛල වඩාත් ඝනීභූත ප්‍රදේශය'],
+  ['අන්ධ ලපය','දෘෂ්ටික ස්නායුව පිටවන ප්‍රභාග්‍රාහක නොමැති ස්ථානය'],
+  ['රොඩොප්සින්','ආලෝකයට සංවේදී දණ්ඩ සෛලවල වර්ණකය'],
+  ['ටිම්පනික් පටලය','ශබ්ද තරංග මගින් කම්පනය වන කන් පටලය'],
+  ['ඔසිකල්','මැලියස්-ඉන්කස්-ස්ටේපිස් නම් කම්පන විස්තාරණය කරන අස්ථි'],
+  ['කර්ණශබ්බය','ශබ්ද තරංග ස්නායු ආවේග බවට හරවන සර්පිලාකාර අවයවය'],
+  ['කෝර්ටි අවයවය','කර්ණශබ්බය තුළ ඇති ශබ්ද ග්‍රාහක රෝම සෛල ඇති අවයවය'],
+  ['අර්ධ වෘත්තාකාර නාල','හිසේ කෝණික චලනය අනාවරණය කරන අවයව'],
+  ['ඕටලිත්','ඕටලිත් අවයවවල ඇති කැල්සියම් කාබනේට් අංශු'],
+  ['ඝ්‍රාණ පුඤ්ජිකාව','නාසයේ ඇති ඝ්‍රාණ ග්‍රාහක සෛල පිහිටි ප්‍රදේශය'],
+  ['රස මුකුළුව','රස ග්‍රාහක සෛල පිහිටි ව්‍යුහය'],
+  ['මයිස්නර් දේහාණු','සියුම් ස්පර්ශය අනාවරණය කරන ග්‍රාහකය'],
+  ['පැසිනියන් දේහාණු','ගැඹුරු පීඩනය හා කම්පනය අනාවරණය කරන ග්‍රාහකය'],
+  ['රෆිනි දේහාණු','උණුසුම හා සම විස්තාරණය අනාවරණය කරන ග්‍රාහකය'],
+  ['නිදහස් ස්නායු අන්ත','වේදනාව අනාවරණය කරන සරලම ග්‍රාහකය'],
+  ['මයෝපියාව','දුර වස්තු අපැහැදිලි වන අසමීපදෘෂ්ටිකතාව'],
+  ['හයිපර්මෙට්‍රෝපියාව','සමීප වස්තු අපැහැදිලි වන දුරදෘෂ්ටිකතාව'],
+  ['ඇස්තිග්මතාව','කනීනිකාවේ අසමාන වක්‍රතාව නිසා ඇතිවන විකෘතිය']
+];
+const grid=document.getElementById('flipGrid');
+terms.forEach(([f,b])=>{
+  const card=document.createElement('div');
+  card.className='flipcard';
+  card.innerHTML='<div class="inner"><div class="face front">'+f+'</div><div class="face back">'+b+'</div></div>';
+  card.addEventListener('click',()=>card.classList.toggle('flip'));
+  grid.appendChild(card);
+});
+</script>
+</body>
+</html>

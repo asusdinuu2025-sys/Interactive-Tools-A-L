@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ස්ත්‍රී ප්‍රජනක පද්ධතිය — අන්තර්ක්‍රියාකාරී ඉගෙනුම් මොඩියුලය</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Sinhala:wght@400;600;700;800&family=Noto+Sans+Sinhala:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#2b1f24;
+  --cream:#faf6f2;
+  --plum:#6b2c46;
+  --plum-dark:#4a1d31;
+  --coral:#c4645a;
+  --gold:#c99a3d;
+  --sage:#7a8b6f;
+  --sage-dark:#586a4e;
+  --line:#e4d9d2;
+  --card:#ffffff;
+  --shadow: 0 6px 24px rgba(75,29,49,0.09);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  font-family:'Noto Sans Sinhala','Noto Serif Sinhala',sans-serif;
+  background:var(--cream);
+  color:var(--ink);
+  line-height:1.65;
+}
+h1,h2,h3,h4{
+  font-family:'Noto Serif Sinhala',serif;
+  color:var(--plum-dark);
+  margin:0 0 .4em 0;
+}
+::selection{background:var(--gold);color:#fff;}
+
+/* HERO */
+.hero{
+  position:relative;
+  padding:56px 20px 34px;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(201,154,61,0.16), transparent 45%),
+    radial-gradient(circle at 85% 10%, rgba(196,100,90,0.16), transparent 45%),
+    linear-gradient(180deg,#fffaf5 0%, var(--cream) 100%);
+  border-bottom:1px solid var(--line);
+  text-align:center;
+}
+.hero .eyebrow{
+  letter-spacing:.24em;
+  text-transform:uppercase;
+  font-size:.72rem;
+  color:var(--coral);
+  font-weight:700;
+  margin-bottom:10px;
+}
+.hero h1{font-size:clamp(1.6rem,4.6vw,2.7rem); font-weight:800;}
+.hero p.sub{max-width:680px;margin:10px auto 0;color:#5b4a52;font-size:1rem;}
+.hero .cycle-orbit{
+  width:120px;height:120px;margin:22px auto 0;position:relative;
+}
+.hero .cycle-orbit .core{
+  position:absolute;inset:38px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #fff, var(--gold) 70%);
+  box-shadow:0 0 0 6px rgba(201,154,61,0.15);
+}
+.hero .cycle-orbit .dot{
+  position:absolute;width:12px;height:12px;border-radius:50%;
+  background:var(--plum);
+  top:50%;left:50%;
+  transform-origin:0 0;
+  animation:orbit 6s linear infinite;
+}
+.hero .cycle-orbit .dot.b{background:var(--coral);animation-duration:9s;animation-direction:reverse;}
+@keyframes orbit{
+  from{transform:rotate(0deg) translateX(58px) rotate(0deg);}
+  to{transform:rotate(360deg) translateX(58px) rotate(-360deg);}
+}
+@media (prefers-reduced-motion: reduce){
+  .hero .cycle-orbit .dot{animation:none;}
+}
+
+/* NAV */
+.tabbar{
+  position:sticky;top:0;z-index:50;
+  display:flex;gap:6px;overflow-x:auto;
+  background:rgba(250,246,242,0.94);
+  backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--line);
+  padding:10px 12px;
+  scrollbar-width:thin;
+}
+.tabbar::-webkit-scrollbar{height:5px;}
+.tabbar::-webkit-scrollbar-thumb{background:var(--line);border-radius:5px;}
+.tab-btn{
+  flex:0 0 auto;
+  border:1px solid var(--line);
+  background:var(--card);
+  color:var(--plum-dark);
+  padding:9px 16px;
+  border-radius:999px;
+  font-size:.86rem;
+  font-weight:600;
+  cursor:pointer;
+  white-space:nowrap;
+  transition:.2s;
+}
+.tab-btn .num{
+  display:inline-block;width:18px;height:18px;border-radius:50%;
+  background:var(--line);color:var(--plum-dark);
+  font-size:.68rem;line-height:18px;text-align:center;margin-inline-end:6px;
+}
+.tab-btn:hover{border-color:var(--coral);}
+.tab-btn.active{background:var(--plum);color:#fff;border-color:var(--plum);}
+.tab-btn.active .num{background:rgba(255,255,255,0.25);color:#fff;}
+
+main{max-width:980px;margin:0 auto;padding:28px 18px 80px;}
+.panel{display:none;animation:fade .35s ease;}
+.panel.active{display:block;}
+@keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+.section-title{
+  display:flex;align-items:center;gap:10px;margin-bottom:6px;
+}
+.section-title .chip{
+  background:var(--plum);color:#fff;font-family:'Noto Serif Sinhala',serif;
+  font-weight:700;font-size:.85rem;padding:4px 12px;border-radius:8px;
+}
+.lede{color:#6a5860;margin-bottom:22px;font-size:.98rem;}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:20px;
+  box-shadow:var(--shadow);
+  margin-bottom:20px;
+}
+.card h3{font-size:1.15rem;border-inline-start:4px solid var(--coral);padding-inline-start:10px;}
+.grid2{display:grid;grid-template-columns:1.15fr .85fr;gap:20px;}
+@media (max-width:800px){.grid2{grid-template-columns:1fr;}}
+
+/* ANATOMY */
+.diagram-wrap{background:#fff8f2;border-radius:14px;border:1px dashed var(--gold);padding:10px;}
+svg .part{cursor:pointer;transition:.2s;}
+svg .part:hover{filter:brightness(1.08);}
+svg .part.selected{stroke:var(--plum);stroke-width:3px;filter:drop-shadow(0 0 6px rgba(107,44,70,0.45));}
+.info-box{
+  min-height:150px;background:#fbf3ee;border-radius:12px;padding:16px;border:1px solid var(--line);
+}
+.info-box h4{color:var(--coral);margin-bottom:8px;}
+.info-box p{margin:0;font-size:.92rem;}
+.hint{font-size:.8rem;color:#8a7a80;margin-top:8px;}
+
+/* PILLS/LEGEND */
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+.legend span{
+  font-size:.78rem;padding:4px 10px;border-radius:999px;background:#fff;border:1px solid var(--line);
+}
+
+/* STEP SIMULATIONS */
+.stepper{display:flex;align-items:center;gap:10px;margin:16px 0;flex-wrap:wrap;}
+.stepper button{
+  background:var(--plum);color:#fff;border:none;border-radius:10px;
+  padding:9px 16px;font-weight:600;cursor:pointer;font-family:inherit;font-size:.88rem;
+}
+.stepper button.secondary{background:#efe3da;color:var(--plum-dark);}
+.stepper button:disabled{opacity:.4;cursor:default;}
+.progress-dots{display:flex;gap:6px;}
+.progress-dots i{width:9px;height:9px;border-radius:50%;background:var(--line);display:inline-block;}
+.progress-dots i.on{background:var(--coral);}
+.stage-stage{
+  background:linear-gradient(180deg,#fff, #fdf6f0);
+  border-radius:14px;border:1px solid var(--line);padding:20px;min-height:200px;
+}
+.stage-visual{display:flex;justify-content:center;align-items:center;min-height:130px;margin-bottom:10px;}
+.stage-title{font-weight:700;color:var(--plum-dark);font-family:'Noto Serif Sinhala',serif;font-size:1.05rem;margin-bottom:6px;}
+.stage-desc{font-size:.92rem;color:#4a3a40;}
+.badge-hormone{
+  display:inline-block;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:999px;margin-inline-end:5px;
+}
+.badge-fsh{background:#e8f0e2;color:var(--sage-dark);}
+.badge-lh{background:#fbe6df;color:var(--coral);}
+.badge-est{background:#fbf1d8;color:#95721f;}
+.badge-prog{background:#eee2f0;color:#6b2c46;}
+.badge-oxy{background:#dcecf4;color:#2c5f7a;}
+.badge-prl{background:#f6e0e8;color:#8a3352;}
+.badge-hcg{background:#fde8d9;color:#a05121;}
+
+/* CYCLE TIMELINE */
+.cycle-slider-wrap{margin-top:6px;}
+input[type=range]{width:100%;accent-color:var(--plum);}
+.day-readout{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
+.day-readout .day{font-family:'Noto Serif Sinhala',serif;font-size:1.4rem;color:var(--plum);font-weight:800;}
+.phase-tag{font-size:.78rem;padding:3px 12px;border-radius:999px;font-weight:700;}
+.phase-menstrual{background:#f6d9d3;color:#8c342a;}
+.phase-follicular{background:#e3ecdd;color:var(--sage-dark);}
+.phase-ovulation{background:#fce6c2;color:#8a5a10;}
+.phase-luteal{background:#ecdcef;color:#5b2c66;}
+#cycleChart{width:100%;height:210px;display:block;}
+.cycle-legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:8px;font-size:.8rem;}
+.cycle-legend span{display:flex;align-items:center;gap:5px;}
+.cycle-legend i{width:14px;height:4px;border-radius:2px;display:inline-block;}
+
+/* FLOW / QUIZ */
+.flow-step{
+  display:flex;gap:14px;align-items:flex-start;border-inline-start:3px solid var(--sage);
+  padding:6px 0 6px 16px;margin-bottom:2px;cursor:pointer;border-radius:8px;
+}
+.flow-step:hover{background:#f7f2ec;}
+.flow-step .fnum{
+  flex:0 0 auto;width:28px;height:28px;border-radius:50%;background:var(--sage);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;
+}
+.flow-step.loop .fnum{background:var(--coral);}
+.flow-detail{
+  display:none;background:#f3f7ef;border-radius:10px;padding:12px 14px;margin:4px 0 12px 42px;font-size:.9rem;
+  border:1px solid #dde7d3;
+}
+.flow-detail.open{display:block;}
+
+.quiz-q{margin-bottom:22px;}
+.quiz-q p.qtext{font-weight:600;margin-bottom:10px;}
+.opt{
+  display:block;width:100%;text-align:start;background:#fff;border:1px solid var(--line);
+  border-radius:10px;padding:10px 14px;margin-bottom:8px;cursor:pointer;font-family:inherit;font-size:.9rem;color:var(--ink);
+}
+.opt:hover{border-color:var(--coral);}
+.opt.correct{background:#e5f3e0;border-color:var(--sage);}
+.opt.wrong{background:#fbe3e0;border-color:var(--coral);}
+.opt[disabled]{cursor:default;}
+.quiz-feedback{font-size:.85rem;margin-top:4px;color:#5b4a52;min-height:18px;}
+.quiz-score{
+  text-align:center;font-family:'Noto Serif Sinhala',serif;font-size:1.4rem;color:var(--plum);
+  background:#fff8f0;border:1px solid var(--gold);border-radius:14px;padding:18px;margin-top:10px;
+}
+#quizResetBtn{
+  display:block;margin:14px auto 0;background:var(--plum);color:#fff;border:none;border-radius:10px;
+  padding:9px 18px;cursor:pointer;font-family:inherit;font-weight:600;
+}
+footer{text-align:center;padding:26px;color:#9a8890;font-size:.8rem;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="eyebrow">උසස් පෙළ ජීව විද්‍යාව · සම්පත් පොත</div>
+  <h1>ස්ත්‍රී ප්‍රජනක පද්ධතිය</h1>
+  <p class="sub">ව්‍යුහයේ සිට ප්‍රසූතිය හා කිරි ප්‍රවාහනය දක්වා — හෝමෝන පාලනය සහ යාන්ත්‍රණ අන්තර්ක්‍රියාකාරීව ඉගෙන ගන්න.</p>
+  <div class="cycle-orbit" aria-hidden="true">
+    <div class="core"></div>
+    <div class="dot"></div>
+    <div class="dot b"></div>
+  </div>
+</div>
+
+<nav class="tabbar" id="tabbar">
+  <button class="tab-btn active" data-tab="t1"><span class="num">1</span>ව්‍යුහය</button>
+  <button class="tab-btn" data-tab="t2"><span class="num">2</span>අණ්ඩෝද්භවය</button>
+  <button class="tab-btn" data-tab="t3"><span class="num">3</span>ආර්තව චක්‍රය</button>
+  <button class="tab-btn" data-tab="t4"><span class="num">4</span>ගර්භණීභාවය හා ප්‍රසූතිය</button>
+  <button class="tab-btn" data-tab="t5"><span class="num">5</span>කිරි ප්‍රවාහනය</button>
+  <button class="tab-btn" data-tab="t6"><span class="num">6</span>ස්වයං ඇගයීම</button>
+</nav>
+
+<main>
+
+<!-- ================= TAB 1: ANATOMY ================= -->
+<section class="panel active" id="t1">
+  <div class="section-title"><span class="chip">01</span><h2 style="display:inline">ප්‍රජනක පද්ධතියේ ව්‍යුහය</h2></div>
+  <p class="lede">පහත රූපයේ ඕනෑම කොටසක් ක්ලික් කර එහි කාර්යභාරය බලන්න.</p>
+
+  <div class="card grid2">
+    <div class="diagram-wrap">
+      <svg id="anatomySvg" viewBox="0 0 460 420" xmlns="http://www.w3.org/2000/svg">
+        <!-- Left Fallopian tube -->
+        <path class="part" data-id="tube" d="M120,70 C60,55 40,110 75,140 C100,160 120,150 130,165" fill="none" stroke="#e0a3ac" stroke-width="16" stroke-linecap="round"/>
+        <!-- Right Fallopian tube -->
+        <path class="part" data-id="tube" d="M340,70 C400,55 420,110 385,140 C360,160 340,150 330,165" fill="none" stroke="#e0a3ac" stroke-width="16" stroke-linecap="round"/>
+        <!-- Left ovary -->
+        <ellipse class="part" data-id="ovary" cx="70" cy="150" rx="26" ry="20" fill="#f3c56b" stroke="#a97a1e" stroke-width="2"/>
+        <!-- Right ovary -->
+        <ellipse class="part" data-id="ovary" cx="390" cy="150" rx="26" ry="20" fill="#f3c56b" stroke="#a97a1e" stroke-width="2"/>
+        <!-- Uterus body -->
+        <path class="part" data-id="uterus" d="M150,165 C150,120 310,120 310,165 L300,290 C280,320 180,320 160,290 Z" fill="#e8b6bf" stroke="#a85263" stroke-width="2"/>
+        <!-- Endometrium lining -->
+        <path class="part" data-id="endometrium" d="M175,175 C175,150 285,150 285,175 L278,270 C260,290 200,290 182,270 Z" fill="#f4d6c8" stroke="#c4645a" stroke-width="2" stroke-dasharray="4 3"/>
+        <!-- Cervix -->
+        <path class="part" data-id="cervix" d="M195,300 C195,290 265,290 265,300 L255,335 C245,345 215,345 205,335 Z" fill="#c9877e" stroke="#8c4a41" stroke-width="2"/>
+        <!-- Vagina -->
+        <path class="part" data-id="vagina" d="M205,335 L255,335 L245,410 L215,410 Z" fill="#e6c9b7" stroke="#a9805f" stroke-width="2"/>
+        <text x="30" y="130" font-size="11" fill="#6b2c46">ෆැලෝපියන් නාළය</text>
+        <text x="35" y="185" font-size="11" fill="#6b2c46">ඩිම්බකෝෂය</text>
+        <text x="200" y="115" font-size="11" fill="#6b2c46">ගර්භාශය</text>
+        <text x="290" y="345" font-size="11" fill="#6b2c46">ගැබ්ගෙල</text>
+        <text x="260" y="405" font-size="11" fill="#6b2c46">යෝනි මාර්ගය</text>
+      </svg>
+      <div class="legend">
+        <span>🟡 ඩිම්බකෝෂය</span><span>🌸 ෆැලෝපියන් නාළය</span><span>💗 ගර්භාශය</span><span>🟠 එන්ඩොමෙට්‍රියම</span><span>🟤 ගැබ්ගෙල</span>
+      </div>
+    </div>
+    <div>
+      <div class="info-box" id="anatomyInfo">
+        <h4>කොටසක් තෝරන්න</h4>
+        <p>ඉහත රූපයේ ඕනෑම අවයවයක් ක්ලික් කිරීමෙන් එහි ව්‍යුහය සහ කාර්යභාරය මෙහි පෙන්වයි.</p>
+      </div>
+      <p class="hint">💡 ඉඟිය: ඩිම්බකෝෂ, නාළ දෙක වර්‍ණ ගැලපුම සඳහා එකම කොටසක් ලෙස සලකුණු කර ඇත.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TAB 2: OOGENESIS ================= -->
+<section class="panel" id="t2">
+  <div class="section-title"><span class="chip">02</span><h2 style="display:inline">ඩිම්බ කෝෂ චක්‍රය — අණ්ඩෝද්භවය</h2></div>
+  <p class="lede">ප්‍රාථමික ඩිම්බ කෝෂයේ සිට පරිණත ඩිම්බය නිදහස් වන තෙක් සිදුවන අවධි පියවරෙන් පියවර බලන්න.</p>
+
+  <div class="card">
+    <div class="stepper">
+      <button class="secondary" id="oogPrev">← පෙර පියවර</button>
+      <div class="progress-dots" id="oogDots"></div>
+      <button id="oogNext">ඊළඟ පියවර →</button>
+    </div>
+    <div class="stage-stage">
+      <div class="stage-visual" id="oogVisual"></div>
+      <div class="stage-title" id="oogTitle"></div>
+      <div class="stage-desc" id="oogDesc"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>ප්‍රධාන කරුණු</h3>
+    <ul>
+      <li>ප්‍රාථමික ඩිම්බ සෛල (ඕගෝනියා) දෙවන අර්ධ ජීවීය කාණ්ඩය I හි ප්‍රාරම්භයේදීම නතර වී, යොවුන් වියේදී FSH මගින් උත්තේජනය වන තෙක් එසේම පවතී.</li>
+      <li>අර්ධාවයවීකරණය I සම්පූර්ණ වීමෙන් ලැබෙන්නේ අසමාන කෝෂ ප්‍රමාණයකින් යුත් ද්විතීයික අණ්ඩ සෛලය සහ පළමු ධ්‍රැවීය දේහයයි.</li>
+      <li>අර්ධාවයවීකරණය II ආරම්භ වුවත් ලුතිය අවධියේදී නැවතී පවතින අතර, පිටතට එළියට එන්නේ ලුතිය අවධියේම සිටින ද්විතීයික අණ්ඩ සෛලයයි (ඩිම්බ මෝචනය).</li>
+      <li>සිසෙදවීම (fertilization) සිදුවුවහොත් පමණක් අර්ධාවයවීකරණය II සම්පූර්ණ වී පරිණත ඩිම්බය සහ දෙවන ධ්‍රැවීය දේහය සෑදේ.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= TAB 3: MENSTRUAL CYCLE ================= -->
+<section class="panel" id="t3">
+  <div class="section-title"><span class="chip">03</span><h2 style="display:inline">ආර්තව චක්‍රය — හෝමෝන පාලනය</h2></div>
+  <p class="lede">දිනය මාරු කිරීමෙන් FSH, LH, ඊස්ට්‍රජන් සහ ප්‍රොජෙස්ටෙරෝන් මට්ටම් වෙනස් වන ආකාරය සහ ඩිම්බකෝෂය/එන්ඩොමෙට්‍රියම වෙනස් වන ආකාරය බලන්න.</p>
+
+  <div class="card">
+    <div class="day-readout">
+      <div><span class="phase-tag" id="phaseTag">—</span></div>
+      <div class="day"><span id="dayNum">1</span> වන දිනය</div>
+    </div>
+    <div class="cycle-slider-wrap">
+      <input type="range" id="daySlider" min="1" max="28" value="1" step="1">
+    </div>
+    <canvas id="cycleChart"></canvas>
+    <div class="cycle-legend">
+      <span><i style="background:#7a8b6f"></i>FSH</span>
+      <span><i style="background:#c4645a"></i>LH</span>
+      <span><i style="background:#c99a3d"></i>ඊස්ට්‍රජන්</span>
+      <span><i style="background:#6b2c46"></i>ප්‍රොජෙස්ටෙරෝන්</span>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>ඩිම්බකෝෂයේ සිදුවීම</h3>
+      <p id="ovaryEvent" style="font-size:.92rem;"></p>
+    </div>
+    <div class="card">
+      <h3>ගර්භාශයේ (එන්ඩොමෙට්‍රියම) සිදුවීම</h3>
+      <p id="uterusEvent" style="font-size:.92rem;"></p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>ප්‍රතිපෝෂණ පාලනය</h3>
+    <p style="font-size:.92rem;">GnRH (හයිපොතැලමස්) → FSH & LH (පූර්ව පිටියුටරි) → ඩිම්බකෝෂය FSH/LH ට ප්‍රතිචාර දක්වා ඊස්ට්‍රජන් හා ප්‍රොජෙස්ටෙරෝන් සාවය කරයි. චක්‍රයේ මුල් අවධියේදී ඊස්ට්‍රජන් අඩු මට්ටමින් <b>සෘණ ප්‍රතිපෝෂණයක්</b> ලෙස ක්‍රියා කර FSH/LH මට්ටම පහළ තබයි. ඩිම්බ මෝචනයට පෙර ඊස්ට්‍රජන් මට්ටම ඉහළ යාමේදී එය <b>ධන ප්‍රතිපෝෂණයක්</b> ලෙස ක්‍රියා කර LH උත්සන්නය (LH surge) ඇති කර ඩිම්බ මෝචනය ප්‍රේරණය කරයි. ඩිම්බ මෝචනයෙන් පසු පීත දේහයෙන් සාවය වන ප්‍රොජෙස්ටෙරෝන් නැවත සෘණ ප්‍රතිපෝෂණයක් ලෙස ක්‍රියාකර GnRH/FSH/LH මට්ටම් පහළ තබයි.</p>
+  </div>
+</section>
+
+<!-- ================= TAB 4: PREGNANCY & LABOR ================= -->
+<section class="panel" id="t4">
+  <div class="section-title"><span class="chip">04</span><h2 style="display:inline">සිසෙදවීම, ගැබ්ගැනීම හා ප්‍රසූතිය</h2></div>
+  <p class="lede">ශුක්‍රාණුවක් ඩිම්බය හමුවීමේ සිට ප්‍රසූතිය දක්වා පියවර ගවේෂණය කරන්න.</p>
+
+  <div class="card">
+    <div class="stepper">
+      <button class="secondary" id="fertPrev">← පෙර පියවර</button>
+      <div class="progress-dots" id="fertDots"></div>
+      <button id="fertNext">ඊළඟ පියවර →</button>
+    </div>
+    <div class="stage-stage">
+      <div class="stage-visual" id="fertVisual"></div>
+      <div class="stage-title" id="fertTitle"></div>
+      <div class="stage-desc" id="fertDesc"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>ප්‍රසූතියේදී ඔක්සිටොසින් ධන ප්‍රතිපෝෂණ ලූපය (ක්ලික් කර දිග හරින්න)</h3>
+    <div id="laborFlow"></div>
+  </div>
+</section>
+
+<!-- ================= TAB 5: LACTATION ================= -->
+<section class="panel" id="t5">
+  <div class="section-title"><span class="chip">05</span><h2 style="display:inline">කිරි ප්‍රවාහනය (Lactation)</h2></div>
+  <p class="lede">ළදරුවා කිරි උරාබොන විට ක්‍රියාත්මක වන ප්‍රොලැක්ටින්/ඔක්සිටොසින් ධන ප්‍රතිපෝෂණ යාන්ත්‍රණය බලන්න.</p>
+
+  <div class="card">
+    <h3>උරාබීමේ පරාවර්තනය (Suckling Reflex) — ක්ලික් කර දිග හරින්න</h3>
+    <div id="lactationFlow"></div>
+  </div>
+
+  <div class="card">
+    <h3>ගැබ්ගැනීමේදී කිරි ප්‍රවාහනය මර්දනය වන්නේ ඇයි?</h3>
+    <p style="font-size:.92rem;">ගැබ්ගැනීම තුළදී ඉහළ මට්ටමේ ඊස්ට්‍රජන් සහ ප්‍රොජෙස්ටෙරෝන් ප්‍රොලැක්ටින් ක්‍රියාකාරීත්වය මර්දනය කරයි. ප්‍රසූතියෙන් පසු මෙම හෝමෝන මට්ටම් ශීඝ්‍රයෙන් පහළ බැසීමත් සමඟ ප්‍රොලැක්ටින්ගේ ක්‍රියාකාරීත්වයට ඇති බාධකය ඉවත් වී කිරි ප්‍රවාහනය ආරම්භ වේ.</p>
+  </div>
+</section>
+
+<!-- ================= TAB 6: QUIZ ================= -->
+<section class="panel" id="t6">
+  <div class="section-title"><span class="chip">06</span><h2 style="display:inline">ස්වයං ඇගයීම</h2></div>
+  <p class="lede">ඔබේ අවබෝධය පරීක්ෂා කර ගැනීමට පහත ප්‍රශ්න වලට පිළිතුරු දෙන්න.</p>
+  <div class="card" id="quizContainer"></div>
+</section>
+
+</main>
+
+<footer>අන්තර්ක්‍රියාකාරී ඉගෙනුම් මොඩියුලය · A/L ජීව විද්‍යාව · සම්පත් පොත ඇසුරෙන් සකස් කරන ලදී</footer>
+
+<script>
+/* ===================== TAB NAVIGATION ===================== */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+});
+
+/* ===================== TAB 1: ANATOMY ===================== */
+const anatomyData = {
+  ovary: {title:"ඩිම්බකෝෂය (Ovary)", text:"ඩිම්බ (egg) නිෂ්පාදනය සිදුවන ප්‍රධාන අවයවය. මෙහි ප්‍රාථමික ඩිම්බ කෝෂ දහස් ගණනක් ඇති අතර, එක් එක් ආර්තව චක්‍රයකදී ඒවායින් එකක් (සාමාන්‍යයෙන්) පරිණත වී ඩිම්බ මෝචනය සිදුවේ. ඊස්ට්‍රජන් හා ප්‍රොජෙස්ටෙරෝන් හෝමෝන ද මෙහි සාවය වේ."},
+  tube: {title:"ෆැලෝපියන් නාළය (Oviduct)", text:"ඩිම්බකෝෂයේ සිට ගර්භාශය දක්වා දිවෙන නාළය. ඩිම්බ මෝචනයෙන් පසු ඩිම්බය මෙම නාළයට රැගෙන එන අතර, සාමාන්‍යයෙන් සිසෙදවීම සිදුවන්නේ නාළයේ 'ඇම්පියුලා' කලාපයේදීය. නාළයේ අභ්‍යන්තර පෘෂ්ඨයේ ඇති සිලියා ඩිම්බය/කලලය ගර්භාශය දෙසට ගමන් කරවීමට උපකාරී වේ."},
+  uterus: {title:"ගර්භාශය (Uterus)", text:"මාංශමය බිත්තියකින් යුත් ගර්භාශය තුළ එන්ඩොමෙට්‍රියම නම් ආස්තරණයක් ඇත. සිසෙදුනු කලලය බද්ධවීම (implantation) සිදුවන්නේ මෙහිය. ගැබ්ගැනීමේදී කලලය වර්ධනය වන්නේ ගර්භාශය තුළය. ප්‍රසූතියේදී ගර්භාශයේ මාංශ පේශි හැකිලීම මගින් දරුවා පිටතට තල්ලු කරයි."},
+  endometrium: {title:"එන්ඩොමෙට්‍රියම (Endometrium)", text:"ගර්භාශයේ අභ්‍යන්තර ආස්තරණය. ආර්තව චක්‍රය පුරාවට ඊස්ට්‍රජන් සහ ප්‍රොජෙස්ටෙරෝන් බලපෑම යටතේ ඝණවී, රුධිර සැපයුමෙන් පොහොසත් වේ. සිසෙදවීමක් සිදු නොවුවහොත් මෙම ආස්තරණය බිඳී ආර්තව රුධිර වශයෙන් පිටවේ (ආර්තව අවධිය)."},
+  cervix: {title:"ගැබ්ගෙල (Cervix)", text:"ගර්භාශය හා යෝනි මාර්ගය සම්බන්ධ කරන පටු කොටස. සාමාන්‍යයෙන් හුයන ශ්ලේෂ්මයකින් වසා ඇති අතර, එමගින් ක්ෂුද්‍ර ජීවීන් ගර්භාශයට ඇතුළුවීම වළක්වයි. ප්‍රසූතියේදී ගැබ්ගෙල පුළුල් වීම (dilation) දරු ප්‍රසූතියේ ප්‍රධාන අවධියකි."},
+  vagina: {title:"යෝනි මාර්ගය (Vagina)", text:"ගැබ්ගෙලේ සිට ශරීරයෙන් පිටතට විවෘත වන මාංශමය නාළය. සංසර්ගයේදී ශුක්‍රාණු ලැබෙන ස්ථානය මෙන්ම, ප්‍රසූතියේදී දරුවා පිටවන මාර්ගය ලෙසද (ප්‍රසූති මාර්ගය) ක්‍රියා කරයි."}
+};
+document.querySelectorAll('#anatomySvg .part').forEach(el=>{
+  el.addEventListener('click',()=>{
+    document.querySelectorAll('#anatomySvg .part').forEach(p=>p.classList.remove('selected'));
+    document.querySelectorAll('#anatomySvg .part[data-id="'+el.dataset.id+'"]').forEach(p=>p.classList.add('selected'));
+    const d = anatomyData[el.dataset.id];
+    document.getElementById('anatomyInfo').innerHTML = '<h4>'+d.title+'</h4><p>'+d.text+'</p>';
+  });
+});
+
+/* ===================== TAB 2: OOGENESIS STEPPER ===================== */
+const oogSteps = [
+  {title:"1. ප්‍රාථමික ජනන කෝෂය", visual:"⚪", desc:"අර්ධ ජීවීය බෙදීම් වලට පෙර, මයිටෝටික බෙදීම මගින් වැඩි වන ප්‍රාථමික ජනන කෝෂ (2n)."},
+  {title:"2. ඕගෝනියා → ප්‍රාථමික ඩිම්බ කෝෂය", visual:"🟡", desc:"ගර්භාශ අභ්‍යන්තර ජීවිතයේදීම ඕගෝනියා අර්ධ ජීවීය කාණ්ඩය I අරඹයි, නමුත් උපතට පෙර එය අවසන් අණ්ඩ අවධියේ (diplotene) නතර වේ. මෙය <b>ප්‍රාථමික ඩිම්බ කෝෂය</b> ලෙස හඳුන්වයි."},
+  {title:"3. යොවුන් වියේදී FSH උත්තේජනය", visual:"🟢", desc:"<span class='badge-hormone badge-fsh'>FSH</span> ක්‍රියාකාරීත්වයෙන් සෑම චක්‍රයකදීම ප්‍රාථමික ඩිම්බ කෝෂ කිහිපයක් වර්ධනය වීමට පටන් ගනී; ග්‍රැෆියානු කූප (follicle) සෑදේ."},
+  {title:"4. LH උත්සන්නය (surge)", visual:"🔴", desc:"ඊස්ට්‍රජන් ඉහළ මට්ටමින් ධන ප්‍රතිපෝෂණයක් ලෙස ක්‍රියා කර <span class='badge-hormone badge-lh'>LH</span> මට්ටම හදිසියේ ඉහළ යාමට හේතු වේ. මෙය අර්ධ ජීවීය කාණ්ඩය I සම්පූර්ණ කිරීමට ප්‍රේරණය කරයි."},
+  {title:"5. ද්විතීයික අණ්ඩ සෛලය + පළමු ධ්‍රැවීය දේහය", visual:"🟠🔹", desc:"අර්ධ ජීවීය කාණ්ඩය I අසමාන ලෙස සම්පූර්ණ වී, විශාල <b>ද්විතීයික අණ්ඩ සෛලය</b>ක් සහ කුඩා <b>පළමු ධ්‍රැවීය දේහය</b>ක් සාදයි. අර්ධ ජීවීය කාණ්ඩය II ආරම්භ වී ලුතිය අවධියේ නැවතී පවතී."},
+  {title:"6. ඩිම්බ මෝචනය", visual:"💥🟠", desc:"ග්‍රැෆියානු කූපය පීදී ද්විතීයික අණ්ඩ සෛලය (ලුතිය අවධියේ නතරව) ෆැලෝපියන් නාළයට මුදා හරියි. ඉතිරි කූප පටක <b>පීත දේහය</b> බවට පත් වේ."},
+  {title:"7. සිසෙදවීම → සම්පූර්ණ ඩිම්බය", visual:"🧬", desc:"ශුක්‍රාණුවක් විනිවිද ගියහොත් පමණක් අර්ධ ජීවීය කාණ්ඩය II සම්පූර්ණ වී, පරිණත ඩිම්බය සහ දෙවන ධ්‍රැවීය දේහය සෑදේ. සිසෙදවීමක් නොවුවහොත් ද්විතීයික අණ්ඩ සෛලය දිරාපත් වේ."}
+];
+let oogIdx=0;
+function renderOog(){
+  const s=oogSteps[oogIdx];
+  document.getElementById('oogVisual').innerHTML = '<div style="font-size:3.4rem;">'+s.visual+'</div>';
+  document.getElementById('oogTitle').textContent = s.title;
+  document.getElementById('oogDesc').innerHTML = s.desc;
+  document.getElementById('oogPrev').disabled = oogIdx===0;
+  document.getElementById('oogNext').disabled = oogIdx===oogSteps.length-1;
+  document.getElementById('oogDots').innerHTML = oogSteps.map((_,i)=>'<i class="'+(i===oogIdx?'on':'')+'"></i>').join('');
+}
+document.getElementById('oogPrev').addEventListener('click',()=>{if(oogIdx>0){oogIdx--;renderOog();}});
+document.getElementById('oogNext').addEventListener('click',()=>{if(oogIdx<oogSteps.length-1){oogIdx++;renderOog();}});
+renderOog();
+
+/* ===================== TAB 3: MENSTRUAL CYCLE ===================== */
+// simplified hormone curves as arrays for days 1..28 (relative values 0-100)
+function hormoneLevels(day){
+  // FSH: moderate rise early, small mid-cycle bump, dip after ovulation, slight late rise
+  let fsh = 30 + 25*Math.exp(-Math.pow((day-6)/5,2)) + 45*Math.exp(-Math.pow((day-13)/1.5,2)) + 10*Math.exp(-Math.pow((day-26)/4,2));
+  // LH: sharp surge at day 14
+  let lh = 15 + 85*Math.exp(-Math.pow((day-14)/1.2,2));
+  // Estrogen: rises through follicular, peaks ~day13, dips, second smaller peak ~day21
+  let est = 15 + 70*Math.exp(-Math.pow((day-13)/3,2)) + 35*Math.exp(-Math.pow((day-21)/3.5,2));
+  // Progesterone: low till ovulation, rises, peaks ~day21, falls to day28
+  let prog = 5 + 80*Math.exp(-Math.pow((day-21)/4,2));
+  return {fsh:Math.min(fsh,100), lh:Math.min(lh,100), est:Math.min(est,100), prog:Math.min(prog,100)};
+}
+function phaseOf(day){
+  if(day<=4) return {tag:"ආර්තව අවධිය", cls:"phase-menstrual",
+    ovary:"මුල් අවධියේ ග්‍රැෆියානු කූප කිහිපයක් FSH මගින් වර්ධනය වීමට පටන් ගනී.",
+    uterus:"පීත දේහය දිරාපත් වීමෙන් ඊස්ට්‍රජන්/ප්‍රොජෙස්ටෙරෝන් මට්ටම් පහත වැටී එන්ඩොමෙට්‍රියම ආස්තරණය කැඩී ලේ ගැලීම සිදුවේ."};
+  if(day<=12) return {tag:"ෆොලික්‍යුලර් අවධිය", cls:"phase-follicular",
+    ovary:"ග්‍රැෆියානු කූප වර්ධනය වෙමින්, ඊස්ට්‍රජන් සාවය ක්‍රමයෙන් වැඩි වේ. එක් ප්‍රමුඛ කූපයක් තෝරා ගැනේ.",
+    uterus:"ඊස්ට්‍රජන් බලපෑම යටතේ එන්ඩොමෙට්‍රියම නැවත ඝණවීම ආරම්භ වේ — 'ප්‍රගුණන අවධිය' (proliferative phase)."};
+  if(day<=16) return {tag:"ඩිම්බ මෝචන අවධිය", cls:"phase-ovulation",
+    ovary:"ඊස්ට්‍රජන් ඉහළ මට්ටම ධන ප්‍රතිපෝෂණයෙන් LH උත්සන්නය ඇති කර, දින 14 පමණ ඩිම්බ මෝචනය සිදුවේ.",
+    uterus:"එන්ඩොමෙට්‍රියම වඩාත් ඝණ වී, ග්‍රන්ථි වර්ධනය වෙමින් තවදුරටත් සකසමින් පවතී."};
+  return {tag:"ලුතියල් අවධිය", cls:"phase-luteal",
+    ovary:"පීත දේහය සෑදී ප්‍රොජෙස්ටෙරෝන් (හා ඊස්ට්‍රජන්) විශාල ලෙස සාවය කරයි. සිසෙදවීමක් නොවුවහොත් දින 24කින් පමණ දිරාපත් වේ.",
+    uterus:"ප්‍රොජෙස්ටෙරෝන් බලපෑම යටතේ එන්ඩොමෙට්‍රියම ග්‍රන්ථි සාවයෙන් පොහොසත් වේ — 'සාවී අවධිය' (secretory phase), ගර්භාවතී වීමට සූදානම් වේ."};
+}
+const cvs = document.getElementById('cycleChart');
+const ctx = cvs.getContext('2d');
+function drawChart(selectedDay){
+  const w = cvs.clientWidth || 600; const h=210;
+  cvs.width=w*2; cvs.height=h*2; ctx.setTransform(2,0,0,2,0,0);
+  ctx.clearRect(0,0,w,h);
+  const pad=28;
+  // axes
+  ctx.strokeStyle="#e4d9d2"; ctx.lineWidth=1;
+  for(let g=0; g<=4; g++){
+    const y = pad + g*(h-pad-14)/4;
+    ctx.beginPath(); ctx.moveTo(pad,y); ctx.lineTo(w-10,y); ctx.stroke();
+  }
+  const colors={fsh:"#7a8b6f",lh:"#c4645a",est:"#c99a3d",prog:"#6b2c46"};
+  function xy(day,val){
+    const x = pad + (day-1)*(w-10-pad)/27;
+    const y = (h-14) - (val/100)*(h-14-pad);
+    return [x,y];
+  }
+  ["fsh","lh","est","prog"].forEach(k=>{
+    ctx.beginPath();
+    for(let d=1;d<=28;d++){
+      const lv = hormoneLevels(d)[k];
+      const [x,y]=xy(d,lv);
+      if(d===1) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.strokeStyle=colors[k]; ctx.lineWidth=2.4; ctx.stroke();
+  });
+  // day marker
+  const [mx] = xy(selectedDay,0);
+  ctx.strokeStyle="rgba(43,31,36,0.35)"; ctx.setLineDash([4,3]); ctx.lineWidth=1.4;
+  ctx.beginPath(); ctx.moveTo(mx,10); ctx.lineTo(mx,h-14); ctx.stroke();
+  ctx.setLineDash([]);
+  // day labels
+  ctx.fillStyle="#9a8890"; ctx.font="10px Noto Sans Sinhala, sans-serif";
+  [1,7,14,21,28].forEach(d=>{
+    const [x]=xy(d,0);
+    ctx.fillText(d, x-3, h-2);
+  });
+}
+function updateCycle(){
+  const day = parseInt(document.getElementById('daySlider').value,10);
+  document.getElementById('dayNum').textContent = day;
+  const p = phaseOf(day);
+  const tag = document.getElementById('phaseTag');
+  tag.textContent = p.tag; tag.className="phase-tag "+p.cls;
+  document.getElementById('ovaryEvent').textContent = p.ovary;
+  document.getElementById('uterusEvent').textContent = p.uterus;
+  drawChart(day);
+}
+document.getElementById('daySlider').addEventListener('input',updateCycle);
+window.addEventListener('resize',()=>drawChart(parseInt(document.getElementById('daySlider').value,10)));
+setTimeout(updateCycle,50);
+
+/* ===================== TAB 4: FERTILIZATION / IMPLANTATION STEPPER ===================== */
+const fertSteps = [
+  {title:"1. ශුක්‍රාණු ගමන", visual:"🏊‍♂️", desc:"සංසර්ගයෙන් පසු ශුක්‍රාණු යෝනි මාර්ගය → ගැබ්ගෙල → ගර්භාශය හරහා ෆැලෝපියන් නාළය දක්වා ගමන් කරයි."},
+  {title:"2. සිසෙදවීම", visual:"🧬✨", desc:"ෆැලෝපියන් නාළයේ ඇම්පියුලා කලාපයේදී ශුක්‍රාණුවක් ද්විතීයික අණ්ඩ සෛලය තුළට විනිවිද යයි. 'zona pellucida' ප්‍රතික්‍රියාවක් හරහා අනෙක් ශුක්‍රාණු ඇතුළුවීම වළක්වයි (බහු සිසෙදවීම වළක්වීම)."},
+  {title:"3. සයිගෝටය සෑදීම", visual:"⚫", desc:"අර්ධ ජීවීය කාණ්ඩය II සම්පූර්ණ වී, ශුක්‍රාණු හා ඩිම්බ න්‍යෂ්ටි එකතු වී ද්විගුණිත (2n) සයිගෝටය සෑදේ."},
+  {title:"4. විඛණ්ඩනය (Cleavage)", visual:"⚫⚫⚫⚫", desc:"සයිගෝටය ෆැලෝපියන් නාළය දිගේ ගමන් කරමින් මයිටෝටික බෙදීම් (cleavage) වලට භාජනය වී බ්ලාස්ටෝසිස්ට් අවධියට වර්ධනය වේ (දින 5-7 පමණ)."},
+  {title:"5. බද්ධවීම (Implantation)", visual:"🌸", desc:"බ්ලාස්ටෝසිස්ට් එය ගර්භාශයේ එන්ඩොමෙට්‍රියමට බැඳී ගැඹුරට කා යයි. සංසේවනයෙන් දින 7ක් පමණ ගතවේ."},
+  {title:"6. hCG සහ ගැබ්ගැනීම පවත්වා ගැනීම", visual:"💊", desc:"කලලයේ කෝරියොනික් සෛල මගින් <span class='badge-hormone badge-hcg'>hCG</span> සාවය කරන අතර, එය පීත දේහය දිගටම ක්‍රියාත්මකව තබා ඊස්ට්‍රජන්/ප්‍රොජෙස්ටෙරෝන් සාවය පවත්වා ගනී — එමගින් ආර්තවය සිදුවීම වළක්වයි."},
+  {title:"7. සත්කලලාශය (Placenta) වර්ධනය", visual:"🩸🔴", desc:"කලල පටක සහ මාතෘ එන්ඩොමෙට්‍රියම එකතුව සත්කලලාශය සාදයි. පසුව එයම ඊස්ට්‍රජන් හා ප්‍රොජෙස්ටෙරෝන් සාවය භාරගනී."},
+  {title:"8. ප්‍රසූතිය", visual:"👶", desc:"මාස 9කට පසු, ඊස්ට්‍රජන් ඉහළ මට්ටම මගින් ගර්භාශයේ ඔක්සිටොසින් ප්‍රතිග්‍රාහක වැඩි කරමින්, ඔක්සිටොසින් ධන ප්‍රතිපෝෂණ ලූපය හරහා ප්‍රසූතිය ආරම්භ වේ."}
+];
+let fertIdx=0;
+function renderFert(){
+  const s=fertSteps[fertIdx];
+  document.getElementById('fertVisual').innerHTML = '<div style="font-size:3.2rem;">'+s.visual+'</div>';
+  document.getElementById('fertTitle').innerHTML = s.title;
+  document.getElementById('fertDesc').innerHTML = s.desc;
+  document.getElementById('fertPrev').disabled = fertIdx===0;
+  document.getElementById('fertNext').disabled = fertIdx===fertSteps.length-1;
+  document.getElementById('fertDots').innerHTML = fertSteps.map((_,i)=>'<i class="'+(i===fertIdx?'on':'')+'"></i>').join('');
+}
+document.getElementById('fertPrev').addEventListener('click',()=>{if(fertIdx>0){fertIdx--;renderFert();}});
+document.getElementById('fertNext').addEventListener('click',()=>{if(fertIdx<fertSteps.length-1){fertIdx++;renderFert();}});
+renderFert();
+
+/* Labor flow (oxytocin positive feedback) */
+const laborSteps = [
+  {t:"ගර්භාශ ග්‍රීවා තුඩ ළදරු හිසෙහි පීඩනය", d:"ප්‍රසූතියට ආසන්නව දරුවාගේ හිස ගැබ්ගෙල මතට තල්ලු වීමෙන් ස්නායු ආවේග හයිපොතැලමසය දක්වා යවනු ලැබේ."},
+  {t:"ඔක්සිටොසින් සාවය (පශ්ච පිටියුටරි)", d:"හයිපොතැලමසය ප්‍රතිචාර දක්වා පශ්ච පිටියුටරි ග්‍රන්ථියෙන් <span class='badge-hormone badge-oxy'>ඔක්සිටොසින්</span> රුධිරයට මුදා හරියි."},
+  {t:"ගර්භාශ මාංශ පේශි හැකිලීම", d:"ඔක්සිටොසින් ගර්භාශයේ මාංශ පේශි වඩාත් ප්‍රබලව හැකිලීමට හේතු වේ, දරුවා ගැබ්ගෙල දෙසට තවදුරටත් තල්ලු කරයි.", loop:true},
+  {t:"ගැබ්ගෙල තව දුරටත් පීඩනයට ලක්වීම → ලූපය දිගටම", d:"මෙය ගැබ්ගෙලට එල්ල වන පීඩනය තවත් වැඩි කරන අතර, එමගින් නැවත වැඩි ඔක්සිටොසින් සාවයක් අවුස්සයි — මෙය <b>ධන ප්‍රතිපෝෂණ ලූපයකි</b>, දරුවා පිටත් වන තෙක් ශක්තිය වැඩිවෙමින් පවතී."},
+  {t:"දරු ප්‍රසූතිය සහ ලූප නැවතීම", d:"දරුවා හා පසුව සත්කලලාශය පිටවීමත් සමඟ ගැබ්ගෙලට එල්ල වන පීඩනය ඉවත් වී ඔක්සිටොසින් සාවය අවසන් වේ."}
+];
+function buildFlow(containerId, steps){
+  const c = document.getElementById(containerId);
+  c.innerHTML = steps.map((s,i)=>`
+    <div class="flow-step ${s.loop?'loop':''}" data-i="${i}">
+      <div class="fnum">${i+1}</div>
+      <div><b>${s.t}</b></div>
+    </div>
+    <div class="flow-detail" id="${containerId}-d${i}">${s.d}</div>
+  `).join('');
+  steps.forEach((s,i)=>{
+    c.querySelector('[data-i="'+i+'"]').addEventListener('click',()=>{
+      document.getElementById(containerId+'-d'+i).classList.toggle('open');
+    });
+  });
+}
+buildFlow('laborFlow', laborSteps);
+
+/* ===================== TAB 5: LACTATION FLOW ===================== */
+const lactSteps = [
+  {t:"ළදරුවා තනපුඩුවේ තුඩ උරාබොනවා", d:"උරාබීමෙන් සංවේදක ස්නායු ආවේග මවගේ හයිපොතැලමසය දක්වා යවනු ලැබේ."},
+  {t:"ප්‍රොලැක්ටින් සහ ඔක්සිටොසින් සාවය", d:"පූර්ව පිටියුටරියෙන් <span class='badge-hormone badge-prl'>ප්‍රොලැක්ටින්</span> (කිරි නිෂ්පාදනය සඳහා) සහ පශ්ච පිටියුටරියෙන් <span class='badge-hormone badge-oxy'>ඔක්සිටොසින්</span> (කිරි නික්මවීම සඳහා) සාවය වේ."},
+  {t:"කිරි නිෂ්පාදනය හා නික්මවීම", d:"ප්‍රොලැක්ටින් ග්‍රන්ථි සෛල මගින් කිරි නිෂ්පාදනය උත්තේජනය කරන අතර, ඔක්සිටොසින් ග්‍රන්ථි වටා ඇති මාංශ පේශි හැකිලීමෙන් කිරි නාළ දිගේ කිරි නික්මවීම (let-down reflex) ඇති කරයි.", loop:true},
+  {t:"දිගටම උරාබීම → දිගටම හෝමෝන සාවය", d:"ළදරුවා දිගටම උරාබොන තාක් කල් සංවේදක ආවේග දිගටම ලැබෙන අතර, එමගින් ප්‍රොලැක්ටින්/ඔක්සිටොසින් සාවය දිගටම පවතී — මෙය <b>ධන ප්‍රතිපෝෂණ ලූපයකි</b>."},
+  {t:"උරාබීම නතර වීම → ලූපය නැවතීම", d:"උරාබීම නතර වූ විට සංවේදක ආවේග නතර වී, හෝමෝන සාවය ක්‍රමයෙන් අඩු වේ."}
+];
+buildFlow('lactationFlow', lactSteps);
+
+/* ===================== TAB 6: QUIZ ===================== */
+const quizData = [
+  {q:"ඩිම්බ මෝචනය ප්‍රේරණය කරන ප්‍රධාන හෝමෝන සිද්ධිය කුමක්ද?",
+   opts:["ප්‍රොජෙස්ටෙරෝන් අඩුවීම","LH උත්සන්නය (LH surge)","FSH අඩුවීම","hCG ඉහළ යාම"], ans:1,
+   exp:"ඉහළ ඊස්ට්‍රජන් මට්ටම ධන ප්‍රතිපෝෂණයෙන් LH උත්සන්නය ඇති කර ඩිම්බ මෝචනය ප්‍රේරණය කරයි."},
+  {q:"ද්විතීයික අණ්ඩ සෛලය සෑදෙන්නේ කුමන අවස්ථාවේදීද?",
+   opts:["අර්ධ ජීවීය කාණ්ඩය I සම්පූර්ණ වීමෙන්","මයිටෝසිස් මගින්","අර්ධ ජීවීය කාණ්ඩය II සම්පූර්ණ වීමෙන්","සිසෙදවීමට පෙර මයිටෝසිස් වලින්"], ans:0,
+   exp:"අර්ධ ජීවීය කාණ්ඩය I අසමාන ලෙස සම්පූර්ණ වීමෙන් ද්විතීයික අණ්ඩ සෛලය සහ පළමු ධ්‍රැවීය දේහය සෑදේ."},
+  {q:"සිසෙදවීම සාමාන්‍යයෙන් සිදුවන්නේ කොහේද?",
+   opts:["ගර්භාශය තුළ","ගැබ්ගෙලේ","ෆැලෝපියන් නාළයේ ඇම්පියුලා කලාපයේ","ඩිම්බකෝෂය තුළ"], ans:2,
+   exp:"සිසෙදවීම සාමාන්‍යයෙන් සිදුවන්නේ ෆැලෝපියන් නාළයේ ඇම්පියුලා කලාපයේදීය."},
+  {q:"ගැබ්ගැනීමේ මුල් අවධියේදී පීත දේහය පවත්වා ගැනීමට වගකියන හෝමෝනය කුමක්ද?",
+   opts:["FSH","hCG","ඔක්සිටොසින්","ප්‍රොලැක්ටින්"], ans:1,
+   exp:"කලලයෙන් සාවය කරන hCG පීත දේහය දිගටම ක්‍රියාත්මකව තබා ඊස්ට්‍රජන්/ප්‍රොජෙස්ටෙරෝන් සාවය පවත්වා ගනී."},
+  {q:"ප්‍රසූතියේදී ගර්භාශ හැකිලීම වැඩි කරන ධන ප්‍රතිපෝෂණ හෝමෝනය කුමක්ද?",
+   opts:["ප්‍රොජෙස්ටෙරෝන්","ප්‍රොලැක්ටින්","ඔක්සිටොසින්","ඊස්ට්‍රජන්"], ans:2,
+   exp:"ගැබ්ගෙලට එල්ල වන පීඩනය හයිපොතැලමසය හරහා ඔක්සිටොසින් සාවය අවුස්සයි, එය නැවත හැකිලීම වැඩි කරන ධන ප්‍රතිපෝෂණ ලූපයකි."},
+  {q:"කිරි නික්මවීම (let-down reflex) ට ප්‍රධාන වශයෙන් සම්බන්ධ හෝමෝනය කුමක්ද?",
+   opts:["ප්‍රොලැක්ටින්","ඔක්සිටොසින්","ඊස්ට්‍රජන්","FSH"], ans:1,
+   exp:"ඔක්සිටොසින් ග්‍රන්ථි වටා ඇති මාංශ පේශි හැකිලීමෙන් කිරි නික්මවීම ඇති කරයි; ප්‍රොලැක්ටින් කිරි නිෂ්පාදනයට වගකියයි."}
+];
+let quizScore=0, quizAnswered=0;
+function renderQuiz(){
+  quizScore=0; quizAnswered=0;
+  const c = document.getElementById('quizContainer');
+  c.innerHTML = quizData.map((q,qi)=>`
+    <div class="quiz-q" data-qi="${qi}">
+      <p class="qtext">${qi+1}. ${q.q}</p>
+      ${q.opts.map((o,oi)=>`<button class="opt" data-oi="${oi}">${o}</button>`).join('')}
+      <div class="quiz-feedback"></div>
+    </div>
+  `).join('') + '<div id="quizScoreBox"></div><button id="quizResetBtn">නැවත උත්සාහ කරන්න</button>';
+
+  quizData.forEach((q,qi)=>{
+    const qDiv = c.querySelector('[data-qi="'+qi+'"]');
+    const btns = qDiv.querySelectorAll('.opt');
+    btns.forEach((b,oi)=>{
+      b.addEventListener('click',()=>{
+        if(qDiv.dataset.done) return;
+        qDiv.dataset.done="1";
+        btns.forEach((bb,bi)=>{
+          bb.disabled=true;
+          if(bi===q.ans) bb.classList.add('correct');
+          else if(bi===oi) bb.classList.add('wrong');
+        });
+        const fb = qDiv.querySelector('.quiz-feedback');
+        if(oi===q.ans){ quizScore++; fb.textContent="✅ නිවැරදියි! "+q.exp; }
+        else { fb.textContent="❌ නිවැරදි නොවේ. "+q.exp; }
+        quizAnswered++;
+        if(quizAnswered===quizData.length){
+          document.getElementById('quizScoreBox').innerHTML =
+            '<div class="quiz-score">ඔබේ ලකුණු: '+quizScore+' / '+quizData.length+'</div>';
+        }
+      });
+    });
+  });
+  document.getElementById('quizResetBtn').addEventListener('click',renderQuiz);
+}
+renderQuiz();
+</script>
+</body>
+</html>

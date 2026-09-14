@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ශාක ජීවන චක්‍ර | භෞමික අනුවර්තන</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Sinhala:wght@500;700&family=Noto+Sans+Sinhala:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F6F2E7; --bg-elev:#FFFFFF; --bg-soft:#EFE9D8;
+  --ink:#1C2A20; --ink-soft:#5C6B5F;
+  --border:#E1D8BD;
+  --n-color:#2E7350; --n-bg:#E1F0E5;
+  --twon-color:#AD5A28; --twon-bg:#F6E4CF;
+  --gold:#B4872A; --gold-bg:#F3E7C6;
+  --shadow: rgba(28,42,32,0.10);
+  --proc-color:#5B6EAE; --proc-bg:#E6E9F7;
+}
+body.dark{
+  --bg:#0D1A13; --bg-elev:#15271B; --bg-soft:#1B3123;
+  --ink:#EAF0E6; --ink-soft:#9FB3A2;
+  --border:#274330;
+  --n-color:#7FCB9C; --n-bg:#1D3826;
+  --twon-color:#E2914E; --twon-bg:#3A2716;
+  --gold:#E8C15A; --gold-bg:#3A3016;
+  --shadow: rgba(0,0,0,0.4);
+  --proc-color:#9AA8E8; --proc-bg:#232A4A;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:'Noto Sans Sinhala','Poppins',sans-serif;
+  -webkit-tap-highlight-color:transparent;
+  transition:background .3s,color .3s;
+  padding-bottom:40px;
+  min-height:100vh;
+}
+.wrap{max-width:560px;margin:0 auto;padding:0 14px;}
+header{
+  position:sticky; top:0; z-index:50;
+  background:var(--bg); border-bottom:1px solid var(--border);
+  padding:12px 0 8px;
+}
+.headrow{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+h1{
+  font-family:'Noto Serif Sinhala',serif;
+  font-size:19px; margin:0; line-height:1.3; font-weight:700;
+}
+.sub{font-size:11.5px;color:var(--ink-soft);margin-top:2px;letter-spacing:.02em;}
+.theme-btn{
+  border:1px solid var(--border); background:var(--bg-elev); color:var(--ink);
+  width:38px;height:38px;border-radius:12px;font-size:17px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;
+}
+.tabs{
+  display:flex; gap:6px; overflow-x:auto; padding:10px 0 2px; scrollbar-width:none;
+}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{
+  flex:none; padding:8px 12px; border-radius:999px; border:1px solid var(--border);
+  background:var(--bg-elev); color:var(--ink-soft); font-size:12.5px; font-weight:600;
+  cursor:pointer; white-space:nowrap; display:flex; gap:5px; align-items:center;
+  transition:all .15s;
+}
+.tab.active{background:var(--n-color);border-color:var(--n-color);color:#fff;}
+main{padding-top:14px;}
+.panel{display:none;animation:fade .35s ease;}
+.panel.show{display:block;}
+@keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.card{
+  background:var(--bg-elev); border:1px solid var(--border); border-radius:16px;
+  padding:14px 15px; margin-bottom:12px; box-shadow:0 3px 10px var(--shadow);
+}
+.card h2{font-family:'Noto Serif Sinhala',serif;font-size:16.5px;margin:0 0 6px;font-weight:700;}
+.card p{font-size:13.4px;line-height:1.65;margin:0;color:var(--ink);}
+.eyebrow{
+  font-family:'Poppins',sans-serif;font-size:10px;letter-spacing:.12em;
+  color:var(--gold); font-weight:600; text-transform:uppercase; margin-bottom:6px; display:block;
+}
+/* badges */
+.badge{
+  display:inline-flex;align-items:center;gap:4px;font-family:'Poppins',sans-serif;
+  font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;
+}
+.badge.n{background:var(--n-bg);color:var(--n-color);}
+.badge.twon{background:var(--twon-bg);color:var(--twon-color);}
+.badge.proc{background:var(--proc-bg);color:var(--proc-color);}
+/* flip cards - module 1 */
+.flipgrid{display:grid;gap:12px;}
+.flipcard{
+  perspective:1200px; height:130px; cursor:pointer;
+}
+.flipinner{
+  position:relative;width:100%;height:100%;transition:transform .55s cubic-bezier(.4,.2,.2,1);
+  transform-style:preserve-3d;
+}
+.flipcard.flipped .flipinner{transform:rotateY(180deg);}
+.flipface{
+  position:absolute;inset:0;backface-visibility:hidden;border-radius:16px;
+  border:1px solid var(--border); padding:14px 16px; display:flex;flex-direction:column;justify-content:center;
+  box-shadow:0 3px 10px var(--shadow);
+}
+.flipfront{background:var(--bg-elev);}
+.flipfront .ficon{font-size:26px;margin-bottom:6px;}
+.flipfront h3{font-family:'Noto Serif Sinhala',serif;font-size:15px;margin:0;font-weight:700;}
+.flipfront .tap{font-size:10.5px;color:var(--ink-soft);margin-top:6px;font-family:'Poppins',sans-serif;}
+.flipback{background:var(--n-bg); transform:rotateY(180deg); overflow-y:auto;}
+.flipback p{font-size:12.4px;line-height:1.55;color:var(--ink);}
+/* wheel */
+.wheelbox{
+  background:var(--bg-elev);border:1px solid var(--border);border-radius:18px;
+  padding:10px; margin-bottom:12px; box-shadow:0 3px 10px var(--shadow); text-align:center;
+}
+svg.wheel{width:100%;max-width:330px;height:auto;touch-action:manipulation;}
+.wnode circle{fill:var(--bg-elev);stroke-width:2.5;cursor:pointer;transition:all .2s;}
+.wnode text{font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;fill:var(--ink);pointer-events:none;}
+.wnode.n circle{stroke:var(--n-color);}
+.wnode.twon circle{stroke:var(--twon-color);}
+.wnode.proc circle{stroke:var(--proc-color);}
+.wnode.active circle{fill:var(--gold);stroke:var(--gold);}
+.wnode.active text{fill:#1C2A20;}
+.wlink{stroke:var(--border);stroke-width:2;fill:none;}
+.wcenter{font-family:'Noto Serif Sinhala',serif;font-size:13px;font-weight:700;fill:var(--ink-soft);}
+.particle{fill:var(--gold);opacity:0;}
+.legend{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;text-align:right-align;}
+.legitem{
+  display:flex;align-items:center;gap:7px;text-align:right !important;
+  background:var(--bg-soft);border-radius:10px;padding:7px 8px;cursor:pointer;border:1px solid transparent;
+  font-size:11.8px;
+}
+.legitem.active{border-color:var(--gold);background:var(--gold-bg);}
+.legnum{
+  flex:none;width:20px;height:20px;border-radius:50%;background:var(--bg-elev);
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'Poppins',sans-serif;
+  border:1.5px solid var(--border);
+}
+.detailbox{
+  background:var(--bg-elev);border:1px solid var(--gold);border-radius:16px;
+  padding:14px 15px;margin-bottom:14px;box-shadow:0 3px 10px var(--shadow);
+}
+.detailbox h3{font-family:'Noto Serif Sinhala',serif;font-size:15.5px;margin:6px 0 6px;font-weight:700;}
+.detailbox p{font-size:13.2px;line-height:1.6;margin:0;}
+/* toggle pair (selaginella) */
+.pairtabs{display:flex;gap:8px;margin-bottom:10px;}
+.pairtab{
+  flex:1;padding:10px;border-radius:12px;border:1.5px solid var(--border);
+  background:var(--bg-elev);text-align:center;font-weight:700;font-size:13px;cursor:pointer;
+}
+.pairtab.micro.active{background:var(--n-bg);border-color:var(--n-color);color:var(--n-color);}
+.pairtab.mega.active{background:var(--twon-bg);border-color:var(--twon-color);color:var(--twon-color);}
+.timeline{border-right:3px dashed var(--border);padding-right:14px;margin-right:4px;}
+.tlitem{position:relative;padding:8px 0 8px 0;font-size:13px;line-height:1.55;}
+.tlitem::after{
+  content:'';position:absolute;right:-19px;top:14px;width:9px;height:9px;border-radius:50%;
+  background:var(--gold);
+}
+.bridge{
+  background:var(--gold-bg);border:1px dashed var(--gold);border-radius:14px;padding:12px 14px;
+  font-size:12.8px;line-height:1.6;margin-top:8px;
+}
+/* cycas linear stepper */
+.stepper{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.stepdots{display:flex;gap:6px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border);}
+.dot.active{background:var(--gold);width:20px;border-radius:6px;}
+.stepnav{
+  display:flex;justify-content:space-between;gap:10px;margin-top:12px;
+}
+.navbtn{
+  flex:1;padding:11px;border-radius:12px;border:none;background:var(--n-color);color:#fff;
+  font-weight:700;font-size:13.5px;cursor:pointer;font-family:'Noto Sans Sinhala',sans-serif;
+}
+.navbtn:disabled{opacity:.35;}
+.stepicon{font-size:32px;text-align:center;margin-bottom:4px;}
+/* matrix */
+.matgrid{display:grid;gap:10px;}
+.matcard{
+  background:var(--bg-elev);border:1px solid var(--border);border-radius:14px;padding:12px 14px;
+}
+.matcard h4{margin:0 0 8px;font-family:'Noto Serif Sinhala',serif;font-size:14.5px;}
+.matrow{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;}
+.matlabel{font-size:12.3px;color:var(--ink-soft);flex:1;}
+.flipbadge{
+  border:none;font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;
+  padding:5px 12px;border-radius:999px;cursor:pointer;background:var(--bg-soft);color:var(--ink-soft);
+}
+.flipbadge.revealed.n{background:var(--n-bg);color:var(--n-color);}
+.flipbadge.revealed.twon{background:var(--twon-bg);color:var(--twon-color);}
+/* quiz */
+.quizbox{background:var(--bg-elev);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:0 3px 10px var(--shadow);}
+.qprog{font-size:11.5px;color:var(--ink-soft);font-family:'Poppins',sans-serif;margin-bottom:6px;}
+.qtext{font-size:14.5px;font-weight:600;line-height:1.55;margin-bottom:12px;}
+.qopt{
+  display:block;width:100%;text-align:right;padding:11px 14px;margin-bottom:8px;border-radius:12px;
+  border:1.5px solid var(--border);background:var(--bg-soft);color:var(--ink);font-size:13.2px;
+  cursor:pointer;font-family:'Noto Sans Sinhala',sans-serif;
+}
+.qopt.correct{background:var(--n-bg);border-color:var(--n-color);color:var(--n-color);font-weight:700;}
+.qopt.wrong{background:var(--twon-bg);border-color:var(--twon-color);color:var(--twon-color);font-weight:700;}
+.qexplain{font-size:12.4px;background:var(--gold-bg);border-radius:10px;padding:10px 12px;margin-top:8px;display:none;line-height:1.55;}
+.scorepill{
+  display:inline-block;background:var(--gold-bg);color:var(--gold);font-family:'Poppins',sans-serif;
+  font-weight:700;font-size:12px;padding:4px 12px;border-radius:999px;margin-bottom:10px;
+}
+.finalscreen{text-align:center;padding:20px 4px;}
+.finalscreen .big{font-family:'Noto Serif Sinhala',serif;font-size:30px;font-weight:700;color:var(--gold);}
+.sectitle{font-family:'Noto Serif Sinhala',serif;font-size:15.5px;font-weight:700;margin:4px 0 10px;}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="headrow">
+      <div>
+        <h1>ශාක ජීවන චක්‍ර 🌿</h1>
+        <div class="sub">භෞමික ජීවිතයට උචිත අනුවර්තන — අ.පො.ස. (උසස් පෙළ) ජීව විද්‍යාව</div>
+      </div>
+      <button class="theme-btn" id="themeBtn" aria-label="theme">🌙</button>
+    </div>
+    <div class="tabs" id="tabs">
+      <div class="tab active" data-tab="t1">🌍 සාමාන්‍ය අනුවර්තන</div>
+      <div class="tab" data-tab="t2">🟢 පොගොනේටම්</div>
+      <div class="tab" data-tab="t3">🌿 නෙෆ්‍රොලෙපිස්</div>
+      <div class="tab" data-tab="t4">🍃 සෙලාජිනෙල්ලා</div>
+      <div class="tab" data-tab="t5">🌰 සයිකස්</div>
+      <div class="tab" data-tab="t6">🧠 සමාලෝචනය</div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- MODULE 1 -->
+  <section class="panel show" id="t1">
+    <div class="sectitle">ශාක ප්‍රජනන ක්‍රියාවලියේ භෞමික අනුවර්තන</div>
+    <div class="flipgrid" id="flipgrid"></div>
+  </section>
+
+  <!-- MODULE 2 -->
+  <section class="panel" id="t2">
+    <div class="sectitle">Pogonatum (මොසී) ජීවන චක්‍රය</div>
+    <div class="wheelbox">
+      <svg class="wheel" id="wheel2" viewBox="0 0 320 320"></svg>
+      <div class="legend" id="leg2"></div>
+    </div>
+    <div class="detailbox" id="det2"><span class="eyebrow">අවධිය තෝරන්න</span><h3>වට රවුමේ අංකයක් තට්ටු කරන්න</h3><p>එක් එක් අවධියේ විස්තරය මෙහි දිස්වේ.</p></div>
+    <div class="card"><span class="eyebrow">ප්‍රධාන ලක්ෂණ</span>
+      <p>ජන්මාංශු ශාකය (n) ප්‍රමුඛ හා දිගු කාලීන පරම්පරාවයි. බීජාණුඝාකය (2n) එයට ‌පරායත්තව, පෝෂණය ලබාගනිමින් වර්ධනය වේ. සංසේචනයට ජලය අත්‍යවශ්‍යයි — කශික ශුක්‍රාණු ජල පටලයක් තුළින් පමණක් ආර්කගෝනියාව කරා පිහිනා යා හැක.</p>
+    </div>
+  </section>
+
+  <!-- MODULE 3 -->
+  <section class="panel" id="t3">
+    <div class="sectitle">Nephrolepis (පර්ණාංග) ජීවන චක්‍රය</div>
+    <div class="wheelbox">
+      <svg class="wheel" id="wheel3" viewBox="0 0 320 320"></svg>
+      <div class="legend" id="leg3"></div>
+    </div>
+    <div class="detailbox" id="det3"><span class="eyebrow">අවධිය තෝරන්න</span><h3>වට රවුමේ අංකයක් තට්ටු කරන්න</h3><p>එක් එක් අවධියේ විස්තරය මෙහි දිස්වේ.</p></div>
+    <div class="card" id="indusiumCard">
+      <span class="eyebrow">සෝරස් සහ කසුව යාන්ත්‍රණය</span>
+      <h2 id="indTitle">කසුව (Indusium) — වැසුණු තත්ත්වය</h2>
+      <p id="indText">තෙත් කාලයේදී කසුව සෝරසය ආවරණය කර බීජාණුධානි රැකවරණය කරයි.</p>
+      <button class="navbtn" style="margin-top:10px;" id="indBtn">☀️ වියළීමට ලක් කරන්න</button>
+    </div>
+  </section>
+
+  <!-- MODULE 4 -->
+  <section class="panel" id="t4">
+    <div class="sectitle">Selaginella — විෂමබීජාණුකතාව</div>
+    <div class="card">
+      <span class="eyebrow">සංකේතුව (Strobilus)</span>
+      <p>අතු අග්‍රයේ සාදන සංකේතුව ක්ෂුද්‍ර ස්පෝරොෆිල් හා මහා ස්පෝරොෆිල් වලින් සමන්විතයි. එකම ශාකයේ බීජාණු වර්ග දෙකක් සෑදීම නිසා මෙය <b>විෂමබීජාණුක</b> ශාකයකි.</p>
+    </div>
+    <div class="pairtabs">
+      <div class="pairtab micro active" data-track="micro">🔬 ක්ෂුද්‍ර මාර්ගය (n)</div>
+      <div class="pairtab mega" data-track="mega">⬤ මහා මාර්ගය (n)</div>
+    </div>
+    <div class="card">
+      <div class="timeline" id="selTimeline"></div>
+    </div>
+    <div class="card">
+      <span class="eyebrow">එකතුවීම</span>
+      <p>ඒකගුණ (n) කශික ශුක්‍රාණුව බාහිර ජලයක් ඔස්සේ පිහිනා, ත්‍රිකෝණ සලකුණෙන් විවෘත වූ මහා බීජාණු බිත්තිය තුළට ඇතුළු වී ආර්කගෝනියාව සංසේචනය කරයි → ද්විගුණ (2n) යුක්තාණුව සෑදේ → කලලය මව් ශාකයට අනුබද්ධව ම, ස්ත්‍රී ජන්මාංශුවෙන් පෝෂණය ලබා වර්ධනය වී නව බීජාණුඝාක ශාකයක් බවට පත් වේ.</p>
+    </div>
+    <div class="bridge">🌉 <b>පරිණාමීය පාලමක්:</b> මහා බීජාණුව හා ස්ත්‍රී ජන්මාංශුව මව් ශාකය තුළම රඳවා පෝෂණය කිරීම — මෙය පසුව බීජ ශාකවල ඩිම්බය (ovule) බවට පරිණාමය වූ තීරණාත්මක අවස්ථාවයි.</div>
+  </section>
+
+  <!-- MODULE 5 -->
+  <section class="panel" id="t5">
+    <div class="sectitle">Cycas — බීජ අනුවර්තනය (Gymnosperm)</div>
+    <div class="card">
+      <div class="stepper">
+        <div class="qprog" id="cycProg">1 / 8</div>
+        <div class="stepdots" id="cycDots"></div>
+      </div>
+      <div class="stepicon" id="cycIcon">🌲</div>
+      <h2 id="cycTitle" style="text-align:center;"></h2>
+      <p id="cycText" style="text-align:center;"></p>
+      <div class="stepnav">
+        <button class="navbtn" id="cycPrev">← පෙර</button>
+        <button class="navbtn" id="cycNext">ඊළඟ →</button>
+      </div>
+    </div>
+    <div class="bridge">🌱 <b>ප්‍රධාන අනුවර්තනය:</b> පරාග නාලය හරහා ශුක්‍රාණු ප්‍රවාහනය වන බැවින් සංසේචනයට බාහිර ජලයක් අවශ්‍ය නොවේ — මෙය සම්පූර්ණ භෞමික ජීවන චක්‍රයක් කරා ගිය තීරණාත්මක පියවරයි.</div>
+  </section>
+
+  <!-- MODULE 6 -->
+  <section class="panel" id="t6">
+    <div class="sectitle">n vs 2n — මතක සටහන් වගුව</div>
+    <div class="card"><p>සෑම කොටුවක් මත ම තට්ටු කර එය ඒකගුණ (n) ද ද්විගුණ (2n) ද යන්න පෙන්වන්න.</p></div>
+    <div class="matgrid" id="matrixGrid"></div>
+
+    <div class="sectitle" style="margin-top:18px;">ඉක්මන් සමාලෝචන ප්‍රශ්නාවලිය</div>
+    <div class="quizbox" id="quizBox"></div>
+  </section>
+
+</main>
+
+<script>
+/* ---------- THEME ---------- */
+var isDark=false;
+document.getElementById('themeBtn').onclick=function(){
+  isDark=!isDark;
+  document.body.classList.toggle('dark',isDark);
+  this.textContent=isDark?'☀️':'🌙';
+};
+
+/* ---------- TABS ---------- */
+document.querySelectorAll('.tab').forEach(function(tb){
+  tb.onclick=function(){
+    document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active');});
+    document.querySelectorAll('.panel').forEach(function(x){x.classList.remove('show');});
+    tb.classList.add('active');
+    document.getElementById(tb.dataset.tab).classList.add('show');
+  };
+});
+
+/* ---------- MODULE 1: FLIP CARDS ---------- */
+var m1=[
+ {icon:'🔁',t:'පරම්පරා ප්‍රත්‍යාවර්තනය',d:'සියලු භෞමික ශාක තම ජීවන චක්‍රයේදී පරම්පරා ප්‍රත්‍යාවර්තනය දක්වයි — ඒකගුණ (n) ජන්මාංශු පරම්පරාවත්, ද්විගුණ (2n) බීජාණුඝාක පරම්පරාවත් හුවමාරු වෙමින් පවතී.'},
+ {icon:'⚖️',t:'විෂම පරම්පරා (Heteromorphic)',d:'ජීවන චක්‍රයේදී රූපාකාරයෙන් වෙනස් වූ, හඳුනාගත හැකි ජන්මාංශු (n) හා බීජාණුඝාක (2n) අවධි දෙකක් පවතී — දෙකම එකම හැඩයෙන් නොපෙනේ.'},
+ {icon:'🛡️',t:'ලිංගික අවයවවල අභ්‍යන්තර සංසේචනය',d:'ලිංගික සෛල (ශුක්‍රාණු/අණ්ඩ) බහුසෛලික ආරක්ෂිත අවයව — ඇන්තෙරීඩියම් හා ආර්කගෝනියම් තුළ නිපදවේ, එමගින් වියළීමෙන් ආරක්ෂාව ලැබේ.'},
+ {icon:'🌱',t:'කලලය රඳවා පෝෂණය',d:'ජන්මාංශු සාදන සෛල ස්තරවලින් ආරක්ෂා වූ පිහිටියේ (ආර්කගෝනියා/මෙගාස්පෝරෝෆිල්) සෑදෙන කලලය එහිම රඳවාගෙන පෝෂණය ලබාදීම භෞමික අනුවර්තනයකි.'},
+ {icon:'📈',t:'ස්පෝරොෆයිට් ප්‍රමුඛත්වය කරා ප්‍රවණතාව',d:'පරිණාමීය ක්‍රියාවලියේදී ද්විගුණ බීජාණුඝාක පරම්පරාව ක්‍රමයෙන් ප්‍රමුඛ ශාකය බවට පත්වී, ජන්මාංශු පරම්පරාව සුළු වෙමින් පැමිණ ඇත (මොසී→පර්ණාංග→බීජ ශාක).'}
+];
+var fg=document.getElementById('flipgrid');
+m1.forEach(function(c,i){
+  var el=document.createElement('div');
+  el.className='flipcard';
+  el.innerHTML='<div class="flipinner">'+
+    '<div class="flipface flipfront"><div class="ficon">'+c.icon+'</div><h3>'+c.t+'</h3><div class="tap">තට්ටු කර විස්තර බලන්න ↺</div></div>'+
+    '<div class="flipface flipback"><p>'+c.d+'</p></div>'+
+  '</div>';
+  el.onclick=function(){el.classList.toggle('flipped');};
+  fg.appendChild(el);
+});
+
+/* ---------- GENERIC WHEEL RENDERER ---------- */
+function renderWheel(svgId,legId,detId,stages){
+  var svg=document.getElementById(svgId);
+  var leg=document.getElementById(legId);
+  var det=document.getElementById(detId);
+  var cx=160,cy=160,R=118;
+  var html='<defs></defs>';
+  var n=stages.length;
+  var pts=stages.map(function(s,i){
+    var ang=-Math.PI/2+i*(2*Math.PI/n);
+    return {x:cx+R*Math.cos(ang), y:cy+R*Math.sin(ang)};
+  });
+  for(var i=0;i<n;i++){
+    var a=pts[i], b=pts[(i+1)%n];
+    html+='<path class="wlink" d="M'+a.x+','+a.y+' L'+b.x+','+b.y+'"/>';
+    var mx=a.x+(b.x-a.x)*0.55, my=a.y+(b.y-a.y)*0.55;
+    var ang2=Math.atan2(b.y-a.y,b.x-a.x);
+    var ax1=mx-6*Math.cos(ang2-0.4), ay1=my-6*Math.sin(ang2-0.4);
+    var ax2=mx-6*Math.cos(ang2+0.4), ay2=my-6*Math.sin(ang2+0.4);
+    html+='<polygon points="'+mx+','+my+' '+ax1+','+ay1+' '+ax2+','+ay2+'" fill="var(--border)"/>';
+  }
+  html+='<circle cx="'+cx+'" cy="'+cy+'" r="46" fill="var(--bg-soft)" stroke="var(--border)"/>';
+  html+='<text class="wcenter" x="'+cx+'" y="'+(cy-4)+'" text-anchor="middle">ජීවන</text>';
+  html+='<text class="wcenter" x="'+cx+'" y="'+(cy+14)+'" text-anchor="middle">චක්‍රය</text>';
+  stages.forEach(function(s,i){
+    var p=pts[i];
+    html+='<g class="wnode '+s.phase+'" data-i="'+i+'" transform="translate('+p.x+','+p.y+')">'+
+      '<circle r="20"/><text x="0" y="5" text-anchor="middle">'+(i+1)+'</text></g>';
+  });
+  svg.innerHTML=html;
+
+  leg.innerHTML='';
+  stages.forEach(function(s,i){
+    var it=document.createElement('div');
+    it.className='legitem';
+    it.dataset.i=i;
+    it.innerHTML='<span class="legnum">'+(i+1)+'</span><span>'+s.icon+' '+s.short+'</span>';
+    it.onclick=function(){selectStage(i);};
+    leg.appendChild(it);
+  });
+
+  function selectStage(i){
+    svg.querySelectorAll('.wnode').forEach(function(g){g.classList.remove('active');});
+    leg.querySelectorAll('.legitem').forEach(function(g){g.classList.remove('active');});
+    svg.querySelector('.wnode[data-i="'+i+'"]').classList.add('active');
+    leg.querySelector('.legitem[data-i="'+i+'"]').classList.add('active');
+    var s=stages[i];
+    var badgeClass=s.phase==='n'?'n':(s.phase==='twon'?'twon':'proc');
+    var badgeText=s.phase==='n'?'ඒකගුණ n':(s.phase==='twon'?'ද්විගුණ 2n':'ක්‍රියාවලිය');
+    det.innerHTML='<span class="badge '+badgeClass+'">'+badgeText+'</span><h3 style="margin-top:8px;">'+s.icon+' '+s.title+'</h3><p>'+s.detail+'</p>';
+    if(s.burst){triggerBurst(svg,pts[i].x,pts[i].y);}
+  }
+  svg.querySelectorAll('.wnode').forEach(function(g){
+    g.onclick=function(){selectStage(+g.dataset.i);};
+  });
+  selectStage(0);
+}
+
+function triggerBurst(svg,x,y){
+  var ns='http://www.w3.org/2000/svg';
+  for(var k=0;k<8;k++){
+    var ang=Math.random()*6.28, dist=18+Math.random()*22;
+    var p=document.createElementNS(ns,'circle');
+    p.setAttribute('cx',x); p.setAttribute('cy',y); p.setAttribute('r',2.6);
+    p.setAttribute('class','particle');
+    svg.appendChild(p);
+    var t0=null;
+    (function(p,ang,dist){
+      function step(ts){
+        if(!t0)t0=ts;
+        var prog=(ts-t0)/700;
+        if(prog>1){p.remove();return;}
+        p.setAttribute('cx',x+Math.cos(ang)*dist*prog);
+        p.setAttribute('cy',y+Math.sin(ang)*dist*prog);
+        p.style.opacity=1-prog;
+        requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    })(p,ang,dist);
+  }
+}
+
+/* ---------- MODULE 2: POGONATUM ---------- */
+var pogo=[
+ {icon:'🌿',short:'ජන්මාංශු ශාකය',title:'ජන්මාංශු ශාකය (n)',phase:'n',detail:'ප්‍රධාන, විශාල හා දිගු කාලීන පරම්පරාවයි. මුල්, කඳ, පත්‍රවලට සමාන අවයව දක්නට ලැබේ.'},
+ {icon:'⚥',short:'ලිංගික අවයව',title:'ඇන්තෙරීඩියම් / ආර්කගෝනියම්',phase:'n',detail:'පරිණත ජන්මාංශු ශාකයේ පුරුෂ (ඇන්තෙරීඩියම්) හා ස්ත්‍රී (ආර්කගෝනියම්) ලිංගික අවයව වර්ධනය වේ.'},
+ {icon:'💧',short:'පිහිනන ශුක්‍රාණු',title:'කශික ශුක්‍රාණු ජලය තුළින් පිහිනීම',phase:'n',detail:'ඇන්තෙරීඩියමයෙන් නිකුත් වන කශික ශුක්‍රාණු, ජල පටලයක් තුළින්, රසායනික ආකර්ෂණයෙන් මගපෙන්වනු ලබමින් ආර්කගෝනියම කරා පිහිනා යයි.'},
+ {icon:'🔗',short:'සංසේචනය',title:'සංසේචනය',phase:'proc',burst:true,detail:'ශුක්‍රාණුව හා අණ්ඩය එකතු වී ද්විගුණ (2n) යුක්තාණුව සාදයි.'},
+ {icon:'🏵️',short:'බීජාණුඝාකය',title:'ද්විගුණ බීජාණුඝාකය (2n)',phase:'twon',detail:'පාදය, තණ්ඩුව (seta) හා කුප්පය (capsule) වලින් සමන්විතයි. ජන්මාංශු ශාකයට ම අනුබද්ධව පෝෂණය ලබාගනියි.'},
+ {icon:'🧬',short:'මියෝසිසය',title:'මියෝසිසය හා බීජාණු නිෂ්පාදනය',phase:'proc',detail:'කුප්පය තුළ බීජාණු මවු සෛල මියෝසිස් ක්‍රියාවලියට ලක්වී ඒකගුණ (n) බීජාණු සාදයි.'},
+ {icon:'💨',short:'බීජාණු නිදහස්',title:'ඒකගුණ බීජාණු නිදහස් වීම',phase:'n',burst:true,detail:'කුප්පය පැලී ඒකගුණ බීජාණු පරිසරයට නිදහස් වේ.'},
+ {icon:'🌾',short:'ප්‍රාක්තන්තුව',title:'ප්‍රාක්තන්තුව (Protonema)',phase:'n',detail:'බීජාණු පැළවී නූල් හැඩැති ප්‍රාක්තන්තුව සාදයි; එහි ඇති අංකුර මගින් නව ජන්මාංශු ශාකයක් වර්ධනය වේ.'}
+];
+renderWheel('wheel2','leg2','det2',pogo);
+
+/* ---------- MODULE 3: NEPHROLEPIS ---------- */
+var neph=[
+ {icon:'🌳',short:'ප්‍රධාන ශාකය',title:'ද්විගුණ බීජාණුඝාක ශාකය (2n)',phase:'twon',detail:'විශාල, දිගු කාලීන ජීවත් වන ප්‍රධාන ශාකයයි. මුල්, කඳ, පත්‍ර මනාව වෙනස් වී ඇති සංකීර්ණ ව්‍යුහයකි.'},
+ {icon:'📄',short:'සෝරස්',title:'පත්‍ර යටිපිට සෝරස්',phase:'twon',detail:'පත්‍ර යටිපිට බීජාණුධානි පොකුරු (සෝරස්) දක්නට ලැබේ; ආරම්භයේදී එය කසුව මගින් ආවරණය වී ඇත.'},
+ {icon:'☀️',short:'කසුව හැකිලීම',title:'කසුව වියළී හැකිලීම',phase:'proc',detail:'පරිසර තත්ත්ව වෙනස් වීමෙන් (වියළි කාලගුණය) කසුව හැකිලී පසෙකට හැරී සෝරසය නිරාවරණය කරයි.'},
+ {icon:'⚙️',short:'ඇනියුලස්',title:'ඇනියුලස් යාන්ත්‍රණය',phase:'proc',burst:true,detail:'ඝන බිත්ති සහිත සෛල පේළියක් වන ඇනියුලස්, වියළීමෙන් හැකිලී, උත්තෝලක ක්‍රියාවක් මෙන් බීජාණුධානිය පුපුරුවා ඒකගුණ බීජාණු විසුරුවා හරියි.'},
+ {icon:'💨',short:'බීජාණු විසිරීම',title:'ඒකගුණ (n) බීජාණු විසිරීම',phase:'n',detail:'සුළඟ මගින් බීජාණු දුරස්ථ ස්ථානවලට ප්‍රවාහනය වේ.'},
+ {icon:'💚',short:'ප්‍රොතලස්',title:'හෘදාකාර ප්‍රොතලස් (ස්වායත්ත ජන්මාංශුව, n)',phase:'n',detail:'තෙත් පරිසරයක බීජාණුව පැළවී, සිකුඳා සහිත, කුඩා, ස්වායත්ත හා ප්‍රභාසංශ්ලේෂක ප්‍රොතලසය සාදයි.'},
+ {icon:'💧',short:'සංසේචනය',title:'ලිංගික අවයව හා සංසේචනය',phase:'proc',burst:true,detail:'ප්‍රොතලසයේ ඇන්තෙරීඩියම් හා ආර්කගෝනියම් සෑදේ. කශික ශුක්‍රාණු ජල පටලයක් ඔස්සේ පිහිනා අණ්ඩය සංසේචනය කර ද්විගුණ යුක්තාණුව සාදයි.'},
+ {icon:'🌱',short:'නව ශාකය',title:'නව බීජාණුඝාක ශාකයේ වර්ධනය (2n)',phase:'twon',detail:'ද්විගුණ කලලය ආරම්භයේ ප්‍රොතලසය මතම වර්ධනය වී, අවසානයේ ස්වායත්ත ශාකයක් බවට පත්වේ; ප්‍රොතලසය දිරාපත් වේ.'}
+];
+renderWheel('wheel3','leg3','det3',neph);
+
+/* indusium toggle demo */
+var indState=false;
+document.getElementById('indBtn').onclick=function(){
+  indState=!indState;
+  if(indState){
+    document.getElementById('indTitle').textContent='කසුව (Indusium) — විවෘත වූ තත්ත්වය';
+    document.getElementById('indText').textContent='වියළීමෙන් කසුව හැකිලී පසෙකට හැරී ඇත. ඇනියුලස් යාන්ත්‍රණය බීජාණුධානිය පුපුරුවා ඒකගුණ (n) බීජාණු නිදහස් කරයි.';
+    this.textContent='💧 නැවත තෙත් කරන්න';
+  }else{
+    document.getElementById('indTitle').textContent='කසුව (Indusium) — වැසුණු තත්ත්වය';
+    document.getElementById('indText').textContent='තෙත් කාලයේදී කසුව සෝරසය ආවරණය කර බීජාණුධානි රැකවරණය කරයි.';
+    this.textContent='☀️ වියළීමට ලක් කරන්න';
+  }
+};
+
+/* ---------- MODULE 4: SELAGINELLA TIMELINE ---------- */
+var selMicro=[
+ 'ක්ෂුද්‍ර ස්පෝරොෆිල් මත ක්ෂුද්‍ර බීජාණුධානි සෑදේ.',
+ 'මියෝසිසයෙන් බොහෝ ගණනක් කුඩා ක්ෂුද්‍ර බීජාණු (n) සෑදේ.',
+ 'බීජාණු බිත්තිය තුළම ඉතා අඩුවූ පුරුෂ ජන්මාංශුවක් වර්ධනය වේ.',
+ 'පුරුෂ ජන්මාංශුව ඇන්තෙරීඩියම් සාදා කශික ශුක්‍රාණු නිපදවයි.'
+];
+var selMega=[
+ 'මහා ස්පෝරොෆිල් මත මහා බීජාණුධානි සෑදේ.',
+ 'මියෝසිසයෙන් (සාමාන්‍යයෙන් 4ක් පමණ) විශාල මහා බීජාණු (n) සෑදේ.',
+ 'බීජාණු බිත්තිය තුළම ඉතා අඩුවූ ස්ත්‍රී ජන්මාංශුවක් වර්ධනය වේ; එය බීජාණුවේ ආහාර ගබඩාවෙන් පෝෂණය ලබයි.',
+ 'ස්ත්‍රී ජන්මාංශුව ආර්කගෝනියම් සාදයි; බීජාණු බිත්තිය ත්‍රිකෝණ සලකුණේදී විවෘත වේ.'
+];
+function renderSelTrack(track){
+  var arr=track==='micro'?selMicro:selMega;
+  var tl=document.getElementById('selTimeline');
+  tl.innerHTML=arr.map(function(t){return '<div class="tlitem">'+t+'</div>';}).join('');
+}
+document.querySelectorAll('.pairtab').forEach(function(pt){
+  pt.onclick=function(){
+    document.querySelectorAll('.pairtab').forEach(function(x){x.classList.remove('active');});
+    pt.classList.add('active');
+    renderSelTrack(pt.dataset.track);
+  };
+});
+renderSelTrack('micro');
+
+/* ---------- MODULE 5: CYCAS STEPPER ---------- */
+var cyc=[
+ {icon:'🌲🌸',t:'ද්විගෘහී ශාකය',d:'සයිකස් ශාකයේ පුරුෂ හා ස්ත්‍රී ලිංගික අවයව වෙන් වෙන් ශාකවල පිහිටයි (ද්විගෘහී). පුරුෂ ශාකයේ පුරුෂ කේතුවක් ද, ස්ත්‍රී ශාකයේ මෙගාස්පෝරෝෆිල් පත්‍ර ද දක්නට ලැබේ.'},
+ {icon:'🔬',t:'ක්ෂුද්‍ර බීජාණු (රේණු) සෑදීම',d:'පුරුෂ කේතුවේ ක්ෂුද්‍ර බීජාණුධානි තුළ මියෝසිසයෙන් ඒකගුණ (n) රේණු (පරාග) සෑදේ.'},
+ {icon:'💨',t:'සුළං පරාගණය',d:'රේණු සුළඟ මගින් ඩිම්බයේ සුක්ෂ්මරන්ධ්‍රය (micropyle) කරා ප්‍රවාහනය වේ — මෙයට බාහිර ජලයක් අවශ්‍ය නොවේ.'},
+ {icon:'🧵',t:'පරාග නාලය වර්ධනය',d:'රේණුව පැළවී පරාග නාලයක් සාදයි; එය තුළින් කශික ශුක්‍රාණු ඩිම්බය තුළටම රැගෙන යනු ලැබේ.'},
+ {icon:'🥚',t:'මහා බීජාණුව හා ස්ත්‍රී ජන්මාංශුව',d:'ඩිම්බය තුළම මහා බීජාණුව (n) රැඳී පෝෂණය ලබා, ආර්කගෝනියම් සහිත ස්ත්‍රී ජන්මාංශුවක් බවට වර්ධනය වේ.'},
+ {icon:'🔗',t:'සංසේචනය',d:'පරාග නාලය තුළින් නිකුත් වන කශික ශුක්‍රාණු ඩිම්බය තුළ කෙටි දුරක් පිහිනා ආර්කගෝනියම සංසේචනය කර ද්විගුණ (2n) යුක්තාණුව සාදයි.'},
+ {icon:'🌰',t:'කලලය වර්ධනය',d:'ද්විගුණ (2n) කලලය ඩිම්බය තුළම, ස්ත්‍රී ජන්මාංශු පටකයෙන් පෝෂණය ලබමින් වර්ධනය වේ.'},
+ {icon:'🫘',t:'බීජය සෑදීම',d:'ඉන්ටෙග්මන්ට් ස්ථරය බීජ කවචය (2n) බවටත්, ආහාර ගබඩාව (n) හා කලලය (2n) සමඟින් සම්පූර්ණ බීජයක් සෑදෙයි — ජලයෙන් තොරව විසරණය හා පැළවීමට හැකි ඒකකයකි.'}
+];
+var cycIdx=0;
+function renderCyc(){
+  var s=cyc[cycIdx];
+  document.getElementById('cycIcon').textContent=s.icon;
+  document.getElementById('cycTitle').textContent=s.t;
+  document.getElementById('cycText').textContent=s.d;
+  document.getElementById('cycProg').textContent=(cycIdx+1)+' / '+cyc.length;
+  document.getElementById('cycPrev').disabled=(cycIdx===0);
+  document.getElementById('cycNext').disabled=(cycIdx===cyc.length-1);
+  document.getElementById('cycDots').innerHTML=cyc.map(function(_,i){
+    return '<div class="dot'+(i===cycIdx?' active':'')+'"></div>';
+  }).join('');
+}
+document.getElementById('cycPrev').onclick=function(){if(cycIdx>0){cycIdx--;renderCyc();}};
+document.getElementById('cycNext').onclick=function(){if(cycIdx<cyc.length-1){cycIdx++;renderCyc();}};
+renderCyc();
+
+/* ---------- MODULE 6: MATRIX ---------- */
+var matrixData=[
+ {plant:'🟢 Pogonatum (මොසී)', rows:[
+   {label:'ප්‍රධාන (ප්‍රමුඛ) ශාකය',phase:'n'},
+   {label:'අනුබද්ධ, පරායත්ත පරම්පරාව',phase:'twon'}
+ ]},
+ {plant:'🌿 Nephrolepis (පර්ණාංග)', rows:[
+   {label:'ප්‍රධාන (ප්‍රමුඛ) ශාකය',phase:'twon'},
+   {label:'ස්වායත්ත ප්‍රොතලස් පරම්පරාව',phase:'n'}
+ ]},
+ {plant:'🍃 Selaginella', rows:[
+   {label:'ප්‍රධාන (ප්‍රමුඛ) ශාකය',phase:'twon'},
+   {label:'ක්ෂුද්‍ර/මහා බීජාණු තුළ අඩුවූ ජන්මාංශුව',phase:'n'}
+ ]},
+ {plant:'🌰 Cycas', rows:[
+   {label:'ප්‍රධාන ශාකය (කේතු දරන)',phase:'twon'},
+   {label:'රේණු / මහා බීජාණුව',phase:'n'}
+ ]}
+];
+var mg=document.getElementById('matrixGrid');
+matrixData.forEach(function(m){
+  var card=document.createElement('div');
+  card.className='matcard';
+  var rowsHtml=m.rows.map(function(r,ri){
+    return '<div class="matrow"><span class="matlabel">'+r.label+'</span><button class="flipbadge" data-phase="'+r.phase+'">? තට්ටු කරන්න</button></div>';
+  }).join('');
+  card.innerHTML='<h4>'+m.plant+'</h4>'+rowsHtml;
+  mg.appendChild(card);
+});
+mg.querySelectorAll('.flipbadge').forEach(function(b){
+  b.onclick=function(){
+    if(b.classList.contains('revealed'))return;
+    b.classList.add('revealed',b.dataset.phase);
+    b.textContent=b.dataset.phase==='n'?'ඒකගුණ (n)':'ද්විගුණ (2n)';
+  };
+});
+
+/* ---------- QUIZ ---------- */
+var quiz=[
+ {q:'පොගොනේටම් ශාකයේ ප්‍රධාන (ප්‍රමුඛ) පරම්පරාව කුමක්ද?',opts:['ජන්මාංශු ශාකය (n)','බීජාණුඝාක ශාකය (2n)','ප්‍රොතලසය','රේණුව'],a:0,e:'මොසී ශාකවල ජන්මාංශු (n) පරම්පරාව ප්‍රමුඛ හා දිගු කාලීනයි; බීජාණුඝාකය එයට පරායත්තයි.'},
+ {q:'නෙෆ්‍රොලෙපිස් (පර්ණාංග) හි ප්‍රධාන ශාකය කුමන පරම්පරාවද?',opts:['ඒකගුණ ජන්මාංශුව','ද්විගුණ බීජාණුඝාකය','ප්‍රාක්තන්තුව','රේණුව'],a:1,e:'පර්ණාංගවල ද්විගුණ (2n) බීජාණුඝාකයම ප්‍රධාන ශාකයයි; ප්‍රොතලසය කුඩා හා ස්වායත්තයි.'},
+ {q:'සෙලාජිනෙල්ලා ශාකයේ දක්නට ලැබෙන විශේෂ ලක්ෂණය කුමක්ද?',opts:['සමබීජාණුකතාව','විෂමබීජාණුකතාව','මුල් රහිත බව','පත්‍ර රහිත බව'],a:1,e:'ක්ෂුද්‍ර හා මහා යනුවෙන් වර්ග දෙකක බීජාණු එකම ශාකයේ සෑදීම විෂමබීජාණුකතාවයි.'},
+ {q:'සයිකස් හි සංසේචනයට බාහිර ජලය අවශ්‍ය නොවන්නේ මන්ද?',opts:['කලලය ඉක්මනින් වර්ධනය වන නිසා','පරාග නාලය හරහා ශුක්‍රාණු ප්‍රවාහනය වන නිසා','ආර්කගෝනියම් නොමැති නිසා','රේණු ජලයේ දිය නොවන නිසා'],a:1,e:'පරාග නාලය කශික ශුක්‍රාණු ඩිම්බය තුළටම ගෙන යන බැවින් බාහිර ජල අවශ්‍යතාවය බැහැර වේ.'},
+ {q:'ආර්කගෝනියම් තුළ සිදුවන ප්‍රධාන කාර්යය කුමක්ද?',opts:['ශුක්‍රාණු නිෂ්පාදනය','අණ්ඩ සෛලය නිෂ්පාදනය','බීජාණු නිෂ්පාදනය','පරාග නිෂ්පාදනය'],a:1,e:'ආර්කගෝනියම යනු ස්ත්‍රී ලිංගික අවයවයයි; එහි අණ්ඩ සෛලය නිපදවේ.'},
+ {q:'ඇන්තෙරීඩියම් මගින් නිපදවනු ලබන්නේ කුමක්ද?',opts:['කශික ශුක්‍රාණු','අණ්ඩ','මහා බීජාණු','රේණු'],a:0,e:'ඇන්තෙරීඩියම යනු පුරුෂ ලිංගික අවයවයයි; එය කශික ශුක්‍රාණු නිපදවයි.'},
+ {q:'නෙෆ්‍රොලෙපිස් හි කසුව (Indusium) ක​ාර්යභාරය කුමක්ද?',opts:['ප්‍රභාසංශ්ලේෂණය','සෝරසය පරිණත වන තුරු රැකවරණය කිරීම','ජලය උරාගැනීම','මුල් ආධාරකය'],a:1,e:'කසුව සෝරසය තෙතමනයෙන් හා අනවශ්‍ය හානියෙන් රැකවරණය කරයි.'},
+ {q:'පරිණාමීය ලෙස ද්විගුණ (2n) බීජාණුඝාක පරම්පරාව ක්‍රමයෙන් ප්‍රමුඛ වීම පෙන්නුම් කරන්නේ කුමක්ද?',opts:['ජලජ ජීවිතයට නැවත යොමුවීම','භෞමික ජීවිතයට වඩාත් හොඳින් අනුවර්තනය වීම','ලිංගික ප්‍රජනනය නැති වීම','පත්‍ර නැති වීම'],a:1,e:'2n පරම්පරාව ප්‍රමුඛ වීම ශාක භෞමික පරිසරයට වඩාත් හොඳින් අනුවර්තනය වීමේ ප්‍රවණතාවකි.'},
+ {q:'මොසී ශාකවල ලිංගික සංසේචනයට අත්‍යවශ්‍ය සාධකය කුමක්ද?',opts:['සුළඟ','ජලය','කෘමීන්','අධික උෂ්ණත්වය'],a:1,e:'කශික ශුක්‍රාණුවලට ආර්කගෝනියම කරා පිහිනීමට ජල පටලයක් අත්‍යවශ්‍යයි.'},
+ {q:'සෙලාජිනෙල්ලා හි මහා බීජාණුව වර්ධනය වන්නේ කුමන අවයවයක් බවටද?',opts:['ප්‍රාක්තන්තුව','ස්ත්‍රී ජන්මාංශුව','පුරුෂ ජන්මාංශුව','බීජාණුඝාකය'],a:1,e:'මහා බීජාණුව බිත්තිය තුළම ඉතා අඩුවූ ස්ත්‍රී ජන්මාංශුවක් බවට වර්ධනය වේ.'}
+];
+var qIdx=0, score=0, answered=false;
+var qbox=document.getElementById('quizBox');
+function renderQuiz(){
+  if(qIdx>=quiz.length){
+    qbox.innerHTML='<div class="finalscreen"><div class="big">'+score+' / '+quiz.length+'</div>'+
+      '<p style="margin-top:8px;">සම්පූර්ණ විය! නැවත උත්සාහ කරන්න.</p>'+
+      '<button class="navbtn" id="restartBtn" style="margin-top:10px;">🔄 නැවත ආරම්භය</button></div>';
+    document.getElementById('restartBtn').onclick=function(){qIdx=0;score=0;renderQuiz();};
+    return;
+  }
+  answered=false;
+  var qd=quiz[qIdx];
+  var optsHtml=qd.opts.map(function(o,i){
+    return '<button class="qopt" data-i="'+i+'">'+o+'</button>';
+  }).join('');
+  qbox.innerHTML='<div class="scorepill">ලකුණු: '+score+' / '+quiz.length+'</div>'+
+    '<div class="qprog">ප්‍රශ්නය '+(qIdx+1)+' / '+quiz.length+'</div>'+
+    '<div class="qtext">'+qd.q+'</div>'+optsHtml+
+    '<div class="qexplain" id="qexp">'+qd.e+'</div>';
+  qbox.querySelectorAll('.qopt').forEach(function(b){
+    b.onclick=function(){
+      if(answered)return;
+      answered=true;
+      var i=+b.dataset.i;
+      if(i===qd.a){b.classList.add('correct');score++;}
+      else{
+        b.classList.add('wrong');
+        qbox.querySelector('.qopt[data-i="'+qd.a+'"]').classList.add('correct');
+      }
+      document.getElementById('qexp').style.display='block';
+      setTimeout(function(){qIdx++;renderQuiz();},1600);
+    };
+  });
+}
+renderQuiz();
+</script>
+</body>
+</html>

@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>සන්ධාරණය හා චලනය | අන්තර්ක්‍රියාකාරී ඉගෙනුම් වේදිකාව</title>
+<style>
+:root{
+  --bone: #EDE7D8;
+  --bone-dark: #DCD2B8;
+  --ink: #1E2530;
+  --ink-soft: #3B4453;
+  --marrow: #A5322E;
+  --marrow-deep: #7C221F;
+  --cartilage: #2E6F6E;
+  --gold: #B9902F;
+  --card-bg: #FFFDF7;
+  --line: #C9BE9F;
+  --radius: 10px;
+  font-size: 16px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:'Noto Sans Sinhala','Iskoola Pota','Nirmala UI',sans-serif;
+  background: var(--bone);
+  color: var(--ink);
+  background-image:
+    radial-gradient(circle at 15% 8%, rgba(165,50,46,0.05), transparent 40%),
+    radial-gradient(circle at 85% 92%, rgba(46,111,110,0.06), transparent 40%);
+  min-height:100vh;
+}
+.app-header{
+  background: linear-gradient(120deg, var(--ink) 0%, #2A3444 100%);
+  color: var(--bone);
+  padding: 28px 20px 22px;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 4px solid var(--marrow);
+}
+.app-header::before{
+  content:"";
+  position:absolute; right:-40px; top:-40px; width:220px; height:220px;
+  background: radial-gradient(circle, rgba(185,144,47,0.18), transparent 70%);
+}
+.app-header h1{ margin:0 0 4px 0; font-size: 1.9rem; letter-spacing:0.5px; font-weight:700; }
+.app-header p{ margin:0; color:#C7CEDA; font-size:0.95rem; }
+.eyebrow{
+  display:inline-block; font-size:0.72rem; letter-spacing:2px; color: var(--gold);
+  border:1px solid rgba(185,144,47,0.5); border-radius:20px; padding:3px 12px; margin-bottom:10px;
+}
+.tabbar{
+  display:flex; gap:6px; overflow-x:auto; background: #232C3A; padding: 8px 14px;
+  position: sticky; top:0; z-index: 50; border-bottom: 2px solid var(--marrow-deep);
+}
+.tabbtn{
+  flex: 0 0 auto; background: transparent; border: none; color: #AEB6C4; font-family: inherit;
+  font-size: 0.88rem; padding: 11px 16px; border-radius: 8px 8px 0 0; cursor: pointer;
+  white-space: nowrap; transition: all 0.18s ease; border-bottom: 3px solid transparent;
+}
+.tabbtn:hover{ color: var(--bone); background: rgba(255,255,255,0.05); }
+.tabbtn.active{ color: #fff; background: rgba(165,50,46,0.25); border-bottom: 3px solid var(--marrow); font-weight:600; }
+main{ max-width: 980px; margin: 0 auto; padding: 20px 16px 60px; }
+.tabpanel{ display:none; animation: fadein 0.3s ease; }
+.tabpanel.active{ display:block; }
+@keyframes fadein{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+.section-title{
+  font-size:1.25rem; font-weight:700; margin: 26px 0 12px; color: var(--marrow-deep);
+  display:flex; align-items:center; gap:8px; border-bottom: 2px solid var(--line); padding-bottom:8px;
+}
+.section-title .tag{ font-size:0.68rem; background: var(--cartilage); color:#fff; padding:2px 8px; border-radius:20px; letter-spacing:1px; }
+.accordion-item{ background: var(--card-bg); border:1px solid var(--line); border-radius: var(--radius); margin-bottom:10px; overflow:hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+.accordion-head{ padding:14px 16px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-weight:600; color: var(--ink); background: linear-gradient(90deg, rgba(165,50,46,0.05), transparent); }
+.accordion-head:hover{ background: rgba(165,50,46,0.09); }
+.accordion-head .chev{ transition: transform 0.25s ease; color: var(--marrow); font-size:1.1rem; }
+.accordion-item.open .chev{ transform: rotate(180deg); }
+.accordion-body{ max-height:0; overflow:hidden; transition: max-height 0.35s ease; padding: 0 16px; }
+.accordion-item.open .accordion-body{ max-height: 3000px; padding: 4px 16px 18px; }
+.accordion-body h4{ color:var(--cartilage); margin:14px 0 6px; font-size:1rem;}
+.accordion-body ul{ margin:6px 0; padding-inline-start:22px; }
+.accordion-body li{ margin-bottom:5px; line-height:1.55; }
+.accordion-body p{ line-height:1.65; margin:8px 0; }
+.subbox{ background: #F5EFDE; border-inline-start: 4px solid var(--gold); border-radius:6px; padding:10px 14px; margin:10px 0; font-size:0.93rem; }
+.compare-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin:12px 0; }
+@media(max-width:600px){ .compare-grid{ grid-template-columns: 1fr; } }
+.compare-card{ background:#fff; border:1px solid var(--line); border-radius:8px; padding:10px 12px; }
+.compare-card h5{ margin:0 0 6px; color:var(--marrow-deep); font-size:0.92rem;}
+.compare-card ul{ margin:0; padding-inline-start:18px; font-size:0.87rem; }
+table.data-table{ width:100%; border-collapse:collapse; margin:10px 0; font-size:0.88rem; }
+table.data-table th, table.data-table td{ border:1px solid var(--line); padding:7px 9px; text-align:start; }
+table.data-table th{ background: var(--ink); color:#fff; }
+table.data-table tr:nth-child(even){ background:#F6F1E4; }
+.hint-btn{ background: var(--cartilage); color:#fff; border:none; border-radius:20px; padding: 6px 12px; font-size:0.78rem; cursor:pointer; margin-top:6px; }
+
+/* Skeleton visualizer */
+.skeleton-wrap{ display:flex; gap:18px; flex-wrap:wrap; align-items:flex-start; }
+.skeleton-svgbox{ flex:1 1 320px; background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:10px; min-width:280px; }
+.skeleton-svgbox svg{ width:100%; height:auto; display:block; }
+.bone-region{ cursor:pointer; transition: fill 0.2s ease, opacity 0.2s ease; }
+.bone-region:hover{ fill: #E8C9A0 !important; }
+.bone-region.selected{ fill: var(--marrow) !important; opacity:0.85; }
+.bone-region.curve-primary{ stroke: var(--marrow); stroke-width:3; }
+.bone-region.curve-secondary{ stroke: var(--cartilage); stroke-width:3; }
+.skeleton-info{ flex:1 1 300px; min-width:280px; background: var(--card-bg); border:1px solid var(--line); border-radius:var(--radius); padding:16px; min-height:260px; }
+.skeleton-info h3{ margin:0 0 8px; color:var(--marrow-deep); }
+.skeleton-info .meta{ font-size:0.8rem; color:var(--cartilage); font-weight:700; margin-bottom:10px; }
+.skeleton-info ul{ padding-inline-start:20px; margin:8px 0; font-size:0.9rem; line-height:1.6;}
+.filter-row{ display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+.filter-chip{ background:#fff; border:1px solid var(--line); border-radius:20px; padding:6px 14px; font-size:0.8rem; cursor:pointer; }
+.filter-chip.active-primary{ background: var(--marrow); color:#fff; border-color:var(--marrow); }
+.filter-chip.active-secondary{ background: var(--cartilage); color:#fff; border-color:var(--cartilage); }
+.placeholder-note{ color:#7a7263; font-size:0.88rem; font-style:italic; }
+
+/* Simulations */
+.sim-card{ background: var(--card-bg); border:1px solid var(--line); border-radius:var(--radius); padding:14px; margin-bottom:20px; }
+.sim-card h3{ margin:0 0 4px; color:var(--marrow-deep); }
+.sim-card .sim-desc{ font-size:0.87rem; color:var(--ink-soft); margin-bottom:10px; }
+.sim-canvas-box{ background:#0F1620; border-radius:8px; overflow:hidden; display:flex; justify-content:center; }
+canvas{ display:block; max-width:100%; }
+.sim-controls{ display:flex; gap:10px; align-items:center; margin-top:10px; flex-wrap:wrap; }
+.sim-btn{ background: var(--marrow); color:#fff; border:none; border-radius:20px; padding:8px 16px; font-size:0.85rem; cursor:pointer; font-family:inherit; }
+.sim-btn.secondary{ background:var(--cartilage); }
+.sim-btn:active{ transform: scale(0.97); }
+.sim-toggle-group{ display:flex; gap:6px; }
+.sim-toggle{ background:#fff; border:1px solid var(--line); border-radius:20px; padding:6px 12px; font-size:0.8rem; cursor:pointer; }
+.sim-toggle.on{ background: var(--gold); color:#fff; border-color:var(--gold); }
+
+/* Flashcards */
+.flash-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(230px,1fr)); gap:14px; margin-top:10px; }
+.flashcard{ perspective: 1200px; height:150px; cursor:pointer; }
+.flashcard-inner{ position:relative; width:100%; height:100%; transition: transform 0.6s; transform-style: preserve-3d; }
+.flashcard.flipped .flashcard-inner{ transform: rotateY(180deg); }
+.flashcard-face{ position:absolute; inset:0; backface-visibility:hidden; border-radius:var(--radius); padding:14px; display:flex; align-items:center; justify-content:center; text-align:center; font-size:0.92rem; line-height:1.4; box-shadow:0 2px 6px rgba(0,0,0,0.08); }
+.flashcard-front{ background: linear-gradient(135deg, var(--ink), #2A3444); color:#fff; font-weight:600; }
+.flashcard-back{ background: var(--card-bg); border:1px solid var(--gold); color:var(--ink); transform: rotateY(180deg); }
+.flash-progress{ font-size:0.82rem; color:var(--ink-soft); margin-top:10px; text-align:center; }
+
+/* Quiz */
+.quiz-progress-bar{ height:8px; background:#DDD4BB; border-radius:6px; overflow:hidden; margin-bottom:16px; }
+.quiz-progress-fill{ height:100%; background: var(--marrow); width:0%; transition: width 0.3s ease; }
+.quiz-q-card{ background: var(--card-bg); border:1px solid var(--line); border-radius:var(--radius); padding:18px; }
+.quiz-q-num{ font-size:0.78rem; color:var(--cartilage); font-weight:700; margin-bottom:6px; }
+.quiz-q-text{ font-size:1.02rem; font-weight:600; margin-bottom:14px; line-height:1.5; }
+.quiz-option{ display:block; width:100%; text-align:start; background:#fff; border:1px solid var(--line); border-radius:8px; padding:11px 14px; margin-bottom:8px; cursor:pointer; font-family:inherit; font-size:0.9rem; transition: all 0.15s ease; }
+.quiz-option:hover{ border-color: var(--cartilage); }
+.quiz-option.correct{ background:#DDF0DD; border-color:#4C9A4C; font-weight:600; }
+.quiz-option.wrong{ background:#F5DADA; border-color:var(--marrow); }
+.quiz-explain{ margin-top:12px; background:#F5EFDE; border-inline-start:4px solid var(--gold); border-radius:6px; padding:10px 14px; font-size:0.88rem; display:none; }
+.quiz-explain.show{ display:block; }
+.quiz-nav{ display:flex; justify-content:space-between; margin-top:16px; }
+.quiz-result{ text-align:center; padding:30px 16px; }
+.quiz-result .score{ font-size:3rem; font-weight:800; color:var(--marrow-deep); }
+.quiz-result .score-label{ color:var(--ink-soft); margin-bottom:20px; }
+
+footer{ text-align:center; padding:20px; color:#8a8371; font-size:0.78rem; }
+</style>
+</head>
+<body>
+<header class="app-header">
+  <span class="eyebrow">G.C.E. A/L ජීව විද්‍යාව • ඒකකය 5</span>
+  <h1>සන්ධාරණය හා චලනය</h1>
+  <p>සම්පත් පොත පදනම් කරගත් අන්තර්ක්‍රියාකාරී පුනරීක්ෂණ වේදිකාව — න්‍යාය, සැකිල්ල, සිමියුලේෂන්, ෆ්ලෑෂ් කාඩ් සහ ප්‍රශ්නාවලිය</p>
+</header>
+
+<nav class="tabbar" id="tabbar">
+  <button class="tabbtn active" data-tab="tab1">📘 ප්‍රධාන න්‍යාය</button>
+  <button class="tabbtn" data-tab="tab2">🦴 මානව සැකිල්ල</button>
+  <button class="tabbtn" data-tab="tab3">🔄 චලන යාන්ත්‍රණ</button>
+  <button class="tabbtn" data-tab="tab4">🗂️ ෆ්ලෑෂ් කාඩ්</button>
+  <button class="tabbtn" data-tab="tab5">📝 ප්‍රශ්නාවලිය</button>
+</nav>
+
+<main>
+<!-- ============ TAB 1: THEORY ============ -->
+<section class="tabpanel active" id="tab1">
+
+  <div class="section-title">සතුන්ගේ සන්ධාරක පද්ධති <span class="tag">Support Systems</span></div>
+
+  <div class="accordion-item">
+    <div class="accordion-head">1. ද්‍රවස්ථිතික සැකිල්ල (Hydrostatic Skeleton) <span class="chev">▾</span></div>
+    <div class="accordion-body">
+      <p>දේහ බිත්තියෙන් වට වූ තරලයෙන් පිරි දේහ කුහරයක් ම ද්‍රවස්ථිතික සැකිල්ලක් ලෙස ක්‍රියා කරයි. නිධාරියාවන්ගේ ආම්ෂවාහිනී කුහරය, නෙමටෝඩාවන්ගේ තරල පිරි ව්‍යාජ සීලෝමයත්, ඇනලිඩාවන්ගේ තරල පිරි දේහ කුහරය වන සිලෝමයත් මෙලෙස ක්‍රියා කරන අත්‍යවශ්‍ය හා බාහ්‍යාකාර ජේසි ස්තර දෙකකින් සමන්විත ය.</p>
+      <div class="subbox">ක්‍රියාකාරීත්වය: පේශි සංකෝචනයෙන් තරල පීඩනයෙන් සම්ප්‍රයුක්ත ඵලය මගින් සතුන්ගේ සංචරණයත් දේහ හැඩය පවත්වා ගැනීමත් සිදු වේ.</div>
+    </div>
+  </div>
+
+  <div class="accordion-item">
+    <div class="accordion-head">2. බාහිර සැකිල්ල (Exoskeleton) <span class="chev">▾</span></div>
+    <div class="accordion-body">
+      <p>සතුන්ගේ දේහයේ පිටත ආවරණය වන දෘඪ බාහිර සැකිල්ලකි. ආකෘතික වශයෙන් කයිටිනීය සැකිල්ල, කැල්සියම් කාබනේට් සැකිල්ල, අස්ථි තලවලින් සමන්විත සැකිල්ල ලෙස ප්‍රධාන වර්ග 3කි.</p>
+      <ul>
+        <li><b>කයිටිනීය සැකිල්ල</b> — ආතෘපෝඩාවන්ගේ (කෘමීන් ඇතුළු) ප්‍රොටීන මගින් හෝ කැල්සියම් කාබනේට් වලින් තැනුණු අභ්‍යාන්තර සැකිල්ලකි.</li>
+        <li><b>මොලුස්කාවන්ගේ බාහිර සැකිල්ල</b> — කැල්සියම් කාබනේට් වලින් සෑදුණි (කවච).</li>
+        <li><b>උරගයන්ගේ</b> අස්ථිතල වලින් සෑදුණු බාහිර සැකිල්ල.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="accordion-item">
+    <div class="accordion-head">3. අභ්‍යන්තර සැකිල්ල (Endoskeleton) <span class="chev">▾</span></div>
+    <div class="accordion-body">
+      <p>සත්ත්ව ශරීරයේ මදුපටක තුළ ගිලී පවතින දෘඪ සැකිල්ලකි. එකයිනෝඩර්මාටාවන්ට කැල්සියම් කාබනේට් ඵලකවලින් තැනුණු අභ්‍යන්තර සැකිල්ලක් ඇත. කෝඩේටාවන්ට අස්ථි හා කාටිලේජවලින් තැනුණු අභ්‍යන්තර සැකිල්ලක් තිබේ (මානව සැකිල්ල මෙයට උදාහරණයකි).</p>
+    </div>
+  </div>
+
+  <div class="accordion-item">
+    <div class="accordion-head">සතුන්ගේ සැකිලි පද්ධති මගින් ඉටු කරනු ලබන පොදු කාර්ය <span class="chev">▾</span></div>
+    <div class="accordion-body">
+      <ul>
+        <li><b>සන්ධාරණය</b> — හැම සැකිල්ලක් ම සත්ත්ව ශරීරයේ දෑ රාමුව ගොඩනගා ගිමින් සම්පීඩනවලට හා ආතතිවලට ප්‍රතිරෝධි ක්‍රියා කරන අතර, දේහයේ හැඩය පවත්වා ගැනීමට ආධාර කරයි.</li>
+        <li><b>ආරක්ෂාව</b> — දේහයේ සියුම් අභ්‍යන්තර අවයව ආරක්ෂා කරයි (උදා: කපාලය මොළය ආරක්ෂා කිරීම).</li>
+        <li><b>වලනය (චලනය)</b> — බොනස් සැකිලි දෘඪ වූ ඝටකවලින් සමන්විත වන අතර, ඒවා සන්ධාන පාර්ශ්ව සපයයි. ඇතැම් සැකිලි කොටස් වෙනත් ලෙස ක්‍රියා කරමින් පේශි ඇමිණීමට ස්ථාන සපයන අතර, මෙය සිදු වන විට වලනය සිදු වේ.</li>
+      </ul>
+      <div class="subbox">මානව සැකිල්ල ඉටු කරන අමතර කාර්ය: <b>තැල්සියම්/පොස්ෆේට් ගබඩා කිරීම හා නිදහස් කිරීම</b> (හෝමෝන බලපෑම යටතේ), සහ <b>රුධිර සෛල නිෂ්පාදනය</b> (රතු ඇටමිදුළුවල).</div>
+    </div>
+  </div>
+
+  <div class="section-title">මානව ආක්ෂක සැකිල්ල <span class="tag">Axial Skeleton</span></div>
+
+  <div class="accordion-item">
+    <div class="accordion-head">මානව සැකිල්ලේ ප්‍රධාන කොටස් <span class="chev">▾</span></div>
+    <div class="accordion-body">
+      <p>මානව සැකිල්ල ප්‍රධාන කොටස් දෙකකට බෙදේ:</p>
+      <div class="compare-grid">
+        <div class="compare-card"><h5>1. ආක්ෂක සැකිල්ල (Axial)</h5><ul><li>කපාලය</li><li>කශේරුව (26 අස්ථි)</li><li>උරෝස්ථිය</li><li>පර්ශු (12 යුගල)</li></ul></div>
+        <div class="compare-card"><h5>2. ගාත්‍ර සැකිල්ල (Appendicular)</h5><ul><li>උර හා ශ්‍රෝණි මේඛලා</li><li>ගාත්‍ර යුගල (අත්, පා)</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="accordion-item">
+    <div class="accordion-head">කපාලය හා වක්ත්‍ර අස්ථි (Skull) <span class="chev">▾</span></div>
+    <div class="accordion-body">
+      <p>මානව කපාල ධාරිතාව <b>ලීටර් 1.5</b> ක් පමණ වේ. එයින් <b>අභ්‍යන්තර කන, මධ්‍ය කන, ආසාන අවයව, ඇස්</b> ආරක්ෂා කිරීම සිදු කරන අතර, කුප, අස්ථි ජේවිවලට සන්ධාන පාශ්ට සපයමින් අක්ෂි චලනයට ආධාර කරයි.</p>
+      <h4>කපාල පෙදෙස — කවච අස්ථි (22ක්)</h4>
+      <ul>
+        <li><b>මූලික කවච අස්ථි:</b> ලලාට අස්ථිය (1), පාර්ශ්ව කපාල අස්ථි (2), ශංඛ අස්ථි (2), පශ්චාස්ථිය (1), ඡද්‍රාස්ථිය (2), කිලාස්ථිය (2)</li>
+        <li><b>මුහුණේ / වක්ත්‍ර අස්ථි:</b> යුග අස්ථි (2), උඩු හනු අස්ථි (2), නාසාස්ථි (2), අභ්‍යන්තර නාසා අවකුණු (inferior conchae, 2), හලාස්ථිය (1 - තනි), හනු ඇටය / අධෝහනුව (1 - තනි, චලනය විය හැකි එකම කපාල අස්ථිය)</li>
+      </ul>
+      <h4>සිවනි (Sutures) සහ රන්ධ්‍ර (Fontanelles)</h4>
+      <p>කපාල අස්ථි අතර චලනය රහිත දෘඪ සන්ධි වන <b>සිවනි</b> දක්නට ලැබේ. අලුත උපන් බිලිඳුන්ගේ කපාලයේ අස්ථි අතර සම්පූර්ණයෙන් ඉරි නොවී ඉතිරි වන මෘදු පටල කලාප <b>රන්ධ්‍ර (Fontanelles)</b> ලෙස හඳුන්වයි. මෙමගින් උපත අතරතුර හිස හැඩගැසීමට ඉඩ සලසන අතර, වයස අවුරුදු 1-2 අතර රන්ධ්‍ර සම්පූර්ණයෙන් අස්ථි බවට හැරී සිවනි බවට පත් වේ.</p>
+      <h4>කෝටරක (Sinuses)</h4>
+      <p>කපාල අස්ථි ඇතුළත පිහිටන කුහර වන කෝටරක, හිස බර අඩු කිරීමට හා හඬ අනුනාද කිරීමට ආධාර කරයි.</p>
+      <h4>අධෝහනුවේ ලක්ෂණ (Mandible Features)</h4>
+      <p>අධෝහනුව කපාලයට සම්බන්ධ වන්නේ ශංඛ අස්ථියේ ඇති ග්ලේනොයිඩ් කුහරය සමගිනි. එහි ප්‍රධාන ව්‍යුහ ලෙස <b>condylar process</b> (සන්ධාන ප්‍රවර්ධනය - ශංඛ අස්ථිය සමග සන්ධි වේ) සහ <b>coronoid process</b> (කිරීටාකාර ප්‍රවර්ධනය - Temporalis පේශිය ඇමිණේ) හඳුනාගත හැක.</p>
+    </div>
+  </div>
+
+  <div class="accordion-item">
+    <div class="accordion-head">කශේරු දණ්ඩ (Vertebral Column) — 26 අස්ථි <span class="chev">▾</span></div>
+    <div class="accordion-body">
+      <p>මානව කශේරුව ගැබ්ගැනීමේදී ඇටමිදුළු කුහරයෙන් යුත් රෝබීය සැකසුම් ඇති අස්ථි විය හැකි වුවත්, ඉන් වැඩි හරයක් එකිනෙකට වෙන් වූ නිදහස් කශේරුකායි. හිස් කබලේ අපර පාලලට දිවෙන දිගුවකි. එය කශේරුකායක් වශයෙන් හඳුනාගත හැකි, එකිනෙකට වෙන් වූ නිදහස් කශේරුකා <b>24ක්</b>, ත්‍රිකාස්ථිය (කශේරුකා 5ක් ලෙස වයස්ගත වීමේදී වෑය වන) සහ අනුත්‍රිකාස්ථිය (කශේරුකා 3-5ක් වෑය වන) ලෙස වෙන් වේ. සම්පත් පොත අනුව මානව කශේරුව නිශ්චිත ප්‍රදේශ 4කින් සමන්විතයි:</p>
+      <table class="data-table">
+        <tr><th>පෙදෙස</th><th>කශේරුකා ගණන</th><th>ලක්ෂණය</th></tr>
+        <tr><td>1. ග්‍රෛවී පෙදෙස (Cervical)</td><td>7</td><td>ගෙල ප්‍රදේශය</td></tr>
+        <tr><td>2. උරස් පෙදෙස (Thoracic)</td><td>12</td><td>පර්ශු සමග සන්ධානය</td></tr>
+        <tr><td>3. කටි පෙදෙස (Lumbar)</td><td>5</td><td>පහළ පිටුපස, විශාලතම දේහ</td></tr>
+        <tr><td>4. ත්‍රිකාස්ථික පෙදෙස</td><td>ත්‍රිකාස්ථිය (5 වෑය) + අනුත්‍රිකාස්ථිය (3-5 වෑය)</td><td>ශ්‍රෝණියට සන්ධානය</td></tr>
+      </table>
+      <h4>මානව කශේරුවේ වක්‍ර 4</h4>
+      <div class="compare-grid">
+        <div class="compare-card"><h5>ප්‍රාථමික වක්‍ර (Primary)</h5><ul><li>උරස් වක්‍රය</li><li>ත්‍රිකාස්ථික වක්‍රය</li><li>ග්‍රෑණයේ දී ම කශේරුවට ඇත්තේ තනි වක්‍රයකි</li><li>ළදරුවාගේ නිදහස් වීමට පෙර පවතී</li></ul></div>
+        <div class="compare-card"><h5>ද්විතීයික වක්‍ර (Secondary)</h5><ul><li>ග්‍රෛවී වක්‍රය</li><li>කටි වක්‍රය</li><li>උපතින් පසු වර්ධනය වේ</li></ul></div>
+      </div>
+      <div class="subbox">
+        <b>ද්විතීයික වක්‍ර වර්ධනය වන අවස්ථා:</b><br>
+        • <b>ග්‍රෛවී වක්‍රය</b> — ළදරුවා හිස ඔසවා ගැනීමට හැකි වූ පසු (මාස 3 පමණ) වර්ධනය වේ.<br>
+        • <b>කටි වක්‍රය</b> — දරුවා සිට ගැනීම/ඇවිදීම ආරම්භ කිරීමෙන් පසු (මාස 7-8 පමණ) වර්ධනය වේ. එමගින් දරුවාට සෘජුව සිටගෙන සිටීමට හැකි වේ.
+      </div>
+      <h4>වක්‍රවල වැදගත්කම</h4>
+      <ul>
+        <li>ප්‍රාථමික වක්‍ර දෙකක් හා ද්විතීයික වක්‍ර දෙකක් ඇතිවීම මගින් මානව ආක්ෂක සැකිල්ල සෘජු ඉරියව්ව පවත්වා ගැනීමට ආධාර කරයි.</li>
+        <li>කශේරුවේ අන්තය දෙසට පිහිටන කශේරුකාවල කශේරුකා දේහයේ ප්‍රමාණය ක්‍රමයෙන් විශාල වීම මගින් සෘජු ඉරියව්වේ දී දේහයේ ඉහළ කොටසේ බර දරා ගැනීමේ හැකියාව ලබා දෙයි.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="accordion-item">
+    <div class="accordion-head">කශේරුකා ව්‍යුහය සහ වර්ග <span class="chev">▾</span></div>
+    <div class="accordion-body">
+      <p>දර්ශීය කශේරුකාවක් කශේරුකා දේහය සහ කශේරුකා චක්‍රය (arch) ලෙස ප්‍රධාන කොටස් දෙකකින් සමන්විතයි. කශේරුකා චක්‍රය කශේරුකා ජීදය (spinal canal) වට කරයි — මින් සුෂුම්නාව ගමන් කරයි. කශේරුකා චක්‍රයෙන් පැන නගින විවිධ ප්‍රසර මගින් පේශි සන්ධානයට හා අනෙක් කශේරුකා සමග සන්ධානයට අවශ්‍ය පෘෂ්ට සපයයි.</p>
+      <div class="compare-grid">
+        <div class="compare-card"><h5>ග්‍රෛවී කශේරුකා (C1-C7)</h5><ul><li>ග්‍රෑවී පෙදෙසේ ඇති සියලුම කශේරුකා හතිය</li><li>දේහ කුඩාම කශේරුකා වර්ගය</li><li>බහුතරයකට හීරියක් ප්‍රසරයේ දෙපසක් ඡිද්‍ර 2ක් ඇත</li><li>C2-C6 ට බන්ටක ප්‍රසරය ද්විභින්න (bifid) වේ</li></ul></div>
+        <div class="compare-card"><h5>උරස් කශේරුකා (T1-T12)</h5><ul><li>ග්‍රෛවී වලට වඩා විශාල</li><li>දේහයේ සහ හීරියක් ප්‍රසරවල පර්ශු සඳහා සන්ධාන මුහුණත් (facets) ඇත</li></ul></div>
+        <div class="compare-card"><h5>කටි කශේරුකා (L1-L5)</h5><ul><li>විශාලතම කශේරුකා</li><li>දේහයේ බර දැරීම සඳහා විශාල දේහයක් ඇත</li><li>සාපේක්ෂව හතරැස් හැඩැති (quadrate) බන්ටක ප්‍රසරයක් ඇත</li></ul></div>
+        <div class="compare-card"><h5>ත්‍රිකාස්ථිය සහ අනුත්‍රිකාස්ථිය</h5><ul><li>ත්‍රිකාස්ථිය — කශේරුකා 5ක් වෑය වූ ත්‍රිකෝණාකාර අස්ථියකි</li><li>අනුත්‍රිකාස්ථිය — ශ්‍රේණි ලෙස කුඩා වන කශේරුකා 3-5ක් වෑය වූ, විශේෂිත ලෙස චලනශීලී වුව අවශේෂ (vestigial) අස්ථියකි</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="accordion-item">
+    <div class="accordion-head">C1 (ඇට්ලස්) සහ C2 (අක්ෂ) — විශේෂ ග්‍රෛවී කශේරුකා <span class="chev">▾</span></div>
+    <div class="accordion-body">
+      <div class="compare-grid">
+        <div class="compare-card"><h5>ඇට්ලස් (C1)</h5><ul><li>දේහයක් නොමැත — වළල්ලක් වැනි හැඩයකි</li><li>දන්තාකාර ප්‍රසරය (odontoid process) සඳහා විශේෂ සන්ධාන මුහුණතක් ඇත</li><li>හිස් කබල සමග (ඔක්සිපිටල් අස්ථිය) සන්ධානය වී හිස ඉදිරියට/පිටුපසට නැමීමට ඉඩ දෙයි — "ඔව්" කීමේ චලනය</li></ul></div>
+        <div class="compare-card"><h5>අක්ෂ (C2)</h5><ul><li>දන්තාකාර ප්‍රසරය (odontoid process / dens) නම් සුවිශේෂී උස් ප්‍රසරයක් ඇත</li><li>මෙය ඇට්ලසයේ වළල්ල තුළින් උඩට නැගී සන්ධානය වේ</li><li>හිස පසෙකට හැරවීමට ඉඩ දෙයි — "නැත" කීමේ චලනය</li></ul></div>
+      </div>
+      <div class="subbox">C1/C2 සන්ධානය පිවෝට් (pivot) සන්ධියකි — මෙය හිසෙහි භ්‍රමණ චලනය (rotation) සඳහා විශේෂිත වී ඇත.</div>
+    </div>
+  </div>
+
+  <div class="accordion-item">
+    <div class="accordion-head">උරෝස්ථිය සහ පර්ශු — වක්ෂ කූඩුව (Thoracic Cage) <span class="chev">▾</span></div>
+    <div class="accordion-body">
+      <h4>උරෝස්ථිය (Sternum)</h4>
+      <p>දිගු, පැතලි අස්ථියකි. උරස් කූඩුවේ පූර්ව ප්‍රදේශය සැදීමට දායක වේ (උරෝස්ථිය පර්ශු හා උරස් කශේරුකාවලින් උරස් කූඩුව සෑදී තිබේ). කොටස් 3කින් සමන්විතයි:</p>
+      <ul>
+        <li><b>මිට (Manubrium)</b> — ඌරමේබලාවේ අක්ෂකාස්ථි යුගල හා පළමු හා දෙවන පර්ශු යුගල උරෝස්ථි මිට සමග සන්ධානය වේ</li>
+        <li><b>දේහය (Body)</b> — මිටට පහළින් ඇති මධ්‍යම ප්‍රදේශය. ඉතිරි පර්ශු සමග සන්ධානය වේ</li>
+        <li><b>අග කොටස (Xiphoid Process)</b> — අසිපත් ප්‍රසරය ලෙසද හැඳින්වේ. මුලින් කාටිලේජමය වන අතර, පසුව අස්ථි බවට හැරේ. ඩයෆ්‍රෑම් හා උදර පේශිවලට සන්ධාන පෘෂ්ඨය සපයයි</li>
+      </ul>
+      <div class="subbox">උරෝස්ථියට පිටුපසින් පිහිටන අවකාශ (හෘදය හා පෙනහළු) රුධිර නාල වලට ආරක්ෂාව සපයයි. උරෝස්ථිය තුළ ඇති රතු ඇටමිදුළු රක්තාණු නිපදවන ප්‍රධානතම මධ්‍යස්ථානයකි.</div>
+      <h4>පර්ශු (Ribs) — යුගල 12</h4>
+      <p>පර්ශු යුගල දොළහකි. මේවා උරස් කූඩුවේ පාර්ශ්වික බිත්ති සෑදීමට දායක වන, වක්‍රාකාර දිගු අස්ථි වර්ගයකි. දේහයේ අපර පැත්තේ දී පර්ශු සියල්ල උරස් කශේරුකා සමග සන්ධානය වේ.</p>
+      <table class="data-table">
+        <tr><th>වර්ගය</th><th>පර්ශු</th><th>විස්තරය</th></tr>
+        <tr><td>සත්‍ය පර්ශු (True Ribs)</td><td>1-7</td><td>සෑම එකක්ම කාටිලේජ හරහා උරෝස්ථියට කෙළින්ම සම්බන්ධ වේ</td></tr>
+        <tr><td>අසත්‍ය පර්ශු (False Ribs)</td><td>8, 9, 10</td><td>උරෝස්ථියට අනියම් ලෙස සම්බන්ධ වේ — 7වන පර්ශුවේ කාටිලේජයට එකතු වේ</td></tr>
+        <tr><td>පාවෙන පර්ශු (Floating Ribs)</td><td>11, 12</td><td>උරෝස්ථියට කිසිසේත් සම්බන්ධ නොවේ — පිටුපසින් කශේරුකාවලට පමණක් සම්බන්ධයි</td></tr>
+      </table>
+      <div class="subbox"><b>ආශ්වාස-ප්‍රශ්වාස යාන්ත්‍රණය:</b> පර්ශු අතර පිහිටන අන්තර්පර්ශුක පේශි සංකෝචනය වීම මගින් ආශ්වාස-ප්‍රශ්වාස ක්‍රියාවලියේ දී වැදගත් කාර්යභාරයක් ඉටු කරයි. පළමු පර්ශුව උරෝස්ථියට හා උරස් කශේරුකාවලට තදින් සම්බන්ධ වන නිසා ආශ්වාසයේ දී චලනය වීම මෙයාවශ්‍ය නොවේ.</div>
+      <h4>සෘජු ඉරියව්ව පවත්වා ගැනීමට මානව ආක්ෂක සැකිල්ල දායක වන ආකාරය</h4>
+      <ul>
+        <li>කශේරුවේ ඇති ප්‍රාථමික වක්‍ර දෙකක් හා ද්විතීයික වක්‍ර දෙකක් මගින් මානව දේහයේ සෘජු ඉරියව්ව පවත්වා ගැනීමට දායක වේ.</li>
+        <li>කශේරුවේ අන්තය දෙසට පිහිටන කශේරුකාවල කශේරුකා දේහයේ ප්‍රමාණය විශාල වීම මගින් සෘජු ඉරියව්වේ දී ශරීරයේ ඉහළ කොටසේ බර දරා ගැනීමේ හැකියාව ලැබේ.</li>
+      </ul>
+    </div>
+  </div>
+
+</section>
+<!-- ============ TAB 2: SKELETON VISUALIZER ============ -->
+<section class="tabpanel" id="tab2">
+  <div class="section-title">මානව සැකිල්ල — අන්තර්ක්‍රියාකාරී දෘශ්‍යකරණය <span class="tag">Click to Explore</span></div>
+  <p class="placeholder-note">පහත රූපයේ ඕනෑම කලාපයක් ක්ලික් කර එහි විස්තර බලන්න. කශේරුවේ වක්‍ර පෙන්වීමට පහත ෆිල්ටර මගින් තෝරන්න.</p>
+
+  <div class="filter-row">
+    <button class="filter-chip" id="filterPrimary" onclick="toggleCurveFilter('primary')">ප්‍රාථමික වක්‍ර පෙන්වන්න</button>
+    <button class="filter-chip" id="filterSecondary" onclick="toggleCurveFilter('secondary')">ද්විතීයික වක්‍ර පෙන්වන්න</button>
+    <button class="filter-chip" onclick="toggleCurveFilter('none')">ෆිල්ටර ඉවත් කරන්න</button>
+  </div>
+
+  <div class="skeleton-wrap">
+    <div class="skeleton-svgbox">
+      <svg viewBox="0 0 300 560" xmlns="http://www.w3.org/2000/svg">
+        <!-- Skull -->
+        <ellipse class="bone-region" data-region="skull" cx="150" cy="45" rx="34" ry="38" fill="#F2E9D5" stroke="#8a8371" stroke-width="1.5"/>
+        <!-- Cervical -->
+        <rect class="bone-region curve-target-secondary" data-region="cervical" x="140" y="82" width="20" height="34" rx="6" fill="#F2E9D5" stroke="#8a8371" stroke-width="1.5"/>
+        <!-- Thoracic + ribs -->
+        <g>
+          <rect class="bone-region curve-target-primary" data-region="thoracic" x="138" y="118" width="24" height="110" rx="6" fill="#F2E9D5" stroke="#8a8371" stroke-width="1.5"/>
+          <path class="bone-region" data-region="ribs" d="M138 130 Q90 150 92 195 Q94 220 118 232 L138 210 Z" fill="#F5EFDE" stroke="#8a8371" stroke-width="1.5"/>
+          <path class="bone-region" data-region="ribs" d="M162 130 Q210 150 208 195 Q206 220 182 232 L162 210 Z" fill="#F5EFDE" stroke="#8a8371" stroke-width="1.5"/>
+          <rect class="bone-region" data-region="sternum" x="140" y="140" width="18" height="75" rx="4" fill="#EFE3C8" stroke="#8a8371" stroke-width="1.5"/>
+        </g>
+        <!-- Lumbar -->
+        <rect class="bone-region curve-target-secondary" data-region="lumbar" x="135" y="230" width="30" height="60" rx="8" fill="#F2E9D5" stroke="#8a8371" stroke-width="1.5"/>
+        <!-- Sacrum -->
+        <path class="bone-region curve-target-primary" data-region="sacrum" d="M133 292 Q150 340 167 292 Z" fill="#F2E9D5" stroke="#8a8371" stroke-width="1.5"/>
+        <!-- Pelvis (context, not a hotspot topic but visual) -->
+        <path d="M100 300 Q80 340 100 380 Q150 400 200 380 Q220 340 200 300 Q150 320 100 300Z" fill="#EFE3C8" stroke="#8a8371" stroke-width="1.2" opacity="0.7"/>
+        <!-- Limbs (context only, faint) -->
+        <line x1="120" y1="130" x2="90" y2="260" stroke="#c9be9f" stroke-width="10" stroke-linecap="round" opacity="0.6"/>
+        <line x1="180" y1="130" x2="210" y2="260" stroke="#c9be9f" stroke-width="10" stroke-linecap="round" opacity="0.6"/>
+        <line x1="130" y1="395" x2="120" y2="500" stroke="#c9be9f" stroke-width="14" stroke-linecap="round" opacity="0.6"/>
+        <line x1="170" y1="395" x2="180" y2="500" stroke="#c9be9f" stroke-width="14" stroke-linecap="round" opacity="0.6"/>
+        <!-- labels -->
+        <text x="195" y="49" font-size="11" fill="#3B4453">කපාලය</text>
+        <text x="165" y="100" font-size="11" fill="#3B4453">ග්‍රෛවී (C1-C7)</text>
+        <text x="220" y="150" font-size="11" fill="#3B4453">පර්ශු</text>
+        <text x="165" y="175" font-size="11" fill="#3B4453">උරෝස්ථිය</text>
+        <text x="165" y="175" font-size="0"></text>
+        <text x="170" y="175" font-size="0"></text>
+        <text x="165" y="120" font-size="11" fill="#3B4453">උරස් (T1-T12)</text>
+        <text x="170" y="260" font-size="11" fill="#3B4453">කටි (L1-L5)</text>
+        <text x="172" y="300" font-size="11" fill="#3B4453">ත්‍රිකාස්ථිය</text>
+      </svg>
+    </div>
+    <div class="skeleton-info" id="skeletonInfo">
+      <h3>කලාපයක් තෝරන්න</h3>
+      <p class="placeholder-note">දෘශ්‍ය සැකිල්ලේ ඕනෑම කොටසක් ක්ලික් කර එහි විස්තර මෙහි පෙන්වනු ලැබේ — Sinhala terminology, අස්ථි ගණන, ව්‍යුහාත්මක ලක්ෂණ සහ කාර්යය සමග.</p>
+    </div>
+  </div>
+</section>
+<!-- ============ TAB 3: LOCOMOTION SIMULATIONS ============ -->
+<section class="tabpanel" id="tab3">
+  <div class="section-title">චලන යාන්ත්‍රණ — සජීවී සිමියුලේෂන් <span class="tag">Animated Physics</span></div>
+
+  <div class="sim-card">
+    <h3>Sim 1 — කශේරුවේ අක්ෂ හා ඇට්ලස් සන්ධිය (C1/C2)</h3>
+    <p class="sim-desc">ඇට්ලසය (C1) අක්ෂයේ (C2) දන්තාකාර ප්‍රසරය මත භ්‍රමණය වන ආකාරය නරඹන්න.</p>
+    <div class="sim-canvas-box"><canvas id="canvasC1C2" width="600" height="260"></canvas></div>
+    <div class="sim-controls">
+      <button class="sim-btn" onclick="playNo()">"නැත" කීමේ චලනය (භ්‍රමණය)</button>
+      <button class="sim-btn secondary" onclick="playYes()">"ඔව්" කීමේ චලනය (නැමීම)</button>
+    </div>
+  </div>
+
+  <div class="sim-card">
+    <h3>Sim 2a — මත්ස්‍යයන්ගේ පිහිනීම (Lateral Wave)</h3>
+    <p class="sim-desc">මාළුවන් තම දේහය හා වලිගය පැත්තට තරංගාකාරව චලනය කරමින් ඉදිරියට ඇදෙයි.</p>
+    <div class="sim-canvas-box"><canvas id="canvasFish" width="600" height="160"></canvas></div>
+    <div class="sim-controls">
+      <button class="sim-btn" onclick="toggleAnim('fish')" id="btnFish">විරාම කරන්න</button>
+    </div>
+  </div>
+
+  <div class="sim-card">
+    <h3>Sim 2b — තෙල්මසුන්ගේ පිහිනීම (Vertical Wave)</h3>
+    <p class="sim-desc">තෙල්මසුන් හා ඩොල්ෆින්වරු තම දේහය හා වලිගය උඩ-යට දෙසට තරංගාකාරව චලනය කරමින් ඉදිරියට ඇදෙති — වේගයෙන් අනුවර්තනය වූ ලක්ෂණයකි.</p>
+    <div class="sim-canvas-box"><canvas id="canvasWhale" width="600" height="160"></canvas></div>
+    <div class="sim-controls">
+      <button class="sim-btn" onclick="toggleAnim('whale')" id="btnWhale">විරාම කරන්න</button>
+    </div>
+  </div>
+
+  <div class="sim-card">
+    <h3>Sim 2c — දැල්ලන්ගේ (Squid) ජෙට් යානය</h3>
+    <p class="sim-desc">දේහය තුළට ජලය ඇදගෙන පසුව එය වේගයෙන් පිටතට විමෝචනය කිරීමෙන් ප්‍රතික්‍රියා බලයෙන් (jet propulsion) ඉදිරියට ගමන් කරයි.</p>
+    <div class="sim-canvas-box"><canvas id="canvasSquid" width="600" height="200"></canvas></div>
+    <div class="sim-controls">
+      <button class="sim-btn" onclick="squidPulse()">ජලය විමෝචනය කරන්න</button>
+    </div>
+  </div>
+
+  <div class="sim-card">
+    <h3>Sim 2d — කුරුල්ලන්ගේ පියාසර කිරීම (Air foil)</h3>
+    <p class="sim-desc">පියාපත් හරහා වාතය ගමන් කරන විට ඉහළ පෘෂ්ඨයෙන් වේගයෙන් හා පහළ පෘෂ්ඨයෙන් සෙමින් ගමන් කිරීම නිසා ලිෆ්ට් (lift) බලය ජනනය වේ.</p>
+    <div class="sim-canvas-box"><canvas id="canvasAirfoil" width="600" height="220"></canvas></div>
+    <div class="sim-controls">
+      <button class="sim-btn" onclick="toggleAnim('airfoil')" id="btnAirfoil">විරාම කරන්න</button>
+    </div>
+  </div>
+</section>
+<!-- ============ TAB 4: FLASHCARDS ============ -->
+<section class="tabpanel" id="tab4">
+  <div class="section-title">ෆ්ලෑෂ් කාඩ් — වේගවත් පුනරීක්ෂණය <span class="tag">Tap to Flip</span></div>
+  <p class="placeholder-note">කාඩ්පතක් ක්ලික් කර පිටුපස පිළිතුර බලන්න.</p>
+  <div class="flash-grid" id="flashGrid"></div>
+</section>
+
+<!-- ============ TAB 5: QUIZ ============ -->
+<section class="tabpanel" id="tab5">
+  <div class="section-title">MCQ ස්වයං-ඇගයීම් ප්‍රශ්නාවලිය <span class="tag">10 Questions</span></div>
+  <div id="quizArea">
+    <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="quizProgressFill"></div></div>
+    <div class="quiz-q-card" id="quizQCard"></div>
+    <div class="quiz-nav">
+      <button class="sim-btn secondary" onclick="quizRestart()">යළි ආරම්භ කරන්න</button>
+      <button class="sim-btn" id="quizNextBtn" onclick="quizNext()" disabled>ඊළඟ ප්‍රශ්නය →</button>
+    </div>
+  </div>
+</section>
+
+</main>
+<footer>සම්පත් පොත පදනම් කරගත් අන්තර්ක්‍රියාකාරී අධ්‍යාපන මෙවලමකි • G.C.E. A/L ජීව විද්‍යාව — සන්ධාරණය හා චලනය</footer>
+<script>
+/* ===== TAB SWITCHING ===== */
+document.querySelectorAll('.tabbtn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tabpanel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+/* ===== ACCORDION ===== */
+document.querySelectorAll('.accordion-head').forEach(head=>{
+  head.addEventListener('click', ()=>{
+    head.parentElement.classList.toggle('open');
+  });
+});
+
+/* ===== SKELETON VISUALIZER ===== */
+const boneData = {
+  skull: {
+    title: "කපාලය (Skull)", meta: "අස්ථි 22",
+    facts: [
+      "කවච අස්ථි 8ක් + වක්ත්‍ර (මුහුණේ) අස්ථි 14ක් = 22",
+      "ලලාට අස්ථිය, පාර්ශ්ව කපාල අස්ථි (2), ශංඛ අස්ථි (2), පශ්චාස්ථිය, ඡද්‍රාස්ථිය (2), කිලාස්ථිය (2)",
+      "සිවනි මගින් අස්ථි එකිනෙක සම්බන්ධ වේ; ළදරුවන්ට රන්ධ්‍ර (fontanelles) ඇත",
+      "කාර්යය: මොළය, ඇස්, කන් ආරක්ෂා කිරීම, කෝටරක මගින් හිස බර අඩු කිරීම"
+    ]
+  },
+  cervical: {
+    title: "ග්‍රෛවී කශේරුකා (Cervical, C1-C7)", meta: "අස්ථි 7",
+    facts: [
+      "දේහ කුඩාම කශේරුකා වර්ගය",
+      "C1 (ඇට්ලස්) — දේහයක් නොමැත, C2 (අක්ෂ) — දන්තාකාර ප්‍රසරයක් ඇත",
+      "බහුතරයට හීරියක් ප්‍රසරයේ ඡිද්‍ර ඇත; C2-C6 ට ද්විභින්න බන්ටක ප්‍රසරයක් ඇත",
+      "කාර්යය: හිස ආධාරකය, හිස චලනය (නැමීම/භ්‍රමණය) සක්‍රීය කිරීම"
+    ]
+  },
+  thoracic: {
+    title: "උරස් කශේරුකා (Thoracic, T1-T12)", meta: "අස්ථි 12",
+    facts: [
+      "ග්‍රෛවී වලට වඩා විශාල, කටි වලට වඩා කුඩා",
+      "දේහයේ හා හීරියක් ප්‍රසරවල පර්ශු සඳහා විශේෂ සන්ධාන මුහුණත් (facets) ඇත",
+      "සියලුම 12 යුගල පර්ශු පිටුපසින් සම්බන්ධ වේ",
+      "කාර්යය: පර්ශු සමග සන්ධානය වී වක්ෂ කූඩුව සෑදීම"
+    ]
+  },
+  lumbar: {
+    title: "කටි කශේරුකා (Lumbar, L1-L5)", meta: "අස්ථි 5",
+    facts: [
+      "විශාලතම හා ශක්තිමත්ම කශේරුකා",
+      "විශාල, දලවු දේහයක් — ශරීරයේ බර වැඩි ප්‍රමාණයක් දරයි",
+      "සාපේක්ෂව හතරැස් (quadrate) හැඩැති බන්ටක ප්‍රසරයක් ඇත",
+      "කාර්යය: ශරීරයේ ඉහළ කොටසේ බර දරාගැනීම, පහළ පිටුපස නම්‍යතාව"
+    ]
+  },
+  sacrum: {
+    title: "ත්‍රිකාස්ථිය හා අනුත්‍රිකාස්ථිය", meta: "ත්‍රිකා. 5 වෑය + අනුත්‍රිකා. 3-5 වෑය",
+    facts: [
+      "ත්‍රිකාස්ථිය — කශේරුකා 5ක් වෑය වූ ත්‍රිකෝණාකාර අස්ථියකි; ශ්‍රෝණි මේඛලාව සමග සන්ධානය වේ",
+      "අනුත්‍රිකාස්ථිය — ඉතා කුඩා, අවශේෂ (vestigial) කශේරුකා 3-5ක් වෑය වූවකි",
+      "වෑය වීම වයස්ගත වීමේ ක්‍රියාවලියක් ලෙස සිදු වේ",
+      "කාර්යය: ශ්‍රෝණි මේඛලාවට සන්ධානය සැපයීම, දේහ බර ශ්‍රෝණියට මාරු කිරීම"
+    ]
+  },
+  ribs: {
+    title: "පර්ශු (Ribs)", meta: "යුගල 12",
+    facts: [
+      "සත්‍ය පර්ශු (1-7) — කාටිලේජ හරහා උරෝස්ථියට කෙළින්ම සම්බන්ධයි",
+      "අසත්‍ය පර්ශු (8,9,10) — 7වන පර්ශුවේ කාටිලේජයට සම්බන්ධ වේ",
+      "පාවෙන පර්ශු (11,12) — උරෝස්ථියට කිසිසේත් සම්බන්ධ නැත",
+      "කාර්යය: හෘදය හා පෙනහළු ආරක්ෂා කිරීම, ආශ්වාස-ප්‍රශ්වාසයට ආධාර කිරීම"
+    ]
+  },
+  sternum: {
+    title: "උරෝස්ථිය (Sternum)", meta: "කොටස් 3",
+    facts: [
+      "මිට (Manubrium) — අක්ෂකාස්ථි හා පර්ශු 1,2 සමග සන්ධානය",
+      "දේහය (Body) — ඉතිරි පර්ශුවලට සන්ධානය",
+      "අග කොටස (Xiphoid Process) — කාටිලේජමය, ඩයෆ්‍රෑම් ඇමිණීමට",
+      "කාර්යය: වක්ෂ කූඩුවේ පූර්ව බිත්තිය සෑදීම, රතු ඇටමිදුළු නිෂ්පාදනය"
+    ]
+  }
+};
+
+const infoBox = document.getElementById('skeletonInfo');
+document.querySelectorAll('.bone-region').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    document.querySelectorAll('.bone-region').forEach(e=>e.classList.remove('selected'));
+    document.querySelectorAll('[data-region="'+el.dataset.region+'"]').forEach(e=>e.classList.add('selected'));
+    const d = boneData[el.dataset.region];
+    if(!d) return;
+    infoBox.innerHTML = '<h3>'+d.title+'</h3><div class="meta">'+d.meta+'</div><ul>'+d.facts.map(f=>'<li>'+f+'</li>').join('')+'</ul>';
+  });
+});
+
+let curveMode = 'none';
+function toggleCurveFilter(mode){
+  curveMode = (curveMode===mode) ? 'none' : mode;
+  document.getElementById('filterPrimary').classList.toggle('active-primary', curveMode==='primary');
+  document.getElementById('filterSecondary').classList.toggle('active-secondary', curveMode==='secondary');
+  document.querySelectorAll('.curve-target-primary').forEach(el=>el.classList.toggle('curve-primary', curveMode==='primary'));
+  document.querySelectorAll('.curve-target-secondary').forEach(el=>el.classList.toggle('curve-secondary', curveMode==='secondary'));
+}
+</script>
+<script>
+/* ===== SIM 1: C1/C2 rotation ===== */
+const cC1C2 = document.getElementById('canvasC1C2');
+const xC1C2 = cC1C2.getContext('2d');
+let c1c2Angle = 0, c1c2Mode = null, c1c2Target = 0, c1c2Tilt = 0, c1c2TiltTarget = 0;
+function drawC1C2(){
+  const w=cC1C2.width, h=cC1C2.height;
+  xC1C2.clearRect(0,0,w,h);
+  xC1C2.fillStyle = '#0F1620'; xC1C2.fillRect(0,0,w,h);
+  const cx = w/2, cy = h/2+20;
+  xC1C2.save();
+  xC1C2.translate(cx,cy);
+  xC1C2.rotate(c1c2Tilt*0.35);
+  // Axis (C2) - stationary base
+  xC1C2.fillStyle = '#B9902F';
+  xC1C2.beginPath(); xC1C2.ellipse(0,60,55,22,0,0,Math.PI*2); xC1C2.fill();
+  xC1C2.strokeStyle='#7C221F'; xC1C2.lineWidth=2; xC1C2.stroke();
+  // dens (odontoid process)
+  xC1C2.fillStyle = '#D9C48C';
+  xC1C2.fillRect(-8,-10,16,72);
+  xC1C2.strokeRect(-8,-10,16,72);
+  xC1C2.fillStyle='#EDE7D8'; xC1C2.font='13px sans-serif'; xC1C2.textAlign='center';
+  xC1C2.fillText('අක්ෂ (C2)', 0, 100);
+  // Atlas (C1) rotates around dens
+  xC1C2.save();
+  xC1C2.rotate(c1c2Angle);
+  xC1C2.fillStyle = '#EDE7D8';
+  xC1C2.beginPath(); xC1C2.ellipse(0,-30,70,26,0,0,Math.PI*2); xC1C2.fill();
+  xC1C2.strokeStyle='#A5322E'; xC1C2.lineWidth=2.5; xC1C2.stroke();
+  xC1C2.fillStyle='#1E2530'; xC1C2.font='13px sans-serif';
+  xC1C2.fillText('ඇට්ලස් (C1)', 0, -30);
+  xC1C2.restore();
+  xC1C2.restore();
+  xC1C2.fillStyle='#AEB6C4'; xC1C2.font='12px sans-serif'; xC1C2.textAlign='center';
+  xC1C2.fillText(c1c2Mode==='yes' ? '"ඔව්" කීමේ චලනය — ඇට්ලසය-ඔක්සිපිටල් සන්ධියේ නැමීම' : c1c2Mode==='no' ? '"නැත" කීමේ චලනය — C1 විසින් C2 මත භ්‍රමණය' : 'ක්‍රියාවක් තෝරන්න', w/2, 24);
+}
+function animC1C2(){
+  c1c2Angle += (c1c2Target - c1c2Angle) * 0.08;
+  c1c2Tilt += (c1c2TiltTarget - c1c2Tilt) * 0.08;
+  drawC1C2();
+  requestAnimationFrame(animC1C2);
+}
+function playNo(){ c1c2Mode='no'; c1c2TiltTarget=0; c1c2Target = (c1c2Target===0.5)? -0.5 : 0.5; }
+function playYes(){ c1c2Mode='yes'; c1c2Target=0; c1c2TiltTarget = (c1c2TiltTarget===0.5)? -0.5:0.5; }
+animC1C2();
+
+/* ===== Generic wave-locomotion animator (fish / whale) ===== */
+function makeWaveAnim(canvasId, vertical){
+  const cvs = document.getElementById(canvasId);
+  const ctx = cvs.getContext('2d');
+  let t=0, running=true;
+  function draw(){
+    const w=cvs.width,h=cvs.height;
+    ctx.fillStyle = vertical ? '#0E2A3A' : '#0E3A3A';
+    ctx.fillRect(0,0,w,h);
+    ctx.strokeStyle='rgba(255,255,255,0.12)'; ctx.lineWidth=1;
+    for(let i=0;i<h;i+=20){ ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(w,i); ctx.stroke(); }
+    const midY = h/2;
+    ctx.beginPath();
+    const n=40;
+    for(let i=0;i<=n;i++){
+      const px = i/n;
+      const xPos = w - px*w*0.85 - 20;
+      const phase = px*7 - t;
+      const amp = 22*(1-px*0.3);
+      const off = Math.sin(phase)*amp;
+      const yPos = vertical ? midY + off : midY;
+      const xx = vertical ? xPos : xPos;
+      const yy = vertical ? yPos : midY + off;
+      if(i===0) ctx.moveTo(xx,yy); else ctx.lineTo(xx,yy);
+    }
+    ctx.strokeStyle = vertical ? '#8FD3D8' : '#7FD9A8';
+    ctx.lineWidth = 10; ctx.lineCap='round'; ctx.stroke();
+    // head
+    const headOff = vertical ? Math.sin(7-t)*22*0.7 : 0;
+    ctx.beginPath();
+    ctx.fillStyle = vertical ? '#8FD3D8' : '#7FD9A8';
+    ctx.ellipse(w-30, vertical? midY+headOff : midY + Math.sin(-t)*22, 18,12,0,0,Math.PI*2);
+    ctx.fill();
+    if(running) t += 0.09;
+    requestAnimationFrame(draw);
+  }
+  draw();
+  return { toggle(){ running = !running; return running; } };
+}
+const fishAnim = makeWaveAnim('canvasFish', false);
+const whaleAnim = makeWaveAnim('canvasWhale', true);
+function toggleAnim(which){
+  if(which==='fish'){ const r=fishAnim.toggle(); document.getElementById('btnFish').textContent = r? 'විරාම කරන්න':'ඉදිරියට'; }
+  if(which==='whale'){ const r=whaleAnim.toggle(); document.getElementById('btnWhale').textContent = r? 'විරාම කරන්න':'ඉදිරියට'; }
+  if(which==='airfoil'){ const r=airfoilAnim.toggle(); document.getElementById('btnAirfoil').textContent = r? 'විරාම කරන්න':'ඉදිරියට'; }
+}
+
+/* ===== SIM: Squid jet propulsion ===== */
+const cSquid = document.getElementById('canvasSquid');
+const xSquid = cSquid.getContext('2d');
+let squidX = 300, squidPulseT = 0, squidPulsing=false;
+function drawSquid(){
+  const w=cSquid.width,h=cSquid.height;
+  xSquid.fillStyle='#0E2233'; xSquid.fillRect(0,0,w,h);
+  const cy = h/2;
+  const bodyScale = 1 + (squidPulsing ? Math.sin(squidPulseT*3)*0.15*Math.max(0,1-squidPulseT/2) : 0);
+  xSquid.save();
+  xSquid.translate(squidX, cy);
+  xSquid.scale(bodyScale, 1/bodyScale*0.5+0.5);
+  xSquid.fillStyle='#C77B54';
+  xSquid.beginPath(); xSquid.ellipse(0,0,55,32,0,0,Math.PI*2); xSquid.fill();
+  xSquid.restore();
+  // tentacles
+  xSquid.strokeStyle='#C77B54'; xSquid.lineWidth=4; xSquid.lineCap='round';
+  for(let i=-2;i<=2;i++){
+    xSquid.beginPath();
+    xSquid.moveTo(squidX+50, cy+i*8);
+    xSquid.lineTo(squidX+90+Math.sin(squidPulseT*4+i)*6, cy+i*10);
+    xSquid.stroke();
+  }
+  // jet water
+  if(squidPulsing && squidPulseT < 1.4){
+    xSquid.fillStyle='rgba(150,220,255,'+(1-squidPulseT/1.4)+')';
+    for(let i=0;i<6;i++){
+      const spread = squidPulseT*(90+i*14);
+      xSquid.beginPath();
+      xSquid.arc(squidX+100+spread, cy + (i-2.5)*8, 5, 0, Math.PI*2);
+      xSquid.fill();
+    }
+  }
+  xSquid.fillStyle='#AEB6C4'; xSquid.font='12px sans-serif'; xSquid.textAlign='center';
+  xSquid.fillText('පේශි සංකෝචනය → ජලය පසුපසට විමෝචනය → ප්‍රතික්‍රියා බලයෙන් ඉදිරියට ගමන්', w/2, h-14);
+}
+function squidLoop(){
+  if(squidPulsing){
+    squidPulseT += 0.045;
+    squidX -= 5.5 * Math.max(0, 1-squidPulseT/1.4);
+    if(squidPulseT>1.4){ squidPulsing=false; }
+    if(squidX < 60){ squidX = 340; }
+  }
+  drawSquid();
+  requestAnimationFrame(squidLoop);
+}
+function squidPulse(){ squidPulsing=true; squidPulseT=0; }
+squidLoop();
+
+/* ===== SIM: Airfoil / bird flight ===== */
+const cAir = document.getElementById('canvasAirfoil');
+const xAir = cAir.getContext('2d');
+let airT=0, airRunning=true;
+function drawAirfoil(){
+  const w=cAir.width,h=cAir.height;
+  xAir.fillStyle='#0E2233'; xAir.fillRect(0,0,w,h);
+  const cx=w/2, cy=h/2;
+  // wing (airfoil cross-section)
+  xAir.save();
+  xAir.translate(cx,cy);
+  xAir.beginPath();
+  xAir.moveTo(-140,10);
+  xAir.quadraticCurveTo(-40,-38,160,-4);
+  xAir.quadraticCurveTo(20,10,-140,10);
+  xAir.closePath();
+  xAir.fillStyle='#D9C48C'; xAir.fill();
+  xAir.strokeStyle='#7C221F'; xAir.lineWidth=2; xAir.stroke();
+  xAir.restore();
+  // airflow lines: top (faster, more curved) vs bottom (slower, straighter)
+  for(let i=0;i<5;i++){
+    const yTop = cy - 60 - i*14;
+    const speedTop = 5.5;
+    const offset = (airT*speedTop + i*30) % (w+80) - 80;
+    xAir.strokeStyle='rgba(143,211,216,0.55)'; xAir.lineWidth=2;
+    xAir.beginPath();
+    xAir.moveTo(offset, yTop + Math.max(0, 26 - Math.abs(offset-cx+20)*0.22));
+    xAir.lineTo(offset+34, yTop + Math.max(0, 26 - Math.abs(offset-cx+20)*0.22));
+    xAir.stroke();
+  }
+  for(let i=0;i<4;i++){
+    const yBot = cy + 30 + i*16;
+    const speedBot = 3.0;
+    const offset = (airT*speedBot + i*40) % (w+80) - 80;
+    xAir.strokeStyle='rgba(127,217,168,0.5)'; xAir.lineWidth=2;
+    xAir.beginPath();
+    xAir.moveTo(offset, yBot);
+    xAir.lineTo(offset+24, yBot);
+    xAir.stroke();
+  }
+  // lift arrow
+  xAir.strokeStyle='#B9902F'; xAir.lineWidth=3;
+  xAir.beginPath(); xAir.moveTo(cx,cy-60); xAir.lineTo(cx,cy-110); xAir.stroke();
+  xAir.beginPath(); xAir.moveTo(cx,cy-110); xAir.lineTo(cx-7,cy-98); xAir.lineTo(cx+7,cy-98); xAir.closePath();
+  xAir.fillStyle='#B9902F'; xAir.fill();
+  xAir.fillStyle='#EDE7D8'; xAir.font='12px sans-serif'; xAir.textAlign='center';
+  xAir.fillText('ලිෆ්ට් (Lift)', cx, cy-118);
+  xAir.fillStyle='#AEB6C4'; xAir.font='12px sans-serif';
+  xAir.fillText('ඉහළ පෘෂ්ඨයෙන් වේගවත් වායු ප්‍රවාහය → අඩු පීඩනය → ලිෆ්ට් බලය ජනිත වේ', cx, h-14);
+  if(airRunning) airT += 1;
+  requestAnimationFrame(drawAirfoil);
+}
+const airfoilAnim = { toggle(){ airRunning = !airRunning; return airRunning; } };
+drawAirfoil();
+</script>
+<script>
+/* ===== FLASHCARDS ===== */
+const flashData = [
+  {q:"රන්ධ්‍ර (Fontanelles) සම්පූර්ණයෙන් අස්ථි බවට පත් වන වයස කවරේද?", a:"වයස අවුරුදු 1-2 අතර. එතෙක් රන්ධ්‍ර මගින් උපත අතරතුර හිස හැඩගැසීමට ඉඩ සලසයි."},
+  {q:"C1 (ඇට්ලස්) සහ C2 (අක්ෂ) අතර ප්‍රධාන වෙනස කුමක්ද?", a:"C1 ට දේහයක් නොමැත (වළල්ලකි); C2 ට අනෙක් කශේරුකාවලට නොමැති දන්තාකාර ප්‍රසරයක් (odontoid process) ඇත, එය C1 වළල්ල තුළින් උඩට නැගේ."},
+  {q:"ප්‍රාථමික වක්‍ර සහ ද්විතීයික වක්‍ර අතර වෙනස කුමක්ද?", a:"ප්‍රාථමික වක්‍ර (උරස්, ත්‍රිකාස්ථික) ග්‍රෑණයේ සිටම පවතී. ද්විතීයික වක්‍ර (ග්‍රෛවී, කටි) උපතින් පසු වර්ධනය වේ — ග්‍රෛවී මාස 3දී, කටි මාස 7-8දී."},
+  {q:"සත්‍ය පර්ශු, අසත්‍ය පර්ශු සහ පාවෙන පර්ශු අතර වෙනස කුමක්ද?", a:"සත්‍ය (1-7) — කෙළින්ම උරෝස්ථියට සම්බන්ධ. අසත්‍ය (8,9,10) — 7වන පර්ශුවේ කාටිලේජය හරහා අනියම් සම්බන්ධතාවක්. පාවෙන (11,12) — උරෝස්ථියට කිසිසේත් සම්බන්ධ නැත."},
+  {q:"උරෝස්ථියේ කොටස් 3 මොනවාද?", a:"මිට (Manubrium), දේහය (Body), අග කොටස / අසිපත් ප්‍රසරය (Xiphoid Process)."},
+  {q:"මානව කශේරුවේ ප්‍රදේශ 4 හා එකිනෙකේ කශේරුකා ගණන කීයද?", a:"ග්‍රෛවී - 7, උරස් - 12, කටි - 5, ත්‍රිකාස්ථික පෙදෙස - ත්‍රිකාස්ථිය (5 වෑය) + අනුත්‍රිකාස්ථිය (3-5 වෑය)."},
+  {q:"අභ්‍යන්තර සැකිල්ල (Endoskeleton) සතුන් දෙකකට උදාහරණ දෙන්න.", a:"එකයිනෝඩර්මාටා (කැල්සියම් කාබනේට් ඵලක වලින්) සහ කෝඩේටාවන් (අස්ථි හා කාටිලේජ වලින් — මිනිසා ඇතුළුව)."},
+  {q:"මානව සැකිල්ලේ අමතර කාර්ය දෙකක් සඳහන් කරන්න (සන්ධාරණය, ආරක්ෂාව, චලනය හැර).", a:"තැල්සියම්/පොස්ෆේට් ගබඩා කිරීම හා නිදහස් කිරීම (හෝමෝන පාලනය යටතේ), සහ රතු ඇටමිදුළුවල රුධිර සෛල නිෂ්පාදනය."},
+  {q:"මාළුවන්ගේ පිහිනීම (lateral wave) සහ තෙල්මසුන්ගේ පිහිනීම (vertical wave) අතර වෙනස කුමක්ද?", a:"මාළුවන් දේහය පැත්තට (side-to-side) තරංගාකාරව චලනය කරයි. තෙල්මසුන්/ඩොල්ෆින්වරු දේහය උඩ-යට (up-down) දෙසට තරංගාකාරව චලනය කරයි."},
+  {q:"පියාසර කරන කුරුල්ලෙකුට ලිෆ්ට් (Lift) බලය ලැබෙන්නේ කෙසේද?", a:"පියාපත් වාපත (Air foil) හැඩය නිසා පියාපතේ ඉහළ පෘෂ්ඨයෙන් වායුව වේගයෙන් ගමන් කිරීම මගින් අඩු පීඩනයක් ඇතිවී, පහළ පෘෂ්ඨයට වඩා ඉහළට තල්ලුවක් ලැබේ."},
+  {q:"කශේරුකාවක ප්‍රධාන කොටස් දෙක මොනවාද?", a:"කශේරුකා දේහය (body) සහ කශේරුකා චක්‍රය (vertebral arch) — චක්‍රය කශේරුකා නාලය වට කර සුෂුම්නාව ආරක්ෂා කරයි."},
+  {q:"කටි කශේරුකාවල බන්ටක ප්‍රසරයේ (spinous process) විශේෂ හැඩය කුමක්ද?", a:"හතරැස් (quadrate) හැඩයකි — ග්‍රෛවී වල ද්විභින්න (bifid) හැඩයට හා උරස් වල පහළට යොමු වූ තුඩු හැඩයට වඩා වෙනස්."}
+];
+const flashGrid = document.getElementById('flashGrid');
+flashData.forEach((f,i)=>{
+  const card = document.createElement('div');
+  card.className='flashcard';
+  card.innerHTML = '<div class="flashcard-inner">'+
+    '<div class="flashcard-face flashcard-front">'+f.q+'</div>'+
+    '<div class="flashcard-face flashcard-back">'+f.a+'</div>'+
+  '</div>';
+  card.addEventListener('click', ()=> card.classList.toggle('flipped'));
+  flashGrid.appendChild(card);
+});
+
+/* ===== QUIZ ===== */
+const quizData = [
+  {q:"මානව කශේරුවේ ග්‍රෛවී පෙදෙසේ ඇති කශේරුකා ගණන කීයද?", opts:["5","7","12","9"], correct:1, exp:"ග්‍රෛවී පෙදෙස C1 සිට C7 දක්වා කශේරුකා 7කින් සමන්විතයි."},
+  {q:"හිස ප්‍රත්‍යාවර්තව භ්‍රමණය කිරීමට ('නැත' කීමේ චලනය) ඉඩ දෙන කශේරුකා සන්ධිය කුමක්ද?", opts:["C1 - ඔක්සිපිටල් අස්ථිය","C1 - C2 (ඇට්ලස් - අක්ෂ)","T1 - T2","L5 - ත්‍රිකාස්ථිය"], correct:1, exp:"C2 හි දන්තාකාර ප්‍රසරය වටා C1 (ඇට්ලස්) භ්‍රමණය වීමෙන් 'නැත' කීමේ චලනය සිදු වේ."},
+  {q:"පහත සඳහන් ඒවායින් ප්‍රාථමික වක්‍රයක් වන්නේ කුමක්ද?", opts:["ග්‍රෛවී වක්‍රය","කටි වක්‍රය","උරස් වක්‍රය","මේ කිසිවක් නොවේ"], correct:2, exp:"උරස් වක්‍රය හා ත්‍රිකාස්ථික වක්‍රය ප්‍රාථමික වක්‍ර වේ — ග්‍රෑණයේ සිටම පවතී."},
+  {q:"'අසත්‍ය පර්ශු' (False Ribs) ලෙස හඳුන්වන්නේ කුමන පර්ශු යුගලයන්ද?", opts:["1-7","8, 9, 10","11, 12","1-12 සියල්ල"], correct:1, exp:"පර්ශු 8, 9, 10 උරෝස්ථියට කෙළින්ම නොව 7වන පර්ශුවේ කාටිලේජය හරහා අනියම් ලෙස සම්බන්ධ වේ."},
+  {q:"උරෝස්ථියේ අග කොටස හඳුන්වන්නේ කුමක් ලෙසද?", opts:["මිට (Manubrium)","දේහය (Body)","අසිපත් ප්‍රසරය (Xiphoid Process)","ග්ලේනොයිඩ් කුහරය"], correct:2, exp:"අග කොටස Xiphoid Process ලෙස හැඳින්වේ; එය මුලින් කාටිලේජමය වේ."},
+  {q:"රන්ධ්‍ර (Fontanelles) දක්නට ලැබෙන්නේ කාගේ කපාලයේ ද?", opts:["වැඩිහිටියන්ගේ","වයෝවෘද්ධයන්ගේ","අලුත උපන් බිලිඳුන්ගේ","නාහෙන පෘෂ්ඨවංශීන් සියල්ලන්ගේම"], correct:2, exp:"අලුත උපන් බිලිඳුන්ගේ කපාල අස්ථි අතර ඇති මෘදු පටල කලාප රන්ධ්‍ර ලෙස හැඳින්වේ; උපත අතරතුර හිස හැඩගැසීමට ඉඩ දේ."},
+  {q:"කටි කශේරුකාවල දේහය විශාල වන්නේ ඇයි?", opts:["වේගවත් චලනය සඳහා","ශරීරයේ ඉහළ කොටසේ බර දැරීම සඳහා","සුෂුම්නාව ආරක්ෂා කිරීම සඳහා පමණයි","පර්ශු සමග සන්ධානය සඳහා"], correct:1, exp:"කටි කශේරුකා ශරීරයේ බර වැඩි ප්‍රමාණයක් දරන නිසා විශාල දේහයක් ඇත."},
+  {q:"ද්‍රවස්ථිතික සැකිල්ලකට හොඳම උදාහරණය කුමක්ද?", opts:["කෘමීන්ගේ කයිටින් සැකිල්ල","නිධාරියාවක ආම්ෂවාහිනී කුහරය","මොලුස්කාවක කැල්සියම් කවචය","මිනිසාගේ අස්ථි සැකිල්ල"], correct:1, exp:"නිධාරියාවේ තරලයෙන් පිරි ආම්ෂවාහිනී කුහරය ද්‍රවස්ථිතික සැකිල්ලක් ලෙස ක්‍රියා කරයි."},
+  {q:"මාළුවෙකුගේ පිහිනීමේ චලනය හඳුන්වන්නේ කුමක් ලෙසද?", opts:["Vertical wave","Lateral wave","Jet propulsion","Gliding"], correct:1, exp:"මාළුවන් දේහය හා වලිගය පැත්තට (lateral) තරංගාකාරව චලනය කරමින් පිහිනයි."},
+  {q:"පියාසර කරන කුරුල්ලෙකුට ලිෆ්ට් බලය ලැබීමට ප්‍රධාන හේතුව කුමක්ද?", opts:["පියාපතේ බර අඩු වීම","පියාපත් වාපත හැඩය නිසා ඉහළ පෘෂ්ඨයේ අඩු වායු පීඩනයක් ඇති වීම","පියාපත් වේගයෙන් සෙලවීම පමණි","ගුරුත්වාකර්ෂණය අඩු වීම"], correct:1, exp:"Air foil හැඩය නිසා ඉහළ පෘෂ්ඨයෙන් වායුව වේගවත්ව ගමන් කර අඩු පීඩනයක් ඇති කරයි — මෙය ලිෆ්ට් බලය ජනිත කරයි."}
+];
+let quizIdx=0, quizScore=0, quizAnswered=false;
+const quizQCard = document.getElementById('quizQCard');
+const quizProgressFill = document.getElementById('quizProgressFill');
+const quizNextBtn = document.getElementById('quizNextBtn');
+
+function quizRender(){
+  if(quizIdx >= quizData.length){
+    quizQCard.innerHTML = '<div class="quiz-result"><div class="score">'+quizScore+' / '+quizData.length+'</div><div class="score-label">ලකුණු</div></div>';
+    quizNextBtn.disabled = true;
+    quizProgressFill.style.width='100%';
+    return;
+  }
+  const item = quizData[quizIdx];
+  quizProgressFill.style.width = (quizIdx/quizData.length*100)+'%';
+  quizAnswered = false;
+  quizNextBtn.disabled = true;
+  let optsHtml = item.opts.map((o,i)=>'<button class="quiz-option" data-i="'+i+'" onclick="quizAnswer('+i+')">'+o+'</button>').join('');
+  quizQCard.innerHTML =
+    '<div class="quiz-q-num">ප්‍රශ්නය '+(quizIdx+1)+' / '+quizData.length+'</div>'+
+    '<div class="quiz-q-text">'+item.q+'</div>'+
+    optsHtml+
+    '<div class="quiz-explain" id="quizExplain">'+item.exp+'</div>';
+}
+function quizAnswer(i){
+  if(quizAnswered) return;
+  quizAnswered = true;
+  const item = quizData[quizIdx];
+  document.querySelectorAll('.quiz-option').forEach(btn=>{
+    const bi = parseInt(btn.dataset.i);
+    if(bi===item.correct) btn.classList.add('correct');
+    else if(bi===i) btn.classList.add('wrong');
+    btn.disabled = true;
+  });
+  if(i===item.correct) quizScore++;
+  document.getElementById('quizExplain').classList.add('show');
+  quizNextBtn.disabled = false;
+}
+function quizNext(){ quizIdx++; quizRender(); }
+function quizRestart(){ quizIdx=0; quizScore=0; quizRender(); }
+quizRender();
+</script>
+</body>
+</html>

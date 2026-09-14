@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>සතුන්ගේ සංසරණ පද්ධති - අන්තර්ක්‍රියාශීලී අනුකරණය</title>
+<style>
+  :root{
+    --bg:#090d12;
+    --bg2:#0d131a;
+    --panel:#121a23;
+    --panel2:#182028;
+    --border:#243040;
+    --border-soft:#1c2733;
+    --text:#e8eef3;
+    --muted:#8a9aa8;
+    --muted2:#5f707d;
+    --oxy:#ef4444;
+    --oxy-glow:#ff8383;
+    --deoxy:#3b82f6;
+    --deoxy-glow:#7fb0ff;
+    --hemo:#c8d94a;
+    --hemo-glow:#e2f06f;
+    --mixed:#b46bd9;
+    --accent:#22d3ee;
+    --accent2:#f5a524;
+    --good:#34d399;
+    --bad:#f87171;
+    --radius:16px;
+    --sinhala-font:"Iskoola Pota","Noto Sans Sinhala","Nirmala UI","Yaldevi","Kaputa",sans-serif;
+    --ui-font:"Segoe UI",system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1100px 620px at 12% -8%, rgba(59,130,246,0.09), transparent 60%),
+      radial-gradient(900px 560px at 100% 0%, rgba(239,68,68,0.07), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--sinhala-font), var(--ui-font);
+    line-height:1.55;
+    min-height:100vh;
+  }
+  ::selection{background:rgba(34,211,238,0.3);}
+
+  /* ---------- top header ---------- */
+  header.topbar{
+    position:sticky; top:0; z-index:50;
+    background:rgba(9,13,18,0.86);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border-soft);
+    padding:.9rem 1.4rem;
+  }
+  .topbar-inner{max-width:1280px;margin:0 auto;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;justify-content:space-between;}
+  .brand{display:flex;align-items:center;gap:.7rem;}
+  .brand-mark{
+    width:40px;height:40px;border-radius:11px;flex:none;
+    background:conic-gradient(from 220deg, var(--oxy), var(--mixed) 35%, var(--deoxy) 70%, var(--hemo) 100%);
+    position:relative; box-shadow:0 0 22px rgba(239,68,68,0.25), 0 0 22px rgba(59,130,246,0.15) inset;
+    animation:pulseMark 1.6s ease-in-out infinite;
+  }
+  @keyframes pulseMark{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+  .brand-text h1{font-size:1.05rem;margin:0;font-weight:700;letter-spacing:.2px;}
+  .brand-text span{font-size:.72rem;color:var(--muted);font-family:var(--ui-font);letter-spacing:.5px;text-transform:uppercase;}
+
+  nav.tabs{
+    display:flex;gap:.35rem;flex-wrap:wrap;
+    background:var(--panel);
+    border:1px solid var(--border-soft);
+    padding:.3rem;border-radius:14px;
+  }
+  nav.tabs button{
+    font-family:inherit;
+    background:transparent;border:none;color:var(--muted);
+    padding:.5rem .85rem;border-radius:10px;font-size:.8rem;cursor:pointer;
+    transition:all .18s ease; white-space:nowrap;
+  }
+  nav.tabs button:hover{color:var(--text);background:rgba(255,255,255,0.04);}
+  nav.tabs button.active{
+    color:#04141b; background:linear-gradient(135deg,var(--accent),#5eead4);
+    font-weight:700; box-shadow:0 4px 14px rgba(34,211,238,0.25);
+  }
+
+  main{max-width:1280px;margin:0 auto;padding:1.5rem 1.4rem 4rem;}
+
+  .panel{display:none;animation:fadeIn .35s ease;}
+  .panel.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+  .panel-head{margin-bottom:1rem;}
+  .panel-head h2{margin:0 0 .3rem;font-size:1.35rem;display:flex;align-items:center;gap:.5rem;}
+  .panel-head p{margin:0;color:var(--muted);font-size:.88rem;max-width:800px;}
+  .eyebrow{
+    display:inline-block;font-family:var(--ui-font);font-size:.68rem;letter-spacing:1.2px;
+    text-transform:uppercase;color:var(--accent2);background:rgba(245,165,36,0.1);
+    border:1px solid rgba(245,165,36,0.3); padding:.15rem .55rem;border-radius:20px;margin-bottom:.5rem;
+  }
+
+  .layout{display:grid;grid-template-columns:1fr 300px;gap:1.1rem;align-items:start;}
+  @media (max-width:920px){.layout{grid-template-columns:1fr;}}
+
+  /* ---------- simulation stage ---------- */
+  .sim-container{
+    position:relative;width:100%;
+    background:linear-gradient(180deg,#0c131a,#0a1015);
+    border:1px solid var(--border); border-radius:var(--radius);
+    overflow:hidden;
+  }
+  .sim-container.ar-open{aspect-ratio:900/420;}
+  .sim-container.ar-cap{aspect-ratio:900/360;}
+  .sim-svg{position:absolute;inset:0;width:100%;height:100%;}
+  .sim-container .grid-bg{position:absolute;inset:0;
+    background-image:linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px);
+    background-size:34px 34px;pointer-events:none;}
+
+  .node{
+    position:absolute;transform:translate(-50%,-50%);
+    padding:.42rem .7rem;border-radius:9px;
+    background:rgba(18,26,35,0.92);border:1px solid var(--border);
+    font-size:.66rem; text-align:center;line-height:1.3; color:var(--muted);
+    max-width:150px; pointer-events:none; transition:all .3s ease;
+  }
+  .node b{display:block;color:var(--text);font-size:.72rem;margin-bottom:1px;}
+  .node.chamber{background:rgba(24,32,42,0.96);font-weight:600;}
+  .node.oxy-chamber{border-color:rgba(239,68,68,0.4);}
+  .node.deoxy-chamber{border-color:rgba(59,130,246,0.4);}
+  .node.active-glow{
+    border-color:var(--accent); color:var(--text);
+    box-shadow:0 0 0 3px rgba(34,211,238,0.15), 0 0 18px rgba(34,211,238,0.35);
+    transform:translate(-50%,-50%) scale(1.06);
+    z-index:5;
+  }
+
+  .flow-line{fill:none;stroke-linecap:round;stroke-linejoin:round;}
+  .flow-line.solid{stroke-width:5;}
+  .flow-line.faint{stroke-width:4;stroke-dasharray:2 8;opacity:.55;}
+  .flow-line.oxy{stroke:var(--oxy);filter:drop-shadow(0 0 4px rgba(239,68,68,0.45));}
+  .flow-line.deoxy{stroke:var(--deoxy);filter:drop-shadow(0 0 4px rgba(59,130,246,0.45));}
+  .flow-line.hemo{stroke:var(--hemo);filter:drop-shadow(0 0 4px rgba(200,217,74,0.45));}
+  .flow-line.mixed{stroke:var(--mixed);filter:drop-shadow(0 0 4px rgba(180,107,217,0.45));}
+  .flow-line.tissue{stroke:#3a4a3a;}
+  path.active-glow{stroke-width:7 !important; opacity:1 !important;}
+
+  .particle{filter:drop-shadow(0 0 4px currentColor);}
+  .p-oxy{fill:var(--oxy);}
+  .p-deoxy{fill:var(--deoxy);}
+  .p-hemo{fill:var(--hemo);}
+  .p-mixed{fill:var(--mixed);}
+  .p-o2{fill:#ffd166;}
+  .p-co2{fill:#7c8b99;}
+
+  .valve{transform-origin:center;}
+  @keyframes valveFlicker{0%,100%{opacity:.35;transform:scaleY(0.6);}50%{opacity:1;transform:scaleY(1);}}
+  .valve{animation:valveFlicker 1.4s ease-in-out infinite;}
+
+  .heartbeat{animation:beat .85s ease-in-out infinite;transform-origin:center;}
+  @keyframes beat{0%,100%{transform:scale(1);}35%{transform:scale(1.09);}55%{transform:scale(0.98);}}
+  .paused .heartbeat{animation-play-state:paused;}
+  .paused .valve{animation-play-state:paused;}
+
+  .cell-blob{fill:#33513a;stroke:#4c7350;stroke-width:1.4;opacity:.75;}
+
+  /* ---------- control card ---------- */
+  .control-card{
+    background:var(--panel);border:1px solid var(--border-soft);border-radius:var(--radius);
+    padding:1rem;position:sticky; top:80px;
+  }
+  .control-card h3{margin:0 0 .6rem;font-size:.9rem;color:var(--accent);}
+  .step-counter{font-family:var(--ui-font);font-size:.7rem;color:var(--muted);letter-spacing:.5px;margin-bottom:.3rem;}
+  .step-desc{
+    background:var(--panel2); border:1px solid var(--border-soft); border-radius:10px;
+    padding:.7rem .8rem; font-size:.82rem; min-height:76px; margin-bottom:.7rem;
+  }
+  .dots{display:flex;gap:.3rem;margin-bottom:.8rem;flex-wrap:wrap;}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:.2s;}
+  .dot.active{background:var(--accent);box-shadow:0 0 8px var(--accent);width:18px;border-radius:5px;}
+
+  .btn-row{display:flex;gap:.4rem;flex-wrap:wrap;}
+  button.ctrl{
+    font-family:inherit; cursor:pointer; border:1px solid var(--border-soft);
+    background:var(--panel2); color:var(--text); padding:.5rem .7rem; border-radius:9px;
+    font-size:.75rem; display:flex;align-items:center;gap:.35rem; transition:.15s;
+  }
+  button.ctrl:hover{border-color:var(--accent);color:var(--accent);}
+  button.ctrl.primary{background:linear-gradient(135deg,var(--accent),#5eead4);color:#04141b;font-weight:700;border:none;}
+  button.ctrl.primary:hover{filter:brightness(1.08);color:#04141b;}
+  button.ctrl.wide{flex:1 1 100%;justify-content:center;}
+
+  .legend{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.9rem;font-size:.68rem;color:var(--muted);font-family:var(--ui-font);}
+  .legend span{display:flex;align-items:center;gap:.3rem;}
+  .swatch{width:10px;height:10px;border-radius:50%;display:inline-block;}
+
+  .toggle-3-4{
+    display:flex; background:var(--panel2); border:1px solid var(--border-soft); border-radius:10px; padding:.25rem; margin-bottom:.8rem;
+  }
+  .toggle-3-4 button{flex:1;background:transparent;border:none;color:var(--muted);font-family:inherit;font-size:.72rem;padding:.45rem;border-radius:7px;cursor:pointer;}
+  .toggle-3-4 button.active{background:linear-gradient(135deg,#b46bd9,#8a5cd1);color:#fff;font-weight:700;}
+
+  .mode-3ch .only-4ch{display:none;}
+  .mode-4ch .only-3ch{display:none;}
+
+  /* ---------- comparison table ---------- */
+  .table-wrap{overflow-x:auto;border:1px solid var(--border-soft);border-radius:var(--radius);}
+  table.compare{border-collapse:collapse;width:100%;min-width:760px;font-size:.8rem;}
+  table.compare th, table.compare td{padding:.65rem .8rem;text-align:left;border-bottom:1px solid var(--border-soft);vertical-align:top;}
+  table.compare thead th{background:var(--panel2);color:var(--accent);font-size:.72rem;letter-spacing:.3px;position:sticky;top:0;}
+  table.compare tbody th{color:var(--text);background:var(--panel);white-space:nowrap;font-weight:700;font-size:.76rem;}
+  table.compare tbody tr:hover{background:rgba(34,211,238,0.04);}
+  table.compare td{color:var(--muted);}
+
+  /* ---------- quiz ---------- */
+  .quiz-card{background:var(--panel);border:1px solid var(--border-soft);border-radius:var(--radius);padding:1.1rem 1.2rem;margin-bottom:1rem;}
+  .quiz-card h4{margin:0 0 .7rem;font-size:.92rem;}
+  .quiz-card .qnum{color:var(--accent2);font-family:var(--ui-font);font-size:.7rem;letter-spacing:1px;text-transform:uppercase;}
+  .opt{
+    display:flex;align-items:center;gap:.55rem;padding:.55rem .7rem;border:1px solid var(--border-soft);
+    border-radius:9px;margin-bottom:.45rem;cursor:pointer;font-size:.82rem;background:var(--panel2);transition:.15s;
+  }
+  .opt:hover{border-color:var(--accent);}
+  .opt input{accent-color:var(--accent);}
+  .opt.correct{border-color:var(--good);background:rgba(52,211,153,0.08);}
+  .opt.incorrect{border-color:var(--bad);background:rgba(248,113,113,0.08);}
+  .explain{display:none;margin-top:.5rem;font-size:.78rem;padding:.6rem .75rem;border-radius:9px;background:var(--panel2);border-left:3px solid var(--accent);color:var(--muted);}
+  .explain.show{display:block;}
+  .quiz-actions{display:flex;gap:.6rem;align-items:center;margin-top:.4rem;}
+  #quizScore{font-family:var(--ui-font);font-size:.85rem;color:var(--accent);font-weight:700;}
+
+  footer{text-align:center;color:var(--muted2);font-size:.72rem;padding:2rem 0 1rem;font-family:var(--ui-font);}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001s !important;}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div class="brand-text">
+        <h1>සතුන්ගේ සංසරණ පද්ධති</h1>
+        <span>Interactive Circulation Simulator · A/L Biology</span>
+      </div>
+    </div>
+    <nav class="tabs" id="tabNav">
+      <button data-panel="open" class="active">විවෘත සංසරණය</button>
+      <button data-panel="closed">සංවෘත සංසරණය</button>
+      <button data-panel="single">ඒක සංසරණය</button>
+      <button data-panel="double">ද්විත්ව සංසරණය</button>
+      <button data-panel="capillary">කේශනාලිකා හුවමාරුව</button>
+      <button data-panel="table">සංසන්දන වගුව</button>
+      <button data-panel="quiz">ප්‍රශ්නාවලිය</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ PANEL 1: OPEN ============ -->
+<section class="panel active" id="panel-open" data-panel="open">
+  <div class="panel-head">
+    <span class="eyebrow">Open Circulatory System</span>
+    <h2>🦗 විවෘත සංසරණ පද්ධතිය</h2>
+    <p>ආත්‍රපෝඩාවන් (උදා: ගොඩකෙළියා) තුළ පවතින විවෘත සංසරණ පද්ධතියේදී, රුධිර වසා (Hemolymph) නාලාකාර හදයෙන් පොම්ප වී, අන්තරාල අවකාශය (Hemocoel) තුළට වගුරා දේහ සෛල සෘජුවම නාවනය කරයි.</p>
+  </div>
+  <div class="layout">
+    <div class="sim-container ar-open" id="stage-open">
+      <div class="grid-bg"></div>
+      <svg class="sim-svg" viewBox="0 0 900 420" preserveAspectRatio="xMidYMid meet">
+        <!-- body outline -->
+        <ellipse cx="480" cy="230" rx="380" ry="115" fill="rgba(200,217,74,0.04)" stroke="#2a3542" stroke-width="2"/>
+        <ellipse cx="120" cy="200" rx="60" ry="46" fill="rgba(200,217,74,0.05)" stroke="#2a3542" stroke-width="2"/>
+        <!-- legs (decorative) -->
+        <g stroke="#2a3542" stroke-width="4" stroke-linecap="round">
+          <path d="M300,300 L260,370"/><path d="M420,320 L390,390"/><path d="M540,320 L560,392"/>
+          <path d="M300,300 L340,260" opacity=".4"/>
+        </g>
+
+        <!-- heart tube (posterior->anterior) -->
+        <path id="openTube" class="flow-line hemo solid" d="M720,95 L230,80" data-stage="heart"/>
+        <!-- valves along tube -->
+        <rect class="valve" x="335" y="72" width="8" height="20" rx="2" fill="#e2f06f" data-stage="heart"/>
+        <rect class="valve" x="480" y="76" width="8" height="20" rx="2" fill="#e2f06f" data-stage="heart" style="animation-delay:.3s"/>
+        <rect class="valve" x="620" y="88" width="8" height="20" rx="2" fill="#e2f06f" data-stage="heart" style="animation-delay:.6s"/>
+
+        <!-- anterior dispersal into hemocoel -->
+        <path id="openDisperse1" class="flow-line hemo faint" d="M230,80 C130,110 95,190 190,235 C260,265 320,270 400,272" data-stage="disperse"/>
+        <!-- return path toward posterior ostia -->
+        <path id="openDisperse2" class="flow-line hemo faint" d="M400,272 C560,282 660,270 700,190 C712,165 715,130 718,100" data-stage="return"/>
+
+        <!-- scattered tissue cells bathed directly -->
+        <g data-stage="disperse">
+          <ellipse class="cell-blob" cx="230" cy="200" rx="20" ry="15"/>
+          <ellipse class="cell-blob" cx="300" cy="250" rx="18" ry="14"/>
+          <ellipse class="cell-blob" cx="400" cy="230" rx="22" ry="16"/>
+          <ellipse class="cell-blob" cx="480" cy="290" rx="19" ry="14"/>
+          <ellipse class="cell-blob" cx="560" cy="260" rx="20" ry="15"/>
+          <ellipse class="cell-blob" cx="620" cy="220" rx="18" ry="14"/>
+        </g>
+
+        <!-- particles: heart tube -->
+        <circle r="6" class="particle p-hemo"><animateMotion dur="3s" begin="0s" repeatCount="indefinite"><mpath href="#openTube"/></animateMotion></circle>
+        <circle r="6" class="particle p-hemo"><animateMotion dur="3s" begin="1s" repeatCount="indefinite"><mpath href="#openTube"/></animateMotion></circle>
+        <circle r="6" class="particle p-hemo"><animateMotion dur="3s" begin="2s" repeatCount="indefinite"><mpath href="#openTube"/></animateMotion></circle>
+        <!-- particles: dispersal into hemocoel -->
+        <circle r="5" class="particle p-hemo"><animateMotion dur="3.2s" begin="0s" repeatCount="indefinite"><mpath href="#openDisperse1"/></animateMotion></circle>
+        <circle r="5" class="particle p-hemo"><animateMotion dur="3.2s" begin="1.6s" repeatCount="indefinite"><mpath href="#openDisperse1"/></animateMotion></circle>
+        <!-- particles: return -->
+        <circle r="5" class="particle p-hemo"><animateMotion dur="2.8s" begin="0.4s" repeatCount="indefinite"><mpath href="#openDisperse2"/></animateMotion></circle>
+        <circle r="5" class="particle p-hemo"><animateMotion dur="2.8s" begin="2s" repeatCount="indefinite"><mpath href="#openDisperse2"/></animateMotion></circle>
+      </svg>
+
+      <div class="node chamber" style="left:78%;top:18%" data-stage="heart"><b>නාලාකාර හදය</b>ක්‍රමාකුංචනයෙන් රුධිර වසා ඉදිරියට තල්ලු කරයි</div>
+      <div class="node" style="left:52%;top:14%" data-stage="heart"><b>කපාට (ඔස්තියා)</b>රුධිර වසා ඇතුල්වීම පාලනය කරයි</div>
+      <div class="node" style="left:12%;top:36%" data-stage="disperse"><b>හිස ප්‍රදේශය</b>අග්‍ර ධමනියෙන් රුධිර වසා පිටවේ</div>
+      <div class="node" style="left:44%;top:70%" data-stage="disperse"><b>අන්තරාල අවකාශය (Hemocoel)</b>දේහ සෛල රුධිර වසාවෙන් සෘජුවම නාවනය වේ</div>
+      <div class="node" style="left:78%;top:66%" data-stage="return"><b>පශ්චාත් කලාපය</b>රුධිර වසා නැවත ඔස්තියා දෙසට රැස්වේ</div>
+    </div>
+
+    <div class="control-card">
+      <h3>අනුකරණ පාලකය</h3>
+      <div class="step-counter" id="open-counter">පියවර 1 / 4</div>
+      <div class="step-desc" id="open-desc"></div>
+      <div class="dots" id="open-dots"></div>
+      <div class="btn-row">
+        <button class="ctrl" data-act="prev">⟵ පෙර</button>
+        <button class="ctrl primary" data-act="play">▶ ධාවනය</button>
+        <button class="ctrl" data-act="next">ඊළඟ ⟶</button>
+        <button class="ctrl wide" data-act="reset">↺ නැවත සකසන්න</button>
+      </div>
+      <div class="legend">
+        <span><i class="swatch" style="background:var(--hemo)"></i> රුධිර වසා (Hemolymph)</span>
+        <span><i class="swatch" style="background:#e2f06f"></i> කපාට (ඔස්තියා)</span>
+        <span><i class="swatch" style="background:#4c7350"></i> දේහ සෛල</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PANEL 2: CLOSED ============ -->
+<section class="panel" id="panel-closed" data-panel="closed">
+  <div class="panel-head">
+    <span class="eyebrow">Closed Circulatory System</span>
+    <h2>🪱 සංවෘත සංසරණ පද්ධතිය</h2>
+    <p>ඇනලිඩාවන් (උදා: ගැඩවිල්ලා) තුළ රුධිරය සම්පූර්ණයෙන්ම වාහිනී තුළ රැඳී පවතී. පෘෂ්ඨීය හා උදරීය වාහිනී අතර පාර්ශ්වික හද (Lateral Hearts) මගින් රුධිරය පොම්ප කරනු ලැබේ.</p>
+  </div>
+  <div class="layout">
+    <div class="sim-container ar-open" id="stage-closed">
+      <div class="grid-bg"></div>
+      <svg class="sim-svg" viewBox="0 0 900 420" preserveAspectRatio="xMidYMid meet">
+        <!-- segmented worm body -->
+        <rect x="80" y="130" width="740" height="220" rx="60" fill="rgba(200,217,74,0.03)" stroke="#2a3542" stroke-width="2"/>
+        <g stroke="#1c2530" stroke-width="1">
+          <line x1="180" y1="130" x2="180" y2="350"/><line x1="280" y1="130" x2="280" y2="350"/>
+          <line x1="380" y1="130" x2="380" y2="350"/><line x1="480" y1="130" x2="480" y2="350"/>
+          <line x1="580" y1="130" x2="580" y2="350"/><line x1="680" y1="130" x2="680" y2="350"/>
+          <line x1="780" y1="130" x2="780" y2="350"/>
+        </g>
+
+        <!-- main loop path: dorsal(right->left) -> lateral hearts(top->bottom) -> ventral(left->right) -> posterior connector(bottom->top) -->
+        <path id="closedLoop" class="flow-line oxy solid" d="M780,170 L180,170 L180,310 L780,310 Z" data-stage="all"/>
+
+        <!-- lateral hearts markers -->
+        <g data-stage="hearts">
+          <circle class="heartbeat" cx="180" cy="200" r="13" fill="#c94b4b"/>
+          <circle class="heartbeat" cx="180" cy="240" r="13" fill="#c94b4b" style="animation-delay:.15s"/>
+          <circle class="heartbeat" cx="180" cy="280" r="13" fill="#c94b4b" style="animation-delay:.3s"/>
+        </g>
+
+        <!-- segmental capillary bars -->
+        <g stroke="#3a4a55" stroke-width="3" data-stage="capillary">
+          <line x1="330" y1="170" x2="330" y2="310"/>
+          <line x1="430" y1="170" x2="430" y2="310"/>
+          <line x1="630" y1="170" x2="630" y2="310"/>
+          <line x1="730" y1="170" x2="730" y2="310"/>
+        </g>
+
+        <!-- particles around loop -->
+        <circle r="6" class="particle p-oxy"><animateMotion dur="6s" begin="0s" repeatCount="indefinite"><mpath href="#closedLoop"/></animateMotion></circle>
+        <circle r="6" class="particle p-oxy"><animateMotion dur="6s" begin="1.5s" repeatCount="indefinite"><mpath href="#closedLoop"/></animateMotion></circle>
+        <circle r="6" class="particle p-oxy"><animateMotion dur="6s" begin="3s" repeatCount="indefinite"><mpath href="#closedLoop"/></animateMotion></circle>
+        <circle r="6" class="particle p-oxy"><animateMotion dur="6s" begin="4.5s" repeatCount="indefinite"><mpath href="#closedLoop"/></animateMotion></circle>
+      </svg>
+
+      <div class="node" style="left:52%;top:30%" data-stage="all"><b>පෘෂ්ඨීය වාහිනිය</b>රුධිරය අග්‍ර දෙසට (දකුණේ සිට වමට) ගමන් කරයි</div>
+      <div class="node chamber" style="left:11%;top:55%" data-stage="hearts"><b>පාර්ශ්වික හද (යුගල 5)</b>පෘෂ්ඨීය සිට උදරීය වාහිනියට රුධිරය පොම්ප කරයි</div>
+      <div class="node" style="left:52%;top:83%" data-stage="all"><b>උදරීය වාහිනිය</b>රුධිරය පශ්චාත් දෙසට (වමේ සිට දකුණට) ගමන් කරයි</div>
+      <div class="node" style="left:90%;top:55%" data-stage="capillary"><b>සෙග්මන්ට් කේශනාලිකා</b>වාහිනී අතර සම්බන්ධතාව - රුධිරය කිසිදා වාහිනියෙන් පිටතට ලික් නොවේ</div>
+    </div>
+
+    <div class="control-card">
+      <h3>අනුකරණ පාලකය</h3>
+      <div class="step-counter" id="closed-counter">පියවර 1 / 4</div>
+      <div class="step-desc" id="closed-desc"></div>
+      <div class="dots" id="closed-dots"></div>
+      <div class="btn-row">
+        <button class="ctrl" data-act="prev">⟵ පෙර</button>
+        <button class="ctrl primary" data-act="play">▶ ධාවනය</button>
+        <button class="ctrl" data-act="next">ඊළඟ ⟶</button>
+        <button class="ctrl wide" data-act="reset">↺ නැවත සකසන්න</button>
+      </div>
+      <div class="legend">
+        <span><i class="swatch" style="background:var(--oxy)"></i> රුධිරය (වාහිනී තුළ පමණක්)</span>
+        <span><i class="swatch" style="background:#c94b4b"></i> පාර්ශ්වික හද</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PANEL 3: SINGLE ============ -->
+<section class="panel" id="panel-single" data-panel="single">
+  <div class="panel-head">
+    <span class="eyebrow">Single Circulation</span>
+    <h2>🐟 ඒක සංසරණය</h2>
+    <p>මාළුන් තුළ හදයේ කුටි 2ක් (කර්ණිකාව 1, කෝෂිකාව 1) පමණක් ඇත. රුධිරය එක් වරක් පමණක් හදය හරහා ගමන් කර, ජලක්ලෝම කේශනාලිකා තුළ ඔක්සිජන්කරණය වී, කෙලින්ම දේහ පටක වෙත යයි.</p>
+  </div>
+  <div class="layout">
+    <div class="sim-container ar-open" id="stage-single">
+      <div class="grid-bg"></div>
+      <svg class="sim-svg" viewBox="0 0 900 420" preserveAspectRatio="xMidYMid meet">
+        <!-- heart chambers -->
+        <circle class="heartbeat" cx="150" cy="180" r="34" fill="#294055" stroke="var(--deoxy)" stroke-width="2" data-stage="heart"/>
+        <circle class="heartbeat" cx="150" cy="255" r="42" fill="#294055" stroke="var(--deoxy)" stroke-width="2" data-stage="heart" style="animation-delay:.15s"/>
+
+        <!-- ventricle -> gill capillaries (deoxy) -->
+        <path id="sgVent2Gill" class="flow-line deoxy solid" d="M188,265 C280,265 320,180 420,150" data-stage="toGill"/>
+        <!-- gill capillary bed -->
+        <g data-stage="gill">
+          <path d="M420,110 L420,190" stroke="#3a4a55" stroke-width="6" fill="none"/>
+          <path d="M440,100 L440,200" stroke="#3a4a55" stroke-width="6" fill="none"/>
+          <path d="M460,95  L460,205" stroke="#3a4a55" stroke-width="6" fill="none"/>
+          <path d="M480,100 L480,200" stroke="#3a4a55" stroke-width="6" fill="none"/>
+          <path d="M500,110 L500,190" stroke="#3a4a55" stroke-width="6" fill="none"/>
+        </g>
+        <!-- gill -> body capillaries (now oxy) -->
+        <path id="sgGill2Body" class="flow-line oxy solid" d="M500,150 C620,150 660,190 740,220" data-stage="toBody"/>
+        <!-- body capillary network -->
+        <g data-stage="body">
+          <path d="M740,190 Q800,220 740,250" stroke="#3a4a55" stroke-width="5" fill="none"/>
+          <path d="M760,190 Q820,220 760,250" stroke="#3a4a55" stroke-width="5" fill="none"/>
+          <path d="M780,190 Q840,220 780,250" stroke="#3a4a55" stroke-width="5" fill="none"/>
+        </g>
+        <!-- body -> atrium (deoxy return) -->
+        <path id="sgReturn" class="flow-line deoxy faint" d="M740,250 C560,320 300,320 150,222" data-stage="return"/>
+
+        <!-- particles -->
+        <circle r="6" class="particle p-deoxy"><animateMotion dur="2.6s" begin="0s" repeatCount="indefinite"><mpath href="#sgVent2Gill"/></animateMotion></circle>
+        <circle r="6" class="particle p-deoxy"><animateMotion dur="2.6s" begin="1.3s" repeatCount="indefinite"><mpath href="#sgVent2Gill"/></animateMotion></circle>
+
+        <circle r="6" class="particle p-oxy"><animateMotion dur="2.6s" begin="0s" repeatCount="indefinite"><mpath href="#sgGill2Body"/></animateMotion></circle>
+        <circle r="6" class="particle p-oxy"><animateMotion dur="2.6s" begin="1.3s" repeatCount="indefinite"><mpath href="#sgGill2Body"/></animateMotion></circle>
+
+        <circle r="5" class="particle p-deoxy"><animateMotion dur="4s" begin="0s" repeatCount="indefinite"><mpath href="#sgReturn"/></animateMotion></circle>
+        <circle r="5" class="particle p-deoxy"><animateMotion dur="4s" begin="2s" repeatCount="indefinite"><mpath href="#sgReturn"/></animateMotion></circle>
+      </svg>
+
+      <div class="node chamber deoxy-chamber" style="left:16.6%;top:43%" data-stage="heart"><b>කර්ණිකාව</b></div>
+      <div class="node chamber deoxy-chamber" style="left:16.6%;top:61%" data-stage="heart"><b>කෝෂිකාව</b>උදරීය ධමනිය ඔස්සේ ඔක්සිජන් රහිත රුධිරය පිටතට පොම්ප කරයි</div>
+      <div class="node" style="left:52%;top:26%" data-stage="gill"><b>ජලක්ලෝම කේශනාලිකා</b>ඔක්සිජන් රහිත රුධිරය ඔක්සිජන්කරණය වේ</div>
+      <div class="node" style="left:85%;top:52%" data-stage="body"><b>දේහ කේශනාලිකා</b>ඔක්සිජන් සහිත රුධිරය පටකවලට ඔක්සිජන් ලබාදෙයි</div>
+      <div class="node" style="left:48%;top:82%" data-stage="return"><b>ශිරා ආපසුයාම</b>ඔක්සිජන් රහිත රුධිරය නැවත කර්ණිකාවට - හදය හරහා 1 වරක් පමණි</div>
+    </div>
+
+    <div class="control-card">
+      <h3>අනුකරණ පාලකය</h3>
+      <div class="step-counter" id="single-counter">පියවර 1 / 4</div>
+      <div class="step-desc" id="single-desc"></div>
+      <div class="dots" id="single-dots"></div>
+      <div class="btn-row">
+        <button class="ctrl" data-act="prev">⟵ පෙර</button>
+        <button class="ctrl primary" data-act="play">▶ ධාවනය</button>
+        <button class="ctrl" data-act="next">ඊළඟ ⟶</button>
+        <button class="ctrl wide" data-act="reset">↺ නැවත සකසන්න</button>
+      </div>
+      <div class="legend">
+        <span><i class="swatch" style="background:var(--deoxy)"></i> ඔක්සිජන් රහිත රුධිරය</span>
+        <span><i class="swatch" style="background:var(--oxy)"></i> ඔක්සිජන් සහිත රුධිරය</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PANEL 4: DOUBLE ============ -->
+<section class="panel" id="panel-double" data-panel="double">
+  <div class="panel-head">
+    <span class="eyebrow">Double Circulation</span>
+    <h2>🦋 ද්විත්ව සංසරණය</h2>
+    <p>පුප්ඵුසීය (Pulmonary) හා සංස්ථානික (Systemic) ලෙස ලූප දෙකකින් සමන්විත වේ. උරගයින්/උභයජීවීන් තුළ කෝෂිකා 1ක් තුළ අර්ධ මිශ්‍රණයක් සිදුවන අතර, පක්ෂීන්/ක්ෂීරපායින් තුළ කුටි 4කින් රුධිරය සම්පූර්ණයෙන්ම වෙන් වේ.</p>
+  </div>
+
+  <div class="toggle-3-4" style="max-width:420px">
+    <button class="active" data-mode="4ch">4-කුටී හදය (පක්ෂීන් / ක්ෂීරපායින්)</button>
+    <button data-mode="3ch">3-කුටී හදය (උභයජීවීන් / උරගයින්)</button>
+  </div>
+
+  <div class="layout">
+    <div class="sim-container ar-open mode-4ch" id="stage-double">
+      <div class="grid-bg"></div>
+      <svg class="sim-svg" viewBox="0 0 900 420" preserveAspectRatio="xMidYMid meet">
+        <!-- septum wall: solid for 4ch, gapped for 3ch -->
+        <line class="only-4ch" x1="450" y1="150" x2="450" y2="330" stroke="#3a4a55" stroke-width="6" data-stage="septum"/>
+        <line class="only-3ch" x1="450" y1="150" x2="450" y2="210" stroke="#3a4a55" stroke-width="6" data-stage="septum"/>
+        <line class="only-3ch" x1="450" y1="270" x2="450" y2="330" stroke="#3a4a55" stroke-width="6" data-stage="septum"/>
+
+        <!-- 4 chambers -->
+        <circle class="heartbeat only-4ch" cx="370" cy="185" r="30" fill="#294055" stroke="var(--deoxy)" stroke-width="2" data-stage="ra"/>
+        <circle class="heartbeat only-4ch" cx="370" cy="295" r="36" fill="#294055" stroke="var(--deoxy)" stroke-width="2" data-stage="rv" style="animation-delay:.1s"/>
+        <circle class="heartbeat only-4ch" cx="530" cy="185" r="30" fill="#552e2e" stroke="var(--oxy)" stroke-width="2" data-stage="la" style="animation-delay:.05s"/>
+        <circle class="heartbeat only-4ch" cx="530" cy="295" r="36" fill="#552e2e" stroke="var(--oxy)" stroke-width="2" data-stage="lv" style="animation-delay:.15s"/>
+
+        <!-- 3 chamber: 2 atria + 1 shared ventricle -->
+        <circle class="heartbeat only-3ch" cx="370" cy="185" r="30" fill="#294055" stroke="var(--deoxy)" stroke-width="2" data-stage="ra"/>
+        <circle class="heartbeat only-3ch" cx="530" cy="185" r="30" fill="#552e2e" stroke="var(--oxy)" stroke-width="2" data-stage="la" style="animation-delay:.05s"/>
+        <ellipse class="heartbeat only-3ch" cx="450" cy="295" rx="95" ry="42" fill="#3d2f4a" stroke="var(--mixed)" stroke-width="2" data-stage="rv"/>
+
+        <!-- systemic circuit (LV -> body -> RA) : oxy out, deoxy back -->
+        <path id="dcSysOut" class="flow-line oxy solid" d="M566,300 C700,300 780,260 800,190" data-stage="sysOut"/>
+        <g data-stage="bodyCap">
+          <path d="M800,150 Q850,190 800,230" stroke="#3a4a55" stroke-width="5" fill="none"/>
+          <path d="M780,145 Q835,190 780,235" stroke="#3a4a55" stroke-width="5" fill="none"/>
+        </g>
+        <path id="dcSysIn" class="flow-line deoxy faint" d="M780,150 C700,110 460,80 335,168" data-stage="sysIn"/>
+
+        <!-- pulmonary circuit (RV -> lungs -> LA) -->
+        <path id="dcPulOut" class="flow-line deoxy solid" d="M335,300 C220,300 150,255 130,190" data-stage="pulOut"/>
+        <g data-stage="lungCap">
+          <path d="M130,150 Q80,190 130,230" stroke="#3a4a55" stroke-width="5" fill="none"/>
+          <path d="M110,145 Q65,190 110,235" stroke="#3a4a55" stroke-width="5" fill="none"/>
+        </g>
+        <path id="dcPulIn" class="flow-line oxy faint" d="M110,150 C170,95 420,80 565,168" data-stage="pulIn"/>
+
+        <!-- mixed particle for 3ch ventricle -->
+        <circle class="only-3ch particle p-mixed" r="7" cx="450" cy="295" data-stage="mix" opacity="0"></circle>
+
+        <!-- particles -->
+        <circle r="6" class="particle p-oxy"><animateMotion dur="2.4s" begin="0s" repeatCount="indefinite"><mpath href="#dcSysOut"/></animateMotion></circle>
+        <circle r="6" class="particle p-oxy"><animateMotion dur="2.4s" begin="1.2s" repeatCount="indefinite"><mpath href="#dcSysOut"/></animateMotion></circle>
+        <circle r="5" class="particle p-deoxy"><animateMotion dur="3.6s" begin="0s" repeatCount="indefinite"><mpath href="#dcSysIn"/></animateMotion></circle>
+        <circle r="5" class="particle p-deoxy"><animateMotion dur="3.6s" begin="1.8s" repeatCount="indefinite"><mpath href="#dcSysIn"/></animateMotion></circle>
+
+        <circle r="6" class="particle p-deoxy"><animateMotion dur="2.2s" begin="0s" repeatCount="indefinite"><mpath href="#dcPulOut"/></animateMotion></circle>
+        <circle r="6" class="particle p-deoxy"><animateMotion dur="2.2s" begin="1.1s" repeatCount="indefinite"><mpath href="#dcPulOut"/></animateMotion></circle>
+        <circle r="5" class="particle p-oxy"><animateMotion dur="3.2s" begin="0s" repeatCount="indefinite"><mpath href="#dcPulIn"/></animateMotion></circle>
+        <circle r="5" class="particle p-oxy"><animateMotion dur="3.2s" begin="1.6s" repeatCount="indefinite"><mpath href="#dcPulIn"/></animateMotion></circle>
+      </svg>
+
+      <div class="node chamber deoxy-chamber" style="left:41%;top:44%" data-stage="ra"><b>දකුණු කර්ණිකාව</b></div>
+      <div class="node chamber deoxy-chamber only-4ch" style="left:41%;top:70%" data-stage="rv"><b>දකුණු කෝෂිකාව</b></div>
+      <div class="node chamber only-3ch" style="left:50%;top:75%" data-stage="rv"><b>එකම කෝෂිකාව</b>අර්ධ මිශ්‍රණය සිදු වේ</div>
+      <div class="node chamber oxy-chamber" style="left:59%;top:44%" data-stage="la"><b>වම් කර්ණිකාව</b></div>
+      <div class="node chamber oxy-chamber only-4ch" style="left:59%;top:70%" data-stage="lv"><b>වම් කෝෂිකාව</b></div>
+
+      <div class="node" style="left:87%;top:42%" data-stage="bodyCap"><b>දේහ කේශනාලිකා</b>සංස්ථානික සංසරණය</div>
+      <div class="node" style="left:11%;top:42%" data-stage="lungCap"><b>පෙනහළු කේශනාලිකා</b>පුප්ඵුසීය සංසරණය</div>
+    </div>
+
+    <div class="control-card">
+      <h3>අනුකරණ පාලකය</h3>
+      <div class="step-counter" id="double-counter">පියවර 1 / 5</div>
+      <div class="step-desc" id="double-desc"></div>
+      <div class="dots" id="double-dots"></div>
+      <div class="btn-row">
+        <button class="ctrl" data-act="prev">⟵ පෙර</button>
+        <button class="ctrl primary" data-act="play">▶ ධාවනය</button>
+        <button class="ctrl" data-act="next">ඊළඟ ⟶</button>
+        <button class="ctrl wide" data-act="reset">↺ නැවත සකසන්න</button>
+      </div>
+      <div class="legend">
+        <span><i class="swatch" style="background:var(--oxy)"></i> ඔක්සිජන් සහිත</span>
+        <span><i class="swatch" style="background:var(--deoxy)"></i> ඔක්සිජන් රහිත</span>
+        <span><i class="swatch" style="background:var(--mixed)"></i> අර්ධ මිශ්‍රණය (3-කුටී)</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PANEL 5: CAPILLARY EXCHANGE ============ -->
+<section class="panel" id="panel-capillary" data-panel="capillary">
+  <div class="panel-head">
+    <span class="eyebrow">Capillary Exchange Zoom-in</span>
+    <h2>🔬 කේශනාලිකා හුවමාරුව - විසරණය</h2>
+    <p>ධමනිකාවේ සිට එන ඔක්සිජන් හා පෝෂක ද්‍රව්‍ය අන්තරාල ද්‍රවය හරහා පටක සෛල වෙත විසරණය වන අතර, කාබන් ඩයොක්සයිඩ් හා අපද්‍රව්‍ය ප්‍රතිවිරුද්ධ දිශාවට කේශනාලිකාවට විසරණය වේ.</p>
+  </div>
+  <div class="layout">
+    <div class="sim-container ar-cap" id="stage-capillary">
+      <div class="grid-bg"></div>
+      <svg class="sim-svg" viewBox="0 0 900 360" preserveAspectRatio="xMidYMid meet">
+        <!-- arteriole -->
+        <path id="capArt" class="flow-line oxy solid" d="M60,110 C150,120 220,150 300,175" data-stage="arteriole"/>
+        <!-- capillary bed -->
+        <g data-stage="capbed">
+          <path d="M300,175 C400,150 500,150 600,175" stroke="#c94b4b" stroke-width="4" fill="none" opacity=".85"/>
+          <path d="M300,190 C400,170 500,170 600,190" stroke="#8a5a5a" stroke-width="4" fill="none" opacity=".7"/>
+          <path d="M300,205 C400,225 500,225 600,205" stroke="#3b6fae" stroke-width="4" fill="none" opacity=".7"/>
+        </g>
+        <!-- venule -->
+        <path id="capVen" class="flow-line deoxy solid" d="M600,190 C700,215 780,245 840,255" data-stage="venule"/>
+
+        <!-- tissue cells around -->
+        <g data-stage="tissue">
+          <ellipse class="cell-blob" cx="380" cy="90" rx="34" ry="24"/>
+          <ellipse class="cell-blob" cx="470" cy="80" rx="30" ry="22"/>
+          <ellipse class="cell-blob" cx="560" cy="95" rx="32" ry="23"/>
+          <ellipse class="cell-blob" cx="400" cy="280" rx="34" ry="24"/>
+          <ellipse class="cell-blob" cx="500" cy="290" rx="30" ry="22"/>
+          <ellipse class="cell-blob" cx="590" cy="278" rx="32" ry="23"/>
+        </g>
+
+        <!-- O2/nutrient diffusion outward (capillary -> tissue) -->
+        <path id="capOut1" class="flow-line faint" stroke="none" d="M380,175 L380,110" data-stage="outdiff"/>
+        <path id="capOut2" class="flow-line faint" stroke="none" d="M470,168 L470,105" data-stage="outdiff"/>
+        <path id="capOut3" class="flow-line faint" stroke="none" d="M400,205 L400,265" data-stage="outdiff"/>
+        <path id="capOut4" class="flow-line faint" stroke="none" d="M500,215 L500,275" data-stage="outdiff"/>
+
+        <!-- CO2/waste diffusion inward (tissue -> capillary) -->
+        <path id="capIn1" class="flow-line faint" stroke="none" d="M420,105 L420,178" data-stage="indiff"/>
+        <path id="capIn2" class="flow-line faint" stroke="none" d="M540,110 L540,178" data-stage="indiff"/>
+        <path id="capIn3" class="flow-line faint" stroke="none" d="M450,270 L450,210" data-stage="indiff"/>
+
+        <circle r="5" class="particle p-oxy"><animateMotion dur="2.4s" begin="0s" repeatCount="indefinite"><mpath href="#capArt"/></animateMotion></circle>
+        <circle r="5" class="particle p-oxy"><animateMotion dur="2.4s" begin="1.2s" repeatCount="indefinite"><mpath href="#capArt"/></animateMotion></circle>
+        <circle r="5" class="particle p-deoxy"><animateMotion dur="2.4s" begin="0s" repeatCount="indefinite"><mpath href="#capVen"/></animateMotion></circle>
+        <circle r="5" class="particle p-deoxy"><animateMotion dur="2.4s" begin="1.2s" repeatCount="indefinite"><mpath href="#capVen"/></animateMotion></circle>
+
+        <circle r="4" class="particle p-o2"><animateMotion dur="1.6s" begin="0s" repeatCount="indefinite"><mpath href="#capOut1"/></animateMotion></circle>
+        <circle r="4" class="particle p-o2"><animateMotion dur="1.6s" begin="0.8s" repeatCount="indefinite"><mpath href="#capOut2"/></animateMotion></circle>
+        <circle r="4" class="particle p-o2"><animateMotion dur="1.6s" begin="0.4s" repeatCount="indefinite"><mpath href="#capOut3"/></animateMotion></circle>
+        <circle r="4" class="particle p-o2"><animateMotion dur="1.6s" begin="1.2s" repeatCount="indefinite"><mpath href="#capOut4"/></animateMotion></circle>
+
+        <circle r="4" class="particle p-co2"><animateMotion dur="1.8s" begin="0.3s" repeatCount="indefinite"><mpath href="#capIn1"/></animateMotion></circle>
+        <circle r="4" class="particle p-co2"><animateMotion dur="1.8s" begin="1s" repeatCount="indefinite"><mpath href="#capIn2"/></animateMotion></circle>
+        <circle r="4" class="particle p-co2"><animateMotion dur="1.8s" begin="0.6s" repeatCount="indefinite"><mpath href="#capIn3"/></animateMotion></circle>
+      </svg>
+
+      <div class="node" style="left:7%;top:30%" data-stage="arteriole"><b>ධමනිකාව</b>ඔක්සිජන් හා පෝෂක සහිත රුධිරය ලබාදෙයි</div>
+      <div class="node" style="left:50%;top:50%" data-stage="capbed"><b>කේශනාලිකා ජාලය</b>විසරණය සිදුවන ප්‍රධාන ස්ථානය</div>
+      <div class="node" style="left:93%;top:70%" data-stage="venule"><b>ශිරිකාව (Venule)</b>ඔක්සිජන් රහිත රුධිරය ශිරා දෙසට රැගෙන යයි</div>
+      <div class="node" style="left:50%;top:14%" data-stage="tissue"><b>පටක සෛල</b>අන්තරාල ද්‍රවය හරහා පෝෂණය ලබාගනී</div>
+    </div>
+
+    <div class="control-card">
+      <h3>අනුකරණ පාලකය</h3>
+      <div class="step-counter" id="capillary-counter">පියවර 1 / 4</div>
+      <div class="step-desc" id="capillary-desc"></div>
+      <div class="dots" id="capillary-dots"></div>
+      <div class="btn-row">
+        <button class="ctrl" data-act="prev">⟵ පෙර</button>
+        <button class="ctrl primary" data-act="play">▶ ධාවනය</button>
+        <button class="ctrl" data-act="next">ඊළඟ ⟶</button>
+        <button class="ctrl wide" data-act="reset">↺ නැවත සකසන්න</button>
+      </div>
+      <div class="legend">
+        <span><i class="swatch" style="background:#ffd166"></i> O2 / පෝෂක</span>
+        <span><i class="swatch" style="background:#7c8b99"></i> CO2 / අපද්‍රව්‍ය</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PANEL 6: TABLE ============ -->
+<section class="panel" id="panel-table" data-panel="table">
+  <div class="panel-head">
+    <span class="eyebrow">Comparison</span>
+    <h2>📊 සංසන්දන වගුව</h2>
+    <p>සෑම සංසරණ පද්ධතියක්ම හෘද ව්‍යුහය, පීඩනය, ප්‍රවාහන ද්‍රවය සහ රුධිර මිශ්‍රණය අනුව එකිනෙකට වෙනස් වේ.</p>
+  </div>
+  <div class="table-wrap">
+    <table class="compare">
+      <thead>
+        <tr>
+          <th>ලක්ෂණය</th>
+          <th>විවෘත (කෘමීන්)</th>
+          <th>සංවෘත (ඇනලිඩා)</th>
+          <th>ඒක සංසරණය (මාළුන්)</th>
+          <th>ද්විත්ව - 3 කුටී (උභයජීවී/උරගයින්)</th>
+          <th>ද්විත්ව - 4 කුටී (පක්ෂීන්/ක්ෂීරපායි)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><th>හෘද කුටි ව්‍යුහය</th><td>නාලාකාර හදය (කුටි විශේෂිත නොවේ)</td><td>පාර්ශ්වික හද 5 යුගල</td><td>කුටි 2 (කර්ණිකාව 1, කෝෂිකාව 1)</td><td>කුටි 3 (කර්ණිකා 2, කෝෂිකාව 1)</td><td>කුටි 4 (කර්ණිකා 2, කෝෂිකා 2)</td></tr>
+        <tr><th>ප්‍රවාහන ද්‍රවය</th><td>රුධිර වසා (Hemolymph)</td><td>රුධිරය - වාහිනී තුළ පමණක්</td><td>රුධිරය</td><td>රුධිරය</td><td>රුධිරය</td></tr>
+        <tr><th>රුධිර පීඩනය</th><td>අඩු</td><td>මධ්‍යම</td><td>අඩු (ගිල් කේශනාලිකා තුළින් පසු පීඩනය අඩුවේ)</td><td>මධ්‍යම (අර්ධ මිශ්‍රණය හේතුවෙන් අඩුවීමක්)</td><td>ඉහළ (සම්පූර්ණ වෙන්වීම හේතුවෙන්)</td></tr>
+        <tr><th>රුධිර මිශ්‍රණය</th><td>අදාළ නොවේ - විවෘත පද්ධතිය</td><td>නොමැත</td><td>නොමැත (එක් ලූපයක් පමණි)</td><td>අර්ධ මිශ්‍රණය (එකම කෝෂිකාව තුළ)</td><td>0% - සම්පූර්ණ වෙන්වීම</td></tr>
+        <tr><th>හදය හරහා ගමන් වාර ගණන (1 චක්‍රයකදී)</th><td>අදාළ නොවේ</td><td>අදාළ නොවේ</td><td>1 වරක්</td><td>2 වරක් (ලූප 2)</td><td>2 වරක් (ලූප 2, සම්පූර්ණ වෙන්)</td></tr>
+        <tr><th>උදාහරණ ජීවීන්</th><td>කෘමීන්, ආත්‍රපෝඩාවන් (ගොඩකෙළියා)</td><td>ඇනලිඩා (ගැඩවිල්ලා)</td><td>මාළුන් (කාටිලේජීය හා අස්ථි මාළුන්)</td><td>උභයජීවීන්, උරගයින්</td><td>පක්ෂීන්, ක්ෂීරපායින්</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ PANEL 7: QUIZ ============ -->
+<section class="panel" id="panel-quiz" data-panel="quiz">
+  <div class="panel-head">
+    <span class="eyebrow">Assessment</span>
+    <h2>📝 ප්‍රශ්නාවලිය</h2>
+    <p>ඔබේ අවබෝධය පරීක්ෂා කිරීමට පහත ප්‍රශ්න 5 සම්පූර්ණ කර "පිළිතුරු පරීක්ෂා කරන්න" බොත්තම ඔබන්න.</p>
+  </div>
+  <div id="quizWrap"></div>
+  <div class="quiz-actions">
+    <button class="ctrl primary" id="quizSubmit">පිළිතුරු පරීක්ෂා කරන්න</button>
+    <button class="ctrl" id="quizReset">↺ නැවත උත්සාහ කරන්න</button>
+    <span id="quizScore"></span>
+  </div>
+</section>
+
+</main>
+
+<footer>සිසුන් සඳහා නිර්මාණය කරන ලද අන්තර්ක්‍රියාශීලී ජීව විද්‍යා අනුකරණය · Sri Lanka A/L Biology</footer>
+
+<script>
+/* ============================================================
+   TAB NAVIGATION
+============================================================ */
+const tabButtons = document.querySelectorAll('#tabNav button');
+const panels = document.querySelectorAll('.panel');
+tabButtons.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabButtons.forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const target = btn.dataset.panel;
+    panels.forEach(p=>p.classList.toggle('active', p.dataset.panel===target));
+  });
+});
+
+/* ============================================================
+   GENERIC STEPPER CONTROLLER FOR EACH SIMULATION PANEL
+============================================================ */
+function initStepper(key, steps, stageElId){
+  const counterEl = document.getElementById(key+'-counter');
+  const descEl = document.getElementById(key+'-desc');
+  const dotsEl = document.getElementById(key+'-dots');
+  const stageEl = document.getElementById(stageElId);
+  const svg = stageEl.querySelector('svg');
+  const panelRoot = stageEl.closest('.panel');
+
+  steps.forEach((_, i)=>{
+    const d = document.createElement('span');
+    d.className = 'dot'+(i===0?' active':'');
+    dotsEl.appendChild(d);
+  });
+
+  let idx = 0;
+  let playing = false;
+  let timer = null;
+
+  function allStageEls(){
+    return panelRoot.querySelectorAll('[data-stage]');
+  }
+
+  function render(){
+    counterEl.textContent = 'පියවර ' + (idx+1) + ' / ' + steps.length;
+    descEl.textContent = steps[idx].desc;
+    [...dotsEl.children].forEach((d,i)=>d.classList.toggle('active', i===idx));
+    const activeStages = steps[idx].stages || [];
+    allStageEls().forEach(el=>{
+      const my = (el.dataset.stage||'').split(' ');
+      const match = my.some(s => activeStages.includes(s) || activeStages.includes('all'));
+      el.classList.toggle('active-glow', match);
+    });
+  }
+
+  function next(){ idx = (idx+1) % steps.length; render(); }
+  function prev(){ idx = (idx-1+steps.length) % steps.length; render(); }
+  function reset(){
+    idx = 0; render();
+    try{ svg.setCurrentTime(0); }catch(e){}
+  }
+  function setPlaying(p){
+    playing = p;
+    const playBtn = panelRoot.querySelector('button[data-act="play"]');
+    if(playing){
+      playBtn.textContent = '⏸ විරාමය';
+      try{ svg.unpauseAnimations(); }catch(e){}
+      stageEl.classList.remove('paused');
+      timer = setInterval(next, 3200);
+    } else {
+      playBtn.textContent = '▶ ධාවනය';
+      try{ svg.pauseAnimations(); }catch(e){}
+      stageEl.classList.add('paused');
+      clearInterval(timer);
+    }
+  }
+
+  panelRoot.querySelectorAll('[data-act]').forEach(btn=>{
+    // only wire buttons that live inside this panel's control card (avoid cross-wiring on double panel toggle btns)
+    if(btn.closest('.control-card') && btn.closest('.panel') === panelRoot){
+      const act = btn.dataset.act;
+      btn.addEventListener('click', ()=>{
+        if(act==='next') next();
+        else if(act==='prev') prev();
+        else if(act==='reset') reset();
+        else if(act==='play') setPlaying(!playing);
+      });
+    }
+  });
+
+  render();
+  return {render, next, prev, reset};
+}
+
+/* ---- OPEN ---- */
+initStepper('open', [
+  {desc:'නාලාකාර හදය ක්‍රමාකුංචනය වී, කපාට (ඔස්තියා) හරහා රුධිර වසා ඉදිරියට තල්ලු කරයි.', stages:['heart']},
+  {desc:'රුධිර වසා අග්‍ර ධමනිය හරහා හිස ප්‍රදේශය දෙසට ගමන් කරයි.', stages:['heart']},
+  {desc:'රුධිර වසා අන්තරාල අවකාශය (Hemocoel) තුළට වගුරා, දේහ සෛල සෘජුවම නාවනය කරයි - මෙය විවෘත පද්ධතියේ ප්‍රධාන ලක්ෂණයයි.', stages:['disperse']},
+  {desc:'රුධිර වසා නැවත රැස්ව, කපාට (ඔස්තියා) හරහා පශ්චාත් කලාපයේ සිට හදය තුළට ඇතුල් වේ.', stages:['return']}
+], 'stage-open');
+
+/* ---- CLOSED ---- */
+initStepper('closed', [
+  {desc:'පෘෂ්ඨීය වාහිනිය ඔස්සේ රුධිරය අග්‍ර දෙසට (ඉදිරියට) ගමන් කරයි - රුධිරය සම්පූර්ණයෙන්ම වාහිනිය තුළ රැඳී පවතී.', stages:['all']},
+  {desc:'පාර්ශ්වික හද (හෘද කුට්ටි 5 යුගල) පෘෂ්ඨීය වාහිනියේ රුධිරය උදරීය වාහිනියට පොම්ප කරයි.', stages:['hearts']},
+  {desc:'උදරීය වාහිනිය ඔස්සේ රුධිරය පශ්චාත් දෙසට ගමන් කර, සෙග්මන්ට් කේශනාලිකා හරහා පටකවලට ළඟා වේ.', stages:['capillary']},
+  {desc:'රුධිරය කිසිදා වාහිනියෙන් පිටතට ලික් නොවේ - සෛල සමඟ සෘජු ස්පර්ශයක් නොමැත. මෙයයි විවෘත පද්ධතියෙන් වෙනස් වන ප්‍රධාන කරුණ.', stages:['all']}
+], 'stage-closed');
+
+/* ---- SINGLE ---- */
+initStepper('single', [
+  {desc:'හෘද කෝෂිකාවෙන් ඔක්සිජන් රහිත රුධිරය උදරීය ධමනිය ඔස්සේ පිටතට පොම්ප වේ.', stages:['heart','toGill']},
+  {desc:'රුධිරය ජලක්ලෝම කේශනාලිකා තුළදී ඔක්සිජන්කරණය වේ - ඔක්සිජන් රහිත රුධිරය, ඔක්සිජන් සහිත රුධිරය බවට පත් වේ.', stages:['gill']},
+  {desc:'ඔක්සිජන් සහිත රුධිරය පෘෂ්ඨීය ධමනිය ඔස්සේ කෙලින්ම දේහ කේශනාලිකා වෙත ගමන් කරයි.', stages:['toBody','body']},
+  {desc:'දේහ පටකවලට ඔක්සිජන් මුදාහැර, ඔක්සිජන් රහිත රුධිරය නැවත කර්ණිකාව වෙත පැමිණේ - රුධිරය එක් වරක් පමණක් හදය හරහා ගමන් කරයි (ගිල් වලින් පසු පීඩනය අඩුවේ).', stages:['heart','return']}
+], 'stage-single');
+
+/* ---- DOUBLE ---- */
+const doubleStages4 = [
+  {desc:'සිරුරෙන් පැමිණෙන ඔක්සිජන් රහිත රුධිරය මහා ශිරාව ඔස්සේ දකුණු කර්ණිකාවට ඇතුල් වේ.', stages:['ra','sysIn']},
+  {desc:'දකුණු කෝෂිකාව රුධිරය පුප්ඵුසීය ධමනිය ඔස්සේ පෙනහළු වෙත පොම්ප කරයි - මෙය පුප්ඵුසීය සංසරණයයි.', stages:['rv','pulOut']},
+  {desc:'පෙනහළු කේශනාලිකා තුළදී රුධිරය ඔක්සිජන්කරණය වී, පුප්ඵුසීය ශිරාව ඔස්සේ වම් කර්ණිකාවට පැමිණේ.', stages:['lungCap','pulIn','la']},
+  {desc:'වම් කෝෂිකාව ඔක්සිජන් සහිත රුධිරය මහා ධමනිය ඔස්සේ මුළු සිරුරටම පොම්ප කරයි - මෙය සංස්ථානික සංසරණයයි.', stages:['lv','sysOut']},
+  {desc:'සිරුර පුරා රුධිරය ඔක්සිජන් මුදාහැර, නැවත දකුණු කර්ණිකාව වෙත පැමිණේ. පුප්ඵුසීය හා සංස්ථානික සංසරණ සම්පූර්ණයෙන්ම වෙන් වී ඇත - මිශ්‍රණය 0%.', stages:['bodyCap','septum','sysIn']}
+];
+const doubleStages3 = [
+  {desc:'සිරුරෙන් පැමිණෙන ඔක්සිජන් රහිත රුධිරය දකුණු කර්ණිකාවට ඇතුල් වී, පොදු කෝෂිකාවට ගමන් කරයි.', stages:['ra','sysIn']},
+  {desc:'පෙනහළු වලින් පැමිණි ඔක්සිජන් සහිත රුධිරය වම් කර්ණිකාව හරහා එකම කෝෂිකාවට ඇතුල් වේ.', stages:['la','pulIn']},
+  {desc:'කෝෂිකාව 1ක් පමණක් තිබීම නිසා, ඔක්සිජන් සහිත හා රහිත රුධිරය අර්ධ වශයෙන් මිශ්‍ර වේ.', stages:['rv']},
+  {desc:'මිශ්‍ර රුධිරයෙන් වැඩි ප්‍රමාණයක් පෙනහළු වෙතත්, ඉතිරිය සිරුර වෙතත් යවනු ලැබේ (පුප්ඵුසීය හා සංස්ථානික ධමනි දෙකම එකම කෝෂිකාවෙන් නික්මේ).', stages:['pulOut','sysOut']},
+  {desc:'මෙය සම්පූර්ණ ද්විත්ව සංසරණයට වඩා අකාර්යක්ෂම වේ - ඔක්සිජන් සාන්ද්‍රණය අඩු රුධිරය සිරුරට යාම හේතුවෙන්.', stages:['rv','septum']}
+];
+const doubleCtrl = initStepper('double', doubleStages4, 'stage-double');
+
+document.querySelectorAll('.toggle-3-4 button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.toggle-3-4 button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const stageEl = document.getElementById('stage-double');
+    if(btn.dataset.mode==='3ch'){
+      stageEl.classList.remove('mode-4ch'); stageEl.classList.add('mode-3ch');
+      doubleCtrl.stepsRef = doubleStages3;
+    } else {
+      stageEl.classList.remove('mode-3ch'); stageEl.classList.add('mode-4ch');
+      doubleCtrl.stepsRef = doubleStages4;
+    }
+  });
+});
+// swap underlying steps array reference used by stepper (rebuild controller for clean state)
+document.querySelectorAll('.toggle-3-4 button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const stageEl = document.getElementById('stage-double');
+    const newSteps = btn.dataset.mode==='3ch' ? doubleStages3 : doubleStages4;
+    // re-init to reset index & rebind dots cleanly
+    document.getElementById('double-dots').innerHTML = '';
+    initStepper('double', newSteps, 'stage-double');
+  });
+});
+
+/* ---- CAPILLARY ---- */
+initStepper('capillary', [
+  {desc:'ධමනිකාවෙන් ඔක්සිජන් හා පෝෂක ද්‍රව්‍ය සහිත රුධිරය කේශනාලිකා ජාලයට පැමිණේ.', stages:['arteriole']},
+  {desc:'ඔක්සිජන් හා පෝෂක ද්‍රව්‍ය අන්තරාල ද්‍රවය හරහා විසරණය වී, පටක සෛල වෙත ලැබේ.', stages:['capbed','outdiff','tissue']},
+  {desc:'පටක සෛලවලින් කාබන් ඩයොක්සයිඩ් හා අපද්‍රව්‍ය අන්තරාල ද්‍රවය හරහා නැවත කේශනාලිකා තුළට විසරණය වේ.', stages:['indiff','tissue']},
+  {desc:'ඔක්සිජන් රහිත රුධිරය ශිරිකාව (Venule) හරහා ශිරා පද්ධතියට ගමන් කරයි.', stages:['venule']}
+], 'stage-capillary');
+
+/* ============================================================
+   QUIZ
+============================================================ */
+const quizData = [
+  {
+    q:'ඒක සංසරණයක් (Single Circulation) සතුව ඇති සතුන් කණ්ඩායම කුමක්ද?',
+    opts:['මාළුන්','පක්ෂීන්','ක්ෂීරපායින්','උරගයින්'],
+    correct:0,
+    explain:'මාළුන්ගේ හදයේ කුටි 2ක් (කර්ණිකාව 1, කෝෂිකාව 1) ඇති අතර, රුධිරය එක් වරක් පමණක් හදය හරහා ගමන් කරයි.'
+  },
+  {
+    q:'විවෘත සංසරණ පද්ධතියක් සතුව ඇත්තේ පහත සතුන්ගෙන් කවරෙකුටද?',
+    opts:['ගැඩවිල්ලා (Earthworm)','ගොඩකෙළියා (Grasshopper)','මිනිසා','මාළුවා'],
+    correct:1,
+    explain:'ආත්‍රපෝඩාවන් වන ගොඩකෙළියා තුළ රුධිර වසා (Hemolymph) අන්තරාල අවකාශය (Hemocoel) තුළට වගුරා දේහ සෛල සෘජුවම නාවනය කරයි.'
+  },
+  {
+    q:'ද්විත්ව සංසරණයේදී, පුප්ඵුසීය සංසරණය ආරම්භ වන්නේ කුමන හෘද කුටියෙන්ද?',
+    opts:['වම් කර්ණිකාව','වම් කෝෂිකාව','දකුණු කර්ණිකාව','දකුණු කෝෂිකාව'],
+    correct:3,
+    explain:'දකුණු කෝෂිකාව ඔක්සිජන් රහිත රුධිරය පුප්ඵුසීය ධමනිය ඔස්සේ පෙනහළු වෙත පොම්ප කරයි - මෙයයි පුප්ඵුසීය සංසරණයේ ආරම්භය.'
+  },
+  {
+    q:'3-කුටී හදයක් (උභයජීවීන් / උරගයින්) තුළ දක්නට ලැබෙන විශේෂ ලක්ෂණය කුමක්ද?',
+    opts:['රුධිරය සම්පූර්ණයෙන්ම වෙන්වීම','ඔක්සිජන් සහිත හා රහිත රුධිරයේ අර්ධ මිශ්‍රණය','රුධිර පීඩනය අතිශයින් ඉහළ යාම','හෘද කුටි 2කින් සමන්විත වීම'],
+    correct:1,
+    explain:'කෝෂිකා 1ක් පමණක් තිබීම නිසා, පෙනහළු වලින් එන ඔක්සිජන් සහිත රුධිරය හා සිරුරෙන් එන ඔක්සිජන් රහිත රුධිරය එකම කෝෂිකාව තුළදී අර්ධ වශයෙන් මිශ්‍ර වේ.'
+  },
+  {
+    q:'ඒක සංසරණයට සාපේක්ෂව ද්විත්ව සංසරණයේ ප්‍රධාන ජීව විද්‍යාත්මක වාසිය කුමක්ද?',
+    opts:['හෘද කුටි ගණන අඩුවීම','පේශී ශක්තිය අවශ්‍ය නොවීම','ඔක්සිජන් සහිත රුධිරය ඉහළ පීඩනයකින් සියලු දේහ පටක වෙත ලබාදීම','රුධිර වර්ණය වෙනස් වීම'],
+    correct:2,
+    explain:'ද්විත්ව සංසරණයේදී රුධිරය හදය හරහා දෙවරක් ගමන් කරන නිසා, ඔක්සිජන් සහිත රුධිරය පීඩනය අඩු නොවී සියලු දේහ පටක වෙත ඉක්මනින් ලබාදිය හැක.'
+  }
+];
+
+const quizWrap = document.getElementById('quizWrap');
+quizData.forEach((item, qi)=>{
+  const card = document.createElement('div');
+  card.className = 'quiz-card';
+  card.innerHTML = `
+    <div class="qnum">ප්‍රශ්නය ${qi+1}</div>
+    <h4>${item.q}</h4>
+    <div class="opts" data-qi="${qi}">
+      ${item.opts.map((o,oi)=>`
+        <label class="opt" data-oi="${oi}">
+          <input type="radio" name="q${qi}" value="${oi}">
+          <span>${o}</span>
+        </label>
+      `).join('')}
+    </div>
+    <div class="explain" id="explain-${qi}">${item.explain}</div>
+  `;
+  quizWrap.appendChild(card);
+});
+
+document.getElementById('quizSubmit').addEventListener('click', ()=>{
+  let score = 0;
+  quizData.forEach((item, qi)=>{
+    const selected = document.querySelector(`input[name="q${qi}"]:checked`);
+    const optsEl = document.querySelectorAll(`.opts[data-qi="${qi}"] .opt`);
+    optsEl.forEach(o=>o.classList.remove('correct','incorrect'));
+    optsEl[item.correct].classList.add('correct');
+    if(selected){
+      const oi = parseInt(selected.value,10);
+      if(oi === item.correct) score++;
+      else optsEl[oi].classList.add('incorrect');
+    }
+    document.getElementById('explain-'+qi).classList.add('show');
+  });
+  document.getElementById('quizScore').textContent = `ලකුණු: ${score} / ${quizData.length}`;
+});
+
+document.getElementById('quizReset').addEventListener('click', ()=>{
+  document.querySelectorAll('.quiz-card input[type="radio"]').forEach(r=>r.checked=false);
+  document.querySelectorAll('.opt').forEach(o=>o.classList.remove('correct','incorrect'));
+  document.querySelectorAll('.explain').forEach(e=>e.classList.remove('show'));
+  document.getElementById('quizScore').textContent = '';
+});
+</script>
+</body>
+</html>

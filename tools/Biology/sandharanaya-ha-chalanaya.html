@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>සන්ධාරණය හා චලනය | අන්තර්ක්‍රියාකාරී ඉගෙනුම් මෙවලම</title>
+<style>
+:root{
+  --paper:#EFEAE0;
+  --paper-2:#E4DCC9;
+  --ink:#232821;
+  --ink-soft:#4b5147;
+  --teal:#2B5D62;
+  --teal-dark:#1B3E42;
+  --teal-light:#6E9C9F;
+  --brick:#8B3A3A;
+  --brick-light:#B96A5A;
+  --gold:#B8901F;
+  --gold-light:#ECD9A5;
+  --line:#c9bfa8;
+  --white:#FBF9F3;
+  --shadow: 0 4px 14px rgba(35,40,33,0.14);
+  --radius: 10px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    repeating-linear-gradient(0deg, rgba(0,0,0,0.015) 0px, rgba(0,0,0,0.015) 1px, transparent 1px, transparent 26px),
+    var(--paper);
+  color:var(--ink);
+  font-family: "Iskoola Pota","Noto Sans Sinhala","Nirmala UI",system-ui,-apple-system,sans-serif;
+  line-height:1.65;
+  min-height:100vh;
+}
+::selection{ background: var(--gold); color:var(--white); }
+
+/* ---------- Header ---------- */
+.app-header{
+  background: linear-gradient(180deg, var(--teal-dark), var(--teal));
+  color: var(--white);
+  padding: 18px 20px 0 20px;
+  position: sticky;
+  top:0;
+  z-index: 100;
+  box-shadow: var(--shadow);
+}
+.app-title-row{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  max-width:1180px;
+  margin: 0 auto 14px auto;
+  flex-wrap:wrap;
+}
+.app-logo{
+  width:46px;height:46px;flex:none;
+}
+.app-title{
+  font-size: 1.35rem;
+  font-weight:700;
+  letter-spacing:0.2px;
+}
+.app-subtitle{
+  font-size:0.8rem;
+  color: #cfe3e2;
+  font-weight:400;
+}
+.app-title-block{flex:1;min-width:200px;}
+
+.tab-nav{
+  max-width:1180px;
+  margin:0 auto;
+  display:flex;
+  gap:4px;
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+.tab-nav::-webkit-scrollbar{display:none;}
+.tab-btn{
+  background:rgba(255,255,255,0.06);
+  border:none;
+  border-bottom:3px solid transparent;
+  color: #d9e8e7;
+  padding:12px 16px;
+  font-size:0.92rem;
+  font-weight:600;
+  white-space:nowrap;
+  cursor:pointer;
+  border-radius:8px 8px 0 0;
+  transition: background 0.2s, color 0.2s;
+  font-family:inherit;
+}
+.tab-btn:hover{ background: rgba(255,255,255,0.13); color:#fff; }
+.tab-btn.active{
+  background: var(--paper);
+  color: var(--teal-dark);
+  border-bottom:3px solid var(--gold);
+}
+
+/* ---------- Main layout ---------- */
+main{
+  max-width:1180px;
+  margin: 0 auto;
+  padding: 22px 18px 70px 18px;
+}
+.tab-panel{ display:none; animation: fadeIn 0.35s ease; }
+.tab-panel.active{ display:block; }
+@keyframes fadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+.section-eyebrow{
+  display:flex; align-items:center; gap:10px;
+  color: var(--brick);
+  font-weight:700;
+  font-size:0.85rem;
+  letter-spacing:0.6px;
+  margin-bottom:6px;
+}
+.section-eyebrow .dash{ width:26px; height:2px; background:var(--brick); display:inline-block; }
+.section-h1{
+  font-size:1.55rem;
+  font-weight:800;
+  color:var(--teal-dark);
+  margin: 0 0 4px 0;
+}
+.section-desc{ color:var(--ink-soft); margin-bottom:20px; max-width:840px; }
+
+/* ---------- Cards / collapsibles ---------- */
+.card{
+  background: var(--white);
+  border:1px solid var(--line);
+  border-radius: var(--radius);
+  margin-bottom:14px;
+  box-shadow: var(--shadow);
+  overflow:hidden;
+}
+.card-head{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 18px;
+  cursor:pointer;
+  gap:10px;
+}
+.card-head:hover{ background: rgba(43,93,98,0.06); }
+.card-head h3{
+  margin:0; font-size:1.05rem; color:var(--teal-dark); display:flex; align-items:center; gap:10px;
+}
+.card-marker{
+  width:10px;height:10px;border-radius:50%;
+  background:var(--gold); flex:none;
+}
+.card-chevron{
+  transition: transform 0.25s;
+  color:var(--teal);
+  font-size:1.1rem;
+  flex:none;
+}
+.card.open .card-chevron{ transform: rotate(180deg); }
+.card-body{
+  max-height:0;
+  overflow:hidden;
+  transition: max-height 0.35s ease, padding 0.35s ease;
+  padding: 0 18px;
+}
+.card.open .card-body{ padding: 0 18px 18px 18px; }
+.card-body ul{ margin:8px 0; padding-inline-start: 20px; }
+.card-body li{ margin-bottom:6px; }
+.bone-chip{
+  display:inline-block;
+  background: var(--paper-2);
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:3px 12px;
+  margin:3px 4px 3px 0;
+  font-size:0.86rem;
+  color:var(--teal-dark);
+  font-weight:600;
+}
+.bone-chip b{ color:var(--brick); }
+.callout{
+  background: #f4ece0;
+  border-left:4px solid var(--gold);
+  border-radius:6px;
+  padding:10px 14px;
+  margin:10px 0;
+  font-size:0.92rem;
+}
+.callout.warn{ border-left-color:var(--brick); background:#f6e9e6; }
+
+/* ---------- Buttons ---------- */
+.btn{
+  background: var(--teal);
+  color:#fff;
+  border:none;
+  padding:9px 16px;
+  border-radius:8px;
+  font-weight:600;
+  font-size:0.88rem;
+  cursor:pointer;
+  font-family:inherit;
+  transition: background 0.2s, transform 0.1s;
+}
+.btn:hover{ background: var(--teal-dark); }
+.btn:active{ transform: scale(0.97); }
+.btn.secondary{ background: var(--paper-2); color:var(--teal-dark); border:1px solid var(--line); }
+.btn.secondary:hover{ background:#d9cfb3; }
+.btn.gold{ background:var(--gold); }
+.btn.gold:hover{ background:#96721a; }
+.btn:disabled{ opacity:0.5; cursor:not-allowed; }
+.btn-row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:12px 0; }
+
+/* ---------- Two column layout ---------- */
+.two-col{ display:grid; grid-template-columns: 1.1fr 0.9fr; gap:20px; align-items:start; }
+@media (max-width: 820px){ .two-col{ grid-template-columns:1fr; } }
+
+.diagram-frame{
+  background: var(--white);
+  border:1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding:14px;
+}
+.diagram-frame svg{ width:100%; height:auto; display:block; }
+
+.label-tag{
+  font-size:12px; font-weight:700; fill:var(--teal-dark);
+}
+.bone-shape{
+  fill:#f5f0e4; stroke:var(--ink); stroke-width:1.6;
+  transition: fill 0.2s, stroke 0.2s;
+  cursor:pointer;
+}
+.bone-shape:hover, .bone-shape.hi{ fill: var(--gold-light,#ecd9a5); stroke:var(--brick); }
+.joint-dot{ fill:var(--teal); stroke:var(--teal-dark); stroke-width:1; }
+
+footer.credit{
+  text-align:center; color:var(--ink-soft); font-size:0.78rem; padding: 18px 0 8px 0;
+}
+
+/* generic small tag/pill for counts */
+.count-pill{
+  display:inline-block; background:var(--teal); color:#fff; font-size:0.75rem; font-weight:700;
+  padding:2px 8px; border-radius:10px; margin-inline-start:6px;
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-title-row">
+    <svg class="app-logo" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="24" cy="24" r="22" fill="#1B3E42" stroke="#B8901F" stroke-width="2"/>
+      <path d="M16 34 L16 22 Q16 14 24 14 Q32 14 32 22 L32 34" stroke="#EFEAE0" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+      <circle cx="16" cy="18" r="2.6" fill="#B8901F"/>
+      <circle cx="32" cy="18" r="2.6" fill="#B8901F"/>
+      <circle cx="16" cy="34" r="2.2" fill="#EFEAE0"/>
+      <circle cx="32" cy="34" r="2.2" fill="#EFEAE0"/>
+    </svg>
+    <div class="app-title-block">
+      <div class="app-title">සන්ධාරණය හා චලනය</div>
+      <div class="app-subtitle">Support &amp; Movement — Sampath Potha Digital Lab · Human Appendicular Skeleton</div>
+    </div>
+  </div>
+  <nav class="tab-nav" id="tabNav">
+    <button class="tab-btn active" data-tab="tab1">📘 ප්‍රධාන න්‍යාය</button>
+    <button class="tab-btn" data-tab="tab2">🦴 ගාත්‍රා සැකිල්ල</button>
+    <button class="tab-btn" data-tab="tab3">🔄 පේශි සංකෝචනය</button>
+    <button class="tab-btn" data-tab="tab4">⚠️ ආබාධ හා සන්ධි</button>
+    <button class="tab-btn" data-tab="tab5">🗂️ පුනරීක්ෂණය</button>
+  </nav>
+</header>
+
+<main>
+  <section id="tab1" class="tab-panel active"></section>
+  <section id="tab2" class="tab-panel"></section>
+  <section id="tab3" class="tab-panel"></section>
+  <section id="tab4" class="tab-panel"></section>
+  <section id="tab5" class="tab-panel"></section>
+</main>
+
+<footer class="credit">සම්පත් පොත ඇසුරෙන් — A/L ජීව විද්‍යාව · පිටු 83–91 · Support &amp; Movement Digital Companion</footer>
+
+<script>
+// ============ TAB SWITCHING ============
+document.getElementById('tabNav').addEventListener('click', (e)=>{
+  const btn = e.target.closest('.tab-btn');
+  if(!btn) return;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(btn.dataset.tab).classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+
+// ============ TAB 1: THEORY ============
+(function(){
+  const el = document.getElementById('tab1');
+  el.innerHTML = `
+    <div class="section-eyebrow"><span class="dash"></span>MODULE 01</div>
+    <h2 class="section-h1">ප්‍රධාන න්‍යාය හා පැහැදිලි කිරීම්</h2>
+    <p class="section-desc">පිටු 83–91 ආශ්‍රිත සම්පත් පොත් අන්තර්ගතය මත පදනම්ව සකස් කළ න්‍යායික සාරාංශය. එක් එක් කාඩ්පත ක්ලික් කර විස්තර විවෘත කරන්න.</p>
+
+    <div class="card">
+      <div class="card-head"><h3><span class="card-marker"></span>1. පූර්ව ගාත්‍රය (Forelimb) — අස්ථි සංයුතිය</h3><span class="card-chevron">▾</span></div>
+      <div class="card-body">
+        <p>පූර්ව ගාත්‍රය ග්‍රහණය සඳහාත්, බර ඉසිලීමට හා පුල්ල පරාසයක චලනය කිරීමට හැකි පරිදිත් සකස් වී ඇත. එය <b>අංශකාස්ථි ඉණ පටිය</b> (pectoral girdle) හා <b>නිදහස් ගාත්‍රීය අස්ථි</b> ලෙස කොටස් දෙකකට බෙදේ.</p>
+        <p><b>අංශකාස්ථි ඉණ පටිය:</b></p>
+        <span class="bone-chip"><b>අක්ෂකාස්ථිය</b> — Clavicle (උරෝස්ථිය සමග සන්ධානය)</span>
+        <span class="bone-chip"><b>අංශඵලකය</b> — Scapula (ග්ලෙනොයිඩි කුහරය සහිත)</span>
+        <p style="margin-top:10px;"><b>නිදහස් ගාත්‍රීය අස්ථි (proximal → distal පිළිවෙළින්):</b></p>
+        <ul>
+          <li><span class="bone-chip"><b>ප්‍රගණ්ඩාස්ථිය</b> — Humerus <span class="count-pill">1</span></span> — ග්ලෙනොයිඩි කුහරය සමග ගෝල-කුහර සන්ධියක් සාදයි</li>
+          <li><span class="bone-chip"><b>අරාස්ථිය</b> — Radius <span class="count-pill">1</span></span> සහ <span class="bone-chip"><b>අන්වරාස්ථිය</b> — Ulna <span class="count-pill">1</span></span> — වැලමිට සන්ධියේදී ප්‍රගණ්ඩාස්ථිය සමග අසව් සන්ධියක් සාදයි</li>
+          <li><span class="bone-chip"><b>හස්තකූර්චාස්ථි</b> — Carpals <span class="count-pill">8</span></span> — මැණික්කටුව සාදන කුඩා අස්ථි</li>
+          <li><span class="bone-chip"><b>හස්තකූර්චෝපරි</b> — Metacarpals <span class="count-pill">5</span></span> — අත්ලේ අස්ථි</li>
+          <li><span class="bone-chip"><b>ඇඟිලි පුරුක්</b> — Phalanges <span class="count-pill">14</span></span> — වැලමිට හා මැණික්කටුවෙන් ඈත ඇති ඇඟිලි අස්ථි (මාපටැඟිල්ලට පුරුක් 2ක්, අනෙක් ඇඟිලිවලට 3 බැගින්)</li>
+        </ul>
+        <div class="callout">හස්තකූර්චෝපරි අස්ථි විදුර කෙළවර හස්තකූර්චාස්ථි සමඟද, විදුර කෙළවර ඇඟිලි පුරුක් සමඟද සන්ධානය වේ. මෙමගින් ග්‍රහණය හා මැණික්කටු චලනය සඳහා අවශ්‍ය නම්‍යශීලීත්වය ලැබේ.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3><span class="card-marker"></span>2. අපර ගාත්‍රය (Hindlimb) — අස්ථි සංයුතිය</h3><span class="card-chevron">▾</span></div>
+      <div class="card-body">
+        <p>අපර ගාත්‍රය මානව දේහයේ සම්පූර්ණ බර දැරීම, ස්ථාවරව සිටගැනීම හා ඇවිදීම සඳහා අනුවර්තනය වී ඇත. එය <b>ශ්‍රෝණි මේඛලාව</b> (Pelvic girdle) හා <b>නිදහස් ගාත්‍රීය අස්ථි</b> වලින් සමන්විතය.</p>
+        <ul>
+          <li><span class="bone-chip"><b>ශ්‍රෝණි මේඛලාව</b> — Pelvic girdle</span> — කලවා ඇටයේ ශ්‍රෝණි කුහරය සමග ගෝල-කුහර සන්ධියක් සාදයි</li>
+          <li><span class="bone-chip"><b>උර්වාස්ථිය</b> — Femur <span class="count-pill">1</span></span> — දේහයේ දිගම හා බර වශයෙන් වැඩිම අස්ථිය</li>
+          <li><span class="bone-chip"><b>දෘසි ඇටය</b> — Patella <span class="count-pill">1</span></span> — දණහිසේ ආරක්ෂක අස්ථිය</li>
+          <li><span class="bone-chip"><b>ජංඝාස්ථිය</b> — Tibia <span class="count-pill">1</span></span> සහ <span class="bone-chip"><b>අනුජංඝාස්ථිය</b> — Fibula <span class="count-pill">1</span></span> — දණහිසේදී උර්වාස්ථිය සමග අසව් සන්ධියක් සාදයි</li>
+          <li><span class="bone-chip"><b>පාදකූර්චාස්ථි</b> — Tarsals <span class="count-pill">7</span></span> — කුරුඳුකඩ අස්ථි</li>
+          <li><span class="bone-chip"><b>පාදකූර්චෝපරි</b> — Metatarsals <span class="count-pill">5</span></span> — පතුලේ අස්ථි</li>
+          <li><span class="bone-chip"><b>ඇඟිලි පුරුක්</b> — Phalanges <span class="count-pill">14</span></span></li>
+        </ul>
+        <div class="callout">සටහන: හස්තකූර්චාස්ථි (8) සහ පාදකූර්චාස්ථි (7) ගණන් අතර වෙනස A/L විභාග ප්‍රශ්නවලට නිතර එන කරුණකි — පහසුවෙන් මතක තබා ගැනීමට Tab 5 හි Flashcards බලන්න.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3><span class="card-marker"></span>3. පාදයේ වක්‍ර (Foot Arches) — පිටුව 86</h3><span class="card-chevron">▾</span></div>
+      <div class="card-body">
+        <p>පාදයේ අස්ථි සැකැස්ම හා ආශ්‍රිත බන්ධනී හා පේශි මගින් විලුඹ ප්‍රදේශයේ පාදයට චක්‍ර හැඩයක් ලබා දී ඇත. පාදයට <b>අන්වායාම (longitudinal) වක්‍ර දෙකක්</b> හා <b>තීර්යක් (transverse) වක්‍රයක්</b> ඇත.</p>
+        <ul>
+          <li><b>අන්වායාම වක්‍ර 2</b> — විලුඹේ සිට ඇඟිලි දක්වා දිගේ විහිදෙන වක්‍ර, පාදකූර්චාස්ථි හා පාදකූර්චෝපරි මගින් සාදන ලද</li>
+          <li><b>තීර්යක් වක්‍රය</b> — පාදයේ පළලට හරහා විහිදෙන වක්‍රය, පාදකූර්චෝපරි ඇටවල පාදඅංශුවලට එකිනෙකට වඩා උස මට්ටම් වීමෙන් සෑදේ</li>
+        </ul>
+        <div class="callout"><b>වැදගත්කම:</b> මෙම වක්‍ර මගින් දේහ බර දක්ෂිසව ප්‍රසාරණය කර ගැනීමට හැකි වන අතර, ඇවිදීමේදී හෝ දිවීමේදී ඇතිවන කම්පන අවශෝෂණය කර ගැනීමට ද උපකාරී වේ (tip-toe හැකියාව ද මින් ලැබේ).</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3><span class="card-marker"></span>4. සන්ධි වර්ග (Joint Types) — පිටුව 88</h3><span class="card-chevron">▾</span></div>
+      <div class="card-body">
+        <ul>
+          <li><b>ගෝල-කුහර සන්ධි</b> (Ball &amp; Socket) — ගෝලාකාර හිසක් කුහරයක් තුළට සම්බන්ධ වීම. සම්මිංජන, ප්‍රසර්පණ, අභිනයන, අපනයන හා භ්‍රමණය යන දිශා රාශියක චලනය සිදු කරයි. උදා: උරහිස් සන්ධිය, උකුල් සන්ධිය</li>
+          <li><b>අසව් සන්ධි</b> (Hinge) — දෝරක අස්ථි දෙකක් එකිනෙකට වී ඇතුවා. එක් තලයක සීමිත චලනයක් (සම්මිංජන, ප්‍රසර්පණය) පමණක් ලබා දෙයි. උදා: වැලමිට, දණහිස, ඇඟිලි සන්ධි</li>
+          <li><b>විවර්තන සන්ධි</b> (Pivot) — එක් අස්ථියක් අනෙක් අස්ථිය වටා භ්‍රමණය වීම. උදා: ග්‍රීවා කශේරුකා (Atlas–Axis) අතර සන්ධානය — හිස පැති දෙසට හැරවීමට ඉඩ දෙයි</li>
+        </ul>
+        <p>Tab 4 හි අන්තර්ක්‍රියාකාරී සජීවීකරණයෙන් මෙම සන්ධි වර්ග තුනේ චලන දිශා සජීවීව නරඹන්න.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3><span class="card-marker"></span>5. සැකිලි පේශි හා සාකොමියරය — පිටු 88–89</h3><span class="card-chevron">▾</span></div>
+      <div class="card-body">
+        <p>සැකිලි පේශි පටක ස්නායු පද්ධතියේ ඉච්ඡානුග (voluntary) පාලනය යටතේ ක්‍රියා කරයි. පේශි එකක් බහුනාභික පේශි සෛල (තන්තු) වලින් සමන්විත වන අතර, එක් එක් තන්තුව තුළ <b>සාකොමියර</b> දහස් ගණනක් අනුක්‍රමිකව සම්බන්ධ වී ඇත.</p>
+        <ul>
+          <li><b>Z-රේඛාව</b> — සාකොමියරයේ මායිම් සලකුණු කරන ප්‍රෝටීන් ව්‍යුහය; සිහින් සූත්‍රිකා (actin) සම්බන්ධ වන ස්ථානය</li>
+          <li><b>M-රේඛාව</b> — සාකොමියරයේ මධ්‍ය රේඛාව; ගන සූත්‍රිකා (myosin) නිශ්චලව රඳවා තබන ස්ථානය</li>
+          <li><b>සිහින් සූත්‍රිකා (Actin)</b> — Z-රේඛාවලින් M-රේඛාව දෙසට විහිදෙන තුනී ප්‍රෝටීන් සූත්‍රිකා</li>
+          <li><b>ගන සූත්‍රිකා (Myosin)</b> — M-රේඛාව අවට පිහිටි ඝන ප්‍රෝටීන් සූත්‍රිකා; ATP බන්ධන ස්ථාන හා ඇක්ටින් හිස් (myosin heads) සහිතයි</li>
+        </ul>
+        <div class="callout">සාකොමියරය සංකෝචනය වන විට Z-රේඛා දෙක එකිනෙකට ළං වේ — නමුත් සිහින් සහ ගන සූත්‍රිකා දිග වෙනස් නොවේ (සර්පණ සූත්‍රිකාවාදය). මුළු විස්තරය Tab 3 හි සජීවීකරණයෙන් බලන්න.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3><span class="card-marker"></span>6. ආබාධ (Disorders) — පිටුව 87</h3><span class="card-chevron">▾</span></div>
+      <div class="card-body">
+        <ul>
+          <li><b>ඔස්ටියෝපොරෝසිස්</b> — අස්ථි ඝනත්වය අඩුවීම හේතුවෙන් අස්ථි තුනී, සුළු බලයකින් පවා බිඳෙන සුළු වීම. ස්ත්‍රී ලිංගික හෝමෝන (ඊස්ට්‍රජන්) අඩුවීම, කැල්සියම් ඌනතාව සහ අස්ථි වෙවර්ධන අඩුවීම ප්‍රධාන හේතු</li>
+          <li><b>ඔස්ටියෝ ආතරයිටිස්</b> (අස්ථි ප්‍රදාහය) — සන්ධි වල කාටිලේජ ක්‍රමයෙන් ක්ෂය වී අස්ථි එකිනෙක ස්පර්ශ වීමෙන් වේදනාව ඇතිවීම. වයස්ගත වීම, අධික බර, ස්ත්‍රී ලිංගිකභාවය, තුවාල ලැබීම හේතු විය හැක</li>
+          <li><b>මඩල ලිස්සා යාම</b> (Slipped Disc) — කශේරුකා අතර පිහිටි අන්තර් කශේරුකා මඩලවල පිටත කාටිලේජීය ස්ථර ඉරී ඇතුළත ජෙලටිනීය ද්‍රව්‍යය බැහැරට තෙරපී ඒම. මෙයින් සමීපව ඇති සුෂුම්නා ස්නායු තෙරපී වේදනාව හා අපහසුතාව ඇති කරයි</li>
+        </ul>
+        <p>මෙම ආබාධ Tab 4 හි විස්තරාත්මක අන්තර්ක්‍රියාකාරී මෙවලමෙන් ගවේෂණය කරන්න.</p>
+      </div>
+    </div>
+  `;
+  wireCollapsibles(el);
+})();
+
+// ============ TAB 2: LIMB VISUALIZER ============
+(function(){
+  const el = document.getElementById('tab2');
+  el.innerHTML = `
+    <div class="section-eyebrow"><span class="dash"></span>MODULE 02</div>
+    <h2 class="section-h1">පූර්ව &amp; අපර ගාත්‍රා සැකිල්ල</h2>
+    <p class="section-desc">අස්ථියක් මත ක්ලික් කර එහි නම, ගණන හා කාර්යභාරය දකින්න. ටැබ් දෙකකින් එකක් තෝරාගෙන ගාත්‍රය මාරු කරන්න.</p>
+    <div class="btn-row">
+      <button class="btn" id="btnForelimb">🦾 පූර්ව ගාත්‍රය (Forelimb)</button>
+      <button class="btn secondary" id="btnHindlimb">🦵 අපර ගාත්‍රය (Hindlimb)</button>
+    </div>
+    <div class="two-col">
+      <div class="diagram-frame">
+        <svg id="limbSvg" viewBox="0 0 320 600" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <div>
+        <div class="card open" style="margin:0;">
+          <div class="card-head" style="cursor:default;"><h3><span class="card-marker"></span>විස්තර පුවරුව</h3></div>
+          <div class="card-body" style="max-height:none; padding:0 18px 18px 18px;">
+            <div id="boneInfoPanel">
+              <p style="color:var(--ink-soft);">ඉහත සැකිල්ලේ ඇති අස්ථියක් මත ක්ලික් කරන්න.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const boneData = {
+    // Forelimb
+    fl_girdle: {name:"අංශකාස්ථි ඉණ පටිය (අක්ෂකාස්ථිය + අංශඵලකය)", count:"2", info:"Clavicle & Scapula — ප්‍රගණ්ඩාස්ථිය සමග ග්ලෙනොයිඩි කුහරයේදී ගෝල-කුහර සන්ධියක් සාදයි."},
+    fl_humerus: {name:"ප්‍රගණ්ඩාස්ථිය (Humerus)", count:"1", info:"පූර්ව ගාත්‍රයේ දිගම අස්ථිය. ඉහළින් ග්ලෙනොයිඩි කුහරය සමගත්, පහළින් අරාස්ථිය/අන්වරාස්ථිය සමගත් සන්ධානය වේ."},
+    fl_radius: {name:"අරාස්ථිය (Radius)", count:"1", info:"අන්වරාස්ථියට සමාන්තරව පිහිටයි. මැණික්කටුවේ මූලික බර දරන අස්ථිය."},
+    fl_ulna: {name:"අන්වරාස්ථිය (Ulna)", count:"1", info:"ප්‍රගණ්ඩාස්ථිය සමග වැලමිටේ අසව් සන්ධියක් සාදයි — වැලමිට නැමීම/ඍජු කිරීම සිදු කරයි."},
+    fl_carpal: {name:"හස්තකූර්චාස්ථි (Carpals)", count:"8", info:"මැණික්කටුව සාදන කුඩා අස්ථි 8ක් — කූර්චාකාරව සකස් වී ඇත."},
+    fl_meta: {name:"හස්තකූර්චෝපරි (Metacarpals)", count:"5", info:"අත්ලේ අස්ථි 5ක් — කූර්චාස්ථි හා ඇඟිලි පුරුක් අතර සම්බන්ධකයි."},
+    fl_phalanx: {name:"ඇඟිලි පුරුක් (Phalanges)", count:"14", info:"ඇඟිලි 5හි පුරුක් — මාපටැඟිල්ලට 2ක් සහ අනෙක් සෑම ඇඟිල්ලකටම 3ක් බැගින්."},
+    // Hindlimb
+    hl_girdle: {name:"ශ්‍රෝණි මේඛලාව (Pelvic Girdle)", count:"2", info:"උර්වාස්ථිය සමග ශ්‍රෝණි කුහරයේදී ගෝල-කුහර සන්ධියක් සාදයි; දේහ බර ශ්‍රෝණියට හරහා යවයි."},
+    hl_femur: {name:"උර්වාස්ථිය (Femur)", count:"1", info:"මානව දේහයේ දිගම සහ ශක්තිමත්ම අස්ථිය. සම්පූර්ණ දේහ බර දරයි."},
+    hl_patella: {name:"දෘසි ඇටය (Patella)", count:"1", info:"දණහිසේ ඉදිරිපස ආරක්ෂක අස්ථිය — චතුරස්‍ර ඌරු පේශියේ කණ්ඩරාව තුළ වර්ධනය වේ."},
+    hl_tibia: {name:"ජංඝාස්ථිය (Tibia)", count:"1", info:"අනුජංඝාස්ථියට වඩා ඝන හා බර දරන ප්‍රධාන අස්ථිය."},
+    hl_fibula: {name:"අනුජංඝාස්ථිය (Fibula)", count:"1", info:"ජංඝාස්ථියට සමාන්තරව පිහිටන සිහින් අස්ථිය — පේශි සම්බන්ධ කිරීම සඳහා ප්‍රධාන වේ."},
+    hl_tarsal: {name:"පාදකූර්චාස්ථි (Tarsals)", count:"7", info:"කුරුඳුකඩය සාදන අස්ථි 7ක් — හස්තකූර්චාස්ථිවලට වඩා අඩුයි, නමුත් වඩා ශක්තිමත්."},
+    hl_meta: {name:"පාදකූර්චෝපරි (Metatarsals)", count:"5", info:"පතුලේ අස්ථි 5ක් — පාදයේ අන්වායාම වක්‍ර සෑදීමට දායක වේ."},
+    hl_phalanx: {name:"ඇඟිලි පුරුක් (Phalanges)", count:"14", info:"පාද ඇඟිලිවල පුරුක් — හස්තයට සමානව 14ක් ඇත."}
+  };
+
+  function boneShape(id, d, extraClass){
+    return `<path d="${d}" class="bone-shape ${extraClass||''}" data-bone="${id}"></path>`;
+  }
+  function rectBone(id, x,y,w,h,rx){
+    return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx||8}" class="bone-shape" data-bone="${id}"></rect>`;
+  }
+  function circBone(id, cx,cy,r){
+    return `<circle cx="${cx}" cy="${cy}" r="${r}" class="bone-shape" data-bone="${id}"></circle>`;
+  }
+
+  const forelimbSVG = `
+    <text x="160" y="18" text-anchor="middle" class="label-tag" style="font-size:14px;">පූර්ව ගාත්‍රය</text>
+    ${rectBone('fl_girdle', 70,28,180,34,14)}
+    <text x="160" y="49" text-anchor="middle" class="label-tag" fill="#232821">අංශකාස්ථි ඉණ පටිය</text>
+
+    ${rectBone('fl_humerus', 135,75,50,150,20)}
+    <text x="230" y="150" class="label-tag">ප්‍රගණ්ඩාස්ථිය</text>
+    <line x1="185" y1="150" x2="225" y2="150" stroke="#4b5147" stroke-width="1"/>
+
+    ${rectBone('fl_radius', 120,240,22,130,10)}
+    ${rectBone('fl_ulna', 148,238,22,132,10)}
+    <text x="235" y="300" class="label-tag">අරාස්ථිය / අන්වරාස්ථිය</text>
+    <line x1="170" y1="290" x2="230" y2="295" stroke="#4b5147" stroke-width="1"/>
+
+    ${circBone('fl_carpal', 160,392,26)}
+    <text x="235" y="398" class="label-tag">හස්තකූර්චාස්ථි (8)</text>
+    <line x1="186" y1="392" x2="230" y2="396" stroke="#4b5147" stroke-width="1"/>
+
+    ${rectBone('fl_meta', 130,428,60,38,8)}
+    <text x="235" y="450" class="label-tag">හස්තකූර්චෝපරි (5)</text>
+    <line x1="190" y1="447" x2="230" y2="448" stroke="#4b5147" stroke-width="1"/>
+
+    ${rectBone('fl_phalanx', 122,478,20,55,6)}
+    ${rectBone('fl_phalanx', 148,478,20,68,6)}
+    ${rectBone('fl_phalanx', 174,478,20,68,6)}
+    ${rectBone('fl_phalanx', 200,478,20,60,6)}
+    <text x="235" y="510" class="label-tag">ඇඟිලි පුරුක් (14)</text>
+    <line x1="220" y1="505" x2="230" y2="508" stroke="#4b5147" stroke-width="1"/>
+  `;
+
+  const hindlimbSVG = `
+    <text x="160" y="18" text-anchor="middle" class="label-tag" style="font-size:14px;">අපර ගාත්‍රය</text>
+    <path d="M90 30 Q160 10 230 30 Q235 60 160 65 Q85 60 90 30 Z" class="bone-shape" data-bone="hl_girdle"></path>
+    <text x="160" y="49" text-anchor="middle" class="label-tag" fill="#232821">ශ්‍රෝණි මේඛලාව</text>
+
+    ${rectBone('hl_femur', 133,78,52,160,20)}
+    <text x="230" y="155" class="label-tag">උර්වාස්ථිය</text>
+    <line x1="185" y1="155" x2="225" y2="155" stroke="#4b5147" stroke-width="1"/>
+
+    ${circBone('hl_patella', 159,250,14)}
+    <text x="235" y="253" class="label-tag">දෘසි ඇටය</text>
+    <line x1="173" y1="250" x2="230" y2="253" stroke="#4b5147" stroke-width="1"/>
+
+    ${rectBone('hl_tibia', 122,268,24,140,10)}
+    ${rectBone('hl_fibula', 152,272,18,132,10)}
+    <text x="235" y="335" class="label-tag">ජංඝාස්ථිය / අනුජංඝාස්ථිය</text>
+    <line x1="170" y1="330" x2="230" y2="333" stroke="#4b5147" stroke-width="1"/>
+
+    ${circBone('hl_tarsal', 160,420,26)}
+    <text x="235" y="424" class="label-tag">පාදකූර්චාස්ථි (7)</text>
+    <line x1="186" y1="420" x2="230" y2="422" stroke="#4b5147" stroke-width="1"/>
+
+    ${rectBone('hl_meta', 130,456,60,38,8)}
+    <text x="235" y="478" class="label-tag">පාදකූර්චෝපරි (5)</text>
+    <line x1="190" y1="475" x2="230" y2="476" stroke="#4b5147" stroke-width="1"/>
+
+    ${rectBone('hl_phalanx', 122,504,20,50,6)}
+    ${rectBone('hl_phalanx', 148,504,20,60,6)}
+    ${rectBone('hl_phalanx', 174,504,20,60,6)}
+    ${rectBone('hl_phalanx', 200,504,20,52,6)}
+    <text x="235" y="538" class="label-tag">ඇඟිලි පුරුක් (14)</text>
+    <line x1="220" y1="533" x2="230" y2="536" stroke="#4b5147" stroke-width="1"/>
+  `;
+
+  const svgEl = document.getElementById('limbSvg');
+  let currentLimb = 'fore';
+
+  function renderLimb(limb){
+    currentLimb = limb;
+    svgEl.innerHTML = limb === 'fore' ? forelimbSVG : hindlimbSVG;
+    document.getElementById('btnForelimb').className = limb==='fore' ? 'btn' : 'btn secondary';
+    document.getElementById('btnHindlimb').className = limb==='hind' ? 'btn' : 'btn secondary';
+    document.getElementById('boneInfoPanel').innerHTML = '<p style="color:var(--ink-soft);">ඉහත සැකිල්ලේ ඇති අස්ථියක් මත ක්ලික් කරන්න.</p>';
+  }
+
+  svgEl.addEventListener('click', (e)=>{
+    const shape = e.target.closest('[data-bone]');
+    if(!shape) return;
+    svgEl.querySelectorAll('.bone-shape').forEach(s=>s.classList.remove('hi'));
+    const id = shape.dataset.bone;
+    svgEl.querySelectorAll(`[data-bone="${id}"]`).forEach(s=>s.classList.add('hi'));
+    const d = boneData[id];
+    document.getElementById('boneInfoPanel').innerHTML = `
+      <h3 style="color:var(--teal-dark); margin-top:0;">${d.name}</h3>
+      <p><span class="count-pill">ගණන: ${d.count}</span></p>
+      <p>${d.info}</p>
+    `;
+  });
+
+  document.getElementById('btnForelimb').addEventListener('click', ()=>renderLimb('fore'));
+  document.getElementById('btnHindlimb').addEventListener('click', ()=>renderLimb('hind'));
+  renderLimb('fore');
+})();
+
+// ============ TAB 3: SLIDING FILAMENT SIMULATION ============
+(function(){
+  const el = document.getElementById('tab3');
+  el.innerHTML = `
+    <div class="section-eyebrow"><span class="dash"></span>MODULE 03</div>
+    <h2 class="section-h1">සර්පණ සූත්‍රිකාවාදය — පේශි සංකෝචන යාන්ත්‍රණය</h2>
+    <p class="section-desc">Sliding Filament Theory — පියවර 5කින් සමන්විත සජීවී අනුකරණය. Play කර නරඹන්න, හෝ Next Step එබ පියවරෙන් පියවර ඉගෙන ගන්න.</p>
+
+    <div class="diagram-frame">
+      <div id="stageDots" style="display:flex; gap:8px; margin-bottom:10px; justify-content:center;"></div>
+      <canvas id="sarcCanvas" width="800" height="330" style="width:100%; height:auto; background:#fbf9f3; border-radius:8px; display:block;"></canvas>
+      <div class="btn-row" style="justify-content:center;">
+        <button class="btn" id="btnPlay">▶️ Play</button>
+        <button class="btn secondary" id="btnNext">⏭️ Next Step</button>
+        <button class="btn secondary" id="btnReset">🔄 Reset</button>
+        <label style="display:flex; align-items:center; gap:6px; font-size:0.85rem; color:var(--ink-soft);">
+          වේගය
+          <input type="range" id="speedRange" min="0.4" max="3" step="0.1" value="1">
+        </label>
+      </div>
+    </div>
+
+    <div class="card open" style="margin-top:14px;">
+      <div class="card-head" style="cursor:default;"><h3><span class="card-marker"></span><span id="stageTitle">1. විරාම අවස්ථාව (Resting State)</span></h3></div>
+      <div class="card-body" style="max-height:none; padding:0 18px 18px 18px;">
+        <p id="stageDesc">මයෝසින් හිසෙහි ATP අණු ජල විච්ඡේදනය වී ADP සහ Pi ලෙස බැඳී ඇත. හිස 45° ලෙස ඉහළ බලශක්ති (high-energy cocked) අවස්ථාවක පවතී. එය තවම ඇක්ටින් සමග බැඳී නොමැත.</p>
+      </div>
+    </div>
+  `;
+
+  const canvas = document.getElementById('sarcCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cy = H/2;
+
+  const stageMeta = [
+    {title:"1. විරාම අවස්ථාව (Resting State)",
+     desc:"මයෝසින් හිසෙහි ATP අණු ජල විච්ඡේදනය වී ADP සහ Pi ලෙස බැඳී ඇත. හිස 45° ලෙස ඉහළ බලශක්ති (high-energy cocked) අවස්ථාවක පවතී. එය තවම ඇක්ටින් සමග බැඳී නොමැත."},
+    {title:"2. හරස් සේතු සෑදීම (Cross-Bridge Formation)",
+     desc:"සාකොප්ලාස්මික් රෙටිකියුලමයෙන් Ca²⁺ අයන මුදා හැරේ. Ca²⁺ ට්‍රොපොනින්ට බැඳී ට්‍රොපොමයෝසින් ස්ථානගත වීම වෙනස් කරයි — එමගින් ඇක්ටින් මත ඇති බන්ධන ස්ථාන විවෘත වේ. මයෝසින් හිස ඇක්ටින් සමග බැඳී හරස් සේතුවක් සාදයි."},
+    {title:"3. බල පහර (Power Stroke)",
+     desc:"ADP සහ Pi මුදා හැරීමත් සමගම මයෝසින් හිස 45° සිට 90° දක්වා පිටිට හැරේ (pivots). මෙමගින් ඇක්ටින් සූත්‍රිකාව M-රේඛාව දෙසට ඇද දමන අතර, සාකොමියරය කෙටි වී Z-රේඛා දෙක ළං වේ."},
+    {title:"4. ATP බැඳීම හා වෙන්වීම (ATP Binding & Detachment)",
+     desc:"නව ATP අණුවක් මයෝසින් හිසට බැඳේ. මෙමගින් මයෝසින්-ඇක්ටින් හරස් සේතුව බිඳී, මයෝසින් හිස ඇක්ටින් සූත්‍රිකාවෙන් වෙන් වේ."},
+    {title:"5. ATP ජල විච්ඡේදනය (ATP Hydrolysis)",
+     desc:"ATP අණුව ජල විච්ඡේදනය වී ADP + Pi බවට පත් වේ. මෙයින් නිදහස් වන ශක්තිය මයෝසින් හිස නැවත 45° ඉහළ බලශක්ති අවස්ථාවට රටා ගැනීමට (re-cock) යොදා ගැනේ. චක්‍රය නැවත ආරම්භ වීමට සූදානම්."}
+  ];
+
+  // stage dots
+  const dotsEl = document.getElementById('stageDots');
+  stageMeta.forEach((s,i)=>{
+    const d = document.createElement('div');
+    d.style.cssText = 'width:30px;height:6px;border-radius:4px;background:#d8cfb6;transition:background .25s;';
+    d.dataset.idx = i;
+    dotsEl.appendChild(d);
+  });
+  function updateDots(){
+    [...dotsEl.children].forEach((d,i)=> d.style.background = i===stage ? 'var(--gold)' : (i<stage ? 'var(--teal-light)' : '#d8cfb6'));
+  }
+
+  let stage = 0;
+  let progress = 0; // 0..1 within stage
+  let playing = false;
+  let speed = 1;
+  let totalShorten = 0; // accumulated 0..1
+  const perCycleShorten = 0.16;
+  const maxShorten = 0.62;
+  let lastT = null;
+  let rafId = null;
+  let autoPlayStageAnim = false; // used for Next Step single-stage animation
+
+  const baseGapPx = 560; // distance between Z lines at full rest
+  const maxShortenPx = 170;
+
+  function easeInOut(t){ return t<0.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2; }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    let shorten = totalShorten;
+    if(stage===2){ shorten = Math.min(maxShorten, totalShorten + easeInOut(progress)*perCycleShorten); }
+    const gap = baseGapPx - shorten*maxShortenPx;
+    const zLeft = W/2 - gap/2;
+    const zRight = W/2 + gap/2;
+    const mLine = W/2;
+
+    // Z lines
+    ctx.strokeStyle = '#8B3A3A';
+    ctx.lineWidth = 5;
+    ctx.beginPath(); ctx.moveTo(zLeft, cy-95); ctx.lineTo(zLeft, cy+95); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(zRight, cy-95); ctx.lineTo(zRight, cy+95); ctx.stroke();
+    ctx.fillStyle = '#8B3A3A'; ctx.font = 'bold 13px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('Z-රේඛාව', zLeft, cy-105);
+    ctx.fillText('Z-රේඛාව', zRight, cy-105);
+
+    // M line (dashed)
+    ctx.strokeStyle = '#2B5D62';
+    ctx.setLineDash([4,4]);
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(mLine, cy-95); ctx.lineTo(mLine, cy+95); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#2B5D62';
+    ctx.fillText('M-රේඛාව', mLine, cy-105);
+
+    // thick filaments (myosin) - centered block
+    const thickHalf = 130;
+    ctx.fillStyle = '#E7D3A0';
+    ctx.strokeStyle = '#B8901F';
+    ctx.lineWidth = 1.5;
+    [cy-45, cy, cy+45].forEach(yy=>{
+      roundRect(ctx, mLine-thickHalf, yy-6, thickHalf*2, 12, 6);
+      ctx.fill(); ctx.stroke();
+    });
+
+    // thin filaments (actin) - double helix look, from each Z line inward
+    // amount they extend into the H-zone depends on shorten (more overlap as it shortens)
+    const actinLen = 195 + shorten*maxShortenPx*0.5; // slightly extends visually as it slides
+    drawActin(zLeft, cy-45, actinLen, 1);
+    drawActin(zLeft, cy+45, actinLen, 1);
+    drawActin(zRight, cy-45, actinLen, -1);
+    drawActin(zRight, cy+45, actinLen, -1);
+
+    // Ca2+ ions (stage 1 cross-bridge formation)
+    if(stage===1){
+      ctx.fillStyle = 'rgba(184,144,31,0.85)';
+      for(let i=0;i<6;i++){
+        const px = mLine - 100 + i*40 + Math.sin(progress*6+i)*4;
+        const py = cy - 70 + (i%2)*140 + Math.cos(progress*5+i)*4;
+        ctx.beginPath(); ctx.arc(px,py,5,0,7); ctx.fill();
+      }
+      ctx.fillStyle='#8B6A10'; ctx.font='bold 12px sans-serif';
+      ctx.fillText('Ca²⁺', mLine-100, cy-90);
+    }
+
+    // Myosin heads (draw at two representative positions, upper & lower filament)
+    drawHead(mLine-70, cy-39, stage, progress, shorten, actinLen, 1);
+    drawHead(mLine+70, cy+39, stage, progress, shorten, actinLen, -1);
+
+    // Labels for ATP/ADP state
+    ctx.textAlign='left';
+    ctx.font='bold 14px sans-serif';
+    if(stage===0){ ctx.fillStyle='#2B5D62'; ctx.fillText('ADP + Pi (බැඳී ඇත)', 20, 30); }
+    else if(stage===1){ ctx.fillStyle='#2B5D62'; ctx.fillText('හරස් සේතුව සෑදෙයි', 20, 30); }
+    else if(stage===2){ ctx.fillStyle='#8B3A3A'; ctx.fillText('ADP + Pi මුදා හැරේ → බල පහර', 20, 30); }
+    else if(stage===3){ ctx.fillStyle='#B8901F'; ctx.fillText('නව ATP බැඳේ → වෙන් වීම', 20, 30); }
+    else { ctx.fillStyle='#2B5D62'; ctx.fillText('ATP → ADP + Pi (ජල විච්ඡේදනය)', 20, 30); }
+
+    ctx.textAlign='right';
+    ctx.fillStyle='#4b5147'; ctx.font='12px sans-serif';
+    ctx.fillText('සාකොමියර දිග: ' + Math.round((1-shorten*0.5))+'%', W-20, 30);
+  }
+
+  function roundRect(ctx,x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);
+    ctx.arcTo(x,y,x+w,y,r);
+    ctx.closePath();
+  }
+
+  function drawActin(zx, y, len, dir){
+    ctx.strokeStyle = '#6E9C9F';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(zx, y);
+    ctx.lineTo(zx + dir*len, y);
+    ctx.stroke();
+    // beads to suggest actin monomers
+    ctx.fillStyle = '#2B5D62';
+    for(let i=0; i<len; i+=18){
+      ctx.beginPath();
+      ctx.arc(zx+dir*i, y + Math.sin(i*0.5)*3, 4, 0, 7);
+      ctx.fill();
+    }
+  }
+
+  function drawHead(baseX, baseY, stage, progress, shorten, actinLen, dir){
+    // angle: 45deg cocked (stage 0,1) -> 90deg (stage 2 end, 3) -> back to 45 (stage 4)
+    let angleDeg;
+    if(stage===0 || stage===1){ angleDeg = 45; }
+    else if(stage===2){ angleDeg = 45 + easeInOut(progress)*45; }
+    else if(stage===3){ angleDeg = 90; }
+    else { angleDeg = 90 - easeInOut(progress)*45; }
+    const rad = angleDeg * Math.PI/180;
+    const headLen = 55;
+    const tipX = baseX + dir* -Math.cos(rad)*headLen; // pointing toward actin (outward)
+    const tipY = baseY - Math.sin(rad)*headLen*dir*0 + baseY*0; // keep simple
+    const tx = baseX + dir*(-1)*Math.cos(rad)*headLen;
+    const ty = baseY - Math.sin(rad)*headLen*0.55;
+
+    ctx.strokeStyle = '#8B3A3A';
+    ctx.lineWidth = 4;
+    ctx.lineCap='round';
+    ctx.beginPath();
+    ctx.moveTo(baseX, baseY);
+    ctx.lineTo(tx, ty);
+    ctx.stroke();
+    ctx.fillStyle = '#B96A5A';
+    ctx.beginPath(); ctx.arc(tx,ty,7,0,7); ctx.fill();
+
+    // attachment indicator line to actin when attached (stage 1,2) 
+    if(stage===1 || stage===2){
+      ctx.strokeStyle = '#B8901F';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([2,3]);
+      ctx.beginPath();
+      ctx.moveTo(tx,ty);
+      ctx.lineTo(tx + dir*20, ty+ (dir>0? -8:8));
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    ctx.fillStyle='#232821'; ctx.font='11px sans-serif'; ctx.textAlign='center';
+    let lbl = stage<=1 ? 'ADP·Pi' : (stage===2 ? '' : (stage===3? 'ATP' : 'ADP·Pi'));
+    if(lbl) ctx.fillText(lbl, baseX, baseY + (dir>0? 22 : -14));
+  }
+
+  function setStage(n, resetProgress){
+    stage = ((n % 5)+5) % 5;
+    if(resetProgress !== false) progress = 0;
+    document.getElementById('stageTitle').textContent = stageMeta[stage].title;
+    document.getElementById('stageDesc').textContent = stageMeta[stage].desc;
+    updateDots();
+    draw();
+  }
+
+  function commitShortenIfNeeded(fromStage){
+    if(fromStage === 2){
+      totalShorten = Math.min(maxShorten, totalShorten + perCycleShorten);
+    }
+  }
+
+  function tick(t){
+    if(lastT===null) lastT = t;
+    const dt = (t - lastT)/1000;
+    lastT = t;
+    const stageDuration = 1.3; // seconds per stage at speed=1
+    progress += (dt/stageDuration) * speed;
+    if(progress >= 1){
+      progress = 1;
+      draw();
+      commitShortenIfNeeded(stage);
+      const next = (stage+1)%5;
+      stage = next;
+      progress = 0;
+      document.getElementById('stageTitle').textContent = stageMeta[stage].title;
+      document.getElementById('stageDesc').textContent = stageMeta[stage].desc;
+      updateDots();
+    }
+    draw();
+    if(playing){ rafId = requestAnimationFrame(tick); }
+    else if(autoPlayStageAnim){ rafId = requestAnimationFrame(tick); }
+  }
+
+  function startLoop(){
+    lastT = null;
+    if(rafId) cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(tick);
+  }
+
+  document.getElementById('btnPlay').addEventListener('click', function(){
+    playing = !playing;
+    autoPlayStageAnim = false;
+    this.textContent = playing ? '⏸️ Pause' : '▶️ Play';
+    if(playing){ startLoop(); } else if(rafId){ cancelAnimationFrame(rafId); }
+  });
+
+  document.getElementById('btnNext').addEventListener('click', ()=>{
+    if(playing){
+      playing = false;
+      document.getElementById('btnPlay').textContent = '▶️ Play';
+      if(rafId) cancelAnimationFrame(rafId);
+    }
+    // commit shorten if we're leaving power-stroke stage without finishing via loop
+    if(stage===2 && progress<1){ /* leaving early: still commit partial as none, require full only via play; but for single-step UX commit full amount */ }
+    commitShortenIfNeeded(stage);
+    stage = (stage+1)%5;
+    progress = 0;
+    autoPlayStageAnim = true;
+    document.getElementById('stageTitle').textContent = stageMeta[stage].title;
+    document.getElementById('stageDesc').textContent = stageMeta[stage].desc;
+    updateDots();
+    lastT = null;
+    if(rafId) cancelAnimationFrame(rafId);
+    function stepTick(t){
+      if(lastT===null) lastT = t;
+      const dt = (t-lastT)/1000; lastT = t;
+      progress += (dt/1.1)*speed;
+      if(progress>=1){ progress=1; draw(); autoPlayStageAnim=false; return; }
+      draw();
+      rafId = requestAnimationFrame(stepTick);
+    }
+    rafId = requestAnimationFrame(stepTick);
+  });
+
+  document.getElementById('btnReset').addEventListener('click', ()=>{
+    playing = false;
+    autoPlayStageAnim = false;
+    if(rafId) cancelAnimationFrame(rafId);
+    document.getElementById('btnPlay').textContent = '▶️ Play';
+    totalShorten = 0;
+    setStage(0, true);
+  });
+
+  document.getElementById('speedRange').addEventListener('input', (e)=>{
+    speed = parseFloat(e.target.value);
+  });
+
+  setStage(0, true);
+})();
+
+// ============ TAB 4: JOINTS & DISORDERS ============
+(function(){
+  const el = document.getElementById('tab4');
+  el.innerHTML = `
+    <div class="section-eyebrow"><span class="dash"></span>MODULE 04</div>
+    <h2 class="section-h1">ආබාධ හා සන්ධි වර්ග ගවේෂකය</h2>
+    <p class="section-desc">සන්ධි වර්ග තුනේ චලන දිශා සජීවීව නරඹන්න, පසුව මඩල ලිස්සා යාමේ (Slipped Disc) බලපෑම ගවේෂණය කරන්න.</p>
+
+    <div class="card open" style="margin:0 0 18px 0;">
+      <div class="card-head" style="cursor:default;"><h3><span class="card-marker"></span>සන්ධි චලන දර්ශකය</h3></div>
+      <div class="card-body" style="max-height:none; padding:0 18px 18px 18px;">
+        <div class="btn-row">
+          <button class="btn" id="jBallBtn">⚽ ගෝල-කුහර සන්ධි</button>
+          <button class="btn secondary" id="jHingeBtn">🚪 අසව් සන්ධි</button>
+          <button class="btn secondary" id="jPivotBtn">🔃 විවර්තන සන්ධි</button>
+        </div>
+        <div class="two-col">
+          <div class="diagram-frame" style="text-align:center;">
+            <svg id="jointSvg" viewBox="0 0 220 220" style="max-width:280px; margin:auto; display:block;"></svg>
+          </div>
+          <div id="jointDesc"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card open">
+      <div class="card-head" style="cursor:default;"><h3><span class="card-marker"></span>මඩල ලිස්සා යාම (Slipped Disc) විශ්ලේෂකය</h3></div>
+      <div class="card-body" style="max-height:none; padding:0 18px 18px 18px;">
+        <div class="btn-row">
+          <button class="btn" id="discNormalBtn">✅ සාමාන්‍ය තත්ත්වය</button>
+          <button class="btn secondary" id="discSlipBtn">⚠️ මඩල ලිස්සා ගිය තත්ත්වය</button>
+        </div>
+        <div class="two-col">
+          <div class="diagram-frame" style="text-align:center;">
+            <svg id="discSvg" viewBox="0 0 260 260" style="max-width:300px;margin:auto;display:block;"></svg>
+          </div>
+          <div id="discDesc"></div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // ---- Joint motion demo ----
+  const jointSvg = document.getElementById('jointSvg');
+  const jointDescEl = document.getElementById('jointDesc');
+  const jointInfo = {
+    ball: {
+      desc:"<h3 style='color:var(--teal-dark);margin-top:0;'>ගෝල-කුහර සන්ධි (Ball &amp; Socket)</h3><p>ගෝලාකාර හිසක් කුහරයක් තුළ ගැලපී පිහිටයි. මෙමගින් <b>සම්මිංජනය, ප්‍රසර්පණය, අභිනයනය, අපනයනය</b> සහ <b>භ්‍රමණය</b> ඇතුළු පුළුල් පරාසයක දිශා ගණනාවකට චලනය කළ හැක (circumduction). උදාහරණ: උරහිස් සන්ධිය, උකුල් සන්ධිය.</p>",
+      svg: `
+        <circle cx="110" cy="60" r="22" fill="#E7D3A0" stroke="#B8901F" stroke-width="2"/>
+        <rect x="100" y="10" width="20" height="46" rx="8" fill="#f5f0e4" stroke="#232821" stroke-width="1.6"/>
+        <g>
+          <rect x="102" y="60" width="16" height="110" rx="8" fill="#f5f0e4" stroke="#232821" stroke-width="1.6"/>
+          <circle cx="110" cy="176" r="10" fill="#6E9C9F"/>
+          <animateTransform attributeName="transform" type="rotate" values="0 110 60;360 110 60" dur="4.5s" repeatCount="indefinite"/>
+        </g>
+        <text x="110" y="205" text-anchor="middle" font-size="11" fill="#4b5147">circumduction</text>
+      `
+    },
+    hinge: {
+      desc:"<h3 style='color:var(--teal-dark);margin-top:0;'>අසව් සන්ධි (Hinge Joint)</h3><p>දෝරක අස්ථි දෙකක් එකිනෙකට ගැලපී ඇති අතර, එය දොර සවියක් (hinge) මෙන් <b>එක් තලයක පමණක්</b> චලනය වේ — සම්මිංජනය (flexion) සහ ප්‍රසර්පණය (extension) පමණි. උදාහරණ: වැලමිට, දණහිස, ඇඟිලි සන්ධි.</p>",
+      svg: `
+        <rect x="100" y="10" width="20" height="50" rx="8" fill="#f5f0e4" stroke="#232821" stroke-width="1.6"/>
+        <circle cx="110" cy="60" r="12" fill="#8B3A3A"/>
+        <g>
+          <rect x="102" y="60" width="16" height="110" rx="8" fill="#f5f0e4" stroke="#232821" stroke-width="1.6"/>
+          <circle cx="110" cy="176" r="10" fill="#6E9C9F"/>
+          <animateTransform attributeName="transform" type="rotate" values="0 110 60;-85 110 60;0 110 60" dur="2.6s" repeatCount="indefinite"/>
+        </g>
+        <text x="110" y="205" text-anchor="middle" font-size="11" fill="#4b5147">flexion ⇄ extension</text>
+      `
+    },
+    pivot: {
+      desc:"<h3 style='color:var(--teal-dark);margin-top:0;'>විවර්තන සන්ධි (Pivot Joint)</h3><p>එක් අස්ථියක් තැඹිලි කරාමයක් (ring) මගින් වට වී ඇති අනෙක් අස්ථිය වටා <b>භ්‍රමණය</b> වේ. චලනය තනි අක්ෂයක් වටා පමණක් සීමා වේ. උදාහරණ: ග්‍රීවා කශේරුකා (Atlas–Axis) — හිස පැත්තට හැරවීම.</p>",
+      svg: `
+        <circle cx="110" cy="70" r="26" fill="none" stroke="#B8901F" stroke-width="4"/>
+        <g>
+          <rect x="60" y="65" width="100" height="12" rx="6" fill="#f5f0e4" stroke="#232821" stroke-width="1.6"/>
+          <circle cx="160" cy="71" r="9" fill="#8B3A3A"/>
+          <circle cx="60" cy="71" r="9" fill="#8B3A3A"/>
+          <animateTransform attributeName="transform" type="rotate" values="-65 110 70;65 110 70;-65 110 70" dur="3s" repeatCount="indefinite"/>
+        </g>
+        <text x="110" y="205" text-anchor="middle" font-size="11" fill="#4b5147">rotation (top view — head turning)</text>
+      `
+    }
+  };
+  function setJoint(kind){
+    jointSvg.innerHTML = jointInfo[kind].svg;
+    jointDescEl.innerHTML = jointInfo[kind].desc;
+    document.getElementById('jBallBtn').className = kind==='ball' ? 'btn' : 'btn secondary';
+    document.getElementById('jHingeBtn').className = kind==='hinge' ? 'btn' : 'btn secondary';
+    document.getElementById('jPivotBtn').className = kind==='pivot' ? 'btn' : 'btn secondary';
+  }
+  document.getElementById('jBallBtn').addEventListener('click', ()=>setJoint('ball'));
+  document.getElementById('jHingeBtn').addEventListener('click', ()=>setJoint('hinge'));
+  document.getElementById('jPivotBtn').addEventListener('click', ()=>setJoint('pivot'));
+  setJoint('ball');
+
+  // ---- Slipped disc demo ----
+  const discSvg = document.getElementById('discSvg');
+  const discDescEl = document.getElementById('discDesc');
+
+  function vertebraeBlock(y){
+    return `<rect x="80" y="${y}" width="70" height="34" rx="6" fill="#f5f0e4" stroke="#232821" stroke-width="1.6"/>`;
+  }
+
+  function normalSvgContent(){
+    return `
+      ${vertebraeBlock(20)}
+      <ellipse cx="115" cy="60" rx="34" ry="10" fill="#E7D3A0" stroke="#B8901F" stroke-width="1.6"/>
+      ${vertebraeBlock(66)}
+      <ellipse cx="115" cy="106" rx="34" ry="10" fill="#E7D3A0" stroke="#B8901F" stroke-width="1.6"/>
+      ${vertebraeBlock(112)}
+      <path d="M115 15 L115 170" stroke="#6E9C9F" stroke-width="10" stroke-linecap="round" opacity="0.5"/>
+      <path d="M115 15 L115 170" stroke="#2B5D62" stroke-width="3" stroke-linecap="round"/>
+      <text x="115" y="190" text-anchor="middle" font-size="12" fill="#2B5D62" font-weight="bold">සුෂුම්නා ස්නායුව — නිදහසේ</text>
+      <text x="115" y="207" text-anchor="middle" font-size="11" fill="#4b5147">මඩල සමමිතික අතර ස්නායුවට බලපෑමක් නැත</text>
+    `;
+  }
+  function slippedSvgContent(){
+    return `
+      ${vertebraeBlock(20)}
+      <path d="M81 60 Q60 60 62 68 Q64 76 90 70 L150 70 Q158 60 149 60 Z" fill="#E7D3A0" stroke="#8B3A3A" stroke-width="1.8"/>
+      ${vertebraeBlock(66)}
+      <ellipse cx="115" cy="106" rx="34" ry="10" fill="#E7D3A0" stroke="#B8901F" stroke-width="1.6"/>
+      ${vertebraeBlock(112)}
+      <path d="M115 15 L115 55 Q95 65 115 75 L115 170" stroke="#B96A5A" stroke-width="10" stroke-linecap="round" opacity="0.55"/>
+      <path d="M115 15 L115 55 Q95 65 115 75 L115 170" stroke="#8B3A3A" stroke-width="3" stroke-linecap="round"/>
+      <g stroke="#8B3A3A" stroke-width="1.6">
+        <line x1="60" y1="66" x2="48" y2="58"/>
+        <line x1="60" y1="70" x2="46" y2="70"/>
+        <line x1="60" y1="74" x2="48" y2="82"/>
+      </g>
+      <text x="115" y="190" text-anchor="middle" font-size="12" fill="#8B3A3A" font-weight="bold">සුෂුම්නා ස්නායුව තෙරපී ඇත</text>
+      <text x="115" y="207" text-anchor="middle" font-size="11" fill="#4b5147">මඩලේ ජෙලටිනීය කේන්ද්‍රය බැහැරට තෙරපී වේදනාව ඇති කරයි</text>
+    `;
+  }
+
+  function setDisc(state){
+    discSvg.innerHTML = state==='normal' ? normalSvgContent() : slippedSvgContent();
+    document.getElementById('discNormalBtn').className = state==='normal' ? 'btn' : 'btn secondary';
+    document.getElementById('discSlipBtn').className = state==='slip' ? 'btn' : 'btn secondary';
+    discDescEl.innerHTML = state==='normal'
+      ? "<h3 style='color:var(--teal-dark);margin-top:0;'>සාමාන්‍ය තත්ත්වය</h3><p>අන්තර් කශේරුකා මඩලයේ පිටත කාටිලේජීය වළල්ල (annulus fibrosus) සම්පූර්ණව ඇතුළත ජෙලටිනීය කේන්ද්‍රය (nucleus pulposus) රඳවා තබයි. එමගින් කම්පන අවශෝෂණය සිදුවන අතර සුෂුම්නා ස්නායුවට කිසිදු බලපෑමක් සිදු නොවේ.</p>"
+      : "<h3 style='color:var(--brick);margin-top:0;'>මඩල ලිස්සා ගිය තත්ත්වය</h3><p>පිටත කාටිලේජීය ස්ථරය ඉරී ඇතුළත ජෙලටිනීය ද්‍රව්‍යය බැහැරට තෙරපී ඒමෙන් අසල පිහිටි සුෂුම්නා ස්නායුව තෙරපී වේදනාව, හිරි වැටීම හා පේශි දුබලතාවය ඇති කරයි. දිගු වේලාවක් නොසෑලීම හෝ අධික බර උසුලීම ප්‍රධාන හේතු වේ.</p>";
+  }
+  document.getElementById('discNormalBtn').addEventListener('click', ()=>setDisc('normal'));
+  document.getElementById('discSlipBtn').addEventListener('click', ()=>setDisc('slip'));
+  setDisc('normal');
+})();
+
+// ============ TAB 5: REVISION & SELF-TEST ============
+(function(){
+  const el = document.getElementById('tab5');
+  el.innerHTML = `
+    <div class="section-eyebrow"><span class="dash"></span>MODULE 05</div>
+    <h2 class="section-h1">පුනරීක්ෂණ කාඩ්පත් හා ස්වයං-පරීක්ෂණය</h2>
+    <p class="section-desc">කාඩ්පතක් ක්ලික් කර පෙරළන්න (flip), පසුව පහත MCQ ප්‍රශ්නාවලිය සම්පූර්ණ කර ඔබේ දැනුම පරීක්ෂා කරන්න.</p>
+
+    <div class="card-head" style="cursor:default; padding-left:0;"><h3 style="margin-bottom:6px;"><span class="card-marker"></span>Flashcards</h3></div>
+    <div id="flashGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:14px; margin-bottom:30px;"></div>
+
+    <div class="card-head" style="cursor:default; padding-left:0;"><h3 style="margin-bottom:6px;"><span class="card-marker"></span>MCQ ස්වයං-පරීක්ෂණය</h3></div>
+    <div id="quizArea"></div>
+  `;
+
+  // ---- Flashcards ----
+  const cards = [
+    {q:"හස්තකූර්චාස්ථි (Carpals) ගණන කීයද?", a:"8 — මැණික්කටුව සාදන කුඩා අස්ථි"},
+    {q:"පාදකූර්චාස්ථි (Tarsals) ගණන කීයද?", a:"7 — කුරුඳුකඩය සාදන අස්ථි"},
+    {q:"පාදයේ ඇති වක්‍ර වර්ග කීයද, මොනවාද?", a:"3 — අන්වායාම වක්‍ර 2 සහ තීර්යක් වක්‍රයක්"},
+    {q:"මඩල ලිස්සා යාම (Slipped Disc) යනු කුමක්ද?", a:"අන්තර් කශේරුකා මඩලයේ පිටත ස්ථරය ඉරී ඇතුළත ජෙලටිනීය ද්‍රව්‍යය තෙරපී ඒම, එමගින් සුෂුම්නා ස්නායු තෙරපීම"},
+    {q:"ගෝල-කුහර සන්ධියකට උදාහරණයක් දෙන්න.", a:"උරහිස් සන්ධිය හෝ උකුල් සන්ධිය"},
+    {q:"අසව් සන්ධියකට උදාහරණයක් දෙන්න.", a:"වැලමිට සන්ධිය හෝ දණහිස් සන්ධිය"},
+    {q:"විවර්තන සන්ධියකට උදාහරණයක් දෙන්න.", a:"ග්‍රීවා කශේරුකා අතර (Atlas–Axis) සන්ධානය"},
+    {q:"බල පහර (Power Stroke) ආරම්භ වන්නේ කුමන සිදුවීමෙන්ද?", a:"ADP සහ Pi මයෝසින් හිසෙන් මුදා හැරීමෙන්"},
+    {q:"මයෝසින් හිස ඇක්ටින්වලින් වෙන් වීමට හේතු වන්නේ කුමක්ද?", a:"නව ATP අණුවක් මයෝසින් හිසට බැඳීම"},
+    {q:"Z-රේඛාවේ කාර්යභාරය කුමක්ද?", a:"සාකොමියරයේ මායිම සලකුණු කර, සිහින් (ඇක්ටින්) සූත්‍රිකා සම්බන්ධ කර ගැනීම"}
+  ];
+  const grid = document.getElementById('flashGrid');
+  cards.forEach(c=>{
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'perspective:1000px; height:150px; cursor:pointer;';
+    wrap.innerHTML = `
+      <div class="flip-inner" style="position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d;">
+        <div style="position:absolute;inset:0;backface-visibility:hidden;background:var(--teal);color:#fff;border-radius:10px;padding:14px;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:600;font-size:0.92rem;box-shadow:var(--shadow);">${c.q}</div>
+        <div style="position:absolute;inset:0;backface-visibility:hidden;transform:rotateY(180deg);background:var(--white);border:2px solid var(--gold);color:var(--ink);border-radius:10px;padding:14px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:0.88rem;box-shadow:var(--shadow);">${c.a}</div>
+      </div>`;
+    let flipped = false;
+    wrap.addEventListener('click', ()=>{
+      flipped = !flipped;
+      wrap.querySelector('.flip-inner').style.transform = flipped ? 'rotateY(180deg)' : 'rotateY(0deg)';
+    });
+    grid.appendChild(wrap);
+  });
+
+  // ---- MCQ Quiz ----
+  const quiz = [
+    {q:"හස්තකූර්චාස්ථි හා පාදකූර්චාස්ථි ගණන් පිළිබඳ නිවැරදි ප්‍රකාශය කුමක්ද?",
+     opts:["හස්තකූර්චාස්ථි 7, පාදකූර්චාස්ථි 8","හස්තකූර්චාස්ථි 8, පාදකූර්චාස්ථි 7","දෙකම 8 බැගින්","දෙකම 7 බැගින්"],
+     correct:1, exp:"හස්තකූර්චාස්ථි (carpals) 8ක් හා පාදකූර්චාස්ථි (tarsals) 7ක් ඇත."},
+    {q:"මඩල ලිස්සා යාමට (Slipped Disc) ප්‍රධාන හේතුව කුමක්ද?",
+     opts:["අස්ථි ඝනත්වය අඩුවීම","කාටිලේජීය වළල්ල ඉරී ජෙලටිනීය ද්‍රව්‍යය තෙරපී ඒම","සන්ධි කාටිලේජය ක්ෂය වීම","පේශි තන්තු දිගු වීම"],
+     correct:1, exp:"අන්තර් කශේරුකා මඩලයේ පිටත කාටිලේජීය ස්ථරය ඉරී ඇතුළත ජෙලටිනීය කේන්ද්‍රය බැහැරට තෙරපී ඒමෙන් සුෂුම්නා ස්නායු තෙරපේ."},
+    {q:"සාකොමියරයේ බල පහර (Power Stroke) අවස්ථාව අවුලුවන්නේ කුමකින්ද?",
+     opts:["ATP මයෝසින් හිසට බැඳීමෙන්","Ca²⁺ අයන මුදා හැරීමෙන්","ADP සහ Pi මයෝසින් හිසෙන් මුදා හැරීමෙන්","ට්‍රොපොනින් වෙන් වීමෙන්"],
+     correct:2, exp:"ADP සහ Pi මුදා හැරීමත් සමගම මයෝසින් හිස පිටිට හැරී (pivot) බල පහර ලබා දෙයි."},
+    {q:"ගෝල-කුහර සන්ධියකට හොඳම උදාහරණය කුමක්ද?",
+     opts:["වැලමිට සන්ධිය","ග්‍රීවා කශේරුකා සන්ධිය","උරහිස් සන්ධිය","ඇඟිලි සන්ධිය"],
+     correct:2, exp:"උරහිස් සන්ධිය (හා උකුල් සන්ධිය) ගෝලාකාර හිසක් කුහරයක් තුළ ගැලපී පිහිටි ගෝල-කුහර සන්ධි වේ."},
+    {q:"ඔස්ටියෝපොරෝසිස් තත්ත්වයට ප්‍රධාන වශයෙන් හේතු වන්නේ කුමක්ද?",
+     opts:["සන්ධි කාටිලේජ ක්ෂය වීම","අස්ථි ඝනත්වය අඩුවීම (හෝමෝන/කැල්සියම් සම්බන්ධ)","සුෂුම්නා ස්නායු තෙරපීම","මාංශ පේශි දුබලතාවය"],
+     correct:1, exp:"ඊස්ට්‍රජන් අඩුවීම, කැල්සියම් ඌනතාව සහ අස්ථි වෙවර්ධන අඩුවීම හේතුවෙන් අස්ථි ඝනත්වය අඩු වී තුනී වේ."}
+  ];
+
+  const quizArea = document.getElementById('quizArea');
+  let answers = new Array(quiz.length).fill(null);
+
+  function renderQuiz(){
+    let html = '';
+    quiz.forEach((q,qi)=>{
+      html += `<div class="card open" style="margin-bottom:12px;"><div class="card-head" style="cursor:default;"><h3 style="font-size:0.98rem;">${qi+1}. ${q.q}</h3></div><div class="card-body" style="max-height:none; padding:0 18px 16px 18px;">`;
+      q.opts.forEach((opt,oi)=>{
+        html += `<label style="display:block; margin:6px 0; padding:8px 12px; border-radius:8px; border:1px solid var(--line); cursor:pointer;" class="quiz-opt" data-q="${qi}" data-o="${oi}">
+          <input type="radio" name="q${qi}" value="${oi}" style="margin-inline-end:8px;">${opt}
+        </label>`;
+      });
+      html += `<div class="quiz-exp" data-q="${qi}" style="display:none; margin-top:8px;"></div></div></div>`;
+    });
+    quizArea.innerHTML = html + `<div class="btn-row"><button class="btn gold" id="submitQuiz">ලකුණු පරීක්ෂා කරන්න</button><button class="btn secondary" id="retryQuiz">නැවත උත්සාහ කරන්න</button></div><div id="quizScore" style="font-weight:700; font-size:1.05rem; color:var(--teal-dark); margin-top:10px;"></div>`;
+
+    quizArea.querySelectorAll('.quiz-opt').forEach(label=>{
+      label.addEventListener('click', ()=>{
+        const qi = parseInt(label.dataset.q), oi = parseInt(label.dataset.o);
+        answers[qi] = oi;
+        quizArea.querySelectorAll(`.quiz-opt[data-q="${qi}"]`).forEach(l=>{
+          l.style.background=''; l.style.borderColor='var(--line)';
+          l.querySelector('input').checked = false;
+        });
+        label.style.background = 'rgba(43,93,98,0.1)';
+        label.style.borderColor = 'var(--teal)';
+        label.querySelector('input').checked = true;
+      });
+    });
+
+    document.getElementById('submitQuiz').addEventListener('click', ()=>{
+      let score = 0;
+      quiz.forEach((q,qi)=>{
+        const expEl = quizArea.querySelector(`.quiz-exp[data-q="${qi}"]`);
+        expEl.style.display = 'block';
+        const correct = answers[qi] === q.correct;
+        if(correct) score++;
+        expEl.innerHTML = correct
+          ? `<div class="callout">✅ නිවැරදියි! ${q.exp}</div>`
+          : `<div class="callout warn">❌ වැරදියි — නිවැරදි පිළිතුර: <b>${q.opts[q.correct]}</b>. ${q.exp}</div>`;
+        quizArea.querySelectorAll(`.quiz-opt[data-q="${qi}"]`).forEach(l=>{
+          const oi = parseInt(l.dataset.o);
+          if(oi === q.correct){ l.style.borderColor='#4f8b52'; }
+          else if(oi === answers[qi]){ l.style.borderColor='var(--brick)'; }
+        });
+      });
+      document.getElementById('quizScore').textContent = `ඔබේ ලකුණු: ${score} / ${quiz.length}`;
+    });
+
+    document.getElementById('retryQuiz').addEventListener('click', ()=>{
+      answers = new Array(quiz.length).fill(null);
+      renderQuiz();
+    });
+  }
+  renderQuiz();
+})();
+
+// ============ CARD COLLAPSIBLE HELPER ============
+function wireCollapsibles(root){
+  root.querySelectorAll('.card-head').forEach(head=>{
+    head.addEventListener('click', ()=>{
+      const card = head.closest('.card');
+      const body = card.querySelector('.card-body');
+      const isOpen = card.classList.contains('open');
+      if(isOpen){
+        card.classList.remove('open');
+        body.style.maxHeight = null;
+      } else {
+        card.classList.add('open');
+        body.style.maxHeight = body.scrollHeight + 40 + 'px';
+      }
+    });
+  });
+}
+</script>
+
+</body>
+</html>

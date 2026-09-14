@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ජීරණ පද්ධතිය සහ පෝෂණය | A/L ජීව විද්‍යාව</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Sinhala:wght@500;700;900&family=Noto+Sans+Sinhala:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f4ecd9;
+  --paper-dark:#e9ddc0;
+  --ink:#2b241a;
+  --maroon:#7a2426;
+  --maroon-deep:#551315;
+  --olive:#5c6b3e;
+  --highlight:#f0d24a;
+  --highlight-soft:#f6e39a55;
+  --teal:#2e5f5a;
+  --line:#c9b98f;
+  --card:#fffaf0;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--paper);
+  background-image:
+    radial-gradient(ellipse at top left, #fffdf7 0%, transparent 55%),
+    repeating-linear-gradient(0deg, transparent, transparent 38px, #00000006 39px);
+  color:var(--ink);
+  font-family:'Noto Sans Sinhala','Noto Sans',sans-serif;
+  line-height:1.75;
+}
+::selection{background:var(--highlight);}
+
+/* ---------- Header ---------- */
+.masthead{
+  background:linear-gradient(135deg,var(--maroon-deep),var(--maroon) 55%,#8a3b2c);
+  color:#fdf3df;
+  padding:56px 24px 70px;
+  position:relative;
+  overflow:hidden;
+  text-align:center;
+}
+.masthead::before{
+  content:"";
+  position:absolute; inset:0;
+  background:
+    radial-gradient(circle at 15% 30%, #ffffff14 0, transparent 40%),
+    radial-gradient(circle at 85% 70%, #ffffff10 0, transparent 45%);
+}
+.eyebrow{
+  font-family:'Space Mono',monospace;
+  letter-spacing:4px;
+  font-size:12.5px;
+  text-transform:uppercase;
+  color:#f0d24a;
+  position:relative;
+}
+.masthead h1{
+  font-family:'Noto Serif Sinhala',serif;
+  font-weight:900;
+  font-size:clamp(30px,5.2vw,54px);
+  margin:14px 0 8px;
+  position:relative;
+  text-shadow:0 3px 0 #00000030;
+}
+.masthead p.sub{
+  font-family:'Noto Serif Sinhala',serif;
+  font-size:clamp(15px,2vw,19px);
+  color:#f4e6c4;
+  max-width:640px;
+  margin:0 auto;
+  position:relative;
+}
+.organ-strip{
+  display:flex; justify-content:center; flex-wrap:wrap; gap:10px;
+  margin-top:26px; position:relative;
+}
+.organ-strip span{
+  background:#00000030;
+  border:1px solid #ffffff30;
+  padding:6px 14px;
+  border-radius:100px;
+  font-size:12.5px;
+  font-family:'Space Mono',monospace;
+}
+
+/* ---------- Layout ---------- */
+.wrap{
+  max-width:1180px;
+  margin:0 auto;
+  display:grid;
+  grid-template-columns:230px 1fr;
+  gap:0;
+  padding:0 20px;
+}
+nav.toc{
+  position:sticky;
+  top:0;
+  align-self:start;
+  padding:34px 14px 34px 0;
+  max-height:100vh;
+  overflow-y:auto;
+}
+nav.toc h4{
+  font-family:'Space Mono',monospace;
+  font-size:11px;
+  letter-spacing:2px;
+  color:var(--maroon);
+  text-transform:uppercase;
+  margin:0 0 10px 4px;
+}
+nav.toc a{
+  display:block;
+  padding:7px 10px;
+  font-size:13.6px;
+  color:var(--ink);
+  text-decoration:none;
+  border-left:3px solid transparent;
+  border-radius:0 6px 6px 0;
+  opacity:.78;
+  transition:.15s;
+}
+nav.toc a:hover, nav.toc a.active{
+  background:var(--paper-dark);
+  border-left-color:var(--maroon);
+  opacity:1;
+  font-weight:600;
+}
+nav.toc a.sub{ padding-left:22px; font-size:12.6px; }
+
+main{ padding:34px 4px 80px 26px; border-left:1px solid var(--line); min-width:0; }
+
+section{ margin-bottom:56px; scroll-margin-top:14px; }
+
+.chnum{
+  font-family:'Space Mono',monospace;
+  font-size:13px;
+  color:var(--olive);
+  letter-spacing:2px;
+}
+h2.section-title{
+  font-family:'Noto Serif Sinhala',serif;
+  font-weight:900;
+  font-size:clamp(22px,3vw,32px);
+  color:var(--maroon-deep);
+  margin:2px 0 22px;
+  padding-bottom:14px;
+  border-bottom:3px solid var(--maroon-deep);
+  display:inline-block;
+}
+h3.sub-title{
+  font-family:'Noto Serif Sinhala',serif;
+  font-weight:700;
+  font-size:21px;
+  color:var(--teal);
+  margin:34px 0 12px;
+  display:flex; align-items:center; gap:10px;
+}
+h3.sub-title::before{
+  content:"";
+  width:10px;height:10px;
+  background:var(--highlight);
+  border:2px solid var(--maroon-deep);
+  border-radius:2px;
+  flex:none;
+}
+h4.mini-title{
+  font-size:16.5px;
+  font-weight:700;
+  color:var(--maroon);
+  margin:22px 0 8px;
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:20px 22px;
+  margin:16px 0;
+  box-shadow:3px 3px 0 var(--line);
+}
+p{ margin:8px 0; }
+ul, ol{ padding-right:0; padding-left:22px; margin:8px 0; }
+li{ margin:5px 0; }
+
+mark{
+  background:linear-gradient(180deg, transparent 55%, var(--highlight) 55%);
+  padding:0 2px;
+}
+b, strong{ color:var(--maroon-deep); }
+.key{
+  background:var(--highlight-soft);
+  border-bottom:2px solid var(--highlight);
+  padding:1px 3px;
+  border-radius:3px;
+  font-weight:600;
+}
+.tag{
+  display:inline-block;
+  font-family:'Space Mono',monospace;
+  font-size:11px;
+  background:var(--maroon-deep);
+  color:#fdf3df;
+  padding:3px 9px;
+  border-radius:5px;
+  margin-left:6px;
+  letter-spacing:1px;
+}
+.tag.eng{ background:var(--teal); }
+
+/* Tables */
+.table-wrap{ overflow-x:auto; margin:14px 0; border-radius:10px; border:1px solid var(--line); }
+table{
+  border-collapse:collapse;
+  width:100%;
+  min-width:560px;
+  background:var(--card);
+  font-size:13.8px;
+}
+thead th{
+  background:var(--maroon-deep);
+  color:#fdf3df;
+  padding:11px 12px;
+  text-align:right;
+  font-family:'Noto Serif Sinhala',serif;
+  font-weight:700;
+  font-size:14px;
+  position:sticky; top:0;
+}
+tbody td{
+  padding:9px 12px;
+  border-bottom:1px solid var(--line);
+  vertical-align:top;
+  text-align:right;
+}
+tbody tr:nth-child(even){ background:#f8f0dc60; }
+tbody tr:hover{ background:var(--highlight-soft); }
+td.name-col{ font-weight:700; color:var(--maroon); white-space:nowrap; }
+
+/* enzyme flow chips */
+.flow{
+  display:flex; align-items:center; flex-wrap:wrap; gap:10px;
+  background:var(--paper-dark);
+  border:1px dashed var(--olive);
+  padding:14px 16px;
+  border-radius:10px;
+  margin:12px 0;
+  font-size:13.8px;
+}
+.flow .chip{
+  background:var(--card);
+  border:1px solid var(--line);
+  padding:6px 12px;
+  border-radius:7px;
+  font-weight:600;
+}
+.flow .enz{
+  color:var(--teal);
+  font-family:'Space Mono',monospace;
+  font-size:12.4px;
+  font-weight:700;
+}
+.flow .arrow{ color:var(--maroon); font-size:18px; }
+
+/* organ accordion */
+.organ{
+  border:1px solid var(--line);
+  border-radius:10px;
+  margin:14px 0;
+  overflow:hidden;
+  background:var(--card);
+}
+.organ summary{
+  cursor:pointer;
+  list-style:none;
+  padding:15px 20px;
+  display:flex; justify-content:space-between; align-items:center;
+  background:linear-gradient(90deg, var(--paper-dark), var(--card));
+  font-family:'Noto Serif Sinhala',serif;
+  font-weight:700;
+  font-size:17px;
+  color:var(--maroon-deep);
+}
+.organ summary::-webkit-details-marker{ display:none; }
+.organ summary::after{
+  content:"+";
+  font-family:'Space Mono',monospace;
+  font-size:20px;
+  color:var(--maroon);
+  transition:.2s;
+}
+.organ[open] summary::after{ content:"–"; }
+.organ .organ-body{ padding:6px 22px 20px; }
+
+.note-box{
+  border-right:5px solid var(--olive);
+  background:#eef1e2;
+  padding:14px 18px;
+  border-radius:8px;
+  margin:14px 0;
+  font-size:13.8px;
+}
+.note-box b{ color:var(--olive); }
+
+.warn-box{
+  border-right:5px solid var(--maroon);
+  background:#f7e6e0;
+  padding:14px 18px;
+  border-radius:8px;
+  margin:14px 0;
+  font-size:13.8px;
+}
+
+.grid2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+@media (max-width:720px){ .grid2{ grid-template-columns:1fr; } }
+
+footer{
+  text-align:center;
+  padding:40px 20px 60px;
+  font-family:'Space Mono',monospace;
+  font-size:12px;
+  color:var(--maroon-deep);
+  opacity:.7;
+}
+
+@media (max-width:880px){
+  .wrap{ grid-template-columns:1fr; }
+  nav.toc{ position:static; max-height:none; padding:20px 0 0; }
+  main{ border-left:none; padding:20px 2px 60px; }
+}
+
+/* mobile nav toggle */
+#navToggle{ display:none; }
+@media (max-width:880px){
+  #navToggle{
+    display:block; width:100%;
+    background:var(--maroon-deep); color:#fdf3df; border:none;
+    padding:12px; font-family:'Noto Sans Sinhala'; font-weight:600; font-size:14px;
+    border-radius:8px; margin-top:16px; cursor:pointer;
+  }
+  nav.toc .toc-list{ display:none; }
+  nav.toc.open .toc-list{ display:block; margin-top:10px; }
+}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="eyebrow">G.C.E. A/L &nbsp;•&nbsp; ජීව විද්‍යාව &nbsp;•&nbsp; සම්පත් පොත සාරාංශය</div>
+  <h1>මිනිස් ජීරණ පද්ධතිය සහ පෝෂණය</h1>
+  <p class="sub">මුඛයේ සිට ගුද මාර්ගය දක්වා — පෝෂක, එන්සයිම, ග්‍රන්ථි සහ අවශෝෂණය පිළිබඳ සම්පූර්ණ ඒකාබද්ධ සටහන්</p>
+  <div class="organ-strip">
+    <span>මුඛ කුහරය</span><span>ආමාශය</span><span>අග්න්‍යාශය</span><span>අක්මාව</span><span>කුඩා අන්ත්‍රය</span><span>මහා අන්ත්‍රය</span>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="toc" id="tocNav">
+    <button id="navToggle">☰ පටුන</button>
+    <div class="toc-list">
+      <h4>පටුන</h4>
+      <a href="#ch1">1. සමබර ආහාරය සහ පෝෂක</a>
+      <a class="sub" href="#carbs">කාබෝහයිඩ්‍රේට්</a>
+      <a class="sub" href="#proteins">ප්‍රෝටීන</a>
+      <a class="sub" href="#lipids">ලිපිඩ</a>
+      <a class="sub" href="#vitamins">විටමින්</a>
+      <a class="sub" href="#minerals">බනිජ ලවණ</a>
+      <a class="sub" href="#other">ජලය, තන්තු, BMR</a>
+      <a href="#ch2">2. ආහාර මාර්ගය</a>
+      <a class="sub" href="#mouth">මුඛ කුහරය</a>
+      <a class="sub" href="#pharynx">ග්‍රසනිකාව/අන්නප්‍රෝතය</a>
+      <a class="sub" href="#stomach">ආමාශය</a>
+      <a class="sub" href="#small">කුඩා අන්ත්‍රය</a>
+      <a class="sub" href="#large">මහා අන්ත්‍රය</a>
+      <a href="#ch3">3. ආශ්‍රිත ග්‍රන්ථි</a>
+      <a class="sub" href="#pancreas">අග්න්‍යාශය</a>
+      <a class="sub" href="#liver">අක්මාව</a>
+      <a href="#ch4">4. ජීරණය, අවශෝෂණය, පරිවහනය</a>
+      <a class="sub" href="#enzymetable">එන්සයිම සාරාංශය</a>
+      <a class="sub" href="#absorption">අවශෝෂණ ක්‍රම</a>
+    </div>
+  </nav>
+
+  <main>
+
+  <!-- ================= CHAPTER 1 ================= -->
+  <section id="ch1">
+    <div class="chnum">CH. 01</div>
+    <h2 class="section-title">සමබර ආහාරය සහ පෝෂක</h2>
+
+    <div class="card">
+      <p><strong>සමබර ආහාරය</strong> යනු, ශරීරයේ යහපත් සෞඛ්‍යය හා වර්ධනය පවත්වාගෙන යාම සඳහා අවශ්‍ය සියලුම පෝෂක — <mark>කාබෝහයිඩ්‍රේට්, ප්‍රෝටීන, ලිපිඩ, විටමින්, බනිජ ලවණ, ජලය සහ තන්තු</mark> — නිසි අනුපාතයකින් හා ප්‍රමාණවත් තරමින් අඩංගු ආහාරයයි. ලබා ගන්නා ශක්තිය, එදිනෙදා ශක්ති වියදමට සරිලන පරිදි තිබිය යුතුය.</p>
+    </div>
+
+    <h3 class="sub-title" id="carbs">කාබෝහයිඩ්‍රේට් (Carbohydrates)</h3>
+    <p>සීනි හා පොලිසැකරයිඩවලින් සමන්විතයි. ප්‍රධාන ප්‍රභවයන්: බත්, පාන්, බිස්කට්, ධාන්‍ය, ආප්ප ආදිය.</p>
+    <ul>
+      <li><span class="key">ශක්තිය සහ තාපය ලබාදීම</span> — කාබෝහයිඩ්‍රේට් බිඳ හෙළීම මගින් දේහයේ ක්‍රියාකාරකම් සඳහා ATP ලබාදෙන අතර තාපය ජනනය කරයි.</li>
+      <li><span class="key">ශක්ති සංචිතයක් ලෙස ක්‍රියා කරයි</span> — අතිරික්ත කාබෝහයිඩ්‍රේට් <b>ග්ලයිකෝජන්</b> හා <b>මේද</b> බවට පරිවර්තනය කෙරේ.</li>
+      <li><span class="key">ප්‍රෝටීන ඉතුරු කිරීම</span> — ආහාරයේ කාබෝහයිඩ්‍රේට් ප්‍රමාණවත් තරම් ඇති විට, ශක්ති නිෂ්පාදනය සඳහා ප්‍රෝටීන යොදා නොගනී.</li>
+    </ul>
+
+    <h3 class="sub-title" id="proteins">ප්‍රෝටීන (Proteins)</h3>
+    <p>ප්‍රෝටීන ඇමයිනෝ අම්ලවලින් සෑදී ඇත. ජීරණයේදී ප්‍රෝටීන අඩ වී ශරීරයට අවශ්‍ය ඇමයිනෝ අම්ල ලබා ගනී.</p>
+    <div class="grid2">
+      <div class="note-box"><b>අත්‍යවශ්‍ය ඇමයිනෝ අම්ල (Essential):</b> ශරීරය තුළ සංශ්ලේෂණය කළ නොහැකි නිසා ආහාරයෙන් ම ලබා ගත යුතුය. උදා: <span class="key">ලියුසීන්, මෙතියොනීන්</span> (ශරීරයට අවශ්‍ය ඇමයිනෝ අම්ල වර්ග 20 අතුරින්, එකක් හෝ කිහිපයක් — ප්‍රභේදය අනුව).</div>
+      <div class="note-box"><b>අනත්‍යවශ්‍ය ඇමයිනෝ අම්ල (Non-essential):</b> කාබනික පූර්වගාමීවලින් ශරීරය තුළ ම සංශ්ලේෂණය කළ හැකි ඇමයිනෝ අම්ල.</div>
+    </div>
+    <p>සතුන්ගෙන් ලැබෙන ප්‍රෝටීන (බිත්තර, මස්, මාළු ආදිය) සියලුම අත්‍යවශ්‍ය ඇමයිනෝ අම්ල නිසි අනුපාතයෙන් සපයන අතර, බොහෝ ශාක ප්‍රෝටීනවල එයින් එකක් හෝ කිහිපයක් අඩුවෙන් හෝ නොමැතිව පවතී — එබැවින් සමබර ආහාර වේලක් සඳහා විවිධ ශාක ප්‍රෝටීන ප්‍රභවයන් සංයෝජනය කළ යුතුය.</p>
+    <h4 class="mini-title">ප්‍රෝටීනවල කෘත්‍ය</h4>
+    <ul>
+      <li>ශරීර වර්ධනය, දෙහ පටක සෛල හා පටක වර්ධනය සහ අභිවෘද්ධිය සඳහා</li>
+      <li>ජීවී ද්‍රවශේෂ, එන්සයිම, ප්‍රතිශක්තිකරණ (ප්‍රතිදේහ) හා සමහර හෝමෝන සංශ්ලේෂණයට භාවිත වේ</li>
+      <li>ගිර කාර්යයන්ට ශක්තියක් ලෙස ක්‍රියා කරයි</li>
+    </ul>
+
+    <h3 class="sub-title" id="lipids">ලිපිඩ / මේද (Lipids)</h3>
+    <p>මේද හා තෙල්වලින් සමන්විතයි. ත්‍යාවශ්‍ය මේද අම්ල (Essential Fatty Acids) කාබනික පූර්වගාමීවලින් ශරීරය තුළ සංශ්ලේෂණය කළ නොහැකි නිසා ආහාරයෙන් ම ලබා ගත යුතුය — <span class="key">ඕල්, ධාන්‍ය හා එළවළු</span> මගින් අත්‍යවශ්‍ය මේද අම්ල ප්‍රමාණවත් තරම් සපයයි.</p>
+    <ul>
+      <li>ශක්තිය හා තාපය සපයයි (බර මන පදනමින්, කාබෝහයිඩ්‍රේට් හා ප්‍රෝටීනවලට සාපේක්ෂව මේද හා තෙල් වැඩි ශක්ති ප්‍රමාණයක් සපයයි)</li>
+      <li>මේදයේ ද්‍රාව්‍ය විටමින් A, D, E සහ K පරිවහනය හා සංචිත කිරීමට උදවු වේ</li>
+      <li>ශරීරය තුළ මේද පටකයක් ලෙස ශක්තිය සංචිත කරයි</li>
+      <li>පරිවරණය සපයයි — සමේ අධ්‍යවර්ණීය පටක ස්ථරයේ ඇති මේදය තාප හානිය අඩු කරයි</li>
+      <li>කොලෙස්ටරෝල් වලින් ස්ටෙරොයිඩ් හෝමෝන සංශ්ලේෂණයට උදවු වේ</li>
+    </ul>
+
+    <h3 class="sub-title" id="vitamins">විටමින්</h3>
+    <p>විටමින් යනු, සාමාන්‍ය සෞඛ්‍යය හා ප්‍රත්‍යාවර්තිය පවත්වා ගැනීම සඳහා ඉතා අඩු ප්‍රමාණවලින් අවශ්‍ය කාබනික සංයෝගයි. බොහෝ විටමින් ශරීරය තුළ නිපදවීමට නොහැකි නිසා ආහාර මගින් ලබා ගත යුතුය. විටමින් ප්‍රධාන කාණ්ඩ දෙකකි — <b>ජල ද්‍රාවී (B, C)</b> සහ <b>මේද ද්‍රාවී (A, D, E, K)</b>.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>විටමින්</th><th>ප්‍රධාන ආහාර ප්‍රභවය</th><th>ඌනතා ලක්ෂණ</th></tr></thead>
+        <tbody>
+          <tr><td class="name-col">A (රෙටිනෝල්) <span class="tag">මේද ද්‍රාවී</span></td><td>තද කොළ පැහැති එළවළු, තෙල් සහිත මාළු, කිරි සහිත ආහාර</td><td>රාත්‍රි අන්ධතාව, සමේ ආබාධ, ප්‍රතිශක්තිය දුබල වීම</td></tr>
+          <tr><td class="name-col">D <span class="tag">මේද ද්‍රාවී</span></td><td>බිත්තර කහ මදය, කිරි නිෂ්පාදන, හිරු එළිය</td><td>කුඩා දරුවන්ගේ අස්ථි විරූප වීම (රිකෙට්ස්), වැඩිහිටියන්ගේ අස්ථි මෘදු වීම</td></tr>
+          <tr><td class="name-col">E <span class="tag">මේද ද්‍රාවී</span></td><td>එළවළු තෙල්, බීජ, nuts</td><td>ස්නායු පද්ධතියේ පිරිහීම</td></tr>
+          <tr><td class="name-col">K <span class="tag">මේද ද්‍රාවී</span></td><td>කොළ පැහැති එළවළු, බඩවැලේ බැක්ටීරියා මගින් නිපදවේ</td><td>රුධිර කැටි ගැසීමේ දුබලතාව</td></tr>
+          <tr><td class="name-col">B₁ (තයමීන්) <span class="tag eng">ජල ද්‍රාවී</span></td><td>රනිල, බෝග, උරුමස්, නිවුඩු ධාන්‍ය</td><td>බෙරි-බෙරි (පුපුරු ගැසීම, ස්නායු ආසාධන)</td></tr>
+          <tr><td class="name-col">B₂ (රයිබොෆ්ලේවින්) <span class="tag eng">ජල ද්‍රාවී</span></td><td>කිරි නිෂ්පාදන, මස්, කොළ පැහැති එළවළු</td><td>සමේ වෑන (කට හා තොල් වණ)</td></tr>
+          <tr><td class="name-col">B₃ (නියසින්) <span class="tag eng">ජල ද්‍රාවී</span></td><td>ධාන්‍ය, මස්, nuts</td><td>පෙලග්‍රා — සමේ වණ, මානසික ව්‍යාකූලතා, පාචනය</td></tr>
+          <tr><td class="name-col">B₅ (පැන්ටතෙනික් අම්ලය)</td><td>කිරි නිෂ්පාදන, බිත්තර, ධාන්‍ය</td><td>විවේකහීන බව, හිරි වැටීම, පුපුරු ගැසීම</td></tr>
+          <tr><td class="name-col">B₆ (පිරිඩොක්සින්)</td><td>නිවුඩු ධාන්‍ය, මස්, එළවළු</td><td>රක්තහීනතාව, උත්තේජනකාරී තත්ත්වයන්</td></tr>
+          <tr><td class="name-col">B₇ (බයෝටින්)</td><td>මස්, රනිල, බිත්තර</td><td>ස්නායු ආබාධ, සමේ රුක්ෂ බව</td></tr>
+          <tr><td class="name-col">B₉ (ෆෝලික් අම්ලය)</td><td>කොළ එළවළු, නිවුඩු ධාන්‍ය</td><td>රක්තහීනතාව, උපත් දෝෂ</td></tr>
+          <tr><td class="name-col">B₁₂ (කොබල්ඇමීන්)</td><td>කිරි නිෂ්පාදන, බිත්තර, මස්</td><td>සමතුලිතතාව නැති වීම, හිරි වැටීම, රක්තහීනතාව</td></tr>
+          <tr><td class="name-col">C (ඇස්කෝබික් අම්ලය) <span class="tag eng">ජල ද්‍රාවී</span></td><td>දෙහි, පුතුරු, ලෙමන්, තක්කාලි</td><td><b>ස්කර්වි</b> (දත් හා සම පරිහානියට පත් වීම), තුවාල සුව වීමට ප්‍රමාද වීම, ප්‍රතිශක්තිකරණය අඩුවීම</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note-box"><b>සටහන:</b> විටමින් A, D, E සහ K මේදය සමග අවශෝෂණය වී අක්මාව හෝ මේද පටක තුළ සංචිත කළ හැකි අතර, B සහ C ජලයෙහි ද්‍රාව්‍ය බැවින් ශරීරයේ අතිරික්තව ගබඩා නොවී මුත්‍රා මගින් බැහැර වේ — එබැවින් නිරන්තරයෙන් ආහාරයෙන් ලබා ගත යුතුය.</div>
+
+    <h3 class="sub-title" id="minerals">බනිජ ලවණ (Minerals)</h3>
+    <p>ශරීරයට වැඩි ප්‍රමාණයෙන් අවශ්‍ය <b>ප්‍රධාන බනිජ (Macro elements)</b>: <span class="key">Ca, P, S, K, Cl, Na, Mg</span>. ඉතා අඩු ප්‍රමාණයෙන් අවශ්‍ය <b>අනුබනිජ / සුළු මූලද්‍රව්‍ය (Trace elements)</b>: <span class="key">Fe, F, I, Co, Cu, Mn, Mo, Se, Zn</span>.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>බනිජය</th><th>ප්‍රධාන ආහාර ප්‍රභවය</th><th>ඌනතා ලක්ෂණ</th></tr></thead>
+        <tbody>
+          <tr><td class="name-col">කැල්සියම් (Ca)</td><td>කිරි නිෂ්පාදන, තද කොළ පැහැති එළවළු, රනිල බෝග</td><td>අස්ථි ශක්තිය අඩුවීම, දුර්වල වර්ධනය</td></tr>
+          <tr><td class="name-col">යකඩ (Fe)</td><td>නිවුඩු ධාන්‍ය, කොළ පැහැති පලා එළවළු, රනිල බෝග, මස්, බිත්තර</td><td>රක්තහීනතාව, ප්‍රතික්‍රියා අඩුවීම, දුර්වලකම</td></tr>
+          <tr><td class="name-col">පොටෑසියම් (K)</td><td>පළතුරු, එළවළු, මස්, කිරි නිෂ්පාදන, ධාන්‍ය</td><td>පේශි දුර්වලතාව, හෘද අක්‍රමිකතාව</td></tr>
+          <tr><td class="name-col">පොස්පරස් (P)</td><td>සේල, පාන්, කිරි, කිරි නිෂ්පාදන, මාළු, රනිල</td><td>දත් හා අස්ථි දුර්වලතාව</td></tr>
+          <tr><td class="name-col">අයඩින් (I)</td><td>මුහුදු ආහාර, අයඩීකෘත ලුණු</td><td>ගලගණ්ඩ රෝගය (තයිරොයිඩ් ග්‍රන්ථි විශාලනය)</td></tr>
+          <tr><td class="name-col">සල්ෆර් (S)</td><td>ප්‍රෝටීන අඩංගු ආහාර</td><td>වර්ධනය පිරිහීම, දුර්වලතාව</td></tr>
+          <tr><td class="name-col">ක්ලෝරයිඩ් (Cl) / සෝඩියම් (Na)</td><td>මේස ලුණු</td><td>ස්නායු පද්ධතියේ ආබාධ</td></tr>
+          <tr><td class="name-col">මැග්නීසියම් (Mg)</td><td>කොළ පැහැති පලා එළවළු, ධාන්‍ය</td><td>දත් දිරා යාම, පේශි කැක්කුම</td></tr>
+          <tr><td class="name-col">ෆ්ලෝරයිඩ් (F)</td><td>තේ, මුහුදු ආහාර, පානීය ජලය</td><td>දත් දිරා යාම</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="sub-title" id="other">ජලය, ආහාරමය තන්තු, ශක්ති තුලනය</h3>
+    <div class="grid2">
+      <div class="card">
+        <h4 class="mini-title">ජලය</h4>
+        <ul>
+          <li>මිනිස් දේහ ස්කන්ධයෙන් <b>60%</b>ක් පමණ ජලයයි</li>
+          <li>සියලුම ජීවී පෙළ සඳහා තෙත් අභ්‍යන්තර පරිසරයක් සපයයි</li>
+          <li>රුධිරය හා පටක තරලවල ප්‍රධාන සංඝටකය — රුධිර හා පටක අතර ද්‍රව්‍ය හුවමාරුවට උදවු</li>
+          <li>ප්‍රභාන වෙනස්කම් වලින් ශරීරය දේහ උෂ්ණත්වය නියාමනය කරයි (දහඩිය)</li>
+          <li>අවයව හා විවේචන තුනුක සිරුම සහ ජීවියේ බිඝිස්සාවයට මාධ්‍යයක් සපයයි</li>
+          <li>ආහාර ගිලීම ලිහිල් කරයි</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4 class="mini-title">ආහාරමය තන්තු (Dietary Fibre)</h4>
+        <p>ජීරණය කළ නොහැකි පොලිසැකරයිඩ මගින් සෑදුණු, ආහාරයේ අඩංගු තන්තු (පිෂ්ඨය නොවන පොලිසැකරයිඩ). ප්‍රභවයන්: පලතුරු, එළවළු, ධාන්‍ය.</p>
+        <ul>
+          <li>ආහාරයේ පරිමාව වැඩි කරයි — ආහාර රුචිය සන්සිඳුවයි</li>
+          <li>ජල ආකර්ෂණය හා ක්‍රියාකාරීත්වය උත්තේජනය කරයි — මල ප්‍රමාණය වැඩි කර, මල බද්ධය නැති කිරීම</li>
+          <li>මහාන්ත්‍රය හා ගුදමාර්ගයේ පිළිකා වැළැක්වීමට උදවු කරයි</li>
+          <li>ආමාශ-ආන්ත්‍රික ආබාධවලට එරෙහි ආරක්ෂාව සපයයි</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <h4 class="mini-title">මූලික පරිවෘත්තීය වේගය (BMR) සහ ශක්ති අය-වැය</h4>
+      <p>BMR යනු, සම්පූර්ණයෙන් විවේකයෙන් සිටින, පසුගිය පැය 12 නිරාහාරව සිටි ආතතියෙන් තොර ශරීරයක අවම පරිවෘත්තීය වේගය. සාමාන්‍ය වැඩිහිටි පුරුෂයෙකුගේ BMR දිනකට 1,600–1,800 kCal ද, ස්ත්‍රියකගේ 1,300–1,500 kCal ද වේ.</p>
+      <div class="flow">
+        <span class="chip">C = M + U + F + P</span>
+        <span style="font-size:12.6px;">C = ලබාගත් ආහාරමය ශක්තිය&nbsp; | &nbsp;M = පරිවෘත්තීය ක්‍රියාවලිය සඳහා වැය වූ ශක්තිය&nbsp; | &nbsp;U = මුත්‍රා මගින් හානි වූ ශක්තිය&nbsp; | &nbsp;F = මල ද්‍රව්‍ය මගින් හානි වූ ශක්තිය&nbsp; | &nbsp;P = නිෂ්පාදනය (වර්ධනය/ප්‍රජනනය) සඳහා ලබා ගත් ශක්තිය</span>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="warn-box">
+        <h4 class="mini-title" style="margin-top:0;">දුෂ්පෝෂණය (Malnutrition)</h4>
+        <p>ආහාරයේ අවශ්‍ය පෝෂක ප්‍රමාණයක් හීන වීම හෝ අධික රසායනික ශක්තියක් දිගින් දිග ලැබීමෙන් ඇතිවේ. WHO අනුව, ශරීර ස්කන්ධ දර්ශකය (<b>BMI</b>) 18.5 ට වඩා අඩු නම් දුෂ්පෝෂණය ලෙස සලකයි.<br><span class="key">BMI = ස්කන්ධය (kg) / උස² (m²)</span></p>
+      </div>
+      <div class="warn-box">
+        <h4 class="mini-title" style="margin-top:0;">ස්ථූලතාව (Obesity)</h4>
+        <p>ලබාගත් ශක්ති ප්‍රමාණයට වඩා වැය කරන ශක්ති ප්‍රමාණය අඩුවීම නිසා ඇතිවේ. WHO අනුව BMI 30.0 ට වඩා වැඩි නම් ස්ථූලතාවයි. දියවැඩියාව, හෘද රෝග සහ ඇතැම් පිළිකා සඳහා අවදානම් සාධකයකි.</p>
+      </div>
+    </div>
+
+    <div class="note-box">
+      <b>ආහාර මාර්ගයේ සුලබ රෝගාබාධ — ගැස්ට්‍රයිටිස්:</b> ආමාශ බිත්තියේ ඇති ඉන්ටිය උත්තේජනය වීමෙන් HCl වැඩි ප්‍රමාණයක් සුාවය වීම නිසා ශ්ලේෂ්මලයට හානි සිදු වී ඇතිවේ. දිගු කලීනව කුසගින්නෙන් සිටීම, ඇස්පිරින් වැනි සමහර ඖෂධ, සහ <i>Helicobacter pylori</i> බැක්ටීරියා ආසාදනය ගැස්ට්‍රයිටිස් තත්ත්වයට හේතු විය හැක.</div>
+  </section>
+
+  <!-- ================= CHAPTER 2 ================= -->
+  <section id="ch2">
+    <div class="chnum">CH. 02</div>
+    <h2 class="section-title">ආහාර මාර්ගයේ ව්‍යුහය සහ කෘත්‍ය</h2>
+    <p>මානව ආහාර මාර්ගය මුඛයේ සිට ගුද මාර්ගය දක්වා විහිදෙන දිගු නලයකි — එය බාහිර පරිසරයට සම්බන්ධ අභ්‍යන්තර මතුපිටක් ලෙස සලකයි. එය ප්‍රධාන කොටස් හතකින් සමන්විතයි: <span class="key">මුඛ කුහරය, ග්‍රසනිකාව, අන්නප්‍රෝතය, ආමාශය, කුඩා අන්ත්‍රය, මහා අන්ත්‍රය සහ ගුද මාර්ගය</span>. මීට අමතරව ආශ්‍රිත ග්‍රන්ථි ලෙස <b>ඛෙට ග්‍රන්ථි, අක්මාව සහ අග්න්‍යාශය</b> ක්‍රියා කරයි.</p>
+
+    <details class="organ" open id="mouth">
+      <summary>මුඛ කුහරය (Buccal Cavity)</summary>
+      <div class="organ-body">
+        <p>දත් හා දිව මගින් <b>යාන්ත්‍රික ජීරණය</b> (ආහාර හපනය/masticaion) සිදු වන අතර, ඛෙට ග්‍රන්ථි වලින් ස්‍රාවය වන ඛෙටය මගින් <b>රසායනික ජීරණය</b> ආරම්භ වේ. දත් හතරක් වර්ග වශයෙන් ආහාර කැපීම, උරා ගැනීම, පොඩි කිරීම හා ඇඹීම සිදු කරයි.</p>
+        <h4 class="mini-title">ඛෙට ග්‍රන්ථි සහ ඛෙටයේ සංයුතිය</h4>
+        <p>ඛෙට ග්‍රන්ථි (ජෝඩු 3ක්) මුඛ කුහරය තුළට ඛෙටය ස්‍රාවය කරයි. එහි ජලය, ශ්ලේෂ්මල (mucin), <span class="key">ඛෙට ඇමයිලේස් (ptyalin)</span> එන්සයිමය, ලයිසෝසයිම් සහ බෆර ලවණ අඩංගු වේ.</p>
+        <ul>
+          <li><b>ඛෙට ඇමයිලේස්:</b> පිෂ්ඨය (පොලිසැකරයිඩ) රසායනිකව ජීරණය කර, කුඩා පොලිසැකරයිඩ හා ඩයිසැකරයිඩ (මෝල්ටෝස්) බවට පත් කරයි.</li>
+          <li><b>ජලය:</b> රසායනික ජීරණයට ජලීය මාධ්‍යයක් සපයන අතර ආහාර ද්‍රාවීකරණයට උදවු වේ.</li>
+          <li><b>ශ්ලේෂ්මල:</b> ආහාර ස්නේහනය මගින් ආහාර ගිලීම පහසු කරන අතර, මුඛය පිරිසිදු කිරීම හා ආස්තරණය රැකීමට උදවු කරයි.</li>
+          <li><b>ප්‍රතිශක්තිජනක ද්‍රව්‍ය (ඉමියුනොග්ලෝබියුලින්, ලයිසෝසයිම්):</b> මුඛයට ඇතුළු වන බැක්ටීරියාවන්ට එරෙහිව ක්‍රියා කිරීමෙන් ආරක්ෂාව සපයයි.</li>
+          <li><b>ස්වාරක්ෂක කාර්යය:</b> අම්ල උදාසීනකරණය මගින් දත් දිරාව වැළැක්වීමට උදවු කරයි.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="organ" id="pharynx">
+      <summary>ග්‍රසනිකාව සහ අන්නප්‍රෝතය</summary>
+      <div class="organ-body">
+        <p><b>ග්‍රසනිකාව</b> මුඛ කුහරය අන්නප්‍රෝතයට සම්බන්ධ කරන කොටසයි. ගිලීමේදී ආහාර පිඬ (bolus) ග්‍රසනිකාව හරහා අන්නප්‍රෝතයට යවනු ලැබේ. <b>අන්නප්‍රෝතය</b> තුළින් ආහාර පිඬ, <span class="key">පරියාකුංචන ක්‍රියාව (peristalsis)</span> — අන්නප්‍රෝතයේ මාංශපේශිවල රිද්මිකව හැකිලීම හා ලිහිල් වීම — මගින් ආමාශය දක්වා තල්ලු කරනු ලැබේ.</p>
+      </div>
+    </details>
+
+    <details class="organ" id="stomach">
+      <summary>ආමාශය (Stomach)</summary>
+      <div class="organ-body">
+        <p>ආමාශය ආහාරමය දිග කුහරයකි. එහි ආමාශයික ග්‍රන්ථි ආමාශයික යුෂ ස්‍රාවය කරයි. ආමාශයික ග්‍රන්ථි ප්‍රධාන වශයෙන් සෛල වර්ග තුනකින් සමන්විතයි — <b>ශ්ලේෂ්මල සෛල, ප්‍රධාන සෛල (chief cells)</b> සහ <b>පාර්ශ්වික සෛල (parietal cells)</b>.</p>
+        <h4 class="mini-title">ආමාශයික යුෂයේ රසායනික ජීරණය</h4>
+        <ul>
+          <li>ආමාශයික යුෂ ප්‍රධාන වශයෙන් <span class="key">ශ්ලේෂ්මල, පෙප්සිනෝජන් සහ HCl</span> වලින් සමන්විතයි.</li>
+          <li><b>පාර්ශ්වික සෛල</b> මගින් හයිඩ්‍රජන් අයන (H⁺) හා ක්ලෝරයිඩ් අයන (Cl⁻) වෙන වෙනම ස්‍රාවය කරන අතර, ඒවා ආමාශයික කුහරය තුළදී ඒකාබද්ධ වී <b>HCl</b> සෑදේ.</li>
+          <li><b>ප්‍රධාන සෛල</b> මගින් නිෂ්ක්‍රීය <span class="key">පෙප්සිනෝජන්</span> ස්‍රාවය කරන අතර, HCl මගින් එය සක්‍රීය <span class="key">පෙප්සින්</span> බවට පරිවර්තනය කෙරේ. සක්‍රීය වූ පෙප්සින්, තවත් පෙප්සිනෝජන් අණු සක්‍රීය කිරීමට උදවු කරයි (ස්වයං-උත්ප්‍රේරණය).</li>
+          <li><b>පෙප්සින්</b> ප්‍රෝටීන අම්ල මාධ්‍යයක් තුළ පෙප්ටයිඩවලට ජීරණය කරයි.</li>
+        </ul>
+        <h4 class="mini-title">HCl හි කාර්යභාරය</h4>
+        <ul>
+          <li>ආහාරයේ ඇතුළු වන බැක්ටීරියා විනාශ කිරීම (රෝගාණු විනාශය)</li>
+          <li>පෙප්සිනෝජන් සක්‍රීය පෙප්සින් බවට පරිවර්තනය කිරීම</li>
+          <li>පෙප්සින් ක්‍රියාකාරී වීමට අවශ්‍ය අම්ල මාධ්‍යය සැපයීම</li>
+        </ul>
+        <div class="note-box"><b>ආමාශ ආස්තරණ ආරක්ෂාව:</b> ශ්ලේෂ්මල ස්‍රාවය ආමාශ බිත්තිය HCl හා පෙප්සින්ගෙන් ආරක්ෂා කරයි (ස්වයං-ජීරණය වැලැක්වීම). ආමාශ ආස්තරණයේ සෛල දිනකට කිහිප වතාවක් ප්‍රතිස්ථාපනය වේ — විනාශ වූ/හානි වූ සෛල, නව අභිවෘද්ධ සෛල ස්ථරයකින් ප්‍රතිස්ථාපනය කෙරේ.</div>
+        <p><b>ගැස්ට්‍රින් හෝමෝනය:</b> ආහාර ආමාශයට ලඟා වූ විට ග්‍රහණියෙන් ස්‍රාවය වන <span class="key">ගැස්ට්‍රින්</span> හෝමෝනය රුධිරය හරහා ආමාශයට ලඟාවී, ආමාශයික යුෂ නිපදවීම උත්තේජනය කරයි.</p>
+      </div>
+    </details>
+
+    <details class="organ" id="small">
+      <summary>කුඩා අන්ත්‍රය (Small Intestine)</summary>
+      <div class="organ-body">
+        <p>කුඩා අන්ත්‍රය කොටස් තුනකින් සමන්විතයි:</p>
+        <ul>
+          <li><b>ග්‍රහණිය (Duodenum):</b> අග්න්‍යාශයික හිස වටා ඇති C හැඩැති වක්‍රයක් ලෙස සැකසුණු කුඩා අන්ත්‍රයේ පූර්ව කොටස. අග්න්‍යාශයික යුෂ හා පිත්ත ලවණ ලැබෙන ප්‍රධාන ස්ථානයයි.</li>
+          <li><b>ගුනාන්ත්‍රකය (Jejunum):</b> කුඩා අන්ත්‍රයේ මැද කොටස.</li>
+          <li><b>ශේෂාන්ත්‍රකය (Ileum):</b> කුඩා අන්ත්‍රයේ අවසාන කොටස. බිත්තිය සම්පූර්ණයෙන් අංගුලිකා (villi) වලින් ආවරණය වී ඇත.</li>
+        </ul>
+        <p>ග්‍රහණියට <b>අග්න්‍යාශයික ප්‍රණාලය</b> සහ <b>පොදු පිත්ත ප්‍රණාලය</b> එකතු වී විවෘත වන අතර, ග්‍රහණියේ බණ්ඩිකා (sphincter) මගින් ප්‍රවාහය පාලනය කෙරේ.</p>
+        <h4 class="mini-title">අංගුලිකා (Villi) සහ බුරුසු දාරය</h4>
+        <p>කුඩා අන්ත්‍රයේ ඇතුළත බිත්තිය අංගුලිකා ලෙස හැඳින්වෙන ඇඟිලි හැඩැති ප්‍රවර්ධකවලින් ආවරණය වී ඇත. ඒවායේ එපිතිලීයම සෛලවල ඇති <span class="key">බුරුසු දාරය (brush border)</span> මතුපිට ප්‍රදේශය තවත් වැඩි කරන අතර, එහි <b>අන්ත්‍රික එන්සයිම (disaccharidases, peptidases)</b> රඳවා තබා ගනී. එක් එක් අංගුලිකාව තුළ රුධිර කේශනාලිකා ජාලයක් හා <span class="key">පයෝලස නාළිකාවක් (lacteal)</span> ඇත.</p>
+      </div>
+    </details>
+
+    <details class="organ" id="large">
+      <summary>මහා අන්ත්‍රය (Large Intestine)</summary>
+      <div class="organ-body">
+        <p>ආහාර මාර්ගයේ අවසාන කොටස මහා අන්ත්‍රයයි. එය ප්‍රධාන කොටස් තුනකට බෙදිය හැක — <b>මහාන්ත්‍රකය (Colon), උන්ඩුකය (Cecum)</b> සහ <b>ගුද මාර්ගය</b>. ශේෂාන්ත්‍රකය මහාන්ත්‍රකයට "T" හැඩැති සන්ධියකින් සම්බන්ධ වේ — මෙහි බණ්ඩිකයක් ද ඇති අතර, ඉතික බැහුවක් ශේෂාන්ත්‍රකයට ආපසු ගමන් වීම වළක්වයි.</p>
+        <ul>
+          <li><b>මහාන්ත්‍රකය:</b> ගුද මාර්ගයට හා ශේෂාන්ත්‍රකයට යාබද වේ.</li>
+          <li><b>ජලය හා විටමින් ප්‍රතිඅවශෝෂණය:</b> මහාන්ත්‍රකයේ ප්‍රධාන කාර්යභාරයයි. සිරුරට ලබා ගැනීම බාක්ටීරියා ක්‍රියාකාරීත්වයෙන් ලැබෙන ද්‍රව්‍ය (ක්ෂුද්‍ර ජීවීන් ආධාරයෙන් සමහර <span class="key">විටමින් B සංකීර්ණ, විටමින් K</span> සහ ෆෝලික් අම්ලය සංශ්ලේෂණය වේ) ද අවශෝෂණය වේ.</li>
+          <li>ජලය හා අයන අවශෝෂණයෙන් පසුව ඉතිරි වන ඝන ද්‍රව්‍ය මල බවට හැඩගැසේ.</li>
+        </ul>
+        <div class="note-box"><b>මල බැහැර කිරීමේ ප්‍රතික්‍රියාව (Defecation reflex):</b> මල බද්ධය සෙමින් ගමන් කිරීම හේතුවෙන් ජලය අවශෝෂණය දීර්ඝ වී මල වඩාත් ඝන බවට පත් වේ. මල බැහැර කිරීම ප්‍රතික්‍රියාව නිෂේධනය වීම හේතුවෙන් ද මල බද්ධය ඇති විය හැක. ගුදයේ වේදනාවක් ඇති වීමත්, මල පහ කිරීමේ අපහසුතාවත් ද ඇති විය හැක. මල පහ කිරීම සඳහා ව්‍යායාමයෙන් අනුගත වීමෙන් මල බද්ධය පාලනය කළ හැක.</div>
+      </div>
+    </details>
+  </section>
+
+  <!-- ================= CHAPTER 3 ================= -->
+  <section id="ch3">
+    <div class="chnum">CH. 03</div>
+    <h2 class="section-title">ආශ්‍රිත ග්‍රන්ථි</h2>
+
+    <h3 class="sub-title" id="pancreas">අග්න්‍යාශය (Pancreas)</h3>
+    <p>අග්න්‍යාශය <b>මිශ්‍ර ග්‍රන්ථියකි</b> — එය බහිරාසර්ග හා අන්තරාසර්ග යන කොටස් දෙකෙන් සමන්විතයි.</p>
+    <div class="grid2">
+      <div class="card">
+        <h4 class="mini-title">බහිරාසර්ග කොටස</h4>
+        <p>ලුබ්ලයික (acini) සෛල පවුරු අග්න්‍යාශයික යුෂ ස්‍රාවය කර, අග්න්‍යාශයික ප්‍රණාලය හරහා ග්‍රහණියට යවයි. එහි ජීරණ එන්සයිම (ඇමයිලේස්, ට්‍රිප්සිනෝජන්, කයිමොට්‍රිප්සිනෝජන්, ලිපේස්, නිවුක්ලියේස්) හා බයිකාබනේට් අඩංගු වේ.</p>
+      </div>
+      <div class="card">
+        <h4 class="mini-title">අන්තරාසර්ග කොටස</h4>
+        <p>ලැන්ගර්හාන්ස් දිපිකා (islets of Langerhans) ලෙස හැඳින්වෙන සෛල පොකුරු, <span class="key">ඉන්සියුලින්</span> හා <span class="key">ග්ලූකගොන්</span> හෝමෝන සෘජුවම රුධිරයට ස්‍රාවය කර රුධිර සීනි මට්ටම නියාමනය කරයි.</p>
+      </div>
+    </div>
+
+    <h3 class="sub-title" id="liver">අක්මාව (Liver)</h3>
+    <p>දේහයේ ඇති විශාලතම ග්‍රන්ථියයි. එහි උත්තර හා පූර්ව මතුපිට පෑෂ්ය සුමට, උත්තල හැඩයක් ගනී. අක්මාව <b>අක්මා බණ්ඩික</b> දහසකින් සමන්විතයි — එක් එක් බණ්ඩිකාව අඩංගු වන්නේ <span class="key">හෙපටොසයිට් (හෙපටික් සෛල)</span> මධ්‍ය සිරාව වටා විකිරණාකාරව සැකසුණු තහඩුවලින්.</p>
+    <ul>
+      <li><b>කෝටරාභ (Sinusoids):</b> හෙපටොසයිට් තහඩු අතර ඇති අර්ධ පාරගම්‍ය රුධිර වාහිනී — හෙපටික් ධමනියෙන් හා හෙපටික් පෝර්ටල් සිරාවෙන් එන රුධිරය මිශ්‍ර වී මධ්‍ය සිරාවට ගමන් කරයි.</li>
+      <li><b>කුප්ෆර් සෛල (Kupffer cells):</b> කෝටරාභවල ඇති යාකෘතික මහාභක්ෂක සෛල, රුධිරයේ ඇති බැක්ටීරියා හා ක්ෂය පදාර්ථ ග්‍රහණය කරයි.</li>
+      <li><b>පිත්ත තාලිකා:</b> හෙපටොසයිට් මගින් සකසන පිත්තය රැගෙන යන කුඩා නාළිකා, පිත්ත ප්‍රණාලයට එකතු වේ.</li>
+    </ul>
+    <h4 class="mini-title">අක්මාවේ කෘත්‍ය</h4>
+    <ul>
+      <li><b>පිත්ත ස්‍රාවය:</b> පිත්ත ලවණ, පිත්ත වර්ණක (රතු රුධිරාණු බිඳවැටීමෙන් ලැබෙන බිලිරූබින්) සහ කොලෙස්ටරෝල් වලින් සමන්විත පිත්තය නිපදවයි. පිත්තාශයේ රැඳවී ගාඪ වේ.</li>
+      <li><b>කාබෝහයිඩ්‍රේට් පරිවෘත්තිය:</b> ග්ලූකෝස් අතිරික්තය ග්ලයිකෝජන් ලෙස ගබඩා කරයි (ග්ලයිකොජෙනසිස්), අවශ්‍ය විට ග්ලූකෝස් නිදහස් කරයි (ග්ලයිකොජෙනොලිසිස්).</li>
+      <li><b>ප්‍රෝටීන පරිවෘත්තිය:</b> ඇමයිනෝ අම්ල නාශන (deamination) සිදු කර යුරියා නිපදවයි.</li>
+      <li><b>විෂ නිශ්කාශනය (Detoxification):</b> ඖෂධ හා විෂ ද්‍රව්‍යවල විෂහරණය.</li>
+      <li><b>සංචිතය:</b> මේද ද්‍රාවී විටමින් (A, D, E සහ K) සහ මධ්‍යම ජල ද්‍රාවී විටමින් (B₁₂), යකඩ (Fe) සහ තඹ (Cu) අක්මාව තුළ ගබඩා කෙරේ.</li>
+      <li><b>රුධිර සාධක සංශ්ලේෂණය:</b> ප්ලාස්මා ප්‍රෝටීන හා රුධිර කැටිගැසීමේ සාධක නිපදවයි.</li>
+      <li><b>තාප ජනනය:</b> අක්මාවේ පරිවෘත්තීය ක්‍රියාකාරකම් තාප ජනනයට හේතු වේ (ශරීර උෂ්ණත්ව නියාමනයට උදවු).</li>
+      <li><b>රතු රුධිරාණු විනාශය:</b> පැරණි රතු රුධිරාණු කුප්ෆර් සෛල මගින් ග්‍රහණය කර, බිලිරූබින් ලෙස පිත්තට එකතු කරයි.</li>
+    </ul>
+
+    <h4 class="mini-title">ජීරණය පාලනය කරන හෝමෝන</h4>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>හෝමෝනය</th><th>ස්‍රාවය වන ස්ථානය</th><th>ක්‍රියාව</th></tr></thead>
+        <tbody>
+          <tr><td class="name-col">ගැස්ට්‍රින්</td><td>ආමාශය</td><td>ආමාශයික යුෂ ස්‍රාවය උත්තේජනය කරයි</td></tr>
+          <tr><td class="name-col">සිකූටින් (Secretin)</td><td>ග්‍රහණිය</td><td>අග්න්‍යාශයෙන් බයිකාබනේට් ස්‍රාවය උත්තේජනය කරයි; ආමාශයික යුෂ ස්‍රාවය නිශේධනය කරයි</td></tr>
+          <tr><td class="name-col">කොලිසිස්ටොකයිනින් (CCK)</td><td>ග්‍රහණිය</td><td>පිත්තාශයෙන් පිත්ත නිදහස් කිරීම හා අග්න්‍යාශයේ එන්සයිම ස්‍රාවය උත්තේජනය කරයි; ආමාශය හිස් වීම මන්දගාමී කරයි</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ================= CHAPTER 4 ================= -->
+  <section id="ch4">
+    <div class="chnum">CH. 04</div>
+    <h2 class="section-title">ජීරණය, අවශෝෂණය සහ පරිවහනය</h2>
+
+    <h3 class="sub-title" id="enzymetable">එන්සයිම ක්‍රියාවලීන් — සාරාංශය</h3>
+
+    <h4 class="mini-title">1. කාබෝහයිඩ්‍රේට් ජීරණය</h4>
+    <div class="flow"><span class="chip">පිෂ්ඨය</span><span class="arrow">→</span><span class="enz">ඛෙට ඇමයිලේස් (මුඛය)</span><span class="arrow">→</span><span class="chip">කුඩා පොලිසැකරයිඩ / මෝල්ටෝස්</span></div>
+    <div class="flow"><span class="chip">පිෂ්ඨය</span><span class="arrow">→</span><span class="enz">අග්න්‍යාශයික ඇමයිලේස් (ග්‍රහණිය)</span><span class="arrow">→</span><span class="chip">ඩයිසැකරයිඩ</span></div>
+    <div class="flow"><span class="chip">ඩයිසැකරයිඩ (මෝල්ටෝස්/සුක්‍රෝස්/ලැක්ටෝස්)</span><span class="arrow">→</span><span class="enz">බුරුසු දාරයේ ඩයිසැකරයිඩේස් (මෝල්ටේස්, සුක්‍රේස්, ලැක්ටේස්)</span><span class="arrow">→</span><span class="chip">මොනොසැකරයිඩ (ග්ලූකෝස්, ෆ්‍රක්ටෝස්, ගැලැක්ටෝස්)</span></div>
+
+    <h4 class="mini-title">2. ප්‍රෝටීන ජීරණය</h4>
+    <div class="flow"><span class="chip">ප්‍රෝටීන</span><span class="arrow">→</span><span class="enz">පෙප්සින් (ආමාශය, HCl මගින් සක්‍රීය කරන ලද)</span><span class="arrow">→</span><span class="chip">පොලිපෙප්ටයිඩ</span></div>
+    <div class="flow"><span class="chip">පොලිපෙප්ටයිඩ</span><span class="arrow">→</span><span class="enz">ට්‍රිප්සින් / කයිමොට්‍රිප්සින් (අග්න්‍යාශය)</span><span class="arrow">→</span><span class="chip">කුඩා පෙප්ටයිඩ</span></div>
+    <p style="font-size:13.4px;">ට්‍රිප්සිනෝජන් හා කයිමොට්‍රිප්සිනෝජන් නිෂ්ක්‍රීය ස්වරූපයෙන් ස්‍රාවය වන අතර, බුරුසු දාරයේ <span class="key">එන්ටරොපෙප්ටිඩේස්</span> එන්සයිමය මගින් ට්‍රිප්සිනෝජන් සක්‍රීය ට්‍රිප්සින් බවට පත් කරයි; සක්‍රීය ට්‍රිප්සින්, කයිමොට්‍රිප්සිනෝජන් ද සක්‍රීය කරයි.</p>
+    <div class="flow"><span class="chip">කුඩා පෙප්ටයිඩ</span><span class="arrow">→</span><span class="enz">බුරුසු දාරයේ පෙප්ටිඩේස්</span><span class="arrow">→</span><span class="chip">ඇමයිනෝ අම්ල</span></div>
+
+    <h4 class="mini-title">3. ලිපිඩ (මේද) ජීරණය</h4>
+    <p><b>පිත්ත ලවණ</b> මගින් මේද, <span class="key">ඉමල්සිකරණය (emulsification)</span> කරයි — විශාල මේද බිංදු කුඩා බිංදු බවට කැඩී මතුපිට ප්‍රදේශය වැඩි කරයි (එය එන්සයිම ක්‍රියාකාරීත්වයක් නොවේ).</p>
+    <div class="flow"><span class="chip">ඉමල්සිකෘත මේදය (ට්‍රයිග්ලිසරයිඩ)</span><span class="arrow">→</span><span class="enz">අග්න්‍යාශයික ලිපේස්</span><span class="arrow">→</span><span class="chip">මේද අම්ල + ග්ලිසරෝල් / මොනොග්ලිසරයිඩ</span></div>
+    <p style="font-size:13.4px;">මේද අම්ල, මොනොග්ලිසරයිඩ හා ග්ලිසරෝල් අන්ත්‍රික ලයිපේස් මගින් ද මේදය, මේද අම්ල හා ග්ලිසරෝල් බවට පත් කිරීම උත්ප්‍රේරණය කෙරේ.</p>
+
+    <h4 class="mini-title">4. නියුක්ලීක් අම්ල ජීරණය</h4>
+    <div class="flow"><span class="chip">DNA / RNA</span><span class="arrow">→</span><span class="enz">අග්න්‍යාශයික නියුක්ලියේස් (DNase/RNase)</span><span class="arrow">→</span><span class="chip">නියුක්ලියෝටයිඩ</span></div>
+    <div class="flow"><span class="chip">නියුක්ලියෝටයිඩ</span><span class="arrow">→</span><span class="enz">නියුක්ලියෝටයිඩේස් / නියුක්ලියෝසයිඩේස් (බුරුසු දාරය)</span><span class="arrow">→</span><span class="chip">නයිට්‍රජනීය භෂ්ම + පෙන්ටෝස් සීනි + පොස්ෆේට්</span></div>
+
+    <h3 class="sub-title" id="absorption">කුඩා අන්ත්‍රයේ අවශෝෂණ ක්‍රම</h3>
+    <div class="grid2">
+      <div class="card">
+        <h4 class="mini-title" style="margin-top:0;">සුවිශේෂී ප්‍රවහන ක්‍රම</h4>
+        <ul>
+          <li><b>ක්‍රියාශීලී ප්‍රවහනය (Active transport):</b> ග්ලූකෝස්, ඇමයිනෝ අම්ල හා සමහර බනිජ, ATP ශක්තිය භාවිතයෙන් සාන්ද්‍රණ අනුක්‍රමයට එරෙහිව අවශෝෂණය කෙරේ (Na⁺ සමඟ සම-ප්‍රවහනය).</li>
+          <li><b>පහසුකරණය කළ විසරණය (Facilitated diffusion):</b> ෆ්‍රක්ටෝස් වැනි සමහර මොනොසැකරයිඩ හා විටමින්, ශක්තියක් වැය නොකර වාහක ප්‍රෝටීන ඔස්සේ අවශෝෂණය කෙරේ.</li>
+          <li><b>සරල විසරණය:</b> ජලය, මේද අම්ල, ඇතැම් විටමින් සහ බනිජ, සාන්ද්‍රණ අනුක්‍රමය ඔස්සේ සෘජුවම විසරණය වේ.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4 class="mini-title" style="margin-top:0;">මේද අවශෝෂණය හා පයෝලස පද්ධතිය</h4>
+        <p>මේද අම්ල හා මොනොග්ලිසරයිඩ එපිතිලීයම සෛල තුළට විසරණය වී, එහිදී නැවත ට්‍රයිග්ලිසරයිඩ ලෙස සංයෝජනය කෙරේ. මේවා කොලෙස්ටරෝල් හා ලිපොප්‍රෝටීන සමඟ එකතු වී <span class="key">කයිලෝමයික්‍රෝන (chylomicrons)</span> සාදයි. කයිලෝමයික්‍රෝන රුධිර කේශනාලිකාවලට නොව, අංගුලිකාවේ <b>පයෝලස නාළිකාවට (lacteal)</b> ඇතුළු වී වසා පද්ධතිය ඔස්සේ පරිවහනය වේ.</p>
+      </div>
+    </div>
+
+    <div class="note-box">
+      <b>අවශෝෂණය සඳහා අංගුලිකා අනුවර්තනයන්:</b> විශාල මතුපිට ප්‍රදේශයක් (කුඩා අන්ත්‍රයේ ඇතුළත බිත්තියේ ප්ලික්කා, අංගුලිකා සහ අංගුලිකා මතුපිටෙහි බුරුසු දාරය), තුනී එපිතිලීයම ස්තරයක්, ඝන රුධිර කේශනාලිකා ජාලයක් හා පයෝලස නාළිකාවක් තිබීම, සහ ස්ථීර පරියාකුංචනයෙන් රුධිර ප්‍රවාහය පවත්වා ගැනීම ආදිය ඇතුළත් වේ.</p>
+    </div>
+  </section>
+
+  </main>
+</div>
+
+<footer>Sri Lanka A/L Biology — ජීරණ පද්ධතිය සහ පෝෂණය · සම්පත් පොත පිටු 172–189 ඇසුරෙන් සකසන ලදී</footer>
+
+<script>
+// mobile toc toggle
+document.getElementById('navToggle').addEventListener('click', function(){
+  document.getElementById('tocNav').classList.toggle('open');
+});
+
+// active link highlight on scroll
+const links = document.querySelectorAll('nav.toc a[href^="#"]');
+const targets = Array.from(links).map(l => document.querySelector(l.getAttribute('href'))).filter(Boolean);
+
+function onScroll(){
+  let currentId = null;
+  const scrollPos = window.scrollY + 120;
+  targets.forEach(t => { if(t.offsetTop <= scrollPos) currentId = t.id; });
+  links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + currentId));
+}
+window.addEventListener('scroll', onScroll);
+onScroll();
+
+// close mobile nav after click
+links.forEach(l => l.addEventListener('click', () => {
+  document.getElementById('tocNav').classList.remove('open');
+}));
+</script>
+</body>
+</html>

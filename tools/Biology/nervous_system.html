@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>ස්නායු පද්ධතිය — අන්තර්ක්‍රියාකාරී</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0e17; --bg2:#0f1524; --panel:#131a2c; --panel2:#182035;
+  --line:#232c42; --text:#e7ebf5; --muted:#8b95b3; --muted2:#5f6a8a;
+  --na:#ffb454; --k:#7c8bff; --ca:#ff6b9d; --nt:#2dd4bf;
+  --spark:#2dd4bf; --spark2:#7c8bff; --danger:#ff6b6b; --warn:#ffb454;
+  --radius:16px; --radius-sm:10px;
+  --shadow:0 8px 30px rgba(0,0,0,.35);
+  --font-si:'Noto Sans Sinhala',sans-serif; --font-en:'Space Grotesk',sans-serif;
+}
+[data-theme="light"]{
+  --bg:#f6f3ec; --bg2:#efe9db; --panel:#ffffff; --panel2:#f5f1e6;
+  --line:#e3ddcb; --text:#211d16; --muted:#5c5546; --muted2:#8a8270;
+  --shadow:0 8px 24px rgba(80,60,20,.10);
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent; touch-action:manipulation;}
+html{scroll-behavior:smooth; -webkit-text-size-adjust:100%; text-size-adjust:100%;}
+body{margin:0; background:var(--bg); color:var(--text); font-family:var(--font-si); line-height:1.6; transition:background .3s,color .3s;
+  overflow-x:hidden; width:100%; max-width:100vw;
+  padding-left:env(safe-area-inset-left); padding-right:env(safe-area-inset-right);
+  -webkit-font-smoothing:antialiased;}
+button, a, input[type=range]{ min-height:0; }
+@media (prefers-reduced-motion:reduce){ *{animation-duration:.001ms !important; transition-duration:.001ms !important;} html{scroll-behavior:auto;} }
+img,svg{ max-width:100%; height:auto; }
+h1,h2,h3{font-family:var(--font-si); font-weight:700; margin:0 0 8px;}
+.eyebrow{font-family:var(--font-en); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--spark); font-weight:600;}
+p{color:var(--muted); margin:6px 0;}
+button{font-family:var(--font-si); cursor:pointer;}
+.wrap{max-width:900px; margin:0 auto; padding:0 16px;}
+
+/* ---------- Top bar ---------- */
+.topbar{position:sticky; top:0; z-index:50; display:flex; align-items:center; justify-content:space-between;
+  padding:calc(12px + env(safe-area-inset-top)) 16px 12px; background:rgba(10,14,23,.85); backdrop-filter:blur(10px); border-bottom:1px solid var(--line);}
+[data-theme="light"] .topbar{background:rgba(246,243,236,.88);}
+.topbar .title{font-size:15px; font-weight:700; display:flex; align-items:center; gap:8px;}
+.topbar .title .dot{width:9px;height:9px;border-radius:50%;background:var(--spark);box-shadow:0 0 12px var(--spark);}
+.topbtns{display:flex; gap:8px;}
+.iconbtn{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--text);display:flex;align-items:center;justify-content:center;font-size:17px; flex:none;}
+.iconbtn:active{transform:scale(.92);}
+
+/* ---------- Nav drawer ---------- */
+.drawer{position:fixed; inset:0; z-index:100; background:rgba(0,0,0,.55); display:none;}
+.drawer.open{display:block;}
+.drawer-panel{position:absolute; top:0; right:0; height:100%; width:78%; max-width:320px; background:var(--panel);
+  padding:70px 18px 18px; box-shadow:var(--shadow); transform:translateX(100%); transition:transform .3s;}
+.drawer.open .drawer-panel{transform:translateX(0);}
+.drawer-panel a{display:flex; align-items:center; gap:12px; padding:13px 10px; border-radius:var(--radius-sm); color:var(--text); text-decoration:none; font-size:14.5px; font-weight:600; margin-bottom:4px;}
+.drawer-panel a:active{background:var(--panel2);}
+.drawer-panel a .num{font-family:var(--font-en); font-size:11px; color:var(--muted2); width:20px;}
+.drawer-close{position:absolute; top:16px; right:16px;}
+
+/* ---------- Hero ---------- */
+.hero{padding:28px 16px 20px; position:relative; overflow:hidden;}
+.hero-axon{position:absolute; inset:0; opacity:.5; pointer-events:none;}
+.hero h1{font-size:clamp(21px,6.2vw,26px); position:relative; z-index:1; line-height:1.25;}
+.hero p.lead{font-size:13.5px; max-width:520px; position:relative; z-index:1;}
+@media(max-width:360px){ .quicknav{grid-template-columns:1fr;} }
+.quicknav{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:18px; position:relative; z-index:1;}
+.qcard{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:14px; text-decoration:none; color:var(--text);}
+.qcard .qtitle{font-weight:700; font-size:13.5px; display:block; margin-bottom:3px;}
+.qcard .qsub{font-size:11.5px; color:var(--muted2); font-family:var(--font-en);}
+.qcard:active{background:var(--panel2);}
+
+/* ---------- Sections ---------- */
+section.mod{padding:26px 16px 10px; scroll-margin-top:60px;}
+.mod-head{margin-bottom:14px;}
+.panel{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:16px; margin-bottom:14px; box-shadow:var(--shadow);}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+.btn{background:var(--spark); color:#03211d; border:none; padding:12px 20px; border-radius:999px; font-weight:700; font-size:13.5px; min-height:44px;}
+.btn:active{transform:scale(.96);}
+.btn.ghost{background:transparent; border:1px solid var(--line); color:var(--text);}
+.btn.small{padding:10px 16px; font-size:12.5px; min-height:40px;}
+.pill{font-family:var(--font-en); font-size:11px; padding:4px 10px; border-radius:999px; background:var(--panel2); border:1px solid var(--line); color:var(--muted);}
+.pill.active{background:var(--spark); color:#03211d; border-color:var(--spark); font-weight:700;}
+
+/* ---------- Action potential ---------- */
+#apSvgWrap{background:var(--bg2); border-radius:var(--radius-sm); padding:6px; overflow:hidden;}
+.phase-label{font-family:var(--font-en); font-weight:700; font-size:13px; letter-spacing:.03em;}
+.mv-readout{font-family:var(--font-en); font-size:28px; font-weight:700; color:var(--spark);}
+.ion{transition:opacity .2s;}
+.legend{display:flex; gap:14px; flex-wrap:wrap; margin-top:8px; font-size:12px; color:var(--muted);}
+.legend span{display:inline-flex; align-items:center; gap:5px;}
+.legend i{width:10px;height:10px;border-radius:50%; display:inline-block;}
+.slider-row{display:flex; align-items:center; gap:10px; margin-top:10px;}
+input[type=range]{flex:1; accent-color:var(--spark);}
+
+/* ---------- Brain explorer ---------- */
+.brainbox{background:var(--bg2); border-radius:var(--radius-sm); padding:8px;}
+.hotspot{cursor:pointer; transition:opacity .15s;}
+.hotspot:hover, .hotspot.active{opacity:.75;}
+.infocard{margin-top:12px; padding:14px; border-radius:var(--radius-sm); background:var(--panel2); border:1px solid var(--line); display:none;}
+.infocard.show{display:block;}
+.infocard h3{font-size:15px; color:var(--spark); margin-bottom:6px;}
+.infocard ul{margin:4px 0 0; padding-left:18px; color:var(--muted); font-size:13.5px;}
+.tabs{display:flex; gap:8px; margin-bottom:12px; overflow-x:auto; padding-bottom:2px;}
+.tabbtn{flex:none; padding:8px 14px; border-radius:999px; border:1px solid var(--line); background:var(--panel2); color:var(--muted); font-size:13px; font-weight:600;}
+.tabbtn.active{background:var(--spark); color:#03211d; border-color:var(--spark);}
+.tabpanel{display:none;} .tabpanel.active{display:block;}
+
+/* ---------- Reflex arc ---------- */
+.reflex-steps{display:flex; justify-content:space-between; margin-top:12px; font-size:10px; color:var(--muted2); font-family:var(--font-si); text-align:center; gap:3px;}
+.reflex-steps span{flex:1; line-height:1.25; word-break:break-word; hyphens:auto;}
+.reflex-steps span.active{color:var(--spark); font-weight:700;}
+@media(max-width:380px){ .reflex-steps{font-size:9px;} }
+.step-desc{margin-top:12px; padding:12px; border-radius:var(--radius-sm); background:var(--panel2); font-size:13.5px; min-height:54px;}
+
+/* ---------- Synapse ---------- */
+.synapse-desc{margin-top:10px; padding:12px; border-radius:var(--radius-sm); background:var(--panel2); font-size:13.5px; min-height:60px;}
+.nt-tags{display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;}
+.nt-tags span{font-size:11px; padding:4px 10px; border-radius:999px; background:rgba(45,212,191,.12); color:var(--spark); border:1px solid rgba(45,212,191,.3);}
+
+/* ---------- Disorders ---------- */
+.dgrid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+.flip{perspective:1200px; height:190px;}
+.flip-inner{position:relative; width:100%; height:100%; transition:transform .55s; transform-style:preserve-3d;}
+.flip.flipped .flip-inner{transform:rotateY(180deg);}
+.flip-face{position:absolute; inset:0; backface-visibility:hidden; border-radius:var(--radius-sm); border:1px solid var(--line); padding:12px; display:flex; flex-direction:column; justify-content:center;}
+.flip-front{background:var(--panel2);}
+.flip-back{background:var(--panel2); transform:rotateY(180deg); overflow-y:auto;}
+.flip-front .icon{font-size:26px;}
+.flip-front .name{font-weight:700; font-size:14px; margin-top:6px; word-break:break-word; line-height:1.3;}
+.flip-front .tap{font-size:10.5px; color:var(--muted2); font-family:var(--font-en); margin-top:auto;}
+.flip-back h4{margin:0 0 4px; font-size:13px; color:var(--spark);}
+.flip-back p{font-size:12px; margin:2px 0; color:var(--muted);}
+
+/* ---------- Flashcards ---------- */
+.fc-wrap{display:flex; flex-direction:column; align-items:center;}
+.fc-card{width:100%; max-width:420px; height:190px; perspective:1200px;}
+.fc-inner{position:relative; width:100%; height:100%; transition:transform .5s; transform-style:preserve-3d; cursor:pointer;}
+.fc-card.flip .fc-inner{transform:rotateY(180deg);}
+.fc-face{position:absolute; inset:0; backface-visibility:hidden; border-radius:var(--radius); border:1px solid var(--line); background:var(--panel2);
+  display:flex; align-items:center; justify-content:center; text-align:center; padding:18px; font-weight:700; font-size:clamp(14px,4vw,16px); overflow-y:auto; word-break:break-word;}
+.fc-face.back{transform:rotateY(180deg); font-size:clamp(12.5px,3.6vw,13.5px); color:var(--muted); font-weight:400;}
+.fc-nav{display:flex; gap:10px; margin-top:14px;}
+.fc-progress{font-family:var(--font-en); font-size:11.5px; color:var(--muted2); margin-top:8px;}
+
+footer{text-align:center; padding:30px 16px calc(60px + env(safe-area-inset-bottom)); color:var(--muted2); font-size:11.5px; font-family:var(--font-en);}
+@media(min-width:640px){ .dgrid{grid-template-columns:repeat(4,1fr);} }
+@media(max-width:380px){
+  .wrap{padding:0 12px;}
+  section.mod{padding:22px 12px 8px;}
+  .panel{padding:13px;}
+  .dgrid{gap:9px;}
+  .flip{height:172px;}
+  .btn{padding:11px 16px; font-size:13px;}
+}
+</style>
+</head>
+<body data-theme="dark">
+
+<div class="topbar">
+  <div class="title"><span class="dot"></span> ස්නායු පද්ධතිය</div>
+  <div class="topbtns">
+    <button class="iconbtn" id="themeToggle">🌙</button>
+    <button class="iconbtn" id="menuOpen">☰</button>
+  </div>
+</div>
+
+<div class="drawer" id="drawer">
+  <div class="drawer-panel">
+    <button class="iconbtn drawer-close" id="menuClose">✕</button>
+    <a href="#ap"><span class="num">01</span> ක්‍රියා විභවය Simulator</a>
+    <a href="#brain"><span class="num">02</span> මොළය සහ සුෂුම්නාව</a>
+    <a href="#reflex"><span class="num">03</span> ප්‍රතිචක්‍රය</a>
+    <a href="#synapse"><span class="num">04</span> උපාගම හා සම්ප්‍රේෂක</a>
+    <a href="#disorders"><span class="num">05</span> ස්නායු ආබාධ</a>
+    <a href="#flash"><span class="num">06</span> ෆ්ලෑෂ් කාඩ්</a>
+  </div>
+</div>
+
+<div class="hero">
+  <svg class="hero-axon" viewBox="0 0 400 120" preserveAspectRatio="none">
+    <path d="M0,60 Q100,20 200,60 T400,60" stroke="#2dd4bf" stroke-width="2" fill="none" opacity=".5"/>
+    <path d="M0,70 Q100,110 200,70 T400,70" stroke="#7c8bff" stroke-width="2" fill="none" opacity=".35"/>
+  </svg>
+  <span class="eyebrow">ජීව විද්‍යාව • අ.පො.ස (උ.පෙළ)</span>
+  <h1>මිනිසාගේ ස්නායු පද්ධතිය</h1>
+  <p class="lead">සම්පත් පොතේ සටහන් නොව — ක්‍රියාකාරී සිමියුලේෂන් හරහා ඉගෙන ගන්න. පහත මොඩියුල ටච් කර අන්තර්ක්‍රියා කරන්න.</p>
+  <div class="quicknav">
+    <a class="qcard" href="#ap"><span class="qtitle">⚡ ක්‍රියා විභවය</span><span class="qsub">ACTION POTENTIAL</span></a>
+    <a class="qcard" href="#brain"><span class="qtitle">🧠 මොළය සහ සුෂුම්නාව</span><span class="qsub">BRAIN & CORD</span></a>
+    <a class="qcard" href="#reflex"><span class="qtitle">🦵 ප්‍රතිචක්‍රය</span><span class="qsub">REFLEX ARC</span></a>
+    <a class="qcard" href="#synapse"><span class="qtitle">🔗 උපාගම</span><span class="qsub">SYNAPSE</span></a>
+    <a class="qcard" href="#disorders"><span class="qtitle">⚠️ ස්නායු ආබාධ</span><span class="qsub">DISORDERS</span></a>
+    <a class="qcard" href="#flash"><span class="qtitle">🃏 ෆ්ලෑෂ් කාඩ්</span><span class="qsub">SELF TEST</span></a>
+  </div>
+</div>
+
+<!-- ================= 1. ACTION POTENTIAL ================= -->
+<section class="mod" id="ap">
+  <div class="mod-head wrap">
+    <span class="eyebrow">01 · SIMULATOR</span>
+    <h2>ක්‍රියා විභවය සහ ආවේග ජනනය</h2>
+    <p>Axon පටලය හරහා Na⁺ සහ K⁺ අයන ගමන් කරන අයුරු නරඹන්න. Play ඔබා සම්පූර්ණ චක්‍රය බලන්න.</p>
+  </div>
+  <div class="wrap">
+    <div class="panel">
+      <div class="row" style="justify-content:space-between;">
+        <div class="phase-label" id="phaseLabel" style="color:var(--spark)">විරාම විභවය (Resting)</div>
+        <div class="mv-readout" id="mvReadout">-70 mV</div>
+      </div>
+      <div id="apSvgWrap">
+        <svg viewBox="0 0 380 130" style="width:100%; display:block;">
+          <!-- graph axes -->
+          <line x1="30" y1="10" x2="30" y2="110" stroke="#3a445e" stroke-width="1"/>
+          <line x1="30" y1="90" x2="370" y2="90" stroke="#3a445e" stroke-width="1" stroke-dasharray="2,3"/>
+          <text x="4" y="35" font-size="7" fill="#8b95b3" font-family="Space Grotesk">+50</text>
+          <text x="4" y="93" font-size="7" fill="#8b95b3" font-family="Space Grotesk">-70</text>
+          <text x="4" y="112" font-size="7" fill="#8b95b3" font-family="Space Grotesk">-90</text>
+          <path id="apGraphPath" d="" stroke="#2dd4bf" stroke-width="2.2" fill="none"/>
+          <circle id="apGraphDot" r="4" fill="#ffb454"/>
+        </svg>
+        <svg viewBox="0 0 380 150" style="width:100%; display:block; margin-top:2px;">
+          <rect x="0" y="60" width="380" height="6" fill="#2a3350"/>
+          <text x="4" y="55" font-size="8" fill="#5f6a8a" font-family="Space Grotesk">OUTSIDE</text>
+          <text x="4" y="90" font-size="8" fill="#5f6a8a" font-family="Space Grotesk">INSIDE</text>
+          <!-- Na channel -->
+          <g id="naChannel">
+            <rect x="110" y="60" width="18" height="6" fill="#544326"/>
+            <text x="105" y="42" font-size="7.5" fill="#ffb454" font-family="Space Grotesk">Na⁺ ch.</text>
+          </g>
+          <!-- K channel -->
+          <g id="kChannel">
+            <rect x="230" y="60" width="18" height="6" fill="#2b2f55"/>
+            <text x="225" y="42" font-size="7.5" fill="#7c8bff" font-family="Space Grotesk">K⁺ ch.</text>
+          </g>
+          <!-- pump -->
+          <g id="pump">
+            <circle cx="330" cy="63" r="11" fill="none" stroke="#ff6b9d" stroke-width="2"/>
+            <text x="308" y="42" font-size="7" fill="#ff6b9d" font-family="Space Grotesk">Na⁺/K⁺ පොම්පය</text>
+            <text x="308" y="90" font-size="6.5" fill="#5f6a8a" font-family="Space Grotesk">3Na⁺out:2K⁺in</text>
+          </g>
+          <g id="ionLayer"></g>
+        </svg>
+      </div>
+      <div class="legend">
+        <span><i style="background:#ffb454"></i>Na⁺</span>
+        <span><i style="background:#7c8bff"></i>K⁺</span>
+        <span><i style="background:#ff6b9d"></i>ATP පොම්පය</span>
+      </div>
+      <div class="row" style="margin-top:12px;">
+        <button class="btn" id="apPlay">▶ ආරම්භ කරන්න</button>
+        <button class="btn ghost" id="apReset">↺ යළි සකසන්න</button>
+        <span class="pill" id="apSpeedPill">වේගය: සාමාන්‍ය</span>
+      </div>
+      <div class="slider-row">
+        <span style="font-size:11px;color:var(--muted2);font-family:var(--font-en)">SLOW</span>
+        <input type="range" id="apSpeed" min="1" max="3" value="2" step="1">
+        <span style="font-size:11px;color:var(--muted2);font-family:var(--font-en)">FAST</span>
+      </div>
+    </div>
+    <div class="panel">
+      <h3 style="font-size:14px;">අවධි විස්තරය</h3>
+      <p id="phaseDesc" style="font-size:13.5px;">Axon පටලය විරාම විභවයේ පවතී (-60 සිට -80 mV). Na⁺/K⁺ පොම්පය මගින් Na⁺ බාහිරව හා K⁺ අභ්‍යන්තරයට ගෙන යනු ලැබේ.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 2. BRAIN & SPINAL CORD ================= -->
+<section class="mod" id="brain">
+  <div class="mod-head wrap">
+    <span class="eyebrow">02 · EXPLORER</span>
+    <h2>මොළය සහ සුෂුම්නාවේ ව්‍යුහය</h2>
+    <p>කොටස් මත ටච් කර ක්‍රියාකාරීත්වය බලන්න.</p>
+  </div>
+  <div class="wrap">
+    <div class="panel">
+      <div class="tabs">
+        <button class="tabbtn active" data-tab="cerebrum-view">මොළය (Sagittal)</button>
+        <button class="tabbtn" data-tab="cord-view">සුෂුම්නාව (Cross-section)</button>
+      </div>
+      <div class="tabpanel active" id="cerebrum-view">
+        <div class="brainbox">
+          <svg viewBox="0 0 360 260" style="width:100%;">
+            <path d="M60,90 C40,40 120,15 190,20 C260,10 320,60 320,110 C330,150 300,190 260,200 C270,220 240,235 210,225 C190,245 150,240 140,220 C100,225 70,200 70,170 C40,160 40,110 60,90 Z"
+              fill="#182035" stroke="#2dd4bf" stroke-width="1.5"/>
+            <path class="hotspot" data-part="cerebrum" d="M70,60 C100,30 220,25 270,55 C290,75 280,110 240,120 L110,120 C80,110 55,85 70,60 Z" fill="#2dd4bf" opacity=".35"/>
+            <path class="hotspot" data-part="thalamus" d="M175,95 C190,88 210,90 212,108 C214,122 195,128 178,120 C168,112 168,102 175,95 Z" fill="#ffb454" opacity=".55"/>
+            <path class="hotspot" data-part="hypothalamus" d="M178,122 C192,120 202,128 198,140 C192,150 176,148 172,138 C170,130 172,125 178,122 Z" fill="#ff6b9d" opacity=".55"/>
+            <circle class="hotspot" data-part="pituitary" cx="185" cy="152" r="7" fill="#7c8bff" opacity=".6"/>
+            <path class="hotspot" data-part="midbrain" d="M205,130 C218,128 228,138 222,150 C215,158 202,155 200,144 C199,138 201,133 205,130 Z" fill="#2dd4bf" opacity=".55"/>
+            <path class="hotspot" data-part="pons" d="M200,155 C218,152 232,162 226,175 C218,184 200,180 197,168 C196,163 197,158 200,155 Z" fill="#a78bfa" opacity=".55"/>
+            <path class="hotspot" data-part="medulla" d="M195,180 C210,178 218,190 210,202 C200,210 188,204 188,192 C188,186 190,182 195,180 Z" fill="#ff6b6b" opacity=".55"/>
+            <path class="hotspot" data-part="cerebellum" d="M245,150 C280,145 305,165 300,190 C293,212 255,215 238,198 C228,185 232,158 245,150 Z" fill="#7c8bff" opacity=".4"/>
+            <path class="hotspot" data-part="corpus" d="M120,75 C160,60 210,60 240,72 C240,80 210,85 180,85 C150,85 125,82 120,75 Z" fill="#fff" opacity=".3"/>
+            <line x1="205" y1="205" x2="205" y2="245" stroke="#5f6a8a" stroke-width="6" stroke-linecap="round"/>
+            <text x="205" y="255" font-size="8" fill="#5f6a8a" text-anchor="middle" font-family="Space Grotesk">SPINAL CORD →</text>
+          </svg>
+        </div>
+        <div class="infocard" id="brainInfo"></div>
+      </div>
+      <div class="tabpanel" id="cord-view">
+        <div class="brainbox">
+          <svg viewBox="0 0 260 260" style="width:100%; max-width:280px; display:block; margin:0 auto;">
+            <circle class="hotspot" data-cord="dura" cx="130" cy="130" r="115" fill="none" stroke="#ff6b6b" stroke-width="3" opacity=".5"/>
+            <circle class="hotspot" data-cord="arachnoid" cx="130" cy="130" r="100" fill="none" stroke="#ffb454" stroke-width="3" opacity=".5"/>
+            <circle class="hotspot" data-cord="pia" cx="130" cy="130" r="88" fill="none" stroke="#2dd4bf" stroke-width="3" opacity=".5"/>
+            <circle class="hotspot" data-cord="white" cx="130" cy="130" r="80" fill="#e7ebf5" opacity=".12"/>
+            <path class="hotspot" data-cord="grey" d="M130,80 C145,90 148,110 138,120 C155,125 158,145 140,150 C148,165 132,180 130,180 C128,180 112,165 120,150 C102,145 105,125 122,120 C112,110 115,90 130,80Z" fill="#a78bfa" opacity=".55"/>
+            <circle class="hotspot" data-cord="canal" cx="130" cy="130" r="4" fill="#7c8bff"/>
+          </svg>
+        </div>
+        <div class="infocard" id="cordInfo"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 3. REFLEX ARC ================= -->
+<section class="mod" id="reflex">
+  <div class="mod-head wrap">
+    <span class="eyebrow">03 · ANIMATION</span>
+    <h2>ප්‍රතිචක්‍රය (Reflex Arc)</h2>
+    <p>"ඊළඟ පියවර" ඔබා ආවේගය ගමන් කරන මාර්ගය අනුගමනය කරන්න.</p>
+  </div>
+  <div class="wrap">
+    <div class="panel">
+      <svg viewBox="0 0 380 150" style="width:100%;">
+        <path id="reflexPath" d="M30,120 L30,40 L130,40 L130,110 L250,110 L250,30 L350,30" fill="none" stroke="#2a3350" stroke-width="3"/>
+        <circle id="reflexDot" r="6" fill="#2dd4bf"/>
+        <g id="reflexNodes"></g>
+      </svg>
+      <div class="reflex-steps" id="reflexLabels">
+        <span data-i="0">උත්තේජනය</span><span data-i="1">ග්‍රාහක</span><span data-i="2">අභිවාහි නියුරෝන</span><span data-i="3">අන්තර්හාර නියුරෝන</span><span data-i="4">අපවාහි නියුරෝන</span><span data-i="5">ප්‍රතිචාරකය</span>
+      </div>
+      <div class="step-desc" id="reflexDesc"></div>
+      <div class="row" style="margin-top:12px; justify-content:center;">
+        <button class="btn ghost small" id="reflexPrev">← පෙර</button>
+        <button class="btn small" id="reflexNext">ඊළඟ පියවර →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 4. SYNAPSE ================= -->
+<section class="mod" id="synapse">
+  <div class="mod-head wrap">
+    <span class="eyebrow">04 · VISUALIZER</span>
+    <h2>උපාගම හා ස්නායු සම්ප්‍රේෂක</h2>
+    <p>ස්නායු ආවේගය එක් සෛලයකින් තවත් සෛලයකට යන ආකාරය පියවරෙන් පියවර.</p>
+  </div>
+  <div class="wrap">
+    <div class="panel">
+      <svg viewBox="0 0 360 170" style="width:100%;">
+        <path d="M20,40 C60,40 90,60 100,85" stroke="#3a445e" stroke-width="10" fill="none" stroke-linecap="round"/>
+        <text x="15" y="30" font-size="8" fill="#5f6a8a" font-family="Space Grotesk">PRESYNAPTIC</text>
+        <g id="vesicles">
+          <circle cx="105" cy="55" r="7" fill="#2dd4bf" opacity=".8"/>
+          <circle cx="120" cy="65" r="7" fill="#2dd4bf" opacity=".8"/>
+          <circle cx="108" cy="75" r="7" fill="#2dd4bf" opacity=".8"/>
+        </g>
+        <g id="caIons"></g>
+        <rect x="95" y="90" width="10" height="55" fill="#0f1524"/>
+        <text x="112" y="120" font-size="7.5" fill="#5f6a8a" font-family="Space Grotesk" transform="rotate(90 112 120)">CLEFT</text>
+        <g id="ntLayer"></g>
+        <rect x="130" y="90" width="10" height="55" fill="#0f1524"/>
+        <path d="M140,145 C180,150 220,150 250,140" stroke="#3a445e" stroke-width="14" fill="none" stroke-linecap="round"/>
+        <g id="receptors">
+          <rect x="150" y="128" width="10" height="16" rx="3" fill="#a78bfa"/>
+          <rect x="175" y="132" width="10" height="16" rx="3" fill="#a78bfa"/>
+          <rect x="200" y="130" width="10" height="16" rx="3" fill="#a78bfa"/>
+        </g>
+        <text x="255" y="160" font-size="8" fill="#5f6a8a" font-family="Space Grotesk">POSTSYNAPTIC</text>
+      </svg>
+      <div class="synapse-desc" id="synapseDesc"></div>
+      <div class="nt-tags">
+        <span>ඇසිටයිල් කෝලින්</span><span>ඩෝපමින්</span><span>පෙප්ටයිඩ</span><span>ගැස් වර්ග (NO)</span>
+      </div>
+      <div class="row" style="margin-top:12px; justify-content:center;">
+        <button class="btn ghost small" id="synPrev">← පෙර</button>
+        <button class="btn small" id="synNext">ඊළඟ පියවර →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 5. DISORDERS ================= -->
+<section class="mod" id="disorders">
+  <div class="mod-head wrap">
+    <span class="eyebrow">05 · CARDS</span>
+    <h2>ස්නායු පද්ධතිය ආශ්‍රිත ආබාධ</h2>
+    <p>කාඩ්පත මත ටච් කර වැඩි විස්තර බලන්න.</p>
+  </div>
+  <div class="wrap">
+    <div class="dgrid" id="disorderGrid"></div>
+  </div>
+</section>
+
+<!-- ================= 6. FLASHCARDS ================= -->
+<section class="mod" id="flash">
+  <div class="mod-head wrap">
+    <span class="eyebrow">06 · SELF TEST</span>
+    <h2>ෆ්ලෑෂ් කාඩ්පත්</h2>
+    <p>කාඩ්පත මත ටච් කර පිළිතුර හෙළි කරන්න.</p>
+  </div>
+  <div class="wrap fc-wrap">
+    <div class="fc-card" id="fcCard">
+      <div class="fc-inner" id="fcInner">
+        <div class="fc-face front" id="fcFront"></div>
+        <div class="fc-face back" id="fcBack"></div>
+      </div>
+    </div>
+    <div class="fc-progress" id="fcProgress">1 / 20</div>
+    <div class="fc-nav">
+      <button class="btn ghost small" id="fcPrev">← පෙර</button>
+      <button class="btn ghost small" id="fcShuffle">🔀 මිශ්‍ර</button>
+      <button class="btn small" id="fcNext">ඊළඟ →</button>
+    </div>
+  </div>
+</section>
+
+<footer>NERVOUS SYSTEM INTERACTIVE · MADE FOR REVISION · ස්පර්ශ කර ඉගෙන ගන්න</footer>
+
+<script>
+/* ---------------- Theme + Drawer ---------------- */
+const body=document.body;
+document.getElementById('themeToggle').onclick=()=>{
+  const dark=body.getAttribute('data-theme')==='dark';
+  body.setAttribute('data-theme', dark?'light':'dark');
+  document.getElementById('themeToggle').textContent=dark?'☀️':'🌙';
+};
+const drawer=document.getElementById('drawer');
+document.getElementById('menuOpen').onclick=()=>drawer.classList.add('open');
+document.getElementById('menuClose').onclick=()=>drawer.classList.remove('open');
+drawer.onclick=(e)=>{ if(e.target===drawer) drawer.classList.remove('open'); };
+drawer.querySelectorAll('a').forEach(a=>a.onclick=()=>drawer.classList.remove('open'));
+
+/* ============================================================
+   1. ACTION POTENTIAL SIMULATOR
+============================================================ */
+const apData=[ // [t(0-100), v(mV)]
+  [0,-70],[14,-70],[16,-58],[20,10],[24,50],[27,45],[30,0],[34,-45],[38,-80],[42,-90],[48,-88],[58,-82],[70,-72],[100,-70]
+];
+function apInterp(t){
+  for(let i=0;i<apData.length-1;i++){
+    const [t0,v0]=apData[i], [t1,v1]=apData[i+1];
+    if(t>=t0&&t<=t1){ const f=(t-t0)/(t1-t0||1); return v0+(v1-v0)*f; }
+  }
+  return -70;
+}
+function vToY(v){ return 90 - ( (v+90) / 140 ) * 80; } // map -90..+50 to y 90..10
+function tToX(t){ return 30 + (t/100)*340; }
+let apPath='';
+for(let t=0;t<=100;t+=1){ apPath += (t===0?'M':'L')+tToX(t)+','+vToY(apInterp(t))+' '; }
+document.getElementById('apGraphPath').setAttribute('d',apPath.trim());
+
+const phaseInfo=[
+  {max:14, name:'විරාම විභවය (Resting)', color:'#2dd4bf', desc:'Axon පටලය විරාම විභවයේ පවතී (-60 සිට -80 mV). Na⁺/K⁺ පොම්පය මගින් සෑම ATP එකකටම Na⁺ අයන 3ක් පිටතටත් K⁺ අයන 2ක් ඇතුළටත් ගෙන යනු ලැබේ.'},
+  {max:19, name:'උත්තේජනය → සීමා අගය', color:'#ffb454', desc:'උත්තේජකයක් නිසා පටලය සීමා විභවයට (~-55mV) ළඟා වේ. මින් පසු Na⁺ වෝල්ටීයතා-ගේට් නාලිකා විවෘත වීමට පටන් ගනී.'},
+  {max:27, name:'විද්‍යුවනය (Depolarization)', color:'#ff6b6b', desc:'Na⁺ නාලිකා පූර්ණයෙන් විවෘත වී Na⁺ අයන විශාල ප්‍රමාණයක් අභ්‍යන්තරයට ගලා යයි. පටලය +50mV දක්වා ධන අගයට හැරේ.'},
+  {max:38, name:'ප්‍රතිවිද්‍යුවනය (Repolarization)', color:'#7c8bff', desc:'Na⁺ නාලිකා වසා K⁺ නාලිකා විවෘත වේ. K⁺ අයන අභ්‍යන්තරයේ සිට පිටතට ගලා යාමෙන් පටලය නැවත සෘණ අගයට හැරේ.'},
+  {max:48, name:'උපරි විද්‍යුවනය (Hyperpolarization)', color:'#a78bfa', desc:'K⁺ නාලිකා තරමක් ප්‍රමාද වී වැසීම නිසා පටලය විරාම විභවයට වඩා සෘණ අගයකට (~-90mV) පත්වේ.'},
+  {max:70, name:'අනස්සව කාලය (Refractory Period)', color:'#5f6a8a', desc:'Na⁺/K⁺ පොම්පය ක්‍රියාත්මක වී අයන ග්‍රේඩියන්ට නැවත ස්ථාපිත කරන කෙටි කාල පරාසය. මෙම කාලය තුළ නව ක්‍රියා විභවයක් ජනනය කිරීම දුෂ්කර හෝ නොහැකි වේ.'},
+  {max:100, name:'විරාම විභවයට නැවත පැමිණීම', color:'#2dd4bf', desc:'පටලය නැවත -70mV පමණ විරාම විභවයට පත්වී ඊළඟ ආවේගය සඳහා සූදානම් වේ.'}
+];
+function phaseFor(t){ for(const p of phaseInfo){ if(t<=p.max) return p; } return phaseInfo[phaseInfo.length-1]; }
+
+const ionLayer=document.getElementById('ionLayer');
+function spawnIon(type,x,dir){ // dir: 1 = outside->inside, -1 = inside->outside
+  const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+  c.setAttribute('r',4); c.setAttribute('cx',x);
+  c.setAttribute('cy', dir===1?40:100);
+  c.setAttribute('fill', type==='Na'?'#ffb454':'#7c8bff');
+  c.classList.add('ion');
+  ionLayer.appendChild(c);
+  const targetY= dir===1?100:40;
+  let y=parseFloat(c.getAttribute('cy'));
+  const step=()=>{
+    y += (targetY-y)*0.14;
+    c.setAttribute('cy',y);
+    if(Math.abs(targetY-y)>1){ requestAnimationFrame(step); }
+    else { c.style.opacity=0; setTimeout(()=>c.remove(),200); }
+  };
+  requestAnimationFrame(step);
+}
+let apRunning=false, apStart=0, apDuration=6000;
+const apDot=document.getElementById('apGraphDot');
+const phaseLabel=document.getElementById('phaseLabel');
+const mvReadout=document.getElementById('mvReadout');
+const phaseDesc=document.getElementById('phaseDesc');
+let lastIonSpawn=0, lastPumpSpawn=0;
+function apStep(ts){
+  if(!apRunning) return;
+  if(!apStart) apStart=ts;
+  const speedMult = {1:0.55,2:1,3:1.8}[document.getElementById('apSpeed').value];
+  const elapsed=(ts-apStart)*speedMult;
+  let t=(elapsed/apDuration)*100;
+  if(t>100){ apRunning=false; t=100; }
+  const v=apInterp(t);
+  apDot.setAttribute('cx',tToX(t)); apDot.setAttribute('cy',vToY(v));
+  mvReadout.textContent=Math.round(v)+' mV';
+  const ph=phaseFor(t);
+  phaseLabel.textContent=ph.name; phaseLabel.style.color=ph.color;
+  phaseDesc.textContent=ph.desc;
+  if(t-lastIonSpawn>4 && t>=16 && t<=27){ spawnIon('Na',119,1); lastIonSpawn=t; }
+  if(t-lastIonSpawn>4 && t>=28 && t<=45){ spawnIon('K',239,-1); lastIonSpawn=t; }
+  if(t-lastPumpSpawn>10 && (t<14 || t>60)){ spawnIon('Na',334,-1); spawnIon('K',326,1); lastPumpSpawn=t; }
+  if(t<100) requestAnimationFrame(apStep);
+  else { apRunning=false; }
+}
+document.getElementById('apPlay').onclick=()=>{
+  if(apRunning) return;
+  apRunning=true; apStart=0; lastIonSpawn=-99; lastPumpSpawn=-99;
+  requestAnimationFrame(apStep);
+};
+document.getElementById('apReset').onclick=()=>{
+  apRunning=false; apStart=0;
+  apDot.setAttribute('cx',tToX(0)); apDot.setAttribute('cy',vToY(-70));
+  mvReadout.textContent='-70 mV'; phaseLabel.textContent='විරාම විභවය (Resting)'; phaseLabel.style.color='#2dd4bf';
+  phaseDesc.textContent=phaseInfo[0].desc;
+  ionLayer.innerHTML='';
+};
+document.getElementById('apSpeed').oninput=(e)=>{
+  const map={1:'මන්දගාමී',2:'සාමාන්‍ය',3:'වේගවත්'};
+  document.getElementById('apSpeedPill').textContent='වේගය: '+map[e.target.value];
+};
+apDot.setAttribute('cx',tToX(0)); apDot.setAttribute('cy',vToY(-70));
+
+/* ============================================================
+   2. BRAIN & SPINAL CORD EXPLORER
+============================================================ */
+document.querySelectorAll('.tabbtn').forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tabpanel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  };
+});
+const brainParts={
+  cerebrum:{name:'මස්තිෂ්කය (Cerebrum)', pts:['මිනිස් මොළයේ විශාලතම කොටස; ග්‍රාහක ස්තර 4කින් (ලෝක, පාර්ශ්වික, ශංඛක, අපරකපාල බන්ධික) සමන්විත වේ.','සංවේදන පිළිබඳ තොරතුරු අර්ථකථනය, සිතීම, බුද්ධිමත්භාවය, විඥානාත්මක ක්‍රියා පාලනය කරයි.','ඉච්ඡානුග (කෘමීය) ක්‍රියාවලීන් ආරම්භ කර පාලනය කරයි.']},
+  thalamus:{name:'තැලමස (Thalamus)', pts:['ආරෝහන හා අවරෝහන ස්නායු තන්තු සඳහා Relay මධ්‍යස්ථානයක් ලෙස ක්‍රියා කරයි.','සංවේදක තොරතුරු (දෘෂ්ටි, ශ්‍රවණ) ලබාගැනීම හා සංකලනය කර මොළයේ දෙදල ප්‍රදේශ වෙත යොමු කරයි.','දෘෂ්ටි හා ශ්‍රවණ ප්‍රතික්‍රියා සමායෝජනය කරයි.']},
+  hypothalamus:{name:'හයිපොතැලමස (Hypothalamus)', pts:['ශරීර උෂ්ණත්වය, ජල හා ලවණ තුලනතාවය, ආහාර රුචිය පාලනය කරයි.','නින්ද-අවදි වීමේ චක්‍රය හා ලිංගික හැසිරීම් සම්බන්ධ කාර්යයන් පාලනය කරයි.','පිටියුටරි ග්‍රන්ථියේ හෝමෝන නිදහස් කිරීම හා ස්වයංසාධක ස්නායු පද්ධතිය පාලනය කරයි.']},
+  pituitary:{name:'පිටියුටරි ග්‍රන්ථිය (Pituitary Gland)', pts:['හයිපොතැලමස මගින් පාලනය වන ප්‍රධාන අන්තස්‍රාවී ග්‍රන්ථිය.','ශරීරයේ විවිධ හෝමෝන නිෂ්පාදනය පාලනය කරයි.']},
+  midbrain:{name:'මධ්‍ය මොළය (Midbrain)', pts:['පූර්ව මොළය හා අපර මොළය අතර තොරතුරු සම්ප්‍රේෂණය කරන සම්බන්ධකයයි.','දෘෂ්ටි හා ශ්‍රවණ ප්‍රතික්‍රියා සමායෝජනය කරයි; ශරීර චලනය පාලනයට දායක වේ.']},
+  pons:{name:'වැරෝලි සේතුව (Pons)', pts:['මධ්‍ය මොළය හා අනුමස්තිෂ්කය අතර සම්බන්ධකයයි.','ශ්වසන රිද්මය පාලනයට හා නින්ද පාලනයට දායක වේ.']},
+  medulla:{name:'සුෂුම්නා ශීර්ෂකය (Medulla Oblongata)', pts:['හෘද ස්පන්දනය, ශ්වසනය, රුධිර පීඩනය වැනි ජීවිතාරක්ෂක ස්වයංක්‍රීය ක්‍රියා පාලනය කරයි.','කැස්ස, පනාපිටි ගැනීම වැනි ප්‍රතීවර්තී ක්‍රියා ද පාලනය කරයි.']},
+  cerebellum:{name:'අනුමස්තිෂ්කය (Cerebellum)', pts:['මාංශ පේශි චලනයන්හි සමායෝජනය හා සමතුලිතතාවය පවත්වා ගනී.','ශරීර ඉරියව්ව හා චලන නිරවද්‍යතාවය පාලනය කරයි.']},
+  corpus:{name:'කැලෝස දේහය (Corpus Callosum)', pts:['මොළයේ වම් හා දකුණු අර්ධගෝල දෙක සම්බන්ධ කරන ස්නායු තන්තු පටලයයි.','අර්ධගෝල දෙක අතර තොරතුරු හුවමාරුව සිදු කරයි.']}
+};
+const brainInfo=document.getElementById('brainInfo');
+document.querySelectorAll('#cerebrum-view .hotspot').forEach(el=>{
+  el.onclick=()=>{
+    document.querySelectorAll('#cerebrum-view .hotspot').forEach(h=>h.classList.remove('active'));
+    el.classList.add('active');
+    const d=brainParts[el.dataset.part];
+    brainInfo.innerHTML=`<h3>${d.name}</h3><ul>${d.pts.map(p=>'<li>'+p+'</li>').join('')}</ul>`;
+    brainInfo.classList.add('show');
+  };
+});
+const cordParts={
+  dura:{name:'ඩියුරා මේටර් (Dura Mater)', pts:['මොළය හා සුෂුම්නාව වටා ඇති පිටතම ආරක්ෂක ස්තරය; ඝන හා ශක්තිමත් ය.']},
+  arachnoid:{name:'ඇරක්නොයිඩ් මේටර් (Arachnoid Mater)', pts:['මධ්‍ය ආරක්ෂක ස්තරය; සෙරෙබ්‍රොස්පයිනල් ද්‍රවය රඳවා ගනී.']},
+  pia:{name:'පියා මේටර් (Pia Mater)', pts:['සුෂුම්නාවට හා මොළයට ඍජුවම බැඳුනු ඇතුලතම, තුනී ස්තරය.']},
+  grey:{name:'ධූසර ද්‍රව්‍ය (Grey Matter)', pts:['සුෂුම්නාවේ මධ්‍යයේ H/පලාපිලක හැඩැති ප්‍රදේශය; ස්නායු සෛල දේහ අඩංගු වේ.','ප්‍රතිචක්‍ර ක්‍රියාවලීන් සඳහා synapse සිදුවන ස්ථානය.']},
+  white:{name:'ශ්වේත ද්‍රව්‍ය (White Matter)', pts:['ග්‍රේ මැටර් වටා ඇති ප්‍රදේශය; මයිලින් කවචිත ඇක්සෝන තන්තු අඩංගු වේ.','මොළය හා ශරීරයේ අනෙකුත් කොටස් අතර ආවේග ඉක්මනින් සම්ප්‍රේෂණය කරයි.']},
+  canal:{name:'මධ්‍යම නාලය (Central Canal)', pts:['සුෂුම්නාවේ මධ්‍යයේ පිහිටි කුඩා නාලය; සෙරෙබ්‍රොස්පයිනල් ද්‍රවය ගමන් කරයි.']}
+};
+const cordInfo=document.getElementById('cordInfo');
+document.querySelectorAll('#cord-view .hotspot').forEach(el=>{
+  el.onclick=()=>{
+    const key=el.dataset.cord;
+    const d=cordParts[key];
+    cordInfo.innerHTML=`<h3>${d.name}</h3><ul>${d.pts.map(p=>'<li>'+p+'</li>').join('')}</ul>`;
+    cordInfo.classList.add('show');
+  };
+});
+
+/* ============================================================
+   3. REFLEX ARC
+============================================================ */
+const reflexPathEl=document.getElementById('reflexPath');
+const reflexDot=document.getElementById('reflexDot');
+const reflexNodesG=document.getElementById('reflexNodes');
+const nodePts=[[30,120],[30,40],[130,40],[130,110],[250,110],[250,30],[350,30]]; // 7 points, 6 steps between key stops mapped to 6 labels
+// We'll define 6 stop positions matching labels
+const stopPts=[[30,120],[30,45],[130,45],[130,108],[250,108],[350,30]];
+const reflexTexts=[
+ 'උත්තේජනය (Stimulus): පරිසරයෙන් හෝ ශරීරය තුළින් ලැබෙන අනතුරුදායක හෝ තියුණු සංඥාවකි (උදා: උණුසුම් වස්තුවක් ස්පර්ශ කිරීම).',
+ 'ග්‍රාහකය (Receptor): සම තුල ඇති සංවේදක අවසාන ලක්ෂ්‍ය උත්තේජනය හඳුනාගෙන එය විද්‍යුත් ආවේගයක් බවට පරිවර්තනය කරයි.',
+ 'අභිවාහි නියුරෝනය (Sensory Neuron): ග්‍රාහකයෙන් ලද ආවේගය මධ්‍ය ස්නායු පද්ධතිය (සුෂුම්නාව) වෙත රැගෙන යයි.',
+ 'අන්තර්හාර නියුරෝනය (Interneuron): සුෂුම්නාවේ ග්‍රේ මැටරය තුළදී ආවේගය අභිවාහි නියුරෝනයෙන් අපවාහි නියුරෝනයට සම්ප්‍රේෂණය කරයි — මොළය නොසලකා ඉක්මන් ප්‍රතිචාරයක් ලබාදෙයි.',
+ 'අපවාහි නියුරෝනය (Motor Neuron): අන්තර්හාර නියුරෝනයෙන් ලද ආඥාව ප්‍රතිචාරකය (මාංශ පේශිය/ග්‍රන්ථිය) වෙත රැගෙන යයි.',
+ 'ප්‍රතිචාරකය (Effector): මාංශ පේශිය හැකිලී හෝ ග්‍රන්ථියක් ස්‍රාවය කර උත්තේජනයෙන් ආරක්ෂා වීමට ක්ෂණික ප්‍රතිචාරයක් දක්වයි.'
+];
+let reflexIdx=0;
+function updateReflex(){
+  const labels=document.querySelectorAll('#reflexLabels span');
+  labels.forEach((l,i)=>l.classList.toggle('active', i===reflexIdx));
+  document.getElementById('reflexDesc').textContent=reflexTexts[reflexIdx];
+  const p=stopPts[reflexIdx];
+  reflexDot.setAttribute('cx',p[0]); reflexDot.setAttribute('cy',p[1]);
+  reflexNodesG.innerHTML='';
+  for(let i=0;i<=reflexIdx;i++){
+    const pt=stopPts[i];
+    const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx',pt[0]); c.setAttribute('cy',pt[1]); c.setAttribute('r', i===reflexIdx?8:5);
+    c.setAttribute('fill', i===reflexIdx?'#2dd4bf':'#3a445e');
+    reflexNodesG.appendChild(c);
+  }
+}
+document.getElementById('reflexNext').onclick=()=>{ reflexIdx=Math.min(reflexIdx+1, stopPts.length-1); updateReflex(); };
+document.getElementById('reflexPrev').onclick=()=>{ reflexIdx=Math.max(reflexIdx-1,0); updateReflex(); };
+updateReflex();
+
+/* ============================================================
+   4. SYNAPSE VISUALIZER
+============================================================ */
+const synSteps=[
+ {desc:'ක්‍රියා විභවය ඇක්සෝන අවසානයට (Axon terminal) ළඟා වේ. මෙමගින් Ca²⁺ වෝල්ටීයතා-ගේට් නාලිකා විවෘත වේ.', fn:()=>{
+    document.getElementById('caIons').innerHTML='<circle cx="60" cy="70" r="4" fill="#ff6b9d"/><circle cx="70" cy="50" r="4" fill="#ff6b9d"/>';
+    document.getElementById('vesicles').style.opacity=1; document.getElementById('ntLayer').innerHTML='';
+ }},
+ {desc:'Ca²⁺ අයන අභ්‍යන්තරයට ගලා ඒම නිසා synaptic vesicles ප්‍රාග් උපාගම පටලය දෙසට ගමන් කර එය සමඟ සංයෝජනය (fuse) වේ.', fn:()=>{
+    document.getElementById('vesicles').innerHTML='<circle cx="100" cy="88" r="6" fill="#2dd4bf" opacity=".6"/><circle cx="115" cy="90" r="6" fill="#2dd4bf" opacity=".6"/><circle cx="108" cy="92" r="6" fill="#2dd4bf" opacity=".6"/>';
+ }},
+ {desc:'ස්නායු සම්ප්‍රේෂක (neurotransmitters) උපාග විවරය (synaptic cleft) හරහා විසරණය වී පශ්ච උපාග පටලය (postsynaptic membrane) දෙසට ගමන් කරයි.', fn:()=>{
+    document.getElementById('ntLayer').innerHTML=`<circle cx="112" cy="95" r="3" fill="#fbbf24"/><circle cx="120" cy="105" r="3" fill="#fbbf24"/><circle cx="128" cy="115" r="3" fill="#fbbf24"/><circle cx="118" cy="120" r="3" fill="#fbbf24"/>`;
+ }},
+ {desc:'ස්නායු සම්ප්‍රේෂක පශ්ච උපාග පටලයේ ග්‍රාහක (receptor) වෙත බැඳී අයන නාලිකා විවෘත කරයි — Na⁺/K⁺ අයන ගලායාම නිසා නව විද්‍යුත් සංඥාවක් ජනිත වේ.', fn:()=>{
+    document.querySelectorAll('#receptors rect').forEach(r=>r.setAttribute('fill','#2dd4bf'));
+    document.getElementById('ntLayer').innerHTML=`<circle cx="155" cy="128" r="3" fill="#fbbf24"/><circle cx="180" cy="132" r="3" fill="#fbbf24"/><circle cx="205" cy="130" r="3" fill="#fbbf24"/>`;
+ }}
+];
+let synIdx=0;
+function updateSyn(){
+  document.getElementById('synapseDesc').textContent=synSteps[synIdx].desc;
+  document.getElementById('caIons').innerHTML=''; document.getElementById('ntLayer').innerHTML='';
+  document.querySelectorAll('#receptors rect').forEach(r=>r.setAttribute('fill','#a78bfa'));
+  document.getElementById('vesicles').innerHTML='<circle cx="105" cy="55" r="7" fill="#2dd4bf" opacity=".8"/><circle cx="120" cy="65" r="7" fill="#2dd4bf" opacity=".8"/><circle cx="108" cy="75" r="7" fill="#2dd4bf" opacity=".8"/>';
+  for(let i=0;i<=synIdx;i++) synSteps[i].fn();
+}
+document.getElementById('synNext').onclick=()=>{ synIdx=Math.min(synIdx+1, synSteps.length-1); updateSyn(); };
+document.getElementById('synPrev').onclick=()=>{ synIdx=Math.max(synIdx-1,0); updateSyn(); };
+updateSyn();
+
+/* ============================================================
+   5. DISORDERS
+============================================================ */
+const disorders=[
+ {icon:'🌀',name:'භින්නෝන්මාදය',en:'Schizophrenia', pts:['විනෝදාත්මක වූ කාර්යයන් තවදුරටත් සතුටුදායක නොවීම, යථාර්ථයෙන් දුරස්ථ වීම.','මනෝභාවය හදිසියේ වෙනස්වීම (mood swings) දක්නට ලැබේ.','මොළයේ සමහර ස්නායු සම්ප්‍රේෂක ක්‍රියාකාරීත්වය අධික වීමට සම්බන්ධ යැයි විශ්වාස කෙරේ.']},
+ {icon:'☁️',name:'විෂාදය',en:'Depression', pts:['නිදි රටාව, ආහාර රුචිය හා ශක්ති මට්ටමේ අසාමාන්‍යතා පෙන්නුම් කරයි.','දිගින් දිගටම දුක්බර හෝ නිශ්ශබ්ද මානසිකත්වයක් පවතී.','මොළයේ ස්නායු සම්ප්‍රේෂක අසමතුලිතතාවය (serotonin/dopamine) හේතුවක් ලෙස සැලකේ.']},
+ {icon:'🧩',name:'ඇල්ශයිමර් රෝගය',en:"Alzheimer's", pts:['මතකය නැතිවීම හා බරපතල මානසික පිරිහීම (dementia) ලක්ෂණ වේ.','ආහාර ගැනීම, ස්නානය කිරීම වැනි එදිනෙදා කටයුතු කිරීමට අපහසු වේ.','මොළයේ නියුරෝන වලට හානි වීම හා ප්‍රතිශක්තිකරණ අසාමාන්‍යතා හේතු වේ. ප්‍රතිකාරයක් තවම සොයාගෙන නැත.']},
+ {icon:'✋',name:'පාකින්සන් රෝගය',en:"Parkinson's", pts:['චලනයන්හි සම්බන්ධීකරණය හා පාලනය නැතිවී යාම; වෙව්ලීම (tremor) ප්‍රධාන ලක්ෂණයකි.','චලනය ප්‍රමාද වීම, ආරම්භ කිරීමට අපහසුවීම, මුහුණේ ස්වාභාවික ඉරියව් නැතිවීම.','මධ්‍ය මොළයේ ඩෝපමින් නිපදවන නියුරෝන විනාශ වීම හේතුවෙන් ඇතිවේ. සුව කළ නොහැකි නමුත් රෝග ලක්ෂණ පාලනය කළ හැක.']}
+];
+const dgrid=document.getElementById('disorderGrid');
+disorders.forEach(d=>{
+  const el=document.createElement('div');
+  el.className='flip';
+  el.innerHTML=`<div class="flip-inner">
+    <div class="flip-face flip-front"><div class="icon">${d.icon}</div><div class="name">${d.name}</div><div class="tap">TAP FOR INFO →</div></div>
+    <div class="flip-face flip-back"><h4>${d.en}</h4>${d.pts.map(p=>'<p>• '+p+'</p>').join('')}</div>
+  </div>`;
+  el.onclick=()=>el.classList.toggle('flipped');
+  dgrid.appendChild(el);
+});
+
+/* ============================================================
+   6. FLASHCARDS
+============================================================ */
+let flashcards=[
+ {q:'විරාම විභවය (Resting Potential)', a:'උත්තේජනයක් නොමැති විට axon පටලයේ පවතින විද්‍යුත් විභවය, සාමාන්‍යයෙන් -60mV සිට -80mV අතර.'},
+ {q:'විද්‍යුවනය (Depolarization)', a:'Na⁺ නාලිකා විවෘත වී Na⁺ අභ්‍යන්තරයට ගලායාම නිසා පටලය ධන අගයට හැරෙන අවධිය.'},
+ {q:'ප්‍රතිවිද්‍යුවනය (Repolarization)', a:'K⁺ නාලිකා විවෘත වී K⁺ පිටතට ගලායාම නිසා පටලය නැවත සෘණ අගයට හැරෙන අවධිය.'},
+ {q:'උපරි විද්‍යුවනය (Hyperpolarization)', a:'පටලය විරාම විභවයට වඩා අධික සෘණ අගයකට (~-90mV) පත්වන කෙටි අවධිය.'},
+ {q:'අනස්සව කාලය (Refractory Period)', a:'නව ක්‍රියා විභවයක් ජනනය කළ නොහැකි හෝ දුෂ්කර කෙටි කාල පරාසය; Na⁺/K⁺ පොම්පය අයන ග්‍රේඩියන්ට ප්‍රතිස්ථාපනය කරයි.'},
+ {q:'Na⁺/K⁺ පොම්පය', a:'ATP භාවිතයෙන් සෑම චක්‍රයකදීම Na⁺ අයන 3ක් අභ්‍යන්තරයේ සිට පිටතටත්, K⁺ අයන 2ක් පිටතින් අභ්‍යන්තරයටත් ප්‍රවාහනය කරන පොම්පය.'},
+ {q:'උපාගම (Synapse)', a:'එක් නියුරෝනයක් තවත් නියුරෝනයක් හෝ ප්‍රතිචාරකයක් හා සම්බන්ධ වන ස්ථානය; තොරතුරු රසායනිකව හෝ විද්‍යුත් ලෙස සම්ප්‍රේෂණය වේ.'},
+ {q:'ස්නායු සම්ප්‍රේෂක (Neurotransmitter)', a:'උපාග විවරය හරහා තොරතුරු රැගෙන යන රසායනික ද්‍රව්‍ය (උදා: ඇසිටයිල් කෝලින්, ඩෝපමින්).'},
+ {q:'ප්‍රතිචක්‍රය (Reflex Arc)', a:'උත්තේජනයක් ලැබූ විට මොළය නොසලකා සුෂුම්නාව හරහා ක්ෂණික ස්වයංක්‍රීය ප්‍රතිචාරයක් ඇතිකරන ස්නායු මාර්ගය.'},
+ {q:'මධ්‍ය ස්නායු පද්ධතිය (CNS)', a:'මොළය හා සුෂුම්නාවෙන් සමන්විත වන ප්‍රධාන ස්නායු පද්ධතිය; තොරතුරු සැකසීම හා ඒකාබද්ධ කිරීම සිදු කරයි.'},
+ {q:'පර්යන්ත ස්නායු පද්ධතිය (PNS)', a:'කපාල ස්නායු, සුෂුම්නා ස්නායු හා ස්වයංසාධක ස්නායු පද්ධතියෙන් සමන්විත; CNS සහ ශරීරයේ අනෙක් කොටස් සම්බන්ධ කරයි.'},
+ {q:'මස්තිෂ්කය (Cerebrum)', a:'මොළයේ විශාලතම කොටස; සිතීම, බුද්ධිය, ස්වේච්ඡා චලනය හා සංවේදන අර්ථකථනය පාලනය කරයි.'},
+ {q:'අනුමස්තිෂ්කය (Cerebellum)', a:'මාංශ පේශි චලනයන්හි සමායෝජනය, සමතුලිතතාවය හා ශරීර ඉරියව්ව පාලනය කරයි.'},
+ {q:'තැලමස (Thalamus)', a:'සංවේදක තොරතුරු සඳහා relay මධ්‍යස්ථානය; තොරතුරු මොළයේ අදාළ ප්‍රදේශ වෙත යොමු කරයි.'},
+ {q:'හයිපොතැලමස (Hypothalamus)', a:'ශරීර උෂ්ණත්වය, ආහාර රුචිය, ජල තුලනතාවය හා හෝමෝන ස්‍රාවය පාලනය කරන homeostasis මධ්‍යස්ථානය.'},
+ {q:'සුෂුම්නා ශීර්ෂකය (Medulla Oblongata)', a:'හෘද ස්පන්දනය, ශ්වසනය වැනි ජීවිතාරක්ෂක ස්වයංක්‍රීය ක්‍රියා පාලනය කරන අපර මොළයේ කොටස.'},
+ {q:'ධූසර ද්‍රව්‍ය (Grey Matter)', a:'ස්නායු සෛල දේහ අඩංගු වන ප්‍රදේශය; සුෂුම්නාවේ මධ්‍යයේ H-හැඩැති ව්‍යුහයක් ලෙස පවතී.'},
+ {q:'ශ්වේත ද්‍රව්‍ය (White Matter)', a:'මයිලින් කවචිත ඇක්සෝන තන්තු අඩංගු වන ප්‍රදේශය; ග්‍රේ මැටරය වටා පිහිටයි.'},
+ {q:'ඇල්ශයිමර් රෝගය', a:'මතකය හා මානසික ශක්තිය ක්‍රමයෙන් පිරිහීමට හේතුවන, නියුරෝන විනාශයට සම්බන්ධ රෝගයකි.'},
+ {q:'පාකින්සන් රෝගය', a:'මධ්‍ය මොළයේ ඩෝපමින් නිපදවන නියුරෝන විනාශ වීමෙන් ඇතිවන, චලන පාලනය අඩාල කරන රෝගයකි.'}
+];
+let fcIdx=0;
+function renderFC(){
+  document.getElementById('fcFront').textContent=flashcards[fcIdx].q;
+  document.getElementById('fcBack').textContent=flashcards[fcIdx].a;
+  document.getElementById('fcCard').classList.remove('flip');
+  document.getElementById('fcProgress').textContent=(fcIdx+1)+' / '+flashcards.length;
+}
+document.getElementById('fcCard').onclick=()=>document.getElementById('fcCard').classList.toggle('flip');
+document.getElementById('fcNext').onclick=()=>{ fcIdx=(fcIdx+1)%flashcards.length; renderFC(); };
+document.getElementById('fcPrev').onclick=()=>{ fcIdx=(fcIdx-1+flashcards.length)%flashcards.length; renderFC(); };
+document.getElementById('fcShuffle').onclick=()=>{
+  for(let i=flashcards.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [flashcards[i],flashcards[j]]=[flashcards[j],flashcards[i]]; }
+  fcIdx=0; renderFC();
+};
+renderFC();
+</script>
+</body>
+</html>

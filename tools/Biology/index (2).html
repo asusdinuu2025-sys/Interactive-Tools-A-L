@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>සෛල චක්‍රය • අනුනනය • ඌනනය — අන්තර්ක්‍රියාකාරී ජීව විද්‍යා මාර්ගෝපදේශය</title>
+<style>
+/* ===================== TOKENS ===================== */
+:root{
+  --bg: #0d0e13;
+  --bg-deep: #08090c;
+  --panel: #161822;
+  --panel-2: #1e2130;
+  --panel-3: #262a3d;
+  --border: #2c2f42;
+  --border-soft: #22243350;
+  --text: #f1ede2;
+  --text-dim: #a8a6b8;
+  --text-faint: #6d6c82;
+  --gold: #d9a441;
+  --gold-lt: #f0c878;
+  --gold-dim: #8a6a2c;
+  --teal: #5ec8bd;
+  --teal-lt: #9fe0d8;
+  --rose: #e0806f;
+  --rose-lt: #f0ab9e;
+  --violet: #8b7fd6;
+  --font-ui: 'Iskoola Pota','Noto Sans Sinhala','Nirmala UI','Yaldevi','Segoe UI',sans-serif;
+  --font-mono: 'Consolas','Menlo',monospace;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --shadow: 0 12px 30px -12px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at 15% 0%, #1a1d2e 0%, transparent 45%),
+    radial-gradient(circle at 100% 30%, #1c1712 0%, transparent 40%),
+    var(--bg);
+  color:var(--text);
+  font-family:var(--font-ui);
+  line-height:1.65;
+  font-size:16px;
+  min-height:100vh;
+}
+::selection{background:var(--gold);color:#000;}
+h1,h2,h3,h4{font-family:var(--font-ui);font-weight:700;letter-spacing:.2px;margin:0 0 .5em;}
+p{margin:0 0 1em;color:var(--text-dim);}
+a{color:var(--gold-lt);}
+button{font-family:var(--font-ui);cursor:pointer;}
+.container{max-width:1180px;margin:0 auto;padding:0 22px;}
+
+/* ===================== TOP BAR ===================== */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(10,11,16,.86);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border-soft);
+}
+.topbar-inner{display:flex;align-items:center;gap:18px;padding:12px 22px;max-width:1180px;margin:0 auto;}
+.brand{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.brand-mark{width:34px;height:34px;flex-shrink:0;}
+.brand-text{font-weight:700;font-size:16px;letter-spacing:.3px;color:var(--gold-lt);white-space:nowrap;}
+.brand-sub{font-size:11px;color:var(--text-faint);white-space:nowrap;}
+nav.tabs{display:flex;gap:4px;flex-wrap:wrap;flex:1;}
+nav.tabs button{
+  background:transparent;border:1px solid transparent;color:var(--text-dim);
+  padding:8px 13px;border-radius:999px;font-size:13.5px;transition:.15s;white-space:nowrap;
+}
+nav.tabs button:hover{color:var(--text);border-color:var(--border);}
+nav.tabs button.active{background:var(--panel-3);color:var(--gold-lt);border-color:var(--gold-dim);}
+.presenter-toggle{
+  flex-shrink:0;background:var(--panel-2);border:1px solid var(--border);color:var(--text-dim);
+  padding:8px 14px;border-radius:999px;font-size:13px;display:flex;align-items:center;gap:6px;
+}
+.presenter-toggle:hover{color:var(--gold-lt);border-color:var(--gold-dim);}
+.presenter-toggle.on{background:var(--gold);color:#1a1305;border-color:var(--gold);}
+
+/* ===================== SECTIONS ===================== */
+main{padding:34px 0 90px;}
+section.page{display:none;animation:fadeIn .35s ease;}
+section.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;font-size:12px;letter-spacing:1.5px;
+  color:var(--teal);text-transform:uppercase;font-weight:700;margin-bottom:10px;
+}
+.eyebrow::before{content:"";width:18px;height:2px;background:var(--teal);border-radius:2px;}
+.page-title{font-size:clamp(26px,4vw,38px);margin-bottom:6px;}
+.page-lede{color:var(--text-dim);max-width:760px;font-size:15.5px;margin-bottom:30px;}
+
+.card{
+  background:linear-gradient(180deg,var(--panel),var(--panel) 60%,var(--panel-2));
+  border:1px solid var(--border);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);
+}
+.grid-2{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+@media(max-width:900px){.grid-2{grid-template-columns:1fr;}.grid-3{grid-template-columns:1fr 1fr;}}
+@media(max-width:600px){.grid-3{grid-template-columns:1fr;}}
+
+/* ===================== HERO / HOME ===================== */
+.hero{position:relative;overflow:hidden;border-radius:20px;border:1px solid var(--border);
+  background:radial-gradient(ellipse at 75% 20%, #2a2312 0%, transparent 55%), var(--panel);
+  padding:46px 40px;margin-bottom:34px;}
+.hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:30px;align-items:center;}
+@media(max-width:850px){.hero-grid{grid-template-columns:1fr;}}
+.hero h1{font-size:clamp(28px,4.4vw,44px);line-height:1.15;margin-bottom:14px;}
+.hero h1 span{color:var(--gold-lt);}
+.hero p{font-size:16px;max-width:520px;}
+.hero-stats{display:flex;gap:22px;margin-top:20px;flex-wrap:wrap;}
+.hero-stat b{display:block;font-size:24px;color:var(--gold-lt);}
+.hero-stat span{font-size:12px;color:var(--text-faint);}
+.wheel-wrap{display:flex;justify-content:center;}
+
+.home-links{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:10px;}
+@media(max-width:850px){.home-links{grid-template-columns:1fr 1fr;}}
+.home-link{
+  border:1px solid var(--border);background:var(--panel);border-radius:var(--radius);
+  padding:20px;text-align:right;transition:.2s;cursor:pointer;
+}
+.home-link:hover{border-color:var(--gold-dim);transform:translateY(-3px);box-shadow:var(--shadow);}
+.home-link .num{font-family:var(--font-mono);color:var(--text-faint);font-size:12px;}
+.home-link h3{margin:8px 0 4px;font-size:17px;color:var(--gold-lt);}
+.home-link p{margin:0;font-size:13px;}
+
+/* ===================== CELL CYCLE WHEEL ===================== */
+.wheel-panel{display:flex;gap:26px;align-items:flex-start;flex-wrap:wrap;}
+.wheel-svg{flex-shrink:0;}
+.wheel-seg{cursor:pointer;transition:.15s;opacity:.88;}
+.wheel-seg:hover{opacity:1;}
+.wheel-seg.active{opacity:1;filter:drop-shadow(0 0 8px rgba(217,164,65,.6));}
+.wheel-info{flex:1;min-width:260px;}
+.wheel-info h3{color:var(--gold-lt);font-size:20px;}
+.phase-tagline{display:inline-block;background:var(--panel-3);color:var(--teal);font-size:12px;
+  padding:3px 10px;border-radius:999px;margin-bottom:10px;}
+.checkpoint-note{border-inline-start:3px solid var(--rose);background:#1c1116;padding:10px 14px;
+  border-radius:0 8px 8px 0;font-size:13.5px;color:var(--rose-lt);margin-top:14px;}
+.g0-note{border-inline-start:3px solid var(--violet);background:#16142a;padding:10px 14px;
+  border-radius:0 8px 8px 0;font-size:13.5px;color:#c9c2f7;margin-top:10px;}
+
+/* ===================== STEPPER (mitosis/meiosis) ===================== */
+.stepper{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:22px;}
+.step-btn{
+  flex-shrink:0;background:var(--panel-2);border:1px solid var(--border);color:var(--text-dim);
+  padding:10px 16px;border-radius:10px;font-size:13.5px;text-align:center;transition:.15s;position:relative;
+}
+.step-btn small{display:block;font-size:10px;color:var(--text-faint);font-family:var(--font-mono);letter-spacing:.5px;}
+.step-btn:hover{border-color:var(--gold-dim);color:var(--text);}
+.step-btn.active{background:linear-gradient(180deg,var(--gold),#b9832d);color:#1a1305;border-color:var(--gold);font-weight:700;}
+.step-btn.active small{color:#1a1305cc;}
+.group-label{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-faint);
+  margin:18px 0 6px;font-weight:700;}
+.stage-wrap{display:grid;grid-template-columns:.9fr 1.1fr;gap:24px;}
+@media(max-width:900px){.stage-wrap{grid-template-columns:1fr;}}
+.stage-visual{background:radial-gradient(ellipse at 50% 40%,#1a1d2c,#101220);border:1px solid var(--border);
+  border-radius:var(--radius);display:flex;align-items:center;justify-content:center;padding:14px;min-height:260px;}
+.stage-visual svg{max-width:100%;height:auto;}
+.stage-text h3{color:var(--gold-lt);font-size:22px;}
+.stage-text ul{padding-inline-start:20px;margin:12px 0;color:var(--text-dim);font-size:14.5px;}
+.stage-text ul li{margin-bottom:6px;}
+.term{color:var(--teal);border-bottom:1px dashed var(--teal);cursor:help;font-weight:600;}
+.crossnote{margin-top:12px;background:#241318;border:1px solid #3a1f24;border-inline-start:3px solid var(--rose);
+  padding:10px 14px;border-radius:0 8px 8px 0;font-size:13.5px;color:var(--rose-lt);}
+.animal-plant-toggle{display:flex;gap:8px;margin-bottom:14px;}
+.ap-btn{background:var(--panel-2);border:1px solid var(--border);color:var(--text-dim);padding:6px 14px;
+  border-radius:999px;font-size:12.5px;}
+.ap-btn.active{background:var(--teal);color:#08201d;border-color:var(--teal);font-weight:700;}
+
+/* ===================== COMPARISON ===================== */
+.compare-toggle{display:flex;gap:8px;margin-bottom:18px;}
+.ct-btn{background:var(--panel-2);border:1px solid var(--border);color:var(--text-dim);padding:9px 18px;
+  border-radius:999px;font-size:13.5px;}
+.ct-btn.active{background:linear-gradient(180deg,var(--gold),#b9832d);color:#1a1305;border-color:var(--gold);font-weight:700;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+table.cmp thead th{text-align:right;background:var(--panel-3);color:var(--gold-lt);padding:12px 14px;
+  font-size:13px;border-bottom:2px solid var(--gold-dim);}
+table.cmp thead th:first-child{color:var(--text-faint);}
+table.cmp td{padding:12px 14px;border-bottom:1px solid var(--border-soft);color:var(--text-dim);vertical-align:top;}
+table.cmp tr:hover td{background:var(--panel-2);}
+table.cmp td:first-child{color:var(--text-faint);font-weight:700;white-space:nowrap;}
+
+/* ===================== ABNORMALITIES ===================== */
+.tumor-toggle{display:flex;gap:10px;margin-bottom:18px;}
+.tumor-card{border:1px solid var(--border);border-radius:var(--radius);padding:22px;background:var(--panel);}
+.tumor-card h3{font-size:19px;}
+.tumor-card.benign{border-inline-start:4px solid var(--teal);}
+.tumor-card.malignant{border-inline-start:4px solid var(--rose);}
+.pill{display:inline-block;font-size:11px;padding:3px 10px;border-radius:999px;margin-bottom:10px;font-weight:700;}
+.pill.b{background:#0f2a27;color:var(--teal-lt);}
+.pill.m{background:#2e1414;color:var(--rose-lt);}
+.gall-box{margin-top:24px;border:1px solid var(--border);border-radius:var(--radius);padding:22px;background:var(--panel);}
+.cause-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.cause-tag{background:var(--panel-3);border:1px solid var(--border);padding:5px 12px;border-radius:999px;font-size:12.5px;color:var(--text-dim);}
+
+/* ===================== GLOSSARY ===================== */
+.gloss-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+@media(max-width:850px){.gloss-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:560px){.gloss-grid{grid-template-columns:1fr;}}
+.gloss-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 18px;
+  cursor:pointer;transition:.18s;}
+.gloss-card:hover{border-color:var(--gold-dim);}
+.gloss-card h4{font-size:15.5px;color:var(--gold-lt);margin:0 0 4px;display:flex;justify-content:space-between;align-items:center;}
+.gloss-card .en{font-size:11px;color:var(--text-faint);font-weight:400;}
+.gloss-card p{font-size:13px;margin:0;max-height:0;overflow:hidden;transition:.25s;color:var(--text-dim);}
+.gloss-card.open p{max-height:200px;margin-top:8px;}
+.gloss-card .chev{transition:.2s;color:var(--text-faint);}
+.gloss-card.open .chev{transform:rotate(180deg);}
+.gloss-search{width:100%;padding:12px 16px;border-radius:999px;border:1px solid var(--border);
+  background:var(--panel-2);color:var(--text);font-size:14px;margin-bottom:18px;}
+.gloss-search::placeholder{color:var(--text-faint);}
+
+/* term tooltip */
+.term-tip{position:fixed;z-index:200;max-width:260px;background:var(--panel-3);border:1px solid var(--gold-dim);
+  border-radius:10px;padding:12px 14px;font-size:13px;color:var(--text);box-shadow:var(--shadow);display:none;}
+.term-tip b{color:var(--gold-lt);display:block;margin-bottom:4px;}
+
+/* ===================== QUIZ ===================== */
+.quiz-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:18px;}
+.quiz-progress{font-size:13px;color:var(--text-faint);}
+.qcard{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px;}
+.qcard .qn{font-size:12px;color:var(--gold-lt);font-family:var(--font-mono);margin-bottom:6px;}
+.qcard h4{font-size:16.5px;margin-bottom:14px;}
+.opt{display:flex;align-items:center;gap:10px;padding:11px 14px;border:1px solid var(--border);border-radius:10px;
+  margin-bottom:8px;cursor:pointer;transition:.15s;font-size:14px;color:var(--text-dim);}
+.opt:hover{border-color:var(--gold-dim);}
+.opt input{accent-color:var(--gold);}
+.opt.correct{border-color:var(--teal);background:#0f2420;color:var(--teal-lt);}
+.opt.wrong{border-color:var(--rose);background:#2a1414;color:var(--rose-lt);}
+.qexplain{display:none;margin-top:10px;font-size:13px;color:var(--text-dim);background:var(--panel-2);
+  border-radius:8px;padding:10px 14px;border-inline-start:3px solid var(--gold);}
+.quiz-actions{display:flex;gap:12px;align-items:center;margin-top:10px;}
+.btn{background:linear-gradient(180deg,var(--gold),#b9832d);color:#1a1305;border:none;padding:12px 24px;
+  border-radius:999px;font-weight:700;font-size:14px;transition:.15s;}
+.btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px -8px rgba(217,164,65,.6);}
+.btn.ghost{background:transparent;border:1px solid var(--border);color:var(--text-dim);}
+.score-box{display:none;text-align:center;padding:30px;border:1px solid var(--gold-dim);border-radius:var(--radius);
+  background:radial-gradient(ellipse at 50% 0%,#241a08,var(--panel));}
+.score-box .big{font-size:44px;color:var(--gold-lt);font-weight:800;}
+
+/* ===================== PRESENTER MODE ===================== */
+body.presenter{font-size:19px;}
+body.presenter .topbar-inner{padding:16px 22px;}
+body.presenter nav.tabs button{font-size:16px;padding:10px 16px;}
+body.presenter .page-title{font-size:clamp(32px,5vw,46px);}
+body.presenter .stage-text h3{font-size:27px;}
+body.presenter .stage-text ul{font-size:17px;}
+body.presenter p{font-size:1.05em;}
+body.presenter .card{padding:30px;}
+body.presenter table.cmp{font-size:16px;}
+
+footer{text-align:center;padding:30px 0;color:var(--text-faint);font-size:12.5px;border-top:1px solid var(--border-soft);margin-top:40px;}
+
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;font-size:12.5px;color:var(--text-faint);}
+.legend span{display:inline-flex;align-items:center;gap:6px;}
+.legend i{width:12px;height:12px;border-radius:3px;display:inline-block;}
+</style>
+</head>
+<body>
+
+<div class="term-tip" id="termTip"><b id="termTipTitle"></b><span id="termTipBody"></span></div>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="none" stroke="#d9a441" stroke-width="2"/><path d="M13,14 C17,17 15,20 20,20 C25,20 23,23 27,26 M27,14 C23,17 25,20 20,20 C15,20 17,23 13,26" stroke="#5ec8bd" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>
+      <div>
+        <div class="brand-text">සෛල විභජනය</div>
+        <div class="brand-sub">අ.පො.ස. (උසස් පෙළ) ජීව විද්‍යාව</div>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button data-page="home" class="active">මුල් පිටුව</button>
+      <button data-page="cellcycle">සෛල චක්‍රය</button>
+      <button data-page="mitosis">අනුනනය</button>
+      <button data-page="meiosis">ඌනනය</button>
+      <button data-page="compare">සැසඳීම</button>
+      <button data-page="abnormal">අර්බුද &amp; ගඩු</button>
+      <button data-page="glossary">පාරිභාෂිකය</button>
+      <button data-page="quiz">ප්‍රශ්නාවලිය</button>
+    </nav>
+    <button class="presenter-toggle" id="presenterBtn">🖥 කථීක ප්‍රකාරය</button>
+  </div>
+</div>
+
+<main class="container">
+
+  <!-- ============ HOME ============ -->
+  <section class="page active" id="page-home">
+    <div class="hero">
+      <div class="hero-grid">
+        <div>
+          <div class="eyebrow">ඒකකය 2 · සෛල ජීව විද්‍යාව</div>
+          <h1>සෛල චක්‍රය, <span>අනුනනය</span> සහ <span>ඌනනය</span></h1>
+          <p>එක් මාතෘ සෛලයක් සිට එකිනෙකට සමාන හෝ අනන්‍ය දුහිතෘ සෛල නිපදවෙන ආකාරය, එහි එක් එක් අවස්ථා, පාලන යාන්ත්‍රණ සහ එය අසාර්ථක වූ විට ඇතිවන අර්බුද පිළිබඳ අන්තර්ක්‍රියාකාරී මාර්ගෝපදේශයකි.</p>
+          <div class="hero-stats">
+            <div class="hero-stat"><b>3</b><span>අන්තර් කලාව අවස්ථා</span></div>
+            <div class="hero-stat"><b>5</b><span>අනුනන කලාප</span></div>
+            <div class="hero-stat"><b>2×4</b><span>ඌනන කලාප (I &amp; II)</span></div>
+            <div class="hero-stat"><b>10</b><span>ස්වයං-ඇගයුම් ප්‍රශ්න</span></div>
+          </div>
+        </div>
+        <div class="wheel-wrap"><div id="heroWheel"></div></div>
+      </div>
+    </div>
+
+    <div class="home-links">
+      <div class="home-link" data-goto="cellcycle"><div class="num">01</div><h3>සෛල චක්‍රය</h3><p>G₁, S, G₂ කලාප, පරීක්ෂක ස්ථාන සහ G₀ විවේක අවස්ථාව.</p></div>
+      <div class="home-link" data-goto="mitosis"><div class="num">02</div><h3>අනුනනය</h3><p>ප්‍රාක්, පෙරයෝග, යෝග, වියෝග, අන්ත කලාප සහ සෛල ප්ලාස්ම විභජනය.</p></div>
+      <div class="home-link" data-goto="meiosis"><div class="num">03</div><h3>ඌනනය</h3><p>ඌනනය I සහ II, අවතරණය (crossing over) සහ ප්‍රවේණික ප්‍රභේදනය.</p></div>
+      <div class="home-link" data-goto="abnormal"><div class="num">04</div><h3>අර්බුද &amp; ගඩු</h3><p>නිරුපද්‍රව/සෝපද්‍රව අර්බුද, ස්ථානාන්තරණය, ශාක ගඩු.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ CELL CYCLE ============ -->
+  <section class="page" id="page-cellcycle">
+    <div class="eyebrow">01 · පදනම</div>
+    <h2 class="page-title">සෛල වක්‍රය සහ එහි පාලනය</h2>
+    <p class="page-lede">එක් සෛල විභජනයක අවසානයේ සිට ඊළඟ සෛල විභජනයේ අවසානය දක්වා සෛලයක ජීවිත කාලය තුළ සිදුවන පිළිවෙළ අනුපිළිවෙල <b>සෛල වක්‍රය</b> ලෙස හැඳින්වේ. එය ප්‍රධාන අවධි දෙකකින් යුක්තයි — <b>අන්තර් කලාව</b> (cycle කාලයෙන් 90%ක් පමණ) සහ <b>අනුනන කලාව / M කලාව</b> (10%ක් පමණ).</p>
+
+    <div class="card wheel-panel">
+      <div id="cycleWheel"></div>
+      <div class="wheel-info" id="wheelInfo"></div>
+    </div>
+
+    <div class="grid-3" style="margin-top:24px;">
+      <div class="card"><h3 style="color:var(--gold-lt);font-size:16px;">G₁ කලාව <small style="color:var(--text-faint);font-weight:400;">(ප්‍රථම වර්ධන කලාව)</small></h3>
+        <p style="font-size:13.5px;">සෛල වර්ධනයට අවශ්‍ය ප්‍රෝටීන සංශ්ලේෂණය හා සෛලීය අන්තර්ගතිකා නිෂ්පාදනය සිදුවේ. S කලාව සඳහා අවශ්‍ය ප්‍රෝටීන මෙහිදී නිපදවේ.</p></div>
+      <div class="card"><h3 style="color:var(--gold-lt);font-size:16px;">S කලාව <small style="color:var(--text-faint);font-weight:400;">(සංශ්ලේෂණ කලාව)</small></h3>
+        <p style="font-size:13.5px;">DNA ප්‍රතිවලිත වීම සහ හිස්ටෝන් ප්‍රෝටීන සංශ්ලේෂණය සිදුවේ. නව DNA අණුව නව හිස්ටෝන් ප්‍රෝටීන සමඟ එකතු වී ක්‍රොමැටින් සාදයි.</p></div>
+      <div class="card"><h3 style="color:var(--gold-lt);font-size:16px;">G₂ කලාව <small style="color:var(--text-faint);font-weight:400;">(ද්විත්ව වර්ධන කලාව)</small></h3>
+        <p style="font-size:13.5px;">සෛල විභජනය සඳහා අවශ්‍ය ප්‍රෝටීන (කේන්ද්‍රදේහ ආදිය) සංශ්ලේෂණය වේ. සෛල වක්‍රය පාලනය කරන පරීක්ෂක ස්ථාන G₁, G₂ සහ M කලාවලට අයත් වේ.</p></div>
+    </div>
+
+    <div class="card" style="margin-top:20px;">
+      <h3 style="color:var(--gold-lt);">පරීක්ෂක ස්ථාන සහ G₀ අවස්ථාව</h3>
+      <p>සෛල වක්‍රය නිසි ලෙස ඉදිරියට ගෙන යාම සඳහා සෛලය සුදානම් බව තහවුරු කරන <b>පරීක්ෂක ස්ථාන (checkpoints)</b> G₁, G₂ සහ M කලාපවල පිහිටා ඇත. සාමාන්‍ය සෛලවලට G₁ පරීක්ෂක ස්ථානයේදී ඉදිරියට යාමේ සංඥා ලැබෙන අතර, එම සංඥා නොලැබුනහොත් සෛලය S, G₂ සහ M කලාවලට යාම වෙනුවට සෛල වක්‍රයෙන් ඉවත් වී <b>G₀ කලාව</b> නම් විවේක අවධියට පිවිසේ. මිනිස් දේහයේ බොහෝ සෛල G₀ කලාවේ පවතී — නිදසුන් ලෙස ස්නායු සෛල සහ අක්මා සෛල දැක්විය හැක.</p>
+    </div>
+  </section>
+
+  <!-- ============ MITOSIS ============ -->
+  <section class="page" id="page-mitosis">
+    <div class="eyebrow">02 · අනුනනය</div>
+    <h2 class="page-title">අනුනනය (Mitosis)</h2>
+    <p class="page-lede">එක් මාතෘ කේන්ද්‍රයකින් ප්‍රවේණිකව සර්වසම (එකිනෙකට සමාන) දුහිතෘ කේන්ද්‍ර දෙකක් නිපදවන කේන්ද්‍රීය විභජන ක්‍රමයයි. එය කලාප 5කින් සමන්විතය — ක්ලික් කර එක් එක් අවස්ථාව බලන්න.</p>
+
+    <div class="stepper" id="mitosisStepper"></div>
+    <div class="stage-wrap">
+      <div class="stage-visual" id="mitosisVisual"></div>
+      <div class="stage-text" id="mitosisText"></div>
+    </div>
+
+    <div class="legend">
+      <span><i style="background:var(--gold)"></i> වර්ණදේහ යුගල A (මාතෘ මූලයෙන්)</span>
+      <span><i style="background:var(--teal)"></i> වර්ණදේහ යුගල B (පීතෘ මූලයෙන්)</span>
+      <span><i style="background:var(--rose)"></i> කේන්ද්‍රදේහ / තර්කු කේන්ද්‍ර</span>
+    </div>
+
+    <div class="card" style="margin-top:26px;">
+      <h3 style="color:var(--gold-lt);">අනුනනයේ වැදගත්කම</h3>
+      <div class="grid-3">
+        <div><b style="color:var(--teal);">1. ප්‍රවේණික ස්ථායීතාව</b><p style="font-size:13.5px;">දුහිතෘ සෛල මාතෘ සෛලයට සර්වසම බැවින් ප්‍රවේණික තොරතුරු නොවෙනස්ව පවත්වා ගැනීමට උපකාරී වේ.</p></div>
+        <div><b style="color:var(--teal);">2. වර්ධනය හා විකසනය</b><p style="font-size:13.5px;">බහුසෛලික ජීවීන්ගේ වර්ධනයට හා පටක විකසනයට අවශ්‍ය නව සෛල නිපදවයි.</p></div>
+        <div><b style="color:var(--teal);">3. සෛල අලුත්වැඩියාව</b><p style="font-size:13.5px;">හානි වූ පටක ප්‍රතිස්ථාපනය කිරීමට හා පුනර්ජනනයට දායක වේ.</p></div>
+        <div><b style="color:var(--teal);">4. අලිංගික ප්‍රජනනය</b><p style="font-size:13.5px;">බැක්ටීරියා, ඇතැම් දිලීර වැනි ජීවීන්ගේ අලිංගික ප්‍රජනනයට පදනම වේ.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MEIOSIS ============ -->
+  <section class="page" id="page-meiosis">
+    <div class="eyebrow">03 · ඌනනය</div>
+    <h2 class="page-title">ඌනනය (Meiosis)</h2>
+    <p class="page-lede">ලිංගිකව ප්‍රජනනය කරන ජීවීන්ගේ බීජාණු/ලිංගික සෛල (gametes) නිපදවීම සඳහා සිදුවන විශේෂිත කේන්ද්‍රීය විභජනයකි. එක් DNA ප්‍රතිවලිතයකින් පසු අනුයාත විභජන දෙකක් (ඌනනය I සහ II) සිදුවී, මාතෘ සෛලයේ අඩක් වර්ණදේහ සංඛ්‍යාවක් සහිත, එකිනෙකට ප්‍රවේණිකව අනන්‍ය දුහිතෘ කේන්ද්‍ර 4ක් නිපදවයි.</p>
+
+    <div class="group-label">ඌනනය I — වර්ණදේහ සංඛ්‍යාව අඩකින් අඩුවේ</div>
+    <div class="stepper" id="meiosisStepper1"></div>
+
+    <div class="group-label">ඌනනය II — සොහෝදර ක්‍රොමැටිඩ වෙන් වේ (අනුනනයට සමාන)</div>
+    <div class="stepper" id="meiosisStepper2"></div>
+
+    <div class="stage-wrap" style="margin-top:10px;">
+      <div class="stage-visual" id="meiosisVisual"></div>
+      <div class="stage-text" id="meiosisText"></div>
+    </div>
+
+    <div class="legend">
+      <span><i style="background:var(--gold)"></i> A1 (මාතෘ)</span>
+      <span><i style="background:var(--gold-lt)"></i> A2 (පීතෘ) — සමජාත යුගලය</span>
+      <span><i style="background:var(--teal)"></i> B1 (මාතෘ)</span>
+      <span><i style="background:var(--teal-lt)"></i> B2 (පීතෘ) — සමජාත යුගලය</span>
+    </div>
+
+    <div class="card" style="margin-top:26px;">
+      <h3 style="color:var(--gold-lt);">ඌනනයේ වැදගත්කම</h3>
+      <div class="grid-3">
+        <div><b style="color:var(--rose-lt);">1. නියත වර්ණදේහ සංඛ්‍යාව</b><p style="font-size:13.5px;">ලිංගිකව ප්‍රජනනය කරන විශේෂවල පරම්පරා ඔස්සේ නියත වර්ණදේහ සංඛ්‍යාවක් පවත්වා ගැනීමට හේතු වේ.</p></div>
+        <div><b style="color:var(--rose-lt);">2. පරිණාමයට මග පාදයි</b><p style="font-size:13.5px;">නව ප්‍රවේණික සංයෝජන නිපදවීමෙන් විශේෂවල පරිණාමයට අවශ්‍ය විචලනය සපයයි.</p></div>
+        <div><b style="color:var(--rose-lt);">3. ප්‍රවේණික ප්‍රභේදනය</b><p style="font-size:13.5px;">අවතරණය (crossing over), ස්වාධීන සංචලනය සහ අහඹු සංසේචනය නිසා සෑම දුහිතෘ සෛලයක්ම අනන්‍ය වේ.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ COMPARE ============ -->
+  <section class="page" id="page-compare">
+    <div class="eyebrow">04 · සැසඳීම</div>
+    <h2 class="page-title">සැසඳුම් මේසය</h2>
+    <p class="page-lede">පහත ටොගල් බොත්තම් භාවිතයෙන් අනුනනය vs ඌනනය, සහ සත්ත්ව vs ශාක සෛල ප්ලාස්ම විභජනය අතර වෙනස්කම් සසඳන්න.</p>
+    <div class="compare-toggle">
+      <button class="ct-btn active" data-cmp="mm">අනුනනය vs ඌනනය</button>
+      <button class="ct-btn" data-cmp="cyto">සත්ත්ව vs ශාක සෛල (ප්ලාස්ම විභජනය)</button>
+    </div>
+    <div class="card"><div id="cmpTable"></div></div>
+  </section>
+
+  <!-- ============ ABNORMAL ============ -->
+  <section class="page" id="page-abnormal">
+    <div class="eyebrow">05 · අර්බුද, පිළිකා සහ ගඩු</div>
+    <h2 class="page-title">සෛල වක්‍ර පාලනය අසාර්ථක වූ විට</h2>
+    <p class="page-lede">සෛල වක්‍රය බාහිර හා අභ්‍යන්තර සාධක මගින් නිවැරදිව පාලනය නොවුනහොත් අසාමාන්‍ය සංඛ්‍යාවකින් සෛල බෙදී <b>අර්බුද (tumors)</b> ඇතිවේ.</p>
+
+    <div class="tumor-toggle">
+      <button class="ap-btn active" data-tumor="benign">නිරුපද්‍රව අර්බුද</button>
+      <button class="ap-btn" data-tumor="malignant">සෝපද්‍රව අර්බුද</button>
+    </div>
+    <div id="tumorCard"></div>
+
+    <div class="gall-box">
+      <h3 style="color:var(--gold-lt);">ශාකවල ඇති ගඩු (Plant Galls)</h3>
+      <p>ගඩු යනු ශාක ධාරකයෙකුගේ සාමාන්‍ය සෛල අනුනන විභජනය පාලනය කළ නොහැකි ලෙස උත්තේජනය කිරීමෙන් ඇතිවන අසාමාන්‍ය වර්ධනයකි. එය පිළිකාවක් නොව, ආක්‍රමණශීලී ජීවියෙකුගේ බලපෑම හේතුවෙන් ධාරක සෛලවල අසාමාන්‍ය වර්ධනයක් හා විකසනයක් සිදුවීමකි.</p>
+      <div class="cause-tags">
+        <span class="cause-tag">🦠 වයිරස්</span><span class="cause-tag">🍄 දිලීර</span>
+        <span class="cause-tag">🧫 බැක්ටීරියා</span><span class="cause-tag">🕷 කෑමන්</span><span class="cause-tag">🐛 මයිටාවන්</span>
+      </div>
+      <p style="margin-top:12px;">සාමාන්‍යයෙන් ගඩු කාරකය පටකයකට ආක්‍රමණය වී හෝ විනිවිද යාමෙන්, ධාරකයාගේ සෛල ප්‍රතිසංවිධානය කර අසාමාන්‍ය වර්ධනයක් ඇති කරයි.</p>
+    </div>
+  </section>
+
+  <!-- ============ GLOSSARY ============ -->
+  <section class="page" id="page-glossary">
+    <div class="eyebrow">06 · පාරිභාෂිකය</div>
+    <h2 class="page-title">සිංහල පාරිභාෂික ශබ්දකෝෂය</h2>
+    <p class="page-lede">වචනයක් මත ක්ලික් කර අර්ථ දැක්වීම විවෘත/වසන්න. පහත සෙවුම් තීරුව භාවිතයෙන් ඉක්මනින් වචනයක් සොයන්න.</p>
+    <input class="gloss-search" id="glossSearch" placeholder="🔍 පදයක් සෙවීමට ටයිප් කරන්න... (උදා: කයිනෙටොකෝරය)">
+    <div class="gloss-grid" id="glossGrid"></div>
+  </section>
+
+  <!-- ============ QUIZ ============ -->
+  <section class="page" id="page-quiz">
+    <div class="eyebrow">07 · ස්වයං-ඇගයුම</div>
+    <h2 class="page-title">ප්‍රශ්නාවලිය</h2>
+    <p class="page-lede">පහත බහුවරණ ප්‍රශ්න 10 සම්පූර්ණ කර ඔබේ දැනුම පරීක්ෂා කරන්න. සෑම පිළිතුරකටම වහාම පැහැදිලි කිරීමක් ලැබේ.</p>
+    <div class="quiz-head">
+      <span class="quiz-progress" id="quizProgress"></span>
+      <button class="btn ghost" id="quizReset">🔄 නැවත ආරම්භ කරන්න</button>
+    </div>
+    <div id="quizList"></div>
+    <div class="quiz-actions"><button class="btn" id="quizSubmit">ලකුණු බලන්න</button></div>
+    <div class="score-box" id="scoreBox">
+      <div class="big" id="scoreBig">0 / 10</div>
+      <p id="scoreMsg" style="margin-top:8px;"></p>
+      <button class="btn ghost" id="scoreRetry" style="margin-top:10px;">නැවත උත්සාහ කරන්න</button>
+    </div>
+  </section>
+
+</main>
+
+<footer>සම්පත් පොත ඇසුරෙන් — අ.පො.ස. (උසස් පෙළ) ජීව විද්‍යාව · සෛල චක්‍රය, අනුනනය සහ ඌනනය · සම්පූර්ණයෙන් offline අන්තර්ක්‍රියාකාරී මාර්ගෝපදේශය</footer>
+
+<script>
+/* ============================================================
+   NAVIGATION
+============================================================ */
+const tabBtns = document.querySelectorAll('#tabs button');
+const pages = document.querySelectorAll('section.page');
+function goto(pageId){
+  pages.forEach(p=>p.classList.toggle('active', p.id === 'page-'+pageId));
+  tabBtns.forEach(b=>b.classList.toggle('active', b.dataset.page === pageId));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+tabBtns.forEach(b=>b.addEventListener('click',()=>goto(b.dataset.page)));
+document.querySelectorAll('.home-link').forEach(el=>{
+  el.addEventListener('click',()=>goto(el.dataset.goto));
+});
+
+/* presenter mode */
+const presenterBtn = document.getElementById('presenterBtn');
+presenterBtn.addEventListener('click',()=>{
+  document.body.classList.toggle('presenter');
+  presenterBtn.classList.toggle('on');
+});
+
+/* ============================================================
+   SVG CHROMOSOME HELPERS
+============================================================ */
+function chromoX(x,y,rot,color){
+  return `<g transform="translate(${x},${y}) rotate(${rot})">
+    <path d="M-9,-20 Q0,-9 0,-2" stroke="${color}" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+    <path d="M9,-20 Q0,-9 0,-2" stroke="${color}" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+    <path d="M-9,20 Q0,9 0,2" stroke="${color}" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+    <path d="M9,20 Q0,9 0,2" stroke="${color}" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+    <circle cx="0" cy="0" r="2.6" fill="${color}"/>
+  </g>`;
+}
+function chromoRod(x,y,rot,color){
+  return `<g transform="translate(${x},${y}) rotate(${rot})">
+    <path d="M-7,-15 Q0,0 7,15" stroke="${color}" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+  </g>`;
+}
+function chromo(c){ return c.split ? chromoX(c.x,c.y,c.rot,c.color) : chromoRod(c.x,c.y,c.rot,c.color); }
+function poleStar(x,y,color){
+  let rays='';
+  for(let i=0;i<8;i++){
+    let a = i*Math.PI/4;
+    rays += `<line x1="${x}" y1="${y}" x2="${x+Math.cos(a)*13}" y2="${y+Math.sin(a)*13}" stroke="${color}" stroke-width="2"/>`;
+  }
+  return `<g opacity=".8">${rays}<circle cx="${x}" cy="${y}" r="3" fill="${color}"/></g>`;
+}
+function spindleLines(chromos, leftX, rightX, cy){
+  let s='';
+  chromos.forEach(c=>{
+    const toLeft = c.x > leftX+20;
+    const toRight = c.x < rightX-20;
+    if(toLeft) s+=`<line x1="${leftX}" y1="${cy}" x2="${c.x-4}" y2="${c.y}" stroke="#4a4e63" stroke-width="1.3" stroke-dasharray="2 2"/>`;
+    if(toRight) s+=`<line x1="${rightX}" y1="${cy}" x2="${c.x+4}" y2="${c.y}" stroke="#4a4e63" stroke-width="1.3" stroke-dasharray="2 2"/>`;
+  });
+  return s;
+}
+function cellSVG(opts){
+  const {w=300,h=230,cells=[{cx:150,cy:115,rx:118,ry:88}],chromos=[],envelope=false,spindle=false,
+         plate=false,plateX=150,poles=null,note=''} = opts;
+  let out = `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">`;
+  cells.forEach(c=>{
+    out += `<ellipse cx="${c.cx}" cy="${c.cy}" rx="${c.rx}" ry="${c.ry}" fill="rgba(217,164,65,0.045)" stroke="#3a3d54" stroke-width="2"/>`;
+  });
+  if(envelope){
+    out += `<ellipse cx="150" cy="115" rx="70" ry="55" fill="none" stroke="#8b7fd6" stroke-width="1.6" stroke-dasharray="4 3"/>`;
+  }
+  if(spindle && poles){
+    out += spindleLines(chromos, poles[0].x, poles[1].x, 115);
+  }
+  if(plate){
+    out += `<line x1="${plateX}" y1="30" x2="${plateX}" y2="200" stroke="#e0806f" stroke-width="1.4" stroke-dasharray="5 4" opacity=".7"/>`;
+  }
+  chromos.forEach(c=> out += chromo(c));
+  if(poles){ poles.forEach(p=> out += poleStar(p.x,p.y,'#e0806f')); }
+  if(note){ out += `<text x="150" y="218" text-anchor="middle" font-size="11" fill="#6d6c82" font-family="sans-serif">${note}</text>`; }
+  out += `</svg>`;
+  return out;
+}
+
+/* ============================================================
+   CELL CYCLE WHEEL (reused for hero + cellcycle page)
+============================================================ */
+const cycleData = {
+  G1:{label:'G₁ කලාව',color:'#d9a441',desc:'මූලික වර්ධන කලාව. සෛලයේ ප්‍රමාණය වැඩිවීම හා ප්‍රෝටීන සංශ්ලේෂණය සිදුවේ. සෛල වර්ධනයට අවශ්‍ය ද්‍රව්‍ය නිපදවෙන අතර, G₁ පරීක්ෂක ස්ථානයේදී S කලාවට යාමට සුදානම්ද යන්න පරීක්ෂා වේ.',tag:'වර්ධනය I'},
+  S:{label:'S කලාව',color:'#5ec8bd',desc:'DNA ප්‍රතිවලිත වීම (replication) සහ හිස්ටෝන් ප්‍රෝටීන සංශ්ලේෂණය සිදුවේ. නව DNA අණුව නව හිස්ටෝන් සමඟ ඒකාබද්ධ වී ක්‍රොමැටින් සෑදේ.',tag:'DNA ප්‍රතිවලිතය'},
+  G2:{label:'G₂ කලාව',color:'#e0806f',desc:'ද්විත්ව වර්ධන කලාව. සෛල විභජනයට අවශ්‍ය ප්‍රෝටීන (කේන්ද්‍රදේහ ඇතුළු) සංශ්ලේෂණය වේ. G₂ පරීක්ෂක ස්ථානයේදී DNA නිවැරදිව ප්‍රතිවලිත වී ඇත්දැයි පරීක්ෂා වේ.',tag:'වර්ධනය II'},
+  M:{label:'M කලාව',color:'#8b7fd6',desc:'අනුනනය (mitosis) සහ සෛල ප්ලාස්ම විභජනය (cytokinesis) සිදුවන කලාපය. සම්පූර්ණ සෛල වක්‍රයෙන් 10%ක් පමණ මෙයට හිමිවේ.',tag:'විභජනය'}
+};
+function buildWheel(container, size, interactive){
+  const cx=size/2, cy=size/2, r=size*0.32, r2=size*0.44;
+  const segs = [
+    {k:'G1', start:-90, end:70},
+    {k:'S', start:70, end:150},
+    {k:'G2', start:150, end:270},
+    {k:'M', start:270, end:360-90}
+  ];
+  function polar(cx,cy,r,ang){const a=(ang-90)*Math.PI/180;return [cx+r*Math.cos(a), cy+r*Math.sin(a)];}
+  function arcPath(start,end,rIn,rOut){
+    const [x1,y1]=polar(cx,cy,rOut,start), [x2,y2]=polar(cx,cy,rOut,end);
+    const [x3,y3]=polar(cx,cy,rIn,end), [x4,y4]=polar(cx,cy,rIn,start);
+    const large = (end-start)%360 > 180 ? 1:0;
+    return `M${x1},${y1} A${rOut},${rOut} 0 ${large} 1 ${x2},${y2} L${x3},${y3} A${rIn},${rIn} 0 ${large} 0 ${x4},${y4} Z`;
+  }
+  let svg = `<svg class="wheel-svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">`;
+  segs.forEach(s=>{
+    const d = arcPath(s.start,s.end,r,r2);
+    svg += `<path class="wheel-seg" data-k="${s.k}" d="${d}" fill="${cycleData[s.k].color}" stroke="${'#0d0e13'}" stroke-width="3"/>`;
+    const mid=(s.start+s.end)/2;
+    const [lx,ly]=polar(cx,cy,(r+r2)/2, mid);
+    svg += `<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle" font-size="${size*0.045}" font-weight="700" fill="#0d0e13" font-family="sans-serif">${cycleData[s.k].label.replace(' කලාව','')}</text>`;
+  });
+  svg += `<circle cx="${cx}" cy="${cy}" r="${r-4}" fill="#12141d" stroke="#2c2f42" stroke-width="1.5"/>`;
+  svg += `<text x="${cx}" y="${cy-6}" text-anchor="middle" font-size="${size*0.05}" fill="#a8a6b8" font-family="sans-serif">සෛල</text>`;
+  svg += `<text x="${cx}" y="${cy+16}" text-anchor="middle" font-size="${size*0.05}" fill="#a8a6b8" font-family="sans-serif">වක්‍රය</text>`;
+  svg += `</svg>`;
+  container.innerHTML = svg;
+  if(interactive){
+    container.querySelectorAll('.wheel-seg').forEach(seg=>{
+      seg.addEventListener('click',()=>selectWheel(seg.dataset.k));
+    });
+  }
+}
+function selectWheel(k){
+  document.querySelectorAll('#cycleWheel .wheel-seg').forEach(s=>s.classList.toggle('active', s.dataset.k===k));
+  const d = cycleData[k];
+  const info = document.getElementById('wheelInfo');
+  info.innerHTML = `<span class="phase-tagline">${d.tag}</span><h3>${d.label}</h3><p>${d.desc}</p>` +
+    (k==='M' ? `<div class="checkpoint-note">🔺 M පරීක්ෂක ස්ථානය: සියලු වර්ණදේහ තර්කුවට නිසි ලෙස සම්බන්ධ වී ඇත්දැයි තහවුරු කරයි.</div>`:'') +
+    (k==='G1' ? `<div class="g0-note">⏸ G₁ පරීක්ෂක ස්ථානයේදී ඉදිරියට යාමේ සංඥා නොලැබුනහොත් සෛලය <b>G₀ කලාවට</b> (විවේක අවධියට) පිවිසේ. උදා: ස්නායු සෛල, අක්මා සෛල.</div>`:'');
+}
+buildWheel(document.getElementById('heroWheel'), 210, false);
+buildWheel(document.getElementById('cycleWheel'), 260, true);
+selectWheel('G1');
+
+/* ============================================================
+   MITOSIS DATA + RENDER
+============================================================ */
+const S=true, U=false; // split / unsplit shorthand
+const mitosisStages = [
+  {id:'prophase', name:'ප්‍රාක් කලාව', code:'PRO',
+    desc:'ක්‍රොමැටින් තන්තු ඝන වී කෙටි වීමෙන් <span class="term" data-term="chromosome">වර්ණදේහ</span> දෘශ්‍යමාන වේ. එක් එක් වර්ණදේහයේ සොහෝදර ක්‍රොමැටිඩ දෙක සෙන්ට්‍රෝමියරයේදී බැඳී ඇත. නාභික ආවරණය බිඳී යාමට පටන් ගනී.',
+    points:['නාභික ආවරණය බිඳී යාමට පටන් ගනී','කේන්ද්‍රදේහ ධ්‍රැව දෙකට සංක්‍රමණය වේ','<span class="term" data-term="spindle">තර්කුව</span> සෑදීමට පටන් ගනී'],
+    build:()=>{
+      const chromos=[
+        {x:105,y:80,rot:24,color:'#d9a441',split:S},{x:190,y:65,rot:-18,color:'#f0c878',split:S},
+        {x:120,y:145,rot:60,color:'#5ec8bd',split:S},{x:185,y:150,rot:-45,color:'#9fe0d8',split:S}
+      ];
+      return cellSVG({chromos,envelope:true,poles:[{x:26,y:115},{x:274,y:115}],note:'නාභික ආවරණය තවම ඇත'});
+    }},
+  {id:'prometaphase', name:'පෙරයෝග කලාව', code:'PRO-M',
+    desc:'නාභික ආවරණය සම්පූර්ණයෙන් බිඳී විසිර යයි. වර්ණදේහවල <span class="term" data-term="kinetochore">කයිනෙටොකෝරය</span> සෑදී, තර්කු තන්තු වලට සම්බන්ධ වීමට පටන් ගනී.',
+    points:['නාභික ආවරණය සම්පූර්ණයෙන් අතුරුදහන් වේ','කයිනෙටොකෝර සෑදෙයි','තර්කු තන්තු කයිනෙටොකෝරයට සම්බන්ධ වේ'],
+    build:()=>{
+      const chromos=[
+        {x:112,y:95,rot:12,color:'#d9a441',split:S},{x:188,y:95,rot:-12,color:'#f0c878',split:S},
+        {x:122,y:140,rot:34,color:'#5ec8bd',split:S},{x:182,y:140,rot:-30,color:'#9fe0d8',split:S}
+      ];
+      return cellSVG({chromos,spindle:true,poles:[{x:26,y:115},{x:274,y:115}]});
+    }},
+  {id:'metaphase', name:'යෝග කලාව', code:'META',
+    desc:'සියලු වර්ණදේහ සෛලයේ මධ්‍ය රේඛාවේ (<span class="term" data-term="metaplate">යෝග කලා තලයේ</span>) පෙළගැසේ. එක් එක් වර්ණදේහයේ කයිනෙටොකෝර දෙක ප්‍රතිවිරුද්ධ ධ්‍රැව දෙසට ඇති තර්කු තන්තුවලට සම්බන්ධ වී ඇත.',
+    points:['වර්ණදේහ මධ්‍ය රේඛාවේ පේළියක පෙළගැසේ','තර්කුවේ ස්ථායීතාව උපරිමය','මෙය බෙදීමට පෙර අවසාන පරීක්ෂාවයි (M පරීක්ෂක ස්ථානය)'],
+    build:()=>{
+      const chromos=[
+        {x:150,y:55,rot:0,color:'#d9a441',split:S},{x:150,y:88,rot:0,color:'#f0c878',split:S},
+        {x:150,y:130,rot:0,color:'#5ec8bd',split:S},{x:150,y:163,rot:0,color:'#9fe0d8',split:S}
+      ];
+      return cellSVG({chromos,spindle:true,plate:true,plateX:150,poles:[{x:26,y:115},{x:274,y:115}]});
+    }},
+  {id:'anaphase', name:'වියෝග කලාව', code:'ANA',
+    desc:'සොහෝදර ක්‍රොමැටිඩ සෙන්ට්‍රෝමියරයේදී වෙන් වී, තර්කු තන්තු කෙටි වීම මගින් ප්‍රතිවිරුද්ධ ධ්‍රැව දෙසට ඇදී යයි. දැන් සෑම ක්‍රොමැටිඩයක්ම අනන්‍ය වර්ණදේහයකි.',
+    points:['සොහෝදර ක්‍රොමැටිඩ වෙන් වේ','සෛලය දිගටි වේ','එක් එක් ධ්‍රැවයට සම්පූර්ණ වර්ණදේහ කට්ටලයක් ලැබේ'],
+    build:()=>{
+      const chromos=[
+        {x:78,y:60,rot:-90,color:'#d9a441',split:U},{x:78,y:95,rot:-90,color:'#f0c878',split:U},
+        {x:78,y:135,rot:-90,color:'#5ec8bd',split:U},{x:78,y:170,rot:-90,color:'#9fe0d8',split:U},
+        {x:222,y:60,rot:90,color:'#d9a441',split:U},{x:222,y:95,rot:90,color:'#f0c878',split:U},
+        {x:222,y:135,rot:90,color:'#5ec8bd',split:U},{x:222,y:170,rot:90,color:'#9fe0d8',split:U}
+      ];
+      return cellSVG({cells:[{cx:150,cy:115,rx:135,ry:80}],chromos,spindle:true,poles:[{x:16,y:115},{x:284,y:115}]});
+    }},
+  {id:'telophase', name:'අන්ත කලාව', code:'TELO',
+    desc:'වර්ණදේහ ධ්‍රැව වෙත ළඟා වී නැවත ක්‍රොමැටින් ලෙස දිගහැරේ. එක් එක් වර්ණදේහ කුලකය වටා නව නාභික ආවරණයක් සෑදී, නාභික දෙකක් ඇතිවේ. තර්කුව අතුරුදහන් වේ.',
+    points:['නව නාභික ආවරණ දෙකක් සෑදේ','ක්‍රොමැටින් නැවත දිගහැරේ','සෛල ප්ලාස්ම විභජනයට සූදානම් වේ (furrow ආරම්භය)'],
+    build:()=>{
+      const chromosL=[{x:78,y:100,rot:20,color:'#d9a441',split:U},{x:78,y:118,rot:-10,color:'#f0c878',split:U},{x:78,y:135,rot:30,color:'#5ec8bd',split:U},{x:60,y:112,rot:-30,color:'#9fe0d8',split:U}];
+      const chromosR=[{x:222,y:100,rot:20,color:'#d9a441',split:U},{x:222,y:118,rot:-10,color:'#f0c878',split:U},{x:222,y:135,rot:30,color:'#5ec8bd',split:U},{x:240,y:112,rot:-30,color:'#9fe0d8',split:U}];
+      let svg = `<svg viewBox="0 0 300 230" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20,115 C20,60 90,45 150,45 C210,45 280,60 280,115 C280,170 210,185 150,185 C90,185 20,170 20,115 Z" fill="rgba(217,164,65,0.045)" stroke="#3a3d54" stroke-width="2"/>
+        <path d="M150,55 Q135,115 150,175" stroke="#3a3d54" stroke-width="2" fill="none" stroke-dasharray="3 3"/>
+        <ellipse cx="78" cy="117" rx="55" ry="48" fill="none" stroke="#8b7fd6" stroke-width="1.6" stroke-dasharray="4 3"/>
+        <ellipse cx="222" cy="117" rx="55" ry="48" fill="none" stroke="#8b7fd6" stroke-width="1.6" stroke-dasharray="4 3"/>`;
+      chromosL.forEach(c=>svg+=chromo(c)); chromosR.forEach(c=>svg+=chromo(c));
+      svg+=`</svg>`;
+      return svg;
+    }},
+  {id:'cytokinesis', name:'සෛල ප්ලාස්ම විභජනය', code:'CYTO',
+    desc:'කේන්ද්‍රීය විභජනයෙන් පසු සෛල ප්ලාස්මය බෙදී, ප්‍රවේණිකව සර්වසම දුහිතෘ සෛල දෙකක් නිර්මාණය වේ. සත්ත්ව සෛලවල <b>හෙදන ඇලියක්</b> (cleavage furrow) මගින්ද, ශාක සෛලවල <b>සෛල තලයක්</b> (cell plate) මගින්ද මෙය සිදුවේ.',
+    points:['සත්ත්ව: ඇක්ටින්-මයෝසින් වළල්ලකින් හෙදන ඇලියක් හැදේ','ශාක: ගොල්ගී වෙසිකා මගින් සෛල තලයක් හැදේ','දුහිතෘ සෛල දෙකම ප්‍රවේණිකව සර්වසමයි'],
+    isCyto:true,
+    build:(mode)=>{
+      const set=(cx)=>[
+        {x:cx-14,y:-14,rot:20,color:'#d9a441',split:U},{x:cx+8,y:-8,rot:-10,color:'#f0c878',split:U},
+        {x:cx-8,y:12,rot:30,color:'#5ec8bd',split:U},{x:cx+12,y:16,rot:-30,color:'#9fe0d8',split:U}
+      ];
+      let svg=`<svg viewBox="0 0 300 230" xmlns="http://www.w3.org/2000/svg">`;
+      [ [80,115], [220,115] ].forEach(([cx,cy])=>{
+        svg+=`<ellipse cx="${cx}" cy="${cy}" rx="72" ry="70" fill="rgba(94,200,189,0.05)" stroke="#3a3d54" stroke-width="2"/>`;
+        svg+=`<ellipse cx="${cx}" cy="${cy}" rx="46" ry="42" fill="none" stroke="#8b7fd6" stroke-width="1.4" stroke-dasharray="4 3"/>`;
+        set(cx).forEach(c=>svg+=`<g transform="translate(0,${cy}) scale(1)">${chromoRod(c.x,c.y,c.rot,c.color)}</g>`);
+      });
+      if(mode==='plant'){
+        svg+=`<line x1="150" y1="35" x2="150" y2="195" stroke="#9fe0d8" stroke-width="5" stroke-linecap="round"/>`;
+        svg+=`<text x="150" y="25" text-anchor="middle" font-size="11" fill="#9fe0d8" font-family="sans-serif">සෛල තලය</text>`;
+      } else {
+        svg+=`<path d="M150,45 Q140,115 150,185" stroke="#e0806f" stroke-width="5" fill="none" stroke-linecap="round"/>`;
+        svg+=`<text x="150" y="25" text-anchor="middle" font-size="11" fill="#e0806f" font-family="sans-serif">හෙදන ඇලිය</text>`;
+      }
+      svg+=`</svg>`;
+      return svg;
+    }}
+];
+let mitosisIdx=0, cytoMode='animal';
+function renderMitosisStepper(){
+  const wrap = document.getElementById('mitosisStepper');
+  wrap.innerHTML='';
+  mitosisStages.forEach((s,i)=>{
+    const b=document.createElement('button');
+    b.className='step-btn'+(i===mitosisIdx?' active':'');
+    b.innerHTML=`${s.name}<small>${s.code}</small>`;
+    b.addEventListener('click',()=>{mitosisIdx=i; renderMitosisStage();});
+    wrap.appendChild(b);
+  });
+}
+function renderMitosisStage(){
+  document.querySelectorAll('#mitosisStepper .step-btn').forEach((b,i)=>b.classList.toggle('active',i===mitosisIdx));
+  const s = mitosisStages[mitosisIdx];
+  document.getElementById('mitosisVisual').innerHTML = s.isCyto ? s.build(cytoMode) : s.build();
+  let extra='';
+  if(s.isCyto){
+    extra = `<div class="animal-plant-toggle">
+      <button class="ap-btn ${cytoMode==='animal'?'active':''}" id="apAnimal">🐾 සත්ත්ව සෛලය</button>
+      <button class="ap-btn ${cytoMode==='plant'?'active':''}" id="apPlant">🌿 ශාක සෛලය</button>
+    </div>`;
+  }
+  document.getElementById('mitosisText').innerHTML = `
+    ${extra}
+    <h3>${s.name}</h3>
+    <p>${s.desc}</p>
+    <ul>${s.points.map(p=>`<li>${p}</li>`).join('')}</ul>
+  `;
+  if(s.isCyto){
+    document.getElementById('apAnimal').addEventListener('click',()=>{cytoMode='animal';renderMitosisStage();});
+    document.getElementById('apPlant').addEventListener('click',()=>{cytoMode='plant';renderMitosisStage();});
+  }
+  attachTermTooltips();
+}
+renderMitosisStepper(); renderMitosisStage();
+
+/* ============================================================
+   MEIOSIS DATA + RENDER
+============================================================ */
+const meiosisI = [
+  {id:'p1', name:'ප්‍රාක් I', code:'PRO I',
+    desc:'<span class="term" data-term="homolog">සමජාත වර්ණදේහ</span> යුගල (එකක් මාතෘ මූලයෙන්, එකක් පීතෘ මූලයෙන්) එකිනෙකට යාබදව පෙළගැසී, <span class="term" data-term="synapsis">උපගමනය</span> මගින් බන්ධනය වේ. මෙහිදී <b>අවතරණය (crossing over)</b> සිදුවී, සොහෝදර නොවන ක්‍රොමැටිඩ අතර DNA කොටස් හුවමාරු වේ.',
+    points:['සමජාත වර්ණදේහ යුගල් සෑදේ (bivalent/tetrad)','අවතරණය මගින් ප්‍රවේණික ප්‍රභේදනය ඇතිවේ','නාභික ආවරණය බිඳී යාමට පටන් ගනී'],
+    crossnote:true,
+    build:()=>{
+      const chromos=[
+        {x:100,y:80,rot:20,color:'#d9a441',split:S},{x:120,y:88,rot:-15,color:'#f0c878',split:S},
+        {x:185,y:145,rot:60,color:'#5ec8bd',split:S},{x:200,y:150,rot:-40,color:'#9fe0d8',split:S}
+      ];
+      let svg=cellSVG({chromos,envelope:true,poles:[{x:26,y:115},{x:274,y:115}]});
+      svg = svg.replace('</svg>', `<line x1="108" y1="86" x2="128" y2="94" stroke="#e0806f" stroke-width="2.4"/><line x1="192" y1="150" x2="212" y2="145" stroke="#e0806f" stroke-width="2.4"/></svg>`);
+      return svg;
+    }},
+  {id:'m1', name:'යෝග I', code:'META I',
+    desc:'සමජාත වර්ණදේහ යුගල් (bivalents) මධ්‍ය රේඛාවේ පෙළගැසේ. එක් එක් යුගලයේ අභිමුඛතාව (orientation) අහඹු ලෙස තීරණය වීම <b>ස්වාධීන සංචලනයට</b> (independent assortment) හේතුවේ.',
+    points:['සමජාත යුගල් 2ක් තලයේ පෙළගැසේ','එක් යුගලයක සොහෝදර ක්‍රොමැටිඩ දෙකම එකම ධ්‍රැවය දෙසට යොමුවේ','අභිමුඛතාව අහඹු ලෙස තෝරාගැනේ'],
+    build:()=>{
+      const chromos=[
+        {x:150,y:58,rot:0,color:'#d9a441',split:S},{x:150,y:88,rot:0,color:'#f0c878',split:S},
+        {x:150,y:135,rot:0,color:'#5ec8bd',split:S},{x:150,y:165,rot:0,color:'#9fe0d8',split:S}
+      ];
+      return cellSVG({chromos,spindle:true,plate:true,poles:[{x:26,y:115},{x:274,y:115}]});
+    }},
+  {id:'a1', name:'වියෝග I', code:'ANA I',
+    desc:'<b>සමජාත වර්ණදේහ (සොහෝදර ක්‍රොමැටිඩ නොව)</b> ප්‍රතිවිරුද්ධ ධ්‍රැව දෙසට වෙන් වී යයි. සෑම වර්ණදේහයක්ම තවමත් සොහෝදර ක්‍රොමැටිඩ දෙකකින් සමන්විතය. මෙය මගින් වර්ණදේහ සංඛ්‍යාව අඩකින් අඩුවේ.',
+    points:['සමජාත යුගල වෙන් වේ — සොහෝදර ක්‍රොමැටිඩ නොවේ','A1 සහ B2 එක් ධ්‍රැවයකටත්, A2 සහ B1 අනෙක් ධ්‍රැවයටත් ගමන් කිරීම (උදාහරණයක්)','මෙය ස්වාධීන සංචලනයේ ප්‍රතිඵලයකි'],
+    build:()=>{
+      const chromos=[
+        {x:78,y:75,rot:-90,color:'#d9a441',split:S},{x:78,y:150,rot:-90,color:'#9fe0d8',split:S},
+        {x:222,y:75,rot:90,color:'#f0c878',split:S},{x:222,y:150,rot:90,color:'#5ec8bd',split:S}
+      ];
+      return cellSVG({cells:[{cx:150,cy:115,rx:135,ry:80}],chromos,spindle:true,poles:[{x:16,y:115},{x:284,y:115}]});
+    }},
+  {id:'t1', name:'අන්ත I', code:'TELO I',
+    desc:'වර්ණදේහ ධ්‍රැව වෙත ළඟා වේ. එක් එක් ධ්‍රැවයේ දැන් හැප්ලොයිඩ් වර්ණදේහ සංඛ්‍යාවක් (එනම් යුගලයෙන් එකක් පමණි) ඇති නමුත් සෑම වර්ණදේහයක්ම තවමත් සොහෝදර ක්‍රොමැටිඩ දෙකකින් සමන්විතය.',
+    points:['නාභික දෙකක් සෑදෙන්නට පුළුවන් (විශේෂය අනුව වෙනස්)','වර්ණදේහ සංඛ්‍යාව මාතෘ සෛලයට වඩා අඩකි','තර්කුව අතුරුදහන් වේ'],
+    build:()=>{
+      const chromosL=[{x:78,y:100,rot:15,color:'#d9a441',split:S},{x:70,y:135,rot:-25,color:'#9fe0d8',split:S}];
+      const chromosR=[{x:222,y:100,rot:15,color:'#f0c878',split:S},{x:230,y:135,rot:-25,color:'#5ec8bd',split:S}];
+      let svg = `<svg viewBox="0 0 300 230" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20,115 C20,60 90,45 150,45 C210,45 280,60 280,115 C280,170 210,185 150,185 C90,185 20,170 20,115 Z" fill="rgba(217,164,65,0.045)" stroke="#3a3d54" stroke-width="2"/>
+        <path d="M150,55 Q135,115 150,175" stroke="#3a3d54" stroke-width="2" fill="none" stroke-dasharray="3 3"/>`;
+      chromosL.forEach(c=>svg+=chromo(c)); chromosR.forEach(c=>svg+=chromo(c));
+      svg+=`</svg>`;
+      return svg;
+    }},
+  {id:'c1', name:'ප්ලාස්ම විභජනය I', code:'CYTO I', isCyto1:true,
+    desc:'සෛල ප්ලාස්මය බෙදී, <b>එකිනෙකට ප්‍රවේණිකව වෙනස්</b> හැප්ලොයිඩ් දුහිතෘ සෛල දෙකක් නිර්මාණය වේ. එක් එක් සෛලයේ වර්ණදේහ තවමත් සොහෝදර ක්‍රොමැටිඩ දෙකකින් සමන්විතය.',
+    points:['දුහිතෘ සෛල 2ක් නිපදවේ (එකිනෙකට වෙනස්)','එක් එක් සෛලය හැප්ලොයිඩ්','ඌනනය II සඳහා සූදානම්'],
+    build:()=>{
+      let svg=`<svg viewBox="0 0 300 230" xmlns="http://www.w3.org/2000/svg">`;
+      const cellA = [{x:-10,y:-8,rot:20,color:'#d9a441',split:S},{x:12,y:14,rot:-30,color:'#9fe0d8',split:S}];
+      const cellB = [{x:-10,y:-8,rot:20,color:'#f0c878',split:S},{x:12,y:14,rot:-30,color:'#5ec8bd',split:S}];
+      [[80,115,cellA,'සෛලය A'],[220,115,cellB,'සෛලය B']].forEach(([cx,cy,set,label])=>{
+        svg+=`<ellipse cx="${cx}" cy="${cy}" rx="66" ry="64" fill="rgba(139,127,214,0.06)" stroke="#3a3d54" stroke-width="2"/>`;
+        set.forEach(c=>svg+=chromo({x:cx+c.x,y:cy+c.y,rot:c.rot,color:c.color,split:c.split}));
+        svg+=`<text x="${cx}" y="${cy+52}" text-anchor="middle" font-size="11" fill="#a8a6b8" font-family="sans-serif">${label}</text>`;
+      });
+      svg+=`</svg>`;
+      return svg;
+    }}
+];
+const meiosisII = [
+  {id:'p2', name:'ප්‍රාක් II', code:'PRO II',
+    desc:'ඌනනය I න් ලැබුණු හැප්ලොයිඩ් සෛල දෙකෙහිම වර්ණදේහ නැවත ඝන වී, තර්කුව නැවත සෑදේ. එක් එක් වර්ණදේහයේ තවමත් සොහෝදර ක්‍රොමැටිඩ දෙකකි (අනුනනයේ ප්‍රාක් කලාවට සමානයි).',
+    points:['තර්කුව සෑලයේ දෙකෙහිම වෙන වෙනම සෑදේ','DNA ප්‍රතිවලිතයක් සිදු නොවේ'],
+    build:()=>{
+      const chromos=[{x:110,y:80,rot:20,color:'#d9a441',split:S},{x:190,y:150,rot:-30,color:'#9fe0d8',split:S}];
+      return cellSVG({cells:[{cx:150,cy:115,rx:100,ry:88}],chromos,envelope:true,poles:[{x:60,y:115},{x:240,y:115}]});
+    }},
+  {id:'m2', name:'යෝග II', code:'META II',
+    desc:'වර්ණදේහ 2ම මධ්‍ය රේඛාවේ පෙළගැසේ — මෙය සාමාන්‍ය අනුනන යෝග කලාපයට සමානය. සොහෝදර ක්‍රොමැටිඩ තවමත් සෙන්ට්‍රෝමියරයේ බැඳී ඇත.',
+    points:['වර්ණදේහ 2ම තලයේ පෙළගැසේ','සෑම වර්ණදේහයක්ම කයිනෙටොකෝර දෙකෙන් තර්කුවට සම්බන්ධ වේ'],
+    build:()=>{
+      const chromos=[{x:150,y:85,rot:0,color:'#d9a441',split:S},{x:150,y:150,rot:0,color:'#9fe0d8',split:S}];
+      return cellSVG({cells:[{cx:150,cy:115,rx:100,ry:88}],chromos,spindle:true,plate:true,poles:[{x:60,y:115},{x:240,y:115}]});
+    }},
+  {id:'a2', name:'වියෝග II', code:'ANA II',
+    desc:'සොහෝදර ක්‍රොමැටිඩ සෙන්ට්‍රෝමියරයේදී වෙන් වී ප්‍රතිවිරුද්ධ ධ්‍රැව දෙසට ඇදී යයි — දැන් එක් එක් ක්‍රොමැටිඩය අනන්‍ය වර්ණදේහයකි (අනුනනයේ වියෝග කලාපයට සමානයි).',
+    points:['සොහෝදර ක්‍රොමැටිඩ වෙන් වේ','සෛලය දිගටි වේ'],
+    build:()=>{
+      const chromos=[
+        {x:90,y:100,rot:-90,color:'#d9a441',split:U},{x:90,y:135,rot:-90,color:'#9fe0d8',split:U},
+        {x:210,y:100,rot:90,color:'#d9a441',split:U},{x:210,y:135,rot:90,color:'#9fe0d8',split:U}
+      ];
+      return cellSVG({cells:[{cx:150,cy:115,rx:110,ry:75}],chromos,spindle:true,poles:[{x:50,y:115},{x:250,y:115}]});
+    }},
+  {id:'t2', name:'අන්ත II', code:'TELO II',
+    desc:'නාභික ආවරණ නැවත සෑදී, එක් එක් මුල් හැප්ලොයිඩ් සෛලයෙන් නාභික දෙක බැගින් ඇතිවේ. සමස්තයක් ලෙස මුල් ඌනන සෛලයෙන් හැප්ලොයිඩ් නාභික 4ක් ලැබේ.',
+    points:['නාභික 4ක් සෑදෙයි (සෛල 2 × 2)','ක්‍රොමැටින් නැවත දිගහැරේ'],
+    build:()=>{
+      const l=[{x:78,y:100,rot:20,color:'#d9a441',split:U}]; const r=[{x:222,y:100,rot:20,color:'#d9a441',split:U}];
+      let svg = `<svg viewBox="0 0 300 230" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20,115 C20,70 90,58 150,58 C210,58 280,70 280,115 C280,160 210,172 150,172 C90,172 20,160 20,115 Z" fill="rgba(217,164,65,0.045)" stroke="#3a3d54" stroke-width="2"/>
+        <path d="M150,65 Q140,115 150,165" stroke="#3a3d54" stroke-width="2" fill="none" stroke-dasharray="3 3"/>
+        <ellipse cx="78" cy="112" rx="45" ry="38" fill="none" stroke="#8b7fd6" stroke-width="1.4" stroke-dasharray="4 3"/>
+        <ellipse cx="222" cy="112" rx="45" ry="38" fill="none" stroke="#8b7fd6" stroke-width="1.4" stroke-dasharray="4 3"/>`;
+      l.forEach(c=>svg+=chromo(c)); r.forEach(c=>svg+=chromo(c));
+      svg+='</svg>';
+      return svg;
+    }},
+  {id:'c2', name:'ප්ලාස්ම විභජනය II', code:'CYTO II', isCyto2:true,
+    desc:'අවසාන සෛල ප්ලාස්ම විභජනයෙන් පසු, මුල් ඌනන මාතෘ සෛලයකින් <b>ප්‍රවේණිකව අනන්‍ය හැප්ලොයිඩ් දුහිතෘ සෛල 4ක්</b> නිර්මාණය වේ (එකිනෙකට වෙනස්, මාතෘ සෛලයට වඩා අර්ධ වර්ණදේහ සංඛ්‍යාවකින් යුතුව).',
+    points:['මුළු දුහිතෘ සෛල: 4','සියල්ලම හැප්ලොයිඩ්, සියල්ලම ප්‍රවේණිකව අනන්‍ය','ලිංගික සෛල (gametes) ලෙස වර්ධනය විය හැක'],
+    build:()=>{
+      let svg=`<svg viewBox="0 0 300 230" xmlns="http://www.w3.org/2000/svg">`;
+      const combos=[['#d9a441','#5ec8bd'],['#d9a441','#9fe0d8'],['#f0c878','#5ec8bd'],['#f0c878','#9fe0d8']];
+      const pos=[[70,70],[230,70],[70,160],[230,160]];
+      pos.forEach((p,i)=>{
+        svg+=`<ellipse cx="${p[0]}" cy="${p[1]}" rx="52" ry="48" fill="rgba(139,127,214,0.06)" stroke="#3a3d54" stroke-width="1.6"/>`;
+        svg+=chromo({x:p[0]-10,y:p[1]-6,rot:20,color:combos[i][0],split:U});
+        svg+=chromo({x:p[0]+10,y:p[1]+8,rot:-20,color:combos[i][1],split:U});
+        svg+=`<text x="${p[0]}" y="${p[1]+40}" text-anchor="middle" font-size="10" fill="#6d6c82" font-family="sans-serif">සෛලය ${i+1}</text>`;
+      });
+      svg+='</svg>';
+      return svg;
+    }}
+];
+const meiosisAll = [...meiosisI.map(s=>({...s,group:1})), ...meiosisII.map(s=>({...s,group:2}))];
+let meiosisIdx=0;
+function renderMeiosisSteppers(){
+  const w1=document.getElementById('meiosisStepper1'); w1.innerHTML='';
+  const w2=document.getElementById('meiosisStepper2'); w2.innerHTML='';
+  meiosisAll.forEach((s,i)=>{
+    const b=document.createElement('button');
+    b.className='step-btn'+(i===meiosisIdx?' active':'');
+    b.innerHTML=`${s.name}<small>${s.code}</small>`;
+    b.addEventListener('click',()=>{meiosisIdx=i; renderMeiosisStage();});
+    (s.group===1?w1:w2).appendChild(b);
+  });
+}
+function renderMeiosisStage(){
+  document.querySelectorAll('#meiosisStepper1 .step-btn, #meiosisStepper2 .step-btn').forEach((b,i)=>b.classList.toggle('active',i===meiosisIdx));
+  const s = meiosisAll[meiosisIdx];
+  document.getElementById('meiosisVisual').innerHTML = s.build();
+  document.getElementById('meiosisText').innerHTML = `
+    <h3>${s.name} <small style="font-size:13px;color:var(--text-faint);">(${s.code})</small></h3>
+    <p>${s.desc}</p>
+    <ul>${s.points.map(p=>`<li>${p}</li>`).join('')}</ul>
+    ${s.crossnote ? `<div class="crossnote">🧬 <b>අවතරණය (Crossing Over):</b> සමජාත වර්ණදේහයක සොහෝදර නොවන ක්‍රොමැටිඩ අතර DNA අණුවේ කොටස් හුවමාරු වීමෙන් නව ජාන සංයෝජන ඇතිවේ — මෙය ප්‍රවේණික ප්‍රභේදනයේ ප්‍රධාන මූලාශ්‍රයකි.</div>` : ''}
+  `;
+  attachTermTooltips();
+}
+renderMeiosisSteppers(); renderMeiosisStage();
+
+/* ============================================================
+   COMPARISON TABLES
+============================================================ */
+const cmpData = {
+  mm: {
+    head:['ලක්ෂණය','අනුනනය (Mitosis)','ඌනනය (Meiosis)'],
+    rows:[
+      ['සිදුවන ස්ථානය','ශරීරයේ (somatic) බොහෝ සෛලවල','ලිංගික අවයවවල පමණි'],
+      ['විභජන වාර ගණන','1','2 (ඌනනය I සහ II)'],
+      ['දුහිතෘ සෛල ගණන','2','4'],
+      ['වර්ණදේහ සංඛ්‍යාව','මාතෘ සෛලයට සමාන (2n → 2n)','මාතෘ සෛලයට අඩක් (2n → n)'],
+      ['ප්‍රවේණික සමානත්වය','දුහිතෘ සෛල සර්වසමයි','දුහිතෘ සෛල එකිනෙකට වෙනස් (අනන්‍ය)'],
+      ['සමජාත වර්ණදේහ යුගලනය','සිදු නොවේ','ප්‍රාක් I හිදී සිදුවේ (bivalent සෑදේ)'],
+      ['අවතරණය (Crossing over)','සිදු නොවේ','ප්‍රාක් I හිදී සිදුවේ'],
+      ['ප්‍රධාන කාර්යභාරය','වර්ධනය, අලුත්වැඩියාව, අලිංගික ප්‍රජනනය','ලිංගික සෛල නිෂ්පාදනය, ප්‍රවේණික ප්‍රභේදනය']
+    ]
+  },
+  cyto: {
+    head:['ලක්ෂණය','සත්ත්ව සෛලය','ශාක සෛලය'],
+    rows:[
+      ['ක්‍රියාවලිය','හෙදන ඇලියක් (cleavage furrow) ඇතිවීම','සෛල තලයක් (cell plate) සෑදීම'],
+      ['සම්බන්ධ ව්‍යුහය','ඇක්ටින්-මයෝසින් හැකිලෙන වළල්ල','ගොල්ගී උපකරණයෙන් නිපදවන ආශයිකා'],
+      ['ක්‍රියාවලි ස්ථානය','සෛල පටලය ඇතුළතට හැකිලීම','සෛලයේ මධ්‍යයේ සිට පිටතට වර්ධනය'],
+      ['නව සෛල බිත්තිය','අදාළ නොවේ','අලුතින් සෛල බිත්තියක් සෑදේ'],
+      ['ප්‍රතිඵලය','ප්‍රවේණිකව සර්වසම දුහිතෘ සෛල 2ක්','ප්‍රවේණිකව සර්වසම දුහිතෘ සෛල 2ක්']
+    ]
+  }
+};
+function renderCmp(k){
+  const d = cmpData[k];
+  let html = `<table class="cmp"><thead><tr>${d.head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>`;
+  d.rows.forEach(r=> html += `<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`);
+  html += `</tbody></table>`;
+  document.getElementById('cmpTable').innerHTML = html;
+}
+document.querySelectorAll('.ct-btn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.ct-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    renderCmp(b.dataset.cmp);
+  });
+});
+renderCmp('mm');
+
+/* ============================================================
+   ABNORMALITIES
+============================================================ */
+const tumorData = {
+  benign:{
+    title:'නිරුපද්‍රව අර්බුද (Benign Tumor)',
+    pill:'ආරක්ෂිත',
+    pillClass:'b',
+    text:'අසාමාන්‍ය සෛල එකම ස්ථානයේදී වර්ධනය වී එකම ස්ථානයේම එකතු වී පවතී. සමීප පටකවලට ආක්‍රමණය නොකරයි. සාමාන්‍යයෙන් සැත්කමකින් සම්පූර්ණයෙන්ම ඉවත් කළ හැක.',
+    points:['එකම ස්ථානයේ සීමා වී පවතී','අනෙක් පටකවලට පැතිරෙන්නේ නැත','සාමාන්‍යයෙන් අඩු අවදානමක්']
+  },
+  malignant:{
+    title:'සෝපද්‍රව අර්බුද (Malignant Tumor)',
+    pill:'අවදානම්',
+    pillClass:'m',
+    text:'මුල් අර්බුදයෙන් සෛල ලිහිල් වී, රුධිරය හෝ වසාව හරහා ගමන් කර ශරීරයේ වෙනත් කොටස්වලට ඇතුළු වී නව අර්බුද සාදයි. මෙම ක්‍රියාවලිය <b>ස්ථානාන්තරණය (Metastasis)</b> ලෙස හැඳින්වේ.',
+    points:['මුල් ස්ථානයෙන් වෙන් වී පැතිරේ','රුධිර/වසා පද්ධතිය හරහා ගමන් කරයි','ස්ථානාන්තරණය: දුරස්ථ ස්ථානවල නව අර්බුද ඇතිකරයි']
+  }
+};
+function renderTumor(k){
+  const d = tumorData[k];
+  document.getElementById('tumorCard').innerHTML = `
+    <div class="tumor-card ${k}">
+      <span class="pill ${d.pillClass}">${d.pill}</span>
+      <h3>${d.title}</h3>
+      <p>${d.text}</p>
+      <ul style="padding-inline-start:20px;font-size:13.5px;color:var(--text-dim);">${d.points.map(p=>`<li>${p}</li>`).join('')}</ul>
+    </div>`;
+}
+document.querySelectorAll('[data-tumor]').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('[data-tumor]').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    renderTumor(b.dataset.tumor);
+  });
+});
+renderTumor('benign');
+
+/* ============================================================
+   GLOSSARY
+============================================================ */
+const glossary = {
+  chromosome:{si:'වර්ණදේහ',en:'Chromosome',def:'සෛල විභජනයේදී ඝන වී දෘශ්‍යමාන වන, DNA හා ප්‍රෝටීන වලින් සැදුම් ලත් තන්තු ව්‍යුහයකි. ප්‍රවේණික තොරතුරු රැගෙන යයි.'},
+  kinetochore:{si:'කයිනෙටොකෝරය',en:'Kinetochore',def:'වර්ණදේහයේ සෙන්ට්‍රෝමියර කලාපයේ පිහිටි ප්‍රෝටීන ව්‍යුහයකි. තර්කු තන්තු මෙයට සම්බන්ධ වී වර්ණදේහ චලනය කරයි.'},
+  spindle:{si:'තර්කුව',en:'Spindle apparatus',def:'සෛල විභජනයේදී සෑදෙන ක්ෂුද්‍රනාලිකා වලින් සැදුම් ලත් ව්‍යුහයක්. වර්ණදේහ ධ්‍රැව දෙසට ගමන් කරවයි.'},
+  centromere:{si:'සෙන්ට්‍රෝමියරය',en:'Centromere',def:'සොහෝදර ක්‍රොමැටිඩ දෙක එකට බඳින, වර්ණදේහයේ හැකිලුනු කලාපයයි.'},
+  crossingover:{si:'අවතරණය',en:'Crossing over',def:'ඌනනය I හි ප්‍රාක් කලාපයේදී, සමජාත වර්ණදේහයක සොහෝදර නොවන ක්‍රොමැටිඩ අතර DNA කොටස් හුවමාරු වීමයි. ප්‍රවේණික ප්‍රභේදනයට හේතුවේ.'},
+  centriole:{si:'සෙන්ට්‍රියෝල',en:'Centriole',def:'සත්ත්ව සෛලවල තර්කුව සංවිධානය කිරීමට උපකාරී වන අන්තර්ගතිකාවකි.'},
+  homolog:{si:'සමජාත වර්ණදේහ',en:'Homologous chromosomes',def:'ප්‍රමාණය, හැඩය සහ ජාන පිහිටීම එකසමාන, එකක් මාතෘ මූලයෙන් හා අනෙක පීතෘ මූලයෙන් ලැබෙන වර්ණදේහ යුගලයකි.'},
+  synapsis:{si:'උපගමනය',en:'Synapsis',def:'ඌනනය I ප්‍රාක් කලාපයේදී සමජාත වර්ණදේහ යුගලයක් “සිප්” (zipper) වැනි ව්‍යුහයකින් (උපගමපට සංකීර්ණය) බැඳී bivalent එකක් සෑදීමයි.'},
+  cytokinesis:{si:'සෛල ප්ලාස්ම විභජනය',en:'Cytokinesis',def:'කේන්ද්‍රීය විභජනයෙන් පසු සෛල ප්ලාස්මය බෙදී, වෙනම දුහිතෘ සෛල නිර්මාණය වීමයි.'},
+  metastasis:{si:'ස්ථානාන්තරණය',en:'Metastasis',def:'සෝපද්‍රව අර්බුදයකින් සෛල වෙන් වී, ශරීරයේ දුරස්ථ ස්ථානවලට ගමන් කර නව අර්බුද ඇතිකිරීමයි.'},
+  g0:{si:'G₀ කලාව',en:'G0 phase',def:'සෛලය සෛල වක්‍රයෙන් ඉවත් වී, විභජනය නොවී පවතින විවේක අවධියයි. ස්නායු හා අක්මා සෛල නිදසුන්.'},
+  nuclearenvelope:{si:'නාභික ආවරණය',en:'Nuclear envelope',def:'නාභිකය වට කරන පටලයයි. සෛල විභජනයේ ආරම්භයේදී බිඳී, අවසානයේ නැවත සෑදේ.'},
+  metaplate:{si:'යෝග කලා තලය',en:'Metaphase plate',def:'මෙටාෆේස් අවධියේදී වර්ණදේහ පෙළගැසෙන, සෛලයේ මධ්‍ය කල්පිත තලයයි.'},
+  bivalent:{si:'ද්වි-සංයුජ (Bivalent/Tetrad)',en:'Bivalent',def:'ඌනනය I හිදී සමජාත වර්ණදේහ දෙක උපගමනය මගින් බැඳී සෑදෙන සංයුක්ත ව්‍යුහයයි (ක්‍රොමැටිඩ 4කින් යුක්ත).'},
+  chiasma:{si:'කයාස්මාව',en:'Chiasma',def:'අවතරණය සිදුවන ස්ථානයේදී පෙනෙන X-හැඩැති සම්බන්ධතාවයයි.'}
+};
+function renderGlossary(filter=''){
+  const grid = document.getElementById('glossGrid');
+  grid.innerHTML='';
+  Object.entries(glossary).forEach(([key,g])=>{
+    if(filter && !(g.si.includes(filter) || g.en.toLowerCase().includes(filter.toLowerCase()) || g.def.includes(filter))) return;
+    const card=document.createElement('div');
+    card.className='gloss-card';
+    card.innerHTML = `<h4>${g.si} <span class="chev">⌄</span></h4><div class="en">${g.en}</div><p>${g.def}</p>`;
+    card.addEventListener('click',()=>card.classList.toggle('open'));
+    grid.appendChild(card);
+  });
+}
+renderGlossary();
+document.getElementById('glossSearch').addEventListener('input',e=>renderGlossary(e.target.value.trim()));
+
+/* term tooltips inline in text */
+function attachTermTooltips(){
+  const tip = document.getElementById('termTip');
+  const title = document.getElementById('termTipTitle');
+  const body = document.getElementById('termTipBody');
+  document.querySelectorAll('.term[data-term]').forEach(el=>{
+    if(el.dataset.bound) return;
+    el.dataset.bound='1';
+    el.addEventListener('click',(e)=>{
+      e.stopPropagation();
+      const key = el.dataset.term.replace(/[^a-z0-9]/gi,'').toLowerCase();
+      const g = glossary[key] || Object.values(glossary).find(x=>x.si===el.textContent.trim());
+      if(!g) return;
+      title.textContent = g.si + '  ·  ' + g.en;
+      body.textContent = g.def;
+      const r = el.getBoundingClientRect();
+      tip.style.display='block';
+      let top = r.bottom+8, left = r.left;
+      if(left+270>window.innerWidth) left = window.innerWidth-280;
+      tip.style.top = top+'px';
+      tip.style.left = left+'px';
+    });
+  });
+}
+document.addEventListener('click',()=>{document.getElementById('termTip').style.display='none';});
+attachTermTooltips();
+
+/* ============================================================
+   QUIZ
+============================================================ */
+const quiz = [
+  {q:'සෛල වක්‍රයෙන් වැඩිම කාලයක් ගන්නා අවධිය කුමක්ද?',opts:['M කලාව','අන්තර් කලාව','G₀ කලාව','සෛල ප්ලාස්ම විභජනය'],ans:1,exp:'අන්තර් කලාව (G₁, S, G₂) සෛල වක්‍රයෙන් 90%ක් පමණ හිමිකර ගනී.'},
+  {q:'DNA ප්‍රතිවලිත වීම සිදුවන්නේ කුමන කලාපයේදීද?',opts:['G₁ කලාව','S කලාව','G₂ කලාව','M කලාව'],ans:1,exp:'S (Synthesis) කලාපයේදී DNA ප්‍රතිවලිත වීම හා හිස්ටෝන් ප්‍රෝටීන සංශ්ලේෂණය සිදුවේ.'},
+  {q:'සෛලයක් විභජනයෙන් ඉවත් වී විවේක අවධියකට පිවිසෙන්නේ කුමන කලාපයටද?',opts:['G₁','G₂','G₀','S'],ans:2,exp:'G₀ කලාව යනු සෛලය සෛල වක්‍රයෙන් ඉවත් වී විභජනය නොවී පවතින විවේක අවධියයි. නිදසුන්: ස්නායු, අක්මා සෛල.'},
+  {q:'අනුනනයේදී වර්ණදේහ මධ්‍ය රේඛාවේ පෙළගැසෙන අවධිය කුමක්ද?',opts:['ප්‍රාක් කලාව','යෝග කලාව','වියෝග කලාව','අන්ත කලාව'],ans:1,exp:'යෝග කලාපයේදී (Metaphase) සියලු වර්ණදේහ මධ්‍ය රේඛාවේ පේළියක පෙළගැසේ.'},
+  {q:'සොහෝදර ක්‍රොමැටිඩ ප්‍රතිවිරුද්ධ ධ්‍රැව දෙසට වෙන් වන්නේ අනුනනයේ කුමන අවධියේදීද?',opts:['ප්‍රාක් කලාව','යෝග කලාව','වියෝග කලාව','අන්ත කලාව'],ans:2,exp:'වියෝග කලාපයේදී (Anaphase) සොහෝදර ක්‍රොමැටිඩ සෙන්ට්‍රෝමියරයේදී වෙන් වී ධ්‍රැව දෙසට ගමන් කරයි.'},
+  {q:'අවතරණය (crossing over) සිදුවන්නේ කුමන අවධියේදීද?',opts:['අනුනනයේ ප්‍රාක් කලාව','ඌනනය I හි ප්‍රාක් කලාව','ඌනනය II හි ප්‍රාක් කලාව','අනුනනයේ අන්ත කලාව'],ans:1,exp:'අවතරණය ඌනනය I හි ප්‍රාක් I (Prophase I) අවධියේදී, සමජාත වර්ණදේහ උපගමනය වූ පසු සිදුවේ.'},
+  {q:'ඌනනය I අවසානයේදී වෙන් වන්නේ කුමක්ද?',opts:['සොහෝදර ක්‍රොමැටිඩ','සමජාත වර්ණදේහ','සෙන්ට්‍රියෝල','කයිනෙටොකෝර'],ans:1,exp:'ඌනනය I හි වියෝග I අවධියේදී සමජාත වර්ණදේහ (සොහෝදර ක්‍රොමැටිඩ නොව) වෙන් වී යයි, එමගින් වර්ණදේහ සංඛ්‍යාව අඩකින් අඩුවේ.'},
+  {q:'එක් ඌනන ක්‍රියාවලියකින් අවසානයේ නිපදවෙන දුහිතෘ සෛල ගණන කීයද?',opts:['2','3','4','8'],ans:2,exp:'ඌනනය I හා II යන අනුයාත විභජන දෙකෙන් අවසානයේ, එකිනෙකට ප්‍රවේණිකව අනන්‍ය හැප්ලොයිඩ් සෛල 4ක් නිපදවේ.'},
+  {q:'සෝපද්‍රව අර්බුදයක සෛල ශරීරයේ අනෙකුත් කොටස්වලට පැතිරීම හඳුන්වන්නේ කුමන නමින්ද?',opts:['මයිටෝසිස්','මෙටාස්ටේසිස් (ස්ථානාන්තරණය)','සයිටොකයිනිසිස්','G₀ අවධිය'],ans:1,exp:'ස්ථානාන්තරණය (Metastasis) යනු මුල් අර්බුදයෙන් සෛල වෙන් වී රුධිර/වසා පද්ධතිය හරහා දුරස්ථ ස්ථානවලට පැතිර නව අර්බුද ඇති කිරීමයි.'},
+  {q:'ශාක සෛලවල සෛල ප්ලාස්ම විභජනයේදී සෑදෙන ව්‍යුහය කුමක්ද?',opts:['හෙදන ඇලිය (cleavage furrow)','සෛල තලය (cell plate)','කයාස්මාව','උපගමපට සංකීර්ණය'],ans:1,exp:'ශාක සෛලවල ගොල්ගී උපකරණයෙන් නිපදවන ආශයිකා මගින් සෛල තලයක් සෑදී, එය නව සෛල බිත්තියක් ලෙස වර්ධනය වේ. සත්ත්ව සෛලවල හෙදන ඇලියක් සෑදේ.'}
+];
+let answered = new Array(quiz.length).fill(null);
+function renderQuiz(){
+  const list = document.getElementById('quizList');
+  list.innerHTML='';
+  quiz.forEach((q,qi)=>{
+    const card = document.createElement('div');
+    card.className='qcard';
+    card.innerHTML = `<div class="qn">ප්‍රශ්නය ${qi+1} / ${quiz.length}</div><h4>${q.q}</h4>
+      <div class="opts">${q.opts.map((o,oi)=>`
+        <label class="opt" data-qi="${qi}" data-oi="${oi}">
+          <input type="radio" name="q${qi}" value="${oi}"> <span>${o}</span>
+        </label>`).join('')}</div>
+      <div class="qexplain" id="exp-${qi}"></div>`;
+    list.appendChild(card);
+  });
+  document.querySelectorAll('.opt').forEach(opt=>{
+    opt.addEventListener('click',()=>{
+      const qi = +opt.dataset.qi, oi = +opt.dataset.oi;
+      answered[qi] = oi;
+      opt.querySelector('input').checked = true;
+      updateProgress();
+    });
+  });
+  updateProgress();
+}
+function updateProgress(){
+  const done = answered.filter(a=>a!==null).length;
+  document.getElementById('quizProgress').textContent = `පිළිතුරු දුන් ප්‍රශ්න: ${done} / ${quiz.length}`;
+}
+document.getElementById('quizSubmit').addEventListener('click',()=>{
+  let score=0;
+  quiz.forEach((q,qi)=>{
+    const opts = document.querySelectorAll(`.opt[data-qi="${qi}"]`);
+    opts.forEach(o=>{
+      const oi=+o.dataset.oi;
+      o.classList.remove('correct','wrong');
+      if(oi===q.ans) o.classList.add('correct');
+      else if(answered[qi]===oi) o.classList.add('wrong');
+    });
+    const exp = document.getElementById('exp-'+qi);
+    exp.style.display='block';
+    exp.innerHTML = `💡 ${q.exp}`;
+    if(answered[qi]===q.ans) score++;
+  });
+  document.getElementById('scoreBox').style.display='block';
+  document.getElementById('scoreBig').textContent = `${score} / ${quiz.length}`;
+  const pct = score/quiz.length;
+  let msg = pct>=0.8 ? 'විශිෂ්ටයි! ඔබ මාතෘකාව හොඳින් අවබෝධ කරගෙන ඇත. 🎉' :
+            pct>=0.5 ? 'හොඳයි! තවත් පුනරීක්ෂණයකින් වැඩි දියුණු කළ හැක. 👍' :
+            'නැවත එක් එක් අවධි කියවා පරීක්ෂණය නැවත උත්සාහ කරන්න. 📘';
+  document.getElementById('scoreMsg').textContent = msg;
+  document.getElementById('scoreBox').scrollIntoView({behavior:'smooth',block:'center'});
+});
+function resetQuiz(){
+  answered = new Array(quiz.length).fill(null);
+  document.getElementById('scoreBox').style.display='none';
+  renderQuiz();
+  document.querySelectorAll('.qexplain').forEach(e=>e.style.display='none');
+  window.scrollTo({top:document.getElementById('page-quiz').offsetTop-80,behavior:'smooth'});
+}
+document.getElementById('quizReset').addEventListener('click',resetQuiz);
+document.getElementById('scoreRetry').addEventListener('click',resetQuiz);
+renderQuiz();
+</script>
+</body>
+</html>

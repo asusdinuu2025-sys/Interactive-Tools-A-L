@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>සමස්ථිතිය — අන්තර්ක්‍රියාකාරී මාර්ගෝපදේශය</title>
+<style>
+:root{
+  --bg:#F3F6F2; --panel:#FFFFFF; --panel-2:#EAF0E9; --ink:#152019; --ink-dim:#5B6B60;
+  --line:#D6E0D3; --teal:#1F6F5C; --teal-d:#164F42;
+  --cold:#3B7EA8; --hot:#D9633B; --gl-high:#C4472A; --gl-low:#2E6DA4;
+  --osmo:#6C5CA6; --liver:#5B8C3E; --amber:#D9A441;
+  --mono:'Courier New',monospace;
+  --radius:16px; --shadow:0 2px 14px rgba(21,32,25,.08);
+}
+[data-theme="dark"]{
+  --bg:#0D1512; --panel:#131F19; --panel-2:#0F1B15; --ink:#E8ECE7; --ink-dim:#93A69A;
+  --line:#233A2E; --teal:#3FA98A; --teal-d:#2C8069;
+  --shadow:0 2px 20px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:'Noto Sans Sinhala','Iskoola Pota',sans-serif;
+  background:var(--bg); color:var(--ink);
+  min-height:100vh; padding-bottom:78px;
+  transition:background .3s,color .3s;
+}
+.topbar{
+  position:sticky; top:0; z-index:50;
+  background:var(--panel); border-bottom:1px solid var(--line);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 16px; box-shadow:var(--shadow);
+}
+.topbar h1{font-size:15px; margin:0; font-weight:700; letter-spacing:.2px;}
+.topbar .sub{font-size:10px; color:var(--ink-dim); font-family:var(--mono); letter-spacing:1px;}
+.theme-btn{
+  width:38px; height:38px; border-radius:50%; border:1px solid var(--line);
+  background:var(--panel-2); color:var(--ink); font-size:16px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+}
+main{max-width:640px; margin:0 auto; padding:14px;}
+.module{display:none; animation:fade .35s ease;}
+.module.active{display:block;}
+@keyframes fade{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+.card{
+  background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+  padding:16px; margin-bottom:14px; box-shadow:var(--shadow);
+}
+.card h2{font-size:17px; margin:0 0 4px; color:var(--teal);}
+.card h3{font-size:14px; margin:14px 0 8px; color:var(--ink);}
+.card p{font-size:13px; line-height:1.65; color:var(--ink-dim); margin:4px 0;}
+.eyebrow{
+  font-family:var(--mono); font-size:10px; letter-spacing:1.5px; color:var(--teal);
+  text-transform:uppercase; margin-bottom:6px; display:block;
+}
+
+/* vital strip */
+.vital{
+  display:flex; align-items:center; gap:12px; background:var(--panel-2);
+  border:1px solid var(--line); border-radius:12px; padding:10px 14px; margin-bottom:14px;
+}
+.vital svg{flex-shrink:0;}
+.vital .readout{font-family:var(--mono); font-size:22px; font-weight:700;}
+.vital .label{font-size:10px; color:var(--ink-dim); letter-spacing:.5px;}
+.vital .status{font-size:12px; font-weight:700; margin-top:2px;}
+
+/* slider */
+.slider-wrap{margin:14px 0 4px;}
+.slider-wrap .range-labels{display:flex; justify-content:space-between; font-size:10px; color:var(--ink-dim); font-family:var(--mono); margin-bottom:4px;}
+input[type=range]{
+  -webkit-appearance:none; width:100%; height:8px; border-radius:6px;
+  background:linear-gradient(90deg,var(--cold),var(--teal) 50%,var(--hot));
+  outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:26px; height:26px; border-radius:50%;
+  background:var(--panel); border:4px solid var(--teal-d); cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.3);
+}
+input[type=range]::-moz-range-thumb{
+  width:26px; height:26px; border-radius:50%; background:var(--panel); border:4px solid var(--teal-d); cursor:pointer;
+}
+
+.tag{
+  display:inline-block; font-size:11px; padding:3px 10px; border-radius:20px;
+  background:var(--panel-2); color:var(--ink-dim); margin:2px 4px 2px 0; border:1px solid var(--line);
+}
+.tag.on{background:var(--teal); color:#fff; border-color:var(--teal);}
+
+.flow{display:flex; flex-direction:column; gap:0;}
+.flow-step{
+  display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px;
+  border:1px solid var(--line); background:var(--panel-2); opacity:.5; transition:.3s;
+}
+.flow-step.active{opacity:1; background:var(--teal); color:#fff; transform:scale(1.02); box-shadow:0 4px 14px rgba(31,111,92,.3);}
+.flow-step .n{font-family:var(--mono); font-weight:700; font-size:12px; width:22px; height:22px; border-radius:50%; background:var(--panel); color:var(--teal); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+.flow-step.active .n{background:#fff; color:var(--teal-d);}
+.flow-step b{display:block; font-size:13px;}
+.flow-step span{font-size:11px; opacity:.85;}
+.flow-arrow{text-align:center; font-size:16px; color:var(--ink-dim); padding:2px 0;}
+.flow-arrow.active{color:var(--teal); font-weight:700;}
+.btn{
+  border:none; border-radius:10px; padding:10px 16px; font-size:13px; font-weight:700;
+  background:var(--teal); color:#fff; cursor:pointer; font-family:inherit;
+}
+.btn.ghost{background:var(--panel-2); color:var(--ink); border:1px solid var(--line);}
+.btn-row{display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;}
+
+/* thermo body */
+.body-stage{display:flex; justify-content:center; padding:6px 0 10px;}
+.effect-list{display:grid; grid-template-columns:1fr; gap:8px; margin-top:10px;}
+.effect{
+  display:flex; gap:10px; align-items:flex-start; padding:10px; border-radius:10px;
+  background:var(--panel-2); border:1px solid var(--line); opacity:.35; transition:.3s;
+}
+.effect.on{opacity:1; border-color:var(--teal);}
+.effect .ic{font-size:18px;}
+.effect b{font-size:12.5px; display:block;}
+.effect span{font-size:11px; color:var(--ink-dim);}
+
+/* glucose/osmo diagram */
+.diagram{width:100%; height:auto; display:block; margin:6px 0;}
+.bar-wrap{background:var(--panel-2); border-radius:10px; height:14px; overflow:hidden; border:1px solid var(--line);}
+.bar-fill{height:100%; border-radius:10px; transition:width .4s ease, background .4s ease;}
+
+/* liver grid */
+.grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.flip-card{
+  perspective:1000px; height:118px; cursor:pointer;
+}
+.flip-inner{position:relative; width:100%; height:100%; transition:transform .5s; transform-style:preserve-3d;}
+.flip-card.flipped .flip-inner{transform:rotateY(180deg);}
+.flip-front,.flip-back{
+  position:absolute; inset:0; backface-visibility:hidden; border-radius:12px;
+  padding:10px; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;
+  border:1px solid var(--line);
+}
+.flip-front{background:var(--panel-2);}
+.flip-front .ic{font-size:22px; margin-bottom:6px;}
+.flip-front b{font-size:12px;}
+.flip-back{background:var(--liver); color:#fff; transform:rotateY(180deg); overflow-y:auto;}
+.flip-back p{color:#fff; font-size:10.5px; margin:0; line-height:1.5;}
+
+/* flashcards/quiz */
+.fc{
+  background:var(--panel-2); border:1px solid var(--line); border-radius:14px;
+  padding:20px; text-align:center; min-height:110px; display:flex; align-items:center; justify-content:center;
+  cursor:pointer; margin-bottom:10px;
+}
+.fc p{font-size:14px; margin:0; font-weight:600;}
+.fc-progress{font-family:var(--mono); font-size:11px; color:var(--ink-dim); text-align:center; margin-bottom:6px;}
+.quiz-opt{
+  display:block; width:100%; text-align:right; padding:10px 14px; margin-bottom:8px;
+  border-radius:10px; border:1px solid var(--line); background:var(--panel); color:var(--ink);
+  font-family:inherit; font-size:13px; cursor:pointer;
+}
+.quiz-opt.correct{background:#2E7D32; color:#fff; border-color:#2E7D32;}
+.quiz-opt.wrong{background:#C62828; color:#fff; border-color:#C62828;}
+.score{font-family:var(--mono); font-size:13px; text-align:center; color:var(--teal); font-weight:700;}
+
+.tabbar{
+  position:fixed; bottom:0; left:0; right:0; z-index:50;
+  background:var(--panel); border-top:1px solid var(--line);
+  display:flex; box-shadow:0 -2px 14px rgba(0,0,0,.08);
+}
+.tab-btn{
+  flex:1; border:none; background:none; padding:9px 2px 8px; font-family:inherit;
+  color:var(--ink-dim); font-size:9.5px; display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer;
+}
+.tab-btn .ic{font-size:18px;}
+.tab-btn.active{color:var(--teal); font-weight:700;}
+</style>
+</head>
+<body data-theme="light">
+
+<div class="topbar">
+  <div>
+    <h1>සමස්ථිතිය</h1>
+    <div class="sub">HOMEOSTASIS · A/L ජීව විද්‍යාව</div>
+  </div>
+  <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
+</div>
+
+<main>
+
+<!-- MODULE 1: NEGATIVE FEEDBACK -->
+<section class="module active" id="mod-feedback">
+  <div class="card">
+    <span class="eyebrow">මූලික මූලධර්මය</span>
+    <h2>සෘණ ප්‍රතිපෝෂී යාන්ත්‍රණය</h2>
+    <p>ශරීරයේ විචල්‍යයක් (උදා: උෂ්ණත්වය, ග්ලූකෝස් මට්ටම) නියමිත මට්ටමෙන් (set point) බැහැරව ගිය විට, එය නැවත එම මට්ටමට ගෙන ඒම සඳහා ක්‍රියාත්මක වන පියවර මාලාවයි.</p>
+  </div>
+
+  <div class="card">
+    <h3>අවස්ථා අනුක්‍රමය</h3>
+    <div class="flow" id="flowChain">
+      <div class="flow-step" data-i="0"><div class="n">1</div><div><b>උත්තේජනය</b><span>Stimulus — නියමිත මට්ටමෙන් අපගමනය</span></div></div>
+      <div class="flow-arrow" data-i="0">↓</div>
+      <div class="flow-step" data-i="1"><div class="n">2</div><div><b>සංවේදකය</b><span>Receptor — වෙනස හඳුනා ගනී</span></div></div>
+      <div class="flow-arrow" data-i="1">↓</div>
+      <div class="flow-step" data-i="2"><div class="n">3</div><div><b>පාලක මධ්‍යස්ථානය</b><span>Control Centre — හයිපොතලමස් වැනි</span></div></div>
+      <div class="flow-arrow" data-i="2">↓</div>
+      <div class="flow-step" data-i="3"><div class="n">4</div><div><b>ප්‍රතිචාරකය</b><span>Effector — ග්‍රන්ථි/මාංශපේශි ක්‍රියාත්මක වේ</span></div></div>
+      <div class="flow-arrow" data-i="3">↓</div>
+      <div class="flow-step" data-i="4"><div class="n">5</div><div><b>ප්‍රතිචාරය</b><span>Response — විචල්‍යය නියමිත මට්ටමට පත් වේ</span></div></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="runFeedback()">අපගමනයක් සිදු කරන්න ▶</button>
+      <button class="btn ghost" onclick="resetFeedback()">යළි සකසන්න</button>
+    </div>
+  </div>
+</section>
+
+<!-- MODULE 2: THERMOREGULATION -->
+<section class="module" id="mod-thermo">
+  <div class="vital">
+    <svg width="46" height="46" viewBox="0 0 46 46"><circle cx="23" cy="23" r="20" fill="none" stroke="var(--line)" stroke-width="4"/><circle id="thermoDial" cx="23" cy="23" r="20" fill="none" stroke="var(--teal)" stroke-width="4" stroke-linecap="round" stroke-dasharray="126" stroke-dashoffset="63" transform="rotate(-90 23 23)"/></svg>
+    <div>
+      <div class="label">දේහ උෂ්ණත්වය</div>
+      <div class="readout"><span id="tempReadout">37.0</span>°C</div>
+      <div class="status" id="tempStatus" style="color:var(--teal)">සාමාන්‍ය පරාසය</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="eyebrow">සිමියුලේටරය</span>
+    <h2>දේහ උෂ්ණත්ව යාමනය</h2>
+    <p>සාමාන්‍ය දේහ උෂ්ණත්වය 36.5°C – 37.5°C අතර පවත්වා ගැනීම හයිපොතලමසයේ "උෂ්ණත්ව පාලන මධ්‍යස්ථානය" මගින් සිදු කරයි. පහත ස්ලයිඩරය ගෙන ගොස් ශරීරය ප්‍රතිචාර දක්වන ආකාරය බලන්න.</p>
+    <div class="slider-wrap">
+      <div class="range-labels"><span>❄ 30°C</span><span>සාමාන්‍ය</span><span>🔥 42°C</span></div>
+      <input type="range" id="tempSlider" min="30" max="42" step="0.1" value="37">
+    </div>
+
+    <div class="body-stage">
+      <svg id="bodySvg" width="130" height="230" viewBox="0 0 130 230">
+        <circle id="headC" cx="65" cy="30" r="22" fill="#E9C6A0"/>
+        <rect id="torsoC" x="35" y="55" width="60" height="90" rx="18" fill="#E9C6A0"/>
+        <rect x="20" y="60" width="16" height="75" rx="8" fill="#E9C6A0"/>
+        <rect x="94" y="60" width="16" height="75" rx="8" fill="#E9C6A0"/>
+        <rect x="45" y="145" width="16" height="75" rx="8" fill="#E9C6A0"/>
+        <rect x="69" y="145" width="16" height="75" rx="8" fill="#E9C6A0"/>
+        <g id="vesselsG" stroke="#C25B4A" stroke-width="2.5" fill="none" opacity="0.55">
+          <path d="M65 60 Q 50 90 60 140"/>
+          <path d="M65 60 Q 80 90 70 140"/>
+        </g>
+        <g id="sweatG" opacity="0"></g>
+        <g id="shiverG" opacity="0"></g>
+        <g id="gooseG" opacity="0"></g>
+      </svg>
+    </div>
+
+    <div class="effect-list" id="effectList">
+      <div class="effect" id="eff-vasodil"><div class="ic">🩸</div><div><b>සමේ රුධිරවාහිනී විස්තාරණය (Vasodilation)</b><span>රුධිරය සමට ළං වී තාපය විකිරණය කරයි</span></div></div>
+      <div class="effect" id="eff-sweat"><div class="ic">💧</div><div><b>ස්වේදනය (Sweating)</b><span>වාෂ්පීකරණයෙන් තාපය පිටවේ</span></div></div>
+      <div class="effect" id="eff-vasocon"><div class="ic">🧊</div><div><b>සමේ රුධිරවාහිනී සංකෝචනය (Vasoconstriction)</b><span>රුධිරය අභ්‍යන්තරයට රඳවා තාප හානිය අඩු කරයි</span></div></div>
+      <div class="effect" id="eff-shiver"><div class="ic">🥶</div><div><b>වෙව්ලීම (Shivering)</b><span>මාංශපේශි හැකිලීමෙන් තාපය ජනනය වේ</span></div></div>
+      <div class="effect" id="eff-goose"><div class="ic">🪶</div><div><b>රෝම උද්ගමනය (Piloerection)</b><span>රෝම හිටුවා තාප පාරවාරක ස්තරයක් සාදයි</span></div></div>
+      <div class="effect" id="eff-horm"><div class="ic">⚡</div><div><b>තයිරොක්සින් / ඇඩ්‍රිනලින් වැඩිවීම</b><span>පරිවෘත්තීය වේගය වැඩි කර තාප ජනනය කරයි</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- MODULE 3: BLOOD GLUCOSE -->
+<section class="module" id="mod-glucose">
+  <div class="vital">
+    <svg width="46" height="46" viewBox="0 0 46 46"><circle cx="23" cy="23" r="20" fill="none" stroke="var(--line)" stroke-width="4"/><circle id="glucDial" cx="23" cy="23" r="20" fill="none" stroke="var(--teal)" stroke-width="4" stroke-linecap="round" stroke-dasharray="126" stroke-dashoffset="63" transform="rotate(-90 23 23)"/></svg>
+    <div>
+      <div class="label">රුධිර ග්ලූකෝස් මට්ටම</div>
+      <div class="readout"><span id="glucReadout">90</span> mg/100mL</div>
+      <div class="status" id="glucStatus" style="color:var(--teal)">සාමාන්‍ය පරාසය (70–110)</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="eyebrow">සිමියුලේටරය</span>
+    <h2>රුධිර ග්ලූකෝස් සමස්ථිතික යාමනය</h2>
+    <p>සාමාන්‍ය රුධිර ග්ලූකෝස් මට්ටම 70–110 mg/100mL වේ. ආහාර ගැනීමෙන් පසු මට්ටම ඉහළ යන අතර, නිරාහාරව සිටීමේදී පහළ බසී. අග්න්‍යාශයේ Islets of Langerhans මගින් මෙය සමතුලිත කරයි.</p>
+    <div class="slider-wrap">
+      <div class="range-labels"><span>🔵 40 (හයිපෝ)</span><span>සාමාන්‍ය</span><span>🔴 160 (හයිපර්)</span></div>
+      <input type="range" id="glucSlider" min="40" max="160" step="1" value="90">
+    </div>
+
+    <svg class="diagram" viewBox="0 0 320 190">
+      <text x="30" y="24" font-size="11" fill="var(--ink)">අග්න්‍යාශය</text>
+      <ellipse cx="55" cy="55" rx="38" ry="26" fill="var(--panel-2)" stroke="var(--line)"/>
+      <circle id="betaCell" cx="42" cy="55" r="10" fill="#cfd8d3"/>
+      <text x="42" y="59" font-size="8" text-anchor="middle" fill="#333">β</text>
+      <circle id="alphaCell" cx="68" cy="55" r="10" fill="#cfd8d3"/>
+      <text x="68" y="59" font-size="8" text-anchor="middle" fill="#333">α</text>
+
+      <text x="230" y="24" font-size="11" fill="var(--ink)">අක්මාව / සෛල</text>
+      <rect x="205" y="35" width="90" height="50" rx="10" fill="var(--panel-2)" stroke="var(--line)"/>
+      <rect id="glycogenBar" x="212" y="76" width="76" height="6" rx="3" fill="#7fae7f"/>
+
+      <path id="hormoneArrow" d="M95 55 L200 55" stroke="var(--line)" stroke-width="2" fill="none" marker-end="url(#arrow1)"/>
+      <circle id="hormoneDot" cx="95" cy="55" r="5" fill="var(--teal)" opacity="0"/>
+      <text id="hormoneLabel" x="148" y="45" font-size="10" text-anchor="middle" fill="var(--ink-dim)"></text>
+
+      <defs><marker id="arrow1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--ink-dim)"/></marker></defs>
+
+      <text x="30" y="140" font-size="10" fill="var(--ink-dim)" id="pathwayText1"></text>
+      <text x="30" y="158" font-size="10" fill="var(--ink-dim)" id="pathwayText2"></text>
+      <text x="30" y="176" font-size="10" fill="var(--ink-dim)" id="pathwayText3"></text>
+    </svg>
+
+    <div class="btn-row">
+      <span class="tag" id="tagInsulin">ඉන්සියුලින්</span>
+      <span class="tag" id="tagGlucagon">ග්ලූකගොන්</span>
+      <span class="tag" id="tagGlycogen">ග්ලයිකොජන් සංචිතය</span>
+    </div>
+  </div>
+</section>
+
+<!-- MODULE 4: OSMOREGULATION -->
+<section class="module" id="mod-osmo">
+  <div class="vital">
+    <svg width="46" height="46" viewBox="0 0 46 46"><circle cx="23" cy="23" r="20" fill="none" stroke="var(--line)" stroke-width="4"/><circle id="osmoDial" cx="23" cy="23" r="20" fill="none" stroke="var(--teal)" stroke-width="4" stroke-linecap="round" stroke-dasharray="126" stroke-dashoffset="63" transform="rotate(-90 23 23)"/></svg>
+    <div>
+      <div class="label">රුධිර ආස්‍රැති තත්ත්වය</div>
+      <div class="readout"><span id="osmoReadout">0</span></div>
+      <div class="status" id="osmoStatus" style="color:var(--teal)">සාමාන්‍ය ජල තුලනය</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="eyebrow">සිමියුලේටරය</span>
+    <h2>ආස්‍රැති විධානය (Osmoregulation)</h2>
+    <p>දේහයේ ජල හා ලවණ ප්‍රමාණය හයිපොතලමසයේ ඇති ආස්‍රැති ග්‍රාහක (osmoreceptors) මගින් නිරීක්ෂණය වේ. ජලය අඩු වූ විට (dehydration) පසුපස පිටියුටරි ග්‍රන්ථියෙන් ADH නිකුත් වී වකුගඩුවේ ජලය නැවත අවශෝෂණය කරයි.</p>
+    <div class="slider-wrap">
+      <div class="range-labels"><span>💧 ජලය අධික</span><span>සාමාන්‍ය</span><span>🏜 විජලනය</span></div>
+      <input type="range" id="osmoSlider" min="-100" max="100" step="1" value="0">
+    </div>
+
+    <svg class="diagram" viewBox="0 0 320 210">
+      <rect x="8" y="10" width="90" height="34" rx="8" fill="var(--panel-2)" stroke="var(--line)"/>
+      <text x="53" y="31" font-size="9.5" text-anchor="middle" fill="var(--ink)">හයිපොතලමස්</text>
+
+      <rect id="pitBox" x="8" y="62" width="90" height="34" rx="8" fill="var(--panel-2)" stroke="var(--line)"/>
+      <text x="53" y="83" font-size="9.5" text-anchor="middle" fill="var(--ink)">පසුපස පිටියුටරි</text>
+
+      <path d="M53 44 L53 62" stroke="var(--line)" stroke-width="2"/>
+
+      <text id="adhLabel" x="115" y="83" font-size="10" fill="var(--ink-dim)"></text>
+
+      <rect id="kidneyBox" x="200" y="55" width="110" height="50" rx="10" fill="var(--panel-2)" stroke="var(--line)"/>
+      <text x="255" y="72" font-size="9.5" text-anchor="middle" fill="var(--ink)">වකුගඩු නාලිකා</text>
+      <text x="255" y="88" font-size="8.5" text-anchor="middle" fill="var(--ink-dim)">(ජල අවශෝෂණය)</text>
+      <path id="adhArrow" d="M98 79 L200 79" stroke="var(--line)" stroke-width="2" fill="none" marker-end="url(#arrow2)"/>
+      <defs><marker id="arrow2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--ink-dim)"/></marker></defs>
+
+      <text x="8" y="128" font-size="10" fill="var(--ink)">මුත්‍රා සාන්ද්‍රණය</text>
+      <rect x="8" y="136" width="180" height="16" rx="8" fill="var(--panel-2)" stroke="var(--line)"/>
+      <rect id="urineBar" x="8" y="136" width="90" height="16" rx="8" fill="#E8C24A"/>
+
+      <text x="8" y="178" font-size="9.5" fill="var(--ink-dim)" id="aldoText"></text>
+      <text x="8" y="196" font-size="9.5" fill="var(--ink-dim)" id="aldoText2"></text>
+    </svg>
+  </div>
+</section>
+
+<!-- MODULE 5: LIVER -->
+<section class="module" id="mod-liver">
+  <div class="card">
+    <span class="eyebrow">අන්තර්ක්‍රියාකාරී න්‍යාසය</span>
+    <h2>සමස්ථිතිය පවත්වා ගැනීමේදී අක්මාවේ කාර්යභාරය</h2>
+    <p>පහත කාඩ්පත් මත ටැප් කර එක් එක් අක්මා කාර්යභාරය පිළිබඳ විස්තර බලන්න.</p>
+  </div>
+  <div class="grid" id="liverGrid"></div>
+</section>
+
+<!-- MODULE 6: FLASHCARDS + QUIZ -->
+<section class="module" id="mod-quiz">
+  <div class="card">
+    <span class="eyebrow">පුනරීක්ෂණය</span>
+    <h2>ෆ්ලෑෂ්කාඩ් සහ ස්වයං-තක්සේරු ප්‍රශ්නාවලිය</h2>
+    <div class="btn-row">
+      <button class="btn" id="modeFcBtn" onclick="setQuizMode('fc')">ෆ්ලෑෂ්කාඩ්</button>
+      <button class="btn ghost" id="modeQzBtn" onclick="setQuizMode('qz')">ප්‍රශ්නාවලිය</button>
+    </div>
+  </div>
+
+  <div class="card" id="fcPanel">
+    <div class="fc-progress" id="fcProgress"></div>
+    <div class="fc" id="fcCard" onclick="flipFc()"><p id="fcText"></p></div>
+    <div class="btn-row">
+      <button class="btn ghost" onclick="prevFc()">◀ පෙර</button>
+      <button class="btn" onclick="nextFc()">ඊළඟ ▶</button>
+    </div>
+  </div>
+
+  <div class="card" id="qzPanel" style="display:none">
+    <div class="fc-progress" id="qzProgress"></div>
+    <p id="qzQuestion" style="font-size:14px; color:var(--ink); font-weight:600;"></p>
+    <div id="qzOptions"></div>
+    <div class="score" id="qzScore"></div>
+  </div>
+</section>
+
+</main>
+
+<nav class="tabbar">
+  <button class="tab-btn active" data-mod="mod-feedback" onclick="showModule('mod-feedback',this)"><span class="ic">🔁</span>ප්‍රතිපෝෂණය</button>
+  <button class="tab-btn" data-mod="mod-thermo" onclick="showModule('mod-thermo',this)"><span class="ic">🌡️</span>උෂ්ණත්වය</button>
+  <button class="tab-btn" data-mod="mod-glucose" onclick="showModule('mod-glucose',this)"><span class="ic">🩸</span>ග්ලූකෝස්</button>
+  <button class="tab-btn" data-mod="mod-osmo" onclick="showModule('mod-osmo',this)"><span class="ic">💧</span>ආස්‍රැති</button>
+  <button class="tab-btn" data-mod="mod-liver" onclick="showModule('mod-liver',this)"><span class="ic">🫀</span>අක්මාව</button>
+  <button class="tab-btn" data-mod="mod-quiz" onclick="showModule('mod-quiz',this)"><span class="ic">🎓</span>පුනරීක්ෂණය</button>
+</nav>
+
+<script>
+/* ---------- THEME ---------- */
+function toggleTheme(){
+  const b=document.body;
+  const cur=b.getAttribute('data-theme');
+  const next=cur==='light'?'dark':'light';
+  b.setAttribute('data-theme',next);
+  document.getElementById('themeBtn').textContent = next==='dark' ? '☀️' : '🌙';
+}
+
+/* ---------- TABS ---------- */
+function showModule(id, btn){
+  document.querySelectorAll('.module').forEach(m=>m.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ---------- MODULE 1: FEEDBACK LOOP ---------- */
+let fbTimer=null, fbStep=-1;
+function resetFeedback(){
+  clearInterval(fbTimer); fbStep=-1;
+  document.querySelectorAll('#flowChain .flow-step').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('#flowChain .flow-arrow').forEach(s=>s.classList.remove('active'));
+}
+function runFeedback(){
+  resetFeedback();
+  fbStep=0;
+  fbTimer=setInterval(()=>{
+    document.querySelectorAll('#flowChain .flow-step').forEach(s=>s.classList.remove('active'));
+    document.querySelectorAll('#flowChain .flow-arrow').forEach(s=>s.classList.remove('active'));
+    const step=document.querySelector(`#flowChain .flow-step[data-i="${fbStep}"]`);
+    if(step) step.classList.add('active');
+    const arrow=document.querySelector(`#flowChain .flow-arrow[data-i="${fbStep}"]`);
+    if(arrow) arrow.classList.add('active');
+    fbStep++;
+    if(fbStep>4){ clearInterval(fbTimer); }
+  },700);
+}
+
+/* ---------- MODULE 2: THERMOREGULATION ---------- */
+const tempSlider=document.getElementById('tempSlider');
+function updateThermo(){
+  const t=parseFloat(tempSlider.value);
+  document.getElementById('tempReadout').textContent=t.toFixed(1);
+  const dial=document.getElementById('thermoDial');
+  const frac=(t-30)/(42-30);
+  dial.setAttribute('stroke-dashoffset', 126-(126*frac));
+  const statusEl=document.getElementById('tempStatus');
+
+  const effs=['vasodil','sweat','vasocon','shiver','goose','horm'];
+  effs.forEach(e=>document.getElementById('eff-'+e).classList.remove('on'));
+
+  const sweatG=document.getElementById('sweatG');
+  const shiverG=document.getElementById('shiverG');
+  const gooseG=document.getElementById('gooseG');
+  const vesselsG=document.getElementById('vesselsG');
+
+  if(t>=36.5 && t<=37.5){
+    dial.setAttribute('stroke','var(--teal)');
+    statusEl.textContent='සාමාන්‍ය පරාසය'; statusEl.style.color='var(--teal)';
+    sweatG.setAttribute('opacity',0); shiverG.setAttribute('opacity',0); gooseG.setAttribute('opacity',0);
+    vesselsG.setAttribute('stroke','#C25B4A'); vesselsG.setAttribute('stroke-width',2.5);
+  } else if(t>37.5){
+    dial.setAttribute('stroke','var(--hot)');
+    statusEl.textContent='උණුසුම — ශීතකරණ ප්‍රතිචාර'; statusEl.style.color='var(--hot)';
+    document.getElementById('eff-vasodil').classList.add('on');
+    document.getElementById('eff-sweat').classList.add('on');
+    vesselsG.setAttribute('stroke','#E8503A'); vesselsG.setAttribute('stroke-width',5);
+    sweatG.setAttribute('opacity',1);
+    sweatG.innerHTML='<circle cx="40" cy="45" r="3" fill="#5AA8D9"/><circle cx="95" cy="60" r="3" fill="#5AA8D9"/><circle cx="30" cy="90" r="3" fill="#5AA8D9"/><circle cx="100" cy="100" r="3" fill="#5AA8D9"/>';
+    shiverG.setAttribute('opacity',0); gooseG.setAttribute('opacity',0);
+  } else {
+    dial.setAttribute('stroke','var(--cold)');
+    statusEl.textContent='සීතල — තාප රැක්ෂණ ප්‍රතිචාර'; statusEl.style.color='var(--cold)';
+    document.getElementById('eff-vasocon').classList.add('on');
+    document.getElementById('eff-shiver').classList.add('on');
+    document.getElementById('eff-goose').classList.add('on');
+    vesselsG.setAttribute('stroke','#7BA0B5'); vesselsG.setAttribute('stroke-width',1.2);
+    sweatG.setAttribute('opacity',0);
+    shiverG.setAttribute('opacity',1);
+    shiverG.innerHTML='<path d="M20 150 l6 -6 l6 6 l6 -6 l6 6" stroke="#666" stroke-width="1.5" fill="none"/><path d="M90 150 l6 -6 l6 6 l6 -6 l6 6" stroke="#666" stroke-width="1.5" fill="none"/>';
+    gooseG.setAttribute('opacity',1);
+    gooseG.innerHTML='<circle cx="45" cy="75" r="2" fill="#8a5a3a"/><circle cx="60" cy="70" r="2" fill="#8a5a3a"/><circle cx="75" cy="78" r="2" fill="#8a5a3a"/><circle cx="55" cy="100" r="2" fill="#8a5a3a"/><circle cx="72" cy="105" r="2" fill="#8a5a3a"/>';
+  }
+  if(t>38.2 || t<34.5){
+    document.getElementById('eff-horm').classList.add('on');
+  }
+}
+tempSlider.addEventListener('input', updateThermo);
+
+/* ---------- MODULE 3: GLUCOSE ---------- */
+const glucSlider=document.getElementById('glucSlider');
+function updateGlucose(){
+  const g=parseFloat(glucSlider.value);
+  document.getElementById('glucReadout').textContent=g.toFixed(0);
+  const dial=document.getElementById('glucDial');
+  const frac=(g-40)/(160-40);
+  dial.setAttribute('stroke-dashoffset', 126-(126*frac));
+  const statusEl=document.getElementById('glucStatus');
+  const beta=document.getElementById('betaCell'), alpha=document.getElementById('alphaCell');
+  const glyBar=document.getElementById('glycogenBar');
+  const dot=document.getElementById('hormoneDot');
+  const label=document.getElementById('hormoneLabel');
+  const tagI=document.getElementById('tagInsulin'), tagG=document.getElementById('tagGlucagon'), tagGly=document.getElementById('tagGlycogen');
+  const p1=document.getElementById('pathwayText1'), p2=document.getElementById('pathwayText2'), p3=document.getElementById('pathwayText3');
+  tagI.classList.remove('on'); tagG.classList.remove('on'); tagGly.classList.remove('on');
+  beta.setAttribute('fill','#cfd8d3'); alpha.setAttribute('fill','#cfd8d3');
+  dot.setAttribute('opacity',1);
+
+  if(g>=70 && g<=110){
+    dial.setAttribute('stroke','var(--teal)');
+    statusEl.textContent='සාමාන්‍ය පරාසය (70–110)'; statusEl.style.color='var(--teal)';
+    label.textContent=''; dot.setAttribute('opacity',0);
+    p1.textContent='ග්ලූකෝස් මට්ටම නියමිත සීමාව තුළ පවතී.'; p2.textContent=''; p3.textContent='';
+    glyBar.setAttribute('width',40); glyBar.setAttribute('fill','#7fae7f');
+  } else if(g>110){
+    dial.setAttribute('stroke','var(--gl-high)');
+    statusEl.textContent='ඉහළ ග්ලූකෝස් — ආහාරයට පසු'; statusEl.style.color='var(--gl-high)';
+    beta.setAttribute('fill','#C4472A');
+    label.textContent='ඉන්සියුලින්'; dot.setAttribute('cx',95);
+    tagI.classList.add('on'); tagGly.classList.add('on');
+    p1.textContent='β සෛල ඉන්සියුලින් නිකුත් කරයි.';
+    p2.textContent='අක්මාව/මාංශපේශි ග්ලූකෝස් ග්ලයිකොජන් ලෙස ගබඩා කරයි.';
+    p3.textContent='සෛල ග්ලූකෝස් උරාගැනීම වැඩි කරයි → මට්ටම පහළට.';
+    glyBar.setAttribute('width', Math.min(76, 40+(g-110)*0.8)); glyBar.setAttribute('fill','#3d7a3d');
+  } else {
+    dial.setAttribute('stroke','var(--gl-low)');
+    statusEl.textContent='පහළ ග්ලූකෝස් — නිරාහාරව'; statusEl.style.color='var(--gl-low)';
+    alpha.setAttribute('fill','#2E6DA4');
+    label.textContent='ග්ලූකගොන්'; dot.setAttribute('cx',95);
+    tagG.classList.add('on'); tagGly.classList.add('on');
+    p1.textContent='α සෛල ග්ලූකගොන් නිකුත් කරයි.';
+    p2.textContent='අක්මාවේ ග්ලයිකොජන් ග්ලූකෝස් බවට බිඳ හැරේ (glycogenolysis).';
+    p3.textContent='අලුතින් ග්ලූකෝස් නිපදවීම (gluconeogenesis) → මට්ටම ඉහළට.';
+    glyBar.setAttribute('width', Math.max(6, 40-(70-g)*0.6)); glyBar.setAttribute('fill','#b5895a');
+  }
+}
+glucSlider.addEventListener('input', updateGlucose);
+
+/* ---------- MODULE 4: OSMOREGULATION ---------- */
+const osmoSlider=document.getElementById('osmoSlider');
+function updateOsmo(){
+  const v=parseFloat(osmoSlider.value);
+  document.getElementById('osmoReadout').textContent=v.toFixed(0);
+  const dial=document.getElementById('osmoDial');
+  const frac=(v+100)/200;
+  dial.setAttribute('stroke-dashoffset', 126-(126*frac));
+  const statusEl=document.getElementById('osmoStatus');
+  const adhLabel=document.getElementById('adhLabel');
+  const urineBar=document.getElementById('urineBar');
+  const aldoText=document.getElementById('aldoText'), aldoText2=document.getElementById('aldoText2');
+  const pitBox=document.getElementById('pitBox'), kidneyBox=document.getElementById('kidneyBox');
+
+  if(Math.abs(v)<15){
+    dial.setAttribute('stroke','var(--teal)');
+    statusEl.textContent='සාමාන්‍ය ජල තුලනය'; statusEl.style.color='var(--teal)';
+    adhLabel.textContent='ADH — සාමාන්‍ය මට්ටම';
+    urineBar.setAttribute('width',95); urineBar.setAttribute('fill','#E8C24A');
+    aldoText.textContent=''; aldoText2.textContent='';
+    pitBox.setAttribute('stroke','var(--line)'); kidneyBox.setAttribute('stroke','var(--line)');
+  } else if(v>0){
+    dial.setAttribute('stroke',v>60?'#8B3A2A':'var(--osmo)');
+    statusEl.textContent='ඉහළ ආස්‍රැතිය — විජලනය'; statusEl.style.color='var(--osmo)';
+    adhLabel.textContent='ADH ↑ නිකුත් වේ → ජල අවශෝෂණය ↑';
+    urineBar.setAttribute('width', Math.max(20, 95-v*0.7)); urineBar.setAttribute('fill','#B5791E');
+    pitBox.setAttribute('stroke','var(--osmo)'); kidneyBox.setAttribute('stroke','var(--osmo)');
+    if(v>60){
+      aldoText.textContent='රුධිර පරිමාව/පීඩනය අඩු නම්:';
+      aldoText2.textContent='ඇල්ඩොස්ටෙරෝන් → Na⁺ හා ජල අවශෝෂණය ඉහළට';
+    } else { aldoText.textContent=''; aldoText2.textContent=''; }
+  } else {
+    dial.setAttribute('stroke','#4A90C2');
+    statusEl.textContent='පහළ ආස්‍රැතිය — අධික ජලය'; statusEl.style.color='#4A90C2';
+    adhLabel.textContent='ADH ↓ අවහිර වේ → ජල අවශෝෂණය ↓';
+    urineBar.setAttribute('width', Math.min(178, 95+Math.abs(v)*0.9)); urineBar.setAttribute('fill','#CFE0F0');
+    pitBox.setAttribute('stroke','#4A90C2'); kidneyBox.setAttribute('stroke','#4A90C2');
+    aldoText.textContent='තනුක මුත්‍රා විශාල ප්‍රමාණයක්'; aldoText2.textContent='පිට කරනු ලැබේ.';
+  }
+}
+osmoSlider.addEventListener('input', updateOsmo);
+
+/* ---------- MODULE 5: LIVER GRID ---------- */
+const liverData=[
+ {ic:'🍞', t:'කාබෝහයිඩ්‍රේට් පරිවෘත්තිය', d:'ග්ලූකෝස් වැඩි විට අතිරික්ත ග්ලූකෝස් ග්ලයිකොජන් ලෙස අක්මාවේ ගබඩා වේ. ග්ලූකෝස් අඩු විට ග්ලයිකොජන් බිඳී නැවත ග්ලූකෝස් බවට හැරේ — රුධිර ග්ලූකෝස් මට්ටම සමතුලනය කරයි.'},
+ {ic:'🔥', t:'මේද පරිවෘත්තිය', d:'දේහයට අවශ්‍ය අතිරේක ශක්තිය සඳහා අක්මා සෛල මේද බිඳ ATP නිපදවීමට දායක වේ.'},
+ {ic:'🧬', t:'ප්‍රෝටීන් පරිවෘත්තිය (Deamination)', d:'අතිරික්ත ඇමයිනෝ අම්ල වලින් ඇමයිනෝ කාණ්ඩය ඉවත් කර (deamination) අවශේෂ කාබන් ව්‍යුහයෙන් ග්ලූකෝස් හෝ මේදය නිපදවයි. ඇමයිනෝවලින් යූරියා (Ornithine cycle) සංශ්ලේෂණය කරයි.'},
+ {ic:'♻️', t:'රක්තාණු බිඳ හෙළීම', d:'ආයු කාලය අවසන් රතු රුධිර සෛල අක්මාව හා ප්ලීහාව මගින් විනාශ කරනු ලැබේ; හීමොග්ලොබින් නැවත භාවිතයට හෝ බිලිරුබින් ලෙස බැහැර කෙරේ.'},
+ {ic:'☠️', t:'ඖෂධ හා විෂ ද්‍රව්‍ය විෂ හරණය', d:'ඖෂධ, ඇල්කොහොල් සහ අනෙකුත් විෂ ද්‍රව්‍ය රුධිරයෙන් ඉවත් කර අවිෂ බවට පත් කරයි (detoxification).'},
+ {ic:'🌡️', t:'තාපය නිෂ්පාදනය', d:'අක්මාවේ ඉහළ පරිවෘත්තීය ක්‍රියාකාරිත්වය නිසා එය දේහයේ ප්‍රධාන තාප නිපදවන අවයවයකි — දේහ උෂ්ණත්ව යාමනයට දායක වේ.'},
+ {ic:'💊', t:'පෝෂක සංචිතය', d:'ග්ලයිකොජන්, මේද-ද්‍රාව්‍ය විටමින් (A, D, E, K), තඹ බඳු අතාවශ්‍ය ලෝහමය ඛනිජ, ජලාවේශී විටමින් B₁₂ සහ යකඩ අක්මාව තුළ ගබඩා වේ.'},
+ {ic:'🧪', t:'හෝර්මෝන අක්‍රිය කිරීම', d:'ඇතැම් හෝර්මෝන, ජීවත්වයේ ක්‍රියාකාරී වේගයට පසුව අක්මාව මගින් අක්‍රිය කරනු ලැබේ.'},
+ {ic:'🟡', t:'පිත රසය සංශ්ලේෂණය', d:'මේද ජීරණය හා බිලිරූබින් (රතු රුධිර සෛල බිඳ හෙළීමේදී නිපදවන ද්‍රව්‍ය) බැහැර කිරීම සඳහා අවශ්‍ය පිත අක්මාව මගින් සංශ්ලේෂණය කරයි.'}
+];
+function buildLiverGrid(){
+  const grid=document.getElementById('liverGrid');
+  liverData.forEach((item,i)=>{
+    const card=document.createElement('div');
+    card.className='flip-card';
+    card.onclick=()=>card.classList.toggle('flipped');
+    card.innerHTML=`<div class="flip-inner">
+      <div class="flip-front"><div class="ic">${item.ic}</div><b>${item.t}</b></div>
+      <div class="flip-back"><p>${item.d}</p></div>
+    </div>`;
+    grid.appendChild(card);
+  });
+}
+
+/* ---------- MODULE 6: FLASHCARDS + QUIZ ---------- */
+const flashcards=[
+ {f:'සෘණ ප්‍රතිපෝෂණය යනු කුමක්ද?', b:'විචල්‍යයක් නියමිත මට්ටමෙන් බැහැරව ගිය විට එය නැවත එම මට්ටමට ගෙන ඒම සඳහා ක්‍රියාත්මක වන පාලන යාන්ත්‍රණය.'},
+ {f:'උෂ්ණත්ව පාලනයේ ප්‍රධාන පාලක මධ්‍යස්ථානය කුමක්ද?', b:'මොළයේ හයිපොතලමසය (Hypothalamus).'},
+ {f:'ඉන්සියුලින් නිපදවන්නේ කවර සෛල මගින්ද?', b:'අග්න්‍යාශයේ Islets of Langerhans හි β (Beta) සෛල.'},
+ {f:'ග්ලූකගොන් හෝර්මෝනයේ කාර්යය කුමක්ද?', b:'අක්මාවේ ග්ලයිකොජන් බිඳ ග්ලූකෝස් බවට හරවා රුධිර ග්ලූකෝස් මට්ටම ඉහළ නංවයි.'},
+ {f:'ADH නිකුත් කරන ග්‍රන්ථිය කුමක්ද?', b:'පසුපස පිටියුටරි ග්‍රන්ථිය (Posterior Pituitary), හයිපොතලමසයේ ආස්‍රැති ග්‍රාහක මගින් උත්තේජනය කිරීමෙන් පසු.'},
+ {f:'ඇල්ඩොස්ටෙරෝන් නිකුත් වන්නේ කොහෙන්ද?', b:'අධිවෘක්ක බාහිකයෙන් (Adrenal Cortex); එය Na⁺ හා ජල අවශෝෂණය උත්තේජනය කරයි.'},
+ {f:'Vasodilation යනු කුමක්ද?', b:'සමේ රුධිරවාහිනී විස්තාරණය වීම — තාපය රුධිරයෙන් පරිසරයට විකිරණය කිරීමට උපකාරී වේ.'},
+ {f:'අක්මාවේ Deamination ක්‍රියාවලියෙන් සිදුවන්නේ කුමක්ද?', b:'අතිරික්ත ඇමයිනෝ අම්ලවලින් ඇමයිනෝ කාණ්ඩය ඉවත් කර යූරියා සංශ්ලේෂණය කිරීම.'},
+ {f:'සාමාන්‍ය රුධිර ග්ලූකෝස් මට්ටම කුමක්ද?', b:'70–110 mg/100mL (නිරාහාරව සිටින විට).'}
+];
+let fcIndex=0, fcFlipped=false;
+function renderFc(){
+  document.getElementById('fcText').textContent = fcFlipped ? flashcards[fcIndex].b : flashcards[fcIndex].f;
+  document.getElementById('fcProgress').textContent = `කාඩ්පත ${fcIndex+1} / ${flashcards.length} — ටැප් කර පෙරළන්න`;
+}
+function flipFc(){ fcFlipped=!fcFlipped; renderFc(); }
+function nextFc(){ fcIndex=(fcIndex+1)%flashcards.length; fcFlipped=false; renderFc(); }
+function prevFc(){ fcIndex=(fcIndex-1+flashcards.length)%flashcards.length; fcFlipped=false; renderFc(); }
+
+const quizData=[
+ {q:'දේහ උෂ්ණත්වය ඉහළ ගිය විට සිදුවන්නේ කුමක්ද?', o:['සමේ රුධිරවාහිනී සංකෝචනය','ස්වේදනය හා vasodilation','රෝම උද්ගමනය','ග්ලූකගොන් නිකුත්වීම'], a:1},
+ {q:'ග්ලූකෝස් මට්ටම අඩු වූ විට (හයිපොග්ලයිසිමියා) නිකුත් වන හෝර්මෝනය කුමක්ද?', o:['ඉන්සියුලින්','ඇල්ඩොස්ටෙරෝන්','ග්ලූකගොන්','ADH'], a:2},
+ {q:'ADH ක්‍රියා කරන ප්‍රධාන ස්ථානය කුමක්ද?', o:['අග්න්‍යාශය','වකුගඩු නාලිකා','අක්මාව','අධිවෘක්ක ග්‍රන්ථිය'], a:1},
+ {q:'සෘණ ප්‍රතිපෝෂණයේ පළමු පියවර කුමක්ද?', o:['ප්‍රතිචාරකය','පාලක මධ්‍යස්ථානය','උත්තේජනය','සංවේදකය'], a:2},
+ {q:'අක්මාවේදී යූරියා නිපදවෙන ක්‍රියාවලිය කුමක්ද?', o:['Glycogenolysis','Deamination','Vasodilation','Osmoregulation'], a:1},
+ {q:'රුධිර පීඩනය අඩු වූ විට Na⁺ අවශෝෂණය වැඩි කරන හෝර්මෝනය කුමක්ද?', o:['ඉන්සියුලින්','තයිරොක්සින්','ඇල්ඩොස්ටෙරෝන්','ග්ලූකගොන්'], a:2}
+];
+let qzIndex=0, qzScore=0, qzAnswered=false;
+function renderQz(){
+  if(qzIndex>=quizData.length){
+    document.getElementById('qzQuestion').textContent='ප්‍රශ්නාවලිය අවසන්!';
+    document.getElementById('qzOptions').innerHTML='';
+    document.getElementById('qzProgress').textContent='';
+    document.getElementById('qzScore').textContent=`ලකුණු: ${qzScore} / ${quizData.length} — නැවත උත්සාහ කිරීමට පහත බොත්තම ටැප් කරන්න`;
+    const retry=document.createElement('button');
+    retry.className='btn'; retry.style.marginTop='10px'; retry.textContent='නැවත ආරම්භ කරන්න';
+    retry.onclick=()=>{qzIndex=0; qzScore=0; renderQz();};
+    document.getElementById('qzOptions').appendChild(retry);
+    return;
+  }
+  qzAnswered=false;
+  const item=quizData[qzIndex];
+  document.getElementById('qzProgress').textContent=`ප්‍රශ්නය ${qzIndex+1} / ${quizData.length}`;
+  document.getElementById('qzQuestion').textContent=item.q;
+  document.getElementById('qzScore').textContent=`ලකුණු: ${qzScore}`;
+  const optsDiv=document.getElementById('qzOptions');
+  optsDiv.innerHTML='';
+  item.o.forEach((opt,i)=>{
+    const b=document.createElement('button');
+    b.className='quiz-opt'; b.textContent=opt;
+    b.onclick=()=>{
+      if(qzAnswered) return;
+      qzAnswered=true;
+      if(i===item.a){ b.classList.add('correct'); qzScore++; }
+      else { b.classList.add('wrong'); optsDiv.children[item.a].classList.add('correct'); }
+      document.getElementById('qzScore').textContent=`ලකුණු: ${qzScore}`;
+      setTimeout(()=>{ qzIndex++; renderQz(); },900);
+    };
+    optsDiv.appendChild(b);
+  });
+}
+function setQuizMode(mode){
+  document.getElementById('fcPanel').style.display = mode==='fc' ? 'block':'none';
+  document.getElementById('qzPanel').style.display = mode==='qz' ? 'block':'none';
+  document.getElementById('modeFcBtn').className = mode==='fc' ? 'btn':'btn ghost';
+  document.getElementById('modeQzBtn').className = mode==='qz' ? 'btn':'btn ghost';
+}
+
+/* ---------- INIT ---------- */
+buildLiverGrid();
+updateThermo(); updateGlucose(); updateOsmo();
+renderFc(); renderQz();
+</script>
+</body>
+</html>

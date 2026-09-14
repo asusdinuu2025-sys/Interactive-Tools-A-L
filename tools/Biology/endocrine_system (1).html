@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>මානව අන්තරාසර්ග පද්ධතිය — Endocrine System</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #070a12;
+    --surface: rgba(255,255,255,0.045);
+    --border: rgba(255,255,255,0.09);
+    --cyan: #2be6ff;
+    --magenta: #ff3d9a;
+    --gold: #ffb703;
+    --green: #34ffb3;
+    --text: #eef3fb;
+    --muted: #8a93ab;
+    --sidebar-w: 260px;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: radial-gradient(1200px 800px at 15% -10%, rgba(43,230,255,0.10), transparent 60%),
+                radial-gradient(1000px 700px at 110% 10%, rgba(255,61,154,0.09), transparent 55%),
+                var(--bg);
+    color: var(--text);
+    font-family:'Noto Sans Sinhala','Segoe UI',sans-serif;
+    font-size:15px;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  a{ color:inherit; }
+  ul{ margin:0; padding:0; list-style:none; }
+  button{ font:inherit; color:inherit; background:none; border:none; cursor:pointer; }
+
+  .font-display{ font-family:'Space Grotesk','Noto Sans Sinhala',sans-serif; }
+  .font-mono{ font-family:'JetBrains Mono',monospace; }
+
+  ::-webkit-scrollbar{ width:8px; height:8px; }
+  ::-webkit-scrollbar-track{ background:transparent; }
+  ::-webkit-scrollbar-thumb{ background:rgba(255,255,255,0.15); border-radius:8px; }
+  ::-webkit-scrollbar-thumb:hover{ background:rgba(255,255,255,0.25); }
+
+  .glass{
+    background: var(--surface);
+    border:1px solid var(--border);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+
+  .glow-cyan{ box-shadow: 0 0 0 1px rgba(43,230,255,.25), 0 0 30px rgba(43,230,255,.12); }
+  .glow-magenta{ box-shadow: 0 0 0 1px rgba(255,61,154,.25), 0 0 30px rgba(255,61,154,.12); }
+
+  /* ---------- App shell ---------- */
+  .app{ display:flex; min-height:100vh; }
+
+  .sidebar{
+    width: var(--sidebar-w);
+    flex-shrink:0;
+    display:flex;
+    flex-direction:column;
+    gap:.35rem;
+    padding:1.25rem;
+    border-right:1px solid var(--border);
+    position:sticky;
+    top:0;
+    height:100vh;
+  }
+  .brand{ display:flex; align-items:center; gap:.75rem; margin-bottom:1.5rem; padding:0 .1rem; }
+  .brand-icon{
+    width:40px; height:40px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .brand-icon i{ color: var(--cyan); }
+  .brand-title{ font-size:.85rem; font-weight:600; line-height:1.25; }
+  .brand-sub{ font-size:11px; color:var(--muted); margin-top:2px; }
+
+  .nav-item{
+    display:flex; align-items:center; gap:.75rem;
+    padding:.7rem .9rem; border-radius:14px;
+    color:var(--muted); cursor:pointer;
+    border:1px solid transparent;
+    transition: all .25s ease;
+    font-size:.92rem;
+  }
+  .nav-item:hover{ color:var(--text); background:rgba(255,255,255,0.05); }
+  .nav-item.active{
+    color:var(--text);
+    background:linear-gradient(90deg, rgba(43,230,255,0.12), rgba(255,61,154,0.08));
+    border-color: rgba(43,230,255,0.35);
+  }
+  .nav-item.active .nav-icon{ color:var(--cyan); text-shadow:0 0 12px rgba(43,230,255,.8); }
+  .nav-icon{ width:20px; text-align:center; color:var(--muted); transition:.25s; flex-shrink:0; }
+
+  .sidebar-footer{
+    margin-top:auto;
+    padding-top:1rem;
+    border-top:1px solid var(--border);
+    font-size:11px;
+    color:var(--muted);
+    line-height:1.6;
+  }
+
+  .mobile-nav{
+    display:none;
+    position:fixed; top:0; left:0; right:0; z-index:30;
+    padding:.6rem .75rem;
+    gap:.5rem;
+    overflow-x:auto;
+    border-bottom:1px solid var(--border);
+  }
+  .mobile-nav .nav-item{ padding:.6rem .75rem; flex-shrink:0; }
+
+  .main{
+    flex:1;
+    min-width:0;
+    padding:2rem;
+    max-width:1400px;
+  }
+
+  @media (max-width: 900px){
+    .sidebar{ display:none; }
+    .mobile-nav{ display:flex; }
+    .main{ margin-top:56px; padding:1rem; }
+    .legend{ display:none; }
+  }
+
+  /* ---------- Page header ---------- */
+  .page-header{ margin-bottom:1.5rem; }
+  .badge{
+    display:inline-flex; align-items:center; gap:.35rem;
+    font-family:'JetBrains Mono',monospace;
+    font-size:.68rem; letter-spacing:.03em;
+    padding:.2rem .55rem; border-radius:999px;
+    border:1px solid var(--border); color:var(--muted);
+    margin-bottom:.6rem;
+  }
+  .page-title{ font-size:1.6rem; font-weight:600; margin:0; }
+  .page-subtitle{ color:var(--muted); margin:.35rem 0 0; font-size:.9rem; }
+
+  @media (min-width:768px){
+    .page-title{ font-size:1.9rem; }
+  }
+
+  /* ---------- Sections ---------- */
+  .section{ display:none; animation: fadeIn .5s ease; }
+  .section.active{ display:block; }
+  @keyframes fadeIn{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:translateY(0); } }
+
+  /* ---------- Module 1 : gland map ---------- */
+  .gland-map-grid{
+    display:grid;
+    grid-template-columns: minmax(280px, 420px) 1fr;
+    gap:1.25rem;
+    align-items:start;
+  }
+  @media (max-width: 950px){
+    .gland-map-grid{ grid-template-columns: 1fr; }
+  }
+
+  .body-panel{
+    border-radius:28px;
+    padding:1rem;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    min-height:560px;
+  }
+  .body-panel svg{ width:100%; max-width:340px; }
+
+  .legend{
+    display:flex; flex-wrap:wrap; gap:.5rem; justify-content:center;
+    margin-top:.75rem;
+  }
+  .legend .badge i{ font-size:9px; }
+
+  .gland-dot{ cursor:pointer; transform-origin:center; transition: transform .25s ease; }
+  .gland-dot:hover{ transform:scale(1.2); }
+  .gland-dot .hit{ fill:transparent; }
+  .gland-dot circle.pulse{ animation: pulseRing 2.4s ease-out infinite; }
+  .gland-dot.selected circle.core{ filter: drop-shadow(0 0 8px currentColor); }
+  @keyframes pulseRing{
+    0%{ opacity:.7; r:7; }
+    80%{ opacity:0; r:22; }
+    100%{ opacity:0; r:22; }
+  }
+
+  .detail-panel{
+    border-radius:28px;
+    padding:1.5rem;
+    display:flex;
+    flex-direction:column;
+    min-height:560px;
+  }
+  .detail-head{ display:flex; align-items:center; gap:.75rem; margin-bottom:1rem; }
+  .detail-icon{
+    width:48px; height:48px; border-radius:16px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .detail-name{ font-size:1.15rem; font-weight:600; }
+  .detail-name-en{ font-size:.72rem; color:var(--muted); font-family:'JetBrains Mono',monospace; }
+
+  .detail-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:.75rem; margin-bottom:1rem; }
+  @media (max-width:560px){ .detail-grid{ grid-template-columns:1fr; } }
+  .info-box{ border-radius:16px; padding:.75rem; border:1px solid var(--border); background:rgba(255,255,255,0.03); }
+  .info-label{ font-size:11px; color:var(--muted); margin-bottom:.25rem; font-family:'JetBrains Mono',monospace; }
+  .info-text{ font-size:.88rem; line-height:1.5; }
+
+  .section-label{ font-size:11px; color:var(--muted); margin-bottom:.5rem; font-family:'JetBrains Mono',monospace; }
+
+  .hormone-list{ flex:1; overflow-y:auto; max-height:340px; padding-right:.25rem; display:flex; flex-direction:column; gap:.5rem; }
+  .hormone-card{ border-radius:16px; padding:.75rem; border:1px solid var(--border); background:rgba(255,255,255,0.03); }
+  .hormone-top{ display:flex; align-items:center; justify-content:space-between; gap:.5rem; margin-bottom:.25rem; flex-wrap:wrap; }
+  .hormone-code{ font-family:'JetBrains Mono',monospace; font-size:.72rem; padding:.15rem .55rem; border-radius:999px; }
+  .hormone-target{ font-size:11px; color:var(--muted); }
+  .hormone-name{ font-size:.9rem; font-weight:500; margin-bottom:.15rem; }
+  .hormone-fn{ font-size:.8rem; color:var(--muted); line-height:1.5; }
+
+  .detail-note{ margin-top:.75rem; font-size:.78rem; border-radius:14px; padding:.75rem; border:1px dashed rgba(255,255,255,.15); color:var(--muted); }
+
+  /* ---------- Tabs ---------- */
+  .tabs{ display:flex; flex-wrap:wrap; gap:.5rem; margin-bottom:1.25rem; }
+  .tab-btn{
+    padding:.5rem 1rem; border-radius:12px; font-size:.85rem;
+    color:var(--muted); cursor:pointer; border:1px solid transparent;
+    transition:.2s;
+  }
+  .tab-btn:hover{ color:var(--text); }
+  .tab-btn.active{ color:var(--text); background:rgba(255,255,255,.06); border-color:var(--border); }
+
+  /* ---------- Module 2 ---------- */
+  .m2-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:1rem; }
+  @media (max-width:700px){ .m2-grid{ grid-template-columns:1fr; } }
+  .m2-card{ border-radius:18px; padding:1rem; }
+  .m2-code-row{ margin-bottom:.5rem; }
+  .m2-name{ font-weight:600; margin-bottom:.5rem; }
+  .m2-target{ font-size:.78rem; color:var(--muted); margin-bottom:.25rem; }
+  .m2-fn{ font-size:.88rem; line-height:1.5; margin-top:.5rem; }
+
+  /* ---------- Module 3 : feedback ---------- */
+  .fb-stage{ border-radius:28px; padding:1.5rem; }
+  .fb-title{ font-size:1.1rem; font-weight:600; margin-bottom:.15rem; }
+  .fb-progress{ font-size:.75rem; color:var(--muted); margin-bottom:1.25rem; }
+  .fb-steps{ display:flex; flex-direction:column; gap:.75rem; margin-bottom:1.25rem; }
+  .fb-step{
+    border-radius:16px; padding:1rem; border:1px solid var(--border);
+    background:rgba(255,255,255,0.03);
+    display:flex; align-items:flex-start; gap:.75rem;
+    transition: all .3s ease;
+  }
+  .fb-step-icon{
+    width:36px; height:36px; border-radius:12px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .fb-step-label{ font-size:.72rem; font-family:'JetBrains Mono',monospace; color:var(--muted); margin-bottom:.2rem; }
+  .fb-step-text{ font-size:.88rem; line-height:1.5; }
+  .fb-controls{ display:flex; align-items:center; gap:.75rem; flex-wrap:wrap; }
+  .fb-btn{ padding:.55rem 1rem; border-radius:12px; border:1px solid rgba(255,255,255,.15); font-size:.85rem; transition:.2s; }
+  .fb-btn:hover{ background:rgba(255,255,255,.06); }
+  .fb-btn.disabled{ opacity:.3; pointer-events:none; }
+  .fb-btn-ghost{ font-size:.78rem; color:var(--muted); margin-left:auto; }
+  .fb-summary{ margin-top:1rem; font-size:.88rem; border-radius:14px; padding:1rem; border:1px solid; line-height:1.5; }
+
+  /* ---------- Module 4 : disorders ---------- */
+  .disorder-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:1.25rem; }
+  @media (max-width:750px){ .disorder-grid{ grid-template-columns:1fr; } }
+  .disorder-card{ border-radius:24px; padding:1.25rem; transition: transform .3s ease; }
+  .disorder-card:hover{ transform: translateY(-4px); }
+  .disorder-head{ display:flex; align-items:center; gap:.75rem; margin-bottom:1rem; }
+  .disorder-icon{ width:44px; height:44px; border-radius:16px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+  .disorder-title{ font-weight:600; }
+  .disorder-sub{ font-size:11px; color:var(--muted); font-family:'JetBrains Mono',monospace; }
+  .disorder-points{ display:flex; flex-direction:column; gap:.5rem; }
+  .disorder-points li{ font-size:.88rem; display:flex; align-items:flex-start; gap:.5rem; line-height:1.55; }
+  .disorder-points i{ margin-top:.3rem; font-size:.65rem; flex-shrink:0; }
+
+  /* ---------- Module 5 : quiz ---------- */
+  .quiz-card{ border-radius:28px; padding:1.5rem; max-width:640px; }
+  .quiz-top{ display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; }
+  .quiz-question{ font-size:1rem; font-weight:500; margin-bottom:1rem; line-height:1.5; }
+  .quiz-options{ display:flex; flex-direction:column; gap:.5rem; margin-bottom:1.25rem; }
+  .quiz-opt{
+    cursor:pointer; transition:.2s; border-radius:12px; padding:.75rem;
+    border:1px solid var(--border); background:rgba(255,255,255,0.03); font-size:.9rem;
+  }
+  .quiz-opt:hover{ background:rgba(255,255,255,.06); }
+  .quiz-opt.correct{ background:rgba(52,255,179,.14); border-color: rgba(52,255,179,.5); }
+  .quiz-opt.wrong{ background:rgba(255,61,154,.14); border-color: rgba(255,61,154,.5); }
+  .quiz-next{ padding:.55rem 1rem; border-radius:12px; border:1px solid rgba(255,255,255,.15); font-size:.85rem; transition:.2s; }
+  .quiz-next:hover{ background:rgba(255,255,255,.06); }
+  .quiz-next.disabled{ opacity:.3; pointer-events:none; }
+
+  .quiz-result{ text-align:center; padding:2rem 0; }
+  .quiz-result-icon{
+    width:64px; height:64px; margin:0 auto 1rem; border-radius:999px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .quiz-result-title{ font-size:1.25rem; font-weight:600; margin-bottom:.25rem; }
+  .quiz-result-score{ color:var(--muted); margin-bottom:1.25rem; }
+  .quiz-restart{ padding:.65rem 1.25rem; border-radius:12px; border:1px solid rgba(255,255,255,.15); font-size:.9rem; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- SIDEBAR (desktop) -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon glass glow-cyan"><i class="fa-solid fa-dna"></i></div>
+      <div>
+        <div class="brand-title font-display">අන්තරාසර්ග පද්ධතිය</div>
+        <div class="brand-sub font-mono">A/L BIOLOGY · UNIT 05</div>
+      </div>
+    </div>
+
+    <div class="nav-item active" data-target="mod1"><span class="nav-icon"><i class="fa-solid fa-person-half-dress"></i></span><span>ග්‍රන්ථි සිතියම</span></div>
+    <div class="nav-item" data-target="mod2"><span class="nav-icon"><i class="fa-solid fa-flask-vial"></i></span><span>හෝමෝන විස්තර</span></div>
+    <div class="nav-item" data-target="mod3"><span class="nav-icon"><i class="fa-solid fa-arrows-spin"></i></span><span>ප්‍රතිපෝෂී යාන්ත්‍රණ</span></div>
+    <div class="nav-item" data-target="mod4"><span class="nav-icon"><i class="fa-solid fa-notes-medical"></i></span><span>අන්තරාසර්ග ආබාධ</span></div>
+    <div class="nav-item" data-target="mod5"><span class="nav-icon"><i class="fa-solid fa-brain"></i></span><span>ක්ෂණික ප්‍රශ්නාවලිය</span></div>
+
+    <div class="sidebar-footer">
+      ශ්‍රී ලංකා අ.පො.ස (උ.පෙළ) ජීව විද්‍යාව සම්පත් පොත පදනම් කරගෙන සකසන ලදී.
+    </div>
+  </aside>
+
+  <!-- MOBILE NAV -->
+  <nav class="mobile-nav glass">
+    <div class="nav-item active" data-target="mod1"><i class="fa-solid fa-person-half-dress"></i></div>
+    <div class="nav-item" data-target="mod2"><i class="fa-solid fa-flask-vial"></i></div>
+    <div class="nav-item" data-target="mod3"><i class="fa-solid fa-arrows-spin"></i></div>
+    <div class="nav-item" data-target="mod4"><i class="fa-solid fa-notes-medical"></i></div>
+    <div class="nav-item" data-target="mod5"><i class="fa-solid fa-brain"></i></div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- MODULE 1 -->
+    <section id="mod1" class="section active">
+      <header class="page-header">
+        <div class="badge glow-cyan"><i class="fa-solid fa-map-location-dot"></i> MODULE 01</div>
+        <h1 class="page-title font-display">අන්තරාසර්ග ග්‍රන්ථි පිහිටීම</h1>
+        <p class="page-subtitle">ග්‍රන්ථියක් ක්ලික් කර එහි විස්තර දකින්න — Endocrine Gland Locations</p>
+      </header>
+
+      <div class="gland-map-grid">
+        <div class="body-panel glass">
+          <svg id="bodySvg" viewBox="0 0 340 640">
+            <g fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.14)" stroke-width="1.5">
+              <circle cx="170" cy="66" r="42"/>
+              <rect x="150" y="104" width="40" height="26" rx="8"/>
+              <path d="M108 136 Q170 112 232 136 L248 306 Q170 336 92 306 Z" />
+              <path d="M98 156 L46 268 Q38 288 53 296 L68 300 L110 200 Z"/>
+              <path d="M242 156 L294 268 Q302 288 287 296 L272 300 L230 200 Z"/>
+              <path d="M116 306 L100 478 Q98 498 118 500 L134 498 L148 326 Z"/>
+              <path d="M224 306 L240 478 Q242 498 222 500 L206 498 L192 326 Z"/>
+              <path d="M110 498 L98 610 Q97 622 112 622 L126 622 L136 502 Z"/>
+              <path d="M230 498 L242 610 Q243 622 228 622 L214 622 L204 502 Z"/>
+            </g>
+            <g id="glandLayer"></g>
+          </svg>
+
+          <div class="legend">
+            <span class="badge"><i class="fa-solid fa-circle" style="color:var(--cyan)"></i> මොළය/බෙල්ල</span>
+            <span class="badge"><i class="fa-solid fa-circle" style="color:var(--magenta)"></i> ශරීර කඳ</span>
+            <span class="badge"><i class="fa-solid fa-circle" style="color:var(--gold)"></i> ප්‍රජනන ග්‍රන්ථි</span>
+          </div>
+        </div>
+
+        <div id="glandDetail" class="detail-panel glass"></div>
+      </div>
+    </section>
+
+    <!-- MODULE 2 -->
+    <section id="mod2" class="section">
+      <header class="page-header">
+        <div class="badge glow-magenta"><i class="fa-solid fa-flask-vial"></i> MODULE 02</div>
+        <h1 class="page-title font-display">ග්‍රන්ථි සහ හෝමෝන විස්තර</h1>
+        <p class="page-subtitle">ග්‍රන්ථියක් තෝරා සම්පූර්ණ හෝමෝන පැතිකඩ බලන්න</p>
+      </header>
+
+      <div class="tabs" id="mod2Tabs"></div>
+      <div id="mod2Content" class="m2-grid"></div>
+    </section>
+
+    <!-- MODULE 3 -->
+    <section id="mod3" class="section">
+      <header class="page-header">
+        <div class="badge glow-cyan"><i class="fa-solid fa-arrows-spin"></i> MODULE 03</div>
+        <h1 class="page-title font-display">ප්‍රතිපෝෂී යාන්ත්‍රණ</h1>
+        <p class="page-subtitle">පියවරෙන් පියවර සජීවීකරණය බලන්න — Step through the mechanism</p>
+      </header>
+
+      <div class="tabs">
+        <div class="tab-btn active" data-fb="oxytocin">ධන ප්‍රතිපෝෂණය · ඔක්සිටොසින්</div>
+        <div class="tab-btn" data-fb="glucose">ඍණ ප්‍රතිපෝෂණය · ග්ලූකෝස්</div>
+        <div class="tab-btn" data-fb="calcium">ඍණ ප්‍රතිපෝෂණය · කැල්සියම්</div>
+      </div>
+
+      <div id="fbStage" class="fb-stage glass"></div>
+    </section>
+
+    <!-- MODULE 4 -->
+    <section id="mod4" class="section">
+      <header class="page-header">
+        <div class="badge glow-magenta"><i class="fa-solid fa-notes-medical"></i> MODULE 04</div>
+        <h1 class="page-title font-display">අන්තරාසර්ග ආබාධ</h1>
+        <p class="page-subtitle">සසඳන ලද සායනික තත්ත්ව</p>
+      </header>
+
+      <div class="tabs">
+        <div class="tab-btn active" data-dis="diabetes">මධුමේහය (Diabetes Mellitus)</div>
+        <div class="tab-btn" data-dis="thyroid">තයිරොයිඩ් ආබාධ</div>
+      </div>
+
+      <div id="disorderGrid" class="disorder-grid"></div>
+    </section>
+
+    <!-- MODULE 5 -->
+    <section id="mod5" class="section">
+      <header class="page-header">
+        <div class="badge glow-cyan"><i class="fa-solid fa-brain"></i> MODULE 05</div>
+        <h1 class="page-title font-display">ක්ෂණික ප්‍රශ්නාවලිය</h1>
+        <p class="page-subtitle">ප්‍රශ්න 5ක කුඩා ප්‍රශ්නාවලියක් — ඔබේ දැනුම පරීක්ෂා කරන්න</p>
+      </header>
+
+      <div class="quiz-card glass">
+        <div class="quiz-top">
+          <span class="badge font-mono" id="quizProgress">ප්‍රශ්නය 1 / 5</span>
+          <span class="badge font-mono" id="quizScore">ලකුණු: 0</span>
+        </div>
+        <div id="quizBody"></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+const COLORS = { cyan:'#2be6ff', magenta:'#ff3d9a', gold:'#ffb703', green:'#34ffb3' };
+
+const GLANDS = [
+  {
+    id:'hypothalamus', name_si:'හයිපෝතලමස', name_en:'Hypothalamus', color:COLORS.cyan,
+    x:150, y:58, icon:'fa-brain',
+    location:'මොළයේ, තැලමසට වහාම පහළින්, පිටියුටරි ග්‍රන්ථියට ඉහළින් පිහිටා ඇත.',
+    structure:'ස්නායු හා අන්තරාසර්ග පටක මගින් සමන්විත; පිටියුටරි ග්‍රන්ථිය සමග ප්‍රතිහාර රුධිර නාල පද්ධතියක් මගින් සම්බන්ධ වේ.',
+    hormones:[
+      {code:'GHRH', name_si:'වර්ධක හෝමෝන ප්‍රාවී හෝමෝනය', target:'පූර්ව පිටියුටරි', fn:'GH ශ්‍රාවය උත්තේජනය කරයි'},
+      {code:'TRH', name_si:'තයිරොට්‍රොපින් ප්‍රාවී හෝමෝනය', target:'පූර්ව පිටියුටරි', fn:'TSH ශ්‍රාවය උත්තේජනය කරයි'},
+      {code:'CRH', name_si:'කෝටිකොට්‍රොපින් ප්‍රාවී හෝමෝනය', target:'පූර්ව පිටියුටරි', fn:'ACTH ශ්‍රාවය උත්තේජනය කරයි'},
+      {code:'GnRH', name_si:'ගොනැඩොට්‍රොපින් ප්‍රාවී හෝමෝනය', target:'පූර්ව පිටියුටරි', fn:'FSH හා LH ශ්‍රාවය උත්තේජනය කරයි'},
+      {code:'PRH / PIH', name_si:'ප්‍රොලැක්ටින් ප්‍රාවී / නිශේධක හෝමෝන', target:'පූර්ව පිටියුටරි', fn:'ප්‍රොලැක්ටින් ශ්‍රාවය පාලනය කරයි (උත්තේජනය/නිශේධනය)'},
+      {code:'GHRIH', name_si:'වර්ධක හෝමෝන ප්‍රාවය නිශේධක හෝමෝනය', target:'පූර්ව පිටියුටරි', fn:'GH හා TSH ශ්‍රාවය නිශේධනය කරයි'},
+    ],
+    note:'ADH සහ ඔක්සිටොසින් හයිපෝතලමසයේ නිපදවී, පසුව පශ්ච පිටියුටරියෙන් ශ්‍රාවය වේ.'
+  },
+  {
+    id:'pineal', name_si:'කේතු දේහය', name_en:'Pineal Body', color:COLORS.cyan,
+    x:210, y:44, icon:'fa-moon',
+    location:'මොළය තුළ, තැලමස පසුපසින් පිහිටා ඇත.',
+    structure:'කුඩා කේතුාකාර ග්‍රන්ථියක් වන අතර ආලෝකයට සංවේදී වේ.',
+    hormones:[
+      {code:'Melatonin', name_si:'මෙලටොනින්', target:'දෛනික ජීව විද්‍යාත්මක ඔරලෝසුව', fn:'නින්ද-අවදි චක්‍රය හා දෛනික රිද්මය (circadian rhythm) පාලනය කරයි; අඳුරේදී වැඩි ශ්‍රාවයක් සිදුවේ'},
+    ],
+    note:'ආලෝකයේ බලපෑමට අනුව මෙලටොනින් ශ්‍රාවය විචල්‍ය වේ — රාත්‍රියේදී වැඩි වේ.'
+  },
+  {
+    id:'pituitary', name_si:'පිටියුටරි ග්‍රන්ථිය', name_en:'Pituitary Gland', color:COLORS.cyan,
+    x:172, y:96, icon:'fa-circle-nodes',
+    location:'හයිපෝතලමසයට වහාම පහළින්, මොළයේ පාදකයේ අස්ථි වන්තයක් තුළ පිහිටා ඇත.',
+    structure:'පූර්ව පිටියුටරිය (ග්‍රන්ථි පටක) සහ පශ්ච පිටියුටරිය (ස්නායු පටක) වශයෙන් කොටස් දෙකකින් සමන්විතයි. "මාස්ටර් ග්‍රන්ථිය" ලෙසද හැඳින්වේ.',
+    hormones:[
+      {code:'GH', name_si:'වර්ධක හෝමෝනය', target:'සියලු දේහික සෛල', fn:'ප්‍රෝටීන් සංශ්ලේෂණය උත්තේජනය මගින් වර්ධනය (විශේෂයෙන් අස්ථි/පේශි) හා පරිවෘත්තිය පාලනය කරයි'},
+      {code:'TSH', name_si:'තයිරොයිඩ් උත්තේජක හෝමෝනය', target:'තයිරොයිඩය', fn:'T3/T4 ශ්‍රාවය හා තයිරොයිඩ් ග්‍රන්ථි වර්ධනය උත්තේජනය කරයි'},
+      {code:'ACTH', name_si:'අධිවෘක්ක බාහික ප්‍රෝමෝටින් හෝමෝනය', target:'අධිවෘක්ක බාහිකය', fn:'ග්ලූකෝකෝටිකොයිඩ් හෝමෝන (කෝටිසෝල්) ශ්‍රාවය උත්තේජනය කරයි'},
+      {code:'Prolactin', name_si:'ප්‍රොලැක්ටින්', target:'ක්ෂීර ග්‍රන්ථි', fn:'කිරි නිෂ්පාදනය උත්තේජනය කරයි'},
+      {code:'FSH', name_si:'සුතික උත්තේජක හෝමෝනය', target:'ඩිම්බ කෝෂ / වෘෂණ', fn:'ඩිම්බ කෝෂ වර්ධනය / ශුක්‍රාණු ජනනය උත්තේජනය කරයි'},
+      {code:'LH', name_si:'ලුටිනිකාරක හෝමෝනය', target:'ඩිම්බ කෝෂ / වෘෂණ', fn:'ඩිම්බ මෝචනය හා ප්‍රොජෙස්ටරෝන් ශ්‍රාවය / ටෙස්ටොස්ටෙරෝන් ශ්‍රාවය උත්තේජනය කරයි'},
+      {code:'ADH', name_si:'ප්‍රතිමුත්‍රීය හෝමෝනය (පශ්ච)', target:'වකුගඩු නාලිකා', fn:'ජල ප්‍රතිශෝෂණය උත්තේජනය කරයි'},
+      {code:'Oxytocin', name_si:'ඔක්සිටොසින් (පශ්ච)', target:'ක්ෂීර ග්‍රන්ථි / ගර්භාශය', fn:'කිරි විස්සර්ජනය හා ගර්භාශ පේශි සංකෝචනය උත්තේජනය කරයි'},
+    ],
+    note:'GH හා TSH හැර අනෙක් සියලුම පූර්ව පිටියුටරි හෝමෝන ඉලක්ක ස්ථාන ලෙස ඇත්තේ අන්තරාසර්ග ග්‍රන්ථි වේ.'
+  },
+  {
+    id:'thyroid', name_si:'තයිරොයිඩ් ග්‍රන්ථිය', name_en:'Thyroid Gland', color:COLORS.magenta,
+    x:150, y:150, icon:'fa-shield-halved',
+    location:'ගෙල ප්‍රදේශයේ, ස්වරාලයට වහාම පහළින්, ශ්වාසනාලයට ඉදිරියෙන් පිහිටා ඇත (පුඩිකා දෙකකින් යුක්ත).',
+    structure:'පුඩිකා (lobes) දෙකකින් සමන්විත ඉස්තුරුප්පු හැඩැති ග්‍රන්ථියක්.',
+    hormones:[
+      {code:'T3 / T4', name_si:'ට්‍රයියඩොතයිරොනීන් / තයිරොක්සින්', target:'සියලු දේහික සෛල', fn:'මූලික පරිවෘත්තිය වේගය වැඩි කරයි; ප්‍රෝටීන්/කාබෝහයිඩ්‍රේට් පරිවෘත්තිය, වර්ධනය හා විකාශනය පාලනය කරයි'},
+      {code:'Calcitonin', name_si:'කැල්සිටොනින්', target:'අස්ථි', fn:'රුධිර කැල්සියම් මට්ටම ඉහළ ගිය විට එය අඩු කිරීම සඳහා අස්ථි තුළට කැල්සියම් ගබඩා කිරීම උත්තේජනය කරයි (PTH ට විරුද්ධ)'},
+    ],
+  },
+  {
+    id:'parathyroid', name_si:'පැරාතයිරොයිඩ් ග්‍රන්ථි', name_en:'Parathyroid Glands', color:COLORS.magenta,
+    x:206, y:158, icon:'fa-gem',
+    location:'තයිරොයිඩ් ග්‍රන්ථියේ පසුපස පෘෂ්ඨයේ තැන්පත් වූ කුඩා ග්‍රන්ථි 4ක් (යුගල 2ක්).',
+    structure:'එක් එක් බැඳීම කුඩා, පට්ට කැටයක ප්‍රමාණයේ ග්‍රන්ථි.',
+    hormones:[
+      {code:'PTH', name_si:'පැරාතයිරොයිඩ් හෝමෝනය', target:'වකුගඩු, අස්ථි, ආන්ත්‍ර', fn:'රුධිර කැල්සියම් මට්ටම ඉහළ නංවයි — වකුගඩුවෙන් කැල්සියම් ප්‍රතිශෝෂණය, අස්ථි වලින් කැල්සියම් නිදහස් කිරීම, ආන්ත්‍රයෙන් කැල්සියම් අවශෝෂණය උත්තේජනය කරයි'},
+    ],
+    note:'කැල්සිටොනින්ට විරුද්ධව ක්‍රියා කරන ප්‍රතිවිරෝධී හෝමෝනයකි.'
+  },
+  {
+    id:'thymus', name_si:'තයිමස් ග්‍රන්ථිය', name_en:'Thymus Gland', color:COLORS.magenta,
+    x:170, y:196, icon:'fa-shield-virus',
+    location:'ශරීර කුහරය තුළ, උරහිසෙහි පිටුපස පිහිටා ඇත.',
+    structure:'වයස් සමග ක්‍රමයෙන් හැකිලෙන ග්‍රන්ථියක් — ළමා අවධියේ වඩාත් සක්‍රියයි.',
+    hormones:[
+      {code:'Thymosin', name_si:'තයිමොසින්', target:'T ලිම්ෆොසයිට් (T සෛල)', fn:'T ලිම්ෆොසයිට් සෛලවල පරිණතභාවය හා ප්‍රතිශක්තිකරණ පද්ධතියේ විකාශනය උත්තේජනය කරයි'},
+    ],
+  },
+  {
+    id:'adrenal', name_si:'අධිවෘක්ක ග්‍රන්ථි', name_en:'Adrenal Glands', color:COLORS.gold,
+    x:140, y:322, icon:'fa-mountain-sun',
+    location:'වකුගඩු දෙක ඉහළින්, එකකට එකක් ලෙස පිහිටා ඇත.',
+    structure:'බාහිකය (Cortex) සහ මධ්‍යකය (Medulla) ලෙස කොටස් දෙකකින් සමන්විතයි; ව්‍යුහයෙන් හා කෘත්‍යයෙන් වෙනස්.',
+    hormones:[
+      {code:'Cortisol', name_si:'කෝටිසෝල් (ග්ලූකෝකෝටිකොයිඩ්)', target:'අක්මාව, පේශි, මේද පටක', fn:'දිගු කාලීන ආතති ප්‍රතිචාරය; ග්ලූකෝනියොජෙනසිස් උත්තේජනය කර රුධිර ග්ලූකෝස් වැඩි කරයි; ප්‍රෝටීන් බිඳහෙළීම වැඩි කරයි'},
+      {code:'Aldosterone', name_si:'ඇල්ඩොස්ටෙරෝන් (මිනරලොකෝටිකොයිඩ්)', target:'වකුගඩු නාලිකා', fn:'Na+ ප්‍රතිශෝෂණය උත්තේජනය කර ජලය රඳවා ගැනීම හා රුධිර පීඩනය පවත්වා ගනියි'},
+      {code:'Adrenaline / Noradrenaline', name_si:'එපිනෙෆ්‍රින් / නොර්එපිනෙෆ්‍රින් (මධ්‍යකයෙන්)', target:'හෘදය, රුධිර නාල, අක්මාව', fn:'"සටන-හෝ-පලායාම" ප්‍රතිචාරය — හෘද ස්පන්දන වේගය, රුධිර ග්ලූකෝස් මට්ටම වැඩි කර ශරීරය හදිසි ක්‍රියාවලට සූදානම් කරයි'},
+    ],
+    note:'බාහික හෝමෝන ACTH මගින් උත්තේජනය වන අතර මධ්‍යක හෝමෝන ස්නායු පද්ධතිය මගින් සෘජුවම උත්තේජනය වේ.'
+  },
+  {
+    id:'pancreas', name_si:'අග්න්‍යාශය (ලැන්ගර්හැන් දීපිකා)', name_en:'Pancreas — Islets of Langerhans', color:COLORS.gold,
+    x:210, y:316, icon:'fa-diagram-project',
+    location:'උදර කුහරය තුළ, ආමාශයට පසුපසින් පිහිටා ඇත.',
+    structure:'ලැන්ගර්හැන් දීපිකා නම් සෛල පොකුරු තුළ ඇල්ෆා හා බීටා සෛල අන්තරාසර්ග කාර්යය සිදු කරයි.',
+    hormones:[
+      {code:'Insulin', name_si:'ඉන්සියුලින් (බීටා සෛල)', target:'අක්මාව, පේශි, මේද පටක', fn:'රුධිර ග්ලූකෝස් මට්ටම අඩු කරයි — සෛල තුළට ග්ලූකෝස් ප්‍රවේශය හා ග්ලයිකොජන් සංශ්ලේෂණය උත්තේජනය කරයි'},
+      {code:'Glucagon', name_si:'ග්ලූකගෝන් (ඇල්ෆා සෛල)', target:'අක්මාව', fn:'රුධිර ග්ලූකෝස් මට්ටම ඉහළ නංවයි — ග්ලයිකොජන් බිඳහෙළීම හා ග්ලූකෝනියොජෙනසිස් උත්තේජනය කරයි'},
+    ],
+    note:'ඉන්සියුලින් හා ග්ලූකගෝන් එකිනෙකට ප්‍රතිවිරෝධී ලෙස ක්‍රියා කර රුධිර ග්ලූකෝස් සමතුලිතතාවය පවත්වයි.'
+  },
+  {
+    id:'gonads', name_si:'ප්‍රජනන ග්‍රන්ථි (ගෝනඩ)', name_en:'Gonads', color:COLORS.gold,
+    x:170, y:512, icon:'fa-venus-mars',
+    location:'ශ්‍රී ලිංගික: ඩිම්බ කෝෂ (ශ්‍රෝණි කුහරය) · පුරුෂ ලිංගික: වෘෂණ (වෘෂණ කෝෂ තුළ)',
+    structure:'ඩිම්බ කෝෂ දෙකක් (ඩිම්බ මෝචනයේදී ශ්‍රාවය) හෝ වෘෂණ දෙකක් (අන්තරාල සෛල හා සර්ටෝලි සෛල).',
+    hormones:[
+      {code:'Estrogen', name_si:'ඊස්ට්‍රජන් (ඩිම්බ කෝෂ)', target:'ගර්භාශය, ස්තන, ශරීරය', fn:'ශ්‍රී ලිංගික ද්විතීයික ලක්ෂණ වර්ධනය කරයි; ඔසප් චක්‍රය හා ගර්භාශ බිත්තිය නිර්මාණය කරයි'},
+      {code:'Progesterone', name_si:'ප්‍රොජෙස්ටරෝන් (පීත දේහය)', target:'ගර්භාශය', fn:'ගර්භාශ බිත්තිය පවත්වා ගෙන ගර්භණී තත්ත්වයට සහාය වේ'},
+      {code:'Testosterone', name_si:'ටෙස්ටොස්ටෙරෝන් (අන්තරාල සෛල)', target:'වෘෂණ, ශරීරය', fn:'පුරුෂ ද්විතීයික ලිංගික ලක්ෂණ වර්ධනය හා ශුක්‍රාණු ජනනය පාලනය කරයි'},
+    ],
+    note:'FSH හා LH මගින් පාලනය වන අතර, එම හෝමෝන හයිපෝතලමසයේ GnRH මගින් නියාමනය වේ.'
+  },
+];
+
+const disorderData = {
+  diabetes:[
+    {
+      title:'මධුමේහය I ප්‍රභේදය', sub:'Type I — Insulin Dependent Diabetes Mellitus', color:COLORS.cyan, icon:'fa-syringe',
+      points:[
+        'ඉන්සියුලින් මත යැපෙන ආකාරය (Insulin Dependent)',
+        'සාමාන්‍යයෙන් ළමා/තරුණ වියේදී ඇතිවේ — ස්වයං ප්‍රතිශක්තිකරණ රෝගාබාධයකි',
+        'ශරීරයේ ප්‍රතිශක්ති පද්ධතිය මගින් ලැන්ගර්හැන් දීපිකා තුළ ඇති බීටා සෛල විනාශ කරයි',
+        'ප්‍රතිඵලයක් ලෙස ඉන්සියුලින් ශ්‍රාවය ප්‍රබල ලෙස අඩු වේ හෝ නැති වී යයි',
+        'ප්‍රතිකාරය: ජීවිත කාලය පුරාම ඉන්සියුලින් එන්නත් අවශ්‍යයි',
+      ]
+    },
+    {
+      title:'මධුමේහය II ප්‍රභේදය', sub:'Type II — Non-Insulin Dependent Diabetes Mellitus', color:COLORS.magenta, icon:'fa-weight-scale',
+      points:[
+        'ඉන්සියුලින් මත නොයැපෙන ආකාරය (Non-Insulin Dependent)',
+        'ඉන්සියුලින් නිෂ්පාදනය සාමාන්‍ය මට්ටමක පවතී — නමුත් ඉන්සියුලින් ග්‍රාහක ක්‍රියාකාරීත්වයේ දුර්වලතාවයක්',
+        'සෛල රුධිරයෙන් ග්ලූකෝස් ලබාගැනීම අඩාල වී රුධිර ග්ලූකෝස් මට්ටම ඉහළ යයි',
+        'හේතු: ජාන ලක්ෂණ, ව්‍යායාම අඩුවීම, තරබාරුකම, වයස්ගත වීම',
+        'ප්‍රතිකාරය: ආහාර පාලනය, ව්‍යායාම, සීනි පරිභෝජනය පාලනය කිරීම',
+      ]
+    }
+  ],
+  thyroid:[
+    {
+      title:'අධි තයිරොයිඩතාව', sub:'Hyperthyroidism', color:COLORS.gold, icon:'fa-fire',
+      points:[
+        'T3/T4 හෝමෝන අසාමාන්‍ය ලෙස වැඩිපුර ශ්‍රාවය වීම',
+        'තයිරොයිඩ් ග්‍රන්ථියේම හෝ පිටියුටරි/හයිපෝතලමස ආබාධයක් හේතුවෙන් ඇතිවේ',
+        'ලක්ෂණ: පරිවෘත්තීය වේගය ඉහළ යාම, බර අඩුවීම, උණුසුම් නොඉවසීම, කැළඹීම',
+        'ග්‍රන්ථිය විශාල වීම (ගොයිටර්) හා ඇස් ඉදිරියට නෙරා යාම (Exophthalmos) දක්නට ලැබේ',
+        'ප්‍රතිකාරය: තයිරොයිඩ් ග්‍රන්ථියේ කොටසක් ඉවත් කිරීම හෝ හෝමෝන සංශ්ලේෂණය අඩුකරන ඖෂධ',
+      ]
+    },
+    {
+      title:'මන්ද තයිරොයිඩතාව', sub:'Hypothyroidism', color:COLORS.cyan, icon:'fa-snowflake',
+      points:[
+        'T3/T4 හෝමෝන ප්‍රමාණවත් නොවන ලෙස ශ්‍රාවය වීම',
+        'හේතු: TSH නිෂ්පාදනය අඩුවීම හෝ ආහාරයේ අයඩින් ඌනතාව',
+        'ලක්ෂණ: පරිවෘත්තීය වේගය අඩුවීම, බර වැඩිවීම, අලසකම හා මැළිකම',
+        'දරුවන්ගේ දී වර්ධන ප්‍රමාදය ඇතිවිය හැක; ගොයිටරයද ඇතිවිය හැක',
+        'ප්‍රතිකාරය: ආහාරයෙන් අයඩින් ප්‍රමාණය වැඩි කිරීම හෝ තයිරොයිඩ් හෝමෝන ප්‍රතිකාරය',
+      ]
+    }
+  ]
+};
+
+const feedbackData = {
+  oxytocin:{
+    title:'ධන ප්‍රතිපෝෂී යාන්ත්‍රණය — කිරි විස්සර්ජනය', color:COLORS.magenta,
+    steps:[
+      {label:'උත්තේජනය', text:'දරුවා විසින් තන පුඩුව උරා බීම — සංවේදක නියුරෝන උත්තේජනය කරයි.', icon:'fa-baby'},
+      {label:'සංඥාව', text:'සංවේදක ස්නායු ආවේගය හයිපෝතලමසය වෙත සම්ප්‍රේෂණය වේ.', icon:'fa-wave-square'},
+      {label:'ශ්‍රාවය', text:'පශ්ච පිටියුටරියෙන් ඔක්සිටොසින් හෝමෝනය රුධිරයට මුදාහරී.', icon:'fa-droplet'},
+      {label:'ඉලක්කය', text:'ඔක්සිටොසින් ක්ෂීර ග්‍රන්ථියේ මයෝඑපිතීලියල් සෛල උත්තේජනය කර කිරි විස්සර්ජනය ඇති කරයි.', icon:'fa-bullseye'},
+      {label:'විස්තාරණය', text:'කිරි විස්සර්ජනය තව දුරටත් උරාබීමට හේතු වේ → තව ඔක්සිටොසින් ශ්‍රාවය → ප්‍රතිචාරය තව තවත් වැඩි වේ.', icon:'fa-arrow-rotate-right'},
+    ],
+    summary:'ධන ප්‍රතිපෝෂණයේදී ප්‍රතිඵලය මුල් උත්තේජනයම තව තවත් වැඩි කරයි — සමතුලිතතාවයට නොව අවසන් සිද්ධියක් (කිරි විස්සර්ජනය/ප්‍රසූතිය) කරා යාමට හේතු වේ.'
+  },
+  glucose:{
+    title:'ඍණ ප්‍රතිපෝෂී යාන්ත්‍රණය — රුධිර ග්ලූකෝස් නියාමනය', color:COLORS.cyan,
+    steps:[
+      {label:'විචලනය', text:'ආහාර ගැනීමෙන් පසු රුධිර ග්ලූකෝස් මට්ටම ඉහළ යයි.', icon:'fa-bowl-rice'},
+      {label:'අනාවරණය', text:'අග්න්‍යාශයේ බීටා සෛල ග්ලූකෝස් වැඩිවීම හඳුනා ගනී.', icon:'fa-magnifying-glass'},
+      {label:'ප්‍රතිචාරය', text:'ඉන්සියුලින් ශ්‍රාවය වී සෛල තුළට ග්ලූකෝස් ප්‍රවේශය හා ග්ලයිකොජන් සංශ්ලේෂණය උත්තේජනය කරයි.', icon:'fa-droplet'},
+      {label:'නිවැරදි කිරීම', text:'රුධිර ග්ලූකෝස් මට්ටම සාමාන්‍ය මට්ටමට පහත වැටේ.', icon:'fa-scale-balanced'},
+      {label:'ප්‍රතිලෝමය', text:'ග්ලූකෝස් මට්ටම අඩු වූ විට ඇල්ෆා සෛලවලින් ග්ලූකගෝන් ශ්‍රාවය වී අක්මාවෙන් ග්ලූකෝස් නිදහස් කරයි — මට්ටම නැවත ඉහළ නංවයි.', icon:'fa-arrows-up-down'},
+    ],
+    summary:'ඍණ ප්‍රතිපෝෂණයේදී මුල් විචලනයට ප්‍රතිවිරුද්ධ දිශාවට ප්‍රතිචාරයක් ඇති කර සමතුලිතතාවය (homeostasis) යළි ස්ථාපිත කරයි — ඉන්සියුලින් හා ග්ලූකගෝන් ප්‍රතිවිරෝධී ලෙස ක්‍රියා කරයි.'
+  },
+  calcium:{
+    title:'ඍණ ප්‍රතිපෝෂී යාන්ත්‍රණය — රුධිර කැල්සියම් සමතුලිතතාවය', color:COLORS.gold,
+    steps:[
+      {label:'විචලනය', text:'රුධිර කැල්සියම් මට්ටම සාමාන්‍යයට වඩා ඉහළ හෝ පහළ යා හැක.', icon:'fa-bone'},
+      {label:'ඉහළ මට්ටම', text:'තයිරොයිඩයෙන් කැල්සිටොනින් ශ්‍රාවය වී අස්ථි තුළට කැල්සියම් ගබඩා කිරීම උත්තේජනය කරයි — මට්ටම අඩු කරයි.', icon:'fa-down-long'},
+      {label:'පහළ මට්ටම', text:'පැරාතයිරොයිඩයෙන් PTH ශ්‍රාවය වී අස්ථි, වකුගඩු හා ආන්ත්‍රයෙන් කැල්සියම් නිදහස්/අවශෝෂණය උත්තේජනය කරයි — මට්ටම ඉහළ නංවයි.', icon:'fa-up-long'},
+      {label:'සමතුලිතතාවය', text:'මෙම ප්‍රතිවිරෝධී හෝමෝන දෙක එකට ක්‍රියා කර රුධිර කැල්සියම් මට්ටම සිරස්තලයක් තුළ පවත්වා ගනී.', icon:'fa-scale-balanced'},
+    ],
+    summary:'කැල්සිටොනින් හා PTH යනු එකිනෙකට ප්‍රතිවිරෝධී ලෙස ක්‍රියා කරන ඍණ ප්‍රතිපෝෂී යුගළයකි — රුධිර කැල්සියම් මට්ටම ස්ථාවර සීමාවක් තුළ පවත්වයි.'
+  }
+};
+
+const quizData = [
+  { q:'ADH හෝමෝනයේ ප්‍රධාන ඉලක්ක ස්ථානය කුමක්ද?',
+    opts:['වකුගඩු නාලිකා','තයිරොයිඩ් ග්‍රන්ථිය','අග්න්‍යාශය','අක්මාව'], ans:0 },
+  { q:'රුධිර ග්ලූකෝස් මට්ටම අඩු කරන හෝමෝනය කුමක්ද?',
+    opts:['ග්ලූකගෝන්','ඉන්සියුලින්','කෝටිසෝල්','එපිනෙෆ්‍රින්'], ans:1 },
+  { q:'පහත ඒවායින් ධන ප්‍රතිපෝෂී යාන්ත්‍රණයට හොඳම උදාහරණය කුමක්ද?',
+    opts:['ඉන්සියුලින්-ග්ලූකගෝන් සමතුලිතතාවය','PTH-කැල්සිටොනින් සමතුලිතතාවය','ඔක්සිටොසින් මගින් කිරි විස්සර්ජනය','ADH මගින් ජල නියාමනය'], ans:2 },
+  { q:'ඇස් ඉදිරියට නෙරා යාම (Exophthalmos) බහුලව සම්බන්ධ වන්නේ කවර තත්ත්වයටද?',
+    opts:['මන්ද තයිරොයිඩතාව','අධි තයිරොයිඩතාව','මධුමේහය I','මධුමේහය II'], ans:1 },
+  { q:'මධුමේහය I ප්‍රභේදයට ප්‍රධාන හේතුව කුමක්ද?',
+    opts:['අධික සීනි පරිභෝජනය','ස්වයං ප්‍රතිශක්තිකරණය මගින් බීටා සෛල විනාශය','ඉන්සියුලින් ග්‍රාහක ප්‍රතිරෝධය','ව්‍යායාම නොකිරීම'], ans:1 },
+];
+
+/* ---------- Module 1 ---------- */
+const glandLayer = document.getElementById('glandLayer');
+
+function renderGlandMarkers(){
+  GLANDS.forEach(g=>{
+    const grp = document.createElementNS('http://www.w3.org/2000/svg','g');
+    grp.setAttribute('class','gland-dot');
+    grp.setAttribute('data-id', g.id);
+    grp.style.color = g.color;
+    grp.innerHTML = `
+      <circle class="hit" cx="${g.x}" cy="${g.y}" r="16"/>
+      <circle class="pulse" cx="${g.x}" cy="${g.y}" r="7" fill="none" stroke="${g.color}" stroke-width="2"/>
+      <circle class="core" cx="${g.x}" cy="${g.y}" r="6" fill="${g.color}"/>
+    `;
+    grp.addEventListener('click', ()=>selectGland(g.id));
+    glandLayer.appendChild(grp);
+  });
+}
+renderGlandMarkers();
+
+function selectGland(id){
+  document.querySelectorAll('.gland-dot').forEach(el=>{
+    el.classList.toggle('selected', el.dataset.id===id);
+  });
+  const g = GLANDS.find(x=>x.id===id);
+  renderGlandDetail(g);
+}
+
+function renderGlandDetail(g){
+  const panel = document.getElementById('glandDetail');
+  panel.innerHTML = `
+    <div class="detail-head">
+      <div class="detail-icon" style="background:${g.color}22; border:1px solid ${g.color}55;">
+        <i class="fa-solid ${g.icon}" style="color:${g.color}"></i>
+      </div>
+      <div>
+        <div class="detail-name font-display">${g.name_si}</div>
+        <div class="detail-name-en">${g.name_en}</div>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <div class="info-box">
+        <div class="info-label">LOCATION</div>
+        <div class="info-text">${g.location}</div>
+      </div>
+      <div class="info-box">
+        <div class="info-label">STRUCTURE</div>
+        <div class="info-text">${g.structure}</div>
+      </div>
+    </div>
+
+    <div class="section-label">SECRETED HORMONES · ශ්‍රාවය වන හෝමෝන</div>
+    <div class="hormone-list">
+      ${g.hormones.map(h=>`
+        <div class="hormone-card">
+          <div class="hormone-top">
+            <span class="hormone-code" style="background:${g.color}22;color:${g.color};border:1px solid ${g.color}44;">${h.code}</span>
+            <span class="hormone-target"><i class="fa-solid fa-bullseye" style="margin-right:.25rem;"></i>${h.target}</span>
+          </div>
+          <div class="hormone-name">${h.name_si}</div>
+          <div class="hormone-fn">${h.fn}</div>
+        </div>
+      `).join('')}
+    </div>
+    ${g.note? `<div class="detail-note"><i class="fa-solid fa-circle-info" style="color:${g.color};margin-right:.25rem;"></i>${g.note}</div>`:''}
+  `;
+}
+selectGland('hypothalamus');
+
+/* ---------- Module 2 ---------- */
+const mod2Tabs = document.getElementById('mod2Tabs');
+const mod2Content = document.getElementById('mod2Content');
+
+GLANDS.forEach((g,i)=>{
+  const t = document.createElement('div');
+  t.className = 'tab-btn' + (i===0?' active':'');
+  t.textContent = g.name_si;
+  t.dataset.id = g.id;
+  t.addEventListener('click', ()=>{
+    document.querySelectorAll('#mod2Tabs .tab-btn').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    renderMod2(g);
+  });
+  mod2Tabs.appendChild(t);
+});
+
+function renderMod2(g){
+  mod2Content.innerHTML = g.hormones.map(h=>`
+    <div class="m2-card glass">
+      <div class="m2-code-row">
+        <span class="hormone-code" style="background:${g.color}22;color:${g.color};border:1px solid ${g.color}44;">${h.code}</span>
+      </div>
+      <div class="m2-name font-display">${h.name_si}</div>
+      <div class="m2-target"><i class="fa-solid fa-bullseye" style="margin-right:.25rem;"></i> ඉලක්කය: ${h.target}</div>
+      <div class="m2-fn">${h.fn}</div>
+    </div>
+  `).join('');
+}
+renderMod2(GLANDS[0]);
+
+/* ---------- Module 3 ---------- */
+const fbStage = document.getElementById('fbStage');
+document.querySelectorAll('[data-fb]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('[data-fb]').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderFeedback(feedbackData[btn.dataset.fb]);
+  });
+});
+
+function renderFeedback(data){
+  let current = 0;
+  function draw(){
+    fbStage.innerHTML = `
+      <div class="fb-title font-display">${data.title}</div>
+      <div class="fb-progress">පියවර ${current+1} / ${data.steps.length}</div>
+
+      <div class="fb-steps">
+        ${data.steps.map((s,i)=>`
+          <div class="fb-step" style="opacity:${i<=current?1:0.35}; ${i===current?`box-shadow:0 0 0 1px ${data.color}55, 0 0 24px ${data.color}22; border-color:${data.color}55;`:''}">
+            <div class="fb-step-icon" style="background:${data.color}22;border:1px solid ${data.color}44;">
+              <i class="fa-solid ${s.icon}" style="color:${data.color}"></i>
+            </div>
+            <div>
+              <div class="fb-step-label">STEP ${i+1} · ${s.label}</div>
+              <div class="fb-step-text">${s.text}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="fb-controls">
+        <button id="fbPrev" class="fb-btn ${current===0?'disabled':''}"><i class="fa-solid fa-arrow-left" style="margin-right:.25rem;"></i> පෙර</button>
+        <button id="fbNext" class="fb-btn ${current===data.steps.length-1?'disabled':''}">ඊළඟ <i class="fa-solid fa-arrow-right" style="margin-left:.25rem;"></i></button>
+        <button id="fbReset" class="fb-btn-ghost"><i class="fa-solid fa-rotate-left" style="margin-right:.25rem;"></i> යළි අරඹන්න</button>
+      </div>
+
+      ${current===data.steps.length-1? `
+        <div class="fb-summary" style="border-color:${data.color}44; background:${data.color}14;">
+          <i class="fa-solid fa-lightbulb" style="color:${data.color};margin-right:.25rem;"></i> ${data.summary}
+        </div>`:''}
+    `;
+    document.getElementById('fbPrev')?.addEventListener('click', ()=>{ current=Math.max(0,current-1); draw(); });
+    document.getElementById('fbNext')?.addEventListener('click', ()=>{ current=Math.min(data.steps.length-1,current+1); draw(); });
+    document.getElementById('fbReset')?.addEventListener('click', ()=>{ current=0; draw(); });
+  }
+  draw();
+}
+renderFeedback(feedbackData.oxytocin);
+
+/* ---------- Module 4 ---------- */
+const disorderGrid = document.getElementById('disorderGrid');
+document.querySelectorAll('[data-dis]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('[data-dis]').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderDisorders(disorderData[btn.dataset.dis]);
+  });
+});
+
+function renderDisorders(list){
+  disorderGrid.innerHTML = list.map(d=>`
+    <div class="disorder-card glass" style="border-color:${d.color}33;">
+      <div class="disorder-head">
+        <div class="disorder-icon" style="background:${d.color}22;border:1px solid ${d.color}44;">
+          <i class="fa-solid ${d.icon}" style="color:${d.color}"></i>
+        </div>
+        <div>
+          <div class="disorder-title font-display">${d.title}</div>
+          <div class="disorder-sub">${d.sub}</div>
+        </div>
+      </div>
+      <ul class="disorder-points">
+        ${d.points.map(p=>`
+          <li><i class="fa-solid fa-circle-chevron-right" style="color:${d.color}"></i><span>${p}</span></li>
+        `).join('')}
+      </ul>
+    </div>
+  `).join('');
+}
+renderDisorders(disorderData.diabetes);
+
+/* ---------- Module 5 ---------- */
+let quizIndex = 0, quizScore = 0, answered = false;
+const quizBody = document.getElementById('quizBody');
+const quizProgress = document.getElementById('quizProgress');
+const quizScoreEl = document.getElementById('quizScore');
+
+function renderQuiz(){
+  if(quizIndex >= quizData.length){
+    quizBody.innerHTML = `
+      <div class="quiz-result">
+        <div class="quiz-result-icon" style="background:var(--green)22;border:1px solid var(--green)55;">
+          <i class="fa-solid fa-trophy" style="color:var(--green); font-size:1.4rem;"></i>
+        </div>
+        <div class="quiz-result-title font-display">ප්‍රශ්නාවලිය අවසන්!</div>
+        <div class="quiz-result-score">ඔබගේ අවසාන ලකුණු: ${quizScore} / ${quizData.length}</div>
+        <button id="quizRestart" class="quiz-restart glow-cyan">
+          <i class="fa-solid fa-rotate-left" style="margin-right:.25rem;"></i> යළි උත්සාහ කරන්න
+        </button>
+      </div>
+    `;
+    document.getElementById('quizRestart').addEventListener('click', ()=>{
+      quizIndex=0; quizScore=0; answered=false; renderQuiz();
+    });
+    quizProgress.textContent = 'සම්පූර්ණයි';
+    quizScoreEl.textContent = `ලකුණු: ${quizScore}`;
+    return;
+  }
+  answered = false;
+  const item = quizData[quizIndex];
+  quizProgress.textContent = `ප්‍රශ්නය ${quizIndex+1} / ${quizData.length}`;
+  quizScoreEl.textContent = `ලකුණු: ${quizScore}`;
+  quizBody.innerHTML = `
+    <div class="quiz-question">${item.q}</div>
+    <div class="quiz-options">
+      ${item.opts.map((o,i)=>`<div class="quiz-opt" data-i="${i}">${o}</div>`).join('')}
+    </div>
+    <button id="quizNext" class="quiz-next disabled">ඊළඟ ප්‍රශ්නය <i class="fa-solid fa-arrow-right" style="margin-left:.25rem;"></i></button>
+  `;
+  document.querySelectorAll('.quiz-opt').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      if(answered) return;
+      answered = true;
+      const chosen = parseInt(el.dataset.i);
+      document.querySelectorAll('.quiz-opt').forEach(o=>{
+        const oi = parseInt(o.dataset.i);
+        if(oi===item.ans) o.classList.add('correct');
+        else if(oi===chosen) o.classList.add('wrong');
+      });
+      if(chosen===item.ans) quizScore++;
+      quizScoreEl.textContent = `ලකුණු: ${quizScore}`;
+      document.getElementById('quizNext').classList.remove('disabled');
+    });
+  });
+  document.getElementById('quizNext').addEventListener('click', ()=>{
+    quizIndex++; renderQuiz();
+  });
+}
+renderQuiz();
+
+/* ---------- Navigation ---------- */
+document.querySelectorAll('.nav-item').forEach(item=>{
+  item.addEventListener('click', ()=>{
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    document.querySelectorAll(`[data-target="${item.dataset.target}"]`).forEach(n=>n.classList.add('active'));
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    document.getElementById(item.dataset.target).classList.add('active');
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+});
+</script>
+</body>
+</html>

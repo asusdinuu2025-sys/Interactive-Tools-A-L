@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ශාක රාජධානියේ විවිධත්වය | A/L ජීව විද්‍යාව</title>
+<style>
+:root{
+  --forest:#1E3D2F;
+  --forest-2:#274F3D;
+  --moss:#5C8768;
+  --moss-soft:#9DB9A0;
+  --amber:#B8842A;
+  --amber-soft:#E4C888;
+  --bg:#F3F1E7;
+  --card:#FFFFFF;
+  --card-2:#EFEADA;
+  --ink:#20281F;
+  --ink-soft:#5A6459;
+  --line: rgba(30,61,47,0.14);
+  --shadow: 0 2px 10px rgba(30,50,35,0.08);
+  --radius: 16px;
+  --sinhala: "Noto Sans Sinhala","Iskoola Pota","Yaldevi","Nirmala UI",sans-serif;
+  --latin: Georgia, "Times New Roman", serif;
+}
+[data-theme="dark"]{
+  --forest:#8FCBA0;
+  --forest-2:#6FAE84;
+  --moss:#7FAE8B;
+  --moss-soft:#3C5748;
+  --amber:#E0AE4E;
+  --amber-soft:#5A4626;
+  --bg:#101B14;
+  --card:#17251C;
+  --card-2:#1E2E22;
+  --ink:#E7ECE4;
+  --ink-soft:#9FB3A2;
+  --line: rgba(230,240,225,0.12);
+  --shadow: 0 2px 14px rgba(0,0,0,0.35);
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--sinhala);
+  line-height:1.75;
+  padding-bottom:74px;
+  transition:background .25s ease, color .25s ease;
+}
+.latin{font-family:var(--latin); font-style:italic;}
+h1,h2,h3,h4{font-family:var(--sinhala); color:var(--forest); margin:0 0 10px;}
+p{margin:0 0 10px;}
+
+/* ---------- Header ---------- */
+header.app-header{
+  position:sticky; top:0; z-index:50;
+  background:linear-gradient(135deg,var(--forest),var(--forest-2));
+  color:#F4F1E4;
+  padding:14px 16px 10px;
+  box-shadow:var(--shadow);
+}
+.header-row{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+.brand{display:flex; align-items:center; gap:10px;}
+.brand-mark{
+  width:38px;height:38px;border-radius:10px;
+  background:var(--amber-soft); display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.brand-title{font-size:15px; font-weight:700; line-height:1.3;}
+.brand-sub{font-size:11px; opacity:.85; font-family:var(--latin); font-style:italic;}
+.theme-btn{
+  background:rgba(255,255,255,0.14); border:none; color:#F4F1E4;
+  width:38px;height:38px;border-radius:50%; font-size:17px; cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+/* Tabs */
+.tabbar{
+  display:flex; gap:6px; overflow-x:auto; margin-top:12px;
+  scrollbar-width:none; padding-bottom:2px;
+}
+.tabbar::-webkit-scrollbar{display:none;}
+.tab-btn{
+  flex:0 0 auto; white-space:nowrap; border:1px solid rgba(244,241,228,0.25);
+  background:rgba(244,241,228,0.08); color:#F4F1E4; padding:8px 14px;
+  border-radius:999px; font-size:13px; font-family:var(--sinhala); cursor:pointer;
+}
+.tab-btn.active{background:var(--amber); border-color:var(--amber); color:#241C08; font-weight:700;}
+
+/* ---------- Main / Sections ---------- */
+main{padding:16px; max-width:720px; margin:0 auto;}
+.section{display:none; animation:fade .35s ease;}
+.section.active{display:block;}
+@keyframes fade{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+.card{
+  background:var(--card); border-radius:var(--radius); padding:16px;
+  box-shadow:var(--shadow); margin-bottom:14px; border:1px solid var(--line);
+}
+.eyebrow{
+  font-size:11px; letter-spacing:.06em; color:var(--amber); font-weight:700;
+  text-transform:uppercase; margin-bottom:6px; font-family:var(--latin); font-style:normal;
+}
+.lede{color:var(--ink-soft); font-size:14.5px;}
+
+/* Accordion */
+.acc{border:1px solid var(--line); border-radius:14px; overflow:hidden; margin-bottom:10px; background:var(--card);}
+.acc-head{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:14px 16px; cursor:pointer; background:var(--card-2);
+}
+.acc-head h3{font-size:15px; margin:0; color:var(--forest);}
+.acc-icon{
+  width:24px;height:24px;flex-shrink:0; border-radius:50%; background:var(--forest);
+  color:#fff; display:flex;align-items:center;justify-content:center; font-size:15px;
+  transition:transform .25s ease;
+}
+.acc.open .acc-icon{transform:rotate(45deg);}
+.acc-body{max-height:0; overflow:hidden; transition:max-height .35s ease;}
+.acc-body-inner{padding:14px 16px 18px; font-size:14.5px; border-top:1px dashed var(--line);}
+.acc-body-inner ul{margin:6px 0 10px; padding-inline-start:20px;}
+.acc-body-inner li{margin-bottom:6px;}
+.tag{
+  display:inline-block; background:var(--amber-soft); color:var(--forest); font-family:var(--latin);
+  font-style:italic; padding:2px 9px; border-radius:8px; font-size:13px; margin:2px 4px 2px 0;
+}
+.example-box{
+  background:var(--card-2); border-radius:10px; padding:10px 12px; margin:8px 0;
+  border-inline-start:4px solid var(--moss); font-size:13.5px;
+}
+
+/* Classification tree */
+.tree-wrap{overflow-x:auto; padding:6px 0;}
+.tree-svg-frame{min-width:640px;}
+.tree-hint{font-size:12px; color:var(--ink-soft); text-align:center; margin-top:6px;}
+.node-info{
+  margin-top:12px; background:var(--card-2); border-radius:12px; padding:12px 14px;
+  border:1px dashed var(--moss); font-size:14px; display:none;
+}
+.node-info.show{display:block;}
+.node-info b{color:var(--forest);}
+
+/* Comparison table / cards */
+.compare-toggle{display:flex; gap:8px; margin-bottom:12px;}
+.compare-toggle button{
+  flex:1; padding:10px; border-radius:12px; border:1px solid var(--line);
+  background:var(--card-2); color:var(--ink); font-family:var(--sinhala); font-size:13.5px; cursor:pointer;
+}
+.compare-toggle button.active{background:var(--forest); color:#fff; border-color:var(--forest);}
+.swipe-wrap{overflow-x:auto; display:flex; gap:12px; scroll-snap-type:x mandatory; padding-bottom:6px;}
+.swipe-card{
+  scroll-snap-align:start; flex:0 0 84%; background:var(--card-2); border-radius:14px;
+  padding:14px; border:1px solid var(--line);
+}
+.swipe-card h4{color:var(--amber); font-size:12px; text-transform:uppercase; letter-spacing:.05em; font-family:var(--latin); font-style:normal;}
+.swipe-card .val{font-size:14.5px; color:var(--ink); margin-bottom:12px;}
+.compare-table{width:100%; border-collapse:collapse; font-size:13px;}
+.compare-table th,.compare-table td{border:1px solid var(--line); padding:8px; text-align:start; vertical-align:top;}
+.compare-table th{background:var(--card-2); color:var(--forest);}
+
+/* Flashcards */
+.flash-grid{display:grid; grid-template-columns:1fr; gap:12px;}
+.flashcard{
+  perspective:1000px; height:120px; cursor:pointer;
+}
+.flashcard-inner{
+  position:relative; width:100%; height:100%; transition:transform .5s;
+  transform-style:preserve-3d;
+}
+.flashcard.flipped .flashcard-inner{transform:rotateY(180deg);}
+.flash-face{
+  position:absolute; inset:0; backface-visibility:hidden; border-radius:14px;
+  display:flex; align-items:center; justify-content:center; text-align:center;
+  padding:12px; font-size:14px; box-shadow:var(--shadow); border:1px solid var(--line);
+}
+.flash-front{background:var(--forest); color:#fff; font-weight:700;}
+.flash-back{background:var(--amber-soft); color:var(--ink); transform:rotateY(180deg); font-size:13px;}
+
+/* Quiz */
+.quiz-progress{
+  height:8px; background:var(--card-2); border-radius:99px; overflow:hidden; margin-bottom:14px;
+}
+.quiz-progress-bar{height:100%; background:var(--amber); width:0%; transition:width .3s ease;}
+.quiz-q{font-size:15px; font-weight:700; margin-bottom:12px; color:var(--forest);}
+.quiz-opt{
+  display:block; width:100%; text-align:start; padding:12px 14px; margin-bottom:8px;
+  border-radius:12px; border:1px solid var(--line); background:var(--card-2); color:var(--ink);
+  font-family:var(--sinhala); font-size:14px; cursor:pointer;
+}
+.quiz-opt.correct{background:#DDEFDF; border-color:var(--moss); color:#12341C; font-weight:700;}
+.quiz-opt.wrong{background:#F6DEDA; border-color:#B85A4A; color:#5A2117; font-weight:700;}
+.quiz-explain{
+  background:var(--card-2); border-radius:10px; padding:10px 12px; margin-top:10px;
+  font-size:13.5px; border-inline-start:4px solid var(--amber); display:none;
+}
+.quiz-explain.show{display:block;}
+.quiz-nav{display:flex; justify-content:space-between; margin-top:14px;}
+.btn{
+  background:var(--forest); color:#fff; border:none; padding:11px 18px; border-radius:12px;
+  font-family:var(--sinhala); font-size:14px; cursor:pointer;
+}
+.btn.secondary{background:transparent; color:var(--forest); border:1px solid var(--forest);}
+.btn:disabled{opacity:.4; cursor:not-allowed;}
+.score-screen{text-align:center; padding:20px 6px;}
+.score-num{font-size:44px; font-weight:800; color:var(--forest);}
+
+/* Bottom nav (mobile) */
+nav.bottom-nav{
+  position:fixed; bottom:0; left:0; right:0; z-index:60;
+  background:var(--card); border-top:1px solid var(--line);
+  display:flex; justify-content:space-around; padding:6px 4px 8px;
+  box-shadow:0 -2px 12px rgba(0,0,0,0.08);
+}
+.bn-item{
+  flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;
+  background:none; border:none; color:var(--ink-soft); font-family:var(--sinhala); font-size:10.5px;
+  padding:5px 2px; cursor:pointer;
+}
+.bn-item.active{color:var(--forest); font-weight:700;}
+.bn-icon{font-size:18px;}
+
+/* Diagram illustration frame */
+.illus{
+  background:var(--card-2); border-radius:14px; padding:10px; display:flex; justify-content:center;
+  margin:10px 0;
+}
+.illus svg{max-width:100%; height:auto;}
+.caption{text-align:center; font-size:12px; color:var(--ink-soft); margin-top:4px;}
+
+.key-term{font-weight:700; color:var(--forest-2);}
+.pill-row{display:flex; flex-wrap:wrap; gap:6px; margin:8px 0;}
+.pill{background:var(--card-2); border:1px solid var(--line); border-radius:999px; padding:4px 10px; font-size:12px;}
+
+@media (min-width:600px){
+  .flash-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body data-theme="light">
+
+<header class="app-header">
+  <div class="header-row">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <path d="M12 21V11" stroke="#1E3D2F" stroke-width="2" stroke-linecap="round"/>
+          <path d="M12 12C12 12 5 12 5 6C11 6 12 12 12 12Z" fill="#1E3D2F"/>
+          <path d="M12 12C12 12 19 12 19 6C13 6 12 12 12 12Z" fill="#1E3D2F"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-title">ශාක රාජධානියේ විවිධත්වය</div>
+        <div class="brand-sub">Diversity of Kingdom Plantae · A/L Biology</div>
+      </div>
+    </div>
+    <button class="theme-btn" id="themeToggle" aria-label="Toggle theme">🌙</button>
+  </div>
+
+  <div class="tabbar" id="tabbar">
+    <button class="tab-btn active" data-tab="overview">සමාලෝචනය</button>
+    <button class="tab-btn" data-tab="bryo">විනාල ශාක</button>
+    <button class="tab-btn" data-tab="seedless">බීජ රහිත සනාල</button>
+    <button class="tab-btn" data-tab="seedplants">බීජ ශාක</button>
+    <button class="tab-btn" data-tab="gymno">විවෘත බීජක</button>
+    <button class="tab-btn" data-tab="angio">ආවෘත බීජක</button>
+    <button class="tab-btn" data-tab="glossary">වචන මාලාව</button>
+    <button class="tab-btn" data-tab="quiz">ප්‍රශ්නාවලිය</button>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ OVERVIEW ============ -->
+<section class="section active" id="overview">
+  <div class="card">
+    <div class="eyebrow">Unit 03 · Page 91</div>
+    <h2>ශාක රාජධානියේ ජීවීන්ගේ විවිධත්වය</h2>
+    <p class="lede">ශාක රාජධානියේ සාමාජිකයන් පරිණාමය වූයේ ක්ලෝරෝෆයිටා නමැති හරිත ඇල්ගී කාණ්ඩායමකින් බව විශ්වාස කෙරේ. ශාක පරිණාමය හෝමික පරිසරයක සිදු වූ අතර, විස්තෘත සනාල පටක පද්ධතියක් පැවතීම හෝ නොපැවතීම මත ප්‍රධාන ශාක කාණ්ඩ දෙකක් හඳුනාගත හැකි ය: <b>විනාල ශාක</b> සහ <b>සනාල ශාක</b>.</p>
+  </div>
+
+  <div class="card">
+    <h3>ශාක කාණ්ඩවල පරිණාමික බන්ධුතා</h3>
+    <p class="lede" style="font-size:13px;">පහත රූපසටහනේ ඕනෑම නෝඩයක් තට්ටු කර වැඩිදුර විස්තර බලන්න.</p>
+    <div class="tree-wrap">
+      <div class="tree-svg-frame">
+        <svg id="cladogram" viewBox="0 0 640 300" xmlns="http://www.w3.org/2000/svg">
+          <!-- backbone -->
+          <path d="M20,270 L600,270" stroke="var(--moss-soft)" stroke-width="3" fill="none"/>
+          <path d="M60,270 L60,60" stroke="var(--moss-soft)" stroke-width="3" fill="none"/>
+          <path d="M180,270 L180,110" stroke="var(--moss-soft)" stroke-width="3" fill="none"/>
+          <path d="M320,270 L320,150" stroke="var(--moss-soft)" stroke-width="3" fill="none"/>
+          <path d="M460,270 L460,190" stroke="var(--moss-soft)" stroke-width="3" fill="none"/>
+          <path d="M580,270 L580,220" stroke="var(--moss-soft)" stroke-width="3" fill="none"/>
+
+          <!-- nodes -->
+          <g class="clade-node" data-node="bryo">
+            <circle cx="60" cy="60" r="16" fill="var(--forest)"/>
+            <text x="60" y="65" text-anchor="middle" font-size="13" fill="#fff">1</text>
+            <text x="60" y="40" text-anchor="middle" font-size="12" fill="var(--ink)">විනාල ශාක</text>
+          </g>
+          <g class="clade-node" data-node="seedless">
+            <circle cx="180" cy="110" r="16" fill="var(--forest)"/>
+            <text x="180" y="115" text-anchor="middle" font-size="13" fill="#fff">2</text>
+            <text x="180" y="90" text-anchor="middle" font-size="12" fill="var(--ink)">බීජ රහිත සනාල</text>
+          </g>
+          <g class="clade-node" data-node="gymno">
+            <circle cx="320" cy="150" r="16" fill="var(--forest)"/>
+            <text x="320" y="155" text-anchor="middle" font-size="13" fill="#fff">3</text>
+            <text x="320" y="130" text-anchor="middle" font-size="12" fill="var(--ink)">විවෘත බීජක</text>
+          </g>
+          <g class="clade-node" data-node="angio">
+            <circle cx="460" cy="190" r="16" fill="var(--amber)"/>
+            <text x="460" y="195" text-anchor="middle" font-size="13" fill="#241C08">4</text>
+            <text x="460" y="170" text-anchor="middle" font-size="12" fill="var(--ink)">ආවෘත බීජක</text>
+          </g>
+          <g class="clade-node" data-node="ancestor">
+            <circle cx="580" cy="220" r="10" fill="var(--moss)"/>
+            <text x="580" y="245" text-anchor="middle" font-size="11" fill="var(--ink)">නවතම පොදු මුතුන්මිත්තා</text>
+          </g>
+          <circle cx="20" cy="270" r="9" fill="var(--ink-soft)"/>
+          <text x="20" y="295" text-anchor="middle" font-size="11" fill="var(--ink-soft)">හරිත ඇල්ගී මුතුන්මිත්තා</text>
+        </svg>
+      </div>
+    </div>
+    <div class="tree-hint">👆 නෝඩ් මත click කරන්න</div>
+    <div class="node-info" id="nodeInfo"></div>
+  </div>
+
+  <div class="card">
+    <h3>ශාක රාජධානියේ වර්ගීකරණය (Expand කරන්න)</h3>
+    <div class="acc">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <h3>1. විනාල ශාක <span class="latin">(Non-vascular Plants)</span></h3>
+        <div class="acc-icon">+</div>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>විස්තාරිත සනාල පටක පද්ධතියක් නොමැති ශාක. ජලය හා පෝෂක සෛලයෙන් සෛලයට කෙටි දුරක් පමණක් ගමන් කරයි. උස අඩුය.</p>
+        <div class="pill-row">
+          <span class="pill">වංශය - බ්‍රයෝෆයිටා → <span class="latin">Pogonatum</span> (පාසි)</span>
+          <span class="pill">වංශය - හෙපටෝෆයිටා → <span class="latin">Marchantia</span> (අක්මා ශාක)</span>
+          <span class="pill">වංශය - ඇන්තොසෙරොෆයිටා → <span class="latin">Anthoceros</span> (අං ශාක)</span>
+        </div>
+      </div></div>
+    </div>
+    <div class="acc">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <h3>2. සනාල ශාක → බීජ රහිත සනාල ශාක</h3>
+        <div class="acc-icon">+</div>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>සංකීර්ණ සනාල පටක (ශෛලමය + ග්ලෝසෙයම) ඇත, එහෙත් බීජ නිපදවන්නේ නැත. බීජාණු මගින් ප්‍රචාරණය වේ.</p>
+        <div class="pill-row">
+          <span class="pill">වංශය - ලයිකොෆයිටා → <span class="latin">Lycopodium, Selaginella</span></span>
+          <span class="pill">වංශය - ටෙරොෆයිටා → <span class="latin">Nephrolepis</span></span>
+        </div>
+      </div></div>
+    </div>
+    <div class="acc">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <h3>3. සනාල ශාක → බීජ ශාක → විවෘත බීජක</h3>
+        <div class="acc-icon">+</div>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>නග්න බීජ ශාක — බීජ, කුටීරයක් තුළ වැසී නොපවතී.</p>
+        <div class="pill-row">
+          <span class="pill">සයිකැඩොෆයිටා → <span class="latin">Cycas</span></span>
+          <span class="pill">කෝනිෆෙරොෆයිටා → <span class="latin">Pinus</span></span>
+          <span class="pill">නීටොෆයිටා → <span class="latin">Gnetum</span></span>
+        </div>
+      </div></div>
+    </div>
+    <div class="acc">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <h3>4. සනාල ශාක → බීජ ශාක → ආවෘත බීජක</h3>
+        <div class="acc-icon">+</div>
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">
+        <p>සියලු සපුෂ්ප ශාක. බීජ ඩිම්බකෝෂය තුළ රැකසනය වේ; එය පසුව ඵලයක් බවට වර්ධනය වේ.</p>
+        <div class="pill-row">
+          <span class="pill">ඇන්තොෆයිටා → තෘණ, පොල් (ඒකබීජපත්‍රී)</span>
+          <span class="pill">ඇන්තොෆයිටා → රෝස, වට් (ද්විබීජපත්‍රී)</span>
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>වැදගත් සංඛ්‍යා ලේඛන</h3>
+    <p>පෘථිවියේ පවතින ශාක විශේෂ අතුරින් <span class="key-term">93%</span> ක් සනාල ශාක වේ. ඒවා තවදුරටත් කාණ්ඩ දෙකකට බෙදේ — <span class="key-term">බීජ රහිත සනාල ශාක</span> සහ <span class="key-term">බීජ ශාක</span>.</p>
+  </div>
+</section>
+
+<!-- ============ BRYOPHYTES ============ -->
+<section class="section" id="bryo">
+  <div class="card">
+    <div class="eyebrow">Page 92–93</div>
+    <h2>විනාල ශාක — බ්‍රයෝෆයිටා විවිධත්වය</h2>
+    <p class="lede">විවිධ ශාක කාණ්ඩායම් වෙන් කර හඳුනාගැනීමට යොදාගන්නා ප්‍රධාන කරුණ වන්නේ ශාක දේහය පුරා ජලය හා පෝෂක පරිවහනය සඳහා විස්තාරිත සනාල පටක පද්ධතියක් තිබීම හෝ නොතිබීමයි. විනාල ශාකවල එවැනි පටක පද්ධතියක් නොමැත.</p>
+  </div>
+
+  <div class="illus">
+    <svg viewBox="0 0 260 200" width="260">
+      <ellipse cx="130" cy="185" rx="90" ry="8" fill="var(--moss-soft)" opacity=".5"/>
+      <g stroke="var(--forest-2)" stroke-width="3" fill="none">
+        <path d="M130 185 L130 70"/>
+        <path d="M130 150 L100 130"/>
+        <path d="M130 130 L160 110"/>
+        <path d="M130 110 L100 90"/>
+        <path d="M130 90 L160 70"/>
+      </g>
+      <g fill="var(--moss)">
+        <ellipse cx="98" cy="128" rx="14" ry="6" transform="rotate(-20 98 128)"/>
+        <ellipse cx="162" cy="108" rx="14" ry="6" transform="rotate(20 162 108)"/>
+        <ellipse cx="98" cy="88" rx="14" ry="6" transform="rotate(-20 98 88)"/>
+        <ellipse cx="162" cy="68" rx="14" ry="6" transform="rotate(20 162 68)"/>
+      </g>
+      <circle cx="130" cy="60" r="10" fill="var(--amber)"/>
+      <rect x="126" y="42" width="8" height="20" fill="var(--forest-2)"/>
+      <ellipse cx="130" cy="40" rx="9" ry="6" fill="var(--amber-soft)"/>
+    </svg>
+  </div>
+  <p class="caption">Pogonatum (පාසි) — බීජාණුධානිය ඉහළින් පිහිටයි</p>
+
+  <div class="acc">
+    <div class="acc-head" onclick="toggleAcc(this)">
+      <h3>Bryophyta වංශයේ ලක්ෂණ — Pogonatum (පාසි)</h3>
+      <div class="acc-icon">+</div>
+    </div>
+    <div class="acc-body"><div class="acc-body-inner">
+      <ul>
+        <li>විශේෂයෙන් තෙත්, ලෙග්මික ස්ථානවල හමු වෙයි.</li>
+        <li>ඒකගුණ ජන්මාණු ශාකය ප්‍රමුඛයි — එය ප්‍රභාසංශ්ලේෂණය සිදු කරන ස්වාධීන ශාකයකි.</li>
+        <li>ජන්මාණු ශාකය 'පත්‍ර', 'කඳ' හා 'මූලාභ' ලෙස විභේදනය වී ඇත. එහෙත් සනාල පටක රහිතය.</li>
+        <li>වෙන් වෙන්ව පවතින ජාය හා පුං ජන්මාණු ශාක මත අණ්ඩාණුධානි හා ශුක්‍රාණුධානි හට ගනියි — එනම් ජන්මාණු ශාකය ද්විලිංගී ය.</li>
+        <li>ශුක්‍රාණු, සංසේචනය සඳහා තුනී ජල පටලයක් හරහා පිහිනා යයි.</li>
+        <li>බීජාණු ශාකය කොළ පැහැති අතර ප්‍රභාසංශ්ලේෂණය සිදු කළත්, ස්වාධීනව ජීවත් විය නොහැක — එය ජනක ජන්මාණු ශාකයට සවි වී පෝෂක හා ජලය අවශෝෂණය කරයි.</li>
+        <li>සියලු සනාල ශාකවල හමු වන 'පුතිකා' නම් විශේෂ සිදුරු ආකාරය බීජාණු ශාකවල දක්නට ඇත.</li>
+        <li>සමබීජාණුකයෙකි (එකම වර්ගයේ බීජාණු පමණක් නිපදවයි).</li>
+      </ul>
+    </div></div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-head" onclick="toggleAcc(this)">
+      <h3>ජලාන්තර රාජධානියේ විනාල ශාක වංශ තුන</h3>
+      <div class="acc-icon">+</div>
+    </div>
+    <div class="acc-body"><div class="acc-body-inner">
+      <table class="compare-table">
+        <tr><th>වංශය</th><th>උදාහරණය</th><th>සිංහල නම</th></tr>
+        <tr><td>බ්‍රයෝෆයිටා</td><td class="latin">Pogonatum</td><td>පාසි</td></tr>
+        <tr><td>හෙපටෝෆයිටා</td><td class="latin">Marchantia</td><td>අක්මා ශාක</td></tr>
+        <tr><td>ඇන්තොසෙරොෆයිටා</td><td class="latin">Anthoceros</td><td>අං ශාක</td></tr>
+      </table>
+    </div></div>
+  </div>
+</section>
+
+<!-- ============ SEEDLESS VASCULAR ============ -->
+<section class="section" id="seedless">
+  <div class="card">
+    <div class="eyebrow">Page 93–95</div>
+    <h2>බීජ රහිත සනාල ශාක</h2>
+    <p class="lede">බීජ රහිත සනාල ශාකවල බීජ හට ගන්නේ නැත; ඒවා <span class="key-term">බීජාණු</span> මගින් ප්‍රචාරණය වේ. මේවා <span class="key-term">ලයිකොෆයිටා</span> සහ <span class="key-term">ටෙරොෆයිටා</span> ලෙස වර්ග දෙකකට බෙදේ. ට්‍රයවෝරියන් හා කාබොනිෆෙරස් අවධියේ පරිණාමය වූ බවට පොසිල සාක්ෂි ඇත.</p>
+  </div>
+
+  <div class="acc">
+    <div class="acc-head" onclick="toggleAcc(this)">
+      <h3>සනාල ශාකවල වැදගත් ලක්ෂණ 4</h3>
+      <div class="acc-icon">+</div>
+    </div>
+    <div class="acc-body"><div class="acc-body-inner">
+      <p><b>1. ශෛලමය හා ග්ලෝසෙයම මගින් ද්‍රව්‍ය පරිවහනය —</b> ශෛලමය (වාහකයන, තන්තු, මෘදූත්ක සෛල වලින් සමන්විත; ලිග්නීන් මගින් යුක්තිමත්ව ජලය හා බනිජ ලවණ ප්‍රවාහනය කරයි) සහ ග්ලෝසෙයම (සිනි වර්ග, ඇමයිනෝ අම්ල හා අනෙකුත් කාබනික නිෂ්පාදන ශාකයේ විවිධ කොටස් වෙත බෙදාහරියි). මෙමගින් උස වර්ධනයට හා වැඩි ආලෝකයක් ලබාගැනීමට ශාකවලට හැකි වී ඇත.</p>
+      <p><b>2. මූලවල පරිණාමය —</b> මූල, ජලය හා බනිජ ලවණ පසෙන් අවශෝෂණය කරන අතර ශාකය පසට සවි කරයි.</p>
+      <p><b>3. පත්‍රවල පරිණාමය —</b> ක්ෂුද්‍ර පත්‍ර (තනි නාරටියක් සහිත, කුඩා) සහ මහා පත්‍ර (විශාල, පැතලි, කැත් බෙදුණු, බහුල නාරටි සහිත — කාර්යක්ෂම ප්‍රභාසංශ්ලේෂණය සඳහා පෘෂ්ඨ වර්ගඵලය වැඩි කරයි) වශයෙන් ආකාර දෙකකි.</p>
+      <p><b>4. බීජාණුපත්‍ර හා බීජාණු ප්‍රභේද —</b> බීජාණුධානි දරන පත්‍ර 'බීජාණුපත්‍ර' නම් වේ. එක්ම වර්ගයේ බීජාණු නිපදවන ශාක <span class="key-term">සමබීජාණුක</span>; ක්ෂුද්‍ර සහ මහා යනුවෙන් වර්ග දෙකක බීජාණු නිපදවන ශාක <span class="key-term">විෂමබීජාණුක</span> ලෙස හැඳින්වේ.</p>
+    </div></div>
+  </div>
+
+  <div class="illus">
+    <svg viewBox="0 0 260 210" width="260">
+      <path d="M40,200 C40,150 60,120 70,80" stroke="var(--forest-2)" stroke-width="4" fill="none"/>
+      <g fill="var(--moss)">
+        <circle cx="72" cy="82" r="5"/><circle cx="80" cy="70" r="5"/><circle cx="65" cy="68" r="5"/>
+        <circle cx="76" cy="55" r="5"/><circle cx="62" cy="52" r="5"/><circle cx="70" cy="40" r="5"/>
+        <circle cx="58" cy="38" r="5"/><circle cx="66" cy="26" r="5"/>
+      </g>
+      <ellipse cx="66" cy="20" rx="9" ry="16" fill="var(--amber)"/>
+      <text x="66" y="196" text-anchor="middle" font-size="10" fill="var(--ink-soft)">Lycopodium</text>
+
+      <path d="M180,200 C170,160 195,140 190,100" stroke="var(--forest-2)" stroke-width="3" fill="none"/>
+      <g fill="var(--moss-soft)">
+        <ellipse cx="196" cy="150" rx="10" ry="4" transform="rotate(30 196 150)"/>
+        <ellipse cx="180" cy="130" rx="7" ry="3" transform="rotate(-25 180 130)"/>
+        <ellipse cx="198" cy="115" rx="10" ry="4" transform="rotate(30 198 115)"/>
+        <ellipse cx="184" cy="100" rx="7" ry="3" transform="rotate(-25 184 100)"/>
+      </g>
+      <ellipse cx="190" cy="90" rx="6" ry="12" fill="var(--amber-soft)"/>
+      <text x="188" y="196" text-anchor="middle" font-size="10" fill="var(--ink-soft)">Selaginella</text>
+    </svg>
+  </div>
+  <p class="caption">ලයිකෝෆයිටා: Lycopodium (සමබීජාණුක) සහ Selaginella (විෂමබීජාණුක)</p>
+
+  <div class="acc">
+    <div class="acc-head" onclick="toggleAcc(this)">
+      <h3>වංශය — ලයිකෝෆයිටා</h3>
+      <div class="acc-icon">+</div>
+    </div>
+    <div class="acc-body"><div class="acc-body-inner">
+      <ul>
+        <li>හෙමිකවාසී — සමහරු ශාක මත උපරි ජීවී ලෙස වැඩෙති.</li>
+        <li>ප්‍රථම (ප්‍රමුඛ) ශාකය බීජාණු ශාකයයි.</li>
+        <li>සමූහ කුඩා පත්‍ර ඇත; පොලොවේ දිගේ දිවෙන කඳෙන් ද්විබෙදුම් ලෙස බෙදෙන මූල නිපදවයි.</li>
+        <li>සංකේතු දරයි — බොහෝ ගඩ පාසිවල හා ශුඑ පාසිවල බීජාණුපත්‍ර ලීකරාවී ගඩාකාර සංකේතු පිහිටුවා ඇත.</li>
+        <li><span class="tag">Lycopodium (ගඩ පාසි)</span> — සමබීජාණුක</li>
+        <li><span class="tag">Selaginella (ශුඑ පාසි)</span> — විෂමබීජාණුක</li>
+      </ul>
+    </div></div>
+  </div>
+
+  <div class="illus">
+    <svg viewBox="0 0 220 180" width="220">
+      <path d="M110,175 L110,90" stroke="var(--forest-2)" stroke-width="4"/>
+      <g fill="none" stroke="var(--moss)" stroke-width="3">
+        <path d="M110,150 C90,140 70,145 55,130"/>
+        <path d="M110,150 C130,140 150,145 165,130"/>
+        <path d="M110,130 C92,122 76,126 62,113"/>
+        <path d="M110,130 C128,122 144,126 158,113"/>
+        <path d="M110,110 C94,104 80,107 68,96"/>
+        <path d="M110,110 C126,104 140,107 152,96"/>
+        <path d="M110,90 C98,84 88,86 78,78"/>
+        <path d="M110,90 C122,84 132,86 142,78"/>
+      </g>
+      <circle cx="110" cy="86" r="4" fill="var(--amber)"/>
+      <text x="110" y="20" text-anchor="middle" font-size="11" fill="var(--ink-soft)" class="latin">Nephrolepis frond</text>
+    </svg>
+  </div>
+  <p class="caption">ටෙරොෆයිටා: Nephrolepis — පිහාටු හැඩැති පත්‍රය (frond)</p>
+
+  <div class="acc">
+    <div class="acc-head" onclick="toggleAcc(this)">
+      <h3>වංශය — ටෙරොෆයිටා <span class="latin">(Ferns)</span></h3>
+      <div class="acc-icon">+</div>
+    </div>
+    <div class="acc-body"><div class="acc-body-inner">
+      <ul>
+        <li>බොහෝ බීජාණු ශාක අඟත රයිසෝම (හුඟක් වැනි කඳ) දරයි.</li>
+        <li>රයිසෝමයෙන් පත්‍ර (fronds) හට ගනී.</li>
+        <li>බහුතරයක් සංයුක්ත පත්‍ර — පතුවල අග දක්වා විච්ඡේදනය වී ඇති අතර පිහාටු ආකාරයයි.</li>
+        <li>සියලු විශේෂ සමබීජාණුක; ඒවා ද්විලිංගික ජන්මාණු ශාක බවට වර්ධනය වේ.</li>
+        <li>උදා: <span class="tag">Nephrolepis</span> (කොසෑලවිස්)</li>
+      </ul>
+      <div class="example-box">නූතන සනාල ශාක පූර්වජයන් සතුව අද දක්නට ලැබෙන මූල හා අනෙකුත් සමහර අනුවර්තන නොතිබූ බවට පොසිල සාක්ෂි ලැබේ.</div>
+    </div></div>
+  </div>
+</section>
+
+<!-- ============ SEED PLANTS GENERAL ============ -->
+<section class="section" id="seedplants">
+  <div class="card">
+    <div class="eyebrow">Page 95–97</div>
+    <h2>බීජ ශාකවල ප්‍රධාන ලක්ෂණ හා පරිණාමික වැදගත්කම</h2>
+    <p class="lede">බීජ සහිත සනාල ශාක <span class="key-term">බීජ ශාක</span> නම් වේ. බීජ පරිණයට පත්වීම සඳහා ව්‍යූහ කුටීරයක් තුළ පවතී ද නැද්ද යන්න මත බීජ ශාක <span class="key-term">විවෘත බීජක</span> සහ <span class="key-term">ආවෘත බීජක</span> ලෙස කාණ්ඩ දෙකකට බෙදේ.</p>
+  </div>
+
+  <div class="acc">
+    <div class="acc-head" onclick="toggleAcc(this)">
+      <h3>1. බීජ නිෂ්පාදනය</h3>
+      <div class="acc-icon">+</div>
+    </div>
+    <div class="acc-body"><div class="acc-body-inner">
+      <p>බීජය සමන්විත වන්නේ <span class="key-term">කලලය</span> හා <span class="key-term">ඍණපෝෂය</span>ෙනි (කලලයට ආහාර සපයන ඍණපෝෂය). මේවා <span class="key-term">බීජාවරණ</span> නම් ආරක්ෂක ආවරණයකින් වට වී ඇත. බීජ පරිණත වූ පසු විවිධ ව්‍යාප්ති ක්‍රම ආධාරයෙන් ව්‍යාප්ත වේ. මෙය ගොඩබිම ශාක විවිධත්වයට හේතු වූ ප්‍රධාන අනුවර්තනයකි.</p>
+    </div></div>
+  </div>
+  <div class="acc">
+    <div class="acc-head" onclick="toggleAcc(this)">
+      <h3>2. ක්ෂීණ වූ ජන්මාණු ශාකය</h3>
+      <div class="acc-icon">+</div>
+    </div>
+    <div class="acc-body"><div class="acc-body-inner">
+      <p>බීජ ශාකවල ජන්මාණු ශාකය ඉතා කුඩා වී ඇති අතර, එය ජනක බීජාණු ශාකයේ බීජාණුධානිය තුළම වර්ධනය වී පාරිසරික හානිකර තත්ත්වයන්ගෙන් ආරක්ෂා වේ. මෙමගින් පරාධීන ජන්මාණු ශාකයට බීජාණු ශාකයෙන් පෝෂක ලබාගැනීමට හැකි වේ.</p>
+    </div></div>
+  </div>
+  <div class="acc">
+    <div class="acc-head" onclick="toggleAcc(this)">
+      <h3>3. විෂමබීජාණුකතාව</h3>
+      <div class="acc-icon">+</div>
+    </div>
+    <div class="acc-body"><div class="acc-body-inner">
+      <p>සියලුම බීජ ශාක විෂමබීජාණුකයි — ක්ෂුද්‍ර බීජාණු හා මහා බීජාණු වශයෙන් වර්ග දෙකක් නිපදවයි. සෑම මහාබීජාණුධානියක් තුළම එක් මහාබීජාණුවක් පමණක් ද, ක්ෂුද්‍ර බීජාණුධානියක් තුළ විශාල සංඛ්‍යාවක් ක්ෂුද්‍ර බීජාණු ද අඩංගු වේ.</p>
+    </div></div>
+  </div>
+  <div class="acc">
+    <div class="acc-head" onclick="toggleAcc(this)">
+      <h3>4. ඩිම්බ හා අණ්ඩ නිපදවීම</h3>
+      <div class="acc-icon">+</div>
+    </div>
+    <div class="acc-body"><div class="acc-body-inner">
+      <p>මහාබීජාණුධානිය ජනක බීජාණු ශාකය තුළම රැඳී පවතී — මෙය බීජ ශාකවල අනන්‍ය ලක්ෂණයකි. මෙය ආරක්ෂා කරන පටක ස්තරය <span class="key-term">ඩිම්බාවරණ</span> නම් වේ. මහාබීජාණුධානිය, මහාබීජාණුව හා ආවරණ පටල එකට එකතු වී <span class="key-term">ඩිම්බය</span> සෑදේ. ඩිම්බය පරිණත වී <span class="key-term">අණ්ඩය (බීජය)</span> බවට පත් වේ.</p>
+    </div></div>
+  </div>
+  <div class="acc">
+    <div class="acc-head" onclick="toggleAcc(this)">
+      <h3>5. පරාග කණිකා හා ඉතුණාණු නිපදවීම</h3>
+      <div class="acc-icon">+</div>
+    </div>
+    <div class="acc-body"><div class="acc-body-inner">
+      <p>ක්ෂුද්‍ර බීජාණු <span class="key-term">පරාග කණිකා</span> බවට වර්ධනය වේ; එය පුං ජන්මාණු ශාකය අඩංගු කරයි. පරාග බිත්තිය <span class="tag">ස්පොරෝපොලනින්</span> නම් ප්‍රතිරෝධී ද්‍රව්‍යයෙන් සෑදී ඇති අතර, පරාග නාළය හරහා ශුක්‍රාණු ජාය ජන්මාණු ශාකය වෙත ළඟා වේ. සමහර විවෘත බීජකවල කයිකාදර (ස්වයං චලනය වන) ශුක්‍රාණු දක්නට ලැබෙන අතර, එය පුරාණ ලක්ෂණයකි.</p>
+    </div></div>
+  </div>
+
+  <div class="card">
+    <h3>විවෘත බීජක <span class="latin">vs</span> ආවෘත බීජක</h3>
+    <table class="compare-table">
+      <tr><th>ලක්ෂණය</th><th>විවෘත බීජක</th><th>ආවෘත බීජක</th></tr>
+      <tr><td>බීජ පිහිටීම</td><td>නග්නව, කුටීරයක් තුළ නොවේ</td><td>ඩිම්බකෝෂය තුළ ආරක්ෂිතව</td></tr>
+      <tr><td>ඵලය</td><td>නොසෑදේ</td><td>ඩිම්බකෝෂයෙන් ඵලය සෑදේ</td></tr>
+      <tr><td>උදාහරණ</td><td class="latin">Cycas, Pinus, Gnetum</td><td>සියලු සපුෂ්ප ශාක</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ============ GYMNOSPERMS ============ -->
+<section class="section" id="gymno">
+  <div class="card">
+    <div class="eyebrow">Page 97</div>
+    <h2>විවෘත බීජක <span class="latin">(Gymnosperms)</span></h2>
+    <p class="lede">"නග්න බීජ" ශාක ලෙසද හැඳින්වෙන විවෘත බීජකවල බීජ කුටීරයක් තුළ වැසී නොපවතී. වංශ 3ක් අඩංගුය.</p>
+  </div>
+
+  <div class="illus">
+    <svg viewBox="0 0 200 220" width="200">
+      <path d="M100,215 L100,60" stroke="#6B4A2A" stroke-width="6"/>
+      <g fill="var(--forest-2)">
+        <ellipse cx="70" cy="80" rx="34" ry="10"/>
+        <ellipse cx="130" cy="70" rx="34" ry="10"/>
+        <ellipse cx="65" cy="60" rx="30" ry="9"/>
+        <ellipse cx="135" cy="50" rx="30" ry="9"/>
+        <ellipse cx="70" cy="42" rx="26" ry="8"/>
+        <ellipse cx="128" cy="34" rx="26" ry="8"/>
+      </g>
+      <g>
+        <ellipse cx="100" cy="100" rx="16" ry="30" fill="#8B5A2B"/>
+        <path d="M86,80 L86,120 M92,76 L92,124 M100,74 L100,126 M108,76 L108,124 M114,80 L114,120" stroke="#5A3A1A" stroke-width="1.5"/>
+      </g>
+      <text x="100" y="16" text-anchor="middle" font-size="11" fill="var(--ink-soft)" class="latin">Pinus cone</text>
+    </svg>
+  </div>
+  <p class="caption">Pinus (කෝනිෆෙරොෆයිටා) — කේතුවක් ඇතුළත බීජාණු ආකාර දෙකක් නිපදවේ</p>
+
+  <div class="acc">
+    <div class="acc-head" onclick="toggleAcc(this)">
+      <h3>වංශය — නීටෝෆයිටා <span class="latin">Gnetophyta</span> · <span class="tag">Gnetum</span></h3>
+      <div class="acc-icon">+</div>
+    </div>
+    <div class="acc-body"><div class="acc-body-inner">
+      <ul>
+        <li>සෛලමේ වාහිනි දරන එකම විවෘත බීජක ආකාරයයි.</li>
+        <li>පත්‍ර සපුෂ්ප ශාක පත්‍ර වැනි පෙනුමක් ගනී.</li>
+        <li>බීජ, ඵලයක් වැනි ආවෘත බීජක ලක්ෂණයක් පෙන්වයි.</li>
+      </ul>
+    </div></div>
+  </div>
+  <div class="acc">
+    <div class="acc-head" onclick="toggleAcc(this)">
+      <h3>වංශය — සයිකැඩොෆයිටා <span class="latin">Cycadophyta</span> · <span class="tag">Cycas</span></h3>
+      <div class="acc-icon">+</div>
+    </div>
+    <div class="acc-body"><div class="acc-body-inner">
+      <ul>
+        <li>තාල වර්ගයට අයත් ශාක පත්‍රවලට සමාන පෙනුමක් ඇති පත්‍ර හා විශාල කේතු ඇත.</li>
+        <li>බීජ රහිත සනාල ශාකවලට සමානව කයිකාදර (ස්වයංචලිත) ශුක්‍රාණු ලබා දේ.</li>
+      </ul>
+      <div class="illus" style="margin:6px 0;">
+        <svg viewBox="0 0 200 160" width="180">
+          <rect x="94" y="90" width="12" height="60" fill="#6B4A2A"/>
+          <g stroke="var(--moss)" stroke-width="3" fill="none">
+            <path d="M100,95 L40,60"/><path d="M100,95 L45,80"/><path d="M100,95 L50,100"/>
+            <path d="M100,95 L160,60"/><path d="M100,95 L155,80"/><path d="M100,95 L150,100"/>
+          </g>
+          <ellipse cx="100" cy="60" rx="14" ry="26" fill="var(--amber)"/>
+        </svg>
+      </div>
+    </div></div>
+  </div>
+  <div class="acc">
+    <div class="acc-head" onclick="toggleAcc(this)">
+      <h3>වංශය — කෝනිෆෙරොෆයිටා <span class="latin">Coniferophyta</span> · <span class="tag">Pinus</span></h3>
+      <div class="acc-icon">+</div>
+    </div>
+    <div class="acc-body"><div class="acc-body-inner">
+      <ul>
+        <li>රෙඩ්වුඩ් හා සයිප්‍රස් වැනි විශාල ශාක ඇතුළත් වේ.</li>
+        <li>එකම ශාකයේ පවතින කේතුවල බීජාණු ආකාර දෙකක් (පුරුෂ හා ස්ත්‍රී කේතු) නිපදවයි.</li>
+      </ul>
+    </div></div>
+  </div>
+</section>
+
+<!-- ============ ANGIOSPERMS ============ -->
+<section class="section" id="angio">
+  <div class="card">
+    <div class="eyebrow">Page 96, 97–98</div>
+    <h2>ආවෘත බීජක <span class="latin">(Angiosperms)</span></h2>
+    <p class="lede">සියලු සපුෂ්ප ශාක ආවෘත බීජක (ඇන්තොෆයිටා) වංශයට අයත් වේ. බීජ, ඩිම්බකෝෂය තුළ රැකසනය වී පසුව ඵලයක් බවට පරිවර්තනය වේ.</p>
+  </div>
+
+  <div class="acc">
+    <div class="acc-head" onclick="toggleAcc(this)">
+      <h3>පුෂ්ප හා ඵල නිෂ්පාදනය</h3>
+      <div class="acc-icon">+</div>
+    </div>
+    <div class="acc-body"><div class="acc-body-inner">
+      <ul>
+        <li>රේණුවල පරාග කණිකා බවට වර්ධනය වන ක්ෂුද්‍ර බීජාණු නිපදවයි (පරාග කණිකාවල පුං ජන්මාණු අන්තර්ගතය).</li>
+        <li>අණ්ඩප තුළ මහා බීජාණු නිපදවේ — එය ජාය ජන්මාණු ශාකය/කලල කෝෂය නිපදවයි.</li>
+        <li>බීජ අණ්ඩප තුළ පිහිටයි.</li>
+        <li>සංසේචනයෙන් පසු ඩිම්බකෝෂයේ බිත්තිය ඝණකම් වී <span class="key-term">ඵලය</span> බවට වර්ධනය වේ; ඩිම්බය <span class="key-term">බීජය</span> බවට වර්ධනය වේ.</li>
+        <li>ඵලය සුප්ත බීජය ආරක්ෂා කරන අතර, බීජ ව්‍යාප්තියටද ආධාර කරයි.</li>
+      </ul>
+    </div></div>
+  </div>
+
+  <div class="card">
+    <h3>ඒකබීජපත්‍රී <span class="latin">vs</span> ද්විබීජපත්‍රී</h3>
+    <p class="lede" style="font-size:13px;">කලලයේ ඇති බීජ පත්‍ර සංඛ්‍යාව අනුව සපුෂ්ප ශාක කාණ්ඩ දෙකකට බෙදේ. Toggle කර සංසන්දනය කරන්න, හෝ swipe කරන්න.</p>
+    <div class="compare-toggle">
+      <button class="active" id="btnTable" onclick="showCompare('table')">වගු දර්ශනය</button>
+      <button id="btnCards" onclick="showCompare('cards')">කාඩ්පත් දර්ශනය</button>
+    </div>
+
+    <div id="compareTableView">
+      <table class="compare-table">
+        <tr><th>Class Monocotyledoneae (ඒකබීජපත්‍රී)</th><th>Class Dicotyledoneae (ද්විබීජපත්‍රී)</th></tr>
+        <tr><td>කලලය බීජ පත්‍ර එකක් දරයි</td><td>කලලය බීජ පත්‍ර දෙකක් දරයි</td></tr>
+        <tr><td>තන්තුමය මූල පද්ධතිය</td><td>මූල මූල පද්ධතිය (Tap root)</td></tr>
+        <tr><td>පත්‍රවල සමාන්තර නාරටි විනාශය</td><td>පත්‍රවල ජාලාකාර නාරටි විනාශය</td></tr>
+        <tr><td>ත්‍රි-අංක පුෂ්ප</td><td>චතුරංක හෝ පංචාංක පුෂ්ප</td></tr>
+        <tr><td>පරිපුෂ්පය මංජිතු/දල පත්‍ර ලෙස වෙන් කළ නොහැක</td><td>පරිපුෂ්පය මංජිතු/දල පත්‍ර ලෙස වෙන් කර හඳුනාගත හැක</td></tr>
+        <tr><td>පරාග කණිකාව එක් විවරයක් සහිතයි</td><td>පරාග කණිකාව විවර තුනක් සහිතයි</td></tr>
+        <tr><td>කඳේ සනාල කලාප විසිරී ඇත, කැම්බියම නැත</td><td>කඳේ සනාල කලාප වළයාකාරව ඇත, කැම්බියම සහිතයි</td></tr>
+        <tr><td>උදා: තෘණ, පොල්, ඉරි</td><td>උදා: රෝස, වට්, <span class="latin">Cucurbita</span></td></tr>
+      </table>
+    </div>
+
+    <div id="compareCardsView" style="display:none;">
+      <div class="swipe-wrap" id="swipeWrap"></div>
+      <p class="tree-hint">👉 කාඩ්පත් Swipe කරන්න</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>අඩුරු අනුස්මරණය — කඳේ සනාල පටක</h3>
+    <div class="illus">
+      <svg viewBox="0 0 260 140" width="260">
+        <circle cx="65" cy="70" r="55" fill="none" stroke="var(--line)" stroke-width="2"/>
+        <g fill="var(--amber)">
+          <circle cx="40" cy="45" r="5"/><circle cx="75" cy="35" r="5"/><circle cx="95" cy="60" r="5"/>
+          <circle cx="85" cy="90" r="5"/><circle cx="50" cy="95" r="5"/><circle cx="30" cy="70" r="5"/>
+        </g>
+        <text x="65" y="132" text-anchor="middle" font-size="11" fill="var(--ink-soft)">ඒකබීජපත්‍රී (විසිරි)</text>
+
+        <circle cx="195" cy="70" r="55" fill="none" stroke="var(--line)" stroke-width="2"/>
+        <g fill="var(--amber)">
+          <circle cx="195" cy="20" r="5"/><circle cx="234" cy="45" r="5"/><circle cx="234" cy="95" r="5"/>
+          <circle cx="195" cy="120" r="5"/><circle cx="156" cy="95" r="5"/><circle cx="156" cy="45" r="5"/>
+        </g>
+        <circle cx="195" cy="70" r="30" fill="none" stroke="var(--moss)" stroke-width="2" stroke-dasharray="3 3"/>
+        <text x="195" y="132" text-anchor="middle" font-size="11" fill="var(--ink-soft)">ද්විබීජපත්‍රී (වළයාකාර)</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GLOSSARY ============ -->
+<section class="section" id="glossary">
+  <div class="card">
+    <div class="eyebrow">Key Terms</div>
+    <h2>සිංහල පාරිභාෂික වචන මාලාව</h2>
+    <p class="lede">කාඩ්පතක් tap කර අර්ථය බලන්න.</p>
+  </div>
+  <div class="flash-grid" id="flashGrid"></div>
+</section>
+
+<!-- ============ QUIZ ============ -->
+<section class="section" id="quiz">
+  <div class="card">
+    <div class="eyebrow">Self-Assessment</div>
+    <h2>ස්වයං-ඇගයීම් ප්‍රශ්නාවලිය</h2>
+    <div class="quiz-progress"><div class="quiz-progress-bar" id="quizProgressBar"></div></div>
+    <div id="quizArea"></div>
+  </div>
+</section>
+
+</main>
+
+<nav class="bottom-nav" id="bottomNav">
+  <button class="bn-item active" data-tab="overview"><span class="bn-icon">🌳</span>සමාලෝචනය</button>
+  <button class="bn-item" data-tab="seedless"><span class="bn-icon">🌿</span>සනාල</button>
+  <button class="bn-item" data-tab="gymno"><span class="bn-icon">🌲</span>විවෘත</button>
+  <button class="bn-item" data-tab="angio"><span class="bn-icon">🌸</span>ආවෘත</button>
+  <button class="bn-item" data-tab="quiz"><span class="bn-icon">📝</span>ප්‍රශ්න</button>
+</nav>
+
+<script>
+/* ---------------- Theme ---------------- */
+const themeBtn = document.getElementById('themeToggle');
+themeBtn.addEventListener('click', ()=>{
+  const body = document.body;
+  const isDark = body.getAttribute('data-theme') === 'dark';
+  body.setAttribute('data-theme', isDark ? 'light':'dark');
+  themeBtn.textContent = isDark ? '🌙' : '☀️';
+});
+
+/* ---------------- Tabs (top bar + bottom nav share state) ---------------- */
+function setTab(tabName){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById(tabName).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tabName));
+  document.querySelectorAll('.bn-item').forEach(b=>b.classList.toggle('active', b.dataset.tab===tabName));
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>setTab(btn.dataset.tab));
+});
+document.querySelectorAll('.bn-item').forEach(btn=>{
+  btn.addEventListener('click', ()=>setTab(btn.dataset.tab));
+});
+
+/* ---------------- Accordion ---------------- */
+function toggleAcc(headEl){
+  const acc = headEl.parentElement;
+  const body = acc.querySelector('.acc-body');
+  const isOpen = acc.classList.contains('open');
+  if(isOpen){
+    acc.classList.remove('open');
+    body.style.maxHeight = null;
+  } else {
+    acc.classList.add('open');
+    body.style.maxHeight = body.scrollHeight + 40 + 'px';
+  }
+}
+
+/* ---------------- Cladogram node info ---------------- */
+const nodeData = {
+  bryo: "<b>විනාල ශාක</b> — විස්තාරිත සනාල පටක පද්ධතියක් නොමැති ප්‍රථම ශාක කාණ්ඩය. උදා: Marchantia, Pogonatum, Anthoceros.",
+  seedless: "<b>බීජ රහිත සනාල ශාක</b> — සනාල පටක (ශෛලමය/ග්ලෝසෙයම) පරිණාමය වූ ප්‍රථම අවස්ථාව. එහෙත් තවමත් බීජ නොමැත. උදා: Lycopodium, Selaginella, Nephrolepis.",
+  gymno: "<b>විවෘත බීජක</b> — බීජ ශාකවල ප්‍රථම කාණ්ඩය. බීජ නග්නව පවතී, ඵලයක් තුළ ආරක්ෂිත නොවේ. උදා: Cycas, Pinus, Gnetum.",
+  angio: "<b>ආවෘත බීජක</b> — වඩාත් නවීන හා විවිධ කාණ්ඩය. පුෂ්ප නිපදවන අතර, බීජ ඵලයක් තුළ ආරක්ෂිතව පවතී.",
+  ancestor: "<b>නවතම පොදු මුතුන්මිත්තා</b> — ක්ලෝරෝෆයිටා හරිත ඇල්ගී කාණ්ඩායමකින් සියලුම ගොඩබිම් ශාක පරිණාමය වී ඇතැයි විශ්වාස කෙරේ."
+};
+document.querySelectorAll('.clade-node').forEach(node=>{
+  node.style.cursor='pointer';
+  node.addEventListener('click', ()=>{
+    const info = document.getElementById('nodeInfo');
+    info.innerHTML = nodeData[node.dataset.node];
+    info.classList.add('show');
+  });
+});
+
+/* ---------------- Monocot/Dicot compare toggle ---------------- */
+function showCompare(mode){
+  document.getElementById('btnTable').classList.toggle('active', mode==='table');
+  document.getElementById('btnCards').classList.toggle('active', mode==='cards');
+  document.getElementById('compareTableView').style.display = mode==='table' ? 'block':'none';
+  document.getElementById('compareCardsView').style.display = mode==='cards' ? 'block':'none';
+}
+const compareData = [
+  ["බීජ පත්‍ර සංඛ්‍යාව","එකක්","දෙකක්"],
+  ["මූල පද්ධතිය","තන්තුමය","මූල මූල (Tap root)"],
+  ["පත්‍ර නාරටි","සමාන්තර","ජාලාකාර"],
+  ["පුෂ්ප කොටස්","ත්‍රි-අංක","චතුරංක / පංචාංක"],
+  ["පරිපුෂ්පය","වෙන් කළ නොහැක","වෙන් කර හඳුනාගත හැක"],
+  ["පරාග විවර","එකක්","තුනක්"],
+  ["කඳේ සනාල කලාප","විසිරි, කැම්බියම නැත","වළයාකාර, කැම්බියම සහිත"],
+  ["උදාහරණ","තෘණ, පොල්, ඉරි","රෝස, වට්, Cucurbita"]
+];
+const swipeWrap = document.getElementById('swipeWrap');
+compareData.forEach(row=>{
+  const card = document.createElement('div');
+  card.className='swipe-card';
+  card.innerHTML = `<h4>${row[0]}</h4>
+    <div class="val"><b>ඒකබීජපත්‍රී:</b> ${row[1]}</div>
+    <div class="val"><b>ද්විබීජපත්‍රී:</b> ${row[2]}</div>`;
+  swipeWrap.appendChild(card);
+});
+
+/* ---------------- Flashcards ---------------- */
+const flashData = [
+  ["ශෛලමය","(Xylem) ජලය හා බනිජ ලවණ පරිවහනය කරන සනාල පටකය. ලිග්නීන් මගින් යුක්තිමත් ය."],
+  ["ග්ලෝසෙයම","(Phloem) සිනි වර්ග, ඇමයිනෝ අම්ල හා කාබනික නිෂ්පාදන ශාකයේ විවිධ කොටස් වෙත බෙදාහරින සනාල පටකය."],
+  ["සමබීජාණුකතාව","එකම ප්‍රමාණයේ හා වර්ගයේ බීජාණු පමණක් නිපදවීම."],
+  ["විෂමබීජාණුකතාව","ක්ෂුද්‍ර බීජාණු හා මහා බීජාණු වශයෙන් වර්ග දෙකක බීජාණු නිපදවීම."],
+  ["ක්ෂුද්‍ර පත්‍ර","තනි නාරටියක් ඇති, ප්‍රමාණයෙන් කුඩා පත්‍ර වර්ගය."],
+  ["මහා පත්‍ර","විශාල, පැතලි, බහුල නාරටි සහිත පත්‍ර වර්ගය — කාර්යක්ෂම ප්‍රභාසංශ්ලේෂණයට උපකාරී."],
+  ["ඩිම්බය","මහාබීජාණුධානිය, මහාබීජාණුව හා ආවරණ පටල එකතු වී සෑදෙන ව්‍යූහය; පසුව බීජය බවට වර්ධනය වේ."],
+  ["ඍණපෝෂය","බීජය තුළ කලලයට ආහාර සපයන පටකය."],
+  ["රයිසෝම","ටෙරොෆයිටාවන්ගේ භූගත, කඳ වැනි ව්‍යූහය; එයින් පත්‍ර (fronds) හට ගනී."],
+  ["පරාග කණිකාව","ක්ෂුද්‍ර බීජාණුවෙන් වර්ධනය වන, පුං ජන්මාණු ශාකය අඩංගු ව්‍යූහය."],
+  ["ඩිම්බාවරණ","මහාබීජාණුධානිය ආරක්ෂා කරන බීජ ශාකවල පටක ස්තරය."],
+  ["කැම්බියම","ද්විබීජපත්‍රී කඳේ සනාල කලාප තුළ දක්නා ලබන, ද්විතීයික වර්ධනයට හේතු වන පටකය."]
+];
+const flashGrid = document.getElementById('flashGrid');
+flashData.forEach(item=>{
+  const card = document.createElement('div');
+  card.className='flashcard';
+  card.innerHTML = `<div class="flashcard-inner">
+      <div class="flash-face flash-front">${item[0]}</div>
+      <div class="flash-face flash-back">${item[1]}</div>
+    </div>`;
+  card.addEventListener('click', ()=>card.classList.toggle('flipped'));
+  flashGrid.appendChild(card);
+});
+
+/* ---------------- Quiz ---------------- */
+const quizData = [
+  {q:"ශාක රාජධානියේ ප්‍රධාන ශාක කාණ්ඩ දෙක වෙන් කරන ප්‍රධාන ලක්ෂණය කුමක්ද?",
+   opts:["පත්‍රවල වර්ණය","සනාල පටක පද්ධතියක් තිබීම හෝ නොතිබීම","පොෂණ ක්‍රමය","ජීවත් වන කාලය"],
+   correct:1,
+   explain:"විස්තාරිත සනාල පටක පද්ධතියක් (ශෛලමය/ග්ලෝසෙයම) තිබීම හෝ නොතිබීම මත සනාල ශාක සහ විනාල ශාක වශයෙන් ප්‍රධාන කාණ්ඩ දෙකට බෙදේ."},
+  {q:"Marchantia අයත් වන්නේ කුමන වංශයටද?",
+   opts:["බ්‍රයෝෆයිටා","හෙපටෝෆයිටා","ලයිකොෆයිටා","කෝනිෆෙරොෆයිටා"],
+   correct:1,
+   explain:"Marchantia (අක්මා ශාක) හෙපටෝෆයිටා වංශයට අයත් විනාල ශාකයකි."},
+  {q:"Selaginella විෂමබීජාණුක වන අතර Lycopodium සමබීජාණුක වේ. දෙකම අයත් වන්නේ කුමන වංශයටද?",
+   opts:["ටෙරොෆයිටා","ලයිකොෆයිටා","සයිකැඩොෆයිටා","ඇන්තොෆයිටා"],
+   correct:1,
+   explain:"Lycopodium (ගඩ පාසි) සහ Selaginella (ශුඑ පාසි) දෙකම ලයිකොෆයිටා වංශයට අයත් වේ."},
+  {q:"ටෙරොෆයිටා (ෆර්න්) ශාකවල භූගත කඳ හඳුන්වන්නේ කුමන නමින්ද?",
+   opts:["ඩිම්බය","රයිසෝම","පරාග නාළය","ඍණපෝෂය"],
+   correct:1,
+   explain:"රයිසෝම යනු ෆර්න් ශාකවල භූගත, කඳ වැනි ව්‍යූහයයි; එයින් frond පත්‍ර හට ගනී."},
+  {q:"බීජ ශාකවල 'ඩිම්බාවරණ' යනු කුමක්ද?",
+   opts:["පරාග කණිකාවේ බිත්තිය","මහාබීජාණුධානිය ආරක්ෂා කරන පටක ස්තරය","ශෛලමයේ කොටසක්","ඵලයේ පිටත සිවිය"],
+   correct:1,
+   explain:"ඩිම්බාවරණ යනු මහාබීජාණුධානිය ආරක්ෂා කරන බීජ ශාකවල පටක ස්තරයයි; එය ඩිම්බය සෑදීමට දායක වේ."},
+  {q:"පහත කුමන ශාකය විවෘත බීජක (Gymnosperm) කාණ්ඩයට අයත් නොවේද?",
+   opts:["Cycas","Pinus","Gnetum","Nephrolepis"],
+   correct:3,
+   explain:"Nephrolepis (කොසෑලවිස්) ටෙරොෆයිටා (බීජ රහිත සනාල ශාක) වංශයට අයත් වේ, එය බීජ ශාකයක් නොවේ."},
+  {q:"සියලුම සපුෂ්ප ශාක අයත් වන්නේ කුමන කාණ්ඩයටද?",
+   opts:["විවෘත බීජක","ආවෘත බීජක (ඇන්තොෆයිටා)","ලයිකොෆයිටා","බ්‍රයෝෆයිටා"],
+   correct:1,
+   explain:"සියලුම සපුෂ්ප ශාක ආවෘත බීජක කාණ්ඩයේ ඇන්තොෆයිටා වංශයට අයත් වේ."},
+  {q:"ඒකබීජපත්‍රී ශාකවල මූල පද්ධතිය සාමාන්‍යයෙන් කුමන ආකාරයද?",
+   opts:["මූල මූලය (Tap root)","තන්තුමය මූල පද්ධතිය","මුල් නොමැත","වායු මූල පමණි"],
+   correct:1,
+   explain:"ඒකබීජපත්‍රී ශාකවල තන්තුමය මූල පද්ධතියක් ඇති අතර ද්විබීජපත්‍රී ශාකවල මූල මූලයක් (tap root) ඇත."},
+  {q:"ද්විබීජපත්‍රී ශාකවල පත්‍ර නාරටි විනාශය සාමාන්‍යයෙන් කුමන ආකාරයද?",
+   opts:["සමාන්තර","ජාලාකාර","වෘත්තාකාර","නොපවතී"],
+   correct:1,
+   explain:"ද්විබීජපත්‍රී ශාකවල ජාලාකාර නාරටි විනාශය දක්නට ලැබෙන අතර, ඒකබීජපත්‍රීවල එය සමාන්තර වේ."},
+  {q:"ඵලය සෑදෙන්නේ පුෂ්පයේ කුමන කොටසින්ද?",
+   opts:["පරාග කණිකාවෙන්","ඩිම්බකෝෂයෙන්","දල පත්‍රයෙන්","මංජිතුවෙන්"],
+   correct:1,
+   explain:"සංසේචනයෙන් පසු ඩිම්බකෝෂයේ බිත්තිය ඝණකම් වී ඵලය බවට වර්ධනය වේ; ඩිම්බය බීජය බවට වර්ධනය වේ."}
+];
+let currentQ = 0;
+let score = 0;
+let answered = [];
+
+function renderQuiz(){
+  const area = document.getElementById('quizArea');
+  const bar = document.getElementById('quizProgressBar');
+  if(currentQ >= quizData.length){
+    bar.style.width = '100%';
+    area.innerHTML = `<div class="score-screen">
+      <div class="score-num">${score} / ${quizData.length}</div>
+      <p>ඔබගේ ලකුණු</p>
+      <button class="btn" onclick="restartQuiz()">නැවත උත්සාහ කරන්න</button>
+    </div>`;
+    return;
+  }
+  bar.style.width = (currentQ / quizData.length * 100) + '%';
+  const item = quizData[currentQ];
+  let optsHtml = item.opts.map((o,i)=>`<button class="quiz-opt" data-i="${i}" onclick="selectOpt(${i})">${o}</button>`).join('');
+  area.innerHTML = `
+    <div class="quiz-q">${currentQ+1}. ${item.q}</div>
+    <div id="optsWrap">${optsHtml}</div>
+    <div class="quiz-explain" id="quizExplain">${item.explain}</div>
+    <div class="quiz-nav">
+      <button class="btn secondary" onclick="prevQ()" ${currentQ===0?'disabled':''}>← පෙර</button>
+      <button class="btn" id="nextBtn" onclick="nextQ()" disabled>ඊළඟ →</button>
+    </div>
+  `;
+  if(answered[currentQ] !== undefined){
+    lockAnswer(answered[currentQ]);
+  }
+}
+function selectOpt(i){
+  if(answered[currentQ] !== undefined) return;
+  answered[currentQ] = i;
+  const item = quizData[currentQ];
+  if(i === item.correct) score++;
+  lockAnswer(i);
+}
+function lockAnswer(i){
+  const item = quizData[currentQ];
+  document.querySelectorAll('.quiz-opt').forEach((btn,idx)=>{
+    btn.disabled = true;
+    if(idx === item.correct) btn.classList.add('correct');
+    else if(idx === i) btn.classList.add('wrong');
+  });
+  document.getElementById('quizExplain').classList.add('show');
+  document.getElementById('nextBtn').disabled = false;
+}
+function nextQ(){ currentQ++; renderQuiz(); }
+function prevQ(){ if(currentQ>0){ currentQ--; renderQuiz(); } }
+function restartQuiz(){ currentQ=0; score=0; answered=[]; renderQuiz(); }
+renderQuiz();
+</script>
+</body>
+</html>

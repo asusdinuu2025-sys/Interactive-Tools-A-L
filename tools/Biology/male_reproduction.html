@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>පුරුෂ ප්‍රජනනය — අන්තර්ක්‍රියාකාරී ඉගෙනුම් මධ්‍යස්ථානය</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Yaldevi:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+Sinhala:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #FAF5EA;
+    --bg-panel: #FFFDF8;
+    --ink: #241B18;
+    --ink-soft: #5B4E47;
+    --primary: #7A2E3E;      /* deep burgundy - tissue */
+    --primary-soft: #C98A98;
+    --primary-wash: #F3E2E4;
+    --secondary: #B8823A;     /* glandular amber */
+    --secondary-wash: #F3E5C8;
+    --accent: #256B68;        /* hormonal teal */
+    --accent-wash: #DCEDE9;
+    --line: #E3D6C2;
+    --danger: #A83A3A;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 100% -10%, var(--primary-wash), transparent 60%),
+      radial-gradient(1000px 500px at -10% 110%, var(--accent-wash), transparent 55%),
+      var(--bg);
+    color:var(--ink);
+    font-family:'Yaldevi','Noto Sans Sinhala',sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .font-display{ font-family:'Yaldevi','Noto Sans Sinhala',sans-serif; }
+  .font-mono{ font-family:'IBM Plex Mono', monospace; }
+  .card{
+    background:var(--bg-panel);
+    border:1px solid var(--line);
+    border-radius:1.1rem;
+    box-shadow: 0 1px 2px rgba(36,27,24,0.04), 0 8px 24px -12px rgba(36,27,24,0.12);
+  }
+  .tab-btn{
+    font-family:'Yaldevi',sans-serif;
+    white-space:nowrap;
+    border-bottom:3px solid transparent;
+    color:var(--ink-soft);
+    transition: all .2s ease;
+  }
+  .tab-btn.active{
+    color:var(--primary);
+    border-bottom-color:var(--primary);
+  }
+  .tab-panel{ display:none; animation: fadeUp .45s ease; }
+  .tab-panel.active{ display:block; }
+  @keyframes fadeUp{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+
+  .eyebrow{
+    letter-spacing:.14em;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:.68rem;
+    text-transform:uppercase;
+    color:var(--primary);
+  }
+
+  .step-node{
+    cursor:pointer;
+    border:2px solid var(--line);
+    background:var(--bg-panel);
+    transition: all .25s ease;
+  }
+  .step-node.active{
+    border-color:var(--primary);
+    background:var(--primary-wash);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px -10px rgba(122,46,62,.4);
+  }
+  .step-connector{
+    flex:1; height:3px; background:repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 10px);
+    min-width: 14px;
+  }
+
+  .hotspot{
+    cursor:pointer;
+    fill: var(--primary);
+    stroke:#fff;
+    stroke-width:2;
+    r:7;
+    transition: r .15s ease, fill .15s ease;
+  }
+  .hotspot:hover, .hotspot.active{
+    r:10;
+    fill: var(--accent);
+  }
+  .hotspot-pulse{
+    fill:none;
+    stroke:var(--primary);
+    stroke-width:2;
+    opacity:0.6;
+    animation: pulseRing 2.2s ease-out infinite;
+  }
+  @keyframes pulseRing{
+    0%{ r:7; opacity:.7; }
+    100%{ r:18; opacity:0; }
+  }
+
+  .gland-tab{
+    border:1px solid var(--line);
+    background:#fff;
+    transition: all .2s ease;
+  }
+  .gland-tab.active{
+    background:var(--secondary);
+    color:#fff;
+    border-color:var(--secondary);
+  }
+
+  .flow-signal{
+    r:5;
+    fill:var(--accent);
+  }
+  .flow-path{
+    fill:none;
+    stroke: var(--ink-soft);
+    stroke-width:2.5;
+    opacity:.35;
+  }
+  .flow-path.hot{
+    stroke:var(--accent);
+    opacity:1;
+  }
+  .feedback-path{
+    fill:none;
+    stroke: var(--danger);
+    stroke-width:2.5;
+    stroke-dasharray:6 6;
+    opacity:.15;
+    transition: opacity .3s ease;
+  }
+  .feedback-path.active{
+    opacity: .9;
+  }
+  .hormone-box{
+    fill:var(--bg-panel);
+    stroke:var(--line);
+    stroke-width:1.5;
+    rx:10;
+  }
+  .hormone-box.glow{
+    stroke: var(--accent);
+    stroke-width:2.5;
+  }
+
+  input[type=range]{
+    -webkit-appearance:none;
+    height:6px;
+    border-radius:999px;
+    background: var(--line);
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    width:20px; height:20px;
+    border-radius:50%;
+    background: var(--primary);
+    border:3px solid #fff;
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    cursor:pointer;
+    margin-top:-1px;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:20px; height:20px;
+    border-radius:50%;
+    background: var(--primary);
+    border:3px solid #fff;
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+    cursor:pointer;
+  }
+
+  .flip-card{ perspective: 1200px; height:180px; }
+  .flip-inner{
+    position:relative; width:100%; height:100%;
+    transition: transform .55s cubic-bezier(.4,.2,.2,1);
+    transform-style:preserve-3d;
+  }
+  .flip-card.flipped .flip-inner{ transform: rotateY(180deg); }
+  .flip-face{
+    position:absolute; inset:0;
+    backface-visibility:hidden;
+    border-radius:1rem;
+    display:flex; align-items:center; justify-content:center;
+    text-align:center; padding:1.1rem;
+  }
+  .flip-back{ transform: rotateY(180deg); }
+
+  .mcq-option{
+    border:1.5px solid var(--line);
+    transition: all .15s ease;
+    cursor:pointer;
+  }
+  .mcq-option:hover{ border-color: var(--primary-soft); background: var(--primary-wash); }
+  .mcq-option.correct{ border-color:#3E7A4F; background:#E3F1E6; }
+  .mcq-option.wrong{ border-color:var(--danger); background:#F5E1E1; }
+
+  ::-webkit-scrollbar{ height:8px; width:8px; }
+  ::-webkit-scrollbar-thumb{ background:var(--primary-soft); border-radius:999px; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:.001ms !important; transition-duration:.001ms !important; }
+  }
+
+  .section-num{
+    font-family:'IBM Plex Mono',monospace;
+    color: var(--secondary);
+    font-weight:600;
+  }
+</style>
+</head>
+<body class="min-h-screen pb-16">
+
+<!-- HEADER -->
+<header class="sticky top-0 z-40 backdrop-blur bg-[#FAF5EA]/90 border-b" style="border-color:var(--line)">
+  <div class="max-w-5xl mx-auto px-4 pt-4">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="eyebrow">අ.පො.ස. (උ.පෙළ.) ජීව විද්‍යාව · සම්පත් පොත</p>
+        <h1 class="font-display font-800 text-xl sm:text-2xl" style="color:var(--primary); font-weight:800;">පුරුෂ ප්‍රජනනය</h1>
+      </div>
+      <div class="hidden sm:flex items-center gap-1 text-xs font-mono px-3 py-1.5 rounded-full" style="background:var(--accent-wash); color:var(--accent)">
+        <span id="progress-label">ප්‍රගතිය: 0%</span>
+      </div>
+    </div>
+    <nav class="flex gap-5 mt-3 overflow-x-auto text-sm sm:text-base font-medium pb-0.5" id="tab-nav">
+      <button class="tab-btn active py-2" data-tab="tab-sperm">① ශුක්‍රාණු ජනනය</button>
+      <button class="tab-btn py-2" data-tab="tab-system">② ප්‍රජනන පද්ධතිය</button>
+      <button class="tab-btn py-2" data-tab="tab-hormone">③ හෝමෝන පාලනය</button>
+      <button class="tab-btn py-2" data-tab="tab-quiz">④ ස්වයං ඇගයීම</button>
+    </nav>
+  </div>
+</header>
+
+<main class="max-w-5xl mx-auto px-4 mt-6 space-y-6">
+
+<!-- ================= TAB 1: SPERMATOGENESIS ================= -->
+<section id="tab-sperm" class="tab-panel active space-y-6">
+
+  <div class="card p-5 sm:p-6">
+    <p class="eyebrow mb-1">මොඩියුලය 1.1</p>
+    <h2 class="font-display text-lg sm:text-xl font-bold mb-2" style="color:var(--primary)">ශුක්‍රාණු ජනනයේ පියවර — ක්‍රෝමසෝම ගණන අනුගමනය කරමු</h2>
+    <p class="text-sm sm:text-[15px] leading-relaxed" style="color:var(--ink-soft)">
+      ශුක්‍රාණු මූලික සෛලයක් (2n) සිට පරිණත ශුක්‍රාණුවක් (n) දක්වා පරිවර්තනය වන අතර, මියෝසිස් I සහ මියෝසිස් II යන අර්ධක බෙදීම් දෙක තුළින් ක්‍රෝමසෝම ගණන අඩකින් අඩුවේ. පහත පියවරක් ටැප් කර විස්තර බලන්න.
+    </p>
+
+    <!-- Stepper -->
+    <div class="flex items-stretch mt-6 overflow-x-auto pb-2 gap-0" id="sperm-stepper"></div>
+
+    <div id="sperm-step-detail" class="mt-5 rounded-xl p-4 sm:p-5" style="background:var(--primary-wash);"></div>
+  </div>
+
+  <div class="card p-5 sm:p-6">
+    <p class="eyebrow mb-1">මොඩියුලය 1.2</p>
+    <h2 class="font-display text-lg sm:text-xl font-bold mb-2" style="color:var(--primary)">ශුක්‍රාණුවේ ව්‍යුහය — ස්පර්ශ කර ගවේෂණය කරන්න</h2>
+    <p class="text-sm sm:text-[15px] leading-relaxed mb-4" style="color:var(--ink-soft)">ශුක්‍රාණුවේ කොටස් (හිස, මධ්‍ය කොටස, වලිගය) මත ඇති තිත් ටැප් කරන්න.</p>
+
+    <div class="grid sm:grid-cols-2 gap-5 items-center">
+      <svg viewBox="0 0 460 200" class="w-full h-auto" id="sperm-svg">
+        <!-- tail flagellum -->
+        <path d="M 250 100 C 300 60, 340 140, 390 90 S 440 40, 450 70" fill="none" stroke="#8C7B6B" stroke-width="4" stroke-linecap="round"/>
+        <!-- midpiece mitochondria spiral -->
+        <path d="M 150 100 C 175 80, 200 120, 225 100 C 240 88, 245 112, 250 100" fill="none" stroke="var(--secondary)" stroke-width="10" stroke-linecap="round" opacity="0.85"/>
+        <line x1="148" y1="100" x2="252" y2="100" stroke="#5B4E47" stroke-width="2.5"/>
+        <!-- head -->
+        <ellipse cx="95" cy="100" rx="55" ry="38" fill="#EFE2D8" stroke="#5B4E47" stroke-width="2.5"/>
+        <path d="M 55 78 A 55 38 0 0 1 130 82" fill="none" stroke="var(--primary)" stroke-width="6" stroke-linecap="round"/>
+        <ellipse cx="100" cy="104" rx="34" ry="24" fill="#D8C6A8" stroke="#8C7B6B" stroke-width="1.5"/>
+
+        <!-- hotspots -->
+        <circle class="hotspot-pulse" cx="72" cy="86" r="7"/>
+        <circle class="hotspot" data-key="acrosome" cx="72" cy="86" r="7"/>
+        <circle class="hotspot" data-key="nucleus" cx="105" cy="106" r="7"/>
+        <circle class="hotspot" data-key="mitochondria" cx="195" cy="100" r="7"/>
+        <circle class="hotspot" data-key="axoneme" cx="330" cy="100" r="7"/>
+
+        <text x="72" y="60" text-anchor="middle" class="font-mono" font-size="10" fill="#5B4E47">acrosome</text>
+        <text x="105" y="150" text-anchor="middle" class="font-mono" font-size="10" fill="#5B4E47">nucleus</text>
+        <text x="195" y="75" text-anchor="middle" class="font-mono" font-size="10" fill="#5B4E47">mitochondria</text>
+        <text x="330" y="30" text-anchor="middle" class="font-mono" font-size="10" fill="#5B4E47">axoneme (9+2)</text>
+      </svg>
+
+      <div id="sperm-part-detail" class="rounded-xl p-4 min-h-[160px]" style="background:var(--bg); border:1px dashed var(--line)">
+        <p class="text-sm" style="color:var(--ink-soft)">ඉහත රූපයේ තිත් (●) මතට ටැප් කරන්න — හිස, මධ්‍ය කොටස සහ වලිගය පිළිබඳ විස්තර මෙහි පෙන්වයි.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card p-5 sm:p-6">
+    <p class="eyebrow mb-1">මොඩියුලය 1.3</p>
+    <h2 class="font-display text-lg sm:text-xl font-bold mb-2" style="color:var(--primary)">වෘෂණ නාලිකාවේ හරස්කඩ — ස්තර මාරු කර බලන්න</h2>
+    <p class="text-sm sm:text-[15px] leading-relaxed mb-4" style="color:var(--ink-soft)">පහත බොත්තම් භාවිතයෙන් වෘෂණ නාලිකාව තුළ ඇති එක් එක් සෛල වර්ගය උද්දීපනය කරන්න.</p>
+
+    <div class="flex flex-wrap gap-2 mb-4" id="tubule-layer-btns">
+      <button class="layer-btn px-3 py-1.5 rounded-full text-sm border" data-layer="germ" style="border-color:var(--line)">🧬 ජනන සෛල (Germ cells)</button>
+      <button class="layer-btn px-3 py-1.5 rounded-full text-sm border" data-layer="sertoli" style="border-color:var(--line)">🛡️ සර්ටෝලි සෛල</button>
+      <button class="layer-btn px-3 py-1.5 rounded-full text-sm border" data-layer="leydig" style="border-color:var(--line)">🧪 ලෙයිඩිග් සෛල</button>
+    </div>
+
+    <div class="grid sm:grid-cols-2 gap-5">
+      <svg viewBox="0 0 400 260" class="w-full h-auto">
+        <circle cx="200" cy="130" r="115" fill="#F6EFE2" stroke="#C9BBA0" stroke-width="2"/>
+        <!-- leydig cells outside tubule -->
+        <g id="layer-leydig">
+          <circle cx="60" cy="60" r="10" fill="var(--secondary)"/>
+          <circle cx="335" cy="70" r="9" fill="var(--secondary)"/>
+          <circle cx="55" cy="210" r="9" fill="var(--secondary)"/>
+          <circle cx="340" cy="205" r="10" fill="var(--secondary)"/>
+        </g>
+        <!-- basement membrane -->
+        <circle cx="200" cy="130" r="95" fill="none" stroke="#8C7B6B" stroke-width="3"/>
+        <!-- germ cells layered -->
+        <g id="layer-germ">
+          <circle cx="200" cy="35" r="8" fill="var(--primary)"/>
+          <circle cx="270" cy="55" r="7" fill="var(--primary-soft)"/>
+          <circle cx="320" cy="110" r="6" fill="#C98A98"/>
+          <circle cx="130" cy="55" r="8" fill="var(--primary)"/>
+          <circle cx="90" cy="100" r="6" fill="#C98A98"/>
+          <circle cx="80" cy="160" r="8" fill="var(--primary)"/>
+          <circle cx="120" cy="205" r="6" fill="#C98A98"/>
+          <circle cx="280" cy="200" r="7" fill="var(--primary-soft)"/>
+          <path d="M 200 45 L 200 70 M 260 60 L 240 78" stroke="#7A2E3E" stroke-width="2" opacity="0.5"/>
+        </g>
+        <!-- sertoli cells spanning -->
+        <g id="layer-sertoli">
+          <path d="M 200 40 L 200 130" stroke="var(--accent)" stroke-width="5" stroke-linecap="round" opacity="0.85"/>
+          <path d="M 130 60 L 175 130" stroke="var(--accent)" stroke-width="5" stroke-linecap="round" opacity="0.85"/>
+          <path d="M 270 60 L 225 130" stroke="var(--accent)" stroke-width="5" stroke-linecap="round" opacity="0.85"/>
+          <path d="M 90 105 L 160 135" stroke="var(--accent)" stroke-width="5" stroke-linecap="round" opacity="0.85"/>
+          <path d="M 320 115 L 245 135" stroke="var(--accent)" stroke-width="5" stroke-linecap="round" opacity="0.85"/>
+        </g>
+        <circle cx="200" cy="130" r="18" fill="#F6EFE2" stroke="#8C7B6B" stroke-width="1.5"/>
+        <text x="200" y="134" text-anchor="middle" font-size="9" class="font-mono" fill="#5B4E47">lumen</text>
+      </svg>
+      <div id="tubule-detail" class="rounded-xl p-4" style="background:var(--bg); border:1px dashed var(--line)">
+        <p class="text-sm" style="color:var(--ink-soft)">ඉහත බොත්තමක් තෝරන්න — එම සෛල ස්තරයේ කාර්යභාරය මෙහි විස්තර වේ.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TAB 2: REPRODUCTIVE SYSTEM ================= -->
+<section id="tab-system" class="tab-panel space-y-6">
+
+  <div class="card p-5 sm:p-6">
+    <p class="eyebrow mb-1">මොඩියුලය 2.1</p>
+    <h2 class="font-display text-lg sm:text-xl font-bold mb-2" style="color:var(--primary)">පුරුෂ ප්‍රජනන පද්ධතියේ ව්‍යුහය</h2>
+    <p class="text-sm sm:text-[15px] leading-relaxed mb-4" style="color:var(--ink-soft)">රූපයේ ඇති ලේබල මත ටැප් කර එක් එක් අවයවයේ කාර්යභාරය කියවන්න.</p>
+
+    <div class="grid sm:grid-cols-2 gap-5">
+      <svg viewBox="0 0 420 320" class="w-full h-auto">
+        <!-- bladder -->
+        <ellipse cx="210" cy="45" rx="48" ry="34" fill="#F3E5C8" stroke="#8C7B6B" stroke-width="2"/>
+        <text x="210" y="49" text-anchor="middle" font-size="10" class="font-mono" fill="#5B4E47">bladder</text>
+        <!-- vas deferens looping -->
+        <path d="M 150 70 C 100 90, 90 140, 140 150 C 190 160, 60 190, 130 210" fill="none" stroke="#7A2E3E" stroke-width="4"/>
+        <!-- seminal vesicle -->
+        <ellipse cx="270" cy="90" rx="26" ry="18" fill="var(--secondary-wash)" stroke="var(--secondary)" stroke-width="2" transform="rotate(20 270 90)"/>
+        <!-- prostate -->
+        <ellipse cx="215" cy="128" rx="34" ry="22" fill="var(--secondary-wash)" stroke="var(--secondary)" stroke-width="2"/>
+        <!-- ejaculatory duct + urethra -->
+        <path d="M 215 128 C 215 160, 200 190, 195 230 C 190 260, 200 290, 200 300" fill="none" stroke="#5B4E47" stroke-width="4"/>
+        <!-- bulbourethral gland -->
+        <circle cx="230" cy="205" r="10" fill="var(--accent-wash)" stroke="var(--accent)" stroke-width="2"/>
+        <!-- penis -->
+        <rect x="178" y="230" width="45" height="80" rx="18" fill="#EFE2D8" stroke="#8C7B6B" stroke-width="2"/>
+        <!-- epididymis -->
+        <path d="M 130 150 C 120 160, 145 170, 135 180 C 125 190, 148 195, 138 205" fill="none" stroke="#B8823A" stroke-width="3"/>
+        <!-- testis + scrotum -->
+        <ellipse cx="130" cy="230" rx="28" ry="38" fill="#F6EFE2" stroke="#8C7B6B" stroke-width="2"/>
+        <path d="M 90 210 C 80 260, 90 300, 130 305 C 170 300, 180 260, 170 210" fill="none" stroke="#C9BBA0" stroke-width="2" stroke-dasharray="4 3"/>
+
+        <g class="sys-hotspots" font-size="10">
+          <circle class="hotspot sys-hotspot" data-key="bladder" cx="210" cy="45" r="6"/>
+          <circle class="hotspot sys-hotspot" data-key="vas" cx="105" cy="140" r="6"/>
+          <circle class="hotspot sys-hotspot" data-key="seminal" cx="286" cy="82" r="6"/>
+          <circle class="hotspot sys-hotspot" data-key="prostate" cx="215" cy="128" r="6"/>
+          <circle class="hotspot sys-hotspot" data-key="bulbourethral" cx="230" cy="205" r="6"/>
+          <circle class="hotspot sys-hotspot" data-key="urethra" cx="200" cy="270" r="6"/>
+          <circle class="hotspot sys-hotspot" data-key="penis" cx="200" cy="300" r="6"/>
+          <circle class="hotspot sys-hotspot" data-key="epididymis" cx="132" cy="178" r="6"/>
+          <circle class="hotspot sys-hotspot" data-key="testis" cx="130" cy="230" r="6"/>
+          <circle class="hotspot sys-hotspot" data-key="scrotum" cx="95" cy="270" r="6"/>
+        </g>
+      </svg>
+
+      <div id="system-detail" class="rounded-xl p-4 min-h-[220px]" style="background:var(--bg); border:1px dashed var(--line)">
+        <p class="text-sm" style="color:var(--ink-soft)">රූපයේ තිත් (●) එකක් තෝරන්න.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card p-5 sm:p-6">
+    <p class="eyebrow mb-1">මොඩියුලය 2.2</p>
+    <h2 class="font-display text-lg sm:text-xl font-bold mb-2" style="color:var(--primary)">අතිරේක ග්‍රන්ථි — සංසන්දනාත්මක වගුව</h2>
+    <p class="text-sm sm:text-[15px] leading-relaxed mb-4" style="color:var(--ink-soft)">ග්‍රන්ථියක් තෝරා එහි ස්‍රාවය, ප්‍රමාණය සහ කාර්යභාරය බලන්න.</p>
+
+    <div class="flex flex-wrap gap-2 mb-4" id="gland-tabs"></div>
+    <div id="gland-detail" class="rounded-xl p-4 sm:p-5" style="background:var(--secondary-wash);"></div>
+  </div>
+</section>
+
+<!-- ================= TAB 3: HORMONAL CONTROL ================= -->
+<section id="tab-hormone" class="tab-panel space-y-6">
+  <div class="card p-5 sm:p-6">
+    <p class="eyebrow mb-1">මොඩියුලය 3.1</p>
+    <h2 class="font-display text-lg sm:text-xl font-bold mb-2" style="color:var(--primary)">හයිපොතලමස්-පිටියුටරි-වෘෂණ අක්ෂය — සජීවී අනුකරණය</h2>
+    <p class="text-sm sm:text-[15px] leading-relaxed mb-4" style="color:var(--ink-soft)">
+      පහත ස්ලයිඩර භාවිතයෙන් රුධිරයේ ටෙස්ටොස්ටෙරෝන් සහ ඉන්හිබින් මට්ටම වෙනස් කර, එය හයිපොතලමස් හා පිටියුටරි ග්‍රන්ථියට ලබාදෙන ඍණ ප්‍රතිපෝෂණ සංඥාවට බලපාන ආකාරය නරඹන්න.
+    </p>
+
+    <div class="grid sm:grid-cols-2 gap-4 mb-5">
+      <div>
+        <div class="flex justify-between text-sm mb-1">
+          <label class="font-medium" style="color:var(--primary)">ටෙස්ටොස්ටෙරෝන් මට්ටම</label>
+          <span class="font-mono" id="testo-val">50%</span>
+        </div>
+        <input type="range" min="0" max="100" value="50" id="testo-slider" class="w-full">
+      </div>
+      <div>
+        <div class="flex justify-between text-sm mb-1">
+          <label class="font-medium" style="color:var(--accent)">ඉන්හිබින් මට්ටම</label>
+          <span class="font-mono" id="inhibin-val">50%</span>
+        </div>
+        <input type="range" min="0" max="100" value="50" id="inhibin-slider" class="w-full">
+      </div>
+    </div>
+
+    <div id="feedback-banner" class="text-sm font-medium px-4 py-2.5 rounded-lg mb-4 border" style="border-color:var(--line)">
+      මට්ටම මධ්‍යස්ථයි — GnRH, FSH සහ LH සාමාන්‍ය ලෙස ස්‍රාවය වේ.
+    </div>
+
+    <svg viewBox="0 0 420 400" class="w-full h-auto" id="hormone-svg">
+      <!-- boxes -->
+      <rect class="hormone-box" id="box-hypo" x="150" y="10" width="120" height="42"/>
+      <text x="210" y="35" text-anchor="middle" font-size="12" font-weight="600" fill="var(--ink)">හයිපොතලමස්</text>
+
+      <rect class="hormone-box" id="box-pit" x="150" y="90" width="120" height="42"/>
+      <text x="210" y="115" text-anchor="middle" font-size="12" font-weight="600" fill="var(--ink)">පිටියුටරි ග්‍රන්ථිය</text>
+
+      <rect class="hormone-box" id="box-sertoli" x="40" y="200" width="130" height="50"/>
+      <text x="105" y="222" text-anchor="middle" font-size="11" font-weight="600" fill="var(--ink)">සර්ටෝලි සෛල</text>
+      <text x="105" y="238" text-anchor="middle" font-size="9" class="font-mono" fill="var(--ink-soft)">(FSH ග්‍රාහක)</text>
+
+      <rect class="hormone-box" id="box-leydig" x="250" y="200" width="130" height="50"/>
+      <text x="315" y="222" text-anchor="middle" font-size="11" font-weight="600" fill="var(--ink)">ලෙයිඩිග් සෛල</text>
+      <text x="315" y="238" text-anchor="middle" font-size="9" class="font-mono" fill="var(--ink-soft)">(LH ග්‍රාහක)</text>
+
+      <rect class="hormone-box" id="box-spermato" x="40" y="300" width="130" height="42" style="fill:var(--primary-wash)"/>
+      <text x="105" y="325" text-anchor="middle" font-size="11" fill="var(--ink)">ශුක්‍රාණු ජනනය + ඉන්හිබින්</text>
+
+      <rect class="hormone-box" id="box-testo" x="250" y="300" width="130" height="42" style="fill:var(--primary-wash)"/>
+      <text x="315" y="325" text-anchor="middle" font-size="11" fill="var(--ink)">ටෙස්ටොස්ටෙරෝන් ස්‍රාවය</text>
+
+      <!-- forward paths -->
+      <path class="flow-path" id="p-hypo-pit" d="M 210 52 L 210 90"/>
+      <path class="flow-path" id="p-pit-sertoli" d="M 180 132 C 150 160, 120 175, 105 200"/>
+      <path class="flow-path" id="p-pit-leydig" d="M 240 132 C 270 160, 300 175, 315 200"/>
+      <path class="flow-path" id="p-sertoli-out" d="M 105 250 L 105 300"/>
+      <path class="flow-path" id="p-leydig-out" d="M 315 250 L 315 300"/>
+
+      <text x="150" y="70" font-size="9" class="font-mono" fill="var(--ink-soft)">GnRH</text>
+      <text x="130" y="160" font-size="9" class="font-mono" fill="var(--ink-soft)">FSH</text>
+      <text x="285" y="160" font-size="9" class="font-mono" fill="var(--ink-soft)">LH</text>
+
+      <!-- feedback (negative) paths -->
+      <path class="feedback-path" id="fb-testo-hypo" d="M 315 300 C 380 200, 320 60, 272 30"/>
+      <path class="feedback-path" id="fb-testo-pit" d="M 315 300 C 350 220, 300 130, 272 108"/>
+      <path class="feedback-path" id="fb-inhibin-pit" d="M 105 300 C 60 220, 100 130, 148 108"/>
+      <text x="330" y="150" font-size="10" font-weight="700" fill="var(--danger)">(−)</text>
+      <text x="65" y="150" font-size="10" font-weight="700" fill="var(--danger)">(−)</text>
+    </svg>
+
+    <div class="grid grid-cols-2 gap-3 mt-4 text-xs sm:text-sm">
+      <div class="flex items-center gap-2"><span class="w-4 h-1 rounded" style="background:var(--accent)"></span> ධාරාව: උත්තේජක සංඥාව</div>
+      <div class="flex items-center gap-2"><span class="w-4 h-0.5 border-t-2 border-dashed" style="border-color:var(--danger)"></span> ඍණ ප්‍රතිපෝෂණ සංඥාව</div>
+    </div>
+  </div>
+
+  <div class="card p-5 sm:p-6">
+    <h3 class="font-display font-bold mb-2" style="color:var(--primary)">ක්‍රියාවලිය සරලව</h3>
+    <ol class="list-decimal ml-5 space-y-1.5 text-sm sm:text-[15px]" style="color:var(--ink-soft)">
+      <li>හයිපොතලමස් ග්‍රන්ථියෙන් <b>GnRH</b> (ගොනැඩොට්‍රොපින් නිකුත් කරන හෝමෝනය) ස්‍රාවය වේ.</li>
+      <li>GnRH මගින් අග්‍රපිටියුටරි ග්‍රන්ථිය උත්තේජනය කර <b>FSH</b> සහ <b>LH</b> ස්‍රාවය කරවයි.</li>
+      <li><b>FSH</b> සර්ටෝලි සෛල උත්තේජනය කර ශුක්‍රාණු ජනනය ප්‍රවර්ධනය කරන අතර ඉන්හිබින් ස්‍රාවය කරවයි.</li>
+      <li><b>LH</b> ලෙයිඩිග් (අන්තරාල) සෛල උත්තේජනය කර <b>ටෙස්ටොස්ටෙරෝන්</b> ස්‍රාවය කරවයි.</li>
+      <li>ටෙස්ටොස්ටෙරෝන් සහ ඉන්හිබින් මට්ටම ඉහළ යාමේදී, ඒවා හයිපොතලමස් හා පිටියුටරි ග්‍රන්ථියට ඍණාත්මක ප්‍රතිපෝෂණයක් ලෙස ක්‍රියා කර GnRH/FSH/LH ස්‍රාවය අවම කරයි.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ================= TAB 4: QUIZ + FLASHCARDS ================= -->
+<section id="tab-quiz" class="tab-panel space-y-6">
+
+  <div class="card p-5 sm:p-6">
+    <p class="eyebrow mb-1">මොඩියුලය 4.1</p>
+    <h2 class="font-display text-lg sm:text-xl font-bold mb-1" style="color:var(--primary)">ස්වයං ඇගයීම — බහුවරණ ප්‍රශ්න</h2>
+    <p class="text-sm mb-4" style="color:var(--ink-soft)">ලකුණු: <span class="font-mono font-semibold" id="quiz-score">0</span> / 5</p>
+    <div id="quiz-container" class="space-y-5"></div>
+    <button id="quiz-reset" class="mt-2 px-4 py-2 rounded-lg text-sm font-medium" style="background:var(--primary); color:#fff;">නැවත උත්සාහ කරන්න</button>
+  </div>
+
+  <div class="card p-5 sm:p-6">
+    <p class="eyebrow mb-1">මොඩියුලය 4.2</p>
+    <h2 class="font-display text-lg sm:text-xl font-bold mb-1" style="color:var(--primary)">ෆ්ලෑෂ්කාඩ් — ඉක්මන් සමාලෝචනය</h2>
+    <p class="text-sm mb-4" style="color:var(--ink-soft)">කාඩ්පත මත ටැප් කර පිටුපස ඇති අර්ථ දැක්වීම බලන්න.</p>
+    <div id="flashcard-container" class="grid sm:grid-cols-2 gap-4"></div>
+  </div>
+</section>
+
+</main>
+
+<footer class="max-w-5xl mx-auto px-4 mt-10 text-center text-xs" style="color:var(--ink-soft)">
+  මූලාශ්‍රය: අ.පො.ස. (උ.පෙළ.) ජීව විද්‍යා සම්පත් පොත — පරිච්ඡේද 5.20–5.25 · අන්තර්ක්‍රියාකාරී අනුවාදය
+</footer>
+
+<script>
+/* ============ TAB NAVIGATION ============ */
+const tabButtons = document.querySelectorAll('.tab-btn');
+const tabPanels = document.querySelectorAll('.tab-panel');
+const visited = new Set(['tab-sperm']);
+function updateProgress(){
+  const pct = Math.round((visited.size/4)*100);
+  document.getElementById('progress-label').textContent = `ප්‍රගතිය: ${pct}%`;
+}
+tabButtons.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabButtons.forEach(b=>b.classList.remove('active'));
+    tabPanels.forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+    visited.add(btn.dataset.tab);
+    updateProgress();
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+});
+updateProgress();
+
+/* ============ 1.1 SPERMATOGENESIS STEPPER ============ */
+const spermSteps = [
+  {
+    name:"ශුක්‍රාණු මූලික සෛලය",
+    en:"Spermatogonium",
+    ploidy:"2n = 46",
+    stage:"මයිටෝසිස් මගින් ස්වයං-පුනර්ජනනය",
+    desc:"වෘෂණ නාලිකාවේ පාදක පටලය අසල පිහිටි ද්විගුණිත මූලික ජනන සෛලයකි. මයිටෝසිස් තුළින් නැවත නැවත බෙදී, එක් දුහිතෘ සෛලයක් ප්‍රාථමික ශුක්‍රාණු මාතෘ සෛලය බවට පරිණත වන අතර අනෙක් සෛලය මූලික සෛලයක් ලෙසම රැඳී සිටියි."
+  },
+  {
+    name:"ප්‍රාථමික ශුක්‍රාණු මාතෘ සෛලය",
+    en:"Primary Spermatocyte",
+    ploidy:"2n = 46",
+    stage:"මියෝසිස් I ආරම්භයට පෙර",
+    desc:"ශුක්‍රාණු මූලික සෛලයේ වර්ධනයෙන් සෑදෙන විශාලතම සෛලයයි. මෙය මියෝසිස් I (අඩුවීම් බෙදීම) සඳහා සූදානම් වන අතර, බෙදීමෙන් පසු ද්විතීයික ශුක්‍රාණු මාතෘ සෛල දෙකක් නිපදවයි."
+  },
+  {
+    name:"ද්විතීයික ශුක්‍රාණු මාතෘ සෛලය",
+    en:"Secondary Spermatocyte",
+    ploidy:"n = 23 (ක්‍රෝමැටිඩ 2 බැගින්)",
+    stage:"මියෝසිස් I අවසානය → මියෝසිස් II",
+    desc:"මියෝසිස් I හේතුවෙන් ක්‍රෝමසෝම සංඛ්‍යාව අඩකින් අඩුවී ඇත. මෙම සෛල මියෝසිස් II (සමාන බෙදීම) මගින් වේගයෙන් බෙදී ශුක්‍රාණු පූර්විකා (spermatids) සෑදෙයි."
+  },
+  {
+    name:"ශුක්‍රාණු පූර්විකාව",
+    en:"Spermatid",
+    ploidy:"n = 23",
+    stage:"මියෝසිස් II අවසානය",
+    desc:"මියෝසිස් II සම්පූර්ණ වීමෙන් පසු සෑදෙන ඒකගුණිත (haploid) සෛලයකි. මෙය තවමත් චලනය කළ නොහැකි අතර, ශුක්‍රාණුජනනය (spermiogenesis) නම් අන්තිම විචලනය තුළින් ව්‍යුහාත්මකව පරිණත වීමට ඉතිරිව ඇත."
+  },
+  {
+    name:"ශුක්‍රාණුව",
+    en:"Spermatozoon",
+    ploidy:"n = 23",
+    stage:"විචලනය සම්පූර්ණයි",
+    desc:"ශුක්‍රාණු පූර්විකාව හිස, මධ්‍ය කොටස සහ වලිගය සහිත පරිණත, චලනය කළ හැකි ශුක්‍රාණුවක් බවට විචලනය වේ. සර්ටෝලි සෛල මගින් පෝෂණය ලබා, වෘෂණ නාලිකා තුළින් ගමන් කර අවසානයේ එපිඩිඩිමිස් තුළදී පූර්ණ ලෙස පරිණත වේ."
+  }
+];
+
+const stepperEl = document.getElementById('sperm-stepper');
+const stepDetailEl = document.getElementById('sperm-step-detail');
+
+function renderStepper(activeIdx){
+  stepperEl.innerHTML = '';
+  spermSteps.forEach((s, i)=>{
+    const node = document.createElement('div');
+    node.className = 'step-node rounded-xl px-3 py-3 min-w-[128px] text-center' + (i===activeIdx? ' active':'');
+    node.innerHTML = `
+      <div class="text-xs font-mono mb-1" style="color:var(--secondary)">${i+1}</div>
+      <div class="text-[13px] font-semibold leading-snug">${s.name}</div>
+      <div class="text-[11px] font-mono mt-1" style="color:var(--ink-soft)">${s.ploidy}</div>
+    `;
+    node.addEventListener('click', ()=> selectStep(i));
+    stepperEl.appendChild(node);
+    if(i < spermSteps.length-1){
+      const conn = document.createElement('div');
+      conn.className = 'step-connector self-center';
+      stepperEl.appendChild(conn);
+    }
+  });
+}
+function selectStep(i){
+  renderStepper(i);
+  const s = spermSteps[i];
+  stepDetailEl.innerHTML = `
+    <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-2">
+      <h4 class="font-display font-bold text-base" style="color:var(--primary)">${s.name}</h4>
+      <span class="text-xs font-mono" style="color:var(--ink-soft)">${s.en}</span>
+    </div>
+    <div class="flex flex-wrap gap-2 mb-3">
+      <span class="text-xs font-mono px-2.5 py-1 rounded-full" style="background:var(--primary); color:#fff;">${s.ploidy}</span>
+      <span class="text-xs font-mono px-2.5 py-1 rounded-full" style="background:var(--accent-wash); color:var(--accent);">${s.stage}</span>
+    </div>
+    <p class="text-sm leading-relaxed" style="color:var(--ink)">${s.desc}</p>
+  `;
+}
+renderStepper(0);
+selectStep(0);
+
+/* ============ 1.2 SPERM ANATOMY HOTSPOTS ============ */
+const spermParts = {
+  acrosome:{
+    title:"ඇක්‍රොසෝමය (Acrosome)",
+    desc:"න්‍යෂ්ටිය ආවරණය කරන ෆ්ලාස්ක් හැඩැති කැප් එකකි. බිත්තරයේ බාහිර ආවරණ විනාශ කිරීමට අවශ්‍ය ජල විච්ඡේදක එන්සයිම (hydrolytic enzymes) අඩංගු වේ — බීජ සංයෝජනයේදී මෙය අත්‍යවශ්‍යයි."
+  },
+  nucleus:{
+    title:"න්‍යෂ්ටිය (Nucleus)",
+    desc:"අධිකව සංයුක්ත (condensed) ඒකගුණිත (n=23) DNA අඩංගු වන අතර, හිසෙහි ප්‍රධාන කොටස වේ. මධ්‍යම කොටසේ දෙකඟ (piece) ප්‍රෝටීන අවශේෂීය හෙයින් DNA ඉතා තදින් සංයුක්තව ඇත."
+  },
+  mitochondria:{
+    title:"සර්පිලාකාර මයිටොකොන්ඩ්‍රියා (Spiral Mitochondria)",
+    desc:"මධ්‍ය කොටසේ අක්ෂීය තන්තුව වටා සර්පිලාකාරව සකසී ඇති මයිටොකොන්ඩ්‍රියා, වලිගයේ චලනයට අවශ්‍ය ATP බලශක්තිය නිපදවයි."
+  },
+  axoneme:{
+    title:"අක්ෂීය තන්තුව (9+2 ක්ෂුද්‍ර නාලිකා සැකැස්ම)",
+    desc:"වලිගය තුළ ඇති අක්ෂීය තන්තුව (axoneme) මධ්‍ය යුගල ක්ෂුද්‍ර නාලිකා දෙකක් වටා පිහිටි පර්යන්ත යුගල 9ක් වශයෙන් සකසී ඇත. මෙය සර්පාකාර චලනය හරහා ශුක්‍රාණුවට ඉදිරියට පිහිනීමට හැකි කරයි."
+  }
+};
+const spermPartDetail = document.getElementById('sperm-part-detail');
+document.querySelectorAll('#sperm-svg .hotspot').forEach(h=>{
+  h.addEventListener('click', ()=>{
+    document.querySelectorAll('#sperm-svg .hotspot').forEach(x=>x.classList.remove('active'));
+    h.classList.add('active');
+    const p = spermParts[h.dataset.key];
+    spermPartDetail.innerHTML = `<h4 class="font-display font-bold mb-1.5" style="color:var(--primary)">${p.title}</h4><p class="text-sm leading-relaxed" style="color:var(--ink)">${p.desc}</p>`;
+  });
+});
+
+/* ============ 1.3 SEMINIFEROUS TUBULE LAYERS ============ */
+const tubuleInfo = {
+  germ:{
+    title:"ජනන සෛල (Germ cells)",
+    desc:"පාදක පටලයේ සිට කුහරය (lumen) දෙසට ක්‍රමිකව පරිණත වෙමින්, ශුක්‍රාණු මූලික සෛල → ශුක්‍රාණු මාතෘ සෛල → ශුක්‍රාණු පූර්විකා → ශුක්‍රාණු ලෙස වර්ධනය වේ."
+  },
+  sertoli:{
+    title:"සර්ටෝලි සෛල (Sertoli / Nurse cells)",
+    desc:"පාදක පටලයේ සිට කුහරය දක්වා විහිදෙන විශාල සෛල වන අතර, ජනන සෛලවලට පෝෂණය සපයයි, ඉන්හිබින් හෝමෝනය ස්‍රාවය කරයි, තවද 'රුධිර-වෘෂණ බාධකය' (blood-testis barrier) සාදා ශුක්‍රාණු ජනනයට ආරක්ෂිත පරිසරයක් සකසයි."
+  },
+  leydig:{
+    title:"ලෙයිඩිග් (අන්තරාල) සෛල",
+    desc:"වෘෂණ නාලිකා අතර පිහිටි අන්තරාල පටක තුළ පවතින සෛල වන අතර, LH හෝමෝනය මගින් උත්තේජනය වී ටෙස්ටොස්ටෙරෝන් ස්‍රාවය කරයි — මෙය ශුක්‍රාණු ජනනය හා ද්විතීයික ලිංගික ලක්ෂණ පවත්වා ගැනීමට අවශ්‍ය වේ."
+  }
+};
+document.querySelectorAll('.layer-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.layer-btn').forEach(b=>{
+      b.style.background=''; b.style.color=''; b.classList.remove('font-semibold');
+    });
+    btn.style.background='var(--secondary)'; btn.style.color='#fff'; btn.classList.add('font-semibold');
+    ['germ','sertoli','leydig'].forEach(key=>{
+      const g = document.getElementById('layer-'+key);
+      if(g) g.style.opacity = (key===btn.dataset.layer) ? '1' : '0.15';
+    });
+    const info = tubuleInfo[btn.dataset.layer];
+    document.getElementById('tubule-detail').innerHTML = `<h4 class="font-display font-bold mb-1.5" style="color:var(--secondary)">${info.title}</h4><p class="text-sm leading-relaxed" style="color:var(--ink)">${info.desc}</p>`;
+  });
+});
+
+/* ============ 2.1 REPRODUCTIVE SYSTEM HOTSPOTS ============ */
+const systemParts = {
+  bladder:{ title:"මුත්‍රාශය (Urinary bladder)", desc:"මුත්‍රා තාවකාලිකව ගබඩා කරන අවයවයයි. ප්‍රජනන ක්‍රියාවලියට සෘජුව සහභාගී නොවුනත් මුත්‍රා මාර්ගය අසලින් පිහිටයි." },
+  vas:{ title:"ශුක්‍රාණු නාලිකාව / ඉද මාර්ගය (Vas Deferens)", desc:"එපිඩිඩිමිසයෙන් ශුක්‍රාණු ප්‍රවාහනය කරන මාංශ පේශිමය බිත්තියකින් යුත් නාලිකාවකි. පෙරිස්ටැල්ටික සංකෝචන මගින් ශුක්‍රාණු විසර්ජක නාලිකාව දෙසට ගමන් කරවයි." },
+  seminal:{ title:"ශුක්‍ර ආශයිකා (Seminal Vesicles)", desc:"ෆ්‍රක්ටෝස්, ප්‍රොස්ටග්ලැන්ඩින් සහ ක්ෂාරීය ශ්ලේෂ්මය අඩංගු තරලයක් ස්‍රාවය කරයි. මෙය විසර්ජනයේ පරිමාවෙන් පමණ 60%ක් වේ." },
+  prostate:{ title:"පුරස්ථ ග්‍රන්ථිය (Prostate Gland)", desc:"තුනී, ක්ෂීරමය ක්ෂාරීය තරලයක් සහ ප්‍රතිශෝණන එන්සයිම ස්‍රාවය කරයි. විසර්ජනයේ පරිමාවෙන් පමණ 30%ක් වේ." },
+  bulbourethral:{ title:"කූපර් ග්‍රන්ථි (Bulbourethral Glands)", desc:"සංසේචනයට පෙර මුත්‍රා මාර්ගයේ ඇති අම්ලීය මුත්‍රා අවශේෂ උදාසීන කිරීම සඳහා ශ්ලේෂ්මය ස්‍රාවය කරයි." },
+  urethra:{ title:"මුත්‍රා මාර්ගය (Urethra)", desc:"මුත්‍රා හා ශුක්‍රාණු මිශ්‍රිත ශුක්‍රාණු තරලය යන දෙකම ශිෂ්නය හරහා පිටතට රැගෙන යන පොදු මාර්ගයයි." },
+  penis:{ title:"ශිෂ්නය (Penis)", desc:"සංසර්ග ක්‍රියාවේදී ශුක්‍රාණු තරලය ගැහැණු ප්‍රජනන මාර්ගය තුළට ගමන් කරවන බාහිර ලිංගික අවයවයයි." },
+  epididymis:{ title:"එපිඩිඩිමිස් (Epididymis)", desc:"වෘෂණයෙන් පිටවන ශුක්‍රාණු ගබඩා කර, පූර්ණ චලනය කළ හැකි බවට පරිණත කරන දිගු, දඟරගැසුණු නාලිකාවකි." },
+  testis:{ title:"වෘෂණය (Testis)", desc:"ශුක්‍රාණු ජනනය සිදුවන වෘෂණ නාලිකා සහ ටෙස්ටොස්ටෙරෝන් ස්‍රාවය කරන ලෙයිඩිග් සෛල අඩංගු ප්‍රධාන ප්‍රජනන ග්‍රන්ථියයි." },
+  scrotum:{ title:"වෘෂණ කෝෂය (Scrotum)", desc:"වෘෂණය ශරීරයෙන් පිටත තබා, එහි උෂ්ණත්වය ශරීරයේ මූලික උෂ්ණත්වයට වඩා 2°C පමණ අඩුවෙන් පවත්වාගෙන යයි — මෙය ශුක්‍රාණු ජනනයට අත්‍යවශ්‍යයි." }
+};
+const systemDetail = document.getElementById('system-detail');
+document.querySelectorAll('.sys-hotspot').forEach(h=>{
+  h.addEventListener('click', ()=>{
+    document.querySelectorAll('.sys-hotspot').forEach(x=>x.classList.remove('active'));
+    h.classList.add('active');
+    const p = systemParts[h.dataset.key];
+    systemDetail.innerHTML = `<h4 class="font-display font-bold mb-1.5" style="color:var(--primary)">${p.title}</h4><p class="text-sm leading-relaxed" style="color:var(--ink)">${p.desc}</p>`;
+  });
+});
+
+/* ============ 2.2 GLAND COMPARISON ============ */
+const glands = [
+  { key:'seminal', label:'ශුක්‍ර ආශයිකා', volume:'~60%',
+    secretion:'ෆ්‍රක්ටෝස් (ශක්ති ප්‍රභවය), ප්‍රොස්ටග්ලැන්ඩින්, ක්ෂාරීය ශ්ලේෂ්මය',
+    role:'ශුක්‍රාණුවලට ශක්තිය සපයයි, ගැහැණු ප්‍රජනන මාර්ගයේ අම්ලීයතාව උදාසීන කරයි, ගර්භාෂ සංකෝචනයට උදව් වේ.' },
+  { key:'prostate', label:'පුරස්ථ ග්‍රන්ථිය', volume:'~30%',
+    secretion:'තුනී, ක්ෂීරමය, ක්ෂාරීය තරලය සහ ප්‍රතිශෝණන එන්සයිම',
+    role:'මුත්‍රා මාර්ගයේ අම්ලීයතාව උදාසීන කර ශුක්‍රාණු ආරක්ෂා කරයි, ශුක්‍රාණු තරලය තුනී තබා ගැනීමට උපකාරී වේ.' },
+  { key:'bulbourethral', label:'කූපර් ග්‍රන්ථි', volume:'ස්වල්පයයි',
+    secretion:'පැහැදිලි, ලිසිතික ශ්ලේෂ්මය',
+    role:'සංසර්ගයට පෙර මුත්‍රා මාර්ගය තුළ ඇති අවශේෂ අම්ලීය මුත්‍රා උදාසීන කර, ශුක්‍රාණුවලට ආරක්ෂිත මාර්ගයක් සකසයි.' }
+];
+const glandTabsEl = document.getElementById('gland-tabs');
+const glandDetailEl = document.getElementById('gland-detail');
+function renderGland(key){
+  document.querySelectorAll('.gland-tab').forEach(b=> b.classList.toggle('active', b.dataset.key===key));
+  const g = glands.find(x=>x.key===key);
+  glandDetailEl.innerHTML = `
+    <h4 class="font-display font-bold mb-2" style="color:var(--secondary)">${g.label}</h4>
+    <div class="grid sm:grid-cols-3 gap-3 text-sm">
+      <div><p class="text-xs font-mono mb-1" style="color:var(--ink-soft)">විසර්ජන පරිමාවෙන්</p><p class="font-semibold text-lg" style="color:var(--primary)">${g.volume}</p></div>
+      <div class="sm:col-span-2"><p class="text-xs font-mono mb-1" style="color:var(--ink-soft)">ස්‍රාවය</p><p>${g.secretion}</p></div>
+    </div>
+    <p class="text-sm leading-relaxed mt-3 pt-3 border-t" style="border-color:var(--line); color:var(--ink)">${g.role}</p>
+  `;
+}
+glands.forEach((g,i)=>{
+  const btn = document.createElement('button');
+  btn.className = 'gland-tab px-3 py-1.5 rounded-full text-sm' + (i===0?' active':'');
+  btn.dataset.key = g.key;
+  btn.textContent = g.label;
+  btn.addEventListener('click', ()=> renderGland(g.key));
+  glandTabsEl.appendChild(btn);
+});
+renderGland('seminal');
+
+/* ============ 3. HORMONE SIMULATION ============ */
+const testoSlider = document.getElementById('testo-slider');
+const inhibinSlider = document.getElementById('inhibin-slider');
+const testoVal = document.getElementById('testo-val');
+const inhibinVal = document.getElementById('inhibin-val');
+const feedbackBanner = document.getElementById('feedback-banner');
+let animSpeed = 1;
+
+function updateHormoneSim(){
+  const t = parseInt(testoSlider.value);
+  const i = parseInt(inhibinSlider.value);
+  testoVal.textContent = t + '%';
+  inhibinVal.textContent = i + '%';
+
+  const fbTestoHypo = document.getElementById('fb-testo-hypo');
+  const fbTestoPit = document.getElementById('fb-testo-pit');
+  const fbInhibinPit = document.getElementById('fb-inhibin-pit');
+  fbTestoHypo.classList.toggle('active', t>60);
+  fbTestoPit.classList.toggle('active', t>60);
+  fbInhibinPit.classList.toggle('active', i>60);
+  fbTestoHypo.style.opacity = 0.1 + (t/100)*0.8;
+  fbTestoPit.style.opacity = 0.1 + (t/100)*0.8;
+  fbInhibinPit.style.opacity = 0.1 + (i/100)*0.8;
+
+  const suppressed = t>60 || i>60;
+  document.getElementById('box-hypo').classList.toggle('glow', !suppressed);
+  document.getElementById('box-pit').classList.toggle('glow', !suppressed);
+  document.querySelectorAll('#hormone-svg .flow-path').forEach(p=> p.classList.toggle('hot', !suppressed));
+
+  if(suppressed){
+    feedbackBanner.innerHTML = '🔴 <b>ඍණ ප්‍රතිපෝෂණය සක්‍රීයයි</b> — ටෙස්ටොස්ටෙරෝන්/ඉන්හිබින් මට්ටම ඉහළ ගොස් ඇති බැවින්, GnRH, FSH සහ LH ස්‍රාවය මර්දනය වේ.';
+    feedbackBanner.style.background = '#F5E1E1';
+    feedbackBanner.style.color = 'var(--danger)';
+  } else if(t<25 && i<25){
+    feedbackBanner.innerHTML = '🟢 <b>මට්ටම පහළයි</b> — ප්‍රතිපෝෂණ මර්දනය දුර්වලයි, GnRH/FSH/LH ස්‍රාවය ඉහළ මට්ටමක පවතී.';
+    feedbackBanner.style.background = 'var(--accent-wash)';
+    feedbackBanner.style.color = 'var(--accent)';
+  } else {
+    feedbackBanner.innerHTML = '⚪ මට්ටම මධ්‍යස්ථයි — GnRH, FSH සහ LH සාමාන්‍ය ලෙස ස්‍රාවය වේ.';
+    feedbackBanner.style.background = '#fff';
+    feedbackBanner.style.color = 'var(--ink-soft)';
+  }
+}
+testoSlider.addEventListener('input', updateHormoneSim);
+inhibinSlider.addEventListener('input', updateHormoneSim);
+updateHormoneSim();
+
+/* Animated flow signals along paths */
+const flowPathIds = ['p-hypo-pit','p-pit-sertoli','p-pit-leydig','p-sertoli-out','p-leydig-out'];
+const svgNS = "http://www.w3.org/2000/svg";
+const signalDots = [];
+flowPathIds.forEach(id=>{
+  const path = document.getElementById(id);
+  const dot = document.createElementNS(svgNS,'circle');
+  dot.setAttribute('class','flow-signal');
+  dot.setAttribute('r','4');
+  path.parentNode.appendChild(dot);
+  signalDots.push({path, dot, t: Math.random()});
+});
+function animateFlow(){
+  const t = parseInt(testoSlider.value);
+  const i = parseInt(inhibinSlider.value);
+  const suppressed = t>60 || i>60;
+  const speed = suppressed ? 0.0015 : 0.005;
+  signalDots.forEach(s=>{
+    s.t += speed;
+    if(s.t > 1) s.t = 0;
+    const len = s.path.getTotalLength();
+    const pt = s.path.getPointAtLength(len * s.t);
+    s.dot.setAttribute('cx', pt.x);
+    s.dot.setAttribute('cy', pt.y);
+    s.dot.style.opacity = suppressed ? 0.25 : 1;
+  });
+  requestAnimationFrame(animateFlow);
+}
+requestAnimationFrame(animateFlow);
+
+/* ============ 4.1 QUIZ ============ */
+const quizData = [
+  { q:"ප්‍රාථමික ශුක්‍රාණු මාතෘ සෛලයේ ක්‍රෝමසෝම ගණන කුමක්ද?",
+    options:["n = 23","2n = 46","4n = 92","n = 46"], correct:1,
+    explain:"ප්‍රාථමික ශුක්‍රාණු මාතෘ සෛලය තවම මියෝසිස් I සම්පූර්ණ කර නොමැති බැවින් ද්විගුණිතව (2n=46) පවතී." },
+  { q:"ශුක්‍රාණුවේ වලිගයේ ඇති ක්ෂුද්‍ර නාලිකා සැකැස්ම කුමක්ද?",
+    options:["9+0","2+9","9+2","11+0"], correct:2,
+    explain:"අක්ෂීය තන්තුවේ (axoneme) ඇත්තේ මධ්‍ය යුගලයක් වටා පිහිටි පර්යන්ත යුගල 9ක් — එනම් 9+2 සැකැස්මයි." },
+  { q:"ශුක්‍රාණු ජනනයට වෘෂණය ශරීරයෙන් පිටත තැබීම අවශ්‍ය වන්නේ ඇයි?",
+    options:["ශුක්‍රාණු ආරක්ෂා කිරීමට","මූලික උෂ්ණත්වයට වඩා 2°C පමණ අඩු උෂ්ණත්වයක් පවත්වා ගැනීමට","රුධිර සැපයුම වැඩි කිරීමට","හෝමෝන නිෂ්පාදනය නැවැත්වීමට"], correct:1,
+    explain:"ශුක්‍රාණු ජනනය සාමාන්‍ය ශරීර උෂ්ණත්වයට වඩා ​​2°C පමණ අඩු උෂ්ණත්වයකදී වඩාත් හොඳින් සිදුවේ." },
+  { q:"FSH හෝමෝනයේ ප්‍රධාන ඉලක්කය කුමක්ද?",
+    options:["ලෙයිඩිග් සෛල","සර්ටෝලි සෛල","පුරස්ථ ග්‍රන්ථිය","එපිඩිඩිමිස්"], correct:1,
+    explain:"FSH සර්ටෝලි සෛල උත්තේජනය කර ශුක්‍රාණු ජනනය හා ඉන්හිබින් ස්‍රාවය ප්‍රවර්ධනය කරයි." },
+  { q:"විසර්ජනයේ පරිමාවෙන් වැඩිම කොටස සපයන්නේ කුමන ග්‍රන්ථියද?",
+    options:["කූපර් ග්‍රන්ථි","පුරස්ථ ග්‍රන්ථිය","ශුක්‍ර ආශයිකා","වෘෂණය"], correct:2,
+    explain:"ශුක්‍ර ආශයිකා විසර්ජනයේ පරිමාවෙන් පමණ 60%ක් සපයයි; පුරස්ථ ග්‍රන්ථිය පමණ 30%ක් සපයයි." }
+];
+let quizAnswers = new Array(quizData.length).fill(null);
+const quizContainer = document.getElementById('quiz-container');
+const quizScoreEl = document.getElementById('quiz-score');
+
+function renderQuiz(){
+  quizContainer.innerHTML = '';
+  quizData.forEach((item, qi)=>{
+    const wrap = document.createElement('div');
+    wrap.className = 'pb-4' + (qi < quizData.length-1 ? ' border-b' : '');
+    wrap.style.borderColor = 'var(--line)';
+    let optsHtml = '';
+    item.options.forEach((opt,oi)=>{
+      optsHtml += `<div class="mcq-option rounded-lg px-3 py-2 text-sm mt-2" data-qi="${qi}" data-oi="${oi}">${opt}</div>`;
+    });
+    wrap.innerHTML = `
+      <p class="font-medium text-sm sm:text-[15px] mb-1"><span class="section-num">Q${qi+1}.</span> ${item.q}</p>
+      ${optsHtml}
+      <p class="mcq-explain text-xs mt-2 rounded-lg px-3 py-2 hidden" style="background:var(--accent-wash); color:var(--ink)"></p>
+    `;
+    quizContainer.appendChild(wrap);
+  });
+  document.querySelectorAll('.mcq-option').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const qi = parseInt(el.dataset.qi);
+      const oi = parseInt(el.dataset.oi);
+      if(quizAnswers[qi] !== null) return;
+      quizAnswers[qi] = oi;
+      const group = document.querySelectorAll(`.mcq-option[data-qi="${qi}"]`);
+      group.forEach(g=>{
+        const gi = parseInt(g.dataset.oi);
+        if(gi === quizData[qi].correct) g.classList.add('correct');
+        else if(gi === oi) g.classList.add('wrong');
+      });
+      const explainEl = el.closest('div.pb-4').querySelector('.mcq-explain');
+      explainEl.textContent = '💡 ' + quizData[qi].explain;
+      explainEl.classList.remove('hidden');
+      updateScore();
+    });
+  });
+}
+function updateScore(){
+  let score = 0;
+  quizAnswers.forEach((a,qi)=>{ if(a === quizData[qi].correct) score++; });
+  quizScoreEl.textContent = score;
+}
+document.getElementById('quiz-reset').addEventListener('click', ()=>{
+  quizAnswers = new Array(quizData.length).fill(null);
+  updateScore();
+  renderQuiz();
+});
+renderQuiz();
+
+/* ============ 4.2 FLASHCARDS ============ */
+const flashcards = [
+  { term:"පාතෙනොජනසිස් (Parthenogenesis)", def:"සංසේචනයකින් තොරව අසංසේචිත බිත්තියක් සිට සම්පූර්ණ ජීවියෙකු වර්ධනය වීමේ අලිංගික ප්‍රජනන ක්‍රමය. (උදා: මී මැස්සන්, කුඩුස්සන්)" },
+  { term:"හර්මැෆ්‍රඩයිට් (Hermaphrodite)", def:"පුරුෂ හා ස්ත්‍රී ප්‍රජනන වයස්ථි දෙකම එකම ජීවියෙකු තුළ පවතින ද්විලිංගික තත්ත්වය. (උදා: ගැඩවිල්ලා)" },
+  { term:"බාහිර සංසේචනය", def:"ජලීය පරිසරයේදී සිදුවන සංසේචනය — බිත්තිය හා ශුක්‍රාණු ශරීරයෙන් පිටතදී එකට එකතු වේ. (උදා: බොහෝ මත්ස්‍යයන්)" },
+  { term:"අභ්‍යන්තර සංසේචනය", def:"ශුක්‍රාණු ස්ත්‍රී ප්‍රජනන මාර්ගය තුළට ලබාදී, ශරීරය තුළදීම බිත්තිය සමග එකතු වන සංසේචන ක්‍රමය. (උදා: කුරුල්ලන්, ක්ෂීරපායින්)" },
+  { term:"ඛණ්ඩනය (Fragmentation)", def:"ජීවියාගේ ශරීරය කොටස් වලට කැඩී, එක් එක් කොටසින් නව ජීවියෙකු වර්ධනය වන අලිංගික ප්‍රජනන ක්‍රමයකි." },
+  { term:"පුනර්ජනනය (Regeneration)", def:"හානි වූ හෝ අහිමි වූ ශරීර කොටසක් නැවත වර්ධනය කරගැනීමේ හැකියාව — සමහරුන් තුළ මෙය සම්පූර්ණ ජීවියෙකු බවට වර්ධනය විය හැක. (උදා: තාරකා මත්ස්‍යයෝ)" }
+];
+const flashContainer = document.getElementById('flashcard-container');
+flashcards.forEach(fc=>{
+  const card = document.createElement('div');
+  card.className = 'flip-card';
+  card.innerHTML = `
+    <div class="flip-inner">
+      <div class="flip-face card" style="background:var(--primary-wash)">
+        <p class="font-display font-bold text-base" style="color:var(--primary)">${fc.term}</p>
+      </div>
+      <div class="flip-face flip-back card">
+        <p class="text-sm leading-relaxed">${fc.def}</p>
+      </div>
+    </div>
+  `;
+  card.addEventListener('click', ()=> card.classList.toggle('flipped'));
+  flashContainer.appendChild(card);
+});
+</script>
+</body>
+</html>
