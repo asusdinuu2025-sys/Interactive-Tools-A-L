@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ත්‍රිකෝණමිතීය සමීකරණ</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: "Noto Sans Sinhala", "Iskoola Pota", Arial, sans-serif;
+            background: #f4f6f8;
+            color: #222;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            padding: 30px 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px;
+            background: white;
+            border-radius: 18px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .section {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 16px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.07);
+        }
+
+        .section h2 {
+            margin-top: 0;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        .equation {
+            background: #f1f3f5;
+            padding: 18px;
+            margin: 12px 0;
+            border-radius: 10px;
+            text-align: center;
+            font-family: "Times New Roman", serif;
+            font-size: 24px;
+        }
+
+        .example {
+            background: #eef7ff;
+            padding: 18px;
+            border-left: 5px solid #2196f3;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .important {
+            background: #fff8df;
+            padding: 18px;
+            border-left: 5px solid #f0b400;
+            border-radius: 8px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #777;
+        }
+
+        /* Dark Mode */
+        .dark {
+            background: #121212;
+            color: #eee;
+        }
+
+        .dark header,
+        .dark .section {
+            background: #1e1e1e;
+        }
+
+        .dark .subtitle,
+        .dark footer {
+            color: #aaa;
+        }
+
+        .dark .equation {
+            background: #292929;
+        }
+
+        .dark .example {
+            background: #162b3b;
+        }
+
+        .dark .important {
+            background: #3a3219;
+        }
+
+        button {
+            border: none;
+            padding: 10px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            background: #222;
+            color: white;
+            font-size: 15px;
+        }
+
+        .dark button {
+            background: white;
+            color: #222;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <header>
+        <h1>📐 ත්‍රිකෝණමිතීය සමීකරණ</h1>
+        <p class="subtitle">
+            G.C.E. Advanced Level ගණිතය
+        </p>
+
+        <button onclick="toggleDarkMode()">
+            🌙 / ☀️ Dark Mode
+        </button>
+    </header>
+
+
+    <!-- Basic Ratios -->
+    <div class="section">
+        <h2>1. මූලික ත්‍රිකෝණමිතික අනුපාත</h2>
+
+        <div class="equation">
+            sin θ = විරුද්ධ පාදය / කර්ණය
+        </div>
+
+        <div class="equation">
+            cos θ = ආසන්න පාදය / කර්ණය
+        </div>
+
+        <div class="equation">
+            tan θ = විරුද්ධ පාදය / ආසන්න පාදය
+        </div>
+    </div>
+
+
+    <!-- Fundamental Identities -->
+    <div class="section">
+        <h2>2. මූලික ත්‍රිකෝණමිතික අනන්‍යතා</h2>
+
+        <div class="equation">
+            sin²θ + cos²θ = 1
+        </div>
+
+        <div class="equation">
+            1 + tan²θ = sec²θ
+        </div>
+
+        <div class="equation">
+            1 + cot²θ = cosec²θ
+        </div>
+
+        <div class="important">
+            <strong>වැදගත්:</strong>
+            මෙම අනන්‍යතා ත්‍රිකෝණමිතික සමීකරණ සරල කිරීමේදී
+            නිතර භාවිතා වේ.
+        </div>
+    </div>
+
+
+    <!-- Reciprocal Identities -->
+    <div class="section">
+        <h2>3. ප්‍රතිලෝම අනන්‍යතා</h2>
+
+        <div class="equation">
+            cosec θ = 1 / sin θ
+        </div>
+
+        <div class="equation">
+            sec θ = 1 / cos θ
+        </div>
+
+        <div class="equation">
+            cot θ = 1 / tan θ
+        </div>
+    </div>
+
+
+    <!-- Addition Formulas -->
+    <div class="section">
+        <h2>4. එකතු කිරීමේ හා අඩු කිරීමේ සූත්‍ර</h2>
+
+        <div class="equation">
+            sin(A + B) = sin A cos B + cos A sin B
+        </div>
+
+        <div class="equation">
+            sin(A − B) = sin A cos B − cos A sin B
+        </div>
+
+        <div class="equation">
+            cos(A + B) = cos A cos B − sin A sin B
+        </div>
+
+        <div class="equation">
+            cos(A − B) = cos A cos B + sin A sin B
+        </div>
+
+        <div class="equation">
+            tan(A + B) =
+            (tan A + tan B) / (1 − tan A tan B)
+        </div>
+
+        <div class="equation">
+            tan(A − B) =
+            (tan A − tan B) / (1 + tan A tan B)
+        </div>
+    </div>
+
+
+    <!-- Double Angle -->
+    <div class="section">
+        <h2>5. ද්විත්ව කෝණ සූත්‍ර</h2>
+
+        <div class="equation">
+            sin 2θ = 2 sin θ cos θ
+        </div>
+
+        <div class="equation">
+            cos 2θ = cos²θ − sin²θ
+        </div>
+
+        <div class="equation">
+            cos 2θ = 2cos²θ − 1
+        </div>
+
+        <div class="equation">
+            cos 2θ = 1 − 2sin²θ
+        </div>
+
+        <div class="equation">
+            tan 2θ = 2tanθ / (1 − tan²θ)
+        </div>
+    </div>
+
+
+    <!-- Example -->
+    <div class="section">
+        <h2>6. උදාහරණයක්</h2>
+
+        <div class="example">
+
+            <strong>ප්‍රශ්නය:</strong><br><br>
+
+            sin θ = 3/5 නම් cos θ හි අගය සොයන්න.
+
+            <br><br>
+
+            <strong>විසඳුම:</strong>
+
+            <div class="equation">
+                sin²θ + cos²θ = 1
+            </div>
+
+            <div class="equation">
+                (3/5)² + cos²θ = 1
+            </div>
+
+            <div class="equation">
+                9/25 + cos²θ = 1
+            </div>
+
+            <div class="equation">
+                cos²θ = 16/25
+            </div>
+
+            <div class="equation">
+                cos θ = 4/5
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- Important Angles -->
+    <div class="section">
+        <h2>7. විශේෂ කෝණ</h2>
+
+        <div class="equation">
+            sin 0° = 0
+        </div>
+
+        <div class="equation">
+            sin 30° = 1/2
+        </div>
+
+        <div class="equation">
+            sin 45° = √2/2
+        </div>
+
+        <div class="equation">
+            sin 60° = √3/2
+        </div>
+
+        <div class="equation">
+            sin 90° = 1
+        </div>
+    </div>
+
+
+    <footer>
+        Designed By Dinusha Hemal ツ
+    </footer>
+
+</div>
+
+
+<script>
+    function toggleDarkMode() {
+        document.body.classList.toggle("dark");
+    }
+</script>
+
+</body>
+</html>
