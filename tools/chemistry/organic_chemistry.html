@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>කාබනික පරිවර්තන ගවේෂකය</title>
+<style>
+  :root{
+    --bg-deep:#101b2d;
+    --bg-panel:#16233a;
+    --bg-card:#1c2d47;
+    --line:#2c3f5e;
+    --teal:#2fd6c0;
+    --amber:#f4b942;
+    --coral:#ef7d6b;
+    --paper:#eef2f2;
+    --text-dim:#9db1c9;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 15% -10%, #1c3350 0%, transparent 45%),
+      radial-gradient(circle at 100% 0%, #16324a 0%, transparent 40%),
+      var(--bg-deep);
+    color:var(--paper);
+    font-family: "Iskoola Pota","Noto Sans Sinhala","Segoe UI",sans-serif;
+    min-height:100vh;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .formula{font-family:"Consolas","Menlo","Courier New",monospace; letter-spacing:.3px;}
+  sub{font-size:.72em;}
+  sup{font-size:.68em;}
+
+  header.top{
+    position:sticky; top:0; z-index:50;
+    background:linear-gradient(180deg, rgba(16,27,45,.98), rgba(16,27,45,.9));
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line);
+    padding:14px 16px 10px;
+  }
+  .brand{
+    display:flex; align-items:center; gap:10px; margin-bottom:12px;
+  }
+  .brand .dot{
+    width:14px;height:14px;border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, var(--teal), #0d6b5f);
+    box-shadow:0 0 14px rgba(47,214,192,.7);
+    flex-shrink:0;
+  }
+  .brand h1{
+    font-size:1.15rem; margin:0; font-weight:700; letter-spacing:.2px;
+  }
+  .brand p{margin:2px 0 0; font-size:.72rem; color:var(--text-dim);}
+
+  nav.tabs{
+    display:flex; gap:8px; overflow-x:auto; scrollbar-width:none;
+  }
+  nav.tabs::-webkit-scrollbar{display:none;}
+  nav.tabs button{
+    flex:1 0 auto;
+    background:var(--bg-panel);
+    border:1px solid var(--line);
+    color:var(--paper);
+    padding:11px 14px;
+    border-radius:12px;
+    font-size:.85rem;
+    font-weight:600;
+    white-space:nowrap;
+    cursor:pointer;
+    transition:.15s;
+  }
+  nav.tabs button.active{
+    background:linear-gradient(135deg, var(--teal), #1a9c8a);
+    color:#062420;
+    border-color:transparent;
+  }
+
+  main{max-width:760px; margin:0 auto; padding:16px 14px 60px;}
+  section.view{display:none; animation:fade .25s ease;}
+  section.view.active{display:block;}
+  @keyframes fade{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  /* ---- EXPLORER ---- */
+  .search-wrap{position:relative; margin-bottom:12px;}
+  #searchBox{
+    width:100%; padding:14px 44px 14px 16px; border-radius:14px;
+    border:1px solid var(--line); background:var(--bg-panel); color:var(--paper);
+    font-size:1rem;
+  }
+  #searchBox::placeholder{color:var(--text-dim);}
+  .search-wrap svg{position:absolute; right:14px; top:50%; transform:translateY(-50%); opacity:.6;}
+
+  .compound-grid{
+    display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:18px;
+  }
+  .compound-btn{
+    background:var(--bg-card); border:1px solid var(--line); border-radius:14px;
+    padding:12px 10px; text-align:center; cursor:pointer; color:var(--paper);
+    transition:.15s;
+  }
+  .compound-btn small{display:block; color:var(--text-dim); font-size:.68rem; margin-bottom:4px;}
+  .compound-btn .cf{font-size:.95rem;}
+  .compound-btn.sel{border-color:var(--teal); box-shadow:0 0 0 2px rgba(47,214,192,.35);}
+  .compound-btn:active{transform:scale(.97);}
+
+  .central-card{
+    background:linear-gradient(160deg, var(--bg-card), #16263f);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:20px 16px;
+    text-align:center;
+    margin-bottom:16px;
+    position:relative;
+    overflow:hidden;
+  }
+  .central-card::before{
+    content:""; position:absolute; inset:0;
+    background:radial-gradient(circle at 85% -20%, rgba(244,185,66,.18), transparent 55%);
+  }
+  .central-card .tag{
+    display:inline-block; font-size:.68rem; padding:3px 10px; border-radius:20px;
+    background:rgba(47,214,192,.14); color:var(--teal); margin-bottom:8px; font-weight:700;
+  }
+  .central-card h2{margin:4px 0 2px; font-size:1.3rem; position:relative;}
+  .central-card p{margin:0; color:var(--text-dim); font-size:.85rem; position:relative;}
+
+  .hint{color:var(--text-dim); font-size:.78rem; margin:6px 2px 10px; text-align:center;}
+
+  .reagent-grid{
+    display:grid; grid-template-columns:repeat(2,1fr); gap:10px;
+  }
+  .reagent-btn{
+    background:var(--bg-panel); border:1px solid var(--line); border-radius:14px;
+    padding:13px 10px; cursor:pointer; color:var(--paper); text-align:center;
+    font-size:.86rem; transition:.15s;
+  }
+  .reagent-btn:active{transform:scale(.96);}
+  .reagent-btn.active{background:linear-gradient(135deg,var(--amber),#c98d1f); color:#2b1c00; border-color:transparent; font-weight:700;}
+
+  .answer-panel{
+    margin-top:16px; background:var(--bg-card); border:1px solid var(--teal); border-radius:16px;
+    padding:16px; display:none;
+  }
+  .answer-panel.show{display:block; animation:fade .25s ease;}
+  .answer-panel .row{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px;}
+  .arrow-tag{
+    background:rgba(244,185,66,.15); color:var(--amber); padding:4px 10px; border-radius:8px; font-size:.78rem;
+  }
+  .answer-panel .product{font-size:1.05rem; margin:6px 0 10px;}
+  .answer-panel .explain{
+    background:rgba(47,214,192,.08); border-right:3px solid var(--teal);
+    padding:10px 12px; border-radius:8px; font-size:.86rem; line-height:1.55; color:#d6e6e2;
+  }
+
+  /* ---- QUIZ ---- */
+  .quiz-top{
+    display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;
+  }
+  .score-box{
+    background:var(--bg-card); border:1px solid var(--line); border-radius:12px;
+    padding:8px 14px; font-size:.85rem; font-weight:700; color:var(--teal);
+  }
+  .btn-primary{
+    background:linear-gradient(135deg, var(--teal), #1a9c8a); color:#062420; border:none;
+    padding:13px 20px; border-radius:14px; font-weight:700; font-size:.9rem; cursor:pointer;
+    width:100%;
+  }
+  .btn-primary:active{transform:scale(.98);}
+  .q-card{
+    background:var(--bg-card); border:1px solid var(--line); border-radius:16px; padding:16px; margin-bottom:14px;
+  }
+  .q-count{color:var(--text-dim); font-size:.75rem; margin-bottom:6px;}
+  .q-text{font-size:1rem; line-height:1.6; margin-bottom:14px;}
+  .q-text .formula{color:var(--amber);}
+  .opt-btn{
+    display:block; width:100%; text-align:right; background:var(--bg-panel);
+    border:1px solid var(--line); color:var(--paper); padding:12px 14px; border-radius:12px;
+    margin-bottom:9px; font-size:.9rem; cursor:pointer; transition:.15s;
+  }
+  .opt-btn:active{transform:scale(.98);}
+  .opt-btn.correct{background:rgba(47,214,192,.18); border-color:var(--teal);}
+  .opt-btn.wrong{background:rgba(239,125,107,.18); border-color:var(--coral);}
+  .opt-btn.disabled{pointer-events:none; opacity:.75;}
+  .feedback{
+    margin-top:6px; padding:12px; border-radius:10px; font-size:.85rem; line-height:1.55; display:none;
+  }
+  .feedback.show{display:block; animation:fade .2s ease;}
+  .feedback.ok{background:rgba(47,214,192,.1); border-right:3px solid var(--teal);}
+  .feedback.no{background:rgba(239,125,107,.1); border-right:3px solid var(--coral);}
+  .quiz-end{text-align:center; padding:30px 10px;}
+  .quiz-end .big{font-size:2.4rem; font-weight:800; color:var(--amber);}
+
+  /* ---- NOTES ---- */
+  .cat-title{
+    font-size:.85rem; color:var(--teal); font-weight:700; margin:18px 4px 8px; letter-spacing:.3px;
+  }
+  .cat-title:first-child{margin-top:2px;}
+  .note-item{
+    background:var(--bg-card); border:1px solid var(--line); border-radius:14px; padding:0; margin-bottom:8px; overflow:hidden;
+  }
+  .note-head{
+    padding:13px 14px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;
+  }
+  .note-head .rname{font-weight:700; color:var(--amber);}
+  .note-head .chevron{transition:.2s; color:var(--text-dim);}
+  .note-body{
+    max-height:0; overflow:hidden; transition:max-height .25s ease;
+    font-size:.85rem; line-height:1.6; color:#d6e2ef;
+  }
+  .note-body-inner{padding:0 14px 14px;}
+  .note-item.open .note-body{max-height:200px;}
+  .note-item.open .chevron{transform:rotate(180deg);}
+
+  footer.space{height:20px;}
+
+  @media (min-width:640px){
+    .compound-grid{grid-template-columns:repeat(3,1fr);}
+    .reagent-grid{grid-template-columns:repeat(3,1fr);}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <div class="dot"></div>
+    <div>
+      <h1>කාබනික පරිවර්තන ගවේෂකය</h1>
+      <p>උසස් පෙළ රසායන විද්‍යාව — කාබනික පරිවර්තන අධ්‍යයන මෙවලම</p>
+    </div>
+  </div>
+  <nav class="tabs">
+    <button class="active" data-view="explorer">🧭 පරිවර්තන ගවේෂකය</button>
+    <button data-view="quiz">📝 ප්‍රශ්නාවලිය</button>
+    <button data-view="notes">📒 කෙටි සටහන්</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- EXPLORER -->
+  <section class="view active" id="view-explorer">
+    <div class="search-wrap">
+      <input id="searchBox" type="text" placeholder="සංයෝගයක් සොයන්න (උදා: ඇනිලීන්, ඇල්කීන්, එස්ටර්...)">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9db1c9" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </div>
+    <div class="compound-grid" id="compoundGrid"></div>
+
+    <div id="centralWrap"></div>
+    <div id="reagentWrap"></div>
+    <div class="answer-panel" id="answerPanel">
+      <div class="row"><span class="arrow-tag" id="ansReagent"></span></div>
+      <div class="product formula" id="ansProduct"></div>
+      <div class="explain" id="ansExplain"></div>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="view" id="view-quiz">
+    <div class="quiz-top">
+      <div class="score-box">ලකුණු: <span id="scoreVal">0</span> / <span id="scoreTotal">0</span></div>
+      <div class="score-box" id="qProgress">0 / 10</div>
+    </div>
+    <div id="quizArea">
+      <p style="color:var(--text-dim); font-size:.9rem; line-height:1.6; margin-bottom:16px;">
+        රූප සටහන් 17 ම පදනම් කරගත් ප්‍රශ්න 10ක අහඹු ප්‍රශ්නාවලියක්. සෑම ප්‍රශ්නයකටම පසුව නිවැරදි පැහැදිලි කිරීම සිංහලෙන් පෙන්වයි.
+      </p>
+      <button class="btn-primary" id="startQuizBtn">ප්‍රශ්නාවලිය ආරම්භ කරන්න ▶</button>
+    </div>
+  </section>
+
+  <!-- NOTES -->
+  <section class="view" id="view-notes">
+    <div id="notesArea"></div>
+  </section>
+
+  <footer class="space"></footer>
+</main>
+
+<script>
+/* =========================================================
+   DATA: 17 CONVERSION SHEETS
+   ========================================================= */
+const C = { // shorthand for html sub tags
+  s:(n)=>`<sub>${n}</sub>`
+};
+const compounds = [
+{
+  id:"aniline", type:"aromatic", name:"ඇනිලීන් (Aniline)",
+  formula:"C<sub>6</sub>H<sub>5</sub>-NH<sub>2</sub>",
+  reactions:[
+    {reagent:"dil. HCl", product:"C<sub>6</sub>H<sub>5</sub>-N<sup>+</sup>H<sub>3</sub> Cl<sup>-</sup>",
+      explain:"ඇනිලීන් හි නයිට්‍රජන් පරමාණුවේ ඇති තනි ඉලෙක්ට්‍රෝන යුගලය H<sup>+</sup> අයනයක් සමඟ බැඳී ඇනිලීනියම් ක්ලෝරයිඩ් ලවණය සෑදේ (-NH<sub>2</sub> → -N<sup>+</sup>H<sub>3</sub>Cl<sup>-</sup>). මූලික ලක්ෂණය ක්ෂාරීයභාවයයි."},
+    {reagent:"Br<sub>2</sub>(aq) / Br<sub>2</sub>+H<sub>2</sub>O", product:"2,4,6-ට්‍රයිබ්‍රෝමෝ ඇනිලීන් + 3HBr",
+      explain:"-NH<sub>2</sub> කාණ්ඩය ප්‍රබල ක්‍රියාකාරී කාණ්ඩයක් නිසා (o,p-directing) වළය තුනට Br පරමාණු 3ක් එකවර ආදේශ වී සුදු අවක්ෂේපයක් සාදයි. Br<sub>2</sub> ජලය පාට නැති වීම මගින් හඳුනාගත හැක."},
+    {reagent:"NaNO<sub>2</sub>/HCl (0-5°C)", product:"C<sub>6</sub>H<sub>5</sub>-N<sup>+</sup>≡NCl<sup>-</sup> (බෙන්සීන් ඩයසෝනියම් ක්ලෝරයිඩ්)",
+      explain:"අඩු උෂ්ණත්වයේදී (0-5°C) -NH<sub>2</sub> කාණ්ඩය ඩයසෝටීකරණය වී ඩයසෝනියම් ලවණය සාදයි. උෂ්ණත්වය ඉහළ ගියහොත් ඩයසෝනියම් ලවණය අස්ථායී වේ."},
+    {reagent:"NaNO<sub>2</sub>/HCl (රත් කිරීමේදී)", product:"C<sub>6</sub>H<sub>5</sub>-OH + N<sub>2</sub>↑",
+      explain:"ඩයසෝනියම් ලවණය රත් කිරීමේදී ජලය සමඟ ප්‍රතික්‍රියා කර ෆීනෝල් සහ නයිට්‍රජන් වායුව නිදහස් කරයි (ජල විච්ඡේදනය)."},
+    {reagent:"R-COCl (acyl chloride)", product:"C<sub>6</sub>H<sub>5</sub>-NH-CO-R + HCl",
+      explain:"නයිට්‍රජන් හි තනි ඉලෙක්ට්‍රෝන යුගලය acyl chloride හි කාබනික කාබන් වෙත ප්‍රහාරය කර N-ආදේශිත ඇමයිඩයක් (ඇනිලයිඩ්) සාදයි."},
+    {reagent:"R-CHO (dil. NaOH, condensation)", product:"R-CH=N-C<sub>6</sub>H<sub>5</sub> (Schiff base)",
+      explain:"ඇල්ඩිහයිඩයේ කාබනික කාබන් හා ඇමයින් හි නයිට්‍රජන් අතර ජලාපනයන ප්‍රතික්‍රියාවක් සිදුවී H<sub>2</sub>O නිදහස් වී imine (Schiff base) සාදයි."},
+    {reagent:"R-CO-R (ketone, condensation)", product:"R-C(=N-C<sub>6</sub>H<sub>5</sub>)-R",
+      explain:"කීටෝනයේ කාබනික කාබන් හා ඇමයින් නයිට්‍රජන් අතර condensation මගින් H<sub>2</sub>O නිදහස් වී N-ආදේශිත imine එකක් සෑදේ."}
+  ]
+},
+{
+  id:"ketone", type:"aliphatic", name:"කීටෝන (Ketone)",
+  formula:"CH<sub>3</sub>-CO-CH<sub>3</sub>",
+  reactions:[
+    {reagent:"CH<sub>3</sub>CH(OH)CH<sub>3</sub> + PCC / H<sup>+</sup>KMnO<sub>4</sub>", product:"CH<sub>3</sub>-CO-CH<sub>3</sub> (ද්විතීයික ඇල්කොහොල් ඔක්සිකරණයෙන්)",
+      explain:"ද්විතීයික ඇල්කොහොල් (2°) ඔක්සිකරණය වී කීටෝන සෑදේ. PCC සහ KMnO<sub>4</sub>/H<sup>+</sup> දෙකෙන්ම මෙය කළ හැක; තවදුරටත් ඔක්සිකරණය නොවේ."},
+    {reagent:"NH<sub>3</sub>", product:"CH<sub>3</sub>-C(=NH)-CH<sub>3</sub> (අස්ථායී imine)",
+      explain:"C=O කාණ්ඩය NH<sub>3</sub> සමඟ ප්‍රතික්‍රියා කර C=NH ලෙස imine එකක් සෑදෙයි (අස්ථායී)."},
+    {reagent:"R-NH<sub>2</sub>", product:"CH<sub>3</sub>-C(=N-R)-CH<sub>3</sub>",
+      explain:"ප්‍රාථමික ඇමයිනයක් සමඟ condensation මගින් H<sub>2</sub>O නිදහස් වී N-ආදේශිත imine එකක් සෑදේ."},
+    {reagent:"Zn(Hg)/conc. HCl (Clemmensen Reduction)", product:"CH<sub>3</sub>-CH<sub>2</sub>-CH<sub>3</sub> (propane)",
+      explain:"C=O කාණ්ඩය සම්පූර්ණයෙන්ම CH<sub>2</sub> ලෙස අඩුකරණය වේ — කීටෝන සෘජුවම ඇල්කේන් බවට පත් වේ (Clemmensen Reduction)."},
+    {reagent:"NH<sub>3</sub>/AgNO<sub>3</sub> (Tollens')", product:"X (ප්‍රතික්‍රියාවක් සිදු නොවේ)",
+      explain:"කීටෝන Tollens් ප්‍රතික්‍රියාකාරකය සමඟ ප්‍රතික්‍රියා නොකරයි — silver mirror සෑදෙන්නේ නැත. මෙය ඇල්ඩිහයිඩ්-කීටෝන වෙන් කිරීමේ පරීක්ෂණයකි."},
+    {reagent:"H<sup>+</sup>/K<sub>2</sub>Cr<sub>2</sub>O<sub>7</sub> හෝ H<sup>+</sup>/CrO<sub>3</sub>", product:"X (ප්‍රතික්‍රියාවක් සිදු නොවේ)",
+      explain:"කීටෝන තවදුරටත් ඔක්සිකරණයට ප්‍රතිරෝධී වේ, මන්ද එහි කාබනික කාබනයට හිමිකම් කියන හයිඩ්‍රජන් පරමාණුවක් නොමැත."},
+    {reagent:"H<sup>+</sup>/KMnO<sub>4</sub>", product:"X (ප්‍රතික්‍රියාවක් සිදු නොවේ)",
+      explain:"ඇල්ඩිහයිඩ් මෙන් නොව කීටෝන KMnO<sub>4</sub> මගින් පහසුවෙන් ඔක්සිකරණය නොවේ."},
+    {reagent:"KCN/HCl (HCN)", product:"CH<sub>3</sub>-C(OH)(CN)-CH<sub>3</sub> (cyanohydrin)",
+      explain:"CN<sup>-</sup> අයනය කාබනික කාබනයට නියුක්ලියෝෆිලික ලෙස එකතු වී cyanohydrin එකක් සාදයි."},
+    {reagent:"R-MgX (Grignard), 2) H<sup>+</sup>/H<sub>2</sub>O", product:"CH<sub>3</sub>-C(OH)(R)-CH<sub>3</sub> (තෘතීයික ඇල්කොහොල්)",
+      explain:"Grignard ප්‍රතික්‍රියාකාරකය C=O කාණ්ඩයට එකතු වී, ජල විච්ඡේදනයෙන් පසු තෘතීයික ඇල්කොහොල් සාදයි."},
+    {reagent:"2,4-DNP (Brady's Reagent)", product:"2,4-dinitrophenylhydrazone (තැඹිලි අවක්ෂේපය)",
+      explain:"C=O කාණ්ඩය 2,4-DNP සමඟ condensation වී විශේෂිත ස්ඵටිකරූපී තැඹිලි වර්ණ අවක්ෂේපයක් සාදයි — C=O කාණ්ඩය හඳුනාගැනීමේ පරීක්ෂණය."},
+    {reagent:"1) LiAlH<sub>4</sub>/dry ether හෝ NaBH<sub>4</sub>, 2) H<sup>+</sup>/H<sub>2</sub>O", product:"CH<sub>3</sub>-CH(OH)-CH<sub>3</sub> (ද්විතීයික ඇල්කොහොල්)",
+      explain:"C=O කාණ්ඩය අඩුකරණය වී C-OH බවට පත් වේ — කීටෝන අඩුකරණයෙන් ලැබෙන්නේ සැමවිටම ද්විතීයික ඇල්කොහොල් එකකි."},
+    {reagent:"dil. NaOH (Aldol Condensation)", product:"CH<sub>3</sub>-CO-CH<sub>2</sub>-C(OH)(CH<sub>3</sub>)-CH<sub>3</sub>",
+      explain:"α-හයිඩ්‍රජන් සහිත එක් කීටෝන අණුවක enolate අයනය තවත් කීටෝන අණුවක C=O කාණ්ඩයට එකතු වී β-hydroxy ketone (aldol) එකක් සාදයි."}
+  ]
+},
+{
+  id:"aldehyde", type:"aliphatic", name:"ඇල්ඩිහයිඩ (Aldehyde)",
+  formula:"CH<sub>3</sub>CH<sub>2</sub>-CHO",
+  reactions:[
+    {reagent:"CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>OH + PCC", product:"CH<sub>3</sub>CH<sub>2</sub>-CHO (ප්‍රාථමික ඇල්කොහොල් අර්ධ ඔක්සිකරණයෙන්)",
+      explain:"PCC (Pyridinium chlorochromate) මගින් ප්‍රාථමික ඇල්කොහොල් සම්පූර්ණයෙන් ඔක්සිකරණය නොවී ඇල්ඩිහයිඩ් අවස්ථාවේදීම නවතී."},
+    {reagent:"dil. NaOH (condensation)", product:"β-hydroxy ඇල්ඩිහයිඩ් (aldol)",
+      explain:"α-හයිඩ්‍රජන් සහිත ඇල්ඩිහයිඩ් අණු දෙකක් අතර aldol addition සිදු වී β-hydroxy aldehyde සාදයි."},
+    {reagent:"NH<sub>3</sub>", product:"CH<sub>3</sub>CH<sub>2</sub>-CH=NH (අස්ථායී imine)",
+      explain:"C=O කාණ්ඩය NH<sub>3</sub> සමඟ ප්‍රතික්‍රියා වී imine (Schiff base) සෑදේ."},
+    {reagent:"R-NH<sub>2</sub>", product:"CH<sub>3</sub>CH<sub>2</sub>-CH=N-R",
+      explain:"ප්‍රාථමික ඇමයින් සමඟ condensation මගින් N-ආදේශිත Schiff base එකක් සාදයි (H<sub>2</sub>O නිදහස් වේ)."},
+    {reagent:"R-MgX, 2) H<sup>+</sup>/H<sub>2</sub>O", product:"CH<sub>3</sub>CH<sub>2</sub>-CH(OH)-R (ද්විතීයික ඇල්කොහොල්)",
+      explain:"Grignard ප්‍රතික්‍රියාකාරකය ඇල්ඩිහයිඩයේ C=O කාණ්ඩයට එකතු වී ජල විච්ඡේදනයෙන් පසු ද්විතීයික ඇල්කොහොල් සාදයි."},
+    {reagent:"2,4-DNP (Brady's Reagent)", product:"2,4-dinitrophenylhydrazone (තැඹිලි අවක්ෂේපය)",
+      explain:"ඇල්ඩිහයිඩය 2,4-DNP සමඟ condensation වී විශේෂිත තැඹිලි ස්ඵටික අවක්ෂේපයක් සාදයි."},
+    {reagent:"1) LiAlH<sub>4</sub>/dry ether හෝ NaBH<sub>4</sub>, 2) H<sup>+</sup>/H<sub>2</sub>O", product:"CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>-OH (ප්‍රාථමික ඇල්කොහොල්)",
+      explain:"C=O කාණ්ඩය අඩුකරණය වී -CH<sub>2</sub>OH බවට පත් වේ — ඇල්ඩිහයිඩ් අඩුකරණයෙන් සැමවිටම ප්‍රාථමික ඇල්කොහොල් ලැබේ."},
+    {reagent:"H<sup>+</sup>/KMnO<sub>4</sub>, K<sub>2</sub>Cr<sub>2</sub>O<sub>7</sub> හෝ CrO<sub>3</sub>", product:"CH<sub>3</sub>CH<sub>2</sub>-COOH (කාබොක්සිලික් අම්ලය)",
+      explain:"ඇල්ඩිහයිඩය පහසුවෙන් ඔක්සිකරණය වී කාබොක්සිලික් අම්ලයක් සාදයි — කීටෝන මෙන් නොව ඇල්ඩිහයිඩය පහසුවෙන් ඔක්සිකරණය වේ."},
+    {reagent:"NH<sub>3</sub>/AgNO<sub>3</sub> (Tollens' Reagent)", product:"CH<sub>3</sub>CH<sub>2</sub>-COO<sup>-</sup> + Ag↓ (silver mirror)",
+      explain:"ඇල්ඩිහයිඩය Ag<sup>+</sup> අඩුකරණය කරමින් තමන් ඔක්සිකරණය වේ — පරීක්ෂණ නලය තුළ රිදී දර්පණයක් සෑදේ."},
+    {reagent:"Fehling's Solution (Cu<sup>2+</sup>)", product:"CH<sub>3</sub>CH<sub>2</sub>-COO<sup>-</sup> + Cu<sub>2</sub>O↓ (ගඩොල් රතු අවක්ෂේපය)",
+      explain:"ඇල්ඩිහයිඩය Cu<sup>2+</sup> අඩුකරණය කර Cu<sub>2</sub>O හි ගඩොල් රතු අවක්ෂේපයක් සාදයි."},
+    {reagent:"Zn(Hg)/conc. HCl (Clemmensen Reduction)", product:"CH<sub>3</sub>CH<sub>2</sub>-CH<sub>3</sub> (propane)",
+      explain:"C=O කාණ්ඩය සම්පූර්ණයෙන් CH<sub>2</sub> බවට අඩුකරණය වී ඇල්කේනයක් ලබාදේ."}
+  ]
+},
+{
+  id:"carboxylicAcid", type:"aliphatic", name:"කාබොක්සිලික් අම්ලය (Carboxylic Acid)",
+  formula:"CH<sub>3</sub>CH<sub>2</sub>-COOH",
+  reactions:[
+    {reagent:"PCl<sub>3</sub> හෝ PCl<sub>5</sub>", product:"CH<sub>3</sub>CH<sub>2</sub>-COCl + HCl",
+      explain:"-OH කාණ්ඩය -Cl මගින් ආදේශනය වී acyl chloride එකක් සාදයි."},
+    {reagent:"Na", product:"CH<sub>3</sub>CH<sub>2</sub>-COO<sup>-</sup>Na<sup>+</sup> + H<sub>2</sub>↑",
+      explain:"අම්ලයේ ඇති -COOH හයිඩ්‍රජන් Na සමඟ ප්‍රතික්‍රියා කර සෝඩියම් ලවණයක් හා H<sub>2</sub> වායුව නිකුත් කරයි."},
+    {reagent:"NaOH", product:"CH<sub>3</sub>CH<sub>2</sub>-COO<sup>-</sup>Na<sup>+</sup> + H<sub>2</sub>O",
+      explain:"සාමාන්‍ය අම්ල-ක්ෂාර උදාසීන ප්‍රතික්‍රියාවකි — ලවණයක් හා ජලය සෑදේ."},
+    {reagent:"Na<sub>2</sub>CO<sub>3</sub>", product:"CH<sub>3</sub>CH<sub>2</sub>-COO<sup>-</sup>Na<sup>+</sup> + CO<sub>2</sub> + H<sub>2</sub>O",
+      explain:"කාබොක්සිලික් අම්ලය කාබනේට් සමඟ ප්‍රතික්‍රියා කර CO<sub>2</sub> වායුව (බුබුලු) නිකුත් කරයි — කාබොක්සිලික් අම්ල හඳුනාගැනීමේ පරීක්ෂණය."},
+    {reagent:"R-OH / conc. H<sub>2</sub>SO<sub>4</sub> / Δ (Esterification)", product:"CH<sub>3</sub>CH<sub>2</sub>-CO-O-R + H<sub>2</sub>O",
+      explain:"අම්ලය හා ඇල්කොහොල් අතර condensation (Fischer esterification) මගින් එස්ටරයක් හා ජලය සෑදේ."},
+    {reagent:"1) LiAlH<sub>4</sub>/dry ether, 2) H<sup>+</sup>/H<sub>2</sub>O", product:"CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>-OH (ප්‍රාථමික ඇල්කොහොල්)",
+      explain:"-COOH කාණ්ඩය සම්පූර්ණයෙන් අඩුකරණය වී ප්‍රාථමික ඇල්කොහොල් බවට පත් වේ."}
+  ]
+},
+{
+  id:"grignard", type:"aliphatic", name:"ග්‍රිග්නාඩ් ප්‍රතික්‍රියාකාරකය (Grignard Reagent)",
+  formula:"CH<sub>3</sub>CH<sub>2</sub>-MgX",
+  reactions:[
+    {reagent:"CH<sub>3</sub>CH<sub>2</sub>-Cl + Mg/dry ether", product:"CH<sub>3</sub>CH<sub>2</sub>-MgX සෑදීම",
+      explain:"ඇල්කයිල් හැලයිඩය dry ether මාධ්‍යයේදී Mg ලෝහය සමඟ ප්‍රතික්‍රියා කර ග්‍රිග්නාඩ් ප්‍රතික්‍රියාකාරකය සාදයි."},
+    {reagent:"R-OH", product:"CH<sub>3</sub>CH<sub>2</sub>-H + ROMgX",
+      explain:"ග්‍රිග්නාඩ් ප්‍රතික්‍රියාකාරකය ඉතා ප්‍රබල භස්මයක් වන අතර ඇල්කොහොල් වල ඇති අම්ලික H සමඟ ඇල්කේනයක් සාදයි."},
+    {reagent:"H<sub>2</sub>O", product:"CH<sub>3</sub>CH<sub>2</sub>-H + HOMgX",
+      explain:"ග්‍රිග්නාඩ් ප්‍රතික්‍රියාකාරකය ජලය සමඟ ඉතා ක්‍රියාශීලීව ප්‍රතික්‍රියා කර ඇල්කේනයක් සාදයි."},
+    {reagent:"dil. HCl", product:"CH<sub>3</sub>CH<sub>2</sub>-H + MgClX",
+      explain:"ග්‍රිග්නාඩ් ප්‍රතික්‍රියාකාරකය තනුක අම්ලයක් සමඟ ඇල්කේනයක් ලෙස ජලවිච්ඡේදනය වේ."},
+    {reagent:"R-C≡CH (terminal alkyne)", product:"CH<sub>3</sub>CH<sub>2</sub>-H + R-C≡C-MgX",
+      explain:"ග්‍රිග්නාඩ් ප්‍රතික්‍රියාකාරකය ටර්මිනල් ඇල්කයිනයේ අම්ලික H ඉවත් කර නව ග්‍රිග්නාඩ් ප්‍රතික්‍රියාකාරකයක් සාදයි."},
+    {reagent:"R-NH<sub>2</sub>", product:"CH<sub>3</sub>CH<sub>2</sub>-H + R-NH-MgX",
+      explain:"ඇමයිනයේ N-H බන්ධනය සමඟ ප්‍රෝටෝන හුවමාරුවක් සිදුවේ."},
+    {reagent:"R-CHO, 2) H<sup>+</sup>/H<sub>2</sub>O", product:"R-CH(OH)-CH<sub>2</sub>CH<sub>3</sub> (ද්විතීයික ඇල්කොහොල්)",
+      explain:"ග්‍රිග්නාඩ් කාබනික කාබනය ඇල්ඩිහයිඩයේ C=O කාණ්ඩයට නියුක්ලියෝෆිලික ලෙස එකතු වී ද්විතීයික ඇල්කොහොල් සාදයි."},
+    {reagent:"R-CO-R (ketone), 2) H<sup>+</sup>/H<sub>2</sub>O", product:"R-C(OH)(R)-CH<sub>2</sub>CH<sub>3</sub> (තෘතීයික ඇල්කොහොල්)",
+      explain:"ග්‍රිග්නාඩ් කාබනික කාබනය කීටෝනයේ C=O කාණ්ඩයට එකතු වී තෘතීයික ඇල්කොහොල් සාදයි."},
+    {reagent:"R-COOH", product:"CH<sub>3</sub>CH<sub>2</sub>-H + R-COOMgX",
+      explain:"කාබොක්සිලික් අම්ලයේ අම්ලික -OH හයිඩ්‍රජන් ග්‍රිග්නාඩ් ප්‍රතික්‍රියාකාරකය විසින් ඉවත් කරගනු ලැබේ."}
+  ]
+},
+{
+  id:"alcohol", type:"aliphatic", name:"ඇල්කොහොල් (Alcohol)",
+  formula:"CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>-OH",
+  reactions:[
+    {reagent:"R-COOH / conc. H<sub>2</sub>SO<sub>4</sub> / Δ", product:"R-CO-O-CH<sub>2</sub>CH<sub>2</sub>CH<sub>3</sub> + H<sub>2</sub>O",
+      explain:"Fischer esterification මගින් එස්ටරයක් හා ජලය සාදයි."},
+    {reagent:"R-COCl", product:"R-CO-O-CH<sub>2</sub>CH<sub>2</sub>CH<sub>3</sub> + HCl",
+      explain:"acyl chloride සමඟ ඉක්මනින් ප්‍රතික්‍රියා වී එස්ටරයක් සාදයි."},
+    {reagent:"PCl<sub>5</sub> හෝ PBr<sub>3</sub>/HBr", product:"CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>-Cl හෝ -Br + HCl",
+      explain:"-OH කාණ්ඩය හැලයිඩ් කාණ්ඩයකින් ආදේශ වේ."},
+    {reagent:"conc. H<sub>2</sub>SO<sub>4</sub>, 170°C (හෝ Al<sub>2</sub>O<sub>3</sub>, 350°C)", product:"CH<sub>3</sub>-CH=CH<sub>2</sub> + H<sub>2</sub>O",
+      explain:"ජලාපනයනය (dehydration) මගින් ඇල්කීනයක් සාදයි."},
+    {reagent:"H<sup>+</sup>/KMnO<sub>4</sub>, K<sub>2</sub>Cr<sub>2</sub>O<sub>7</sub> හෝ CrO<sub>3</sub> (ප්‍රබල ඔක්සිකාරක)", product:"CH<sub>3</sub>CH<sub>2</sub>-COOH",
+      explain:"ප්‍රාථමික ඇල්කොහොල් සම්පූර්ණයෙන් ඔක්සිකරණය වී කාබොක්සිලික් අම්ලයක් සාදයි (ඇල්ඩිහයිඩ් හරහා)."},
+    {reagent:"PCC", product:"CH<sub>3</sub>CH<sub>2</sub>-CHO",
+      explain:"PCC මගින් අර්ධ ඔක්සිකරණයක් සිදුවී ඇල්ඩිහයිඩ් අවස්ථාවේදීම නවතී."},
+    {reagent:"Na", product:"CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>-O<sup>-</sup>Na<sup>+</sup> + H<sub>2</sub>↑",
+      explain:"ඇල්කොහොල් හි ඇති දුර්වල අම්ලික H, Na ලෝහය සමඟ ප්‍රතික්‍රියා කර ඇල්කොක්සයිඩයක් සාදයි."}
+  ]
+},
+{
+  id:"phenol", type:"aromatic", name:"ෆීනෝල් (Phenol)",
+  formula:"C<sub>6</sub>H<sub>5</sub>-OH",
+  reactions:[
+    {reagent:"C<sub>6</sub>H<sub>5</sub>-N<sub>2</sub>Cl + H<sub>2</sub>O", product:"C<sub>6</sub>H<sub>5</sub>-OH (ඩයසෝනියම් ලවණය ජල විච්ඡේදනයෙන්)",
+      explain:"ඩයසෝනියම් ලවණය රත් ජලය සමඟ ප්‍රතික්‍රියා කර ෆීනෝල් හා N<sub>2</sub> වායුව ලබාදෙයි."},
+    {reagent:"Na", product:"C<sub>6</sub>H<sub>5</sub>-O<sup>-</sup>Na<sup>+</sup> + H<sub>2</sub>↑",
+      explain:"ෆීනෝල් හි ඇති -OH හයිඩ්‍රජන් Na ලෝහය සමඟ ප්‍රතික්‍රියා කර සෝඩියම් ෆීනොක්සයිඩ් සාදයි."},
+    {reagent:"NaOH", product:"C<sub>6</sub>H<sub>5</sub>-O<sup>-</sup>Na<sup>+</sup> + H<sub>2</sub>O",
+      explain:"ෆීනෝල් ඇල්කොහොල් වලට වඩා අම්ලික බැවින් NaOH සමඟද ලවණයක් සාදයි."},
+    {reagent:"Br<sub>2</sub>(aq)", product:"2,4,6-ට්‍රයිබ්‍රෝමෝ ෆීනෝල් + 3HBr (සුදු අවක්ෂේපය)",
+      explain:"-OH කාණ්ඩය ප්‍රබල ක්‍රියාකාරී කාණ්ඩයක් නිසා වළය තුනටම Br පරමාණු ආදේශ වී සුදු අවක්ෂේපයක් සාදයි."},
+    {reagent:"dil. HNO<sub>3</sub> (20°C)", product:"o-nitrophenol + p-nitrophenol මිශ්‍රණය",
+      explain:"-OH කාණ්ඩය o,p-directing බැවින් ortho සහ para ස්ථානවලට NO<sub>2</sub> කාණ්ඩ ආදේශ වේ."},
+    {reagent:"Neutral FeCl<sub>3</sub>", product:"දම් පාට සංකීර්ණය (Purple colour complex)",
+      explain:"ෆීනෝල් හඳුනාගැනීමේ ලාක්ෂණික පරීක්ෂණයයි — udasීන FeCl<sub>3</sub> සමඟ දම් පාට සංකීර්ණයක් සාදයි."}
+  ]
+},
+{
+  id:"alkylHalide", type:"aliphatic", name:"ඇල්කයිල් හැලයිඩ (Alkyl Halide)",
+  formula:"CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>-X",
+  reactions:[
+    {reagent:"aq. KOH", product:"CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>-OH + KX",
+      explain:"OH<sup>-</sup> නියුක්ලියෝෆයිල් X ආදේශනය කර (SN2/SN1) ඇල්කොහොල් සාදයි (ජලීය KOH → ආදේශනය)."},
+    {reagent:"alc. KOH, Δ", product:"CH<sub>3</sub>-CH=CH<sub>2</sub> + KX + H<sub>2</sub>O",
+      explain:"ඇල්කොහොලික KOH බේස් එකක් ලෙස ක්‍රියා කර β-හයිඩ්‍රජන් ඉවත් කරමින් elimination මගින් ඇල්කීනයක් සාදයි."},
+    {reagent:"NH<sub>3</sub> (conc.)", product:"CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>-NH<sub>2</sub> + HX",
+      explain:"NH<sub>3</sub> නියුක්ලියෝෆයිල් ලෙස X ආදේශනය කර ප්‍රාථමික ඇමයිනයක් සාදයි."},
+    {reagent:"Mg / dry ether", product:"CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>-MgX (ග්‍රිග්නාඩ්)",
+      explain:"dry ether මාධ්‍යයේදී Mg ලෝහය සමඟ ප්‍රතික්‍රියා කර ග්‍රිග්නාඩ් ප්‍රතික්‍රියාකාරකය සාදයි."},
+    {reagent:"KCN (ජලීය ඇල්කොහොලික)", product:"CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>-CN + KX",
+      explain:"CN<sup>-</sup> නියුක්ලියෝෆයිල් ලෙස ක්‍රියා කර නයිට්‍රයිල් (nitrile) එකක් සාදයි — කාබන් දාමය දිගු වේ."},
+    {reagent:"CH<sub>3</sub>O<sup>-</sup>Na<sup>+</sup>", product:"CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>-O-CH<sub>3</sub> (ඊතරය - Williamson synthesis)",
+      explain:"ඇල්කොක්සයිඩ් අයනය නියුක්ලියෝෆයිල් ලෙස X ආදේශනය කර ඊතරයක් සාදයි."},
+    {reagent:"CH<sub>3</sub>-C≡C-Na<sup>+</sup>", product:"CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>-C≡C-CH<sub>3</sub>",
+      explain:"ඇසිටිලයිඩ් අයනය නියුක්ලියෝෆයිල් ලෙස ක්‍රියා කර ඇල්කයින් දාමය දිගු කරයි."}
+  ]
+},
+{
+  id:"benzene", type:"aromatic", name:"බෙන්සීන් (Benzene)",
+  formula:"C<sub>6</sub>H<sub>6</sub>",
+  reactions:[
+    {reagent:"3CH≡CH / රත් නළිකාව (Fe)", product:"C<sub>6</sub>H<sub>6</sub> සෑදීම",
+      explain:"ඇසිටිලීන් අණු 3ක් cyclotrimerization මගින් බෙන්සීන් සාදයි."},
+    {reagent:"Br<sub>2</sub> / FeBr<sub>3</sub> (Halogenation)", product:"C<sub>6</sub>H<sub>5</sub>-Br + HBr",
+      explain:"Lewis අම්ලයක් (FeBr<sub>3</sub>) පවතින විට විද්‍යුත් රාග ආදේශන ප්‍රතික්‍රියාවක් මගින් Br ආදේශනය වේ."},
+    {reagent:"Cl<sub>2</sub> / AlCl<sub>3</sub>", product:"C<sub>6</sub>H<sub>5</sub>-Cl + HCl",
+      explain:"AlCl<sub>3</sub> Lewis අම්ලයක් ලෙස ක්‍රියා කර Cl<sup>+</sup> ජනනය කර ආදේශන ප්‍රතික්‍රියාව ප්‍රවර්ධනය කරයි."},
+    {reagent:"R-Cl / AlCl<sub>3</sub> (Friedel-Crafts Alkylation)", product:"C<sub>6</sub>H<sub>5</sub>-R",
+      explain:"ඇල්කයිල් කාණ්ඩයක් වළයට ආදේශ වේ (ඇල්කයිලේෂණය)."},
+    {reagent:"R-COCl / AlCl<sub>3</sub> (Friedel-Crafts Acylation)", product:"C<sub>6</sub>H<sub>5</sub>-CO-R",
+      explain:"acyl කාණ්ඩයක් වළයට ආදේශ වී aryl ketone එකක් සාදයි (acylation)."},
+    {reagent:"conc. HNO<sub>3</sub> / conc. H<sub>2</sub>SO<sub>4</sub> (Nitration)", product:"C<sub>6</sub>H<sub>5</sub>-NO<sub>2</sub> + H<sub>2</sub>O",
+      explain:"NO<sub>2</sub><sup>+</sup> විද්‍යුත් රාගය ජනනය වී වළයට ආදේශ වේ (නයිට්‍රේෂණය)."},
+    {reagent:"CH<sub>3</sub>Cl / AlCl<sub>3</sub>, පසුව H<sup>+</sup>/KMnO<sub>4</sub>", product:"C<sub>6</sub>H<sub>5</sub>-COOH (බෙන්සොයික් අම්ලය)",
+      explain:"ඇල්කයිලේෂණයෙන් ටොලුවීන් සාදා පසුව -CH<sub>3</sub> කාණ්ඩය KMnO<sub>4</sub> මගින් ඔක්සිකරණය කර -COOH බවට පත් කරයි."},
+    {reagent:"3Cl<sub>2</sub> / hv", product:"C<sub>6</sub>H<sub>6</sub>Cl<sub>6</sub> (hexachlorocyclohexane)",
+      explain:"UV ආලෝකයේදී free radical addition මගින් Cl පරමාණු 6ක් රිං එකට එකතු වේ (ආදේශනය නොවේ)."},
+    {reagent:"H<sub>2</sub>/Ni(Pd/Pt), 150°C", product:"C<sub>6</sub>H<sub>12</sub> (cyclohexane)",
+      explain:"සම්පූර්ණ hydrogenation මගින් සියලුම ද්විත්ව බන්ධන සංතෘප්ත වී cyclohexane සාදයි."}
+  ]
+},
+{
+  id:"alkane", type:"aliphatic", name:"ඇල්කේන (Alkane) — C<sub>n</sub>H<sub>2n+2</sub>",
+  formula:"CH<sub>3</sub>CH<sub>2</sub>CH<sub>3</sub>",
+  reactions:[
+    {reagent:"CH<sub>3</sub>-CH=CH<sub>2</sub> + H<sub>2</sub>/Ni,Pt (Hydrogenation)", product:"CH<sub>3</sub>CH<sub>2</sub>CH<sub>3</sub> සෑදීම",
+      explain:"ඇල්කීනයේ C=C ද්විත්ව බන්ධනය H<sub>2</sub> එකතුවීමෙන් සංතෘප්ත වී ඇල්කේන් සාදයි."},
+    {reagent:"CH<sub>3</sub>-C≡CH + H<sub>2</sub>/Ni,Pt", product:"CH<sub>3</sub>CH<sub>2</sub>CH<sub>3</sub> සෑදීම",
+      explain:"ඇල්කයිනයේ ත්‍රිත්ව බන්ධනය H<sub>2</sub> අණු 2ක් එකතුවීමෙන් සම්පූර්ණයෙන් සංතෘප්ත වේ."},
+    {reagent:"Zn(Hg)/conc. HCl (Clemmensen, ඇල්ඩිහයිඩ්/කීටෝන වලින්)", product:"CH<sub>3</sub>CH<sub>2</sub>CH<sub>3</sub> සෑදීම",
+      explain:"C=O කාණ්ඩය සම්පූර්ණයෙන් CH<sub>2</sub> බවට අඩුකරණය වේ."},
+    {reagent:"O<sub>2</sub> / Combustion", product:"CO<sub>2</sub> + H<sub>2</sub>O",
+      explain:"සම්පූර්ණ දහනයේදී ඇල්කේන CO<sub>2</sub> හා H<sub>2</sub>O බවට ඔක්සිකරණය වේ."},
+    {reagent:"Cl<sub>2</sub> / hv (Free Radical Chlorination)", product:"CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>-Cl + CH<sub>3</sub>-CHCl-CH<sub>3</sub>",
+      explain:"UV ආලෝකයේදී free radical substitution මගින් H පරමාණුවක් Cl මගින් ආදේශ වී විවිධ ස්ථානවල isomer මිශ්‍රණයක් ලැබේ."}
+  ]
+},
+{
+  id:"alkene", type:"aliphatic", name:"ඇල්කීන (Alkene) — C<sub>n</sub>H<sub>2n</sub>",
+  formula:"CH<sub>3</sub>-CH=CH<sub>2</sub>",
+  reactions:[
+    {reagent:"H<sub>2</sub>/Ni හෝ Pt (Hydrogenation)", product:"CH<sub>3</sub>CH<sub>2</sub>CH<sub>3</sub>",
+      explain:"ද්විත්ව බන්ධනයට H<sub>2</sub> එකතු වී ඇල්කේනයක් සාදයි."},
+    {reagent:"Br<sub>2</sub>/CCl<sub>4</sub> (Bromination test)", product:"CH<sub>3</sub>-CHBr-CH<sub>2</sub>Br",
+      explain:"Br<sub>2</sub> ද්විත්ව බන්ධනයට එකතු වී පාට නැති වේ — අසංතෘප්තභාවය හඳුනාගැනීමේ පරීක්ෂණය."},
+    {reagent:"HBr (Markovnikov addition)", product:"CH<sub>3</sub>-CHBr-CH<sub>3</sub> (ප්‍රධාන නිශ්පාදිතය)",
+      explain:"H<sup>+</sup> වඩාත් හයිඩ්‍රජන් සහිත කාබනයට එකතු වී වඩාත් ස්ථායි කාබොකැටායන් හරහා Markovnikov නීතියට අනුව එකතු වේ."},
+    {reagent:"HBr / R<sub>2</sub>O<sub>2</sub> (Peroxide effect)", product:"CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>-Br (anti-Markovnikov)",
+      explain:"පෙරොක්සයිඩ් ඉදිරියේ free radical යාන්ත්‍රණය හරහා ප්‍රතික්‍රියාව සිදුවී Markovnikov නීතියට පටහැනිව Br ආන්තික කාබනයට යයි."},
+    {reagent:"1) dil. H<sub>2</sub>SO<sub>4</sub>, 2) H<sub>2</sub>O (Hydration)", product:"CH<sub>3</sub>-CH(OH)-CH<sub>3</sub>",
+      explain:"ජලය Markovnikov නීතියට අනුව එකතු වී ද්විතීයික ඇල්කොහොල් සාදයි."},
+    {reagent:"dil. KMnO<sub>4</sub> / OH<sup>-</sup> (සීතල)", product:"CH<sub>3</sub>-CH(OH)-CH<sub>2</sub>OH (diol)",
+      explain:"සීතල තනුක KMnO<sub>4</sub> ද්විත්ව බන්ධනයට OH කාණ්ඩ දෙකක් එකතු කර diol එකක් සාදයි — ද්විත්ව බන්ධන පරීක්ෂණය (dark purple → colourless/brown)."}
+  ]
+},
+{
+  id:"alkyne", type:"aliphatic", name:"ඇල්කයින (Alkyne) — C<sub>n</sub>H<sub>2n-2</sub>",
+  formula:"CH<sub>3</sub>-C≡CH",
+  reactions:[
+    {reagent:"H<sub>2</sub>/Ni හෝ Pt (සම්පූර්ණ)", product:"CH<sub>3</sub>CH<sub>2</sub>CH<sub>3</sub>",
+      explain:"ත්‍රිත්ව බන්ධනයට H<sub>2</sub> අණු 2ක් එකතු වී සම්පූර්ණයෙන් සංතෘප්ත ඇල්කේනයක් සාදයි."},
+    {reagent:"H<sub>2</sub>/Pd-BaSO<sub>4</sub> (Lindlar's catalyst, පාලිත)", product:"cis-CH<sub>3</sub>-CH=CH<sub>2</sub>",
+      explain:"Lindlar's ප්‍රභේදකයෙන් ප්‍රතික්‍රියාව ඇල්කීන අවස්ථාවේදීම නවතී — cis ඇල්කීනයක් ලැබේ."},
+    {reagent:"Br<sub>2</sub>/CCl<sub>4</sub> (අතිරික්ත)", product:"CH<sub>3</sub>-CBr<sub>2</sub>-CHBr<sub>2</sub>",
+      explain:"Br<sub>2</sub> අණු 2ක් ත්‍රිත්ව බන්ධනයට එකතු වී tetrahalide එකක් සාදයි."},
+    {reagent:"HBr (අතිරික්ත)", product:"CH<sub>3</sub>-CBr<sub>2</sub>-CH<sub>3</sub>",
+      explain:"HBr අණු 2ක් Markovnikov නීතියට අනුව එකතු වී geminal dihalide එකක් සාදයි."},
+    {reagent:"Hg<sup>2+</sup>/dil. H<sub>2</sub>SO<sub>4</sub> (Hydration)", product:"CH<sub>3</sub>-CO-CH<sub>3</sub> (acetone)",
+      explain:"ජලය එකතුවීමෙන් enol එකක් සෑදී එය keto-enol tautomerism මගින් කීටෝනයක් බවට පත් වේ."},
+    {reagent:"Na (ලෝහ)", product:"CH<sub>3</sub>-C≡C<sup>-</sup>Na<sup>+</sup> + H<sub>2</sub>↑",
+      explain:"ටර්මිනල් ඇල්කයින හි අම්ලික ≡C-H, Na මගින් ප්‍රතිස්ථාපනය වී ඇසිටිලයිඩ් අයනයක් සාදයි."},
+    {reagent:"NaNH<sub>2</sub>", product:"CH<sub>3</sub>-C≡C<sup>-</sup>Na<sup>+</sup> + NH<sub>3</sub>↑",
+      explain:"ප්‍රබල භස්මයක් වන NaNH<sub>2</sub> ටර්මිනල් H ඉවත් කර ඇසිටිලයිඩ් අයනයක් සාදයි."},
+    {reagent:"NH<sub>3</sub>/AgNO<sub>3</sub>", product:"CH<sub>3</sub>-C≡C-Ag↓ (සුදු අවක්ෂේපය)",
+      explain:"ටර්මිනල් ඇල්කයින Ag<sup>+</sup> සමඟ ප්‍රතික්‍රියා කර silver acetylide අවක්ෂේපයක් සාදයි — ටර්මිනල් ඇල්කයින හඳුනාගැනීමේ පරීක්ෂණය."},
+    {reagent:"NH<sub>3</sub>/Cu<sub>2</sub>Cl<sub>2</sub> (ammoniacal)", product:"CH<sub>3</sub>-C≡C-Cu↓ (රතු-දුඹුරු අවක්ෂේපය)",
+      explain:"ammoniacal cuprous chloride සමඟ copper acetylide අවක්ෂේපයක් සාදයි."}
+  ]
+},
+{
+  id:"amide", type:"aliphatic", name:"ඇමයිඩ (Amide)",
+  formula:"CH<sub>3</sub>CH<sub>2</sub>-CO-NH<sub>2</sub>",
+  reactions:[
+    {reagent:"CH<sub>3</sub>CH<sub>2</sub>-COCl + NH<sub>3</sub>", product:"CH<sub>3</sub>CH<sub>2</sub>-CO-NH<sub>2</sub> සෑදීම",
+      explain:"acyl chloride NH<sub>3</sub> සමඟ ප්‍රතික්‍රියා කර ඇමයිඩයක් සාදයි."},
+    {reagent:"NaOH(aq), Δ (Hydrolysis)", product:"CH<sub>3</sub>CH<sub>2</sub>-COONa + NH<sub>3</sub>",
+      explain:"ක්ෂාරීය ජලවිච්ඡේදනය මගින් කාබොක්සිලේට් ලවණයක් හා NH<sub>3</sub> වායුව නිදහස් වේ."},
+    {reagent:"1) LiAlH<sub>4</sub>/dry ether, 2) H<sup>+</sup>/H<sub>2</sub>O", product:"CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>-NH<sub>2</sub> (ප්‍රාථමික ඇමයින්)",
+      explain:"C=O කාණ්ඩය CH<sub>2</sub> බවට අඩුකරණය වී ඇමයිඩය ප්‍රාථමික ඇමයිනයක් බවට පත් වේ."}
+  ]
+},
+{
+  id:"diazonium", type:"aromatic", name:"බෙන්සීන ඩයසෝනියම් ක්ලෝරයිඩ",
+  formula:"C<sub>6</sub>H<sub>5</sub>-N<sup>+</sup>≡NCl<sup>-</sup>",
+  reactions:[
+    {reagent:"H<sub>3</sub>PO<sub>2</sub>/H<sub>2</sub>O", product:"C<sub>6</sub>H<sub>6</sub> + N<sub>2</sub>↑",
+      explain:"Deamination — ඩයසෝනියම් කාණ්ඩය H මගින් ප්‍රතිස්ථාපනය වී බෙන්සීන් නැවත ලබාදෙයි."},
+    {reagent:"H<sub>2</sub>O (10-15°C)", product:"C<sub>6</sub>H<sub>5</sub>-OH + N<sub>2</sub>↑",
+      explain:"ජල විච්ඡේදනය මගින් ෆීනෝල් සෑදේ."},
+    {reagent:"CuCl (Sandmeyer)", product:"C<sub>6</sub>H<sub>5</sub>-Cl + N<sub>2</sub>↑",
+      explain:"Sandmeyer ප්‍රතික්‍රියාව මගින් ඩයසෝනියම් කාණ්ඩය Cl මගින් ප්‍රතිස්ථාපනය වේ."},
+    {reagent:"CuBr/HBr (Sandmeyer)", product:"C<sub>6</sub>H<sub>5</sub>-Br + N<sub>2</sub>↑",
+      explain:"Sandmeyer ප්‍රතික්‍රියාව මගින් ඩයසෝනියම් කාණ්ඩය Br මගින් ප්‍රතිස්ථාපනය වේ."},
+    {reagent:"KI", product:"C<sub>6</sub>H<sub>5</sub>-I + N<sub>2</sub>↑",
+      explain:"KI සමඟ සෘජුවම ප්‍රතික්‍රියා කර ඩයසෝනියම් කාණ්ඩය I මගින් ප්‍රතිස්ථාපනය වේ."},
+    {reagent:"CuCN (Sandmeyer)", product:"C<sub>6</sub>H<sub>5</sub>-CN + N<sub>2</sub>↑",
+      explain:"Sandmeyer ප්‍රතික්‍රියාව මගින් නයිට්‍රයිල් කාණ්ඩයක් ආදේශ වේ — කාබන් දාමය දිගු වේ."},
+    {reagent:"C<sub>6</sub>H<sub>5</sub>-OH / NaOH (Azo coupling)", product:"p-hydroxyazobenzene (තැඹිලි අවක්ෂේපය)",
+      explain:"ඩයසෝනියම් ලවණය ෆීනෝල් සමඟ coupling ප්‍රතික්‍රියාවකට යටත් වී azo dye (-N=N-) එකක් සාදයි."}
+  ]
+},
+{
+  id:"ester", type:"aliphatic", name:"එස්ටර (Ester)",
+  formula:"CH<sub>3</sub>CH<sub>2</sub>-CO-O-CH<sub>3</sub>",
+  reactions:[
+    {reagent:"CH<sub>3</sub>CH<sub>2</sub>COOH + CH<sub>3</sub>OH / conc. H<sub>2</sub>SO<sub>4</sub>, Δ", product:"එස්ටරය සෑදීම + H<sub>2</sub>O",
+      explain:"Fischer esterification — අම්ලය හා ඇල්කොහොල් condensation වී එස්ටරයක් හා ජලය සාදයි."},
+    {reagent:"CH<sub>3</sub>CH<sub>2</sub>COCl + CH<sub>3</sub>OH", product:"එස්ටරය සෑදීම + HCl",
+      explain:"acyl chloride ඇල්කොහොල් සමඟ ඉක්මනින් ප්‍රතික්‍රියා වී එස්ටරයක් සාදයි."},
+    {reagent:"H<sup>+</sup>/H<sub>2</sub>O (Acid hydrolysis)", product:"CH<sub>3</sub>CH<sub>2</sub>-COOH + CH<sub>3</sub>OH",
+      explain:"අම්ලික ජල විච්ඡේදනය මගින් එස්ටරය අම්ලය හා ඇල්කොහොල් බවට ආපසු වෙන් වේ (ප්‍රතිලෝම ප්‍රතික්‍රියාව)."},
+    {reagent:"dil. NaOH (Saponification)", product:"CH<sub>3</sub>CH<sub>2</sub>-COO<sup>-</sup>Na<sup>+</sup> + CH<sub>3</sub>OH",
+      explain:"ක්ෂාරීය ජල විච්ඡේදනය (saponification) මගින් කාබොක්සිලේට් ලවණයක් හා ඇල්කොහොල් සාදයි — ආපසු හැරවිය නොහැක."},
+    {reagent:"R-MgX (අතිරික්ත), 2) H<sup>+</sup>/H<sub>2</sub>O", product:"R-C(OH)(R)-CH<sub>2</sub>CH<sub>3</sub> (තෘතීයික ඇල්කොහොල්) + CH<sub>3</sub>OH",
+      explain:"ග්‍රිග්නාඩ් ප්‍රතික්‍රියාකාරකය අණු 2ක් එකතු වී තෘතීයික ඇල්කොහොල් එකක් සාදයි."},
+    {reagent:"1) LiAlH<sub>4</sub>/dry ether, 2) H<sup>+</sup>/H<sub>2</sub>O", product:"CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>OH + CH<sub>3</sub>OH",
+      explain:"එස්ටරය සම්පූර්ණයෙන් අඩුකරණය වී ඇල්කොහොල් දෙකක් ලබාදෙයි."}
+  ]
+},
+{
+  id:"acylChloride", type:"aliphatic", name:"ඇසයිල් ක්ලෝරයිඩ (Acyl Chloride)",
+  formula:"CH<sub>3</sub>CH<sub>2</sub>-CO-Cl",
+  reactions:[
+    {reagent:"CH<sub>3</sub>CH<sub>2</sub>COOH + PCl<sub>3</sub> හෝ PCl<sub>5</sub>", product:"acyl chloride සෑදීම",
+      explain:"කාබොක්සිලික් අම්ලයේ -OH කාණ්ඩය -Cl මගින් ආදේශ වේ."},
+    {reagent:"H<sub>2</sub>O", product:"CH<sub>3</sub>CH<sub>2</sub>-COOH + HCl",
+      explain:"acyl chloride ජලය සමඟ ඉතා ක්ෂණිකව ප්‍රතික්‍රියා කර නැවත අම්ලය සාදයි."},
+    {reagent:"NH<sub>3</sub>", product:"CH<sub>3</sub>CH<sub>2</sub>-CO-NH<sub>2</sub> + HCl",
+      explain:"NH<sub>3</sub> සමඟ ප්‍රතික්‍රියා කර ඇමයිඩයක් සාදයි."},
+    {reagent:"R-NH<sub>2</sub>", product:"CH<sub>3</sub>CH<sub>2</sub>-CO-NH-R + HCl",
+      explain:"ප්‍රාථමික ඇමයින් සමඟ N-ආදේශිත ඇමයිඩයක් සාදයි."},
+    {reagent:"R-OH", product:"CH<sub>3</sub>CH<sub>2</sub>-CO-O-R + HCl",
+      explain:"ඇල්කොහොල් සමඟ ඉක්මනින් ප්‍රතික්‍රියා කර එස්ටරයක් සාදයි."},
+    {reagent:"C<sub>6</sub>H<sub>5</sub>OH (Phenol)", product:"CH<sub>3</sub>CH<sub>2</sub>-CO-O-C<sub>6</sub>H<sub>5</sub> + HCl (phenyl ester)",
+      explain:"ෆීනෝල් සමඟ ප්‍රතික්‍රියා කර phenyl ester එකක් සාදයි."},
+    {reagent:"AgNO<sub>3</sub>(aq)", product:"AgCl↓ (සුදු අවක්ෂේපය)",
+      explain:"Cl<sup>-</sup> අයන Ag<sup>+</sup> සමඟ AgCl සුදු අවක්ෂේපයක් සාදයි — acyl chloride ඉතා ක්‍රියාශීලී බව පෙන්වයි."},
+    {reagent:"NaOH", product:"CH<sub>3</sub>CH<sub>2</sub>-COO<sup>-</sup>Na<sup>+</sup>",
+      explain:"ක්ෂාරීය ජල විච්ඡේදනය මගින් සෝඩියම් කාබොක්සිලේට් ලවණයක් සාදයි."}
+  ]
+},
+{
+  id:"amine", type:"aliphatic", name:"ඇමයින (Amine)",
+  formula:"CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>-NH<sub>2</sub>",
+  reactions:[
+    {reagent:"CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>-X + conc. NH<sub>3</sub>", product:"ප්‍රාථමික ඇමයිනය සෑදීම + HX",
+      explain:"NH<sub>3</sub> නියුක්ලියෝෆයිල් ලෙස X ආදේශනය කර ප්‍රාථමික ඇමයිනයක් සාදයි."},
+    {reagent:"CH<sub>3</sub>CH<sub>2</sub>-CONH<sub>2</sub> + 1) LiAlH<sub>4</sub> 2) H<sup>+</sup>/H<sub>2</sub>O", product:"ප්‍රාථමික ඇමයිනය සෑදීම",
+      explain:"ඇමයිඩයේ C=O කාණ්ඩය CH<sub>2</sub> බවට අඩුකරණය වී ප්‍රාථමික ඇමයිනයක් ලබාදෙයි."},
+    {reagent:"HCl", product:"CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>-N<sup>+</sup>H<sub>3</sub>Cl<sup>-</sup>",
+      explain:"ඇමයින් හි ක්ෂාරීය N ලවණයක් සෑදීම සඳහා H<sup>+</sup> සමඟ බැඳේ."},
+    {reagent:"NaNO<sub>2</sub>/HCl", product:"CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>-OH + N<sub>2</sub>↑ + H<sub>2</sub>O",
+      explain:"ඇලිපැටික් ප්‍රාථමික ඇමයින් ඩයසෝනියම් ලවණය අස්ථායී වන අතර ක්ෂණිකව N<sub>2</sub> නිදහස් කර ඇල්කොහොල් සාදයි."},
+    {reagent:"R-X (RX අතිරික්ත)", product:"CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>-NH-R (ද්විතීයික ඇමයින්)",
+      explain:"තවත් ඇල්කයිල් හැලයිඩ් අණුවක් සමඟ ප්‍රතික්‍රියා වී ද්විතීයික ඇමයිනයක් සාදයි."},
+    {reagent:"R-CHO", product:"CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>-N=CH-R (imine)",
+      explain:"ඇල්ඩිහයිඩය සමඟ condensation මගින් Schiff base එකක් සාදයි."},
+    {reagent:"R-COCl", product:"CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>-NH-CO-R + HCl",
+      explain:"acyl chloride සමඟ ප්‍රතික්‍රියා කර N-ආදේශිත ඇමයිඩයක් සාදයි."},
+    {reagent:"R-COOH", product:"CH<sub>3</sub>CH<sub>2</sub>CH<sub>2</sub>-NH-CO-R + H<sub>2</sub>O",
+      explain:"කාබොක්සිලික් අම්ලය සමඟ condensation මගින් ඇමයිඩයක් සාදයි."}
+  ]
+}
+];
+
+/* =========================================================
+   NOTES DATA
+   ========================================================= */
+const notesData = [
+  {cat:"අඩුකරණ (Reduction) ප්‍රතික්‍රියාකාරක", items:[
+    {n:"LiAlH<sub>4</sub> / dry ether", f:"ප්‍රබලම අඩුකාරකය. ඇල්ඩිහයිඩ්, කීටෝන, කාබොක්සිලික් අම්ල, එස්ටර, ඇමයිඩ — සියල්ලම අඩුකරණය කරයි (ඇමයිඩ → ඇමයින්, අනෙක් → ඇල්කොහොල්)."},
+    {n:"NaBH<sub>4</sub>", f:"මෘදු අඩුකාරකයකි. ඇල්ඩිහයිඩ් සහ කීටෝන පමණක් ඇල්කොහොල් බවට අඩුකරණය කරයි."},
+    {n:"Zn(Hg) / conc. HCl (Clemmensen)", f:"ඇල්ඩිහයිඩ්/කීටෝන හි C=O කාණ්ඩය සම්පූර්ණයෙන් CH<sub>2</sub> බවට අඩුකරණය කර ඇල්කේනයක් ලබාදෙයි."},
+    {n:"H<sub>2</sub>/Ni,Pd,Pt", f:"ඇල්කීන/ඇල්කයින හි ද්විත්ව/ත්‍රිත්ව බන්ධන සංතෘප්ත කිරීම සඳහා (hydrogenation)."},
+    {n:"H<sub>2</sub>/Pd-BaSO<sub>4</sub> (Lindlar's)", f:"ඇල්කයින, cis-ඇල්කීන දක්වා පමණක් අර්ධ අඩුකරණය කරයි."}
+  ]},
+  {cat:"ඔක්සිකරණ (Oxidation) ප්‍රතික්‍රියාකාරක", items:[
+    {n:"PCC (Pyridinium Chlorochromate)", f:"ප්‍රාථමික ඇල්කොහොල් ඇල්ඩිහයිඩ් අවස්ථාවේදීම නවත්වයි (අර්ධ ඔක්සිකරණය)."},
+    {n:"H<sup>+</sup>/KMnO<sub>4</sub>, K<sub>2</sub>Cr<sub>2</sub>O<sub>7</sub>, CrO<sub>3</sub>", f:"ප්‍රාථමික ඇල්කොහොල්/ඇල්ඩිහයිඩ් සම්පූර්ණයෙන් කාබොක්සිලික් අම්ල දක්වා ඔක්සිකරණය කරයි. ද්විතීයික ඇල්කොහොල් → කීටෝන. කීටෝන ඉන් ඔක්සිකරණය නොවේ."},
+    {n:"Tollens' Reagent (NH<sub>3</sub>/AgNO<sub>3</sub>)", f:"ඇල්ඩිහයිඩ් හඳුනාගැනීම — silver mirror සාදයි. කීටෝන සමඟ ප්‍රතික්‍රියා නොකරයි."},
+    {n:"Fehling's Solution (Cu<sup>2+</sup>)", f:"ඇල්ඩිහයිඩ් හඳුනාගැනීම — Cu<sub>2</sub>O ගඩොල් රතු අවක්ෂේපය සාදයි."}
+  ]},
+  {cat:"හැලයිඩ්/ඇසිල් ප්‍රතික්‍රියාකාරක", items:[
+    {n:"PCl<sub>3</sub>, PCl<sub>5</sub>, PBr<sub>3</sub>, SOCl<sub>2</sub>", f:"ඇල්කොහොල් හෝ කාබොක්සිලික් අම්ල හි -OH කාණ්ඩය හැලයිඩයක් (-Cl/-Br) බවට පත් කරයි."},
+    {n:"conc. H<sub>2</sub>SO<sub>4</sub> (170°C)", f:"ඇල්කොහොල් ජලාපනයනය (dehydration) කර ඇල්කීන සාදයි."},
+    {n:"conc. H<sub>2</sub>SO<sub>4</sub> (Esterification, Δ)", f:"කාබොක්සිලික් අම්ලය හා ඇල්කොහොල් අතර condensation ප්‍රවර්ධනය කරන උත්ප්‍රේරකයකි."}
+  ]},
+  {cat:"ග්‍රිග්නාඩ් හා ඔගැනෝමෙටැලික්", items:[
+    {n:"Mg / dry ether", f:"ඇල්කයිල් හැලයිඩය ග්‍රිග්නාඩ් ප්‍රතික්‍රියාකාරකය (R-MgX) බවට පත් කරයි."},
+    {n:"R-MgX + ඇල්ඩිහයිඩ්", f:"ද්විතීයික ඇල්කොහොල් සාදයි (H<sup>+</sup>/H<sub>2</sub>O සමඟ)."},
+    {n:"R-MgX + කීටෝන", f:"තෘතීයික ඇල්කොහොල් සාදයි (H<sup>+</sup>/H<sub>2</sub>O සමඟ)."},
+    {n:"R-MgX + එස්ටර් (අතිරික්ත)", f:"තෘතීයික ඇල්කොහොල් සාදයි (එස්ටර් අණු 2ක් සමඟ ප්‍රතික්‍රියා වේ)."}
+  ]},
+  {cat:"ආරෝමැටික/ඩයසෝනියම් ප්‍රතික්‍රියාකාරක", items:[
+    {n:"NaNO<sub>2</sub>/HCl (0-5°C)", f:"ඇරෝමැටික ප්‍රාථමික ඇමයින් ඩයසෝනියම් ලවණය බවට පත් කරයි."},
+    {n:"H<sub>3</sub>PO<sub>2</sub>/H<sub>2</sub>O", f:"ඩයසෝනියම් කාණ්ඩය H මගින් ප්‍රතිස්ථාපනය කර (deamination) බෙන්සීන් නැවත ලබාදෙයි."},
+    {n:"Sandmeyer ප්‍රතික්‍රියාව (CuCl/CuBr/CuCN)", f:"ඩයසෝනියම් කාණ්ඩය Cl, Br හෝ CN මගින් ප්‍රතිස්ථාපනය කරයි."},
+    {n:"AlCl<sub>3</sub> (Friedel-Crafts උත්ප්‍රේරකය)", f:"බෙන්සීන් හි ඇල්කයිලේෂණය/ඇසිලේෂණය ප්‍රවර්ධනය කරන Lewis අම්ලයකි."},
+    {n:"neutral FeCl<sub>3</sub>", f:"ෆීනෝල් හඳුනාගැනීම — දම් පාට සංකීර්ණයක් සාදයි."}
+  ]},
+  {cat:"හඳුනාගැනීමේ පරීක්ෂණ (Test Reagents)", items:[
+    {n:"2,4-DNP (Brady's Reagent)", f:"ඇල්ඩිහයිඩ්/කීටෝන (C=O) හඳුනාගැනීම — තැඹිලි ස්ඵටික අවක්ෂේපය."},
+    {n:"Br<sub>2</sub> ජලය", f:"අසංතෘප්තභාවය (ඇල්කීන/ෆීනෝල්/ඇනිලීන්) හඳුනාගැනීම — පාට නැති වීම/සුදු අවක්ෂේපය."},
+    {n:"Na<sub>2</sub>CO<sub>3</sub>", f:"කාබොක්සිලික් අම්ල හඳුනාගැනීම — CO<sub>2</sub> බුබුලු නිකුත් වේ."},
+    {n:"NaNH<sub>2</sub> / NH<sub>3</sub>-AgNO<sub>3</sub> / NH<sub>3</sub>-Cu<sub>2</sub>Cl<sub>2</sub>", f:"ටර්මිනල් ඇල්කයින (≡C-H) හඳුනාගැනීම — ලෝහ ඇසිටිලයිඩ් අවක්ෂේප සාදයි."}
+  ]}
+];
+
+/* =========================================================
+   EXPLORER LOGIC
+   ========================================================= */
+let selectedCompound = null;
+let selectedReactionIdx = null;
+
+const grid = document.getElementById("compoundGrid");
+const searchBox = document.getElementById("searchBox");
+
+function renderCompoundGrid(filter=""){
+  grid.innerHTML = "";
+  const f = filter.trim().toLowerCase();
+  compounds.forEach(c=>{
+    const plain = c.name.toLowerCase();
+    if(f && !plain.includes(f)) return;
+    const btn = document.createElement("div");
+    btn.className = "compound-btn" + (selectedCompound && selectedCompound.id===c.id ? " sel":"");
+    btn.innerHTML = `<small>${c.type==='aromatic'?'ඇරෝමැටික':'ඇලිපැටික්'}</small><span class="cf formula">${c.name.split('(')[0]}</span>`;
+    btn.onclick = ()=>selectCompound(c.id);
+    grid.appendChild(btn);
+  });
+}
+
+function selectCompound(id){
+  selectedCompound = compounds.find(c=>c.id===id);
+  selectedReactionIdx = null;
+  renderCompoundGrid(searchBox.value);
+  renderCentral();
+  renderReagents();
+  document.getElementById("answerPanel").classList.remove("show");
+}
+
+function renderCentral(){
+  const wrap = document.getElementById("centralWrap");
+  if(!selectedCompound){ wrap.innerHTML=""; return; }
+  wrap.innerHTML = `
+    <div class="central-card">
+      <span class="tag">${selectedCompound.type==='aromatic'?'ඇරෝමැටික සංයෝගය':'ඇලිපැටික් සංයෝගය'}</span>
+      <h2 class="formula">${selectedCompound.formula}</h2>
+      <p>${selectedCompound.name}</p>
+    </div>
+    <div class="hint">👇 පහත ප්‍රතික්‍රියාකාරකයක් ඔබා පරිවර්තනය බලන්න</div>
+  `;
+}
+
+function renderReagents(){
+  const wrap = document.getElementById("reagentWrap");
+  if(!selectedCompound){ wrap.innerHTML=""; return; }
+  const gridHtml = selectedCompound.reactions.map((r,i)=>
+    `<div class="reagent-btn formula${selectedReactionIdx===i?' active':''}" data-i="${i}">${r.reagent}</div>`
+  ).join("");
+  wrap.innerHTML = `<div class="reagent-grid">${gridHtml}</div>`;
+  wrap.querySelectorAll(".reagent-btn").forEach(btn=>{
+    btn.onclick = ()=>{
+      selectedReactionIdx = parseInt(btn.dataset.i);
+      renderReagents();
+      showAnswer();
+    };
+  });
+}
+
+function showAnswer(){
+  const r = selectedCompound.reactions[selectedReactionIdx];
+  document.getElementById("ansReagent").innerHTML = "ප්‍රතික්‍රියාකාරකය: " + r.reagent;
+  document.getElementById("ansProduct").innerHTML = "→ " + r.product;
+  document.getElementById("ansExplain").innerHTML = r.explain;
+  const panel = document.getElementById("answerPanel");
+  panel.classList.add("show");
+  panel.scrollIntoView({behavior:"smooth", block:"nearest"});
+}
+
+searchBox.addEventListener("input", ()=>renderCompoundGrid(searchBox.value));
+renderCompoundGrid();
+
+/* =========================================================
+   TABS
+   ========================================================= */
+document.querySelectorAll("nav.tabs button").forEach(btn=>{
+  btn.onclick = ()=>{
+    document.querySelectorAll("nav.tabs button").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    document.querySelectorAll("section.view").forEach(v=>v.classList.remove("active"));
+    document.getElementById("view-"+btn.dataset.view).classList.add("active");
+  };
+});
+
+/* =========================================================
+   QUIZ LOGIC
+   ========================================================= */
+// flatten all reactions with parent compound reference
+const pool = [];
+compounds.forEach(c=>{
+  c.reactions.forEach(r=>{
+    pool.push({compound:c, reagent:r.reagent, product:r.product, explain:r.explain});
+  });
+});
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+let quizQuestions = [];
+let quizIdx = 0;
+let score = 0;
+
+function buildQuiz(){
+  const shuffled = shuffle(pool);
+  quizQuestions = shuffled.slice(0,10).map(item=>{
+    const type = Math.random() < 0.5 ? "product" : "reagent";
+    let correct, questionText, options;
+    if(type === "product"){
+      correct = item.product;
+      questionText = `<span class="formula">${item.compound.formula}</span> සංයෝගයට <span class="formula">${item.reagent}</span> ප්‍රතික්‍රියාකාරකය දැමූ විට ලැබෙන ප්‍රධාන නිශ්පාදිතය කුමක්ද?`;
+      const distractors = shuffle(pool.filter(p=>p.product!==correct)).slice(0,3).map(p=>p.product);
+      options = shuffle([correct, ...distractors]);
+    } else {
+      correct = item.reagent;
+      questionText = `<span class="formula">${item.compound.formula}</span> සංයෝගය <span class="formula">${item.product}</span> බවට පත් කිරීමට යෙදිය යුතු නිවැරදි ප්‍රතික්‍රියාකාරකය තෝරන්න.`;
+      const distractors = shuffle(pool.filter(p=>p.reagent!==correct)).slice(0,3).map(p=>p.reagent);
+      options = shuffle([correct, ...distractors]);
+    }
+    return {questionText, options, correct, explain:item.explain};
+  });
+  quizIdx = 0; score = 0;
+  document.getElementById("scoreVal").textContent = "0";
+  document.getElementById("scoreTotal").textContent = "10";
+  renderQuizQuestion();
+}
+
+function renderQuizQuestion(){
+  document.getElementById("qProgress").textContent = (quizIdx+1)+" / "+quizQuestions.length;
+  const q = quizQuestions[quizIdx];
+  const area = document.getElementById("quizArea");
+  area.innerHTML = `
+    <div class="q-card">
+      <div class="q-count">ප්‍රශ්නය ${quizIdx+1}</div>
+      <div class="q-text">${q.questionText}</div>
+      <div id="optsWrap"></div>
+      <div class="feedback" id="fb"></div>
+    </div>
+  `;
+  const optsWrap = document.getElementById("optsWrap");
+  q.options.forEach(opt=>{
+    const b = document.createElement("div");
+    b.className = "opt-btn formula";
+    b.innerHTML = opt;
+    b.onclick = ()=>answerQuiz(opt, b);
+    optsWrap.appendChild(b);
+  });
+}
+
+function answerQuiz(chosen, btnEl){
+  const q = quizQuestions[quizIdx];
+  const allBtns = document.querySelectorAll(".opt-btn");
+  allBtns.forEach(b=>b.classList.add("disabled"));
+  const isCorrect = chosen === q.correct;
+  if(isCorrect){ score++; document.getElementById("scoreVal").textContent = score; btnEl.classList.add("correct"); }
+  else {
+    btnEl.classList.add("wrong");
+    allBtns.forEach(b=>{ if(b.innerHTML===q.correct) b.classList.add("correct"); });
+  }
+  const fb = document.getElementById("fb");
+  fb.className = "feedback show " + (isCorrect ? "ok":"no");
+  fb.innerHTML = (isCorrect ? "✅ නිවැරදියි! " : "❌ වැරදියි. නිවැරදි පිළිතුර: <span class='formula'>"+q.correct+"</span><br>") + q.explain;
+
+  const nextBtn = document.createElement("button");
+  nextBtn.className = "btn-primary";
+  nextBtn.style.marginTop = "14px";
+  nextBtn.textContent = (quizIdx < quizQuestions.length-1) ? "ඊළඟ ප්‍රශ්නය ▶" : "ප්‍රතිඵලය බලන්න 🏁";
+  nextBtn.onclick = ()=>{
+    quizIdx++;
+    if(quizIdx < quizQuestions.length) renderQuizQuestion();
+    else renderQuizEnd();
+  };
+  document.querySelector(".q-card").appendChild(nextBtn);
+}
+
+function renderQuizEnd(){
+  const area = document.getElementById("quizArea");
+  const pct = Math.round((score/quizQuestions.length)*100);
+  let msg = "හොඳින් උත්සාහ කරන්න!";
+  if(pct>=80) msg = "විශිෂ්ටයි! ඔබ මාතෘකාව හොඳින් තේරුම් ගෙන ඇත 🎉";
+  else if(pct>=50) msg = "හොඳයි! තව ටිකක් පුනරීක්ෂණය කරන්න.";
+  area.innerHTML = `
+    <div class="q-card quiz-end">
+      <div class="big">${score} / ${quizQuestions.length}</div>
+      <p style="color:var(--text-dim); margin:8px 0 18px;">${msg}</p>
+      <button class="btn-primary" id="restartBtn">නැවත උත්සාහ කරන්න ↻</button>
+    </div>
+  `;
+  document.getElementById("restartBtn").onclick = buildQuiz;
+}
+
+document.getElementById("startQuizBtn").onclick = buildQuiz;
+
+/* =========================================================
+   NOTES RENDER
+   ========================================================= */
+const notesArea = document.getElementById("notesArea");
+notesData.forEach(cat=>{
+  const title = document.createElement("div");
+  title.className = "cat-title";
+  title.textContent = cat.cat;
+  notesArea.appendChild(title);
+  cat.items.forEach(item=>{
+    const box = document.createElement("div");
+    box.className = "note-item";
+    box.innerHTML = `
+      <div class="note-head">
+        <span class="rname formula">${item.n}</span>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="note-body"><div class="note-body-inner">${item.f}</div></div>
+    `;
+    box.querySelector(".note-head").onclick = ()=>{
+      const isOpen = box.classList.contains("open");
+      notesArea.querySelectorAll(".note-item.open").forEach(o=>o.classList.remove("open"));
+      if(!isOpen) box.classList.add("open");
+    };
+    notesArea.appendChild(box);
+  });
+});
+</script>
+</body>
+</html>
