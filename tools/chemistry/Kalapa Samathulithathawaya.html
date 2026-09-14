@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>කලාප සමතුලිතතාව | Phase Equilibrium Lab</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600;700&family=Spectral+SC:wght@600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+Sinhala:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#EEF1EA;
+    --panel:#FFFDF8;
+    --ink:#1C2B2A;
+    --ink-soft:#4B5B58;
+    --line:#D8DBCE;
+    --solid:#375A82;
+    --liquid:#1E8A72;
+    --vapor:#E0862A;
+    --critical:#B23A48;
+    --mustard:#B98A1A;
+  }
+  *{box-sizing:border-box;}
+  html,body{background:var(--canvas); color:var(--ink); font-family:'Noto Sans Sinhala','Inter',sans-serif; -webkit-tap-highlight-color:transparent;}
+  .font-display{font-family:'Spectral','Noto Sans Sinhala',serif;}
+  .font-mono{font-family:'JetBrains Mono',monospace;}
+  .grid-paper{
+    background-image:
+      linear-gradient(rgba(28,43,42,0.055) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(28,43,42,0.055) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    box-shadow: 0 1px 0 rgba(28,43,42,0.04), 0 8px 20px -12px rgba(28,43,42,0.18);
+  }
+  .tab-btn{ transition: color .2s ease, transform .15s ease; }
+  .tab-btn.active{ color:var(--ink); }
+  .tab-btn.active .tab-dot{ opacity:1; transform:scale(1); }
+  .tab-dot{ opacity:0; transform:scale(.4); transition:.2s ease; }
+  .tab-panel{ display:none; }
+  .tab-panel.active{ display:block; animation: rise .35s ease; }
+  @keyframes rise{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+  .accordion-body{ max-height:0; overflow:hidden; transition:max-height .35s ease; }
+  .accordion.open .accordion-body{ max-height:1400px; }
+  .accordion.open .chev{ transform:rotate(180deg); }
+  .chev{ transition: transform .3s ease; }
+  input[type=range]{ -webkit-appearance:none; height:6px; border-radius:999px; background:var(--line); }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:20px; height:20px; border-radius:50%;
+    background:var(--panel); border:3px solid var(--solid); cursor:pointer; margin-top:-1px;
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+  }
+  input[type=range]::-moz-range-thumb{
+    width:20px; height:20px; border-radius:50%; background:var(--panel); border:3px solid var(--solid); cursor:pointer;
+  }
+  .flip-card{ perspective:1200px; height:150px; }
+  .flip-inner{ position:relative; width:100%; height:100%; transition:transform .5s; transform-style:preserve-3d; }
+  .flip-card.flipped .flip-inner{ transform:rotateY(180deg); }
+  .flip-face{ position:absolute; inset:0; backface-visibility:hidden; border-radius:12px; display:flex; align-items:center; justify-content:center; text-align:center; padding:12px; }
+  .flip-back{ transform:rotateY(180deg); }
+  .toggle-pill{ transition:.25s ease; }
+  ::-webkit-scrollbar{ width:6px; height:6px; }
+  ::-webkit-scrollbar-thumb{ background:var(--line); border-radius:99px; }
+  .orbit{ animation: orbit 6s linear infinite; transform-origin: 30px 30px; }
+  @keyframes orbit{ from{ transform: rotate(0deg);} to{ transform: rotate(360deg);} }
+  @media (prefers-reduced-motion: reduce){
+    .orbit{ animation:none; }
+    .tab-panel.active{ animation:none; }
+  }
+</style>
+</head>
+<body class="min-h-screen grid-paper">
+
+<div class="max-w-md mx-auto min-h-screen flex flex-col relative">
+
+  <!-- HEADER -->
+  <header class="sticky top-0 z-30 backdrop-blur bg-[var(--canvas)]/90 border-b border-[var(--line)]">
+    <div class="flex items-center justify-between px-4 pt-4 pb-3">
+      <div class="flex items-center gap-3">
+        <svg width="34" height="34" viewBox="0 0 60 60" class="shrink-0">
+          <circle cx="30" cy="30" r="27" fill="none" stroke="var(--ink)" stroke-width="1" opacity="0.15"/>
+          <path d="M14 40 C 18 24, 26 14, 30 10 C 34 14, 42 24, 46 40 C 40 46, 20 46, 14 40 Z" fill="none" stroke="var(--solid)" stroke-width="1.4" opacity="0.55"/>
+          <g class="orbit">
+            <circle cx="30" cy="6" r="3" fill="var(--vapor)"/>
+          </g>
+          <circle cx="30" cy="30" r="2.6" fill="var(--critical)"/>
+        </svg>
+        <div>
+          <h1 class="font-display font-semibold text-[17px] leading-tight">කලාප සමතුලිතතාව</h1>
+          <p class="text-[10.5px] font-mono tracking-wide text-[var(--ink-soft)] uppercase">Unit 12 · Phase Equilibrium Lab</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="flex-1 px-4 pt-4 pb-28 overflow-x-hidden">
+
+    <!-- ========================= TAB 1: THEORY ========================= -->
+    <section id="tab-theory" class="tab-panel active space-y-3">
+      <p class="text-xs font-mono uppercase tracking-widest text-[var(--ink-soft)] mb-1">01 · සිද්ධාන්ත සාරාංශ</p>
+
+      <!-- Card: SVP -->
+      <div class="accordion panel open">
+        <button onclick="toggleAcc(this)" class="w-full flex items-center justify-between px-4 py-3.5 text-left">
+          <span class="font-display font-semibold text-[15px]">වාෂ්ප පීඩන සමතුලිතතාවය <span class="text-[var(--ink-soft)] font-sans text-xs">(SVP Equilibrium)</span></span>
+          <svg class="chev w-4 h-4 shrink-0 ml-2" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="accordion-body px-4">
+          <div class="pb-4 text-[13.5px] leading-relaxed text-[var(--ink-soft)] space-y-2 border-t border-[var(--line)] pt-3">
+            <p>සංවෘත භාජනයක ද්‍රවයක් තැබූ විට <b class="text-[var(--ink)]">වාෂ්පීකරණය</b> (R<sub>f</sub>) සහ <b class="text-[var(--ink)]">ඝනීභවනය</b> (R<sub>b</sub>) එකම වේගයකින් සිදුවන අවස්ථාවේදී ගතික සමතුලිතතාවයක් (dynamic equilibrium) ඇතිවේ: R<sub>f</sub> = R<sub>b</sub>.</p>
+            <p>මෙම අවස්ථාවේ ද්‍රවය මතට ඇති කරන පීඩනය <b class="text-[var(--ink)]">සන්තෘප්ත වාෂ්ප පීඩනය</b> (Saturated Vapour Pressure - SVP) ලෙස හැඳින්වේ.</p>
+            <p>SVP රඳා පවතින්නේ ද්‍රවයේ <b>අන්තර් අණුක බලවේග</b> (intermolecular forces) සහ <b>උෂ්ණත්වය</b> මතයි — උෂ්ණත්වය වැඩිවීමේදී SVP ඝාතීයව (exponentially) වැඩිවේ.</p>
+            <p><b class="text-[var(--ink)]">සම මාන්‍ය තාපාංකය</b> (Standard boiling point) යනු SVP = 1 atm බවට පත්වන උෂ්ණත්වයයි.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card: Raoult -->
+      <div class="accordion panel">
+        <button onclick="toggleAcc(this)" class="w-full flex items-center justify-between px-4 py-3.5 text-left">
+          <span class="font-display font-semibold text-[15px]">රවුල්ට් නියමය හා පරිපූර්ණ ද්‍රාවණ <span class="text-[var(--ink-soft)] font-sans text-xs">(Raoult's Law)</span></span>
+          <svg class="chev w-4 h-4 shrink-0 ml-2" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="accordion-body px-4">
+          <div class="pb-4 text-[13.5px] leading-relaxed text-[var(--ink-soft)] space-y-2 border-t border-[var(--line)] pt-3">
+            <p><b class="text-[var(--ink)]">පරිපූර්ණ ද්විසංයුජ මිශ්‍රණයක්</b> (Ideal binary mixture) යනු A සහ B යන අන්තර්ක්‍රියා බලවේග එකිනෙකට සමාන වන මිශ්‍රණයකි:</p>
+            <p class="font-mono text-center bg-[var(--canvas)] rounded-lg py-2 text-[var(--ink)]">f<sub>A-A</sub> = f<sub>B-B</sub> = f<sub>A-B</sub></p>
+            <p>රවුල්ට් නියමය අනුව, එක් සංඝටකයක අර්ධ වාෂ්ප පීඩනය එහි ද්‍රව ඉන් මවුල අංශයට (mole fraction) සමානුපාතිකයි:</p>
+            <p class="font-mono text-center bg-[var(--canvas)] rounded-lg py-2 text-[var(--ink)]">P<sub>A</sub> = P<sub>A</sub>° × X<sub>A</sub> &nbsp;&nbsp;|&nbsp;&nbsp; P<sub>B</sub> = P<sub>B</sub>° × X<sub>B</sub></p>
+            <p>ඩෝල්ටන්ගේ අර්ධ පීඩන නියමයෙන්, මුළු වාෂ්ප පීඩනය: <span class="font-mono text-[var(--ink)]">P<sub>tot</sub> = P<sub>A</sub> + P<sub>B</sub></span> — Xa එදිරිව P වීමසුමේදී මෙය ඍජුරේඛීයව (linearly) වෙනස් වේ.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card: Deviations -->
+      <div class="accordion panel">
+        <button onclick="toggleAcc(this)" class="w-full flex items-center justify-between px-4 py-3.5 text-left">
+          <span class="font-display font-semibold text-[15px]">රවුල්ට් නියමයෙන් අපගමන <span class="text-[var(--ink-soft)] font-sans text-xs">(Deviations)</span></span>
+          <svg class="chev w-4 h-4 shrink-0 ml-2" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="accordion-body px-4">
+          <div class="pb-4 text-[13.5px] leading-relaxed text-[var(--ink-soft)] space-y-3 border-t border-[var(--line)] pt-3">
+            <div class="rounded-lg border border-[var(--line)] p-3">
+              <p class="font-semibold text-[var(--critical)] mb-1">ඍණ අපගමනය (Negative Deviation)</p>
+              <p class="font-mono text-[12px]">f<sub>A-B</sub> &gt; f<sub>A-A</sub>, f<sub>B-B</sub></p>
+              <p class="mt-1">මිශ්‍රණයේ ආකර්ෂණ බලවේග වඩා ප්‍රබලයි ⇒ P<sub>tot</sub> අපේක්ෂිතයට වඩා අඩුයි.</p>
+              <p class="text-[12px] mt-1">උදා: ඇසිටෝන් + ක්ලෝරෝෆෝම් (CH₃COCH₃ + CHCl₃), නයිට්‍රික් අම්ලය + ජලය</p>
+            </div>
+            <div class="rounded-lg border border-[var(--line)] p-3">
+              <p class="font-semibold text-[var(--vapor)] mb-1">ධන අපගමනය (Positive Deviation)</p>
+              <p class="font-mono text-[12px]">f<sub>A-B</sub> &lt; f<sub>A-A</sub>, f<sub>B-B</sub></p>
+              <p class="mt-1">මිශ්‍රණයේ ආකර්ෂණ බලවේග දුර්වලයි ⇒ P<sub>tot</sub> අපේක්ෂිතයට වඩා වැඩියි.</p>
+              <p class="text-[12px] mt-1">උදා: එතනෝල් + ජලය, එතනෝල් + CS₂</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card: Fractional distillation -->
+      <div class="accordion panel">
+        <button onclick="toggleAcc(this)" class="w-full flex items-center justify-between px-4 py-3.5 text-left">
+          <span class="font-display font-semibold text-[15px]">භාගික ආසවනය <span class="text-[var(--ink-soft)] font-sans text-xs">(Fractional Distillation)</span></span>
+          <svg class="chev w-4 h-4 shrink-0 ml-2" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="accordion-body px-4">
+          <div class="pb-4 text-[13.5px] leading-relaxed text-[var(--ink-soft)] space-y-2 border-t border-[var(--line)] pt-3">
+            <p>වාෂ්පශීලී ද්‍රව මිශ්‍රණයක් ඒවායේ <b class="text-[var(--ink)]">තාපාංක වෙනස</b> (boiling point difference) මත පදනම්ව වෙන් කිරීමට භාවිත කරන ක්‍රමයයි.</p>
+            <p>පුනරාවර්තිත වාෂ්පීකරණය හා ඝනීභවනය හරහා, එක් එක් අවධියේදී වාෂ්පය වඩාත් වාෂ්පශීලී සංඝටකයෙන් (A) පොහොසත් වේ.</p>
+            <p>T–X රූප සටහනක ද්‍රව රේඛාව (T<sub>L</sub>) සහ වාෂ්ප රේඛාව (T<sub>V</sub>) අතර පරතරය භාගික ආසවනයේ කාර්යක්ෂමතාවය තීරණය කරයි.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card: Water phase diagram -->
+      <div class="accordion panel">
+        <button onclick="toggleAcc(this)" class="w-full flex items-center justify-between px-4 py-3.5 text-left">
+          <span class="font-display font-semibold text-[15px]">ජලයේ කලාප සටහන <span class="text-[var(--ink-soft)] font-sans text-xs">(Water Phase Diagram)</span></span>
+          <svg class="chev w-4 h-4 shrink-0 ml-2" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="accordion-body px-4">
+          <div class="pb-4 text-[13.5px] leading-relaxed text-[var(--ink-soft)] space-y-2 border-t border-[var(--line)] pt-3">
+            <p><b class="text-[var(--ink)]">ත්‍රිත්ව ලක්ෂ්‍යය</b> (Triple Point, T): 273.16 K සහ 0.006 atm හිදී ඝන, ද්‍රව හා වායු යන අවස්ථා තුනම එකවර ගතික සමතුලිතතාවයේ පවතී.</p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li><b class="text-[var(--solid)]">TA වක්‍රය</b> — ඝන-වායු සමතුලිතතාවය (උත්පතනය / Sublimation)</li>
+              <li><b class="text-[var(--critical)]">TB වක්‍රය</b> — ඝන-ද්‍රව සමතුලිතතාවය (Melting). අයිස් ජලයට වඩා අඩු ඝනත්වයක් ඇති නිසා මෙම වක්‍රයට <b>ඍණ අනුක්‍රමණයක්</b> (negative slope) ඇත.</li>
+              <li><b class="text-[var(--liquid)]">TC වක්‍රය</b> — ද්‍රව-වායු සමතුලිතතාවය (වාෂ්පීකරණය / Vaporization)</li>
+            </ul>
+            <p><b class="text-[var(--ink)]">අවධි ලක්ෂ්‍යය</b> (Critical Point, C): 647.09 K සහ 217.7 atm ට වඩා ඉහළ දී ද්‍රව හා වායු අතර වෙනසක් නොපෙනේ.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card: KD -->
+      <div class="accordion panel">
+        <button onclick="toggleAcc(this)" class="w-full flex items-center justify-between px-4 py-3.5 text-left">
+          <span class="font-display font-semibold text-[15px]">බෙදුම් සංගුණකය <span class="text-[var(--ink-soft)] font-sans text-xs">(Nernst Distribution Law - K<sub>D</sub>)</span></span>
+          <svg class="chev w-4 h-4 shrink-0 ml-2" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="accordion-body px-4">
+          <div class="pb-4 text-[13.5px] leading-relaxed text-[var(--ink-soft)] space-y-2 border-t border-[var(--line)] pt-3">
+            <p>එකිනෙකට අවිද්‍රාව්‍ය ද්‍රාවක දෙකක් අතර ද්‍රාවණීය ද්‍රව්‍යයක් (solute) නියත උෂ්ණත්වයක දී ස්ථාවර අනුපාතයකින් බෙදී යයි:</p>
+            <p class="font-mono text-center bg-[var(--canvas)] rounded-lg py-2 text-[var(--ink)]">K<sub>D</sub> = [A<sub>(oil)</sub>] / [A<sub>(aq)</sub>]</p>
+            <p class="font-semibold text-[var(--ink)]">වලංගු වීමේ කොන්දේසි:</p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li>ද්‍රාවක දෙක එකිනෙකට අවිද්‍රාව්‍ය විය යුතුය.</li>
+              <li>ද්‍රාවක දෙකෙහිම ද්‍රාවණීය ද්‍රව්‍යය එකම අණුක තත්ත්වයේ පැවතිය යුතුය (සංගමයට හෝ අඝටනයට ලක් නොවිය යුතුය).</li>
+              <li>ද්‍රාවණය නියත උෂ්ණත්වයක පැවතිය යුතුය.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= TAB 2: GRAPHS ========================= -->
+    <section id="tab-graphs" class="tab-panel space-y-4">
+      <p class="text-xs font-mono uppercase tracking-widest text-[var(--ink-soft)] mb-1">02 · අන්තර්ක්‍රියාකාරී ප්‍රස්ථාර</p>
+
+      <!-- Ideal solution graph -->
+      <div class="panel p-4">
+        <h2 class="font-display font-semibold text-[15px] mb-1">පරිපූර්ණ ද්‍රාවණය — රවුල්ට් නියමය</h2>
+        <p class="text-[12px] text-[var(--ink-soft)] mb-3">Pa°, Pb° ස්ලයිඩර මගින් සකසා, Pa, Pb, Ptotal Xa එදිරිව සජීවීව බලන්න.</p>
+        <div class="h-56"><canvas id="idealChart"></canvas></div>
+        <div class="mt-4 space-y-3">
+          <div>
+            <div class="flex justify-between text-[12px] font-mono mb-1"><span>P<sub>A</sub>° (kPa)</span><span id="idealPaVal" class="text-[var(--solid)] font-semibold">80</span></div>
+            <input id="idealPaSlider" type="range" min="10" max="150" value="80" class="w-full" oninput="updateIdealChart()">
+          </div>
+          <div>
+            <div class="flex justify-between text-[12px] font-mono mb-1"><span>P<sub>B</sub>° (kPa)</span><span id="idealPbVal" class="text-[var(--liquid)] font-semibold">40</span></div>
+            <input id="idealPbSlider" type="range" min="10" max="150" value="40" class="w-full" oninput="updateIdealChart()">
+          </div>
+        </div>
+        <div class="flex gap-3 mt-3 text-[11px] font-mono">
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full inline-block" style="background:var(--solid)"></span>P<sub>A</sub></span>
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full inline-block" style="background:var(--liquid)"></span>P<sub>B</sub></span>
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full inline-block" style="background:var(--ink)"></span>P<sub>tot</sub></span>
+        </div>
+      </div>
+
+      <!-- Deviation graph -->
+      <div class="panel p-4">
+        <h2 class="font-display font-semibold text-[15px] mb-1">රවුල්ට් නියමයෙන් අපගමන</h2>
+        <div class="flex gap-2 mb-3">
+          <button id="btnPos" onclick="setDeviation('pos')" class="toggle-pill flex-1 text-[12.5px] font-medium py-2 rounded-full border border-[var(--line)]">ධන අපගමනය (+)</button>
+          <button id="btnNeg" onclick="setDeviation('neg')" class="toggle-pill flex-1 text-[12.5px] font-medium py-2 rounded-full border border-[var(--line)]">ඍණ අපගමනය (−)</button>
+        </div>
+        <div class="h-56"><canvas id="devChart"></canvas></div>
+        <p id="devNote" class="text-[12px] text-[var(--ink-soft)] mt-3 leading-relaxed"></p>
+      </div>
+
+      <!-- Water phase diagram -->
+      <div class="panel p-4">
+        <h2 class="font-display font-semibold text-[15px] mb-1">ජලයේ කලාප සටහන</h2>
+        <p class="text-[12px] text-[var(--ink-soft)] mb-3">P (log පරිමාණය, atm) එදිරිව T (K). ලක්ෂ්‍ය මත ස්පර්ශ කර විස්තර බලන්න.</p>
+        <div class="h-64"><canvas id="waterChart"></canvas></div>
+        <div class="grid grid-cols-3 gap-2 mt-3 text-[11px] font-mono text-center">
+          <div class="rounded-lg bg-[var(--canvas)] py-1.5"><span style="color:var(--solid)">■</span> TA — උත්පතනය</div>
+          <div class="rounded-lg bg-[var(--canvas)] py-1.5"><span style="color:var(--critical)">■</span> TB — ද්‍රවීකරණය</div>
+          <div class="rounded-lg bg-[var(--canvas)] py-1.5"><span style="color:var(--liquid)">■</span> TC — වාෂ්පීකරණය</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= TAB 3: CALCULATORS ========================= -->
+    <section id="tab-calc" class="tab-panel space-y-4">
+      <p class="text-xs font-mono uppercase tracking-widest text-[var(--ink-soft)] mb-1">03 · ගණනය කිරීම්</p>
+
+      <!-- Raoult calculator -->
+      <div class="panel p-4">
+        <h2 class="font-display font-semibold text-[15px] mb-3">රවුල්ට් නියම ගණකය</h2>
+        <div class="space-y-3">
+          <div>
+            <label class="text-[12px] font-mono text-[var(--ink-soft)]">P<sub>A</sub>° (kPa)</label>
+            <input id="rPa0" type="number" value="80" class="w-full mt-1 rounded-lg border border-[var(--line)] px-3 py-2 font-mono text-sm bg-[var(--canvas)]">
+          </div>
+          <div>
+            <label class="text-[12px] font-mono text-[var(--ink-soft)]">P<sub>B</sub>° (kPa)</label>
+            <input id="rPb0" type="number" value="40" class="w-full mt-1 rounded-lg border border-[var(--line)] px-3 py-2 font-mono text-sm bg-[var(--canvas)]">
+          </div>
+          <div>
+            <label class="text-[12px] font-mono text-[var(--ink-soft)]">X<sub>A</sub> (0 – 1)</label>
+            <input id="rXa" type="number" value="0.4" step="0.01" min="0" max="1" class="w-full mt-1 rounded-lg border border-[var(--line)] px-3 py-2 font-mono text-sm bg-[var(--canvas)]">
+          </div>
+          <button onclick="calcRaoult()" class="w-full py-2.5 rounded-lg text-white text-sm font-semibold" style="background:var(--solid)">ගණනය කරන්න</button>
+        </div>
+        <div id="raoultOut" class="mt-4 hidden">
+          <div class="rounded-lg border border-[var(--line)] p-3 font-mono text-[12.5px] leading-loose bg-[var(--canvas)]" id="raoultSteps"></div>
+        </div>
+      </div>
+
+      <!-- KD calculator -->
+      <div class="panel p-4">
+        <h2 class="font-display font-semibold text-[15px] mb-3">බෙදුම් සංගුණක (K<sub>D</sub>) ගණකය</h2>
+        <div class="space-y-3">
+          <div>
+            <label class="text-[12px] font-mono text-[var(--ink-soft)]">[A<sub>(oil)</sub>] (mol dm⁻³)</label>
+            <input id="kAoil" type="number" value="1.6" step="0.01" class="w-full mt-1 rounded-lg border border-[var(--line)] px-3 py-2 font-mono text-sm bg-[var(--canvas)]">
+          </div>
+          <div>
+            <label class="text-[12px] font-mono text-[var(--ink-soft)]">[A<sub>(aq)</sub>] (mol dm⁻³)</label>
+            <input id="kAaq" type="number" value="0.4" step="0.01" class="w-full mt-1 rounded-lg border border-[var(--line)] px-3 py-2 font-mono text-sm bg-[var(--canvas)]">
+          </div>
+          <button onclick="calcKD()" class="w-full py-2.5 rounded-lg text-white text-sm font-semibold" style="background:var(--liquid)">ගණනය කරන්න</button>
+        </div>
+        <div id="kdOut" class="mt-4 hidden">
+          <div class="rounded-lg border border-[var(--line)] p-3 font-mono text-[12.5px] leading-loose bg-[var(--canvas)]" id="kdSteps"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= TAB 4: FORMULAE / MCQ ========================= -->
+    <section id="tab-notes" class="tab-panel space-y-4">
+      <p class="text-xs font-mono uppercase tracking-widest text-[var(--ink-soft)] mb-1">04 · කෙටි සටහන් / MCQ</p>
+
+      <div>
+        <h2 class="font-display font-semibold text-[15px] mb-2">සූත්‍ර කාඩ්පත් <span class="text-[11px] text-[var(--ink-soft)] font-sans">(තට්ටු කර පෙරළන්න)</span></h2>
+        <div class="grid grid-cols-2 gap-3" id="flipGrid"></div>
+      </div>
+
+      <div>
+        <h2 class="font-display font-semibold text-[15px] mb-2 mt-2">ක්ෂණික ප්‍රශ්නාවලිය</h2>
+        <div id="quizWrap" class="panel p-4 space-y-4"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- BOTTOM NAV -->
+  <nav class="fixed bottom-0 left-0 right-0 z-40">
+    <div class="max-w-md mx-auto bg-[var(--panel)]/95 backdrop-blur border-t border-[var(--line)] px-2 pt-2 pb-[max(0.6rem,env(safe-area-inset-bottom))] flex justify-between">
+      <button onclick="showTab('theory')" data-tab="theory" class="tab-btn flex-1 flex flex-col items-center gap-1 py-1.5 text-[var(--ink-soft)]">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5V5a2 2 0 012-2h11a2 2 0 012 2v14"/><path d="M4 19.5A2.5 2.5 0 006.5 22H19"/><path d="M8 7h7M8 11h7"/></svg>
+        <span class="text-[10.5px] font-medium">සිද්ධාන්ත</span>
+        <span class="tab-dot w-1 h-1 rounded-full" style="background:var(--solid)"></span>
+      </button>
+      <button onclick="showTab('graphs')" data-tab="graphs" class="tab-btn flex-1 flex flex-col items-center gap-1 py-1.5 text-[var(--ink-soft)]">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19h16M6 19V9l4 4 3-6 5 4v8"/></svg>
+        <span class="text-[10.5px] font-medium">ප්‍රස්ථාර</span>
+        <span class="tab-dot w-1 h-1 rounded-full" style="background:var(--solid)"></span>
+      </button>
+      <button onclick="showTab('calc')" data-tab="calc" class="tab-btn flex-1 flex flex-col items-center gap-1 py-1.5 text-[var(--ink-soft)]">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M16 11h0M8 15h2M12 15h2M16 15h0"/></svg>
+        <span class="text-[10.5px] font-medium">ගණනය</span>
+        <span class="tab-dot w-1 h-1 rounded-full" style="background:var(--solid)"></span>
+      </button>
+      <button onclick="showTab('notes')" data-tab="notes" class="tab-btn flex-1 flex flex-col items-center gap-1 py-1.5 text-[var(--ink-soft)]">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 4H5a1 1 0 00-1 1v14a1 1 0 001 1h4M9 4h10a1 1 0 011 1v14a1 1 0 01-1 1H9M9 4v16"/></svg>
+        <span class="text-[10.5px] font-medium">MCQ</span>
+        <span class="tab-dot w-1 h-1 rounded-full" style="background:var(--solid)"></span>
+      </button>
+    </div>
+  </nav>
+</div>
+
+<script>
+/* ---------------- TAB SWITCHING ---------------- */
+function showTab(name){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
+}
+document.querySelector('.tab-btn[data-tab="theory"]').classList.add('active');
+
+/* ---------------- ACCORDION ---------------- */
+function toggleAcc(btn){
+  const acc = btn.closest('.accordion');
+  const wasOpen = acc.classList.contains('open');
+  document.querySelectorAll('.accordion').forEach(a=>a.classList.remove('open'));
+  if(!wasOpen) acc.classList.add('open');
+}
+
+/* ---------------- CHART DEFAULTS ---------------- */
+Chart.defaults.font.family = "'Inter','Noto Sans Sinhala',sans-serif";
+Chart.defaults.font.size = 11;
+Chart.defaults.color = '#4B5B58';
+
+function xaLabels(){ const a=[]; for(let i=0;i<=20;i++) a.push((i/20).toFixed(2)); return a; }
+
+/* ---------------- IDEAL SOLUTION CHART ---------------- */
+let idealChart;
+function buildIdealDatasets(){
+  const Pa0 = parseFloat(document.getElementById('idealPaSlider').value);
+  const Pb0 = parseFloat(document.getElementById('idealPbSlider').value);
+  document.getElementById('idealPaVal').textContent = Pa0;
+  document.getElementById('idealPbVal').textContent = Pb0;
+  const xs = xaLabels().map(Number);
+  const Pa = xs.map(x=>Pa0*x);
+  const Pb = xs.map(x=>Pb0*(1-x));
+  const Pt = xs.map((x,i)=>Pa[i]+Pb[i]);
+  return {xs,Pa,Pb,Pt,Pa0,Pb0};
+}
+function initIdealChart(){
+  const d = buildIdealDatasets();
+  idealChart = new Chart(document.getElementById('idealChart'), {
+    type:'line',
+    data:{ labels:d.xs.map(x=>x.toFixed(2)),
+      datasets:[
+        {label:'Pa', data:d.Pa, borderColor:'#375A82', backgroundColor:'#375A82', pointRadius:0, borderWidth:2.4, tension:0},
+        {label:'Pb', data:d.Pb, borderColor:'#1E8A72', backgroundColor:'#1E8A72', pointRadius:0, borderWidth:2.4, tension:0},
+        {label:'Ptotal', data:d.Pt, borderColor:'#1C2B2A', backgroundColor:'#1C2B2A', pointRadius:0, borderWidth:3, tension:0}
+      ]},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}, tooltip:{callbacks:{title:(items)=> 'Xa = '+items[0].label}}},
+      scales:{
+        x:{title:{display:true,text:'X_A'}, grid:{color:'#E5E7DD'}},
+        y:{title:{display:true,text:'P (kPa)'}, grid:{color:'#E5E7DD'}, beginAtZero:true}
+      }
+    }
+  });
+}
+function updateIdealChart(){
+  const d = buildIdealDatasets();
+  idealChart.data.datasets[0].data = d.Pa;
+  idealChart.data.datasets[1].data = d.Pb;
+  idealChart.data.datasets[2].data = d.Pt;
+  idealChart.update('none');
+  refreshDevChart();
+}
+function refreshDevChart(){
+  if(!devChart) return;
+  const d = buildDevDatasets(devMode);
+  devChart.data.datasets[0].data = d.idealTot;
+  devChart.data.datasets[1].data = d.realTot;
+  devChart.update('none');
+}
+
+/* ---------------- DEVIATION CHART ---------------- */
+let devChart, devMode='pos';
+function buildDevDatasets(mode){
+  const Pa0 = parseFloat(document.getElementById('idealPaSlider').value);
+  const Pb0 = parseFloat(document.getElementById('idealPbSlider').value);
+  const spread = Pa0 + Pb0;
+  const k = (mode==='pos' ? 0.55 : -0.34) * spread;
+  const xs = xaLabels().map(Number);
+  const Pa = xs.map(x=>Pa0*x);
+  const Pb = xs.map(x=>Pb0*(1-x));
+  const idealTot = xs.map((x,i)=>Pa[i]+Pb[i]);
+  const realTot = xs.map((x,i)=> idealTot[i] + k*x*(1-x));
+  return {xs, idealTot, realTot};
+}
+function initDevChart(){
+  const d = buildDevDatasets(devMode);
+  devChart = new Chart(document.getElementById('devChart'), {
+    type:'line',
+    data:{ labels:d.xs.map(x=>x.toFixed(2)),
+      datasets:[
+        {label:'පරිපූර්ණ රේඛාව (Ideal)', data:d.idealTot, borderColor:'#9AA39A', borderDash:[5,4], pointRadius:0, borderWidth:1.8},
+        {label:'ඇත්ත Ptotal', data:d.realTot, borderColor:'#E0862A', backgroundColor:'#E0862A', pointRadius:0, borderWidth:3}
+      ]},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom', labels:{boxWidth:10,boxHeight:10,padding:12,font:{size:10.5}}}},
+      scales:{ x:{title:{display:true,text:'X_A'}, grid:{color:'#E5E7DD'}}, y:{title:{display:true,text:'P (kPa)'}, grid:{color:'#E5E7DD'}} }
+    }
+  });
+  updateDevNote();
+}
+function setDeviation(mode){
+  devMode = mode;
+  document.getElementById('btnPos').style.background = mode==='pos' ? 'var(--vapor)' : '';
+  document.getElementById('btnPos').style.color = mode==='pos' ? '#fff' : '';
+  document.getElementById('btnPos').style.borderColor = mode==='pos' ? 'var(--vapor)' : '';
+  document.getElementById('btnNeg').style.background = mode==='neg' ? 'var(--critical)' : '';
+  document.getElementById('btnNeg').style.color = mode==='neg' ? '#fff' : '';
+  document.getElementById('btnNeg').style.borderColor = mode==='neg' ? 'var(--critical)' : '';
+  const d = buildDevDatasets(mode);
+  devChart.data.datasets[0].data = d.idealTot;
+  devChart.data.datasets[1].data = d.realTot;
+  devChart.data.datasets[1].borderColor = mode==='pos' ? '#E0862A' : '#B23A48';
+  devChart.data.datasets[1].backgroundColor = mode==='pos' ? '#E0862A' : '#B23A48';
+  devChart.data.datasets[1].label = mode==='pos' ? 'ඇත්ත Ptotal (ධන අපගමනය)' : 'ඇත්ත Ptotal (ඍණ අපගමනය)';
+  devChart.update();
+  updateDevNote();
+}
+function updateDevNote(){
+  document.getElementById('devNote').innerHTML = devMode==='pos'
+    ? 'ධන අපගමනය: <b>f<sub>A-B</sub> &lt; f<sub>A-A</sub>, f<sub>B-B</sub></b> — A-B අණු අතර ආකර්ෂණය දුර්වල නිසා අණු වාෂ්ප අවස්ථාවට පලායාමට වැඩි ප්‍රවණතාවක් දක්වයි. උදා: එතනෝල් + ජලය.'
+    : 'ඍණ අපගමනය: <b>f<sub>A-B</sub> &gt; f<sub>A-A</sub>, f<sub>B-B</sub></b> — A-B අණු අතර ආකර්ෂණය ප්‍රබල නිසා අණු ද්‍රව අවස්ථාවේ රැඳී සිටීමට වැඩි ප්‍රවණතාවක් දක්වයි. උදා: ඇසිටෝන් + ක්ලෝරෝෆෝම්.';
+}
+
+/* ---------------- WATER PHASE DIAGRAM ---------------- */
+let waterChart;
+function initWaterChart(){
+  const sublimation = [{x:200,y:0.0004},{x:230,y:0.001},{x:250,y:0.0027},{x:273.16,y:0.006}];
+  const melting = [{x:273.16,y:0.006},{x:273.12,y:1},{x:273.0,y:10},{x:272.7,y:100},{x:272.4,y:1000}];
+  const vaporization = [{x:273.16,y:0.006},{x:313,y:0.03},{x:373.15,y:1},{x:473,y:15.3},{x:573,y:85.8},{x:647.09,y:217.7}];
+  waterChart = new Chart(document.getElementById('waterChart'), {
+    type:'scatter',
+    data:{ datasets:[
+      {label:'TA — උත්පතනය', data:sublimation, showLine:true, borderColor:'#375A82', backgroundColor:'#375A82', pointRadius:2, borderWidth:2.4},
+      {label:'TB — ද්‍රවීකරණය', data:melting, showLine:true, borderColor:'#B23A48', backgroundColor:'#B23A48', pointRadius:2, borderWidth:2.4},
+      {label:'TC — වාෂ්පීකරණය', data:vaporization, showLine:true, borderColor:'#1E8A72', backgroundColor:'#1E8A72', pointRadius:2, borderWidth:2.4},
+      {label:'ත්‍රිත්ව ලක්ෂ්‍යය (T)', data:[{x:273.16,y:0.006}], pointStyle:'star', pointRadius:8, backgroundColor:'#B98A1A', borderColor:'#B98A1A', showLine:false},
+      {label:'අවධි ලක්ෂ්‍යය (C)', data:[{x:647.09,y:217.7}], pointStyle:'rectRot', pointRadius:7, backgroundColor:'#1C2B2A', borderColor:'#1C2B2A', showLine:false}
+    ]},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:(item)=>{
+        const p = item.raw;
+        return item.dataset.label + ': ' + p.x + ' K, ' + p.y + ' atm';
+      }}}},
+      scales:{
+        x:{type:'linear', title:{display:true,text:'T (K)'}, grid:{color:'#E5E7DD'}, min:190, max:660},
+        y:{type:'logarithmic', title:{display:true,text:'P (atm) — log'}, grid:{color:'#E5E7DD'}, min:0.0003, max:300}
+      }
+    }
+  });
+}
+
+/* ---------------- RAOULT CALCULATOR ---------------- */
+function calcRaoult(){
+  const Pa0 = parseFloat(document.getElementById('rPa0').value);
+  const Pb0 = parseFloat(document.getElementById('rPb0').value);
+  const Xa = parseFloat(document.getElementById('rXa').value);
+  if(isNaN(Pa0)||isNaN(Pb0)||isNaN(Xa)||Xa<0||Xa>1){ alert('කරුණාකර වලංගු අගයන් ඇතුළත් කරන්න (Xa: 0–1)'); return; }
+  const Xb = 1-Xa;
+  const Pa = Pa0*Xa;
+  const Pb = Pb0*Xb;
+  const Pt = Pa+Pb;
+  const Ya = Pa/Pt;
+  const Yb = Pb/Pt;
+  document.getElementById('raoultSteps').innerHTML = `
+    1) X<sub>B</sub> = 1 − X<sub>A</sub> = 1 − ${Xa.toFixed(2)} = <b>${Xb.toFixed(2)}</b><br>
+    2) P<sub>A</sub> = P<sub>A</sub>° × X<sub>A</sub> = ${Pa0} × ${Xa.toFixed(2)} = <b>${Pa.toFixed(2)} kPa</b><br>
+    3) P<sub>B</sub> = P<sub>B</sub>° × X<sub>B</sub> = ${Pb0} × ${Xb.toFixed(2)} = <b>${Pb.toFixed(2)} kPa</b><br>
+    4) P<sub>total</sub> = P<sub>A</sub> + P<sub>B</sub> = ${Pa.toFixed(2)} + ${Pb.toFixed(2)} = <b>${Pt.toFixed(2)} kPa</b><br>
+    5) Y<sub>A</sub> = P<sub>A</sub>/P<sub>total</sub> = <b>${Ya.toFixed(3)}</b> &nbsp; | &nbsp; Y<sub>B</sub> = P<sub>B</sub>/P<sub>total</sub> = <b>${Yb.toFixed(3)}</b>
+    <div class="mt-2 text-[11px] text-[var(--ink-soft)]">* Y<sub>A</sub>, Y<sub>B</sub> = වායු ඉන් මවුල අංශ (gas-phase mole fractions)</div>`;
+  document.getElementById('raoultOut').classList.remove('hidden');
+}
+
+/* ---------------- KD CALCULATOR ---------------- */
+function calcKD(){
+  const oil = parseFloat(document.getElementById('kAoil').value);
+  const aq = parseFloat(document.getElementById('kAaq').value);
+  if(isNaN(oil)||isNaN(aq)||aq===0){ alert('කරුණාකර වලංගු අගයන් ඇතුළත් කරන්න'); return; }
+  const kd = oil/aq;
+  const eff = (oil/(oil+aq))*100;
+  document.getElementById('kdSteps').innerHTML = `
+    1) K<sub>D</sub> = [A<sub>(oil)</sub>] / [A<sub>(aq)</sub>] = ${oil} / ${aq} = <b>${kd.toFixed(3)}</b><br>
+    2) නිස්සාරණ කාර්යක්ෂමතාව (extraction efficiency) ≈ [A<sub>(oil)</sub>] / ([A<sub>(oil)</sub>]+[A<sub>(aq)</sub>]) × 100
+       = ${oil} / (${oil}+${aq}) × 100 = <b>${eff.toFixed(1)}%</b>
+    <div class="mt-2 text-[11px] text-[var(--ink-soft)]">* මෙය තනි-පියවර සමතුලිතතාවයක් සඳහා සරල ඇස්තමේන්තුවකි; සැබෑ නිස්සාරණයේදී K<sub>D</sub> ස්ථාවරව පවතී, පියවර ගණන වැඩි වන විට කාර්යක්ෂමතාව වැඩිවේ.</div>`;
+  document.getElementById('kdOut').classList.remove('hidden');
+}
+
+/* ---------------- FLASHCARDS ---------------- */
+const flashData = [
+  {f:'Rf = Rb', b:'SVP සමතුලිතතාවය: වාෂ්පීකරණ වේගය = ඝනීභවන වේගය'},
+  {f:'Pₐ = Pₐ° × Xₐ', b:'රවුල්ට් නියමය — අර්ධ වාෂ්ප පීඩනය'},
+  {f:'Ptot = Pₐ + P_B', b:'ඩෝල්ටන් අර්ධ පීඩන එකතුව'},
+  {f:'K_D = [A(oil)]/[A(aq)]', b:'නර්න්ස්ට් බෙදුම් සංගුණකය'},
+  {f:'f A-B = f A-A = f B-B', b:'පරිපූර්ණ ද්විසංයුජ මිශ්‍රණයේ කොන්දේසිය'},
+  {f:'T = 273.16 K, 0.006 atm', b:'ජලයේ ත්‍රිත්ව ලක්ෂ්‍යය (Triple Point)'}
+];
+function buildFlashcards(){
+  const grid = document.getElementById('flipGrid');
+  flashData.forEach((c,i)=>{
+    const wrap = document.createElement('div');
+    wrap.className='flip-card cursor-pointer';
+    wrap.innerHTML = `
+      <div class="flip-inner">
+        <div class="flip-face panel font-mono text-[13px] font-semibold text-[var(--ink)]">${c.f}</div>
+        <div class="flip-face flip-back text-[12px] text-white" style="background:var(--solid)">${c.b}</div>
+      </div>`;
+    wrap.onclick=()=>wrap.classList.toggle('flipped');
+    grid.appendChild(wrap);
+  });
+}
+
+/* ---------------- MCQ QUIZ ---------------- */
+const quizData = [
+  {q:'A ද්‍රවයේ Xₐ = 0.3 ක් වූ විට, Pₐ° = 100 kPa නම් Pₐ අගය කුමක්ද?', opts:['30 kPa','70 kPa','100 kPa','3 kPa'], ans:0},
+  {q:'ධන අපගමනයකදී අන්තර්ක්‍රියා බලවේග පිළිබඳ සත්‍ය ප්‍රකාශය කුමක්ද?', opts:['fA-B > fA-A, fB-B','fA-B = fA-A = fB-B','fA-B < fA-A, fB-B','අන්තර්ක්‍රියා නොමැත'], ans:2},
+  {q:'ජලයේ ත්‍රිත්ව ලක්ෂ්‍යයේ උෂ්ණත්වය හා පීඩනය කුමක්ද?', opts:['373.15 K, 1 atm','273.16 K, 0.006 atm','647.09 K, 217.7 atm','273.15 K, 1 atm'], ans:1},
+  {q:'TB (ද්‍රවීකරණ) වක්‍රයට ඍණ අනුක්‍රමණයක් තිබීමට හේතුව කුමක්ද?', opts:['ජලය විද්‍යුත් සන්නායකයක් නිසා','අයිස් ජලයට වඩා අඩු ඝනත්වයක් ඇති නිසා','ජලය වර්ණ රහිත නිසා','පීඩනය නියත නිසා'], ans:1},
+  {q:'K_D ගණනය කිරීමට වලංගු නොවන කොන්දේසිය කුමක්ද?', opts:['ද්‍රාවක අවිද්‍රාව්‍ය විය යුතුය','නියත උෂ්ණත්වයක් තිබිය යුතුය','ද්‍රාවණීය ද්‍රව්‍යය සංගමයට ලක්විය හැක','අණුක තත්ත්වය එකසමාන විය යුතුය'], ans:2}
+];
+function buildQuiz(){
+  const wrap = document.getElementById('quizWrap');
+  quizData.forEach((q,qi)=>{
+    const block = document.createElement('div');
+    block.className='pb-4 border-b border-[var(--line)] last:border-0 last:pb-0';
+    let optsHtml='';
+    q.opts.forEach((o,oi)=>{
+      optsHtml += `<label class="flex items-center gap-2 py-1.5 text-[13px] cursor-pointer">
+        <input type="radio" name="q${qi}" value="${oi}" class="accent-[var(--solid)]"> ${o}
+      </label>`;
+    });
+    block.innerHTML = `
+      <p class="font-medium text-[13.5px] mb-2">${qi+1}. ${q.q}</p>
+      ${optsHtml}
+      <button class="mt-2 text-[12px] font-semibold px-3 py-1.5 rounded-full border border-[var(--line)]" onclick="checkAnswer(${qi},this)">පරීක්ෂා කරන්න</button>
+      <p id="fb${qi}" class="text-[12.5px] mt-2 font-medium"></p>`;
+    wrap.appendChild(block);
+  });
+}
+function checkAnswer(qi, btn){
+  const sel = document.querySelector(`input[name="q${qi}"]:checked`);
+  const fb = document.getElementById('fb'+qi);
+  if(!sel){ fb.textContent='කරුණාකර පිළිතුරක් තෝරන්න.'; fb.style.color='var(--vapor)'; return; }
+  const correct = parseInt(sel.value)===quizData[qi].ans;
+  fb.textContent = correct ? '✓ නිවැරදියි!' : '✗ වැරදියි — නිවැරදි පිළිතුර: '+quizData[qi].opts[quizData[qi].ans];
+  fb.style.color = correct ? 'var(--liquid)' : 'var(--critical)';
+}
+
+/* ---------------- INIT ---------------- */
+window.addEventListener('DOMContentLoaded', ()=>{
+  initIdealChart();
+  initDevChart();
+  setDeviation('pos');
+  initWaterChart();
+  buildFlashcards();
+  buildQuiz();
+});
+</script>
+</body>
+</html>
