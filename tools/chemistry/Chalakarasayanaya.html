@@ -1,1 +1,1107 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>චාලක රසායනය | Chemical Kinetics — Interactive Lab</title>
+
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+    options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+Sinhala:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg-0:#080b12;
+    --bg-1:#0d1220;
+    --bg-2:#111a2c;
+    --glass: rgba(255,255,255,0.045);
+    --glass-brd: rgba(255,255,255,0.09);
+    --glass-brd-strong: rgba(255,255,255,0.16);
+    --text-0:#e9edf5;
+    --text-1:#aab4c8;
+    --text-2:#6b7690;
+    --flame:#ff7a45;
+    --flame-dim: rgba(255,122,69,0.15);
+    --catalyst:#2dd4bf;
+    --catalyst-dim: rgba(45,212,191,0.15);
+    --data-blue:#5fa8ff;
+    --data-blue-dim: rgba(95,168,255,0.15);
+    --gold:#f2b134;
+    --danger:#ff6b6b;
+    --radius: 16px;
+    --font-display: 'Space Grotesk', 'Noto Sans Sinhala', sans-serif;
+    --font-body: 'Inter', 'Noto Sans Sinhala', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:
+      radial-gradient(1200px 700px at 85% -10%, rgba(255,122,69,0.08), transparent 60%),
+      radial-gradient(1000px 600px at -10% 110%, rgba(45,212,191,0.07), transparent 55%),
+      var(--bg-0);
+    color: var(--text-0);
+    font-family: var(--font-body);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background: var(--flame-dim); color:var(--text-0); }
+  ::-webkit-scrollbar{ width:10px; height:10px; }
+  ::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.12); border-radius:8px; }
+  ::-webkit-scrollbar-track{ background: transparent; }
+
+  a{ color:inherit; }
+
+  h1,h2,h3,h4{ font-family: var(--font-display); margin:0; letter-spacing:-0.01em; }
+
+  .sinhala{ font-family:'Noto Sans Sinhala', var(--font-body); }
+
+  /* ===== Header / Nav ===== */
+  .topbar{
+    position:sticky; top:0; z-index:50;
+    display:flex; align-items:center; justify-content:space-between;
+    gap:16px;
+    padding:14px 22px;
+    background: rgba(8,11,18,0.72);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    border-bottom:1px solid var(--glass-brd);
+  }
+  .brand{ display:flex; align-items:center; gap:12px; }
+  .brand-mark{
+    width:38px; height:38px; border-radius:10px;
+    background: conic-gradient(from 200deg, var(--flame), var(--gold), var(--catalyst), var(--flame));
+    display:flex; align-items:center; justify-content:center;
+    font-family: var(--font-display); font-weight:700; font-size:14px; color:#0a0d14;
+    box-shadow: 0 0 24px rgba(255,122,69,0.35);
+    flex-shrink:0;
+  }
+  .brand-text h1{ font-size:16px; line-height:1.2; }
+  .brand-text .sub{ font-size:11px; color:var(--text-2); letter-spacing:0.14em; text-transform:uppercase; }
+
+  .tabs{
+    display:flex; gap:4px; background:var(--glass); border:1px solid var(--glass-brd);
+    border-radius:14px; padding:4px; flex-wrap:wrap;
+  }
+  .tab-btn{
+    appearance:none; border:none; background:transparent; color:var(--text-1);
+    font-family: var(--font-body); font-weight:600; font-size:12.5px;
+    padding:9px 14px; border-radius:10px; cursor:pointer;
+    transition: all .25s ease; white-space:nowrap;
+    display:flex; align-items:center; gap:7px;
+  }
+  .tab-btn .tag{ font-family:var(--font-mono); font-size:10px; opacity:.55; }
+  .tab-btn:hover{ color:var(--text-0); background: rgba(255,255,255,0.05); }
+  .tab-btn.active{
+    color:#0a0d14; background: linear-gradient(135deg, var(--flame), var(--gold));
+    box-shadow: 0 4px 18px rgba(255,122,69,0.3);
+  }
+
+  /* live rate gauge - signature element */
+  .gauge-wrap{ display:flex; align-items:center; gap:10px; flex-shrink:0; }
+  .gauge{ position:relative; width:56px; height:56px; }
+  .gauge svg{ width:100%; height:100%; transform:rotate(-90deg); }
+  .gauge-bg{ fill:none; stroke:rgba(255,255,255,0.08); stroke-width:5; }
+  .gauge-fg{ fill:none; stroke:url(#gaugeGrad); stroke-width:5; stroke-linecap:round;
+    transition: stroke-dashoffset .4s ease; }
+  .gauge-label{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-mono); font-size:9px; color:var(--text-1); }
+  .gauge-text .g-title{ font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-2); }
+  .gauge-text .g-value{ font-family:var(--font-mono); font-size:13px; color:var(--gold); font-weight:600; }
+
+  /* ===== Layout ===== */
+  .wrap{ max-width:1360px; margin:0 auto; padding:26px 22px 80px; }
+  .module{ display:none; animation: fadeIn .45s ease; }
+  .module.active{ display:block; }
+  @keyframes fadeIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
+
+  .module-head{ margin-bottom:22px; }
+  .eyebrow{ font-family:var(--font-mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase;
+    color: var(--flame); margin-bottom:8px; display:block; }
+  .module-head h2{ font-size:26px; margin-bottom:6px; }
+  .module-head p{ color:var(--text-1); font-size:14px; max-width:760px; line-height:1.6; }
+
+  .grid{ display:grid; gap:18px; }
+  .grid-2{ grid-template-columns: 340px 1fr; }
+  .grid-3charts{ grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 980px){
+    .grid-2{ grid-template-columns: 1fr; }
+    .grid-3charts{ grid-template-columns: 1fr; }
+  }
+
+  .card{
+    background: var(--glass);
+    border:1px solid var(--glass-brd);
+    border-radius: var(--radius);
+    padding:20px;
+    backdrop-filter: blur(10px);
+    position:relative;
+    overflow:hidden;
+  }
+  .card::before{
+    content:''; position:absolute; top:0; left:0; right:0; height:1px;
+    background: linear-gradient(90deg, transparent, var(--glass-brd-strong), transparent);
+  }
+  .card h3{ font-size:14px; margin-bottom:14px; display:flex; align-items:center; gap:8px; color:var(--text-0); }
+  .card h3 .dot{ width:7px; height:7px; border-radius:50%; background:var(--flame); box-shadow:0 0 10px var(--flame); }
+
+  .control{ margin-bottom:18px; }
+  .control label{ display:flex; justify-content:space-between; align-items:baseline;
+    font-size:12.5px; color:var(--text-1); margin-bottom:8px; }
+  .control label .val{ font-family:var(--font-mono); color:var(--gold); font-size:13px; }
+  input[type="range"]{
+    -webkit-appearance:none; width:100%; height:5px; border-radius:6px;
+    background: linear-gradient(90deg, var(--flame), var(--gold));
+    outline:none; cursor:pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:16px; height:16px; border-radius:50%;
+    background:#fff; border:3px solid var(--flame); cursor:grab;
+    box-shadow:0 0 0 4px rgba(255,122,69,0.18);
+  }
+  input[type="range"]::-moz-range-thumb{
+    width:16px; height:16px; border-radius:50%; background:#fff; border:3px solid var(--flame); cursor:grab;
+  }
+
+  .seg{ display:flex; gap:6px; background:rgba(0,0,0,0.25); padding:4px; border-radius:10px; border:1px solid var(--glass-brd); }
+  .seg button{
+    flex:1; appearance:none; border:none; background:transparent; color:var(--text-1);
+    padding:8px 6px; font-family:var(--font-body); font-weight:600; font-size:12px; border-radius:7px; cursor:pointer;
+    transition:.2s;
+  }
+  .seg button.active{ background: linear-gradient(135deg, var(--catalyst), #1aa89a); color:#04120f; }
+
+  .toggle-row{ display:flex; align-items:center; justify-content:space-between; padding:10px 0; }
+  .toggle-row span{ font-size:13px; color:var(--text-1); }
+  .switch{ position:relative; width:44px; height:24px; }
+  .switch input{ opacity:0; width:0; height:0; }
+  .slider-toggle{ position:absolute; inset:0; background:rgba(255,255,255,0.1); border-radius:24px; cursor:pointer; transition:.25s; border:1px solid var(--glass-brd); }
+  .slider-toggle::before{ content:''; position:absolute; width:18px; height:18px; left:2px; top:2px; background:#fff; border-radius:50%; transition:.25s; }
+  .switch input:checked + .slider-toggle{ background: linear-gradient(135deg, var(--catalyst), #1aa89a); }
+  .switch input:checked + .slider-toggle::before{ transform:translateX(20px); }
+
+  .chart-box{ position:relative; height:260px; }
+  .chart-box canvas{ max-height:100%; }
+
+  .readout{
+    font-family:var(--font-mono); background:rgba(0,0,0,0.28); border:1px solid var(--glass-brd);
+    border-radius:10px; padding:12px 14px; font-size:13px; color:var(--text-0); line-height:1.7;
+  }
+  .readout .r-label{ color:var(--text-2); }
+  .readout .r-num{ color:var(--gold); }
+
+  .formula-card{
+    background: linear-gradient(160deg, rgba(255,122,69,0.08), rgba(255,255,255,0.02));
+    border:1px solid var(--glass-brd); border-radius:14px; padding:16px 18px; margin-top:14px;
+    position:relative;
+  }
+  .formula-card .fc-tab{
+    position:absolute; top:-9px; left:16px; background: var(--flame); color:#1a0900;
+    font-family:var(--font-mono); font-size:10px; font-weight:700; padding:2px 9px; border-radius:6px;
+    letter-spacing:.06em;
+  }
+  .formula-card .fc-body{ font-size:14px; margin-top:6px; }
+  .formula-card .fc-note{ font-size:12px; color:var(--text-1); margin-top:8px; line-height:1.55; }
+
+  .summary-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:18px; }
+  @media (max-width:900px){ .summary-grid{ grid-template-columns:1fr; } }
+  .summary-card{
+    background:var(--glass); border:1px solid var(--glass-brd); border-radius:14px; padding:16px;
+  }
+  .summary-card .sc-head{ font-family:var(--font-display); font-size:13px; color:var(--gold); margin-bottom:8px; }
+  .summary-card .sc-body{ font-size:13px; color:var(--text-1); line-height:1.6; }
+
+  /* Energy diagram */
+  .energy-svg-box{ background:rgba(0,0,0,0.28); border:1px solid var(--glass-brd); border-radius:14px; padding:8px; }
+
+  /* table module 4 */
+  table.data-table{ width:100%; border-collapse:collapse; font-size:13px; }
+  table.data-table th{
+    font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.06em;
+    color:var(--text-2); text-align:left; padding:8px 10px; border-bottom:1px solid var(--glass-brd-strong);
+  }
+  table.data-table td{ padding:6px 8px; border-bottom:1px solid var(--glass-brd); }
+  table.data-table input{
+    width:82px; background:rgba(0,0,0,0.3); border:1px solid var(--glass-brd); color:var(--text-0);
+    font-family:var(--font-mono); font-size:12.5px; border-radius:7px; padding:6px 8px; outline:none;
+  }
+  table.data-table input:focus{ border-color:var(--flame); }
+  table.data-table tr:hover td{ background: rgba(255,255,255,0.02); }
+
+  select.preset-select{
+    width:100%; background:rgba(0,0,0,0.3); border:1px solid var(--glass-brd); color:var(--text-0);
+    font-family:var(--font-body); font-size:13px; border-radius:10px; padding:10px 12px; outline:none;
+    margin-bottom:14px; cursor:pointer;
+  }
+
+  .btn-primary{
+    appearance:none; border:none; cursor:pointer; font-family:var(--font-body); font-weight:700; font-size:13px;
+    color:#180900; background: linear-gradient(135deg, var(--flame), var(--gold));
+    padding:11px 18px; border-radius:11px; box-shadow:0 6px 20px rgba(255,122,69,0.25);
+    transition: transform .15s ease;
+  }
+  .btn-primary:hover{ transform:translateY(-1px); }
+  .btn-primary:active{ transform:translateY(0); }
+
+  .steps-box{
+    margin-top:16px; background:rgba(0,0,0,0.28); border:1px solid var(--glass-brd); border-radius:14px;
+    padding:16px 18px; font-size:13.5px; line-height:1.8;
+  }
+  .steps-box .step{ margin-bottom:10px; padding-left:14px; border-left:2px solid var(--catalyst); }
+  .steps-box .step .step-tag{ color:var(--catalyst); font-family:var(--font-mono); font-size:11px; margin-right:6px; }
+  .result-pill{
+    display:inline-flex; align-items:center; gap:6px; background:var(--flame-dim); color:var(--gold);
+    border:1px solid rgba(255,122,69,0.35); font-family:var(--font-mono); font-size:13px;
+    padding:5px 12px; border-radius:20px; margin:4px 6px 0 0;
+  }
+
+  footer.credit{ text-align:center; color:var(--text-2); font-size:11.5px; margin-top:50px; padding-bottom:10px; }
+  footer.credit b{ color:var(--text-1); }
+
+  .flex-between{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+</style>
+</head>
+<body>
+
+<!-- ============ TOP BAR ============ -->
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-mark">CK</div>
+    <div class="brand-text">
+      <h1 class="sinhala">චාලක රසායනය</h1>
+      <div class="sub">Chemical Kinetics · A/L Interactive Lab</div>
+    </div>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <button class="tab-btn active" data-mod="m1"><span class="tag">01</span><span class="sinhala">සීඝ්‍රතාව</span></button>
+    <button class="tab-btn" data-mod="m2"><span class="tag">02</span><span class="sinhala">ප්‍රතික්‍රියා පෙළ</span></button>
+    <button class="tab-btn" data-mod="m3"><span class="tag">03</span><span class="sinhala">ශක්ති පැතිකඩ</span></button>
+    <button class="tab-btn" data-mod="m4"><span class="tag">04</span><span class="sinhala">විභාග ගැටලු</span></button>
+  </div>
+
+  <div class="gauge-wrap">
+    <div class="gauge-text" style="text-align:right;">
+      <div class="g-title">Live Rate</div>
+      <div class="g-value" id="gaugeValue">0.000</div>
+    </div>
+    <div class="gauge">
+      <svg viewBox="0 0 56 56">
+        <defs>
+          <linearGradient id="gaugeGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#ff7a45"/>
+            <stop offset="100%" stop-color="#f2b134"/>
+          </linearGradient>
+        </defs>
+        <circle class="gauge-bg" cx="28" cy="28" r="23"></circle>
+        <circle class="gauge-fg" id="gaugeFg" cx="28" cy="28" r="23" stroke-dasharray="144.5" stroke-dashoffset="144.5"></circle>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ============================================================ -->
+  <!-- MODULE 1: RATE & TANGENT FINDER -->
+  <!-- ============================================================ -->
+  <section class="module active" id="m1">
+    <div class="module-head">
+      <span class="eyebrow">Module 01</span>
+      <h2 class="sinhala">ප්‍රතික්‍රියා සීඝ්‍රතාව සහ ප්‍රස්තාරික නිරූපණය</h2>
+      <p class="sinhala">A → B ප්‍රතික්‍රියාවක් සලකමු. කාලය (t) සමඟ ප්‍රතික්‍රියක A හි ප්‍රමාණය (n<sub>A</sub>) අඩුවෙද්දී, ඵලය B හි ප්‍රමාණය (n<sub>B</sub>) වැඩි වේ. චලක්‍රමය මත ලක්ෂ්‍යයක් (t) තෝරා එහි ස්පර්ශකය (tangent) — එනම් <b>ක්ෂණික සීඝ්‍රතාව</b> — සහ කාල පරාසයක් (Δt) සඳහා <b>මධ්‍යක සීඝ්‍රතාව</b> සසඳන්න.</p>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3><span class="dot"></span> පාලක (Controls)</h3>
+
+        <div class="control">
+          <label><span class="sinhala">ආරම්භක ප්‍රමාණය, n₀</span><span class="val" id="m1_n0_val">1.00</span></label>
+          <input type="range" id="m1_n0" min="0.4" max="2.0" step="0.05" value="1.00">
+        </div>
+
+        <div class="control">
+          <label><span class="sinhala">වේග නියතය, k</span><span class="val" id="m1_k_val">0.35</span></label>
+          <input type="range" id="m1_k" min="0.05" max="1.2" step="0.01" value="0.35">
+        </div>
+
+        <div class="control">
+          <label><span class="sinhala">කාලය, t (ස්පර්ශකය සඳහා)</span><span class="val" id="m1_t_val">3.0 s</span></label>
+          <input type="range" id="m1_t" min="0.2" max="9.5" step="0.1" value="3.0">
+        </div>
+
+        <div class="control">
+          <label><span class="sinhala">කාල පරාසය, Δt (මධ්‍යක සීඝ්‍රතාව සඳහා)</span><span class="val" id="m1_dt_val">2.0 s</span></label>
+          <input type="range" id="m1_dt" min="0.3" max="4" step="0.1" value="2.0">
+        </div>
+
+        <div class="readout" id="m1_readout">—</div>
+
+        <div class="formula-card">
+          <div class="fc-tab">FORMULA</div>
+          <div class="fc-body sinhala">$$ \text{ක්ෂණික සීඝ්‍රතාව} = \left|\frac{dn_A}{dt}\right|_{t} \qquad \text{මධ්‍යක සීඝ්‍රතාව} = \left|\frac{\Delta n_A}{\Delta t}\right| $$</div>
+          <div class="fc-note sinhala">තද රේඛාව ස්පර්ශකය (a). තිත් රේඛාව Δt පරාසය තුළ ජ්‍යා රේඛාව (b/c) නියෝජනය කරයි.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="dot"></span> n(t) ප්‍රස්තාරය — <span class="sinhala">ප්‍රතික්‍රියක වියෙදීම සහ ඵලය සෑදීම</span></h3>
+        <div class="chart-box" style="height:420px;">
+          <canvas id="m1_chart"></canvas>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- MODULE 2: ORDER OF REACTION & RATE LAW -->
+  <!-- ============================================================ -->
+  <section class="module" id="m2">
+    <div class="module-head">
+      <span class="eyebrow">Module 02</span>
+      <h2 class="sinhala">ප්‍රතික්‍රියා පෙළ සහ සීඝ්‍රතා නියමය (Rate Law Simulator)</h2>
+      <p class="sinhala">A → Products ප්‍රතික්‍රියාවක් සලකා, <b>Zero</b>, <b>First</b> සහ <b>Second</b> Order සීඝ්‍රතා නියම තුනම එකවර සසඳන්න. [A]₀ සහ k වෙනස් කර සියලු ප්‍රස්තාර සජීවීව යාවත්කාලීන වන අයුරු බලන්න.</p>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3><span class="dot"></span> <span class="sinhala">ප්‍රතික්‍රියා පෙළ තෝරන්න</span></h3>
+        <div class="seg" id="m2_order_seg">
+          <button data-n="0" class="active">Zero (0)</button>
+          <button data-n="1">First (1)</button>
+          <button data-n="2">Second (2)</button>
+        </div>
+
+        <div class="control" style="margin-top:20px;">
+          <label><span>[A]₀ initial conc.</span><span class="val" id="m2_a0_val">1.00 mol dm⁻³</span></label>
+          <input type="range" id="m2_a0" min="0.2" max="2.0" step="0.05" value="1.00">
+        </div>
+
+        <div class="control">
+          <label><span>Rate constant, k</span><span class="val" id="m2_k_val">0.30</span></label>
+          <input type="range" id="m2_k" min="0.02" max="1.0" step="0.01" value="0.30">
+        </div>
+
+        <div class="readout" id="m2_readout">—</div>
+
+        <div class="formula-card">
+          <div class="fc-tab">HALF-LIFE</div>
+          <div class="fc-body" id="m2_halflife_formula">$$ t_{1/2} = \dfrac{0.693}{k} $$</div>
+          <div class="fc-note sinhala" id="m2_halflife_note">පළමු පෙළ ප්‍රතික්‍රියාවක අර්ධ ආයු කාලය [A]₀ මත රඳා නොපවතී.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="dot"></span> [A] <span class="sinhala">vs</span> t</h3>
+        <div class="chart-box"><canvas id="m2_chart_conc"></canvas></div>
+      </div>
+    </div>
+
+    <div class="grid grid-3charts" style="margin-top:18px;">
+      <div class="card">
+        <h3><span class="dot"></span> Rate <span class="sinhala">vs</span> [A]</h3>
+        <div class="chart-box" style="height:220px;"><canvas id="m2_chart_rate"></canvas></div>
+      </div>
+      <div class="card">
+        <h3><span class="dot"></span> log(Rate) <span class="sinhala">vs</span> log[A]</h3>
+        <div class="chart-box" style="height:220px;"><canvas id="m2_chart_log"></canvas></div>
+      </div>
+      <div class="card">
+        <h3><span class="dot"></span> <span class="sinhala">අර්ධ ආයු කාලය</span></h3>
+        <div class="readout" style="height:220px; display:flex; flex-direction:column; justify-content:center; gap:14px;" id="m2_t_half_box">—</div>
+      </div>
+    </div>
+
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="sc-head">Zero Order</div>
+        <div class="sc-body">$$R=k \quad t_{1/2}=\dfrac{[A]_0}{2k}$$ <span class="sinhala">සීඝ්‍රතාව සාන්ද්‍රණයෙන් ස්වායත්ත වේ.</span></div>
+      </div>
+      <div class="summary-card">
+        <div class="sc-head">First Order</div>
+        <div class="sc-body">$$R=k[A] \quad t_{1/2}=\dfrac{0.693}{k}$$ <span class="sinhala">අර්ධ ආයු කාලය [A]₀ මත රඳා නොපවතී.</span></div>
+      </div>
+      <div class="summary-card">
+        <div class="sc-head">Second Order</div>
+        <div class="sc-body">$$R=k[A]^2 \quad t_{1/2}=\dfrac{1}{k[A]_0}$$ <span class="sinhala">t₁/₂ ∝ 1/[A]₀ — ප්‍රතිලෝමව සමානුපාතික.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- MODULE 3: ENERGY PROFILE & COLLISION THEORY -->
+  <!-- ============================================================ -->
+  <section class="module" id="m3">
+    <div class="module-head">
+      <span class="eyebrow">Module 03</span>
+      <h2 class="sinhala">සංඝට්ටන වාදය සහ ශක්ති පැතිකඩ (Collision Theory & Energy Profile)</h2>
+      <p class="sinhala">ක්‍රියාකාරී ශක්තිය (Ea), ප්‍රතිලෝම ක්‍රියාකාරී ශක්තිය සහ එන්තැල්පි වෙනස (ΔH) වෙනස් කර ශක්ති පැතිකඩ නිරීක්ෂණය කරන්න. උත්ප්‍රේරකයක් යොදා Ea අඩුවන අයුරුත්, උෂ්ණත්වය වෙනස් කිරීමෙන් Maxwell-Boltzmann විසරණයේ ඵලදායී ගැටුම් (E > Ea) කොපමණ දැයි බලන්න.</p>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3><span class="dot"></span> <span class="sinhala">ශක්ති පැතිකඩ පාලක</span></h3>
+
+        <div class="control">
+          <label><span>E<sub>a (fwd)</sub></span><span class="val" id="m3_eaf_val">60</span></label>
+          <input type="range" id="m3_eaf" min="20" max="100" step="1" value="60">
+        </div>
+        <div class="control">
+          <label><span>E<sub>a (rev)</sub></span><span class="val" id="m3_ear_val">35</span></label>
+          <input type="range" id="m3_ear" min="10" max="90" step="1" value="35">
+        </div>
+
+        <div class="toggle-row">
+          <span class="sinhala">උත්ප්‍රේරකය (Catalyst)</span>
+          <label class="switch"><input type="checkbox" id="m3_catalyst"><span class="slider-toggle"></span></label>
+        </div>
+
+        <div class="readout" id="m3_energy_readout" style="margin-top:8px;">—</div>
+
+        <h3 style="margin-top:22px;"><span class="dot"></span> Maxwell–Boltzmann</h3>
+        <div class="control">
+          <label><span>T₁ (K)</span><span class="val" id="m3_t1_val">300</span></label>
+          <input type="range" id="m3_t1" min="250" max="500" step="5" value="300">
+        </div>
+        <div class="control">
+          <label><span>T₂ (K)</span><span class="val" id="m3_t2_val">400</span></label>
+          <input type="range" id="m3_t2" min="250" max="600" step="5" value="400">
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:18px;">
+        <div class="card">
+          <h3><span class="dot"></span> <span class="sinhala">ප්‍රතික්‍රියා පැතිකඩ (Reaction Coordinate)</span></h3>
+          <div class="energy-svg-box">
+            <svg id="m3_svg" viewBox="0 0 600 300" style="width:100%; height:260px;"></svg>
+          </div>
+        </div>
+        <div class="card">
+          <h3><span class="dot"></span> <span class="sinhala">Kinetic Energy Distribution — ඵලදායී ගැටුම්</span></h3>
+          <div class="chart-box" style="height:230px;"><canvas id="m3_mb_chart"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- MODULE 4: INITIAL RATES / PAST PAPER SOLVER -->
+  <!-- ============================================================ -->
+  <section class="module" id="m4">
+    <div class="module-head">
+      <span class="eyebrow">Module 04</span>
+      <h2 class="sinhala">ආරම්භක සීඝ්‍රතා ක්‍රමය සහ පසුගිය විභාග ගැටලු විසඳනය</h2>
+      <p class="sinhala">පහත වගුවේ අගයන් සංස්කරණය කර, හෝ පෙර-සකසන ලද A/L ගැටලුවක් තෝරා, <b>"ගණනය කරන්න"</b> බොත්තම එබීමෙන් එක් එක් ප්‍රතික්‍රියකයට අදාළ පෙළ (x, y, z) සහ සීඝ්‍රතා නියතය (k) පියවරෙන් පියවර ලබාගන්න.</p>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3><span class="dot"></span> <span class="sinhala">ගැටලුව තෝරන්න</span></h3>
+        <select class="preset-select" id="m4_preset"></select>
+        <div id="m4_reaction_eq" class="readout" style="margin-bottom:14px;">—</div>
+        <button class="btn-primary" id="m4_calc_btn" style="width:100%;">ගණනය කරන්න · Calculate Order</button>
+        <div class="formula-card">
+          <div class="fc-tab">METHOD</div>
+          <div class="fc-body sinhala" style="font-size:13px;">$$ n = \dfrac{\log(R_2/R_1)}{\log(C_2/C_1)} $$</div>
+          <div class="fc-note sinhala">වගුවේ දෙපේළි දෙකක් අතර එක් ප්‍රතික්‍රියකයක සාන්ද්‍රණය පමණක් වෙනස් වූ විට, එම ප්‍රතික්‍රියකයට අදාළ පෙළ ඉහත සමීකරණයෙන් ගණනය කෙරේ. කාලයෙන් ලබාදුන් දත්ත සඳහා, සීඝ්‍රතාව ∝ 1/කාලය ලෙස සලකනු ලැබේ.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="dot"></span> <span class="sinhala">දත්ත වගුව</span></h3>
+        <div style="overflow-x:auto;">
+          <table class="data-table" id="m4_table">
+            <thead><tr id="m4_thead_row"></tr></thead>
+            <tbody id="m4_tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="steps-box" id="m4_steps">
+      <span class="sinhala" style="color:var(--text-2);">ගණනය කිරීම සඳහා ඉහත "ගණනය කරන්න" බොත්තම එබන්න.</span>
+    </div>
+  </section>
+
+</div>
+
+<footer class="credit">
+  <span class="sinhala">Sri Lanka GCE A/L Chemistry — Unit 11</span> · <b>Chemical Kinetics Interactive Lab</b> · built for revision use
+</footer>
+
+<script>
+/* ============================================================
+   GLOBAL HELPERS
+   ============================================================ */
+const FONT = "'Inter', sans-serif";
+Chart.defaults.color = '#aab4c8';
+Chart.defaults.font.family = FONT;
+Chart.defaults.borderColor = 'rgba(255,255,255,0.08)';
+
+function baseGridOptions(xTitle, yTitle){
+  return {
+    responsive:true, maintainAspectRatio:false,
+    animation:{ duration:250 },
+    plugins:{ legend:{ labels:{ boxWidth:12, font:{size:11} } }, tooltip:{ mode:'index', intersect:false } },
+    scales:{
+      x:{ title:{ display:true, text:xTitle, color:'#6b7690', font:{size:11} }, grid:{ color:'rgba(255,255,255,0.05)' } },
+      y:{ title:{ display:true, text:yTitle, color:'#6b7690', font:{size:11} }, grid:{ color:'rgba(255,255,255,0.05)' } }
+    }
+  };
+}
+
+function typeset(){
+  if(window.MathJax && MathJax.typesetPromise){
+    MathJax.typesetPromise().catch(()=>{});
+  }
+}
+
+function setGauge(rate, maxRate){
+  const pct = Math.max(0, Math.min(1, rate / (maxRate||1)));
+  const circumference = 2 * Math.PI * 23;
+  const offset = circumference * (1 - pct);
+  document.getElementById('gaugeFg').style.strokeDasharray = circumference.toFixed(1);
+  document.getElementById('gaugeFg').style.strokeDashoffset = offset.toFixed(1);
+  document.getElementById('gaugeValue').textContent = rate.toFixed(3);
+}
+
+/* ============================================================
+   TAB SWITCHING
+   ============================================================ */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.module').forEach(m=>m.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.mod).classList.add('active');
+    setTimeout(typeset, 60);
+  });
+});
+
+/* ============================================================
+   MODULE 1 — TANGENT FINDER
+   ============================================================ */
+(function(){
+  const el = id => document.getElementById(id);
+  const n0In = el('m1_n0'), kIn = el('m1_k'), tIn = el('m1_t'), dtIn = el('m1_dt');
+  const ctx = el('m1_chart').getContext('2d');
+
+  const TMAX = 10;
+  const STEPS = 120;
+
+  function nA(t,n0,k){ return n0*Math.exp(-k*t); }
+  function nB(t,n0,k){ return n0*(1-Math.exp(-k*t)); }
+  function dnA(t,n0,k){ return -k*n0*Math.exp(-k*t); } // slope (negative)
+
+  const chart = new Chart(ctx, {
+    type:'line',
+    data:{ datasets:[
+      { label:'n_A(t)', borderColor:'#5fa8ff', backgroundColor:'transparent', borderWidth:2.5, pointRadius:0, data:[], tension:.15 },
+      { label:'n_B(t)', borderColor:'#2dd4bf', backgroundColor:'transparent', borderWidth:2.5, pointRadius:0, data:[], tension:.15 },
+      { label:'Tangent (instantaneous)', borderColor:'#f2b134', borderWidth:2, borderDash:[6,4], pointRadius:0, data:[] },
+      { label:'Chord (average, Δt)', borderColor:'#ff7a45', borderWidth:2, pointRadius:4, pointBackgroundColor:'#ff7a45', data:[] },
+    ]},
+    options:{
+      ...baseGridOptions('Time (t)', 'Amount (n)'),
+      parsing:false,
+      scales:{
+        x:{ type:'linear', title:{display:true,text:'Time (t)',color:'#6b7690'}, grid:{color:'rgba(255,255,255,0.05)'} },
+        y:{ title:{display:true,text:'Amount (n)',color:'#6b7690'}, grid:{color:'rgba(255,255,255,0.05)'}, min:0 }
+      }
+    }
+  });
+
+  function update(){
+    const n0 = parseFloat(n0In.value), k = parseFloat(kIn.value);
+    const t = parseFloat(tIn.value), dt = parseFloat(dtIn.value);
+
+    el('m1_n0_val').textContent = n0.toFixed(2);
+    el('m1_k_val').textContent = k.toFixed(2);
+    el('m1_t_val').textContent = t.toFixed(1)+' s';
+    el('m1_dt_val').textContent = dt.toFixed(1)+' s';
+
+    const curveA = [], curveB = [];
+    for(let i=0;i<=STEPS;i++){
+      const tt = TMAX*i/STEPS;
+      curveA.push({x:tt, y:nA(tt,n0,k)});
+      curveB.push({x:tt, y:nB(tt,n0,k)});
+    }
+    chart.data.datasets[0].data = curveA;
+    chart.data.datasets[1].data = curveB;
+
+    // tangent at t (on curve A)
+    const slope = dnA(t,n0,k);
+    const y0 = nA(t,n0,k);
+    const span = 1.1;
+    chart.data.datasets[2].data = [
+      {x:Math.max(0,t-span), y:y0 - slope*span},
+      {x:Math.min(TMAX,t+span), y:y0 + slope*span}
+    ];
+
+    // chord across Δt
+    const t2 = Math.min(TMAX, t+dt);
+    const yA1 = nA(t,n0,k), yA2 = nA(t2,n0,k);
+    chart.data.datasets[3].data = [ {x:t,y:yA1}, {x:t2,y:yA2} ];
+
+    chart.update('none');
+
+    const instRate = Math.abs(slope);
+    const avgRate = Math.abs((yA2-yA1)/(t2-t));
+
+    el('m1_readout').innerHTML =
+      `<span class="r-label">t = </span><span class="r-num">${t.toFixed(2)} s</span> &nbsp;|&nbsp; `+
+      `<span class="r-label">ක්ෂණික සීඝ්‍රතාව |dn_A/dt| = </span><span class="r-num">${instRate.toFixed(4)}</span><br>`+
+      `<span class="r-label">Δt = </span><span class="r-num">${dt.toFixed(2)} s</span> &nbsp;|&nbsp; `+
+      `<span class="r-label">මධ්‍යක සීඝ්‍රතාව |Δn_A/Δt| = </span><span class="r-num">${avgRate.toFixed(4)}</span>`;
+
+    setGauge(instRate, n0*k);
+  }
+
+  [n0In,kIn,tIn,dtIn].forEach(inp=>inp.addEventListener('input', update));
+  update();
+})();
+
+/* ============================================================
+   MODULE 2 — ORDER OF REACTION
+   ============================================================ */
+(function(){
+  const el = id => document.getElementById(id);
+  let order = 0;
+
+  const a0In = el('m2_a0'), kIn = el('m2_k');
+  const segBtns = document.querySelectorAll('#m2_order_seg button');
+
+  const concChart = new Chart(el('m2_chart_conc').getContext('2d'), {
+    type:'line',
+    data:{ datasets:[{ label:'[A]', data:[], borderColor:'#5fa8ff', backgroundColor:'rgba(95,168,255,0.08)', fill:true, borderWidth:2.5, pointRadius:0, tension:.1 }] },
+    options:{ ...baseGridOptions('t (s)','[A] (mol dm⁻³)'), parsing:false, scales:{
+      x:{type:'linear', title:{display:true,text:'t (s)',color:'#6b7690'}, grid:{color:'rgba(255,255,255,0.05)'}},
+      y:{ min:0, title:{display:true,text:'[A] (mol dm⁻³)',color:'#6b7690'}, grid:{color:'rgba(255,255,255,0.05)'}}
+    }}
+  });
+  const rateChart = new Chart(el('m2_chart_rate').getContext('2d'), {
+    type:'line',
+    data:{ datasets:[{ label:'Rate', data:[], borderColor:'#ff7a45', backgroundColor:'transparent', borderWidth:2.5, pointRadius:0, tension:.1 }] },
+    options:{ ...baseGridOptions('[A]','Rate'), parsing:false, scales:{
+      x:{type:'linear', title:{display:true,text:'[A]',color:'#6b7690'}, grid:{color:'rgba(255,255,255,0.05)'}},
+      y:{ min:0, title:{display:true,text:'Rate',color:'#6b7690'}, grid:{color:'rgba(255,255,255,0.05)'}}
+    }}
+  });
+  const logChart = new Chart(el('m2_chart_log').getContext('2d'), {
+    type:'line',
+    data:{ datasets:[{ label:'log(R) vs log[A]', data:[], borderColor:'#2dd4bf', backgroundColor:'transparent', borderWidth:2.5, pointRadius:0, tension:0 }] },
+    options:{ ...baseGridOptions('log[A]','log(R)'), parsing:false, scales:{
+      x:{type:'linear', title:{display:true,text:'log[A]',color:'#6b7690'}, grid:{color:'rgba(255,255,255,0.05)'}},
+      y:{ title:{display:true,text:'log(R)',color:'#6b7690'}, grid:{color:'rgba(255,255,255,0.05)'}}
+    }}
+  });
+
+  function concAt(t,a0,k,n){
+    if(n===0) return Math.max(a0 - k*t, 0);
+    if(n===1) return a0*Math.exp(-k*t);
+    return a0/(1+a0*k*t); // n===2
+  }
+  function rateAt(a,k,n){ return k*Math.pow(Math.max(a,0), n); }
+
+  function halfLife(a0,k,n){
+    if(n===0) return a0/(2*k);
+    if(n===1) return 0.693/k;
+    return 1/(k*a0);
+  }
+
+  function update(){
+    const a0 = parseFloat(a0In.value), k = parseFloat(kIn.value);
+    el('m2_a0_val').textContent = a0.toFixed(2)+' mol dm⁻³';
+    el('m2_k_val').textContent = k.toFixed(2);
+
+    // time axis range depends on order/k so curve visibly decays
+    let tmax;
+    if(order===0) tmax = a0/k * 1.15;
+    else if(order===1) tmax = 4/k;
+    else tmax = 6/(k*a0);
+    tmax = Math.min(Math.max(tmax, 1), 60);
+
+    const concData=[];
+    for(let i=0;i<=150;i++){
+      const t = tmax*i/150;
+      concData.push({x:t, y:concAt(t,a0,k,order)});
+    }
+    concChart.data.datasets[0].data = concData;
+    concChart.update('none');
+
+    const rateData=[], logData=[];
+    for(let i=0;i<=100;i++){
+      const a = a0*i/100;
+      const r = rateAt(a,k,order);
+      rateData.push({x:a,y:r});
+      if(a>0 && r>0) logData.push({x:Math.log10(a), y:Math.log10(r)});
+    }
+    rateChart.data.datasets[0].data = rateData;
+    rateChart.update('none');
+    logChart.data.datasets[0].data = logData;
+    logChart.update('none');
+
+    const R0 = rateAt(a0,k,order);
+    const t12 = halfLife(a0,k,order);
+
+    el('m2_readout').innerHTML =
+      `<span class="r-label">Rate law:</span> <span class="r-num">R = k[A]^${order}</span><br>`+
+      `<span class="r-label">Initial rate R₀ =</span> <span class="r-num">${R0.toFixed(4)}</span><br>`+
+      `<span class="r-label">log k (intercept) =</span> <span class="r-num">${Math.log10(k).toFixed(3)}</span>`;
+
+    let formula, note;
+    if(order===0){ formula = "$$ t_{1/2} = \\dfrac{[A]_0}{2k} = "+t12.toFixed(2)+"\\ s $$"; note="ශුන්‍ය පෙළ: t₁/₂ ආරම්භක සාන්ද්‍රණයට සමානුපාතික වේ."; }
+    else if(order===1){ formula = "$$ t_{1/2} = \\dfrac{0.693}{k} = "+t12.toFixed(2)+"\\ s $$"; note="පළමු පෙළ: t₁/₂ සාන්ද්‍රණයෙන් ස්වායත්ත — නියතයකි."; }
+    else { formula = "$$ t_{1/2} = \\dfrac{1}{k[A]_0} = "+t12.toFixed(2)+"\\ s $$"; note="දෙවන පෙළ: t₁/₂ ∝ 1/[A]₀ — ප්‍රතිලෝමව සමානුපාතික වේ."; }
+    el('m2_halflife_formula').innerHTML = formula;
+    el('m2_halflife_note').textContent = note;
+    el('m2_t_half_box').innerHTML =
+      `<div style="font-size:12px;color:var(--text-2);">SELECTED ORDER</div>`+
+      `<div style="font-family:var(--font-mono); font-size:26px; color:var(--gold);">n = ${order}</div>`+
+      `<div style="font-size:12px;color:var(--text-2); margin-top:6px;">t₁/₂</div>`+
+      `<div style="font-family:var(--font-mono); font-size:22px; color:#5fa8ff;">${t12.toFixed(3)} s</div>`;
+
+    setGauge(R0, k*a0*2 + 0.001);
+    typeset();
+  }
+
+  segBtns.forEach(b=>b.addEventListener('click', ()=>{
+    segBtns.forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    order = parseInt(b.dataset.n);
+    update();
+  }));
+  [a0In,kIn].forEach(inp=>inp.addEventListener('input', update));
+  update();
+})();
+
+/* ============================================================
+   MODULE 3 — ENERGY PROFILE & COLLISION THEORY
+   ============================================================ */
+(function(){
+  const el = id => document.getElementById(id);
+  const eafIn = el('m3_eaf'), earIn = el('m3_ear'), catIn = el('m3_catalyst');
+  const t1In = el('m3_t1'), t2In = el('m3_t2');
+  const svg = el('m3_svg');
+
+  function drawProfile(){
+    const eaf = parseFloat(eafIn.value), ear = parseFloat(earIn.value);
+    const catalyst = catIn.checked;
+    el('m3_eaf_val').textContent = eaf;
+    el('m3_ear_val').textContent = ear;
+
+    const dH = eaf - ear; // enthalpy change forward
+    const baseY = 230, peakYmax = 40;
+    const reactY = baseY;
+    const prodY = baseY - (dH * 1.4); // scale
+    const peakY = Math.max(peakYmax, reactY - eaf*1.4);
+
+    const x0=60, x1=300, x2=540;
+
+    function curvePath(peakYlocal){
+      return `M ${x0} ${reactY} C ${x0+90} ${reactY}, ${x1-70} ${peakYlocal}, ${x1} ${peakYlocal} C ${x1+70} ${peakYlocal}, ${x2-90} ${prodY}, ${x2} ${prodY}`;
+    }
+
+    let extra = '';
+    if(catalyst){
+      const catPeakY = Math.max(peakYmax+25, peakY + 55);
+      extra = `<path d="${curvePath(catPeakY)}" fill="none" stroke="#2dd4bf" stroke-width="3" stroke-dasharray="7,5" />`;
+    }
+
+    svg.innerHTML = `
+      <line x1="40" y1="255" x2="580" y2="255" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+      <text x="300" y="278" fill="#6b7690" font-size="12" text-anchor="middle" font-family="Inter">Reaction coordinate</text>
+      <text x="20" y="150" fill="#6b7690" font-size="12" font-family="Inter" transform="rotate(-90 20 150)" text-anchor="middle">Potential Energy</text>
+
+      <path d="${curvePath(peakY)}" fill="none" stroke="#ff7a45" stroke-width="3.5"/>
+      ${extra}
+
+      <line x1="${x0}" y1="${reactY}" x2="${x0+40}" y2="${reactY}" stroke="#5fa8ff" stroke-width="2"/>
+      <text x="${x0}" y="${reactY+18}" fill="#5fa8ff" font-size="12" font-family="Inter">Reactants</text>
+
+      <line x1="${x2-40}" y1="${prodY}" x2="${x2}" y2="${prodY}" stroke="#5fa8ff" stroke-width="2"/>
+      <text x="${x2-70}" y="${prodY - 10}" fill="#5fa8ff" font-size="12" font-family="Inter">Products</text>
+
+      <line x1="${x1}" y1="${reactY}" x2="${x1}" y2="${peakY}" stroke="#f2b134" stroke-width="1" stroke-dasharray="3,3"/>
+      <text x="${x1+8}" y="${(reactY+peakY)/2}" fill="#f2b134" font-size="11" font-family="JetBrains Mono">Ea(fwd)=${eaf}</text>
+
+      <line x1="${x1}" y1="${prodY}" x2="${x1}" y2="${peakY}" stroke="#ff6b6b" stroke-width="1" stroke-dasharray="3,3"/>
+      <text x="${x1-95}" y="${(prodY+peakY)/2}" fill="#ff6b6b" font-size="11" font-family="JetBrains Mono">Ea(rev)=${ear}</text>
+
+      <line x1="${x2+15}" y1="${reactY}" x2="${x2+15}" y2="${prodY}" stroke="#aab4c8" stroke-width="1" stroke-dasharray="2,2"/>
+      <text x="${x2+20}" y="${(reactY+prodY)/2}" fill="#aab4c8" font-size="11" font-family="JetBrains Mono">ΔH=${dH}</text>
+    `;
+
+    el('m3_energy_readout').innerHTML =
+      `<span class="r-label">ΔH = Ea(fwd) − Ea(rev) =</span> <span class="r-num">${dH}</span> `+
+      `<span class="r-label">${dH<0 ? '(exothermic)' : '(endothermic)'}</span><br>`+
+      `<span class="r-label">Catalyst:</span> <span class="r-num">${catalyst ? 'ON — lower Ea pathway shown (teal dashed)' : 'OFF'}</span>`;
+  }
+
+  // Maxwell-Boltzmann pedagogical curve: f(E) ~ sqrt(E) * exp(-E/(c*T))
+  const mbChart = new Chart(el('m3_mb_chart').getContext('2d'), {
+    type:'line',
+    data:{ datasets:[
+      { label:'T₁', data:[], borderColor:'#5fa8ff', backgroundColor:'transparent', borderWidth:2.5, pointRadius:0, tension:.25 },
+      { label:'T₂', data:[], borderColor:'#ff7a45', backgroundColor:'transparent', borderWidth:2.5, pointRadius:0, tension:.25 },
+      { label:'Effective collisions (T₂, E>Ea)', data:[], borderColor:'transparent', backgroundColor:'rgba(255,122,69,0.22)', fill:'origin', pointRadius:0 },
+    ]},
+    options:{ ...baseGridOptions('Kinetic Energy (E)','Fraction of molecules'), parsing:false, scales:{
+      x:{type:'linear', title:{display:true,text:'Kinetic Energy (E)',color:'#6b7690'}, grid:{color:'rgba(255,255,255,0.05)'}},
+      y:{ min:0, title:{display:true,text:'Fraction of molecules',color:'#6b7690'}, grid:{color:'rgba(255,255,255,0.05)'}}
+    }}
+  });
+
+  function mbCurve(T, Emax, c){
+    const pts=[];
+    for(let i=0;i<=150;i++){
+      const E = Emax*i/150;
+      const y = Math.sqrt(E) * Math.exp(-E/(c*T));
+      pts.push({x:E,y:y});
+    }
+    return pts;
+  }
+
+  function drawMB(){
+    const T1 = parseFloat(t1In.value), T2 = parseFloat(t2In.value);
+    el('m3_t1_val').textContent = T1;
+    el('m3_t2_val').textContent = T2;
+    const c = 4.2; // pedagogical scaling constant
+    const Emax = 260;
+    const curve1 = mbCurve(T1, Emax, c);
+    const curve2 = mbCurve(T2, Emax, c);
+
+    // normalize so peak ~1 for nicer display
+    const maxY = Math.max(...curve1.map(p=>p.y), ...curve2.map(p=>p.y));
+    curve1.forEach(p=>p.y/=maxY);
+    curve2.forEach(p=>p.y/=maxY);
+
+    const eaf = parseFloat(eafIn.value);
+    const shaded = curve2.filter(p=>p.x>=eaf);
+
+    mbChart.data.datasets[0].data = curve1;
+    mbChart.data.datasets[1].data = curve2;
+    mbChart.data.datasets[2].data = shaded;
+    mbChart.options.plugins.annotation = undefined;
+    mbChart.update('none');
+  }
+
+  [eafIn,earIn,catIn].forEach(inp=>inp.addEventListener('input', ()=>{ drawProfile(); drawMB(); }));
+  [t1In,t2In].forEach(inp=>inp.addEventListener('input', drawMB));
+
+  drawProfile();
+  drawMB();
+})();
+
+/* ============================================================
+   MODULE 4 — INITIAL RATES / PAST PAPER SOLVER
+   ============================================================ */
+(function(){
+  const el = id => document.getElementById(id);
+  const presetSel = el('m4_preset');
+  const theadRow = el('m4_thead_row');
+  const tbody = el('m4_tbody');
+  const eqBox = el('m4_reaction_eq');
+  const stepsBox = el('m4_steps');
+
+  // Presets: reactants list, columns of concentrations, and either 'rate' or 'time' column.
+  const presets = [
+    {
+      name: "2015 A/L — A + 5B + 6C → 3D + 3E",
+      eq: "A (aq) + 5B (aq) + 6C (aq) → 3D (aq) + 3E (aq)",
+      reactants: ['A','B','C'],
+      mode: 'rate',
+      rows: [
+        {A:0.2,B:0.2,C:0.2, rate:1.6e-3},
+        {A:0.4,B:0.2,C:0.2, rate:3.84e-3},
+        {A:0.4,B:0.4,C:0.2, rate:5.12e-3},
+        {A:0.2,B:0.2,C:0.4, rate:1.6e-3},
+      ]
+    },
+    {
+      name: "1992 A/L — 2B + 3C → D + E + F",
+      eq: "2B (aq) + 3C (aq) → D (s) + E (aq) + F (aq)",
+      reactants: ['B','C'],
+      mode: 'time',
+      rows: [
+        {B:15.0, C:25.0, time:18.0},
+        {B:20.0, C:25.0, time:10.1},
+        {B:25.0, C:8.0,  time:7.6},
+        {B:25.0, C:2.0,  time:30.2},
+      ]
+    },
+    {
+      name: "1983 A/L — H2O2 / KI Iodine Clock",
+      eq: "H₂O₂ (aq) + 2I⁻(aq) + 2H⁺(aq) → I₂(aq) + 2H₂O (l)   [acid & KI in excess — R ∝ [H₂O₂]ⁿ]",
+      reactants: ['H2O2'],
+      mode: 'time',
+      rows: [
+        {H2O2:0.0500, time:12},
+        {H2O2:0.0400, time:15},
+        {H2O2:0.0300, time:21},
+        {H2O2:0.0200, time:31},
+        {H2O2:0.0100, time:60},
+      ]
+    },
+    {
+      name: "1986 A/L — Na2S2O3 + HCl",
+      eq: "Na₂S₂O₃ (aq) + 2HCl (aq) → 2NaCl (aq) + S (s) + SO₂ (g) + H₂O (l)",
+      reactants: ['Na2S2O3','HCl'],
+      mode: 'time',
+      rows: [
+        {Na2S2O3:12, HCl:5, time:21},
+        {Na2S2O3:15, HCl:5, time:16.6},
+        {Na2S2O3:20, HCl:5, time:12.5},
+        {Na2S2O3:25, HCl:5, time:10.0},
+        {Na2S2O3:25, HCl:4, time:10.1},
+        {Na2S2O3:25, HCl:3, time:10.2},
+        {Na2S2O3:25, HCl:2, time:10.1},
+      ]
+    },
+  ];
+
+  presets.forEach((p,i)=>{
+    const opt = document.createElement('option');
+    opt.value = i; opt.textContent = p.name;
+    presetSel.appendChild(opt);
+  });
+
+  function buildTable(preset){
+    eqBox.innerHTML = `<span class="sinhala">${preset.eq}</span>`;
+    theadRow.innerHTML = '';
+    preset.reactants.forEach(r=>{
+      const th = document.createElement('th'); th.textContent = `[${r}]`; theadRow.appendChild(th);
+    });
+    const thLast = document.createElement('th');
+    thLast.textContent = preset.mode==='rate' ? 'Rate' : 'Time (s)';
+    theadRow.appendChild(thLast);
+
+    tbody.innerHTML = '';
+    preset.rows.forEach((row,ri)=>{
+      const tr = document.createElement('tr');
+      preset.reactants.forEach(r=>{
+        const td = document.createElement('td');
+        td.innerHTML = `<input type="number" step="any" data-row="${ri}" data-key="${r}" value="${row[r]}">`;
+        tr.appendChild(td);
+      });
+      const tdLast = document.createElement('td');
+      const key = preset.mode==='rate' ? 'rate' : 'time';
+      tdLast.innerHTML = `<input type="number" step="any" data-row="${ri}" data-key="${key}" value="${row[key]}">`;
+      tr.appendChild(tdLast);
+      tbody.appendChild(tr);
+    });
+    stepsBox.innerHTML = `<span class="sinhala" style="color:var(--text-2);">දත්ත සකසා ඇත. "ගණනය කරන්න" බොත්තම එබන්න.</span>`;
+  }
+
+  function readTable(preset){
+    const rows = preset.rows.map(()=>({}));
+    tbody.querySelectorAll('input').forEach(inp=>{
+      const ri = parseInt(inp.dataset.row), key = inp.dataset.key;
+      rows[ri][key] = parseFloat(inp.value);
+    });
+    return rows;
+  }
+
+  function calc(){
+    const preset = presets[parseInt(presetSel.value)];
+    const rows = readTable(preset);
+    const reactants = preset.reactants;
+    const getRate = row => preset.mode==='rate' ? row.rate : (1/row.time);
+
+    let steps = [];
+    let orders = {};
+    reactants.forEach(r=>orders[r] = []);
+
+    // pairwise comparison: rows where exactly one reactant differs
+    for(let i=0;i<rows.length;i++){
+      for(let j=i+1;j<rows.length;j++){
+        const diffs = reactants.filter(r => Math.abs(rows[i][r]-rows[j][r]) > 1e-9);
+        if(diffs.length === 1){
+          const r = diffs[0];
+          const Ci = rows[i][r], Cj = rows[j][r];
+          const Ri = getRate(rows[i]), Rj = getRate(rows[j]);
+          if(Ci>0 && Cj>0 && Ri>0 && Rj>0 && Ci!==Cj){
+            const n = Math.log(Rj/Ri) / Math.log(Cj/Ci);
+            orders[r].push(n);
+            steps.push(
+              `<div class="step"><span class="step-tag">STEP</span>`+
+              `<span class="sinhala">දෙපේළි</span> ${i+1} <span class="sinhala">සහ</span> ${j+1} <span class="sinhala">— පමණක් </span>[${r}]<span class="sinhala"> වෙනස් වේ:</span> `+
+              `n<sub>${r}</sub> = log(${Rj.toFixed(5)}/${Ri.toFixed(5)}) / log(${Cj}/${Ci}) = <b>${n.toFixed(2)}</b></div>`
+            );
+          }
+        }
+      }
+    }
+
+    let finalOrders = {};
+    reactants.forEach(r=>{
+      if(orders[r].length){
+        const avg = orders[r].reduce((a,b)=>a+b,0)/orders[r].length;
+        finalOrders[r] = Math.round(avg*2)/2; // nearest 0.5
+      } else {
+        finalOrders[r] = null;
+      }
+    });
+
+    // compute k using first fully-known row
+    let kVals = [];
+    rows.forEach(row=>{
+      let denom = 1, ok = true;
+      reactants.forEach(r=>{
+        const n = finalOrders[r];
+        if(n===null){ ok=false; return; }
+        denom *= Math.pow(row[r], n);
+      });
+      const R = getRate(row);
+      if(ok && denom>0){ kVals.push(R/denom); }
+    });
+    const kAvg = kVals.length ? kVals.reduce((a,b)=>a+b,0)/kVals.length : null;
+
+    let totalOrder = 0, anyNull=false;
+    reactants.forEach(r=>{ if(finalOrders[r]===null) anyNull=true; else totalOrder += finalOrders[r]; });
+
+    let html = steps.join('');
+    if(steps.length===0){
+      html += `<div class="step sinhala" style="border-color:var(--danger);">සුදුසු දෙපේළි යුගලයක් හමු නොවීය — එක් ප්‍රතික්‍රියකයක් පමණක් වෙනස් වන දත්ත අවශ්‍යයි.</div>`;
+    }
+    html += `<div style="margin-top:14px;">`;
+    reactants.forEach(r=>{
+      html += `<span class="result-pill">n(${r}) = ${finalOrders[r]===null?'—':finalOrders[r]}</span>`;
+    });
+    if(!anyNull){
+      html += `<span class="result-pill">overall order = ${totalOrder}</span>`;
+      if(kAvg!==null) html += `<span class="result-pill">k ≈ ${kAvg.toExponential(3)}</span>`;
+    }
+    html += `</div>`;
+
+    stepsBox.innerHTML = html;
+
+    // update gauge with average measured rate (relative)
+    const rates = rows.map(getRate);
+    setGauge(Math.max(...rates), Math.max(...rates)*1.05);
+  }
+
+  presetSel.addEventListener('change', ()=>{
+    buildTable(presets[parseInt(presetSel.value)]);
+  });
+  el('m4_calc_btn').addEventListener('click', calc);
+
+  buildTable(presets[0]);
+})();
+
+/* initial typeset pass */
+window.addEventListener('load', ()=>setTimeout(typeset, 300));
+</script>
+</body>
+</html>
 
