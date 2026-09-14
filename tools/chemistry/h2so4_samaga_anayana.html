@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conc. H₂SO₄ සමඟ ඇනායන ප්‍රතික්‍රියා - රසායන විද්‍යා පරීක්ෂණාගාරය</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts for Sinhala Support -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;500;600;700;800&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans Sinhala', sans-serif;
+            background: linear-gradient(135deg, #090d16 0%, #111827 50%, #070a12 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+        }
+
+        /* Glassmorphism Test Tube Styling */
+        .test-tube-outer {
+            width: 96px;
+            height: 290px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 3px solid rgba(255, 255, 255, 0.35);
+            border-top: none;
+            border-bottom-left-radius: 48px;
+            border-bottom-right-radius: 48px;
+            position: relative;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.5), 
+                        inset 2px 2px 10px rgba(255, 255, 255, 0.25),
+                        inset -2px -2px 10px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            overflow: visible;
+        }
+
+        .test-tube-lip {
+            width: 114px;
+            height: 14px;
+            background: rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 7px;
+            position: absolute;
+            top: -14px;
+            left: -12px;
+            z-index: 10;
+        }
+
+        /* Test tube inner container for clipping liquid */
+        .test-tube-inner {
+            width: 100%;
+            height: 100%;
+            border-bottom-left-radius: 45px;
+            border-bottom-right-radius: 45px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Liquid Level Base Transition */
+        .liquid-container {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 45%;
+            transition: height 1.2s ease-in-out, background-color 1.5s ease-in-out;
+            border-bottom-left-radius: 45px;
+            border-bottom-right-radius: 45px;
+        }
+
+        /* Meniscus Curve */
+        .meniscus {
+            position: absolute;
+            top: -8px;
+            width: 100%;
+            height: 16px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transition: background-color 1.5s ease-in-out;
+        }
+
+        /* Dropper Animation */
+        @keyframes dropFall {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            70% { transform: translateY(140px) scale(0.9); opacity: 1; }
+            100% { transform: translateY(160px) scale(0.2); opacity: 0; }
+        }
+
+        .droplet {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 0 50% 50% 50%;
+            transform: rotate(45deg);
+            opacity: 0;
+        }
+
+        .droplet-animating {
+            animation: dropFall 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+        }
+
+        /* Smooth Gas & Fume Animations */
+        @keyframes emitFumes {
+            0% {
+                transform: translateY(0) scale(0.5);
+                opacity: 0;
+            }
+            30% {
+                opacity: var(--gas-opacity, 0.7);
+            }
+            100% {
+                transform: translateY(-160px) scale(2.2);
+                opacity: 0;
+            }
+        }
+
+        .gas-particle {
+            position: absolute;
+            top: -10px;
+            border-radius: 50%;
+            filter: blur(8px);
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        .gas-emitting {
+            animation: emitFumes 3s infinite ease-out;
+        }
+
+        /* Effervescence Bubbles inside liquid */
+        @keyframes bubbleRise {
+            0% { transform: translateY(0) scale(0.4); opacity: 0; }
+            50% { opacity: 0.8; }
+            100% { transform: translateY(-90px) scale(1); opacity: 0; }
+        }
+
+        .eff-bubble {
+            position: absolute;
+            bottom: 5px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            opacity: 0;
+        }
+
+        .eff-active {
+            animation: bubbleRise 1.5s infinite ease-in;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.5);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="p-3 md:p-6 flex flex-col justify-between min-h-screen">
+
+    <!-- Header Section -->
+    <header class="max-w-6xl mx-auto w-full text-center mb-5">
+        <div class="inline-flex items-center gap-2 bg-indigo-950/60 border border-indigo-500/30 px-4 py-1.5 rounded-full mb-3 backdrop-blur-md">
+            <i class="fa-solid fa-flask-vial text-indigo-400 text-lg"></i>
+            <span class="text-indigo-200 text-xs md:text-sm font-semibold">අ.පො.ස උසස් පෙළ රසායන විද්‍යාව - ඇනායන ගුණාත්මක විග්‍රහය</span>
+        </div>
+        <h1 class="text-2xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-300 to-rose-400 tracking-wide">
+            සාන්ද්‍ර H₂SO₄ සමඟ ඇනායන ප්‍රතික්‍රියා
+        </h1>
+        <p class="text-slate-400 text-xs md:text-sm mt-1.5 max-w-2xl mx-auto">
+            Cl⁻, Br⁻, I⁻, NO₃⁻, C₂O₄²⁻ සහ CH₃COO⁻ ඇනායන සාන්ද්‍ර H₂SO₄ සමඟ රත් කිරීමේදී පිටවන වායු, ඒවායේ වර්ණ, ගන්ධයන් සහ රසායනික සමීකරණ අධ්‍යයනය කරන්න.
+        </p>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-5 items-start my-auto">
+
+        <!-- Left Column: Anion Selection & Actions -->
+        <section class="lg:col-span-4 bg-slate-900/70 border border-slate-800 backdrop-blur-md p-5 rounded-2xl shadow-xl flex flex-col gap-4">
+            
+            <h2 class="text-sm font-bold text-slate-200 flex items-center gap-2 border-b border-slate-800 pb-2 uppercase tracking-wider">
+                <i class="fa-solid fa-vial-circle-check text-purple-400"></i>
+                1. ඇනායනය තෝරන්න (Select Anion)
+            </h2>
+
+            <!-- Grid of 6 Anions -->
+            <div id="anionGrid" class="grid grid-cols-3 gap-2">
+                <button onclick="selectAnion('Cl')" id="btn-Cl" class="anion-btn p-2.5 rounded-xl border text-center transition duration-200 flex flex-col items-center justify-center gap-0.5 bg-indigo-600/50 border-indigo-400 text-white shadow-lg ring-2 ring-indigo-400/50">
+                    <span class="text-sm font-bold">Cl⁻</span>
+                    <span class="text-[9px] text-slate-300">ක්ලෝරයිඩ්</span>
+                </button>
+
+                <button onclick="selectAnion('Br')" id="btn-Br" class="anion-btn p-2.5 rounded-xl border text-center transition duration-200 flex flex-col items-center justify-center gap-0.5 bg-slate-800/60 border-slate-700/80 text-slate-300 hover:bg-slate-700/60">
+                    <span class="text-sm font-bold">Br⁻</span>
+                    <span class="text-[9px] text-slate-400">බ්‍රෝමයිඩ්</span>
+                </button>
+
+                <button onclick="selectAnion('I')" id="btn-I" class="anion-btn p-2.5 rounded-xl border text-center transition duration-200 flex flex-col items-center justify-center gap-0.5 bg-slate-800/60 border-slate-700/80 text-slate-300 hover:bg-slate-700/60">
+                    <span class="text-sm font-bold">I⁻</span>
+                    <span class="text-[9px] text-slate-400">අයඩයිඩ්</span>
+                </button>
+
+                <button onclick="selectAnion('NO3')" id="btn-NO3" class="anion-btn p-2.5 rounded-xl border text-center transition duration-200 flex flex-col items-center justify-center gap-0.5 bg-slate-800/60 border-slate-700/80 text-slate-300 hover:bg-slate-700/60">
+                    <span class="text-sm font-bold">NO₃⁻</span>
+                    <span class="text-[9px] text-slate-400">නයිට්‍රේට්</span>
+                </button>
+
+                <button onclick="selectAnion('C2O4')" id="btn-C2O4" class="anion-btn p-2.5 rounded-xl border text-center transition duration-200 flex flex-col items-center justify-center gap-0.5 bg-slate-800/60 border-slate-700/80 text-slate-300 hover:bg-slate-700/60">
+                    <span class="text-sm font-bold">C₂O₄²⁻</span>
+                    <span class="text-[9px] text-slate-400">ඔක්සලේට්</span>
+                </button>
+
+                <button onclick="selectAnion('CH3COO')" id="btn-CH3COO" class="anion-btn p-2.5 rounded-xl border text-center transition duration-200 flex flex-col items-center justify-center gap-0.5 bg-slate-800/60 border-slate-700/80 text-slate-300 hover:bg-slate-700/60">
+                    <span class="text-sm font-bold">CH₃COO⁻</span>
+                    <span class="text-[9px] text-slate-400">ඇසිටේට්</span>
+                </button>
+            </div>
+
+            <!-- Action Buttons -->
+            <h2 class="text-sm font-bold text-slate-200 flex items-center gap-2 border-b border-slate-800 pb-2 mt-2 uppercase tracking-wider">
+                <i class="fa-solid fa-fire text-rose-400"></i>
+                2. ප්‍රතික්‍රියා ක්‍රියාත්මක කරන්න
+            </h2>
+
+            <div class="flex flex-col gap-2.5">
+                <button id="btnAddH2SO4" onclick="addAcidAndHeat()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold py-2.5 px-4 rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2 text-sm disabled:opacity-40 disabled:cursor-not-allowed">
+                    <i class="fa-solid fa-fire-flame-curved text-rose-300"></i>
+                    සාන්ද්‍ර H₂SO₄ එකතු කර රත් කරන්න
+                </button>
+
+                <button id="btnReset" onclick="resetReaction()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium py-2 px-4 rounded-xl transition duration-200 flex items-center justify-center gap-2 border border-slate-700 text-xs">
+                    <i class="fa-solid fa-rotate-left"></i>
+                    නැවත මුල සිට (Reset)
+                </button>
+            </div>
+        </section>
+
+        <!-- Center Column: Animated Test Tube Simulation -->
+        <section class="lg:col-span-4 bg-slate-900/70 border border-slate-800 backdrop-blur-md p-6 rounded-2xl shadow-xl flex flex-col items-center justify-center min-h-[420px] relative overflow-hidden">
+            
+            <!-- Dynamic Background Ambient Glow -->
+            <div id="bgGlow" class="absolute w-56 h-56 rounded-full blur-3xl opacity-20 bg-indigo-500 pointer-events-none transition-all duration-1000"></div>
+
+            <!-- Dropper Element -->
+            <div id="dropper" class="absolute top-4 flex flex-col items-center opacity-0 transition-opacity duration-300 pointer-events-none z-30">
+                <div class="w-4 h-9 bg-slate-400/80 rounded-t-sm border border-slate-300"></div>
+                <div class="w-2 h-5 bg-slate-300/80"></div>
+                <div class="w-1 h-3 bg-slate-200/90 rounded-b-full"></div>
+            </div>
+
+            <!-- Falling Droplet Animation Element -->
+            <div id="droplet" class="droplet top-16 z-20"></div>
+
+            <!-- Test Tube Visual Container -->
+            <div class="mt-20 mb-2 relative flex flex-col items-center">
+
+                <!-- Gas Particles (Positioned at Lip of Test Tube) -->
+                <div id="gasContainer" class="absolute -top-6 w-full flex justify-center items-center pointer-events-none z-20">
+                    <div id="gas1" class="gas-particle w-12 h-12 bg-slate-300 left-2"></div>
+                    <div id="gas2" class="gas-particle w-16 h-16 bg-slate-300 right-2" style="animation-delay: 0.8s;"></div>
+                    <div id="gas3" class="gas-particle w-14 h-14 bg-slate-300 left-6" style="animation-delay: 1.6s;"></div>
+                </div>
+
+                <div class="test-tube-outer flex items-end">
+                    <div class="test-tube-lip"></div>
+                    <div class="test-tube-inner">
+                        <!-- Fluid Level & Base Liquid Color -->
+                        <div id="liquid" class="liquid-container bg-slate-200/20">
+                            <!-- Effervescence Bubbles -->
+                            <div id="eff1" class="eff-bubble w-2.5 h-2.5 left-3"></div>
+                            <div id="eff2" class="eff-bubble w-2 h-2 left-8" style="animation-delay: 0.4s;"></div>
+                            <div id="eff3" class="eff-bubble w-3 h-3 right-4" style="animation-delay: 0.9s;"></div>
+                            <div id="meniscus" class="meniscus bg-slate-300/40"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Burner Flame (Appears during heating) -->
+                <div id="flame" class="opacity-0 transition-opacity duration-500 flex flex-col items-center -mt-1 z-10">
+                    <div class="w-6 h-8 bg-gradient-to-t from-orange-500 via-amber-400 to-blue-400 rounded-full blur-[1px] animate-pulse"></div>
+                    <div class="w-10 h-2 bg-slate-600 rounded-full"></div>
+                </div>
+
+                <!-- Stand Base Visualization -->
+                <div class="w-36 h-3 bg-slate-700 rounded-full mt-1 border border-slate-600 shadow-md"></div>
+            </div>
+
+            <!-- Status Badge -->
+            <div id="statusBadge" class="mt-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 shadow text-center">
+                ආරම්භක Cl⁻ නියැදිය
+            </div>
+        </section>
+
+        <!-- Right Column: Scientific Details & Observations -->
+        <section class="lg:col-span-4 bg-slate-900/70 border border-slate-800 backdrop-blur-md p-5 rounded-2xl shadow-xl flex flex-col justify-between min-h-[420px]">
+            <div>
+                <h2 class="text-sm font-bold text-slate-200 flex items-center gap-2 border-b border-slate-800 pb-2 mb-3 uppercase tracking-wider">
+                    <i class="fa-solid fa-clipboard-list text-purple-400"></i>
+                    නිරීක්ෂණ සහ වායු තොරතුරු
+                </h2>
+
+                <div class="space-y-2.5 text-xs">
+                    <!-- Selected Anion -->
+                    <div class="bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/60">
+                        <span class="text-[10px] text-slate-400 block mb-0.5">තෝරාගත් ඇනායනය:</span>
+                        <div id="infoAnionName" class="text-sm font-bold text-purple-300">ක්ලෝරයිඩ් අයනය (Cl⁻)</div>
+                    </div>
+
+                    <!-- Emitted Gas & Formula -->
+                    <div class="bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/60">
+                        <span class="text-[10px] text-slate-400 block mb-0.5">පිටවන වායුව (Emitted Gas):</span>
+                        <div id="infoGasFormula" class="font-bold text-slate-100 text-sm">-</div>
+                    </div>
+
+                    <!-- Gas Color & Smell -->
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="bg-slate-800/60 p-2 rounded-xl border border-slate-700/60">
+                            <span class="text-[10px] text-slate-400 block mb-0.5">වායුවේ වර්ණය:</span>
+                            <div id="infoGasColor" class="font-semibold text-pink-300">-</div>
+                        </div>
+                        <div class="bg-slate-800/60 p-2 rounded-xl border border-slate-700/60">
+                            <span class="text-[10px] text-slate-400 block mb-0.5">ගන්ධය (Smell):</span>
+                            <div id="infoGasSmell" class="font-semibold text-amber-300">-</div>
+                        </div>
+                    </div>
+
+                    <!-- Balanced Chemical Equation -->
+                    <div class="bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/60">
+                        <span class="text-[10px] text-slate-400 block mb-1">රසායනික සමීකරණය:</span>
+                        <div id="infoEquation" class="font-mono text-[11px] text-emerald-300 break-words bg-slate-950/70 p-2 rounded border border-slate-800">
+                            -
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Theoretical Explanation Box -->
+            <div class="mt-3 p-3 bg-purple-950/40 border border-purple-800/50 rounded-xl text-xs text-purple-200 leading-relaxed">
+                <i class="fa-solid fa-circle-info mr-1 text-purple-400"></i>
+                <span id="infoExplanation">ඇනායනයක් තෝරා "සාන්ද්‍ර H₂SO₄ එකතු කර රත් කරන්න" බොත්තම ඔබන්න.</span>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Detailed Analytical Chemistry Highlights Section -->
+    <section class="max-w-6xl mx-auto w-full mt-5 bg-slate-900/80 border border-slate-800 rounded-2xl p-4 text-xs backdrop-blur-md shadow-lg">
+        <div class="flex items-center gap-2 font-bold text-amber-400 mb-2 border-b border-slate-800 pb-1.5 text-xs md:text-sm">
+            <i class="fa-solid fa-lightbulb"></i>
+            උසස් පෙළ රසායන විද්‍යාව - සාන්ද්‍ර H₂SO₄ සමඟ ඇනායන නිරීක්ෂණ සාරාංශය:
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-slate-300 leading-relaxed">
+            <div class="bg-slate-950/50 p-2.5 rounded-xl border border-slate-800">
+                <span class="text-indigo-400 font-semibold block mb-1">1. halide ඇනායන (Cl⁻, Br⁻, I⁻):</span>
+                • <strong>Cl⁻:</strong> වර්ණහීන, සැර ගන්ධයක් ඇති HCl වායුව (NH₃ දුම් සමඟ සුදු NH₄Cl සාදයි).<br>
+                • <strong>Br⁻:</strong> රතු-දුඹුරු Br₂ වායුව (H₂SO₄ මඟින් HBr ඔක්සිකරණය වේ).<br>
+                • <strong>I⁻:</strong> දම් පැහැති I₂ වායුව (තද ඔක්සිකරණයක් සිදුවේ, H₂S/SO₂ ද ලැබේ).
+            </div>
+            <div class="bg-slate-950/50 p-2.5 rounded-xl border border-slate-800">
+                <span class="text-rose-400 font-semibold block mb-1">2. NO₃⁻ (නයිට්‍රේට්) අයනය:</span>
+                • සාන්ද්‍ර H₂SO₄ සමඟ රත් කළ විට <strong>තැඹිලි-දුඹුරු පැහැති NO₂ වායුව</strong> පිටවේ.<br>
+                • Cu කැබැලි එකතු කළ විට NO₂ වායු පිටවීම තවත් වේගවත් වේ.
+            </div>
+            <div class="bg-slate-950/50 p-2.5 rounded-xl border border-slate-800">
+                <span class="text-emerald-400 font-semibold block mb-1">3. C₂O₄²⁻ සහ CH₃COO⁻:</span>
+                • <strong>C₂O₄²⁻:</strong> CO (නිල් දැල්ලෙන් දැල්වේ) සහ CO₂ (සුනු දිය බොර කරයි) වායු මිශ්‍රණය පිටවේ.<br>
+                • <strong>CH₃COO⁻:</strong> විනාකිරි (Vinegar) ගන්ධය සහිත CH₃COOH වාෂ්ප පිටවේ.
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer with Telegram Channel Links & Personal Branding -->
+    <footer class="max-w-6xl mx-auto w-full text-center text-xs text-slate-500 mt-6 pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <span class="text-slate-400">අධ්‍යාපනික අනුකරණය | Conc. H₂SO₄ Anion Reaction Simulator</span>
+        
+        <div class="flex items-center gap-3">
+            <!-- Telegram E-Tools Channel Button -->
+            <a href="https://t.me/htmlstudytools" target="_blank" rel="noopener noreferrer" title="E-Tools Telegram Channel" class="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3.5 py-1.5 rounded-full shadow-md text-slate-200 transition duration-300 transform hover:scale-105 cursor-pointer">
+                <i class="fa-paper-plane text-cyan-400 text-xs"></i>
+                <span class="font-semibold text-xs" style="font-family: 'Poppins', sans-serif;">E-Tools Channel</span>
+            </a>
+
+            <!-- Personal Telegram Profile Button -->
+            <a href="https://t.me/dinusha_Official" target="_blank" rel="noopener noreferrer" title="Contact Dinusha on Telegram" class="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-950 via-purple-950 to-slate-900 border border-indigo-500/40 hover:border-indigo-400 px-3.5 py-1.5 rounded-full shadow-md text-slate-200 transition duration-300 transform hover:scale-105 group cursor-pointer">
+                <i class="fa-brands fa-telegram text-sky-400 text-sm group-hover:animate-bounce"></i>
+                <span class="font-semibold text-xs tracking-wide" style="font-family: 'Poppins', sans-serif;">designed by <span class="text-indigo-300 font-bold group-hover:text-indigo-200">@dinusha_Official</span></span>
+            </a>
+        </div>
+    </footer>
+
+    <!-- JavaScript Reaction Logic & Animation Script -->
+    <script>
+        // Data Dictionary for Conc. H2SO4 Anion Reactions
+        const anionData = {
+            'Cl': {
+                name: 'ක්ලෝරයිඩ් අයනය - Cl⁻',
+                initialColor: 'rgba(241, 245, 249, 0.15)', // Colorless solid/solution
+                gasFormula: 'HCl වායුව (Hydrogen Chloride)',
+                gasColor: 'වර්ණහීන වායුව (වෙරළාසන්න තෙතමනය හමුවේ සුදු දුම් සාදයි)',
+                gasSmell: 'දැඩි සැර ගන්ධය (Pungent / Choking Smell)',
+                gasParticleColor: 'rgba(241, 245, 249, 0.65)',
+                gasOpacity: '0.6',
+                glowColor: 'rgba(148, 163, 184, 0.4)',
+                equation: 'NaCl(s) + H₂SO₄(l) → NaHSO₄(s) + HCl(g) ↑',
+                explanation: 'ක්ලෝරයිඩ් ලවණ සාන්ද්‍ර H₂SO₄ සමඟ රත් කළ විට වර්ණහීන, සැර ගන්ධයක් ඇති HCl වායුව පිටවේ. තෙත සහිත NH₃ කූරක් ඇල්ලූ විට සුදු පැහැති NH₄Cl දුම් නිරීක්ෂණය කළ හැක.'
+            },
+            'Br': {
+                name: 'බ්‍රෝමයිඩ් අයනය - Br⁻',
+                initialColor: 'rgba(241, 245, 249, 0.15)',
+                gasFormula: 'Br₂ (බ්‍රෝමීන් වාෂ්ප) + HBr + SO₂',
+                gasColor: 'රතු-දුඹුරු පැහැති (Reddish-Brown) වාෂ්ප',
+                gasSmell: 'දැඩි තද සැර ගන්ධය (Pungent Smell)',
+                gasParticleColor: 'rgba(185, 28, 28, 0.85)',
+                gasOpacity: '0.85',
+                glowColor: 'rgba(220, 38, 38, 0.5)',
+                equation: '2NaBr + 3H₂SO₄ → 2NaHSO₄ + Br₂(g) ↑ + SO₂(g) + 2H₂O',
+                explanation: 'H₂SO₄ යනු ප්‍රබල ඔක්සිකාරකයක් බැවින්, සෑදෙන HBr වායුව Br₂ (රතු-දුඹුරු වාෂ්ප) බවට ඔක්සිකරණය කරයි. එමෙන්ම SO₂ වායුවද සමඟ මිශ්‍රව පිටවේ.'
+            },
+            'I': {
+                name: 'අයඩයිඩ් අයනය - I⁻',
+                initialColor: 'rgba(241, 245, 249, 0.15)',
+                gasFormula: 'I₂ (අයඩීන් වාෂ්ප) + H₂S / SO₂',
+                gasColor: 'තද දම් පැහැති (Dark Violet/Purple) වාෂ්ප',
+                gasSmell: 'දැඩි සැර ගන්ධය (කුණු වූ බිත්තර ගන්ධය H₂S නිසා)',
+                gasParticleColor: 'rgba(147, 51, 234, 0.9)',
+                gasOpacity: '0.9',
+                glowColor: 'rgba(168, 85, 247, 0.6)',
+                equation: '2NaI + 3H₂SO₄ → 2NaHSO₄ + I₂(g) ↑ + SO₂(g) + 2H₂O (හා H₂S)',
+                explanation: 'I⁻ ඉතා ප්‍රබල ඔක්සිහාරකයක් වන අතර සාන්ද්‍ර H₂SO₄ මඟින් පහසුවෙන්ම දම් පැහැති I₂ වාෂ්ප බවට ඔක්සිකරණය වේ. පරීක්ෂණ නලයේ බිත්ති මත කලු-දම් I₂ ස්ඵටික තැන්පත් විය හැක.'
+            },
+            'NO3': {
+                name: 'නයිට්‍රේට් අයනය - NO₃⁻',
+                initialColor: 'rgba(241, 245, 249, 0.15)',
+                gasFormula: 'NO₂ වායුව (Nitrogen Dioxide)',
+                gasColor: 'තැඹිලි-දුඹුරු පැහැති (Brown) වායුව',
+                gasSmell: 'දැඩි සැර නයිට්‍රස් ගන්ධය (Irritating Choking Smell)',
+                gasParticleColor: 'rgba(194, 65, 12, 0.85)',
+                gasOpacity: '0.85',
+                glowColor: 'rgba(249, 115, 22, 0.5)',
+                equation: '4NaNO₃ + 2H₂SO₄ → 4NaHSO₄ + 4NO₂(g) ↑ + O₂(g) + 2H₂O',
+                explanation: 'නයිට්‍රේට් ලවණ සාන්ද්‍ර H₂SO₄ සමඟ තදින් රත් කළ විට HNO₃ වියෝජනය වී තැඹිලි-දුඹුරු NO₂ වායුව පිටවේ. Cu කැබලි එකතු කළ විට NO₂ පිටවීම තවත් තීව්‍ර වේ.'
+            },
+            'C2O4': {
+                name: 'ඔක්සලේට් අයනය - C₂O₄²⁻',
+                initialColor: 'rgba(241, 245, 249, 0.15)',
+                gasFormula: 'CO (කාබන් මොනොක්සයිඩ්) + CO₂ (කාබන් ඩයොක්සයිඩ්)',
+                gasColor: 'වර්ණහීන වායු මිශ්‍රණය (Colorless Gases)',
+                gasSmell: 'ගන්ධයක් නැත (Odourless)',
+                gasParticleColor: 'rgba(203, 213, 225, 0.5)',
+                gasOpacity: '0.5',
+                glowColor: 'rgba(100, 116, 139, 0.4)',
+                equation: 'Na₂C₂O₄ + H₂SO₄ → Na₂SO₄ + CO(g) ↑ + CO₂(g) ↑ + H₂O(l)',
+                explanation: 'සාන්ද්‍ර H₂SO₄ මඟින් ඔක්සලික් අම්ලය විජලනය (Dehydration) කරයි. මෙහිදී CO සහ CO₂ සමමෝලිකව පිටවේ. CO වායුව නිල් පැහැති දැල්ලෙන් දැල්වෙන අතර CO₂ මඟින් සුනු දිය බොර කරයි.'
+            },
+            'CH3COO': {
+                name: 'ඇසිටේට් අයනය - CH₃COO⁻',
+                initialColor: 'rgba(241, 245, 249, 0.15)',
+                gasFormula: 'CH₃COOH වාෂ්ප (Acetic Acid Vapour)',
+                gasColor: 'වර්ණහීන වාෂ්ප (Colorless Vapour)',
+                gasSmell: 'විනාකිරි ගන්ධය (Vinegar Smell)',
+                gasParticleColor: 'rgba(248, 250, 252, 0.55)',
+                gasOpacity: '0.55',
+                glowColor: 'rgba(251, 146, 60, 0.4)',
+                equation: 'CH₃COONa + H₂SO₄ → NaHSO₄ + CH₃COOH(g) ↑',
+                explanation: 'ඇසිටේට් ලවණ සාන්ද්‍ර H₂SO₄ සමඟ රත් කළ විට වාෂ්පශීලී ඇසිටික් අම්ලය (CH₃COOH) සෑදී පිටවන අතර, පැහැදිලි විනාකිරි (Vinegar) ගන්ධයක් ලබා දෙයි.'
+            }
+        };
+
+        // Current state tracking
+        let currentAnionKey = 'Cl';
+        let isReacting = false;
+
+        // DOM Element references
+        const liquid = document.getElementById('liquid');
+        const meniscus = document.getElementById('meniscus');
+        const bgGlow = document.getElementById('bgGlow');
+        const dropper = document.getElementById('dropper');
+        const droplet = document.getElementById('droplet');
+        const statusBadge = document.getElementById('statusBadge');
+        const flame = document.getElementById('flame');
+
+        const gas1 = document.getElementById('gas1');
+        const gas2 = document.getElementById('gas2');
+        const gas3 = document.getElementById('gas3');
+
+        const eff1 = document.getElementById('eff1');
+        const eff2 = document.getElementById('eff2');
+        const eff3 = document.getElementById('eff3');
+
+        const infoAnionName = document.getElementById('infoAnionName');
+        const infoGasFormula = document.getElementById('infoGasFormula');
+        const infoGasColor = document.getElementById('infoGasColor');
+        const infoGasSmell = document.getElementById('infoGasSmell');
+        const infoEquation = document.getElementById('infoEquation');
+        const infoExplanation = document.getElementById('infoExplanation');
+
+        // Select Anion Button Handler
+        function selectAnion(key) {
+            if (isReacting) return;
+            currentAnionKey = key;
+
+            // Highlight selected button
+            document.querySelectorAll('.anion-btn').forEach(btn => {
+                btn.className = 'anion-btn p-2.5 rounded-xl border text-center transition duration-200 flex flex-col items-center justify-center gap-0.5 bg-slate-800/60 border-slate-700/80 text-slate-300 hover:bg-slate-700/60';
+            });
+
+            const activeBtn = document.getElementById(`btn-${key}`);
+            activeBtn.className = 'anion-btn p-2.5 rounded-xl border text-center transition duration-200 flex flex-col items-center justify-center gap-0.5 bg-indigo-600/50 border-indigo-400 text-white shadow-lg ring-2 ring-indigo-400/50';
+
+            resetReaction();
+        }
+
+        // Trigger Dropper Drop Animation
+        function animateDropper(callback) {
+            dropper.style.opacity = '1';
+            droplet.classList.add('droplet-animating');
+
+            setTimeout(() => {
+                droplet.classList.remove('droplet-animating');
+                dropper.style.opacity = '0';
+                if (callback) callback();
+            }, 1000);
+        }
+
+        // Add Acid and Heat Simulation Handler
+        function addAcidAndHeat() {
+            if (isReacting) return;
+            isReacting = true;
+
+            const data = anionData[currentAnionKey];
+
+            // Step 1: Add Acid Dropper
+            animateDropper(() => {
+                // Step 2: Show Burner Flame & Increase Fluid Level
+                flame.style.opacity = '1';
+                liquid.style.height = '60%';
+
+                // Activate Effervescence Bubbles inside test tube
+                eff1.classList.add('eff-active');
+                eff2.classList.add('eff-active');
+                eff3.classList.add('eff-active');
+
+                // Update Status
+                statusBadge.innerText = 'රත් කරමින් වායුව පිටකිරීම...';
+                statusBadge.className = 'mt-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-rose-900/50 text-rose-200 border border-rose-700 shadow animate-pulse';
+
+                // Step 3: Trigger Gas Emission Animations after short heating delay
+                setTimeout(() => {
+                    // Apply Gas particle styling
+                    [gas1, gas2, gas3].forEach(g => {
+                        g.style.backgroundColor = data.gasParticleColor;
+                        g.style.setProperty('--gas-opacity', data.gasOpacity);
+                        g.classList.add('gas-emitting');
+                    });
+
+                    // Update background glow
+                    bgGlow.style.backgroundColor = data.glowColor;
+
+                    // Update Info Section
+                    infoGasFormula.innerText = data.gasFormula;
+                    infoGasColor.innerText = data.gasColor;
+                    infoGasSmell.innerText = data.gasSmell;
+                    infoEquation.innerText = data.equation;
+                    infoExplanation.innerHTML = data.explanation;
+
+                    statusBadge.innerText = 'වායු පිටවීම සිදු වේ';
+                    statusBadge.className = 'mt-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-emerald-900/50 text-emerald-200 border border-emerald-700 shadow';
+                }, 800);
+            });
+        }
+
+        // Reset Test Tube State
+        function resetReaction() {
+            isReacting = false;
+            const data = anionData[currentAnionKey];
+
+            // Reset Flame & Liquids
+            flame.style.opacity = '0';
+            liquid.style.height = '45%';
+            liquid.style.backgroundColor = data.initialColor;
+
+            // Stop Gas Emission Animation
+            [gas1, gas2, gas3].forEach(g => {
+                g.classList.remove('gas-emitting');
+            });
+
+            // Stop Effervescence
+            eff1.classList.remove('eff-active');
+            eff2.classList.remove('eff-active');
+            eff3.classList.remove('eff-active');
+
+            // Reset Glow
+            bgGlow.style.backgroundColor = 'rgba(99, 102, 241, 0.2)';
+
+            // Reset Status & Info Panel
+            statusBadge.innerText = `ආරම්භක ${data.name.split('-')[0]} නියැදිය`;
+            statusBadge.className = 'mt-2 px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 shadow text-center';
+
+            infoAnionName.innerText = data.name;
+            infoGasFormula.innerText = '-';
+            infoGasColor.innerText = '-';
+            infoGasSmell.innerText = '-';
+            infoEquation.innerText = '-';
+            infoExplanation.innerHTML = `${data.name} සඳහා පරීක්ෂණය සිදු කිරීමට "සාන්ද්‍ර H₂SO₄ එකතු කර රත් කරන්න" බොත්තම ඔබන්න.`;
+        }
+
+        // Initial setup on window load
+        window.onload = function() {
+            resetReaction();
+        };
+    </script>
+</body>
+</html>
