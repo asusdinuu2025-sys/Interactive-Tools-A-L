@@ -1,0 +1,191 @@
+```html
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A/L Complex Numbers - සංකීර්ණ සංඛ්‍යා</title>
+
+<style>
+body{
+    margin:0;
+    font-family:"Noto Sans Sinhala","Iskoola Pota",Arial,sans-serif;
+    background:#f4f6f8;
+    color:#222;
+}
+.container{
+    max-width:950px;
+    margin:auto;
+    padding:30px 20px;
+}
+header,.card{
+    background:white;
+    padding:25px;
+    margin-bottom:20px;
+    border-radius:18px;
+    box-shadow:0 4px 15px rgba(0,0,0,.08);
+}
+header{text-align:center}
+.subtitle{color:#666}
+.formula{
+    background:#f0f2f5;
+    padding:18px;
+    margin:12px 0;
+    border-radius:10px;
+    text-align:center;
+    font-family:"Times New Roman",serif;
+    font-size:24px;
+}
+.example{
+    background:#fff5e8;
+    border-left:5px solid #ff9800;
+    padding:18px;
+    border-radius:8px;
+}
+button{
+    border:0;
+    padding:10px 18px;
+    border-radius:20px;
+    background:#222;
+    color:white;
+    cursor:pointer;
+}
+.dark{
+    background:#121212;
+    color:#eee;
+}
+.dark header,.dark .card{background:#1e1e1e}
+.dark .formula{background:#292929}
+.dark .example{background:#362918}
+.dark button{background:white;color:#222}
+.dark .subtitle{color:#aaa}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+<h1>ℂ සංකීර්ණ සංඛ්‍යා</h1>
+<p class="subtitle">G.C.E. Advanced Level Combined Mathematics</p>
+<button onclick="toggleDark()">🌙 / ☀️</button>
+</header>
+
+<div class="card">
+<h2>1. සංකීර්ණ සංඛ්‍යාවක ආකාරය</h2>
+
+<div class="formula">
+z = a + ib
+</div>
+
+<p>
+මෙහි <strong>a</strong> යනු තාත්වික කොටස වන අතර
+<strong>b</strong> යනු අතාත්වික කොටසේ සංගුණකයයි.
+</p>
+
+<div class="formula">
+i² = −1
+</div>
+</div>
+
+<div class="card">
+<h2>2. සංකීර්ණ සංඛ්‍යාවල එකතුව</h2>
+
+<div class="formula">
+(a + ib) + (c + id)
+= (a+c) + i(b+d)
+</div>
+</div>
+
+<div class="card">
+<h2>3. ගුණ කිරීම</h2>
+
+<div class="formula">
+(a+ib)(c+id)
+= ac + iad + ibc + i²bd
+</div>
+
+<div class="formula">
+= (ac − bd) + i(ad + bc)
+</div>
+</div>
+
+<div class="card">
+<h2>4. සංකීර්ණ සංඛ්‍යාවක සංයුග්මය</h2>
+
+<div class="formula">
+z = a + ib
+</div>
+
+<div class="formula">
+z̄ = a − ib
+</div>
+</div>
+
+<div class="card">
+<h2>5. මාපාංකය (Modulus)</h2>
+
+<div class="formula">
+|z| = √(a² + b²)
+</div>
+</div>
+
+<div class="card">
+<h2>6. Argand තලය</h2>
+
+<p>
+සංකීර්ණ සංඛ්‍යාවක් Argand තලයක ලක්ෂ්‍යයක් ලෙස
+නිරූපණය කළ හැක.
+</p>
+
+<div class="formula">
+z = a + ib
+</div>
+
+<p>
+තිරස් අක්ෂය → තාත්වික අක්ෂය (Real Axis)
+<br>
+සිරස් අක්ෂය → අතාත්වික අක්ෂය (Imaginary Axis)
+</p>
+</div>
+
+<div class="card">
+<h2>7. උදාහරණය</h2>
+
+<div class="example">
+
+<strong>z = 3 + 4i නම් |z| සොයන්න.</strong>
+
+<br><br>
+
+<div class="formula">
+|z| = √(3² + 4²)
+</div>
+
+<div class="formula">
+|z| = √25
+</div>
+
+<div class="formula">
+|z| = 5
+</div>
+
+</div>
+</div>
+
+<footer style="text-align:center;color:#777;padding:20px">
+Designed By Dinusha Hemal ツ
+</footer>
+
+</div>
+
+<script>
+function toggleDark(){
+    document.body.classList.toggle("dark");
+}
+</script>
+
+</body>
+</html>
+```
