@@ -4,233 +4,1185 @@
   <link rel="icon" type="image/png" href="assets/icon/icon2.png">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title> Study-Lab Simulater for G.C.E A/L Sri Lanka</title>
-  <meta name="description" content="Interactive tools in sinhala for G.C.E Advanced Level students in Sri Lanka — Mathematics, Biology, Chemistry and Physics." />
+
+  <meta
+    name="description"
+    content="Interactive tools in sinhala for G.C.E Advanced Level students in Sri Lanka — Mathematics, Biology, Chemistry and Physics."
+  />
+
   <link rel="stylesheet" href="assets/css/main.css" />
+
+
+  <!-- =========================================================
+       STUDY LAB LK — GLASS UI START
+       Apple-inspired glass / smooth / silky interface
+       All new visual styling is isolated here.
+       ========================================================= -->
+
+  <style>
+
+    /* =========================================================
+       GLASS VARIABLES
+       ========================================================= */
+
+    :root {
+      --sl-glass-dark: rgba(18, 27, 42, 0.48);
+      --sl-glass-dark-strong: rgba(25, 37, 56, 0.60);
+      --sl-glass-dark-border: rgba(255, 255, 255, 0.11);
+
+      --sl-glass-light: rgba(255, 255, 255, 0.56);
+      --sl-glass-light-strong: rgba(255, 255, 255, 0.70);
+      --sl-glass-light-border: rgba(255, 255, 255, 0.78);
+
+      --sl-glass-radius: 24px;
+      --sl-glass-blur: 24px;
+
+      --sl-accent: #7edcff;
+      --sl-accent-soft: rgba(91, 190, 255, 0.16);
+    }
+
+
+    /* =========================================================
+       BACKGROUND — SOFT GLASS ATMOSPHERE
+       ========================================================= */
+
+    body {
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      pointer-events: none;
+
+      width: 420px;
+      height: 420px;
+
+      border-radius: 50%;
+
+      filter: blur(100px);
+
+      z-index: -3;
+    }
+
+    body::before {
+      top: -180px;
+      left: -160px;
+
+      background: rgba(45, 150, 255, 0.13);
+    }
+
+    body::after {
+      right: -160px;
+      bottom: -180px;
+
+      background: rgba(105, 75, 255, 0.10);
+    }
+
+
+    /* =========================================================
+       FLOATING SCIENCE BACKGROUND
+       ========================================================= */
+
+    .science-background {
+      position: fixed;
+      inset: 0;
+
+      overflow: hidden;
+
+      pointer-events: none;
+
+      z-index: -2;
+
+      opacity: 1;
+    }
+
+    .science-symbol {
+      position: absolute;
+
+      color: rgba(150, 215, 255, 0.075);
+
+      font-family:
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+      font-weight: 500;
+
+      white-space: nowrap;
+
+      user-select: none;
+
+      text-shadow:
+        0 0 18px rgba(80, 180, 255, 0.06);
+
+      animation:
+        scienceFloat linear infinite;
+    }
+
+    @keyframes scienceFloat {
+
+      0% {
+        transform:
+          translate3d(0, 40px, 0)
+          rotate(0deg);
+        opacity: 0;
+      }
+
+      12% {
+        opacity: 1;
+      }
+
+      50% {
+        transform:
+          translate3d(35px, -35px, 0)
+          rotate(5deg);
+      }
+
+      88% {
+        opacity: 1;
+      }
+
+      100% {
+        transform:
+          translate3d(-25px, -110px, 0)
+          rotate(-4deg);
+        opacity: 0;
+      }
+    }
+
+
+    /* =========================================================
+       HEADER — GLASS
+       ========================================================= */
+
+    .site-header {
+      position: relative;
+      z-index: 20;
+
+      background: var(--sl-glass-dark) !important;
+
+      border: 1px solid var(--sl-glass-dark-border) !important;
+
+      border-radius:
+        0 0
+        var(--sl-glass-radius)
+        var(--sl-glass-radius) !important;
+
+      box-shadow:
+        0 18px 45px rgba(0, 0, 0, 0.20),
+        inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+
+      backdrop-filter:
+        blur(var(--sl-glass-blur))
+        saturate(145%);
+
+      -webkit-backdrop-filter:
+        blur(var(--sl-glass-blur))
+        saturate(145%);
+
+      transition:
+        background 0.35s ease,
+        border-color 0.35s ease,
+        box-shadow 0.35s ease;
+    }
+
+
+    /* =========================================================
+       BRAND
+       ========================================================= */
+
+    .brand-mark {
+      filter:
+        drop-shadow(
+          0 5px 15px
+          rgba(70, 190, 255, 0.15)
+        );
+    }
+
+
+    /* =========================================================
+       THEME TOGGLE
+       ========================================================= */
+
+    .theme-toggle {
+      background:
+        rgba(255, 255, 255, 0.055) !important;
+
+      border:
+        1px solid rgba(255, 255, 255, 0.11) !important;
+
+      border-radius: 15px !important;
+
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+
+      box-shadow:
+        0 10px 28px rgba(0, 0, 0, 0.13),
+        inset 0 1px 0 rgba(255, 255, 255, 0.07);
+
+      transition:
+        transform 0.25s ease,
+        background 0.25s ease,
+        box-shadow 0.25s ease;
+    }
+
+    .theme-toggle:hover {
+      transform: translateY(-2px);
+
+      background:
+        rgba(255, 255, 255, 0.095) !important;
+
+      box-shadow:
+        0 14px 30px rgba(0, 0, 0, 0.17),
+        inset 0 1px 0 rgba(255, 255, 255, 0.10);
+    }
+
+
+    /* =========================================================
+       HERO — SMOOTH TYPOGRAPHY
+       ========================================================= */
+
+    .hero {
+      position: relative;
+    }
+
+    .hero h1 {
+      letter-spacing: -0.035em;
+
+      text-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.13);
+    }
+
+    .subtitle {
+      opacity: 0.88;
+    }
+
+
+    /* =========================================================
+       VISITOR COUNTER — GLASS REFINEMENT
+       ========================================================= */
+
+    .student-counter {
+      background:
+        linear-gradient(
+          135deg,
+          rgba(48, 135, 220, 0.21),
+          rgba(75, 72, 160, 0.15)
+        ) !important;
+
+      border:
+        1px solid rgba(145, 215, 255, 0.18) !important;
+
+      border-radius:
+        var(--sl-glass-radius) !important;
+
+      box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.19),
+        inset 0 1px 0 rgba(255, 255, 255, 0.085),
+        0 0 32px rgba(70, 170, 255, 0.06) !important;
+
+      backdrop-filter:
+        blur(24px)
+        saturate(140%) !important;
+
+      -webkit-backdrop-filter:
+        blur(24px)
+        saturate(140%) !important;
+
+      transition:
+        transform 0.30s ease,
+        box-shadow 0.30s ease,
+        background 0.30s ease;
+    }
+
+    .student-counter:hover {
+      transform: translateY(-3px);
+
+      box-shadow:
+        0 27px 55px rgba(0, 0, 0, 0.23),
+        inset 0 1px 0 rgba(255, 255, 255, 0.10),
+        0 0 38px rgba(70, 170, 255, 0.08) !important;
+    }
+
+
+    /* =========================================================
+       SUBJECT CARDS — APPLE-STYLE GLASS
+       ========================================================= */
+
+    .subject-card {
+      position: relative;
+
+      overflow: hidden;
+
+      background:
+        var(--sl-glass-dark) !important;
+
+      border:
+        1px solid var(--sl-glass-dark-border) !important;
+
+      border-radius:
+        var(--sl-glass-radius) !important;
+
+      backdrop-filter:
+        blur(var(--sl-glass-blur))
+        saturate(140%);
+
+      -webkit-backdrop-filter:
+        blur(var(--sl-glass-blur))
+        saturate(140%);
+
+      box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.065) !important;
+
+      transition:
+        transform 0.35s cubic-bezier(.2,.8,.2,1),
+        background 0.35s ease,
+        border-color 0.35s ease,
+        box-shadow 0.35s ease;
+    }
+
+
+    /* Top glass reflection */
+
+    .subject-card::before {
+      content: "";
+
+      position: absolute;
+
+      top: 0;
+      left: 12%;
+      right: 12%;
+
+      height: 1px;
+
+      background:
+        linear-gradient(
+          90deg,
+          transparent,
+          rgba(255,255,255,0.32),
+          transparent
+        );
+
+      pointer-events: none;
+    }
+
+
+    /* Soft internal glow */
+
+    .subject-card::after {
+      content: "";
+
+      position: absolute;
+
+      width: 160px;
+      height: 160px;
+
+      right: -90px;
+      top: -90px;
+
+      border-radius: 50%;
+
+      background:
+        rgba(90, 190, 255, 0.06);
+
+      filter: blur(20px);
+
+      pointer-events: none;
+
+      transition:
+        transform 0.5s ease;
+    }
+
+
+    .subject-card:hover {
+      transform:
+        translateY(-7px)
+        scale(1.008);
+
+      background:
+        var(--sl-glass-dark-strong) !important;
+
+      border-color:
+        rgba(150, 220, 255, 0.17) !important;
+
+      box-shadow:
+        0 30px 70px rgba(0, 0, 0, 0.24),
+        inset 0 1px 0 rgba(255, 255, 255, 0.09),
+        0 0 32px rgba(75, 170, 255, 0.055) !important;
+    }
+
+    .subject-card:hover::after {
+      transform:
+        scale(1.25)
+        translate(-20px, 20px);
+    }
+
+
+    /* =========================================================
+       TELEGRAM CARD
+       Full-width fifth card.
+       ========================================================= */
+
+    .telegram-card {
+      grid-column: 1 / -1;
+
+      min-height: 145px;
+
+      display: flex;
+      align-items: center;
+      gap: 22px;
+    }
+
+    .telegram-card .card-icon {
+      flex: 0 0 auto;
+    }
+
+    .telegram-card-content {
+      flex: 1;
+    }
+
+    .telegram-badge {
+      display: inline-block;
+
+      margin-bottom: 7px;
+
+      padding: 5px 9px;
+
+      border-radius: 999px;
+
+      background:
+        rgba(85, 180, 255, 0.09);
+
+      border:
+        1px solid rgba(115, 200, 255, 0.12);
+
+      color:
+        var(--sl-accent);
+
+      font-size: 11px;
+      font-weight: 700;
+
+      letter-spacing: 0.02em;
+    }
+
+
+    /* =========================================================
+       FOOTER — GLASS
+       ========================================================= */
+
+    .site-footer {
+      background:
+        var(--sl-glass-dark) !important;
+
+      border-top:
+        1px solid var(--sl-glass-dark-border) !important;
+
+      border-radius:
+        var(--sl-glass-radius)
+        var(--sl-glass-radius)
+        0 0 !important;
+
+      box-shadow:
+        0 -18px 45px rgba(0, 0, 0, 0.14),
+        inset 0 1px 0 rgba(255, 255, 255, 0.055) !important;
+
+      backdrop-filter:
+        blur(24px)
+        saturate(135%);
+
+      -webkit-backdrop-filter:
+        blur(24px)
+        saturate(135%);
+    }
+
+
+    /* =========================================================
+       LIGHT MODE — GLASS
+       ========================================================= */
+
+    html[data-theme="light"] .site-header {
+      background:
+        var(--sl-glass-light) !important;
+
+      border-color:
+        var(--sl-glass-light-border) !important;
+
+      box-shadow:
+        0 18px 45px rgba(35, 65, 95, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.88) !important;
+    }
+
+    html[data-theme="light"] .theme-toggle {
+      background:
+        rgba(255, 255, 255, 0.48) !important;
+
+      border-color:
+        rgba(70, 110, 145, 0.11) !important;
+
+      box-shadow:
+        0 10px 25px rgba(35, 65, 95, 0.07),
+        inset 0 1px 0 rgba(255, 255, 255, 0.90);
+    }
+
+    html[data-theme="light"] .subject-card {
+      background:
+        var(--sl-glass-light) !important;
+
+      border-color:
+        var(--sl-glass-light-border) !important;
+
+      box-shadow:
+        0 20px 50px rgba(35, 70, 105, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.92) !important;
+    }
+
+    html[data-theme="light"] .subject-card:hover {
+      background:
+        var(--sl-glass-light-strong) !important;
+
+      border-color:
+        rgba(130, 195, 235, 0.27) !important;
+
+      box-shadow:
+        0 30px 65px rgba(35, 70, 105, 0.11),
+        inset 0 1px 0 rgba(255, 255, 255, 0.98) !important;
+    }
+
+    html[data-theme="light"] .student-counter {
+      background:
+        linear-gradient(
+          135deg,
+          rgba(255,255,255,0.69),
+          rgba(235,247,255,0.62)
+        ) !important;
+
+      border-color:
+        rgba(255,255,255,0.86) !important;
+
+      box-shadow:
+        0 20px 50px rgba(35, 70, 105, 0.08),
+        inset 0 1px 0 rgba(255,255,255,0.96) !important;
+    }
+
+    html[data-theme="light"] .site-footer {
+      background:
+        var(--sl-glass-light) !important;
+
+      border-top-color:
+        var(--sl-glass-light-border) !important;
+
+      box-shadow:
+        0 -18px 45px rgba(35, 65, 95, 0.06),
+        inset 0 1px 0 rgba(255,255,255,0.92) !important;
+    }
+
+    html[data-theme="light"] .science-symbol {
+      color:
+        rgba(30, 105, 165, 0.065);
+    }
+
+
+    /* =========================================================
+       MOBILE
+       ========================================================= */
+
+    @media (max-width: 720px) {
+
+      .telegram-card {
+        display: block;
+      }
+
+      .telegram-card .card-icon {
+        margin-bottom: 15px;
+      }
+
+    }
+
+
+    /* =========================================================
+       ACCESSIBILITY
+       ========================================================= */
+
+    @media (prefers-reduced-motion: reduce) {
+
+      .science-symbol {
+        animation: none !important;
+      }
+
+      .subject-card,
+      .student-counter,
+      .theme-toggle {
+        transition: none !important;
+      }
+
+    }
+
+  </style>
+
+  <!-- =========================================================
+       STUDY LAB LK — GLASS UI END
+       ========================================================= -->
+
 </head>
+
+
 <body>
 
-  <header class="site-header">
-    <div class="brand">
-      <span class="brand-mark">🎓</span>
-      <span>Study-Lab</span>
-    </div>
-    <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle light and dark mode">
-      🌙 Dark Mode
-    </button>
-  </header>
 
-  <main class="container">
-    <section class="hero">
-      <h1>Study-Lab for G.C.E A/L Sri Lanka</h1>
-      <p class="subtitle">Interactive Tools for Advanced Level Students</p>
+  <!-- =========================================================
+       STUDY LAB LK — FLOWING SCIENCE BACKGROUND START
+       Maths + Chemistry + Biology + Physics
+       ========================================================= -->
 
-      <!-- ========================================================= -->
-<!--              STUDY LAB LK - VISITOR COUNTER              -->
-<!--        START: DO NOT MIX WITH MAIN WEBSITE CODE         -->
-<!-- ========================================================= -->
+  <div
+    class="science-background"
+    aria-hidden="true"
+  >
 
-<div class="student-counter">
+    <!-- Mathematics -->
+    <span class="science-symbol" style="left:5%; top:18%; animation-duration:26s; animation-delay:-9s; font-size:28px;">∫ f(x) dx</span>
+    <span class="science-symbol" style="left:72%; top:12%; animation-duration:31s; animation-delay:-18s; font-size:24px;">πr²</span>
+    <span class="science-symbol" style="left:42%; top:76%; animation-duration:29s; animation-delay:-7s; font-size:22px;">∑x²</span>
+    <span class="science-symbol" style="left:84%; top:54%; animation-duration:34s; animation-delay:-21s; font-size:27px;">Δx → 0</span>
+    <span class="science-symbol" style="left:18%; top:73%; animation-duration:30s; animation-delay:-13s; font-size:23px;">y = mx + c</span>
 
-  <div class="counter-icon">^_^</div>
+    <!-- Chemistry -->
+    <span class="science-symbol" style="left:28%; top:8%; animation-duration:35s; animation-delay:-19s; font-size:24px;">H₂O</span>
+    <span class="science-symbol" style="left:91%; top:28%; animation-duration:28s; animation-delay:-12s; font-size:23px;">NH₃</span>
+    <span class="science-symbol" style="left:59%; top:87%; animation-duration:32s; animation-delay:-20s; font-size:22px;">Na⁺ + Cl⁻</span>
+    <span class="science-symbol" style="left:9%; top:48%; animation-duration:37s; animation-delay:-25s; font-size:25px;">ΔH</span>
+    <span class="science-symbol" style="left:67%; top:68%; animation-duration:33s; animation-delay:-14s; font-size:21px;">pH = −log[H⁺]</span>
 
-  <div class="counter-content">
-    <div class="counter-number" id="studentCount">0+</div>
-    <div class="counter-label"><b>Students Visited Study Lab LK</b></div>
+    <!-- Biology -->
+    <span class="science-symbol" style="left:49%; top:13%; animation-duration:39s; animation-delay:-17s; font-size:25px;">DNA</span>
+    <span class="science-symbol" style="left:13%; top:87%; animation-duration:36s; animation-delay:-28s; font-size:23px;">ATP</span>
+    <span class="science-symbol" style="left:78%; top:84%; animation-duration:41s; animation-delay:-23s; font-size:27px;">A → T</span>
+    <span class="science-symbol" style="left:36%; top:42%; animation-duration:38s; animation-delay:-11s; font-size:22px;">🧬</span>
+
+    <!-- Physics -->
+    <span class="science-symbol" style="left:62%; top:33%; animation-duration:30s; animation-delay:-15s; font-size:24px;">F = ma</span>
+    <span class="science-symbol" style="left:3%; top:64%; animation-duration:35s; animation-delay:-24s; font-size:25px;">E = mc²</span>
+    <span class="science-symbol" style="left:88%; top:72%; animation-duration:40s; animation-delay:-29s; font-size:23px;">v = u + at</span>
+    <span class="science-symbol" style="left:25%; top:58%; animation-duration:34s; animation-delay:-10s; font-size:23px;">λ = h / p</span>
+    <span class="science-symbol" style="left:55%; top:52%; animation-duration:36s; animation-delay:-22s; font-size:27px;">⚛</span>
+
   </div>
 
-</div>
+  <!-- =========================================================
+       STUDY LAB LK — FLOWING SCIENCE BACKGROUND END
+       ========================================================= -->
 
-<style>
-.student-counter {
-  max-width: 520px;
-  margin: 0 auto 38px;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
+  <!-- =========================================================
+       STUDY LAB LK — HEADER
+       ========================================================= -->
 
-  padding: 18px 24px;
+  <header class="site-header">
 
-  border-radius: 18px;
+    <div class="brand">
 
-  background:
-    linear-gradient(
-      135deg,
-      rgba(18,58,106,.72),
-      rgba(7,29,64,.82)
-    );
+      <span class="brand-mark">
+        🎓
+      </span>
 
-  border: 1px solid rgba(105,190,255,.20);
+      <span>
+        Study-Lab
+      </span>
 
-  box-shadow:
-    0 15px 35px rgba(0,0,0,.20),
-    0 0 30px rgba(0,130,255,.08),
-    inset 0 1px 0 rgba(255,255,255,.06);
+    </div>
 
-  backdrop-filter: blur(12px);
 
-  text-align: left;
-}
+    <button
+      type="button"
+      class="theme-toggle"
+      data-theme-toggle
+      aria-label="Toggle light and dark mode"
+    >
+      🌙 Dark Mode
+    </button>
 
-.counter-icon {
-  width: 54px;
-  height: 54px;
+  </header>
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
 
-  border-radius: 15px;
+  <!-- =========================================================
+       STUDY LAB LK — MAIN CONTENT
+       ========================================================= -->
 
-  font-size: 27px;
+  <main class="container">
 
-  background:
-    linear-gradient(
-      145deg,
-      rgba(65,160,255,.16),
-      rgba(105,80,255,.15)
-    );
 
-  border: 1px solid rgba(110,190,255,.22);
+    <!-- =======================================================
+         STUDY LAB LK — HERO
+         ======================================================= -->
 
-  box-shadow:
-    0 0 22px rgba(0,135,255,.12);
-}
+    <section class="hero">
 
-.counter-number {
-  font-size: 28px;
-  font-weight: 800;
-  line-height: 1;
+      <h1>
+        Study-Lab for G.C.E A/L Sri Lanka
+      </h1>
 
-  color: #8bdcff;
+      <p class="subtitle">
+        Interactive Tools for Advanced Level Students
+      </p>
 
-  text-shadow:
-    0 0 18px rgba(60,190,255,.25);
-}
 
-.counter-label {
-  margin-top: 6px;
+      <!-- =====================================================
+           STUDY LAB LK — VISITOR COUNTER START
+           ===================================================== -->
 
-  color: #91abc8;
+      <div class="student-counter">
 
-  font-size: 13px;
-}
+        <div class="counter-icon">
+          ^_^
+        </div>
 
-@media (max-width: 600px) {
+        <div class="counter-content">
 
-  .student-counter {
-    margin-left: 8px;
-    margin-right: 8px;
-    padding: 16px 18px;
-  }
+          <div
+            class="counter-number"
+            id="studentCount"
+          >
+            0+
+          </div>
 
-  .counter-number {
-    font-size: 24px;
-  }
+          <div class="counter-label">
+            <b>
+              Students Visited Study Lab LK
+            </b>
+          </div>
 
-  .counter-label {
-    font-size: 12px;
-  }
+        </div>
 
-}
-</style>
+      </div>
 
-<script>
-(function () {
 
-  /* CHANGE ONLY THIS NUMBER */
-  const studentCount = 1144;
+      <style>
 
-  const counter = document.getElementById("studentCount");
+        /* =====================================================
+           STUDY LAB LK — VISITOR COUNTER ORIGINAL CODE
+           ===================================================== */
 
-  if (!counter) return;
+        .student-counter {
+          max-width: 520px;
+          margin: 0 auto 38px;
 
-  const duration = 1600;
-  const startTime = performance.now();
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 16px;
 
-  function animateCounter(currentTime) {
+          padding: 18px 24px;
 
-    const elapsed = currentTime - startTime;
-    const progress = Math.min(elapsed / duration, 1);
+          border-radius: 18px;
 
-    const eased = 1 - Math.pow(1 - progress, 3);
+          background:
+            linear-gradient(
+              135deg,
+              rgba(18,58,106,.72),
+              rgba(7,29,64,.82)
+            );
 
-    const value = Math.floor(studentCount * eased);
+          border: 1px solid rgba(105,190,255,.20);
 
-    counter.textContent = value.toLocaleString() + "+";
+          box-shadow:
+            0 15px 35px rgba(0,0,0,.20),
+            0 0 30px rgba(0,130,255,.08),
+            inset 0 1px 0 rgba(255,255,255,.06);
 
-    if (progress < 1) {
-      requestAnimationFrame(animateCounter);
-    } else {
-      counter.textContent = studentCount.toLocaleString() + "+";
-    }
-  }
+          backdrop-filter: blur(12px);
 
-  requestAnimationFrame(animateCounter);
+          text-align: left;
+        }
 
-})();
-</script>
+        .counter-icon {
+          width: 54px;
+          height: 54px;
 
-<!-- ========================================================= -->
-<!--               STUDY LAB LK - COUNTER END                 -->
-<!--          END: MAIN WEBSITE CODE CONTINUES BELOW          -->
-<!-- ========================================================= -->
-      
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          border-radius: 15px;
+
+          font-size: 27px;
+
+          background:
+            linear-gradient(
+              145deg,
+              rgba(65,160,255,.16),
+              rgba(105,80,255,.15)
+            );
+
+          border: 1px solid rgba(110,190,255,.22);
+
+          box-shadow:
+            0 0 22px rgba(0,135,255,.12);
+        }
+
+        .counter-number {
+          font-size: 28px;
+          font-weight: 800;
+          line-height: 1;
+
+          color: #8bdcff;
+
+          text-shadow:
+            0 0 18px rgba(60,190,255,.25);
+        }
+
+        .counter-label {
+          margin-top: 6px;
+
+          color: #91abc8;
+
+          font-size: 13px;
+        }
+
+        @media (max-width: 600px) {
+
+          .student-counter {
+            margin-left: 8px;
+            margin-right: 8px;
+            padding: 16px 18px;
+          }
+
+          .counter-number {
+            font-size: 24px;
+          }
+
+          .counter-label {
+            font-size: 12px;
+          }
+
+        }
+
+      </style>
+
+
+      <script>
+
+        /* =====================================================
+           STUDY LAB LK — VISITOR COUNTER ANIMATION
+           ===================================================== */
+
+        (function () {
+
+          /* CHANGE ONLY THIS NUMBER */
+          const studentCount = 1144;
+
+          const counter =
+            document.getElementById("studentCount");
+
+          if (!counter) return;
+
+          const duration = 1600;
+
+          const startTime =
+            performance.now();
+
+          function animateCounter(currentTime) {
+
+            const elapsed =
+              currentTime - startTime;
+
+            const progress =
+              Math.min(
+                elapsed / duration,
+                1
+              );
+
+            const eased =
+              1 - Math.pow(
+                1 - progress,
+                3
+              );
+
+            const value =
+              Math.floor(
+                studentCount * eased
+              );
+
+            counter.textContent =
+              value.toLocaleString() + "+";
+
+            if (progress < 1) {
+
+              requestAnimationFrame(
+                animateCounter
+              );
+
+            } else {
+
+              counter.textContent =
+                studentCount.toLocaleString() + "+";
+
+            }
+
+          }
+
+          requestAnimationFrame(
+            animateCounter
+          );
+
+        })();
+
+      </script>
+
+
+      <!-- =====================================================
+           STUDY LAB LK — VISITOR COUNTER END
+           ===================================================== -->
+
     </section>
 
-    
 
-    <section class="card-grid" aria-label="Subjects">
-      <a class="subject-card" href="maths.html" aria-label="Open Mathematics tools">
-        <span class="card-icon">📐</span>
-        <h2>සංයුක්ත ගණිතය (Mathematics)</h2>
-        <p>Vectors, graphs, calculus and coordinate geometry tools.</p>
-        <span class="card-cta">Explore tools →</span>
+    <!-- =======================================================
+         STUDY LAB LK — SUBJECT CARDS START
+         ======================================================= -->
+
+    <section
+      class="card-grid"
+      aria-label="Subjects"
+    >
+
+
+      <!-- =====================================================
+           MATHEMATICS CARD
+           ===================================================== -->
+
+      <a
+        class="subject-card"
+        href="maths.html"
+        aria-label="Open Mathematics tools"
+      >
+
+        <span class="card-icon">
+          📐
+        </span>
+
+        <h2>
+          සංයුක්ත ගණිතය (Mathematics)
+        </h2>
+
+        <p>
+          Vectors, graphs, calculus and coordinate geometry tools.
+        </p>
+
+        <span class="card-cta">
+          Explore tools →
+        </span>
+
       </a>
 
-      <a class="subject-card" href="biology.html" aria-label="Open Biology tools">
-        <span class="card-icon">🧬</span>
-        <h2>ජීව විද්‍යාව(Biology)</h2>
-        <p>Genetics, cell structure, physiology and plant biology tools.</p>
-        <span class="card-cta">Explore tools →</span>
+
+      <!-- =====================================================
+           BIOLOGY CARD
+           ===================================================== -->
+
+      <a
+        class="subject-card"
+        href="biology.html"
+        aria-label="Open Biology tools"
+      >
+
+        <span class="card-icon">
+          🧬
+        </span>
+
+        <h2>
+          ජීව විද්‍යාව(Biology)
+        </h2>
+
+        <p>
+          Genetics, cell structure, physiology and plant biology tools.
+        </p>
+
+        <span class="card-cta">
+          Explore tools →
+        </span>
+
       </a>
 
-      <a class="subject-card" href="chemistry.html" aria-label="Open Chemistry tools">
-        <span class="card-icon">⚗️</span>
-        <h2>රසායන විද්‍යාව(Chemistry)</h2>
-        <p>Interactive inorganic, organic and physical chemistry tools.</p>
-        <span class="card-cta">Explore tools →</span>
+
+      <!-- =====================================================
+           CHEMISTRY CARD
+           ===================================================== -->
+
+      <a
+        class="subject-card"
+        href="chemistry.html"
+        aria-label="Open Chemistry tools"
+      >
+
+        <span class="card-icon">
+          ⚗️
+        </span>
+
+        <h2>
+          රසායන විද්‍යාව(Chemistry)
+        </h2>
+
+        <p>
+          Interactive inorganic, organic and physical chemistry tools.
+        </p>
+
+        <span class="card-cta">
+          Explore tools →
+        </span>
+
       </a>
 
-      <a class="subject-card" href="physics.html" aria-label="Open Physics tools">
-        <span class="card-icon">⚛️</span>
-        <h2>භෞතික විද්‍යාව (Physics)</h2>
-        <p>Gravitational fields, projectile motion, electricity and waves.</p>
-        <span class="card-cta">Explore tools →</span>
+
+      <!-- =====================================================
+           PHYSICS CARD
+           ===================================================== -->
+
+      <a
+        class="subject-card"
+        href="physics.html"
+        aria-label="Open Physics tools"
+      >
+
+        <span class="card-icon">
+          ⚛️
+        </span>
+
+        <h2>
+          භෞතික විද්‍යාව (Physics)
+        </h2>
+
+        <p>
+          Gravitational fields, projectile motion, electricity and waves.
+        </p>
+
+        <span class="card-cta">
+          Explore tools →
+        </span>
+
       </a>
+
+
+      <!-- =====================================================
+           A/L TELEGRAM CHANNELS CARD
+           ===================================================== -->
+
+      <div
+        class="subject-card telegram-card"
+        role="group"
+        aria-label="A/L Telegram Channels"
+      >
+
+        <span class="card-icon">
+          ✈️
+        </span>
+
+        <div class="telegram-card-content">
+
+          <span class="telegram-badge">
+            STUDENT COMMUNITY
+          </span>
+
+          <h2>
+            A/L Telegram Channels
+          </h2>
+
+          <p>
+            Useful G.C.E A/L Telegram channels, study resources,
+            notes and educational communities for Sri Lankan students.
+          </p>
+
+          <!--
+            =====================================================
+            ADD YOUR REAL TELEGRAM CHANNEL LINK HERE LATER.
+
+            Example:
+            <a href="https://t.me/your_channel"
+               class="card-cta"
+               target="_blank"
+               rel="noopener noreferrer">
+              Open Telegram Channels →
+            </a>
+            =====================================================
+          -->
+
+          <span class="card-cta">
+            Telegram resources →
+          </span>
+
+        </div>
+
+      </div>
+
+
     </section>
+
+    <!-- =======================================================
+         STUDY LAB LK — SUBJECT CARDS END
+         ======================================================= -->
+
+
   </main>
 
+
+  <!-- =========================================================
+       STUDY LAB LK — FOOTER
+       ========================================================= -->
+
   <footer class="site-footer">
+
     <div>
+
       Developed by
-      <a class="dev-link" href="https://t.me/dinusha_official" target="_blank" rel="noopener noreferrer">
+
+      <a
+        class="dev-link"
+        href="https://t.me/dinusha_official"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
         Dinusha ツ
       </a>
 
-     <div>
-      Powered by
-      <a class="dev-link" href="https://t.me/htmlstudytools" target="_blank" rel="noopener noreferrer">
-        E-Tools Telegram Channel
-      </a>
+
+      <div>
+
+        Powered by
+
+        <a
+          class="dev-link"
+          href="https://t.me/htmlstudytools"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          E-Tools Telegram Channel
+        </a>
+
+      </div>
+
+      <hr>
+
     </div>
-    <hr> 
+
+
+    <div class="footer-title">
+      Study-Lab for G.C.E A/L Sri Lanka
     </div>
-      <div class="footer-title">Study-Lab for G.C.E A/L Sri Lanka</div>
+
   </footer>
 
-  <script src="assets/js/main.js"></script>  
+
+  <!-- =========================================================
+       STUDY LAB LK — EXISTING MAIN JAVASCRIPT
+       ========================================================= -->
+
+  <script src="assets/js/main.js"></script>
+
+
 </body>
 </html>
