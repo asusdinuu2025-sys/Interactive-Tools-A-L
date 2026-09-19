@@ -814,6 +814,166 @@
 
 
     /* =========================================================
+       SIMPLE PROFILE
+       ========================================================= */
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .profile-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      background: rgba(255, 255, 255, 0.055);
+      color: var(--text-primary);
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      transition: transform .25s ease, background .25s ease, box-shadow .25s ease;
+    }
+
+    .profile-button:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.095);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+    }
+
+    html[data-theme="light"] .profile-button {
+      background: rgba(255, 255, 255, 0.48);
+      border-color: rgba(70, 110, 145, 0.11);
+    }
+
+    .profile-modal[hidden] {
+      display: none;
+    }
+
+    .profile-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(3, 8, 18, 0.42);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .profile-dialog {
+      width: min(430px, 100%);
+      padding: 28px;
+      border-radius: 24px;
+      background: rgba(16, 28, 45, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(28px) saturate(145%);
+      -webkit-backdrop-filter: blur(28px) saturate(145%);
+    }
+
+    html[data-theme="light"] .profile-dialog {
+      background: rgba(255, 255, 255, 0.88);
+      border-color: rgba(255, 255, 255, 0.85);
+      box-shadow: 0 30px 80px rgba(35, 70, 105, 0.16);
+    }
+
+    .profile-dialog h2 {
+      margin: 0 36px 8px 0;
+    }
+
+    .profile-dialog p {
+      margin: 0 0 18px;
+      color: var(--text-secondary);
+    }
+
+    .profile-close {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      width: 38px;
+      height: 38px;
+      border: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,.08);
+      color: inherit;
+      cursor: pointer;
+      font-size: 1.15rem;
+    }
+
+    .profile-dialog {
+      position: relative;
+    }
+
+    .profile-input {
+      width: 100%;
+      padding: 13px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: inherit;
+      outline: none;
+      font: inherit;
+    }
+
+    html[data-theme="light"] .profile-input {
+      background: rgba(255,255,255,.72);
+      border-color: rgba(70,110,145,.15);
+    }
+
+    .profile-input:focus {
+      border-color: rgba(126,220,255,.5);
+      box-shadow: 0 0 0 3px rgba(91,190,255,.10);
+    }
+
+    .profile-save {
+      width: 100%;
+      margin-top: 14px;
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 16px;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      color: #fff;
+      font-weight: 700;
+      font-size: .95rem;
+    }
+
+    .profile-status {
+      margin-top: 12px !important;
+      font-size: .88rem;
+      color: var(--accent-cyan) !important;
+    }
+
+    .profile-modal-open {
+      overflow: hidden;
+    }
+
+    @media (max-width: 600px) {
+      .header-actions {
+        gap: 6px;
+      }
+
+      .profile-button,
+      .theme-toggle {
+        padding: 9px 10px;
+      }
+
+      .profile-button {
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+
+    /* =========================================================
        ACCESSIBILITY
        ========================================================= */
 
@@ -907,14 +1067,26 @@
     </div>
 
 
-    <button
-      type="button"
-      class="theme-toggle"
-      data-theme-toggle
-      aria-label="Toggle light and dark mode"
-    >
-      🌙 Dark Mode
-    </button>
+    <div class="header-actions">
+      <button
+        type="button"
+        class="profile-button"
+        id="profileButton"
+        aria-haspopup="dialog"
+        aria-controls="profileModal"
+      >
+        👤 Create Profile
+      </button>
+
+      <button
+        type="button"
+        class="theme-toggle"
+        data-theme-toggle
+        aria-label="Toggle light and dark mode"
+      >
+        🌙 Dark Mode
+      </button>
+    </div>
 
   </header>
 
@@ -1379,6 +1551,53 @@
 
   </main>
 
+  <!-- =========================================================
+       STUDY LAB LK — SIMPLE PROFILE
+       ========================================================= -->
+
+  <div
+    class="profile-modal"
+    id="profileModal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="profileNameLabel"
+    hidden
+  >
+    <div class="profile-dialog">
+      <button type="button" class="profile-close" id="profileClose" aria-label="Close profile dialog">✕</button>
+
+      <h2 id="profileNameLabel">Create your Study-Lab profile</h2>
+      <p>Your name stays saved on this device. A copy can also be added to the Study-Lab name list.</p>
+
+      <form id="profileForm">
+        <input
+          class="profile-input"
+          id="profileName"
+          name="name"
+          type="text"
+          maxlength="60"
+          autocomplete="name"
+          placeholder="Enter your name"
+          required
+        />
+
+        <button class="profile-save" type="submit">Save Profile</button>
+
+        <button
+          type="button"
+          class="back-button"
+          id="profileCancel"
+          style="width:100%; justify-content:center; margin-top:10px;"
+        >
+          Cancel
+        </button>
+
+        <p class="profile-status" id="profileStatus" hidden></p>
+      </form>
+    </div>
+  </div>
+
+
   <footer class="site-footer">
 
     <div>
@@ -1426,6 +1645,7 @@
        STUDY LAB LK — EXISTING MAIN JAVASCRIPT
        ========================================================= -->
 
+  <script src="assets/js/profile.js"></script>
   <script src="assets/js/main.js"></script>
 
 
