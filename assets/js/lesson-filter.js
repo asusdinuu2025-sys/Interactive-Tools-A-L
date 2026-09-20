@@ -76,6 +76,10 @@
         {
           lessons: [12],
           pattern: /equilibrium|සමතුලිතතාවය|සමතුලිත/
+        },
+        {
+          lessons: [7],
+          pattern: /organic_chemistry|organic|කාබනික/
         }
       ];
 
