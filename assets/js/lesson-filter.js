@@ -1,6 +1,7 @@
 /*
  * Study-Lab automatic subject filter
- * Reads the lesson number directly from each card's visible text.
+ * Automatically classifies cards by visible text:
+ *   All → Lesson 01... → Resources → Past Papers
  * No data-category/data-lesson attribute is required.
  */
 (function () {
@@ -21,7 +22,7 @@
 
   if (!maxLessons) return;
 
-  const cardText = card => card.textContent.replace(/s+/g, " ").trim();
+  const cardText = card => card.textContent.replace(/\s+/g, " ").trim();
 
   function unique(values) {
     return [...new Set(values)];
@@ -32,20 +33,28 @@
     let match;
 
     // Examples: "Lesson 04", "lesson 4"
-    const lessonPattern = /\blesson\s*(0?[1-9]|1[0-4])\b/gi;
+    const lessonPattern = new RegExp(
+      "\\blesson\\s*(0?[1-9]|1[0-" + maxLessons + "])\\b",
+      "gi"
+    );
+
     while ((match = lessonPattern.exec(text)) !== null) {
       found.push(Number(match[1]));
     }
 
     // Examples: "04. තාපය", "08/ ධාරා විද්‍යුතය", "03: දෝලන"
-    const numberedPattern = /(?:^|\s)(0?[1-9]|1[0-4])\s*[.\/:\-]\s*/g;
+    const numberedPattern = new RegExp(
+      "(?:^|\\s)(0?[1-9]|1[0-" + maxLessons + "])\\s*[.\\/:\\-]\\s*",
+      "g"
+    );
+
     while ((match = numberedPattern.exec(text)) !== null) {
       found.push(Number(match[1]));
     }
 
     /*
-     * Backward compatibility for older cards that were created before
-     * lesson numbers were placed in their titles.
+     * Backward compatibility for older Chemistry cards that were created
+     * before lesson numbers were placed in their titles.
      */
     if (subject === "chemistry") {
       const rules = [
@@ -65,18 +74,39 @@
   }
 
   function getCards() {
-    return [...grid.querySelectorAll(":scope > .tool-card")].map(element => ({
-      element,
-      lessons: getLessonNumbers(cardText(element)),
-      isPastPaper: /past\s*papers?|past\s*paper|pastpaper/i.test(cardText(element))
-    }));
+    return [...grid.querySelectorAll(":scope > .tool-card")].map(element => {
+      const text = cardText(element);
+      const lessons = getLessonNumbers(text);
+      const isPastPaper = /past\s*papers?|past\s*paper|pastpaper/i.test(text);
+
+      return {
+        element,
+        text,
+        lessons,
+        isPastPaper,
+        type: isPastPaper ? "pastpaper" : lessons.length ? "lesson" : "resource"
+      };
+    });
   }
 
   let cards = getCards();
   let activeFilter = "all";
+  let lastSignature = "";
+
+  function cardSignature() {
+    return [...grid.querySelectorAll(":scope > .tool-card")]
+      .map(card => cardText(card))
+      .join("\u0001");
+  }
 
   function countFor(filterId) {
     if (filterId === "all") return cards.length;
+    if (filterId === "resources") {
+      return cards.filter(card => card.type === "resource").length;
+    }
+    if (filterId === "pastpapers") {
+      return cards.filter(card => card.type === "pastpaper").length;
+    }
 
     const lesson = Number(filterId.replace("lesson-", ""));
     return cards.filter(card => card.lessons.includes(lesson)).length;
@@ -84,6 +114,9 @@
 
   function labelFor(filterId) {
     if (filterId === "all") return "All";
+    if (filterId === "resources") return "Resources";
+    if (filterId === "pastpapers") return "Past Papers";
+
     const lesson = Number(filterId.replace("lesson-", ""));
     return String(lesson).padStart(2, "0") + ".";
   }
@@ -97,7 +130,9 @@
           id: "lesson-" + lesson,
           label: String(lesson).padStart(2, "0") + "."
         };
-      })
+      }),
+      { id: "resources", label: "Resources" },
+      { id: "pastpapers", label: "Past Papers" }
     ];
   }
 
@@ -128,8 +163,7 @@
       item.dataset.filter = option.id;
       item.setAttribute("role", "menuitem");
       item.innerHTML =
-        '<span class="lesson-filter-option-label">' + option.label + "</span>" +
-        '<span class="lesson-filter-option-count">[' + countFor(option.id) + ' cards]</span>';
+        '<span class="lesson-filter-option-label">' + option.label + "</span>";
 
       item.addEventListener("click", () => {
         activeFilter = option.id;
@@ -155,6 +189,7 @@
     root.appendChild(wrapper);
 
     updateButtonLabel();
+    updateActiveOption();
   }
 
   function updateButtonLabel() {
@@ -164,7 +199,7 @@
     current.textContent =
       activeFilter === "all"
         ? "Filter"
-        : labelFor(activeFilter) + " [" + countFor(activeFilter) + " cards]";
+        : labelFor(activeFilter);
   }
 
   function updateActiveOption() {
@@ -177,9 +212,15 @@
 
   function applyFilter(filterId) {
     cards.forEach(card => {
-      let visible = filterId === "all";
+      let visible;
 
-      if (filterId !== "all") {
+      if (filterId === "all") {
+        visible = true;
+      } else if (filterId === "resources") {
+        visible = card.type === "resource";
+      } else if (filterId === "pastpapers") {
+        visible = card.type === "pastpaper";
+      } else {
         const lesson = Number(filterId.replace("lesson-", ""));
         visible = card.lessons.includes(lesson);
       }
@@ -198,8 +239,8 @@
       if (menu && !menu.hidden) {
         menu.hidden = true;
         root.classList.remove("open");
-        const button = root.querySelector(".lesson-filter-button");
-        button?.setAttribute("aria-expanded", "false");
+        root.querySelector(".lesson-filter-button")
+          ?.setAttribute("aria-expanded", "false");
       }
     }
   });
@@ -210,24 +251,32 @@
       if (menu && !menu.hidden) {
         menu.hidden = true;
         root.classList.remove("open");
-        root.querySelector(".lesson-filter-button")?.setAttribute("aria-expanded", "false");
+        root.querySelector(".lesson-filter-button")
+          ?.setAttribute("aria-expanded", "false");
       }
     }
   });
 
   function refreshIfCardsChanged() {
-    const latestCount = grid.querySelectorAll(":scope > .tool-card").length;
-    if (latestCount !== cards.length) {
+    const latestSignature = cardSignature();
+
+    if (latestSignature !== lastSignature) {
+      lastSignature = latestSignature;
       cards = getCards();
       render();
       applyFilter(activeFilter);
     }
   }
 
+  lastSignature = cardSignature();
   render();
   applyFilter("all");
 
-  // New cards added later are automatically included.
+  // Future cards are automatically reclassified from their visible title/text.
   const observer = new MutationObserver(refreshIfCardsChanged);
-  observer.observe(grid, { childList: true });
+  observer.observe(grid, {
+    childList: true,
+    subtree: true,
+    characterData: true
+  });
 })();
