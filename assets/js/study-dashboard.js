@@ -214,27 +214,39 @@
   async function hydrateStoredMetadata() {
     const favorites = getFavorites();
     const recent = getRecent();
-    const storedItems = [...favorites, ...recent].filter(needsStoredTitle);
 
-    if (!storedItems.length) return;
+    if (!favorites.length && !recent.length) return;
 
     const index = await buildToolDirectoryIndex();
+    const directoryEntries = [...index.values()];
     let favoritesChanged = false;
     let recentChanged = false;
 
     const enrich = item => {
-      if (!needsStoredTitle(item)) return item;
+      const normalizedUrl = normalizeUrl(item.url);
+      let match = index.get(normalizedUrl);
 
-      const match = index.get(normalizeUrl(item.url));
+      if (!match && item.title && item.title !== "Saved tool" && item.title !== "Untitled tool" &&
+          item.title !== "Tool name unavailable") {
+        match = directoryEntries.find(candidate =>
+          candidate.title === item.title &&
+          (!item.subject || item.subject === "study-lab" || candidate.subject === item.subject)
+        );
+      }
+
       if (!match) {
-        return {
-          ...item,
-          title: "Tool name unavailable"
-        };
+        if (needsStoredTitle(item)) {
+          return {
+            ...item,
+            title: "Tool name unavailable"
+          };
+        }
+        return item;
       }
 
       return {
         ...item,
+        url: match.url,
         title: match.title,
         description: match.description,
         subject: match.subject
@@ -243,7 +255,8 @@
 
     const nextFavorites = favorites.map(item => {
       const next = enrich(item);
-      favoritesChanged ||= next.title !== item.title ||
+      favoritesChanged ||= next.url !== item.url ||
+        next.title !== item.title ||
         next.description !== item.description ||
         next.subject !== item.subject;
       return next;
@@ -251,7 +264,8 @@
 
     const nextRecent = recent.map(item => {
       const next = enrich(item);
-      recentChanged ||= next.title !== item.title ||
+      recentChanged ||= next.url !== item.url ||
+        next.title !== item.title ||
         next.description !== item.description ||
         next.subject !== item.subject;
       return next;
@@ -261,10 +275,6 @@
     if (recentChanged) saveRecent(nextRecent);
 
     if (favoritesChanged || recentChanged) refreshQuickPanel();
-  }
-
-  function isToolCard(card) {
-    return card.matches(".tool-card") && !!getCardUrl(card);
   }
 
   function buildMeta(card, knownSubject) {
