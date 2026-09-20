@@ -1,7 +1,7 @@
 /*
- * Study-Lab automatic lesson/type filter
- * Cards are classified from their visible title/description.
- * No data-category attribute is required.
+ * Study-Lab automatic subject filter
+ * Reads the lesson number directly from each card's visible text.
+ * No data-category/data-lesson attribute is required.
  */
 (function () {
   "use strict";
@@ -10,35 +10,18 @@
   const grid = document.querySelector(".tool-grid");
   const subject = document.body.dataset.filterSubject;
 
-  if (!root || !grid || !subject) return;
+  // Maths intentionally has no filter.
+  if (!root || !grid || !subject || subject === "maths") return;
 
-  const config = {
-    chemistry: { maxLessons: 14, label: "Chemistry" },
-    biology: { maxLessons: 10, label: "Biology" },
-    physics: { maxLessons: 11, label: "Physics" },
-    maths: { maxLessons: 0, label: "Mathematics" }
+  const maxLessons = {
+    chemistry: 14,
+    biology: 10,
+    physics: 11
   }[subject];
 
-  if (!config) return;
+  if (!maxLessons) return;
 
-  const pureHints = [
-    "trigonametry", "trigonometry", "ත්‍රිකෝණමිතීය",
-    "differentiation", "අවකලනය",
-    "integration", "අනුකලනය",
-    "complex number", "complex numbers", "සංකීර්ණ සංඛ්‍යා",
-    "pure mathematics", "pure maths", "ශුද්ධ ගණිත"
-  ];
-
-  const appliedHints = [
-    "applied mathematics", "applied maths", "ව්‍යවහාරික ගණිත",
-    "mechanics", "statics", "dynamics", "probability",
-    "statistics", "distribution", "kinematics", "projectile",
-    "friction", "moment", "moments"
-  ];
-
-  function getText(card) {
-    return card.textContent.replace(/\s+/g, " ").trim().toLowerCase();
-  }
+  const cardText = card => card.textContent.replace(/s+/g, " ").trim();
 
   function unique(values) {
     return [...new Set(values)];
@@ -46,202 +29,205 @@
 
   function getLessonNumbers(text) {
     const found = [];
-
-    const lessonWords = /\blesson\s*(0?[1-9]|1[0-4])\b/gi;
     let match;
-    while ((match = lessonWords.exec(text)) !== null) {
+
+    // Examples: "Lesson 04", "lesson 4"
+    const lessonPattern = /\blesson\s*(0?[1-9]|1[0-4])\b/gi;
+    while ((match = lessonPattern.exec(text)) !== null) {
       found.push(Number(match[1]));
     }
 
-    const numbered = /\b(0?[1-9]|1[0-4])\s*[.\/:\-]\s*/g;
-    while ((match = numbered.exec(text)) !== null) {
+    // Examples: "04. තාපය", "08/ ධාරා විද්‍යුතය", "03: දෝලන"
+    const numberedPattern = /(?:^|\s)(0?[1-9]|1[0-4])\s*[.\/:\-]\s*/g;
+    while ((match = numberedPattern.exec(text)) !== null) {
       found.push(Number(match[1]));
     }
 
-    // Chemistry cards that were created before lesson numbers were added.
+    /*
+     * Backward compatibility for older cards that were created before
+     * lesson numbers were placed in their titles.
+     */
     if (subject === "chemistry") {
-      const chemistryRules = [
-        {
-          lessons: [5],
-          pattern: /energetics|ශක්ති\s*විද්‍යාව|enthalpy|thermochem/
-        },
-        {
-          lessons: [6],
-          pattern: /nh3|nh₃|cation|කැටායන|fe²|fe3|fe³|h2so4|h₂so₄|anion|ඇනායන|flame|පහන්\s*සිළු|inorganic|අකාබනික|කාණ්ඩ\s*විශ්ලේෂණ/
-        },
-        {
-          lessons: [11],
-          pattern: /kinetic|kinetics|චාලක\s*රසායනය/
-        },
-        {
-          lessons: [12],
-          pattern: /equilibrium|සමතුලිතතාවය|සමතුලිත/
-        },
-        {
-          lessons: [7],
-          pattern: /organic_chemistry|organic|කාබනික/
-        }
+      const rules = [
+        { lesson: 5, pattern: /energetics|ශක්ති\s*විද්‍යාව|enthalpy|thermochem/i },
+        { lesson: 6, pattern: /nh3|nh₃|cation|කැටායන|fe²|fe³|h2so4|h₂so₄|anion|ඇනායන|flame|පහන්\s*සිළු|inorganic|අකාබනික|කාණ්ඩ\s*විශ්ලේෂණ/i },
+        { lesson: 7, pattern: /organic|කාබනික/i },
+        { lesson: 11, pattern: /kinetic|kinetics|චාලක\s*රසායනය/i },
+        { lesson: 12, pattern: /equilibrium|සමතුලිතතාවය|සමතුලිත/i }
       ];
 
-      chemistryRules.forEach(rule => {
-        if (rule.pattern.test(text)) found.push(...rule.lessons);
+      rules.forEach(rule => {
+        if (rule.pattern.test(text)) found.push(rule.lesson);
       });
     }
 
-    return unique(found.filter(n => n >= 1 && n <= config.maxLessons));
+    return unique(found.filter(n => n >= 1 && n <= maxLessons));
   }
 
-  function classify(card) {
-    const text = getText(card);
-
-    if (/past\s*papers?|past\s*paper|pastpaper/.test(text)) {
-      return { lessons: [], types: [], resource: true };
-    }
-
-    if (subject === "maths") {
-      const types = [];
-
-      if (/\bpure\b|pure\s+mathematics|ශුද්ධ\s+ගණිත/.test(text) ||
-          pureHints.some(hint => text.includes(hint))) {
-        types.push("pure");
-      }
-
-      if (/\bapplied\b|applied\s+mathematics|ව්‍යවහාරික\s+ගණිත/.test(text) ||
-          appliedHints.some(hint => text.includes(hint))) {
-        types.push("applied");
-      }
-
-      return { lessons: [], types: unique(types), resource: false };
-    }
-
-    return {
-      lessons: getLessonNumbers(text),
-      types: [],
-      resource: false
-    };
-  }
-
-  function collectCards() {
-    return [...grid.querySelectorAll(":scope > .tool-card")].map(card => ({
-      element: card,
-      meta: classify(card)
+  function getCards() {
+    return [...grid.querySelectorAll(":scope > .tool-card")].map(element => ({
+      element,
+      lessons: getLessonNumbers(cardText(element)),
+      isPastPaper: /past\s*papers?|past\s*paper|pastpaper/i.test(cardText(element))
     }));
   }
 
-  let cards = collectCards();
+  let cards = getCards();
+  let activeFilter = "all";
 
-  const filters = [];
-  filters.push({ id: "all", label: "All" });
+  function countFor(filterId) {
+    if (filterId === "all") return cards.length;
 
-  if (subject === "maths") {
-    filters.push(
-      { id: "pure", label: "Pure" },
-      { id: "applied", label: "Applied" }
-    );
-  } else {
-    for (let i = 1; i <= config.maxLessons; i++) {
-      filters.push({
-        id: "lesson-" + i,
-        label: "Lesson " + String(i).padStart(2, "0")
-      });
-    }
+    const lesson = Number(filterId.replace("lesson-", ""));
+    return cards.filter(card => card.lessons.includes(lesson)).length;
   }
 
-  filters.push({ id: "resources", label: "Resources" });
-
-  function countFor(id) {
-    if (id === "all") return cards.length;
-    if (id === "resources") {
-      return cards.filter(item => item.meta.resource).length;
-    }
-
-    if (subject === "maths") {
-      return cards.filter(item =>
-        !item.meta.resource && item.meta.types.includes(id)
-      ).length;
-    }
-
-    const lesson = Number(id.replace("lesson-", ""));
-    return cards.filter(item =>
-      !item.meta.resource && item.meta.lessons.includes(lesson)
-    ).length;
+  function labelFor(filterId) {
+    if (filterId === "all") return "All";
+    const lesson = Number(filterId.replace("lesson-", ""));
+    return String(lesson).padStart(2, "0") + ".";
   }
 
-  function renderButtons() {
+  function menuOptions() {
+    return [
+      { id: "all", label: "All" },
+      ...Array.from({ length: maxLessons }, (_, index) => {
+        const lesson = index + 1;
+        return {
+          id: "lesson-" + lesson,
+          label: String(lesson).padStart(2, "0") + "."
+        };
+      })
+    ];
+  }
+
+  function render() {
     root.innerHTML = "";
 
-    const title = document.createElement("div");
-    title.className = "lesson-filter-title";
-    title.textContent = subject === "maths"
-      ? "Filter by type"
-      : "Filter by lesson";
-    root.appendChild(title);
+    const wrapper = document.createElement("div");
+    wrapper.className = "lesson-filter-buttons";
 
-    const buttons = document.createElement("div");
-    buttons.className = "lesson-filter-buttons";
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "lesson-filter-button";
+    button.setAttribute("aria-haspopup", "true");
+    button.setAttribute("aria-expanded", "false");
+    button.innerHTML =
+      '<span class="lesson-filter-current">Filter</span>' +
+      '<span class="lesson-filter-arrow" aria-hidden="true">⌄</span>';
 
-    filters.forEach(filter => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "lesson-filter-button";
-      button.dataset.filter = filter.id;
-      button.innerHTML =
-        "<span>" + filter.label + "</span>" +
-        '<span class="lesson-filter-count">' + countFor(filter.id) + "</span>";
+    const menu = document.createElement("div");
+    menu.className = "lesson-filter-menu";
+    menu.hidden = true;
+    menu.setAttribute("role", "menu");
 
-      button.addEventListener("click", () => applyFilter(filter.id));
-      buttons.appendChild(button);
+    menuOptions().forEach(option => {
+      const item = document.createElement("button");
+      item.type = "button";
+      item.className = "lesson-filter-option";
+      item.dataset.filter = option.id;
+      item.setAttribute("role", "menuitem");
+      item.innerHTML =
+        '<span class="lesson-filter-option-label">' + option.label + "</span>" +
+        '<span class="lesson-filter-option-count">[' + countFor(option.id) + ' cards]</span>';
+
+      item.addEventListener("click", () => {
+        activeFilter = option.id;
+        applyFilter(activeFilter);
+        menu.hidden = true;
+        wrapper.parentElement.parentElement.classList.remove("open");
+        button.setAttribute("aria-expanded", "false");
+      });
+
+      menu.appendChild(item);
     });
 
-    root.appendChild(buttons);
+    button.addEventListener("click", event => {
+      event.stopPropagation();
+      const willOpen = menu.hidden;
+      menu.hidden = !willOpen;
+      root.classList.toggle("open", willOpen);
+      button.setAttribute("aria-expanded", String(willOpen));
+    });
+
+    wrapper.appendChild(button);
+    wrapper.appendChild(menu);
+    root.appendChild(wrapper);
+
+    updateButtonLabel();
   }
 
-  function applyFilter(id) {
-    buttonsSetActive(id);
+  function updateButtonLabel() {
+    const current = root.querySelector(".lesson-filter-current");
+    if (!current) return;
 
-    cards.forEach(item => {
-      const { meta, element } = item;
-      let visible = false;
+    current.textContent =
+      activeFilter === "all"
+        ? "Filter"
+        : labelFor(activeFilter) + " [" + countFor(activeFilter) + " cards]";
+  }
 
-      if (id === "all") {
-        visible = true;
-      } else if (id === "resources") {
-        visible = meta.resource;
-      } else if (subject === "maths") {
-        visible = !meta.resource && meta.types.includes(id);
-      } else {
-        const lesson = Number(id.replace("lesson-", ""));
-        visible = !meta.resource && meta.lessons.includes(lesson);
+  function updateActiveOption() {
+    root.querySelectorAll(".lesson-filter-option").forEach(option => {
+      const active = option.dataset.filter === activeFilter;
+      option.classList.toggle("active", active);
+      option.setAttribute("aria-selected", String(active));
+    });
+  }
+
+  function applyFilter(filterId) {
+    cards.forEach(card => {
+      let visible = filterId === "all";
+
+      if (filterId !== "all") {
+        const lesson = Number(filterId.replace("lesson-", ""));
+        visible = card.lessons.includes(lesson);
       }
 
-      element.hidden = !visible;
+      card.element.hidden = !visible;
     });
+
+    activeFilter = filterId;
+    updateButtonLabel();
+    updateActiveOption();
   }
 
-  function buttonsSetActive(id) {
-    root.querySelectorAll(".lesson-filter-button").forEach(button => {
-      const active = button.dataset.filter === id;
-      button.classList.toggle("active", active);
-      button.setAttribute("aria-pressed", String(active));
-    });
-  }
-
-  function refresh() {
-    cards = collectCards();
-    renderButtons();
-    applyFilter(
-      root.querySelector(".lesson-filter-button.active")?.dataset.filter || "all"
-    );
-  }
-
-  renderButtons();
-  applyFilter("all");
-
-  // Automatically notice cards added later to the page.
-  const observer = new MutationObserver(() => {
-    const latestCount = grid.querySelectorAll(":scope > .tool-card").length;
-    if (latestCount !== cards.length) refresh();
+  document.addEventListener("click", event => {
+    if (!root.contains(event.target)) {
+      const menu = root.querySelector(".lesson-filter-menu");
+      if (menu && !menu.hidden) {
+        menu.hidden = true;
+        root.classList.remove("open");
+        const button = root.querySelector(".lesson-filter-button");
+        button?.setAttribute("aria-expanded", "false");
+      }
+    }
   });
 
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") {
+      const menu = root.querySelector(".lesson-filter-menu");
+      if (menu && !menu.hidden) {
+        menu.hidden = true;
+        root.classList.remove("open");
+        root.querySelector(".lesson-filter-button")?.setAttribute("aria-expanded", "false");
+      }
+    }
+  });
+
+  function refreshIfCardsChanged() {
+    const latestCount = grid.querySelectorAll(":scope > .tool-card").length;
+    if (latestCount !== cards.length) {
+      cards = getCards();
+      render();
+      applyFilter(activeFilter);
+    }
+  }
+
+  render();
+  applyFilter("all");
+
+  // New cards added later are automatically included.
+  const observer = new MutationObserver(refreshIfCardsChanged);
   observer.observe(grid, { childList: true });
 })();
