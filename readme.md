@@ -19,8 +19,8 @@ Study-Lab/
 │   └── js/main.js        Shared JS (dark/light mode + localStorage)
 │
 └── tools/
-    ├── maths/
-    ├── biology/
+    ├── Maths/
+    ├── Biology/
     ├── chemistry/
     │   └── nh3-cations.html
     └── physics/
@@ -62,8 +62,8 @@ You do **not** need to touch the homepage or any other tool file.
 
 Each subject has its own folder under `tools/`:
 
-- `tools/maths/`
-- `tools/biology/`
+- `tools/Maths/`
+- `tools/Biology/`
 - `tools/chemistry/`
 - `tools/physics/`
 
