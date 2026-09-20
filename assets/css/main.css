@@ -740,6 +740,14 @@ html[data-theme="light"] .lesson-filter-option[data-filter="pastpapers"] {
   border-color: rgba(255,255,255,.17);
 }
 
+.study-favorite-toggle::before {
+  content: "☆";
+}
+
+.study-favorite-toggle.is-favorite::before {
+  content: "★";
+}
+
 .study-favorite-toggle.is-favorite {
   color: #ffd86b;
   background: rgba(255,216,107,.09);
