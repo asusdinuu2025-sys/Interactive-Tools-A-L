@@ -621,8 +621,147 @@ html[data-theme="light"] .lesson-filter-option:hover {
 }
 
 @media (max-width: 720px) {
+
+/* ---------- Automatic subject lesson dropdown ---------- */
+
+.lesson-filter {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  margin: 10px 0 0;
+  z-index: 30;
+}
+
+.lesson-filter-title {
+  display: none;
+}
+
+.lesson-filter-buttons {
+  position: relative;
+}
+
+.lesson-filter-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 118px;
+  padding: 9px 13px;
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 14px;
+  background: rgba(13,22,37,.30);
+  color: var(--text-primary);
+  cursor: pointer;
+  font: inherit;
+  font-size: .82rem;
+  font-weight: 650;
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  box-shadow:
+    0 12px 28px rgba(0,0,0,.12),
+    inset 0 1px 0 rgba(255,255,255,.065);
+}
+
+.lesson-filter-button:hover {
+  background: rgba(255,255,255,.075);
+  border-color: rgba(255,255,255,.21);
+}
+
+.lesson-filter-arrow {
+  opacity: .7;
+  font-size: 1rem;
+  line-height: 1;
+  transition: transform .2s ease;
+}
+
+.lesson-filter.open .lesson-filter-arrow {
+  transform: rotate(180deg);
+}
+
+.lesson-filter-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 205px;
+  max-height: 370px;
+  overflow-y: auto;
+  padding: 7px;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 16px;
+  background: rgba(10,18,31,.60);
+  backdrop-filter: blur(30px) saturate(155%);
+  -webkit-backdrop-filter: blur(30px) saturate(155%);
+  box-shadow:
+    0 26px 65px rgba(0,0,0,.30),
+    inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+.lesson-filter-menu[hidden] {
+  display: none;
+}
+
+.lesson-filter-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+  font: inherit;
+  font-size: .83rem;
+  text-align: left;
+}
+
+.lesson-filter-option:hover {
+  background: rgba(255,255,255,.075);
+}
+
+.lesson-filter-option.active {
+  background: rgba(91,140,255,.16);
+  color: var(--accent-cyan);
+}
+
+.lesson-filter-option-label {
+  white-space: nowrap;
+}
+
+.lesson-filter-option-count {
+  color: var(--text-muted);
+  font-size: .72rem;
+  white-space: nowrap;
+}
+
+.lesson-filter-option.active .lesson-filter-option-count {
+  color: var(--accent-cyan);
+}
+
+.tool-card[hidden] {
+  display: none !important;
+}
+
+html[data-theme="light"] .lesson-filter-button {
+  background: rgba(255,255,255,.48);
+  border-color: rgba(255,255,255,.85);
+}
+
+html[data-theme="light"] .lesson-filter-menu {
+  background: rgba(255,255,255,.70);
+  border-color: rgba(255,255,255,.88);
+  box-shadow: 0 26px 65px rgba(35,70,105,.14);
+}
+
+html[data-theme="light"] .lesson-filter-option:hover {
+  background: rgba(70,110,145,.07);
+}
+
+@media (max-width: 720px) {
   .lesson-filter {
-    margin-top: 12px;
+    margin-top: 8px;
   }
 
   .lesson-filter-menu {
