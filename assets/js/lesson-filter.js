@@ -1,7 +1,13 @@
 /*
  * Study-Lab automatic subject filter
- * Automatically classifies cards by visible text:
+ *
+ * Chemistry / Biology / Physics:
  *   All → Lesson 01... → Resources → Past Papers
+ *
+ * Maths:
+ *   All → Pure → Applied → Resources → Past Papers
+ *
+ * Cards are classified automatically from their visible text.
  * No data-category/data-lesson attribute is required.
  */
 (function () {
@@ -11,8 +17,9 @@
   const grid = document.querySelector(".tool-grid");
   const subject = document.body.dataset.filterSubject;
 
-  // Maths intentionally has no filter.
-  if (!root || !grid || !subject || subject === "maths") return;
+  if (!root || !grid || !subject) return;
+
+  const isMaths = subject === "maths";
 
   const maxLessons = {
     chemistry: 14,
@@ -20,7 +27,7 @@
     physics: 11
   }[subject];
 
-  if (!maxLessons) return;
+  if (!isMaths && !maxLessons) return;
 
   const cardText = card => card.textContent.replace(/\s+/g, " ").trim();
 
@@ -29,27 +36,22 @@
   }
 
   function getLessonNumbers(text) {
+    if (isMaths || !maxLessons) return [];
+
     const found = [];
     let match;
 
-    // Examples: "Lesson 04", "lesson 4"
     const lessonPattern = /\blesson\s*(0?[1-9]|1[0-9])\b/gi;
-
     while ((match = lessonPattern.exec(text)) !== null) {
       found.push(Number(match[1]));
     }
 
-    // Examples: "04. තාපය", "08/ ධාරා විද්‍යුතය", "03: දෝලන"
     const numberedPattern = /(?:^|\s)(0?[1-9]|1[0-9])\s*[.\/:\-]\s*/g;
-
     while ((match = numberedPattern.exec(text)) !== null) {
       found.push(Number(match[1]));
     }
 
-    /*
-     * Backward compatibility for older Chemistry cards that were created
-     * before lesson numbers were placed in their titles.
-     */
+    // Backward compatibility for older Chemistry cards.
     if (subject === "chemistry") {
       const rules = [
         { lesson: 5, pattern: /energetics|ශක්ති\s*විද්‍යාව|enthalpy|thermochem/i },
@@ -67,11 +69,39 @@
     return unique(found.filter(n => n >= 1 && n <= maxLessons));
   }
 
+  function getMathsCategory(text, lessons) {
+    const isPastPaper = /past\s*papers?|past\s*paper|pastpaper/i.test(text);
+
+    if (isPastPaper) return "pastpapers";
+
+    // Explicit Applied labels always take priority.
+    if (/\bapplied\b|applied\s*mathematics|ව්‍යවහාරික|යෙදුම්/i.test(text)) {
+      return "applied";
+    }
+
+    // Existing/current numbered Maths lesson cards are Pure.
+    if (lessons || /(?:^|\s)(0?[1-9]|[12][0-9]|3[0-9])\s*[.\/:\-]\s*/.test(text)) {
+      return "pure";
+    }
+
+    return "resource";
+  }
+
   function getCards() {
     return [...grid.querySelectorAll(":scope > .tool-card")].map(element => {
       const text = cardText(element);
       const lessons = getLessonNumbers(text);
       const isPastPaper = /past\s*papers?|past\s*paper|pastpaper/i.test(text);
+
+      if (isMaths) {
+        return {
+          element,
+          text,
+          lessons: [],
+          isPastPaper,
+          type: getMathsCategory(text, lessons)
+        };
+      }
 
       return {
         element,
@@ -95,9 +125,15 @@
 
   function countFor(filterId) {
     if (filterId === "all") return cards.length;
+
+    if (isMaths) {
+      return cards.filter(card => card.type === filterId).length;
+    }
+
     if (filterId === "resources") {
       return cards.filter(card => card.type === "resource").length;
     }
+
     if (filterId === "pastpapers") {
       return cards.filter(card => card.type === "pastpaper").length;
     }
@@ -108,6 +144,17 @@
 
   function labelFor(filterId) {
     if (filterId === "all") return "All";
+
+    if (isMaths) {
+      const mathsLabels = {
+        pure: "Pure",
+        applied: "Applied",
+        resource: "Resources",
+        pastpapers: "Past Papers"
+      };
+      return mathsLabels[filterId] || "Filter";
+    }
+
     if (filterId === "resources") return "Resources";
     if (filterId === "pastpapers") return "Past Papers";
 
@@ -116,6 +163,16 @@
   }
 
   function menuOptions() {
+    if (isMaths) {
+      return [
+        { id: "all", label: "All" },
+        { id: "pure", label: "Pure" },
+        { id: "applied", label: "Applied" },
+        { id: "resource", label: "Resources" },
+        { id: "pastpapers", label: "Past Papers" }
+      ];
+    }
+
     return [
       { id: "all", label: "All" },
       ...Array.from({ length: maxLessons }, (_, index) => {
@@ -157,7 +214,10 @@
       item.dataset.filter = option.id;
       item.setAttribute("role", "menuitem");
       item.innerHTML =
-        '<span class="lesson-filter-option-label">' + option.label + "</span>";
+        '<span class="lesson-filter-option-label">' + option.label + "</span>" +
+        '<span class="lesson-filter-option-count">[' +
+        countFor(option.id) +
+        ' cards]</span>';
 
       item.addEventListener("click", () => {
         activeFilter = option.id;
@@ -189,11 +249,7 @@
   function updateButtonLabel() {
     const current = root.querySelector(".lesson-filter-current");
     if (!current) return;
-
-    current.textContent =
-      activeFilter === "all"
-        ? "Filter"
-        : labelFor(activeFilter);
+    current.textContent = labelFor(activeFilter);
   }
 
   function updateActiveOption() {
@@ -206,10 +262,12 @@
 
   function applyFilter(filterId) {
     cards.forEach(card => {
-      let visible;
+      let visible = false;
 
       if (filterId === "all") {
         visible = true;
+      } else if (isMaths) {
+        visible = card.type === filterId;
       } else if (filterId === "resources") {
         visible = card.type === "resource";
       } else if (filterId === "pastpapers") {
@@ -257,6 +315,11 @@
     if (latestSignature !== lastSignature) {
       lastSignature = latestSignature;
       cards = getCards();
+
+      if (!menuOptions().some(option => option.id === activeFilter)) {
+        activeFilter = "all";
+      }
+
       render();
       applyFilter(activeFilter);
     }
@@ -266,7 +329,7 @@
   render();
   applyFilter("all");
 
-  // Future cards are automatically reclassified from their visible title/text.
+  // Future cards are automatically reclassified from their visible text.
   const observer = new MutationObserver(refreshIfCardsChanged);
   observer.observe(grid, {
     childList: true,
