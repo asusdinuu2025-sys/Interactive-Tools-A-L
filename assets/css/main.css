@@ -1106,3 +1106,52 @@ html[data-theme="light"] .study-quick-item {
     transition: none !important;
   }
 }
+
+
+/* ---------- PhET external simulation cards ---------- */
+
+.phet-card {
+  isolation: isolate;
+}
+
+.phet-card .phet-badge {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 3px 8px;
+  border: 1px solid rgba(126,220,255,.18);
+  border-radius: 999px;
+  background: rgba(126,220,255,.08);
+  color: var(--accent-cyan);
+  font-size: .65rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+  line-height: 1;
+  text-transform: uppercase;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.phet-card .card-icon {
+  margin-top: 25px;
+}
+
+.phet-card .open-tool-btn {
+  background: linear-gradient(135deg, rgba(91,140,255,.92), rgba(168,119,255,.92));
+}
+
+html[data-theme="light"] .phet-card .phet-badge {
+  background: rgba(91,140,255,.07);
+  border-color: rgba(91,140,255,.16);
+}
+
+@media (max-width: 720px) {
+  .phet-card .phet-badge {
+    top: 16px;
+    left: 16px;
+  }
+}
