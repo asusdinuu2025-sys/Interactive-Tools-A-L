@@ -135,7 +135,7 @@
         activeFilter = option.id;
         applyFilter(activeFilter);
         menu.hidden = true;
-        wrapper.parentElement.parentElement.classList.remove("open");
+        root.classList.remove("open");
         button.setAttribute("aria-expanded", "false");
       });
 
