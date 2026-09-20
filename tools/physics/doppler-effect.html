@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doppler Effect — 03. දෝලන හා තරංග | A/L Physics</title>
+    <meta name="description" content="G.C.E. A/L Physics Doppler Effect interactive simulator for the lesson දෝලන හා තරංග.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --panel-bg: rgba(22, 31, 49, 0.75);
+            --accent-source: #ff3366;
+            --accent-obs: #00e676;
+            --accent-wave: #00d2ff;
+            --text-main: #f0f4f8;
+            --text-sub: #8a99ad;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            width: 100%;
+            min-height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', 'Noto Sans Sinhala', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Top Header Navigation */
+        header {
+            min-height: 65px;
+            padding: 15px 30px;
+            background: rgba(11, 15, 25, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 18px;
+            z-index: 10;
+        }
+
+        header h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-meta {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 9px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            transition: background 0.2s, transform 0.2s;
+            font-size: 0.82rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+
+        /* Main Workbench Layout */
+        .workbench {
+            display: flex;
+            flex: 1;
+            position: relative;
+            min-height: calc(100vh - 65px);
+            width: 100%;
+        }
+
+        /* Fullscreen Simulation Canvas Frame */
+        .canvas-container {
+            flex: 1;
+            min-width: 0;
+            position: relative;
+            background: radial-gradient(circle at center, #131c2e 0%, #0b0f19 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Floating Control Dock (Glassmorphism UI) */
+        .control-dock {
+            width: 360px;
+            flex: 0 0 360px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+            z-index: 5;
+            overflow-y: auto;
+        }
+
+        .panel-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--text-sub);
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        /* Frequency Display Card */
+        .freq-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .freq-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-source), var(--accent-obs));
+        }
+
+        .freq-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 0 12px rgba(0, 210, 255, 0.4);
+            margin: 5px 0;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .freq-label {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+        }
+
+        /* Interactive Sliders */
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .control-val {
+            font-weight: 700;
+            color: var(--accent-wave);
+            white-space: nowrap;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            transition: background 0.2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 210, 255, 0.8);
+            transition: transform 0.1s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border: none;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 210, 255, 0.8);
+        }
+
+        /* Action Buttons */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-main);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Canvas Overlay Legends */
+        .legend-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 12px 18px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            gap: 20px;
+            font-size: 0.8rem;
+            pointer-events: none;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        @media (max-width: 900px) {
+            header {
+                padding: 12px 16px;
+                flex-wrap: wrap;
+            }
+
+            header h1 {
+                font-size: 1.05rem;
+            }
+
+            .header-meta {
+                font-size: 0.75rem;
+                margin-left: auto;
+            }
+
+            .workbench {
+                flex-direction: column;
+            }
+
+            .canvas-container {
+                height: 55vh;
+                min-height: 390px;
+            }
+
+            canvas {
+                width: 100%;
+                height: 100%;
+            }
+
+            .control-dock {
+                width: 100%;
+                flex: 0 0 auto;
+                border-left: 0;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.35);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .header-meta {
+                display: none;
+            }
+
+            .legend-overlay {
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 10px 16px;
+            }
+
+            .control-dock {
+                padding: 18px;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .control-label {
+                font-size: 0.78rem;
+            }
+
+            .freq-value {
+                font-size: 1.9rem;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>⚡ Doppler Effect High-Precision Simulator</h1>
+        <div class="header-meta">
+            03. දෝලන හා තරංග · A/L Physics
+            <a class="back-link" href="../../physics.html">← Physics</a>
+        </div>
+    </header>
+
+    <div class="workbench">
+        <!-- Canvas Viewport -->
+        <div class="canvas-container" id="canvasFrame">
+            <canvas id="simCanvas"></canvas>
+
+            <div class="legend-overlay">
+                <div class="legend-item">
+                    <div class="dot" style="background: var(--accent-source); box-shadow: 0 0 8px var(--accent-source);"></div>
+                    <span>ප්‍රභවය (Source)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="dot" style="background: var(--accent-obs); box-shadow: 0 0 8px var(--accent-obs);"></div>
+                    <span>නිරීක්ෂකයා (Observer)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Control Panel -->
+        <div class="control-dock">
+            <div>
+                <div class="panel-title">Realtime Readout</div>
+                <div class="freq-card">
+                    <div class="freq-label">නිරීක්ෂිත සංඛ්‍යාතය (Apparent Freq)</div>
+                    <div class="freq-value" id="appFreqDisplay">440.0 <span style="font-size:1rem;">Hz</span></div>
+                    <div class="freq-label" id="pitchIndicator">Pitch: Normal</div>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-primary" id="toggleAudioBtn">🔊 Start Audio</button>
+                <button class="btn btn-secondary" id="resetBtn">🔄 Reset Positions</button>
+            </div>
+
+            <div class="panel-title">Kinematics Control</div>
+
+            <div class="control-group">
+                <div class="control-label">
+                    <span>ප්‍රභව ප්‍රවේගය (v<sub>s</sub>)</span>
+                    <span class="control-val" id="vsVal">0 m/s</span>
+                </div>
+                <input type="range" id="vsSlider" min="-200" max="200" value="0">
+            </div>
+
+            <div class="control-group">
+                <div class="control-label">
+                    <span>නිරීක්ෂක ප්‍රවේගය (v<sub>o</sub>)</span>
+                    <span class="control-val" id="voVal">0 m/s</span>
+                </div>
+                <input type="range" id="voSlider" min="-200" max="200" value="0">
+            </div>
+
+            <div class="panel-title">Wave Properties</div>
+
+            <div class="control-group">
+                <div class="control-label">
+                    <span>මුල් සංඛ්‍යාතය (f)</span>
+                    <span class="control-val" id="fVal">440 Hz</span>
+                </div>
+                <input type="range" id="fSlider" min="150" max="800" value="440">
+            </div>
+
+            <div class="control-group">
+                <div class="control-label">
+                    <span>මාධ්‍යයේ ශබ්ද ප්‍රවේගය (v)</span>
+                    <span class="control-val" id="vSoundVal">340 m/s</span>
+                </div>
+                <input type="range" id="vSoundSlider" min="250" max="500" value="340">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        const canvasFrame = document.getElementById('canvasFrame');
+
+        // UI Controls
+        const vsSlider = document.getElementById('vsSlider');
+        const voSlider = document.getElementById('voSlider');
+        const fSlider = document.getElementById('fSlider');
+        const vSoundSlider = document.getElementById('vSoundSlider');
+        const appFreqDisplay = document.getElementById('appFreqDisplay');
+        const pitchIndicator = document.getElementById('pitchIndicator');
+        const toggleAudioBtn = document.getElementById('toggleAudioBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // Responsive canvas sizing
+        function resizeCanvas() {
+            const width = Math.max(1, canvasFrame.clientWidth);
+            const height = Math.max(1, canvasFrame.clientHeight);
+            const oldWidth = canvas.width || width;
+            const oldHeight = canvas.height || height;
+
+            canvas.width = width;
+            canvas.height = height;
+
+            // Keep entities at the same relative positions after a resize.
+            if (source && observer) {
+                source.x = (source.x / oldWidth) * width;
+                source.y = (source.y / oldHeight) * height;
+                observer.x = (observer.x / oldWidth) * width;
+                observer.y = (observer.y / oldHeight) * height;
+            }
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+
+        // Physical Entities & States
+        let source = { x: 0, y: 0, vx: 0 };
+        let observer = { x: 0, y: 0, vx: 0 };
+        let waves = [];
+        let waveEmitTimer = 0;
+
+        // Web Audio API State
+        let audioCtx = null;
+        let oscillator = null;
+        let gainNode = null;
+        let isAudioPlaying = false;
+
+        function resetPositions() {
+            source.x = canvas.width * 0.25;
+            source.y = canvas.height * 0.5;
+            observer.x = canvas.width * 0.75;
+            observer.y = canvas.height * 0.5;
+            source.vx = 0;
+            observer.vx = 0;
+            vsSlider.value = 0;
+            voSlider.value = 0;
+            waves = [];
+            waveEmitTimer = 0;
+        }
+
+        resizeCanvas();
+        resetPositions();
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                oscillator = audioCtx.createOscillator();
+                gainNode = audioCtx.createGain();
+
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                oscillator.start();
+            }
+        }
+
+        toggleAudioBtn.addEventListener('click', () => {
+            initAudio();
+
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            isAudioPlaying = !isAudioPlaying;
+
+            if (isAudioPlaying) {
+                gainNode.gain.setTargetAtTime(0.12, audioCtx.currentTime, 0.05);
+                toggleAudioBtn.innerText = "⏸ Pause Audio";
+                toggleAudioBtn.style.background = "linear-gradient(135deg, #ff3366, #ff6b8b)";
+            } else {
+                gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.05);
+                toggleAudioBtn.innerText = "🔊 Start Audio";
+                toggleAudioBtn.style.background = "linear-gradient(135deg, #00d2ff, #3a7bd5)";
+            }
+        });
+
+        resetBtn.addEventListener('click', resetPositions);
+
+        vsSlider.addEventListener('input', updatePhysics);
+        voSlider.addEventListener('input', updatePhysics);
+        fSlider.addEventListener('input', updatePhysics);
+        vSoundSlider.addEventListener('input', updatePhysics);
+
+        function calculateDoppler() {
+            const f = parseFloat(fSlider.value);
+            const vs = parseFloat(vsSlider.value);
+            const vo = parseFloat(voSlider.value);
+            const vSound = parseFloat(vSoundSlider.value);
+
+            // Direction from source to observer.
+            const isObserverRight = observer.x >= source.x;
+            const dir = isObserverRight ? 1 : -1;
+
+            const vsRel = vs * dir;
+            const voRel = vo * dir;
+
+            // Classical 1-D Doppler relation in a stationary medium:
+            // f' = f (v - v_o) / (v - v_s)
+            // Here positive velocity is defined in the source→observer direction.
+            const denominator = vSound - vsRel;
+
+            // The visualizer allows a wide slider range, including values
+            // near the sound speed. Avoid an unphysical singularity.
+            if (Math.abs(denominator) < 1) {
+                return f;
+            }
+
+            const fPrime = f * ((vSound - voRel) / denominator);
+
+            return Math.max(20, Math.min(3000, fPrime));
+        }
+
+        function updatePhysics() {
+            const vSound = parseFloat(vSoundSlider.value);
+            const vs = parseFloat(vsSlider.value);
+            const vo = parseFloat(voSlider.value);
+
+            // Scale velocity for screen movement.
+            source.vx = vs * 0.035;
+            observer.vx = vo * 0.035;
+
+            source.x += source.vx;
+            observer.x += observer.vx;
+
+            // Hold objects at the canvas edges.
+            const margin = 40;
+
+            if (source.x < margin) {
+                source.x = margin;
+                source.vx = 0;
+            }
+
+            if (source.x > canvas.width - margin) {
+                source.x = canvas.width - margin;
+                source.vx = 0;
+            }
+
+            if (observer.x < margin) {
+                observer.x = margin;
+                observer.vx = 0;
+            }
+
+            if (observer.x > canvas.width - margin) {
+                observer.x = canvas.width - margin;
+                observer.vx = 0;
+            }
+
+            // Emit wave pulses based on source frequency.
+            waveEmitTimer++;
+            const emitInterval = Math.max(4, Math.floor(6000 / parseFloat(fSlider.value)));
+
+            if (waveEmitTimer >= emitInterval) {
+                waves.push({
+                    x: source.x,
+                    y: source.y,
+                    radius: 0,
+                    alpha: 1
+                });
+                waveEmitTimer = 0;
+            }
+
+            // Expand spherical waves.
+            const waveSpeedScale = vSound * 0.025;
+
+            for (let i = waves.length - 1; i >= 0; i--) {
+                waves[i].radius += waveSpeedScale;
+                waves[i].alpha = Math.max(
+                    0,
+                    1 - (waves[i].radius / (canvas.width * 0.8))
+                );
+
+                if (waves[i].radius > canvas.width * 0.9) {
+                    waves.splice(i, 1);
+                }
+            }
+
+            // Update UI metrics.
+            document.getElementById('vsVal').innerText = vs + " m/s";
+            document.getElementById('voVal').innerText = vo + " m/s";
+            document.getElementById('fVal').innerText = fSlider.value + " Hz";
+            document.getElementById('vSoundVal').innerText = vSound + " m/s";
+
+            const apparentFreq = calculateDoppler();
+
+            appFreqDisplay.innerHTML =
+                `${apparentFreq.toFixed(1)} <span style="font-size:1rem;">Hz</span>`;
+
+            const baseF = parseFloat(fSlider.value);
+
+            if (apparentFreq > baseF + 5) {
+                pitchIndicator.innerText = "Pitch: Higher (සිහින් හඬ)";
+                pitchIndicator.style.color = "#00e676";
+            } else if (apparentFreq < baseF - 5) {
+                pitchIndicator.innerText = "Pitch: Lower (ගැඹුරු හඬ)";
+                pitchIndicator.style.color = "#ff3366";
+            } else {
+                pitchIndicator.innerText = "Pitch: Normal";
+                pitchIndicator.style.color = "var(--text-sub)";
+            }
+
+            // Audio frequency follows the calculated apparent frequency.
+            if (audioCtx && isAudioPlaying) {
+                oscillator.frequency.setTargetAtTime(
+                    apparentFreq,
+                    audioCtx.currentTime,
+                    0.03
+                );
+            }
+        }
+
+        function renderGraphics() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Subtle Background Grid
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.03)";
+            ctx.lineWidth = 1;
+
+            const gridSize = 40;
+
+            for (let x = 0; x < canvas.width; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+
+            for (let y = 0; y < canvas.height; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+
+            // Render sound-wave spheres.
+            waves.forEach(w => {
+                ctx.beginPath();
+                ctx.arc(w.x, w.y, w.radius, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(0, 210, 255, ${w.alpha * 0.75})`;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            });
+
+            // Draw Source Object.
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = "#ff3366";
+            ctx.fillStyle = "#ff3366";
+            ctx.beginPath();
+            ctx.arc(source.x, source.y, 14, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = "#fff";
+            ctx.font = "600 13px Inter";
+            ctx.fillText("Source (S)", source.x - 28, source.y - 22);
+
+            // Draw Observer Object.
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = "#00e676";
+            ctx.fillStyle = "#00e676";
+            ctx.beginPath();
+            ctx.arc(observer.x, observer.y, 14, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = "#fff";
+            ctx.fillText("Observer (O)", observer.x - 34, observer.y - 22);
+        }
+
+        // Smooth Animation Loop
+        function loop() {
+            updatePhysics();
+            renderGraphics();
+            requestAnimationFrame(loop);
+        }
+
+        loop();
+    </script>
+</body>
+</html>
