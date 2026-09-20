@@ -198,9 +198,7 @@
     });
   }
 
-  function recordOpen(card) {
-    const meta = buildMeta(card, card.dataset.studySubject || subject);
-
+  function recordMeta(meta) {
     let explored = getExplored().filter(item => item?.url !== meta.url);
     explored.push(meta);
     saveExplored(explored);
@@ -211,6 +209,11 @@
 
     refreshQuickPanel();
     refreshProgress();
+  }
+
+  function recordOpen(card) {
+    const meta = buildMeta(card, card.dataset.studySubject || subject);
+    recordMeta(meta);
   }
 
   function attachOpenTracking(card) {
@@ -559,13 +562,10 @@
     a.append(icon, text);
 
     a.addEventListener("click", () => {
-      const now = Date.now();
-      const recent = getRecent().filter(entry => entry?.url !== item.url);
-      recent.unshift({
+      recordMeta({
         ...item,
-        savedAt: now
+        savedAt: Date.now()
       });
-      saveRecent(recent);
     });
 
     return a;
