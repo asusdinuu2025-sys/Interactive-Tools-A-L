@@ -133,7 +133,6 @@
       "aria-label",
       active ? "Remove from favorites" : "Add to favorites"
     );
-    button.textContent = active ? "★" : "☆";
   }
 
   function toggleFavorite(card) {
