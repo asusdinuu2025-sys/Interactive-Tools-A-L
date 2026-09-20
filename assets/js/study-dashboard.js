@@ -15,6 +15,7 @@
 
   const STORAGE = {
     favorites: "studyLabFavorites",
+    favoriteMeta: "studyLabFavoriteMeta",
     recent: "studyLabRecent",
     explored: "studyLabExploredTools"
   };
@@ -44,45 +45,66 @@
     }
   }
 
-  function normalizeFavorite(item) {
-    if (typeof item === "string" && item.trim()) {
-      return {
-        url: item,
-        title: "",
-        description: "",
-        subject: "study-lab",
-        savedAt: 0
-      };
-    }
+  function getFavoriteMetaStore() {
+    const value = readJSON(STORAGE.favoriteMeta, {});
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  }
 
-    if (item && typeof item === "object" && typeof item.url === "string" && item.url) {
-      return {
-        url: item.url,
-        title: typeof item.title === "string" ? item.title : "",
-        description: typeof item.description === "string" ? item.description : "",
-        subject: typeof item.subject === "string" && item.subject ? item.subject : "study-lab",
-        savedAt: Number.isFinite(item.savedAt) ? item.savedAt : 0
-      };
-    }
+  function saveFavoriteMetaStore(value) {
+    writeJSON(STORAGE.favoriteMeta, value);
+  }
 
-    return null;
+  function rememberFavoriteMeta(url, meta) {
+    if (!url || !meta) return;
+    const store = getFavoriteMetaStore();
+    store[url] = {
+      title: meta.title || "",
+      description: meta.description || "",
+      subject: meta.subject || subject || "study-lab"
+    };
+    saveFavoriteMetaStore(store);
   }
 
   function getFavorites() {
     const value = readJSON(STORAGE.favorites, []);
     if (!Array.isArray(value)) return [];
-    return value.map(normalizeFavorite).filter(Boolean);
+
+    const urls = [];
+    const metaStore = getFavoriteMetaStore();
+    let metaChanged = false;
+
+    value.forEach(item => {
+      const url = typeof item === "string" ? item : item?.url;
+      if (!url || urls.includes(url)) return;
+
+      urls.push(url);
+
+      if (item && typeof item === "object" && item.title && !metaStore[url]) {
+        metaStore[url] = {
+          title: item.title,
+          description: item.description || "",
+          subject: item.subject || subject || "study-lab"
+        };
+        metaChanged = true;
+      }
+    });
+
+    if (metaChanged) saveFavoriteMetaStore(metaStore);
+
+    // Migrate the temporary object-based format created by the earlier fix
+    // back to the original URL-only favorites format.
+    if (value.some(item => item && typeof item === "object")) {
+      writeJSON(STORAGE.favorites, urls);
+    }
+
+    return urls;
   }
 
   function saveFavorites(value) {
-    const unique = new Map();
-
-    value
-      .map(normalizeFavorite)
-      .filter(Boolean)
-      .forEach(item => unique.set(item.url, item));
-
-    writeJSON(STORAGE.favorites, [...unique.values()]);
+    const urls = value
+      .map(item => typeof item === "string" ? item : item?.url)
+      .filter(Boolean);
+    writeJSON(STORAGE.favorites, [...new Set(urls)]);
   }
 
   function getRecent() {
@@ -135,166 +157,8 @@
     return labels[value] || "Study-Lab";
   }
 
-  const SUBJECT_DIRECTORY_PAGES = [
-    "maths.html",
-    "biology.html",
-    "chemistry.html",
-    "physics.html"
-  ];
-
-  let toolDirectoryIndexPromise = null;
-
-  // Historical filename aliases keep old saved items working after a file rename.
-  const LEGACY_URL_ALIASES = {
-    "tools/maths/trigonametry.html": "tools/maths/trigonometry.html"
-  };
-
-  function normalizeUrl(url, base = window.location.href) {
-
-    try {
-      return new URL(url, base).href;
-    } catch {
-      return String(url || "");
-    }
-  }
-
-  function getToolPathKey(url, base = window.location.href) {
-    try {
-      return decodeURIComponent(new URL(url, base).pathname)
-        .replace(/\\/g, "/")
-        .replace(/^\/+/, "")
-        .toLowerCase();
-    } catch {
-      return String(url || "")
-        .replace(/\\/g, "/")
-        .replace(/^\/+/, "")
-        .toLowerCase();
-    }
-  }
-
-  function buildDirectoryMeta(card, pageUrl, pageSubject) {
-    return {
-      url: normalizeUrl(card.getAttribute("href") || "", pageUrl),
-      title: getCardTitle(card),
-      description: getCardDescription(card),
-      subject: pageSubject || "study-lab",
-      savedAt: 0
-    };
-  }
-
-  function addDirectoryEntry(index, card, pageUrl, pageSubject) {
-    if (!isToolCard(card)) return;
-    const meta = buildDirectoryMeta(card, pageUrl, pageSubject);
-    index.byUrl.set(meta.url, meta);
-    index.byPath.set(getToolPathKey(meta.url), meta);
-  }
-
-  async function buildToolDirectoryIndex() {
-    if (toolDirectoryIndexPromise) return toolDirectoryIndexPromise;
-
-    toolDirectoryIndexPromise = (async () => {
-      const index = {
-        byUrl: new Map(),
-        byPath: new Map()
-      };
-
-      document.querySelectorAll(".tool-card").forEach(card => {
-        if (!isToolCard(card)) return;
-        const meta = buildMeta(card, card.dataset.studySubject || subject);
-        index.byUrl.set(normalizeUrl(meta.url), meta);
-        index.byPath.set(getToolPathKey(meta.url), meta);
-      });
-
-      await Promise.all(
-        SUBJECT_DIRECTORY_PAGES.map(async page => {
-          try {
-            const pageUrl = normalizeUrl(page);
-            const response = await fetch(pageUrl, { cache: "no-store" });
-            if (!response.ok) return;
-
-            const html = await response.text();
-            const doc = new DOMParser().parseFromString(html, "text/html");
-            const pageSubject = (doc.body?.dataset.filterSubject || "").trim().toLowerCase();
-
-            doc.querySelectorAll(".tool-card").forEach(card => {
-              addDirectoryEntry(index, card, pageUrl, pageSubject);
-            });
-          } catch {
-            // Keep the dashboard usable when a subject page cannot be fetched.
-          }
-        })
-      );
-
-      return index;
-    })();
-
-    return toolDirectoryIndexPromise;
-  }
-
-  function findDirectoryMeta(index, url) {
-    const normalized = normalizeUrl(url);
-    const exact = index.byUrl.get(normalized);
-    if (exact) return exact;
-
-    let pathKey = getToolPathKey(normalized);
-    pathKey = LEGACY_URL_ALIASES[pathKey] || pathKey;
-    return index.byPath.get(pathKey) || null;
-  }
-
-  function needsStoredTitle(item) {
-    return !item?.title ||
-      item.title === "Saved tool" ||
-      item.title === "Untitled tool" ||
-      item.title === "Tool name unavailable";
-  }
-
-  async function hydrateStoredMetadata() {
-    const favorites = getFavorites();
-    const recent = getRecent();
-
-    if (!favorites.length && !recent.length) return;
-
-    const index = await buildToolDirectoryIndex();
-    const directoryEntries = [...index.values()];
-    let favoritesChanged = false;
-    let recentChanged = false;
-
-    const enrich = item => {
-      const match = findDirectoryMeta(index, item.url);
-
-      if (!match) return item;
-
-      return {
-        ...item,
-        url: match.url,
-        title: match.title,
-        description: match.description,
-        subject: match.subject
-      };
-    };
-
-    const nextFavorites = favorites.map(item => {
-      const next = enrich(item);
-      favoritesChanged ||= next.url !== item.url ||
-        next.title !== item.title ||
-        next.description !== item.description ||
-        next.subject !== item.subject;
-      return next;
-    });
-
-    const nextRecent = recent.map(item => {
-      const next = enrich(item);
-      recentChanged ||= next.url !== item.url ||
-        next.title !== item.title ||
-        next.description !== item.description ||
-        next.subject !== item.subject;
-      return next;
-    });
-
-    if (favoritesChanged) saveFavorites(nextFavorites);
-    if (recentChanged) saveRecent(nextRecent);
-
-    if (favoritesChanged || recentChanged) refreshQuickPanel();
+  function isToolCard(card) {
+    return card.matches(".tool-card") && !!getCardUrl(card);
   }
 
   function buildMeta(card, knownSubject) {
@@ -308,7 +172,7 @@
   }
 
   function favoriteSet() {
-    return new Set(getFavorites().map(item => item.url));
+    return new Set(getFavorites());
   }
 
   function isFavorite(card) {
@@ -326,16 +190,19 @@
   }
 
   function toggleFavorite(card) {
-    const favorites = getFavorites();
-    const existingIndex = favorites.findIndex(item => item.url === card.href);
+    const favorites = favoriteSet();
 
-    if (existingIndex >= 0) {
-      favorites.splice(existingIndex, 1);
+    if (favorites.has(card.href)) {
+      favorites.delete(card.href);
     } else {
-      favorites.unshift(buildMeta(card, card.dataset.studySubject || subject));
+      favorites.add(card.href);
+      rememberFavoriteMeta(
+        card.href,
+        buildMeta(card, card.dataset.studySubject || subject)
+      );
     }
 
-    saveFavorites(favorites);
+    saveFavorites([...favorites]);
 
     const button = card.querySelector(".study-favorite-toggle");
     if (button) updateFavoriteButton(card, button);
@@ -731,20 +598,6 @@
     });
   }
 
-  function resolveFavoriteMeta(item) {
-    const favorite = normalizeFavorite(item);
-    if (!favorite) return null;
-
-    const matchingCard = Array.from(document.querySelectorAll(".tool-card"))
-      .find(card => normalizeUrl(card.href) === normalizeUrl(favorite.url));
-
-    if (matchingCard) {
-      return buildMeta(matchingCard, matchingCard.dataset.studySubject || subject);
-    }
-
-    return favorite;
-  }
-
   function makeQuickItem(item, type) {
     const a = document.createElement("a");
     a.className = "study-quick-item";
@@ -793,7 +646,30 @@
       favoriteList.innerHTML = "";
 
       const favoriteEntries = favorites
-        .map(resolveFavoriteMeta)
+        .map(url => {
+          const currentCard = [...document.querySelectorAll(".tool-card")]
+            .find(card => card.href === url);
+
+          if (currentCard) {
+            return buildMeta(
+              currentCard,
+              currentCard.dataset.studySubject || subject
+            );
+          }
+
+          const stored = getFavoriteMetaStore()[url];
+          if (stored?.title) {
+            return {
+              url,
+              title: stored.title,
+              description: stored.description || "",
+              subject: stored.subject || subject || "study-lab",
+              savedAt: 0
+            };
+          }
+
+          return recent.find(item => item?.url === url) || null;
+        })
         .filter(Boolean)
         .slice(0, 8);
 
@@ -810,10 +686,7 @@
       if (!recent.length) {
         recentList.innerHTML = '<div class="study-quick-empty">No tools opened yet.</div>';
       } else {
-        recent.slice(0, MAX_RECENT).forEach(item => {
-          const resolved = resolveFavoriteMeta(item);
-          recentList.appendChild(makeQuickItem(resolved || item, "recent"));
-        });
+        recent.slice(0, MAX_RECENT).forEach(item => recentList.appendChild(makeQuickItem(item, "recent")));
       }
     }
 
@@ -866,6 +739,165 @@
     });
   }
 
+  function isPlaceholderTitle(title) {
+    return !title ||
+      title === "Saved tool" ||
+      title === "Untitled tool" ||
+      title === "Tool name unavailable";
+  }
+
+  function normalizeComparableUrl(url) {
+    try {
+      return new URL(url, window.location.href).href;
+    } catch {
+      return String(url || "");
+    }
+  }
+
+  function uniqueTitleMatch(entries, title, subjectName) {
+    if (isPlaceholderTitle(title)) return null;
+
+    const matches = entries.filter(item =>
+      item.title === title &&
+      (!subjectName || subjectName === "study-lab" || item.subject === subjectName)
+    );
+
+    return matches.length === 1 ? matches[0] : null;
+  }
+
+  async function hydrateStoredDashboardMetadata() {
+    try {
+      const favorites = getFavorites();
+      const recent = getRecent();
+      if (!favorites.length && !recent.length) return;
+
+      const entries = [];
+
+      // The current page is always the first and cheapest source of truth.
+      document.querySelectorAll(".tool-card").forEach(card => {
+        if (!isToolCard(card)) return;
+        entries.push(buildMeta(card, card.dataset.studySubject || subject));
+      });
+
+      // On the home page, load the four subject directories only for metadata
+      // recovery. Nothing here participates in progress calculations.
+      const pages = ["maths.html", "biology.html", "chemistry.html", "physics.html"];
+
+      await Promise.all(pages.map(async page => {
+        try {
+          const pageUrl = normalizeComparableUrl(page);
+          const response = await fetch(pageUrl, { cache: "no-store" });
+          if (!response.ok) return;
+
+          const html = await response.text();
+          const doc = new DOMParser().parseFromString(html, "text/html");
+          const pageSubject = (doc.body?.dataset.filterSubject || "").trim().toLowerCase();
+
+          doc.querySelectorAll(".tool-card").forEach(card => {
+            if (!isToolCard(card)) return;
+            entries.push({
+              url: normalizeComparableUrl(card.getAttribute("href") || "", pageUrl),
+              title: getCardTitle(card),
+              description: getCardDescription(card),
+              subject: pageSubject || "study-lab",
+              savedAt: 0
+            });
+          });
+        } catch {
+          // Metadata recovery must never affect the dashboard itself.
+        }
+      }));
+
+      const byUrl = new Map(entries.map(item => [normalizeComparableUrl(item.url), item]));
+      const favoriteMeta = getFavoriteMetaStore();
+      const nextFavorites = [];
+      const nextMeta = { ...favoriteMeta };
+
+      favorites.forEach(oldUrl => {
+        const exact = byUrl.get(normalizeComparableUrl(oldUrl));
+        const stored = nextMeta[oldUrl];
+
+        let match = exact || null;
+
+        // If a file was renamed but its visible card title stayed the same,
+        // safely move the saved favorite to the current card URL.
+        if (!match && stored?.title) {
+          match = uniqueTitleMatch(
+            entries,
+            stored.title,
+            stored.subject
+          );
+        }
+
+        if (match) {
+          nextFavorites.push(match.url);
+          nextMeta[match.url] = {
+            title: match.title,
+            description: match.description,
+            subject: match.subject
+          };
+        } else {
+          nextFavorites.push(oldUrl);
+          if (stored) nextMeta[oldUrl] = stored;
+        }
+      });
+
+      saveFavorites(nextFavorites);
+      saveFavoriteMetaStore(nextMeta);
+
+      const favoriteUrls = new Set(nextFavorites);
+      const nextRecent = recent.map(item => {
+        if (!item?.url) return item;
+
+        const stored = nextMeta[item.url];
+        const exact = byUrl.get(normalizeComparableUrl(item.url));
+
+        if (exact) {
+          return { ...item, ...exact, savedAt: item.savedAt || Date.now() };
+        }
+
+        if (stored?.title && isPlaceholderTitle(item.title)) {
+          return {
+            ...item,
+            title: stored.title,
+            description: stored.description || item.description || "",
+            subject: stored.subject || item.subject || "study-lab"
+          };
+        }
+
+        if (stored?.title && item.title && item.title !== stored.title) {
+          const titleMatch = uniqueTitleMatch(
+            entries,
+            stored.title,
+            stored.subject
+          );
+          if (titleMatch) {
+            return {
+              ...item,
+              ...titleMatch,
+              savedAt: item.savedAt || Date.now()
+            };
+          }
+        }
+
+        const titleMatch = !isPlaceholderTitle(item.title)
+          ? uniqueTitleMatch(entries, item.title, item.subject)
+          : null;
+
+        return titleMatch
+          ? { ...item, ...titleMatch, savedAt: item.savedAt || Date.now() }
+          : item;
+      });
+
+      saveRecent(nextRecent);
+
+      // Refresh only the Quick panel after metadata recovery.
+      refreshQuickPanel();
+    } catch {
+      // Never let metadata recovery break Progress, Quick Access, search, or cards.
+    }
+  }
+
   function boot() {
     createSearchBar();
     ensureProgress();
@@ -878,8 +910,8 @@
     refreshProgress();
     createQuickAccess();
     refreshQuickPanel();
-    hydrateStoredMetadata();
     setupCardObservers();
+    hydrateStoredDashboardMetadata();
   }
 
   if (document.readyState === "loading") {
