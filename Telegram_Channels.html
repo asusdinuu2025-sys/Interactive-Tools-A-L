@@ -152,6 +152,8 @@
     }
 
     .telegram-channel {
+      position: relative;
+      z-index: 1;
       display: grid;
       grid-template-columns: auto 1fr auto;
       gap: 15px;
@@ -171,12 +173,19 @@
       box-shadow: 0 14px 34px rgba(20,55,130,.20), inset 0 1px 0 rgba(255,255,255,.08);
     }
 
+    .telegram-all-channel:hover {
+      transform: translateY(-3px);
+      border-color: rgba(77,216,240,.34);
+      box-shadow: 0 14px 34px rgba(20,55,130,.20), inset 0 1px 0 rgba(255,255,255,.08);
+    }
+
     .telegram-channel-title {
       display: contents;
     }
 
-    .telegram-channel-title > span:last-child {
-      font-weight: 700;
+    .telegram-channel-title > strong {
+      display: block;
+      margin-bottom: 4px;
       line-height: 1.35;
     }
 
@@ -348,6 +357,7 @@
     @media (prefers-reduced-motion: reduce) {
       .telegram-back,
       .telegram-channel,
+      .telegram-all-channel,
       .telegram-open {
         transition: none;
       }
@@ -399,7 +409,7 @@
         >
           <div class="telegram-channel-title">
             <span class="telegram-channel-icon" aria-hidden="true">➤</span>
-            <span>2027 Combined Maths Notes | Ajantha Dissanayake — @CMNotes27</span>
+            <strong>2027 Combined Maths Notes | Ajantha Dissanayake — @CMNotes27</strong>
           </div>
           <p>2027 A/L Combined Maths notes and study resources in Sinhala.</p>
           <span class="telegram-channel-cta">Open Telegram →</span>
