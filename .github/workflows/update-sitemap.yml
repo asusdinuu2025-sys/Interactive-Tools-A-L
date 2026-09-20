@@ -1,0 +1,65 @@
+name: Update sitemap
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sitemap:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Generate sitemap from HTML files
+        shell: python
+        run: |
+          import os
+          from pathlib import Path
+          from urllib.parse import quote
+          from xml.sax.saxutils import escape
+
+          BASE_URL = "https://studylablk.netlify.app/"
+          ROOT = Path(".").resolve()
+
+          html_files = sorted(
+              path for path in ROOT.rglob("*.html")
+              if ".git" not in path.parts
+              and "node_modules" not in path.parts
+          )
+
+          urls = []
+          for path in html_files:
+              relative = path.relative_to(ROOT).as_posix()
+              encoded = quote(relative, safe="/:@-._~()")
+              urls.append(f"  <url><loc>{escape(BASE_URL + encoded)}</loc></url>")
+
+          sitemap = (
+              '<?xml version="1.0" encoding="UTF-8"?>\n'
+              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+              + "\n".join(urls)
+              + "\n</urlset>\n"
+          )
+
+          Path("sitemap.xml").write_text(sitemap, encoding="utf-8")
+          print(f"Generated sitemap.xml with {len(urls)} HTML URLs.")
+
+      - name: Commit sitemap changes
+        shell: bash
+        run: |
+          if git diff --quiet -- sitemap.xml; then
+            echo "Sitemap is already up to date."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add sitemap.xml
+          git commit -m "chore: automatically update sitemap"
+          git push
