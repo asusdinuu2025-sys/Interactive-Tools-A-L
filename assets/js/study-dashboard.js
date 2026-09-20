@@ -856,13 +856,29 @@
           return { ...item, ...exact, savedAt: item.savedAt || Date.now() };
         }
 
-        if (stored?.title && isPlaceholderTitle(item.title)) {
-          return {
-            ...item,
-            title: stored.title,
-            description: stored.description || item.description || "",
-            subject: stored.subject || item.subject || "study-lab"
-          };
+        if (stored?.title) {
+          const storedTitleMatch = uniqueTitleMatch(
+            entries,
+            stored.title,
+            stored.subject
+          );
+
+          if (storedTitleMatch) {
+            return {
+              ...item,
+              ...storedTitleMatch,
+              savedAt: item.savedAt || Date.now()
+            };
+          }
+
+          if (isPlaceholderTitle(item.title)) {
+            return {
+              ...item,
+              title: stored.title,
+              description: stored.description || item.description || "",
+              subject: stored.subject || item.subject || "study-lab"
+            };
+          }
         }
 
         if (stored?.title && item.title && item.title !== stored.title) {
