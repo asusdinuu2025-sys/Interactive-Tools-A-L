@@ -6,8 +6,168 @@
   <title>Chemistry Audio Books — StudyLab for G.C.E A/L Sri Lanka</title>
   <meta name="description" content="Audio books for G.C.E Advanced Level students." />
   <link rel="stylesheet" href="assets/css/main.css" />
-</head>
-<body>
+  <style>
+    /* Audio Books page-specific glass layer */
+    body.audio-books-page {
+      position: relative;
+      background:
+        radial-gradient(700px circle at 8% 8%, rgba(77,216,240,.13), transparent 58%),
+        radial-gradient(760px circle at 92% 18%, rgba(168,119,255,.11), transparent 60%),
+        radial-gradient(860px circle at 50% 92%, rgba(91,140,255,.09), transparent 62%),
+        var(--bg-deep);
+    }
+
+    body.audio-books-page::before,
+    body.audio-books-page::after {
+      content: "";
+      position: fixed;
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      filter: blur(110px);
+      pointer-events: none;
+      z-index: -3;
+    }
+
+    body.audio-books-page::before {
+      top: -180px;
+      left: -170px;
+      background: rgba(77,216,240,.10);
+    }
+
+    body.audio-books-page::after {
+      right: -170px;
+      bottom: -190px;
+      background: rgba(168,119,255,.09);
+    }
+
+    .audio-books-background {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: -2;
+    }
+
+    .audio-symbol {
+      position: absolute;
+      color: rgba(170,225,255,.075);
+      font-family: "Segoe UI", "Noto Sans Sinhala", Arial, sans-serif;
+      font-weight: 600;
+      white-space: nowrap;
+      user-select: none;
+      animation: audioFloat 30s linear infinite;
+      text-shadow: 0 0 20px rgba(77,216,240,.10);
+    }
+
+    @keyframes audioFloat {
+      0% { transform: translate3d(0,35px,0) rotate(0deg); opacity:0; }
+      12% { opacity:1; }
+      50% { transform: translate3d(34px,-30px,0) rotate(4deg); }
+      88% { opacity:1; }
+      100% { transform: translate3d(-26px,-105px,0) rotate(-4deg); opacity:0; }
+    }
+
+    .audio-books-page .site-header,
+    .audio-books-page .site-footer,
+    .audio-books-page .back-button {
+      background: rgba(18,27,42,.42) !important;
+      border-color: rgba(255,255,255,.12) !important;
+      backdrop-filter: blur(28px) saturate(150%);
+      -webkit-backdrop-filter: blur(28px) saturate(150%);
+    }
+
+    .audio-books-page .page-header {
+      padding-top: 26px;
+      padding-bottom: 4px;
+    }
+
+    .audio-books-page .page-header h1 {
+      background: linear-gradient(120deg, var(--text-primary), #4dd8f0 58%, #a877ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 12px 40px rgba(0,0,0,.16);
+    }
+
+    .audio-grid {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important;
+      gap: 20px !important;
+      margin-top: 28px !important;
+    }
+
+    .audio-grid .tool-card {
+      display: flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      min-height: 250px;
+      position: relative;
+      overflow: hidden;
+      background: rgba(13,22,37,.34) !important;
+      border: 1px solid rgba(255,255,255,.13) !important;
+      border-radius: 24px !important;
+      backdrop-filter: blur(28px) saturate(145%);
+      -webkit-backdrop-filter: blur(28px) saturate(145%);
+      box-shadow:
+        0 24px 58px rgba(0,0,0,.20),
+        inset 0 1px 0 rgba(255,255,255,.075) !important;
+    }
+
+    .audio-grid .tool-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 12%;
+      right: 12%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.34), transparent);
+      pointer-events: none;
+    }
+
+    .audio-grid .tool-card:hover {
+      transform: translateY(-7px) scale(1.008);
+      background: rgba(24,36,54,.48) !important;
+      border-color: rgba(77,216,240,.25) !important;
+      box-shadow:
+        0 30px 70px rgba(0,0,0,.24),
+        inset 0 1px 0 rgba(255,255,255,.09),
+        0 0 32px rgba(77,216,240,.06) !important;
+    }
+
+    html[data-theme="light"] .audio-grid .tool-card {
+      background: rgba(255,255,255,.47) !important;
+      border-color: rgba(255,255,255,.86) !important;
+    }
+
+    html[data-theme="light"] .audio-grid .tool-card:hover {
+      background: rgba(255,255,255,.61) !important;
+    }
+
+    @media (max-width: 600px) {
+      .audio-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+      }
+    }
+  </style>
+  </head>
+<body class="audio-books-page">  <div class="audio-books-background" aria-hidden="true">
+    <span class="audio-symbol" style="left:6%;top:16%;font-size:25px;animation-delay:-8s;">H₂O</span>
+    <span class="audio-symbol" style="left:24%;top:9%;font-size:22px;animation-delay:16s;">NH₃</span>
+    <span class="audio-symbol" style="left:47%;top:18%;font-size:24px;animation-delay:-12s;">ΔH</span>
+    <span class="audio-symbol" style="left:70%;top:11%;font-size:22px;animation-delay:9s;">Na⁺</span>
+    <span class="audio-symbol" style="left:88%;top:28%;font-size:25px;animation-delay:-7s;">Cl⁻</span>
+    <span class="audio-symbol" style="left:11%;top:48%;font-size:23px;animation-delay:11s;">Fe³⁺</span>
+    <span class="audio-symbol" style="left:34%;top:54%;font-size:21px;animation-delay:-12s;">Cu²⁺</span>
+    <span class="audio-symbol" style="left:61%;top:47%;font-size:24px;animation-delay:7s;">pH</span>
+    <span class="audio-symbol" style="left:80%;top:61%;font-size:22px;animation-delay:-9s;">Kc</span>
+    <span class="audio-symbol" style="left:7%;top:77%;font-size:21px;animation-delay:8s;">Ag⁺</span>
+    <span class="audio-symbol" style="left:45%;top:82%;font-size:23px;animation-delay:-10s;">C₆H₁₂O₆</span>
+    <span class="audio-symbol" style="left:73%;top:84%;font-size:21px;animation-delay:12s;">⚗</span>
+  </div>
+
+
 
   <header class="site-header">
     <div class="brand">
@@ -29,7 +189,7 @@
       <a class="back-button" href="index.html">← Back to StudyLab</a>
     </div>
 
-    <section class="tool-grid" aria-label="Chemistry audio books">
+    <section class="tool-grid audio-grid" aria-label="Chemistry audio books">
 
       <a class="tool-card" href="tools/audios/Audio1.html">
         <span class="card-icon">🎧</span>
