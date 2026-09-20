@@ -686,7 +686,25 @@
       if (!recent.length) {
         recentList.innerHTML = '<div class="study-quick-empty">No tools opened yet.</div>';
       } else {
-        recent.slice(0, MAX_RECENT).forEach(item => recentList.appendChild(makeQuickItem(item, "recent")));
+        recent.slice(0, MAX_RECENT).forEach(item => {
+          const currentCard = [...document.querySelectorAll(".tool-card")]
+            .find(card => card.href === item?.url);
+
+          const stored = item?.url ? getFavoriteMetaStore()[item.url] : null;
+
+          const displayItem = currentCard
+            ? buildMeta(currentCard, currentCard.dataset.studySubject || subject)
+            : stored?.title && isPlaceholderTitle(item.title)
+              ? {
+                  ...item,
+                  title: stored.title,
+                  description: stored.description || item.description || "",
+                  subject: stored.subject || item.subject || "study-lab"
+                }
+              : item;
+
+          recentList.appendChild(makeQuickItem(displayItem, "recent"));
+        });
       }
     }
 
@@ -845,7 +863,6 @@
       saveFavorites(nextFavorites);
       saveFavoriteMetaStore(nextMeta);
 
-      const favoriteUrls = new Set(nextFavorites);
       const nextRecent = recent.map(item => {
         if (!item?.url) return item;
 
