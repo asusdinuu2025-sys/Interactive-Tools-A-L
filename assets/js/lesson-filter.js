@@ -33,14 +33,14 @@
     let match;
 
     // Examples: "Lesson 04", "lesson 4"
-    const lessonPattern = /\\blesson\\s*(0?[1-9]|1[0-9])\\b/gi;
+    const lessonPattern = /\blesson\s*(0?[1-9]|1[0-9])\b/gi;
 
     while ((match = lessonPattern.exec(text)) !== null) {
       found.push(Number(match[1]));
     }
 
     // Examples: "04. තාපය", "08/ ධාරා විද්‍යුතය", "03: දෝලන"
-    const numberedPattern = /(?:^|\\s)(0?[1-9]|1[0-9])\\s*[.\\/:\\-]\\s*/g;
+    const numberedPattern = /(?:^|\s)(0?[1-9]|1[0-9])\s*[.\/:\-]\s*/g;
 
     while ((match = numberedPattern.exec(text)) !== null) {
       found.push(Number(match[1]));
@@ -122,7 +122,7 @@
         const lesson = index + 1;
         return {
           id: "lesson-" + lesson,
-          label: String(lesson).padStart(2, "0") + "."
+          label: "Lesson " + String(lesson).padStart(2, "0")
         };
       }),
       { id: "resources", label: "Resources" },
