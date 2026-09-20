@@ -44,13 +44,45 @@
     }
   }
 
+  function normalizeFavorite(item) {
+    if (typeof item === "string" && item.trim()) {
+      return {
+        url: item,
+        title: "",
+        description: "",
+        subject: "study-lab",
+        savedAt: 0
+      };
+    }
+
+    if (item && typeof item === "object" && typeof item.url === "string" && item.url) {
+      return {
+        url: item.url,
+        title: typeof item.title === "string" ? item.title : "",
+        description: typeof item.description === "string" ? item.description : "",
+        subject: typeof item.subject === "string" && item.subject ? item.subject : "study-lab",
+        savedAt: Number.isFinite(item.savedAt) ? item.savedAt : 0
+      };
+    }
+
+    return null;
+  }
+
   function getFavorites() {
     const value = readJSON(STORAGE.favorites, []);
-    return Array.isArray(value) ? value : [];
+    if (!Array.isArray(value)) return [];
+    return value.map(normalizeFavorite).filter(Boolean);
   }
 
   function saveFavorites(value) {
-    writeJSON(STORAGE.favorites, [...new Set(value)]);
+    const unique = new Map();
+
+    value
+      .map(normalizeFavorite)
+      .filter(Boolean)
+      .forEach(item => unique.set(item.url, item));
+
+    writeJSON(STORAGE.favorites, [...unique.values()]);
   }
 
   function getRecent() {
@@ -118,7 +150,7 @@
   }
 
   function favoriteSet() {
-    return new Set(getFavorites());
+    return new Set(getFavorites().map(item => item.url));
   }
 
   function isFavorite(card) {
@@ -136,14 +168,16 @@
   }
 
   function toggleFavorite(card) {
-    const favorites = favoriteSet();
-    if (favorites.has(card.href)) {
-      favorites.delete(card.href);
+    const favorites = getFavorites();
+    const existingIndex = favorites.findIndex(item => item.url === card.href);
+
+    if (existingIndex >= 0) {
+      favorites.splice(existingIndex, 1);
     } else {
-      favorites.add(card.href);
+      favorites.unshift(buildMeta(card, card.dataset.studySubject || subject));
     }
 
-    saveFavorites([...favorites]);
+    saveFavorites(favorites);
 
     const button = card.querySelector(".study-favorite-toggle");
     if (button) updateFavoriteButton(card, button);
@@ -539,6 +573,34 @@
     });
   }
 
+  function resolveFavoriteMeta(item) {
+    const favorite = normalizeFavorite(item);
+    if (!favorite) return null;
+    if (favorite.title) return favorite;
+
+    const matchingCard = Array.from(document.querySelectorAll(".tool-card"))
+      .find(card => card.href === favorite.url);
+
+    if (matchingCard) {
+      return buildMeta(matchingCard, matchingCard.dataset.studySubject || subject);
+    }
+
+    let fallbackTitle = favorite.url;
+    try {
+      const parsedUrl = new URL(favorite.url, window.location.href);
+      const filename = decodeURIComponent(parsedUrl.pathname.split("/").pop() || "");
+      fallbackTitle = filename.replace(/\.html?$/i, "").replace(/[-_]+/g, " ").trim() || "Saved tool";
+    } catch {
+      // Keep the URL as a last-resort label.
+    }
+
+    return {
+      ...favorite,
+      title: fallbackTitle,
+      subject: favorite.subject || subject || "study-lab"
+    };
+  }
+
   function makeQuickItem(item, type) {
     const a = document.createElement("a");
     a.className = "study-quick-item";
@@ -587,11 +649,8 @@
       favoriteList.innerHTML = "";
 
       const favoriteEntries = favorites
-        .map(url => recent.find(item => item?.url === url) || {
-          url,
-          title: "Saved tool",
-          subject: subject || "study-lab"
-        })
+        .map(resolveFavoriteMeta)
+        .filter(Boolean)
         .slice(0, 8);
 
       if (!favoriteEntries.length) {
