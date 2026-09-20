@@ -256,7 +256,14 @@
       font-size: .86rem;
     }
 
-    .telegram-all-channel {
+    .telegram-all-grid {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 12px;
+    }
+
+        .telegram-all-channel {
       position: relative;
       z-index: 1;
       display: grid;
@@ -434,27 +441,67 @@
         <span class="telegram-subject-icon">🌐</span>
         <div>
           <h2>All Subjects</h2>
-          <p>General G.C.E. A/L resources and StudyLab updates.</p>
+          <p>Mixed G.C.E. A/L channels that share resources across multiple subjects.</p>
         </div>
       </div>
 
-      <a
-        class="telegram-all-channel"
-        href="https://t.me/htmlstudytools"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Open E-Tools Telegram Channel"
-      >
-        <span class="telegram-channel-icon" aria-hidden="true">➤</span>
-        <span>
-          <strong>E-Tools Telegram Channel</strong>
-          <span>StudyLab / E-tools updates, interactive tools and general educational resources.</span>
-        </span>
-        <span class="telegram-open">Open Telegram →</span>
-      </a>
+      <div class="telegram-all-grid">
+
+        <a
+          class="telegram-all-channel"
+          href="https://t.me/htmlstudytools"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Open E-Tools Telegram Channel"
+        >
+          <span class="telegram-channel-icon" aria-hidden="true">➤</span>
+          <span>
+            <strong>E-Tools Telegram Channel</strong>
+            <span>StudyLab / E-tools updates, interactive tools and general educational resources.</span>
+          </span>
+          <span class="telegram-open">Open Telegram →</span>
+        </a>
+
+        <div class="telegram-all-channel" aria-label="Mixed A/L channel slot">
+          <span class="telegram-channel-icon" aria-hidden="true">＋</span>
+          <span>
+            <strong>Mixed A/L Channel — Add Here</strong>
+            <span>For a real Telegram channel that shares Maths, Biology, Chemistry, Physics and other A/L resources.</span>
+          </span>
+          <span class="telegram-open" style="opacity:.55;pointer-events:none;">Add Link →</span>
+        </div>
+
+        <div class="telegram-all-channel" aria-label="Mixed A/L channel slot">
+          <span class="telegram-channel-icon" aria-hidden="true">＋</span>
+          <span>
+            <strong>Mixed A/L Channel — Add Here</strong>
+            <span>For another mixed-subject channel covering notes, papers, resources or announcements.</span>
+          </span>
+          <span class="telegram-open" style="opacity:.55;pointer-events:none;">Add Link →</span>
+        </div>
+
+      </div>
+
+      <!--
+        Add real mixed/all-subject Telegram channels inside .telegram-all-grid.
+        Keep E-Tools as one channel among them.
+
+        Template:
+        <a class="telegram-all-channel"
+           href="https://t.me/REAL_CHANNEL"
+           target="_blank"
+           rel="noopener noreferrer">
+          <span class="telegram-channel-icon" aria-hidden="true">➤</span>
+          <span>
+            <strong>Channel Name</strong>
+            <span>Short description of the mixed A/L resources shared there.</span>
+          </span>
+          <span class="telegram-open">Open Telegram →</span>
+        </a>
+      -->
 
       <div class="telegram-note">
-        Subject channels can be added above without changing the rest of the page.
+        All Subjects is for genuinely mixed/general A/L channels. E-Tools is one channel in this section, not the section itself.
       </div>
     </section>
   </main>
