@@ -144,11 +144,31 @@
 
   let toolDirectoryIndexPromise = null;
 
+  // Historical filename aliases keep old saved items working after a file rename.
+  const LEGACY_URL_ALIASES = {
+    "tools/maths/trigonametry.html": "tools/maths/trigonometry.html"
+  };
+
   function normalizeUrl(url, base = window.location.href) {
+
     try {
       return new URL(url, base).href;
     } catch {
       return String(url || "");
+    }
+  }
+
+  function getToolPathKey(url, base = window.location.href) {
+    try {
+      return decodeURIComponent(new URL(url, base).pathname)
+        .replace(/\\/g, "/")
+        .replace(/^\/+/, "")
+        .toLowerCase();
+    } catch {
+      return String(url || "")
+        .replace(/\\/g, "/")
+        .replace(/^\/+/, "")
+        .toLowerCase();
     }
   }
 
@@ -162,18 +182,27 @@
     };
   }
 
+  function addDirectoryEntry(index, card, pageUrl, pageSubject) {
+    if (!isToolCard(card)) return;
+    const meta = buildDirectoryMeta(card, pageUrl, pageSubject);
+    index.byUrl.set(meta.url, meta);
+    index.byPath.set(getToolPathKey(meta.url), meta);
+  }
+
   async function buildToolDirectoryIndex() {
     if (toolDirectoryIndexPromise) return toolDirectoryIndexPromise;
 
     toolDirectoryIndexPromise = (async () => {
-      const index = new Map();
+      const index = {
+        byUrl: new Map(),
+        byPath: new Map()
+      };
 
       document.querySelectorAll(".tool-card").forEach(card => {
         if (!isToolCard(card)) return;
-        index.set(
-          normalizeUrl(card.href),
-          buildMeta(card, card.dataset.studySubject || subject)
-        );
+        const meta = buildMeta(card, card.dataset.studySubject || subject);
+        index.byUrl.set(normalizeUrl(meta.url), meta);
+        index.byPath.set(getToolPathKey(meta.url), meta);
       });
 
       await Promise.all(
@@ -188,9 +217,7 @@
             const pageSubject = (doc.body?.dataset.filterSubject || "").trim().toLowerCase();
 
             doc.querySelectorAll(".tool-card").forEach(card => {
-              if (!isToolCard(card)) return;
-              const meta = buildDirectoryMeta(card, pageUrl, pageSubject);
-              index.set(meta.url, meta);
+              addDirectoryEntry(index, card, pageUrl, pageSubject);
             });
           } catch {
             // Keep the dashboard usable when a subject page cannot be fetched.
@@ -202,6 +229,16 @@
     })();
 
     return toolDirectoryIndexPromise;
+  }
+
+  function findDirectoryMeta(index, url) {
+    const normalized = normalizeUrl(url);
+    const exact = index.byUrl.get(normalized);
+    if (exact) return exact;
+
+    let pathKey = getToolPathKey(normalized);
+    pathKey = LEGACY_URL_ALIASES[pathKey] || pathKey;
+    return index.byPath.get(pathKey) || null;
   }
 
   function needsStoredTitle(item) {
@@ -223,26 +260,9 @@
     let recentChanged = false;
 
     const enrich = item => {
-      const normalizedUrl = normalizeUrl(item.url);
-      let match = index.get(normalizedUrl);
+      const match = findDirectoryMeta(index, item.url);
 
-      if (!match && item.title && item.title !== "Saved tool" && item.title !== "Untitled tool" &&
-          item.title !== "Tool name unavailable") {
-        match = directoryEntries.find(candidate =>
-          candidate.title === item.title &&
-          (!item.subject || item.subject === "study-lab" || candidate.subject === item.subject)
-        );
-      }
-
-      if (!match) {
-        if (needsStoredTitle(item)) {
-          return {
-            ...item,
-            title: "Tool name unavailable"
-          };
-        }
-        return item;
-      }
+      if (!match) return item;
 
       return {
         ...item,
@@ -715,10 +735,6 @@
     const favorite = normalizeFavorite(item);
     if (!favorite) return null;
 
-    if (favorite.title && favorite.title !== "Saved tool" && favorite.title !== "Untitled tool") {
-      return favorite;
-    }
-
     const matchingCard = Array.from(document.querySelectorAll(".tool-card"))
       .find(card => normalizeUrl(card.href) === normalizeUrl(favorite.url));
 
@@ -726,11 +742,7 @@
       return buildMeta(matchingCard, matchingCard.dataset.studySubject || subject);
     }
 
-    return {
-      ...favorite,
-      title: "Tool name unavailable",
-      subject: favorite.subject || subject || "study-lab"
-    };
+    return favorite;
   }
 
   function makeQuickItem(item, type) {
