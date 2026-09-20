@@ -112,7 +112,7 @@
     if (filterId === "pastpapers") return "Past Papers";
 
     const lesson = Number(filterId.replace("lesson-", ""));
-    return String(lesson).padStart(2, "0") + ".";
+    return "Lesson " + String(lesson).padStart(2, "0");
   }
 
   function menuOptions() {
