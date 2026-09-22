@@ -123,14 +123,19 @@
 
     userId = user.id;
 
-    const profile = await account.getProfile?.();
-    if (profile?.display_name) {
-      nickname = profile.display_name;
-    } else {
-      const nicknameNumber = Array.from(userId)
-        .reduce((sum, char) => sum + char.charCodeAt(0), 0) % 9000 + 1000;
-      nickname = "Student " + nicknameNumber;
+    try {
+      const profile = await account.getProfile?.();
+      if (profile?.display_name) {
+        nickname = profile.display_name;
+        return;
+      }
+    } catch (profileError) {
+      console.warn("StudyLab chat profile:", profileError);
     }
+
+    const nicknameNumber = Array.from(userId)
+      .reduce((sum, char) => sum + char.charCodeAt(0), 0) % 9000 + 1000;
+    nickname = "Student " + nicknameNumber;
   }
 
   window.addEventListener("studylab-profile-updated", event => {
