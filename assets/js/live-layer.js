@@ -66,8 +66,8 @@
      NEVER put a secret/service-role key here.
      ========================================================= */
 
-  const SUPABASE_URL = "YOUR_SUPABASE_URL";
-  const SUPABASE_PUBLISHABLE_KEY = "YOUR_SUPABASE_PUBLISHABLE_KEY";
+  const SUPABASE_URL = "https://zpvatyxdbshjuqgtexzw.supabase.co";
+  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_zd8S3PcyicJX6Cgyh0ez8A_sUSTCuiB";
 
   function showLiveMessage(message) {
     if (liveStatus) liveStatus.textContent = message;
