@@ -233,7 +233,7 @@ drop trigger if exists studylab_chat_trim_after_insert
 
 create trigger studylab_chat_trim_after_insert
 after insert on public.studylab_chat_messages
-for each row
+for each statement
 execute function public.trim_studylab_chat_after_insert();
 
 do $$
