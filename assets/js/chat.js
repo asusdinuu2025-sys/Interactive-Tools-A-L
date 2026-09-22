@@ -103,16 +103,40 @@
 
   sessionStorage.setItem("studylab_chat_session", sessionKey);
 
-  const nicknameNumber = Array.from(sessionKey)
-    .reduce((sum, char) => sum + char.charCodeAt(0), 0) % 9000 + 1000;
-  const nickname = "Student " + nicknameNumber;
-
   let client = null;
+  let userId = null;
+  let nickname = "Student";
   let channel = null;
   let isOpen = false;
   let unreadCount = 0;
   let lastSentAt = 0;
   let messagesById = new Map();
+
+  async function loadChatIdentity() {
+    const account = window.StudyLabAccount;
+    if (!account?.ready) throw new Error("StudyLab account unavailable.");
+
+    await account.ready;
+
+    const user = account.getUser?.();
+    if (!user?.id) throw new Error("StudyLab student account unavailable.");
+
+    userId = user.id;
+
+    const profile = await account.getProfile?.();
+    if (profile?.display_name) {
+      nickname = profile.display_name;
+    } else {
+      const nicknameNumber = Array.from(userId)
+        .reduce((sum, char) => sum + char.charCodeAt(0), 0) % 9000 + 1000;
+      nickname = "Student " + nicknameNumber;
+    }
+  }
+
+  window.addEventListener("studylab-profile-updated", event => {
+    const name = event.detail?.display_name;
+    if (name) nickname = name;
+  });
 
   function setStatus(online, textValue) {
     statusDot?.classList.toggle("is-offline", !online);
@@ -155,7 +179,7 @@
     const article = document.createElement("article");
     article.className = "study-chat-message";
 
-    if (row.session_id === sessionKey) {
+    if ((row.user_id && row.user_id === userId) || (!row.user_id && row.session_id === sessionKey)) {
       article.classList.add("own");
     }
 
@@ -234,7 +258,7 @@
 
     const { data, error } = await client
       .from(CONFIG.table)
-      .select("id,message,created_at,session_id,nickname")
+      .select("id,message,created_at,session_id,user_id,nickname")
       .order("created_at", { ascending: true })
       .limit(CONFIG.maxMessages);
 
@@ -268,7 +292,7 @@
 
           renderMessage(row);
 
-          if (!isOpen && row.session_id !== sessionKey) {
+          if (!isOpen && row.user_id !== userId) {
             setUnread(unreadCount + 1);
           }
 
@@ -308,6 +332,7 @@
       .insert({
         message,
         session_id: sessionKey,
+        user_id: userId,
         nickname
       });
 
@@ -421,7 +446,9 @@
     }
 
     try {
-      client = window.supabase.createClient(
+      await loadChatIdentity();
+
+      client = window.StudyLabAccount?.client || window.supabase.createClient(
         CONFIG.supabaseUrl,
         CONFIG.supabasePublishableKey
       );
