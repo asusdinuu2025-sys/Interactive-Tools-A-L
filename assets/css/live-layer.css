@@ -190,3 +190,34 @@ html[data-theme="light"] .countdown-note {
     padding: 10px 5px;
   }
 }
+
+
+/* Live count state */
+.live-layer.is-low .live-pill {
+  background: rgba(245, 74, 74, .10);
+  border-color: rgba(255, 105, 105, .24);
+}
+
+.live-layer.is-low .live-pill .live-dot {
+  background: #ff5d63;
+  box-shadow: 0 0 12px rgba(255, 93, 99, .68);
+}
+
+.live-layer.is-low .live-number {
+  color: #ff7076;
+  text-shadow: 0 0 18px rgba(255, 93, 99, .20);
+}
+
+.live-layer.is-live .live-pill {
+  background: rgba(80, 220, 160, .09);
+  border-color: rgba(100, 230, 175, .18);
+}
+
+.live-layer.is-live .live-pill .live-dot {
+  background: #58e6a3;
+  box-shadow: 0 0 12px rgba(88,230,163,.65);
+}
+
+.live-layer.is-live .live-number {
+  color: #8bdcff;
+}
