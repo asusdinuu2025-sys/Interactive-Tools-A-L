@@ -21,6 +21,9 @@ create index if not exists studylab_chat_messages_created_at_idx
 
 alter table public.studylab_chat_messages enable row level security;
 
+grant select, insert on table public.studylab_chat_messages to anon, authenticated;
+revoke update, delete on table public.studylab_chat_messages from anon, authenticated;
+
 drop policy if exists "StudyLab chat read recent messages"
   on public.studylab_chat_messages;
 
