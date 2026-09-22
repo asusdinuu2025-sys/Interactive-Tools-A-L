@@ -42,6 +42,11 @@
       button.dataset.reaction = reaction;
       button.setAttribute("aria-label", label + " for " + cardTitle(card));
       button.innerHTML = '<span aria-hidden="true">' + icon + '</span><span class="study-reaction-count">0</span>';
+      button.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        toggleReaction(card, reaction);
+      });
       row.appendChild(button);
     });
 
