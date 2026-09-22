@@ -1,4 +1,4 @@
 [build]
   command = "node scripts/generate-sitemap.mjs"
   publish = "."
-  ignore = "./scripts/netlify-ignore.sh"
+  ignore = "bash ./scripts/netlify-ignore.sh"
