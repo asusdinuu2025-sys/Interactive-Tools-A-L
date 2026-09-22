@@ -128,7 +128,18 @@
 
   const ready = (async function () {
     const currentUser = await ensureSignedIn();
-    await loadProfile();
+
+    /*
+     * Profile data is optional during account startup.
+     * A missing/unconfigured profile table must not prevent
+     * Chat, Live presence, or the rest of StudyLab from starting.
+     */
+    try {
+      await loadProfile();
+    } catch (profileError) {
+      console.warn("StudyLab profile startup:", profileError);
+      profile = null;
+    }
 
     /*
      * One-time migration of the old local profile.
