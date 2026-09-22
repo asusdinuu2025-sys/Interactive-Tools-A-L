@@ -1636,12 +1636,12 @@
        STUDY LAB LK — EXISTING MAIN JAVASCRIPT
        ========================================================= -->
 
+  <!-- Supabase must load before StudyLab cloud features. -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/studylab-account.js"></script>
   <script src="assets/js/profile.js"></script>
   <script src="assets/js/main.js"></script>
   <script src="assets/js/study-dashboard.js"></script>
-
-  <!-- Supabase must load before the realtime layers. -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/live-layer.js"></script>
   <script src="assets/js/chat.js"></script>
 
