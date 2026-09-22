@@ -190,6 +190,7 @@ create policy "StudyLab chat insert own authenticated messages"
     user_id = auth.uid()
     and char_length(btrim(message)) between 1 and 500
     and char_length(btrim(nickname)) between 1 and 60
+    and created_at >= now() - interval '30 seconds'
     and created_at <= now() + interval '5 minutes'
   );
 
@@ -214,8 +215,6 @@ end;
 $$;
 
 revoke all on function public.cleanup_studylab_chat() from public;
-grant execute on function public.cleanup_studylab_chat() to authenticated;
-
 create or replace function public.trim_studylab_chat_after_insert()
 returns trigger
 language plpgsql
@@ -224,7 +223,7 @@ set search_path = public
 as $$
 begin
   perform public.cleanup_studylab_chat();
-  return new;
+  return null;
 end;
 $$;
 
@@ -250,5 +249,55 @@ begin
   end if;
 end;
 $$;
+
+select public.cleanup_studylab_chat();
+
+
+-- =========================================================
+-- SERVER-SIDE CHAT RATE LIMIT
+-- Protects the temporary chat even if client-side throttling
+-- is bypassed.
+-- =========================================================
+
+create or replace function public.enforce_studylab_chat_rate_limit()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  recent_count integer;
+begin
+  if auth.uid() is null then
+    raise exception 'StudyLab chat requires an authenticated student.';
+  end if;
+
+  perform pg_advisory_xact_lock(
+    hashtextextended(auth.uid()::text, 0)
+  );
+
+  select count(*)
+    into recent_count
+  from public.studylab_chat_messages
+  where user_id = auth.uid()
+    and created_at > now() - interval '2.5 seconds';
+
+  if recent_count > 0 then
+    raise exception 'Please wait before sending another chat message.';
+  end if;
+
+  return new;
+end;
+$$;
+
+revoke all on function public.enforce_studylab_chat_rate_limit() from public;
+
+drop trigger if exists studylab_chat_rate_limit_before_insert
+  on public.studylab_chat_messages;
+
+create trigger studylab_chat_rate_limit_before_insert
+before insert on public.studylab_chat_messages
+for each row
+execute function public.enforce_studylab_chat_rate_limit();
 
 select public.cleanup_studylab_chat();

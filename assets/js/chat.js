@@ -248,7 +248,7 @@
     list.innerHTML = `
       <div class="study-chat-setup">
         <strong>Chat is being prepared</strong>
-        Run <code>supabase/chat_setup.sql</code> once in your Supabase SQL Editor, then refresh this page.
+        Run <code>supabase/studylab_backend_setup.sql</code> once in your Supabase SQL Editor, with Anonymous Sign-Ins enabled, then refresh this page.
       </div>
     `;
   }
@@ -349,17 +349,6 @@
     window.setTimeout(updateComposer, CONFIG.rateLimitMs + 20);
   }
 
-  async function cleanupExpired() {
-    if (!client) return;
-
-    const { error } = await client.rpc("cleanup_studylab_chat");
-    if (error) {
-      // Cleanup is also enforced by the insert trigger; keep the chat usable
-      // if the optional cleanup RPC has not been created yet.
-      console.debug("StudyLab Chat cleanup:", error.message);
-    }
-  }
-
   function closeQuickAccess() {
     const quickPanel = document.getElementById("studyQuickAccessPanel");
     const quickButton = document.getElementById("studyQuickButton");
@@ -458,11 +447,9 @@
         CONFIG.supabasePublishableKey
       );
 
-      await cleanupExpired();
       await loadMessages();
       subscribe();
 
-      window.setInterval(cleanupExpired, 5 * 60 * 1000);
     } catch (error) {
       console.warn("StudyLab Chat:", error);
       setStatus(false, "Chat connection unavailable");

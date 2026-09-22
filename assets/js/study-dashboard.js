@@ -1,14 +1,14 @@
 /*
  * Study-Lab personal study dashboard
  *
- * Local-device only:
+ * Cloud-backed student dashboard:
  * - Quick Find search
  * - Favorites
  * - Recently opened
  * - Unique tools explored progress
  * - Floating Quick Access panel
  *
- * No account, server, cookie, or external service is required.
+ * Supabase is the source of truth for student dashboard data.
  */
 (function () {
   "use strict";
@@ -57,16 +57,6 @@
       };
     });
     return store;
-  }
-
-  function rememberFavoriteMeta(url, meta) {
-    if (!url || !meta) return;
-    const current = cloud.favorites.get(url) || {};
-    cloud.favorites.set(url, {
-      title: meta.title || current.title || "",
-      description: meta.description || current.description || "",
-      subject: meta.subject || current.subject || subject || "study-lab"
-    });
   }
 
   function getRecent() {
@@ -1023,180 +1013,6 @@
         subtree: true
       });
     });
-  }
-
-  function isPlaceholderTitle(title) {
-    return !title ||
-      title === "Saved tool" ||
-      title === "Untitled tool" ||
-      title === "Tool name unavailable";
-  }
-
-  function normalizeComparableUrl(url) {
-    try {
-      return new URL(url, window.location.href).href;
-    } catch {
-      return String(url || "");
-    }
-  }
-
-  function uniqueTitleMatch(entries, title, subjectName) {
-    if (isPlaceholderTitle(title)) return null;
-
-    const matches = entries.filter(item =>
-      item.title === title &&
-      (!subjectName || subjectName === "study-lab" || item.subject === subjectName)
-    );
-
-    return matches.length === 1 ? matches[0] : null;
-  }
-
-  async function hydrateStoredDashboardMetadata() {
-    try {
-      const favorites = getFavorites();
-      const recent = getRecent();
-      if (!favorites.length && !recent.length) return;
-
-      const entries = [];
-
-      // The current page is always the first and cheapest source of truth.
-      document.querySelectorAll(".tool-card").forEach(card => {
-        if (!isToolCard(card)) return;
-        entries.push(buildMeta(card, card.dataset.studySubject || subject));
-      });
-
-      // On the home page, load the four subject directories only for metadata
-      // recovery. Nothing here participates in progress calculations.
-      const pages = ["maths.html", "biology.html", "chemistry.html", "physics.html"];
-
-      await Promise.all(pages.map(async page => {
-        try {
-          const pageUrl = normalizeComparableUrl(page);
-          const response = await fetch(pageUrl, { cache: "no-store" });
-          if (!response.ok) return;
-
-          const html = await response.text();
-          const doc = new DOMParser().parseFromString(html, "text/html");
-          const pageSubject = (doc.body?.dataset.filterSubject || "").trim().toLowerCase();
-
-          doc.querySelectorAll(".tool-card").forEach(card => {
-            if (!isToolCard(card)) return;
-            entries.push({
-              url: normalizeComparableUrl(card.getAttribute("href") || "", pageUrl),
-              title: getCardTitle(card),
-              description: getCardDescription(card),
-              subject: pageSubject || "study-lab",
-              savedAt: 0
-            });
-          });
-        } catch {
-          // Metadata recovery must never affect the dashboard itself.
-        }
-      }));
-
-      const byUrl = new Map(entries.map(item => [normalizeComparableUrl(item.url), item]));
-      const favoriteMeta = getFavoriteMetaStore();
-      const nextFavorites = [];
-      const nextMeta = { ...favoriteMeta };
-
-      favorites.forEach(oldUrl => {
-        const exact = byUrl.get(normalizeComparableUrl(oldUrl));
-        const stored = nextMeta[oldUrl];
-
-        let match = exact || null;
-
-        // If a file was renamed but its visible card title stayed the same,
-        // safely move the saved favorite to the current card URL.
-        if (!match && stored?.title) {
-          match = uniqueTitleMatch(
-            entries,
-            stored.title,
-            stored.subject
-          );
-        }
-
-        if (match) {
-          nextFavorites.push(match.url);
-          nextMeta[match.url] = {
-            title: match.title,
-            description: match.description,
-            subject: match.subject
-          };
-        } else {
-          nextFavorites.push(oldUrl);
-          if (stored) nextMeta[oldUrl] = stored;
-        }
-      });
-
-      saveFavorites(nextFavorites);
-      saveFavoriteMetaStore(nextMeta);
-
-      const nextRecent = recent.map(item => {
-        if (!item?.url) return item;
-
-        const stored = nextMeta[item.url];
-        const exact = byUrl.get(normalizeComparableUrl(item.url));
-
-        if (exact) {
-          return { ...item, ...exact, savedAt: item.savedAt || Date.now() };
-        }
-
-        if (stored?.title) {
-          const storedTitleMatch = uniqueTitleMatch(
-            entries,
-            stored.title,
-            stored.subject
-          );
-
-          if (storedTitleMatch) {
-            return {
-              ...item,
-              ...storedTitleMatch,
-              savedAt: item.savedAt || Date.now()
-            };
-          }
-
-          if (isPlaceholderTitle(item.title)) {
-            return {
-              ...item,
-              title: stored.title,
-              description: stored.description || item.description || "",
-              subject: stored.subject || item.subject || "study-lab"
-            };
-          }
-        }
-
-        if (stored?.title && item.title && item.title !== stored.title) {
-          const titleMatch = uniqueTitleMatch(
-            entries,
-            stored.title,
-            stored.subject
-          );
-          if (titleMatch) {
-            return {
-              ...item,
-              ...titleMatch,
-              savedAt: item.savedAt || Date.now()
-            };
-          }
-        }
-
-        const titleMatch = !isPlaceholderTitle(item.title)
-          ? uniqueTitleMatch(entries, item.title, item.subject)
-          : null;
-
-        return titleMatch
-          ? { ...item, ...titleMatch, savedAt: item.savedAt || Date.now() }
-          : item;
-      });
-
-      saveRecent(nextRecent);
-
-      // Refresh only the Quick panel after metadata recovery.
-      refreshQuickPanel();
-    } catch {
-      // Never let metadata recovery break Progress, Quick Access, search, or cards.
-    }
   }
 
   async function boot() {

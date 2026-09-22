@@ -1,7 +1,7 @@
 /* =========================================================
    STUDY LAB — LIVE LAYER
-   Requires Supabase Realtime for the online count.
-   The countdown itself works without any external service.
+   Shared Supabase client + Realtime presence.
+   The countdown works without any external service.
    ========================================================= */
 
 (function () {
@@ -13,6 +13,7 @@
   const onlineNumber = liveRoot.querySelector("[data-live-online]");
   const liveStatus = liveRoot.querySelector("[data-live-status]");
   const countdownTarget = liveRoot.dataset.countdownTarget;
+
   const countdown = {
     days: liveRoot.querySelector("[data-cd-days]"),
     hours: liveRoot.querySelector("[data-cd-hours]"),
@@ -20,23 +21,13 @@
     seconds: liveRoot.querySelector("[data-cd-seconds]")
   };
 
-  /* =========================================================
-     A/L 2027 COUNTDOWN
-     The official 2027 A/L exam date is not configured here
-     yet. The homepage currently uses 01 August 2027 as a
-     clearly labelled target. Update the data attribute in
-     index.html when the official timetable is published.
-     ========================================================= */
-
   function updateCountdown() {
     if (!countdownTarget) return;
 
     const target = new Date(countdownTarget).getTime();
-    const now = Date.now();
-    const diff = target - now;
-
     if (!Number.isFinite(target)) return;
 
+    const diff = target - Date.now();
     const remaining = Math.max(0, diff);
     const totalSeconds = Math.floor(remaining / 1000);
 
@@ -59,16 +50,6 @@
   updateCountdown();
   window.setInterval(updateCountdown, 1000);
 
-  /* =========================================================
-     REAL-TIME ONLINE PRESENCE
-     Fill in the two Supabase values below after creating the
-     project. A publishable key is safe to use in browser code;
-     NEVER put a secret/service-role key here.
-     ========================================================= */
-
-  const SUPABASE_URL = "https://zpvatyxdbshjuqgtexzw.supabase.co";
-  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_zd8S3PcyicJX6Cgyh0ez8A_sUSTCuiB";
-
   function showLiveMessage(message) {
     if (liveStatus) liveStatus.textContent = message;
   }
@@ -76,7 +57,7 @@
   function setOnlineCount(count) {
     if (!onlineNumber) return;
 
-    if (typeof count !== "number" || !Number.isFinite(count)) {
+    if (!Number.isFinite(count)) {
       onlineNumber.textContent = "—";
       liveRoot.classList.remove("is-low", "is-live");
       return;
@@ -84,79 +65,89 @@
 
     const safeCount = Math.max(0, Math.floor(count));
     onlineNumber.textContent = safeCount.toLocaleString();
-
     liveRoot.classList.toggle("is-low", safeCount < 10);
     liveRoot.classList.toggle("is-live", safeCount >= 10);
   }
 
-  if (
-    SUPABASE_URL.startsWith("YOUR_") ||
-    SUPABASE_PUBLISHABLE_KEY.startsWith("YOUR_") ||
-    !window.supabase ||
-    typeof window.supabase.createClient !== "function"
-  ) {
-    setOnlineCount("—");
-    showLiveMessage("Live connection is ready to configure.");
-    return;
-  }
+  async function startPresence() {
+    try {
+      const account = window.StudyLabAccount;
+      if (!account?.ready) throw new Error("StudyLab account unavailable.");
 
-  try {
-    const client = window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_PUBLISHABLE_KEY
-    );
+      await account.ready;
 
-    const sessionKey =
-      sessionStorage.getItem("studylab_live_session") ||
-      (window.crypto && crypto.randomUUID
-        ? crypto.randomUUID()
-        : "guest-" + Date.now() + "-" + Math.random().toString(36).slice(2));
+      const client = account.client;
+      const user = account.getUser?.();
 
-    sessionStorage.setItem("studylab_live_session", sessionKey);
-
-    const channel = client.channel("studylab-live", {
-      config: {
-        presence: {
-          key: sessionKey
-        }
+      if (
+        !client ||
+        !user?.id ||
+        !window.supabase ||
+        typeof window.supabase.createClient !== "function"
+      ) {
+        throw new Error("Supabase client unavailable.");
       }
-    });
 
-    function refreshPresence() {
-      const state = channel.presenceState();
-      const uniqueKeys = new Set(Object.keys(state));
-      const count = uniqueKeys.size;
+      const sessionKey =
+        sessionStorage.getItem("studylab_live_session") ||
+        (window.crypto && crypto.randomUUID
+          ? crypto.randomUUID()
+          : "guest-" + Date.now() + "-" + Math.random().toString(36).slice(2));
 
-      setOnlineCount(count);
+      sessionStorage.setItem("studylab_live_session", sessionKey);
 
-      showLiveMessage(
-        count === 1
-          ? "1 student currently online"
-          : count + " students currently online"
-      );
-    }
-
-    channel
-      .on("presence", { event: "sync" }, refreshPresence)
-      .subscribe(async (status) => {
-        if (status === "SUBSCRIBED") {
-          await channel.track({
-            page: location.pathname,
-            online_at: new Date().toISOString()
-          });
-          refreshPresence();
-        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
-          setOnlineCount("—");
-          showLiveMessage("Live connection unavailable right now.");
+      const channel = client.channel("studylab-live", {
+        config: {
+          presence: {
+            key: sessionKey
+          }
         }
       });
 
-    window.addEventListener("pagehide", () => {
-      channel.untrack().catch(() => {});
-    });
-  } catch (error) {
-    console.warn("StudyLab Live:", error);
-    setOnlineCount("—");
-    showLiveMessage("Live connection unavailable right now.");
+      function refreshPresence() {
+        const state = channel.presenceState();
+        const userIds = new Set();
+
+        Object.values(state).forEach(entries => {
+          (entries || []).forEach(entry => {
+            if (entry?.user_id) userIds.add(entry.user_id);
+          });
+        });
+
+        const count = userIds.size || Object.keys(state).length;
+        setOnlineCount(count);
+        showLiveMessage(
+          count === 1
+            ? "1 student currently online"
+            : count + " students currently online"
+        );
+      }
+
+      channel
+        .on("presence", { event: "sync" }, refreshPresence)
+        .subscribe(async status => {
+          if (status === "SUBSCRIBED") {
+            await channel.track({
+              user_id: user.id,
+              page: location.pathname,
+              online_at: new Date().toISOString()
+            });
+            refreshPresence();
+          } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+            setOnlineCount(NaN);
+            showLiveMessage("Live connection unavailable right now.");
+          }
+        });
+
+      window.addEventListener("pagehide", () => {
+        channel.untrack().catch(() => {});
+      });
+    } catch (error) {
+      console.warn("StudyLab Live:", error);
+      setOnlineCount(NaN);
+      showLiveMessage("Live connection unavailable right now.");
+    }
   }
+
+  startPresence();
 })();
