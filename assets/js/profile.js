@@ -1,17 +1,14 @@
 /*
- * Study-Lab simple profile
- * No passwords, email or phone numbers.
- * Students' names are saved locally on their browser.
+ * Study-Lab cloud student profile.
  *
- * To send newly-created names to your Google Sheet, paste your
- * Google Apps Script Web App URL into PROFILE_ENDPOINT below.
+ * The visible name is stored in Supabase and tied to the
+ * anonymous Supabase student account. No password, email, or
+ * phone number is required.
  */
-const PROFILE_ENDPOINT = "";
 
 (function () {
   "use strict";
 
-  const STORAGE_KEY = "studyLabProfile";
   const profileButton = document.getElementById("profileButton");
   const profileModal = document.getElementById("profileModal");
   const profileForm = document.getElementById("profileForm");
@@ -23,40 +20,63 @@ const PROFILE_ENDPOINT = "";
 
   if (!profileButton || !profileModal || !profileForm || !profileInput) return;
 
-  function getProfile() {
-    try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || null;
-    } catch {
-      return null;
+  function setButtonName(name) {
+    profileButton.textContent = name
+      ? "👤 " + name
+      : "👤 Create Profile";
+  }
+
+  function showStatus(message, isError = false) {
+    if (!profileStatus) return;
+    profileStatus.textContent = message;
+    profileStatus.hidden = false;
+    profileStatus.dataset.state = isError ? "error" : "success";
+  }
+
+  async function getCloudProfile() {
+    const account = window.StudyLabAccount;
+    if (!account?.ready) {
+      throw new Error("StudyLab account is still starting.");
     }
+
+    await account.ready;
+    return account.getProfile();
   }
 
-  function saveLocalProfile(name, id) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      id,
-      name,
-      createdAt: new Date().toISOString()
-    }));
-  }
-
-  function openModal() {
-    const profile = getProfile();
-    profileStatus.textContent = "";
+  async function openModal() {
     profileStatus.hidden = true;
+    profileStatus.textContent = "";
 
-    if (profile?.name) {
-      profileInput.value = profile.name;
-      profileNameLabel.textContent = "Your Study-Lab profile";
-      profileButton.textContent = "👤 " + profile.name;
-    } else {
+    try {
+      const profile = await getCloudProfile();
+
+      if (profile?.display_name) {
+        profileInput.value = profile.display_name;
+        profileNameLabel.textContent = "Your Study-Lab profile";
+        setButtonName(profile.display_name);
+      } else {
+        profileInput.value = "";
+        profileNameLabel.textContent = "Create your Study-Lab profile";
+        setButtonName("");
+      }
+    } catch (error) {
+      console.warn("StudyLab profile:", error);
       profileInput.value = "";
       profileNameLabel.textContent = "Create your Study-Lab profile";
-      profileButton.textContent = "👤 Create Profile";
+      showStatus(
+        "Cloud profile is not ready. Enable Anonymous Sign-Ins in Supabase and run the backend SQL.",
+        true
+      );
+      setButtonName("");
     }
 
     profileModal.hidden = false;
     document.body.classList.add("profile-modal-open");
-    requestAnimationFrame(() => profileInput.focus());
+
+    requestAnimationFrame(() => {
+      profileInput.focus();
+      profileInput.select?.();
+    });
   }
 
   function closeModal() {
@@ -64,68 +84,75 @@ const PROFILE_ENDPOINT = "";
     document.body.classList.remove("profile-modal-open");
   }
 
-  async function sendToSheet(name, id) {
-    if (!PROFILE_ENDPOINT) return;
-
-    try {
-      await fetch(PROFILE_ENDPOINT, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ name, id })
-      });
-    } catch (error) {
-      console.warn("Study-Lab profile could not reach the name-list service.", error);
-    }
-  }
-
   profileButton.addEventListener("click", openModal);
   profileClose?.addEventListener("click", closeModal);
   profileCancel?.addEventListener("click", closeModal);
 
-  profileModal.addEventListener("click", (event) => {
+  profileModal.addEventListener("click", event => {
     if (event.target === profileModal) closeModal();
   });
 
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !profileModal.hidden) closeModal();
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && !profileModal.hidden) {
+      closeModal();
+    }
   });
 
-  profileForm.addEventListener("submit", async (event) => {
+  profileForm.addEventListener("submit", async event => {
     event.preventDefault();
 
     const name = profileInput.value.trim().replace(/\s+/g, " ");
+
     if (name.length < 2) {
-      profileStatus.textContent = "Please enter your name.";
-      profileStatus.hidden = false;
+      showStatus("Please enter your name.", true);
       profileInput.focus();
       return;
     }
 
     if (name.length > 60) {
-      profileStatus.textContent = "Please keep your name under 60 characters.";
-      profileStatus.hidden = false;
+      showStatus("Please keep your name under 60 characters.", true);
       return;
     }
 
-    const existing = getProfile();
-    const id = existing?.id || (crypto.randomUUID ? crypto.randomUUID() : "sl-" + Date.now() + "-" + Math.random().toString(36).slice(2));
+    const submitButton = profileForm.querySelector(".profile-save");
+    if (submitButton) submitButton.disabled = true;
 
-    saveLocalProfile(name, id);
-    profileButton.textContent = "👤 " + name;
+    try {
+      const account = window.StudyLabAccount;
+      if (!account?.ready) throw new Error("StudyLab account is unavailable.");
 
-    await sendToSheet(name, id);
+      await account.ready;
+      const profile = await account.saveProfile(name);
 
-    profileStatus.textContent = PROFILE_ENDPOINT
-      ? "Profile saved ✓"
-      : "Profile saved on this device ✓";
-    profileStatus.hidden = false;
+      setButtonName(profile.display_name);
+      profileNameLabel.textContent = "Your Study-Lab profile";
+      showStatus("Profile synced to your StudyLab account ✓");
 
-    setTimeout(closeModal, 700);
+      window.dispatchEvent(new CustomEvent("studylab-profile-updated", {
+        detail: profile
+      }));
+
+      window.setTimeout(closeModal, 800);
+    } catch (error) {
+      console.warn("StudyLab profile save:", error);
+      showStatus(
+        error?.message || "Profile could not be synced right now.",
+        true
+      );
+    } finally {
+      if (submitButton) submitButton.disabled = false;
+    }
   });
 
-  const existing = getProfile();
-  if (existing?.name) {
-    profileButton.textContent = "👤 " + existing.name;
-  }
+  (async function boot() {
+    try {
+      const profile = await getCloudProfile();
+
+      if (profile?.display_name) {
+        setButtonName(profile.display_name);
+      }
+    } catch (error) {
+      console.warn("StudyLab profile startup:", error);
+    }
+  })();
 })();
