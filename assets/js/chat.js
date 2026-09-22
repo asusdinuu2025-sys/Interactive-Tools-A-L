@@ -15,6 +15,70 @@
     rateLimitMs: 2500
   };
 
+  const CHAT_MARKUP = `
+    <div class="study-chat" data-study-chat>
+      <button
+        type="button"
+        class="study-chat-button"
+        data-chat-button
+        aria-expanded="false"
+        aria-controls="studyChatPanel"
+        aria-label="Open StudyLab temporary chat"
+      >
+        <span class="study-chat-button-icon" aria-hidden="true">💬</span>
+        <span>Chat</span>
+        <span class="study-chat-unread" data-chat-unread hidden aria-label="Unread messages"></span>
+      </button>
+
+      <aside
+        class="study-chat-panel"
+        id="studyChatPanel"
+        data-chat-panel
+        hidden
+        aria-label="StudyLab temporary chat"
+      >
+        <div class="study-chat-head">
+          <div class="study-chat-title-wrap">
+            <h2 class="study-chat-title">StudyLab Chat</h2>
+            <div class="study-chat-meta">
+              <span class="study-chat-status-dot is-offline" data-chat-status-dot aria-hidden="true"></span>
+              <span data-chat-status>Connecting…</span>
+            </div>
+          </div>
+          <button type="button" class="study-chat-close" data-chat-close aria-label="Close chat">×</button>
+        </div>
+
+        <div class="study-chat-notice">
+          🎓 Temporary study chat • newest 50 messages • messages older than 24 hours are removed.
+          <strong>Please keep conversations educational and respectful.</strong>
+        </div>
+
+        <div class="study-chat-list" data-chat-list aria-live="polite"></div>
+
+        <form class="study-chat-compose" data-chat-form>
+          <div class="study-chat-input-wrap">
+            <textarea
+              class="study-chat-input"
+              data-chat-input
+              rows="1"
+              maxlength="500"
+              autocomplete="off"
+              spellcheck="true"
+              aria-label="Type a study-related message"
+            ></textarea>
+            <span class="study-chat-watermark">Educational purposes only • Keep it study-related</span>
+          </div>
+          <button type="submit" class="study-chat-send" data-chat-send disabled aria-label="Send message">➤</button>
+          <span class="study-chat-compose-meta" data-chat-count>0/500</span>
+        </form>
+      </aside>
+    </div>
+  `;
+
+  if (!document.querySelector("[data-study-chat]")) {
+    document.body.insertAdjacentHTML("beforeend", CHAT_MARKUP);
+  }
+
   const root = document.querySelector("[data-study-chat]");
   if (!root) return;
 
