@@ -1,0 +1,95 @@
+/* =========================================================
+   STUDY LAB — TOOL REACTIONS
+   Compact reactions embedded inside tool/resource cards.
+   ========================================================= */
+
+.study-reactions {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 14px;
+  z-index: 9;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  pointer-events: none;
+  opacity: .92;
+}
+
+.study-reaction {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 27px;
+  padding: 4px 8px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 999px;
+  background: rgba(8,15,28,.32);
+  color: var(--text-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: .63rem;
+  font-weight: 720;
+  backdrop-filter: blur(13px) saturate(150%);
+  -webkit-backdrop-filter: blur(13px) saturate(150%);
+  box-shadow: 0 7px 18px rgba(0,0,0,.10), inset 0 1px 0 rgba(255,255,255,.045);
+  transition: transform .18s ease, background .18s ease, border-color .18s ease, color .18s ease;
+}
+
+.study-reaction:hover {
+  transform: translateY(-1px);
+  background: rgba(255,255,255,.08);
+  border-color: rgba(255,255,255,.14);
+  color: var(--text-primary);
+}
+
+.study-reaction.active {
+  background: rgba(126,220,255,.10);
+  border-color: rgba(126,220,255,.22);
+  color: var(--accent-cyan);
+}
+
+.study-reaction-count {
+  min-width: 1ch;
+  font-variant-numeric: tabular-nums;
+}
+
+.study-reactions-loading {
+  color: var(--text-muted);
+  font-size: .6rem;
+}
+
+.tool-card.study-has-reactions {
+  padding-bottom: 57px !important;
+}
+
+html[data-theme="light"] .study-reaction {
+  background: rgba(255,255,255,.55);
+  border-color: rgba(70,110,145,.10);
+  box-shadow: 0 7px 18px rgba(35,70,105,.07), inset 0 1px 0 rgba(255,255,255,.88);
+}
+
+html[data-theme="light"] .study-reaction:hover {
+  background: rgba(70,110,145,.07);
+  border-color: rgba(70,110,145,.13);
+}
+
+@media (max-width: 720px) {
+  .study-reactions {
+    left: 14px;
+    right: 14px;
+    bottom: 12px;
+  }
+
+  .study-reaction {
+    min-height: 26px;
+    padding: 4px 7px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .study-reaction {
+    transition: none !important;
+  }
+}
