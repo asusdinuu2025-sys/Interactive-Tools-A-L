@@ -377,6 +377,7 @@
     button.classList.toggle("is-open", open);
 
     if (open) {
+      window.dispatchEvent(new Event("studylab-chat-open"));
       closeQuickAccess();
       setUnread(0);
       scrollToBottom(true);
@@ -427,6 +428,10 @@
     });
 
     window.addEventListener("studylab-quick-open", () => {
+      if (isOpen) setOpen(false);
+    });
+
+    window.addEventListener("studylab-feedback-open", () => {
       if (isOpen) setOpen(false);
     });
 
