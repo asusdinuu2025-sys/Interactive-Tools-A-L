@@ -123,19 +123,14 @@
 
     userId = user.id;
 
-    try {
-      const profile = await account.getProfile?.();
-      if (profile?.display_name) {
-        nickname = profile.display_name;
-        return;
-      }
-    } catch (profileError) {
-      console.warn("StudyLab chat profile:", profileError);
+    const profile = await account.getProfile?.();
+    if (profile?.display_name) {
+      nickname = profile.display_name;
+    } else {
+      const nicknameNumber = Array.from(userId)
+        .reduce((sum, char) => sum + char.charCodeAt(0), 0) % 9000 + 1000;
+      nickname = "Student " + nicknameNumber;
     }
-
-    const nicknameNumber = Array.from(userId)
-      .reduce((sum, char) => sum + char.charCodeAt(0), 0) % 9000 + 1000;
-    nickname = "Student " + nicknameNumber;
   }
 
   window.addEventListener("studylab-profile-updated", event => {
@@ -253,7 +248,7 @@
     list.innerHTML = `
       <div class="study-chat-setup">
         <strong>Chat is being prepared</strong>
-        Run <code>supabase/studylab_backend_setup.sql</code> once in your Supabase SQL Editor, then refresh this page.
+        Run <code>supabase/chat_setup.sql</code> once in your Supabase SQL Editor, then refresh this page.
       </div>
     `;
   }
