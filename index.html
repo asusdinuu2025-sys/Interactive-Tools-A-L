@@ -1020,6 +1020,8 @@
        STUDY LAB LK — GLASS UI END
        ========================================================= -->
 
+  <link rel="stylesheet" href="assets/css/live-layer.css">
+
 </head>
 
 
@@ -1138,6 +1140,43 @@
       <!-- =====================================================
            STUDY LAB LK — VISITOR COUNTER START
            ===================================================== -->
+
+      
+      <!-- =====================================================
+           STUDY LAB — LIVE NOW + A/L 2027 COUNTDOWN
+           ===================================================== -->
+
+      <section
+        class="live-layer"
+        data-live-layer
+        data-countdown-target="2027-08-01T00:00:00+05:30"
+        aria-label="Live StudyLab information"
+      >
+        <article class="live-card">
+          <div class="live-card-head">
+            <h2 class="live-card-title">Live Now</h2>
+            <span class="live-pill"><span class="live-dot" aria-hidden="true"></span>LIVE</span>
+          </div>
+          <div class="live-number" data-live-online aria-live="polite">—</div>
+          <div class="live-subtext">Students currently on Study-Lab</div>
+          <div class="live-status" data-live-status aria-live="polite">Connecting to live service…</div>
+        </article>
+
+        <article class="live-card">
+          <div class="live-card-head">
+            <h2 class="live-card-title">A/L 2027 Countdown</h2>
+            <span class="live-pill">REAL TIME</span>
+          </div>
+          <div class="countdown-grid" aria-live="polite">
+            <div class="countdown-box"><span class="countdown-value" data-cd-days>—</span><span class="countdown-label">Days</span></div>
+            <div class="countdown-box"><span class="countdown-value" data-cd-hours>—</span><span class="countdown-label">Hours</span></div>
+            <div class="countdown-box"><span class="countdown-value" data-cd-minutes>—</span><span class="countdown-label">Minutes</span></div>
+            <div class="countdown-box"><span class="countdown-value" data-cd-seconds>—</span><span class="countdown-label">Seconds</span></div>
+          </div>
+          <div class="countdown-note" data-countdown-note>Countdown target will be updated when the official 2027 timetable is published.</div>
+        </article>
+      </section>
+
 
       <div class="student-counter">
 
@@ -1599,7 +1638,10 @@
   <script src="assets/js/profile.js"></script>
   <script src="assets/js/main.js"></script>
   <script src="assets/js/study-dashboard.js"></script>
+  <script src="assets/js/live-layer.js"></script>
 
 
-</body>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  </body>
 </html>
