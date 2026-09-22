@@ -10,7 +10,8 @@ if git diff --quiet "$CACHED_COMMIT_REF" "$COMMIT_REF" -- \
   ':(exclude)supabase/**' \
   ':(exclude).github/**' \
   ':(exclude)agents.md' \
-  ':(exclude)readme.md'
+  ':(exclude)readme.md' \
+  ':(exclude)sitemap.xml'
 then
   exit 0
 fi
