@@ -74,7 +74,19 @@
   }
 
   function setOnlineCount(count) {
-    if (onlineNumber) onlineNumber.textContent = Number(count).toLocaleString();
+    if (!onlineNumber) return;
+
+    if (typeof count !== "number" || !Number.isFinite(count)) {
+      onlineNumber.textContent = "—";
+      liveRoot.classList.remove("is-low", "is-live");
+      return;
+    }
+
+    const safeCount = Math.max(0, Math.floor(count));
+    onlineNumber.textContent = safeCount.toLocaleString();
+
+    liveRoot.classList.toggle("is-low", safeCount < 10);
+    liveRoot.classList.toggle("is-live", safeCount >= 10);
   }
 
   if (
@@ -113,11 +125,14 @@
     function refreshPresence() {
       const state = channel.presenceState();
       const uniqueKeys = new Set(Object.keys(state));
-      setOnlineCount(uniqueKeys.size);
+      const count = uniqueKeys.size;
+
+      setOnlineCount(count);
+
       showLiveMessage(
-        uniqueKeys.size === 1
+        count === 1
           ? "1 student currently online"
-          : uniqueKeys.size + " students currently online"
+          : count + " students currently online"
       );
     }
 
