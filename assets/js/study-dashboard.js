@@ -542,6 +542,10 @@
     const panelSearch = panel.querySelector("#studyQuickSearchPanel");
 
     function setOpen(open) {
+      if (open) {
+        window.dispatchEvent(new Event("studylab-quick-open"));
+      }
+
       panel.hidden = !open;
       button.setAttribute("aria-expanded", String(open));
       button.classList.toggle("is-open", open);
