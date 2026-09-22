@@ -248,7 +248,7 @@
     list.innerHTML = `
       <div class="study-chat-setup">
         <strong>Chat is being prepared</strong>
-        Run <code>supabase/chat_setup.sql</code> once in your Supabase SQL Editor, then refresh this page.
+        Run <code>supabase/studylab_backend_setup.sql</code> once in your Supabase SQL Editor, then refresh this page.
       </div>
     `;
   }
