@@ -1,6 +1,6 @@
 /* =========================================================
    STUDY LAB — ASK AI ANYTHING
-   Isolated from the existing temporary live chat.
+   Isolated from the existing temporary live chat. Preview-safe integration.
    No localStorage, no sessionStorage, no database history.
    ========================================================= */
 
