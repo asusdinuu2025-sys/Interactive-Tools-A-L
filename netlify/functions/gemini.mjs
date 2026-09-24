@@ -15,7 +15,6 @@ const MAX_MESSAGE_LENGTH = 3000;
 const MAX_BODY_LENGTH = 14000;
 const MAX_OUTPUT_TOKENS = 800;
 
-const USAGE_STORE = getStore("studylab-ai-usage");
 const DAILY_KEY_PREFIX = "daily/";
 
 const SYSTEM_INSTRUCTION = [
@@ -100,12 +99,13 @@ function normalizeHistory(history) {
 }
 
 async function reserveDailySlot() {
+  const usageStore = getStore("studylab-ai-usage");
   const key = DAILY_KEY_PREFIX + pacificDateKey();
 
   let currentCount = 0;
 
   try {
-    const stored = await USAGE_STORE.get(key);
+    const stored = await usageStore.get(key);
     if (stored) {
       const parsed = Number(stored);
       if (Number.isFinite(parsed) && parsed >= 0) {
@@ -133,7 +133,7 @@ async function reserveDailySlot() {
      * Count the attempt before calling Google. This deliberately fails closed
      * against quota overruns rather than trying to refund failed requests.
      */
-    await USAGE_STORE.set(key, String(nextCount));
+    await usageStore.set(key, String(nextCount));
   } catch (error) {
     console.error("StudyLab AI quota write failed:", error);
     return { ok: false, reason: "storage" };
