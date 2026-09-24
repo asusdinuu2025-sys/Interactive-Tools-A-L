@@ -461,3 +461,365 @@
 
   boot();
 })();
+
+/* =========================================================
+   STUDY LAB — AI TUTOR
+   Adds the AI tutor beside the visitor counter without
+   changing the existing temporary chat behavior.
+   ========================================================= */
+
+(function () {
+  "use strict";
+
+  const MAX_HISTORY = 12;
+  const MAX_INPUT = 4000;
+  const CSS_PATH = "assets/css/ai-tutor.css";
+  const ENDPOINT = "/.netlify/functions/gemini";
+
+  function loadStyles() {
+    if (document.querySelector('link[data-studylab-ai-css]')) return;
+
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = CSS_PATH;
+    link.dataset.studylabAiCss = "true";
+    document.head.appendChild(link);
+  }
+
+  function createMarkup() {
+    return `
+      <div class="studylab-ai-row" data-studylab-ai>
+        <button
+          type="button"
+          class="studylab-ai-launcher"
+          data-ai-launcher
+          aria-expanded="false"
+          aria-controls="studylabAiPanel"
+        >
+          <span class="studylab-ai-launcher-icon" aria-hidden="true">🤖</span>
+          <span class="studylab-ai-launcher-copy">
+            <span class="studylab-ai-launcher-title">StudyLab AI</span>
+            <span class="studylab-ai-launcher-subtitle">Ask an A/L study question</span>
+          </span>
+        </button>
+
+        <aside
+          class="studylab-ai-panel"
+          id="studylabAiPanel"
+          data-ai-panel
+          aria-label="StudyLab AI Tutor"
+          aria-hidden="true"
+        >
+          <div class="studylab-ai-head">
+            <div class="studylab-ai-head-left">
+              <h2 class="studylab-ai-title">StudyLab AI Tutor</h2>
+              <div class="studylab-ai-meta">
+                <span class="studylab-ai-status-dot" data-ai-status-dot aria-hidden="true"></span>
+                <span data-ai-status>A/L study assistant</span>
+              </div>
+            </div>
+
+            <div class="studylab-ai-head-actions">
+              <button type="button" class="studylab-ai-clear" data-ai-clear aria-label="Clear conversation">Clear</button>
+              <button type="button" class="studylab-ai-close" data-ai-close aria-label="Close StudyLab AI">×</button>
+            </div>
+          </div>
+
+          <div class="studylab-ai-notice">
+            Sinhala, English හෝ mixed language වලින් අහන්න. Responses are designed for G.C.E. A/L study support.
+          </div>
+
+          <div class="studylab-ai-list" data-ai-list aria-live="polite"></div>
+
+          <form class="studylab-ai-compose" data-ai-form>
+            <textarea
+              class="studylab-ai-input"
+              data-ai-input
+              rows="1"
+              maxlength="4000"
+              autocomplete="off"
+              spellcheck="true"
+              placeholder="Ask an A/L question..."
+              aria-label="Ask StudyLab AI a question"
+            ></textarea>
+
+            <button
+              type="submit"
+              class="studylab-ai-send"
+              data-ai-send
+              disabled
+              aria-label="Send question"
+            >➤</button>
+          </form>
+        </aside>
+      </div>
+    `;
+  }
+
+  function init() {
+    const counter = document.querySelector(".student-counter");
+    if (!counter) return;
+    if (document.querySelector("[data-studylab-ai]")) return;
+
+    loadStyles();
+
+    const row = document.createElement("div");
+    row.innerHTML = createMarkup();
+    const wrapper = row.firstElementChild;
+    if (!wrapper) return;
+
+    counter.parentNode.insertBefore(wrapper, counter);
+    wrapper.appendChild(counter);
+
+    const launcher = wrapper.querySelector("[data-ai-launcher]");
+    const panel = wrapper.querySelector("[data-ai-panel]");
+    const closeButton = wrapper.querySelector("[data-ai-close]");
+    const clearButton = wrapper.querySelector("[data-ai-clear]");
+    const form = wrapper.querySelector("[data-ai-form]");
+    const input = wrapper.querySelector("[data-ai-input]");
+    const sendButton = wrapper.querySelector("[data-ai-send]");
+    const list = wrapper.querySelector("[data-ai-list]");
+    const statusDot = wrapper.querySelector("[data-ai-status-dot]");
+    const statusText = wrapper.querySelector("[data-ai-status]");
+
+    let open = false;
+    let busy = false;
+    let history = [];
+
+    function setStatus(state, text) {
+      statusDot?.classList.toggle("is-busy", state === "busy");
+      statusDot?.classList.toggle("is-error", state === "error");
+      if (statusText) statusText.textContent = text;
+    }
+
+    function appendMessage(role, text) {
+      if (!list || !text) return;
+
+      const article = document.createElement("article");
+      article.className = "studylab-ai-message" + (role === "user" ? " user" : "");
+
+      const roleLabel = document.createElement("div");
+      roleLabel.className = "studylab-ai-message-role";
+      roleLabel.textContent = role === "user" ? "You" : "StudyLab AI";
+
+      const message = document.createElement("div");
+      message.className = "studylab-ai-message-text";
+      message.textContent = text;
+
+      article.append(roleLabel, message);
+      list.appendChild(article);
+
+      requestAnimationFrame(() => {
+        list.scrollTop = list.scrollHeight;
+      });
+
+      return article;
+    }
+
+    function appendTyping() {
+      if (!list) return null;
+
+      const article = document.createElement("article");
+      article.className = "studylab-ai-message";
+
+      const roleLabel = document.createElement("div");
+      roleLabel.className = "studylab-ai-message-role";
+      roleLabel.textContent = "StudyLab AI";
+
+      const typing = document.createElement("div");
+      typing.className = "studylab-ai-typing";
+      typing.innerHTML = "<span></span><span></span><span></span>";
+
+      article.append(roleLabel, typing);
+      list.appendChild(article);
+
+      requestAnimationFrame(() => {
+        list.scrollTop = list.scrollHeight;
+      });
+
+      return article;
+    }
+
+    function renderWelcome() {
+      if (!list) return;
+      list.innerHTML = "";
+      history = [];
+
+      appendMessage(
+        "model",
+        "ආයුබෝවන්! 👋
+
+මගෙන් G.C.E. A/L ගණිතය, භෞතික විද්‍යාව හෝ රසායන විද්‍යාව ගැන අහන්න. Sinhala, English හෝ දෙකම mix කරලා අහන්න පුළුවන්."
+      );
+    }
+
+    function updateComposer() {
+      const length = input?.value.trim().length || 0;
+      if (sendButton) {
+        sendButton.disabled = busy || length === 0 || length > MAX_INPUT;
+      }
+    }
+
+    function setOpen(next) {
+      open = Boolean(next);
+
+      panel?.classList.toggle("is-open", open);
+      panel?.setAttribute("aria-hidden", String(!open));
+      launcher?.setAttribute("aria-expanded", String(open));
+      launcher?.classList.toggle("is-open", open);
+
+      if (open) {
+        window.dispatchEvent(new Event("studylab-ai-open"));
+        input?.focus();
+      }
+    }
+
+    function clearConversation() {
+      if (busy) return;
+      renderWelcome();
+      setStatus("ready", "A/L study assistant");
+      updateComposer();
+    }
+
+    async function askAI(message) {
+      const nextHistory = [
+        ...history,
+        {
+          role: "user",
+          parts: [{ text: message }]
+        }
+      ].slice(-MAX_HISTORY);
+
+      busy = true;
+      updateComposer();
+      setStatus("busy", "Thinking…");
+
+      const typing = appendTyping();
+
+      try {
+        const controller = new AbortController();
+        const timeout = window.setTimeout(() => controller.abort(), 32000);
+
+        const response = await fetch(ENDPOINT, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            message,
+            history: nextHistory,
+            pageContext: document.title + " | " + window.location.pathname
+          }),
+          signal: controller.signal
+        });
+
+        window.clearTimeout(timeout);
+
+        const data = await response.json().catch(() => ({}));
+
+        typing?.remove();
+
+        if (!response.ok) {
+          throw new Error(data?.error || "The AI could not answer right now.");
+        }
+
+        const answer = String(data?.text || "").trim();
+
+        if (!answer) {
+          throw new Error("The AI returned an empty response.");
+        }
+
+        history = [
+          ...nextHistory,
+          {
+            role: "model",
+            parts: [{ text: answer }]
+          }
+        ].slice(-MAX_HISTORY);
+
+        appendMessage("model", answer);
+        setStatus("ready", "A/L study assistant");
+      } catch (error) {
+        typing?.remove();
+        appendMessage(
+          "model",
+          "කණගාටුයි, මේ මොහොතේ AI response එක ලබාගන්න බැහැ. " +
+          (error?.message || "Please try again.")
+        );
+        setStatus("error", "AI connection unavailable");
+      } finally {
+        busy = false;
+        updateComposer();
+      }
+    }
+
+    launcher?.addEventListener("click", event => {
+      event.stopPropagation();
+      setOpen(!open);
+    });
+
+    closeButton?.addEventListener("click", () => setOpen(false));
+
+    clearButton?.addEventListener("click", clearConversation);
+
+    panel?.addEventListener("click", event => event.stopPropagation());
+
+    form?.addEventListener("submit", event => {
+      event.preventDefault();
+
+      if (busy || !input) return;
+
+      const message = input.value.trim();
+
+      if (!message || message.length > MAX_INPUT) {
+        updateComposer();
+        return;
+      }
+
+      appendMessage("user", message);
+      input.value = "";
+      updateComposer();
+
+      void askAI(message);
+    });
+
+    input?.addEventListener("input", () => {
+      input.style.height = "auto";
+      input.style.height = Math.min(input.scrollHeight, 118) + "px";
+      updateComposer();
+    });
+
+    input?.addEventListener("keydown", event => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        form?.requestSubmit();
+      }
+    });
+
+    document.addEventListener("click", event => {
+      if (!open) return;
+      if (!panel?.contains(event.target) && event.target !== launcher && !launcher?.contains(event.target)) {
+        setOpen(false);
+      }
+    });
+
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && open) {
+        setOpen(false);
+      }
+    });
+
+    window.addEventListener("studylab-chat-open", () => {
+      if (open) setOpen(false);
+    });
+
+    renderWelcome();
+    updateComposer();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init, { once: true });
+  } else {
+    init();
+  }
+})();
