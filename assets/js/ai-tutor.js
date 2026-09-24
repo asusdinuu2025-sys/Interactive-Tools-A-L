@@ -1,7 +1,7 @@
 /* =========================================================
    STUDY LAB — ASK AI ANYTHING
-   Isolated from the existing temporary live chat.
-   No localStorage, no sessionStorage, no database history.
+   Completely isolated from the existing temporary live chat.
+   Conversation exists only in runtime memory and is cleared on close.
    ========================================================= */
 
 (function () {
@@ -9,14 +9,10 @@
 
   const CONFIG = {
     endpoint: "/.netlify/functions/gemini",
-    maxInput: 4000,
-    maxHistory: 10,
+    maxInput: 3000,
+    maxHistory: 8,
     cooldownMs: 1200
   };
-
-  function clearText(element) {
-    if (element) element.replaceChildren();
-  }
 
   function init() {
     const root = document.querySelector("[data-studylab-ai]");
@@ -34,6 +30,7 @@
 
     let isOpen = false;
     let busy = false;
+    let lockedForLimit = false;
     let lastSentAt = 0;
     let conversation = [];
     let activeController = null;
@@ -55,7 +52,8 @@
       if (!list || !text) return;
 
       const article = document.createElement("article");
-      article.className = "studylab-ai-message" + (role === "user" ? " user" : "");
+      article.className =
+        "studylab-ai-message" + (role === "user" ? " user" : "");
 
       const label = document.createElement("div");
       label.className = "studylab-ai-message-role";
@@ -70,23 +68,38 @@
       scrollToBottom();
     }
 
-    function renderEmpty() {
-      clearText(list);
+    function renderWelcome() {
+      if (!list) return;
+
+      list.replaceChildren();
 
       const welcome = document.createElement("div");
       welcome.className = "studylab-ai-welcome";
-      welcome.innerHTML =
-        "<strong>ආයුබෝවන්! 👋</strong><br>" +
-        "Ask me anything. Sinhala, English හෝ mixed language වලින් අහන්න පුළුවන්.<br><br>" +
-        "A/L Maths, Physics, Chemistry සහ සාමාන්‍ය ප්‍රශ්න ගැනත් අහන්න.";
-      list?.appendChild(welcome);
+
+      const strong = document.createElement("strong");
+      strong.textContent = "ආයුබෝවන්! 👋";
+
+      const body = document.createElement("div");
+      body.style.marginTop = "8px";
+      body.textContent =
+        "Ask anything. Sinhala, English හෝ mixed language වලින් අහන්න පුළුවන්.";
+
+      const detail = document.createElement("div");
+      detail.style.marginTop = "7px";
+      detail.textContent =
+        "A/L Maths, Physics, Chemistry සහ Biology වගේ study questions සඳහා step-by-step help ලැබේ.";
+
+      welcome.append(strong, body, detail);
+      list.appendChild(welcome);
     }
 
     function updateSendState() {
       const length = input?.value.trim().length || 0;
+
       if (sendButton) {
         sendButton.disabled =
           busy ||
+          lockedForLimit ||
           length === 0 ||
           length > CONFIG.maxInput ||
           Date.now() - lastSentAt < CONFIG.cooldownMs;
@@ -101,6 +114,7 @@
       panel.classList.toggle("is-open", isOpen);
       panel.setAttribute("aria-hidden", String(!isOpen));
       panel.inert = !isOpen;
+
       launcher.classList.toggle("is-open", isOpen);
       launcher.setAttribute("aria-expanded", String(isOpen));
 
@@ -110,12 +124,13 @@
       }
     }
 
-    function deleteConversation() {
+    function clearConversation() {
       activeController?.abort();
       activeController = null;
 
       conversation = [];
       busy = false;
+      lockedForLimit = false;
       lastSentAt = 0;
 
       if (input) {
@@ -123,22 +138,22 @@
         input.style.height = "auto";
       }
 
-      renderEmpty();
+      renderWelcome();
       setStatus("ready", "A/L study assistant");
       updateSendState();
     }
 
     function closeAI() {
       /*
-       * Deliberately clear the conversation before hiding the panel.
-       * Nothing is written to localStorage/sessionStorage or a database.
+       * Closing the panel permanently clears the in-memory conversation.
+       * No browser persistence and no database history are used.
        */
-      deleteConversation();
+      clearConversation();
       setOpen(false);
     }
 
     async function sendQuestion() {
-      if (!input || busy) return;
+      if (!input || busy || lockedForLimit) return;
 
       const message = input.value.trim();
 
@@ -159,15 +174,13 @@
       input.value = "";
       input.style.height = "auto";
 
-      const requestHistory = [
+      conversation = [
         ...conversation,
         {
           role: "user",
           parts: [{ text: message }]
         }
       ].slice(-CONFIG.maxHistory);
-
-      conversation = requestHistory;
 
       const typing = document.createElement("article");
       typing.className = "studylab-ai-message";
@@ -183,7 +196,10 @@
       let timeoutId = null;
 
       try {
-        timeoutId = window.setTimeout(() => activeController?.abort(), 32000);
+        timeoutId = window.setTimeout(
+          () => activeController?.abort(),
+          32000
+        );
 
         const response = await fetch(CONFIG.endpoint, {
           method: "POST",
@@ -202,7 +218,12 @@
         typing.remove();
 
         if (!response.ok) {
-          throw new Error(data?.error || "The AI could not answer right now.");
+          const error = new Error(
+            data?.error || "The AI could not answer right now."
+          );
+          error.code = data?.code || "";
+          error.remaining = data?.remaining;
+          throw error;
         }
 
         const answer = String(data?.text || "").trim();
@@ -220,7 +241,13 @@
         ].slice(-CONFIG.maxHistory);
 
         appendMessage("model", answer);
-        setStatus("ready", "A/L study assistant");
+
+        if (Number(data?.remaining) === 0) {
+          lockedForLimit = true;
+          setStatus("ready", "Daily AI limit reached");
+        } else {
+          setStatus("ready", "A/L study assistant");
+        }
       } catch (error) {
         typing.remove();
 
@@ -228,11 +255,25 @@
           if (isOpen) {
             setStatus("error", "Request cancelled");
           }
+        } else if (error?.code === "DAILY_LIMIT") {
+          lockedForLimit = true;
+          appendMessage(
+            "model",
+            "Daily AI limit reached. Please try again after the daily limit resets."
+          );
+          setStatus("error", "Daily AI limit reached");
+        } else if (error?.code === "PROVIDER_LIMIT") {
+          lockedForLimit = true;
+          appendMessage(
+            "model",
+            "The AI service has reached its current limit. Please try again later."
+          );
+          setStatus("error", "AI limit reached");
         } else {
           appendMessage(
             "model",
-            "Sorry, I couldn't get an answer right now. " +
-              (error?.message || "Please try again.")
+            error?.message ||
+              "Sorry, I couldn't get an answer right now. Please try again later."
           );
           setStatus("error", "AI connection unavailable");
         }
@@ -294,7 +335,7 @@
       if (isOpen) closeAI();
     });
 
-    renderEmpty();
+    renderWelcome();
     setOpen(false);
     updateSendState();
   }
