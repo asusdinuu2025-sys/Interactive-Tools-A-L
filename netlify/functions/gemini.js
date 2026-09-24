@@ -1,5 +1,4 @@
 const crypto = require("node:crypto");
-const { getStore } = require("@netlify/blobs");
 
 const MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
 
@@ -59,6 +58,11 @@ function getClientIp(event) {
     headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
     "unknown"
   );
+}
+
+async function getUsageStore() {
+  const { getStore } = await import("@netlify/blobs");
+  return getStore("studylab-ai-usage");
 }
 
 function hashIp(ip) {
@@ -291,7 +295,18 @@ exports.handler = async function handler(event) {
     });
   }
 
-  const store = getStore("studylab-ai-usage");
+  let store;
+
+  try {
+    store = await getUsageStore();
+  } catch (error) {
+    console.error("StudyLab AI storage module failed:", error);
+    return jsonResponse(503, {
+      code: "QUOTA_SERVICE_UNAVAILABLE",
+      error: "AI access is temporarily unavailable. Please try again later."
+    });
+  }
+
   const quota = await reserveQuota(event, store);
 
   if (!quota.ok) {
