@@ -1,0 +1,7 @@
+{
+  "name": "studylab-site",
+  "private": true,
+  "dependencies": {
+    "@netlify/blobs": "11.1.1"
+  }
+}
