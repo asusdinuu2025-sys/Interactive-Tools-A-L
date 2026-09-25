@@ -268,7 +268,11 @@ exports.handler = async function handler(event) {
     });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  // Accept the currently used Netlify variable name as well as the standard name.
+  // Environment-variable names are case-sensitive.
+  const apiKey =
+    process.env.Gemnin_API_KEY ||
+    process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
     return jsonResponse(503, {
