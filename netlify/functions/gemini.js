@@ -520,10 +520,12 @@ exports.handler = async function handler(event) {
       .trim();
 
     if (!answer) {
+      await releaseStudentQuota(accessToken);
+
       return jsonResponse(502, {
         code: "EMPTY_PROVIDER_RESPONSE",
         error: "Gemini returned no answer. Please try again later.",
-        remaining: studentQuota.remaining
+        remaining: Math.min(DAILY_LIMIT, studentQuota.remaining + 1)
       });
     }
 
