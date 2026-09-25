@@ -41,6 +41,30 @@
       if (statusText) statusText.textContent = text;
     }
 
+    async function getStudentAccessToken() {
+      const account = window.StudyLabAccount;
+
+      if (!account?.ready || !account?.client) {
+        const error = new Error("StudyLab student account is unavailable.");
+        error.code = "ACCOUNT_UNAVAILABLE";
+        throw error;
+      }
+
+      await account.ready;
+
+      const { data, error } = await account.client.auth.getSession();
+
+      if (error || !data?.session?.access_token) {
+        const sessionError = new Error(
+          "Your StudyLab student account is not ready yet. Please refresh the page."
+        );
+        sessionError.code = "ACCOUNT_UNAVAILABLE";
+        throw sessionError;
+      }
+
+      return data.session.access_token;
+    }
+
     function scrollToBottom() {
       if (!list) return;
       requestAnimationFrame(() => {
@@ -423,10 +447,13 @@
           32000
         );
 
+        const accessToken = await getStudentAccessToken();
+
         const response = await fetch(CONFIG.endpoint, {
           method: "POST",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + accessToken
           },
           body: JSON.stringify({
             message,
@@ -491,6 +518,18 @@
             "The AI service has reached its current limit. Please try again later."
           );
           setStatus("error", "AI limit reached");
+        } else if (error?.code === "ACCOUNT_UNAVAILABLE" || error?.code === "ACCOUNT_REQUIRED") {
+          appendMessage(
+            "model",
+            "Your StudyLab student account is not ready yet. Please refresh the page and try again."
+          );
+          setStatus("error", "Account unavailable");
+        } else if (error?.code === "QUOTA_SERVICE_UNAVAILABLE") {
+          appendMessage(
+            "model",
+            "The StudyLab AI quota service is temporarily unavailable. Please try again later."
+          );
+          setStatus("error", "Quota service unavailable");
         } else {
           appendMessage(
             "model",
