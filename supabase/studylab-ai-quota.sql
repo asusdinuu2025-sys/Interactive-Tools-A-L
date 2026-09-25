@@ -75,3 +75,45 @@ $$;
 
 revoke all on function public.studylab_reserve_ai_quota() from public, anon;
 grant execute on function public.studylab_reserve_ai_quota() to authenticated;
+
+create or replace function public.studylab_release_ai_quota()
+returns table (
+  released boolean,
+  remaining integer,
+  used integer
+)
+language plpgsql
+security definer
+set search_path = public
+as $
+declare
+  v_user_id uuid := auth.uid();
+  v_usage_date date := (now() at time zone 'Asia/Colombo')::date;
+  v_daily_limit integer := 18;
+  v_used integer;
+begin
+  if v_user_id is null then
+    raise exception 'Not authenticated';
+  end if;
+
+  update public.studylab_ai_usage
+     set request_count = greatest(0, request_count - 1),
+         updated_at = now()
+   where user_id = v_user_id
+     and usage_date = v_usage_date
+     and request_count > 0
+   returning request_count into v_used;
+
+  if v_used is null then
+    return query select false, v_daily_limit, 0;
+  end if;
+
+  return query
+    select true,
+           greatest(0, v_daily_limit - v_used),
+           v_used;
+end;
+$;
+
+revoke all on function public.studylab_release_ai_quota() from public, anon;
+grant execute on function public.studylab_release_ai_quota() to authenticated;
