@@ -1,13 +1,19 @@
 -- StudyLab AI: persistent per-student daily quota
--- Run this once in Supabase SQL Editor for project:
--- zpvatyxdbshjuqgtexzw
+-- Run this ONCE in the Supabase SQL Editor.
+-- Project: zpvatyxdbshjuqgtexzw
+--
+-- This gives each anonymous StudyLab student 18 AI requests per
+-- Asia/Colombo calendar day. Failed provider requests can be released
+-- by the Netlify function so they do not permanently consume a quota slot.
 
 create table if not exists public.studylab_ai_usage (
   user_id uuid not null references auth.users(id) on delete cascade,
   usage_date date not null,
   request_count integer not null default 0,
   updated_at timestamptz not null default now(),
-  primary key (user_id, usage_date)
+  primary key (user_id, usage_date),
+  constraint studylab_ai_usage_request_count_nonnegative
+    check (request_count >= 0)
 );
 
 alter table public.studylab_ai_usage enable row level security;
@@ -64,6 +70,7 @@ begin
       select false,
              greatest(0, v_daily_limit - coalesce(v_used, 0)),
              coalesce(v_used, 0);
+    return;
   end if;
 
   return query
@@ -85,7 +92,7 @@ returns table (
 language plpgsql
 security definer
 set search_path = public
-as $
+as $$
 declare
   v_user_id uuid := auth.uid();
   v_usage_date date := (now() at time zone 'Asia/Colombo')::date;
@@ -105,7 +112,11 @@ begin
    returning request_count into v_used;
 
   if v_used is null then
-    return query select false, v_daily_limit, 0;
+    return query
+      select false,
+             v_daily_limit,
+             0;
+    return;
   end if;
 
   return query
@@ -113,7 +124,7 @@ begin
            greatest(0, v_daily_limit - v_used),
            v_used;
 end;
-$;
+$$;
 
 revoke all on function public.studylab_release_ai_quota() from public, anon;
 grant execute on function public.studylab_release_ai_quota() to authenticated;
