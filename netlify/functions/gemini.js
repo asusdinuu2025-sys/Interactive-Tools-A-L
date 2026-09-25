@@ -2,7 +2,7 @@ const crypto = require("node:crypto");
 
 const MODEL = "gemini-3.8-flash";
 
-const DAILY_LIMIT = 8;
+const DAILY_LIMIT = 18;
 const IP_WINDOW_MS = 60 * 1000;
 const IP_LIMIT = 4;
 
