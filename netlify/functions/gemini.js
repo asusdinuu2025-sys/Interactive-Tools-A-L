@@ -1,31 +1,21 @@
 const crypto = require("node:crypto");
 
-const MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+const MODEL = "gemini-3.8-flash";
 
-/*
- * Conservative application-side cap.
- * Google says active Gemini limits vary by project/model and should be
- * checked in AI Studio. This site-side cap is intentionally much lower
- * than the commonly reported 20-request/day free-tier ceiling.
- */
 const DAILY_LIMIT = 8;
-
 const IP_WINDOW_MS = 60 * 1000;
-const IP_LIMIT = 1;
+const IP_LIMIT = 4;
 
 const MAX_HISTORY = 8;
 const MAX_MESSAGE_LENGTH = 3000;
 const MAX_BODY_LENGTH = 14000;
 const MAX_OUTPUT_TOKENS = 800;
 
-const DAILY_KEY_PREFIX = "daily/";
-const RATE_KEY_PREFIX = "rate/";
-
 const SYSTEM_INSTRUCTION = [
   "You are StudyLab AI, an educational assistant for StudyLab.",
-  "You can answer general questions, but prioritize useful support for Sri Lankan G.C.E. Advanced Level students.",
+  "Prioritize useful support for Sri Lankan G.C.E. Advanced Level students.",
   "For A/L questions, especially Combined Mathematics, Physics, Chemistry, and Biology, explain clearly and accurately.",
-  "Use Sinhala when the student writes in Sinhala, English when they write in English, and handle Sinhala-English mixed language naturally.",
+  "Use Sinhala when the student writes in Sinhala, English when the student writes in English, and handle Sinhala-English mixed language naturally.",
   "For mathematics and science problems, show the important steps rather than only giving the final answer.",
   "Keep answers useful, clear, and reasonably concise for students.",
   "Do not invent official Sri Lankan syllabus rules, exam rules, marking schemes, timetables, or past-paper answers. When uncertain, say so.",
@@ -34,10 +24,13 @@ const SYSTEM_INSTRUCTION = [
   "Help students learn rather than cheat during a live examination."
 ].join("\n");
 
-async function getUsageStore() {
-  const { getStore } = await import("@netlify/blobs");
-  return getStore("studylab-ai-usage");
-}
+const quotaState = globalThis.__studylabAiQuota || {
+  dayKey: "",
+  dailyCount: 0,
+  ipBuckets: new Map()
+};
+
+globalThis.__studylabAiQuota = quotaState;
 
 function jsonResponse(statusCode, payload, headers = {}) {
   return {
@@ -58,7 +51,6 @@ function cleanText(value, maxLength) {
 
 function getClientIp(event) {
   const headers = event?.headers || {};
-
   return (
     headers["x-nf-client-connection-ip"] ||
     headers["client-ip"] ||
@@ -68,20 +60,16 @@ function getClientIp(event) {
 }
 
 function hashIp(ip) {
-  return crypto
-    .createHash("sha256")
-    .update(ip)
-    .digest("hex")
-    .slice(0, 32);
+  return crypto.createHash("sha256").update(ip).digest("hex").slice(0, 32);
 }
 
 function currentMinuteBucket() {
   return Math.floor(Date.now() / IP_WINDOW_MS);
 }
 
-function pacificDateKey() {
+function localDateKey() {
   const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Los_Angeles",
+    timeZone: "Asia/Colombo",
     year: "numeric",
     month: "2-digit",
     day: "2-digit"
@@ -94,6 +82,54 @@ function pacificDateKey() {
   );
 
   return values.year + "-" + values.month + "-" + values.day;
+}
+
+function reserveQuota(event) {
+  const dayKey = localDateKey();
+
+  if (quotaState.dayKey !== dayKey) {
+    quotaState.dayKey = dayKey;
+    quotaState.dailyCount = 0;
+    quotaState.ipBuckets = new Map();
+  }
+
+  if (quotaState.dailyCount >= DAILY_LIMIT) {
+    return { ok: false, reason: "daily_limit", remaining: 0 };
+  }
+
+  const ipKey = hashIp(getClientIp(event));
+  const bucket = currentMinuteBucket();
+  const current = quotaState.ipBuckets.get(ipKey);
+
+  const ipCount =
+    current?.bucket === bucket
+      ? Math.max(0, Math.floor(current.count || 0))
+      : 0;
+
+  if (ipCount >= IP_LIMIT) {
+    return {
+      ok: false,
+      reason: "ip_limit",
+      remaining: Math.max(0, DAILY_LIMIT - quotaState.dailyCount),
+      retryAfter: 60 - Math.floor((Date.now() / 1000) % 60)
+    };
+  }
+
+  quotaState.dailyCount += 1;
+  quotaState.ipBuckets.set(ipKey, { bucket, count: ipCount + 1 });
+
+  if (quotaState.ipBuckets.size > 2000) {
+    quotaState.ipBuckets = new Map(
+      [...quotaState.ipBuckets.entries()].filter(
+        ([, value]) => value?.bucket === bucket
+      )
+    );
+  }
+
+  return {
+    ok: true,
+    remaining: Math.max(0, DAILY_LIMIT - quotaState.dailyCount)
+  };
 }
 
 function normalizeHistory(history) {
@@ -121,136 +157,40 @@ function normalizeHistory(history) {
     .filter(Boolean);
 }
 
-async function reserveQuota(event, store) {
-  const dailyKey = DAILY_KEY_PREFIX + pacificDateKey();
-
-  let dailyCount = 0;
-
-  try {
-    const storedDaily = await store.get(dailyKey);
-
-    if (storedDaily) {
-      const parsed = Number(storedDaily);
-
-      if (Number.isFinite(parsed) && parsed >= 0) {
-        dailyCount = Math.floor(parsed);
-      }
-    }
-  } catch (error) {
-    console.error("StudyLab AI daily quota read failed:", error);
-
+function providerError(statusCode) {
+  if (statusCode === 400) {
     return {
-      ok: false,
-      reason: "storage"
+      code: "PROVIDER_BAD_REQUEST",
+      error: "Gemini rejected the request. Please try again."
     };
   }
 
-  if (dailyCount >= DAILY_LIMIT) {
+  if (statusCode === 401 || statusCode === 403) {
     return {
-      ok: false,
-      reason: "daily_limit",
-      remaining: 0
+      code: "PROVIDER_ACCESS",
+      error: "Gemini rejected the API key or project access."
     };
   }
 
-  const ipKey = RATE_KEY_PREFIX + hashIp(getClientIp(event));
-  const now = Date.now();
-  const bucket = currentMinuteBucket();
-
-  let ipBucket = bucket;
-  let ipCount = 0;
-
-  try {
-    const storedIp = await store.get(ipKey);
-
-    if (storedIp) {
-      const parsed = JSON.parse(storedIp);
-
-      if (
-        Number.isFinite(parsed?.bucket) &&
-        Number.isFinite(parsed?.count) &&
-        parsed.bucket === bucket
-      ) {
-        ipBucket = parsed.bucket;
-        ipCount = Math.max(0, Math.floor(parsed.count));
-      }
-    }
-  } catch (error) {
-    console.error("StudyLab AI IP limit read failed:", error);
-
+  if (statusCode === 404) {
     return {
-      ok: false,
-      reason: "storage"
+      code: "PROVIDER_MODEL",
+      error: "The configured Gemini model is unavailable for this API."
     };
   }
-
-  if (ipCount >= IP_LIMIT) {
-    return {
-      ok: false,
-      reason: "ip_limit",
-      remaining: Math.max(0, DAILY_LIMIT - dailyCount),
-      retryAfter: 60 - Math.floor((now / 1000) % 60)
-    };
-  }
-
-  /*
-   * The usage counters contain no question/answer text.
-   * Count before the provider call so a provider failure cannot accidentally
-   * free a slot and permit the site to overshoot its conservative budget.
-   */
-  try {
-    await store.set(dailyKey, String(dailyCount + 1));
-
-    await store.set(
-      ipKey,
-      JSON.stringify({
-        bucket: ipBucket,
-        count: ipCount + 1
-      })
-    );
-  } catch (error) {
-    console.error("StudyLab AI quota write failed:", error);
-
-    return {
-      ok: false,
-      reason: "storage"
-    };
-  }
-
-  return {
-    ok: true,
-    remaining: Math.max(0, DAILY_LIMIT - dailyCount - 1)
-  };
-}
-
-function providerError(statusCode, data) {
-  console.error(
-    "StudyLab Gemini provider response:",
-    statusCode,
-    data?.error?.message || ""
-  );
 
   if (statusCode === 429) {
     return {
       code: "PROVIDER_LIMIT",
       error:
-        "The AI service has reached its current rate or quota limit. Please try again later."
-    };
-  }
-
-  if (statusCode === 403) {
-    return {
-      code: "PROVIDER_ACCESS",
-      error:
-        "The AI service rejected this request. Check the Gemini project and API key settings."
+        "The Gemini service has reached its current rate or quota limit. Please try again later."
     };
   }
 
   if (statusCode >= 500) {
     return {
       code: "PROVIDER_ERROR",
-      error:
-        "The AI service is temporarily unavailable. Please try again later."
+      error: "Gemini is temporarily unavailable. Please try again later."
     };
   }
 
@@ -268,7 +208,8 @@ exports.handler = async function handler(event) {
     });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  // Only this environment variable is used for StudyLab AI.
+  const apiKey = process.env.STUDYLAB_AI_GEMINI_API_KEY;
 
   if (!apiKey) {
     return jsonResponse(503, {
@@ -297,10 +238,7 @@ exports.handler = async function handler(event) {
     });
   }
 
-  const message = cleanText(
-    payload.message,
-    MAX_MESSAGE_LENGTH
-  );
+  const message = cleanText(payload.message, MAX_MESSAGE_LENGTH);
 
   if (!message) {
     return jsonResponse(400, {
@@ -309,20 +247,7 @@ exports.handler = async function handler(event) {
     });
   }
 
-  let store;
-
-  try {
-    store = await getUsageStore();
-  } catch (error) {
-    console.error("StudyLab AI storage module failed:", error);
-
-    return jsonResponse(503, {
-      code: "QUOTA_SERVICE_UNAVAILABLE",
-      error: "AI access is temporarily unavailable. Please try again later."
-    });
-  }
-
-  const quota = await reserveQuota(event, store);
+  const quota = reserveQuota(event);
 
   if (!quota.ok) {
     if (quota.reason === "daily_limit") {
@@ -335,31 +260,19 @@ exports.handler = async function handler(event) {
       });
     }
 
-    if (quota.reason === "ip_limit") {
-      return jsonResponse(
-        429,
-        {
-          code: "IP_LIMIT",
-          error:
-            "Please wait a moment before sending another AI question.",
-          retryAfter: quota.retryAfter,
-          remaining: quota.remaining
-        },
-        {
-          "Retry-After": String(quota.retryAfter)
-        }
-      );
-    }
-
-    return jsonResponse(503, {
-      code: "QUOTA_SERVICE_UNAVAILABLE",
-      error:
-        "AI access is temporarily unavailable. Please try again later."
-    });
+    return jsonResponse(
+      429,
+      {
+        code: "IP_LIMIT",
+        error: "Please wait a few seconds before sending another AI question.",
+        retryAfter: quota.retryAfter,
+        remaining: quota.remaining
+      },
+      { "Retry-After": String(quota.retryAfter) }
+    );
   }
 
   let history = normalizeHistory(payload.history);
-
   const last = history[history.length - 1];
 
   if (
@@ -369,10 +282,7 @@ exports.handler = async function handler(event) {
   ) {
     history = [
       ...history,
-      {
-        role: "user",
-        parts: [{ text: message }]
-      }
+      { role: "user", parts: [{ text: message }] }
     ].slice(-MAX_HISTORY);
   }
 
@@ -382,8 +292,6 @@ exports.handler = async function handler(event) {
     },
     contents: history,
     generationConfig: {
-      temperature: 0.35,
-      topP: 0.9,
       maxOutputTokens: MAX_OUTPUT_TOKENS
     }
   };
@@ -395,11 +303,7 @@ exports.handler = async function handler(event) {
 
   try {
     const controller = new AbortController();
-
-    const timeoutId = setTimeout(
-      () => controller.abort(),
-      30000
-    );
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
 
     let apiResponse;
 
@@ -420,10 +324,7 @@ exports.handler = async function handler(event) {
     const data = await apiResponse.json().catch(() => ({}));
 
     if (!apiResponse.ok) {
-      const friendly = providerError(
-        apiResponse.status,
-        data
-      );
+      const friendly = providerError(apiResponse.status);
 
       return jsonResponse(
         apiResponse.status === 429 ? 429 : 502,
@@ -442,8 +343,7 @@ exports.handler = async function handler(event) {
     if (!answer) {
       return jsonResponse(502, {
         code: "EMPTY_PROVIDER_RESPONSE",
-        error:
-          "The AI returned no answer. Please try again later.",
+        error: "The AI returned no answer. Please try again later.",
         remaining: quota.remaining
       });
     }
