@@ -2,14 +2,7 @@ const crypto = require("node:crypto");
 
 const MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
 
-/*
- * Conservative application-side cap.
- * Google says active Gemini limits vary by project/model and should be
- * checked in AI Studio. This site-side cap is intentionally much lower
- * than the commonly reported 20-request/day free-tier ceiling.
- */
 const DAILY_LIMIT = 8;
-
 const IP_WINDOW_MS = 60 * 1000;
 const IP_LIMIT = 1;
 
@@ -17,9 +10,6 @@ const MAX_HISTORY = 8;
 const MAX_MESSAGE_LENGTH = 3000;
 const MAX_BODY_LENGTH = 14000;
 const MAX_OUTPUT_TOKENS = 800;
-
-const DAILY_KEY_PREFIX = "daily/";
-const RATE_KEY_PREFIX = "rate/";
 
 const SYSTEM_INSTRUCTION = [
   "You are StudyLab AI, an educational assistant for StudyLab.",
@@ -34,22 +24,13 @@ const SYSTEM_INSTRUCTION = [
   "Help students learn rather than cheat during a live examination."
 ].join("\n");
 
-async function getUsageStore() {
-  const { getStore } = await import("@netlify/blobs");
-  return getStore("studylab-ai-usage");
-}
+const quotaState = globalThis.__studylabAiQuota || {
+  dayKey: "",
+  dailyCount: 0,
+  ipBuckets: new Map()
+};
 
-function jsonResponse(statusCode, payload, headers = {}) {
-  return {
-    statusCode,
-    headers: {
-      "Content-Type": "application/json; charset=utf-8",
-      "Cache-Control": "no-store",
-      ...headers
-    },
-    body: JSON.stringify(payload)
-  };
-}
+globalThis.__studylabAiQuota = quotaState;
 
 function cleanText(value, maxLength) {
   if (typeof value !== "string") return "";
@@ -58,7 +39,6 @@ function cleanText(value, maxLength) {
 
 function getClientIp(event) {
   const headers = event?.headers || {};
-
   return (
     headers["x-nf-client-connection-ip"] ||
     headers["client-ip"] ||
@@ -68,11 +48,7 @@ function getClientIp(event) {
 }
 
 function hashIp(ip) {
-  return crypto
-    .createHash("sha256")
-    .update(ip)
-    .digest("hex")
-    .slice(0, 32);
+  return crypto.createHash("sha256").update(ip).digest("hex").slice(0, 32);
 }
 
 function currentMinuteBucket() {
@@ -103,7 +79,6 @@ function normalizeHistory(history) {
     .slice(-MAX_HISTORY)
     .map(item => {
       const role = item?.role === "model" ? "model" : "user";
-
       const text = cleanText(
         Array.isArray(item?.parts)
           ? item.parts.map(part => part?.text || "").join("\n")
@@ -121,105 +96,62 @@ function normalizeHistory(history) {
     .filter(Boolean);
 }
 
-async function reserveQuota(event, store) {
-  const dailyKey = DAILY_KEY_PREFIX + pacificDateKey();
+function reserveQuota(event) {
+  const dayKey = pacificDateKey();
 
-  let dailyCount = 0;
-
-  try {
-    const storedDaily = await store.get(dailyKey);
-
-    if (storedDaily) {
-      const parsed = Number(storedDaily);
-
-      if (Number.isFinite(parsed) && parsed >= 0) {
-        dailyCount = Math.floor(parsed);
-      }
-    }
-  } catch (error) {
-    console.error("StudyLab AI daily quota read failed:", error);
-
-    return {
-      ok: false,
-      reason: "storage"
-    };
+  if (quotaState.dayKey !== dayKey) {
+    quotaState.dayKey = dayKey;
+    quotaState.dailyCount = 0;
+    quotaState.ipBuckets = new Map();
   }
 
-  if (dailyCount >= DAILY_LIMIT) {
-    return {
-      ok: false,
-      reason: "daily_limit",
-      remaining: 0
-    };
+  if (quotaState.dailyCount >= DAILY_LIMIT) {
+    return { ok: false, reason: "daily_limit", remaining: 0 };
   }
 
-  const ipKey = RATE_KEY_PREFIX + hashIp(getClientIp(event));
-  const now = Date.now();
+  const ipKey = hashIp(getClientIp(event));
   const bucket = currentMinuteBucket();
-
-  let ipBucket = bucket;
-  let ipCount = 0;
-
-  try {
-    const storedIp = await store.get(ipKey);
-
-    if (storedIp) {
-      const parsed = JSON.parse(storedIp);
-
-      if (
-        Number.isFinite(parsed?.bucket) &&
-        Number.isFinite(parsed?.count) &&
-        parsed.bucket === bucket
-      ) {
-        ipBucket = parsed.bucket;
-        ipCount = Math.max(0, Math.floor(parsed.count));
-      }
-    }
-  } catch (error) {
-    console.error("StudyLab AI IP limit read failed:", error);
-
-    return {
-      ok: false,
-      reason: "storage"
-    };
-  }
+  const current = quotaState.ipBuckets.get(ipKey);
+  const ipCount =
+    current?.bucket === bucket
+      ? Math.max(0, Math.floor(current.count || 0))
+      : 0;
 
   if (ipCount >= IP_LIMIT) {
     return {
       ok: false,
       reason: "ip_limit",
-      remaining: Math.max(0, DAILY_LIMIT - dailyCount),
-      retryAfter: 60 - Math.floor((now / 1000) % 60)
+      remaining: Math.max(0, DAILY_LIMIT - quotaState.dailyCount),
+      retryAfter: 60 - Math.floor((Date.now() / 1000) % 60)
     };
   }
 
-  /*
-   * The usage counters contain no question/answer text.
-   * Count before the provider call so a provider failure cannot accidentally
-   * free a slot and permit the site to overshoot its conservative budget.
-   */
-  try {
-    await store.set(dailyKey, String(dailyCount + 1));
+  quotaState.dailyCount += 1;
+  quotaState.ipBuckets.set(ipKey, { bucket, count: ipCount + 1 });
 
-    await store.set(
-      ipKey,
-      JSON.stringify({
-        bucket: ipBucket,
-        count: ipCount + 1
-      })
+  if (quotaState.ipBuckets.size > 2000) {
+    quotaState.ipBuckets = new Map(
+      [...quotaState.ipBuckets.entries()].filter(
+        ([, value]) => value?.bucket === bucket
+      )
     );
-  } catch (error) {
-    console.error("StudyLab AI quota write failed:", error);
-
-    return {
-      ok: false,
-      reason: "storage"
-    };
   }
 
   return {
     ok: true,
-    remaining: Math.max(0, DAILY_LIMIT - dailyCount - 1)
+    remaining: Math.max(0, DAILY_LIMIT - quotaState.dailyCount)
+  };
+}
+
+function jsonResponse(statusCode, payload, headers = {}) {
+  return {
+    statusCode,
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store",
+      ...headers
+    },
+    body: JSON.stringify(payload)
   };
 }
 
@@ -268,7 +200,10 @@ exports.handler = async function handler(event) {
     });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey =
+    process.env.STUDYLAB_AI_GEMINI_API_KEY ||
+    process.env.GEMINI_API_KEY ||
+    process.env.Gemini_API_KEY;
 
   if (!apiKey) {
     return jsonResponse(503, {
@@ -287,7 +222,6 @@ exports.handler = async function handler(event) {
   }
 
   let payload;
-
   try {
     payload = JSON.parse(bodyText || "{}");
   } catch {
@@ -297,10 +231,7 @@ exports.handler = async function handler(event) {
     });
   }
 
-  const message = cleanText(
-    payload.message,
-    MAX_MESSAGE_LENGTH
-  );
+  const message = cleanText(payload.message, MAX_MESSAGE_LENGTH);
 
   if (!message) {
     return jsonResponse(400, {
@@ -309,20 +240,7 @@ exports.handler = async function handler(event) {
     });
   }
 
-  let store;
-
-  try {
-    store = await getUsageStore();
-  } catch (error) {
-    console.error("StudyLab AI storage module failed:", error);
-
-    return jsonResponse(503, {
-      code: "QUOTA_SERVICE_UNAVAILABLE",
-      error: "AI access is temporarily unavailable. Please try again later."
-    });
-  }
-
-  const quota = await reserveQuota(event, store);
+  const quota = reserveQuota(event);
 
   if (!quota.ok) {
     if (quota.reason === "daily_limit") {
@@ -335,31 +253,19 @@ exports.handler = async function handler(event) {
       });
     }
 
-    if (quota.reason === "ip_limit") {
-      return jsonResponse(
-        429,
-        {
-          code: "IP_LIMIT",
-          error:
-            "Please wait a moment before sending another AI question.",
-          retryAfter: quota.retryAfter,
-          remaining: quota.remaining
-        },
-        {
-          "Retry-After": String(quota.retryAfter)
-        }
-      );
-    }
-
-    return jsonResponse(503, {
-      code: "QUOTA_SERVICE_UNAVAILABLE",
-      error:
-        "AI access is temporarily unavailable. Please try again later."
-    });
+    return jsonResponse(
+      429,
+      {
+        code: "IP_LIMIT",
+        error: "Please wait a moment before sending another AI question.",
+        retryAfter: quota.retryAfter,
+        remaining: quota.remaining
+      },
+      { "Retry-After": String(quota.retryAfter) }
+    );
   }
 
   let history = normalizeHistory(payload.history);
-
   const last = history[history.length - 1];
 
   if (
@@ -382,8 +288,6 @@ exports.handler = async function handler(event) {
     },
     contents: history,
     generationConfig: {
-      temperature: 0.35,
-      topP: 0.9,
       maxOutputTokens: MAX_OUTPUT_TOKENS
     }
   };
@@ -395,14 +299,9 @@ exports.handler = async function handler(event) {
 
   try {
     const controller = new AbortController();
-
-    const timeoutId = setTimeout(
-      () => controller.abort(),
-      30000
-    );
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
 
     let apiResponse;
-
     try {
       apiResponse = await fetch(endpoint, {
         method: "POST",
@@ -420,10 +319,7 @@ exports.handler = async function handler(event) {
     const data = await apiResponse.json().catch(() => ({}));
 
     if (!apiResponse.ok) {
-      const friendly = providerError(
-        apiResponse.status,
-        data
-      );
+      const friendly = providerError(apiResponse.status, data);
 
       return jsonResponse(
         apiResponse.status === 429 ? 429 : 502,
@@ -442,8 +338,7 @@ exports.handler = async function handler(event) {
     if (!answer) {
       return jsonResponse(502, {
         code: "EMPTY_PROVIDER_RESPONSE",
-        error:
-          "The AI returned no answer. Please try again later.",
+        error: "The AI returned no answer. Please try again later.",
         remaining: quota.remaining
       });
     }
