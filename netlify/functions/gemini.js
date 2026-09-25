@@ -1,6 +1,6 @@
 const crypto = require("node:crypto");
 
-const MODEL = "openai/gpt-oss-120b";
+const MODEL = "gemini-3.8-flash";
 
 const DAILY_LIMIT = 8;
 const IP_WINDOW_MS = 60 * 1000;
@@ -24,13 +24,13 @@ const SYSTEM_INSTRUCTION = [
   "Help students learn rather than cheat during a live examination."
 ].join("\n");
 
-const quotaState = globalThis.__studylabGroqQuota || {
+const quotaState = globalThis.__studylabGeminiQuota || {
   dayKey: "",
   dailyCount: 0,
   ipBuckets: new Map()
 };
 
-globalThis.__studylabGroqQuota = quotaState;
+globalThis.__studylabGeminiQuota = quotaState;
 
 function jsonResponse(statusCode, payload, headers = {}) {
   return {
@@ -51,6 +51,7 @@ function cleanText(value, maxLength) {
 
 function getClientIp(event) {
   const headers = event?.headers || {};
+
   return (
     headers["x-nf-client-connection-ip"] ||
     headers["client-ip"] ||
@@ -60,7 +61,11 @@ function getClientIp(event) {
 }
 
 function hashIp(ip) {
-  return crypto.createHash("sha256").update(ip).digest("hex").slice(0, 32);
+  return crypto
+    .createHash("sha256")
+    .update(ip)
+    .digest("hex")
+    .slice(0, 32);
 }
 
 function currentMinuteBucket() {
@@ -94,7 +99,11 @@ function reserveQuota(event) {
   }
 
   if (quotaState.dailyCount >= DAILY_LIMIT) {
-    return { ok: false, reason: "daily_limit", remaining: 0 };
+    return {
+      ok: false,
+      reason: "daily_limit",
+      remaining: 0
+    };
   }
 
   const ipKey = hashIp(getClientIp(event));
@@ -116,7 +125,10 @@ function reserveQuota(event) {
   }
 
   quotaState.dailyCount += 1;
-  quotaState.ipBuckets.set(ipKey, { bucket, count: ipCount + 1 });
+  quotaState.ipBuckets.set(ipKey, {
+    bucket,
+    count: ipCount + 1
+  });
 
   if (quotaState.ipBuckets.size > 2000) {
     quotaState.ipBuckets = new Map(
@@ -138,7 +150,8 @@ function normalizeHistory(history) {
   return history
     .slice(-MAX_HISTORY)
     .map(item => {
-      const role = item?.role === "model" ? "assistant" : "user";
+      const role = item?.role === "model" ? "model" : "user";
+
       const text = cleanText(
         Array.isArray(item?.parts)
           ? item.parts.map(part => part?.text || "").join("\n")
@@ -150,7 +163,7 @@ function normalizeHistory(history) {
 
       return {
         role,
-        content: text
+        parts: [{ text }]
       };
     })
     .filter(Boolean);
@@ -163,43 +176,44 @@ function providerError(statusCode, providerMessage = "") {
     return {
       code: "PROVIDER_BAD_REQUEST",
       error: detail
-        ? "Groq rejected the request: " + detail
-        : "Groq rejected the request. Please try again."
+        ? "Gemini rejected the request: " + detail
+        : "Gemini rejected the request. Please try again."
     };
   }
 
   if (statusCode === 401 || statusCode === 403) {
     return {
       code: "PROVIDER_ACCESS",
-      error: "Groq rejected the API key or project access."
+      error: "Gemini rejected the API key or project access."
     };
   }
 
   if (statusCode === 404) {
     return {
       code: "PROVIDER_MODEL",
-      error: "The configured Groq model is unavailable."
+      error: "The configured Gemini model is unavailable for this API."
     };
   }
 
   if (statusCode === 429) {
     return {
       code: "PROVIDER_LIMIT",
-      error: "The Groq service has reached its current rate or quota limit."
+      error:
+        "The Gemini service has reached its current rate or quota limit. Please try again later."
     };
   }
 
   if (statusCode >= 500) {
     return {
       code: "PROVIDER_ERROR",
-      error: "Groq is temporarily unavailable. Please try again later."
+      error: "Gemini is temporarily unavailable. Please try again later."
     };
   }
 
   return {
     code: "PROVIDER_ERROR",
     error: detail
-      ? "The AI provider returned an error: " + detail
+      ? "The Gemini API returned an error: " + detail
       : "The AI could not answer that right now."
   };
 }
@@ -212,12 +226,13 @@ exports.handler = async function handler(event) {
     });
   }
 
-  const apiKey = process.env.STUDYLAB_AI_GROQ_API_KEY;
+  // This is the only environment variable used for the Gemini API key.
+  const apiKey = process.env.STUDYLAB_AI_GEMINI_API_KEY;
 
   if (!apiKey) {
     return jsonResponse(503, {
       code: "NOT_CONFIGURED",
-      error: "Groq API is not configured."
+      error: "Gemini API is not configured."
     });
   }
 
@@ -271,7 +286,9 @@ exports.handler = async function handler(event) {
         retryAfter: quota.retryAfter,
         remaining: quota.remaining
       },
-      { "Retry-After": String(quota.retryAfter) }
+      {
+        "Retry-After": String(quota.retryAfter)
+      }
     );
   }
 
@@ -282,30 +299,31 @@ exports.handler = async function handler(event) {
   if (
     !last ||
     last.role !== "user" ||
-    last.content !== message
+    last.parts?.[0]?.text !== message
   ) {
     history = [
       ...history,
       {
         role: "user",
-        content: message
+        parts: [{ text: message }]
       }
     ].slice(-MAX_HISTORY);
   }
 
   const requestBody = {
-    model: MODEL,
-    messages: [
-      {
-        role: "system",
-        content: SYSTEM_INSTRUCTION
-      },
-      ...history
-    ],
-    max_completion_tokens: MAX_OUTPUT_TOKENS
+    systemInstruction: {
+      parts: [{ text: SYSTEM_INSTRUCTION }]
+    },
+    contents: history,
+    generationConfig: {
+      maxOutputTokens: MAX_OUTPUT_TOKENS
+    }
   };
 
-  const endpoint = "https://api.groq.com/openai/v1/chat/completions";
+  const endpoint =
+    "https://generativelanguage.googleapis.com/v1beta/models/" +
+    encodeURIComponent(MODEL) +
+    ":generateContent";
 
   try {
     const controller = new AbortController();
@@ -322,7 +340,7 @@ exports.handler = async function handler(event) {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + apiKey
+            "x-goog-api-key": apiKey
           },
           body: JSON.stringify(requestBody),
           signal: controller.signal
@@ -339,7 +357,10 @@ exports.handler = async function handler(event) {
 
         if (!retryable || attempt === maxAttempts) break;
 
-        const retryAfter = Number(apiResponse.headers.get("retry-after"));
+        const retryAfter = Number(
+          apiResponse.headers.get("retry-after")
+        );
+
         const delayMs =
           Number.isFinite(retryAfter) && retryAfter > 0
             ? Math.min(retryAfter * 1000, 4000)
@@ -366,26 +387,27 @@ exports.handler = async function handler(event) {
       );
     }
 
-    const answer = String(
-      data?.choices?.[0]?.message?.content || ""
-    ).trim();
+    const answer = data?.candidates?.[0]?.content?.parts
+      ?.map(part => part?.text || "")
+      .join("")
+      .trim();
 
     if (!answer) {
       return jsonResponse(502, {
         code: "EMPTY_PROVIDER_RESPONSE",
-        error: "Groq returned no answer. Please try again later.",
+        error: "Gemini returned no answer. Please try again later.",
         remaining: quota.remaining
       });
     }
 
     return jsonResponse(200, {
       text: answer,
-      model: data?.model || MODEL,
+      model: MODEL,
       dailyLimit: DAILY_LIMIT,
       remaining: quota.remaining
     });
   } catch (error) {
-    console.error("StudyLab Groq request failed:", error);
+    console.error("StudyLab Gemini request failed:", error);
 
     return jsonResponse(
       error?.name === "AbortError" ? 504 : 502,
@@ -397,7 +419,7 @@ exports.handler = async function handler(event) {
         error:
           error?.name === "AbortError"
             ? "The AI took too long to respond. Please try again later."
-            : "The Groq service is temporarily unavailable. Please try again later.",
+            : "The Gemini service is temporarily unavailable. Please try again later.",
         remaining: quota.remaining
       }
     );
