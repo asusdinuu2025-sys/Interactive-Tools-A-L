@@ -48,6 +48,222 @@
       });
     }
 
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function renderInlineMarkdown(source) {
+      const mathTokens = [];
+      const codeTokens = [];
+      let text = String(source);
+
+      text = text.replace(
+        /(\$\$[\s\S]*?\$\$|\$[^$\n]+\$|\\\([\s\S]*?\\\)|\\\[[\s\S]*?\\\])/g,
+        match => {
+          const token = "\uE000M" + mathTokens.length + "\uE001";
+          mathTokens.push(match);
+          return token;
+        }
+      );
+
+      text = text.replace(
+        /\x60([^\x60\n]+)\x60/g,
+        (_, value) => {
+          const token = "\uE000C" + codeTokens.length + "\uE001";
+          codeTokens.push(value);
+          return token;
+        }
+      );
+
+      text = escapeHtml(text);
+
+      text = text.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+      text = text.replace(/__([^_\n]+)__/g, "<strong>$1</strong>");
+      text = text.replace(/~~([^~\n]+)~~/g, "<del>$1</del>");
+      text = text.replace(
+        /(^|[\s([{"'])\*([^*\n]+)\*(?=$|[\s\])}.,!?;:])/g,
+        "$1<em>$2</em>"
+      );
+      text = text.replace(
+        /(^|[\s([{"'])_([^_\n]+)_(?=$|[\s\])}.,!?;:])/g,
+        "$1<em>$2</em>"
+      );
+
+      text = text.replace(
+        /&lt;u&gt;([\s\S]*?)&lt;\/u&gt;/gi,
+        "<u>$1</u>"
+      );
+
+      text = text.replace(
+        /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+        '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
+      );
+
+      text = text.replace(
+        /\uE000C(\d+)\uE001/g,
+        (_, index) => "<code>" + escapeHtml(codeTokens[Number(index)]) + "</code>"
+      );
+
+      text = text.replace(
+        /\uE000M(\d+)\uE001/g,
+        (_, index) => mathTokens[Number(index)]
+      );
+
+      return text;
+    }
+
+    function renderMarkdown(source) {
+      const lines = String(source).replace(/\r\n?/g, "\n").split("\n");
+      let html = "";
+      let inCode = false;
+      let codeBuffer = [];
+      let listType = null;
+      const fence = String.fromCharCode(96).repeat(3);
+
+      function closeList() {
+        if (listType === "ul") html += "</ul>";
+        if (listType === "ol") html += "</ol>";
+        listType = null;
+      }
+
+      function addListItem(type, item) {
+        if (listType !== type) {
+          closeList();
+          html += type === "ul" ? "<ul>" : "<ol>";
+          listType = type;
+        }
+        html += "<li>" + renderInlineMarkdown(item) + "</li>";
+      }
+
+      for (const line of lines) {
+        if (line.trim().startsWith(fence)) {
+          if (inCode) {
+            html += "<pre><code>" + escapeHtml(codeBuffer.join("\n")) + "</code></pre>";
+            codeBuffer = [];
+            inCode = false;
+          } else {
+            closeList();
+            inCode = true;
+          }
+          continue;
+        }
+
+        if (inCode) {
+          codeBuffer.push(line);
+          continue;
+        }
+
+        const heading = line.match(/^\s*(#{1,6})\s+(.+)$/);
+        const bullet = line.match(/^\s*[-*+]\s+(.+)$/);
+        const numbered = line.match(/^\s*\d+[.)]\s+(.+)$/);
+        const quote = line.match(/^\s*>\s?(.*)$/);
+
+        if (!line.trim()) {
+          closeList();
+          html += "<br>";
+          continue;
+        }
+
+        if (heading) {
+          closeList();
+          const level = heading[1].length;
+          html += "<h" + level + ">" +
+            renderInlineMarkdown(heading[2]) +
+            "</h" + level + ">";
+          continue;
+        }
+
+        if (bullet) {
+          addListItem("ul", bullet[1]);
+          continue;
+        }
+
+        if (numbered) {
+          addListItem("ol", numbered[1]);
+          continue;
+        }
+
+        if (quote) {
+          closeList();
+          html += "<blockquote>" +
+            renderInlineMarkdown(quote[1]) +
+            "</blockquote>";
+          continue;
+        }
+
+        if (/^\s*([-*_])\1\1+\s*$/.test(line)) {
+          closeList();
+          html += "<hr>";
+          continue;
+        }
+
+        closeList();
+        html += "<p>" + renderInlineMarkdown(line) + "</p>";
+      }
+
+      closeList();
+
+      if (inCode && codeBuffer.length) {
+        html += "<pre><code>" +
+          escapeHtml(codeBuffer.join("\n")) +
+          "</code></pre>";
+      }
+
+      return html;
+    }
+
+    let mathJaxPromise = null;
+
+    function loadMathJax() {
+      if (window.MathJax?.typesetPromise) {
+        return Promise.resolve(window.MathJax);
+      }
+
+      if (mathJaxPromise) return mathJaxPromise;
+
+      window.MathJax = window.MathJax || {
+        tex: {
+          inlineMath: [["$", "$"], ["\\(", "\\)"]],
+          displayMath: [["$$", "$$"], ["\\[", "\\]"]]
+        },
+        options: {
+          skipHtmlTags: [
+            "script",
+            "noscript",
+            "style",
+            "textarea",
+            "pre",
+            "code"
+          ]
+        }
+      };
+
+      mathJaxPromise = new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js";
+        script.async = true;
+        script.onload = () => resolve(window.MathJax);
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+
+      return mathJaxPromise;
+    }
+
+    function typesetMath(element) {
+      const source = element?.textContent || "";
+      if (!element || !/[$]|\\\(|\\\[/.test(source)) return;
+
+      loadMathJax()
+        .then(() => window.MathJax.typesetPromise?.([element]))
+        .catch(() => {});
+    }
+
     function appendMessage(role, text) {
       if (!list || !text) return;
 
@@ -61,7 +277,13 @@
 
       const message = document.createElement("div");
       message.className = "studylab-ai-message-text";
-      message.textContent = text;
+
+      if (role === "model") {
+        message.innerHTML = renderMarkdown(text);
+        typesetMath(message);
+      } else {
+        message.textContent = text;
+      }
 
       article.append(label, message);
       list.appendChild(article);
