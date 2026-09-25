@@ -1,6 +1,7 @@
 const crypto = require("node:crypto");
 
 const MODEL = "gemini-3.8-flash";
+const FALLBACK_MODEL = "gemini-3.7-flash";
 
 const DAILY_LIMIT = 18;
 const SUPABASE_URL = "https://zpvatyxdbshjuqgtexzw.supabase.co";
@@ -217,6 +218,35 @@ async function reserveStudentQuota(accessToken) {
   };
 }
 
+async function releaseStudentQuota(accessToken) {
+  if (!accessToken) return;
+
+  const endpoint = SUPABASE_URL + "/rest/v1/rpc/studylab_release_ai_quota";
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: SUPABASE_PUBLISHABLE_KEY,
+        Authorization: "Bearer " + accessToken
+      },
+      body: "{}"
+    });
+
+    if (!response.ok) {
+      const detail = await response.text().catch(() => "");
+      console.error(
+        "StudyLab AI quota release failed:",
+        response.status,
+        detail
+      );
+    }
+  } catch (error) {
+    console.error("StudyLab AI quota release request failed:", error);
+  }
+}
+
 function normalizeHistory(history) {
   if (!Array.isArray(history)) return [];
 
@@ -411,35 +441,65 @@ exports.handler = async function handler(event) {
     }
   };
 
-  const endpoint =
-    "https://generativelanguage.googleapis.com/v1beta/models/" +
-    encodeURIComponent(MODEL) +
-    ":generateContent";
-
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30000);
 
     let apiResponse;
     let data = {};
+    let usedModel = MODEL;
 
     try {
-      apiResponse = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": apiKey
-        },
-        body: JSON.stringify(requestBody),
-        signal: controller.signal
-      });
+      const callModel = async model => {
+        const modelEndpoint =
+          "https://generativelanguage.googleapis.com/v1beta/models/" +
+          encodeURIComponent(model) +
+          ":generateContent";
 
-      data = await apiResponse.json().catch(() => ({}));
+        const response = await fetch(modelEndpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": apiKey
+          },
+          body: JSON.stringify(requestBody),
+          signal: controller.signal
+        });
+
+        const responseData = await response.json().catch(() => ({}));
+
+        return {
+          response,
+          data: responseData
+        };
+      };
+
+      let result = await callModel(MODEL);
+      apiResponse = result.response;
+      data = result.data;
+
+      const retryablePrimary =
+        apiResponse.status === 500 ||
+        apiResponse.status === 502 ||
+        apiResponse.status === 503 ||
+        apiResponse.status === 504;
+
+      if (!apiResponse.ok && retryablePrimary) {
+        const fallbackResult = await callModel(FALLBACK_MODEL);
+        apiResponse = fallbackResult.response;
+        data = fallbackResult.data;
+
+        if (apiResponse.ok) {
+          usedModel = FALLBACK_MODEL;
+        }
+      }
     } finally {
       clearTimeout(timeoutId);
     }
 
     if (!apiResponse.ok) {
+      await releaseStudentQuota(accessToken);
+
       const friendly = providerError(
         apiResponse.status,
         data?.error?.message || ""
@@ -449,7 +509,7 @@ exports.handler = async function handler(event) {
         apiResponse.status === 429 ? 429 : 502,
         {
           ...friendly,
-          remaining: studentQuota.remaining
+          remaining: Math.min(DAILY_LIMIT, studentQuota.remaining + 1)
         }
       );
     }
@@ -476,6 +536,8 @@ exports.handler = async function handler(event) {
   } catch (error) {
     console.error("StudyLab Gemini request failed:", error);
 
+    await releaseStudentQuota(accessToken);
+
     return jsonResponse(
       error?.name === "AbortError" ? 504 : 502,
       {
@@ -487,7 +549,7 @@ exports.handler = async function handler(event) {
           error?.name === "AbortError"
             ? "The AI took too long to respond. Please try again later."
             : "The Gemini service is temporarily unavailable. Please try again later.",
-        remaining: studentQuota.remaining
+        remaining: Math.min(DAILY_LIMIT, studentQuota.remaining + 1)
       }
     );
   }
