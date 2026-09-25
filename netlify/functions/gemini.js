@@ -302,7 +302,7 @@ exports.handler = async function handler(event) {
       },
       ...history
     ],
-    max_tokens: MAX_OUTPUT_TOKENS
+    max_completion_tokens: MAX_OUTPUT_TOKENS
   };
 
   const endpoint = "https://api.groq.com/openai/v1/chat/completions";
@@ -312,22 +312,44 @@ exports.handler = async function handler(event) {
     const timeoutId = setTimeout(() => controller.abort(), 30000);
 
     let apiResponse;
+    let data = {};
 
     try {
-      apiResponse = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + apiKey
-        },
-        body: JSON.stringify(requestBody),
-        signal: controller.signal
-      });
+      const maxAttempts = 3;
+
+      for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+        apiResponse = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + apiKey
+          },
+          body: JSON.stringify(requestBody),
+          signal: controller.signal
+        });
+
+        data = await apiResponse.json().catch(() => ({}));
+
+        const retryable =
+          apiResponse.status === 429 ||
+          apiResponse.status === 500 ||
+          apiResponse.status === 502 ||
+          apiResponse.status === 503 ||
+          apiResponse.status === 504;
+
+        if (!retryable || attempt === maxAttempts) break;
+
+        const retryAfter = Number(apiResponse.headers.get("retry-after"));
+        const delayMs =
+          Number.isFinite(retryAfter) && retryAfter > 0
+            ? Math.min(retryAfter * 1000, 4000)
+            : attempt * 700;
+
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+      }
     } finally {
       clearTimeout(timeoutId);
     }
-
-    const data = await apiResponse.json().catch(() => ({}));
 
     if (!apiResponse.ok) {
       const friendly = providerError(
