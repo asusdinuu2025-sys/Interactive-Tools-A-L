@@ -1,6 +1,6 @@
 const crypto = require("node:crypto");
 
-const MODEL = "llama-3.3-70b-versatile";
+const MODEL = "openai/gpt-oss-120b";
 
 const DAILY_LIMIT = 8;
 const IP_WINDOW_MS = 60 * 1000;
