@@ -326,8 +326,93 @@
   color: var(--text-primary);
   font-size: .77rem;
   line-height: 1.50;
-  white-space: pre-wrap;
+  white-space: normal;
   overflow-wrap: anywhere;
+}
+
+.studylab-ai-message-text p {
+  margin: 0 0 .55em;
+}
+
+.studylab-ai-message-text p:last-child {
+  margin-bottom: 0;
+}
+
+.studylab-ai-message-text strong {
+  font-weight: 800;
+}
+
+.studylab-ai-message-text em {
+  font-style: italic;
+}
+
+.studylab-ai-message-text u {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.studylab-ai-message-text del {
+  text-decoration: line-through;
+}
+
+.studylab-ai-message-text h1,
+.studylab-ai-message-text h2,
+.studylab-ai-message-text h3,
+.studylab-ai-message-text h4,
+.studylab-ai-message-text h5,
+.studylab-ai-message-text h6 {
+  margin: .35em 0 .45em;
+  line-height: 1.25;
+  color: var(--text-primary);
+}
+
+.studylab-ai-message-text ul,
+.studylab-ai-message-text ol {
+  margin: .35em 0 .65em 1.25em;
+  padding-left: 1em;
+}
+
+.studylab-ai-message-text li {
+  margin: .18em 0;
+}
+
+.studylab-ai-message-text blockquote {
+  margin: .45em 0;
+  padding-left: .75em;
+  border-left: 2px solid rgba(126, 220, 255, .28);
+  color: var(--text-secondary);
+}
+
+.studylab-ai-message-text hr {
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, .10);
+  margin: .65em 0;
+}
+
+.studylab-ai-message-text code {
+  padding: .08em .32em;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, .075);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: .92em;
+}
+
+.studylab-ai-message-text pre {
+  margin: .45em 0;
+  padding: .65em;
+  overflow-x: auto;
+  border-radius: 9px;
+  background: rgba(0, 0, 0, .20);
+}
+
+.studylab-ai-message-text pre code {
+  padding: 0;
+  background: transparent;
+}
+
+.studylab-ai-message-text a {
+  color: var(--accent-cyan);
+  text-decoration: underline;
 }
 
 .studylab-ai-typing {
