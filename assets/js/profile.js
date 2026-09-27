@@ -20,10 +20,15 @@
 
   if (!profileButton || !profileModal || !profileForm || !profileInput) return;
 
+  function isPlaceholderName(name) {
+    return /^Student\d{4}$/.test(String(name || ""));
+  }
+
   function setButtonName(name) {
-    profileButton.textContent = name
-      ? "👤 " + name
-      : "👤 Create Profile";
+    profileButton.textContent =
+      name && !isPlaceholderName(name)
+        ? "👤 " + name
+        : "👤 Create Profile";
   }
 
   function showStatus(message, isError = false) {
@@ -50,7 +55,7 @@
     try {
       const profile = await getCloudProfile();
 
-      if (profile?.display_name) {
+      if (profile?.display_name && !isPlaceholderName(profile.display_name)) {
         profileInput.value = profile.display_name;
         profileNameLabel.textContent = "Your Study-Lab profile";
         setButtonName(profile.display_name);
@@ -148,7 +153,7 @@
     try {
       const profile = await getCloudProfile();
 
-      if (profile?.display_name) {
+      if (profile?.display_name && !isPlaceholderName(profile.display_name)) {
         setButtonName(profile.display_name);
       }
     } catch (error) {
