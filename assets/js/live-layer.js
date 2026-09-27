@@ -65,8 +65,8 @@
 
     const safeCount = Math.max(0, Math.floor(count));
     onlineNumber.textContent = safeCount.toLocaleString();
-    liveRoot.classList.toggle("is-low", safeCount < 10);
-    liveRoot.classList.toggle("is-live", safeCount >= 10);
+    liveRoot.classList.toggle("is-low", safeCount < 2);
+    liveRoot.classList.toggle("is-live", safeCount >= 2);
   }
 
   async function startPresence() {
