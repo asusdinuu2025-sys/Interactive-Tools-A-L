@@ -78,6 +78,43 @@
     return profile;
   }
 
+  function makeDefaultStudentName() {
+    if (!user?.id) return "Student0000";
+
+    const compactId = user.id.replace(/-/g, "").slice(0, 8);
+    const numericPart = parseInt(compactId, 16);
+
+    if (!Number.isFinite(numericPart)) {
+      return "Student0000";
+    }
+
+    return "Student" +
+      String(numericPart % 10000).padStart(4, "0");
+  }
+
+  async function ensureProfileRow() {
+    if (!user) return null;
+    if (profile) return profile;
+
+    const { data, error } = await client
+      .from("studylab_profiles")
+      .upsert(
+        {
+          id: user.id,
+          display_name: makeDefaultStudentName(),
+          updated_at: new Date().toISOString()
+        },
+        { onConflict: "id" }
+      )
+      .select("id,display_name,created_at,updated_at")
+      .single();
+
+    if (error) throw error;
+
+    profile = data;
+    return profile;
+  }
+
   async function saveProfile(name) {
     const cleanName = String(name || "")
       .trim()
@@ -145,6 +182,19 @@
         }
       } catch (migrationError) {
         console.warn("StudyLab profile migration:", migrationError);
+      }
+    }
+
+    /*
+     * Every anonymous StudyLab account gets a cloud profile row.
+     * A stable placeholder name is used until the student chooses
+     * a display name. The UUID and AI quota identity are unchanged.
+     */
+    if (!profile) {
+      try {
+        await ensureProfileRow();
+      } catch (profileError) {
+        console.warn("StudyLab default profile:", profileError);
       }
     }
 
