@@ -1185,29 +1185,32 @@
 
 
       <div class="studylab-ai-tools-row" data-studylab-ai>
-      <div class="student-counter">
+      <div class="student-milestone">
+        <div class="student-milestone-icon" aria-hidden="true">🚀</div>
 
-        <div class="counter-icon">
-          ^_^
-        </div>
+        <div class="student-milestone-content">
+          <div class="student-milestone-kicker">STUDYLAB IS GROWING</div>
 
-        <div class="counter-content">
+          <div class="student-milestone-main">
+            <span class="student-milestone-number" data-student-total>—</span>
+            <span class="student-milestone-label">students have joined StudyLab</span>
+          </div>
+
+          <div class="student-milestone-goal" data-student-next>
+            Next milestone: —
+          </div>
 
           <div
-            class="counter-number"
-            id="studentCount"
+            class="student-milestone-progress"
+            role="progressbar"
+            aria-label="Progress to next StudyLab student milestone"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
           >
-            0+
+            <span data-student-progress></span>
           </div>
-
-          <div class="counter-label">
-            <b>
-              Students Visited Study Lab LK
-            </b>
-          </div>
-
         </div>
-
       </div>
 
         <button
@@ -1282,179 +1285,157 @@
       <style>
 
         /* =====================================================
-           STUDY LAB LK — VISITOR COUNTER ORIGINAL CODE
+           STUDY LAB — STUDENT MILESTONE
            ===================================================== */
 
-        .student-counter {
+        .student-milestone {
           max-width: 520px;
           margin: 0 auto 38px;
-
           display: flex;
           align-items: center;
-          justify-content: center;
           gap: 16px;
-
           padding: 18px 24px;
-
           border-radius: 18px;
-
           background:
             linear-gradient(
               135deg,
-              rgba(18,58,106,.72),
-              rgba(7,29,64,.82)
+              rgba(48,135,220,.18),
+              rgba(75,72,160,.14)
             );
-
-          border: 1px solid rgba(105,190,255,.20);
-
+          border: 1px solid rgba(145,215,255,.18);
           box-shadow:
-            0 15px 35px rgba(0,0,0,.20),
-            0 0 30px rgba(0,130,255,.08),
-            inset 0 1px 0 rgba(255,255,255,.06);
-
-          backdrop-filter: blur(12px);
-
+            0 20px 50px rgba(0,0,0,.19),
+            inset 0 1px 0 rgba(255,255,255,.085),
+            0 0 32px rgba(70,170,255,.06);
+          backdrop-filter: blur(24px) saturate(140%);
+          -webkit-backdrop-filter: blur(24px) saturate(140%);
           text-align: left;
+          transition: transform .30s ease, box-shadow .30s ease;
         }
 
-        .counter-icon {
+        .student-milestone:hover {
+          transform: translateY(-3px);
+          box-shadow:
+            0 27px 55px rgba(0,0,0,.23),
+            inset 0 1px 0 rgba(255,255,255,.10),
+            0 0 38px rgba(70,170,255,.08);
+        }
+
+        .student-milestone-icon {
           width: 54px;
           height: 54px;
-
+          flex: 0 0 54px;
           display: flex;
           align-items: center;
           justify-content: center;
-
           border-radius: 15px;
-
           font-size: 27px;
-
           background:
             linear-gradient(
               145deg,
               rgba(65,160,255,.16),
               rgba(105,80,255,.15)
             );
-
           border: 1px solid rgba(110,190,255,.22);
-
-          box-shadow:
-            0 0 22px rgba(0,135,255,.12);
+          box-shadow: 0 0 22px rgba(0,135,255,.12);
         }
 
-        .counter-number {
+        .student-milestone-kicker {
+          color: #8fa7c1;
+          font-size: 10px;
+          font-weight: 850;
+          letter-spacing: .10em;
+          text-transform: uppercase;
+        }
+
+        .student-milestone-main {
+          display: flex;
+          align-items: baseline;
+          flex-wrap: wrap;
+          gap: 7px;
+          margin-top: 5px;
+        }
+
+        .student-milestone-number {
           font-size: 28px;
-          font-weight: 800;
+          font-weight: 850;
           line-height: 1;
-
           color: #8bdcff;
-
-          text-shadow:
-            0 0 18px rgba(60,190,255,.25);
+          text-shadow: 0 0 18px rgba(60,190,255,.25);
         }
 
-        .counter-label {
-          margin-top: 6px;
-
+        .student-milestone-label {
           color: #91abc8;
-
           font-size: 13px;
         }
 
-        @media (max-width: 600px) {
+        .student-milestone-goal {
+          margin-top: 7px;
+          color: #a8bdd4;
+          font-size: 11px;
+        }
 
-          .student-counter {
+        .student-milestone-progress {
+          height: 6px;
+          margin-top: 9px;
+          overflow: hidden;
+          border-radius: 999px;
+          background: rgba(255,255,255,.07);
+          border: 1px solid rgba(255,255,255,.06);
+        }
+
+        .student-milestone-progress span {
+          display: block;
+          width: 0%;
+          height: 100%;
+          border-radius: inherit;
+          background: linear-gradient(
+            90deg,
+            rgba(92,210,255,.70),
+            rgba(128,110,255,.80)
+          );
+          transition: width .55s ease;
+        }
+
+        html[data-theme="light"] .student-milestone {
+          background:
+            linear-gradient(135deg, rgba(255,255,255,.72), rgba(235,247,255,.58)),
+            rgba(255,255,255,.50);
+          border-color: rgba(255,255,255,.88);
+          box-shadow:
+            0 22px 52px rgba(35,70,105,.08),
+            inset 0 1px 0 rgba(255,255,255,.96);
+        }
+
+        html[data-theme="light"] .student-milestone-number {
+          color: #1689d4;
+        }
+
+        html[data-theme="light"] .student-milestone-kicker,
+        html[data-theme="light"] .student-milestone-goal {
+          color: #607892;
+        }
+
+        @media (max-width: 600px) {
+          .student-milestone {
             margin-left: 8px;
             margin-right: 8px;
             padding: 16px 18px;
           }
 
-          .counter-number {
+          .student-milestone-number {
             font-size: 24px;
           }
 
-          .counter-label {
+          .student-milestone-label {
             font-size: 12px;
           }
-
         }
 
       </style>
 
 
-      <script>
 
-        /* =====================================================
-           STUDY LAB LK — VISITOR COUNTER ANIMATION
-           ===================================================== */
-
-        (function () {
-
-          /* CHANGE ONLY THIS NUMBER */
-          const studentCount = 1144;
-
-          const counter =
-            document.getElementById("studentCount");
-
-          if (!counter) return;
-
-          const duration = 1600;
-
-          const startTime =
-            performance.now();
-
-          function animateCounter(currentTime) {
-
-            const elapsed =
-              currentTime - startTime;
-
-            const progress =
-              Math.min(
-                elapsed / duration,
-                1
-              );
-
-            const eased =
-              1 - Math.pow(
-                1 - progress,
-                3
-              );
-
-            const value =
-              Math.floor(
-                studentCount * eased
-              );
-
-            counter.textContent =
-              value.toLocaleString() + "+";
-
-            if (progress < 1) {
-
-              requestAnimationFrame(
-                animateCounter
-              );
-
-            } else {
-
-              counter.textContent =
-                studentCount.toLocaleString() + "+";
-
-            }
-
-          }
-
-          requestAnimationFrame(
-            animateCounter
-          );
-
-        })();
-
-      </script>
-
-
-      <!-- =====================================================
-           STUDY LAB LK — VISITOR COUNTER END
-           ===================================================== -->
 
     </section>
 
@@ -1716,6 +1697,7 @@
   <script src="assets/js/profile.js"></script>
   <script src="assets/js/main.js"></script>
   <script src="assets/js/study-dashboard.js"></script>
+  <script src="assets/js/student-milestone.js"></script>
   <script src="assets/js/live-layer.js"></script>
   <script src="assets/js/chat.js"></script>
   <script src="assets/js/feedback.js"></script>
