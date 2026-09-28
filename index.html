@@ -432,7 +432,7 @@
        ========================================================= */
 
     .telegram-card {
-      grid-column: 1 / -1;
+      grid-column: span 2;
       min-height: 132px;
       display: flex;
       align-items: center;
@@ -793,6 +793,37 @@
       }
     }
 
+    .mcq-practice-card {
+      border-color: rgba(120, 190, 255, .18);
+      background:
+        linear-gradient(135deg, rgba(95, 155, 255, .085), rgba(90, 220, 185, .055)),
+        var(--card-bg);
+    }
+
+    .mcq-practice-card:hover {
+      border-color: rgba(100, 220, 200, .30);
+    }
+
+    .mcq-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px;
+      height: 52px;
+      flex: 0 0 52px;
+      border-radius: 15px;
+      background: rgba(85, 180, 255, .10);
+      border: 1px solid rgba(115, 200, 255, .15);
+      font-size: 27px;
+    }
+
+    @media (max-width: 1000px) {
+      .telegram-card,
+      .mcq-practice-card {
+        grid-column: 1 / -1;
+      }
+    }
+
     /* =========================================================
        HOMEPAGE — TIGHTER VERTICAL SPACING
        ========================================================= */
@@ -825,11 +856,13 @@
     @media (max-width: 720px) {
 
       .telegram-card,
+      .mcq-practice-card,
       .chemistry-resources-card {
         display: block;
       }
 
       .telegram-card .card-icon,
+      .mcq-practice-card .card-icon,
       .chemistry-resources-card .card-icon {
         margin-bottom: 15px;
       }
@@ -1588,6 +1621,27 @@
       </div>
 
       <span class="card-cta">Open Channels →</span>
+    </a>
+
+    <a
+      class="telegram-card mcq-practice-card"
+      href="https://almcq.vercel.app"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Open Online pastpaper MCQ practice"
+    >
+      <span class="card-icon mcq-icon" aria-hidden="true">📝</span>
+
+      <div class="telegram-card-content">
+        <span class="telegram-badge">ONLINE PRACTICE</span>
+        <h2>Online pastpaper MCQ practice</h2>
+        <p lang="si">
+          පසුගිය විභාග ප්‍රශ්න ආශ්‍රිත MCQ සමඟ ඔබේ දැනුම පරීක්ෂා කරමින්
+          වේගයෙන් පුහුණු වන්න.
+        </p>
+      </div>
+
+      <span class="card-cta">Practice MCQs →</span>
     </a>
 
     <!-- =======================================================
