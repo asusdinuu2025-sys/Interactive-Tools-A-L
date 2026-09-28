@@ -1295,9 +1295,10 @@
 
       
       <!-- =====================================================
-           STUDY LAB — LIVE NOW + A/L 2027 COUNTDOWN
+           STUDY LAB — FOUR UTILITY CARDS TEST ROW
            ===================================================== -->
 
+      <div class="homepage-utility-row">
       <section
         class="live-layer"
         data-live-layer
@@ -1426,6 +1427,73 @@
         </aside>
       </div>
 
+      </div>
+
+      <style>
+        /* =====================================================
+           FOUR UTILITY CARDS — PREVIEW TEST
+           Keep the four utility cards equal and in one row.
+           ===================================================== */
+        .homepage-utility-row {
+          position: relative;
+          z-index: 35;
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 16px;
+          width: 100%;
+          margin: 0 auto 38px;
+          align-items: stretch;
+        }
+
+        .homepage-utility-row > .live-layer,
+        .homepage-utility-row > .studylab-ai-tools-row {
+          display: contents;
+        }
+
+        .homepage-utility-row .live-card,
+        .homepage-utility-row .student-milestone,
+        .homepage-utility-row .studylab-ai-launcher {
+          width: 100%;
+          min-width: 0;
+          min-height: 132px;
+          height: 132px;
+          box-sizing: border-box;
+          margin: 0;
+        }
+
+        .homepage-utility-row .student-milestone {
+          max-width: none;
+        }
+
+        .homepage-utility-row .studylab-ai-launcher {
+          padding: 20px 18px;
+        }
+
+        .homepage-utility-row .studylab-ai-panel {
+          top: 144px;
+          right: 0;
+        }
+
+        @media (max-width: 900px) {
+          .homepage-utility-row {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+        }
+
+        @media (max-width: 720px) {
+          .homepage-utility-row {
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-bottom: 22px;
+          }
+
+          .homepage-utility-row .live-card,
+          .homepage-utility-row .student-milestone,
+          .homepage-utility-row .studylab-ai-launcher {
+            height: 132px;
+          }
+        }
+      </style>
 
 
       <style>
