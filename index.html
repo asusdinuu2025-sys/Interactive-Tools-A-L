@@ -1295,9 +1295,10 @@
 
       
       <!-- =====================================================
-           STUDY LAB — LIVE NOW + A/L 2027 COUNTDOWN
+           STUDY LAB — FOUR UTILITY CARDS TEST ROW
            ===================================================== -->
 
+      <div class="homepage-utility-row">
       <section
         class="live-layer"
         data-live-layer
@@ -1426,6 +1427,139 @@
         </aside>
       </div>
 
+      </div>
+
+      <style>
+        /* =====================================================
+           FOUR UTILITY CARDS — PREVIEW TEST
+           Keep the four utility cards equal and in one row.
+           ===================================================== */
+        .homepage-utility-row {
+          position: relative;
+          z-index: 35;
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 16px;
+          width: 100%;
+          margin: 0 auto 38px;
+          align-items: stretch;
+        }
+
+        .homepage-utility-row > .live-layer,
+        .homepage-utility-row > .studylab-ai-tools-row {
+          display: contents;
+        }
+
+        .homepage-utility-row .live-card,
+        .homepage-utility-row .student-milestone,
+        .homepage-utility-row .studylab-ai-launcher {
+          width: 100%;
+          min-width: 0;
+          min-height: 154px;
+          height: 154px;
+          box-sizing: border-box;
+          margin: 0;
+        }
+
+        .homepage-utility-row .live-card {
+          padding: 16px 18px;
+        }
+
+        .homepage-utility-row .live-card-head {
+          margin-bottom: 10px;
+        }
+
+        .homepage-utility-row .countdown-grid {
+          gap: 7px;
+        }
+
+        .homepage-utility-row .countdown-box {
+          padding: 9px 5px;
+          border-radius: 13px;
+        }
+
+        .homepage-utility-row .countdown-value {
+          font-size: 22px;
+        }
+
+        .homepage-utility-row .countdown-label {
+          margin-top: 4px;
+          font-size: 9px;
+        }
+
+        .homepage-utility-row .countdown-note {
+          margin-top: 7px;
+          font-size: 9px;
+          line-height: 1.25;
+        }
+
+        .homepage-utility-row .student-milestone {
+          max-width: none;
+          padding: 14px 16px;
+          gap: 11px;
+        }
+
+        .homepage-utility-row .student-milestone-icon {
+          width: 46px;
+          height: 46px;
+          flex-basis: 46px;
+          border-radius: 13px;
+          font-size: 23px;
+        }
+
+        .homepage-utility-row .student-milestone-main {
+          gap: 5px;
+          margin-top: 4px;
+        }
+
+        .homepage-utility-row .student-milestone-number {
+          font-size: 24px;
+        }
+
+        .homepage-utility-row .student-milestone-label {
+          font-size: 11px;
+        }
+
+        .homepage-utility-row .student-milestone-goal {
+          margin-top: 5px;
+          font-size: 10px;
+        }
+
+        .homepage-utility-row .student-milestone-progress {
+          height: 5px;
+          margin-top: 7px;
+        }
+
+        .homepage-utility-row .studylab-ai-launcher {
+          padding: 18px 16px;
+        }
+
+        .homepage-utility-row .studylab-ai-panel {
+          top: 144px;
+          right: 0;
+        }
+
+        @media (max-width: 900px) {
+          .homepage-utility-row {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+        }
+
+        @media (max-width: 720px) {
+          .homepage-utility-row {
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-bottom: 22px;
+          }
+
+          .homepage-utility-row .live-card,
+          .homepage-utility-row .student-milestone,
+          .homepage-utility-row .studylab-ai-launcher {
+            min-height: 154px;
+            height: 154px;
+          }
+        }
+      </style>
 
 
       <style>
