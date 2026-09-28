@@ -4,237 +4,88 @@
   <link rel="icon" type="image/png" href="assets/icon/icon2.png">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title>StudyLab — GIT (General Information Technology) Sri Lanka</title>
-  <meta
-    name="description"
-    content="StudyLab GIT hub for Sri Lankan G.C.E. A/L students with GIT past papers, marking schemes, notes, exam information and study resources."
-  />
-
+  <title>GIT Past Papers — Study-Lab</title>
+  <meta name="description" content="G.C.E A/L General Information Technology (GIT) past papers linked to ALapiEdu." />
   <link rel="stylesheet" href="assets/css/main.css" />
-
   <style>
-    :root {
-      --git-cyan: #78e3ff;
-      --git-green: #74f0c2;
-      --git-glow: rgba(70, 190, 255, 0.14);
-    }
-
-    body {
-      position: relative;
-      overflow-x: hidden;
-    }
-
-    body::before,
-    body::after {
-      content: "";
-      position: fixed;
-      pointer-events: none;
-      width: 430px;
-      height: 430px;
-      border-radius: 50%;
-      filter: blur(105px);
-      z-index: -3;
-    }
-
-    body::before {
-      top: -190px;
-      left: -170px;
-      background: rgba(35, 190, 255, 0.13);
-    }
-
-    body::after {
-      right: -175px;
-      bottom: -190px;
-      background: rgba(65, 235, 185, 0.09);
-    }
-
-    .git-background {
-      position: fixed;
-      inset: 0;
-      overflow: hidden;
-      pointer-events: none;
-      z-index: -2;
-      opacity: 1;
-    }
-
-    .git-symbol {
-      position: absolute;
-      color: rgba(125, 225, 255, 0.08);
-      font-family: "Segoe UI", Arial, sans-serif;
-      font-weight: 600;
-      white-space: nowrap;
-      user-select: none;
-      animation: gitFloat 24s linear infinite;
-    }
-
-    @keyframes gitFloat {
-      0% {
-        transform: translate3d(0, 34px, 0);
-        opacity: 0;
-      }
-      12% {
-        opacity: 1;
-      }
-      50% {
-        transform: translate3d(26px, -32px, 0);
-      }
-      88% {
-        opacity: 1;
-      }
-      100% {
-        transform: translate3d(-20px, -105px, 0);
-        opacity: 0;
-      }
-    }
-
-    .git-header {
-      text-align: center;
-      padding: clamp(22px, 5vw, 46px) 0 6px;
-    }
-
-    .git-header h1 {
-      margin: 0 0 10px;
-      font-size: clamp(1.7rem, 4vw, 2.6rem);
-      letter-spacing: -0.03em;
-      text-shadow: 0 12px 36px rgba(0, 0, 0, 0.15);
-    }
-
-    .git-header p {
-      max-width: 700px;
-      margin: 0 auto;
-      color: var(--text-secondary);
-      line-height: 1.7;
-    }
-
-    .git-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 12px;
-      padding: 7px 12px;
-      border-radius: 999px;
-      background: rgba(80, 205, 255, 0.09);
-      border: 1px solid rgba(100, 220, 255, 0.16);
-      color: var(--git-cyan);
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .git-info {
-      margin: 26px auto 0;
-      max-width: 920px;
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
-    }
-
-    .git-info-item {
-      padding: 16px 18px;
-      border-radius: 18px;
-      background: rgba(16, 30, 45, 0.34);
-      border: 1px solid rgba(255, 255, 255, 0.10);
-      box-shadow:
-        0 18px 42px rgba(0, 0, 0, 0.14),
-        inset 0 1px 0 rgba(255, 255, 255, 0.055);
-      backdrop-filter: blur(22px) saturate(145%);
-      -webkit-backdrop-filter: blur(22px) saturate(145%);
-    }
-
-    .git-info-item strong {
-      display: block;
-      margin-bottom: 4px;
-      color: var(--git-green);
-      font-size: 0.92rem;
-    }
-
-    .git-info-item span {
-      color: var(--text-secondary);
-      font-size: 0.84rem;
-    }
-
-    .git-resource-card {
-      position: relative;
-      overflow: hidden;
-      background:
-        linear-gradient(135deg, rgba(57, 187, 229, 0.07), rgba(101, 235, 191, 0.045)),
-        var(--card-bg);
-      border: 1px solid rgba(110, 215, 245, 0.14);
-    }
-
-    .git-resource-card::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 12%;
-      right: 12%;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.30), transparent);
-      pointer-events: none;
-    }
-
-    .git-resource-card:hover {
-      border-color: rgba(110, 225, 248, 0.28);
-      box-shadow:
-        0 22px 58px rgba(30, 170, 205, 0.18),
-        inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    }
-
-    .git-resource-card .card-icon {
-      background: linear-gradient(
-        135deg,
-        rgba(72, 205, 255, 0.20),
-        rgba(76, 238, 180, 0.16)
-      );
-    }
-
-    .git-source-note {
-      max-width: 760px;
-      margin: 28px auto 0;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 0.82rem;
+    .papers-note {
+      margin: 0 0 24px;
+      opacity: 0.82;
       line-height: 1.6;
     }
 
-    html[data-theme="light"] .git-info-item {
-      background: rgba(255, 255, 255, 0.56);
-      border-color: rgba(255, 255, 255, 0.88);
-      box-shadow:
-        0 20px 48px rgba(35, 70, 105, 0.08),
-        inset 0 1px 0 rgba(255,255,255,0.96);
+    .papers-note a {
+      color: inherit;
+      font-weight: 700;
     }
 
-    html[data-theme="light"] .git-resource-card {
-      background:
-        linear-gradient(135deg, rgba(255,255,255,0.64), rgba(238,252,255,0.53)),
-        var(--card-bg);
-      border-color: rgba(255,255,255,0.88);
+    .paper-year {
+      margin: 28px 0 14px;
+      font-size: 1.35rem;
     }
 
-    @media (max-width: 760px) {
-      .git-info {
-        grid-template-columns: 1fr;
+    .paper-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .paper-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 16px 18px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(8px);
+    }
+
+    .paper-title {
+      margin: 0;
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
+    .paper-type {
+      margin: 4px 0 0;
+      font-size: 0.9rem;
+      opacity: 0.72;
+    }
+
+    .paper-btn {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 9px 14px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 700;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.08);
+      color: inherit;
+      transition: transform .18s ease, background .18s ease;
+    }
+
+    .paper-btn:hover {
+      transform: translateY(-1px);
+      background: rgba(255,255,255,0.14);
+    }
+
+    @media (max-width: 600px) {
+      .paper-item {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .paper-btn {
+        width: 100%;
       }
     }
-  </style>
+</style>
 </head>
-
-<body class="git-page">
-  <div class="git-background" aria-hidden="true">
-    <span class="git-symbol" style="left:6%; top:16%; animation-duration:31s;">0101</span>
-    <span class="git-symbol" style="left:25%; top:10%; animation-duration:36s; animation-delay:-14s;">&lt;/&gt;</span>
-    <span class="git-symbol" style="left:53%; top:18%; animation-duration:33s; animation-delay:-6s;">GIT</span>
-    <span class="git-symbol" style="left:82%; top:12%; animation-duration:39s; animation-delay:-20s;">SQL</span>
-    <span class="git-symbol" style="left:12%; top:45%; animation-duration:35s; animation-delay:-9s;">1010</span>
-    <span class="git-symbol" style="left:38%; top:55%; animation-duration:30s; animation-delay:-17s;">HTML</span>
-    <span class="git-symbol" style="left:71%; top:48%; animation-duration:37s; animation-delay:-12s;">@</span>
-    <span class="git-symbol" style="left:87%; top:72%; animation-duration:32s; animation-delay:-24s;">DB</span>
-    <span class="git-symbol" style="left:27%; top:79%; animation-duration:40s; animation-delay:-27s;">0110</span>
-    <span class="git-symbol" style="left:60%; top:84%; animation-duration:34s; animation-delay:-7s;">NETWORK</span>
-  </div>
+<body>
 
   <header class="site-header">
     <div class="brand">
@@ -247,150 +98,152 @@
   </header>
 
   <main class="container">
-    <section class="git-header">
-      <span class="git-badge">A/L Common Subject</span>
-      <h1>💻 සාමාන්‍ය තොරතුරු තාක්ෂණය (GIT)</h1>
-      <p>
-        G.C.E. A/L සමඟ අධ්‍යයනය කරන GIT සඳහා past papers, marking schemes,
-        notes සහ විභාග සම්බන්ධ නිල සම්පත් එකම තැනකින්.
-      </p>
-
-      <div class="git-info" aria-label="GIT resource overview">
-        <div class="git-info-item">
-          <strong>Past Papers</strong>
-          <span>Recent and historical GIT examination papers.</span>
-        </div>
-        <div class="git-info-item">
-          <strong>Answers</strong>
-          <span>Available marking schemes and answer resources.</span>
-        </div>
-        <div class="git-info-item">
-          <strong>Exam Resources</strong>
-          <span>Official examination information and guidance.</span>
-        </div>
-      </div>
+    <section class="page-header">
+      <h1>💻 GIT Past Papers</h1>
+      <p>G.C.E. A/L General Information Technology past papers</p>
     </section>
 
     <div class="back-row">
       <a class="back-button" href="index.html">← Back to Subjects</a>
     </div>
 
-    <section class="tool-grid" aria-label="GIT resources">
+    <p class="papers-note">
+      Papers are opened directly from
+      <a href="https://alapiedu.com/Category/paper_hub/PaperSubject?paper_type=Past+Paper&search=&subject=ict" target="_blank" rel="noopener noreferrer">ALapiEdu</a>.
+      Study-Lab does not host these PDF files.
+    </p>
 
-      <a
-        class="tool-card git-resource-card"
-        href="https://pastpapers.wiki/2024-a-l-git-past-paper-english-medium/"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Open GIT English medium past papers"
-      >
-        <span class="card-icon">📄</span>
-        <h3>GIT Past Papers — English</h3>
-        <p>Recent GIT papers with links to previous examination papers and available marking schemes.</p>
-        <span class="open-tool-btn">View Papers →</span>
-      </a>
+    <section aria-label="GIT past papers">
+      <h2 class="paper-year">2025</h2>
+      <div class="paper-list">
+        <div class="paper-item">
+          <div><p class="paper-title">2025 AL GIT Full Paper + Marking</p><p class="paper-type">Past Paper + Marking</p></div>
+          <a class="paper-btn" href="https://alapiedu.com/Category/paper_hub/uploads/1775565867_y2025_AL_Ict_Sinhala_Mark_Scheme_Final.pdf" target="_blank" rel="noopener noreferrer">View PDF →</a>
+        </div>
+      </div>
 
-      <a
-        class="tool-card git-resource-card"
-        href="https://pastpapers.wiki/2024-a-l-git-past-paper-sinhala-medium/"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Open GIT Sinhala medium past papers"
-      >
-        <span class="card-icon">📄</span>
-        <h3>GIT Past Papers — Sinhala</h3>
-        <p>GIT Sinhala-medium paper resources with access to earlier years and available answers.</p>
-        <span class="open-tool-btn">View Papers →</span>
-      </a>
+      <h2 class="paper-year">2023</h2>
+      <div class="paper-list">
+        <div class="paper-item">
+          <div><p class="paper-title">2023 AL GIT Past Paper</p><p class="paper-type">Past Paper</p></div>
+          <a class="paper-btn" href="https://alapiedu.com/Category/paper_hub/uploads/1753847711_2023.pdf" target="_blank" rel="noopener noreferrer">View PDF →</a>
+        </div>
+      </div>
 
-      <a
-        class="tool-card git-resource-card"
-        href="https://jobconlk.com/gce-a-l-git-past-papers"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Open GIT papers and answers archive"
-      >
-        <span class="card-icon">🗂️</span>
-        <h3>GIT Papers &amp; Answers Archive</h3>
-        <p>Year-organized GIT paper resources covering different language mediums.</p>
-        <span class="open-tool-btn">Open Archive →</span>
-      </a>
+      <h2 class="paper-year">2022</h2>
+      <div class="paper-list">
+        <div class="paper-item">
+          <div><p class="paper-title">2022 AL GIT Past Paper — Part 2</p><p class="paper-type">Part 2</p></div>
+          <a class="paper-btn" href="https://alapiedu.com/Category/paper_hub/uploads/1753847668_2022%20p2.pdf" target="_blank" rel="noopener noreferrer">View PDF →</a>
+        </div>
+      </div>
 
-      <a
-        class="tool-card git-resource-card"
-        href="https://www.e-akaram.edu.lk/2026/09/GCE-AL-GIT.html"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Open GIT notes and resources"
-      >
-        <span class="card-icon">📘</span>
-        <h3>GIT Notes &amp; Resources</h3>
-        <p>GIT notes and study-resource collection for revision.</p>
-        <span class="open-tool-btn">Open Resources →</span>
-      </a>
+      <h2 class="paper-year">2022</h2>
+      <div class="paper-list">
+        <div class="paper-item">
+          <div><p class="paper-title">2022 AL GIT Past Paper — Part 1</p><p class="paper-type">Part 1</p></div>
+          <a class="paper-btn" href="https://alapiedu.com/Category/paper_hub/uploads/1753847637_2022%20p1.pdf" target="_blank" rel="noopener noreferrer">View PDF →</a>
+        </div>
+      </div>
 
-      <a
-        class="tool-card git-resource-card"
-        href="https://www.doenets.lk/"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Open official Department of Examinations"
-      >
-        <span class="card-icon">🏛️</span>
-        <h3>Official GIT Exam Information</h3>
-        <p>Check the Department of Examinations for current GIT examination notices and official updates.</p>
-        <span class="open-tool-btn">Open Official Site →</span>
-      </a>
+      <h2 class="paper-year">2021</h2>
+      <div class="paper-list">
+        <div class="paper-item">
+          <div><p class="paper-title">2021 AL GIT Past Paper</p><p class="paper-type">Past Paper</p></div>
+          <a class="paper-btn" href="https://alapiedu.com/Category/paper_hub/uploads/1753846995_2021%20ICT%20Paper.pdf" target="_blank" rel="noopener noreferrer">View PDF →</a>
+        </div>
+      </div>
 
-      <a
-        class="tool-card git-resource-card"
-        href="https://www.doenets.lk/documents/statistics/GIT_Book.pdf"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Open official GIT examination guide"
-      >
-        <span class="card-icon">📑</span>
-        <h3>Official GIT Examination Guide</h3>
-        <p>Department of Examinations publication covering GIT examination information and structure.</p>
-        <span class="open-tool-btn">Open Guide →</span>
-      </a>
+      <h2 class="paper-year">2020</h2>
+      <div class="paper-list">
+        <div class="paper-item">
+          <div><p class="paper-title">2020 AL GIT Past Paper</p><p class="paper-type">Past Paper</p></div>
+          <a class="paper-btn" href="https://alapiedu.com/Category/paper_hub/uploads/1753846959_2020%20ICT%20Paper.pdf" target="_blank" rel="noopener noreferrer">View PDF →</a>
+        </div>
+      </div>
+
+      <h2 class="paper-year">2019</h2>
+      <div class="paper-list">
+        <div class="paper-item">
+          <div><p class="paper-title">2019 AL GIT Past Paper</p><p class="paper-type">Past Paper</p></div>
+          <a class="paper-btn" href="https://alapiedu.com/Category/paper_hub/uploads/1753846937_2019%20ICT%20%20Paper.pdf" target="_blank" rel="noopener noreferrer">View PDF →</a>
+        </div>
+      </div>
+
+      <h2 class="paper-year">2018</h2>
+      <div class="paper-list">
+        <div class="paper-item">
+          <div><p class="paper-title">2018 AL GIT Past Paper</p><p class="paper-type">Past Paper</p></div>
+          <a class="paper-btn" href="https://alapiedu.com/Category/paper_hub/uploads/1753846881_2018%20ICT%20%20Paper.pdf" target="_blank" rel="noopener noreferrer">View PDF →</a>
+        </div>
+      </div>
+
+      <h2 class="paper-year">2017</h2>
+      <div class="paper-list">
+        <div class="paper-item">
+          <div><p class="paper-title">2017 AL GIT Past Paper</p><p class="paper-type">Past Paper</p></div>
+          <a class="paper-btn" href="https://alapiedu.com/Category/paper_hub/uploads/1753846863_2017%20ICT%20%20Paper.pdf" target="_blank" rel="noopener noreferrer">View PDF →</a>
+        </div>
+      </div>
+
+      <h2 class="paper-year">2016</h2>
+      <div class="paper-list">
+        <div class="paper-item">
+          <div><p class="paper-title">2016 AL GIT Past Paper</p><p class="paper-type">Past Paper</p></div>
+          <a class="paper-btn" href="https://alapiedu.com/Category/paper_hub/uploads/1753846809_2016%20ICT%20%20Paper.pdf" target="_blank" rel="noopener noreferrer">View PDF →</a>
+        </div>
+      </div>
+
+      <h2 class="paper-year">2015</h2>
+      <div class="paper-list">
+        <div class="paper-item">
+          <div><p class="paper-title">2015 AL GIT Past Paper</p><p class="paper-type">Past Paper</p></div>
+          <a class="paper-btn" href="https://alapiedu.com/Category/paper_hub/uploads/1753846786_2015%20ICT%20%20Paper.pdf" target="_blank" rel="noopener noreferrer">View PDF →</a>
+        </div>
+      </div>
+
+      <h2 class="paper-year">2014</h2>
+      <div class="paper-list">
+        <div class="paper-item">
+          <div><p class="paper-title">2014 AL GIT Past Paper</p><p class="paper-type">Past Paper</p></div>
+          <a class="paper-btn" href="https://alapiedu.com/Category/paper_hub/uploads/1753846767_2014%20ICT%20%20Paper.pdf" target="_blank" rel="noopener noreferrer">View PDF →</a>
+        </div>
+      </div>
+
+      <h2 class="paper-year">2013</h2>
+      <div class="paper-list">
+        <div class="paper-item">
+          <div><p class="paper-title">2013 AL GIT Past Paper</p><p class="paper-type">Past Paper</p></div>
+          <a class="paper-btn" href="https://alapiedu.com/Category/paper_hub/uploads/1753846715_2013%20ICT%20%20Paper.pdf" target="_blank" rel="noopener noreferrer">View PDF →</a>
+        </div>
+      </div>
+
+      <h2 class="paper-year">2012</h2>
+      <div class="paper-list">
+        <div class="paper-item">
+          <div><p class="paper-title">2012 AL GIT Past Paper</p><p class="paper-type">Past Paper</p></div>
+          <a class="paper-btn" href="https://alapiedu.com/Category/paper_hub/uploads/1753846676_2012%20ICT%20%20Paper.pdf" target="_blank" rel="noopener noreferrer">View PDF →</a>
+        </div>
+      </div>
+
+      <h2 class="paper-year">2011</h2>
+      <div class="paper-list">
+        <div class="paper-item">
+          <div><p class="paper-title">2011 AL GIT Past Paper</p><p class="paper-type">Past Paper</p></div>
+          <a class="paper-btn" href="https://alapiedu.com/Category/paper_hub/uploads/1753846619_2011%20ICT%20%20Paper.pdf" target="_blank" rel="noopener noreferrer">View PDF →</a>
+        </div>
+      </div>
 
     </section>
-
-    <p class="git-source-note">
-      External resources are linked to their original websites. Check the source site for the latest available paper, answer or examination notice.
-    </p>
   </main>
 
   <footer class="site-footer">
     <div>
       Developed by
-      <a
-        class="dev-link"
-        href="https://t.me/dinusha_official"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
+      <a class="dev-link" href="https://t.me/dinusha_official" target="_blank" rel="noopener noreferrer">
         Dinusha ツ
       </a>
-
-      <div>
-        Powered by
-        <a
-          class="dev-link"
-          href="https://t.me/htmlstudytools"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          E-Tools Telegram Channel
-        </a>
-      </div>
-
-      <hr>
-    </div>
-
-    <div class="footer-title">
-      Study-Lab for G.C.E A/L Sri Lanka
+      <div class="footer-title">Study-Lab for G.C.E A/L Sri Lanka</div>
     </div>
   </footer>
 
