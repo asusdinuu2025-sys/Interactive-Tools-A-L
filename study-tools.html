@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <link rel="icon" type="image/png" href="assets/icon/icon2.png">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Study Tools — Study-Lab</title>
+  <meta name="description" content="StudyLab general A/L study tools including marks calculator, study time planner, Pomodoro timer, random question generator, flashcards, mistake notebook, daily practice generator, mock exam timer and unit converter." />
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <style>
+    .study-tools-hero {
+      text-align: center;
+      padding: clamp(22px, 5vw, 46px) 0 10px;
+    }
+
+    .study-tools-hero h1 {
+      margin: 0 0 10px;
+      font-size: clamp(1.8rem, 4vw, 2.7rem);
+      letter-spacing: -0.035em;
+    }
+
+    .study-tools-hero p {
+      max-width: 720px;
+      margin: 0 auto;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    .study-tools-badge {
+      display: inline-flex;
+      margin-bottom: 12px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(120, 185, 255, .08);
+      border: 1px solid rgba(120, 205, 255, .16);
+      color: var(--accent-cyan);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .study-tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 18px;
+      margin-top: 28px;
+    }
+
+    .utility-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+      min-height: 170px;
+      padding: 22px;
+      border-radius: 22px;
+      background:
+        linear-gradient(145deg, rgba(82, 177, 255, .075), rgba(151, 111, 255, .045)),
+        var(--card-bg);
+      border: 1px solid rgba(115, 200, 255, .14);
+      box-shadow:
+        0 18px 46px rgba(20, 55, 115, .16),
+        inset 0 1px 0 rgba(255,255,255,.07);
+      backdrop-filter: blur(20px) saturate(140%);
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+      cursor: pointer;
+      transition: transform .28s ease, border-color .28s ease, box-shadow .28s ease;
+      text-align: left;
+    }
+
+    .utility-card:hover,
+    .utility-card.is-active {
+      transform: translateY(-5px);
+      border-color: rgba(115, 220, 255, .32);
+      box-shadow:
+        0 24px 58px rgba(25, 80, 150, .20),
+        inset 0 1px 0 rgba(255,255,255,.10);
+    }
+
+    .utility-card .card-icon {
+      width: 54px;
+      height: 54px;
+      font-size: 1.45rem;
+      background:
+        linear-gradient(135deg, rgba(78, 205, 255, .16), rgba(148, 114, 255, .13));
+    }
+
+    .utility-card h2 {
+      margin: 0;
+      font-size: 1.05rem;
+    }
+
+    .utility-card p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: .90rem;
+      line-height: 1.55;
+    }
+
+    .utility-card .card-cta {
+      margin-top: auto;
+      font-size: .86rem;
+    }
+
+    .tool-panel {
+      display: none;
+      margin-top: 18px;
+      padding: 22px;
+      border-radius: 22px;
+      background:
+        linear-gradient(145deg, rgba(36, 85, 130, .11), rgba(96, 74, 145, .07)),
+        var(--card-bg);
+      border: 1px solid rgba(120, 205, 255, .13);
+      box-shadow:
+        0 20px 50px rgba(20, 45, 90, .14),
+        inset 0 1px 0 rgba(255,255,255,.06);
+      backdrop-filter: blur(20px) saturate(140%);
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+    }
+
+    .tool-panel.is-open {
+      display: block;
+    }
+
+    .tool-panel h2 {
+      margin: 0 0 6px;
+      font-size: 1.2rem;
+    }
+
+    .tool-panel > p {
+      margin: 0 0 18px;
+      color: var(--text-secondary);
+    }
+
+    .tool-form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+    }
+
+    .tool-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .tool-field label {
+      font-size: .82rem;
+      color: var(--text-secondary);
+      font-weight: 650;
+    }
+
+    .tool-field input,
+    .tool-field select,
+    .tool-field textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 11px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+      background: rgba(255,255,255,.055);
+      color: inherit;
+      font: inherit;
+      outline: none;
+    }
+
+    .tool-field textarea {
+      min-height: 92px;
+      resize: vertical;
+    }
+
+    .tool-field input:focus,
+    .tool-field select:focus,
+    .tool-field textarea:focus {
+      border-color: rgba(110, 215, 255, .42);
+      box-shadow: 0 0 0 3px rgba(90, 190, 255, .08);
+    }
+
+    .tool-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .tool-btn {
+      border: 1px solid rgba(110, 205, 255, .18);
+      border-radius: 12px;
+      padding: 10px 15px;
+      background: linear-gradient(135deg, rgba(91,140,255,.22), rgba(168,119,255,.16));
+      color: inherit;
+      font-weight: 750;
+      cursor: pointer;
+    }
+
+    .tool-btn.secondary {
+      background: rgba(255,255,255,.06);
+    }
+
+    .tool-result {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.045);
+      border: 1px solid rgba(255,255,255,.08);
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .result-strong {
+      color: var(--accent-cyan);
+      font-weight: 800;
+    }
+
+    .timer-display {
+      font-size: clamp(3rem, 10vw, 5.2rem);
+      font-weight: 850;
+      letter-spacing: .03em;
+      text-align: center;
+      margin: 8px 0 14px;
+      color: var(--accent-cyan);
+      text-shadow: 0 0 28px rgba(75,195,255,.18);
+    }
+
+    .timer-mode {
+      text-align: center;
+      color: var(--text-secondary);
+      font-weight: 750;
+    }
+
+    .question-box {
+      min-height: 120px;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.045);
+      border: 1px solid rgba(255,255,255,.08);
+      text-align: center;
+      font-size: 1.06rem;
+      line-height: 1.65;
+    }
+
+    .stack-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .saved-item {
+      padding: 13px 15px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.045);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .saved-item strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .saved-item small {
+      color: var(--text-muted);
+    }
+
+    .flashcard-view {
+      min-height: 150px;
+      display: grid;
+      place-items: center;
+      padding: 22px;
+      border-radius: 18px;
+      background:
+        linear-gradient(135deg, rgba(75,190,255,.08), rgba(142,108,255,.06)),
+        rgba(255,255,255,.035);
+      border: 1px solid rgba(115,205,255,.13);
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .flashcard-label {
+      margin-bottom: 9px;
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--text-muted);
+    }
+
+    .flashcard-text {
+      font-size: 1.05rem;
+      line-height: 1.65;
+    }
+
+    .practice-plan {
+      display: grid;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .practice-task {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 13px;
+      background: rgba(255,255,255,.045);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .practice-task span:first-child {
+      width: 34px;
+      height: 34px;
+      flex: 0 0 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      background: rgba(100,200,255,.10);
+      border: 1px solid rgba(115,205,255,.13);
+    }
+
+    .converter-output {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--accent-cyan);
+    }
+
+    .tool-note {
+      margin-top: 24px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: .82rem;
+      line-height: 1.6;
+    }
+
+    html[data-theme="light"] .utility-card,
+    html[data-theme="light"] .tool-panel {
+      background:
+        linear-gradient(145deg, rgba(255,255,255,.64), rgba(239,250,255,.53)),
+        var(--card-bg);
+      border-color: rgba(255,255,255,.88);
+      box-shadow:
+        0 20px 52px rgba(35,70,105,.08),
+        inset 0 1px 0 rgba(255,255,255,.96);
+    }
+
+    html[data-theme="light"] .tool-field input,
+    html[data-theme="light"] .tool-field select,
+    html[data-theme="light"] .tool-field textarea {
+      background: rgba(255,255,255,.62);
+      border-color: rgba(90,130,165,.18);
+    }
+
+    @media (max-width: 600px) {
+      .utility-card,
+      .tool-panel {
+        padding: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="brand">
+      <span class="brand-mark">🎓</span>
+      <span>E-tools</span>
+    </div>
+    <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle light and dark mode">
+      🌙 Dark Mode
+    </button>
+  </header>
+
+  <main class="container">
+    <section class="study-tools-hero">
+      <span class="study-tools-badge">A/L General Study Tools</span>
+      <h1>🧰 Study Tools</h1>
+      <p>
+        Practical tools for planning, calculating, practicing and managing your A/L study workflow.
+        The A/L 2027 countdown already lives on the StudyLab homepage, so it is deliberately not duplicated here.
+      </p>
+    </section>
+
+    <div class="back-row">
+      <a class="back-button" href="index.html">← Back to Subjects</a>
+    </div>
+
+    <section class="study-tools-grid" aria-label="Study tools">
+
+      <button class="utility-card" type="button" data-open-tool="marks">
+        <span class="card-icon">🧮</span>
+        <h2>Marks Calculator</h2>
+        <p>Calculate raw totals, percentages, averages and weighted marks.</p>
+        <span class="card-cta">Open Calculator →</span>
+      </button>
+
+      <button class="utility-card" type="button" data-open-tool="study-time">
+        <span class="card-icon">⏱️</span>
+        <h2>Study Time Calculator</h2>
+        <p>Distribute your available study time across subjects using custom weights.</p>
+        <span class="card-cta">Plan Time →</span>
+      </button>
+
+      <button class="utility-card" type="button" data-open-tool="pomodoro">
+        <span class="card-icon">🍅</span>
+        <h2>Pomodoro / Study Timer</h2>
+        <p>Run focused study sessions with automatic study and break cycles.</p>
+        <span class="card-cta">Start Timer →</span>
+      </button>
+
+      <button class="utility-card" type="button" data-open-tool="random">
+        <span class="card-icon">🎲</span>
+        <h2>Random Question Generator</h2>
+        <p>Generate a quick A/L-style revision prompt from a selected subject.</p>
+        <span class="card-cta">Generate Question →</span>
+      </button>
+
+      <button class="utility-card" type="button" data-open-tool="flashcards">
+        <span class="card-icon">🗃️</span>
+        <h2>Flashcards</h2>
+        <p>Create your own question-and-answer cards and keep them on this device.</p>
+        <span class="card-cta">Open Flashcards →</span>
+      </button>
+
+      <button class="utility-card" type="button" data-open-tool="mistakes">
+        <span class="card-icon">📓</span>
+        <h2>Mistake Notebook</h2>
+        <p>Save questions you got wrong, record the correction and retry them later.</p>
+        <span class="card-cta">Open Notebook →</span>
+      </button>
+
+      <button class="utility-card" type="button" data-open-tool="daily">
+        <span class="card-icon">📅</span>
+        <h2>Daily Practice Generator</h2>
+        <p>Build a balanced daily practice plan from your subjects and available time.</p>
+        <span class="card-cta">Build Plan →</span>
+      </button>
+
+      <button class="utility-card" type="button" data-open-tool="mock">
+        <span class="card-icon">🎯</span>
+        <h2>Mock Exam Timer</h2>
+        <p>Run a distraction-free countdown for a full paper or custom mock exam.</p>
+        <span class="card-cta">Start Mock →</span>
+      </button>
+
+      <button class="utility-card" type="button" data-open-tool="units">
+        <span class="card-icon">📏</span>
+        <h2>Unit Converter</h2>
+        <p>Convert common length, mass, time, energy, pressure, temperature and electrical units.</p>
+        <span class="card-cta">Open Converter →</span>
+      </button>
+    </section>
+
+    <section id="tool-marks" class="tool-panel" data-panel="marks">
+      <h2>🧮 Marks Calculator</h2>
+      <p>Enter as many component marks as you need. Weighted calculation can use custom weights.</p>
+      <div class="tool-form-grid">
+        <div class="tool-field"><label for="mark1">Mark 1</label><input id="mark1" type="number" min="0" step="any" placeholder="e.g. 72"></div>
+        <div class="tool-field"><label for="max1">Maximum 1</label><input id="max1" type="number" min="0" step="any" placeholder="100"></div>
+        <div class="tool-field"><label for="mark2">Mark 2</label><input id="mark2" type="number" min="0" step="any" placeholder="e.g. 58"></div>
+        <div class="tool-field"><label for="max2">Maximum 2</label><input id="max2" type="number" min="0" step="any" placeholder="100"></div>
+        <div class="tool-field"><label for="mark3">Mark 3</label><input id="mark3" type="number" min="0" step="any" placeholder="e.g. 84"></div>
+        <div class="tool-field"><label for="max3">Maximum 3</label><input id="max3" type="number" min="0" step="any" placeholder="100"></div>
+        <div class="tool-field"><label for="weight1">Weight 1 (%)</label><input id="weight1" type="number" min="0" step="any" placeholder="e.g. 40"></div>
+        <div class="tool-field"><label for="weight2">Weight 2 (%)</label><input id="weight2" type="number" min="0" step="any" placeholder="30"></div>
+        <div class="tool-field"><label for="weight3">Weight 3 (%)</label><input id="weight3" type="number" min="0" step="any" placeholder="30"></div>
+      </div>
+      <div class="tool-actions">
+        <button class="tool-btn" type="button" id="calculateMarks">Calculate</button>
+      </div>
+      <div class="tool-result" id="marksResult">Enter your marks and maximums, then calculate.</div>
+    </section>
+
+    <section id="tool-study-time" class="tool-panel" data-panel="study-time">
+      <h2>⏱️ Study Time Calculator</h2>
+      <p>Choose your available hours and give each subject a weight. Higher weight gets more time.</p>
+      <div class="tool-form-grid">
+        <div class="tool-field"><label for="studyHours">Available hours</label><input id="studyHours" type="number" min="0.25" step="0.25" placeholder="e.g. 6"></div>
+        <div class="tool-field"><label for="studyMaths">Mathematics weight</label><input id="studyMaths" type="number" min="0" step="1" value="1"></div>
+        <div class="tool-field"><label for="studyPhysics">Physics weight</label><input id="studyPhysics" type="number" min="0" step="1" value="1"></div>
+        <div class="tool-field"><label for="studyChemistry">Chemistry weight</label><input id="studyChemistry" type="number" min="0" step="1" value="1"></div>
+        <div class="tool-field"><label for="studyBiology">Biology weight</label><input id="studyBiology" type="number" min="0" step="1" value="1"></div>
+        <div class="tool-field"><label for="studyGIT">GIT weight</label><input id="studyGIT" type="number" min="0" step="1" value="0"></div>
+        <div class="tool-field"><label for="studyEnglish">General English weight</label><input id="studyEnglish" type="number" min="0" step="1" value="0"></div>
+      </div>
+      <div class="tool-actions"><button class="tool-btn" type="button" id="calculateStudyTime">Calculate Allocation</button></div>
+      <div class="tool-result" id="studyTimeResult">Enter available hours and weights.</div>
+    </section>
+
+    <section id="tool-pomodoro" class="tool-panel" data-panel="pomodoro">
+      <h2>🍅 Pomodoro / Study Timer</h2>
+      <p>Set your focus and break lengths. The timer switches between them automatically.</p>
+      <div class="tool-form-grid">
+        <div class="tool-field"><label for="focusMinutes">Focus minutes</label><input id="focusMinutes" type="number" min="1" max="180" value="25"></div>
+        <div class="tool-field"><label for="breakMinutes">Break minutes</label><input id="breakMinutes" type="number" min="1" max="60" value="5"></div>
+      </div>
+      <div class="timer-mode" id="pomodoroMode">Focus</div>
+      <div class="timer-display" id="pomodoroDisplay">25:00</div>
+      <div class="tool-actions" style="justify-content:center;">
+        <button class="tool-btn" type="button" id="pomodoroStart">Start</button>
+        <button class="tool-btn secondary" type="button" id="pomodoroPause">Pause</button>
+        <button class="tool-btn secondary" type="button" id="pomodoroReset">Reset</button>
+      </div>
+    </section>
+
+    <section id="tool-random" class="tool-panel" data-panel="random">
+      <h2>🎲 Random Question Generator</h2>
+      <p>These prompts are quick revision starters. They are deliberately separate from the existing past-paper/MCQ systems.</p>
+      <div class="tool-form-grid">
+        <div class="tool-field">
+          <label for="randomSubject">Subject</label>
+          <select id="randomSubject">
+            <option value="all">All subjects</option>
+            <option value="maths">Combined Mathematics</option>
+            <option value="physics">Physics</option>
+            <option value="chemistry">Chemistry</option>
+            <option value="biology">Biology</option>
+            <option value="git">GIT</option>
+            <option value="english">General English</option>
+          </select>
+        </div>
+      </div>
+      <div class="tool-actions"><button class="tool-btn" type="button" id="generateQuestion">Generate Random Question</button></div>
+      <div class="question-box" id="questionBox">Press the button to generate a question.</div>
+    </section>
+
+    <section id="tool-flashcards" class="tool-panel" data-panel="flashcards">
+      <h2>🗃️ Flashcards</h2>
+      <p>Cards are stored in your browser with localStorage. They are not uploaded to StudyLab's servers.</p>
+      <div class="tool-form-grid">
+        <div class="tool-field"><label for="flashFront">Front / Question</label><textarea id="flashFront" placeholder="e.g. State Newton's second law."></textarea></div>
+        <div class="tool-field"><label for="flashBack">Back / Answer</label><textarea id="flashBack" placeholder="e.g. F = ma"></textarea></div>
+      </div>
+      <div class="tool-actions">
+        <button class="tool-btn" type="button" id="saveFlashcard">Save Flashcard</button>
+        <button class="tool-btn secondary" type="button" id="newFlashcard">Show Saved Card</button>
+      </div>
+      <div class="flashcard-view" id="flashcardView" role="button" tabindex="0" aria-label="Flashcard, click to flip">
+        <div>
+          <div class="flashcard-label" id="flashLabel">Flashcard</div>
+          <div class="flashcard-text" id="flashText">No saved card yet.</div>
+        </div>
+      </div>
+      <div class="stack-list" id="flashcardList"></div>
+    </section>
+
+    <section id="tool-mistakes" class="tool-panel" data-panel="mistakes">
+      <h2>📓 Mistake Notebook</h2>
+      <p>Record what you got wrong and the corrected idea. Use the saved list for later retry sessions.</p>
+      <div class="tool-form-grid">
+        <div class="tool-field">
+          <label for="mistakeSubject">Subject</label>
+          <select id="mistakeSubject">
+            <option>Mathematics</option><option>Physics</option><option>Chemistry</option><option>Biology</option><option>GIT</option><option>General English</option><option>Other</option>
+          </select>
+        </div>
+        <div class="tool-field"><label for="mistakeQuestion">Question / mistake</label><textarea id="mistakeQuestion" placeholder="What did you get wrong?"></textarea></div>
+        <div class="tool-field"><label for="mistakeCorrection">Correction / lesson</label><textarea id="mistakeCorrection" placeholder="What should you remember next time?"></textarea></div>
+      </div>
+      <div class="tool-actions"><button class="tool-btn" type="button" id="saveMistake">Save Mistake</button></div>
+      <div class="stack-list" id="mistakeList"></div>
+    </section>
+
+    <section id="tool-daily" class="tool-panel" data-panel="daily">
+      <h2>📅 Daily Practice Generator</h2>
+      <p>Create a practical session plan from your available time. This is a planner, not a replacement for actual questions.</p>
+      <div class="tool-form-grid">
+        <div class="tool-field"><label for="dailyMinutes">Available minutes</label><input id="dailyMinutes" type="number" min="15" step="5" value="120"></div>
+        <div class="tool-field"><label for="dailySubjects">Subjects</label><input id="dailySubjects" type="text" value="Mathematics, Physics, Chemistry" placeholder="Separate subjects with commas"></div>
+      </div>
+      <div class="tool-actions"><button class="tool-btn" type="button" id="generateDaily">Generate Practice Plan</button></div>
+      <div class="practice-plan" id="dailyPlan"></div>
+    </section>
+
+    <section id="tool-mock" class="tool-panel" data-panel="mock">
+      <h2>🎯 Mock Exam Timer</h2>
+      <p>Use a custom duration for a full paper, timed section or mock exam.</p>
+      <div class="tool-form-grid">
+        <div class="tool-field"><label for="mockMinutes">Exam minutes</label><input id="mockMinutes" type="number" min="1" max="720" value="180"></div>
+      </div>
+      <div class="timer-display" id="mockDisplay">180:00</div>
+      <div class="tool-actions" style="justify-content:center;">
+        <button class="tool-btn" type="button" id="mockStart">Start</button>
+        <button class="tool-btn secondary" type="button" id="mockPause">Pause</button>
+        <button class="tool-btn secondary" type="button" id="mockReset">Reset</button>
+      </div>
+      <div class="tool-result" id="mockStatus">Ready.</div>
+    </section>
+
+    <section id="tool-units" class="tool-panel" data-panel="units">
+      <h2>📏 Unit Converter</h2>
+      <p>Convert common A/L science-study units without reaching for three tabs and a calculator app.</p>
+      <div class="tool-form-grid">
+        <div class="tool-field">
+          <label for="unitCategory">Category</label>
+          <select id="unitCategory">
+            <option value="length">Length</option>
+            <option value="mass">Mass</option>
+            <option value="time">Time</option>
+            <option value="energy">Energy</option>
+            <option value="pressure">Pressure</option>
+            <option value="temperature">Temperature</option>
+            <option value="voltage">Voltage</option>
+            <option value="current">Current</option>
+            <option value="resistance">Resistance</option>
+            <option value="power">Power</option>
+          </select>
+        </div>
+        <div class="tool-field"><label for="unitValue">Value</label><input id="unitValue" type="number" step="any" value="1"></div>
+        <div class="tool-field"><label for="unitFrom">From</label><select id="unitFrom"></select></div>
+        <div class="tool-field"><label for="unitTo">To</label><select id="unitTo"></select></div>
+      </div>
+      <div class="tool-actions"><button class="tool-btn" type="button" id="convertUnit">Convert</button></div>
+      <div class="tool-result"><div class="converter-output" id="unitResult">1 m = 100 cm</div></div>
+    </section>
+
+    <p class="tool-note">
+      Flashcards and mistake notes are stored locally in the current browser. They are not part of the StudyLab cloud profile system.
+    </p>
+  </main>
+
+  <footer class="site-footer">
+    <div>
+      Developed by
+      <a class="dev-link" href="https://t.me/dinusha_official" target="_blank" rel="noopener noreferrer">Dinusha ツ</a>
+      <div class="footer-title">Study-Lab for G.C.E A/L Sri Lanka</div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+  <script>
+    const $$ = (selector) => Array.from(document.querySelectorAll(selector));
+    const $ = (selector) => document.querySelector(selector);
+
+    // ---------- Tool panel navigation ----------
+    $$("[data-open-tool]").forEach((card) => {
+      card.addEventListener("click", () => {
+        const name = card.dataset.openTool;
+        const panel = document.querySelector('[data-panel="' + name + '"]');
+        if (!panel) return;
+
+        $$(".utility-card").forEach((item) => item.classList.remove("is-active"));
+        $$(".tool-panel").forEach((item) => item.classList.remove("is-open"));
+        card.classList.add("is-active");
+        panel.classList.add("is-open");
+        panel.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+
+    // ---------- Marks calculator ----------
+    $("#calculateMarks").addEventListener("click", () => {
+      const components = [];
+      for (let i = 1; i <= 3; i++) {
+        const mark = parseFloat($("#mark" + i).value);
+        const max = parseFloat($("#max" + i).value);
+        const weight = parseFloat($("#weight" + i).value);
+
+        if (Number.isFinite(mark) && Number.isFinite(max) && max > 0) {
+          components.push({
+            mark,
+            max,
+            weight: Number.isFinite(weight) && weight >= 0 ? weight : 0
+          });
+        }
+      }
+
+      if (!components.length) {
+        $("#marksResult").textContent = "Enter at least one valid mark and maximum.";
+        return;
+      }
+
+      const rawMark = components.reduce((sum, x) => sum + x.mark, 0);
+      const rawMax = components.reduce((sum, x) => sum + x.max, 0);
+      const percentage = rawMax ? (rawMark / rawMax) * 100 : 0;
+
+      const weightTotal = components.reduce((sum, x) => sum + x.weight, 0);
+      const weighted = weightTotal > 0
+        ? components.reduce((sum, x) => sum + ((x.mark / x.max) * 100) * (x.weight / weightTotal), 0)
+        : null;
+
+      $("#marksResult").innerHTML =
+        '<span class="result-strong">Raw total:</span> ' + rawMark.toFixed(2) + " / " + rawMax.toFixed(2) +
+        '<br><span class="result-strong">Percentage:</span> ' + percentage.toFixed(2) + "%" +
+        (weighted === null ? "" : '<br><span class="result-strong">Weighted mark:</span> ' + weighted.toFixed(2) + "%");
+    });
+
+    // ---------- Study time calculator ----------
+    $("#calculateStudyTime").addEventListener("click", () => {
+      const hours = parseFloat($("#studyHours").value);
+      if (!Number.isFinite(hours) || hours <= 0) {
+        $("#studyTimeResult").textContent = "Enter a positive number of available hours.";
+        return;
+      }
+
+      const entries = [
+        ["Mathematics", $("#studyMaths").value],
+        ["Physics", $("#studyPhysics").value],
+        ["Chemistry", $("#studyChemistry").value],
+        ["Biology", $("#studyBiology").value],
+        ["GIT", $("#studyGIT").value],
+        ["General English", $("#studyEnglish").value]
+      ].map(([name, value]) => [name, Math.max(0, parseFloat(value) || 0)])
+       .filter(([, weight]) => weight > 0);
+
+      const totalWeight = entries.reduce((sum, [, weight]) => sum + weight, 0);
+      if (!totalWeight) {
+        $("#studyTimeResult").textContent = "Give at least one subject a weight above zero.";
+        return;
+      }
+
+      $("#studyTimeResult").innerHTML = entries.map(([name, weight]) => {
+        const allocated = hours * weight / totalWeight;
+        const mins = Math.round(allocated * 60);
+        return '<span class="result-strong">' + name + ":</span> " + mins + " min (" + allocated.toFixed(2) + " h)";
+      }).join("<br>");
+    });
+
+    // ---------- Pomodoro ----------
+    const pomodoro = { remaining: 25 * 60, running: false, mode: "Focus", interval: null };
+
+    function formatSeconds(total) {
+      total = Math.max(0, Math.floor(total));
+      const h = Math.floor(total / 3600);
+      const m = Math.floor((total % 3600) / 60);
+      const s = total % 60;
+      return h > 0
+        ? String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0")
+        : String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+    }
+
+    function resetPomodoro() {
+      clearInterval(pomodoro.interval);
+      pomodoro.running = false;
+      pomodoro.mode = "Focus";
+      pomodoro.remaining = Math.max(1, parseInt($("#focusMinutes").value, 10) || 25) * 60;
+      $("#pomodoroMode").textContent = pomodoro.mode;
+      $("#pomodoroDisplay").textContent = formatSeconds(pomodoro.remaining);
+    }
+
+    $("#focusMinutes").addEventListener("change", () => { if (!pomodoro.running) resetPomodoro(); });
+    $("#breakMinutes").addEventListener("change", () => { if (!pomodoro.running && pomodoro.mode === "Break") resetPomodoro(); });
+
+    $("#pomodoroStart").addEventListener("click", () => {
+      if (pomodoro.running) return;
+      pomodoro.running = true;
+      pomodoro.interval = setInterval(() => {
+        pomodoro.remaining -= 1;
+        if (pomodoro.remaining <= 0) {
+          pomodoro.mode = pomodoro.mode === "Focus" ? "Break" : "Focus";
+          pomodoro.remaining = (pomodoro.mode === "Focus"
+            ? Math.max(1, parseInt($("#focusMinutes").value, 10) || 25)
+            : Math.max(1, parseInt($("#breakMinutes").value, 10) || 5)) * 60;
+          $("#pomodoroMode").textContent = pomodoro.mode;
+        }
+        $("#pomodoroDisplay").textContent = formatSeconds(pomodoro.remaining);
+      }, 1000);
+    });
+
+    $("#pomodoroPause").addEventListener("click", () => {
+      clearInterval(pomodoro.interval);
+      pomodoro.running = false;
+    });
+
+    $("#pomodoroReset").addEventListener("click", resetPomodoro);
+    resetPomodoro();
+
+    // ---------- Random question generator ----------
+    const questionBank = {
+      maths: [
+        "Find the stationary points of a polynomial function and determine their nature.",
+        "Solve a trigonometric equation over a specified interval and state all solutions.",
+        "Use vectors to find the angle between two lines or vectors.",
+        "Apply integration to find the area between two curves.",
+        "Use permutations or combinations to model a counting problem."
+      ],
+      physics: [
+        "Explain the assumptions behind the simple pendulum model and how the period depends on length.",
+        "Use Kirchhoff's laws to analyse a simple circuit with more than one loop.",
+        "Explain the photoelectric effect using photon energy.",
+        "Derive a relationship for projectile motion using horizontal and vertical components.",
+        "Explain how resonance occurs in a driven oscillating system."
+      ],
+      chemistry: [
+        "Explain how Le Chatelier's principle predicts a change in an equilibrium system.",
+        "Calculate the energy change for a reaction using bond enthalpies.",
+        "Explain how concentration affects the rate of a chemical reaction.",
+        "Describe a qualitative test that distinguishes two common ions.",
+        "Explain the relationship between pH, hydrogen-ion concentration and a strong acid."
+      ],
+      biology: [
+        "Explain how ATP supports an energy-requiring cellular process.",
+        "Compare gas exchange surfaces in humans and another organism.",
+        "Explain how the kidney contributes to osmoregulation.",
+        "Describe the sequence of events in a reflex arc.",
+        "Explain how natural selection can change allele frequencies in a population."
+      ],
+      git: [
+        "Explain the difference between a primary key and a foreign key in a relational database.",
+        "Describe the main purpose of an operating system.",
+        "Explain how an IP address differs from a MAC address.",
+        "Describe how a web browser and web server communicate using HTTP.",
+        "Explain why data validation is important in an information system."
+      ],
+      english: [
+        "Write a short formal paragraph proposing an improvement to a school facility.",
+        "Identify the main idea and two supporting details in a short passage you read.",
+        "Rewrite a sentence in the passive voice without changing its meaning.",
+        "Write a concise argumentative paragraph with a clear claim and supporting reason.",
+        "Correct a paragraph containing common tense and subject-verb agreement errors."
+      ]
+    };
+
+    $("#generateQuestion").addEventListener("click", () => {
+      const selected = $("#randomSubject").value;
+      const pools = selected === "all" ? Object.values(questionBank).flat() : questionBank[selected] || [];
+      const question = pools[Math.floor(Math.random() * pools.length)];
+      $("#questionBox").textContent = question || "No question available.";
+    });
+
+    // ---------- Flashcards ----------
+    const FLASH_KEY = "studylab_flashcards_v1";
+    let flashcards = JSON.parse(localStorage.getItem(FLASH_KEY) || "[]");
+    let flashIndex = -1;
+    let flashShowingBack = false;
+
+    function renderFlashcards() {
+      const list = $("#flashcardList");
+      list.innerHTML = "";
+      flashcards.forEach((card, index) => {
+        const item = document.createElement("div");
+        item.className = "saved-item";
+        item.innerHTML =
+          "<strong>" + escapeHtml(card.front) + "</strong>" +
+          "<small>Answer: " + escapeHtml(card.back) + " · Card " + (index + 1) + "</small>";
+        list.appendChild(item);
+      });
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function showFlashcard() {
+      if (!flashcards.length) {
+        $("#flashLabel").textContent = "Flashcard";
+        $("#flashText").textContent = "No saved card yet.";
+        return;
+      }
+      if (flashIndex < 0 || flashIndex >= flashcards.length) {
+        flashIndex = Math.floor(Math.random() * flashcards.length);
+      }
+      const card = flashcards[flashIndex];
+      $("#flashLabel").textContent = flashShowingBack ? "Answer" : "Question";
+      $("#flashText").textContent = flashShowingBack ? card.back : card.front;
+    }
+
+    $("#saveFlashcard").addEventListener("click", () => {
+      const front = $("#flashFront").value.trim();
+      const back = $("#flashBack").value.trim();
+      if (!front || !back) return;
+      flashcards.push({ front, back });
+      localStorage.setItem(FLASH_KEY, JSON.stringify(flashcards));
+      $("#flashFront").value = "";
+      $("#flashBack").value = "";
+      flashIndex = flashcards.length - 1;
+      flashShowingBack = false;
+      showFlashcard();
+      renderFlashcards();
+    });
+
+    $("#newFlashcard").addEventListener("click", () => {
+      flashIndex = -1;
+      flashShowingBack = false;
+      showFlashcard();
+    });
+
+    $("#flashcardView").addEventListener("click", () => {
+      if (!flashcards.length) return;
+      flashShowingBack = !flashShowingBack;
+      showFlashcard();
+    });
+
+    $("#flashcardView").addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        $("#flashcardView").click();
+      }
+    });
+
+    renderFlashcards();
+    showFlashcard();
+
+    // ---------- Mistake notebook ----------
+    const MISTAKE_KEY = "studylab_mistakes_v1";
+    let mistakes = JSON.parse(localStorage.getItem(MISTAKE_KEY) || "[]");
+
+    function renderMistakes() {
+      const list = $("#mistakeList");
+      list.innerHTML = "";
+      if (!mistakes.length) {
+        list.innerHTML = '<div class="saved-item"><small>No mistakes saved yet.</small></div>';
+        return;
+      }
+      mistakes.slice().reverse().forEach((item) => {
+        const div = document.createElement("div");
+        div.className = "saved-item";
+        div.innerHTML =
+          "<strong>" + escapeHtml(item.subject) + "</strong>" +
+          "<div>" + escapeHtml(item.question) + "</div>" +
+          "<small>Correction: " + escapeHtml(item.correction) + "</small>";
+        list.appendChild(div);
+      });
+    }
+
+    $("#saveMistake").addEventListener("click", () => {
+      const question = $("#mistakeQuestion").value.trim();
+      const correction = $("#mistakeCorrection").value.trim();
+      if (!question || !correction) return;
+      mistakes.push({
+        subject: $("#mistakeSubject").value,
+        question,
+        correction,
+        createdAt: new Date().toISOString()
+      });
+      localStorage.setItem(MISTAKE_KEY, JSON.stringify(mistakes));
+      $("#mistakeQuestion").value = "";
+      $("#mistakeCorrection").value = "";
+      renderMistakes();
+    });
+
+    renderMistakes();
+
+    // ---------- Daily practice generator ----------
+    $("#generateDaily").addEventListener("click", () => {
+      const minutes = Math.max(15, parseInt($("#dailyMinutes").value, 10) || 120);
+      const subjects = $("#dailySubjects").value.split(",").map((x) => x.trim()).filter(Boolean);
+      if (!subjects.length) {
+        $("#dailyPlan").innerHTML = '<div class="saved-item">Enter at least one subject.</div>';
+        return;
+      }
+
+      const totalBlocks = Math.max(1, Math.floor(minutes / 25));
+      const tasks = [];
+      for (let i = 0; i < totalBlocks; i++) {
+        const subject = subjects[i % subjects.length];
+        const modes = [
+          "25 min focused revision",
+          "25 min past-paper questions",
+          "25 min active recall",
+          "25 min mistake review"
+        ];
+        tasks.push(
+          '<div class="practice-task"><span>' + (i + 1) + '</span><div><strong>' +
+          escapeHtml(subject) + "</strong><br><small>" + modes[i % modes.length] + "</small></div></div>"
+        );
+      }
+      $("#dailyPlan").innerHTML = tasks.join("");
+    });
+
+    // ---------- Mock exam timer ----------
+    const mock = { remaining: 180 * 60, running: false, interval: null };
+
+    function resetMock() {
+      clearInterval(mock.interval);
+      mock.running = false;
+      mock.remaining = Math.max(1, parseInt($("#mockMinutes").value, 10) || 180) * 60;
+      $("#mockDisplay").textContent = formatSeconds(mock.remaining);
+      $("#mockStatus").textContent = "Ready.";
+    }
+
+    $("#mockMinutes").addEventListener("change", () => { if (!mock.running) resetMock(); });
+
+    $("#mockStart").addEventListener("click", () => {
+      if (mock.running) return;
+      mock.running = true;
+      $("#mockStatus").textContent = "Exam in progress.";
+      mock.interval = setInterval(() => {
+        mock.remaining -= 1;
+        $("#mockDisplay").textContent = formatSeconds(mock.remaining);
+        if (mock.remaining <= 0) {
+          clearInterval(mock.interval);
+          mock.running = false;
+          $("#mockStatus").textContent = "Time is up.";
+        }
+      }, 1000);
+    });
+
+    $("#mockPause").addEventListener("click", () => {
+      clearInterval(mock.interval);
+      mock.running = false;
+      $("#mockStatus").textContent = "Paused.";
+    });
+
+    $("#mockReset").addEventListener("click", resetMock);
+    resetMock();
+
+    // ---------- Unit converter ----------
+    const unitSets = {
+      length: {
+        units: { mm: 0.001, cm: 0.01, m: 1, km: 1000 },
+        labels: { mm: "mm", cm: "cm", m: "m", km: "km" }
+      },
+      mass: {
+        units: { mg: 0.000001, g: 0.001, kg: 1, tonne: 1000 },
+        labels: { mg: "mg", g: "g", kg: "kg", tonne: "tonne" }
+      },
+      time: {
+        units: { ms: 0.001, s: 1, min: 60, h: 3600 },
+        labels: { ms: "ms", s: "s", min: "min", h: "h" }
+      },
+      temperature: {
+        units: { celsius: "°C", fahrenheit: "°F", kelvin: "K" },
+        labels: { celsius: "°C", fahrenheit: "°F", kelvin: "K" }
+      },
+      energy: {
+        units: { J: 1, kJ: 1000, MJ: 1000000, Wh: 3600, kWh: 3600000 },
+        labels: { J: "J", kJ: "kJ", MJ: "MJ", Wh: "Wh", kWh: "kWh" }
+      },
+      pressure: {
+        units: { Pa: 1, kPa: 1000, MPa: 1000000, bar: 100000, atm: 101325 },
+        labels: { Pa: "Pa", kPa: "kPa", MPa: "MPa", bar: "bar", atm: "atm" }
+      },
+      voltage: {
+        units: { mV: 0.001, V: 1, kV: 1000 },
+        labels: { mV: "mV", V: "V", kV: "kV" }
+      },
+      current: {
+        units: { mA: 0.001, A: 1, kA: 1000 },
+        labels: { mA: "mA", A: "A", kA: "kA" }
+      },
+      resistance: {
+        units: { ohm: 1, kohm: 1000, Mohm: 1000000 },
+        labels: { ohm: "Ω", kohm: "kΩ", Mohm: "MΩ" }
+      },
+      power: {
+        units: { W: 1, kW: 1000, MW: 1000000 },
+        labels: { W: "W", kW: "kW", MW: "MW" }
+      }
+    };
+
+    function populateUnits() {
+      const set = unitSets[$("#unitCategory").value];
+      const from = $("#unitFrom");
+      const to = $("#unitTo");
+      from.innerHTML = "";
+      to.innerHTML = "";
+      Object.entries(set.labels).forEach(([key, label]) => {
+        from.insertAdjacentHTML("beforeend", '<option value="' + key + '">' + label + "</option>");
+        to.insertAdjacentHTML("beforeend", '<option value="' + key + '">' + label + "</option>");
+      });
+      if (to.options.length > 1) to.selectedIndex = 1;
+      convertUnit();
+    }
+
+    function convertUnit() {
+      const set = unitSets[$("#unitCategory").value];
+      const value = parseFloat($("#unitValue").value);
+      if (!Number.isFinite(value)) {
+        $("#unitResult").textContent = "Enter a number.";
+        return;
+      }
+
+      const from = $("#unitFrom").value;
+      const to = $("#unitTo").value;
+
+      let output;
+
+      if ($("#unitCategory").value === "temperature") {
+        let celsius;
+        if (from === "celsius") celsius = value;
+        else if (from === "fahrenheit") celsius = (value - 32) * 5 / 9;
+        else celsius = value - 273.15;
+
+        if (to === "celsius") output = celsius;
+        else if (to === "fahrenheit") output = (celsius * 9 / 5) + 32;
+        else output = celsius + 273.15;
+      } else {
+        const base = value * set.units[from];
+        output = base / set.units[to];
+      }
+
+      $("#unitResult").textContent =
+        value + " " + set.labels[from] + " = " + output.toPrecision(8).replace(/\.?0+$/, "") + " " + set.labels[to];
+    }
+
+    $("#unitCategory").addEventListener("change", populateUnits);
+    $("#convertUnit").addEventListener("click", convertUnit);
+    populateUnits();
+  </script>
+</body>
+</html>
