@@ -1012,6 +1012,10 @@
         units: { ms: 0.001, s: 1, min: 60, h: 3600 },
         labels: { ms: "ms", s: "s", min: "min", h: "h" }
       },
+      temperature: {
+        units: { celsius: "°C", fahrenheit: "°F", kelvin: "K" },
+        labels: { celsius: "°C", fahrenheit: "°F", kelvin: "K" }
+      },
       energy: {
         units: { J: 1, kJ: 1000, MJ: 1000000, Wh: 3600, kWh: 3600000 },
         labels: { J: "J", kJ: "kJ", MJ: "MJ", Wh: "Wh", kWh: "kWh" }
@@ -1063,13 +1067,22 @@
       const from = $("#unitFrom").value;
       const to = $("#unitTo").value;
 
+      let output;
+
       if ($("#unitCategory").value === "temperature") {
-        $("#unitResult").textContent = "Temperature conversion is not configured in this release.";
-        return;
+        let celsius;
+        if (from === "celsius") celsius = value;
+        else if (from === "fahrenheit") celsius = (value - 32) * 5 / 9;
+        else celsius = value - 273.15;
+
+        if (to === "celsius") output = celsius;
+        else if (to === "fahrenheit") output = (celsius * 9 / 5) + 32;
+        else output = celsius + 273.15;
+      } else {
+        const base = value * set.units[from];
+        output = base / set.units[to];
       }
 
-      const base = value * set.units[from];
-      const output = base / set.units[to];
       $("#unitResult").textContent =
         value + " " + set.labels[from] + " = " + output.toPrecision(8).replace(/\.?0+$/, "") + " " + set.labels[to];
     }
