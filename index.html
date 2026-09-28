@@ -1294,140 +1294,6 @@
            ===================================================== -->
 
       
-      <!-- =====================================================
-           STUDY LAB — LIVE NOW + A/L 2027 COUNTDOWN
-           ===================================================== -->
-
-      <section
-        class="live-layer"
-        data-live-layer
-        data-countdown-target="2027-08-01T00:00:00+05:30"
-        aria-label="Live StudyLab information"
-      >
-        <article class="live-card">
-          <div class="live-card-head">
-            <h2 class="live-card-title">Live Now</h2>
-            <span class="live-pill"><span class="live-dot" aria-hidden="true"></span>LIVE</span>
-          </div>
-          <div class="live-number" data-live-online aria-live="polite">—</div>
-          <div class="live-subtext">Students currently on Study-Lab</div>
-          <div class="live-status" data-live-status aria-live="polite">Connecting to live service…</div>
-        </article>
-
-        <article class="live-card">
-          <div class="live-card-head">
-            <h2 class="live-card-title">A/L 2027 Countdown</h2>
-            <span class="live-pill">REAL TIME</span>
-          </div>
-          <div class="countdown-grid" aria-live="polite">
-            <div class="countdown-box"><span class="countdown-value" data-cd-days>—</span><span class="countdown-label">Days</span></div>
-            <div class="countdown-box"><span class="countdown-value" data-cd-hours>—</span><span class="countdown-label">Hours</span></div>
-            <div class="countdown-box"><span class="countdown-value" data-cd-minutes>—</span><span class="countdown-label">Minutes</span></div>
-            <div class="countdown-box"><span class="countdown-value" data-cd-seconds>—</span><span class="countdown-label">Seconds</span></div>
-          </div>
-          <div class="countdown-note" data-countdown-note>Countdown target will be updated when the official 2027 timetable is published.</div>
-        </article>
-      </section>
-
-
-      <div class="studylab-ai-tools-row" data-studylab-ai>
-      <div class="student-milestone">
-        <div class="student-milestone-icon" aria-hidden="true">🚀</div>
-
-        <div class="student-milestone-content">
-          <div class="student-milestone-kicker">STUDYLAB IS GROWING</div>
-
-          <div class="student-milestone-main">
-            <span class="student-milestone-number" data-student-total>—</span>
-            <span class="student-milestone-label">students have joined StudyLab</span>
-          </div>
-
-          <div class="student-milestone-goal" data-student-next>
-            Next milestone: —
-          </div>
-
-          <div
-            class="student-milestone-progress"
-            role="progressbar"
-            aria-label="Progress to next StudyLab student milestone"
-            aria-valuemin="0"
-            aria-valuemax="100"
-            aria-valuenow="0"
-          >
-            <span data-student-progress></span>
-          </div>
-        </div>
-      </div>
-
-        <button
-          type="button"
-          class="studylab-ai-launcher"
-          data-ai-launcher
-          aria-expanded="false"
-          aria-controls="studylabAiPanel"
-        >
-          <span class="studylab-ai-launcher-icon" aria-hidden="true">🤖</span>
-          <span class="studylab-ai-launcher-copy">
-            <span class="studylab-ai-launcher-title">ASK AI ANYTHING</span>
-            <span class="studylab-ai-launcher-subtitle">StudyLab AI Tutor</span>
-          </span>
-        </button>
-
-        <aside
-          class="studylab-ai-panel"
-          id="studylabAiPanel"
-          data-ai-panel
-          aria-label="StudyLab AI Tutor"
-          aria-hidden="true"
-          inert
-        >
-          <div class="studylab-ai-head">
-            <div class="studylab-ai-head-left">
-              <h2 class="studylab-ai-title">StudyLab AI Tutor</h2>
-              <div class="studylab-ai-meta">
-                <span class="studylab-ai-status-dot" data-ai-status-dot aria-hidden="true"></span>
-                <span data-ai-status>A/L study assistant</span>
-              </div>
-            </div>
-            <button
-              type="button"
-              class="studylab-ai-close"
-              data-ai-close
-              aria-label="Close StudyLab AI"
-            >×</button>
-          </div>
-
-          <div class="studylab-ai-notice">
-            Sinhala, English හෝ mixed language වලින් අහන්න. Ask anything, and use follow-up questions while this chat is open.
-          </div>
-
-          <div class="studylab-ai-list" data-ai-list aria-live="polite"></div>
-
-          <form class="studylab-ai-compose" data-ai-form>
-            <textarea
-              class="studylab-ai-input"
-              data-ai-input
-              rows="1"
-              maxlength="4000"
-              autocomplete="off"
-              spellcheck="true"
-              placeholder="Ask anything..."
-              aria-label="Ask StudyLab AI a question"
-            ></textarea>
-
-            <button
-              type="submit"
-              class="studylab-ai-send"
-              data-ai-send
-              disabled
-              aria-label="Send question"
-            >➤</button>
-          </form>
-        </aside>
-      </div>
-
-
-
       <style>
 
         /* =====================================================
@@ -1590,6 +1456,377 @@
          STUDY LAB LK — SUBJECT CARDS START
          ======================================================= -->
 
+
+    <style>
+      /* =========================================================
+         HOMEPAGE EXPERIMENT — UTILITY RAIL + MAJOR CONTENT
+         Layout only. Existing live/countdown/AI behavior remains
+         controlled by their existing scripts.
+         ========================================================= */
+
+      .homepage-content-layout {
+        display: grid;
+        grid-template-columns: minmax(220px, 250px) minmax(0, 1fr);
+        align-items: start;
+        gap: 24px;
+        margin-top: 4px;
+      }
+
+      .homepage-utility-rail {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-width: 0;
+        position: relative;
+        z-index: 35;
+      }
+
+      .homepage-utility-rail .live-layer {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+        max-width: none;
+        margin: 0;
+      }
+
+      .homepage-utility-rail .live-card {
+        height: 112px;
+        min-height: 112px;
+        box-sizing: border-box;
+        padding: 14px 15px;
+        border-radius: 18px;
+      }
+
+      .homepage-utility-rail .live-card-head {
+        margin-bottom: 9px;
+      }
+
+      .homepage-utility-rail .live-card-title {
+        font-size: 13px;
+      }
+
+      .homepage-utility-rail .live-pill {
+        padding: 4px 7px;
+        font-size: 9px;
+      }
+
+      .homepage-utility-rail .live-number {
+        font-size: 27px;
+      }
+
+      .homepage-utility-rail .live-subtext {
+        margin-top: 4px;
+        font-size: 10px;
+      }
+
+      .homepage-utility-rail .live-status {
+        min-height: 14px;
+        margin-top: 4px;
+        font-size: 9px;
+        line-height: 1.25;
+      }
+
+      .homepage-utility-rail .countdown-grid {
+        gap: 5px;
+      }
+
+      .homepage-utility-rail .countdown-box {
+        padding: 7px 3px;
+        border-radius: 10px;
+      }
+
+      .homepage-utility-rail .countdown-value {
+        font-size: 16px;
+      }
+
+      .homepage-utility-rail .countdown-label {
+        margin-top: 3px;
+        font-size: 7px;
+      }
+
+      .homepage-utility-rail .countdown-note {
+        margin-top: 5px;
+        font-size: 8px;
+        line-height: 1.2;
+      }
+
+      .homepage-utility-rail .studylab-ai-tools-row {
+        width: 100%;
+        margin: 0;
+        display: block;
+      }
+
+      .homepage-utility-rail .student-milestone {
+        width: 100%;
+        max-width: none;
+        min-height: 112px;
+        height: 112px;
+        box-sizing: border-box;
+        margin: 0;
+        padding: 14px 15px;
+        border-radius: 18px;
+        gap: 11px;
+      }
+
+      .homepage-utility-rail .student-milestone-icon {
+        width: 40px;
+        height: 40px;
+        flex-basis: 40px;
+        border-radius: 12px;
+        font-size: 20px;
+      }
+
+      .homepage-utility-rail .student-milestone-kicker {
+        font-size: 8px;
+      }
+
+      .homepage-utility-rail .student-milestone-main {
+        gap: 4px;
+        margin-top: 4px;
+      }
+
+      .homepage-utility-rail .student-milestone-number {
+        font-size: 22px;
+      }
+
+      .homepage-utility-rail .student-milestone-label {
+        font-size: 10px;
+      }
+
+      .homepage-utility-rail .student-milestone-goal {
+        margin-top: 5px;
+        font-size: 8px;
+      }
+
+      .homepage-utility-rail .student-milestone-progress {
+        margin-top: 6px;
+        height: 4px;
+      }
+
+      .homepage-utility-rail .studylab-ai-launcher {
+        width: 100%;
+        min-height: 112px;
+        height: 112px;
+        box-sizing: border-box;
+        padding: 14px 15px;
+        border-radius: 18px;
+      }
+
+      .homepage-utility-rail .studylab-ai-launcher-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        font-size: 1.12rem;
+      }
+
+      .homepage-utility-rail .studylab-ai-launcher-title {
+        font-size: .82rem;
+      }
+
+      .homepage-utility-rail .studylab-ai-launcher-subtitle {
+        font-size: .60rem;
+      }
+
+      .homepage-utility-rail .studylab-ai-panel {
+        top: calc(100% - 8px);
+        right: 0;
+      }
+
+      .homepage-major-content {
+        min-width: 0;
+      }
+
+      .homepage-major-content .card-grid {
+        margin-top: 0 !important;
+      }
+
+      @media (max-width: 900px) and (min-width: 721px) {
+        .homepage-content-layout {
+          grid-template-columns: minmax(205px, 220px) minmax(0, 1fr);
+          gap: 18px;
+        }
+      }
+
+      @media (max-width: 720px) {
+        .homepage-content-layout {
+          grid-template-columns: 1fr;
+          gap: 18px;
+        }
+
+        .homepage-utility-rail {
+          width: 100%;
+        }
+
+        .homepage-utility-rail .live-card,
+        .homepage-utility-rail .student-milestone,
+        .homepage-utility-rail .studylab-ai-launcher {
+          height: auto;
+          min-height: 98px;
+        }
+
+        .homepage-utility-rail .live-layer {
+          gap: 10px;
+        }
+
+        .homepage-utility-rail .student-milestone {
+          padding: 13px 15px;
+        }
+
+        .homepage-utility-rail .studylab-ai-panel {
+          position: fixed;
+          top: auto;
+          right: 12px;
+          bottom: 12px;
+        }
+      }
+    </style>
+
+    
+    <!-- =======================================================
+         STUDYLAB HOMEPAGE — UTILITY RAIL + MAJOR CONTENT
+         ======================================================= -->
+
+    <div class="homepage-content-layout">
+      <aside class="homepage-utility-rail" aria-label="StudyLab live and study utilities">
+      <!-- =====================================================
+           STUDY LAB — LIVE NOW + A/L 2027 COUNTDOWN
+           ===================================================== -->
+
+      <section
+        class="live-layer"
+        data-live-layer
+        data-countdown-target="2027-08-01T00:00:00+05:30"
+        aria-label="Live StudyLab information"
+      >
+        <article class="live-card">
+          <div class="live-card-head">
+            <h2 class="live-card-title">Live Now</h2>
+            <span class="live-pill"><span class="live-dot" aria-hidden="true"></span>LIVE</span>
+          </div>
+          <div class="live-number" data-live-online aria-live="polite">—</div>
+          <div class="live-subtext">Students currently on Study-Lab</div>
+          <div class="live-status" data-live-status aria-live="polite">Connecting to live service…</div>
+        </article>
+
+        <article class="live-card">
+          <div class="live-card-head">
+            <h2 class="live-card-title">A/L 2027 Countdown</h2>
+            <span class="live-pill">REAL TIME</span>
+          </div>
+          <div class="countdown-grid" aria-live="polite">
+            <div class="countdown-box"><span class="countdown-value" data-cd-days>—</span><span class="countdown-label">Days</span></div>
+            <div class="countdown-box"><span class="countdown-value" data-cd-hours>—</span><span class="countdown-label">Hours</span></div>
+            <div class="countdown-box"><span class="countdown-value" data-cd-minutes>—</span><span class="countdown-label">Minutes</span></div>
+            <div class="countdown-box"><span class="countdown-value" data-cd-seconds>—</span><span class="countdown-label">Seconds</span></div>
+          </div>
+          <div class="countdown-note" data-countdown-note>Countdown target will be updated when the official 2027 timetable is published.</div>
+        </article>
+      </section>
+
+
+      <div class="studylab-ai-tools-row" data-studylab-ai>
+      <div class="student-milestone">
+        <div class="student-milestone-icon" aria-hidden="true">🚀</div>
+
+        <div class="student-milestone-content">
+          <div class="student-milestone-kicker">STUDYLAB IS GROWING</div>
+
+          <div class="student-milestone-main">
+            <span class="student-milestone-number" data-student-total>—</span>
+            <span class="student-milestone-label">students have joined StudyLab</span>
+          </div>
+
+          <div class="student-milestone-goal" data-student-next>
+            Next milestone: —
+          </div>
+
+          <div
+            class="student-milestone-progress"
+            role="progressbar"
+            aria-label="Progress to next StudyLab student milestone"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
+          >
+            <span data-student-progress></span>
+          </div>
+        </div>
+      </div>
+
+        <button
+          type="button"
+          class="studylab-ai-launcher"
+          data-ai-launcher
+          aria-expanded="false"
+          aria-controls="studylabAiPanel"
+        >
+          <span class="studylab-ai-launcher-icon" aria-hidden="true">🤖</span>
+          <span class="studylab-ai-launcher-copy">
+            <span class="studylab-ai-launcher-title">ASK AI ANYTHING</span>
+            <span class="studylab-ai-launcher-subtitle">StudyLab AI Tutor</span>
+          </span>
+        </button>
+
+        <aside
+          class="studylab-ai-panel"
+          id="studylabAiPanel"
+          data-ai-panel
+          aria-label="StudyLab AI Tutor"
+          aria-hidden="true"
+          inert
+        >
+          <div class="studylab-ai-head">
+            <div class="studylab-ai-head-left">
+              <h2 class="studylab-ai-title">StudyLab AI Tutor</h2>
+              <div class="studylab-ai-meta">
+                <span class="studylab-ai-status-dot" data-ai-status-dot aria-hidden="true"></span>
+                <span data-ai-status>A/L study assistant</span>
+              </div>
+            </div>
+            <button
+              type="button"
+              class="studylab-ai-close"
+              data-ai-close
+              aria-label="Close StudyLab AI"
+            >×</button>
+          </div>
+
+          <div class="studylab-ai-notice">
+            Sinhala, English හෝ mixed language වලින් අහන්න. Ask anything, and use follow-up questions while this chat is open.
+          </div>
+
+          <div class="studylab-ai-list" data-ai-list aria-live="polite"></div>
+
+          <form class="studylab-ai-compose" data-ai-form>
+            <textarea
+              class="studylab-ai-input"
+              data-ai-input
+              rows="1"
+              maxlength="4000"
+              autocomplete="off"
+              spellcheck="true"
+              placeholder="Ask anything..."
+              aria-label="Ask StudyLab AI a question"
+            ></textarea>
+
+            <button
+              type="submit"
+              class="studylab-ai-send"
+              data-ai-send
+              disabled
+              aria-label="Send question"
+            >➤</button>
+          </form>
+        </aside>
+      </div>
+
+
+
+
+      </aside>
+
+      <section class="homepage-major-content" aria-label="StudyLab major resources">
     <section
       class="card-grid"
       aria-label="Subjects"
@@ -1876,6 +2113,9 @@
     <!-- =======================================================
          STUDY LAB LK — SUBJECT CARDS END
          ======================================================= -->
+      </section>
+    </div>
+
 
 
   </main>
