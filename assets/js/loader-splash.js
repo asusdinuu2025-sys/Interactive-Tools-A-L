@@ -8,24 +8,21 @@
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
 
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduceMotion) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   let w = 0, h = 0, dpr = 1, raf = 0;
   const start = performance.now();
 
-  const drops = [
-    [-.44,-.28,10,.9], [.35,-.33,9,.7], [-.58,-.07,6,.9], [.52,-.12,7,.75],
-    [-.32,-.48,5,.7], [.10,-.52,8,.85], [.61,.18,9,.72], [-.66,.23,5,.9],
-    [-.25,.50,6,.74], [.18,.54,4,.83], [.67,.40,7,.62], [-.74,-.35,3,.8],
-    [.77,-.18,4,.78], [-.80,.05,3,.7], [.06,.69,3,.65], [-.11,-.67,4,.82],
-    [.38,.66,3,.68], [-.42,.64,3,.72]
-  ];
+  const smoke = Array.from({ length: 24 }, (_, i) => ({
+    angle: i * 2.399963 + 0.5,
+    radius: 0.035 + ((i * 17) % 23) / 1000,
+    size: 0.035 + ((i * 13) % 31) / 900,
+    drift: 0.018 + ((i * 7) % 17) / 1000,
+    speed: 0.45 + ((i * 11) % 23) / 45,
+    phase: ((i * 19) % 29) / 29
+  }));
 
-  function rand(i) {
-    const x = Math.sin(i * 91.317 + 17.13) * 43758.5453;
-    return x - Math.floor(x);
-  }
+  let wordAlpha = 0;
 
   function resize() {
     dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -38,180 +35,104 @@
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
-  function center() {
-    return { x: w * 0.5, y: h * 0.62 };
-  }
-
-  function drawOrb(x, y, r, green, alpha, stretch) {
-    const g = ctx.createRadialGradient(x - r*.32, y - r*.35, r*.05, x, y, r*1.12);
+  function themeValues() {
     const light = document.documentElement.dataset.theme === 'light';
-    if (green) {
-      g.addColorStop(0, 'rgba(245,255,220,' + (.98*alpha) + ')');
-      g.addColorStop(.30, 'rgba(139,255,76,' + (.90*alpha) + ')');
-      g.addColorStop(.75, 'rgba(48,225,110,' + (.72*alpha) + ')');
-      g.addColorStop(1, 'rgba(30,170,90,0)');
-    } else if (light) {
-      g.addColorStop(0, 'rgba(235,255,255,' + (.92*alpha) + ')');
-      g.addColorStop(.32, 'rgba(66,211,235,' + (.82*alpha) + ')');
-      g.addColorStop(.78, 'rgba(12,150,190,' + (.60*alpha) + ')');
-      g.addColorStop(1, 'rgba(0,100,150,0)');
-    } else {
-      g.addColorStop(0, 'rgba(242,255,255,' + (.98*alpha) + ')');
-      g.addColorStop(.30, 'rgba(87,239,255,' + (.88*alpha) + ')');
-      g.addColorStop(.78, 'rgba(20,179,233,' + (.70*alpha) + ')');
-      g.addColorStop(1, 'rgba(0,110,185,0)');
-    }
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.scale(1, stretch || 1);
-    ctx.fillStyle = g;
-    ctx.shadowBlur = r * 2.1;
-    ctx.shadowColor = green ? 'rgba(64,255,92,.48)' : 'rgba(65,225,255,.34)';
-    ctx.beginPath();
-    ctx.arc(0, 0, r, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
+    return light
+      ? {
+          core: 'rgba(145,248,255,.44)',
+          mid: 'rgba(28,212,241,.30)',
+          edge: 'rgba(0,145,190,0)',
+          text: 'rgba(14,86,119,',
+          glow: 'rgba(28,210,239,.20)'
+        }
+      : {
+          core: 'rgba(190,255,255,.68)',
+          mid: 'rgba(35,229,255,.44)',
+          edge: 'rgba(0,137,210,0)',
+          text: 'rgba(235,255,255,',
+          glow: 'rgba(51,231,255,.42)'
+        };
   }
 
-  function drawSplash(t) {
-    const p = Math.max(0, Math.min(1, (t - 2550) / 330));
-    const slip = Math.max(0, Math.min(1, (t - 3280) / 700));
-    const a = t < 3270 ? 1 : 1 - Math.min(1, (t - 3270) / 520);
-    const c = center();
+  function drawSmoke(t) {
+    const elapsed = t - start;
+    if (elapsed < 2480 || elapsed > 3920) return;
+
+    const values = themeValues();
+    const cx = w * 0.5;
+    const baseY = h * 0.61;
     const s = Math.min(w, h);
-    const scale = .74 + p * .31;
+    const grow = Math.min(1, Math.max(0, (elapsed - 2500) / 460));
+    const fade = elapsed > 3500 ? Math.min(1, (elapsed - 3500) / 380) : 0;
 
     ctx.save();
-    ctx.translate(c.x, c.y + slip * h * .07);
-    ctx.scale(scale, scale * .78);
-    ctx.globalAlpha = a;
+    ctx.globalCompositeOperation = 'screen';
 
-    const light = document.documentElement.dataset.theme === 'light';
-    const grad = ctx.createRadialGradient(-s*.08,-s*.10,s*.03,0,0,s*.42);
-    if (light) {
-      grad.addColorStop(0,'rgba(229,255,255,.94)');
-      grad.addColorStop(.28,'rgba(65,215,237,.74)');
-      grad.addColorStop(.72,'rgba(12,150,190,.48)');
-    } else {
-      grad.addColorStop(0,'rgba(242,255,255,.99)');
-      grad.addColorStop(.28,'rgba(80,239,255,.84)');
-      grad.addColorStop(.72,'rgba(16,171,228,.52)');
-    }
-    grad.addColorStop(1,'rgba(0,120,180,0)');
-    ctx.fillStyle = grad;
-
+    const core = ctx.createRadialGradient(cx, baseY, s*.018, cx, baseY, s*.25);
+    core.addColorStop(0, values.core);
+    core.addColorStop(.28, values.mid);
+    core.addColorStop(.68, 'rgba(25,185,235,.10)');
+    core.addColorStop(1, values.edge);
+    ctx.globalAlpha = (0.42 + grow*.22) * (1 - fade*.72);
+    ctx.fillStyle = core;
     ctx.beginPath();
-    ctx.moveTo(-s*.25,s*.07);
-    ctx.bezierCurveTo(-s*.31,s*.02,-s*.28,-s*.11,-s*.18,-s*.14);
-    ctx.bezierCurveTo(-s*.11,-s*.19,-s*.08,-s*.06,-s*.02,-s*.13);
-    ctx.bezierCurveTo(s*.03,-s*.20,s*.08,-s*.10,s*.13,-s*.13);
-    ctx.bezierCurveTo(s*.19,-s*.18,s*.28,-s*.08,s*.25,s*.02);
-    ctx.bezierCurveTo(s*.23,s*.12,s*.12,s*.10,s*.05,s*.15);
-    ctx.bezierCurveTo(-s*.02,s*.20,-s*.11,s*.14,-s*.17,s*.17);
-    ctx.bezierCurveTo(-s*.21,s*.18,-s*.24,s*.13,-s*.25,s*.07);
-    ctx.closePath();
+    ctx.ellipse(cx, baseY + s*.015, s*.23, s*.12, 0, 0, Math.PI*2);
     ctx.fill();
 
-    for (let i = 0; i < drops.length; i++) {
-      const d = drops[i];
-      const x = d[0] * s * .34;
-      const y = d[1] * s * .29;
-      drawOrb(x, y, d[2] * (.78 + .22*Math.sin(i+1)), i % 6 === 0, .70, .84 + (i%3)*.08);
-    }
-
-    ctx.lineCap = 'round';
-    for (let i = 0; i < 8; i++) {
-      const x = (i - 3.5) * s * .055;
-      const top = s * (.15 + (i%4)*.035);
-      ctx.strokeStyle = (i===3 || i===4) ? 'rgba(111,255,125,.70)' : 'rgba(96,239,255,.66)';
-      ctx.lineWidth = Math.max(2, s*.008);
+    ctx.filter = 'blur(' + Math.max(4, s*.012) + 'px)';
+    for (let i = 0; i < smoke.length; i++) {
+      const p = smoke[i];
+      const phase = elapsed * 0.001 * p.speed + p.phase * Math.PI * 2;
+      const x = cx + Math.cos(phase + p.angle) * s*p.radius * (1 + grow*.6) + Math.sin(phase*1.7) * s*p.drift;
+      const y = baseY - (elapsed - 2480) * (0.018 + p.speed*.004) - Math.abs(Math.sin(phase*.8)) * s*.055;
+      const r = s * p.size * (0.7 + grow*.75);
+      const a = (0.16 + (i%5)*.022) * (1-fade);
+      const g = ctx.createRadialGradient(x-r*.25,y-r*.30,r*.05,x,y,r);
+      g.addColorStop(0, values.core);
+      g.addColorStop(.38, values.mid);
+      g.addColorStop(1, values.edge);
+      ctx.globalAlpha = a;
+      ctx.fillStyle = g;
       ctx.beginPath();
-      ctx.moveTo(x, -s*.035);
-      ctx.quadraticCurveTo(x + Math.sin(i*2.4)*s*.018, -s*.09, x + Math.cos(i*1.8)*s*.014, -top);
-      ctx.stroke();
-      drawOrb(x + Math.cos(i*1.8)*s*.014, -top, s*.012, i===3 || i===4, .72, 1);
-    }
-    ctx.restore();
-  }
-
-  function makeTextTargets() {
-    const off = document.createElement('canvas');
-    const o = off.getContext('2d');
-    if (!o) return [];
-    const size = Math.max(44, Math.min(w*.095, 104));
-    o.font = '800 ' + size + 'px Segoe UI, Arial, sans-serif';
-    const label = 'Study-Lab';
-    const mw = Math.ceil(o.measureText(label).width) + 24;
-    off.width = Math.min(760, Math.max(280, mw));
-    off.height = Math.ceil(size * 1.35);
-    o.font = '800 ' + size + 'px Segoe UI, Arial, sans-serif';
-    o.textAlign = 'center';
-    o.textBaseline = 'middle';
-    o.fillStyle = '#fff';
-    o.fillText(label, off.width/2, off.height/2);
-    const data = o.getImageData(0,0,off.width,off.height).data;
-    const step = Math.max(3, Math.round(size/25));
-    const pts = [];
-    for (let y=0;y<off.height;y+=step) {
-      for (let x=0;x<off.width;x+=step) {
-        if (data[(y*off.width+x)*4+3] > 190) pts.push({x:x-off.width/2,y:y-off.height/2});
-      }
-    }
-    return pts;
-  }
-
-  let targets = [];
-  function drawWord(t) {
-    if (!targets.length) return;
-    const p = Math.max(0, Math.min(1, (t-2770)/430));
-    const fade = Math.max(0, Math.min(1, (t-3370)/420));
-    const c = center();
-    const size = Math.max(44, Math.min(w*.095, 104));
-    const count = targets.length;
-    ctx.save();
-    for (let i=0;i<count;i++) {
-      const q = targets[i];
-      const seed = (i*7)%drops.length;
-      const d = drops[seed];
-      const fromX = c.x + d[0]*Math.min(w,h)*.34;
-      const fromY = c.y + d[1]*Math.min(w,h)*.29;
-      const x = fromX + (c.x + q.x*1.18 - fromX)*p;
-      const y = fromY + (c.y + q.y*1.18 - fromY)*p;
-      const alpha = (.78 + .18*Math.sin(i*.61+t*.007))*p*(1-fade);
-      ctx.fillStyle = document.documentElement.dataset.theme === 'light'
-        ? 'rgba(15,92,125,'+alpha+')'
-        : 'rgba(233,255,255,'+alpha+')';
-      ctx.shadowBlur = document.documentElement.dataset.theme === 'light' ? 0 : 11;
-      ctx.shadowColor = 'rgba(70,235,255,.40)';
-      ctx.beginPath();
-      ctx.arc(x,y,Math.max(1.2,size*.008),0,Math.PI*2);
+      ctx.arc(x, y, r, 0, Math.PI*2);
       ctx.fill();
     }
-    if (p > .82 && fade < .62) {
-      const aa = Math.min(1,(p-.82)/.18) * (1-fade*.92);
-      ctx.textAlign='center';
-      ctx.textBaseline='middle';
-      ctx.font='800 '+size+'px Segoe UI, Arial, sans-serif';
-      ctx.fillStyle=document.documentElement.dataset.theme === 'light'
-        ? 'rgba(13,88,121,'+aa+')'
-        : 'rgba(233,255,255,'+aa+')';
-      ctx.shadowBlur=document.documentElement.dataset.theme === 'light' ? 0 : 18;
-      ctx.shadowColor='rgba(70,235,255,.38)';
-      ctx.fillText('Study-Lab',c.x,c.y-h*.03+fade*h*.055);
-    }
+    ctx.restore();
+  }
+
+  function drawWordmark(t) {
+    const elapsed = t - start;
+    if (elapsed < 2640 || elapsed > 3920) return;
+
+    const appear = Math.min(1, Math.max(0, (elapsed - 2640) / 380));
+    const fade = elapsed > 3640 ? Math.min(1, (elapsed - 3640) / 280) : 0;
+    wordAlpha = appear * (1 - fade*.35);
+
+    const values = themeValues();
+    const size = Math.max(46, Math.min(w * .105, 112));
+    const y = h * 0.57 + fade * h * .025;
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = '800 ' + size + 'px Segoe UI, Arial, sans-serif';
+    ctx.fillStyle = values.text + wordAlpha + ')';
+    ctx.shadowBlur = document.documentElement.dataset.theme === 'light' ? 8 : 24;
+    ctx.shadowColor = values.glow;
+    ctx.fillText('Study-Lab', w*.5, y);
     ctx.restore();
   }
 
   function frame(now) {
-    const t = now - start;
-    ctx.clearRect(0,0,w,h);
-    if (t >= 2520 && t < 3420) drawSplash(t);
-    if (t >= 2720 && t < 3760) drawWord(t);
-    if (!loader.classList.contains('is-exiting')) raf=requestAnimationFrame(frame);
+    ctx.clearRect(0, 0, w, h);
+    drawSmoke(now);
+    drawWordmark(now);
+    if (!loader.classList.contains('is-exiting')) {
+      raf = requestAnimationFrame(frame);
+    }
   }
 
   resize();
-  targets = makeTextTargets();
-  window.addEventListener('resize', () => { resize(); targets = makeTextTargets(); }, {passive:true});
+  window.addEventListener('resize', resize, { passive: true });
   raf = requestAnimationFrame(frame);
 })();
