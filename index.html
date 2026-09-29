@@ -1442,6 +1442,21 @@
       animation: splashLiquidFade .42s ease-in 2.86s forwards;
     }
 
+    .splash-random-1 {
+      transform-origin: 50% 50%;
+      transform: rotate(-3deg) scaleX(1.04) scaleY(.96);
+    }
+
+    .splash-random-2 {
+      transform-origin: 50% 50%;
+      transform: rotate(7deg) scaleX(.91) scaleY(1.12);
+    }
+
+    .splash-random-green {
+      transform-origin: 50% 50%;
+      transform: rotate(-9deg) scaleX(1.08) scaleY(.92);
+    }
+
     .splash-wordmark {
       opacity: 0;
       fill: rgba(229, 255, 255, .96);
@@ -1719,31 +1734,36 @@
     <div class="studylab-loader-splash" aria-hidden="true">
       <svg viewBox="0 0 100 100" preserveAspectRatio="none" role="presentation">
         <path
-          class="splash-main"
-          d="M18 51C22 45 28 48 33 43C38 38 44 40 50 44C56 40 62 39 68 44C74 49 82 45 86 52C84 59 78 61 72 64C66 67 64 73 56 72C49 72 45 68 39 70C32 73 28 66 23 64C18 62 15 57 18 51Z"
+          class="splash-main splash-random-1"
+          d="M11 56C14 47 22 45 27 40C32 35 35 42 42 39C47 36 52 42 57 39C63 36 67 42 73 40C80 38 85 44 88 50C92 56 86 60 82 64C77 68 75 75 68 73C61 71 58 77 52 73C46 70 42 75 35 71C29 68 25 72 21 66C17 62 9 63 11 56Z"
         />
         <path
-          class="splash-green"
-          d="M39 46C43 41 48 44 52 47C56 44 61 44 64 48C61 53 58 56 52 55C47 55 43 53 39 46Z"
+          class="splash-main splash-random-2"
+          d="M37 51C40 46 44 43 48 46C52 42 58 45 61 48C64 52 62 56 58 58C54 61 49 58 46 60C42 62 37 58 37 51Z"
         />
-        <circle class="splash-drop" cx="10" cy="40" r="1.7"/>
-        <circle class="splash-drop" cx="16" cy="27" r="1.1"/>
-        <circle class="splash-drop" cx="24" cy="18" r="1.5"/>
-        <circle class="splash-drop" cx="35" cy="11" r="1.0"/>
-        <circle class="splash-drop" cx="50" cy="7" r="1.7"/>
-        <circle class="splash-drop" cx="66" cy="11" r="1.1"/>
-        <circle class="splash-drop" cx="77" cy="19" r="1.7"/>
-        <circle class="splash-drop" cx="88" cy="30" r="1.1"/>
-        <circle class="splash-drop" cx="93" cy="43" r="1.8"/>
-        <circle class="splash-drop" cx="89" cy="61" r="1.2"/>
-        <circle class="splash-drop" cx="80" cy="76" r="1.7"/>
-        <circle class="splash-drop" cx="67" cy="87" r="1.0"/>
-        <circle class="splash-drop" cx="51" cy="91" r="1.5"/>
-        <circle class="splash-drop" cx="35" cy="88" r="1.1"/>
-        <circle class="splash-drop" cx="21" cy="80" r="1.7"/>
-        <circle class="splash-drop" cx="11" cy="67" r="1.0"/>
-        <circle class="splash-glow" cx="50" cy="52" r="7"/>
-        <text class="splash-wordmark" x="50" y="52">Study-Lab</text>
+        <path
+          class="splash-green splash-random-green"
+          d="M43 50C46 46 49 49 52 47C55 46 59 49 59 52C58 56 54 57 51 55C48 56 45 54 43 50Z"
+        />
+
+        <path class="splash-drop" d="M14 43c-2-3-1-6 1-8 3 3 4 6 2 9-.9 1.2-2 1-3-1Z"/>
+        <path class="splash-drop" d="M23 25c-1.5-2.6-.6-4.8 1.2-6.4 1.7 2.4 2.3 4.7.6 6.7-.6.8-1.2.6-1.8-.3Z"/>
+        <path class="splash-drop" d="M31 14c-.8-2 .2-3.7 1.7-4.7 1.1 1.8.9 3.5-.4 4.9-.4.5-.9.3-1.3-.2Z"/>
+        <path class="splash-drop" d="M42 8c-1.2-2.2-.2-4.2 1.6-5.2 1.5 2.3 1.5 4.2-.2 5.6-.5.4-1 .3-1.4-.4Z"/>
+        <path class="splash-drop" d="M55 13c-.5-2.4.8-4 2.9-4.8.6 2.6-.1 4.2-2.1 5.2-.4.2-.7 0-.8-.4Z"/>
+        <path class="splash-drop" d="M70 17c.2-2.2 1.8-3.4 3.7-3.6.1 2.4-1.1 3.8-3.1 4.2-.4.1-.6-.1-.6-.6Z"/>
+        <path class="splash-drop" d="M84 28c1-2 2.8-2.5 4.5-1.8-.8 2.1-2.1 3-4.1 2.8-.5 0-.7-.4-.4-1Z"/>
+        <path class="splash-drop" d="M91 43c1.7-1.6 3.7-1.2 4.8.3-1.6 1.6-3.4 1.7-5 .4-.4-.3-.4-.6.2-.7Z"/>
+        <path class="splash-drop" d="M89 61c2-.4 3.5.8 3.7 2.6-2 .4-3.5-.5-4-2.2-.1-.4 0-.7.3-.8Z"/>
+        <path class="splash-drop" d="M79 76c1.8.2 2.8 1.8 2.5 3.4-1.9-.1-3-1.2-3.1-2.9 0-.4.2-.6.6-.5Z"/>
+        <path class="splash-drop" d="M65 86c1.2 1.1 1.2 2.8.1 3.9-1.3-1-1.5-2.5-.7-3.8.2-.3.4-.4.6-.1Z"/>
+        <path class="splash-drop" d="M51 93c0 1.7-1.2 2.8-2.7 2.8-.1-1.7.8-2.7 2.2-3.1.3-.1.5 0 .5.3Z"/>
+        <path class="splash-drop" d="M36 88c-.9 1.5-2.6 1.8-3.8.8.8-1.6 2.1-2.1 3.6-1.5.4.1.5.3.2.7Z"/>
+        <path class="splash-drop" d="M21 80c-1.6 1-3.1.4-3.7-1.2 1.5-.9 2.8-.5 3.8.7.2.3.2.4-.1.5Z"/>
+        <path class="splash-drop" d="M11 67c-1.6.1-2.6-1-2.5-2.4 1.5-.2 2.5.6 2.8 2 .1.3 0 .4-.3.4Z"/>
+
+        <circle class="splash-glow" cx="49" cy="53" r="6.5"/>
+        <text class="splash-wordmark" x="49" y="53">Study-Lab</text>
       </svg>
     </div>
 
@@ -2718,9 +2738,7 @@
   <script src="assets/js/feedback.js"></script>
   <script src="assets/js/ai-tutor.js"></script>
 
-  <script>(function(s){s.dataset.zone='11885118',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
-
-  <script>
+    <script>
 (function () {
   const loader = document.getElementById("studylabLoader");
   if (!loader) return;
