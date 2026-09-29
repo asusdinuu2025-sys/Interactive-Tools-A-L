@@ -5,6 +5,9 @@
   const loader = document.getElementById('studylabLoader');
   if (!canvas || !loader) return;
 
+  const reactionCore = document.querySelector('.studylab-loader-reaction-core');
+  if (reactionCore) reactionCore.remove();
+
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
 
@@ -67,17 +70,6 @@
 
     ctx.save();
     ctx.globalCompositeOperation = 'screen';
-
-    const core = ctx.createRadialGradient(cx, baseY, s*.018, cx, baseY, s*.25);
-    core.addColorStop(0, values.core);
-    core.addColorStop(.28, values.mid);
-    core.addColorStop(.68, 'rgba(25,185,235,.10)');
-    core.addColorStop(1, values.edge);
-    ctx.globalAlpha = (0.42 + grow*.22) * (1 - fade*.72);
-    ctx.fillStyle = core;
-    ctx.beginPath();
-    ctx.ellipse(cx, baseY + s*.015, s*.23, s*.12, 0, 0, Math.PI*2);
-    ctx.fill();
 
     ctx.filter = 'blur(' + Math.max(4, s*.012) + 'px)';
     for (let i = 0; i < smoke.length; i++) {
