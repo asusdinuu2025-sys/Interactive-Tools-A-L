@@ -797,8 +797,7 @@
       }
     }
 
-    /* Homepage search sits slightly higher than the resource grid. */    .hero + .study-findbar {      margin-top: 14px;    }
-    /* =========================================================
+    /* Homepage search sits slightly higher than the resource grid. */    .hero + .study-findbar {      margin-top: 14px;    }    /* =========================================================
        STUDYLAB — DISTINCT NON-SUBJECT HUB CARDS
        Full-width on desktop so utility/resource hubs never blend
        into the four core subject cards.
@@ -1215,9 +1214,9 @@
 
   <style>
     /* =========================================================
-       STUDYLAB — CINEMATIC CHEMICAL REACTION LOADER
-       Calm setup -> one clear drop -> critical reaction ->
-       sudden full-screen cyan/green smoke burst -> reveal.
+       STUDYLAB — FLAT 2D CHEMISTRY LOADER
+       Clean flask + glass test tube + reagent drop ->
+       crisp liquid splash -> slight downward slip -> reveal.
        ========================================================= */
 
     #studylabLoader {
@@ -1227,15 +1226,13 @@
       display: grid;
       place-items: center;
       overflow: hidden;
-      background:
-        radial-gradient(circle at 50% 48%, rgba(28, 104, 165, .10), transparent 24%),
-        #03070e;
+      background: #03070e;
       opacity: 1;
       visibility: visible;
       pointer-events: all;
       transition:
-        opacity .24s cubic-bezier(.2,.8,.2,1),
-        visibility 0s linear .24s;
+        opacity .26s ease,
+        visibility 0s linear .26s;
     }
 
     #studylabLoader.is-exiting {
@@ -1246,9 +1243,9 @@
 
     .studylab-loader-scene {
       position: relative;
-      width: min(700px, 94vw);
-      height: min(620px, 84vh);
-      min-height: 430px;
+      width: min(560px, 92vw);
+      height: min(570px, 82vh);
+      min-height: 410px;
       display: grid;
       place-items: center;
       isolation: isolate;
@@ -1257,56 +1254,54 @@
     .studylab-loader-flask {
       position: absolute;
       left: 50%;
-      top: 64%;
-      width: min(520px, 82vw);
-      height: min(390px, 54vh);
+      top: 60%;
+      width: min(440px, 78vw);
+      height: min(365px, 52vh);
       transform: translate(-50%, -50%) scale(.94);
       opacity: 0;
       z-index: 4;
-      filter:
-        drop-shadow(0 0 10px rgba(102, 224, 255, .16))
-        drop-shadow(0 0 28px rgba(62, 136, 255, .08));
-      animation: loaderFlaskIn .95s cubic-bezier(.16,.84,.2,1) .05s forwards;
+      filter: drop-shadow(0 0 10px rgba(72, 226, 255, .16));
+      animation: loaderFlaskIn .72s ease-out .06s forwards;
     }
 
-    .studylab-loader-flask svg {
+    .studylab-loader-flask svg,
+    .studylab-loader-dropper svg {
       width: 100%;
       height: 100%;
       overflow: visible;
     }
 
     .loader-flask-outline {
-      fill: rgba(89, 219, 255, .025);
-      stroke: rgba(189, 247, 255, .88);
+      fill: rgba(71, 214, 245, .035);
+      stroke: rgba(191, 248, 255, .88);
       stroke-width: 3;
       stroke-linejoin: round;
     }
 
     .loader-flask-mouth {
       fill: none;
-      stroke: rgba(235, 253, 255, .92);
+      stroke: rgba(238, 255, 255, .92);
       stroke-width: 3;
       stroke-linecap: round;
     }
 
     .loader-liquid-fill {
-      fill: rgba(45, 223, 248, .46);
+      fill: rgba(39, 218, 242, .48);
     }
 
     .loader-liquid-line {
       fill: none;
-      stroke: rgba(168, 250, 255, .98);
+      stroke: rgba(177, 252, 255, .98);
       stroke-width: 3;
       stroke-linecap: round;
     }
 
-    html[data-theme="light"] .studylab-loader-dropper svg path {
-      fill: rgba(54, 185, 214, .035);
-      stroke: rgba(29, 111, 149, .88);
+    html[data-theme="light"] #studylabLoader {
+      background: #eef4fb;
     }
 
     html[data-theme="light"] .loader-flask-outline {
-      fill: rgba(255, 255, 255, .06);
+      fill: rgba(255, 255, 255, .08);
       stroke: rgba(28, 111, 150, .94);
     }
 
@@ -1315,41 +1310,51 @@
     }
 
     html[data-theme="light"] .loader-liquid-fill {
-      fill: rgba(24, 186, 218, .50);
+      fill: rgba(16, 180, 211, .48);
     }
 
     html[data-theme="light"] .loader-liquid-line {
-      stroke: rgba(7, 126, 157, .98);
-    }
-
-    .studylab-loader-liquid {
-      display: none !important;
-      animation: none !important;
+      stroke: rgba(7, 122, 154, .98);
     }
 
     .studylab-loader-dropper {
       position: absolute;
       left: 50%;
-      top: -118px;
-      width: min(174px, 28vw);
-      height: min(305px, 40vh);
+      top: -94px;
+      width: min(124px, 22vw);
+      height: min(292px, 38vh);
       transform-origin: 50% 100%;
       transform:
         translateX(-50%)
-        rotate(-12deg)
-        translateY(-18px);
+        rotate(-11deg)
+        translateY(-12px);
       opacity: 0;
       z-index: 7;
-      filter:
-        drop-shadow(0 0 8px rgba(149, 239, 255, .20))
-        drop-shadow(0 0 24px rgba(59, 176, 255, .10));
-      animation: loaderDropperAction 1.42s cubic-bezier(.18,.86,.18,1) .45s forwards;
+      filter: drop-shadow(0 0 7px rgba(145, 237, 255, .18));
+      animation: loaderDropperAction 1.28s cubic-bezier(.18,.86,.18,1) .40s forwards;
     }
 
-    .studylab-loader-dropper svg {
-      width: 100%;
-      height: 100%;
-      overflow: visible;
+    .loader-test-tube {
+      fill: rgba(145, 232, 248, .035);
+      stroke: rgba(220, 250, 255, .86);
+      stroke-width: 2.4;
+      stroke-linejoin: round;
+    }
+
+    .loader-test-tube-rim {
+      fill: none;
+      stroke: rgba(239, 255, 255, .95);
+      stroke-width: 2.8;
+      stroke-linecap: round;
+    }
+
+    html[data-theme="light"] .loader-test-tube {
+      fill: rgba(62, 192, 220, .035);
+      stroke: rgba(34, 111, 145, .92);
+    }
+
+    html[data-theme="light"] .loader-test-tube-rim {
+      stroke: rgba(22, 101, 133, .98);
     }
 
     .studylab-loader-green-drop {
@@ -1378,127 +1383,82 @@
       position: absolute;
       left: 50%;
       top: 64%;
-      width: 46px;
-      height: 46px;
+      width: 42px;
+      height: 42px;
       border-radius: 50%;
       z-index: 10;
       transform: translate(-50%, -50%) scale(.1);
       opacity: 0;
-      background:
-        radial-gradient(circle,
-          rgba(255,255,255,1) 0%,
-          rgba(202,255,151,.98) 10%,
-          rgba(92,255,106,.93) 22%,
-          rgba(68,235,255,.70) 40%,
-          transparent 74%);
+      background: rgba(105, 255, 121, .90);
       box-shadow:
-        0 0 20px rgba(128, 255, 96, .92),
-        0 0 52px rgba(81, 233, 255, .60);
-      animation: loaderCriticalHit .34s cubic-bezier(.12,.78,.16,1) 2.50s forwards;
+        0 0 16px rgba(109, 255, 102, .88),
+        0 0 34px rgba(72, 231, 255, .48);
+      animation: loaderCriticalHit .28s ease-out 2.50s forwards;
     }
 
-    .studylab-loader-smoke,
-    .studylab-loader-smoke::before,
-    .studylab-loader-smoke::after {
+    .studylab-loader-splash {
       position: absolute;
-      left: 50%;
-      top: 64%;
-      width: 140px;
-      height: 140px;
-      border-radius: 50%;
+      inset: -8%;
+      z-index: 15;
       pointer-events: none;
-      z-index: 9;
-    }
-
-    .studylab-loader-smoke {
-      transform: translate(-50%, -50%) scale(.18);
       opacity: 0;
-      background:
-        radial-gradient(circle at 35% 35%, rgba(221,255,236,.96) 0 5%, rgba(116,255,113,.88) 11%, rgba(42,241,131,.56) 28%, rgba(54,221,255,.44) 45%, transparent 72%);
-      filter: blur(5px);
+      transform: translate3d(0, 0, 0) scale(.72);
+      transform-origin: 50% 58%;
       mix-blend-mode: screen;
-      animation: loaderSmokeBurst .62s cubic-bezier(.04,.78,.08,1) 2.57s forwards;
+      animation: loaderSplashHit .16s ease-out 2.58s forwards,
+                 loaderSplashSlip .62s cubic-bezier(.15,.8,.18,1) 2.74s forwards;
     }
 
-    .studylab-loader-smoke::before {
-      content: "";
-      transform:
-        translate(-38%, 16%)
-        scale(.72);
-      background:
-        radial-gradient(circle at 65% 30%, rgba(224,255,255,.88) 0 5%, rgba(77,239,255,.72) 15%, rgba(62,144,255,.40) 40%, transparent 72%);
-      filter: blur(10px);
+    .studylab-loader-splash svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
     }
 
-    .studylab-loader-smoke::after {
-      content: "";
-      transform:
-        translate(34%, -22%)
-        scale(.62);
-      background:
-        radial-gradient(circle at 35% 65%, rgba(246,255,206,.80) 0 5%, rgba(133,255,66,.64) 14%, rgba(30,245,151,.42) 37%, transparent 70%);
-      filter: blur(12px);
+    .splash-main {
+      fill: rgba(42, 230, 248, .76);
+      stroke: rgba(180, 255, 255, .90);
+      stroke-width: .35;
     }
 
-    .studylab-loader-smoke-2 {
-      position: absolute;
-      left: 50%;
-      top: 64%;
-      width: 300px;
-      height: 300px;
-      transform: translate(-50%, -50%) scale(.07);
-      border-radius: 50%;
-      opacity: 0;
-      z-index: 9;
-      background:
-        radial-gradient(circle at 25% 40%, rgba(41,237,255,.42) 0 8%, transparent 20%),
-        radial-gradient(circle at 72% 31%, rgba(91,255,93,.40) 0 7%, transparent 22%),
-        radial-gradient(circle at 50% 68%, rgba(123,235,255,.35) 0 9%, transparent 24%),
-        radial-gradient(circle at 35% 74%, rgba(131,255,72,.30) 0 6%, transparent 18%),
-        transparent 70%;
-      filter: blur(16px);
-      mix-blend-mode: screen;
-      animation: loaderSmokeMass .54s cubic-bezier(.02,.72,.05,1) 2.62s forwards;
+    .splash-green {
+      fill: rgba(123, 255, 60, .56);
+      stroke: rgba(221, 255, 177, .82);
+      stroke-width: .26;
     }
 
-    .studylab-loader-fog {
-      position: absolute;
-      inset: -12%;
-      z-index: 12;
-      opacity: 0;
-      pointer-events: none;
-      background:
-        radial-gradient(ellipse at 49% 51%, rgba(255,255,255,.98) 0 3%, rgba(190,255,244,.90) 7%, rgba(77,245,255,.74) 16%, rgba(44,221,178,.44) 26%, rgba(89,111,255,.20) 39%, transparent 58%),
-        radial-gradient(ellipse at 18% 44%, rgba(46,240,255,.46), transparent 36%),
-        radial-gradient(ellipse at 82% 58%, rgba(120,255,71,.43), transparent 34%);
-      filter: blur(8px);
-      transform: scale(.36);
-      mix-blend-mode: screen;
-      animation: loaderFogTakeover .46s cubic-bezier(.04,.72,.08,1) 2.70s forwards;
+    .splash-drop {
+      fill: rgba(49, 229, 248, .82);
     }
 
-    .studylab-loader-grain {
-      position: absolute;
-      inset: -10%;
-      z-index: 13;
-      opacity: 0;
-      pointer-events: none;
-      background:
-        radial-gradient(circle at 17% 28%, rgba(132,255,253,.80) 0 1px, transparent 2px),
-        radial-gradient(circle at 82% 22%, rgba(173,255,104,.72) 0 1px, transparent 2px),
-        radial-gradient(circle at 26% 76%, rgba(95,255,222,.62) 0 1px, transparent 2px),
-        radial-gradient(circle at 74% 79%, rgba(185,255,104,.60) 0 1px, transparent 2px),
-        radial-gradient(circle at 50% 15%, rgba(224,255,255,.84) 0 1px, transparent 2px);
-      filter: blur(.3px);
-      transform: scale(.6);
-      animation: loaderGrainBurst .56s ease-out 2.70s forwards;
+    .splash-glow {
+      fill: rgba(175, 255, 255, .46);
+    }
+
+    html[data-theme="light"] .splash-main {
+      fill: rgba(22, 174, 205, .48);
+      stroke: rgba(8, 108, 138, .72);
+    }
+
+    html[data-theme="light"] .splash-green {
+      fill: rgba(86, 202, 55, .44);
+      stroke: rgba(42, 125, 38, .62);
+    }
+
+    html[data-theme="light"] .splash-drop {
+      fill: rgba(17, 165, 198, .62);
+    }
+
+    html[data-theme="light"] .splash-glow {
+      fill: rgba(58, 206, 228, .24);
     }
 
     .studylab-loader-wordmark {
       position: absolute;
       left: 50%;
-      top: 93%;
-      transform: translate(-50%, 12px);
+      top: 92%;
+      transform: translate(-50%, 8px);
       color: rgba(229, 250, 255, .82);
       font-size: clamp(12px, 1.7vw, 17px);
       font-weight: 750;
@@ -1508,27 +1468,31 @@
       opacity: 0;
       z-index: 14;
       text-shadow: 0 0 16px rgba(104, 233, 255, .30);
-      animation: loaderWordmark .80s ease-out 2.05s forwards;
+      animation: loaderWordmark .70s ease-out 2.02s forwards;
+    }
+
+    html[data-theme="light"] .studylab-loader-wordmark {
+      color: rgba(20, 92, 125, .78);
+      text-shadow: none;
     }
 
     @keyframes loaderFlaskIn {
-      0% { opacity: 0; transform: translate(-50%, -50%) scale(.86); }
-      58% { opacity: 1; }
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(.92); }
       100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
     }
 
     @keyframes loaderDropperAction {
       0% {
         opacity: 0;
-        transform: translateX(-50%) rotate(-22deg) translateY(-28px);
+        transform: translateX(-50%) rotate(-18deg) translateY(-20px);
       }
       22% { opacity: 1; }
-      70% {
-        transform: translateX(-50%) rotate(7deg) translateY(2px);
+      72% {
+        transform: translateX(-50%) rotate(6deg) translateY(0);
       }
       100% {
         opacity: 1;
-        transform: translateX(-50%) rotate(15deg) translateY(0);
+        transform: translateX(-50%) rotate(11deg) translateY(0);
       }
     }
 
@@ -1538,9 +1502,7 @@
         top: 26%;
         transform: translate(-50%, -50%) scale(.22);
       }
-      9% {
-        opacity: 1;
-      }
+      9% { opacity: 1; }
       54% {
         top: 53%;
         transform: translate(-50%, -50%) scale(1);
@@ -1559,71 +1521,63 @@
 
     @keyframes loaderCriticalHit {
       0% { opacity: 0; transform: translate(-50%, -50%) scale(.10); }
-      18% { opacity: 1; transform: translate(-50%, -50%) scale(1.35); }
-      100% { opacity: 0; transform: translate(-50%, -50%) scale(2.3); }
+      20% { opacity: 1; transform: translate(-50%, -50%) scale(1.45); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(2.1); }
     }
 
-    @keyframes loaderSmokeBurst {
-      0% { opacity: 0; transform: translate(-50%, -50%) scale(.12); }
-      20% { opacity: .98; }
-      100% { opacity: .78; transform: translate(-50%, -50%) scale(13.5); }
+    @keyframes loaderSplashHit {
+      0% {
+        opacity: 0;
+        transform: translate3d(0, 0, 0) scale(.18);
+      }
+      34% { opacity: 1; }
+      100% {
+        opacity: .96;
+        transform: translate3d(0, 0, 0) scale(1);
+      }
     }
 
-    @keyframes loaderSmokeMass {
-      0% { opacity: 0; transform: translate(-50%, -50%) scale(.06); }
-      24% { opacity: .90; }
-      100% { opacity: .34; transform: translate(-50%, -50%) scale(8.8); }
-    }
-
-    @keyframes loaderFogTakeover {
-      0% { opacity: 0; transform: scale(.28); }
-      20% { opacity: .98; }
-      100% { opacity: .92; transform: scale(1.56); }
-    }
-
-    @keyframes loaderGrainBurst {
-      0% { opacity: 0; transform: scale(.45); }
-      20% { opacity: .92; }
-      100% { opacity: .10; transform: scale(1.35); }
+    @keyframes loaderSplashSlip {
+      0% {
+        opacity: .96;
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate3d(0, 7vh, 0) scale(1.02);
+      }
     }
 
     @keyframes loaderWordmark {
-      0% { opacity: 0; transform: translate(-50%, 12px); }
+      0% { opacity: 0; transform: translate(-50%, 8px); }
       42% { opacity: .80; }
-      100% { opacity: .72; transform: translate(-50%, 0); }    }
-
-    html[data-theme="light"] #studylabLoader {
-      background:
-        radial-gradient(circle at 50% 48%, rgba(74, 165, 218, .10), transparent 24%),
-        #eef4fb;
+      100% { opacity: .72; transform: translate(-50%, 0); }
     }
 
     @media (max-width: 640px) {
       .studylab-loader-scene {
-        width: 96vw;        height: 74vh;
-        min-height: 390px;      }
-
-      .studylab-loader-flask {
-        width: 340px;
-        height: 255px;
+        width: 96vw;
+        height: 74vh;
+        min-height: 390px;
       }
 
-      .studylab-loader-liquid {
-        display: none;
+      .studylab-loader-flask {
+        width: 360px;
+        height: 298px;
       }
 
       .studylab-loader-dropper {
-        width: 150px;
-        height: 270px;
+        width: 110px;
+        height: 258px;
       }
 
-      .studylab-loader-green-drop {
-        width: 22px;
-        height: 31px;
+      .studylab-loader-wordmark {
+        top: 94%;
       }
     }
 
-    @media (prefers-reduced-motion: reduce) {      #studylabLoader {
+    @media (prefers-reduced-motion: reduce) {
+      #studylabLoader {
         opacity: 0;
         visibility: hidden;
         pointer-events: none;
@@ -1632,14 +1586,10 @@
 
       .studylab-loader-scene,
       .studylab-loader-flask,
-      .studylab-loader-liquid,
       .studylab-loader-dropper,
       .studylab-loader-green-drop,
       .studylab-loader-reaction-core,
-      .studylab-loader-smoke,
-      .studylab-loader-smoke-2,
-      .studylab-loader-fog,
-      .studylab-loader-grain,
+      .studylab-loader-splash,
       .studylab-loader-wordmark {
         animation: none !important;
       }
@@ -1653,56 +1603,50 @@
   <div class="studylab-loader-scene">
 
     <div class="studylab-loader-flask" aria-hidden="true">
-      <svg viewBox="0 0 520 400" role="presentation">
+      <svg viewBox="0 0 440 365" role="presentation">
         <defs>
           <clipPath id="slFlaskBodyClip">
-            <path d="M220 20H300V120L455 300C478 327 460 370 419 370H101C60 370 42 327 65 300L220 120V20Z" />
+            <path d="M176 18H264V118L392 286C412 312 393 348 358 348H82C47 348 28 312 48 286L176 118V18Z" />
           </clipPath>
         </defs>
 
         <g clip-path="url(#slFlaskBodyClip)">
-          <rect
+          <path
             class="loader-liquid-fill"
-            x="35"
-            y="200"
-            width="450"
-            height="150"
+            d="M31 214H409V380H31Z"
           />
           <path
             class="loader-liquid-line"
-            d="M70 200H450"
+            d="M56 214H384"
           />
         </g>
 
         <path
           class="loader-flask-outline"
-          d="M220 20H300V120L455 300C478 327 460 370 419 370H101C60 370 42 327 65 300L220 120V20Z"
+          d="M176 18H264V118L392 286C412 312 393 348 358 348H82C47 348 28 312 48 286L176 118V18Z"
         />
         <path
           class="loader-flask-mouth"
-          d="M220 20H300"
+          d="M176 18H264"
         />
       </svg>
     </div>
 
-    <div class="studylab-loader-liquid" aria-hidden="true"></div>
-
     <div class="studylab-loader-dropper" aria-hidden="true">
-      <svg viewBox="0 0 190 340">
+      <svg viewBox="0 0 150 310" role="presentation">
         <path
-          d="M59 18h72c6 0 11 5 11 11v183c0 9-3 16-9 23l-23 28v49c0 7-4 11-11 11h-9c-7 0-11-4-11-11v-49l-23-28c-6-7-9-14-9-23V29c0-6 5-11 12-11Z"
-          fill="rgba(122, 224, 255, .035)"
-          stroke="rgba(210, 250, 255, .74)"
-          stroke-width="2.4"
-          stroke-linejoin="round"
+          class="loader-test-tube"
+          d="M52 18H98C104 18 108 22 108 28V236C108 251 103 264 95 276L82 296C78 302 72 302 68 296L55 276C47 264 42 251 42 236V28C42 22 46 18 52 18Z"
         />
-
-
+        <path
+          class="loader-test-tube-rim"
+          d="M48 18H102"
+        />
       </svg>
     </div>
 
     <div class="studylab-loader-green-drop" aria-hidden="true">
-      <svg viewBox="0 0 60 80">
+      <svg viewBox="0 0 60 80" role="presentation">
         <path
           d="M30 3C22 16 8 29 8 47c0 17 10 30 22 30s22-13 22-30C52 29 38 16 30 3Z"
           fill="#7dff39"
@@ -1711,11 +1655,38 @@
         />
       </svg>
     </div>
+
     <div class="studylab-loader-reaction-core" aria-hidden="true"></div>
-    <div class="studylab-loader-smoke" aria-hidden="true"></div>
-    <div class="studylab-loader-smoke-2" aria-hidden="true"></div>
-    <div class="studylab-loader-fog" aria-hidden="true"></div>
-    <div class="studylab-loader-grain" aria-hidden="true"></div>
+
+    <div class="studylab-loader-splash" aria-hidden="true">
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none" role="presentation">
+        <path
+          class="splash-main"
+          d="M18 51C22 45 28 48 33 43C38 38 44 40 50 44C56 40 62 39 68 44C74 49 82 45 86 52C84 59 78 61 72 64C66 67 64 73 56 72C49 72 45 68 39 70C32 73 28 66 23 64C18 62 15 57 18 51Z"
+        />
+        <path
+          class="splash-green"
+          d="M39 46C43 41 48 44 52 47C56 44 61 44 64 48C61 53 58 56 52 55C47 55 43 53 39 46Z"
+        />
+        <circle class="splash-drop" cx="10" cy="40" r="1.7"/>
+        <circle class="splash-drop" cx="16" cy="27" r="1.1"/>
+        <circle class="splash-drop" cx="24" cy="18" r="1.5"/>
+        <circle class="splash-drop" cx="35" cy="11" r="1.0"/>
+        <circle class="splash-drop" cx="50" cy="7" r="1.7"/>
+        <circle class="splash-drop" cx="66" cy="11" r="1.1"/>
+        <circle class="splash-drop" cx="77" cy="19" r="1.7"/>
+        <circle class="splash-drop" cx="88" cy="30" r="1.1"/>
+        <circle class="splash-drop" cx="93" cy="43" r="1.8"/>
+        <circle class="splash-drop" cx="89" cy="61" r="1.2"/>
+        <circle class="splash-drop" cx="80" cy="76" r="1.7"/>
+        <circle class="splash-drop" cx="67" cy="87" r="1.0"/>
+        <circle class="splash-drop" cx="51" cy="91" r="1.5"/>
+        <circle class="splash-drop" cx="35" cy="88" r="1.1"/>
+        <circle class="splash-drop" cx="21" cy="80" r="1.7"/>
+        <circle class="splash-drop" cx="11" cy="67" r="1.0"/>
+        <circle class="splash-glow" cx="50" cy="52" r="7"/>
+      </svg>
+    </div>
 
     <div class="studylab-loader-wordmark">StudyLab</div>
   </div>
@@ -2397,8 +2368,7 @@
 
         <span class="card-icon">
           💻
-        </span>
-        <h2>
+        </span>        <h2>
           සාමාන්‍ය තොරතුරු තාක්ෂණය (GIT)
         </h2>
         <p>
@@ -2698,8 +2668,8 @@
   if (!loader) return;
 
   const start = performance.now();
-  const MIN_VISIBLE_MS = 2620;
-  const MAX_VISIBLE_MS = 3350;
+  const MIN_VISIBLE_MS = 2920;
+  const MAX_VISIBLE_MS = 3500;
   let finished = false;
 
   function hideLoader() {
