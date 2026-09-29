@@ -798,7 +798,6 @@
     }
 
     /* Homepage search sits slightly higher than the resource grid. */    .hero + .study-findbar {      margin-top: 14px;    }
-
     /* =========================================================
        STUDYLAB — DISTINCT NON-SUBJECT HUB CARDS
        Full-width on desktop so utility/resource hubs never blend
@@ -1258,7 +1257,7 @@
     .studylab-loader-flask {
       position: absolute;
       left: 50%;
-      top: 60%;
+      top: 64%;
       width: min(520px, 82vw);
       height: min(390px, 54vh);
       transform: translate(-50%, -50%) scale(.94);
@@ -1299,6 +1298,11 @@
       stroke: rgba(168, 250, 255, .98);
       stroke-width: 3;
       stroke-linecap: round;
+    }
+
+    html[data-theme="light"] .studylab-loader-dropper svg path {
+      fill: rgba(54, 185, 214, .035);
+      stroke: rgba(29, 111, 149, .88);
     }
 
     html[data-theme="light"] .loader-flask-outline {
@@ -1373,7 +1377,7 @@
     .studylab-loader-reaction-core {
       position: absolute;
       left: 50%;
-      top: 72%;
+      top: 64%;
       width: 46px;
       height: 46px;
       border-radius: 50%;
@@ -1398,7 +1402,7 @@
     .studylab-loader-smoke::after {
       position: absolute;
       left: 50%;
-      top: 72%;
+      top: 64%;
       width: 140px;
       height: 140px;
       border-radius: 50%;
@@ -1439,7 +1443,7 @@
     .studylab-loader-smoke-2 {
       position: absolute;
       left: 50%;
-      top: 72%;
+      top: 64%;
       width: 300px;
       height: 300px;
       transform: translate(-50%, -50%) scale(.07);
@@ -1493,7 +1497,7 @@
     .studylab-loader-wordmark {
       position: absolute;
       left: 50%;
-      top: 85%;
+      top: 93%;
       transform: translate(-50%, 12px);
       color: rgba(229, 250, 255, .82);
       font-size: clamp(12px, 1.7vw, 17px);
@@ -1542,12 +1546,12 @@
         transform: translate(-50%, -50%) scale(1);
       }
       82% {
-        top: 70%;
+        top: 62%;
         transform: translate(-50%, -50%) scale(.98);
         opacity: 1;
       }
       100% {
-        top: 72%;
+        top: 64%;
         transform: translate(-50%, -50%) scale(.88);
         opacity: 0;
       }
@@ -1597,8 +1601,7 @@
     @media (max-width: 640px) {
       .studylab-loader-scene {
         width: 96vw;        height: 74vh;
-        min-height: 390px;
-      }
+        min-height: 390px;      }
 
       .studylab-loader-flask {
         width: 340px;
@@ -1661,13 +1664,13 @@
           <rect
             class="loader-liquid-fill"
             x="35"
-            y="270"
+            y="200"
             width="450"
             height="150"
           />
           <path
             class="loader-liquid-line"
-            d="M70 270H450"
+            d="M70 200H450"
           />
         </g>
 
@@ -2398,7 +2401,6 @@
         <h2>
           සාමාන්‍ය තොරතුරු තාක්ෂණය (GIT)
         </h2>
-
         <p>
           GIT past papers, marking schemes, notes and examination resources.
         </p>
