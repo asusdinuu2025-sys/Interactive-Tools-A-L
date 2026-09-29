@@ -1284,10 +1284,343 @@
 
   <link rel="stylesheet" href="assets/css/feedback.css">
 
+  <style>
+    /* =========================================================
+       STUDYLAB — CHEMICAL REACTION PAGE LOADER
+       Fast, smooth, science-themed first-load transition.
+       ========================================================= */
+
+    #studylabLoader {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 44%, rgba(72, 170, 255, .09), transparent 26%),
+        radial-gradient(circle at 50% 58%, rgba(168, 119, 255, .07), transparent 34%),
+        rgba(5, 10, 20, .985);
+      opacity: 1;
+      visibility: visible;
+      pointer-events: all;
+      transition:
+        opacity .28s ease,
+        visibility 0s linear .28s;
+    }
+
+    #studylabLoader.is-exiting {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .studylab-loader-scene {
+      position: relative;
+      width: 180px;
+      height: 190px;
+      display: grid;
+      place-items: center;
+      transform: translateY(2px);
+    }
+
+    .studylab-loader-flask {
+      position: absolute;
+      left: 50%;
+      bottom: 26px;
+      width: 78px;
+      height: 92px;
+      transform: translateX(-50%);
+      filter:
+        drop-shadow(0 0 8px rgba(126, 220, 255, .18))
+        drop-shadow(0 0 24px rgba(91, 140, 255, .12));
+      animation: loaderFlaskPulse 1.05s ease-out .10s both;
+    }
+
+    .studylab-loader-flask svg,
+    .studylab-loader-beaker svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .studylab-loader-liquid {
+      position: absolute;
+      left: 50%;
+      bottom: 33px;
+      width: 54px;
+      height: 26px;
+      border-radius: 45% 45% 40% 40%;
+      transform: translateX(-50%) scaleY(.35);
+      transform-origin: center bottom;
+      opacity: 0;
+      background:
+        radial-gradient(circle at 28% 26%, rgba(220, 250, 255, .85), transparent 22%),
+        linear-gradient(180deg, rgba(116, 230, 255, .78), rgba(108, 110, 255, .70));
+      box-shadow:
+        0 0 10px rgba(100, 210, 255, .55),
+        0 0 30px rgba(105, 120, 255, .32);
+      animation: loaderLiquid 1.08s cubic-bezier(.2,.85,.25,1) .32s both;
+    }
+
+    .studylab-loader-beaker {
+      position: absolute;
+      left: 50%;
+      top: 8px;
+      width: 38px;
+      height: 50px;
+      transform: translateX(-50%) translateY(-7px) rotate(-8deg);
+      transform-origin: 50% 100%;
+      filter:
+        drop-shadow(0 0 6px rgba(126, 220, 255, .18))
+        drop-shadow(0 0 18px rgba(91, 140, 255, .10));
+      opacity: 0;
+      animation: loaderBeakerMove .52s cubic-bezier(.22,.82,.22,1) .10s forwards;
+    }
+
+    .studylab-loader-drop {
+      position: absolute;
+      left: 50%;
+      top: 56px;
+      width: 10px;
+      height: 15px;
+      border-radius: 60% 60% 60% 8%;
+      transform: translateX(-50%) translateY(-4px) rotate(45deg) scale(.55);
+      opacity: 0;
+      background:
+        radial-gradient(circle at 32% 28%, rgba(240, 255, 255, .95), transparent 25%),
+        linear-gradient(145deg, rgba(107, 235, 255, .96), rgba(120, 109, 255, .88));
+      box-shadow:
+        0 0 7px rgba(115, 225, 255, .75),
+        0 0 18px rgba(120, 110, 255, .42);
+      animation: loaderDrop .42s cubic-bezier(.18,.9,.26,1) .45s forwards;
+    }
+
+    .studylab-loader-reaction {
+      position: absolute;
+      left: 50%;
+      bottom: 48px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      transform: translate(-50%, 50%) scale(.2);
+      opacity: 0;
+      background:
+        radial-gradient(circle, rgba(245, 255, 255, .98) 0%, rgba(127, 231, 255, .80) 18%, rgba(111, 116, 255, .34) 44%, transparent 72%);
+      filter: blur(.2px);
+      animation: loaderReaction .56s cubic-bezier(.16,.82,.2,1) .76s forwards;
+    }
+
+    .studylab-loader-bloom {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      transform: translate(-50%, -50%) scale(.1);
+      opacity: 0;
+      background:
+        radial-gradient(circle, rgba(255,255,255,.96) 0%, rgba(161, 238, 255, .72) 16%, rgba(108, 125, 255, .30) 40%, transparent 70%);
+      mix-blend-mode: screen;
+      filter: blur(2px);
+      animation: loaderBloom .50s cubic-bezier(.15,.75,.2,1) 1.00s forwards;
+    }
+
+    .studylab-loader-flash {
+      position: absolute;
+      inset: -20vw;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,.92) 0%, rgba(173, 239, 255, .50) 7%, rgba(108, 124, 255, .20) 20%, transparent 42%);
+      opacity: 0;
+      transform: scale(.52);
+      animation: loaderFlash .36s ease-out 1.04s forwards;
+      pointer-events: none;
+    }
+
+    .studylab-loader-particles {
+      position: absolute;
+      left: 50%;
+      bottom: 47px;
+      width: 8px;
+      height: 8px;
+      transform: translate(-50%, 50%);
+    }
+
+    .studylab-loader-particle {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: rgba(171, 239, 255, .92);
+      box-shadow: 0 0 8px rgba(126, 220, 255, .70);
+      transform: translate(-50%, -50%) scale(.2);
+      opacity: 0;
+      animation:
+        loaderParticle .48s cubic-bezier(.15,.8,.2,1) var(--delay) forwards;
+    }
+
+    @keyframes loaderFlaskPulse {
+      0% { transform: translateX(-50%) scale(.88); opacity: .60; }
+      65% { transform: translateX(-50%) scale(1.03); opacity: 1; }
+      100% { transform: translateX(-50%) scale(1); opacity: 1; }
+    }
+
+    @keyframes loaderBeakerMove {
+      0% { opacity: 0; transform: translateX(-50%) translateY(-20px) rotate(-13deg); }
+      45% { opacity: 1; }
+      100% { opacity: 1; transform: translateX(-50%) translateY(0) rotate(4deg); }
+    }
+
+    @keyframes loaderDrop {
+      0% { opacity: 0; transform: translateX(-50%) translateY(-2px) rotate(45deg) scale(.55); }
+      15% { opacity: 1; }
+      100% { opacity: 1; transform: translateX(-50%) translateY(30px) rotate(45deg) scale(1); }
+    }
+
+    @keyframes loaderLiquid {
+      0% { opacity: 0; transform: translateX(-50%) scaleY(.35); }
+      30% { opacity: 1; }
+      100% { opacity: 1; transform: translateX(-50%) scaleY(1); }
+    }
+
+    @keyframes loaderReaction {
+      0% { opacity: 0; transform: translate(-50%, 50%) scale(.20); }
+      25% { opacity: 1; }
+      100% { opacity: .02; transform: translate(-50%, 50%) scale(5.4); }
+    }
+
+    @keyframes loaderBloom {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(.10); }
+      28% { opacity: .92; }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(18); }
+    }
+
+    @keyframes loaderFlash {
+      0% { opacity: 0; transform: scale(.52); }
+      35% { opacity: .88; }
+      100% { opacity: 0; transform: scale(1.45); }
+    }
+
+    @keyframes loaderParticle {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(.2); }
+      18% { opacity: 1; }
+      100% {
+        opacity: 0;
+        transform:
+          translate(
+            calc(-50% + var(--x)),
+            calc(-50% + var(--y))
+          )
+          scale(.02);
+      }
+    }
+
+    .studylab-loader-particle:nth-child(1) { --x: -52px; --y: -30px; --delay: .82s; }
+    .studylab-loader-particle:nth-child(2) { --x:  54px; --y: -24px; --delay: .84s; }
+    .studylab-loader-particle:nth-child(3) { --x: -40px; --y:  40px; --delay: .86s; }
+    .studylab-loader-particle:nth-child(4) { --x:  46px; --y:  34px; --delay: .88s; }
+    .studylab-loader-particle:nth-child(5) { --x: -20px; --y: -54px; --delay: .90s; }
+    .studylab-loader-particle:nth-child(6) { --x:  24px; --y: -48px; --delay: .92s; }
+    .studylab-loader-particle:nth-child(7) { --x: -68px; --y:  10px; --delay: .94s; }
+    .studylab-loader-particle:nth-child(8) { --x:  66px; --y:   8px; --delay: .96s; }
+
+    html[data-theme="light"] #studylabLoader {
+      background:
+        radial-gradient(circle at 50% 44%, rgba(91, 140, 255, .10), transparent 26%),
+        radial-gradient(circle at 50% 58%, rgba(168, 119, 255, .08), transparent 34%),
+        rgba(244, 247, 254, .985);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #studylabLoader {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: none;
+      }
+
+      .studylab-loader-scene,
+      .studylab-loader-flask,
+      .studylab-loader-beaker,
+      .studylab-loader-drop,
+      .studylab-loader-liquid,
+      .studylab-loader-reaction,
+      .studylab-loader-bloom,
+      .studylab-loader-flash,
+      .studylab-loader-particle {
+        animation: none !important;
+      }
+    }
+  </style>
+
 </head>
 
 
 <body>
+
+  <div id="studylabLoader" aria-hidden="true">
+  <div class="studylab-loader-scene">
+    <div class="studylab-loader-flask">
+      <svg viewBox="0 0 78 92" aria-hidden="true">
+        <path
+          d="M30 5h18v21l17.5 31.5c4.8 8.7-1.5 19.5-11.4 19.5H23.9c-9.9 0-16.2-10.8-11.4-19.5L30 26V5Z"
+          fill="rgba(16,31,51,.72)"
+          stroke="rgba(151,231,255,.52)"
+          stroke-width="1.7"
+        />
+        <path
+          d="M19 55c9 4 31 4 40 0l6.2 11.2c3 5.4-.8 10.8-6.9 10.8H19.7c-6.1 0-9.9-5.4-6.9-10.8L19 55Z"
+          fill="rgba(91,140,255,.07)"
+        />
+        <path
+          d="M31 5h16"
+          stroke="rgba(226,250,255,.75)"
+          stroke-width="2.2"
+          stroke-linecap="round"
+        />
+      </svg>
+    </div>
+
+    <div class="studylab-loader-liquid"></div>
+
+    <div class="studylab-loader-beaker">
+      <svg viewBox="0 0 38 50" aria-hidden="true">
+        <path
+          d="M9 4h20M13 4v25l-5.7 11.2C5.3 44.1 8.2 47 12.5 47h13c4.3 0 7.2-2.9 5.2-6.8L25 29V4"
+          fill="rgba(19,34,54,.60)"
+          stroke="rgba(190,242,255,.60)"
+          stroke-width="1.35"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M10.2 31.5c4.5 1.4 13.1 1.4 17.6 0l3.1 6.2c1.5 3-0.8 5.7-4.3 5.7H11.3c-3.5 0-5.8-2.7-4.3-5.7l3.2-6.2Z"
+          fill="rgba(126,220,255,.14)"
+        />
+      </svg>
+    </div>
+
+    <div class="studylab-loader-drop"></div>
+    <div class="studylab-loader-reaction"></div>
+
+    <div class="studylab-loader-particles">
+      <span class="studylab-loader-particle"></span>
+      <span class="studylab-loader-particle"></span>
+      <span class="studylab-loader-particle"></span>
+      <span class="studylab-loader-particle"></span>
+      <span class="studylab-loader-particle"></span>
+      <span class="studylab-loader-particle"></span>
+      <span class="studylab-loader-particle"></span>
+      <span class="studylab-loader-particle"></span>
+    </div>
+
+    <div class="studylab-loader-bloom"></div>
+    <div class="studylab-loader-flash"></div>
+  </div>
+</div>
+
 
 
   <!-- =========================================================
@@ -2265,5 +2598,46 @@
 
   <script>(function(s){s.dataset.zone='11885118',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
 
-  </body>
+  <script>
+(function () {
+  const loader = document.getElementById("studylabLoader");
+  if (!loader) return;
+
+  const start = performance.now();
+  const MIN_VISIBLE_MS = 1120;
+  const MAX_VISIBLE_MS = 1700;
+  let finished = false;
+
+  function hideLoader() {
+    if (finished) return;
+    finished = true;
+
+    const delay = Math.max(
+      0,
+      MIN_VISIBLE_MS - (performance.now() - start)
+    );
+
+    window.setTimeout(() => {
+      loader.classList.add("is-exiting");
+      window.setTimeout(() => loader.remove(), 360);
+    }, delay);
+  }
+
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    hideLoader();
+    return;
+  }
+
+  if (document.readyState === "complete") {
+    hideLoader();
+  } else {
+    window.addEventListener("load", hideLoader, { once: true });
+  }
+
+  window.setTimeout(hideLoader, MAX_VISIBLE_MS);
+})();
+</script>
+
+
+</body>
 </html>
