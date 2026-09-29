@@ -797,8 +797,7 @@
       }
     }
 
-    /* Homepage search sits slightly higher than the resource grid. */    .hero + .study-findbar {
-      margin-top: 14px;
+    /* Homepage search sits slightly higher than the resource grid. */    .hero + .study-findbar {      margin-top: 14px;
     }
 
     /* =========================================================
@@ -1249,8 +1248,8 @@
 
     .studylab-loader-scene {
       position: relative;
-      width: min(620px, 88vw);
-      height: min(650px, 86vh);
+      width: min(700px, 94vw);
+      height: min(620px, 84vh);
       min-height: 430px;
       display: grid;
       place-items: center;
@@ -1260,10 +1259,10 @@
     .studylab-loader-flask {
       position: absolute;
       left: 50%;
-      top: 54%;
-      width: min(360px, 58vw);
-      height: min(430px, 58vh);
-      transform: translate(-50%, -50%) scale(.92);
+      top: 61%;
+      width: min(520px, 82vw);
+      height: min(390px, 54vh);
+      transform: translate(-50%, -50%) scale(.94);
       opacity: 0;
       z-index: 4;
       filter:
@@ -1278,24 +1277,51 @@
       overflow: visible;
     }
 
+    .loader-flask-outline {
+      fill: rgba(89, 219, 255, .025);
+      stroke: rgba(189, 247, 255, .88);
+      stroke-width: 3;
+      stroke-linejoin: round;
+    }
+
+    .loader-flask-mouth {
+      fill: none;
+      stroke: rgba(235, 253, 255, .92);
+      stroke-width: 3;
+      stroke-linecap: round;
+    }
+
+    .loader-liquid-fill {
+      fill: rgba(45, 223, 248, .46);
+    }
+
+    .loader-liquid-line {
+      fill: none;
+      stroke: rgba(168, 250, 255, .98);
+      stroke-width: 3;
+      stroke-linecap: round;
+    }
+
+    html[data-theme="light"] .loader-flask-outline {
+      fill: rgba(255, 255, 255, .06);
+      stroke: rgba(28, 111, 150, .94);
+    }
+
+    html[data-theme="light"] .loader-flask-mouth {
+      stroke: rgba(18, 105, 144, .98);
+    }
+
+    html[data-theme="light"] .loader-liquid-fill {
+      fill: rgba(24, 186, 218, .50);
+    }
+
+    html[data-theme="light"] .loader-liquid-line {
+      stroke: rgba(7, 126, 157, .98);
+    }
+
     .studylab-loader-liquid {
-      position: absolute;
-      left: 50%;
-      top: 77%;
-      width: min(224px, 38vw);
-      height: min(102px, 16vw);
-      min-height: 82px;
-      transform: translate(-50%, -50%);
-      transform-origin: center center;
-      opacity: 1;
-      z-index: 5;
-      overflow: hidden;
-      border-radius: 50%;
-      background: rgba(42, 224, 255, .42);
-      border: 2px solid rgba(148, 246, 255, .72);
-      box-shadow:
-        0 0 16px rgba(105, 239, 255, .44),
-        0 0 30px rgba(53, 197, 255, .22);
+      display: none !important;
+      animation: none !important;
     }
 
     .studylab-loader-dropper {
@@ -1577,13 +1603,12 @@
       }
 
       .studylab-loader-flask {
-        width: 285px;
-        height: 342px;
+        width: 340px;
+        height: 255px;
       }
 
       .studylab-loader-liquid {
-        width: 205px;
-        height: 96px;
+        display: none;
       }
 
       .studylab-loader-dropper {
@@ -1597,8 +1622,7 @@
       }
     }
 
-    @media (prefers-reduced-motion: reduce) {
-      #studylabLoader {
+    @media (prefers-reduced-motion: reduce) {      #studylabLoader {
         opacity: 0;
         visibility: hidden;
         pointer-events: none;
@@ -1628,18 +1652,35 @@
   <div class="studylab-loader-scene">
 
     <div class="studylab-loader-flask" aria-hidden="true">
-      <svg viewBox="0 0 360 430">
+      <svg viewBox="0 0 520 400" role="presentation">
+        <defs>
+          <clipPath id="slFlaskBodyClip">
+            <path d="M220 20H300V120L455 300C478 327 460 370 419 370H101C60 370 42 327 65 300L220 120V20Z" />
+          </clipPath>
+        </defs>
+
+        <g clip-path="url(#slFlaskBodyClip)">
+          <rect
+            class="loader-liquid-fill"
+            x="35"
+            y="255"
+            width="450"
+            height="150"
+          />
+          <path
+            class="loader-liquid-line"
+            d="M64 255H456"
+          />
+        </g>
+
         <path
-          d="M138 16h84M152 16v94L62 316c-29 48 5 89 56 89h124c51 0 85-41 56-89l-90-206V16Z"
-          fill="rgba(89, 219, 255, .025)"
-          stroke="rgba(169, 244, 255, .78)"
-          stroke-width="3.2"
-          stroke-linejoin="round"
+          class="loader-flask-outline"
+          d="M220 20H300V120L455 300C478 327 460 370 419 370H101C60 370 42 327 65 300L220 120V20Z"
         />
-
-
-
-
+        <path
+          class="loader-flask-mouth"
+          d="M220 20H300"
+        />
       </svg>
     </div>
 
@@ -2397,8 +2438,7 @@
 
       <a
         class="subject-card"
-        href="generalknowledge.html"
-        aria-label="Open General Knowledge past papers"
+        href="generalknowledge.html"        aria-label="Open General Knowledge past papers"
       >
 
         <span class="card-icon">
