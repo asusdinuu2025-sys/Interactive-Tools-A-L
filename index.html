@@ -793,6 +793,11 @@
       }
     }
 
+    /* Homepage search sits slightly higher than the resource grid. */
+    .hero + .study-findbar {
+      margin-top: 14px;
+    }
+
     /* =========================================================
        STUDYLAB — DISTINCT NON-SUBJECT HUB CARDS
        Full-width on desktop so utility/resource hubs never blend
@@ -862,6 +867,7 @@
       margin: 0;
       font-size: 1.35rem;
       letter-spacing: -.01em;
+      color: var(--text-primary);
     }
 
     .study-tools-card p {
@@ -1326,7 +1332,7 @@
             <div class="countdown-box"><span class="countdown-value" data-cd-minutes>—</span><span class="countdown-label">Minutes</span></div>
             <div class="countdown-box"><span class="countdown-value" data-cd-seconds>—</span><span class="countdown-label">Seconds</span></div>
           </div>
-          <div class="countdown-note" data-countdown-note>Countdown target will be updated when the official 2027 timetable is published.</div>
+          <div class="countdown-note" data-countdown-note aria-live="polite"></div>
         </article>
       </section>
 
@@ -1491,6 +1497,10 @@
           margin-top: 7px;
           font-size: 9px;
           line-height: 1.25;
+        }
+
+        .homepage-utility-row .countdown-note:empty {
+          display: none;
         }
 
         .homepage-utility-row .student-milestone {
