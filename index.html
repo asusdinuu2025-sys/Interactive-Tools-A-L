@@ -797,8 +797,7 @@
       }
     }
 
-    /* Homepage search sits slightly higher than the resource grid. */    .hero + .study-findbar {      margin-top: 14px;    }    /* =========================================================
-       STUDYLAB — DISTINCT NON-SUBJECT HUB CARDS
+    /* Homepage search sits slightly higher than the resource grid. */    .hero + .study-findbar {      margin-top: 14px;    }    /* =========================================================       STUDYLAB — DISTINCT NON-SUBJECT HUB CARDS
        Full-width on desktop so utility/resource hubs never blend
        into the four core subject cards.
        ========================================================= */
@@ -1405,8 +1404,9 @@
       transform: translate3d(0, 0, 0) scale(.72);
       transform-origin: 50% 58%;
       mix-blend-mode: screen;
-      animation: loaderSplashHit .16s ease-out 2.58s forwards,
-                 loaderSplashSlip .62s cubic-bezier(.15,.8,.18,1) 2.74s forwards;
+      animation:
+        loaderSplashHit .16s ease-out 2.58s forwards,
+        loaderSplashSlip .58s cubic-bezier(.15,.8,.18,1) 2.82s forwards;
     }
 
     .studylab-loader-splash svg {
@@ -1436,7 +1436,33 @@
       fill: rgba(175, 255, 255, .46);
     }
 
-    html[data-theme="light"] .splash-main {
+    .splash-main,
+    .splash-green,
+    .splash-drop {
+      animation: splashLiquidFade .32s ease-in 2.76s forwards;
+    }
+
+    .splash-wordmark {
+      opacity: 0;
+      fill: rgba(229, 255, 255, .96);
+      stroke: rgba(87, 244, 255, .52);
+      stroke-width: .22;
+      paint-order: stroke;
+      font-family: "Segoe UI", Arial, sans-serif;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: .45px;
+      text-anchor: middle;
+      dominant-baseline: middle;
+      filter: drop-shadow(0 0 2px rgba(91, 235, 255, .55));
+      transform-box: fill-box;
+      transform-origin: center;
+      animation:
+        splashWordmarkIn .42s cubic-bezier(.16,.86,.18,1) 2.76s forwards,
+        splashWordmarkSlip .42s ease-in 3.12s forwards;
+    }
+
+    html[data-theme="light"] .splash-main/ {
       fill: rgba(22, 174, 205, .48);
       stroke: rgba(8, 108, 138, .72);
     }
@@ -1452,6 +1478,12 @@
 
     html[data-theme="light"] .splash-glow {
       fill: rgba(58, 206, 228, .24);
+    }
+
+    html[data-theme="light"] .splash-wordmark {
+      fill: rgba(19, 93, 126, .94);
+      stroke: rgba(37, 181, 210, .42);
+      filter: none;
     }
 
     .studylab-loader-wordmark {
@@ -1525,6 +1557,33 @@
       100% { opacity: 0; transform: translate(-50%, -50%) scale(2.1); }
     }
 
+    @keyframes splashLiquidFade {
+      0% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    @keyframes splashWordmarkIn {
+      0% {
+        opacity: 0;
+        transform: translateY(5px) scale(.72);
+      }
+      100% {
+        opacity: .98;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes splashWordmarkSlip {
+      0% {
+        opacity: .98;
+        transform: translateY(0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(6vh) scale(1.02);
+      }
+    }
+
     @keyframes loaderSplashHit {
       0% {
         opacity: 0;
@@ -1543,7 +1602,7 @@
         transform: translate3d(0, 0, 0) scale(1);
       }
       100% {
-        opacity: 0;
+        opacity: .22;
         transform: translate3d(0, 7vh, 0) scale(1.02);
       }
     }
@@ -1598,7 +1657,6 @@
 
 
 <body>
-
   <div id="studylabLoader" aria-hidden="true">
   <div class="studylab-loader-scene">
 
@@ -1685,6 +1743,7 @@
         <circle class="splash-drop" cx="21" cy="80" r="1.7"/>
         <circle class="splash-drop" cx="11" cy="67" r="1.0"/>
         <circle class="splash-glow" cx="50" cy="52" r="7"/>
+        <text class="splash-wordmark" x="50" y="52">Study-Lab</text>
       </svg>
     </div>
 
@@ -2398,7 +2457,6 @@
         <p>
           G.C.E. A/L General English past papers arranged by year.
         </p>
-
         <span class="card-cta">
           View past papers →
         </span>
@@ -2668,8 +2726,8 @@
   if (!loader) return;
 
   const start = performance.now();
-  const MIN_VISIBLE_MS = 2920;
-  const MAX_VISIBLE_MS = 3500;
+  const MIN_VISIBLE_MS = 3200;
+  const MAX_VISIBLE_MS = 3700;
   let finished = false;
 
   function hideLoader() {
