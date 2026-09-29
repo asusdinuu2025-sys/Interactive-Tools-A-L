@@ -1286,8 +1286,9 @@
 
   <style>
     /* =========================================================
-       STUDYLAB — CHEMICAL REACTION PAGE LOADER
-       Fast, smooth, science-themed first-load transition.
+       STUDYLAB — CINEMATIC CHEMICAL REACTION LOADER
+       Large glass flask + cyan liquid + angled dropper +
+       neon-green reaction + full-screen light burst.
        ========================================================= */
 
     #studylabLoader {
@@ -1298,15 +1299,15 @@
       place-items: center;
       overflow: hidden;
       background:
-        radial-gradient(circle at 50% 44%, rgba(72, 170, 255, .09), transparent 26%),
-        radial-gradient(circle at 50% 58%, rgba(168, 119, 255, .07), transparent 34%),
-        rgba(5, 10, 20, .985);
+        radial-gradient(circle at 50% 48%, rgba(31, 116, 194, .12), transparent 24%),
+        radial-gradient(circle at 50% 54%, rgba(126, 67, 255, .07), transparent 42%),
+        #040811;
       opacity: 1;
       visibility: visible;
       pointer-events: all;
       transition:
-        opacity .28s ease,
-        visibility 0s linear .28s;
+        opacity .34s cubic-bezier(.25,.8,.25,1),
+        visibility 0s linear .34s;
     }
 
     #studylabLoader.is-exiting {
@@ -1315,197 +1316,416 @@
       pointer-events: none;
     }
 
+    .studylab-loader-vignette {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 50% 50%, transparent 0 24%, rgba(0,0,0,.18) 62%, rgba(0,0,0,.42) 100%);
+      opacity: .95;
+    }
+
     .studylab-loader-scene {
       position: relative;
-      width: 180px;
-      height: 190px;
+      width: min(560px, 82vw);
+      height: min(620px, 82vh);
+      min-height: 440px;
       display: grid;
       place-items: center;
-      transform: translateY(2px);
+      isolation: isolate;
     }
 
-    .studylab-loader-flask {
+    .studylab-loader-aura {
       position: absolute;
       left: 50%;
-      bottom: 26px;
-      width: 78px;
-      height: 92px;
-      transform: translateX(-50%);
-      filter:
-        drop-shadow(0 0 8px rgba(126, 220, 255, .18))
-        drop-shadow(0 0 24px rgba(91, 140, 255, .12));
-      animation: loaderFlaskPulse 1.05s ease-out .10s both;
+      top: 55%;
+      width: 280px;
+      height: 280px;
+      transform: translate(-50%, -50%) scale(.72);
+      border-radius: 50%;
+      background:
+        radial-gradient(circle, rgba(84, 203, 255, .12) 0%, rgba(88, 145, 255, .08) 36%, transparent 72%);
+      filter: blur(6px);
+      opacity: 0;
+      animation: loaderAura 2.15s ease-out .10s forwards;
+      pointer-events: none;
     }
 
-    .studylab-loader-flask svg,
-    .studylab-loader-beaker svg {
-      display: block;
+    .studylab-loader-glass {
+      position: absolute;
+      left: 50%;
+      top: 58%;
+      width: min(330px, 58vw);
+      height: min(390px, 58vh);
+      transform: translate(-50%, -50%) scale(.88);
+      opacity: 0;
+      z-index: 3;
+      filter:
+        drop-shadow(0 0 12px rgba(88, 214, 255, .18))
+        drop-shadow(0 0 40px rgba(80, 135, 255, .10));
+      animation: loaderGlassIn 1.05s cubic-bezier(.16,.84,.22,1) .05s forwards;
+    }
+
+    .studylab-loader-glass svg {
       width: 100%;
       height: 100%;
+      overflow: visible;
     }
 
     .studylab-loader-liquid {
       position: absolute;
       left: 50%;
-      bottom: 33px;
-      width: 54px;
-      height: 26px;
-      border-radius: 45% 45% 40% 40%;
-      transform: translateX(-50%) scaleY(.35);
+      bottom: 12.5%;
+      width: 68%;
+      height: 27%;
+      transform: translateX(-50%) scaleY(.20);
       transform-origin: center bottom;
       opacity: 0;
+      z-index: 4;
+      overflow: hidden;
+      border-radius: 0 0 48% 48% / 0 0 34% 34%;
       background:
-        radial-gradient(circle at 28% 26%, rgba(220, 250, 255, .85), transparent 22%),
-        linear-gradient(180deg, rgba(116, 230, 255, .78), rgba(108, 110, 255, .70));
+        linear-gradient(
+          180deg,
+          rgba(154, 247, 255, .95) 0%,
+          rgba(39, 215, 244, .72) 18%,
+          rgba(28, 143, 255, .56) 58%,
+          rgba(68, 88, 230, .44) 100%
+        );
       box-shadow:
-        0 0 10px rgba(100, 210, 255, .55),
-        0 0 30px rgba(105, 120, 255, .32);
-      animation: loaderLiquid 1.08s cubic-bezier(.2,.85,.25,1) .32s both;
+        0 -5px 17px rgba(105, 239, 255, .42),
+        0 0 25px rgba(34, 189, 255, .28),
+        inset 0 6px 16px rgba(235, 255, 255, .15);
+      clip-path: ellipse(48% 53% at 50% 50%);
+      animation: loaderLiquidFill 1.02s cubic-bezier(.18,.84,.22,1) .35s forwards;
     }
 
-    .studylab-loader-beaker {
+    .studylab-loader-liquid::before {
+      content: "";
       position: absolute;
-      left: 50%;
-      top: 8px;
-      width: 38px;
-      height: 50px;
-      transform: translateX(-50%) translateY(-7px) rotate(-8deg);
-      transform-origin: 50% 100%;
+      left: -8%;
+      top: 7%;
+      width: 116%;
+      height: 18px;
+      border-radius: 50%;
+      background:
+        linear-gradient(
+          90deg,
+          rgba(255,255,255,0),
+          rgba(213, 252, 255, .72) 26%,
+          rgba(126, 240, 255, .56) 52%,
+          rgba(255,255,255,0) 82%
+        );
+      filter: blur(1px);
+      animation: loaderLiquidWave 2.1s ease-in-out .7s infinite;
+    }
+
+    .studylab-loader-liquid::after {
+      content: "";
+      position: absolute;
+      left: 10%;
+      bottom: 15%;
+      width: 80%;
+      height: 52%;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 50% 10%, rgba(188, 248, 255, .16), transparent 55%);
+      filter: blur(5px);
+    }
+
+    .studylab-loader-dropper {
+      position: absolute;
+      left: 56%;
+      top: 1%;
+      width: min(168px, 26vw);
+      height: min(300px, 38vh);
+      transform-origin: 82% 88%;
+      transform:
+        translate(-50%, -50%)
+        rotate(-18deg)
+        translateY(-70px);
+      opacity: 0;
+      z-index: 6;
       filter:
-        drop-shadow(0 0 6px rgba(126, 220, 255, .18))
-        drop-shadow(0 0 18px rgba(91, 140, 255, .10));
-      opacity: 0;
-      animation: loaderBeakerMove .52s cubic-bezier(.22,.82,.22,1) .10s forwards;
+        drop-shadow(0 0 9px rgba(132, 236, 255, .20))
+        drop-shadow(0 0 28px rgba(61, 172, 255, .12));
+      animation: loaderDropper 1.35s cubic-bezier(.18,.86,.22,1) .28s forwards;
     }
 
-    .studylab-loader-drop {
+    .studylab-loader-dropper svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .studylab-loader-green-drop {
       position: absolute;
-      left: 50%;
-      top: 56px;
-      width: 10px;
-      height: 15px;
-      border-radius: 60% 60% 60% 8%;
-      transform: translateX(-50%) translateY(-4px) rotate(45deg) scale(.55);
+      left: 65.5%;
+      top: 25.5%;
+      width: 25px;
+      height: 34px;
+      border-radius: 58% 58% 64% 12%;
+      transform:
+        translate(-50%, -50%)
+        rotate(45deg)
+        scale(.22);
       opacity: 0;
+      z-index: 7;
       background:
-        radial-gradient(circle at 32% 28%, rgba(240, 255, 255, .95), transparent 25%),
-        linear-gradient(145deg, rgba(107, 235, 255, .96), rgba(120, 109, 255, .88));
+        radial-gradient(circle at 28% 24%, rgba(247, 255, 236, .98), transparent 22%),
+        linear-gradient(145deg, #efff68 0%, #7dff22 42%, #26f06f 100%);
       box-shadow:
-        0 0 7px rgba(115, 225, 255, .75),
-        0 0 18px rgba(120, 110, 255, .42);
-      animation: loaderDrop .42s cubic-bezier(.18,.9,.26,1) .45s forwards;
+        0 0 10px rgba(152, 255, 55, .95),
+        0 0 24px rgba(86, 255, 59, .72),
+        0 0 46px rgba(41, 255, 131, .42);
+      animation: loaderGreenDrop 1.10s cubic-bezier(.14,.88,.2,1) 1.23s forwards;
     }
 
-    .studylab-loader-reaction {
+    .studylab-loader-impact {
       position: absolute;
       left: 50%;
-      bottom: 48px;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      transform: translate(-50%, 50%) scale(.2);
-      opacity: 0;
-      background:
-        radial-gradient(circle, rgba(245, 255, 255, .98) 0%, rgba(127, 231, 255, .80) 18%, rgba(111, 116, 255, .34) 44%, transparent 72%);
-      filter: blur(.2px);
-      animation: loaderReaction .56s cubic-bezier(.16,.82,.2,1) .76s forwards;
-    }
-
-    .studylab-loader-bloom {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
+      top: 62%;
+      width: 30px;
+      height: 30px;
       transform: translate(-50%, -50%) scale(.1);
+      border-radius: 50%;
       opacity: 0;
+      z-index: 8;
       background:
-        radial-gradient(circle, rgba(255,255,255,.96) 0%, rgba(161, 238, 255, .72) 16%, rgba(108, 125, 255, .30) 40%, transparent 70%);
-      mix-blend-mode: screen;
-      filter: blur(2px);
-      animation: loaderBloom .50s cubic-bezier(.15,.75,.2,1) 1.00s forwards;
+        radial-gradient(circle, rgba(255,255,255,.98) 0%, rgba(192,255,150,.96) 12%, rgba(89,255,102,.80) 24%, rgba(84,221,255,.42) 45%, transparent 72%);
+      filter: blur(.3px);
+      animation: loaderImpact 1.05s cubic-bezier(.11,.8,.18,1) 1.88s forwards;
     }
 
-    .studylab-loader-flash {
+    .studylab-loader-ripple {
       position: absolute;
-      inset: -20vw;
-      background:
-        radial-gradient(circle at 50% 50%, rgba(255,255,255,.92) 0%, rgba(173, 239, 255, .50) 7%, rgba(108, 124, 255, .20) 20%, transparent 42%);
+      left: 50%;
+      top: 62%;
+      width: 36px;
+      height: 36px;
+      transform: translate(-50%, -50%) scale(.2);
+      border-radius: 50%;
+      border: 2px solid rgba(170, 255, 105, .92);
+      box-shadow:
+        0 0 14px rgba(103, 255, 105, .62),
+        inset 0 0 12px rgba(102, 228, 255, .30);
       opacity: 0;
-      transform: scale(.52);
-      animation: loaderFlash .36s ease-out 1.04s forwards;
-      pointer-events: none;
+      z-index: 8;
+      animation: loaderRipple .86s cubic-bezier(.13,.75,.16,1) 1.90s forwards;
+    }
+
+    .studylab-loader-shock {
+      position: absolute;
+      left: 50%;
+      top: 62%;
+      width: 70px;
+      height: 70px;
+      transform: translate(-50%, -50%) scale(.12);
+      border-radius: 50%;
+      border: 1px solid rgba(107, 236, 255, .72);
+      box-shadow:
+        0 0 18px rgba(106, 235, 255, .45),
+        0 0 44px rgba(93, 126, 255, .24);
+      opacity: 0;
+      z-index: 7;
+      animation: loaderShock .95s cubic-bezier(.12,.77,.16,1) 2.02s forwards;
     }
 
     .studylab-loader-particles {
       position: absolute;
       left: 50%;
-      bottom: 47px;
-      width: 8px;
-      height: 8px;
-      transform: translate(-50%, 50%);
+      top: 62%;
+      width: 10px;
+      height: 10px;
+      transform: translate(-50%, -50%);
+      z-index: 9;
+      pointer-events: none;
     }
 
     .studylab-loader-particle {
       position: absolute;
       left: 50%;
       top: 50%;
-      width: 4px;
-      height: 4px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
-      background: rgba(171, 239, 255, .92);
-      box-shadow: 0 0 8px rgba(126, 220, 255, .70);
-      transform: translate(-50%, -50%) scale(.2);
+      transform: translate(-50%, -50%) scale(.1);
       opacity: 0;
-      animation:
-        loaderParticle .48s cubic-bezier(.15,.8,.2,1) var(--delay) forwards;
+      background: rgba(181, 255, 226, .94);
+      box-shadow:
+        0 0 9px rgba(91, 255, 155, .76),
+        0 0 18px rgba(87, 218, 255, .42);
+      animation: loaderParticle .72s cubic-bezier(.12,.78,.15,1) var(--delay) forwards;
     }
 
-    @keyframes loaderFlaskPulse {
-      0% { transform: translateX(-50%) scale(.88); opacity: .60; }
-      65% { transform: translateX(-50%) scale(1.03); opacity: 1; }
-      100% { transform: translateX(-50%) scale(1); opacity: 1; }
+    .studylab-loader-particle:nth-child(1) { --x: -135px; --y: -88px; --s: 1.35; --delay: 2.08s; }
+    .studylab-loader-particle:nth-child(2) { --x:  132px; --y: -68px; --s: .95;  --delay: 2.11s; }
+    .studylab-loader-particle:nth-child(3) { --x: -96px;  --y:  98px; --s: 1.10; --delay: 2.14s; }
+    .studylab-loader-particle:nth-child(4) { --x:  108px; --y:  104px; --s: 1.20; --delay: 2.17s; }
+    .studylab-loader-particle:nth-child(5) { --x: -38px;  --y: -142px; --s: .78; --delay: 2.20s; }
+    .studylab-loader-particle:nth-child(6) { --x:  42px;  --y: -132px; --s: .90; --delay: 2.23s; }
+    .studylab-loader-particle:nth-child(7) { --x: -154px; --y:  15px; --s: 1.25; --delay: 2.26s; }
+    .studylab-loader-particle:nth-child(8) { --x:  154px; --y:  20px; --s: 1.05; --delay: 2.29s; }
+    .studylab-loader-particle:nth-child(9) { --x: -66px;  --y:  154px; --s: .72; --delay: 2.32s; }
+    .studylab-loader-particle:nth-child(10){ --x:  73px;  --y:  148px; --s: .84; --delay: 2.35s; }
+    .studylab-loader-particle:nth-child(11){ --x: -58px;  --y:  58px; --s: .65; --delay: 2.38s; }
+    .studylab-loader-particle:nth-child(12){ --x:  54px;  --y:  65px; --s: .58; --delay: 2.41s; }
+
+    .studylab-loader-burst {
+      position: absolute;
+      left: 50%;
+      top: 55%;
+      width: 90px;
+      height: 90px;
+      transform: translate(-50%, -50%) scale(.08);
+      border-radius: 50%;
+      background:
+        radial-gradient(circle,
+          rgba(255,255,255,.98) 0%,
+          rgba(197,255,172,.90) 9%,
+          rgba(113,241,255,.72) 19%,
+          rgba(96,147,255,.38) 35%,
+          transparent 70%);
+      mix-blend-mode: screen;
+      filter: blur(1.5px);
+      opacity: 0;
+      z-index: 10;
+      animation: loaderBurst 1.15s cubic-bezier(.08,.73,.12,1) 2.12s forwards;
     }
 
-    @keyframes loaderBeakerMove {
-      0% { opacity: 0; transform: translateX(-50%) translateY(-20px) rotate(-13deg); }
-      45% { opacity: 1; }
-      100% { opacity: 1; transform: translateX(-50%) translateY(0) rotate(4deg); }
+    .studylab-loader-screenwave {
+      position: absolute;
+      left: 50%;
+      top: 55%;
+      width: 120px;
+      height: 120px;
+      transform: translate(-50%, -50%) scale(.08);
+      border-radius: 50%;
+      border: 2px solid rgba(124, 236, 255, .72);
+      box-shadow:
+        0 0 22px rgba(95, 227, 255, .54),
+        0 0 58px rgba(110, 133, 255, .32);
+      opacity: 0;
+      z-index: 9;
+      animation: loaderScreenWave 1.06s cubic-bezier(.09,.72,.14,1) 2.12s forwards;
     }
 
-    @keyframes loaderDrop {
-      0% { opacity: 0; transform: translateX(-50%) translateY(-2px) rotate(45deg) scale(.55); }
-      15% { opacity: 1; }
-      100% { opacity: 1; transform: translateX(-50%) translateY(30px) rotate(45deg) scale(1); }
+    .studylab-loader-flash {
+      position: absolute;
+      inset: -15vw;
+      transform: scale(.18);
+      opacity: 0;
+      z-index: 11;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 50% 50%,
+          rgba(255,255,255,.96) 0%,
+          rgba(209,255,221,.80) 4%,
+          rgba(152,241,255,.52) 12%,
+          rgba(104,135,255,.22) 25%,
+          transparent 45%);
+      mix-blend-mode: screen;
+      filter: blur(3px);
+      animation: loaderFullFlash 1.10s cubic-bezier(.12,.8,.18,1) 2.20s forwards;
     }
 
-    @keyframes loaderLiquid {
-      0% { opacity: 0; transform: translateX(-50%) scaleY(.35); }
-      30% { opacity: 1; }
+    .studylab-loader-wordmark {
+      position: absolute;
+      left: 50%;
+      top: 82%;
+      transform: translateX(-50%) translateY(10px);
+      color: rgba(225, 245, 255, .78);
+      font-size: clamp(12px, 1.7vw, 16px);
+      font-weight: 750;
+      letter-spacing: .28em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      opacity: 0;
+      z-index: 12;
+      text-shadow:
+        0 0 12px rgba(111, 224, 255, .25);
+      animation: loaderWordmark 1.0s ease-out 1.42s forwards;
+    }
+
+    @keyframes loaderAura {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(.55); }
+      34% { opacity: .95; }
+      100% { opacity: .18; transform: translate(-50%, -50%) scale(1.24); }
+    }
+
+    @keyframes loaderGlassIn {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(.82); }
+      55% { opacity: 1; }
+      100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+
+    @keyframes loaderLiquidFill {
+      0% { opacity: 0; transform: translateX(-50%) scaleY(.10); }
+      22% { opacity: 1; }
       100% { opacity: 1; transform: translateX(-50%) scaleY(1); }
     }
 
-    @keyframes loaderReaction {
-      0% { opacity: 0; transform: translate(-50%, 50%) scale(.20); }
-      25% { opacity: 1; }
-      100% { opacity: .02; transform: translate(-50%, 50%) scale(5.4); }
+    @keyframes loaderLiquidWave {
+      0%,100% { transform: translateX(-8%); opacity: .48; }
+      50% { transform: translateX(8%); opacity: .80; }
     }
 
-    @keyframes loaderBloom {
+    @keyframes loaderDropper {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) rotate(-24deg) translateY(-75px);
+      }
+      20% { opacity: 1; }
+      72% {
+        transform: translate(-50%, -50%) rotate(11deg) translateY(0);
+      }
+      100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) rotate(15deg) translateY(0);
+      }
+    }
+
+    @keyframes loaderGreenDrop {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) rotate(45deg) scale(.22);
+      }
+      12% {
+        opacity: 1;
+      }
+      57% {
+        transform: translate(-50%, 42px) rotate(45deg) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, 260px) rotate(45deg) scale(.78);
+      }
+    }
+
+    @keyframes loaderImpact {
       0% { opacity: 0; transform: translate(-50%, -50%) scale(.10); }
-      28% { opacity: .92; }
-      100% { opacity: 0; transform: translate(-50%, -50%) scale(18); }
+      18% { opacity: 1; }
+      55% { opacity: .90; transform: translate(-50%, -50%) scale(3.5); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(8); }
     }
 
-    @keyframes loaderFlash {
-      0% { opacity: 0; transform: scale(.52); }
-      35% { opacity: .88; }
-      100% { opacity: 0; transform: scale(1.45); }
+    @keyframes loaderRipple {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(.20); }
+      18% { opacity: .98; }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(8.5); }
+    }
+
+    @keyframes loaderShock {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(.12); }
+      20% { opacity: .86; }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(8.8); }
     }
 
     @keyframes loaderParticle {
-      0% { opacity: 0; transform: translate(-50%, -50%) scale(.2); }
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(.08);
+      }
       18% { opacity: 1; }
       100% {
         opacity: 0;
@@ -1514,24 +1734,67 @@
             calc(-50% + var(--x)),
             calc(-50% + var(--y))
           )
-          scale(.02);
+          scale(var(--s));
       }
     }
 
-    .studylab-loader-particle:nth-child(1) { --x: -52px; --y: -30px; --delay: .82s; }
-    .studylab-loader-particle:nth-child(2) { --x:  54px; --y: -24px; --delay: .84s; }
-    .studylab-loader-particle:nth-child(3) { --x: -40px; --y:  40px; --delay: .86s; }
-    .studylab-loader-particle:nth-child(4) { --x:  46px; --y:  34px; --delay: .88s; }
-    .studylab-loader-particle:nth-child(5) { --x: -20px; --y: -54px; --delay: .90s; }
-    .studylab-loader-particle:nth-child(6) { --x:  24px; --y: -48px; --delay: .92s; }
-    .studylab-loader-particle:nth-child(7) { --x: -68px; --y:  10px; --delay: .94s; }
-    .studylab-loader-particle:nth-child(8) { --x:  66px; --y:   8px; --delay: .96s; }
+    @keyframes loaderBurst {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(.08); }
+      22% { opacity: .95; }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(21); }
+    }
+
+    @keyframes loaderScreenWave {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(.08); }
+      18% { opacity: .9; }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(17); }
+    }
+
+    @keyframes loaderFullFlash {
+      0% { opacity: 0; transform: scale(.18); }
+      25% { opacity: .92; }
+      54% { opacity: .44; }
+      100% { opacity: 0; transform: scale(1.42); }
+    }
+
+    @keyframes loaderWordmark {
+      0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
+      35% { opacity: .78; }
+      100% { opacity: .70; transform: translateX(-50%) translateY(0); }
+    }
 
     html[data-theme="light"] #studylabLoader {
       background:
-        radial-gradient(circle at 50% 44%, rgba(91, 140, 255, .10), transparent 26%),
-        radial-gradient(circle at 50% 58%, rgba(168, 119, 255, .08), transparent 34%),
-        rgba(244, 247, 254, .985);
+        radial-gradient(circle at 50% 48%, rgba(83, 168, 230, .10), transparent 24%),
+        radial-gradient(circle at 50% 54%, rgba(126, 88, 220, .07), transparent 42%),
+        #eef4fb;
+    }
+
+    @media (max-width: 640px) {
+      .studylab-loader-scene {
+        width: 94vw;
+        height: 76vh;
+        min-height: 390px;
+      }
+
+      .studylab-loader-glass {
+        width: 280px;
+        height: 330px;
+      }
+
+      .studylab-loader-dropper {
+        width: 142px;
+        height: 258px;
+      }
+
+      .studylab-loader-green-drop {
+        width: 21px;
+        height: 29px;
+      }
+
+      .studylab-loader-wordmark {
+        top: 85%;
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1543,69 +1806,171 @@
       }
 
       .studylab-loader-scene,
-      .studylab-loader-flask,
-      .studylab-loader-beaker,
-      .studylab-loader-drop,
+      .studylab-loader-aura,
+      .studylab-loader-glass,
       .studylab-loader-liquid,
-      .studylab-loader-reaction,
-      .studylab-loader-bloom,
+      .studylab-loader-dropper,
+      .studylab-loader-green-drop,
+      .studylab-loader-impact,
+      .studylab-loader-ripple,
+      .studylab-loader-shock,
+      .studylab-loader-particle,
+      .studylab-loader-burst,
+      .studylab-loader-screenwave,
       .studylab-loader-flash,
-      .studylab-loader-particle {
+      .studylab-loader-wordmark {
         animation: none !important;
       }
     }
   </style>
-
 </head>
 
 
 <body>
 
   <div id="studylabLoader" aria-hidden="true">
+  <div class="studylab-loader-vignette"></div>
+
   <div class="studylab-loader-scene">
-    <div class="studylab-loader-flask">
-      <svg viewBox="0 0 78 92" aria-hidden="true">
+    <div class="studylab-loader-aura"></div>
+
+    <div class="studylab-loader-glass" aria-hidden="true">
+      <svg viewBox="0 0 330 390">
+        <defs>
+          <linearGradient id="slGlassFill" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="rgba(255,255,255,.15)"/>
+            <stop offset="42%" stop-color="rgba(110,206,255,.035)"/>
+            <stop offset="100%" stop-color="rgba(95,120,255,.10)"/>
+          </linearGradient>
+
+          <linearGradient id="slGlassEdge" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="rgba(232,252,255,.82)"/>
+            <stop offset="55%" stop-color="rgba(117,224,255,.40)"/>
+            <stop offset="100%" stop-color="rgba(139,145,255,.38)"/>
+          </linearGradient>
+
+          <linearGradient id="slNeckGlass" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="rgba(220,250,255,.58)"/>
+            <stop offset="45%" stop-color="rgba(255,255,255,.14)"/>
+            <stop offset="100%" stop-color="rgba(114,202,255,.46)"/>
+          </linearGradient>
+        </defs>
+
         <path
-          d="M30 5h18v21l17.5 31.5c4.8 8.7-1.5 19.5-11.4 19.5H23.9c-9.9 0-16.2-10.8-11.4-19.5L30 26V5Z"
-          fill="rgba(16,31,51,.72)"
-          stroke="rgba(151,231,255,.52)"
-          stroke-width="1.7"
+          d="M128 18h74M140 18v88L58 304c-22 37 5 68 46 68h122c41 0 68-31 46-68l-82-198V18Z"
+          fill="url(#slGlassFill)"
+          stroke="url(#slGlassEdge)"
+          stroke-width="3"
+          stroke-linejoin="round"
         />
+
         <path
-          d="M19 55c9 4 31 4 40 0l6.2 11.2c3 5.4-.8 10.8-6.9 10.8H19.7c-6.1 0-9.9-5.4-6.9-10.8L19 55Z"
-          fill="rgba(91,140,255,.07)"
+          d="M141 22h48v77c0 10-4 19-10 27L94 296c-17 27 2 48 32 48h78c30 0 49-21 32-48l-84-170c-7-12-11-25-11-39V22Z"
+          fill="rgba(255,255,255,.018)"
+          stroke="rgba(231,252,255,.18)"
+          stroke-width="1.2"
         />
+
         <path
-          d="M31 5h16"
-          stroke="rgba(226,250,255,.75)"
-          stroke-width="2.2"
+          d="M133 18h64"
+          stroke="rgba(244,255,255,.86)"
+          stroke-width="4"
+          stroke-linecap="round"
+        />
+
+        <path
+          d="M87 315c39 15 117 15 156 0"
+          stroke="rgba(178,247,255,.32)"
+          stroke-width="2"
+          fill="none"
+        />
+
+        <path
+          d="M104 130c-9 32-36 73-44 97"
+          stroke="rgba(255,255,255,.33)"
+          stroke-width="4"
+          stroke-linecap="round"
+          opacity=".72"
+        />
+
+        <path
+          d="M86 270c-12 24-16 38-2 53"
+          stroke="rgba(126,229,255,.24)"
+          stroke-width="2.5"
+          stroke-linecap="round"
+        />
+
+        <path
+          d="M226 128c18 36 26 54 37 77"
+          stroke="rgba(102,192,255,.18)"
+          stroke-width="3"
           stroke-linecap="round"
         />
       </svg>
     </div>
 
-    <div class="studylab-loader-liquid"></div>
+    <div class="studylab-loader-liquid" aria-hidden="true"></div>
 
-    <div class="studylab-loader-beaker">
-      <svg viewBox="0 0 38 50" aria-hidden="true">
+    <div class="studylab-loader-dropper" aria-hidden="true">
+      <svg viewBox="0 0 168 300">
+        <defs>
+          <linearGradient id="slTubeGlass" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="rgba(232,255,255,.64)"/>
+            <stop offset="18%" stop-color="rgba(146,233,255,.20)"/>
+            <stop offset="50%" stop-color="rgba(255,255,255,.10)"/>
+            <stop offset="82%" stop-color="rgba(123,213,255,.24)"/>
+            <stop offset="100%" stop-color="rgba(229,253,255,.56)"/>
+          </linearGradient>
+        </defs>
+
         <path
-          d="M9 4h20M13 4v25l-5.7 11.2C5.3 44.1 8.2 47 12.5 47h13c4.3 0 7.2-2.9 5.2-6.8L25 29V4"
-          fill="rgba(19,34,54,.60)"
-          stroke="rgba(190,242,255,.60)"
-          stroke-width="1.35"
-          stroke-linejoin="round"
+          d="M53 18h62c6 0 10 4 10 10v156c0 8-3 14-8 20l-20 24v48c0 6-4 10-10 10h-6c-6 0-10-4-10-10v-48l-20-24c-5-6-8-12-8-20V28c0-6 4-10 10-10Z"
+          fill="url(#slTubeGlass)"
+          stroke="rgba(216,250,255,.65)"
+          stroke-width="2.2"
         />
+
         <path
-          d="M10.2 31.5c4.5 1.4 13.1 1.4 17.6 0l3.1 6.2c1.5 3-0.8 5.7-4.3 5.7H11.3c-3.5 0-5.8-2.7-4.3-5.7l3.2-6.2Z"
-          fill="rgba(126,220,255,.14)"
+          d="M72 34h26v151c0 8-2 13-6 19l-10 14"
+          stroke="rgba(255,255,255,.36)"
+          stroke-width="5"
+          stroke-linecap="round"
+          fill="none"
+        />
+
+        <path
+          d="M63 205h42"
+          stroke="rgba(109,229,255,.35)"
+          stroke-width="2.4"
+          stroke-linecap="round"
+        />
+
+        <path
+          d="M80 244h8"
+          stroke="rgba(231,255,255,.72)"
+          stroke-width="2.5"
+          stroke-linecap="round"
+        />
+
+        <path
+          d="M67 26h36"
+          stroke="rgba(248,255,255,.75)"
+          stroke-width="3"
+          stroke-linecap="round"
         />
       </svg>
     </div>
 
-    <div class="studylab-loader-drop"></div>
-    <div class="studylab-loader-reaction"></div>
+    <div class="studylab-loader-green-drop" aria-hidden="true"></div>
+    <div class="studylab-loader-impact" aria-hidden="true"></div>
+    <div class="studylab-loader-ripple" aria-hidden="true"></div>
+    <div class="studylab-loader-shock" aria-hidden="true"></div>
 
-    <div class="studylab-loader-particles">
+    <div class="studylab-loader-particles" aria-hidden="true">
+      <span class="studylab-loader-particle"></span>
+      <span class="studylab-loader-particle"></span>
+      <span class="studylab-loader-particle"></span>
+      <span class="studylab-loader-particle"></span>
       <span class="studylab-loader-particle"></span>
       <span class="studylab-loader-particle"></span>
       <span class="studylab-loader-particle"></span>
@@ -1616,12 +1981,13 @@
       <span class="studylab-loader-particle"></span>
     </div>
 
-    <div class="studylab-loader-bloom"></div>
-    <div class="studylab-loader-flash"></div>
+    <div class="studylab-loader-burst" aria-hidden="true"></div>
+    <div class="studylab-loader-screenwave" aria-hidden="true"></div>
+    <div class="studylab-loader-flash" aria-hidden="true"></div>
+
+    <div class="studylab-loader-wordmark">StudyLab</div>
   </div>
 </div>
-
-
 
   <!-- =========================================================
        STUDY LAB LK — FLOWING SCIENCE BACKGROUND START
@@ -2604,8 +2970,8 @@
   if (!loader) return;
 
   const start = performance.now();
-  const MIN_VISIBLE_MS = 1120;
-  const MAX_VISIBLE_MS = 1700;
+  const MIN_VISIBLE_MS = 2100;
+  const MAX_VISIBLE_MS = 2750;
   let finished = false;
 
   function hideLoader() {
