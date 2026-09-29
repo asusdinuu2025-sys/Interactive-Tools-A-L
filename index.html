@@ -193,6 +193,68 @@
         box-shadow 0.35s ease;
     }
 
+    /* =========================================================
+       HEADER — SLOW MOVING NEON EDGE
+       A restrained light sweep travels around the outer border.
+       ========================================================= */
+
+    .site-header::after {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      padding: 1px;
+      border-radius:
+        0 0
+        var(--sl-glass-radius)
+        var(--sl-glass-radius);
+      pointer-events: none;
+      z-index: 2;
+      background:
+        conic-gradient(
+          from 0deg,
+          transparent 0deg,
+          transparent 218deg,
+          rgba(126, 220, 255, .08) 244deg,
+          rgba(126, 220, 255, .72) 258deg,
+          rgba(168, 119, 255, .64) 274deg,
+          rgba(126, 220, 255, .10) 288deg,
+          transparent 310deg,
+          transparent 360deg
+        );
+      -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+      mask-composite: exclude;
+      animation: headerNeonSweep 18s linear infinite;
+      opacity: .78;
+    }
+
+    @keyframes headerNeonSweep {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    html[data-theme="light"] .site-header::after {
+      background:
+        conic-gradient(
+          from 0deg,
+          transparent 0deg,
+          transparent 218deg,
+          rgba(22, 137, 212, .06) 244deg,
+          rgba(22, 137, 212, .46) 258deg,
+          rgba(119, 89, 190, .38) 274deg,
+          rgba(22, 137, 212, .07) 288deg,
+          transparent 310deg,
+          transparent 360deg
+        );
+      opacity: .62;
+    }
+
 
     /* =========================================================
        BRAND
@@ -268,99 +330,8 @@
     }
 
     /* =========================================================
-       HERO — SLOW NEON ORBIT GLOW
-       Soft moving arcs inspired by startup-logo glow effects.
+       HERO — SMOOTH TYPOGRAPHY
        ========================================================= */
-
-    .hero {
-      overflow: visible;
-    }
-
-    .hero::before,
-    .hero::after {
-      content: "";
-      position: absolute;
-      left: 50%;
-      top: 118px;
-      width: min(760px, 92%);
-      height: 148px;
-      border: 1px solid rgba(126, 220, 255, .16);
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 0;
-      opacity: .72;
-      filter: blur(.15px);
-      box-shadow:
-        0 0 7px rgba(126, 220, 255, .12),
-        0 0 28px rgba(91, 140, 255, .10),
-        0 0 58px rgba(126, 220, 255, .06);
-      transform: translate(-50%, -50%) rotate(-7deg) scaleX(1.02);
-      animation: heroNeonDrift 18s ease-in-out infinite;
-    }
-
-    .hero::after {
-      width: min(650px, 82%);
-      height: 112px;
-      top: 122px;
-      border-color: rgba(168, 119, 255, .13);
-      box-shadow:
-        0 0 8px rgba(168, 119, 255, .11),
-        0 0 26px rgba(91, 140, 255, .08),
-        0 0 52px rgba(168, 119, 255, .05);
-      transform: translate(-50%, -50%) rotate(11deg) scaleX(.98);
-      animation:
-        heroNeonDriftReverse
-        24s
-        ease-in-out
-        infinite;
-    }
-
-    .hero > * {
-      position: relative;
-      z-index: 1;
-    }
-
-    @keyframes heroNeonDrift {
-      0%, 100% {
-        transform: translate(-50%, -50%) rotate(-7deg) scaleX(1.02);
-        opacity: .48;
-      }
-
-      50% {
-        transform: translate(-50%, calc(-50% - 5px)) rotate(-2deg) scaleX(1.07);
-        opacity: .82;
-      }
-    }
-
-    @keyframes heroNeonDriftReverse {
-      0%, 100% {
-        transform: translate(-50%, -50%) rotate(11deg) scaleX(.98);
-        opacity: .34;
-      }
-
-      50% {
-        transform: translate(-50%, calc(-50% + 5px)) rotate(17deg) scaleX(1.03);
-        opacity: .68;
-      }
-    }
-
-    html[data-theme="light"] .hero::before {
-      border-color: rgba(22, 137, 212, .14);
-      box-shadow:
-        0 0 7px rgba(22, 137, 212, .09),
-        0 0 26px rgba(91, 140, 255, .08),
-        0 0 54px rgba(22, 137, 212, .045);
-    }
-
-    html[data-theme="light"] .hero::after {
-      border-color: rgba(119, 89, 190, .11);
-      box-shadow:
-        0 0 8px rgba(119, 89, 190, .08),
-        0 0 24px rgba(91, 140, 255, .06),
-        0 0 48px rgba(119, 89, 190, .035);
-    }
-
-
     /* =========================================================
        VISITOR COUNTER — GLASS REFINEMENT
        ========================================================= */
@@ -1288,8 +1259,7 @@
         animation: none !important;
       }
 
-      .hero::before,
-      .hero::after {
+      .site-header::after {
         animation: none !important;
       }
 
@@ -1425,7 +1395,7 @@
       </h1>
 
       <p class="subtitle">
-        Practical simulations, A/L past papers, study utilities, notes, exam resources සහ තවත් ගොඩක් අධ්‍යයන සම්පත් එකම තැනකින්.
+        Practical simulations, A/L past papers, study utilities, notes, exam resources සහ තවත් අධ්‍යයන සම්පත් එකම තැනකින්.
       </p>
 
 
