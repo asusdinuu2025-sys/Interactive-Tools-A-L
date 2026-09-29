@@ -1405,8 +1405,8 @@
       transform-origin: 50% 58%;
       mix-blend-mode: screen;
       animation:
-        loaderSplashHit .16s ease-out 2.58s forwards,
-        loaderSplashSlip .58s cubic-bezier(.15,.8,.18,1) 2.82s forwards;
+        loaderSplashHit .24s ease-out 2.58s forwards,
+        loaderSplashSlip .76s cubic-bezier(.15,.8,.18,1) 2.86s forwards;
     }
 
     .studylab-loader-splash svg {
@@ -1439,7 +1439,7 @@
     .splash-main,
     .splash-green,
     .splash-drop {
-      animation: splashLiquidFade .32s ease-in 2.76s forwards;
+      animation: splashLiquidFade .42s ease-in 2.86s forwards;
     }
 
     .splash-wordmark {
@@ -1458,8 +1458,8 @@
       transform-box: fill-box;
       transform-origin: center;
       animation:
-        splashWordmarkIn .42s cubic-bezier(.16,.86,.18,1) 2.76s forwards,
-        splashWordmarkSlip .42s ease-in 3.12s forwards;
+        splashWordmarkIn .46s cubic-bezier(.16,.86,.18,1) 2.90s forwards,
+        splashWordmarkSlip .46s ease-in 3.28s forwards;
     }
 
     html[data-theme="light"] .splash-main/ {
@@ -2726,8 +2726,8 @@
   if (!loader) return;
 
   const start = performance.now();
-  const MIN_VISIBLE_MS = 3200;
-  const MAX_VISIBLE_MS = 3700;
+  const MIN_VISIBLE_MS = 3380;
+  const MAX_VISIBLE_MS = 3920;
   let finished = false;
 
   function hideLoader() {
