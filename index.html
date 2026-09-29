@@ -1261,7 +1261,7 @@
     .studylab-loader-flask {
       position: absolute;
       left: 50%;
-      top: 58%;
+      top: 54%;
       width: min(360px, 58vw);
       height: min(430px, 58vh);
       transform: translate(-50%, -50%) scale(.92);
@@ -1282,10 +1282,10 @@
     .studylab-loader-liquid {
       position: absolute;
       left: 50%;
-      top: 66%;
-      width: min(242px, 39vw);
-      height: min(118px, 18vw);
-      min-height: 84px;
+      top: 77%;
+      width: min(224px, 38vw);
+      height: min(102px, 16vw);
+      min-height: 82px;
       transform: translate(-50%, -50%) scaleY(.12);
       transform-origin: center bottom;
       opacity: 0;
@@ -1324,15 +1324,15 @@
 
     .studylab-loader-dropper {
       position: absolute;
-      left: 59%;
-      top: 10%;
-      width: min(190px, 29vw);
-      height: min(340px, 41vh);
-      transform-origin: 80% 86%;
+      left: 50%;
+      top: -118px;
+      width: min(174px, 28vw);
+      height: min(305px, 40vh);
+      transform-origin: 50% 100%;
       transform:
-        translate(-50%, -50%)
-        rotate(-21deg)
-        translateY(-80px);
+        translateX(-50%)
+        rotate(-12deg)
+        translateY(-18px);
       opacity: 0;
       z-index: 7;
       filter:
@@ -1349,8 +1349,8 @@
 
     .studylab-loader-green-drop {
       position: absolute;
-      left: 67%;
-      top: 30%;
+      left: 50%;
+      top: 26%;
       width: 28px;
       height: 40px;
       border-radius: 58% 58% 64% 12%;
@@ -1373,7 +1373,7 @@
     .studylab-loader-reaction-core {
       position: absolute;
       left: 50%;
-      top: 67%;
+      top: 77%;
       width: 46px;
       height: 46px;
       border-radius: 50%;
@@ -1398,7 +1398,7 @@
     .studylab-loader-smoke::after {
       position: absolute;
       left: 50%;
-      top: 66%;
+      top: 77%;
       width: 140px;
       height: 140px;
       border-radius: 50%;
@@ -1439,7 +1439,7 @@
     .studylab-loader-smoke-2 {
       position: absolute;
       left: 50%;
-      top: 66%;
+      top: 77%;
       width: 300px;
       height: 300px;
       transform: translate(-50%, -50%) scale(.07);
@@ -1527,33 +1527,39 @@
     @keyframes loaderDropperAction {
       0% {
         opacity: 0;
-        transform: translate(-50%, -50%) rotate(-26deg) translateY(-95px);
+        transform: translateX(-50%) rotate(-22deg) translateY(-28px);
       }
-      18% { opacity: 1; }
-      65% {
-        transform: translate(-50%, -50%) rotate(10deg) translateY(2px);
+      22% { opacity: 1; }
+      70% {
+        transform: translateX(-50%) rotate(7deg) translateY(2px);
       }
       100% {
         opacity: 1;
-        transform: translate(-50%, -50%) rotate(15deg) translateY(0);
+        transform: translateX(-50%) rotate(15deg) translateY(0);
       }
     }
 
     @keyframes loaderGreenDrop {
       0% {
         opacity: 0;
-        transform: translate(-50%, -50%) rotate(45deg) scale(.22);
+        top: 26%;
+        transform: translateX(-50%) rotate(45deg) scale(.22);
       }
-      10% { opacity: 1; }
-      55% {
-        transform: translate(-50%, 30px) rotate(45deg) scale(1);
+      9% {
+        opacity: 1;
       }
-      78% {
-        transform: translate(-50%, 175px) rotate(45deg) scale(.94);
+      54% {
+        top: 53%;
+        transform: translateX(-50%) rotate(45deg) scale(1);
+      }
+      82% {
+        top: 76%;
+        transform: translateX(-50%) rotate(45deg) scale(.96);
         opacity: 1;
       }
       100% {
-        transform: translate(-50%, 210px) rotate(45deg) scale(.75);
+        top: 78%;
+        transform: translateX(-50%) rotate(45deg) scale(.78);
         opacity: 0;
       }
     }
