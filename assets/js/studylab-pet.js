@@ -77,6 +77,9 @@
     dragPointerId: null,
     dragOffsetX: 0,
     dragOffsetY: 0,
+    pressX: 0,
+    pressY: 0,
+    pointerMoved: false,
 
     reactionTimer: null,
     bubbleTimer: null,
@@ -164,6 +167,11 @@
 
     character.style.left = state.x + "px";
     character.style.top = state.y + "px";
+
+    if (thought.classList.contains("is-visible")) {
+      thought.style.left = state.x + "px";
+      thought.style.top = Math.max(64, state.y - 45) + "px";
+    }
 
     if (!state.dragging) {
       save(KEY.x, Math.round(state.x));
@@ -682,31 +690,49 @@
     state.dragPointerId = ev.pointerId;
     state.dragOffsetX = ev.clientX - state.x;
     state.dragOffsetY = ev.clientY - state.y;
+    state.pressX = ev.clientX;
+    state.pressY = ev.clientY;
+    state.pointerMoved = false;
 
-    character.classList.add("is-dragging");
-    setExpression("scared", 1200, true);
     character.setPointerCapture?.(ev.pointerId);
   }
 
   function drag(ev) {
-    if (!state.dragging || ev.pointerId !== state.dragPointerId) return;
+    if (state.dragPointerId !== ev.pointerId) return;
 
+    const travel = Math.hypot(ev.clientX - state.pressX, ev.clientY - state.pressY);
+
+    if (!state.dragging && travel < 7) return;
+
+    if (!state.dragging) {
+      state.dragging = true;
+      character.classList.add("is-dragging");
+      setExpression("scared", 1200, true);
+    }
+
+    state.pointerMoved = true;
     setPosition(ev.clientX - state.dragOffsetX, ev.clientY - state.dragOffsetY);
     setGazeTarget(ev.clientX, ev.clientY, false);
     state.lastActivity = now();
   }
 
   function endDrag(ev) {
-    if (!state.dragging || ev.pointerId !== state.dragPointerId) return;
+    if (ev.pointerId !== state.dragPointerId) return false;
 
+    const wasDragging = state.dragging;
     state.dragging = false;
     state.dragPointerId = null;
     character.classList.remove("is-dragging");
-    setExpression("relieved", 1050, true);
     save(KEY.x, Math.round(state.x));
     save(KEY.y, Math.round(state.y));
 
     character.releasePointerCapture?.(ev.pointerId);
+
+    if (wasDragging) {
+      setExpression("relieved", 1050, true);
+    }
+
+    return wasDragging;
   }
 
   function nearestInteractive(el) {
@@ -759,8 +785,7 @@
   });
 
   character.addEventListener("pointerup", (ev) => {
-    const wasDragging = state.dragging;
-    endDrag(ev);
+    const wasDragging = endDrag(ev);
     if (!wasDragging) handlePetTap();
   });
 
