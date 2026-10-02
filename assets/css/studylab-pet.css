@@ -857,9 +857,12 @@
 }
 
 .sl-pet-setting-buttons button.is-active {
-  background: rgba(126,220,255,.11);
-  border-color: rgba(126,220,255,.28);
-  color: #8fe7ff;
+  background: linear-gradient(135deg, #1687ff, #4d8dff);
+  border-color: #71bbff;
+  color: #ffffff;
+  box-shadow:
+    0 0 0 1px rgba(115,187,255,.18),
+    0 6px 18px rgba(22,135,255,.22);
 }
 
 .sl-pet-setting-buttons button[data-pet-eye="pink"].is-active {
@@ -929,10 +932,12 @@
 }
 
 .sl-pet-personality-row button.is-active {
-  background: rgba(126,220,255,.12);
-  border-color: rgba(126,220,255,.34);
-  color: #91e9ff;
-  box-shadow: 0 0 16px rgba(126,220,255,.07);
+  background: linear-gradient(135deg, #1687ff, #4d8dff);
+  border-color: #71bbff;
+  color: #ffffff;
+  box-shadow:
+    0 0 0 1px rgba(115,187,255,.18),
+    0 5px 16px rgba(22,135,255,.20);
 }
 
 .sl-pet-personality-row button[data-pet-personality-disable].is-active {
