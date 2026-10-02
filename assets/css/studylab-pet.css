@@ -41,7 +41,7 @@
   pointer-events: auto;
   cursor: grab;
   touch-action: none;
-  will-change: left, top;
+  will-change: transform;
 }
 
 .sl-pet-character::before {
