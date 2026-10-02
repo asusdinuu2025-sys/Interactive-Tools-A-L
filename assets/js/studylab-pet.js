@@ -12,6 +12,7 @@
   const KEY = {
     enabled: "studylab-pet-enabled",
     eye: "studylab-pet-eye",
+    mode: "studylab-pet-mode",
     x: "studylab-pet-x",
     y: "studylab-pet-y"
   };
@@ -40,6 +41,7 @@
   const state = {
     enabled: bool(KEY.enabled, true),
     eye: read(KEY.eye, "cyan") === "pink" ? "pink" : "cyan",
+    mode: read(KEY.mode, "natural"),
     context: "home",
     expression: "neutral",
     sleeping: false,
@@ -84,7 +86,9 @@
     reactionTimer: null,
     bubbleTimer: null,
     blinkTimer: null,
-    lastHoveredElement: null
+    hoverTimer: null,
+    lastHoveredElement: null,
+    nameMessageShown: false
   };
 
   state.x = clamp(
@@ -141,7 +145,21 @@
       '<div class="sl-pet-setting"><span>Eye colour</span><div class="sl-pet-setting-buttons">' +
         '<button type="button" data-pet-eye="cyan">Cyan</button><button type="button" data-pet-eye="pink">Pink</button>' +
       '</div></div>' +
-      '<p class="sl-pet-panel-note">Cyan and Pink are two tiny personalities. Watch the face, gaze, walking and thoughts.</p>' +
+      '<div class="sl-pet-setting sl-pet-mode-setting"><span>Personality</span><div class="sl-pet-mode-grid">' +
+        '<button type="button" data-pet-mode="natural">Natural</button>' +
+        '<button type="button" data-pet-mode="playful">Playful</button>' +
+        '<button type="button" data-pet-mode="strict">Strict</button>' +
+        '<button type="button" data-pet-mode="lazy">Lazy</button>' +
+        '<button type="button" data-pet-mode="focused">Focused</button>' +
+        '<button type="button" data-pet-mode="curious">Curious</button>' +
+        '<button type="button" data-pet-mode="energetic">Energetic</button>' +
+        '<button type="button" data-pet-mode="observer">Observer</button>' +
+        '<button type="button" data-pet-mode="social">Social</button>' +
+        '<button type="button" data-pet-mode="sleepy">Sleepy</button>' +
+        '<button type="button" data-pet-mode="exam">Exam Mode</button>' +
+        '<button type="button" class="is-featured" data-pet-mode="all-in-one">All In One</button>' +
+      '</div></div>' +
+      '<p class="sl-pet-panel-note">Each personality changes movement, attention, sleep, expressions and reactions. Messages stay tied to what you do.</p>' +
     '</aside>'
   );
 
@@ -157,6 +175,7 @@
   const enableButton = panel.querySelector("[data-pet-enable]");
   const disableButton = panel.querySelector("[data-pet-disable]");
   const eyeButtons = [...panel.querySelectorAll("[data-pet-eye]")];
+  const modeButtons = [...panel.querySelectorAll("[data-pet-mode]")];
 
   function setPosition(x, y) {
     const halfW = window.innerWidth <= 720 ? 41 : 45;
@@ -187,15 +206,16 @@
   }
 
   function placeThought() {
-    const cloudWidth = window.innerWidth <= 720 ? 175 : 190;
+    const cloudWidth = window.innerWidth <= 720 ? 82 : 90;
     const petHalfHeight = window.innerWidth <= 720 ? 32 : 35;
+    const rightShift = window.innerWidth <= 720 ? 5 : 7;
     const anchorX = clamp(
-      state.x - cloudWidth / 2,
-      10,
-      Math.max(10, window.innerWidth - cloudWidth - 10)
+      state.x - cloudWidth / 2 + rightShift,
+      8,
+      Math.max(8, window.innerWidth - cloudWidth - 8)
     );
     thought.style.left = anchorX + "px";
-    thought.style.top = Math.max(58, state.y - petHalfHeight - 8) + "px";
+    thought.style.top = Math.max(54, state.y - petHalfHeight - 2) + "px";
   }
 
   function showThought(message, duration = 1800) {
@@ -223,7 +243,6 @@
     const next = expressionNames.includes(name) ? name : "neutral";
     state.expression = next;
     character.dataset.state = state.sleeping ? "sleeping" : next;
-    character.dataset.micro = String(Math.floor(Math.random() * 24));
 
     clearTimeout(state.reactionTimer);
     if (ttl > 0) {
