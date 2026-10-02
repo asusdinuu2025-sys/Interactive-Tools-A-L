@@ -48,7 +48,7 @@
     lastActivity: getNow(),
     lastReaction: 0,
     lastAmbient: 0,
-    lastBlink: 0,
+    lastBlink: getNow(),
     anger: 0,
     x: Math.min(window.innerWidth - 90, Math.max(90, window.innerWidth * 0.72)),
     y: Math.min(window.innerHeight - 120, Math.max(100, window.innerHeight * 0.56)),
@@ -80,6 +80,10 @@
           <div class="sl-pet-eye left"><i></i></div>
           <div class="sl-pet-eye right"><i></i></div>
           <div class="sl-pet-mouth"></div>
+          <span class="sl-pet-sleep-z z1">Z</span>
+          <span class="sl-pet-sleep-z z2">z</span>
+          <span class="sl-pet-sleep-z z3">z</span>
+          <span class="sl-pet-crack" aria-hidden="true"></span>
         </div>
       </div>
       <div class="sl-pet-bubble" data-pet-bubble role="status" aria-live="polite"></div>
@@ -317,8 +321,9 @@
     const width = window.innerWidth;
     const height = window.innerHeight;
 
-    const x = 70 + Math.random() * Math.max(1, width - 140);
-    const y = 88 + Math.random() * Math.max(1, height - 190);
+    const maxMove = state.context === "study" ? 165 : 125;
+    const x = Math.max(70, Math.min(width - 70, state.x + (Math.random() * 2 - 1) * maxMove));
+    const y = Math.max(88, Math.min(height - 120, state.y + (Math.random() * 2 - 1) * maxMove * 0.72));
 
     return { x, y };
   }
@@ -337,7 +342,9 @@
 
       setStagePosition(target.x, target.y);
       scheduleWander(
-        state.context === "study" ? 2400 + Math.random() * 2600 : 3600 + Math.random() * 5200
+        state.context === "study"
+          ? 9000 + Math.random() * 6500
+          : 13000 + Math.random() * 10000
       );
     }, delay);
   }
@@ -561,7 +568,7 @@
         eye.style.height = "";
         eye.style.top = "";
       });
-    }, 145);
+    }, 175);
   }
 
   function gazeAt(x, y) {
@@ -910,18 +917,15 @@
       const idleMs = getNow() - state.lastActivity;
       const hour = new Date().getHours();
       const lateNight = hour >= 23 || hour < 6;
-      const sleepThreshold = lateNight ? 14000 : state.context === "study" ? 26000 : 21000;
+      const sleepThreshold = 7000;
 
-      if (idleMs > sleepThreshold && !state.sleeping) {
-        if (lateNight) react("late-night");
-        else {
-          state.sleeping = true;
-          character.dataset.state = "sleeping";
-          showMessage("Zzz...", 1600);
-        }
+      if (idleMs >= sleepThreshold && !state.sleeping) {
+        state.sleeping = true;
+        character.dataset.state = "sleeping";
+        showMessage(lateNight ? "It's late... Zzz." : "Zzz...", 1500);
       }
 
-      if (!state.sleeping && getNow() - state.lastBlink > 3400 && Math.random() < 0.035) {
+      if (!state.sleeping && getNow() - state.lastBlink >= 10000) {
         blink();
       }
 
@@ -951,7 +955,7 @@
       }
     }
 
-    window.setTimeout(activityLoop, 1800);
+    window.setTimeout(activityLoop, 700);
   }
 
   state.enabled = Boolean(state.enabled);
