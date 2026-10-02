@@ -823,10 +823,16 @@
   function enterAnger(level = 1) {
     if (!state.enabled) return;
 
-    state.sleeping = false;
-    state.angerLevel = clamp(Math.max(state.angerLevel, level), 1, 5);
     const profile = modeProfile();
-    state.angerUntil = now() + rand(profile.angerDuration[0], profile.angerDuration[1]);
+    const angryBoost = state.personalities.includes("angry") || state.personalities.includes("all-in-one");
+    const adjustedLevel = angryBoost ? Math.min(5, level + 1) : level;
+
+    state.sleeping = false;
+    state.angerLevel = clamp(Math.max(state.angerLevel, adjustedLevel), 1, 5);
+    state.angerUntil = now() + rand(
+      profile.angerDuration[0] * profile.angerFactor,
+      profile.angerDuration[1] * profile.angerFactor
+    );
     state.danger = true;
     character.dataset.danger = "true";
     character.dataset.angerLevel = String(state.angerLevel);
@@ -862,7 +868,10 @@
     state.clickTimes.push(t);
 
     const rapid = state.clickTimes.length;
-    if (rapid >= 3) {
+    const angerEnabled = state.personalities.includes("angry") || state.personalities.includes("all-in-one");
+    const angerThreshold = angerEnabled ? 2 : 3;
+
+    if (rapid >= angerThreshold) {
       enterAnger(Math.min(5, rapid));
     } else if (rapid === 2) {
       setExpression("annoyed", 850, true);
