@@ -288,6 +288,72 @@
   border-radius: 50%;
 }
 
+.sl-pet-character[data-state="surprised"] .sl-pet-eye > i {
+  width: 21px;
+  height: 29px;
+  border-radius: 50% 48% 52% 50% / 46% 54% 46% 54%;
+}
+
+.sl-pet-character[data-state="surprised"] .sl-pet-mouth {
+  width: 11px;
+  height: 11px;
+  border: 2px solid rgba(216,237,249,.84);
+  border-radius: 50%;
+}
+
+.sl-pet-character[data-state="sleepy"] .sl-pet-eye > i {
+  width: 19px;
+  height: 9px;
+  border-radius: 50%;
+  opacity: .72;
+}
+
+.sl-pet-character[data-state="sleepy"] .sl-pet-mouth {
+  width: 11px;
+  height: 4px;
+  border-bottom-width: 2px;
+  opacity: .65;
+}
+
+.sl-pet-character[data-state="bored"] .sl-pet-eye > i {
+  width: 17px;
+  height: 14px;
+  border-radius: 50%;
+  opacity: .62;
+}
+
+.sl-pet-character[data-state="bored"] .sl-pet-mouth {
+  width: 13px;
+  height: 2px;
+  border-bottom: 2px solid rgba(214,237,249,.58);
+  border-radius: 999px;
+}
+
+.sl-pet-character.is-walking .sl-pet-eye > i {
+  width: 13px;
+  height: 18px;
+  border-radius: 46% 54% 50% 50% / 58% 44% 56% 42%;
+}
+
+.sl-pet-character.is-climbing .sl-pet-eye > i {
+  width: 11px;
+  height: 17px;
+  border-radius: 44% 56% 48% 52% / 60% 42% 58% 40%;
+}
+
+.sl-pet-character.is-falling .sl-pet-eye > i {
+  width: 18px;
+  height: 23px;
+}
+
+.sl-pet-character.is-walking .sl-pet-mouth,
+.sl-pet-character.is-climbing .sl-pet-mouth {
+  width: 9px;
+  height: 3px;
+  border-bottom-width: 2px;
+  opacity: .66;
+}
+
 .sl-pet-character[data-state="angry"] .sl-pet-mouth {
   width: 18px;
   height: 4px;
@@ -427,11 +493,11 @@
 }
 
 .sl-pet-character.is-walking {
-  animation: slPetWalk .78s ease-in-out infinite alternate;
+  animation: slPetWalk 1.05s ease-in-out infinite alternate;
 }
 
 .sl-pet-character.is-climbing {
-  animation: slPetClimb .92s ease-in-out infinite alternate;
+  animation: slPetClimb 1.18s ease-in-out infinite alternate;
 }
 
 .sl-pet-character.is-falling {
@@ -447,13 +513,13 @@
 }
 
 @keyframes slPetWalk {
-  from { transform: translate(-50%, -50%) translateY(0) rotate(-1deg); }
-  to   { transform: translate(-50%, -50%) translateY(-2px) rotate(1deg); }
+  from { transform: translate(-50%, -50%) translateY(0) rotate(-.7deg); }
+  to   { transform: translate(-50%, -50%) translateY(-1.5px) rotate(.7deg); }
 }
 
 @keyframes slPetClimb {
-  from { transform: translate(-50%, -50%) translateY(1px) rotate(-4deg); }
-  to   { transform: translate(-50%, -50%) translateY(-2px) rotate(3deg); }
+  from { transform: translate(-50%, -50%) translateY(1.5px) rotate(-3.2deg); }
+  to   { transform: translate(-50%, -50%) translateY(-1.5px) rotate(2.5deg); }
 }
 
 @keyframes slPetFall {
