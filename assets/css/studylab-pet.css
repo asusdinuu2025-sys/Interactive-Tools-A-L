@@ -196,6 +196,42 @@
   height: 23px;
 }
 
+.sl-pet-character[data-state="thinking"] .sl-pet-eye.left { transform: translateY(1px) rotate(-2deg); }
+.sl-pet-character[data-state="thinking"] .sl-pet-eye.right { transform: translateY(-1px) rotate(2deg); }
+.sl-pet-character[data-state="thinking"] .sl-pet-mouth {
+  width: 8px;
+  height: 4px;
+  border-radius: 999px;
+}
+
+.sl-pet-character[data-state="excited"] .sl-pet-eye > i {
+  width: 20px;
+  height: 27px;
+  box-shadow:
+    0 0 12px rgba(99,232,255,.94),
+    0 0 25px rgba(99,232,255,.28);
+}
+.sl-pet-character[data-eye="pink"][data-state="excited"] .sl-pet-eye > i {
+  box-shadow:
+    0 0 12px rgba(255,134,202,.94),
+    0 0 25px rgba(255,134,202,.28);
+}
+.sl-pet-character[data-state="excited"] .sl-pet-mouth {
+  width: 19px;
+  height: 8px;
+}
+
+.sl-pet-character[data-state="unimpressed"] .sl-pet-eye > i {
+  height: 12px;
+  opacity: .68;
+}
+.sl-pet-character[data-state="unimpressed"] .sl-pet-mouth {
+  width: 14px;
+  height: 2px;
+  border-radius: 999px;
+  opacity: .64;
+}
+
 .sl-pet-character[data-state="focused"] .sl-pet-mouth {
   width: 9px;
   height: 3px;
