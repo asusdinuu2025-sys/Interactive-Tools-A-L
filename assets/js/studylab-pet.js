@@ -408,6 +408,7 @@
     character.dataset.routine = "none";
     clearTimeout(state.emoteTimer);
     emote.classList.remove("is-visible");
+    emote.style.opacity = "";
     state.gazeTargetX = 0;
     state.gazeTargetY = 0;
   }
@@ -467,6 +468,7 @@
     emote.classList.remove("is-visible");
     void emote.offsetWidth;
     emote.classList.add("is-visible");
+    emote.style.opacity = "1";
 
     character.dataset.routine = name;
     setExpression(em.expression, name === "playful" ? 850 : 1550, true);
@@ -1811,26 +1813,23 @@
   });
 
   /*
-   * Keep Pet Enable/Disable control handling on the panel itself.
-   * The pet stage can be hidden, faded, or non-interactive, but the control panel
-   * remains authoritative and clickable.
+   * Direct handlers are intentionally used for the two Pet power buttons.
+   * They must remain usable even while the pet stage itself is hidden/disabled.
    */
-  panel.addEventListener("click", (ev) => {
-    const enable = ev.target.closest("[data-pet-enable]");
-    const disable = ev.target.closest("[data-pet-disable]");
-
-    if (!enable && !disable) return;
-
+  enableButton.addEventListener("click", (ev) => {
     ev.preventDefault();
     ev.stopPropagation();
     state.lastMeaningfulActivity = now();
+    setEnabled(true);
+  }, true);
 
-    if (enable) {
-      setEnabled(true);
-    } else if (disable) {
-      setEnabled(false);
-    }
-  });
+  disableButton.addEventListener("click", (ev) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    state.lastMeaningfulActivity = now();
+    setEnabled(false);
+  }, true);
+
 
   eyeButtons.forEach((button) => {
     button.addEventListener("click", () => {
@@ -1897,7 +1896,13 @@
 
     const has = state.personalities.includes(name);
     if (has === enabled) {
-      notifySetting(personalityLabel(name) + (enabled ? " enabled." : " disabled."));
+      if (enabled && state.enabled) {
+        clearTimeout(state.hoverTimer);
+        state.lastHoveredElement = null;
+        runPersonalityRoutine(name);
+        state.lastMeaningfulActivity = now();
+        notifySetting(personalityLabel(name) + " active.", 900);
+      }
       return;
     }
 
@@ -1998,6 +2003,31 @@
 
     function setEnabled(enabled) {
     enabled = Boolean(enabled);
+
+    if (enabled && state.enabled) {
+      stage.classList.remove("is-disabled");
+      character.classList.remove("is-fading-out");
+      state.sleeping = false;
+      state.dragging = false;
+      state.danger = false;
+      state.evading = false;
+      state.angerUntil = 0;
+      state.angerLevel = 0;
+      character.dataset.danger = "false";
+      character.dataset.angerLevel = "0";
+      state.lastActivity = now();
+      state.lastMeaningfulActivity = now();
+      runPersonalityRoutine(
+        state.personalities.includes("playful")
+          ? "playful"
+          : (state.personalities.find((name) => name !== "natural") || "natural")
+      );
+      setExpression("delighted", 1350, true);
+      if (state.bubbleEnabled) showThought("I'm back.", 1050);
+      updateControls();
+      return;
+    }
+
     save(KEY.enabled, enabled);
 
     if (!enabled) {
