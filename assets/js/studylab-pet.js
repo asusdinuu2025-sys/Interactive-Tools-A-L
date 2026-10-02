@@ -188,10 +188,14 @@
   }
 
   function placeThought() {
-    const cloudHalf = window.innerWidth <= 720 ? 82 : 92;
-    const anchorX = clamp(state.x + 48, cloudHalf + 8, window.innerWidth - cloudHalf - 8);
+    const cloudWidth = window.innerWidth <= 720 ? 175 : 190;
+    const anchorX = clamp(
+      state.x - cloudWidth * 0.34,
+      10,
+      Math.max(10, window.innerWidth - cloudWidth - 10)
+    );
     thought.style.left = anchorX + "px";
-    thought.style.top = Math.max(58, state.y - 8) + "px";
+    thought.style.top = Math.max(58, state.y - 9) + "px";
   }
 
   function showThought(message, duration = 1800) {
