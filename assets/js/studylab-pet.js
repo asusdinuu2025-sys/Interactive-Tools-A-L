@@ -51,7 +51,7 @@
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) {
           const clean = parsed.filter((name) => PERSONALITY_NAMES.includes(name));
-          if (clean.length) return [...new Set(clean)];
+          return [...new Set(clean)];
         }
       } catch (_) {}
     }
@@ -1168,7 +1168,6 @@
       state.personalities.filter((name) => PERSONALITY_NAMES.includes(name))
     )];
 
-    if (!state.personalities.length) state.personalities = ["natural"];
     save(KEY.personalities, JSON.stringify(state.personalities));
     character.dataset.personalities = state.personalities.join(",");
   }
