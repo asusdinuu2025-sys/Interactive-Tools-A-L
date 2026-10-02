@@ -113,6 +113,7 @@
     pointerMoved: false,
 
     reactionTimer: null,
+    emoteTimer: null,
     bubbleTimer: null,
     blinkTimer: null,
     hoverTimer: null,
@@ -201,6 +202,8 @@
   const eyes = [...stage.querySelectorAll(".sl-pet-eye > i")];
   const thought = stage.querySelector("[data-pet-thought]");
   const thoughtText = stage.querySelector("[data-pet-thought-text]");
+  const emote = stage.querySelector("[data-pet-emote]");
+  const emoteIcon = stage.querySelector("[data-pet-emote-icon]");
   const launcher = document.getElementById("studylabPetLauncher");
   const panel = document.getElementById("studylabPetPanel");
   const closeButton = panel.querySelector("[data-pet-close]");
@@ -388,6 +391,41 @@
     "angry", "scared", "annoyed", "delighted", "surprised", "shy"
   ];
 
+  const personalityEmotes = {
+    natural:  { icon:"👋", expression:"delighted" },
+    playful:  { icon:"🎉", expression:"excited" },
+    focused:  { icon:"🎯", expression:"focused" },
+    curious:  { icon:"🔎", expression:"curious" },
+    observer: { icon:"👀", expression:"suspicious" }
+  };
+
+  function showPersonalityEmote(name) {
+    const em = personalityEmotes[name];
+    if (!em || !state.enabled) return;
+
+    clearTimeout(state.emoteTimer);
+    emote.dataset.emote = name;
+    emoteIcon.textContent = em.icon;
+    emote.classList.remove("is-visible");
+    void emote.offsetWidth;
+    emote.classList.add("is-visible");
+
+    setExpression(em.expression, 1350, true);
+
+    if (name === "playful" && !state.sleeping && !state.dragging && !reduced) {
+      state.roamActive = true;
+      state.roamPausedUntil = 0;
+      state.roamBoostUntil = now() + 7600;
+      chooseRoamTarget(true);
+      state.roamVelocityX *= 0.42;
+      state.roamVelocityY *= 0.42;
+    }
+
+    state.emoteTimer = setTimeout(() => {
+      emote.classList.remove("is-visible");
+    }, 1450);
+  }
+
   function setExpression(name, ttl = 1300, force = false) {
     if (!state.enabled && !force) return;
 
@@ -454,11 +492,11 @@
   };
 
   const personalityProfiles = {
-    natural:{label:"Natural",moveScale:1.00,minMove:320,wanderWait:[18000,30000],initialWait:[9000,15000],sleepAfter:34000,cardBias:.46,hoverDelay:160,expressionMoods:["neutral","curious","thinking","happy"],angerDuration:[4500,6500],angerFactor:1.00},
-    playful:{label:"Playful",moveScale:.90,minMove:300,wanderWait:[12500,22000],initialWait:[6500,10500],sleepAfter:45000,cardBias:.60,hoverDelay:110,expressionMoods:["happy","excited","curious","surprised"],angerDuration:[3800,5400],angerFactor:1.00},
-    focused:{label:"Focused",moveScale:1.04,minMove:350,wanderWait:[19000,31000],initialWait:[10000,17000],sleepAfter:50000,cardBias:.78,hoverDelay:140,expressionMoods:["focused","thinking","alert"],angerDuration:[4600,6600],angerFactor:1.05},
-    curious:{label:"Curious",moveScale:.95,minMove:310,wanderWait:[11000,19000],initialWait:[5500,9000],sleepAfter:42000,cardBias:.86,hoverDelay:75,expressionMoods:["curious","surprised","thinking","delighted"],angerDuration:[4000,5600],angerFactor:1.00},
-    observer:{label:"Observer",moveScale:1.15,minMove:370,wanderWait:[26000,42000],initialWait:[14000,23000],sleepAfter:38000,cardBias:.90,hoverDelay:240,expressionMoods:["curious","focused","neutral","suspicious"],angerDuration:[3800,5400],angerFactor:.95}
+    natural:{label:"Natural",moveScale:1.00,minMove:320,wanderWait:[18000,30000],initialWait:[9000,15000],sleepAfter:34000,cardBias:.46,hoverDelay:160,expressionMoods:["neutral","curious","thinking","happy"],angerDuration:[4500,6500],angerFactor:1.00,playfulness:0},
+    playful:{label:"Playful",moveScale:.86,minMove:300,wanderWait:[8500,15000],initialWait:[5000,8000],sleepAfter:45000,cardBias:.60,hoverDelay:100,expressionMoods:["happy","excited","curious","surprised"],angerDuration:[3800,5400],angerFactor:1.00,playfulness:1},
+    focused:{label:"Focused",moveScale:1.04,minMove:350,wanderWait:[19000,31000],initialWait:[10000,17000],sleepAfter:50000,cardBias:.78,hoverDelay:140,expressionMoods:["focused","thinking","alert"],angerDuration:[4600,6600],angerFactor:1.05,playfulness:0},
+    curious:{label:"Curious",moveScale:.95,minMove:310,wanderWait:[11000,19000],initialWait:[5500,9000],sleepAfter:42000,cardBias:.86,hoverDelay:75,expressionMoods:["curious","surprised","thinking","delighted"],angerDuration:[4000,5600],angerFactor:1.00,playfulness:.35},
+    observer:{label:"Observer",moveScale:1.15,minMove:370,wanderWait:[26000,42000],initialWait:[14000,23000],sleepAfter:38000,cardBias:.90,hoverDelay:240,expressionMoods:["curious","focused","neutral","suspicious"],angerDuration:[3800,5400],angerFactor:.95,playfulness:.08}
   };
 
   function enabledPersonalities() {
@@ -490,6 +528,7 @@
       hoverDelay: average("hoverDelay"),
       angerDuration: rangeAverage("angerDuration"),
       angerFactor: average("angerFactor"),
+      playfulness: average("playfulness"),
       expressionMoods: moods.length ? moods : null
     };
   }
@@ -868,11 +907,16 @@
 
   function chooseRoamTarget(immediate = false) {
     const speed = Math.hypot(state.roamVelocityX, state.roamVelocityY);
+    const profile = modeProfile();
+    const playful = clamp(profile.playfulness || 0, 0, 1);
     const baseAngle = speed > 6
       ? Math.atan2(state.roamVelocityY, state.roamVelocityX)
       : rand(0, Math.PI * 2);
-    const angle = baseAngle + rand(-0.82, 0.82);
-    const distance = immediate ? rand(450, 720) : rand(380, 760);
+    const turnRange = 0.82 + playful * 0.58;
+    const angle = baseAngle + rand(-turnRange, turnRange);
+    const distance = immediate
+      ? (playful > 0.55 ? rand(330, 620) : rand(450, 720))
+      : (playful > 0.55 ? rand(300, 650) : rand(380, 760));
 
     let x = state.x + Math.cos(angle) * distance;
     let y = state.y + Math.sin(angle) * distance * 0.78;
@@ -898,6 +942,8 @@
     const dt = clamp((timestamp - previous) / 1000, 0.001, 0.040);
     state.roamLastFrame = timestamp;
     const t = now();
+    const profile = modeProfile();
+    const playful = clamp(profile.playfulness || 0, 0, 1);
 
     if (!state.roamTargetX && !state.roamTargetY) chooseRoamTarget(true);
 
@@ -911,10 +957,11 @@
       const distance = Math.max(1, Math.hypot(dx, dy));
       const currentSpeed = Math.hypot(state.roamVelocityX, state.roamVelocityY);
       const maxSpeed = roamSpeed();
+      const pace = 1 + Math.sin(t * 0.00123) * 0.13 * playful;
 
       /* Smooth arrival and smooth acceleration. */
-      const arrival = clamp(distance / 210, 0.22, 1);
-      const desiredSpeed = maxSpeed * arrival;
+      const arrival = clamp(distance / (210 - playful * 45), 0.20, 1);
+      const desiredSpeed = maxSpeed * arrival * pace;
       const desiredX = (dx / distance) * desiredSpeed;
       const desiredY = (dy / distance) * desiredSpeed;
 
@@ -928,9 +975,16 @@
       if (state.y > window.innerHeight - 125) steerY -= (state.y - (window.innerHeight - 125)) / 125 * maxSpeed * 2.2;
 
       /* Very small curved drift makes the path feel organic rather than programmed. */
-      const curve = Math.sin(t * 0.00037) * 0.16;
+      const curve = Math.sin(t * 0.00037) * (0.16 + playful * 0.34);
       steerX += -desiredY * curve;
       steerY += desiredX * curve;
+
+      if (playful > 0 && distance > 90) {
+        const playWave = Math.sin(t * 0.00108 + state.roamTargetX * 0.0017) *
+          maxSpeed * 0.19 * playful;
+        steerX += -(dy / distance) * playWave;
+        steerY += (dx / distance) * playWave;
+      }
 
       const response = 1 - Math.exp(-dt / 0.95);
       state.roamVelocityX += (steerX - state.roamVelocityX) * response;
@@ -944,7 +998,7 @@
       }
 
       if (distance < 95) {
-        const pause = Math.random() < 0.16;
+        const pause = Math.random() < (0.16 + playful * 0.08);
         if (pause) state.roamPausedUntil = t + rand(700, 1500);
         chooseRoamTarget(false);
       }
@@ -1464,6 +1518,7 @@
 
     save(KEY.personalities, JSON.stringify(state.personalities));
     character.dataset.personalities = state.personalities.join(",");
+    character.dataset.playful = state.personalities.includes("playful") ? "true" : "false";
   }
 
   function notifySetting(message, duration = 1100) {
@@ -1511,6 +1566,9 @@
       true
     );
 
+    if (enabled) {
+      showPersonalityEmote(name);
+    }
     notifySetting(personalityLabel(name) + (enabled ? " enabled." : " disabled."));
     updateControls();
   }
@@ -1617,6 +1675,7 @@
   savePersonalities();
   character.dataset.eye = state.eye;
   character.dataset.personalities = state.personalities.join(",");
+  character.dataset.playful = state.personalities.includes("playful") ? "true" : "false";
   state.nextWander = now() + rand(
     modeProfile().initialWait[0],
     modeProfile().initialWait[1]
