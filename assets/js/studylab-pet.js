@@ -1,7 +1,6 @@
 /* =========================================================
-   StudyLab Living Pet — final companion engine
-   Inspired by expressive screen-pet interaction patterns.
-   No simulation integration.
+   StudyLab Living Pet — active companion engine
+   Global/page-level companion only. No simulation integration.
    ========================================================= */
 
 (function () {
@@ -20,167 +19,134 @@
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const now = () => Date.now();
 
-  function readBool(key, fallback) {
+  const read = (key, fallback) => {
     try {
-      const v = localStorage.getItem(key);
-      return v == null ? fallback : v === "true";
+      const value = localStorage.getItem(key);
+      return value == null ? fallback : value;
     } catch (_) {
       return fallback;
     }
-  }
+  };
 
-  function readText(key, fallback) {
-    try {
-      const v = localStorage.getItem(key);
-      return v == null ? fallback : v;
-    } catch (_) {
-      return fallback;
-    }
-  }
-
-  function save(key, value) {
+  const save = (key, value) => {
     try { localStorage.setItem(key, String(value)); } catch (_) {}
-  }
+  };
 
-  function clamp(value, min, max) {
-    return Math.max(min, Math.min(max, value));
-  }
-
-  function random(min, max) {
-    return min + Math.random() * (max - min);
-  }
+  const bool = (key, fallback) => read(key, String(fallback)) === "true";
+  const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+  const rand = (min, max) => min + Math.random() * (max - min);
+  const pick = (items) => items[Math.floor(Math.random() * items.length)];
 
   const state = {
-    enabled: readBool(KEY.enabled, true),
-    eye: readText(KEY.eye, "cyan") === "pink" ? "pink" : "cyan",
+    enabled: bool(KEY.enabled, true),
+    eye: read(KEY.eye, "cyan") === "pink" ? "pink" : "cyan",
     context: "home",
     expression: "neutral",
-    previousExpression: "neutral",
     sleeping: false,
     dragging: false,
-    dragged: false,
     danger: false,
-    x: clamp(
-      Number(readText(KEY.x, Math.round(window.innerWidth * .72))) || window.innerWidth * .72,
-      56,
-      window.innerWidth - 56
-    ),
-    y: clamp(
-      Number(readText(KEY.y, Math.round(window.innerHeight * .54))) || window.innerHeight * .54,
-      78,
-      window.innerHeight - 86
-    ),
-    pointerX: window.innerWidth * .72,
-    pointerY: window.innerHeight * .54,
+    evading: false,
+
+    x: 0,
+    y: 0,
+    moveAnimation: 0,
+    moveToken: 0,
+
+    pointerX: window.innerWidth * 0.72,
+    pointerY: window.innerHeight * 0.52,
+    gazeX: 0,
+    gazeY: 0,
+    gazeTargetX: 0,
+    gazeTargetY: 0,
+
     lastActivity: now(),
     lastMeaningfulActivity: now(),
     lastReaction: 0,
-    lastMovement: now(),
-    nextBlink: now() + random(7200, 10600),
-    nextAmbient: now() + random(8500, 14000),
-    nextWander: now() + random(13500, 21000),
-    anger: 0,
-    nameTimer: null,
-    bubbleTimer: null,
+    lastWander: 0,
+
+    nextBlink: now() + rand(6500, 10400),
+    nextWander: now() + rand(6500, 10500),
+    nextAmbient: now() + rand(5000, 9000),
+    nextThought: now() + rand(9000, 15500),
+
+    clickTimes: [],
+    angerLevel: 0,
+    angerUntil: 0,
+    nextEvade: 0,
+
     dragPointerId: null,
     dragOffsetX: 0,
     dragOffsetY: 0,
-    reactionTimer: null
+
+    reactionTimer: null,
+    bubbleTimer: null,
+    blinkTimer: null,
+    lastHoveredElement: null
   };
+
+  state.x = clamp(
+    Number(read(KEY.x, Math.round(window.innerWidth * 0.72))) || window.innerWidth * 0.72,
+    50,
+    window.innerWidth - 50
+  );
+  state.y = clamp(
+    Number(read(KEY.y, Math.round(window.innerHeight * 0.53))) || window.innerHeight * 0.53,
+    76,
+    window.innerHeight - 82
+  );
 
   const link = document.createElement("link");
   link.rel = "stylesheet";
   link.href = "assets/css/studylab-pet.css";
   document.head.appendChild(link);
 
-  document.body.insertAdjacentHTML("beforeend", `
-    <div id="studylabPetStage">
-      <div
-        class="sl-pet-character"
-        data-state="neutral"
-        data-eye="cyan"
-        data-danger="false"
-        data-blink="false"
-        role="button"
-        tabindex="0"
-        aria-label="StudyLab Pet"
-      >
-        <div class="sl-pet-face" aria-hidden="true">
-          <div class="sl-pet-eye left"><i></i></div>
-          <div class="sl-pet-eye right"><i></i></div>
-          <div class="sl-pet-mouth"></div>
-        </div>
+  document.body.insertAdjacentHTML("beforeend",
+    '<div id="studylabPetStage">' +
+      '<div class="sl-pet-character" data-state="neutral" data-eye="cyan" data-danger="false" data-blink="false" data-moving="false" data-direction="idle" role="button" tabindex="0" aria-label="StudyLab Pet">' +
+        '<div class="sl-pet-visual">' +
+          '<div class="sl-pet-face" aria-hidden="true">' +
+            '<div class="sl-pet-eye left"><i></i></div>' +
+            '<div class="sl-pet-eye right"><i></i></div>' +
+          '</div>' +
+          '<svg class="sl-pet-crack" viewBox="0 0 32 26" aria-hidden="true">' +
+            '<path d="M26 2L20 8L22 11L16 14L18 18L11 24"></path>' +
+            '<path d="M20 8L26 9"></path>' +
+          '</svg>' +
+          '<div class="sl-pet-zzz" aria-hidden="true"><span>Z</span><span>z</span><span>z</span></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="sl-pet-thought" data-pet-thought aria-hidden="true">' +
+        '<span class="sl-pet-thought-dot d1"></span>' +
+        '<span class="sl-pet-thought-dot d2"></span>' +
+        '<div class="sl-pet-thought-cloud"><b data-pet-thought-text>...</b></div>' +
+      '</div>' +
+    '</div>' +
 
-        <svg class="sl-pet-crack" viewBox="0 0 32 26" aria-hidden="true">
-          <path d="M26 2L20 8L22 11L16 14L18 18L11 24"></path>
-          <path d="M20 8L26 9"></path>
-        </svg>
+    '<button id="studylabPetLauncher" type="button" aria-expanded="false" aria-controls="studylabPetPanel" title="StudyLab Pet controls">' +
+      '<span class="sl-pet-launcher-icon" aria-hidden="true">🤖</span><span>Pet</span>' +
+    '</button>' +
 
-        <div class="sl-pet-zzz" aria-hidden="true">
-          <span>Z</span><span>z</span><span>z</span>
-        </div>
-      </div>
-
-      <div class="sl-pet-bubble" data-pet-bubble role="status" aria-live="polite"></div>
-    </div>
-
-    <button
-      id="studylabPetLauncher"
-      type="button"
-      aria-expanded="false"
-      aria-controls="studylabPetPanel"
-      title="StudyLab Pet controls"
-    >
-      <span class="sl-pet-launcher-icon" aria-hidden="true">🤖</span>
-      <span>Pet</span>
-    </button>
-
-    <aside
-      class="sl-pet-panel"
-      id="studylabPetPanel"
-      hidden
-      aria-label="StudyLab Pet controls"
-    >
-      <div class="sl-pet-panel-head">
-        <div>
-          <strong>StudyLab Pet</strong>
-          <small>Your little study companion</small>
-        </div>
-        <button
-          class="sl-pet-panel-close"
-          type="button"
-          data-pet-close
-          aria-label="Close pet controls"
-        >×</button>
-      </div>
-
-      <div class="sl-pet-setting">
-        <span>Pet</span>
-        <div class="sl-pet-setting-buttons">
-          <button type="button" data-pet-enable>Enable</button>
-          <button type="button" data-pet-disable>Disable</button>
-        </div>
-      </div>
-
-      <div class="sl-pet-setting">
-        <span>Eye colour</span>
-        <div class="sl-pet-setting-buttons">
-          <button type="button" data-pet-eye="cyan">Cyan</button>
-          <button type="button" data-pet-eye="pink">Pink</button>
-        </div>
-      </div>
-
-      <p class="sl-pet-panel-note">
-        Expressive eyes, slow wandering, cursor awareness, sleep, and playful reactions.
-      </p>
-    </aside>
-  `);
+    '<aside class="sl-pet-panel" id="studylabPetPanel" hidden aria-label="StudyLab Pet controls">' +
+      '<div class="sl-pet-panel-head">' +
+        '<div><strong>StudyLab Pet</strong><small>Your little study companion</small></div>' +
+        '<button class="sl-pet-panel-close" type="button" data-pet-close aria-label="Close pet controls">×</button>' +
+      '</div>' +
+      '<div class="sl-pet-setting"><span>Pet</span><div class="sl-pet-setting-buttons">' +
+        '<button type="button" data-pet-enable>Enable</button><button type="button" data-pet-disable>Disable</button>' +
+      '</div></div>' +
+      '<div class="sl-pet-setting"><span>Eye colour</span><div class="sl-pet-setting-buttons">' +
+        '<button type="button" data-pet-eye="cyan">Cyan</button><button type="button" data-pet-eye="pink">Pink</button>' +
+      '</div></div>' +
+      '<p class="sl-pet-panel-note">Cyan and Pink are two tiny personalities. Watch the face, gaze, walking and thoughts.</p>' +
+    '</aside>'
+  );
 
   const stage = document.getElementById("studylabPetStage");
   const character = stage.querySelector(".sl-pet-character");
-  const bubble = stage.querySelector("[data-pet-bubble]");
+  const visual = stage.querySelector(".sl-pet-visual");
   const eyes = [...stage.querySelectorAll(".sl-pet-eye > i")];
-  const eyeShells = [...stage.querySelectorAll(".sl-pet-eye")];
+  const thought = stage.querySelector("[data-pet-thought]");
+  const thoughtText = stage.querySelector("[data-pet-thought-text]");
   const launcher = document.getElementById("studylabPetLauncher");
   const panel = document.getElementById("studylabPetPanel");
   const closeButton = panel.querySelector("[data-pet-close]");
@@ -188,11 +154,76 @@
   const disableButton = panel.querySelector("[data-pet-disable]");
   const eyeButtons = [...panel.querySelectorAll("[data-pet-eye]")];
 
-  function getContext() {
-    const path = location.pathname.toLowerCase();
-    const title = (document.title || "").toLowerCase();
-    const text = (document.body?.innerText || "").slice(0, 6500).toLowerCase();
+  function setPosition(x, y) {
+    const halfW = window.innerWidth <= 720 ? 41 : 45;
+    const minY = 74;
+    const maxY = Math.max(minY + 20, window.innerHeight - 82);
 
+    state.x = clamp(x, halfW, window.innerWidth - halfW);
+    state.y = clamp(y, minY, maxY);
+
+    character.style.left = state.x + "px";
+    character.style.top = state.y + "px";
+
+    if (!state.dragging) {
+      save(KEY.x, Math.round(state.x));
+      save(KEY.y, Math.round(state.y));
+    }
+  }
+
+  setPosition(state.x, state.y);
+
+  function wake(reason) {
+    state.lastActivity = now();
+    if (!state.sleeping) return;
+    state.sleeping = false;
+    character.dataset.state = "curious";
+    state.expression = "curious";
+    state.nextBlink = now() + rand(2800, 5200);
+    if (reason === "pointer") showThought("Oh. You're back.", 1300);
+  }
+
+  function showThought(message, duration = 1800) {
+    if (!state.enabled || !message) return;
+    thoughtText.textContent = message;
+    thought.classList.add("is-visible");
+    clearTimeout(state.bubbleTimer);
+    state.bubbleTimer = setTimeout(() => thought.classList.remove("is-visible"), duration);
+    thought.style.left = state.x + "px";
+    thought.style.top = Math.max(64, state.y - 45) + "px";
+  }
+
+  function hideThought() {
+    thought.classList.remove("is-visible");
+  }
+
+  const expressionNames = [
+    "neutral", "curious", "happy", "excited", "focused", "thinking",
+    "alert", "worried", "confused", "suspicious", "bored", "sleeping",
+    "angry", "scared", "annoyed", "delighted", "surprised", "shy"
+  ];
+
+  function setExpression(name, ttl = 1300, force = false) {
+    if (!state.enabled && !force) return;
+
+    const next = expressionNames.includes(name) ? name : "neutral";
+    state.expression = next;
+    character.dataset.state = state.sleeping ? "sleeping" : next;
+    character.dataset.micro = String(Math.floor(Math.random() * 24));
+
+    clearTimeout(state.reactionTimer);
+    if (ttl > 0) {
+      state.reactionTimer = setTimeout(() => {
+        if (!state.dragging && !state.sleeping && now() > state.angerUntil) {
+          state.expression = "neutral";
+          character.dataset.state = "neutral";
+        }
+      }, ttl);
+    }
+  }
+
+  function contextFromPath() {
+    const path = location.pathname.toLowerCase();
     if (path.includes("study-tools")) return "study";
     if (path.includes("physics")) return "physics";
     if (path.includes("chemistry")) return "chemistry";
@@ -200,823 +231,735 @@
     if (path.includes("biology")) return "biology";
     if (path.includes("exam-hub")) return "exam";
     if (path.includes("telegram")) return "social";
-
-    const combined = title + " " + text;
-    if (/physics/.test(combined)) return "physics";
-    if (/chemistry/.test(combined)) return "chemistry";
-    if (/mathematics|combined maths|combined mathematics/.test(combined)) return "maths";
-    if (/biology/.test(combined)) return "biology";
-    if (/past papers|marking scheme|exam hub/.test(combined)) return "exam";
     return "home";
   }
 
-  state.context = getContext();
+  state.context = contextFromPath();
 
-  function setPosition(x, y, movement = "none", duration = 0) {
-    const halfW = window.innerWidth <= 720 ? 41 : 45;
-    const minY = 72;
-    const maxY = Math.max(minY + 20, window.innerHeight - 84);
+  const contextMoods = {
+    home: ["curious", "calm", "neutral"],
+    physics: ["alert", "focused", "excited"],
+    chemistry: ["curious", "delighted", "focused"],
+    maths: ["thinking", "focused", "suspicious"],
+    biology: ["curious", "delighted", "alert"],
+    study: ["focused", "thinking", "curious"],
+    exam: ["alert", "focused", "worried"],
+    social: ["happy", "delighted", "curious"]
+  };
 
-    state.x = clamp(x, halfW, window.innerWidth - halfW);
-    state.y = clamp(y, minY, maxY);
+  const contextThoughts = {
+    home: ["What's next?", "Hmm...", "Browsing too.", "Interesting."],
+    physics: ["F = ma...", "That graph.", "Let's test it.", "Motion."],
+    chemistry: ["Balance it.", "Need electrons.", "That reaction...", "Interesting."],
+    maths: ["x = ?", "This needs a plan.", "Checking...", "That sign."],
+    biology: ["Tiny structures.", "Observe...", "Cells.", "Interesting."],
+    study: ["Stay focused.", "One task.", "Let's get this done.", "Hmm..."],
+    exam: ["Read carefully.", "Watch the time.", "No silly mistakes.", "Focus."],
+    social: ["👀", "A break?", "Hmm.", "Hello."]
+  };
 
-    character.style.setProperty("--pet-left", state.x + "px");
-    character.style.setProperty("--pet-top", state.y + "px");
-
-    if (duration > 0) {
-      character.style.setProperty("--pet-move-duration", duration + "ms");
-      character.classList.remove("is-walking", "is-climbing", "is-falling", "is-landed");
-      if (movement === "up") character.classList.add("is-climbing");
-      else if (movement === "down") character.classList.add("is-falling");
-      else character.classList.add("is-walking");
-    }
-
-    save(KEY.x, Math.round(state.x));
-    save(KEY.y, Math.round(state.y));
-  }
-
-  function showBubble(message, duration = 1800) {
-    if (!state.enabled || !message) return;
-    bubble.textContent = message;
-    bubble.classList.add("is-visible");
-    window.clearTimeout(state.bubbleTimer);
-    state.bubbleTimer = window.setTimeout(() => {
-      bubble.classList.remove("is-visible");
-    }, duration);
-    bubble.style.left = state.x + "px";
-    bubble.style.top = Math.max(78, state.y - 34) + "px";
-  }
-
-  function hideBubble() {
-    bubble.classList.remove("is-visible");
-  }
-
-  /*
-   * Expression engine:
-   * 24 expression families x multiple procedural variants,
-   * gaze positions, blink phases and two palettes produce
-   * thousands of distinct rendered facial states without
-   * shipping thousands of static images.
-   */
-  const expressions = [
-    "neutral","curious","happy","excited","sad","worried",
-    "angry","surprised","scared","suspicious","confused",
-    "focused","bored","sleeping","thinking","dizzy",
-    "relieved","shy","disappointed","love","delighted",
-    "annoyed","calm","alert"
+  const utilityMap = [
+    { re: /pomodoro|focus timer/, expression: "focused", thought: "Focus mode." },
+    { re: /flashcard|flash card/, expression: "curious", thought: "What's next?" },
+    { re: /mistake|mistakes|error notebook/, expression: "worried", thought: "Fix that one." },
+    { re: /planner|study plan|plan/, expression: "thinking", thought: "Plan first." },
+    { re: /marks|calculator|calculat/, expression: "thinking", thought: "Let's calculate." },
+    { re: /mock exam|exam timer|quiz/, expression: "alert", thought: "Clock's ticking." },
+    { re: /converter|convert/, expression: "curious", thought: "Unit swap." }
   ];
 
-  function setExpression(expression, ttl = 1200, force = false) {
-    if (!state.enabled && !force) return;
+  const elementMap = [
+    { re: /theme|dark mode|light mode/, expression: "surprised", thought: "New lighting." },
+    { re: /search/, expression: "curious", thought: "Looking..." },
+    { re: /profile|account|name/, expression: "curious", thought: "Who's that?" },
+    { re: /telegram|community|channel/, expression: "happy", thought: "Messages." },
+    { re: /past paper|marking scheme|model paper|school paper/, expression: "focused", thought: "Exam stuff." },
+    { re: /simulation|simulat|interactive/, expression: "excited", thought: "Let's play." },
+    { re: /practical|laboratory|lab/, expression: "delighted", thought: "Experiment." },
+    { re: /physics|doppler|gravity|wave|electricity|motion|force/, expression: "alert", thought: "Physics." },
+    { re: /chemistry|chemical|organic|inorganic|reaction|titration/, expression: "curious", thought: "Chemistry." },
+    { re: /maths|mathematics|trigonometry|calculus|vector|algebra/, expression: "thinking", thought: "Numbers." },
+    { re: /biology|genetics|cell|ecology|organism/, expression: "curious", thought: "Observe..." },
+    { re: /download|pdf|open|view/, expression: "focused", thought: "Let's see." },
+    { re: /save|favorite|favourite|bookmark/, expression: "happy", thought: "Keeping it." },
+    { re: /delete|remove|reset|clear/, expression: "worried", thought: "Careful..." },
+    { re: /submit|finish|complete|start/, expression: "alert", thought: "Go." }
+  ];
 
-    const next = expressions.includes(expression) ? expression : "neutral";
-    state.previousExpression = state.expression;
-    state.expression = next;
-
-    character.dataset.state = state.sleeping ? "sleeping" : next;
-    character.dataset.micro = String(Math.floor(Math.random() * 12));
-
-    if (ttl === 0) return;
-
-    window.clearTimeout(state.reactionTimer);
-    state.reactionTimer = window.setTimeout(() => {
-      if (state.dragging) return;
-      character.dataset.state = state.sleeping ? "sleeping" : "neutral";
-      state.expression = state.sleeping ? "sleeping" : "neutral";
-    }, ttl);
+  function descriptor(el) {
+    if (!el) return "";
+    return [
+      el.id || "",
+      typeof el.className === "string" ? el.className : "",
+      el.getAttribute("aria-label") || "",
+      el.getAttribute("title") || "",
+      el.getAttribute("data-tool") || "",
+      el.getAttribute("href") || "",
+      el.textContent || ""
+    ].join(" ").replace(/\s+/g, " ").toLowerCase();
   }
 
-  function contextMood(context) {
-    if (context === "study" || context === "exam") return "focused";
-    if (context === "chemistry") return "curious";
-    if (context === "physics") return "alert";
-    if (context === "maths") return "thinking";
-    if (context === "biology") return "curious";
-    if (context === "social") return "delighted";
-    return "neutral";
+  function infoFor(el) {
+    const text = descriptor(el);
+    const utility = utilityMap.find((item) => item.re.test(text));
+    if (utility) return utility;
+
+    const matched = elementMap.find((item) => item.re.test(text));
+    if (matched) return matched;
+
+    const context = contextFromElement(el) || state.context;
+    return {
+      expression: pick(contextMoods[context] || ["neutral"]),
+      thought: pick(contextThoughts[context] || ["Hmm..."])
+    };
   }
 
-  function cardContext(element) {
-    if (!element) return state.context;
-
-    const value = [
-      element.id || "",
-      element.className || "",
-      element.getAttribute("href") || "",
-      element.getAttribute("aria-label") || "",
-      element.textContent || ""
-    ].join(" ").toLowerCase();
-
-    if (/pomodoro|focus timer|flashcard|flash card|mistake|planner|converter|marks calculator|mock exam/.test(value)) return "study";
-    if (/physics|doppler|gravity|projectile|wave|electricity/.test(value)) return "physics";
-    if (/chemistry|රසායන|practical|organic|inorganic/.test(value)) return "chemistry";
-    if (/maths|mathematics|සංයුක්ත ගණිතය|trigonometry|calculus|vector/.test(value)) return "maths";
-    if (/biology|ජීව|genetics|cell structure/.test(value)) return "biology";
-    if (/exam|past paper|marking scheme|model paper|school paper|timetable/.test(value)) return "exam";
-    if (/telegram|community|channel/.test(value)) return "social";
+  function contextFromElement(el) {
+    const text = descriptor(el);
+    if (!text) return state.context;
+    if (/pomodoro|focus timer|flashcard|mistake|planner|marks calculator|mock exam|converter/.test(text)) return "study";
+    if (/physics|doppler|gravity|wave|electricity|force|motion/.test(text)) return "physics";
+    if (/chemistry|chemical|practical|laboratory|reaction|titration/.test(text)) return "chemistry";
+    if (/maths|mathematics|trigonometry|calculus|vector|algebra/.test(text)) return "maths";
+    if (/biology|genetics|cell|ecology|organism/.test(text)) return "biology";
+    if (/exam|past paper|marking scheme|model paper|school paper|timetable/.test(text)) return "exam";
+    if (/telegram|community|channel/.test(text)) return "social";
     return state.context;
   }
 
-  function utilityKind(element) {
-    const value = [
-      element?.id || "",
-      element?.className || "",
-      element?.textContent || ""
-    ].join(" ").toLowerCase();
+  function personaVariation(base) {
+    if (state.eye === "cyan") {
+      const boyish = {
+        neutral: ["neutral", "suspicious", "calm"],
+        curious: ["curious", "alert"],
+        happy: ["happy", "excited"],
+        thinking: ["thinking", "focused"],
+        delighted: ["delighted", "excited"]
+      };
+      const pool = boyish[base];
+      return pool ? pick(pool) : base;
+    }
 
-    if (/pomodoro|focus timer/.test(value)) return "pomodoro";
-    if (/flashcard/.test(value)) return "flashcard";
-    if (/mistake/.test(value)) return "mistake";
-    if (/marks/.test(value)) return "marks";
-    if (/planner/.test(value)) return "planner";
-    if (/mock exam|exam timer/.test(value)) return "mock";
-    if (/converter/.test(value)) return "converter";
-    return "";
+    const girlish = {
+      neutral: ["neutral", "shy", "curious"],
+      curious: ["curious", "shy", "happy"],
+      happy: ["happy", "delighted"],
+      thinking: ["thinking", "curious"],
+      delighted: ["delighted", "happy", "shy"]
+    };
+    const pool = girlish[base];
+    return pool ? pick(pool) : base;
   }
 
-  function react(type, detail = {}) {
-    if (!state.enabled) return;
+  function reactToElement(el, type) {
+    if (!state.enabled || !el || el === character || character.contains(el)) return;
 
     const time = now();
-    if (time - state.lastReaction < 300 && type !== "anger" && type !== "scared") return;
+    if (time - state.lastReaction < 220 && type === "hover") return;
 
     state.lastReaction = time;
     state.lastActivity = time;
     state.lastMeaningfulActivity = time;
-    state.sleeping = false;
+    wake("pointer");
 
-    if (type === "hover-card") {
-      const context = detail.context || state.context;
-      const utility = utilityKind(detail.element);
+    const info = infoFor(el);
+    const expression = personaVariation(info.expression || "neutral");
 
-      if (context === "study" && utility === "pomodoro") {
-        setExpression("focused", 1800);
-      } else if (context === "study" && utility === "flashcard") {
-        setExpression("curious", 1300);
-      } else if (context === "study" && utility === "mistake") {
-        setExpression("worried", 1300);
-      } else if (context === "study" && utility === "marks") {
-        setExpression("thinking", 1300);
-      } else if (context === "study" && utility === "planner") {
-        setExpression("focused", 1300);
-      } else if (context === "study" && utility === "mock") {
-        setExpression("alert", 1400);
-      } else if (context === "study" && utility === "converter") {
-        setExpression("curious", 1100);
-      } else {
-        setExpression(contextMood(context), 1200);
-      }
-
-      if (Math.random() < 0.18) {
-        const messages = {
-          physics: ["⚛️", "Watching."],
-          chemistry: ["🧪", "Curious."],
-          maths: ["📐", "Thinking..."],
-          biology: ["🧬", "Observing."],
-          study: ["Focus.", "Still here."],
-          exam: ["Lock in."],
-          social: ["👀"]
-        };
-        const pool = messages[context] || ["👀"];
-        showBubble(pool[Math.floor(Math.random() * pool.length)], 1500);
-      }
-      return;
+    if (type === "click") {
+      setExpression(expression, 1550);
+      if (Math.random() < 0.26) showThought(info.thought || pick(contextThoughts[state.context]), 1500);
+    } else {
+      setExpression(expression, 950);
+      if (Math.random() < 0.13) showThought(info.thought || pick(contextThoughts[state.context]), 1350);
     }
 
-    if (type === "click-card") {
-      const context = detail.context || state.context;
-      const utility = utilityKind(detail.element);
+    lookAtElement(el);
+  }
 
-      if (context === "study" && utility === "pomodoro") {
-        setExpression("focused", 2300);
-        showBubble("⏱️", 1200);
-      } else if (context === "study" && utility === "flashcard") {
-        setExpression("excited", 1200);
-      } else if (context === "study" && utility === "mistake") {
-        setExpression("worried", 1500);
-      } else if (context === "study" && utility === "marks") {
-        setExpression("thinking", 1400);
-      } else if (context === "exam") {
-        setExpression("alert", 1500);
-      } else if (context === "chemistry") {
-        setExpression("delighted", 1350);
-      } else if (context === "physics") {
-        setExpression("excited", 1300);
-      } else if (context === "maths") {
-        setExpression("thinking", 1250);
-      } else {
-        setExpression("happy", 1050);
-      }
-      return;
+  function lookAtElement(el) {
+    const rect = el.getBoundingClientRect();
+    if (!rect.width && !rect.height) return;
+    const targetX = rect.left + rect.width / 2;
+    const targetY = rect.top + rect.height / 2;
+    setGazeTarget(targetX, targetY, false);
+  }
+
+  function setGazeTarget(x, y, reversed) {
+    const dx = x - state.x;
+    const dy = y - state.y;
+    const distance = Math.max(1, Math.hypot(dx, dy));
+    const scale = clamp(distance / 170, 0.45, 1);
+
+    let gx = clamp(dx / 130, -1, 1) * 6.5 * scale;
+    let gy = clamp(dy / 110, -1, 1) * 5.8 * scale;
+
+    if (reversed) {
+      gx *= -1.18;
+      gy *= -1.18;
     }
 
-    if (type === "typing") {
-      setExpression(detail.isName ? "curious" : "alert", 900);
-      if (detail.isName && Math.random() < .35) showBubble("👀", 1000);
-      return;
-    }
+    state.gazeTargetX = clamp(gx, -7.2, 7.2);
+    state.gazeTargetY = clamp(gy, -6.2, 6.2);
+  }
 
-    if (type === "name-complete") {
-      setExpression("delighted", 1450);
-      if (detail.name) showBubble("👀", 1200);
-      return;
-    }
+  function updateGaze() {
+    state.gazeX += (state.gazeTargetX - state.gazeX) * 0.17;
+    state.gazeY += (state.gazeTargetY - state.gazeY) * 0.17;
 
-    if (type === "search") {
-      setExpression("curious", 1100);
-      return;
-    }
+    character.style.setProperty("--gaze-x", state.gazeX.toFixed(2) + "px");
+    character.style.setProperty("--gaze-y", state.gazeY.toFixed(2) + "px");
 
-    if (type === "theme") {
-      setExpression("surprised", 900);
-      return;
-    }
-
-    if (type === "scroll") {
-      setExpression("alert", 500);
-      return;
-    }
-
-    if (type === "scared") {
-      setExpression("scared", 1250, true);
-      return;
-    }
-
-    if (type === "anger") {
-      state.anger += 1;
-      state.danger = true;
-      character.dataset.danger = "true";
-      setExpression("angry", 1300, true);
-
-      window.setTimeout(() => {
-        state.danger = false;
-        character.dataset.danger = "false";
-      }, 1350);
-
-      if (state.anger >= 3 && Math.random() < .55) {
-        showBubble("...", 1150);
-      }
-      return;
-    }
-
-    if (type === "wake") {
-      setExpression("curious", 1000);
-      return;
+    if (state.enabled && !state.dragging && !state.sleeping) {
+      const dist = Math.hypot(state.pointerX - state.x, state.pointerY - state.y);
+      if (dist > 65) setGazeTarget(state.pointerX, state.pointerY, state.angerUntil > now());
     }
   }
 
+  function animationLoop() {
+    updateGaze();
+    requestAnimationFrame(animationLoop);
+  }
+  requestAnimationFrame(animationLoop);
+
   function blink() {
-    if (!state.enabled || state.sleeping || state.dragging) return;
+    if (!state.enabled || state.sleeping || state.dragging || state.danger) return;
 
     character.dataset.blink = "true";
-    state.lastActivity = now();
+    clearTimeout(state.blinkTimer);
 
-    const double = Math.random() < .08;
-    window.setTimeout(() => {
+    const double = Math.random() < 0.09;
+    state.blinkTimer = setTimeout(() => {
       character.dataset.blink = "false";
-      if (double && state.enabled && !state.sleeping) {
-        window.setTimeout(() => {
+
+      if (double && state.enabled && !state.sleeping && !state.danger) {
+        setTimeout(() => {
           character.dataset.blink = "true";
-          window.setTimeout(() => {
-            character.dataset.blink = "false";
-          }, 115);
+          setTimeout(() => { character.dataset.blink = "false"; }, 115);
         }, 105);
       }
     }, 135);
 
-    state.nextBlink = now() + random(7200, 10600);
+    state.nextBlink = now() + rand(6200, 10400);
   }
 
-  function gazeAt(x, y) {
-    if (!state.enabled) return;
-
-    const rect = character.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-
-    const gx = clamp((x - centerX) / 150, -1, 1) * 6.2;
-    const gy = clamp((y - centerY) / 125, -1, 1) * 5.3;
-
-    state.pointerX = x;
-    state.pointerY = y;
-
-    eyes.forEach((eye) => {
-      eye.style.transform =
-        "translate(" +
-        "calc(-50% + " + gx.toFixed(2) + "px), " +
-        "calc(-50% + " + gy.toFixed(2) + "px))";
-    });
+  function walkingDuration(distance, direction) {
+    if (direction === "up") return clamp(1700 + distance * 2.25, 1900, 3900);
+    if (direction === "down") return clamp(1000 + distance * 1.05, 1100, 2500);
+    return clamp(1300 + distance * 1.52, 1500, 3200);
   }
 
-  function movePetNaturally() {
-    if (!state.enabled || state.sleeping || state.dragging || reduced) return;
+  function visualDirection(dx, dy) {
+    if (Math.abs(dy) > Math.abs(dx) * 0.7) return dy < 0 ? "up" : "down";
+    return dx < 0 ? "left" : "right";
+  }
 
-    const oldX = state.x;
-    const oldY = state.y;
+  function easeInOut(t) {
+    return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+  }
 
-    const targetX = random(65, Math.max(70, window.innerWidth - 65));
-    const targetY = random(88, Math.max(95, window.innerHeight - 100));
+  function stopMove() {
+    if (state.moveAnimation) cancelAnimationFrame(state.moveAnimation);
+    state.moveAnimation = 0;
+    state.moveToken += 1;
+    character.dataset.moving = "false";
+    character.dataset.direction = "idle";
+  }
 
-    const dx = targetX - oldX;
-    const dy = targetY - oldY;
+  function animateMoveTo(targetX, targetY, reason = "wander") {
+    if (!state.enabled || state.dragging || reduced || state.sleeping) return;
+
+    stopMove();
+
+    const startX = state.x;
+    const startY = state.y;
+    const dx = targetX - startX;
+    const dy = targetY - startY;
     const distance = Math.hypot(dx, dy);
 
-    if (distance < 95) {
-      state.nextWander = now() + random(6500, 10500);
-      return;
+    if (distance < 95) return;
+
+    const direction = visualDirection(dx, dy);
+    const duration = walkingDuration(distance, direction);
+    const started = now();
+    const token = state.moveToken;
+
+    character.dataset.moving = "true";
+    character.dataset.direction = direction;
+
+    if (direction === "up") {
+      setExpression("focused", 1150);
+    } else if (direction === "down") {
+      setExpression("alert", 900);
+    } else {
+      setExpression(state.eye === "cyan" ? pick(["neutral", "curious", "excited"]) : pick(["neutral", "happy", "curious"]), 1000);
     }
 
-    const movement = Math.abs(dy) > Math.abs(dx) * .55
-      ? (dy < 0 ? "up" : "down")
-      : "horizontal";
+    function frame() {
+      if (token !== state.moveToken || state.dragging || !state.enabled) return;
 
-    const duration = movement === "up"
-      ? clamp(1500 + distance * 2.9, 1800, 3300)
-      : movement === "down"
-        ? clamp(850 + distance * 1.35, 1000, 2100)
-        : clamp(1200 + distance * 1.8, 1500, 2800);
+      const elapsed = now() - started;
+      const p = clamp(elapsed / duration, 0, 1);
+      const e = easeInOut(p);
 
-    state.lastMovement = now();
+      setPosition(
+        startX + dx * e,
+        startY + dy * e
+      );
 
-    setExpression(
-      movement === "up" ? "focused" :
-      movement === "down" ? "alert" :
-      (Math.random() < .45 ? "curious" : "neutral"),
-      950
-    );
+      if (p < 1) {
+        state.moveAnimation = requestAnimationFrame(frame);
+      } else {
+        state.moveAnimation = 0;
+        character.dataset.moving = "false";
+        character.dataset.direction = "idle";
 
-    setPosition(targetX, targetY, movement, duration);
+        if (direction === "down") {
+          character.classList.add("is-landed");
+          setTimeout(() => character.classList.remove("is-landed"), 500);
+        }
 
-    window.setTimeout(() => {
-      character.classList.remove("is-walking", "is-climbing", "is-falling");
-      if (movement === "down") {
-        character.classList.add("is-landed");
-        window.setTimeout(() => character.classList.remove("is-landed"), 520);
-      }
-    }, duration + 40);
+        state.lastWander = now();
+        state.nextWander = now() + (
+          state.context === "study"
+            ? rand(7500, 12500)
+            : rand(9500, 16500)
+        );
 
-    state.nextWander =
-      now() +
-      (state.context === "study"
-        ? random(10500, 17500)
-        : random(15000, 25000));
-  }
-
-  function idleLoop() {
-    if (!state.enabled || document.hidden || state.dragging) return;
-
-    const idleFor = now() - state.lastActivity;
-
-    if (idleFor >= 7800 && !state.sleeping) {
-      state.sleeping = true;
-      state.expression = "sleeping";
-      character.dataset.state = "sleeping";
-      character.dataset.blink = "false";
-      hideBubble();
-      return;
-    }
-
-    if (state.sleeping) return;
-
-    if (now() >= state.nextBlink) blink();
-
-    if (now() >= state.nextWander) movePetNaturally();
-
-    if (now() >= state.nextAmbient) {
-      state.nextAmbient =
-        now() +
-        (state.context === "study" ? random(9500, 15000) : random(16000, 26000));
-
-      const contextChance = state.context === "study" ? .45 : .17;
-
-      if (Math.random() < contextChance) {
-        const ambientStates = {
-          home: ["calm","neutral","curious"],
-          physics: ["alert","curious","thinking"],
-          chemistry: ["curious","delighted","alert"],
-          maths: ["thinking","focused","curious"],
-          biology: ["curious","calm","alert"],
-          study: ["focused","thinking","alert","delighted"],
-          exam: ["focused","alert","worried"],
-          social: ["delighted","curious","happy"]
-        };
-
-        const pool = ambientStates[state.context] || ambientStates.home;
-        setExpression(pool[Math.floor(Math.random() * pool.length)], 1800);
-
-        if (state.context === "study" && Math.random() < .14) {
-          showBubble("👀", 1050);
+        if (reason === "evade") {
+          state.evading = true;
+          setTimeout(() => { state.evading = false; }, rand(1800, 3500));
         }
       }
     }
 
-    window.setTimeout(idleLoop, 550);
+    state.moveAnimation = requestAnimationFrame(frame);
   }
 
-  function wakeFromActivity() {
-    state.lastActivity = now();
-    state.lastMeaningfulActivity = now();
+  function randomSafePoint() {
+    const marginX = window.innerWidth <= 720 ? 55 : 70;
+    const marginTop = 95;
+    const marginBottom = 100;
 
-    if (state.sleeping) {
-      state.sleeping = false;
-      react("wake");
-      state.nextWander = now() + random(9000, 14500);
-    }
+    const x = rand(marginX, Math.max(marginX + 20, window.innerWidth - marginX));
+    const y = rand(marginTop, Math.max(marginTop + 25, window.innerHeight - marginBottom));
+    return { x, y };
   }
 
-  function pointerMove(event) {
-    if (!state.enabled) return;
-    state.lastActivity = now();
-    gazeAt(event.clientX, event.clientY);
+  function visibleDestination() {
+    const candidates = [...document.querySelectorAll(
+      ".subject-card, .utility-card, .telegram-card, .card, .resource-card, .tool-card, button, a"
+    )].filter((el) => {
+      if (!el || el === launcher || panel.contains(el) || character.contains(el)) return false;
+      const r = el.getBoundingClientRect();
+      const style = getComputedStyle(el);
+      return r.width > 50 && r.height > 30 && r.bottom > 70 && r.top < window.innerHeight - 30 &&
+        style.display !== "none" && style.visibility !== "hidden";
+    });
 
-    if (state.sleeping) {
-      wakeFromActivity();
-      return;
-    }
+    if (!candidates.length || Math.random() < 0.55) return randomSafePoint();
 
-    const rect = character.getBoundingClientRect();
-    const dist = Math.hypot(
-      event.clientX - (rect.left + rect.width / 2),
-      event.clientY - (rect.top + rect.height / 2)
-    );
-
-    if (!state.dragging && dist < 82 && now() - state.lastReaction > 1450) {
-      setExpression("curious", 700);
-    }
+    const el = pick(candidates);
+    const r = el.getBoundingClientRect();
+    const side = Math.random() < 0.5 ? -1 : 1;
+    return {
+      x: clamp(r.left + r.width / 2 + side * rand(65, 120), 55, window.innerWidth - 55),
+      y: clamp(r.top + r.height / 2 + rand(-45, 45), 92, window.innerHeight - 105)
+    };
   }
 
-  function pointerOver(event) {
-    if (!state.enabled) return;
+  function wander() {
+    if (!state.enabled || state.sleeping || state.dragging || reduced || state.angerUntil > now()) return;
 
-    const target = event.target;
-    const card = target.closest?.(
-      ".subject-card,.study-tools-card,.telegram-card,.utility-card,.tool-card,.live-card,.student-counter"
-    );
+    const point = visibleDestination();
+    animateMoveTo(point.x, point.y, "wander");
 
-    if (!card || card.contains(event.relatedTarget)) return;
-
-    const context = cardContext(card);
-    state.lastActivity = now();
-
-    if (now() - state.lastReaction > 800) {
-      react("hover-card", { context, element: card });
-    }
-  }
-
-  function globalClick(event) {
-    if (!state.enabled) return;
-
-    const target = event.target.closest?.("a,button,[role='button']");
-    if (!target) return;
-
-    if (
-      target === launcher ||
-      panel.contains(target) ||
-      character.contains(target)
-    ) {
-      return;
-    }
-
-    const context = cardContext(target);
-    const isCard = target.matches(
-      ".subject-card,.study-tools-card,.telegram-card,.utility-card,.tool-card,.live-card"
-    );
-
-    const utility = utilityKind(target);
-
-    if (isCard || utility) {
-      react("click-card", { context, element: target });
-    }
-
-    const label = [
-      target.id || "",
-      target.textContent || "",
-      target.getAttribute("aria-label") || "",
-      target.title || ""
-    ].join(" ").toLowerCase();
-
-    if (/theme|dark mode|light mode/.test(label)) {
-      react("theme");
+    const chance = state.context === "study" ? 0.35 : 0.16;
+    if (Math.random() < chance) {
+      const info = infoFor(document.elementFromPoint(
+        clamp(point.x, 1, window.innerWidth - 1),
+        clamp(point.y, 1, window.innerHeight - 1)
+      ));
+      showThought(info.thought || pick(contextThoughts[state.context]), 1450);
     }
   }
 
-  function inputEvent(event) {
+  function evadeCursor(force = false) {
+    if (!state.enabled || state.dragging || reduced) return;
+    if (!force && now() < state.nextEvade) return;
+
+    const dx = state.x - state.pointerX;
+    const dy = state.y - state.pointerY;
+    const len = Math.max(1, Math.hypot(dx, dy));
+
+    let vx = dx / len;
+    let vy = dy / len;
+
+    if (len < 1) {
+      vx = Math.random() < 0.5 ? -1 : 1;
+      vy = Math.random() < 0.5 ? -0.6 : 0.6;
+    }
+
+    const distance = state.angerLevel >= 3 ? rand(150, 235) : rand(100, 175);
+    let tx = state.x + vx * distance;
+    let ty = state.y + vy * distance * 0.78;
+
+    if (Math.abs(vx) < 0.25) tx += (Math.random() < 0.5 ? -1 : 1) * rand(50, 110);
+
+    tx = clamp(tx, 55, window.innerWidth - 55);
+    ty = clamp(ty, 92, window.innerHeight - 105);
+
+    setExpression("angry", 950, true);
+    state.nextEvade = now() + rand(500, 1000);
+    animateMoveTo(tx, ty, "evade");
+  }
+
+  function enterAnger(level = 1) {
     if (!state.enabled) return;
 
-    const target = event.target;
-    const isField =
-      target instanceof HTMLInputElement ||
-      target instanceof HTMLTextAreaElement ||
-      target instanceof HTMLSelectElement;
+    state.sleeping = false;
+    state.angerLevel = clamp(Math.max(state.angerLevel, level), 1, 5);
+    state.angerUntil = now() + rand(3100, 5600);
+    state.danger = true;
+    character.dataset.danger = "true";
+    setExpression("angry", 1600, true);
+    setGazeTarget(state.pointerX, state.pointerY, false);
 
-    if (!isField) return;
+    if (state.angerLevel >= 2) {
+      showThought(state.angerLevel >= 4 ? "BACK OFF." : "...seriously?", 1100);
+    }
 
-    state.lastActivity = now();
-
-    const value = (target.value || "").trim();
-    const isName = target.id === "profileName" || target.name === "name";
-    const isSearch =
-      target.type === "search" ||
-      target.getAttribute("role") === "searchbox" ||
-      /search/i.test(target.placeholder || "");
-
-    if (isName) {
-      react("typing", { isName: true, name: value });
-      window.clearTimeout(state.nameTimer);
-
-      if (value.length >= 2) {
-        state.nameTimer = window.setTimeout(() => {
-          if (String(target.value || "").trim() === value) {
-            react("name-complete", { name: value });
-          }
-        }, 950);
+    setTimeout(() => {
+      if (now() >= state.angerUntil) {
+        state.danger = false;
+        character.dataset.danger = "false";
+        state.angerLevel = 0;
+        if (!state.dragging && !state.sleeping) setExpression("neutral", 800);
       }
-    } else if (isSearch) {
-      react("search");
-    } else if (now() - state.lastReaction > 950) {
-      react("typing");
+    }, 5700);
+
+    evadeCursor(true);
+  }
+
+  function handlePetTap() {
+    wake("pointer");
+
+    const t = now();
+    state.clickTimes = state.clickTimes.filter((item) => t - item < 1050);
+    state.clickTimes.push(t);
+
+    const rapid = state.clickTimes.length;
+    if (rapid >= 4) {
+      enterAnger(4);
+    } else if (rapid >= 2) {
+      enterAnger(2);
+    } else {
+      state.angerLevel = Math.max(state.angerLevel, 1);
+      state.angerUntil = now() + 2800;
+      state.danger = true;
+      character.dataset.danger = "true";
+      setExpression("annoyed", 900, true);
+      showThought(state.eye === "cyan" ? "Dude..." : "Seriously?", 950);
+      setTimeout(() => {
+        if (now() >= state.angerUntil) {
+          state.danger = false;
+          character.dataset.danger = "false";
+          state.angerLevel = 0;
+        }
+      }, 3100);
     }
   }
 
-  function keydown(event) {
-    if (!state.enabled) return;
-
-    state.lastActivity = now();
-
-    if (event.key === "Escape") {
-      setOpen(false);
+  function startDrag(ev) {
+    if (!state.enabled || state.angerUntil > now() && ev.pointerType === "mouse") {
+      if (state.angerUntil > now()) evadeCursor(true);
       return;
     }
 
-    if (event.key.length === 1 || event.key === "Backspace" || event.key === "Enter") {
-      const focused = document.activeElement;
-      const isName =
-        focused?.id === "profileName" ||
-        focused?.name === "name";
-      react("typing", { isName });
-    }
-  }
-
-  function focusIn(event) {
-    if (!state.enabled) return;
-
-    if (event.target.matches?.("input,textarea,select")) {
-      const isName =
-        event.target.id === "profileName" ||
-        event.target.name === "name";
-
-      react("typing", { isName });
-    }
-  }
-
-  function handleScroll() {
-    if (!state.enabled) return;
-    state.lastActivity = now();
-
-    if (!state.dragging && now() - state.lastReaction > 1200) {
-      react("scroll");
-    }
-  }
-
-  function petPointerDown(event) {
-    if (!state.enabled) return;
+    stopMove();
+    wake("pointer");
 
     state.dragging = true;
-    state.dragged = false;
-    state.dragPointerId = event.pointerId;
-    state.lastActivity = now();
+    state.dragPointerId = ev.pointerId;
+    state.dragOffsetX = ev.clientX - state.x;
+    state.dragOffsetY = ev.clientY - state.y;
 
-    const rect = character.getBoundingClientRect();
-    state.dragOffsetX = event.clientX - (rect.left + rect.width / 2);
-    state.dragOffsetY = event.clientY - (rect.top + rect.height / 2);
-
-    character.setPointerCapture?.(event.pointerId);
-    character.classList.remove("is-walking", "is-climbing", "is-falling", "is-landed");
     character.classList.add("is-dragging");
-
-    react("scared", {}, true);
-    event.preventDefault();
-    event.stopPropagation();
+    setExpression("scared", 1200, true);
+    character.setPointerCapture?.(ev.pointerId);
   }
 
-  function petPointerMove(event) {
-    if (!state.dragging || event.pointerId !== state.dragPointerId) return;
+  function drag(ev) {
+    if (!state.dragging || ev.pointerId !== state.dragPointerId) return;
 
-    const dx = event.clientX - (state.x + state.dragOffsetX);
-    const dy = event.clientY - (state.y + state.dragOffsetY);
-
-    if (Math.hypot(
-      event.clientX - state.pointerX,
-      event.clientY - state.pointerY
-    ) > 5) {
-      state.dragged = true;
-    }
-
-    state.pointerX = event.clientX;
-    state.pointerY = event.clientY;
-
-    const x = event.clientX - state.dragOffsetX;
-    const y = event.clientY - state.dragOffsetY;
-
-    character.style.transition = "none";
-    setPosition(x, y, "horizontal", 0);
-    gazeAt(event.clientX, event.clientY);
-
-    event.preventDefault();
-    event.stopPropagation();
+    setPosition(ev.clientX - state.dragOffsetX, ev.clientY - state.dragOffsetY);
+    setGazeTarget(ev.clientX, ev.clientY, false);
+    state.lastActivity = now();
   }
 
-  function petPointerUp(event) {
-    if (!state.dragging || event.pointerId !== state.dragPointerId) return;
-
-    const dragged = state.dragged;
+  function endDrag(ev) {
+    if (!state.dragging || ev.pointerId !== state.dragPointerId) return;
 
     state.dragging = false;
     state.dragPointerId = null;
     character.classList.remove("is-dragging");
+    setExpression("relieved", 1050, true);
+    save(KEY.x, Math.round(state.x));
+    save(KEY.y, Math.round(state.y));
 
-    character.style.transition = "";
+    character.releasePointerCapture?.(ev.pointerId);
+  }
 
-    try {
-      character.releasePointerCapture?.(event.pointerId);
-    } catch (_) {}
+  function nearestInteractive(el) {
+    return el?.closest?.(
+      ".subject-card, .utility-card, .telegram-card, .card, .resource-card, .tool-card, .tool-panel, button, a, input, select, textarea, .theme-toggle"
+    ) || null;
+  }
 
+  document.addEventListener("pointermove", (ev) => {
+    if (!state.enabled) return;
+
+    state.pointerX = ev.clientX;
+    state.pointerY = ev.clientY;
     state.lastActivity = now();
 
-    if (dragged) {
-      character.classList.add("is-landed");
-      window.setTimeout(() => character.classList.remove("is-landed"), 500);
-      setExpression("relieved", 900);
-    } else {
-      react("anger", {}, true);
+    if (state.sleeping) wake("pointer");
+
+    if (!state.dragging && state.angerUntil > now()) {
+      const distance = Math.hypot(ev.clientX - state.x, ev.clientY - state.y);
+      if (distance < 145) evadeCursor();
     }
 
-    event.preventDefault();
-    event.stopPropagation();
-  }
+    if (!state.dragging && state.angerUntil <= now()) {
+      setGazeTarget(ev.clientX, ev.clientY, false);
+    }
+  }, { passive: true });
 
-  function setOpen(open) {
-    panel.hidden = !open;
-    launcher.setAttribute("aria-expanded", String(open));
-  }
+  character.addEventListener("pointerenter", () => {
+    if (!state.enabled) return;
+    wake("pointer");
 
-  function closeOtherPanels() {
-    const feedbackPanel = document.querySelector("[data-feedback-panel]");
-    const feedbackButton = document.querySelector("[data-feedback-button]");
-
-    if (feedbackPanel && !feedbackPanel.hidden) {
-      feedbackPanel.hidden = true;
-      feedbackButton?.setAttribute("aria-expanded", "false");
-      feedbackButton?.classList.remove("is-open");
+    if (state.angerUntil > now()) {
+      enterAnger(Math.max(2, state.angerLevel || 2));
+      return;
     }
 
-    const chatPanel = document.getElementById("studyChatPanel");
-    const chatButton = document.querySelector("[data-chat-button]");
+    setExpression(state.eye === "cyan" ? "curious" : "shy", 900);
+  });
 
-    if (chatPanel && !chatPanel.hidden) {
-      chatPanel.hidden = true;
-      chatButton?.setAttribute("aria-expanded", "false");
-      chatButton?.classList.remove("is-open");
+  character.addEventListener("pointerdown", (ev) => {
+    if (ev.button !== 0) return;
+    ev.stopPropagation();
+    if (state.angerUntil > now()) {
+      enterAnger(Math.max(3, state.angerLevel || 3));
+      ev.preventDefault();
+      return;
     }
-  }
+    startDrag(ev);
+    ev.preventDefault();
+  });
 
-  function setEnabled(enabled) {
-    state.enabled = Boolean(enabled);
-    state.sleeping = false;
-    save(KEY.enabled, state.enabled);
+  character.addEventListener("pointerup", (ev) => {
+    const wasDragging = state.dragging;
+    endDrag(ev);
+    if (!wasDragging) handlePetTap();
+  });
 
-    if (!state.enabled) {
-      hideBubble();
-      setOpen(false);
-      character.dataset.state = "neutral";
-      character.dataset.blink = "false";
-      character.dataset.danger = "false";
-      character.classList.remove("is-dragging","is-walking","is-climbing","is-falling","is-landed");
-      stage.classList.add("is-disabled");
-    } else {
-      stage.classList.remove("is-disabled");
-      state.lastActivity = now();
-      state.nextBlink = now() + random(7000, 10000);
-      state.nextWander = now() + random(10000, 16000);
-      setExpression("curious", 1000);
+  character.addEventListener("pointercancel", endDrag);
+  character.addEventListener("dblclick", (ev) => {
+    ev.preventDefault();
+    enterAnger(4);
+  });
+
+  character.addEventListener("keydown", (ev) => {
+    if (ev.key === "Enter" || ev.key === " ") {
+      ev.preventDefault();
+      handlePetTap();
     }
+  });
 
-    updateControls();
-  }
+  document.addEventListener("pointerover", (ev) => {
+    const interactive = nearestInteractive(ev.target);
+    if (!interactive || interactive === state.lastHoveredElement) return;
+    if (interactive.contains(ev.relatedTarget)) return;
 
-  function setEyeColor(eye) {
-    state.eye = eye === "pink" ? "pink" : "cyan";
-    character.dataset.eye = state.eye;
-    save(KEY.eye, state.eye);
-    updateControls();
+    state.lastHoveredElement = interactive;
+    reactToElement(interactive, "hover");
+  }, { passive: true });
 
-    if (state.enabled) {
-      setExpression("delighted", 900);
+  document.addEventListener("click", (ev) => {
+    if (!state.enabled) return;
+    const interactive = nearestInteractive(ev.target);
+    if (!interactive || interactive === character || character.contains(interactive)) return;
+    reactToElement(interactive, "click");
+  }, { passive: true });
+
+  document.addEventListener("input", (ev) => {
+    if (!state.enabled) return;
+    const el = ev.target;
+    const text = descriptor(el);
+    const value = String(el.value || "");
+    const isName = /name|profile|display name/.test(text);
+    if (value) {
+      setExpression(isName ? "curious" : "focused", isName ? 850 : 650);
+      if (isName && value.length >= 2 && Math.random() < 0.10) showThought("Is that your name?", 1100);
     }
-  }
+  }, { passive: true });
 
-  function updateControls() {
-    stage.classList.toggle("is-disabled", !state.enabled);
-    character.dataset.eye = state.eye;
-    enableButton.classList.toggle("is-active", state.enabled);
-    disableButton.classList.toggle("is-active", !state.enabled);
+  document.addEventListener("scroll", () => {
+    if (!state.enabled) return;
+    state.lastActivity = now();
+    if (Math.random() < 0.035 && !state.sleeping) {
+      setExpression("alert", 600);
+    }
+  }, { passive: true });
 
-    eyeButtons.forEach((button) => {
-      button.classList.toggle("is-active", button.dataset.petEye === state.eye);
+  const themeToggle = document.querySelector(".theme-toggle");
+  if (themeToggle) {
+    themeToggle.addEventListener("click", () => {
+      setExpression("surprised", 850);
+      showThought("New lighting.", 900);
     });
   }
 
-  launcher.addEventListener("click", (event) => {
-    event.stopPropagation();
-    closeOtherPanels();
-    setOpen(panel.hidden);
+  launcher.addEventListener("click", () => {
+    const open = panel.hidden;
+    panel.hidden = !open;
+    launcher.setAttribute("aria-expanded", String(open));
+    if (open) {
+      launcher.classList.add("is-open");
+      updateControls();
+    } else {
+      launcher.classList.remove("is-open");
+    }
   });
 
-  closeButton.addEventListener("click", () => setOpen(false));
+  closeButton.addEventListener("click", () => {
+    panel.hidden = true;
+    launcher.setAttribute("aria-expanded", "false");
+    launcher.classList.remove("is-open");
+  });
 
   enableButton.addEventListener("click", () => setEnabled(true));
   disableButton.addEventListener("click", () => setEnabled(false));
 
   eyeButtons.forEach((button) => {
-    button.addEventListener("click", () => setEyeColor(button.dataset.petEye));
+    button.addEventListener("click", () => {
+      state.eye = button.dataset.petEye === "pink" ? "pink" : "cyan";
+      character.dataset.eye = state.eye;
+      save(KEY.eye, state.eye);
+      setExpression(state.eye === "cyan" ? "delighted" : "shy", 1000, true);
+      showThought(state.eye === "cyan" ? "Heh." : "✨", 900);
+      updateControls();
+    });
   });
 
-  character.addEventListener("pointerdown", petPointerDown);
-  character.addEventListener("pointermove", petPointerMove);
-  character.addEventListener("pointerup", petPointerUp);
-  character.addEventListener("pointercancel", petPointerUp);
-
-  character.addEventListener("keydown", (event) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      react("anger", {}, true);
-    }
-  });
-
-  document.addEventListener("mousemove", pointerMove, { passive: true });
-  document.addEventListener("pointerover", pointerOver, { passive: true });
-  document.addEventListener("click", globalClick, true);
-  document.addEventListener("input", inputEvent, { passive: true });
-  document.addEventListener("keydown", keydown);
-  document.addEventListener("focusin", focusIn);
-  document.addEventListener("scroll", handleScroll, { passive: true });
-
-  document.addEventListener("click", (event) => {
-    if (
-      !panel.hidden &&
-      !panel.contains(event.target) &&
-      !launcher.contains(event.target)
-    ) {
-      setOpen(false);
-    }
-  });
-
-  document.addEventListener("visibilitychange", () => {
-    if (!state.enabled) return;
-
-    if (document.hidden) {
-      state.sleeping = true;
-      character.dataset.state = "sleeping";
-      hideBubble();
-    } else {
-      state.sleeping = false;
-      state.lastActivity = now();
-      setExpression("curious", 900);
-    }
-  });
-
-  window.addEventListener("resize", () => {
-    setPosition(state.x, state.y, "horizontal", 0);
-    gazeAt(state.pointerX, state.pointerY);
-  }, { passive: true });
-
-  window.addEventListener("studylab-profile-updated", (event) => {
-    const name = event.detail?.display_name || "";
-    if (state.enabled && name) {
-      react("name-complete", { name });
-    }
-  });
-
-  document.addEventListener("DOMContentLoaded", () => {
-    const themeButton = document.querySelector("[data-theme-toggle]");
-    themeButton?.addEventListener("click", () => react("theme"));
-  });
-
-  setPosition(state.x, state.y, "horizontal", 0);
-  updateControls();
-  gazeAt(state.pointerX, state.pointerY);
-
-  if (state.enabled) {
-    window.setTimeout(() => react("wake"), 800);
-  } else {
-    stage.classList.add("is-disabled");
+  function updateControls() {
+    enableButton.classList.toggle("is-active", state.enabled);
+    disableButton.classList.toggle("is-active", !state.enabled);
+    eyeButtons.forEach((button) => {
+      button.classList.toggle("is-active", button.dataset.petEye === state.eye);
+    });
   }
 
-  window.setInterval(() => {
-    if (state.anger > 0 && now() - state.lastReaction > 6500) {
-      state.anger = Math.max(0, state.anger - 1);
-    }
-  }, 2200);
+  function setEnabled(enabled) {
+    state.enabled = enabled;
+    save(KEY.enabled, enabled);
 
-  idleLoop();
+    if (!enabled) {
+      stopMove();
+      state.sleeping = false;
+      state.dragging = false;
+      state.danger = false;
+      state.angerUntil = 0;
+      character.dataset.danger = "false";
+      character.dataset.state = "neutral";
+      hideThought();
+      stage.classList.add("is-disabled");
+      launcher.classList.remove("is-open");
+    } else {
+      stage.classList.remove("is-disabled");
+      setExpression("surprised", 850, true);
+      setGazeTarget(state.pointerX, state.pointerY, false);
+      state.lastActivity = now();
+      state.nextWander = now() + rand(4500, 8000);
+      showThought("I'm back.", 950);
+    }
+
+    updateControls();
+  }
+
+  character.dataset.eye = state.eye;
+  stage.classList.toggle("is-disabled", !state.enabled);
+  updateControls();
+
+  window.addEventListener("resize", () => {
+    setPosition(
+      clamp(state.x, 55, window.innerWidth - 55),
+      clamp(state.y, 92, window.innerHeight - 105)
+    );
+  }, { passive: true });
+
+  function idleAndLife() {
+    if (!state.enabled || document.hidden || state.dragging) return;
+
+    const t = now();
+    const idleFor = t - state.lastActivity;
+
+    if (idleFor >= 8200 && !state.sleeping && state.angerUntil <= t) {
+      state.sleeping = true;
+      state.expression = "sleeping";
+      character.dataset.state = "sleeping";
+      character.dataset.blink = "false";
+      hideThought();
+      stopMove();
+      return;
+    }
+
+    if (state.sleeping) return;
+
+    if (t >= state.nextBlink) blink();
+
+    if (t >= state.nextWander && state.angerUntil <= t) wander();
+
+    if (t >= state.nextThought) {
+      state.nextThought = t + (
+        state.context === "study"
+          ? rand(8000, 14500)
+          : rand(12000, 22000)
+      );
+
+      if (Math.random() < (state.context === "study" ? 0.38 : 0.17)) {
+        const text = pick(contextThoughts[state.context] || ["Hmm..."]);
+        setExpression("thinking", 1050);
+        showThought(text, 1500);
+      }
+    }
+
+    if (t >= state.nextAmbient && state.angerUntil <= t) {
+      state.nextAmbient = t + (
+        state.context === "study"
+          ? rand(6500, 11500)
+          : rand(8500, 15500)
+      );
+
+      const base = pick(contextMoods[state.context] || ["neutral"]);
+      const expression = personaVariation(base);
+      setExpression(expression, rand(800, 1500));
+
+      if (Math.random() < (state.context === "study" ? 0.24 : 0.11)) {
+        showThought(pick(contextThoughts[state.context] || ["Hmm..."]), 1300);
+      }
+    }
+
+    if (state.angerUntil > t) {
+      const distance = Math.hypot(state.pointerX - state.x, state.pointerY - state.y);
+      if (distance < 155) evadeCursor();
+    } else if (state.angerUntil <= t && state.danger) {
+      state.danger = false;
+      character.dataset.danger = "false";
+    }
+  }
+
+  setInterval(idleAndLife, 400);
+  setTimeout(() => setExpression("curious", 950, true), 850);
 })();
