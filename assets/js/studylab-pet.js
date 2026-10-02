@@ -173,10 +173,6 @@
       placeThought();
     }
 
-    if (!state.dragging) {
-      save(KEY.x, Math.round(state.x));
-      save(KEY.y, Math.round(state.y));
-    }
   }
 
   setPosition(state.x, state.y);
@@ -313,18 +309,59 @@
     ].join(" ").replace(/\s+/g, " ").toLowerCase();
   }
 
+  function elementName(el) {
+    if (!el) return "this";
+
+    const preferred =
+      el.getAttribute("aria-label") ||
+      el.getAttribute("title") ||
+      el.getAttribute("data-tool");
+
+    if (preferred && preferred.trim().length >= 2) {
+      return preferred.trim().replace(/\s+/g, " ").slice(0, 72);
+    }
+
+    const heading = el.querySelector?.(
+      "h1,h2,h3,h4,h5,h6,.card-title,.utility-card-title,.subject-title,.tool-title,strong,b"
+    );
+    const headingText = heading?.textContent?.trim().replace(/\s+/g, " ");
+    if (headingText && headingText.length >= 2) return headingText.slice(0, 72);
+
+    const raw = (el.textContent || "").trim().replace(/\s+/g, " ");
+    return raw.slice(0, 72) || "this";
+  }
+
+  function namedThought(name, hint) {
+    const cleanName = String(name || "").trim().replace(/\s+/g, " ").slice(0, 72);
+    const cleanHint = String(hint || "").trim();
+
+    if (!cleanName || cleanName === "this") return cleanHint || "Hmm...";
+    if (!cleanHint || /^(physics|chemistry|maths|biology|study|exam|social)[:.]?$/i.test(cleanHint)) {
+      return cleanName;
+    }
+    return cleanHint + " • " + cleanName;
+  }
+
   function infoFor(el) {
     const text = descriptor(el);
+    const name = elementName(el);
+
     const utility = utilityMap.find((item) => item.re.test(text));
-    if (utility) return utility;
+    if (utility) return {
+      expression: utility.expression,
+      thought: namedThought(name, utility.thought)
+    };
 
     const matched = elementMap.find((item) => item.re.test(text));
-    if (matched) return matched;
+    if (matched) return {
+      expression: matched.expression,
+      thought: namedThought(name, matched.thought)
+    };
 
     const context = contextFromElement(el) || state.context;
     return {
       expression: pick(contextMoods[context] || ["neutral"]),
-      thought: pick(contextThoughts[context] || ["Hmm..."])
+      thought: namedThought(name, pick(contextThoughts[context] || ["Hmm..."]))
     };
   }
 
@@ -369,7 +406,7 @@
     if (!state.enabled || !el || el === character || character.contains(el) || el === launcher || panel.contains(el)) return;
 
     const time = now();
-    if (time - state.lastReaction < (type === "hover" ? 850 : 300)) return;
+    if (time - state.lastReaction < (type === "hover" ? 1250 : 350)) return;
 
     state.lastReaction = time;
     state.lastActivity = time;
@@ -476,9 +513,11 @@
     state.moveToken += 1;
     character.dataset.moving = "false";
     character.dataset.direction = "idle";
+    visual.style.transform = "";
   }
 
-  function animateMoveTo(targetX, targetY, reason = "wander") {
+  function animateMoveTo
+(targetX, targetY, reason = "wander") {
     if (!state.enabled || state.dragging || reduced || state.sleeping) return;
 
     stopMove();
@@ -492,7 +531,7 @@
     if (distance < 95) return;
 
     const direction = visualDirection(dx, dy);
-    const duration = walkingDuration(distance, direction);
+    const duration = clamp(walkingDuration(distance, direction) * 1.75, 3200, 6800);
     const started = now();
     const token = state.moveToken;
 
@@ -519,16 +558,6 @@
         startY + dy * e
       );
 
-      const stride = Math.sin((elapsed / 260) * Math.PI) * 1.15;
-      const lean = direction === "left" ? -0.65 : direction === "right" ? 0.65 : 0;
-      const climbLean = direction === "up" ? -1.0 : direction === "down" ? 0.7 : lean;
-      const scaleX = direction === "down" ? 1.005 : 1;
-      const scaleY = direction === "down" ? 0.997 : 1;
-      visual.style.transform =
-        "translateY(" + (-Math.abs(stride)).toFixed(2) + "px) " +
-        "rotate(" + climbLean.toFixed(2) + "deg) " +
-        "scale(" + scaleX + "," + scaleY + ")";
-
       if (p < 1) {
         state.moveAnimation = requestAnimationFrame(frame);
       } else {
@@ -545,13 +574,12 @@
         state.lastWander = now();
         state.nextWander = now() + (
           state.context === "study"
-            ? rand(7500, 12500)
-            : rand(9500, 16500)
+            ? rand(19000, 32000)
+            : rand(26000, 42000)
         );
 
         if (reason === "evade") {
-          state.evading = true;
-          setTimeout(() => { state.evading = false; }, rand(1800, 3500));
+          setTimeout(() => { state.evading = false; }, rand(1700, 2800));
         }
       }
     }
@@ -570,25 +598,35 @@
   }
 
   function visibleDestination() {
+    const minDistance = Math.max(300, Math.min(window.innerWidth, window.innerHeight) * 0.34);
     const candidates = [...document.querySelectorAll(
-      ".subject-card, .utility-card, .telegram-card, .card, .resource-card, .tool-card, button, a"
+      ".subject-card, .utility-card, .telegram-card, .card, .resource-card, .tool-card"
     )].filter((el) => {
       if (!el || el === launcher || panel.contains(el) || character.contains(el)) return false;
       const r = el.getBoundingClientRect();
       const style = getComputedStyle(el);
-      return r.width > 50 && r.height > 30 && r.bottom > 70 && r.top < window.innerHeight - 30 &&
+      return r.width > 90 && r.height > 40 &&
+        r.bottom > 70 && r.top < window.innerHeight - 30 &&
         style.display !== "none" && style.visibility !== "hidden";
     });
 
-    if (!candidates.length || Math.random() < 0.55) return randomSafePoint();
+    for (let attempt = 0; attempt < 10; attempt++) {
+      const point = candidates.length && Math.random() < 0.30
+        ? (() => {
+            const el = pick(candidates);
+            const r = el.getBoundingClientRect();
+            const side = Math.random() < 0.5 ? -1 : 1;
+            return {
+              x: clamp(r.left + r.width / 2 + side * rand(120, 170), 60, window.innerWidth - 60),
+              y: clamp(r.top + r.height / 2 + rand(-100, 100), 105, window.innerHeight - 110)
+            };
+          })()
+        : randomSafePoint();
 
-    const el = pick(candidates);
-    const r = el.getBoundingClientRect();
-    const side = Math.random() < 0.5 ? -1 : 1;
-    return {
-      x: clamp(r.left + r.width / 2 + side * rand(65, 120), 55, window.innerWidth - 55),
-      y: clamp(r.top + r.height / 2 + rand(-45, 45), 92, window.innerHeight - 105)
-    };
+      if (Math.hypot(point.x - state.x, point.y - state.y) >= minDistance) return point;
+    }
+
+    return randomSafePoint();
   }
 
   function wander() {
@@ -609,7 +647,9 @@
 
   function evadeCursor(force = false) {
     if (!state.enabled || state.dragging || reduced) return;
+    if (state.evading && !force) return;
     if (!force && now() < state.nextEvade) return;
+    if (state.moveAnimation && !force) return;
 
     const dx = state.x - state.pointerX;
     const dy = state.y - state.pointerY;
@@ -633,7 +673,8 @@
     ty = clamp(ty, 92, window.innerHeight - 105);
 
     setExpression("angry", 950, true);
-    state.nextEvade = now() + rand(500, 1000);
+    state.nextEvade = now() + rand(1200, 1800);
+    state.evading = true;
     animateMoveTo(tx, ty, "evade");
   }
 
@@ -642,10 +683,11 @@
 
     state.sleeping = false;
     state.angerLevel = clamp(Math.max(state.angerLevel, level), 1, 5);
-    state.angerUntil = now() + rand(3100, 5600);
+    state.angerUntil = now() + rand(3400, 5200);
     state.danger = true;
     character.dataset.danger = "true";
     setExpression("angry", 1600, true);
+    state.evading = false;
     setGazeTarget(state.pointerX, state.pointerY, true);
 
     if (state.angerLevel >= 2) {
@@ -692,6 +734,7 @@
     wake("pointer");
 
     state.dragging = false;
+    state.evading = false;
     state.dragPointerId = ev.pointerId;
     state.dragOffsetX = ev.clientX - state.x;
     state.dragOffsetY = ev.clientY - state.y;
@@ -724,7 +767,7 @@
   function endDrag(ev) {
     if (ev.pointerId !== state.dragPointerId) return false;
 
-    const wasDragging = state.dragging;
+    const wasDragging = state.dragging || state.pointerMoved;
     state.dragging = false;
     state.dragPointerId = null;
     character.classList.remove("is-dragging");
@@ -732,6 +775,9 @@
     save(KEY.y, Math.round(state.y));
 
     character.releasePointerCapture?.(ev.pointerId);
+
+    state.evading = false;
+    state.pointerMoved = false;
 
     if (wasDragging) {
       setExpression("relieved", 1050, true);
@@ -753,14 +799,19 @@
     state.pointerY = ev.clientY;
     state.lastActivity = now();
 
+    if (state.dragPointerId === ev.pointerId) {
+      drag(ev);
+      return;
+    }
+
     if (state.sleeping) wake("pointer");
 
     if (!state.dragging && state.angerUntil > now()) {
       const distance = Math.hypot(ev.clientX - state.x, ev.clientY - state.y);
-      if (distance < 145) evadeCursor();
+      if (distance < 118 && !state.evading) evadeCursor();
     }
 
-    if (!state.dragging && state.angerUntil <= now()) {
+    if (!state.dragging && state.angerUntil <= now() && !state.evading) {
       setGazeTarget(ev.clientX, ev.clientY, false);
     }
   }, { passive: true });
@@ -949,7 +1000,7 @@
 
     if (t >= state.nextBlink) blink();
 
-    if (t >= state.nextWander && state.angerUntil <= t) wander();
+    if (t >= state.nextWander && state.angerUntil <= t && idleFor >= 3800) wander();
 
     if (t >= state.nextThought) {
       state.nextThought = t + (
