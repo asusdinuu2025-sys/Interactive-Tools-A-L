@@ -228,6 +228,14 @@
   const bubbleEnableButton = panel.querySelector("[data-pet-bubble-enable]");
   const bubbleDisableButton = panel.querySelector("[data-pet-bubble-disable]");
 
+  const personalityEmotes = {
+    natural:  { icon:"👋", expression:"delighted" },
+    playful:  { icon:"🎉", expression:"excited" },
+    focused:  { icon:"🎯", expression:"focused" },
+    curious:  { icon:"🔎", expression:"curious" },
+    observer: { icon:"👀", expression:"suspicious" }
+  };
+
   /*
    * Install all settings controls immediately after the UI is created.
    * This keeps the control panel functional even if a later optional behavior
@@ -465,14 +473,6 @@
     "angry", "scared", "annoyed", "delighted", "surprised", "shy"
   ];
 
-  const personalityEmotes = {
-    natural:  { icon:"👋", expression:"delighted" },
-    playful:  { icon:"🎉", expression:"excited" },
-    focused:  { icon:"🎯", expression:"focused" },
-    curious:  { icon:"🔎", expression:"curious" },
-    observer: { icon:"👀", expression:"suspicious" }
-  };
-
   function clearPersonalityRoutine() {
     state.personalityRoutineToken += 1;
     state.personalityRoutineTimers.forEach((timer) => clearTimeout(timer));
@@ -532,6 +532,11 @@
     clearPersonalityRoutine();
 
     const em = personalityEmotes[name];
+    if (!em || !emote || !emoteIcon) {
+      setExpression(em?.expression || "neutral", 900, true);
+      return;
+    }
+
     const token = state.personalityRoutineToken;
 
     emote.dataset.emote = name;
