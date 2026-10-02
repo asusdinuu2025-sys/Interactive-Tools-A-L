@@ -114,6 +114,8 @@
 
     reactionTimer: null,
     emoteTimer: null,
+    personalityRoutineTimers: [],
+    personalityRoutineToken: 0,
     bubbleTimer: null,
     blinkTimer: null,
     hoverTimer: null,
@@ -399,31 +401,209 @@
     observer: { icon:"👀", expression:"suspicious" }
   };
 
-  function showPersonalityEmote(name) {
-    const em = personalityEmotes[name];
-    if (!em || !state.enabled) return;
-
+  function clearPersonalityRoutine() {
+    state.personalityRoutineToken += 1;
+    state.personalityRoutineTimers.forEach((timer) => clearTimeout(timer));
+    state.personalityRoutineTimers = [];
+    character.dataset.routine = "none";
     clearTimeout(state.emoteTimer);
+    emote.classList.remove("is-visible");
+    state.gazeTargetX = 0;
+    state.gazeTargetY = 0;
+  }
+
+  function routineTimer(fn, delay) {
+    const timer = setTimeout(fn, delay);
+    state.personalityRoutineTimers.push(timer);
+    return timer;
+  }
+
+  function cardGazeTargets(limit = 4) {
+    const candidates = [...document.querySelectorAll(
+      ".subject-card, .utility-card, .telegram-card, .card, .resource-card, .tool-card"
+    )].filter((el) => {
+      if (!el || el === launcher || panel.contains(el) || character.contains(el)) return false;
+      const r = el.getBoundingClientRect();
+      const style = getComputedStyle(el);
+      return r.width > 90 && r.height > 40 &&
+        r.bottom > 70 && r.top < window.innerHeight - 30 &&
+        style.display !== "none" && style.visibility !== "hidden";
+    });
+
+    const picked = [];
+    const pool = [...candidates];
+    while (pool.length && picked.length < limit) {
+      const el = pick(pool);
+      pool.splice(pool.indexOf(el), 1);
+      const r = el.getBoundingClientRect();
+      picked.push({
+        x: r.left + r.width / 2,
+        y: r.top + r.height / 2
+      });
+    }
+
+    if (!picked.length) {
+      picked.push(
+        {x: window.innerWidth * .28, y: window.innerHeight * .30},
+        {x: window.innerWidth * .72, y: window.innerHeight * .30},
+        {x: window.innerWidth * .72, y: window.innerHeight * .70},
+        {x: window.innerWidth * .28, y: window.innerHeight * .70}
+      );
+    }
+
+    return picked;
+  }
+
+  function runPersonalityRoutine(name) {
+    if (!state.enabled || !personalityEmotes[name]) return;
+
+    clearPersonalityRoutine();
+
+    const em = personalityEmotes[name];
+    const token = state.personalityRoutineToken;
+
     emote.dataset.emote = name;
     emoteIcon.textContent = em.icon;
     emote.classList.remove("is-visible");
     void emote.offsetWidth;
     emote.classList.add("is-visible");
 
-    setExpression(em.expression, 1350, true);
+    character.dataset.routine = name;
+    setExpression(em.expression, name === "playful" ? 850 : 1550, true);
 
-    if (name === "playful" && !state.sleeping && !state.dragging && !reduced) {
-      state.roamActive = true;
-      state.roamPausedUntil = 0;
-      state.roamBoostUntil = now() + 7600;
-      chooseRoamTarget(true);
-      state.roamVelocityX *= 0.42;
-      state.roamVelocityY *= 0.42;
+    const finish = () => {
+      if (token !== state.personalityRoutineToken || !state.enabled) return;
+      character.dataset.routine = "none";
+      state.gazeTargetX = 0;
+      state.gazeTargetY = 0;
+      setExpression("neutral", 850, true);
+
+      if (hasPlayfulPersonality()) {
+        stopMove();
+        state.nextWander = now() + rand(9000, 16000);
+      } else {
+        state.nextWander = now() + rand(
+          modeProfile().initialWait[0],
+          modeProfile().initialWait[1]
+        );
+      }
+    };
+
+    if (name === "natural") {
+      routineTimer(finish, 1050);
+      return;
     }
 
-    state.emoteTimer = setTimeout(() => {
-      emote.classList.remove("is-visible");
-    }, 1450);
+    if (name === "focused") {
+      const center = { x: window.innerWidth * .50, y: window.innerHeight * .44 };
+      setGazeTarget(center.x, center.y, false);
+      routineTimer(finish, 1750);
+      return;
+    }
+
+    if (name === "curious") {
+      const targets = cardGazeTargets(4);
+      let index = 0;
+      const look = () => {
+        if (token !== state.personalityRoutineToken || !state.enabled) return;
+        const target = targets[index % targets.length];
+        setGazeTarget(target.x, target.y, false);
+        index += 1;
+        if (index < targets.length) routineTimer(look, 720);
+        else routineTimer(finish, 1050);
+      };
+      look();
+      return;
+    }
+
+    if (name === "observer") {
+      const targets = cardGazeTargets(3);
+      let index = 0;
+      const look = () => {
+        if (token !== state.personalityRoutineToken || !state.enabled) return;
+        const target = targets[index % targets.length];
+        setGazeTarget(target.x, target.y, false);
+        index += 1;
+        if (index < targets.length) routineTimer(look, 900);
+        else routineTimer(finish, 1150);
+      };
+      look();
+      return;
+    }
+
+    if (name === "playful") {
+      stopMove();
+      state.roamActive = false;
+      state.roamPausedUntil = 0;
+      state.roamVelocityX = 0;
+      state.roamVelocityY = 0;
+
+      let hops = 0;
+      const hop = () => {
+        if (token !== state.personalityRoutineToken || !state.enabled || !hasPlayfulPersonality()) {
+          finish();
+          return;
+        }
+
+        const target = playfulWanderTarget();
+        state.roamActive = false;
+
+        const startX = state.x;
+        const startY = state.y;
+        const dx = target.x - startX;
+        const dy = target.y - startY;
+        const distance = Math.hypot(dx, dy);
+        if (distance < 120) {
+          routineTimer(hop, 90);
+          return;
+        }
+
+        const direction = visualDirection(dx, dy);
+        const motion = direction === "up"
+          ? {duration: 470, ease:[0.22,0.68,0.18,1]}
+          : direction === "down"
+            ? {duration: 340, ease:[0.15,0.90,0.28,1.25]}
+            : {duration: 430, ease:[0.22,0.78,0.20,1]};
+
+        const started = performance.now();
+        const moveToken = state.moveToken;
+        character.dataset.moving = "true";
+        character.dataset.direction = direction;
+
+        const frame = (timestamp) => {
+          if (
+            token !== state.personalityRoutineToken ||
+            moveToken !== state.moveToken ||
+            state.dragging ||
+            !state.enabled
+          ) return;
+
+          const p = clamp((timestamp - started) / motion.duration, 0, 1);
+          const e = cubicBezierEase(p, motion.ease[0], motion.ease[1], motion.ease[2], motion.ease[3]);
+          setPosition(startX + dx * e, startY + dy * e);
+
+          if (p < 1) {
+            state.moveAnimation = requestAnimationFrame(frame);
+            return;
+          }
+
+          state.moveAnimation = 0;
+          character.dataset.moving = "false";
+          character.dataset.direction = "idle";
+          hops += 1;
+
+          if (hops < 3) {
+            routineTimer(hop, 150);
+          } else {
+            routineTimer(finish, 420);
+          }
+        };
+
+        state.moveAnimation = requestAnimationFrame(frame);
+      };
+
+      hop();
+    }
   }
 
   function setExpression(name, ttl = 1300, force = false) {
@@ -1804,19 +1984,13 @@
   }
 
     function setEnabled(enabled) {
-    if (enabled === state.enabled) {
-      if (enabled) notifySetting("Pet already enabled.");
-      return;
-    }
-
-    if (!enabled && state.enabled && state.bubbleEnabled) {
-      showThought("Pet disabled.", 1000);
-    }
-
+    enabled = Boolean(enabled);
     save(KEY.enabled, enabled);
 
     if (!enabled) {
+      clearPersonalityRoutine();
       stopMove();
+      state.enabled = false;
       state.sleeping = false;
       state.dragging = false;
       state.danger = false;
@@ -1828,25 +2002,37 @@
       state.lastHoveredElement = null;
       character.dataset.danger = "false";
       character.dataset.angerLevel = "0";
+      character.dataset.routine = "none";
 
-      state.enabled = false;
+      if (state.bubbleEnabled) showThought("Pet disabled.", 1000);
+
       character.dataset.state = "sad";
       character.classList.add("is-fading-out");
       stage.classList.remove("is-disabled");
-      launcher.classList.remove("is-open");
-
       window.setTimeout(() => {
         if (!state.enabled) stage.classList.add("is-disabled");
       }, 920);
     } else {
       stage.classList.remove("is-disabled");
       character.classList.remove("is-fading-out");
+      character.style.pointerEvents = "auto";
+
       state.enabled = true;
-      setExpression("delighted", 1350, true);
-      setGazeTarget(state.pointerX, state.pointerY, false);
+      state.sleeping = false;
+      state.dragging = false;
+      state.danger = false;
+      state.evading = false;
+      state.angerUntil = 0;
+      state.angerLevel = 0;
+      character.dataset.danger = "false";
+      character.dataset.angerLevel = "0";
       state.lastActivity = now();
       state.lastMeaningfulActivity = now();
       state.lastReaction = now();
+      state.lastHoveredElement = null;
+      clearTimeout(state.hoverTimer);
+
+      setGazeTarget(state.pointerX, state.pointerY, false);
 
       if (hasPlayfulPersonality()) {
         state.nextWander = now() + rand(9000, 16000);
@@ -1854,6 +2040,13 @@
         state.nextWander = now() + 350;
         startRoam(true);
       }
+
+      setExpression("delighted", 1350, true);
+      runPersonalityRoutine(
+        state.personalities.includes("playful")
+          ? "playful"
+          : (state.personalities.find((name) => name !== "natural") || "natural")
+      );
 
       if (state.bubbleEnabled) showThought("I'm back.", 1050);
     }
