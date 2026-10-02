@@ -12,7 +12,8 @@
   const KEY = {
     enabled: "studylab-pet-enabled",
     eye: "studylab-pet-eye",
-    mode: "studylab-pet-mode",
+    bubble: "studylab-pet-bubble",
+    personalities: "studylab-pet-personalities",
     x: "studylab-pet-x",
     y: "studylab-pet-y"
   };
@@ -38,10 +39,31 @@
   const rand = (min, max) => min + Math.random() * (max - min);
   const pick = (items) => items[Math.floor(Math.random() * items.length)];
 
+  const PERSONALITY_NAMES = [
+    "natural", "playful", "angry", "strict", "lazy", "focused",
+    "curious", "energetic", "observer", "social", "sleepy", "exam", "all-in-one"
+  ];
+
+  function readPersonalities() {
+    const raw = read(KEY.personalities, "");
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          const clean = parsed.filter((name) => PERSONALITY_NAMES.includes(name));
+          if (clean.length) return [...new Set(clean)];
+        }
+      } catch (_) {}
+    }
+    const legacy = read("studylab-pet-mode", "");
+    return PERSONALITY_NAMES.includes(legacy) ? [legacy] : ["natural"];
+  }
+
   const state = {
     enabled: bool(KEY.enabled, true),
     eye: read(KEY.eye, "cyan") === "pink" ? "pink" : "cyan",
-    mode: read(KEY.mode, "natural"),
+    bubbleEnabled: bool(KEY.bubble, true),
+    personalities: readPersonalities(),
     context: "home",
     expression: "neutral",
     sleeping: false,
@@ -145,21 +167,25 @@
       '<div class="sl-pet-setting"><span>Eye colour</span><div class="sl-pet-setting-buttons">' +
         '<button type="button" data-pet-eye="cyan">Cyan</button><button type="button" data-pet-eye="pink">Pink</button>' +
       '</div></div>' +
-      '<div class="sl-pet-setting sl-pet-mode-setting"><span>Personality</span><div class="sl-pet-mode-grid">' +
-        '<button type="button" data-pet-mode="natural">Natural</button>' +
-        '<button type="button" data-pet-mode="playful">Playful</button>' +
-        '<button type="button" data-pet-mode="strict">Strict</button>' +
-        '<button type="button" data-pet-mode="lazy">Lazy</button>' +
-        '<button type="button" data-pet-mode="focused">Focused</button>' +
-        '<button type="button" data-pet-mode="curious">Curious</button>' +
-        '<button type="button" data-pet-mode="energetic">Energetic</button>' +
-        '<button type="button" data-pet-mode="observer">Observer</button>' +
-        '<button type="button" data-pet-mode="social">Social</button>' +
-        '<button type="button" data-pet-mode="sleepy">Sleepy</button>' +
-        '<button type="button" data-pet-mode="exam">Exam Mode</button>' +
-        '<button type="button" class="is-featured" data-pet-mode="all-in-one">All In One</button>' +
+      '<div class="sl-pet-setting sl-pet-personality-setting"><span>Personalities</span><div class="sl-pet-personality-list">' +
+        '<div class="sl-pet-personality-row" data-personality="natural"><strong>Natural</strong><div><button type="button" data-pet-personality-enable="natural">Enable</button><button type="button" data-pet-personality-disable="natural">Disable</button></div></div>' +
+        '<div class="sl-pet-personality-row" data-personality="playful"><strong>Playful</strong><div><button type="button" data-pet-personality-enable="playful">Enable</button><button type="button" data-pet-personality-disable="playful">Disable</button></div></div>' +
+        '<div class="sl-pet-personality-row" data-personality="angry"><strong>Angry</strong><div><button type="button" data-pet-personality-enable="angry">Enable</button><button type="button" data-pet-personality-disable="angry">Disable</button></div></div>' +
+        '<div class="sl-pet-personality-row" data-personality="strict"><strong>Strict</strong><div><button type="button" data-pet-personality-enable="strict">Enable</button><button type="button" data-pet-personality-disable="strict">Disable</button></div></div>' +
+        '<div class="sl-pet-personality-row" data-personality="lazy"><strong>Lazy</strong><div><button type="button" data-pet-personality-enable="lazy">Enable</button><button type="button" data-pet-personality-disable="lazy">Disable</button></div></div>' +
+        '<div class="sl-pet-personality-row" data-personality="focused"><strong>Focused</strong><div><button type="button" data-pet-personality-enable="focused">Enable</button><button type="button" data-pet-personality-disable="focused">Disable</button></div></div>' +
+        '<div class="sl-pet-personality-row" data-personality="curious"><strong>Curious</strong><div><button type="button" data-pet-personality-enable="curious">Enable</button><button type="button" data-pet-personality-disable="curious">Disable</button></div></div>' +
+        '<div class="sl-pet-personality-row" data-personality="energetic"><strong>Energetic</strong><div><button type="button" data-pet-personality-enable="energetic">Enable</button><button type="button" data-pet-personality-disable="energetic">Disable</button></div></div>' +
+        '<div class="sl-pet-personality-row" data-personality="observer"><strong>Observer</strong><div><button type="button" data-pet-personality-enable="observer">Enable</button><button type="button" data-pet-personality-disable="observer">Disable</button></div></div>' +
+        '<div class="sl-pet-personality-row" data-personality="social"><strong>Social</strong><div><button type="button" data-pet-personality-enable="social">Enable</button><button type="button" data-pet-personality-disable="social">Disable</button></div></div>' +
+        '<div class="sl-pet-personality-row" data-personality="sleepy"><strong>Sleepy</strong><div><button type="button" data-pet-personality-enable="sleepy">Enable</button><button type="button" data-pet-personality-disable="sleepy">Disable</button></div></div>' +
+        '<div class="sl-pet-personality-row" data-personality="exam"><strong>Exam Mode</strong><div><button type="button" data-pet-personality-enable="exam">Enable</button><button type="button" data-pet-personality-disable="exam">Disable</button></div></div>' +
+        '<div class="sl-pet-personality-row is-featured" data-personality="all-in-one"><strong>All In One</strong><div><button type="button" data-pet-personality-enable="all-in-one">Enable</button><button type="button" data-pet-personality-disable="all-in-one">Disable</button></div></div>' +
       '</div></div>' +
-      '<p class="sl-pet-panel-note">Each personality changes movement, attention, sleep, expressions and reactions. Messages stay tied to what you do.</p>' +
+      '<div class="sl-pet-setting"><span>Message box</span><div class="sl-pet-setting-buttons">' +
+        '<button type="button" data-pet-bubble-enable>Enable</button><button type="button" data-pet-bubble-disable>Disable</button>' +
+      '</div></div>' +
+      '<p class="sl-pet-panel-note">Personalities can be enabled together. All In One blends every personality. Messages appear only for real interactions.</p>' +
     '</aside>'
   );
 
@@ -175,7 +201,10 @@
   const enableButton = panel.querySelector("[data-pet-enable]");
   const disableButton = panel.querySelector("[data-pet-disable]");
   const eyeButtons = [...panel.querySelectorAll("[data-pet-eye]")];
-  const modeButtons = [...panel.querySelectorAll("[data-pet-mode]")];
+  const personalityEnableButtons = [...panel.querySelectorAll("[data-pet-personality-enable]")];
+  const personalityDisableButtons = [...panel.querySelectorAll("[data-pet-personality-disable]")];
+  const bubbleEnableButton = panel.querySelector("[data-pet-bubble-enable]");
+  const bubbleDisableButton = panel.querySelector("[data-pet-bubble-disable]");
 
   function setPosition(x, y) {
     const halfW = window.innerWidth <= 720 ? 41 : 45;
