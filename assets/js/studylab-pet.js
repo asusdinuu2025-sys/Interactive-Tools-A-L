@@ -228,6 +228,67 @@
   const bubbleEnableButton = panel.querySelector("[data-pet-bubble-enable]");
   const bubbleDisableButton = panel.querySelector("[data-pet-bubble-disable]");
 
+  /*
+   * Install all settings controls immediately after the UI is created.
+   * This keeps the control panel functional even if a later optional behavior
+   * hits an unrelated runtime problem.
+   */
+  enableButton.onclick = (ev) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    setEnabled(true);
+  };
+
+  disableButton.onclick = (ev) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    setEnabled(false);
+  };
+
+  personalityEnableButtons.forEach((button) => {
+    button.onclick = (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      setPersonalityEnabled(button.dataset.petPersonalityEnable, true);
+    };
+  });
+
+  personalityDisableButtons.forEach((button) => {
+    button.onclick = (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      setPersonalityEnabled(button.dataset.petPersonalityDisable, false);
+    };
+  });
+
+  eyeButtons.forEach((button) => {
+    button.onclick = (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      state.lastMeaningfulActivity = now();
+      state.eye = button.dataset.petEye === "pink" ? "pink" : "cyan";
+      character.dataset.eye = state.eye;
+      save(KEY.eye, state.eye);
+      setExpression(state.eye === "cyan" ? "delighted" : "shy", 1000, true);
+      notifySetting("Eye colour: " + (state.eye === "cyan" ? "Cyan" : "Pink") + ".");
+      updateControls();
+    };
+  });
+
+  bubbleEnableButton.onclick = (ev) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    state.lastMeaningfulActivity = now();
+    setBubbleEnabled(true);
+  };
+
+  bubbleDisableButton.onclick = (ev) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    state.lastMeaningfulActivity = now();
+    setBubbleEnabled(false);
+  };
+
   function setPosition(x, y) {
     const halfW = window.innerWidth <= 720 ? 41 : 45;
     const minY = 74;
@@ -1821,60 +1882,6 @@
     launcher.classList.remove("is-open");
   });
 
-  /*
-   * Direct handlers are intentionally used for the two Pet power buttons.
-   * They must remain usable even while the pet stage itself is hidden/disabled.
-   */
-  enableButton.addEventListener("click", (ev) => {
-    ev.preventDefault();
-    ev.stopPropagation();
-    state.lastMeaningfulActivity = now();
-    setEnabled(true);
-  }, true);
-
-  disableButton.addEventListener("click", (ev) => {
-    ev.preventDefault();
-    ev.stopPropagation();
-    state.lastMeaningfulActivity = now();
-    setEnabled(false);
-  }, true);
-
-
-  eyeButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      state.lastMeaningfulActivity = now();
-      state.eye = button.dataset.petEye === "pink" ? "pink" : "cyan";
-      character.dataset.eye = state.eye;
-      save(KEY.eye, state.eye);
-      setExpression(state.eye === "cyan" ? "delighted" : "shy", 1000, true);
-      notifySetting("Eye colour: " + (state.eye === "cyan" ? "Cyan" : "Pink") + ".");
-      updateControls();
-    });
-  });
-
-  personalityEnableButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      setPersonalityEnabled(button.dataset.petPersonalityEnable, true);
-    });
-  });
-
-  personalityDisableButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      setPersonalityEnabled(button.dataset.petPersonalityDisable, false);
-    });
-  });
-
-  bubbleEnableButton.addEventListener("click", () => {
-    state.lastMeaningfulActivity = now();
-    setBubbleEnabled(true);
-    updateControls();
-  });
-
-  bubbleDisableButton.addEventListener("click", () => {
-    state.lastMeaningfulActivity = now();
-    setBubbleEnabled(false);
-    updateControls();
-  });
 
   function personalityLabel(name) {
     const labels = {
