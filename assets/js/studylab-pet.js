@@ -67,7 +67,6 @@
     nextBlink: now() + rand(6500, 10400),
     nextWander: now() + rand(9000, 15000),
     nextAmbient: now() + rand(10000, 18000),
-    nextThought: now() + rand(13000, 22000),
 
     clickTimes: [],
     angerLevel: 0,
@@ -185,7 +184,6 @@
     character.dataset.state = "curious";
     state.expression = "curious";
     state.nextBlink = now() + rand(2800, 5200);
-    if (reason === "pointer") showThought("Oh. You're back.", 1300);
   }
 
   function placeThought() {
@@ -264,14 +262,14 @@
   };
 
   const contextThoughts = {
-    home: ["What's next?", "Hmm...", "Browsing too.", "Interesting."],
-    physics: ["F = ma...", "That graph.", "Let's test it.", "Motion."],
-    chemistry: ["Balance it.", "Need electrons.", "That reaction...", "Interesting."],
-    maths: ["x = ?", "This needs a plan.", "Checking...", "That sign."],
-    biology: ["Tiny structures.", "Observe...", "Cells.", "Interesting."],
-    study: ["Stay focused.", "One task.", "Let's get this done.", "Hmm..."],
-    exam: ["Read carefully.", "Watch the time.", "No silly mistakes.", "Focus."],
-    social: ["👀", "A break?", "Hmm.", "Hello."]
+    home: "Open it.",
+    physics: "Open physics.",
+    chemistry: "Open chemistry.",
+    maths: "Open maths.",
+    biology: "Open biology.",
+    study: "Open this tool.",
+    exam: "Open exam material.",
+    social: "Open community."
   };
 
   const utilityMap = [
@@ -367,7 +365,7 @@
     const context = contextFromElement(el) || state.context;
     return {
       expression: pick(contextMoods[context] || ["neutral"]),
-      thought: namedThought(name, pick(contextThoughts[context] || ["Hmm..."]))
+      thought: namedThought(name, contextThoughts[context] || "Open it.")
     };
   }
 
@@ -424,10 +422,9 @@
 
     if (type === "click") {
       setExpression(expression, 1550);
-      if (Math.random() < 0.12) showThought(info.thought || pick(contextThoughts[state.context]), 1350);
+      showThought(info.thought || "Open it.", 1450);
     } else {
       setExpression(expression, 900);
-      if (Math.random() < 0.045) showThought(info.thought || pick(contextThoughts[state.context]), 1200);
     }
 
     lookAtElement(el);
@@ -504,11 +501,11 @@
 
   function walkingDuration(distance, direction, reason = "wander") {
     if (reason === "evade") {
-      return clamp(500 + distance * 0.75, 650, 1250);
+      return clamp(420 + distance * 0.68, 560, 1120);
     }
-    if (direction === "up") return clamp(1900 + distance * 2.40, 2100, 4200);
-    if (direction === "down") return clamp(1250 + distance * 1.15, 1300, 2800);
-    return clamp(1550 + distance * 1.62, 1750, 3500);
+    if (direction === "up") return clamp(1750 + distance * 1.95, 2000, 3900);
+    if (direction === "down") return clamp(1100 + distance * 0.95, 1200, 2600);
+    return clamp(1400 + distance * 1.42, 1550, 3200);
   }
 
   function visualDirection(dx, dy) {
@@ -517,7 +514,8 @@
   }
 
   function easeInOut(t) {
-    return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+    const smooth = t * t * (3 - 2 * t);
+    return smooth;
   }
 
   function stopMove() {
@@ -541,12 +539,12 @@
     const dy = targetY - startY;
     const distance = Math.hypot(dx, dy);
 
-    if (distance < 95) return;
+    if (distance < 240) return;
 
     const direction = visualDirection(dx, dy);
     const duration = reason === "evade"
       ? walkingDuration(distance, direction, reason)
-      : clamp(walkingDuration(distance, direction, reason) * 1.55, 3600, 7600);
+      : clamp(walkingDuration(distance, direction, reason) * 1.40, 3200, 6800);
     const started = now();
     const token = state.moveToken;
 
@@ -653,15 +651,6 @@
 
     const point = visibleDestination();
     animateMoveTo(point.x, point.y, "wander");
-
-    const chance = state.context === "study" ? 0.52 : 0.30;
-    if (Math.random() < chance) {
-      const info = infoFor(document.elementFromPoint(
-        clamp(point.x, 1, window.innerWidth - 1),
-        clamp(point.y, 1, window.innerHeight - 1)
-      ));
-      showThought(info.thought || pick(contextThoughts[state.context]), 1450);
-    }
   }
 
   function evadeCursor(force = false) {
@@ -1043,20 +1032,6 @@
 
     if (t >= state.nextWander && state.angerUntil <= t && idleFor >= 2600) wander();
 
-    if (t >= state.nextThought) {
-      state.nextThought = t + (
-        state.context === "study"
-          ? rand(12000, 21000)
-          : rand(17000, 29000)
-      );
-
-      if (Math.random() < (state.context === "study" ? 0.22 : 0.075)) {
-        const text = pick(contextThoughts[state.context] || ["Hmm..."]);
-        setExpression("thinking", 1050);
-        showThought(text, 1500);
-      }
-    }
-
     if (t >= state.nextAmbient && state.angerUntil <= t) {
       state.nextAmbient = t + (
         state.context === "study"
@@ -1067,10 +1042,6 @@
       const base = pick(contextMoods[state.context] || ["neutral"]);
       const expression = personaVariation(base);
       setExpression(expression, rand(800, 1500));
-
-      if (Math.random() < (state.context === "study" ? 0.13 : 0.055)) {
-        showThought(pick(contextThoughts[state.context] || ["Hmm..."]), 1300);
-      }
     }
 
     if (state.angerUntil > t) {
