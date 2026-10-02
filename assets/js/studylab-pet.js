@@ -937,8 +937,8 @@
         state.lastWander = now();
         state.nextWander = now() + (
           state.context === "study"
-            ? rand(2400, 5000)
-            : rand(3600, 8800)
+            ? rand(9000, 16000)
+            : rand(11000, 19000)
         );
       }
 
@@ -963,8 +963,8 @@
     if (!moved) {
       state.nextWander = now() + (
         state.context === "study"
-          ? rand(2400, 5000)
-          : rand(3600, 8800)
+          ? rand(9000, 16000)
+          : rand(11000, 19000)
       );
     }
   }
@@ -1727,18 +1727,15 @@
       character.dataset.angerLevel = "0";
     }
 
-    if (hasPlayfulPersonality()) {
-      stopMove();
-      state.nextWander = now() + 2600;
-    } else {
-      const profile = modeProfile();
-      state.nextWander = now() + rand(profile.initialWait[0], profile.initialWait[1]);
-    }
     clearTimeout(state.hoverTimer);
     state.lastHoveredElement = null;
 
+    const profile = modeProfile();
+
     setExpression(
-      profile.expressionMoods?.[0] || (enabled ? "delighted" : "neutral"),
+      enabled
+        ? (profile.expressionMoods?.[0] || "delighted")
+        : (profile.expressionMoods?.[0] || "neutral"),
       1000,
       true
     );
@@ -1749,10 +1746,9 @@
 
     if (hasPlayfulPersonality()) {
       stopMove();
-      state.nextWander = now() + 2600;
+      state.nextWander = now() + rand(9000, 16000);
     } else {
       startRoam(false);
-      const profile = modeProfile();
       state.nextWander = now() + rand(profile.initialWait[0], profile.initialWait[1]);
     }
 
@@ -1853,7 +1849,7 @@
       state.lastReaction = now();
 
       if (hasPlayfulPersonality()) {
-        state.nextWander = now() + 2600;
+        state.nextWander = now() + rand(9000, 16000);
       } else {
         state.nextWander = now() + 350;
         startRoam(true);
@@ -1871,7 +1867,7 @@
   character.dataset.playful = state.personalities.includes("playful") ? "true" : "false";
 
   if (hasPlayfulPersonality()) {
-    state.nextWander = now() + 2600;
+    state.nextWander = now() + rand(9000, 16000);
   } else {
     state.nextWander = now() + rand(
       modeProfile().initialWait[0],
