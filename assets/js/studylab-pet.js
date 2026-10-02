@@ -166,8 +166,8 @@
     state.x = clamp(x, halfW, window.innerWidth - halfW);
     state.y = clamp(y, minY, maxY);
 
-    character.style.left = state.x + "px";
-    character.style.top = state.y + "px";
+    character.style.transform =
+      "translate3d(" + state.x + "px, " + state.y + "px, 0) translate(-50%, -50%)";
 
     if (thought.classList.contains("is-visible")) {
       placeThought();
