@@ -459,7 +459,7 @@
     if (!state.enabled || !el || el === character || character.contains(el) || el === launcher || panel.contains(el)) return;
 
     const time = now();
-    if (time - state.lastReaction < (type === "hover" ? 500 : 350)) return;
+    if (type === "click" && time - state.lastReaction < 350) return;
 
     state.lastReaction = time;
     state.lastActivity = time;
@@ -584,7 +584,7 @@
 
   function animateMoveTo
 (targetX, targetY, reason = "wander") {
-    if (!state.enabled || state.dragging || reduced || state.sleeping) return;
+    if (!state.enabled || state.dragging || reduced || state.sleeping) return false;
 
     stopMove();
 
@@ -594,7 +594,7 @@
     const dy = targetY - startY;
     const distance = Math.hypot(dx, dy);
 
-    if (distance < minimumWalkDistance()) return;
+    if (distance < minimumWalkDistance()) return false;
 
     const direction = visualDirection(dx, dy);
     const duration = reason === "evade"
@@ -656,6 +656,7 @@
     }
 
     state.moveAnimation = requestAnimationFrame(frame);
+    return true;
   }
 
   function randomSafePoint() {
@@ -713,7 +714,13 @@
     if (!state.enabled || state.sleeping || state.dragging || reduced || state.angerUntil > now()) return;
 
     const point = visibleDestination();
-    animateMoveTo(point.x, point.y, "wander");
+    const moved = animateMoveTo(point.x, point.y, "wander");
+    if (!moved) {
+      state.nextWander = now() + rand(
+        modeProfile().wanderWait[0],
+        modeProfile().wanderWait[1]
+      );
+    }
   }
 
   function evadeCursor(force = false) {
