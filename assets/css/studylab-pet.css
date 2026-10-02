@@ -844,3 +844,167 @@ html[data-theme="light"] .sl-pet-setting-buttons button {
     transition: none !important;
   }
 }
+
+
+/* =========================================================
+   STUDYLAB PET — EMO-STYLE DISPLAY FACE + PROCEDURAL EYES
+   Inspired by expressive desktop-pet displays, not copied art.
+   ========================================================= */
+
+.sl-pet-character {
+  width: var(--pet-size-w);
+  height: var(--pet-size-h);
+  border-radius: 8px;
+  background: #020304;
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow:
+    0 22px 42px rgba(0,0,0,.38),
+    inset 0 0 0 1px rgba(255,255,255,.025),
+    0 0 30px rgba(70,225,255,.045);
+  clip-path: polygon(
+    3.5% 0%,
+    96.5% 0%,
+    100% 5%,
+    100% 94%,
+    96% 100%,
+    4% 100%,
+    0% 94%,
+    0% 6%
+  );
+}
+
+.sl-pet-character::after {
+  inset: 1px;
+  border-radius: 7px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.018), transparent 38%),
+    radial-gradient(circle at 50% 42%, rgba(68,180,220,.028), transparent 64%);
+}
+
+.sl-pet-face {
+  inset: 0;
+  z-index: 2;
+}
+
+.sl-pet-eye {
+  top: 19px;
+  width: 23px;
+  height: 30px;
+  overflow: visible;
+  transform-origin: 50% 50%;
+}
+
+.sl-pet-eye.left {
+  left: 17px;
+}
+
+.sl-pet-eye.right {
+  right: 17px;
+}
+
+.sl-pet-eye > i {
+  left: 50%;
+  top: 50%;
+  width: var(--expr-eye-w, 17px);
+  height: var(--expr-eye-h, 25px);
+  min-width: 5px;
+  min-height: 3px;
+  border-radius: var(--expr-eye-radius, 48%);
+  opacity: var(--expr-eye-opacity, 1);
+  transform:
+    translate(
+      calc(-50% + var(--gaze-x, 0px) + var(--expr-eye-x, 0px)),
+      calc(-50% + var(--gaze-y, 0px) + var(--expr-eye-y, 0px))
+    )
+    rotate(var(--expr-eye-rotate, 0deg))
+    skewX(var(--expr-eye-skew, 0deg))
+    scaleX(var(--expr-eye-scale-x, 1))
+    scaleY(var(--expr-eye-scale-y, 1));
+  background: var(--expr-eye-color, #63e8ff);
+  box-shadow:
+    0 0 var(--expr-eye-glow, 11px) var(--expr-eye-shadow, rgba(99,232,255,.88)),
+    0 0 calc(var(--expr-eye-glow, 11px) * 2.1) var(--expr-eye-shadow-soft, rgba(99,232,255,.20));
+  transition:
+    width .22s cubic-bezier(.2,.8,.2,1),
+    height .22s cubic-bezier(.2,.8,.2,1),
+    border-radius .22s ease,
+    opacity .18s ease,
+    transform .12s cubic-bezier(.2,.8,.2,1),
+    box-shadow .18s ease,
+    background .18s ease;
+  will-change: transform, width, height;
+}
+
+.sl-pet-character[data-eye="pink"] .sl-pet-eye > i {
+  --expr-eye-color: #ff86ca;
+  --expr-eye-shadow: rgba(255,134,202,.88);
+  --expr-eye-shadow-soft: rgba(255,134,202,.20);
+}
+
+.sl-pet-mouth {
+  left: 50%;
+  bottom: var(--expr-mouth-bottom, 8px);
+  width: var(--expr-mouth-w, 15px);
+  height: var(--expr-mouth-h, 6px);
+  opacity: var(--expr-mouth-opacity, 1);
+  transform:
+    translateX(-50%)
+    translateY(var(--expr-mouth-y, 0px))
+    rotate(var(--expr-mouth-rotate, 0deg))
+    scaleX(var(--expr-mouth-scale-x, 1))
+    scaleY(var(--expr-mouth-scale-y, 1));
+  border: var(--expr-mouth-border, 0);
+  border-bottom: var(--expr-mouth-border-bottom, 2px solid rgba(214,237,249,.82));
+  border-radius: var(--expr-mouth-radius, 0 0 13px 13px);
+  box-shadow: var(--expr-mouth-shadow, none);
+  transition:
+    width .20s ease,
+    height .20s ease,
+    opacity .18s ease,
+    transform .14s ease,
+    border .18s ease,
+    border-bottom .18s ease,
+    border-radius .18s ease,
+    box-shadow .18s ease;
+}
+
+.sl-pet-character[data-state="angry"] .sl-pet-mouth {
+  width: var(--expr-mouth-w, 18px);
+  height: var(--expr-mouth-h, 4px);
+  border-top: var(--expr-mouth-border-top, 3px solid rgba(216,237,249,.84));
+}
+
+.sl-pet-character[data-state="sleeping"] .sl-pet-mouth {
+  border-bottom: var(--expr-mouth-border-bottom, 2px solid rgba(214,237,249,.72));
+}
+
+.sl-pet-character.is-dragging {
+  border-color: rgba(255,255,255,.22);
+  background: #010203;
+}
+
+/* The display face stays visually clean in light mode too. */
+html[data-theme="light"] .sl-pet-character {
+  background: #030506;
+  border-color: rgba(255,255,255,.12);
+  box-shadow:
+    0 22px 42px rgba(20,45,65,.28),
+    inset 0 0 0 1px rgba(255,255,255,.026),
+    0 0 30px rgba(70,185,220,.06);
+}
+
+html[data-theme="light"] .sl-pet-character::after {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.018), transparent 38%),
+    radial-gradient(circle at 50% 42%, rgba(68,180,220,.035), transparent 64%);
+}
+
+/* =========================================================
+   SLEEP Zs: stay in the display language and float from the
+   upper-right corner of the black face.
+   ========================================================= */
+
+.sl-pet-sleep-z {
+  z-index: 6;
+  font-family: "Segoe UI", Arial, sans-serif;
+}
