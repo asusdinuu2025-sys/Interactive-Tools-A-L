@@ -13,7 +13,6 @@
     enabled: "studylab-pet-enabled",
     eye: "studylab-pet-eye",
     bubble: "studylab-pet-bubble",
-    personalities: "studylab-pet-personalities",
     x: "studylab-pet-x",
     y: "studylab-pet-y"
   };
@@ -39,30 +38,10 @@
   const rand = (min, max) => min + Math.random() * (max - min);
   const pick = (items) => items[Math.floor(Math.random() * items.length)];
 
-  const PERSONALITY_NAMES = [
-    "natural", "playful", "focused", "curious", "observer"
-  ];
-
-  function readPersonalities() {
-    const raw = read(KEY.personalities, "");
-    if (raw) {
-      try {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          const clean = parsed.filter((name) => PERSONALITY_NAMES.includes(name));
-          return [...new Set(clean)];
-        }
-      } catch (_) {}
-    }
-    const legacy = read("studylab-pet-mode", "");
-    return PERSONALITY_NAMES.includes(legacy) ? [legacy] : ["natural"];
-  }
-
   const state = {
     enabled: bool(KEY.enabled, true),
     eye: read(KEY.eye, "cyan") === "pink" ? "pink" : "cyan",
     bubbleEnabled: bool(KEY.bubble, true),
-    personalities: ["natural"],
     context: "home",
     expression: "neutral",
     sleeping: false,
@@ -113,9 +92,6 @@
     pointerMoved: false,
 
     reactionTimer: null,
-    emoteTimer: null,
-    personalityRoutineTimers: [],
-    personalityRoutineToken: 0,
     enableBurstActive: false,
     enableBurstTimers: [],
     bubbleTimer: null,
@@ -208,14 +184,6 @@
   const eyeButtons = [...panel.querySelectorAll("[data-pet-eye]")];
   const bubbleEnableButton = panel.querySelector("[data-pet-bubble-enable]");
   const bubbleDisableButton = panel.querySelector("[data-pet-bubble-disable]");
-
-  const personalityEmotes = {
-    natural:  { icon:"👋", expression:"delighted" },
-    playful:  { icon:"🎉", expression:"excited" },
-    focused:  { icon:"🎯", expression:"focused" },
-    curious:  { icon:"🔎", expression:"curious" },
-    observer: { icon:"👀", expression:"suspicious" }
-  };
 
   /*
    * Single capture-phase settings handler. It owns the entire Pet control panel,
@@ -444,216 +412,6 @@
     "angry", "scared", "annoyed", "delighted", "surprised", "shy"
   ];
 
-  function clearPersonalityRoutine() {
-    state.personalityRoutineToken += 1;
-    state.personalityRoutineTimers.forEach((timer) => clearTimeout(timer));
-    state.personalityRoutineTimers = [];
-    character.dataset.routine = "none";
-    clearTimeout(state.emoteTimer);
-    emote.classList.remove("is-visible");
-    state.gazeTargetX = 0;
-    state.gazeTargetY = 0;
-  }
-
-  function routineTimer(fn, delay) {
-    const timer = setTimeout(fn, delay);
-    state.personalityRoutineTimers.push(timer);
-    return timer;
-  }
-
-  function cardGazeTargets(limit = 4) {
-    const candidates = [...document.querySelectorAll(
-      ".subject-card, .utility-card, .telegram-card, .card, .resource-card, .tool-card"
-    )].filter((el) => {
-      if (!el || el === launcher || panel.contains(el) || character.contains(el)) return false;
-      const r = el.getBoundingClientRect();
-      const style = getComputedStyle(el);
-      return r.width > 90 && r.height > 40 &&
-        r.bottom > 70 && r.top < window.innerHeight - 30 &&
-        style.display !== "none" && style.visibility !== "hidden";
-    });
-
-    const picked = [];
-    const pool = [...candidates];
-    while (pool.length && picked.length < limit) {
-      const el = pick(pool);
-      pool.splice(pool.indexOf(el), 1);
-      const r = el.getBoundingClientRect();
-      picked.push({
-        x: r.left + r.width / 2,
-        y: r.top + r.height / 2
-      });
-    }
-
-    if (!picked.length) {
-      picked.push(
-        {x: window.innerWidth * .28, y: window.innerHeight * .30},
-        {x: window.innerWidth * .72, y: window.innerHeight * .30},
-        {x: window.innerWidth * .72, y: window.innerHeight * .70},
-        {x: window.innerWidth * .28, y: window.innerHeight * .70}
-      );
-    }
-
-    return picked;
-  }
-
-  function runPersonalityRoutine(name) {
-    if (!state.enabled || !personalityEmotes[name]) return;
-
-    clearPersonalityRoutine();
-
-    const em = personalityEmotes[name];
-    if (!em || !emote || !emoteIcon) {
-      setExpression(em?.expression || "neutral", 900, true);
-      return;
-    }
-
-    const token = state.personalityRoutineToken;
-
-    emote.dataset.emote = name;
-    emoteIcon.textContent = em.icon;
-    emote.classList.remove("is-visible");
-    void emote.offsetWidth;
-    emote.classList.add("is-visible");
-
-    character.dataset.routine = name;
-    setExpression(em.expression, name === "playful" ? 850 : 1550, true);
-
-    const finish = () => {
-      if (token !== state.personalityRoutineToken || !state.enabled) return;
-      character.dataset.routine = "none";
-      state.gazeTargetX = 0;
-      state.gazeTargetY = 0;
-      setExpression("neutral", 850, true);
-
-      if (hasPlayfulPersonality()) {
-        stopMove();
-        state.nextWander = now() + rand(9000, 16000);
-      } else {
-        state.nextWander = now() + rand(
-          modeProfile().initialWait[0],
-          modeProfile().initialWait[1]
-        );
-      }
-    };
-
-    if (name === "natural") {
-      routineTimer(finish, 1050);
-      return;
-    }
-
-    if (name === "focused") {
-      const center = { x: window.innerWidth * .50, y: window.innerHeight * .44 };
-      setGazeTarget(center.x, center.y, false);
-      routineTimer(finish, 1750);
-      return;
-    }
-
-    if (name === "curious") {
-      const targets = cardGazeTargets(4);
-      let index = 0;
-      const look = () => {
-        if (token !== state.personalityRoutineToken || !state.enabled) return;
-        const target = targets[index % targets.length];
-        setGazeTarget(target.x, target.y, false);
-        index += 1;
-        if (index < targets.length) routineTimer(look, 720);
-        else routineTimer(finish, 1050);
-      };
-      look();
-      return;
-    }
-
-    if (name === "observer") {
-      const targets = cardGazeTargets(3);
-      let index = 0;
-      const look = () => {
-        if (token !== state.personalityRoutineToken || !state.enabled) return;
-        const target = targets[index % targets.length];
-        setGazeTarget(target.x, target.y, false);
-        index += 1;
-        if (index < targets.length) routineTimer(look, 900);
-        else routineTimer(finish, 1150);
-      };
-      look();
-      return;
-    }
-
-    if (name === "playful") {
-      stopMove();
-      state.roamActive = false;
-      state.roamPausedUntil = 0;
-      state.roamVelocityX = 0;
-      state.roamVelocityY = 0;
-
-      let hops = 0;
-      const hop = () => {
-        if (token !== state.personalityRoutineToken || !state.enabled || !hasPlayfulPersonality()) {
-          finish();
-          return;
-        }
-
-        const target = playfulWanderTarget();
-        state.roamActive = false;
-
-        const startX = state.x;
-        const startY = state.y;
-        const dx = target.x - startX;
-        const dy = target.y - startY;
-        const distance = Math.hypot(dx, dy);
-        if (distance < 120) {
-          routineTimer(hop, 90);
-          return;
-        }
-
-        const direction = visualDirection(dx, dy);
-        const motion = direction === "up"
-          ? {duration: 470, ease:[0.22,0.68,0.18,1]}
-          : direction === "down"
-            ? {duration: 340, ease:[0.15,0.90,0.28,1.25]}
-            : {duration: 430, ease:[0.22,0.78,0.20,1]};
-
-        const started = performance.now();
-        const moveToken = state.moveToken;
-        character.dataset.moving = "true";
-        character.dataset.direction = direction;
-
-        const frame = (timestamp) => {
-          if (
-            token !== state.personalityRoutineToken ||
-            moveToken !== state.moveToken ||
-            state.dragging ||
-            !state.enabled
-          ) return;
-
-          const p = clamp((timestamp - started) / motion.duration, 0, 1);
-          const e = cubicBezierEase(p, motion.ease[0], motion.ease[1], motion.ease[2], motion.ease[3]);
-          setPosition(startX + dx * e, startY + dy * e);
-
-          if (p < 1) {
-            state.moveAnimation = requestAnimationFrame(frame);
-            return;
-          }
-
-          state.moveAnimation = 0;
-          character.dataset.moving = "false";
-          character.dataset.direction = "idle";
-          hops += 1;
-
-          if (hops < 3) {
-            routineTimer(hop, 150);
-          } else {
-            routineTimer(finish, 420);
-          }
-        };
-
-        state.moveAnimation = requestAnimationFrame(frame);
-      };
-
-      hop();
-    }
-  }
-
   function setExpression(name, ttl = 1300, force = false) {
     if (!state.enabled && !force) return;
 
@@ -719,46 +477,26 @@
     social:["Opening community resources.","Let's see what's there.","Community resources."]
   };
 
-  const personalityProfiles = {
-    natural:{label:"Natural",moveScale:1.00,minMove:320,wanderWait:[18000,30000],initialWait:[9000,15000],sleepAfter:34000,cardBias:.46,hoverDelay:160,expressionMoods:["neutral","curious","thinking","happy"],angerDuration:[4500,6500],angerFactor:1.00,playfulness:0},
-    playful:{label:"Playful",moveScale:.86,minMove:300,wanderWait:[8500,15000],initialWait:[5000,8000],sleepAfter:45000,cardBias:.60,hoverDelay:100,expressionMoods:["happy","excited","curious","surprised"],angerDuration:[3800,5400],angerFactor:1.00,playfulness:1},
-    focused:{label:"Focused",moveScale:1.04,minMove:350,wanderWait:[19000,31000],initialWait:[10000,17000],sleepAfter:50000,cardBias:.78,hoverDelay:140,expressionMoods:["focused","thinking","alert"],angerDuration:[4600,6600],angerFactor:1.05,playfulness:0},
-    curious:{label:"Curious",moveScale:.95,minMove:310,wanderWait:[11000,19000],initialWait:[5500,9000],sleepAfter:42000,cardBias:.86,hoverDelay:75,expressionMoods:["curious","surprised","thinking","delighted"],angerDuration:[4000,5600],angerFactor:1.00,playfulness:.35},
-    observer:{label:"Observer",moveScale:1.15,minMove:370,wanderWait:[26000,42000],initialWait:[14000,23000],sleepAfter:38000,cardBias:.90,hoverDelay:240,expressionMoods:["curious","focused","neutral","suspicious"],angerDuration:[3800,5400],angerFactor:.95,playfulness:.08}
+  const petProfile = {
+    moveScale: 1.00,
+    minMove: 320,
+    wanderWait: [18000, 30000],
+    initialWait: [9000, 15000],
+    sleepAfter: 34000,
+    cardBias: .46,
+    hoverDelay: 160,
+    expressionMoods: ["neutral","curious","thinking","happy"],
+    angerDuration: [4500,6500],
+    angerFactor: 1.00
   };
 
-  function enabledPersonalities() {
-    return state.personalities.filter((name) => personalityProfiles[name]);
+  function modeProfile() {
+    return petProfile;
   }
 
-  function combinedProfile() {
-    const keys = enabledPersonalities();
-    if (!keys.length) return {
-      ...personalityProfiles.natural,
-      expressionMoods:["neutral"]
-    };
-
-    const profiles = keys.map((key) => personalityProfiles[key]);
-    const average = (field) => profiles.reduce((sum, profile) => sum + profile[field], 0) / profiles.length;
-    const rangeAverage = (field) => [
-      profiles.reduce((sum, profile) => sum + profile[field][0], 0) / profiles.length,
-      profiles.reduce((sum, profile) => sum + profile[field][1], 0) / profiles.length
-    ];
-    const moods = [...new Set(profiles.flatMap((profile) => profile.expressionMoods || []))];
-
-    return {
-      moveScale: average("moveScale"),
-      minMove: average("minMove"),
-      wanderWait: rangeAverage("wanderWait"),
-      initialWait: rangeAverage("initialWait"),
-      sleepAfter: average("sleepAfter"),
-      cardBias: average("cardBias"),
-      hoverDelay: average("hoverDelay"),
-      angerDuration: rangeAverage("angerDuration"),
-      angerFactor: average("angerFactor"),
-      playfulness: average("playfulness"),
-      expressionMoods: moods.length ? moods : null
-    };
+  function modeExpression(base) {
+    const profile = modeProfile();
+    return profile.expressionMoods?.length ? pick(profile.expressionMoods) : eyeVariation(base);
   }
 
   const semanticRules = [
@@ -857,7 +595,7 @@
 
   function modeExpression(base) {
     const profile = modeProfile();
-    return profile.expressionMoods?.length ? pick(profile.expressionMoods) : personaVariation(base);
+    return profile.expressionMoods?.length ? pick(profile.expressionMoods) : eyeVariation(base);
   }
 
   function contextFromElement(el) {
@@ -873,7 +611,7 @@
     return state.context;
   }
 
-  function personaVariation(base) {
+  function eyeVariation(base) {
     if (state.eye === "cyan") {
       const boyish = {
         neutral: ["neutral", "suspicious", "calm"],
@@ -1037,11 +775,7 @@
   }
 
 
-  function hasPlayfulPersonality() {
-    return false;
-  }
-
-  function playfulWanderTarget() {
+  function enableBurstTarget() {
     return {
       x: 70 + Math.random() * Math.max(1, window.innerWidth - 140),
       y: 88 + Math.random() * Math.max(1, window.innerHeight - 190)
@@ -1088,7 +822,7 @@
     return cubicBezierY(t, y1, y2);
   }
 
-  function playfulMoveDurationAndEase(direction) {
+  function enableBurstMoveDurationAndEase(direction) {
     if (direction === "up") {
       return { duration: 1120, ease: [0.22, 0.68, 0.18, 1] };
     }
@@ -1098,7 +832,7 @@
     return { duration: 760, ease: [0.22, 0.78, 0.20, 1] };
   }
 
-  function animatePlayfulMoveTo(targetX, targetY, reason = "enable-burst", onComplete = null) {
+  function animateEnableBurstMove(targetX, targetY, reason = "enable-burst", onComplete = null) {
     if (!state.enabled || state.dragging || reduced || state.sleeping) return false;
 
     stopMove();
@@ -1113,7 +847,7 @@
     if (distance < minimumDistance) return false;
 
     const direction = visualDirection(dx, dy);
-    const motion = playfulMoveDurationAndEase(direction);
+    const motion = enableBurstMoveDurationAndEase(direction);
     const started = performance.now();
     const token = state.moveToken;
 
@@ -1181,24 +915,6 @@
 
     state.moveAnimation = requestAnimationFrame(frame);
     return true;
-  }
-
-  function playfulWander() {
-    if (!state.enabled || state.sleeping || state.dragging || reduced || state.angerUntil > now()) return;
-    const target = playfulWanderTarget();
-    state.roamActive = false;
-    state.roamPausedUntil = 0;
-    state.roamVelocityX = 0;
-    state.roamVelocityY = 0;
-    const moved = animatePlayfulMoveTo(target.x, target.y, "wander");
-
-    if (!moved) {
-      state.nextWander = now() + (
-        state.context === "study"
-          ? rand(9000, 16000)
-          : rand(11000, 19000)
-      );
-    }
   }
 
   function stopMove() {
@@ -1301,15 +1017,12 @@
   function chooseRoamTarget(immediate = false) {
     const speed = Math.hypot(state.roamVelocityX, state.roamVelocityY);
     const profile = modeProfile();
-    const playful = clamp(profile.playfulness || 0, 0, 1);
     const baseAngle = speed > 6
       ? Math.atan2(state.roamVelocityY, state.roamVelocityX)
       : rand(0, Math.PI * 2);
-    const turnRange = 0.82 + playful * 0.58;
+    const turnRange = 0.82;
     const angle = baseAngle + rand(-turnRange, turnRange);
-    const distance = immediate
-      ? (playful > 0.55 ? rand(330, 620) : rand(450, 720))
-      : (playful > 0.55 ? rand(300, 650) : rand(380, 760));
+    const distance = immediate ? rand(450, 720) : rand(380, 760);
 
     let x = state.x + Math.cos(angle) * distance;
     let y = state.y + Math.sin(angle) * distance * 0.78;
@@ -1325,11 +1038,6 @@
   }
 
   function updateRoam(timestamp) {
-    if (hasPlayfulPersonality()) {
-      state.roamLastFrame = timestamp;
-      return;
-    }
-
     if (!state.enabled || state.sleeping || state.dragging || state.evading ||
         state.angerUntil > now() || reduced || !state.roamActive) {
       state.roamLastFrame = timestamp;
@@ -1341,7 +1049,6 @@
     state.roamLastFrame = timestamp;
     const t = now();
     const profile = modeProfile();
-    const playful = clamp(profile.playfulness || 0, 0, 1);
 
     if (!state.roamTargetX && !state.roamTargetY) chooseRoamTarget(true);
 
@@ -1355,10 +1062,10 @@
       const distance = Math.max(1, Math.hypot(dx, dy));
       const currentSpeed = Math.hypot(state.roamVelocityX, state.roamVelocityY);
       const maxSpeed = roamSpeed();
-      const pace = 1 + Math.sin(t * 0.00123) * 0.13 * playful;
+      const pace = 1;
 
       /* Smooth arrival and smooth acceleration. */
-      const arrival = clamp(distance / (210 - playful * 45), 0.20, 1);
+      const arrival = clamp(distance / 210, 0.20, 1);
       const desiredSpeed = maxSpeed * arrival * pace;
       const desiredX = (dx / distance) * desiredSpeed;
       const desiredY = (dy / distance) * desiredSpeed;
@@ -1373,16 +1080,9 @@
       if (state.y > window.innerHeight - 125) steerY -= (state.y - (window.innerHeight - 125)) / 125 * maxSpeed * 2.2;
 
       /* Very small curved drift makes the path feel organic rather than programmed. */
-      const curve = Math.sin(t * 0.00037) * (0.16 + playful * 0.34);
+      const curve = Math.sin(t * 0.00037) * 0.16;
       steerX += -desiredY * curve;
       steerY += desiredX * curve;
-
-      if (playful > 0 && distance > 90) {
-        const playWave = Math.sin(t * 0.00108 + state.roamTargetX * 0.0017) *
-          maxSpeed * 0.19 * playful;
-        steerX += -(dy / distance) * playWave;
-        steerY += (dx / distance) * playWave;
-      }
 
       const response = 1 - Math.exp(-dt / 0.95);
       state.roamVelocityX += (steerX - state.roamVelocityX) * response;
@@ -1396,7 +1096,7 @@
       }
 
       if (distance < 95) {
-        const pause = Math.random() < (0.16 + playful * 0.08);
+        const pause = Math.random() < 0.16;
         if (pause) state.roamPausedUntil = t + rand(700, 1500);
         chooseRoamTarget(false);
       }
@@ -1458,8 +1158,8 @@
     const hop = () => {
       if (!state.enableBurstActive || !state.enabled || state.dragging) return;
 
-      const target = playfulWanderTarget();
-      const started = animatePlayfulMoveTo(
+      const target = enableBurstTarget();
+      const started = animateEnableBurstMove(
         target.x,
         target.y,
         "enable-burst",
@@ -1544,11 +1244,6 @@
 
   function wander() {
     if (!state.enabled || state.sleeping || state.dragging || reduced || state.angerUntil > now()) return;
-
-    if (hasPlayfulPersonality()) {
-      playfulWander();
-      return;
-    }
 
     startRoam(false);
     state.lastWander = now();
@@ -1920,93 +1615,6 @@
   });
 
 
-  function personalityLabel(name) {
-    const labels = {
-      natural:"Natural", playful:"Playful", focused:"Focused",
-      curious:"Curious", observer:"Observer"
-    };
-    return labels[name] || name;
-  }
-
-  function savePersonalities() {
-    state.personalities = [...new Set(
-      state.personalities.filter((name) => PERSONALITY_NAMES.includes(name))
-    )];
-
-    save(KEY.personalities, JSON.stringify(state.personalities));
-    character.dataset.personalities = state.personalities.join(",");
-    character.dataset.playful = state.personalities.includes("playful") ? "true" : "false";
-  }
-
-  function notifySetting(message, duration = 1100) {
-    if (state.enabled && state.bubbleEnabled) {
-      showThought(message, duration);
-    }
-  }
-
-  function setPersonalityEnabled(name, enabled) {
-    if (!PERSONALITY_NAMES.includes(name)) return;
-
-    const has = state.personalities.includes(name);
-    if (has === enabled) {
-      if (enabled && state.enabled) {
-        clearTimeout(state.hoverTimer);
-        state.lastHoveredElement = null;
-        runPersonalityRoutine(name);
-        state.lastMeaningfulActivity = now();
-        notifySetting(personalityLabel(name) + " active.", 900);
-      }
-      return;
-    }
-
-    state.lastMeaningfulActivity = now();
-
-    if (enabled) {
-      state.personalities = [...state.personalities, name];
-    } else {
-      state.personalities = state.personalities.filter((item) => item !== name);
-    }
-
-    savePersonalities();
-
-    if (name === "angry" && !enabled) {
-      state.angerUntil = 0;
-      state.angerLevel = 0;
-      state.danger = false;
-      state.evading = false;
-      character.dataset.danger = "false";
-      character.dataset.angerLevel = "0";
-    }
-
-    clearTimeout(state.hoverTimer);
-    state.lastHoveredElement = null;
-
-    const profile = modeProfile();
-
-    setExpression(
-      enabled
-        ? (profile.expressionMoods?.[0] || "delighted")
-        : (profile.expressionMoods?.[0] || "neutral"),
-      1000,
-      true
-    );
-
-    if (enabled) {
-      showPersonalityEmote(name);
-    }
-
-    if (hasPlayfulPersonality()) {
-      stopMove();
-      state.nextWander = now() + rand(9000, 16000);
-    } else {
-      startRoam(false);
-      state.nextWander = now() + rand(profile.initialWait[0], profile.initialWait[1]);
-    }
-
-    notifySetting(personalityLabel(name) + (enabled ? " enabled." : " disabled."));
-    updateControls();
-  }
-
   function setBubbleEnabled(enabled) {
     if (enabled === state.bubbleEnabled) {
       if (state.enabled && enabled) {
@@ -2126,19 +1734,12 @@
     updateControls();
   }
 
-  savePersonalities();
   character.dataset.eye = state.eye;
-  character.dataset.personalities = state.personalities.join(",");
-  character.dataset.playful = state.personalities.includes("playful") ? "true" : "false";
 
-  if (hasPlayfulPersonality()) {
-    state.nextWander = now() + rand(9000, 16000);
-  } else {
-    state.nextWander = now() + rand(
-      modeProfile().initialWait[0],
-      modeProfile().initialWait[1]
-    );
-  }
+  state.nextWander = now() + rand(
+    modeProfile().initialWait[0],
+    modeProfile().initialWait[1]
+  );
   stage.classList.toggle("is-disabled", !state.enabled);
   updateControls();
 
@@ -2181,7 +1782,7 @@
       );
 
       const base = pick(contextMoods[state.context] || ["neutral"]);
-      const expression = personaVariation(base);
+      const expression = eyeVariation(base);
       setExpression(expression, rand(800, 1500));
     }
 
