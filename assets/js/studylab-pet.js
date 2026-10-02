@@ -366,7 +366,7 @@
   }
 
   function reactToElement(el, type) {
-    if (!state.enabled || !el || el === character || character.contains(el)) return;
+    if (!state.enabled || !el || el === character || character.contains(el) || el === launcher || panel.contains(el)) return;
 
     const time = now();
     if (time - state.lastReaction < (type === "hover" ? 850 : 300)) return;
@@ -519,12 +519,23 @@
         startY + dy * e
       );
 
+      const stride = Math.sin((elapsed / 260) * Math.PI) * 1.15;
+      const lean = direction === "left" ? -0.65 : direction === "right" ? 0.65 : 0;
+      const climbLean = direction === "up" ? -1.0 : direction === "down" ? 0.7 : lean;
+      const scaleX = direction === "down" ? 1.005 : 1;
+      const scaleY = direction === "down" ? 0.997 : 1;
+      visual.style.transform =
+        "translateY(" + (-Math.abs(stride)).toFixed(2) + "px) " +
+        "rotate(" + climbLean.toFixed(2) + "deg) " +
+        "scale(" + scaleX + "," + scaleY + ")";
+
       if (p < 1) {
         state.moveAnimation = requestAnimationFrame(frame);
       } else {
         state.moveAnimation = 0;
         character.dataset.moving = "false";
         character.dataset.direction = "idle";
+        visual.style.transform = "";
 
         if (direction === "down") {
           character.classList.add("is-landed");
@@ -661,24 +672,13 @@
     state.clickTimes.push(t);
 
     const rapid = state.clickTimes.length;
-    if (rapid >= 4) {
-      enterAnger(4);
-    } else if (rapid >= 2) {
-      enterAnger(2);
+    if (rapid >= 3) {
+      enterAnger(Math.min(4, rapid));
+    } else if (rapid === 2) {
+      setExpression("annoyed", 850, true);
+      showThought(state.eye === "cyan" ? "Dude..." : "Seriously?", 900);
     } else {
-      state.angerLevel = Math.max(state.angerLevel, 1);
-      state.angerUntil = now() + 2800;
-      state.danger = true;
-      character.dataset.danger = "true";
-      setExpression("annoyed", 900, true);
-      showThought(state.eye === "cyan" ? "Dude..." : "Seriously?", 950);
-      setTimeout(() => {
-        if (now() >= state.angerUntil) {
-          state.danger = false;
-          character.dataset.danger = "false";
-          state.angerLevel = 0;
-        }
-      }, 3100);
+      setExpression(state.eye === "cyan" ? "curious" : "shy", 700, true);
     }
   }
 
@@ -691,7 +691,7 @@
     stopMove();
     wake("pointer");
 
-    state.dragging = true;
+    state.dragging = false;
     state.dragPointerId = ev.pointerId;
     state.dragOffsetX = ev.clientX - state.x;
     state.dragOffsetY = ev.clientY - state.y;
@@ -958,7 +958,7 @@
           : rand(20000, 32000)
       );
 
-      if (Math.random() < (state.context === "study" ? 0.22 : 0.08)) {
+      if (Math.random() < (state.context === "study" ? 0.15 : 0.04)) {
         const text = pick(contextThoughts[state.context] || ["Hmm..."]);
         setExpression("thinking", 1050);
         showThought(text, 1500);
@@ -976,14 +976,14 @@
       const expression = personaVariation(base);
       setExpression(expression, rand(800, 1500));
 
-      if (Math.random() < (state.context === "study" ? 0.12 : 0.05)) {
+      if (Math.random() < (state.context === "study" ? 0.08 : 0.03)) {
         showThought(pick(contextThoughts[state.context] || ["Hmm..."]), 1300);
       }
     }
 
     if (state.angerUntil > t) {
       const distance = Math.hypot(state.pointerX - state.x, state.pointerY - state.y);
-      if (distance < 155) evadeCursor();
+      if (distance < 118) evadeCursor();
     } else if (state.angerUntil <= t && state.danger) {
       state.danger = false;
       character.dataset.danger = "false";
