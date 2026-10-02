@@ -307,10 +307,11 @@
 
   function showThought(message, duration = 1800, force = false) {
     if (!state.enabled || (!state.bubbleEnabled && !force) || !message) return;
+    const previous = state.recentThoughts[0];
     const selected = freshThought(message);
     if (!selected) return;
     const t = now();
-    if (selected === state.recentThoughts[1] && t - state.lastThoughtAt < 4200) return;
+    if (selected === previous && t - state.lastThoughtAt < 4200) return;
     state.lastThoughtAt = t;
     thoughtText.textContent = selected;
     placeThought();
@@ -375,6 +376,7 @@
   const expressionNames = [
     "neutral", "curious", "happy", "excited", "focused", "thinking",
     "alert", "worried", "confused", "suspicious", "bored", "sleeping",
+    "relieved",
     "angry", "scared", "annoyed", "delighted", "surprised", "shy"
   ];
 
