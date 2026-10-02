@@ -276,15 +276,15 @@
 
         character.style.setProperty(
           "--pet-move-duration",
-          upward ? "1120ms" : downward ? "520ms" : "760ms"
+          upward ? "2800ms" : downward ? "900ms" : "1900ms"
         );
         character.style.setProperty(
           "--pet-move-ease",
           upward
-            ? "cubic-bezier(.22,.68,.18,1)"
+            ? "cubic-bezier(.30,.60,.18,1)"
             : downward
-              ? "cubic-bezier(.15,.9,.28,1.25)"
-              : "cubic-bezier(.22,.78,.2,1)"
+              ? "cubic-bezier(.12,.88,.24,1.12)"
+              : "cubic-bezier(.24,.72,.20,1)"
         );
 
         character.classList.remove("is-walking", "is-climbing", "is-falling", "is-landed");
@@ -332,7 +332,7 @@
     window.clearTimeout(state.wanderTimer);
     state.wanderTimer = window.setTimeout(() => {
       if (!state.enabled || state.sleeping || state.dragging || document.hidden) {
-        scheduleWander(2600);
+        scheduleWander(state.sleeping ? 4200 : 3200);
         return;
       }
 
@@ -371,7 +371,7 @@
     window.setTimeout(() => {
       if (state.sleeping || state.dragging) return;
       state.mood =
-        state.context === "study" && getNow() - state.lastActivity > 7000
+        state.context === "study" && getNow() - state.lastActivity > 3200
           ? "focused"
           : "idle";
       character.dataset.state = state.mood;
@@ -441,7 +441,10 @@
     state.sleeping = false;
 
     if (type === "wake") {
-      setMood("curious", 900);
+      setMood("sleepy", 650);
+      window.setTimeout(() => {
+        if (state.enabled && !state.sleeping) setMood("curious", 850);
+      }, 420);
       showMessage("I'm awake. 👀", 1400);
       return;
     }
@@ -478,24 +481,27 @@
       const utility = detail.element ? utilityKind(detail.element) : "";
 
       if (context === "study" && utility === "pomodoro") {
-        setMood("focused", 2200);
-        showMessage("Focus mode. No excuses. ⏱️", 2100);
+        setMood("focused", 2600);
+        showMessage("Focus mode. No excuses. ⏱️", 1900);
       } else if (context === "study" && utility === "flashcard") {
-        setMood("curious", 1300);
-        showMessage("Flip it.", 1200);
+        setMood("curious", 1500);
+        showMessage("Flip it.", 1100);
       } else if (context === "study" && utility === "mistake") {
-        setMood("confused", 1350);
-        showMessage("Good. Fix the mistake.", 1800);
+        setMood("confused", 1500);
+        showMessage("Good. Fix the mistake.", 1600);
+      } else if (context === "study" && utility === "marks") {
+        setMood("surprised", 1200);
+        showMessage("Let's see...", 1200);
       } else {
-        showMessage(profile.click[Math.floor(Math.random() * profile.click.length)], 1650);
-        setMood(context === "study" || context === "exam" ? "focused" : "happy", 1100);
+        showMessage(profile.click[Math.floor(Math.random() * profile.click.length)], 1500);
+        setMood(context === "study" || context === "exam" ? "focused" : "happy", 1050);
       }
       return;
     }
 
     if (type === "typing") {
-      setMood("curious", 820);
-      showMessage(detail.name ? "That name got my attention. 👀" : "What are you typing?", 1500);
+      setMood("curious", 1050);
+      showMessage(detail.name ? "That name got my attention. 👀" : "What are you typing?", 1450);
       return;
     }
 
@@ -515,7 +521,7 @@
     }
 
     if (type === "scroll") {
-      setMood("curious", 550);
+      setMood("bored", 750);
       return;
     }
 
@@ -540,7 +546,7 @@
 
     if (type === "scared") {
       setMood("scared", 1100);
-      showMessage("Hey! 😳", 1500);
+      showMessage("Hey! 😳", 1200);
       return;
     }
 
@@ -553,7 +559,7 @@
   }
 
   function blink() {
-    if (!state.enabled || state.sleeping || state.dragging) return;
+    if (!state.enabled || state.sleeping || state.dragging || getNow() - state.lastBlink < 9000) return;
 
     state.lastBlink = getNow();
 
@@ -955,7 +961,7 @@
       }
     }
 
-    window.setTimeout(activityLoop, 700);
+    window.setTimeout(activityLoop, 650);
   }
 
   state.enabled = Boolean(state.enabled);
