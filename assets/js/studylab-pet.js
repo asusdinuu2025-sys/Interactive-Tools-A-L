@@ -74,6 +74,14 @@
     y: 0,
     moveAnimation: 0,
     moveToken: 0,
+    roamActive: false,
+    roamVelocityX: 0,
+    roamVelocityY: 0,
+    roamTargetX: 0,
+    roamTargetY: 0,
+    roamPausedUntil: 0,
+    roamBoostUntil: 0,
+    roamLastFrame: performance.now(),
 
     pointerX: window.innerWidth * 0.72,
     pointerY: window.innerHeight * 0.52,
@@ -376,7 +384,7 @@
   const expressionNames = [
     "neutral", "curious", "happy", "excited", "focused", "thinking",
     "alert", "worried", "confused", "suspicious", "bored", "sleeping",
-    "relieved",
+    "relieved", "sad",
     "angry", "scared", "annoyed", "delighted", "surprised", "shy"
   ];
 
@@ -702,8 +710,9 @@
     character.style.setProperty("--gaze-y", state.gazeY.toFixed(2) + "px");
   }
 
-  function animationLoop() {
+  function animationLoop(timestamp) {
     updateGaze();
+    updateRoam(timestamp);
     requestAnimationFrame(animationLoop);
   }
   requestAnimationFrame(animationLoop);
@@ -764,6 +773,10 @@
     if (state.moveAnimation) cancelAnimationFrame(state.moveAnimation);
     state.moveAnimation = 0;
     state.moveToken += 1;
+    state.roamActive = false;
+    state.roamPausedUntil = 0;
+    state.roamVelocityX = 0;
+    state.roamVelocityY = 0;
     character.dataset.moving = "false";
     character.dataset.direction = "idle";
     visual.style.transform = "";
@@ -847,6 +860,128 @@
     return true;
   }
 
+  function roamSpeed() {
+    const profile = modeProfile();
+    const base = clamp(36 / profile.moveScale, 28, 48);
+    return base * (now() < state.roamBoostUntil ? 1.42 : 1);
+  }
+
+  function chooseRoamTarget(immediate = false) {
+    const speed = Math.hypot(state.roamVelocityX, state.roamVelocityY);
+    const baseAngle = speed > 6
+      ? Math.atan2(state.roamVelocityY, state.roamVelocityX)
+      : rand(0, Math.PI * 2);
+    const angle = baseAngle + rand(-0.82, 0.82);
+    const distance = immediate ? rand(450, 720) : rand(380, 760);
+
+    let x = state.x + Math.cos(angle) * distance;
+    let y = state.y + Math.sin(angle) * distance * 0.78;
+
+    if (x < 90 || x > window.innerWidth - 90 || y < 112 || y > window.innerHeight - 120) {
+      const safe = randomSafePoint();
+      x = safe.x;
+      y = safe.y;
+    }
+
+    state.roamTargetX = clamp(x, 65, Math.max(65, window.innerWidth - 65));
+    state.roamTargetY = clamp(y, 100, Math.max(100, window.innerHeight - 112));
+  }
+
+  function updateRoam(timestamp) {
+    if (!state.enabled || state.sleeping || state.dragging || state.evading ||
+        state.angerUntil > now() || reduced || !state.roamActive) {
+      state.roamLastFrame = timestamp;
+      return;
+    }
+
+    const previous = state.roamLastFrame || timestamp;
+    const dt = clamp((timestamp - previous) / 1000, 0.001, 0.040);
+    state.roamLastFrame = timestamp;
+    const t = now();
+
+    if (!state.roamTargetX && !state.roamTargetY) chooseRoamTarget(true);
+
+    if (state.roamPausedUntil > t) {
+      const brake = Math.pow(0.035, dt);
+      state.roamVelocityX *= brake;
+      state.roamVelocityY *= brake;
+    } else {
+      const dx = state.roamTargetX - state.x;
+      const dy = state.roamTargetY - state.y;
+      const distance = Math.max(1, Math.hypot(dx, dy));
+      const currentSpeed = Math.hypot(state.roamVelocityX, state.roamVelocityY);
+      const maxSpeed = roamSpeed();
+
+      /* Smooth arrival and smooth acceleration. */
+      const arrival = clamp(distance / 210, 0.22, 1);
+      const desiredSpeed = maxSpeed * arrival;
+      const desiredX = (dx / distance) * desiredSpeed;
+      const desiredY = (dy / distance) * desiredSpeed;
+
+      const edge = 120;
+      let steerX = desiredX;
+      let steerY = desiredY;
+
+      if (state.x < edge) steerX += (edge - state.x) / edge * maxSpeed * 2.2;
+      if (state.x > window.innerWidth - edge) steerX -= (state.x - (window.innerWidth - edge)) / edge * maxSpeed * 2.2;
+      if (state.y < edge) steerY += (edge - state.y) / edge * maxSpeed * 2.2;
+      if (state.y > window.innerHeight - 125) steerY -= (state.y - (window.innerHeight - 125)) / 125 * maxSpeed * 2.2;
+
+      /* Very small curved drift makes the path feel organic rather than programmed. */
+      const curve = Math.sin(t * 0.00037) * 0.16;
+      steerX += -desiredY * curve;
+      steerY += desiredX * curve;
+
+      const response = 1 - Math.exp(-dt / 0.95);
+      state.roamVelocityX += (steerX - state.roamVelocityX) * response;
+      state.roamVelocityY += (steerY - state.roamVelocityY) * response;
+
+      const nextSpeed = Math.hypot(state.roamVelocityX, state.roamVelocityY);
+      if (nextSpeed > maxSpeed) {
+        const scale = maxSpeed / nextSpeed;
+        state.roamVelocityX *= scale;
+        state.roamVelocityY *= scale;
+      }
+
+      if (distance < 95) {
+        const pause = Math.random() < 0.16;
+        if (pause) state.roamPausedUntil = t + rand(700, 1500);
+        chooseRoamTarget(false);
+      }
+    }
+
+    const nextX = state.x + state.roamVelocityX * dt;
+    const nextY = state.y + state.roamVelocityY * dt;
+    setPosition(
+      clamp(nextX, 58, Math.max(58, window.innerWidth - 58)),
+      clamp(nextY, 94, Math.max(94, window.innerHeight - 108))
+    );
+
+    const speed = Math.hypot(state.roamVelocityX, state.roamVelocityY);
+    character.dataset.moving = speed > 3.5 ? "true" : "false";
+    character.dataset.direction = speed > 3.5
+      ? visualDirection(state.roamVelocityX, state.roamVelocityY)
+      : "idle";
+
+    if (speed > 7 && state.expression === "neutral" && t - state.lastReaction > 3400) {
+      setExpression(modeExpression(pick(["curious","happy","focused","thinking"])), rand(900, 1500));
+    }
+  }
+
+  function startRoam(boost = false) {
+    if (!state.enabled || state.sleeping || state.dragging || reduced) return;
+    state.roamActive = true;
+    state.roamLastFrame = performance.now();
+    state.roamBoostUntil = boost ? now() + 5200 : 0;
+    chooseRoamTarget(true);
+
+    if (boost) {
+      state.roamVelocityX *= 0.28;
+      state.roamVelocityY *= 0.28;
+      setExpression("delighted", 1450, true);
+    }
+  }
+
   function randomSafePoint() {
     const marginX = window.innerWidth <= 720 ? 55 : 70;
     const marginTop = 95;
@@ -900,15 +1035,12 @@
 
   function wander() {
     if (!state.enabled || state.sleeping || state.dragging || reduced || state.angerUntil > now()) return;
-
-    const point = visibleDestination();
-    const moved = animateMoveTo(point.x, point.y, "wander");
-    if (!moved) {
-      state.nextWander = now() + rand(
-        modeProfile().wanderWait[0],
-        modeProfile().wanderWait[1]
-      );
-    }
+    startRoam(false);
+    state.lastWander = now();
+    state.nextWander = now() + rand(
+      modeProfile().wanderWait[0],
+      modeProfile().wanderWait[1]
+    );
   }
 
   function evadeCursor(force = false) {
@@ -1440,7 +1572,6 @@
       showThought("Pet disabled.", 1000);
     }
 
-    state.enabled = enabled;
     save(KEY.enabled, enabled);
 
     if (!enabled) {
@@ -1456,18 +1587,28 @@
       state.lastHoveredElement = null;
       character.dataset.danger = "false";
       character.dataset.angerLevel = "0";
-      stage.classList.add("is-disabled");
+
+      state.enabled = false;
+      character.dataset.state = "sad";
+      character.classList.add("is-fading-out");
+      stage.classList.remove("is-disabled");
       launcher.classList.remove("is-open");
-      character.dataset.state = "neutral";
+
+      window.setTimeout(() => {
+        if (!state.enabled) stage.classList.add("is-disabled");
+      }, 920);
     } else {
       stage.classList.remove("is-disabled");
-      setExpression("surprised", 850, true);
+      character.classList.remove("is-fading-out");
+      state.enabled = true;
+      setExpression("delighted", 1350, true);
       setGazeTarget(state.pointerX, state.pointerY, false);
       state.lastActivity = now();
       state.lastMeaningfulActivity = now();
-      const profile = modeProfile();
-      state.nextWander = now() + rand(profile.initialWait[0], profile.initialWait[1]);
-      if (state.bubbleEnabled) showThought("Pet enabled.", 950);
+      state.lastReaction = now();
+      state.nextWander = now() + 350;
+      startRoam(true);
+      if (state.bubbleEnabled) showThought("I'm back.", 1050);
     }
 
     updateControls();
