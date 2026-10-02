@@ -40,8 +40,7 @@
   const pick = (items) => items[Math.floor(Math.random() * items.length)];
 
   const PERSONALITY_NAMES = [
-    "natural", "playful", "angry", "strict", "lazy", "focused",
-    "curious", "energetic", "observer", "social", "sleepy", "exam", "all-in-one"
+    "natural", "playful", "focused", "curious", "observer"
   ];
 
   function readPersonalities() {
@@ -110,7 +109,14 @@
     blinkTimer: null,
     hoverTimer: null,
     lastHoveredElement: null,
-    nameMessageShown: false
+    nameMessageShown: false,
+    studentName: "",
+    companionName: "Student 0000",
+    recentThoughts: [],
+    lastThoughtAt: 0,
+    recentInteractionKeys: [],
+    lastSleepAt: 0,
+    wakeGreetingShown: false
   };
 
   state.x = clamp(
@@ -170,22 +176,14 @@
       '<div class="sl-pet-setting sl-pet-personality-setting"><span>Personalities</span><div class="sl-pet-personality-list">' +
         '<div class="sl-pet-personality-row" data-personality="natural"><strong>Natural</strong><div><button type="button" data-pet-personality-enable="natural">Enable</button><button type="button" data-pet-personality-disable="natural">Disable</button></div></div>' +
         '<div class="sl-pet-personality-row" data-personality="playful"><strong>Playful</strong><div><button type="button" data-pet-personality-enable="playful">Enable</button><button type="button" data-pet-personality-disable="playful">Disable</button></div></div>' +
-        '<div class="sl-pet-personality-row" data-personality="angry"><strong>Angry</strong><div><button type="button" data-pet-personality-enable="angry">Enable</button><button type="button" data-pet-personality-disable="angry">Disable</button></div></div>' +
-        '<div class="sl-pet-personality-row" data-personality="strict"><strong>Strict</strong><div><button type="button" data-pet-personality-enable="strict">Enable</button><button type="button" data-pet-personality-disable="strict">Disable</button></div></div>' +
-        '<div class="sl-pet-personality-row" data-personality="lazy"><strong>Lazy</strong><div><button type="button" data-pet-personality-enable="lazy">Enable</button><button type="button" data-pet-personality-disable="lazy">Disable</button></div></div>' +
         '<div class="sl-pet-personality-row" data-personality="focused"><strong>Focused</strong><div><button type="button" data-pet-personality-enable="focused">Enable</button><button type="button" data-pet-personality-disable="focused">Disable</button></div></div>' +
         '<div class="sl-pet-personality-row" data-personality="curious"><strong>Curious</strong><div><button type="button" data-pet-personality-enable="curious">Enable</button><button type="button" data-pet-personality-disable="curious">Disable</button></div></div>' +
-        '<div class="sl-pet-personality-row" data-personality="energetic"><strong>Energetic</strong><div><button type="button" data-pet-personality-enable="energetic">Enable</button><button type="button" data-pet-personality-disable="energetic">Disable</button></div></div>' +
         '<div class="sl-pet-personality-row" data-personality="observer"><strong>Observer</strong><div><button type="button" data-pet-personality-enable="observer">Enable</button><button type="button" data-pet-personality-disable="observer">Disable</button></div></div>' +
-        '<div class="sl-pet-personality-row" data-personality="social"><strong>Social</strong><div><button type="button" data-pet-personality-enable="social">Enable</button><button type="button" data-pet-personality-disable="social">Disable</button></div></div>' +
-        '<div class="sl-pet-personality-row" data-personality="sleepy"><strong>Sleepy</strong><div><button type="button" data-pet-personality-enable="sleepy">Enable</button><button type="button" data-pet-personality-disable="sleepy">Disable</button></div></div>' +
-        '<div class="sl-pet-personality-row" data-personality="exam"><strong>Exam Mode</strong><div><button type="button" data-pet-personality-enable="exam">Enable</button><button type="button" data-pet-personality-disable="exam">Disable</button></div></div>' +
-        '<div class="sl-pet-personality-row is-featured" data-personality="all-in-one"><strong>All In One</strong><div><button type="button" data-pet-personality-enable="all-in-one">Enable</button><button type="button" data-pet-personality-disable="all-in-one">Disable</button></div></div>' +
       '</div></div>' +
       '<div class="sl-pet-setting"><span>Message box</span><div class="sl-pet-setting-buttons">' +
         '<button type="button" data-pet-bubble-enable>Enable</button><button type="button" data-pet-bubble-disable>Disable</button>' +
       '</div></div>' +
-      '<p class="sl-pet-panel-note">Personalities can be enabled together. All In One blends every personality. Messages appear only for real interactions.</p>' +
+      '<p class="sl-pet-panel-note">Multiple personalities can work together.</p>' +
     '</aside>'
   );
 
@@ -226,12 +224,25 @@
   setPosition(state.x, state.y);
 
   function wake(reason) {
-    state.lastActivity = now();
+    const t = now();
+    state.lastActivity = t;
     if (!state.sleeping) return;
+
+    const sleptFor = state.lastSleepAt ? t - state.lastSleepAt : 0;
     state.sleeping = false;
+    state.wakeGreetingShown = false;
     character.dataset.state = "curious";
     state.expression = "curious";
-    state.nextBlink = now() + rand(2800, 5200);
+    state.nextBlink = t + rand(2800, 5200);
+
+    if (sleptFor >= 5000 && state.enabled && state.bubbleEnabled) {
+      state.wakeGreetingShown = true;
+      setTimeout(() => {
+        if (!state.enabled || !state.bubbleEnabled || state.sleeping) return;
+        setExpression("delighted", 1200, true);
+        showThought("Oh, " + state.companionName + " is back.", 1900);
+      }, 130);
+    }
   }
 
   function placeThought() {
@@ -247,13 +258,114 @@
     thought.style.top = Math.max(54, state.y - petHalfHeight - 2) + "px";
   }
 
+  const thoughtVariants = {
+    "Focus, work, break.":["Focus, work, break.","One task at a time.","Keep the rhythm."],
+    "Recall before reveal.":["Try remembering first.","Give your memory a turn.","Don't reveal it yet."],
+    "Find the pattern.":["Mistakes leave clues.","Let's find what changed.","That one has a lesson."],
+    "Plan the next task.":["One step at a time.","What comes next?","Make the next move count."],
+    "Check before targeting.":["Measure first.","Check the target twice.","Numbers behave better when checked."],
+    "Time + accuracy.":["Watch both the clock and the answer.","Speed matters, but so does accuracy.","Stay sharp."],
+    "Convert, then verify.":["Convert it, then check it.","Units first. Confidence second.","Let's make the units behave."],
+    "Relative motion → frequency.":["Motion changes what you hear.","Relative motion matters here.","Listen for the shift."],
+    "Masses attract each other.":["Gravity never really clocks out.","Everything with mass pulls a little.","Tiny pull, big consequence."],
+    "Forces change motion.":["Forces leave fingerprints.","Watch what the force changes.","Motion follows the push and pull."],
+    "Amplitude • frequency • phase.":["Three clues: amplitude, frequency, phase.","Watch the pattern change.","Waves have a rhythm."],
+    "Current • voltage • resistance.":["Keep an eye on the circuit.","Current, voltage, resistance.","Let's follow the charge."],
+    "Watch the endpoint.":["The endpoint is hiding in plain sight.","Watch for the change.","Easy hand, sharp eye."],
+    "Particles • bonds • reactions.":["Something interesting is happening at the particle level.","Bonds, particles, reactions.","Chemistry likes to rearrange things."],
+    "Observe before concluding.":["Look closely first.","Observation before conclusion.","Tiny details can matter."],
+    "Check signs and quadrants.":["Signs matter here.","Quadrants can trick you.","Check the angle before trusting it."],
+    "Define the variable first.":["Name the variable before chasing it.","One clean definition helps.","Start with the variable."],
+    "Magnitude + direction.":["Size and direction.","Vectors like both parts.","Don't lose the direction."],
+    "Isolate x, then check.":["Move the pieces, then check.","One step at a time.","Solve it, then verify it."],
+    "Structure • function • systems.":["Structure tells a story.","Function follows the structure.","Biology is full of connections."],
+    "Spot repeated patterns.":["Past papers leave clues.","Look for recurring ideas.","Patterns show up eventually."],
+    "Change one variable.":["Change one thing and watch.","One variable at a time.","Let's see what moves."],
+    "Study resources live here.":["There's useful stuff here.","The study trail continues.","A little resource treasure."],
+    "Narrow the search term.":["A tighter search should help.","Try a sharper keyword.","Let's narrow it down."],
+    "Keep this for later.":["Good one to keep.","Save it before you forget.","That might be useful later."],
+    "Ready for the PDF.":["That one looks ready to take with you.","Paper time.","A PDF for future-you."],
+    "Open it and start.":["Go on, open it.","Ready when you are.","Let's see what's inside."],
+    "Careful: data may clear.":["Easy there.","That button deserves a second look.","Careful with the data."],
+    "Choose what to study.":["Where are we going?","What's interesting today?","Pick a path."],
+    "Choose the next study task.":["What's the next little task?","One useful thing at a time.","Let's pick the next move."]
+  };
+
+  function freshThought(message) {
+    if (!message) return "";
+    const candidates = Array.isArray(message)
+      ? message
+      : (thoughtVariants[message] || [message]);
+    const clean = [...new Set(candidates.filter(Boolean))];
+    if (!clean.length) return "";
+    const recent = new Set(state.recentThoughts);
+    const fresh = clean.filter((item) => !recent.has(item));
+    const selected = pick(fresh.length ? fresh : clean);
+    state.recentThoughts = [selected, ...state.recentThoughts.filter((item) => item !== selected)].slice(0, 6);
+    return selected;
+  }
+
   function showThought(message, duration = 1800, force = false) {
     if (!state.enabled || (!state.bubbleEnabled && !force) || !message) return;
-    thoughtText.textContent = message;
+    const selected = freshThought(message);
+    if (!selected) return;
+    const t = now();
+    if (selected === state.recentThoughts[1] && t - state.lastThoughtAt < 4200) return;
+    state.lastThoughtAt = t;
+    thoughtText.textContent = selected;
     placeThought();
     thought.classList.add("is-visible");
     clearTimeout(state.bubbleTimer);
     state.bubbleTimer = setTimeout(() => thought.classList.remove("is-visible"), duration);
+  }
+
+  function displayNameForBubble(name) {
+    const clean = String(name || "").trim().replace(/s+/g, " ");
+    const placeholder = clean.match(/^Students*([0-9]{4})$/i);
+    if (placeholder) return "Student " + placeholder[1];
+    if (!clean) return "Student";
+    const first = clean.split(" ")[0];
+    return first.length <= 14 ? first : first.slice(0, 13) + "…";
+  }
+
+  function setStudentIdentity(name) {
+    const clean = String(name || "").trim().replace(/s+/g, " ");
+    if (!clean) return false;
+    const next = displayNameForBubble(clean);
+    const changed = state.studentName !== clean;
+    state.studentName = clean;
+    state.companionName = next;
+    return changed;
+  }
+
+  function sessionFlag(key) {
+    try { return sessionStorage.getItem(key) === "1"; } catch (_) { return false; }
+  }
+
+  function setSessionFlag(key) {
+    try { sessionStorage.setItem(key, "1"); } catch (_) {}
+  }
+
+  function initialWelcome() {
+    if (!state.enabled || !state.bubbleEnabled || sessionFlag("studylab-pet-welcomed")) return;
+    setSessionFlag("studylab-pet-welcomed");
+    setTimeout(() => {
+      if (!state.enabled || !state.bubbleEnabled || state.sleeping) return;
+      setExpression("delighted", 1250, true);
+      showThought("Hi " + state.companionName + "!", 1900);
+    }, 600);
+  }
+
+  async function loadStudentIdentity() {
+    try {
+      const account = window.StudyLabAccount;
+      if (account?.ready) {
+        await account.ready;
+        const profile = await account.getProfile();
+        if (profile?.display_name) setStudentIdentity(profile.display_name);
+      }
+    } catch (_) {}
+    initialWelcome();
   }
 
   function hideThought() {
@@ -310,47 +422,36 @@
   };
 
   const contextHoverFallback = {
-    home:"Choose what to study.",
-    physics:"Physics: observe, calculate, check.",
-    chemistry:"Chemistry: observe, balance, check.",
-    maths:"Maths: plan, solve, verify.",
-    biology:"Biology: observe structure and function.",
-    study:"Choose the next study task.",
-    exam:"Read carefully and watch time.",
-    social:"Study resources and updates."
+    home:["Choose what to study.","What's interesting today?","Pick a path."],
+    physics:["Physics time.","Let's see what moves.","Watch the cause and effect."],
+    chemistry:["Chemistry time.","Something is reacting.","Let's see what changed."],
+    maths:["Maths time.","Think first, then solve.","Let's make the steps behave."],
+    biology:["Life is doing something interesting.","Look at the structure.","Biology has patterns everywhere."],
+    study:["Choose the next little task.","One useful thing at a time.","Let's pick the next move."],
+    exam:["Read carefully.","Stay calm and watch the time.","One question at a time."],
+    social:["Something useful may be hiding here.","Study resources live here.","The community shelf."]
   };
 
   const contextActionFallback = {
-    home:"Opening this StudyLab item.",
-    physics:"Opening physics work.",
-    chemistry:"Opening chemistry work.",
-    maths:"Opening maths work.",
-    biology:"Opening biology work.",
-    study:"Opening this study tool.",
-    exam:"Opening exam material.",
-    social:"Opening community resources."
+    home:["Opening this StudyLab item.","Let's see.","Off we go."],
+    physics:["Opening physics work.","Let's follow the motion.","Physics is calling."],
+    chemistry:["Opening chemistry work.","Let's inspect the reaction.","Chemistry time."],
+    maths:["Opening maths work.","Let's solve it carefully.","Maths time."],
+    biology:["Opening biology work.","Let's inspect the system.","Biology time."],
+    study:["Opening this study tool.","Let's make this count.","One useful tool."],
+    exam:["Opening exam material.","Let's tackle it carefully.","Exam work."],
+    social:["Opening community resources.","Let's see what's there.","Community resources."]
   };
 
   const personalityProfiles = {
-    natural:{label:"Natural",moveScale:1.00,minMove:300,wanderWait:[13000,22000],initialWait:[9000,15000],sleepAfter:32000,cardBias:.38,hoverDelay:120,expressionMoods:null,angerDuration:[4200,6200],angerFactor:1.00},
-    playful:{label:"Playful",moveScale:.88,minMove:285,wanderWait:[8000,14500],initialWait:[6000,10000],sleepAfter:42000,cardBias:.62,hoverDelay:90,expressionMoods:["happy","excited","curious","surprised"],angerDuration:[3400,5000],angerFactor:1.05},
-    angry:{label:"Angry",moveScale:.94,minMove:290,wanderWait:[9000,16000],initialWait:[6500,10500],sleepAfter:52000,cardBias:.48,hoverDelay:60,expressionMoods:["angry","annoyed","suspicious","alert"],angerDuration:[5600,7600],angerFactor:1.75},
-    strict:{label:"Strict",moveScale:1.14,minMove:340,wanderWait:[18000,30000],initialWait:[13000,21000],sleepAfter:44000,cardBias:.24,hoverDelay:150,expressionMoods:["focused","alert","suspicious","worried"],angerDuration:[5200,7200],angerFactor:1.10},
-    lazy:{label:"Lazy",moveScale:1.26,minMove:335,wanderWait:[28000,46000],initialWait:[22000,34000],sleepAfter:19000,cardBias:.10,hoverDelay:260,expressionMoods:["bored","neutral","shy"],angerDuration:[2800,4300],angerFactor:.80},
-    focused:{label:"Focused",moveScale:1.06,minMove:325,wanderWait:[10500,18500],initialWait:[7500,12000],sleepAfter:43000,cardBias:.76,hoverDelay:95,expressionMoods:["focused","thinking","alert"],angerDuration:[4500,6500],angerFactor:1.05},
-    curious:{label:"Curious",moveScale:.93,minMove:300,wanderWait:[7500,14000],initialWait:[5500,9500],sleepAfter:40000,cardBias:.86,hoverDelay:55,expressionMoods:["curious","surprised","thinking","delighted"],angerDuration:[3800,5400],angerFactor:1.00},
-    energetic:{label:"Energetic",moveScale:.78,minMove:310,wanderWait:[6000,11500],initialWait:[4500,8000],sleepAfter:50000,cardBias:.64,hoverDelay:60,expressionMoods:["excited","happy","alert","curious"],angerDuration:[3800,5600],angerFactor:1.10},
-    observer:{label:"Observer",moveScale:1.17,minMove:365,wanderWait:[29000,47000],initialWait:[18000,31000],sleepAfter:36000,cardBias:.86,hoverDelay:210,expressionMoods:["curious","focused","neutral","suspicious"],angerDuration:[3600,5200],angerFactor:.95},
-    social:{label:"Social",moveScale:.96,minMove:300,wanderWait:[9500,17500],initialWait:[7000,12000],sleepAfter:46000,cardBias:.66,hoverDelay:85,expressionMoods:["happy","delighted","curious","excited"],angerDuration:[3600,5200],angerFactor:.90},
-    sleepy:{label:"Sleepy",moveScale:1.30,minMove:350,wanderWait:[30000,52000],initialWait:[24000,38000],sleepAfter:15000,cardBias:.07,hoverDelay:300,expressionMoods:["sleeping","bored","shy","neutral"],angerDuration:[3000,4500],angerFactor:.75},
-    exam:{label:"Exam Mode",moveScale:1.10,minMove:345,wanderWait:[18000,30000],initialWait:[12000,20000],sleepAfter:52000,cardBias:.50,hoverDelay:135,expressionMoods:["alert","focused","worried","thinking"],angerDuration:[5200,7200],angerFactor:1.15},
-    "all-in-one":{label:"All In One",moveScale:.90,minMove:300,wanderWait:[7000,13500],initialWait:[5000,9000],sleepAfter:50000,cardBias:.82,hoverDelay:60,expressionMoods:null,angerDuration:[4600,6800],angerFactor:1.30}
+    natural:{label:"Natural",moveScale:1.00,minMove:320,wanderWait:[18000,30000],initialWait:[9000,15000],sleepAfter:34000,cardBias:.46,hoverDelay:160,expressionMoods:["neutral","curious","thinking","happy"],angerDuration:[4500,6500],angerFactor:1.00},
+    playful:{label:"Playful",moveScale:.90,minMove:300,wanderWait:[12500,22000],initialWait:[6500,10500],sleepAfter:45000,cardBias:.60,hoverDelay:110,expressionMoods:["happy","excited","curious","surprised"],angerDuration:[3800,5400],angerFactor:1.00},
+    focused:{label:"Focused",moveScale:1.04,minMove:350,wanderWait:[19000,31000],initialWait:[10000,17000],sleepAfter:50000,cardBias:.78,hoverDelay:140,expressionMoods:["focused","thinking","alert"],angerDuration:[4600,6600],angerFactor:1.05},
+    curious:{label:"Curious",moveScale:.95,minMove:310,wanderWait:[11000,19000],initialWait:[5500,9000],sleepAfter:42000,cardBias:.86,hoverDelay:75,expressionMoods:["curious","surprised","thinking","delighted"],angerDuration:[4000,5600],angerFactor:1.00},
+    observer:{label:"Observer",moveScale:1.15,minMove:370,wanderWait:[26000,42000],initialWait:[14000,23000],sleepAfter:38000,cardBias:.90,hoverDelay:240,expressionMoods:["curious","focused","neutral","suspicious"],angerDuration:[3800,5400],angerFactor:.95}
   };
 
   function enabledPersonalities() {
-    if (state.personalities.includes("all-in-one")) {
-      return PERSONALITY_NAMES.filter((name) => name !== "all-in-one");
-    }
     return state.personalities.filter((name) => personalityProfiles[name]);
   }
 
@@ -519,11 +620,31 @@
     return pool ? pick(pool) : base;
   }
 
+  function interactionKey(el) {
+    if (!el) return "";
+    const href = el.getAttribute("href") || "";
+    const id = el.id || "";
+    const label = (el.getAttribute("aria-label") || el.getAttribute("title") || "").trim();
+    const heading = el.querySelector?.("h1,h2,h3,h4,h5,h6,.card-title,.utility-card-title,.subject-title,.tool-title,strong")?.textContent || "";
+    return [href, id, label, heading].join("|").replace(/s+/g, " ").slice(0, 180).toLowerCase();
+  }
+
   function reactToElement(el, type) {
     if (!state.enabled || !el || el === character || character.contains(el) || el === launcher || panel.contains(el)) return;
 
     const time = now();
     if (type === "click" && time - state.lastReaction < 350) return;
+
+    const key = interactionKey(el);
+    if (type === "hover" && key &&
+        state.recentInteractionKeys.some((item) => item.key === key && time - item.time < 6500)) {
+      return;
+    }
+
+    state.recentInteractionKeys = [
+      ...(key ? [{ key, time }] : []),
+      ...state.recentInteractionKeys.filter((item) => item.key !== key && time - item.time < 16000)
+    ].slice(0, 12);
 
     state.lastReaction = time;
     state.lastActivity = time;
@@ -658,7 +779,8 @@
     const dy = targetY - startY;
     const distance = Math.hypot(dx, dy);
 
-    if (distance < minimumWalkDistance()) return false;
+    const minimumDistance = reason === "evade" ? 150 : minimumWalkDistance();
+    if (distance < minimumDistance) return false;
 
     const direction = visualDirection(dx, dy);
     const duration = reason === "evade"
@@ -788,47 +910,75 @@
   }
 
   function evadeCursor(force = false) {
-    if (!state.enabled || state.dragging || reduced) return;
-    if (state.evading && !force) return;
-    if (!force && now() < state.nextEvade) return;
-    if (state.moveAnimation && !force) return;
+    if (!state.enabled || state.dragging || reduced) return false;
+    if (state.evading && !force) return false;
+    if (!force && now() < state.nextEvade) return false;
+    if (state.moveAnimation && !force) return false;
 
-    const dx = state.x - state.pointerX;
-    const dy = state.y - state.pointerY;
-    const len = Math.max(1, Math.hypot(dx, dy));
+    const pointerDx = state.x - state.pointerX;
+    const pointerDy = state.y - state.pointerY;
+    const pointerDistance = Math.hypot(pointerDx, pointerDy);
+    let baseAngle = Math.atan2(pointerDy, pointerDx);
 
-    let vx = dx / len;
-    let vy = dy / len;
-
-    if (len < 1) {
-      vx = Math.random() < 0.5 ? -1 : 1;
-      vy = Math.random() < 0.5 ? -0.6 : 0.6;
+    if (!Number.isFinite(baseAngle) || pointerDistance < 28) {
+      baseAngle = rand(0, Math.PI * 2);
     }
 
-    const distance = state.angerLevel >= 4 ? rand(190, 270) : rand(165, 225);
-    let tx = state.x + vx * distance;
-    let ty = state.y + vy * distance * 0.78;
+    const avoidRadius = state.angerLevel >= 4 ? 255 : 225;
+    const distances = state.angerLevel >= 4 ? [300, 330, 360] : [260, 290, 320];
+    const angleOffsets = [0, -0.28, 0.28, -0.56, 0.56, -0.90, 0.90];
 
-    if (Math.abs(vx) < 0.25) tx += (Math.random() < 0.5 ? -1 : 1) * rand(50, 110);
+    let best = null;
+    let bestScore = -Infinity;
 
-    tx = clamp(tx, 55, window.innerWidth - 55);
-    ty = clamp(ty, 92, window.innerHeight - 105);
+    for (const offset of angleOffsets) {
+      for (const distance of distances) {
+        const angle = baseAngle + offset;
+        const candidate = {
+          x: clamp(state.x + Math.cos(angle) * distance, 58, window.innerWidth - 58),
+          y: clamp(state.y + Math.sin(angle) * distance * 0.78, 94, window.innerHeight - 108)
+        };
+
+        const movement = Math.hypot(candidate.x - state.x, candidate.y - state.y);
+        const fromCursor = Math.hypot(candidate.x - state.pointerX, candidate.y - state.pointerY);
+        const score = fromCursor * 2.2 + movement * 0.35;
+
+        if (movement >= 150 && fromCursor >= avoidRadius && score > bestScore) {
+          best = candidate;
+          bestScore = score;
+        }
+      }
+    }
+
+    if (!best) {
+      const fallbackAngle = baseAngle + (Math.PI * (Math.random() < 0.5 ? 0.72 : -0.72));
+      best = {
+        x: clamp(state.x + Math.cos(fallbackAngle) * 280, 58, window.innerWidth - 58),
+        y: clamp(state.y + Math.sin(fallbackAngle) * 280 * 0.78, 94, window.innerHeight - 108)
+      };
+    }
 
     setExpression("angry", 900, true);
-    state.nextEvade = now() + rand(420, 720);
+    state.nextEvade = now() + rand(520, 850);
     state.evading = true;
-    animateMoveTo(tx, ty, "evade");
+
+    const moved = animateMoveTo(best.x, best.y, "evade");
+    if (!moved) {
+      state.evading = false;
+      state.nextEvade = now() + 220;
+      return false;
+    }
+
+    return true;
   }
 
   function enterAnger(level = 1) {
     if (!state.enabled) return;
 
     const profile = modeProfile();
-    const angryBoost = state.personalities.includes("angry") || state.personalities.includes("all-in-one");
-    const adjustedLevel = angryBoost ? Math.min(5, level + 1) : level;
 
     state.sleeping = false;
-    state.angerLevel = clamp(Math.max(state.angerLevel, adjustedLevel), 1, 5);
+    state.angerLevel = clamp(Math.max(state.angerLevel, level), 1, 5);
     state.angerUntil = now() + rand(
       profile.angerDuration[0] * profile.angerFactor,
       profile.angerDuration[1] * profile.angerFactor
@@ -842,7 +992,10 @@
     setGazeTarget(state.pointerX, state.pointerY, true);
 
     if (state.angerLevel >= 2) {
-      showThought(state.angerLevel >= 4 ? "BACK OFF." : "...seriously?", 1100);
+      const angerThoughts = state.angerLevel >= 4
+        ? ["Hey... easy.","Please stop.","Too much now."]
+        : ["Easy there.","Again?","Hey..."];
+      showThought(angerThoughts, 1100);
     }
 
     state.angerTimer = setTimeout(() => {
@@ -868,16 +1021,15 @@
     state.clickTimes.push(t);
 
     const rapid = state.clickTimes.length;
-    const angerEnabled = state.personalities.includes("angry") || state.personalities.includes("all-in-one");
-    const angerThreshold = angerEnabled ? 2 : 3;
 
-    if (rapid >= angerThreshold) {
+    if (rapid >= 3) {
       enterAnger(Math.min(5, rapid));
     } else if (rapid === 2) {
       setExpression("annoyed", 850, true);
-      showThought(state.eye === "cyan" ? "Dude..." : "Seriously?", 900);
+      showThought(["Easy...","You clicked twice.","I'm right here."], 900);
     } else {
-      setExpression(state.eye === "cyan" ? "curious" : "shy", 700, true);
+      setExpression(state.eye === "cyan" ? "curious" : "shy", 850, true);
+      showThought(["Hm?","You called?","I'm here."], 850);
     }
   }
 
@@ -1064,7 +1216,7 @@
         state.nameMessageShown = false;
       } else if (!state.nameMessageShown) {
         state.nameMessageShown = true;
-        showThought(value.length >= 2 ? "Profile name set." : "Typing your name.", 1050);
+        showThought(value.length >= 2 ? "I see the name." : "I'm watching.", 1050);
       }
     } else if (value) {
       setExpression("focused", 650);
@@ -1078,6 +1230,16 @@
     if (Math.random() < 0.045 && !state.sleeping) {
       setExpression("alert", 600);
     }
+  }, { passive: true });
+
+  window.addEventListener("studylab-profile-updated", (event) => {
+    const nextName = event.detail?.display_name;
+    if (!nextName) return;
+    const changed = setStudentIdentity(nextName);
+    if (!changed || !state.enabled || !state.bubbleEnabled) return;
+    state.lastMeaningfulActivity = now();
+    setExpression("delighted", 1100);
+    showThought("Nice, " + state.companionName + ".", 1700);
   }, { passive: true });
 
   const themeToggle = document.querySelector(".theme-toggle");
@@ -1155,10 +1317,8 @@
 
   function personalityLabel(name) {
     const labels = {
-      natural:"Natural", playful:"Playful", angry:"Angry", strict:"Strict",
-      lazy:"Lazy", focused:"Focused", curious:"Curious", energetic:"Energetic",
-      observer:"Observer", social:"Social", sleepy:"Sleepy", exam:"Exam Mode",
-      "all-in-one":"All In One"
+      natural:"Natural", playful:"Playful", focused:"Focused",
+      curious:"Curious", observer:"Observer"
     };
     return labels[name] || name;
   }
@@ -1341,6 +1501,8 @@
       character.dataset.blink = "false";
       hideThought();
       stopMove();
+      state.lastSleepAt = t;
+      state.wakeGreetingShown = false;
       return;
     }
 
@@ -1374,4 +1536,5 @@
 
   setInterval(idleAndLife, 400);
   setTimeout(() => setExpression("curious", 950, true), 850);
+  loadStudentIdentity();
 })();
