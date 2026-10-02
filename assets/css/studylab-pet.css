@@ -1129,3 +1129,130 @@ html[data-theme="light"] .sl-pet-setting-buttons button {
 .sl-pet-character[data-eye="pink"][data-state="sad"] .sl-pet-mouth {
   border-color: #d39abc;
 }
+
+
+/* ---------- Personality emotes ---------- */
+
+.sl-pet-emote {
+  position: absolute;
+  left: 50%;
+  top: -34px;
+  width: 29px;
+  height: 29px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(2,5,8,.88);
+  border: 1px solid rgba(255,255,255,.18);
+  box-shadow:
+    0 8px 18px rgba(0,0,0,.22),
+    0 0 15px rgba(93,231,255,.16);
+  color: #e9fbff;
+  font-size: 17px;
+  line-height: 1;
+  opacity: 0;
+  transform: translate(-50%, 9px) scale(.45);
+  transform-origin: 50% 100%;
+  pointer-events: none;
+  z-index: 8;
+  will-change: transform, opacity;
+}
+
+.sl-pet-emote.is-visible {
+  animation: slPetEmotePop 1.45s cubic-bezier(.18,.82,.18,1) both;
+}
+
+.sl-pet-emote[data-emote="natural"].is-visible {
+  animation-name: slPetEmoteNatural;
+}
+
+.sl-pet-emote[data-emote="playful"].is-visible {
+  animation-name: slPetEmotePlayful;
+}
+
+.sl-pet-emote[data-emote="focused"].is-visible {
+  animation-name: slPetEmoteFocused;
+}
+
+.sl-pet-emote[data-emote="curious"].is-visible {
+  animation-name: slPetEmoteCurious;
+}
+
+.sl-pet-emote[data-emote="observer"].is-visible {
+  animation-name: slPetEmoteObserver;
+}
+
+.sl-pet-character[data-eye="pink"] .sl-pet-emote {
+  box-shadow:
+    0 8px 18px rgba(0,0,0,.22),
+    0 0 15px rgba(255,132,200,.17);
+}
+
+@keyframes slPetEmotePop {
+  0% { opacity: 0; transform: translate(-50%, 9px) scale(.45); }
+  20% { opacity: 1; transform: translate(-50%, -2px) scale(1.08); }
+  38% { transform: translate(-50%, -1px) scale(.96); }
+  72% { opacity: 1; transform: translate(-50%, -8px) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -19px) scale(.86); }
+}
+
+@keyframes slPetEmoteNatural {
+  0% { opacity: 0; transform: translate(-50%, 8px) scale(.42) rotate(-18deg); }
+  20% { opacity: 1; transform: translate(-50%, -2px) scale(1.08) rotate(10deg); }
+  42% { transform: translate(-50%, -1px) scale(.98) rotate(-8deg); }
+  62% { transform: translate(-50%, -6px) scale(1) rotate(5deg); }
+  100% { opacity: 0; transform: translate(-50%, -19px) scale(.84) rotate(0); }
+}
+
+@keyframes slPetEmotePlayful {
+  0% { opacity: 0; transform: translate(-50%, 9px) scale(.38) rotate(-14deg); }
+  18% { opacity: 1; transform: translate(-50%, -2px) scale(1.14) rotate(12deg); }
+  34% { transform: translate(-50%, -4px) scale(.94) rotate(-11deg); }
+  52% { transform: translate(-50%, -1px) scale(1.06) rotate(8deg); }
+  100% { opacity: 0; transform: translate(-50%, -21px) scale(.82) rotate(0); }
+}
+
+@keyframes slPetEmoteFocused {
+  0% { opacity: 0; transform: translate(-50%, 8px) scale(.38); }
+  24% { opacity: 1; transform: translate(-50%, -2px) scale(1.08); }
+  48% { transform: translate(-50%, -7px) scale(.98); }
+  100% { opacity: 0; transform: translate(-50%, -19px) scale(.86); }
+}
+
+@keyframes slPetEmoteCurious {
+  0% { opacity: 0; transform: translate(-50%, 8px) scale(.42) rotate(0); }
+  22% { opacity: 1; transform: translate(-50%, -2px) scale(1.08) rotate(-7deg); }
+  52% { transform: translate(-50%, -7px) scale(1) rotate(7deg); }
+  100% { opacity: 0; transform: translate(-50%, -20px) scale(.84) rotate(0); }
+}
+
+@keyframes slPetEmoteObserver {
+  0% { opacity: 0; transform: translate(-50%, 8px) scale(.40); }
+  25% { opacity: 1; transform: translate(-50%, -2px) scale(1.08); }
+  45% { transform: translate(-50%, -3px) scale(1); }
+  60% { transform: translate(-50%, -10px) scale(1.03); }
+  100% { opacity: 0; transform: translate(-50%, -20px) scale(.84); }
+}
+
+/* Playful personality gets a lively sway without adding robotic side-to-side shaking. */
+.sl-pet-character[data-playful="true"][data-moving="true"] .sl-pet-visual {
+  animation: slPetPlayfulBob .76s ease-in-out infinite !important;
+}
+
+@keyframes slPetPlayfulBob {
+  0%, 100% { transform: translateY(0) rotate(0deg) scaleY(1); }
+  32% { transform: translateY(-1.7px) rotate(-.7deg) scaleY(1.01); }
+  68% { transform: translateY(.2px) rotate(.7deg) scaleY(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sl-pet-emote.is-visible,
+  .sl-pet-character[data-playful="true"][data-moving="true"] .sl-pet-visual {
+    animation: none !important;
+  }
+
+  .sl-pet-emote.is-visible {
+    opacity: 1;
+    transform: translate(-50%, -5px) scale(1);
+  }
+}
