@@ -988,7 +988,11 @@
       state.dragging = false;
       state.danger = false;
       state.angerUntil = 0;
+      state.angerLevel = 0;
+      state.evading = false;
+      clearTimeout(state.angerTimer);
       character.dataset.danger = "false";
+      character.dataset.angerLevel = "0";
       character.dataset.state = "neutral";
       hideThought();
       stage.classList.add("is-disabled");
