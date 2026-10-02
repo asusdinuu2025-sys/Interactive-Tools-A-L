@@ -176,6 +176,7 @@
   const disableButton = panel.querySelector("[data-pet-disable]");
   const eyeButtons = [...panel.querySelectorAll("[data-pet-eye]")];
   const modeButtons = [...panel.querySelectorAll("[data-pet-mode]")];
+  const modeButtons = [...panel.querySelectorAll("[data-pet-mode]")];
 
   function setPosition(x, y) {
     const halfW = window.innerWidth <= 720 ? 41 : 45;
@@ -319,6 +320,82 @@
     { re: /submit|finish|complete|start/, expression: "alert", thought: "Go." }
   ];
 
+  const modeProfiles = {
+    natural:{label:"Natural",moveScale:1,minMove:300,wanderWait:[13000,22000],initialWait:[9000,15000],sleepAfter:32000,cardBias:.38,hoverDelay:120,expressionMoods:null,angerDuration:[4200,6200]},
+    playful:{label:"Playful",moveScale:.90,minMove:285,wanderWait:[8500,15000],initialWait:[6500,11000],sleepAfter:42000,cardBias:.58,hoverDelay:90,expressionMoods:["happy","excited","curious","surprised"],angerDuration:[3500,5000]},
+    strict:{label:"Strict",moveScale:1.12,minMove:340,wanderWait:[18000,29000],initialWait:[13000,21000],sleepAfter:44000,cardBias:.22,hoverDelay:160,expressionMoods:["focused","alert","suspicious","worried"],angerDuration:[5200,7200]},
+    lazy:{label:"Lazy",moveScale:1.18,minMove:330,wanderWait:[26000,44000],initialWait:[20000,32000],sleepAfter:19000,cardBias:.12,hoverDelay:260,expressionMoods:["bored","sleeping","neutral","shy"],angerDuration:[2800,4300]},
+    focused:{label:"Focused",moveScale:1.05,minMove:320,wanderWait:[10500,18500],initialWait:[7500,12000],sleepAfter:43000,cardBias:.72,hoverDelay:100,expressionMoods:["focused","thinking","alert"],angerDuration:[4500,6500]},
+    curious:{label:"Curious",moveScale:.94,minMove:300,wanderWait:[8000,14500],initialWait:[6000,10000],sleepAfter:40000,cardBias:.82,hoverDelay:80,expressionMoods:["curious","surprised","thinking","delighted"],angerDuration:[3800,5400]},
+    energetic:{label:"Energetic",moveScale:.82,minMove:310,wanderWait:[6500,12000],initialWait:[5000,8500],sleepAfter:50000,cardBias:.62,hoverDelay:70,expressionMoods:["excited","happy","alert","curious"],angerDuration:[3800,5600]},
+    observer:{label:"Observer",moveScale:1.16,minMove:360,wanderWait:[28000,46000],initialWait:[17000,30000],sleepAfter:36000,cardBias:.80,hoverDelay:240,expressionMoods:["curious","focused","neutral","suspicious"],angerDuration:[3600,5200]},
+    social:{label:"Social",moveScale:.96,minMove:300,wanderWait:[10000,18000],initialWait:[7000,12000],sleepAfter:46000,cardBias:.65,hoverDelay:100,expressionMoods:["happy","delighted","curious","excited"],angerDuration:[3600,5200]},
+    sleepy:{label:"Sleepy",moveScale:1.28,minMove:350,wanderWait:[30000,52000],initialWait:[24000,38000],sleepAfter:15000,cardBias:.08,hoverDelay:300,expressionMoods:["sleeping","bored","shy","neutral"],angerDuration:[3000,4500]},
+    exam:{label:"Exam Mode",moveScale:1.12,minMove:345,wanderWait:[18000,30000],initialWait:[12000,20000],sleepAfter:52000,cardBias:.48,hoverDelay:140,expressionMoods:["alert","focused","worried","thinking"],angerDuration:[5200,7200]},
+    "all-in-one":{label:"All In One",moveScale:.88,minMove:300,wanderWait:[7500,14500],initialWait:[5500,9500],sleepAfter:48000,cardBias:.78,hoverDelay:75,expressionMoods:null,angerDuration:[4600,6800]}
+  };
+  if (!modeProfiles[state.mode]) state.mode="natural";
+
+  const semanticRules = [
+    {re:/pomodoro|focus timer/,expression:"focused",hover:"Focus, work, break.",action:"Starting a focus session."},
+    {re:/flashcard|flash card/,expression:"curious",hover:"Recall before reveal.",action:"Opening flashcard practice."},
+    {re:/mistake|mistakes|error notebook/,expression:"worried",hover:"Find the pattern.",action:"Reviewing mistakes."},
+    {re:/planner|study plan/,expression:"thinking",hover:"Plan the next task.",action:"Planning the study session."},
+    {re:/marks|marks calculator|calculator|calculat/,expression:"thinking",hover:"Check before targeting.",action:"Calculating the marks."},
+    {re:/mock exam|exam timer|quiz/,expression:"alert",hover:"Time + accuracy.",action:"Starting mock-exam work."},
+    {re:/converter|convert/,expression:"curious",hover:"Convert, then verify.",action:"Converting units."},
+
+    {re:/doppler/,expression:"excited",hover:"Relative motion → frequency.",action:"Studying the Doppler effect."},
+    {re:/gravity|gravitation/,expression:"focused",hover:"Masses attract each other.",action:"Exploring gravity."},
+    {re:/newton|force|motion|kinematic|mechanic/,expression:"alert",hover:"Forces change motion.",action:"Working on mechanics."},
+    {re:/wave|oscillation|shm|simple harmonic/,expression:"focused",hover:"Amplitude • frequency • phase.",action:"Studying wave motion."},
+    {re:/electric|circuit|current|voltage|resistor/,expression:"alert",hover:"Current • voltage • resistance.",action:"Working on electricity."},
+    {re:/physics/,expression:"focused",hover:"Force • motion • energy.",action:"Opening physics work."},
+
+    {re:/titration|titrate|endpoint|end point/,expression:"focused",hover:"Watch the endpoint.",action:"Working on titration."},
+    {re:/reaction|chemical|organic|inorganic|mole|stoichiometr/,expression:"curious",hover:"Particles • bonds • reactions.",action:"Working on chemistry."},
+    {re:/practical|laboratory|lab/,expression:"delighted",hover:"Observe before concluding.",action:"Starting practical work."},
+    {re:/chemistry/,expression:"curious",hover:"Particles • bonds • reactions.",action:"Opening chemistry work."},
+
+    {re:/trigonometry|sine|cosine|tan/,expression:"thinking",hover:"Check signs and quadrants.",action:"Working on trigonometry."},
+    {re:/calculus|derivative|integral|differential/,expression:"focused",hover:"Define the variable first.",action:"Working on calculus."},
+    {re:/vector|vectors/,expression:"thinking",hover:"Magnitude + direction.",action:"Working on vectors."},
+    {re:/equation|algebra|polynomial/,expression:"thinking",hover:"Isolate x, then check.",action:"Working on algebra."},
+    {re:/maths|mathematics/,expression:"thinking",hover:"Plan • solve • verify.",action:"Opening maths work."},
+
+    {re:/genetics|gene|dna|chromosome/,expression:"curious",hover:"Genes carry information.",action:"Exploring genetics."},
+    {re:/cell|organelle|mitosis|meiosis/,expression:"focused",hover:"Structure and function.",action:"Studying cells."},
+    {re:/ecology|ecosystem|food chain/,expression:"alert",hover:"Watch system interactions.",action:"Exploring ecology."},
+    {re:/biology|organism/,expression:"curious",hover:"Structure • function • systems.",action:"Opening biology work."},
+
+    {re:/past paper|marking scheme|model paper|school paper/,expression:"focused",hover:"Spot repeated patterns.",action:"Opening exam material."},
+    {re:/exam hub|exam/,expression:"alert",hover:"Read carefully. Watch time.",action:"Opening exam work."},
+    {re:/simulation|simulat|interactive/,expression:"excited",hover:"Change one variable.",action:"Opening an interactive simulation."},
+    {re:/telegram|community|channel/,expression:"happy",hover:"Study resources live here.",action:"Opening community resources."},
+    {re:/search/,expression:"curious",hover:"Narrow the search term.",action:"Using StudyLab search."},
+    {re:/profile|account|name/,expression:"curious",hover:"Your StudyLab identity.",action:"Editing your profile."},
+    {re:/theme|dark mode|light mode/,expression:"surprised",hover:"New view, same StudyLab.",action:"Changing the theme."},
+    {re:/save|favorite|favourite|bookmark/,expression:"happy",hover:"Keep this for later.",action:"Saving this resource."},
+    {re:/download|pdf/,expression:"focused",hover:"Ready for the PDF.",action:"Downloading study material."},
+    {re:/open|view/,expression:"focused",hover:"Open it and start.",action:"Opening the material."},
+    {re:/delete|remove|reset|clear/,expression:"worried",hover:"Careful: data may clear.",action:"Editing or clearing this item."},
+    {re:/submit|finish|complete|start/,expression:"alert",hover:"Ready for the next step.",action:"Moving to the next step."}
+  ];
+
+  const contextHoverFallback = {
+    home:"Choose what to study.", physics:"Physics: observe, calculate, check.",
+    chemistry:"Chemistry: observe, balance, check.", maths:"Maths: plan, solve, verify.",
+    biology:"Biology: observe structure and function.", study:"Choose the next study task.",
+    exam:"Read carefully and watch time.", social:"Study resources and updates."
+  };
+
+  const contextActionFallback = {
+    home:"Opening this StudyLab item.", physics:"Opening physics work.",
+    chemistry:"Opening chemistry work.", maths:"Opening maths work.",
+    biology:"Opening biology work.", study:"Opening this study tool.",
+    exam:"Opening exam material.", social:"Opening community resources."
+  };
+
   function descriptor(el) {
     if (!el) return "";
     return [
@@ -365,27 +442,27 @@
     return cleanHint + " • " + cleanName;
   }
 
-  function infoFor(el) {
+  function infoFor(el, type = "hover") {
     const text = descriptor(el);
-    const name = elementName(el);
-
-    const utility = utilityMap.find((item) => item.re.test(text));
-    if (utility) return {
-      expression: utility.expression,
-      thought: namedThought(name, utility.thought)
-    };
-
-    const matched = elementMap.find((item) => item.re.test(text));
-    if (matched) return {
-      expression: matched.expression,
-      thought: namedThought(name, matched.thought)
-    };
-
+    const matched = semanticRules.find((item) => item.re.test(text));
     const context = contextFromElement(el) || state.context;
+    const fallback = type === "click"
+      ? (contextActionFallback[context] || "Opening this StudyLab item.")
+      : (contextHoverFallback[context] || "Choose the next study task.");
+
     return {
-      expression: pick(contextMoods[context] || ["neutral"]),
-      thought: namedThought(name, contextThoughts[context] || "Open it.")
+      expression: matched ? matched.expression : pick(contextMoods[context] || ["neutral"]),
+      thought: matched ? (type === "click" ? matched.action : matched.hover) : fallback
     };
+  }
+
+  function modeProfile() {
+    return modeProfiles[state.mode] || modeProfiles.natural;
+  }
+
+  function modeExpression(base) {
+    const profile = modeProfile();
+    return profile.expressionMoods?.length ? pick(profile.expressionMoods) : personaVariation(base);
   }
 
   function contextFromElement(el) {
@@ -429,23 +506,17 @@
     if (!state.enabled || !el || el === character || character.contains(el) || el === launcher || panel.contains(el)) return;
 
     const time = now();
-    if (time - state.lastReaction < (type === "hover" ? 1250 : 350)) return;
+    if (time - state.lastReaction < (type === "hover" ? 500 : 350)) return;
 
     state.lastReaction = time;
     state.lastActivity = time;
     state.lastMeaningfulActivity = time;
     wake("pointer");
 
-    const info = infoFor(el);
-    const expression = personaVariation(info.expression || "neutral");
-
-    if (type === "click") {
-      setExpression(expression, 1550);
-      showThought(info.thought || "Open it.", 1450);
-    } else {
-      setExpression(expression, 900);
-    }
-
+    const info = infoFor(el, type);
+    const expression = modeExpression(info.expression || "neutral");
+    setExpression(expression, type === "hover" ? 1250 : 1550);
+    showThought(info.thought, type === "hover" ? 1450 : 1500);
     lookAtElement(el);
   }
 
@@ -558,12 +629,12 @@
     const dy = targetY - startY;
     const distance = Math.hypot(dx, dy);
 
-    if (distance < 240) return;
+    if (distance < modeProfile().minMove) return;
 
     const direction = visualDirection(dx, dy);
     const duration = reason === "evade"
       ? walkingDuration(distance, direction, reason)
-      : clamp(walkingDuration(distance, direction, reason) * 1.40, 3200, 6800);
+      : clamp(walkingDuration(distance, direction, reason) * modeProfile().moveScale * 1.40, 3200, 7000);
     const started = now();
     const token = state.moveToken;
 
@@ -607,10 +678,9 @@
 
         if (reason === "wander") {
           state.lastWander = now();
-          state.nextWander = now() + (
-            state.context === "study"
-              ? rand(13000, 22000)
-              : rand(20000, 34000)
+          state.nextWander = now() + rand(
+            modeProfile().wanderWait[0],
+            modeProfile().wanderWait[1]
           );
         }
 
@@ -634,7 +704,11 @@
   }
 
   function visibleDestination() {
-    const minDistance = Math.max(300, Math.min(window.innerWidth, window.innerHeight) * 0.34);
+    const profile = modeProfile();
+    const minDistance = Math.max(
+      profile.minMove,
+      Math.min(window.innerWidth, window.innerHeight) * 0.38
+    );
     const candidates = [...document.querySelectorAll(
       ".subject-card, .utility-card, .telegram-card, .card, .resource-card, .tool-card"
     )].filter((el) => {
@@ -647,7 +721,7 @@
     });
 
     for (let attempt = 0; attempt < 10; attempt++) {
-      const point = candidates.length && Math.random() < 0.30
+      const point = candidates.length && Math.random() < profile.cardBias
         ? (() => {
             const el = pick(candidates);
             const r = el.getBoundingClientRect();
@@ -710,7 +784,8 @@
 
     state.sleeping = false;
     state.angerLevel = clamp(Math.max(state.angerLevel, level), 1, 5);
-    state.angerUntil = now() + rand(4200, 6200);
+    const profile = modeProfile();
+    state.angerUntil = now() + rand(profile.angerDuration[0], profile.angerDuration[1]);
     state.danger = true;
     character.dataset.danger = "true";
     character.dataset.angerLevel = String(state.angerLevel);
@@ -836,6 +911,8 @@
       return;
     }
 
+    trackHoverTarget();
+
     if (state.sleeping) wake("pointer");
 
     if (!state.dragging && state.angerUntil > now()) {
@@ -891,14 +968,30 @@
     }
   });
 
-  document.addEventListener("pointerover", (ev) => {
-    const interactive = nearestInteractive(ev.target);
-    if (!interactive || interactive === state.lastHoveredElement) return;
-    if (interactive.contains(ev.relatedTarget)) return;
+  function trackHoverTarget() {
+    const target = nearestInteractive(
+      document.elementFromPoint(
+        clamp(state.pointerX, 1, window.innerWidth - 1),
+        clamp(state.pointerY, 1, window.innerHeight - 1)
+      )
+    );
 
-    state.lastHoveredElement = interactive;
-    reactToElement(interactive, "hover");
-  }, { passive: true });
+    if (target === state.lastHoveredElement) return;
+
+    clearTimeout(state.hoverTimer);
+    state.lastHoveredElement = target;
+
+    if (!target || target === character || character.contains(target) ||
+        target === launcher || panel.contains(target)) return;
+
+    const delay = modeProfile().hoverDelay;
+    state.hoverTimer = setTimeout(() => {
+      if (state.enabled && target === state.lastHoveredElement &&
+          !state.dragging && !state.sleeping) {
+        reactToElement(target, "hover");
+      }
+    }, delay);
+  }
 
   document.addEventListener("click", (ev) => {
     if (!state.enabled) return;
@@ -914,9 +1007,17 @@
     const value = String(el.value || "");
     state.lastMeaningfulActivity = now();
     const isName = /name|profile|display name/.test(text);
-    if (value) {
-      setExpression(isName ? "curious" : "focused", isName ? 850 : 650);
-      if (isName && value.length >= 2 && Math.random() < 0.10) showThought("Is that your name?", 1100);
+
+    if (isName) {
+      setExpression("curious", 850);
+      if (!value) {
+        state.nameMessageShown = false;
+      } else if (!state.nameMessageShown) {
+        state.nameMessageShown = true;
+        showThought(value.length >= 2 ? "Profile name set." : "Typing your name.", 1050);
+      }
+    } else if (value) {
+      setExpression("focused", 650);
     }
   }, { passive: true });
 
@@ -978,11 +1079,42 @@
     });
   });
 
+  function setMode(mode) {
+    state.mode = modeProfiles[mode] ? mode : "natural";
+    save(KEY.mode, state.mode);
+    character.dataset.mode = state.mode;
+    state.nextWander = now() + rand(
+      modeProfile().initialWait[0],
+      modeProfile().initialWait[1]
+    );
+    state.lastMeaningfulActivity = now();
+    clearTimeout(state.hoverTimer);
+    state.lastHoveredElement = null;
+    hideThought();
+
+    const profile = modeProfile();
+    const modeExpression =
+      profile.expressionMoods?.[0] ||
+      (state.mode === "strict" || state.mode === "exam" ? "focused" :
+       state.mode === "lazy" || state.mode === "sleepy" ? "bored" :
+       state.mode === "playful" || state.mode === "energetic" ? "happy" :
+       state.mode === "curious" ? "curious" :
+       state.mode === "focused" ? "focused" :
+       state.mode === "social" ? "happy" : "curious");
+
+    setExpression(modeExpression, 1000, true);
+    showThought(profile.label + " mode.", 1050);
+    updateControls();
+  }
+
   function updateControls() {
     enableButton.classList.toggle("is-active", state.enabled);
     disableButton.classList.toggle("is-active", !state.enabled);
     eyeButtons.forEach((button) => {
       button.classList.toggle("is-active", button.dataset.petEye === state.eye);
+    });
+    modeButtons.forEach((button) => {
+      button.classList.toggle("is-active", button.dataset.petMode === state.mode);
     });
   }
 
@@ -1003,6 +1135,8 @@
       character.dataset.angerLevel = "0";
       character.dataset.state = "neutral";
       hideThought();
+      clearTimeout(state.hoverTimer);
+      state.lastHoveredElement = null;
       stage.classList.add("is-disabled");
       launcher.classList.remove("is-open");
     } else {
@@ -1011,14 +1145,22 @@
       setGazeTarget(state.pointerX, state.pointerY, false);
       state.lastActivity = now();
       state.lastMeaningfulActivity = now();
-      state.nextWander = now() + rand(4000, 7500);
-      showThought("I'm back.", 950);
+      state.nextWander = now() + rand(
+        modeProfile().initialWait[0],
+        modeProfile().initialWait[1]
+      );
+      showThought("Pet enabled.", 950);
     }
 
     updateControls();
   }
 
   character.dataset.eye = state.eye;
+  character.dataset.mode = state.mode;
+  state.nextWander = now() + rand(
+    modeProfile().initialWait[0],
+    modeProfile().initialWait[1]
+  );
   stage.classList.toggle("is-disabled", !state.enabled);
   updateControls();
 
@@ -1035,7 +1177,7 @@
     const t = now();
     const idleFor = t - state.lastMeaningfulActivity;
 
-    if (idleFor >= 32000 && !state.sleeping && state.angerUntil <= t) {
+    if (idleFor >= modeProfile().sleepAfter && !state.sleeping && state.angerUntil <= t) {
       state.sleeping = true;
       state.expression = "sleeping";
       character.dataset.state = "sleeping";
