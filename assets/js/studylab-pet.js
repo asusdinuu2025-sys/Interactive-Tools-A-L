@@ -365,11 +365,13 @@
 
     state.mood = mood;
     character.dataset.state = state.sleeping ? "sleeping" : mood;
+    applyExpression(state.sleeping ? "sleeping" : mood);
 
     if (ttl === 0) return;
 
     window.setTimeout(() => {
       if (state.sleeping || state.dragging) return;
+      applyExpression(state.mood);
       state.mood =
         state.context === "study" && getNow() - state.lastActivity > 3200
           ? "focused"
@@ -574,6 +576,7 @@
         eye.style.height = "";
         eye.style.top = "";
       });
+      applyExpression(state.mood);
     }, 175);
   }
 
@@ -901,6 +904,169 @@
   const themeButton = document.querySelector("[data-theme-toggle]");
   themeButton?.addEventListener("click", () => react("theme"));
 
+
+
+  /*
+   * Procedural emotion engine.
+   *
+   * 18 eye silhouettes × 9 sizes × 7 tilt states × 7 gaze offsets ×
+   * 6 asymmetry states × 10 mouth forms × 4 intensity levels already
+   * create far more than 1000 possible expression combinations.
+   * We intentionally generate the final pose from context + mood rather
+   * than storing a giant table of brittle hand-written animations.
+   */
+  const EXPRESSION = {
+    eyeShapes: [
+      { w: 19, h: 27, r: "46% 54% 48% 52% / 54% 46% 58% 42%", sx: 1, sy: 1 },
+      { w: 17, h: 25, r: "52% 48% 44% 56% / 58% 48% 52% 42%", sx: 1, sy: 1 },
+      { w: 21, h: 21, r: "50%", sx: 1, sy: 1 },
+      { w: 23, h: 16, r: "55% 45% 45% 55% / 66% 58% 42% 34%", sx: 1, sy: 1 },
+      { w: 14, h: 29, r: "44% 56% 48% 52% / 60% 42% 58% 40%", sx: 1, sy: 1 },
+      { w: 25, h: 14, r: "50% 50% 40% 60% / 48% 54% 46% 52%", sx: 1, sy: 1 },
+      { w: 18, h: 30, r: "42% 58% 50% 50% / 42% 58% 42% 58%", sx: 1, sy: 1 },
+      { w: 22, h: 18, r: "38% 62% 56% 44% / 56% 46% 54% 44%", sx: 1, sy: 1 },
+      { w: 13, h: 24, r: "45% 55% 46% 54% / 62% 42% 58% 38%", sx: 1, sy: 1 },
+      { w: 24, h: 22, r: "50% 50% 58% 42% / 48% 52% 48% 52%", sx: 1, sy: 1 },
+      { w: 16, h: 18, r: "48% 52% 40% 60% / 54% 46% 54% 46%", sx: 1, sy: 1 },
+      { w: 20, h: 14, r: "58% 42% 42% 58% / 54% 62% 38% 46%", sx: 1, sy: 1 },
+      { w: 26, h: 10, r: "50% 50% 50% 50%", sx: 1, sy: 1 },
+      { w: 10, h: 28, r: "42% 58% 45% 55% / 62% 38% 62% 38%", sx: 1, sy: 1 },
+      { w: 27, h: 24, r: "44% 56% 50% 50% / 50% 48% 52% 50%", sx: 1, sy: 1 },
+      { w: 15, h: 20, r: "60% 40% 45% 55% / 50% 62% 38% 50%", sx: 1, sy: 1 },
+      { w: 22, h: 26, r: "48% 52% 56% 44% / 44% 58% 42% 56%", sx: 1, sy: 1 },
+      { w: 18, h: 11, r: "50% 50% 70% 30% / 60% 60% 40% 40%", sx: 1, sy: 1 }
+    ],
+    sizes: [0.78,0.88,0.96,1,1.06,1.14,1.22,1.30,1.38],
+    tilts: [-18,-13,-9,-5,0,5,9,13,18],
+    gazeX: [-5,-3,-1,0,1,3,5],
+    gazeY: [-4,-2,0,2,4],
+    asymmetry: [-0.18,-0.12,-0.06,0,0.06,0.12,0.18],
+    glows: [8,9,10,11,13,15,18],
+    mouths: [
+      { w: 11,h: 3,r:"0 0 12px 12px",bottom:9, rotate:0, border:"0", bb:"2px solid rgba(214,237,249,.76)" },
+      { w: 16,h: 6,r:"0 0 13px 13px",bottom:8, rotate:0, border:"0", bb:"2px solid rgba(214,237,249,.82)" },
+      { w: 19,h: 8,r:"0 0 16px 16px",bottom:7, rotate:0, border:"0", bb:"3px solid rgba(214,237,249,.86)" },
+      { w: 8,h: 8,r:"50%",bottom:8, rotate:0, border:"2px solid rgba(214,237,249,.80)", bb:"0" },
+      { w: 5,h: 12,r:"50%",bottom:7, rotate:-14, border:"2px solid rgba(214,237,249,.80)", bb:"0" },
+      { w: 21,h: 3,r:"999px",bottom:9, rotate:0, border:"0", bb:"2px solid rgba(214,237,249,.72)" },
+      { w: 17,h: 5,r:"999px",bottom:8, rotate:7, border:"0", bb:"2px solid rgba(214,237,249,.74)" },
+      { w: 18,h: 4,r:"14px 14px 0 0",bottom:8, rotate:0, border:"2px solid rgba(214,237,249,.80)", bb:"0" },
+      { w: 13,h: 10,r:"44%",bottom:7, rotate:0, border:"2px solid rgba(214,237,249,.82)", bb:"0" },
+      { w: 7,h: 3,r:"999px",bottom:10, rotate:-7, border:"0", bb:"2px solid rgba(214,237,249,.62)" }
+    ]
+  };
+
+  const expressionStyles = {
+    idle:    { shapeBias: [0,1,2,7,9], sizeBias: [1,2,3,4,5], mouthBias:[0,1,5,6], tiltBias:[-1,0,1] },
+    curious: { shapeBias: [0,1,4,6,9,14,16], sizeBias: [3,4,5,6,7], mouthBias:[1,3,4,6,8], tiltBias:[-2,-1,0,1,2] },
+    happy:   { shapeBias: [2,3,7,9,11], sizeBias: [2,3,4,5,6], mouthBias:[2,5,6,8], tiltBias:[-1,0,1] },
+    focused: { shapeBias: [1,4,8,10,13,15], sizeBias:[1,2,3,4,5], mouthBias:[0,5,9], tiltBias:[-1,0,1] },
+    confused:{ shapeBias:[4,7,9,10,15,17], sizeBias:[2,3,4,5,6], mouthBias:[4,6,7,9], tiltBias:[-3,-2,-1,1,2,3] },
+    surprised:{shapeBias:[2,6,9,14,16], sizeBias:[5,6,7,8], mouthBias:[3,8], tiltBias:[-1,0,1] },
+    scared:  { shapeBias:[2,6,9,14], sizeBias:[6,7,8], mouthBias:[3,8], tiltBias:[-2,-1,0,1,2] },
+    angry:   { shapeBias:[3,5,7,11,12,17], sizeBias:[2,3,4,5,6], mouthBias:[7,9,5], tiltBias:[-4,-3,3,4] },
+    bored:   { shapeBias:[3,5,7,11,17], sizeBias:[0,1,2,3], mouthBias:[5,9], tiltBias:[-1,0,1] },
+    sleeping:{ shapeBias:[12], sizeBias:[2,3,4,5], mouthBias:[0,5], tiltBias:[-3,-2,-1,0,1] },
+    sleepy:  { shapeBias:[3,5,11,17], sizeBias:[0,1,2,3], mouthBias:[0,5,9], tiltBias:[-2,-1,0,1,2] }
+  };
+
+  let expressionNonce = 0;
+
+  function pick(list) {
+    return list[Math.floor(Math.random() * list.length)];
+  }
+
+  function chooseExpression(mood) {
+    const config = expressionStyles[mood] || expressionStyles.idle;
+    const base = EXPRESSION.eyeShapes[pick(config.shapeBias)];
+    const size = pick(EXPRESSION.sizes);
+    const tilt = pick(config.tiltBias) * 4.2;
+    const gX = pick(EXPRESSION.gazeX);
+    const gY = pick(EXPRESSION.gazeY);
+    const asym = pick(EXPRESSION.asymmetry);
+    const glow = pick(EXPRESSION.glows);
+    const mouth = EXPRESSION.mouths[pick(config.mouthBias)];
+
+    expressionNonce += 1;
+
+    return {
+      left: {
+        shape: base,
+        w: base.w * size * (1 + asym),
+        h: base.h * size * (1 - asym * .55),
+        rotate: tilt + pick([-3,-1,0,1,3]),
+        x: gX,
+        y: gY,
+        glow
+      },
+      right: {
+        shape: base,
+        w: base.w * size * (1 - asym),
+        h: base.h * size * (1 + asym * .55),
+        rotate: tilt + pick([-3,-1,0,1,3]),
+        x: gX,
+        y: gY,
+        glow
+      },
+      mouth,
+      nonce: expressionNonce
+    };
+  }
+
+  function applyExpression(mood) {
+    if (!state.enabled) return;
+
+    const expression = chooseExpression(mood || state.mood || "idle");
+    const eyeEls = eyes;
+
+    eyeEls.forEach((eye, index) => {
+      const p = expression[index === 0 ? "left" : "right"];
+      eye.style.setProperty("--expr-eye-w", p.w.toFixed(2) + "px");
+      eye.style.setProperty("--expr-eye-h", p.h.toFixed(2) + "px");
+      eye.style.setProperty("--expr-eye-radius", p.shape.r);
+      eye.style.setProperty("--expr-eye-x", p.x + "px");
+      eye.style.setProperty("--expr-eye-y", p.y + "px");
+      eye.style.setProperty("--expr-eye-rotate", p.rotate.toFixed(2) + "deg");
+      eye.style.setProperty("--expr-eye-scale-x", p.shape.sx);
+      eye.style.setProperty("--expr-eye-scale-y", "1");
+      eye.style.setProperty("--expr-eye-glow", p.glow + "px");
+    });
+
+    const mouthEl = character.querySelector(".sl-pet-mouth");
+    if (mouthEl) {
+      const m = expression.mouth;
+      mouthEl.style.setProperty("--expr-mouth-w", m.w + "px");
+      mouthEl.style.setProperty("--expr-mouth-h", m.h + "px");
+      mouthEl.style.setProperty("--expr-mouth-radius", m.r);
+      mouthEl.style.setProperty("--expr-mouth-bottom", m.bottom + "px");
+      mouthEl.style.setProperty("--expr-mouth-rotate", m.rotate + "deg");
+      mouthEl.style.setProperty("--expr-mouth-border", m.border);
+      mouthEl.style.setProperty("--expr-mouth-border-bottom", m.bb);
+      mouthEl.style.setProperty("--expr-mouth-border-top", "0");
+      mouthEl.style.setProperty("--expr-mouth-opacity", "1");
+    }
+  }
+
+  function clearExpression() {
+    eyes.forEach((eye) => {
+      [
+        "--expr-eye-w","--expr-eye-h","--expr-eye-radius",
+        "--expr-eye-x","--expr-eye-y","--expr-eye-rotate",
+        "--expr-eye-scale-x","--expr-eye-scale-y","--expr-eye-glow"
+      ].forEach((name) => eye.style.removeProperty(name));
+    });
+
+    const mouthEl = character.querySelector(".sl-pet-mouth");
+    if (mouthEl) {
+      [
+        "--expr-mouth-w","--expr-mouth-h","--expr-mouth-radius",
+        "--expr-mouth-bottom","--expr-mouth-rotate",
+        "--expr-mouth-border","--expr-mouth-border-bottom",
+        "--expr-mouth-border-top","--expr-mouth-opacity"
+      ].forEach((name) => mouthEl.style.removeProperty(name));
+    }
+  }
+
   const observer = new MutationObserver(() => {
     if (!state.enabled) return;
 
@@ -908,6 +1074,7 @@
     if (current !== state.context) {
       state.context = current;
       setMood(current === "study" || current === "exam" ? "focused" : "curious", 1200);
+      window.setTimeout(() => applyExpression(state.mood), 500);
     }
   });
 
@@ -966,6 +1133,7 @@
 
   state.enabled = Boolean(state.enabled);
   updateControls();
+  applyExpression(state.mood);
   setStagePosition(state.x, state.y, { drag: true });
   state.lastActivity = getNow();
 
