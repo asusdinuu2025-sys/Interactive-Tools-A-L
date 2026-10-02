@@ -2098,6 +2098,10 @@
       state.lastHoveredElement = null;
       clearTimeout(state.hoverTimer);
 
+      // Refresh the panel immediately so all saved active states turn blue
+      // as soon as the Pet is re-enabled, before movement/emote work begins.
+      updateControls();
+
       setGazeTarget(state.pointerX, state.pointerY, false);
 
       if (hasPlayfulPersonality()) {
