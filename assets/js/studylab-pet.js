@@ -62,7 +62,7 @@
     enabled: bool(KEY.enabled, true),
     eye: read(KEY.eye, "cyan") === "pink" ? "pink" : "cyan",
     bubbleEnabled: bool(KEY.bubble, true),
-    personalities: readPersonalities(),
+    personalities: ["natural"],
     context: "home",
     expression: "neutral",
     sleeping: false,
@@ -150,7 +150,6 @@
     '<div id="studylabPetStage">' +
       '<div class="sl-pet-character" data-state="neutral" data-eye="cyan" data-danger="false" data-blink="false" data-moving="false" data-direction="idle" role="button" tabindex="0" aria-label="StudyLab Pet">' +
         '<div class="sl-pet-visual">' +
-          '<div class="sl-pet-emote" data-pet-emote aria-hidden="true"><span data-pet-emote-icon>✦</span></div>' +
           '<div class="sl-pet-face" aria-hidden="true">' +
             '<div class="sl-pet-eye left"><i></i></div>' +
             '<div class="sl-pet-eye right"><i></i></div>' +
@@ -185,17 +184,10 @@
       '<div class="sl-pet-setting"><span>Eye colour</span><div class="sl-pet-setting-buttons">' +
         '<button type="button" data-pet-eye="cyan">Cyan</button><button type="button" data-pet-eye="pink">Pink</button>' +
       '</div></div>' +
-      '<div class="sl-pet-setting sl-pet-personality-setting"><span>Personalities</span><div class="sl-pet-personality-list">' +
-        '<div class="sl-pet-personality-row" data-personality="natural"><strong>Natural</strong><div><button type="button" data-pet-personality-enable="natural">Enable</button><button type="button" data-pet-personality-disable="natural">Disable</button></div></div>' +
-        '<div class="sl-pet-personality-row" data-personality="playful"><strong>Playful</strong><div><button type="button" data-pet-personality-enable="playful">Enable</button><button type="button" data-pet-personality-disable="playful">Disable</button></div></div>' +
-        '<div class="sl-pet-personality-row" data-personality="focused"><strong>Focused</strong><div><button type="button" data-pet-personality-enable="focused">Enable</button><button type="button" data-pet-personality-disable="focused">Disable</button></div></div>' +
-        '<div class="sl-pet-personality-row" data-personality="curious"><strong>Curious</strong><div><button type="button" data-pet-personality-enable="curious">Enable</button><button type="button" data-pet-personality-disable="curious">Disable</button></div></div>' +
-        '<div class="sl-pet-personality-row" data-personality="observer"><strong>Observer</strong><div><button type="button" data-pet-personality-enable="observer">Enable</button><button type="button" data-pet-personality-disable="observer">Disable</button></div></div>' +
-      '</div></div>' +
       '<div class="sl-pet-setting"><span>Message box</span><div class="sl-pet-setting-buttons">' +
         '<button type="button" data-pet-bubble-enable>Enable</button><button type="button" data-pet-bubble-disable>Disable</button>' +
       '</div></div>' +
-      '<p class="sl-pet-panel-note">Multiple personalities can work together.</p>' +
+      '<p class="sl-pet-panel-note">Enable briefly wakes the Pet with a quick burst, then normal roaming resumes.</p>' +
     '</aside>'
   );
 
@@ -206,25 +198,12 @@
   const thought = stage.querySelector("[data-pet-thought]");
   const thoughtText = stage.querySelector("[data-pet-thought-text]");
 
-  const emote = stage.querySelector("[data-pet-emote]") || (() => {
-    const node = document.createElement("div");
-    node.className = "sl-pet-emote";
-    node.dataset.petEmote = "";
-    node.setAttribute("aria-hidden", "true");
-    node.innerHTML = '<span data-pet-emote-icon>✦</span>';
-    visual.appendChild(node);
-    return node;
-  })();
-
-  const emoteIcon = emote.querySelector("[data-pet-emote-icon]");
   const launcher = document.getElementById("studylabPetLauncher");
   const panel = document.getElementById("studylabPetPanel");
   const closeButton = panel.querySelector("[data-pet-close]");
   const enableButton = panel.querySelector("[data-pet-enable]");
   const disableButton = panel.querySelector("[data-pet-disable]");
   const eyeButtons = [...panel.querySelectorAll("[data-pet-eye]")];
-  const personalityEnableButtons = [...panel.querySelectorAll("[data-pet-personality-enable]")];
-  const personalityDisableButtons = [...panel.querySelectorAll("[data-pet-personality-disable]")];
   const bubbleEnableButton = panel.querySelector("[data-pet-bubble-enable]");
   const bubbleDisableButton = panel.querySelector("[data-pet-bubble-disable]");
 
@@ -246,14 +225,11 @@
 
     const petEnable = target.matches("[data-pet-enable]");
     const petDisable = target.matches("[data-pet-disable]");
-    const personalityEnable = target.dataset.petPersonalityEnable;
-    const personalityDisable = target.dataset.petPersonalityDisable;
     const petEye = target.dataset.petEye;
     const bubbleEnable = target.matches("[data-pet-bubble-enable]");
     const bubbleDisable = target.matches("[data-pet-bubble-disable]");
 
-    if (!petEnable && !petDisable && !personalityEnable && !personalityDisable &&
-        !petEye && !bubbleEnable && !bubbleDisable) return;
+    if (!petEnable && !petDisable && !petEye && !bubbleEnable && !bubbleDisable) return;
 
     ev.preventDefault();
     ev.stopImmediatePropagation();
@@ -269,15 +245,6 @@
       return;
     }
 
-    if (personalityEnable) {
-      setPersonalityEnabled(personalityEnable, true);
-      return;
-    }
-
-    if (personalityDisable) {
-      setPersonalityEnabled(personalityDisable, false);
-      return;
-    }
 
     if (petEye) {
       state.eye = petEye === "pink" ? "pink" : "cyan";
@@ -1069,7 +1036,7 @@
 
 
   function hasPlayfulPersonality() {
-    return state.personalities.includes("playful");
+    return false;
   }
 
   function playfulWanderTarget() {
@@ -2010,15 +1977,6 @@
       button.classList.toggle("is-active", button.dataset.petEye === state.eye);
     });
 
-    personalityEnableButtons.forEach((button) => {
-      const name = button.dataset.petPersonalityEnable;
-      button.classList.toggle("is-active", state.personalities.includes(name));
-    });
-
-    personalityDisableButtons.forEach((button) => {
-      const name = button.dataset.petPersonalityDisable;
-      button.classList.toggle("is-active", !state.personalities.includes(name));
-    });
 
     bubbleEnableButton.classList.toggle("is-active", state.bubbleEnabled);
     bubbleDisableButton.classList.toggle("is-active", !state.bubbleEnabled);
@@ -2040,11 +1998,7 @@
       character.dataset.angerLevel = "0";
       state.lastActivity = now();
       state.lastMeaningfulActivity = now();
-      runPersonalityRoutine(
-        state.personalities.includes("playful")
-          ? "playful"
-          : (state.personalities.find((name) => name !== "natural") || "natural")
-      );
+
       setExpression("delighted", 1350, true);
       if (state.bubbleEnabled) showThought("I'm back.", 1050);
       updateControls();
@@ -2112,11 +2066,7 @@
       }
 
       setExpression("delighted", 1350, true);
-      runPersonalityRoutine(
-        state.personalities.includes("playful")
-          ? "playful"
-          : (state.personalities.find((name) => name !== "natural") || "natural")
-      );
+
 
       if (state.bubbleEnabled) showThought("I'm back.", 1050);
     }
