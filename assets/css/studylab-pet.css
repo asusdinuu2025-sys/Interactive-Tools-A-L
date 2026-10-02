@@ -1008,3 +1008,190 @@ html[data-theme="light"] .sl-pet-character::after {
   z-index: 6;
   font-family: "Segoe UI", Arial, sans-serif;
 }
+
+
+/* =========================================================
+   FINAL EMO-STYLE DISPLAY LANGUAGE
+   The character keeps its own StudyLab personality/behavior,
+   while the face uses a black desktop-pet display language:
+   squared display corners + softened rectangular eye blocks.
+   ========================================================= */
+
+.sl-pet-character {
+  --pet-size-w: 96px;
+  --pet-size-h: 74px;
+  border-radius: 10px;
+  background:
+    linear-gradient(180deg, #05080d 0%, #010204 58%, #000102 100%);
+  border: 1px solid rgba(255,255,255,.12);
+  clip-path: polygon(
+    4% 0%,
+    96% 0%,
+    100% 6%,
+    100% 94%,
+    96% 100%,
+    4% 100%,
+    0% 94%,
+    0% 6%
+  );
+  box-shadow:
+    0 22px 44px rgba(0,0,0,.38),
+    inset 0 0 0 1px rgba(255,255,255,.022),
+    0 0 28px rgba(70,225,255,.045);
+}
+
+.sl-pet-character::before {
+  left: 8%;
+  right: 8%;
+  bottom: -10px;
+  height: 12px;
+  opacity: .62;
+}
+
+.sl-pet-character::after {
+  inset: 1px;
+  border-radius: 9px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.018), transparent 36%),
+    radial-gradient(circle at 50% 40%, rgba(65,180,220,.025), transparent 66%);
+}
+
+.sl-pet-face {
+  inset: 0;
+}
+
+.sl-pet-eye {
+  top: 20px;
+  width: 27px;
+  height: 31px;
+}
+
+.sl-pet-eye.left {
+  left: 17px;
+}
+
+.sl-pet-eye.right {
+  right: 17px;
+}
+
+.sl-pet-eye > i {
+  width: var(--expr-eye-w, 21px) !important;
+  height: var(--expr-eye-h, 27px) !important;
+  min-width: 5px;
+  min-height: 3px;
+  border-radius: var(--expr-eye-radius, 6px) !important;
+  opacity: var(--expr-eye-opacity, 1);
+  transform:
+    translate(
+      calc(-50% + var(--gaze-x, 0px) + var(--expr-eye-x, 0px)),
+      calc(-50% + var(--gaze-y, 0px) + var(--expr-eye-y, 0px))
+    )
+    rotate(var(--expr-eye-rotate, 0deg))
+    skewX(var(--expr-eye-skew, 0deg))
+    scaleX(var(--expr-eye-scale-x, 1))
+    scaleY(var(--expr-eye-scale-y, 1)) !important;
+  background: var(--expr-eye-color, #63e8ff) !important;
+  box-shadow:
+    0 0 var(--expr-eye-glow, 10px) var(--expr-eye-shadow, rgba(99,232,255,.86)),
+    0 0 calc(var(--expr-eye-glow, 10px) * 1.9) var(--expr-eye-shadow-soft, rgba(99,232,255,.20)) !important;
+  transition:
+    width .22s cubic-bezier(.2,.8,.2,1),
+    height .22s cubic-bezier(.2,.8,.2,1),
+    border-radius .18s ease,
+    transform .12s cubic-bezier(.2,.8,.2,1),
+    box-shadow .18s ease,
+    background .18s ease;
+}
+
+/* Keep every normal expression in the rounded-rectangle display family. */
+.sl-pet-character:not([data-state="sleeping"]) .sl-pet-eye > i {
+  border-radius: max(3px, min(var(--expr-eye-radius, 6px), 8px)) !important;
+}
+
+/* Movement makes the display eyes visibly smaller and more strained. */
+.sl-pet-character.is-walking .sl-pet-eye > i {
+  width: max(8px, calc(var(--expr-eye-w, 21px) * .72)) !important;
+  height: max(6px, calc(var(--expr-eye-h, 27px) * .76)) !important;
+  border-radius: 5px !important;
+}
+
+.sl-pet-character.is-climbing .sl-pet-eye > i {
+  width: max(7px, calc(var(--expr-eye-w, 21px) * .63)) !important;
+  height: max(5px, calc(var(--expr-eye-h, 27px) * .70)) !important;
+  border-radius: 4px !important;
+}
+
+.sl-pet-character.is-climbing {
+  animation: slPetClimb 1.75s ease-in-out infinite alternate;
+}
+
+.sl-pet-character.is-walking {
+  animation: slPetWalk 1.65s ease-in-out infinite alternate;
+}
+
+/* Downward travel stays easier/faster, with a subtle landing. */
+.sl-pet-character.is-falling .sl-pet-eye > i {
+  width: max(9px, calc(var(--expr-eye-w, 21px) * .90)) !important;
+  height: max(7px, calc(var(--expr-eye-h, 27px) * .92)) !important;
+  border-radius: 6px !important;
+}
+
+.sl-pet-character[data-state="sleeping"] .sl-pet-eye > i {
+  width: 24px !important;
+  height: 4px !important;
+  border-radius: 3px !important;
+  opacity: .82;
+}
+
+/* Angry state: red display eyes + the existing temporary head crack. */
+.sl-pet-character[data-state="angry"] .sl-pet-eye > i {
+  width: max(12px, calc(var(--expr-eye-w, 21px) * .94)) !important;
+  height: max(7px, calc(var(--expr-eye-h, 27px) * .62)) !important;
+  border-radius: 5px !important;
+  background: #ff3f49 !important;
+  box-shadow:
+    0 0 12px rgba(255,63,73,.96),
+    0 0 27px rgba(255,63,73,.38) !important;
+}
+
+.sl-pet-character[data-state="angry"] .sl-pet-crack {
+  opacity: 1;
+  transform: rotate(-8deg) scale(1);
+}
+
+/* Sleep Zs remain eye-colour matched and rise from the display's upper-right. */
+.sl-pet-character[data-state="sleeping"] .sl-pet-sleep-z {
+  display: block;
+}
+
+/* The face stays a black display even in light theme. */
+html[data-theme="light"] .sl-pet-character {
+  background:
+    linear-gradient(180deg, #05080d 0%, #010204 58%, #000102 100%);
+  border-color: rgba(255,255,255,.12);
+  box-shadow:
+    0 22px 44px rgba(20,45,65,.28),
+    inset 0 0 0 1px rgba(255,255,255,.022),
+    0 0 28px rgba(70,185,220,.055);
+}
+
+@media (max-width: 720px) {
+  .sl-pet-character {
+    --pet-size-w: 86px;
+    --pet-size-h: 66px;
+  }
+
+  .sl-pet-eye {
+    top: 18px;
+    width: 24px;
+    height: 28px;
+  }
+
+  .sl-pet-eye.left {
+    left: 15px;
+  }
+
+  .sl-pet-eye.right {
+    right: 15px;
+  }
+}
