@@ -247,8 +247,8 @@
     thought.style.top = Math.max(54, state.y - petHalfHeight - 2) + "px";
   }
 
-  function showThought(message, duration = 1800) {
-    if (!state.enabled || !message) return;
+  function showThought(message, duration = 1800, force = false) {
+    if (!state.enabled || (!state.bubbleEnabled && !force) || !message) return;
     thoughtText.textContent = message;
     placeThought();
     thought.classList.add("is-visible");
@@ -1115,51 +1115,45 @@
       character.dataset.eye = state.eye;
       save(KEY.eye, state.eye);
       setExpression(state.eye === "cyan" ? "delighted" : "shy", 1000, true);
-      showThought(state.eye === "cyan" ? "Heh." : "✨", 900);
+      notifySetting("Eye colour: " + (state.eye === "cyan" ? "Cyan" : "Pink") + ".");
       updateControls();
     });
   });
 
-  function setMode(mode) {
-    state.mode = modeProfiles[mode] ? mode : "natural";
-    save(KEY.mode, state.mode);
-    character.dataset.mode = state.mode;
-    state.nextWander = now() + rand(
-      modeProfile().initialWait[0],
-      modeProfile().initialWait[1]
-    );
+  personalityEnableButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      setPersonalityEnabled(button.dataset.petPersonalityEnable, true);
+    });
+  });
+
+  personalityDisableButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      setPersonalityEnabled(button.dataset.petPersonalityDisable, false);
+    });
+  });
+
+  bubbleEnableButton.addEventListener("click", () => {
     state.lastMeaningfulActivity = now();
-    clearTimeout(state.hoverTimer);
-    state.lastHoveredElement = null;
-    hideThought();
-
-    const profile = modeProfile();
-    const modeExpression =
-      profile.expressionMoods?.[0] ||
-      (state.mode === "strict" || state.mode === "exam" ? "focused" :
-       state.mode === "lazy" || state.mode === "sleepy" ? "bored" :
-       state.mode === "playful" || state.mode === "energetic" ? "happy" :
-       state.mode === "curious" ? "curious" :
-       state.mode === "focused" ? "focused" :
-       state.mode === "social" ? "happy" : "curious");
-
-    setExpression(modeExpression, 1000, true);
-    showThought(profile.label + " mode.", 1050);
+    setBubbleEnabled(true);
     updateControls();
-  }
+  });
 
-  function updateControls() {
-    enableButton.classList.toggle("is-active", state.enabled);
-    disableButton.classList.toggle("is-active", !state.enabled);
-    eyeButtons.forEach((button) => {
-      button.classList.toggle("is-active", button.dataset.petEye === state.eye);
-    });
-    modeButtons.forEach((button) => {
-      button.classList.toggle("is-active", button.dataset.petMode === state.mode);
-    });
-  }
+  bubbleDisableButton.addEventListener("click", () => {
+    state.lastMeaningfulActivity = now();
+    setBubbleEnabled(false);
+    updateControls();
+  });
 
   function setEnabled(enabled) {
+    if (enabled === state.enabled) {
+      if (enabled) notifySetting("Pet already enabled.");
+      return;
+    }
+
+    if (!enabled && state.enabled && state.bubbleEnabled) {
+      showThought("Pet disabled.", 1000);
+    }
+
     state.enabled = enabled;
     save(KEY.enabled, enabled);
 
@@ -1172,32 +1166,30 @@
       state.angerLevel = 0;
       state.evading = false;
       clearTimeout(state.angerTimer);
-      character.dataset.danger = "false";
-      character.dataset.angerLevel = "0";
-      character.dataset.state = "neutral";
-      hideThought();
       clearTimeout(state.hoverTimer);
       state.lastHoveredElement = null;
+      character.dataset.danger = "false";
+      character.dataset.angerLevel = "0";
       stage.classList.add("is-disabled");
       launcher.classList.remove("is-open");
+      character.dataset.state = "neutral";
     } else {
       stage.classList.remove("is-disabled");
       setExpression("surprised", 850, true);
       setGazeTarget(state.pointerX, state.pointerY, false);
       state.lastActivity = now();
       state.lastMeaningfulActivity = now();
-      state.nextWander = now() + rand(
-        modeProfile().initialWait[0],
-        modeProfile().initialWait[1]
-      );
-      showThought("Pet enabled.", 950);
+      const profile = modeProfile();
+      state.nextWander = now() + rand(profile.initialWait[0], profile.initialWait[1]);
+      if (state.bubbleEnabled) showThought("Pet enabled.", 950);
     }
 
     updateControls();
   }
 
+  savePersonalities();
   character.dataset.eye = state.eye;
-  character.dataset.mode = state.mode;
+  character.dataset.personalities = state.personalities.join(",");
   state.nextWander = now() + rand(
     modeProfile().initialWait[0],
     modeProfile().initialWait[1]
