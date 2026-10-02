@@ -299,7 +299,6 @@
     }
   }, true);
 
-  function setPosition
   function setPosition(x, y) {
     const halfW = window.innerWidth <= 720 ? 41 : 45;
     const minY = 74;
