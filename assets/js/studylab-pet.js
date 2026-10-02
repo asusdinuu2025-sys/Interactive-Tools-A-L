@@ -1441,6 +1441,7 @@
 
     clearEnableBurst();
     state.enableBurstActive = true;
+    character.dataset.enableBurst = "true";
     stopMove();
 
     let hops = 0;
