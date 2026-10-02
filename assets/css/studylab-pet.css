@@ -141,12 +141,17 @@
 }
 
 .sl-pet-character[data-state="angry"] .sl-pet-mouth {
-  width: 19px;
-  height: 4px;
-  border: 0;
-  border-top: 3px solid #ff3f4f;
-  border-radius: 14px 14px 0 0;
-  transform: translateX(-50%) translateY(2px);
+  width: 25px;
+  height: 9px;
+  bottom: 9px;
+  border: 2.5px solid #ff3f4f;
+  border-top: 0;
+  border-radius: 3px 3px 11px 11px;
+  background: rgba(255,63,79,.055);
+  box-shadow:
+    0 0 7px rgba(255,63,79,.34),
+    inset 0 2px 0 rgba(255,255,255,.045);
+  transform: translateX(-50%) translateY(1px);
 }
 
 .sl-pet-character[data-state="annoyed"] .sl-pet-mouth {
@@ -377,17 +382,33 @@
 }
 
 .sl-pet-character[data-state="angry"] .sl-pet-eye.left {
-  transform: rotate(17deg) translateY(2px);
+  transform: rotate(28deg) translateY(3px);
 }
 
 .sl-pet-character[data-state="angry"] .sl-pet-eye.right {
-  transform: rotate(-17deg) translateY(2px);
+  transform: rotate(-28deg) translateY(3px);
 }
 
 .sl-pet-character[data-state="angry"] .sl-pet-eye > i {
-  width: 22px;
-  height: 15px;
-  border-radius: 7px 7px 5px 5px;
+  width: 24px;
+  height: 14px;
+  border-radius: 4px 7px 4px 4px;
+  clip-path: polygon(0 24%, 100% 0, 91% 100%, 8% 83%);
+}
+
+.sl-pet-character[data-anger-level="5"] .sl-pet-eye.left {
+  transform: rotate(32deg) translateY(4px);
+}
+
+.sl-pet-character[data-anger-level="5"] .sl-pet-eye.right {
+  transform: rotate(-32deg) translateY(4px);
+}
+
+.sl-pet-character[data-anger-level="5"] .sl-pet-eye > i {
+  width: 26px;
+  height: 12px;
+  border-radius: 3px 6px 3px 3px;
+  clip-path: polygon(0 30%, 100% 0, 88% 100%, 10% 78%);
 }
 
 .sl-pet-character[data-danger="true"] {
@@ -592,7 +613,7 @@
   min-height: 54px;
   opacity: 0;
   transform: translateY(-100%) translateY(3px) scale(.96);
-  transform-origin: 18px 100%;
+  transform-origin: 50% 100%;
   transition: opacity .22s ease, transform .22s cubic-bezier(.2,.8,.2,1);
   pointer-events: none;
   z-index: 954;
@@ -604,11 +625,13 @@
 }
 
 .sl-pet-thought-cloud {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
   min-width: 80px;
   max-width: 190px;
+  box-sizing: border-box;
   min-height: 38px;
   padding: 8px 13px;
   border: 1px solid rgba(255,255,255,.16);
@@ -639,14 +662,14 @@
 .sl-pet-thought-dot.d1 {
   width: 8px;
   height: 8px;
-  left: 9px;
+  left: calc(50% - 4px);
   bottom: 5px;
 }
 
 .sl-pet-thought-dot.d2 {
   width: 5px;
   height: 5px;
-  left: 2px;
+  left: calc(50% - 2px);
   bottom: -2px;
 }
 
@@ -948,13 +971,17 @@ html[data-theme="light"] .sl-pet-setting-buttons button {
   animation: none !important;
 }
 
-/* Keep the thinking cloud anchored to the face. */
+/* Keep the thinking cloud centered and attached to the face. */
+.sl-pet-thought {
+  transform-origin: 50% 100%;
+}
+
 .sl-pet-thought-dot.d1 {
-  left: 13px;
+  left: calc(50% - 4px);
   bottom: 4px;
 }
 
 .sl-pet-thought-dot.d2 {
-  left: 6px;
+  left: calc(50% - 2px);
   bottom: -3px;
 }
