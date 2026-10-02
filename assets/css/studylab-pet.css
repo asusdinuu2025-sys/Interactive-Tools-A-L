@@ -107,6 +107,7 @@
 }
 
 .sl-pet-character[data-state="happy"] .sl-pet-mouth,
+.sl-pet-character[data-state="relieved"] .sl-pet-mouth,
 .sl-pet-character[data-state="delighted"] .sl-pet-mouth {
   width: 20px;
   height: 8px;
@@ -344,6 +345,7 @@
     );
 }
 
+.sl-pet-character[data-state="relieved"] .sl-pet-eye > i,
 .sl-pet-character[data-state="delighted"] .sl-pet-eye > i {
   width: 21px;
   height: 13px;
@@ -611,8 +613,8 @@
   position: absolute;
   left: 0;
   top: 0;
-  width: 90px;
-  min-height: 34px;
+  width: 104px;
+  min-height: 36px;
   opacity: 0;
   transform: translateY(-100%) translateY(3px) scale(.96);
   transform-origin: 50% 100%;
@@ -630,11 +632,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 90px;
-  min-width: 90px;
-  max-width: 90px;
-  min-height: 30px;
-  max-height: 38px;
+  width: 104px;
+  min-width: 104px;
+  max-width: 104px;
+  min-height: 32px;
+  max-height: 40px;
   box-sizing: border-box;
   padding: 5px 7px;
   border: 1px solid rgba(255,255,255,.16);
@@ -749,8 +751,8 @@
   left: 20px;
   bottom: 78px;
   z-index: 953;
-  width: min(360px, calc(100vw - 28px));
-  padding: 15px;
+  width: min(304px, calc(100vw - 28px));
+  padding: 12px;
   border: 1px solid rgba(255,255,255,.14);
   border-radius: 20px;
   background:
@@ -772,8 +774,8 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 10px;
+  margin-bottom: 8px;
 }
 
 .sl-pet-panel-head strong {
@@ -804,8 +806,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 10px 2px;
+  gap: 9px;
+  padding: 7px 2px;
   border-top: 1px solid rgba(255,255,255,.07);
 }
 
@@ -856,24 +858,23 @@
 }
 
 .sl-pet-personality-setting > span {
-  flex: 0 0 82px;
-  padding-top: 8px;
+  flex: 0 0 74px;
+  padding-top: 5px;
 }
 
 .sl-pet-personality-list {
   width: 100%;
-  max-height: min(54vh, 520px);
-  overflow-y: auto;
-  padding-right: 3px;
-  scrollbar-width: thin;
+  max-height: none;
+  overflow: visible;
+  padding-right: 1px;
 }
 
 .sl-pet-personality-row {
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
-  gap: 8px;
-  padding: 7px 0;
+  gap: 7px;
+  padding: 5px 0;
   border-bottom: 1px solid rgba(255,255,255,.055);
 }
 
@@ -892,9 +893,9 @@
 }
 
 .sl-pet-personality-row button {
-  min-width: 56px;
-  min-height: 28px;
-  padding: 5px 7px;
+  min-width: 52px;
+  min-height: 26px;
+  padding: 4px 6px;
   border: 1px solid rgba(255,255,255,.09);
   border-radius: 9px;
   background: rgba(255,255,255,.045);
@@ -939,9 +940,9 @@
 }
 
 .sl-pet-panel-note {
-  margin: 11px 2px 2px;
+  margin: 8px 2px 1px;
   color: var(--text-muted);
-  font-size: .68rem;
+  font-size: .64rem;
   line-height: 1.50;
 }
 
@@ -997,13 +998,13 @@ html[data-theme="light"] .sl-pet-setting-buttons button {
   }
 
   .sl-pet-thought {
-    width: 82px;
+    width: 98px;
   }
 
   .sl-pet-thought-cloud {
-    width: 82px;
-    min-width: 82px;
-    max-width: 82px;
+    width: 98px;
+    min-width: 98px;
+    max-width: 98px;
   }
 
   #studylabPetLauncher {
@@ -1015,6 +1016,8 @@ html[data-theme="light"] .sl-pet-setting-buttons button {
     left: 12px;
     bottom: 68px;
     width: calc(100vw - 24px);
+    max-height: min(470px, calc(100vh - 88px));
+    overflow-y: auto;
   }
 
   .sl-pet-personality-setting {
@@ -1024,11 +1027,12 @@ html[data-theme="light"] .sl-pet-setting-buttons button {
   .sl-pet-personality-setting > span {
     display: block;
     padding-top: 0;
-    padding-bottom: 7px;
+    padding-bottom: 5px;
   }
 
   .sl-pet-personality-list {
-    max-height: 52vh;
+    max-height: none;
+    overflow: visible;
   }
 }
 
