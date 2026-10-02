@@ -808,6 +808,167 @@
     return smooth;
   }
 
+
+  function hasPlayfulPersonality() {
+    return state.personalities.includes("playful");
+  }
+
+  function playfulWanderTarget() {
+    return {
+      x: 70 + Math.random() * Math.max(1, window.innerWidth - 140),
+      y: 88 + Math.random() * Math.max(1, window.innerHeight - 190)
+    };
+  }
+
+  function cubicBezierY(t, p1, p2) {
+    const mt = 1 - t;
+    return 3 * mt * mt * t * p1 + 3 * mt * t * t * p2 + t * t * t;
+  }
+
+  function cubicBezierX(t, p1, p2) {
+    const mt = 1 - t;
+    return 3 * mt * mt * t * p1 + 3 * mt * t * t * p2 + t * t * t;
+  }
+
+  function cubicBezierEase(x, x1, y1, x2, y2) {
+    let lo = 0;
+    let hi = 1;
+    let t = x;
+
+    for (let i = 0; i < 9; i++) {
+      const bx = cubicBezierX(t, x1, x2) - x;
+      const derivative =
+        3 * (1 - t) * (1 - t) * x1 +
+        6 * (1 - t) * t * (x2 - x1) +
+        3 * t * t * (1 - x2);
+
+      if (Math.abs(derivative) > 0.00001) {
+        t = clamp(t - bx / derivative, 0, 1);
+      } else {
+        break;
+      }
+    }
+
+    for (let i = 0; i < 12; i++) {
+      const bx = cubicBezierX(t, x1, x2);
+      if (Math.abs(bx - x) < 0.00001) break;
+      if (bx < x) lo = t;
+      else hi = t;
+      t = (lo + hi) / 2;
+    }
+
+    return cubicBezierY(t, y1, y2);
+  }
+
+  function playfulMoveDurationAndEase(direction) {
+    if (direction === "up") {
+      return { duration: 1120, ease: [0.22, 0.68, 0.18, 1] };
+    }
+    if (direction === "down") {
+      return { duration: 520, ease: [0.15, 0.90, 0.28, 1.25] };
+    }
+    return { duration: 760, ease: [0.22, 0.78, 0.20, 1] };
+  }
+
+  function animatePlayfulMoveTo(targetX, targetY, reason = "wander") {
+    if (!state.enabled || state.dragging || reduced || state.sleeping) return false;
+
+    stopMove();
+
+    const startX = state.x;
+    const startY = state.y;
+    const dx = targetX - startX;
+    const dy = targetY - startY;
+    const distance = Math.hypot(dx, dy);
+    const minimumDistance = reason === "evade" ? 150 : 0;
+
+    if (distance < minimumDistance) return false;
+
+    const direction = visualDirection(dx, dy);
+    const motion = playfulMoveDurationAndEase(direction);
+    const started = performance.now();
+    const token = state.moveToken;
+
+    character.dataset.moving = "true";
+    character.dataset.direction = direction;
+    character.classList.remove("is-walking", "is-climbing", "is-falling", "is-landed");
+
+    if (direction === "up") {
+      character.classList.add("is-climbing");
+      setExpression(modeExpression("focused"), 1150);
+    } else if (direction === "down") {
+      character.classList.add("is-falling");
+      setExpression(modeExpression("alert"), 900);
+    } else {
+      character.classList.add("is-walking");
+      setExpression(modeExpression("neutral"), 1000);
+    }
+
+    function frame(timestamp) {
+      if (token !== state.moveToken || state.dragging || !state.enabled) return;
+
+      const p = clamp((timestamp - started) / motion.duration, 0, 1);
+      const e = cubicBezierEase(
+        p,
+        motion.ease[0],
+        motion.ease[1],
+        motion.ease[2],
+        motion.ease[3]
+      );
+
+      setPosition(startX + dx * e, startY + dy * e);
+
+      if (p < 1) {
+        state.moveAnimation = requestAnimationFrame(frame);
+        return;
+      }
+
+      state.moveAnimation = 0;
+      character.dataset.moving = "false";
+      character.dataset.direction = "idle";
+      character.classList.remove("is-walking", "is-climbing", "is-falling");
+
+      if (direction === "down") {
+        character.classList.add("is-landed");
+        setTimeout(() => character.classList.remove("is-landed"), 480);
+      }
+
+      if (reason === "wander") {
+        state.lastWander = now();
+        state.nextWander = now() + (
+          state.context === "study"
+            ? rand(2400, 5000)
+            : rand(3600, 8800)
+        );
+      }
+
+      if (reason === "evade") {
+        setTimeout(() => { state.evading = false; }, rand(450, 850));
+      }
+    }
+
+    state.moveAnimation = requestAnimationFrame(frame);
+    return true;
+  }
+
+  function playfulWander() {
+    if (!state.enabled || state.sleeping || state.dragging || reduced || state.angerUntil > now()) return;
+    const target = playfulWanderTarget();
+    state.roamActive = false;
+    state.roamPausedUntil = 0;
+    state.roamVelocityX = 0;
+    state.roamVelocityY = 0;
+    const moved = animatePlayfulMoveTo(target.x, target.y, "wander");
+
+    if (!moved) {
+      state.nextWander = now() + (
+        state.context === "study"
+          ? rand(2400, 5000)
+          : rand(3600, 8800)
+      );
+    }
+  }
+
   function stopMove() {
     if (state.moveAnimation) cancelAnimationFrame(state.moveAnimation);
     state.moveAnimation = 0;
@@ -932,6 +1093,11 @@
   }
 
   function updateRoam(timestamp) {
+    if (hasPlayfulPersonality()) {
+      state.roamLastFrame = timestamp;
+      return;
+    }
+
     if (!state.enabled || state.sleeping || state.dragging || state.evading ||
         state.angerUntil > now() || reduced || !state.roamActive) {
       state.roamLastFrame = timestamp;
@@ -1089,6 +1255,12 @@
 
   function wander() {
     if (!state.enabled || state.sleeping || state.dragging || reduced || state.angerUntil > now()) return;
+
+    if (hasPlayfulPersonality()) {
+      playfulWander();
+      return;
+    }
+
     startRoam(false);
     state.lastWander = now();
     state.nextWander = now() + rand(
@@ -1555,8 +1727,13 @@
       character.dataset.angerLevel = "0";
     }
 
-    const profile = modeProfile();
-    state.nextWander = now() + rand(profile.initialWait[0], profile.initialWait[1]);
+    if (hasPlayfulPersonality()) {
+      stopMove();
+      state.nextWander = now() + 2600;
+    } else {
+      const profile = modeProfile();
+      state.nextWander = now() + rand(profile.initialWait[0], profile.initialWait[1]);
+    }
     clearTimeout(state.hoverTimer);
     state.lastHoveredElement = null;
 
@@ -1569,6 +1746,16 @@
     if (enabled) {
       showPersonalityEmote(name);
     }
+
+    if (hasPlayfulPersonality()) {
+      stopMove();
+      state.nextWander = now() + 2600;
+    } else {
+      startRoam(false);
+      const profile = modeProfile();
+      state.nextWander = now() + rand(profile.initialWait[0], profile.initialWait[1]);
+    }
+
     notifySetting(personalityLabel(name) + (enabled ? " enabled." : " disabled."));
     updateControls();
   }
@@ -1664,8 +1851,14 @@
       state.lastActivity = now();
       state.lastMeaningfulActivity = now();
       state.lastReaction = now();
-      state.nextWander = now() + 350;
-      startRoam(true);
+
+      if (hasPlayfulPersonality()) {
+        state.nextWander = now() + 2600;
+      } else {
+        state.nextWander = now() + 350;
+        startRoam(true);
+      }
+
       if (state.bubbleEnabled) showThought("I'm back.", 1050);
     }
 
@@ -1676,10 +1869,15 @@
   character.dataset.eye = state.eye;
   character.dataset.personalities = state.personalities.join(",");
   character.dataset.playful = state.personalities.includes("playful") ? "true" : "false";
-  state.nextWander = now() + rand(
-    modeProfile().initialWait[0],
-    modeProfile().initialWait[1]
-  );
+
+  if (hasPlayfulPersonality()) {
+    state.nextWander = now() + 2600;
+  } else {
+    state.nextWander = now() + rand(
+      modeProfile().initialWait[0],
+      modeProfile().initialWait[1]
+    );
+  }
   stage.classList.toggle("is-disabled", !state.enabled);
   updateControls();
 
