@@ -83,6 +83,91 @@
   inset: 0;
 }
 
+.sl-pet-mouth {
+  position: absolute;
+  left: 50%;
+  bottom: 11px;
+  width: 16px;
+  height: 7px;
+  transform: translateX(-50%);
+  border-bottom: 2px solid #5de7ff;
+  border-radius: 0 0 12px 12px;
+  opacity: .92;
+  transition:
+    width .22s cubic-bezier(.18,.82,.18,1),
+    height .22s cubic-bezier(.18,.82,.18,1),
+    border-color .16s ease,
+    border-width .18s ease,
+    border-radius .18s ease,
+    transform .18s cubic-bezier(.18,.82,.18,1);
+}
+
+.sl-pet-character[data-eye="pink"] .sl-pet-mouth {
+  border-color: #ff84c8;
+}
+
+.sl-pet-character[data-state="happy"] .sl-pet-mouth,
+.sl-pet-character[data-state="delighted"] .sl-pet-mouth {
+  width: 20px;
+  height: 8px;
+  border-bottom-width: 2.4px;
+}
+
+.sl-pet-character[data-state="thinking"] .sl-pet-mouth {
+  width: 8px;
+  height: 8px;
+  border: 0;
+  border-right: 2px solid #5de7ff;
+  border-radius: 50%;
+}
+
+.sl-pet-character[data-eye="pink"][data-state="thinking"] .sl-pet-mouth {
+  border-color: #ff84c8;
+}
+
+.sl-pet-character[data-state="worried"] .sl-pet-mouth,
+.sl-pet-character[data-state="scared"] .sl-pet-mouth {
+  width: 10px;
+  height: 10px;
+  border: 2px solid #b6d5e6;
+  border-radius: 50%;
+}
+
+.sl-pet-character[data-state="surprised"] .sl-pet-mouth {
+  width: 11px;
+  height: 12px;
+  border: 2px solid #dcefff;
+  border-radius: 50%;
+}
+
+.sl-pet-character[data-state="angry"] .sl-pet-mouth {
+  width: 19px;
+  height: 4px;
+  border: 0;
+  border-top: 3px solid #ff3f4f;
+  border-radius: 14px 14px 0 0;
+  transform: translateX(-50%) translateY(2px);
+}
+
+.sl-pet-character[data-state="annoyed"] .sl-pet-mouth {
+  width: 15px;
+  height: 4px;
+  border: 0;
+  border-top: 2px solid #5de7ff;
+  border-radius: 14px 14px 0 0;
+}
+
+.sl-pet-character[data-eye="pink"][data-state="annoyed"] .sl-pet-mouth {
+  border-color: #ff84c8;
+}
+
+.sl-pet-character[data-state="sleeping"] .sl-pet-mouth {
+  width: 9px;
+  height: 4px;
+  bottom: 10px;
+  border-bottom-width: 2px;
+}
+
 /* ---------- Eyes ---------- */
 
 .sl-pet-eye {
@@ -885,4 +970,33 @@ html[data-theme="light"] .sl-pet-setting-buttons button {
 
 .sl-pet-face {
   transform: translateY(var(--pet-micro-y, 0px)) rotate(var(--pet-micro-rot, 0deg));
+}
+
+
+/* Final motion correction: no artificial side-to-side walking shake. */
+.sl-pet-character[data-moving="true"] .sl-pet-visual {
+  animation: none !important;
+}
+
+.sl-pet-character[data-danger="true"] .sl-pet-visual {
+  animation: none !important;
+}
+
+/* Keep the thinking cloud attached tightly to the face. */
+.sl-pet-thought {
+  transform: translate(-12px, -100%) translateY(3px) scale(.96);
+}
+
+.sl-pet-thought.is-visible {
+  transform: translate(-12px, -100%) translateY(0) scale(1);
+}
+
+.sl-pet-thought-dot.d1 {
+  left: 13px;
+  bottom: 4px;
+}
+
+.sl-pet-thought-dot.d2 {
+  left: 6px;
+  bottom: -3px;
 }
