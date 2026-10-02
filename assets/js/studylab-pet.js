@@ -1144,7 +1144,123 @@
     updateControls();
   });
 
-  function setEnabled(enabled) {
+  function personalityLabel(name) {
+    const labels = {
+      natural:"Natural", playful:"Playful", angry:"Angry", strict:"Strict",
+      lazy:"Lazy", focused:"Focused", curious:"Curious", energetic:"Energetic",
+      observer:"Observer", social:"Social", sleepy:"Sleepy", exam:"Exam Mode",
+      "all-in-one":"All In One"
+    };
+    return labels[name] || name;
+  }
+
+  function savePersonalities() {
+    state.personalities = [...new Set(
+      state.personalities.filter((name) => PERSONALITY_NAMES.includes(name))
+    )];
+
+    if (!state.personalities.length) state.personalities = ["natural"];
+    save(KEY.personalities, JSON.stringify(state.personalities));
+    character.dataset.personalities = state.personalities.join(",");
+  }
+
+  function notifySetting(message, duration = 1100) {
+    if (state.enabled && state.bubbleEnabled) {
+      showThought(message, duration);
+    }
+  }
+
+  function setPersonalityEnabled(name, enabled) {
+    if (!PERSONALITY_NAMES.includes(name)) return;
+
+    const has = state.personalities.includes(name);
+    if (has === enabled) {
+      notifySetting(personalityLabel(name) + (enabled ? " enabled." : " disabled."));
+      return;
+    }
+
+    state.lastMeaningfulActivity = now();
+
+    if (enabled) {
+      state.personalities = [...state.personalities, name];
+    } else {
+      state.personalities = state.personalities.filter((item) => item !== name);
+    }
+
+    savePersonalities();
+
+    if (name === "angry" && !enabled) {
+      state.angerUntil = 0;
+      state.angerLevel = 0;
+      state.danger = false;
+      state.evading = false;
+      character.dataset.danger = "false";
+      character.dataset.angerLevel = "0";
+    }
+
+    const profile = modeProfile();
+    state.nextWander = now() + rand(profile.initialWait[0], profile.initialWait[1]);
+    clearTimeout(state.hoverTimer);
+    state.lastHoveredElement = null;
+
+    setExpression(
+      profile.expressionMoods?.[0] || (enabled ? "delighted" : "neutral"),
+      1000,
+      true
+    );
+
+    notifySetting(personalityLabel(name) + (enabled ? " enabled." : " disabled."));
+    updateControls();
+  }
+
+  function setBubbleEnabled(enabled) {
+    if (enabled === state.bubbleEnabled) {
+      if (state.enabled && enabled) {
+        showThought("Message box already enabled.", 900);
+      }
+      return;
+    }
+
+    if (!enabled) {
+      if (state.enabled && state.bubbleEnabled) {
+        showThought("Message box disabled.", 900);
+      }
+      state.bubbleEnabled = false;
+      save(KEY.bubble, false);
+      clearTimeout(state.bubbleTimer);
+      setTimeout(() => thought.classList.remove("is-visible"), 820);
+    } else {
+      state.bubbleEnabled = true;
+      save(KEY.bubble, true);
+      showThought("Message box enabled.", 1100);
+    }
+
+    updateControls();
+  }
+
+  function updateControls() {
+    enableButton.classList.toggle("is-active", state.enabled);
+    disableButton.classList.toggle("is-active", !state.enabled);
+
+    eyeButtons.forEach((button) => {
+      button.classList.toggle("is-active", button.dataset.petEye === state.eye);
+    });
+
+    personalityEnableButtons.forEach((button) => {
+      const name = button.dataset.petPersonalityEnable;
+      button.classList.toggle("is-active", state.personalities.includes(name));
+    });
+
+    personalityDisableButtons.forEach((button) => {
+      const name = button.dataset.petPersonalityDisable;
+      button.classList.toggle("is-active", !state.personalities.includes(name));
+    });
+
+    bubbleEnableButton.classList.toggle("is-active", state.bubbleEnabled);
+    bubbleDisableButton.classList.toggle("is-active", !state.bubbleEnabled);
+  }
+
+    function setEnabled(enabled) {
     if (enabled === state.enabled) {
       if (enabled) notifySetting("Pet already enabled.");
       return;
