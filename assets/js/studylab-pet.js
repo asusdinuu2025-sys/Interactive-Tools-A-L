@@ -331,22 +331,57 @@
     social:"Opening community resources."
   };
 
-  const modeProfiles = {
-    natural:{label:"Natural",moveScale:1.00,minMove:300,wanderWait:[13000,22000],initialWait:[9000,15000],sleepAfter:32000,cardBias:.38,hoverDelay:120,expressionMoods:null,angerDuration:[4200,6200]},
-    playful:{label:"Playful",moveScale:.90,minMove:285,wanderWait:[8500,15000],initialWait:[6500,11000],sleepAfter:42000,cardBias:.58,hoverDelay:90,expressionMoods:["happy","excited","curious","surprised"],angerDuration:[3500,5000]},
-    strict:{label:"Strict",moveScale:1.12,minMove:340,wanderWait:[18000,29000],initialWait:[13000,21000],sleepAfter:44000,cardBias:.22,hoverDelay:160,expressionMoods:["focused","alert","suspicious","worried"],angerDuration:[5200,7200]},
-    lazy:{label:"Lazy",moveScale:1.18,minMove:330,wanderWait:[26000,44000],initialWait:[20000,32000],sleepAfter:19000,cardBias:.12,hoverDelay:260,expressionMoods:["bored","sleeping","neutral","shy"],angerDuration:[2800,4300]},
-    focused:{label:"Focused",moveScale:1.05,minMove:320,wanderWait:[10500,18500],initialWait:[7500,12000],sleepAfter:43000,cardBias:.72,hoverDelay:100,expressionMoods:["focused","thinking","alert"],angerDuration:[4500,6500]},
-    curious:{label:"Curious",moveScale:.94,minMove:300,wanderWait:[8000,14500],initialWait:[6000,10000],sleepAfter:40000,cardBias:.82,hoverDelay:80,expressionMoods:["curious","surprised","thinking","delighted"],angerDuration:[3800,5400]},
-    energetic:{label:"Energetic",moveScale:.82,minMove:310,wanderWait:[6500,12000],initialWait:[5000,8500],sleepAfter:50000,cardBias:.62,hoverDelay:70,expressionMoods:["excited","happy","alert","curious"],angerDuration:[3800,5600]},
-    observer:{label:"Observer",moveScale:1.16,minMove:360,wanderWait:[28000,46000],initialWait:[17000,30000],sleepAfter:36000,cardBias:.80,hoverDelay:240,expressionMoods:["curious","focused","neutral","suspicious"],angerDuration:[3600,5200]},
-    social:{label:"Social",moveScale:.96,minMove:300,wanderWait:[10000,18000],initialWait:[7000,12000],sleepAfter:46000,cardBias:.65,hoverDelay:100,expressionMoods:["happy","delighted","curious","excited"],angerDuration:[3600,5200]},
-    sleepy:{label:"Sleepy",moveScale:1.28,minMove:350,wanderWait:[30000,52000],initialWait:[24000,38000],sleepAfter:15000,cardBias:.08,hoverDelay:300,expressionMoods:["sleeping","bored","shy","neutral"],angerDuration:[3000,4500]},
-    exam:{label:"Exam Mode",moveScale:1.12,minMove:345,wanderWait:[18000,30000],initialWait:[12000,20000],sleepAfter:52000,cardBias:.48,hoverDelay:140,expressionMoods:["alert","focused","worried","thinking"],angerDuration:[5200,7200]},
-    "all-in-one":{label:"All In One",moveScale:.88,minMove:300,wanderWait:[7500,14500],initialWait:[5500,9500],sleepAfter:48000,cardBias:.78,hoverDelay:75,expressionMoods:null,angerDuration:[4600,6800]}
+  const personalityProfiles = {
+    natural:{label:"Natural",moveScale:1.00,minMove:300,wanderWait:[13000,22000],initialWait:[9000,15000],sleepAfter:32000,cardBias:.38,hoverDelay:120,expressionMoods:null,angerDuration:[4200,6200],angerFactor:1.00},
+    playful:{label:"Playful",moveScale:.88,minMove:285,wanderWait:[8000,14500],initialWait:[6000,10000],sleepAfter:42000,cardBias:.62,hoverDelay:90,expressionMoods:["happy","excited","curious","surprised"],angerDuration:[3400,5000],angerFactor:1.05},
+    angry:{label:"Angry",moveScale:.94,minMove:290,wanderWait:[9000,16000],initialWait:[6500,10500],sleepAfter:52000,cardBias:.48,hoverDelay:60,expressionMoods:["angry","annoyed","suspicious","alert"],angerDuration:[5600,7600],angerFactor:1.75},
+    strict:{label:"Strict",moveScale:1.14,minMove:340,wanderWait:[18000,30000],initialWait:[13000,21000],sleepAfter:44000,cardBias:.24,hoverDelay:150,expressionMoods:["focused","alert","suspicious","worried"],angerDuration:[5200,7200],angerFactor:1.10},
+    lazy:{label:"Lazy",moveScale:1.26,minMove:335,wanderWait:[28000,46000],initialWait:[22000,34000],sleepAfter:19000,cardBias:.10,hoverDelay:260,expressionMoods:["bored","neutral","shy"],angerDuration:[2800,4300],angerFactor:.80},
+    focused:{label:"Focused",moveScale:1.06,minMove:325,wanderWait:[10500,18500],initialWait:[7500,12000],sleepAfter:43000,cardBias:.76,hoverDelay:95,expressionMoods:["focused","thinking","alert"],angerDuration:[4500,6500],angerFactor:1.05},
+    curious:{label:"Curious",moveScale:.93,minMove:300,wanderWait:[7500,14000],initialWait:[5500,9500],sleepAfter:40000,cardBias:.86,hoverDelay:55,expressionMoods:["curious","surprised","thinking","delighted"],angerDuration:[3800,5400],angerFactor:1.00},
+    energetic:{label:"Energetic",moveScale:.78,minMove:310,wanderWait:[6000,11500],initialWait:[4500,8000],sleepAfter:50000,cardBias:.64,hoverDelay:60,expressionMoods:["excited","happy","alert","curious"],angerDuration:[3800,5600],angerFactor:1.10},
+    observer:{label:"Observer",moveScale:1.17,minMove:365,wanderWait:[29000,47000],initialWait:[18000,31000],sleepAfter:36000,cardBias:.86,hoverDelay:210,expressionMoods:["curious","focused","neutral","suspicious"],angerDuration:[3600,5200],angerFactor:.95},
+    social:{label:"Social",moveScale:.96,minMove:300,wanderWait:[9500,17500],initialWait:[7000,12000],sleepAfter:46000,cardBias:.66,hoverDelay:85,expressionMoods:["happy","delighted","curious","excited"],angerDuration:[3600,5200],angerFactor:.90},
+    sleepy:{label:"Sleepy",moveScale:1.30,minMove:350,wanderWait:[30000,52000],initialWait:[24000,38000],sleepAfter:15000,cardBias:.07,hoverDelay:300,expressionMoods:["sleeping","bored","shy","neutral"],angerDuration:[3000,4500],angerFactor:.75},
+    exam:{label:"Exam Mode",moveScale:1.10,minMove:345,wanderWait:[18000,30000],initialWait:[12000,20000],sleepAfter:52000,cardBias:.50,hoverDelay:135,expressionMoods:["alert","focused","worried","thinking"],angerDuration:[5200,7200],angerFactor:1.15},
+    "all-in-one":{label:"All In One",moveScale:.90,minMove:300,wanderWait:[7000,13500],initialWait:[5000,9000],sleepAfter:50000,cardBias:.82,hoverDelay:60,expressionMoods:null,angerDuration:[4600,6800],angerFactor:1.30}
   };
 
-  if (!modeProfiles[state.mode]) state.mode="natural";
+  function enabledPersonalities() {
+    if (state.personalities.includes("all-in-one")) {
+      return PERSONALITY_NAMES.filter((name) => name !== "all-in-one");
+    }
+    return state.personalities.filter((name) => personalityProfiles[name]);
+  }
+
+  function combinedProfile() {
+    const keys = enabledPersonalities();
+    if (!keys.length) return {
+      ...personalityProfiles.natural,
+      expressionMoods:["neutral"]
+    };
+
+    const profiles = keys.map((key) => personalityProfiles[key]);
+    const average = (field) => profiles.reduce((sum, profile) => sum + profile[field], 0) / profiles.length;
+    const rangeAverage = (field) => [
+      profiles.reduce((sum, profile) => sum + profile[field][0], 0) / profiles.length,
+      profiles.reduce((sum, profile) => sum + profile[field][1], 0) / profiles.length
+    ];
+    const moods = [...new Set(profiles.flatMap((profile) => profile.expressionMoods || []))];
+
+    return {
+      moveScale: average("moveScale"),
+      minMove: average("minMove"),
+      wanderWait: rangeAverage("wanderWait"),
+      initialWait: rangeAverage("initialWait"),
+      sleepAfter: average("sleepAfter"),
+      cardBias: average("cardBias"),
+      hoverDelay: average("hoverDelay"),
+      angerDuration: rangeAverage("angerDuration"),
+      angerFactor: average("angerFactor"),
+      expressionMoods: moods.length ? moods : null
+    };
+  }
 
   const semanticRules = [
     {re:/pomodoro|focus timer/,expression:"focused",hover:"Focus, work, break.",action:"Starting a focus session."},
@@ -439,7 +474,7 @@
   }
 
   function modeProfile() {
-    return modeProfiles[state.mode] || modeProfiles.natural;
+    return combinedProfile();
   }
 
   function modeExpression(base) {
