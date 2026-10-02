@@ -65,13 +65,14 @@
     lastWander: 0,
 
     nextBlink: now() + rand(6500, 10400),
-    nextWander: now() + rand(12000, 19000),
-    nextAmbient: now() + rand(15000, 24000),
-    nextThought: now() + rand(18000, 30000),
+    nextWander: now() + rand(9000, 15000),
+    nextAmbient: now() + rand(10000, 18000),
+    nextThought: now() + rand(13000, 22000),
 
     clickTimes: [],
     angerLevel: 0,
     angerUntil: 0,
+    angerTimer: null,
     nextEvade: 0,
 
     dragPointerId: null,
@@ -189,13 +190,14 @@
 
   function placeThought() {
     const cloudWidth = window.innerWidth <= 720 ? 175 : 190;
+    const petHalfHeight = window.innerWidth <= 720 ? 32 : 35;
     const anchorX = clamp(
-      state.x - cloudWidth * 0.34,
+      state.x - cloudWidth / 2,
       10,
       Math.max(10, window.innerWidth - cloudWidth - 10)
     );
     thought.style.left = anchorX + "px";
-    thought.style.top = Math.max(58, state.y - 9) + "px";
+    thought.style.top = Math.max(58, state.y - petHalfHeight - 8) + "px";
   }
 
   function showThought(message, duration = 1800) {
@@ -459,7 +461,11 @@
 
   function updateGaze() {
     if (state.enabled && !state.dragging && !state.sleeping && !state.evading) {
-      setGazeTarget(state.pointerX, state.pointerY, false);
+      setGazeTarget(
+        state.pointerX,
+        state.pointerY,
+        state.angerUntil > now()
+      );
     }
 
     state.gazeX += (state.gazeTargetX - state.gazeX) * 0.14;
@@ -496,10 +502,13 @@
     state.nextBlink = now() + rand(6200, 10400);
   }
 
-  function walkingDuration(distance, direction) {
-    if (direction === "up") return clamp(1700 + distance * 2.25, 1900, 3900);
-    if (direction === "down") return clamp(1000 + distance * 1.05, 1100, 2500);
-    return clamp(1300 + distance * 1.52, 1500, 3200);
+  function walkingDuration(distance, direction, reason = "wander") {
+    if (reason === "evade") {
+      return clamp(500 + distance * 0.75, 650, 1250);
+    }
+    if (direction === "up") return clamp(1900 + distance * 2.40, 2100, 4200);
+    if (direction === "down") return clamp(1250 + distance * 1.15, 1300, 2800);
+    return clamp(1550 + distance * 1.62, 1750, 3500);
   }
 
   function visualDirection(dx, dy) {
@@ -535,14 +544,18 @@
     if (distance < 95) return;
 
     const direction = visualDirection(dx, dy);
-    const duration = clamp(walkingDuration(distance, direction) * 1.75, 3200, 6800);
+    const duration = reason === "evade"
+      ? walkingDuration(distance, direction, reason)
+      : clamp(walkingDuration(distance, direction, reason) * 1.55, 3600, 7600);
     const started = now();
     const token = state.moveToken;
 
     character.dataset.moving = "true";
     character.dataset.direction = direction;
 
-    if (direction === "up") {
+    if (reason === "evade") {
+      setExpression("angry", 900, true);
+    } else if (direction === "up") {
       setExpression("focused", 1150);
     } else if (direction === "down") {
       setExpression("alert", 900);
@@ -575,15 +588,17 @@
           setTimeout(() => character.classList.remove("is-landed"), 500);
         }
 
-        state.lastWander = now();
-        state.nextWander = now() + (
-          state.context === "study"
-            ? rand(19000, 32000)
-            : rand(26000, 42000)
-        );
+        if (reason === "wander") {
+          state.lastWander = now();
+          state.nextWander = now() + (
+            state.context === "study"
+              ? rand(13000, 22000)
+              : rand(20000, 34000)
+          );
+        }
 
         if (reason === "evade") {
-          setTimeout(() => { state.evading = false; }, rand(1700, 2800));
+          setTimeout(() => { state.evading = false; }, rand(450, 850));
         }
       }
     }
@@ -639,7 +654,7 @@
     const point = visibleDestination();
     animateMoveTo(point.x, point.y, "wander");
 
-    const chance = state.context === "study" ? 0.35 : 0.16;
+    const chance = state.context === "study" ? 0.52 : 0.30;
     if (Math.random() < chance) {
       const info = infoFor(document.elementFromPoint(
         clamp(point.x, 1, window.innerWidth - 1),
@@ -667,7 +682,7 @@
       vy = Math.random() < 0.5 ? -0.6 : 0.6;
     }
 
-    const distance = state.angerLevel >= 3 ? rand(150, 235) : rand(100, 175);
+    const distance = state.angerLevel >= 4 ? rand(190, 270) : rand(165, 225);
     let tx = state.x + vx * distance;
     let ty = state.y + vy * distance * 0.78;
 
@@ -676,8 +691,8 @@
     tx = clamp(tx, 55, window.innerWidth - 55);
     ty = clamp(ty, 92, window.innerHeight - 105);
 
-    setExpression("angry", 950, true);
-    state.nextEvade = now() + rand(1200, 1800);
+    setExpression("angry", 900, true);
+    state.nextEvade = now() + rand(420, 720);
     state.evading = true;
     animateMoveTo(tx, ty, "evade");
   }
@@ -687,10 +702,12 @@
 
     state.sleeping = false;
     state.angerLevel = clamp(Math.max(state.angerLevel, level), 1, 5);
-    state.angerUntil = now() + rand(3400, 5200);
+    state.angerUntil = now() + rand(4200, 6200);
     state.danger = true;
     character.dataset.danger = "true";
-    setExpression("angry", 1600, true);
+    character.dataset.angerLevel = String(state.angerLevel);
+    clearTimeout(state.angerTimer);
+    setExpression("angry", 1700, true);
     state.evading = false;
     setGazeTarget(state.pointerX, state.pointerY, true);
 
@@ -698,14 +715,16 @@
       showThought(state.angerLevel >= 4 ? "BACK OFF." : "...seriously?", 1100);
     }
 
-    setTimeout(() => {
+    state.angerTimer = setTimeout(() => {
       if (now() >= state.angerUntil) {
         state.danger = false;
         character.dataset.danger = "false";
+        character.dataset.angerLevel = "0";
         state.angerLevel = 0;
+        state.evading = false;
         if (!state.dragging && !state.sleeping) setExpression("neutral", 800);
       }
-    }, 5700);
+    }, 6300);
 
     evadeCursor(true);
   }
@@ -714,12 +733,13 @@
     wake("pointer");
 
     const t = now();
-    state.clickTimes = state.clickTimes.filter((item) => t - item < 1050);
+    state.lastMeaningfulActivity = t;
+    state.clickTimes = state.clickTimes.filter((item) => t - item < 1200);
     state.clickTimes.push(t);
 
     const rapid = state.clickTimes.length;
     if (rapid >= 3) {
-      enterAnger(Math.min(4, rapid));
+      enterAnger(Math.min(5, rapid));
     } else if (rapid === 2) {
       setExpression("annoyed", 850, true);
       showThought(state.eye === "cyan" ? "Dude..." : "Seriously?", 900);
@@ -812,7 +832,8 @@
 
     if (!state.dragging && state.angerUntil > now()) {
       const distance = Math.hypot(ev.clientX - state.x, ev.clientY - state.y);
-      if (distance < 118 && !state.evading) evadeCursor();
+      const avoidRadius = state.angerLevel >= 4 ? 235 : 195;
+      if (distance < avoidRadius && !state.evading) evadeCursor();
     }
 
     if (!state.dragging && state.angerUntil <= now() && !state.evading) {
@@ -883,6 +904,7 @@
     const el = ev.target;
     const text = descriptor(el);
     const value = String(el.value || "");
+    state.lastMeaningfulActivity = now();
     const isName = /name|profile|display name/.test(text);
     if (value) {
       setExpression(isName ? "curious" : "focused", isName ? 850 : 650);
@@ -893,7 +915,8 @@
   document.addEventListener("scroll", () => {
     if (!state.enabled) return;
     state.lastActivity = now();
-    if (Math.random() < 0.035 && !state.sleeping) {
+    state.lastMeaningfulActivity = now();
+    if (Math.random() < 0.045 && !state.sleeping) {
       setExpression("alert", 600);
     }
   }, { passive: true });
@@ -907,6 +930,7 @@
   }
 
   launcher.addEventListener("click", () => {
+    state.lastMeaningfulActivity = now();
     const open = panel.hidden;
     panel.hidden = !open;
     launcher.setAttribute("aria-expanded", String(open));
@@ -919,16 +943,24 @@
   });
 
   closeButton.addEventListener("click", () => {
+    state.lastMeaningfulActivity = now();
     panel.hidden = true;
     launcher.setAttribute("aria-expanded", "false");
     launcher.classList.remove("is-open");
   });
 
-  enableButton.addEventListener("click", () => setEnabled(true));
-  disableButton.addEventListener("click", () => setEnabled(false));
+  enableButton.addEventListener("click", () => {
+    state.lastMeaningfulActivity = now();
+    setEnabled(true);
+  });
+  disableButton.addEventListener("click", () => {
+    state.lastMeaningfulActivity = now();
+    setEnabled(false);
+  });
 
   eyeButtons.forEach((button) => {
     button.addEventListener("click", () => {
+      state.lastMeaningfulActivity = now();
       state.eye = button.dataset.petEye === "pink" ? "pink" : "cyan";
       character.dataset.eye = state.eye;
       save(KEY.eye, state.eye);
@@ -966,7 +998,8 @@
       setExpression("surprised", 850, true);
       setGazeTarget(state.pointerX, state.pointerY, false);
       state.lastActivity = now();
-      state.nextWander = now() + rand(4500, 8000);
+      state.lastMeaningfulActivity = now();
+      state.nextWander = now() + rand(4000, 7500);
       showThought("I'm back.", 950);
     }
 
@@ -988,9 +1021,9 @@
     if (!state.enabled || document.hidden || state.dragging) return;
 
     const t = now();
-    const idleFor = t - state.lastActivity;
+    const idleFor = t - state.lastMeaningfulActivity;
 
-    if (idleFor >= 8200 && !state.sleeping && state.angerUntil <= t) {
+    if (idleFor >= 32000 && !state.sleeping && state.angerUntil <= t) {
       state.sleeping = true;
       state.expression = "sleeping";
       character.dataset.state = "sleeping";
@@ -1004,16 +1037,16 @@
 
     if (t >= state.nextBlink) blink();
 
-    if (t >= state.nextWander && state.angerUntil <= t && idleFor >= 3800) wander();
+    if (t >= state.nextWander && state.angerUntil <= t && idleFor >= 2600) wander();
 
     if (t >= state.nextThought) {
       state.nextThought = t + (
         state.context === "study"
-          ? rand(14000, 24000)
-          : rand(20000, 32000)
+          ? rand(12000, 21000)
+          : rand(17000, 29000)
       );
 
-      if (Math.random() < (state.context === "study" ? 0.15 : 0.04)) {
+      if (Math.random() < (state.context === "study" ? 0.22 : 0.075)) {
         const text = pick(contextThoughts[state.context] || ["Hmm..."]);
         setExpression("thinking", 1050);
         showThought(text, 1500);
@@ -1023,22 +1056,23 @@
     if (t >= state.nextAmbient && state.angerUntil <= t) {
       state.nextAmbient = t + (
         state.context === "study"
-          ? rand(12000, 19000)
-          : rand(18000, 28000)
+          ? rand(9500, 16500)
+          : rand(13000, 23000)
       );
 
       const base = pick(contextMoods[state.context] || ["neutral"]);
       const expression = personaVariation(base);
       setExpression(expression, rand(800, 1500));
 
-      if (Math.random() < (state.context === "study" ? 0.08 : 0.03)) {
+      if (Math.random() < (state.context === "study" ? 0.13 : 0.055)) {
         showThought(pick(contextThoughts[state.context] || ["Hmm..."]), 1300);
       }
     }
 
     if (state.angerUntil > t) {
       const distance = Math.hypot(state.pointerX - state.x, state.pointerY - state.y);
-      if (distance < 118) evadeCursor();
+      const avoidRadius = state.angerLevel >= 4 ? 235 : 195;
+      if (distance < avoidRadius && !state.evading) evadeCursor();
     } else if (state.angerUntil <= t && state.danger) {
       state.danger = false;
       character.dataset.danger = "false";
