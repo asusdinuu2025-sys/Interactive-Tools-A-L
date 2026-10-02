@@ -871,94 +871,6 @@
   color: #ff9cd1;
 }
 
-.sl-pet-personality-setting {
-  align-items: flex-start;
-}
-
-.sl-pet-personality-setting > span {
-  flex: 0 0 74px;
-  padding-top: 5px;
-}
-
-.sl-pet-personality-list {
-  width: 100%;
-  max-height: none;
-  overflow: visible;
-  padding-right: 1px;
-}
-
-.sl-pet-personality-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: 7px;
-  padding: 5px 0;
-  border-bottom: 1px solid rgba(255,255,255,.055);
-}
-
-.sl-pet-personality-row:last-child {
-  border-bottom: 0;
-}
-
-.sl-pet-personality-row strong {
-  font-size: .70rem;
-  font-weight: 760;
-}
-
-.sl-pet-personality-row > div {
-  display: inline-flex;
-  gap: 5px;
-}
-
-.sl-pet-personality-row button {
-  min-width: 52px;
-  min-height: 26px;
-  padding: 4px 6px;
-  border: 1px solid rgba(255,255,255,.09);
-  border-radius: 9px;
-  background: rgba(255,255,255,.045);
-  color: inherit;
-  cursor: pointer;
-  font: inherit;
-  font-size: .59rem;
-  font-weight: 730;
-  line-height: 1;
-  transition: transform .16s ease, background .16s ease, border-color .16s ease, box-shadow .16s ease;
-}
-
-.sl-pet-personality-row button:hover {
-  transform: translateY(-1px);
-  background: rgba(255,255,255,.07);
-}
-
-.sl-pet-personality-row button.is-active {
-  background: linear-gradient(135deg, #1687ff, #4d8dff);
-  border-color: #71bbff;
-  color: #ffffff;
-  box-shadow:
-    0 0 0 1px rgba(115,187,255,.18),
-    0 5px 16px rgba(22,135,255,.20);
-}
-
-.sl-pet-personality-row button[data-pet-personality-disable].is-active {
-  background: rgba(255,255,255,.06);
-  border-color: rgba(255,255,255,.18);
-  color: var(--text-secondary);
-  box-shadow: none;
-}
-
-.sl-pet-personality-row.is-featured {
-  margin-top: 4px;
-  padding: 9px 8px;
-  border: 1px solid rgba(126,220,255,.18);
-  border-radius: 11px;
-  background: linear-gradient(135deg, rgba(126,220,255,.075), rgba(91,140,255,.045));
-}
-
-.sl-pet-personality-row.is-featured strong {
-  color: #91e9ff;
-}
-
 .sl-pet-panel-note {
   margin: 8px 2px 1px;
   color: var(--text-muted);
@@ -977,15 +889,6 @@ html[data-theme="light"] .sl-pet-thought-cloud {
   box-shadow:
     0 24px 62px rgba(35,70,105,.15),
     inset 0 1px 0 rgba(255,255,255,.96);
-}
-
-html[data-theme="light"] .sl-pet-personality-row button[data-pet-personality-disable].is-active {
-  color: #5f738d;
-}
-
-html[data-theme="light"] .sl-pet-personality-row.is-featured {
-  background: rgba(126,220,255,.055);
-  border-color: rgba(72,151,187,.20);
 }
 
 html[data-theme="light"] .sl-pet-panel-head small,
@@ -1040,20 +943,6 @@ html[data-theme="light"] .sl-pet-setting-buttons button {
     overflow-y: auto;
   }
 
-  .sl-pet-personality-setting {
-    display: block;
-  }
-
-  .sl-pet-personality-setting > span {
-    display: block;
-    padding-top: 0;
-    padding-bottom: 5px;
-  }
-
-  .sl-pet-personality-list {
-    max-height: none;
-    overflow: visible;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1135,7 +1024,6 @@ html[data-theme="light"] .sl-pet-setting-buttons button {
   border-color: #d39abc;
 }
 
-
 /* Enable-only rapid movement visuals, matching the 4b336d6 motion cues. */
 .sl-pet-character[data-enable-burst="true"][data-moving="true"].is-walking .sl-pet-visual {
   animation: slPetLegacyWalk .46s ease-in-out infinite alternate !important;
@@ -1170,5 +1058,4 @@ html[data-theme="light"] .sl-pet-setting-buttons button {
   65% { transform: translateY(-4px) scaleY(1.04) scaleX(.98); }
   100% { transform: scale(1); }
 }
-
 
