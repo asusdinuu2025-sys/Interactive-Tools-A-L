@@ -438,50 +438,15 @@
   top: 32px !important;
 }
 
-/* ---------- Walking: visible little steps, not hovering ---------- */
+/* ---------- Walking ---------- */
+/* Position itself moves slowly in JavaScript. No artificial side-to-side shake. */
 
-.sl-pet-character[data-moving="true"][data-direction="left"] .sl-pet-visual,
-.sl-pet-character[data-moving="true"][data-direction="right"] .sl-pet-visual {
-  animation: slPetWalkHorizontal .43s ease-in-out infinite;
-}
-
-.sl-pet-character[data-moving="true"][data-direction="up"] .sl-pet-visual {
-  animation: slPetWalkUp .56s ease-in-out infinite;
-}
-
-.sl-pet-character[data-moving="true"][data-direction="down"] .sl-pet-visual {
-  animation: slPetWalkDown .48s ease-in-out infinite;
-}
-
-@keyframes slPetWalkHorizontal {
-  0%   { transform: translate(0,0) rotate(0deg); }
-  17%  { transform: translate(-2px,1px) rotate(-1.5deg); }
-  34%  { transform: translate(-1px,-3px) rotate(.2deg); }
-  50%  { transform: translate(0,1px) rotate(1.6deg); }
-  67%  { transform: translate(2px,-3px) rotate(-.2deg); }
-  84%  { transform: translate(1px,1px) rotate(-1.4deg); }
-  100% { transform: translate(0,0) rotate(0deg); }
-}
-
-@keyframes slPetWalkUp {
-  0%   { transform: translate(0,1px) rotate(-1deg); }
-  18%  { transform: translate(-2px,-2px) rotate(-3deg); }
-  36%  { transform: translate(1px,-4px) rotate(-1deg); }
-  54%  { transform: translate(2px,-2px) rotate(2.5deg); }
-  72%  { transform: translate(-1px,-5px) rotate(1deg); }
-  100% { transform: translate(0,1px) rotate(-1deg); }
-}
-
-@keyframes slPetWalkDown {
-  0%   { transform: translate(0,-1px) rotate(0deg) scale(1); }
-  24%  { transform: translate(2px,2px) rotate(2deg) scale(1.01,.98); }
-  48%  { transform: translate(-1px,4px) rotate(-2deg) scale(.99,1.01); }
-  72%  { transform: translate(1px,1px) rotate(1deg) scale(1.01,.99); }
-  100% { transform: translate(0,0) rotate(0deg) scale(1); }
+.sl-pet-character[data-moving="true"] .sl-pet-visual {
+  animation: none !important;
 }
 
 .sl-pet-character.is-landed .sl-pet-visual {
-  animation: slPetLand .48s cubic-bezier(.16,.9,.2,1);
+  animation: slPetLand .42s cubic-bezier(.16,.9,.2,1);
 }
 
 @keyframes slPetLand {
@@ -512,9 +477,9 @@
 
 @keyframes slPetShiver {
   0%,100% { transform: translate(0,0) rotate(0deg); }
-  25% { transform: translate(-2px,1px) rotate(-2deg); }
-  50% { transform: translate(1px,-1px) rotate(2deg); }
-  75% { transform: translate(-1px,0) rotate(-1.4deg); }
+  25% { transform: translate(-.7px,.4px) rotate(-.7deg); }
+  50% { transform: translate(.7px,-.4px) rotate(.7deg); }
+  75% { transform: translate(-.4px,0) rotate(-.4deg); }
 }
 
 /* ---------- Sleep ---------- */
@@ -621,12 +586,13 @@
 
 .sl-pet-thought {
   position: absolute;
-  left: 50%;
-  top: 50%;
+  left: 0;
+  top: 0;
   width: 190px;
   min-height: 54px;
   opacity: 0;
-  transform: translate(-50%,-100%) translateY(8px) scale(.94);
+  transform: translateY(-100%) translateY(3px) scale(.96);
+  transform-origin: 18px 100%;
   transition: opacity .22s ease, transform .22s cubic-bezier(.2,.8,.2,1);
   pointer-events: none;
   z-index: 954;
@@ -634,7 +600,7 @@
 
 .sl-pet-thought.is-visible {
   opacity: 1;
-  transform: translate(-50%,-100%) translateY(0) scale(1);
+  transform: translateY(-100%) translateY(0) scale(1);
 }
 
 .sl-pet-thought-cloud {
@@ -982,15 +948,7 @@ html[data-theme="light"] .sl-pet-setting-buttons button {
   animation: none !important;
 }
 
-/* Keep the thinking cloud attached tightly to the face. */
-.sl-pet-thought {
-  transform: translate(-12px, -100%) translateY(3px) scale(.96);
-}
-
-.sl-pet-thought.is-visible {
-  transform: translate(-12px, -100%) translateY(0) scale(1);
-}
-
+/* Keep the thinking cloud anchored to the face. */
 .sl-pet-thought-dot.d1 {
   left: 13px;
   bottom: 4px;
