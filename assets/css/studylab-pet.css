@@ -1256,3 +1256,39 @@ html[data-theme="light"] .sl-pet-setting-buttons button {
     transform: translate(-50%, -5px) scale(1);
   }
 }
+
+
+/* Playful-only legacy movement visuals, matching the 4b336d6 motion cues. */
+.sl-pet-character[data-playful="true"][data-moving="true"].is-walking .sl-pet-visual {
+  animation: slPetLegacyWalk .46s ease-in-out infinite alternate !important;
+}
+.sl-pet-character[data-playful="true"][data-moving="true"].is-climbing .sl-pet-visual {
+  animation: slPetLegacyClimb .62s ease-in-out infinite alternate !important;
+}
+.sl-pet-character[data-playful="true"].is-falling .sl-pet-visual {
+  animation: slPetLegacyFall .40s cubic-bezier(.2,.9,.3,1.2) !important;
+}
+.sl-pet-character[data-playful="true"].is-landed .sl-pet-visual {
+  animation: slPetLegacyLand .48s cubic-bezier(.2,.9,.2,1) !important;
+}
+
+@keyframes slPetLegacyWalk {
+  from { transform: translateY(0) rotate(-1.5deg); }
+  to { transform: translateY(-3px) rotate(1.5deg); }
+}
+
+@keyframes slPetLegacyClimb {
+  from { transform: translateY(1px) rotate(-5deg); }
+  to { transform: translateY(-3px) rotate(4deg); }
+}
+
+@keyframes slPetLegacyFall {
+  from { transform: translateY(-9px) rotate(-2deg) scale(.98); }
+  to { transform: translateY(4px) rotate(1deg) scale(1); }
+}
+
+@keyframes slPetLegacyLand {
+  0% { transform: scaleY(.90) scaleX(1.07); }
+  65% { transform: translateY(-4px) scaleY(1.04) scaleX(.98); }
+  100% { transform: scale(1); }
+}
