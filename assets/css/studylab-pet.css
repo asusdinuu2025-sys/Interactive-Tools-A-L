@@ -1292,3 +1292,73 @@ html[data-theme="light"] .sl-pet-setting-buttons button {
   65% { transform: translateY(-4px) scaleY(1.04) scaleX(.98); }
   100% { transform: scale(1); }
 }
+
+
+/* ---------- Personality routine faces ---------- */
+
+/* Curious: oversized eyes while it slowly scans visible study cards. */
+.sl-pet-character[data-routine="curious"] .sl-pet-eye > i {
+  width: 24px;
+  height: 31px;
+  border-radius: 8px;
+  box-shadow:
+    0 0 12px rgba(93,231,255,.90),
+    0 0 27px rgba(93,231,255,.34);
+}
+.sl-pet-character[data-eye="pink"][data-routine="curious"] .sl-pet-eye > i {
+  box-shadow:
+    0 0 12px rgba(255,132,200,.90),
+    0 0 27px rgba(255,132,200,.32);
+}
+.sl-pet-character[data-routine="curious"] .sl-pet-eye.left {
+  transform: rotate(-3deg) translateY(-1px);
+}
+.sl-pet-character[data-routine="curious"] .sl-pet-eye.right {
+  transform: rotate(3deg) translateY(-1px);
+}
+
+/* Focused: narrow, deliberate eyes with a centered aiming posture. */
+.sl-pet-character[data-routine="focused"] .sl-pet-eye > i {
+  width: 16px;
+  height: 24px;
+  border-radius: 5px;
+}
+.sl-pet-character[data-routine="focused"] .sl-pet-eye.left {
+  transform: rotate(-2deg) translateY(1px);
+}
+.sl-pet-character[data-routine="focused"] .sl-pet-eye.right {
+  transform: rotate(2deg) translateY(1px);
+}
+.sl-pet-character[data-routine="focused"] .sl-pet-mouth {
+  width: 9px;
+  height: 4px;
+  bottom: 10px;
+}
+
+/* Observer: one eye intentionally larger while it slowly checks the page. */
+.sl-pet-character[data-routine="observer"] .sl-pet-eye.left > i {
+  width: 23px;
+  height: 29px;
+  border-radius: 8px;
+}
+.sl-pet-character[data-routine="observer"] .sl-pet-eye.right > i {
+  width: 15px;
+  height: 18px;
+  border-radius: 6px;
+}
+.sl-pet-character[data-routine="observer"] .sl-pet-eye.left {
+  transform: rotate(-2deg) translateY(-1px);
+}
+.sl-pet-character[data-routine="observer"] .sl-pet-eye.right {
+  transform: rotate(3deg) translateY(3px);
+}
+
+/* Playful personality keeps the old movement body's bounce only during its short emote routine. */
+.sl-pet-character[data-routine="playful"][data-moving="true"] .sl-pet-visual {
+  animation: slPetPlayfulRoutineBob .30s ease-in-out infinite alternate !important;
+}
+
+@keyframes slPetPlayfulRoutineBob {
+  from { transform: translateY(0) rotate(-1.2deg) scale(1); }
+  to { transform: translateY(-2.3px) rotate(1.2deg) scale(1.018); }
+}
