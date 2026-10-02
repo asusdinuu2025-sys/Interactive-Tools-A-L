@@ -116,6 +116,8 @@
     emoteTimer: null,
     personalityRoutineTimers: [],
     personalityRoutineToken: 0,
+    enableBurstActive: false,
+    enableBurstTimers: [],
     bubbleTimer: null,
     blinkTimer: null,
     hoverTimer: null,
@@ -1096,7 +1098,7 @@
     return { duration: 760, ease: [0.22, 0.78, 0.20, 1] };
   }
 
-  function animatePlayfulMoveTo(targetX, targetY, reason = "wander") {
+  function animatePlayfulMoveTo(targetX, targetY, reason = "enable-burst", onComplete = null) {
     if (!state.enabled || state.dragging || reduced || state.sleeping) return false;
 
     stopMove();
@@ -1170,6 +1172,10 @@
 
       if (reason === "evade") {
         setTimeout(() => { state.evading = false; }, rand(450, 850));
+      }
+
+      if (reason === "enable-burst" && typeof onComplete === "function") {
+        onComplete();
       }
     }
 
@@ -1412,6 +1418,62 @@
     if (speed > 7 && state.expression === "neutral" && t - state.lastReaction > 3400) {
       setExpression(modeExpression(pick(["curious","happy","focused","thinking"])), rand(900, 1500));
     }
+  }
+
+  function clearEnableBurst() {
+    state.enableBurstActive = false;
+    state.enableBurstTimers.forEach((timer) => clearTimeout(timer));
+    state.enableBurstTimers = [];
+    character.dataset.enableBurst = "false";
+  }
+
+  function burstTimer(fn, delay) {
+    const timer = setTimeout(fn, delay);
+    state.enableBurstTimers.push(timer);
+    return timer;
+  }
+
+  function runEnableBurst() {
+    if (!state.enabled || reduced || state.sleeping || state.dragging) {
+      startRoam(false);
+      return;
+    }
+
+    clearEnableBurst();
+    state.enableBurstActive = true;
+    stopMove();
+
+    let hops = 0;
+
+    const finish = () => {
+      if (!state.enableBurstActive || !state.enabled) return;
+      state.enableBurstActive = false;
+      character.dataset.enableBurst = "false";
+      character.dataset.moving = "false";
+      character.dataset.direction = "idle";
+      startRoam(false);
+    };
+
+    const hop = () => {
+      if (!state.enableBurstActive || !state.enabled || state.dragging) return;
+
+      const target = playfulWanderTarget();
+      const started = animatePlayfulMoveTo(
+        target.x,
+        target.y,
+        "enable-burst",
+        () => {
+          if (!state.enableBurstActive || !state.enabled) return;
+          hops += 1;
+          if (hops < 3) burstTimer(hop, 150);
+          else burstTimer(finish, 420);
+        }
+      );
+
+      if (!started) burstTimer(finish, 100);
+    };
+
+    hop();
   }
 
   function startRoam(boost = false) {
@@ -2008,7 +2070,7 @@
     save(KEY.enabled, enabled);
 
     if (!enabled) {
-      clearPersonalityRoutine();
+      clearEnableBurst();
       stopMove();
       state.enabled = false;
       state.sleeping = false;
@@ -2052,21 +2114,10 @@
       state.lastHoveredElement = null;
       clearTimeout(state.hoverTimer);
 
-      // Refresh the panel immediately so all saved active states turn blue
-      // as soon as the Pet is re-enabled, before movement/emote work begins.
       updateControls();
-
       setGazeTarget(state.pointerX, state.pointerY, false);
-
-      if (hasPlayfulPersonality()) {
-        state.nextWander = now() + rand(9000, 16000);
-      } else {
-        state.nextWander = now() + 350;
-        startRoam(true);
-      }
-
       setExpression("delighted", 1350, true);
-
+      runEnableBurst();
 
       if (state.bubbleEnabled) showThought("I'm back.", 1050);
     }
