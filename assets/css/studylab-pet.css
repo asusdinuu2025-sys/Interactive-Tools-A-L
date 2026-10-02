@@ -18,7 +18,22 @@
 }
 
 #studylabPetStage.is-disabled {
-  display: none;
+  pointer-events: none;
+}
+
+#studylabPetStage.is-disabled .sl-pet-character {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sl-pet-character.is-fading-out {
+  opacity: 0;
+  filter: saturate(.60) brightness(.72);
+  transform: translate3d(var(--pet-fade-x, 0px), var(--pet-fade-y, 0px), 0) translate(-50%, -50%) scale(.86);
+  transition:
+    opacity .92s cubic-bezier(.22,.70,.20,1),
+    filter .92s ease,
+    transform .92s cubic-bezier(.22,.70,.20,1);
 }
 
 /* ---------- Face box ---------- */
@@ -1056,11 +1071,20 @@ html[data-theme="light"] .sl-pet-setting-buttons button {
   }
 }
 
-/* Final motion correction: no artificial side-to-side walking shake. */
-.sl-pet-character[data-moving="true"] .sl-pet-visual,
+/* Continuous roaming: only a subtle vertical bob while velocity stays smooth. */
+.sl-pet-character[data-moving="true"] .sl-pet-visual {
+  animation: slPetWalkBob .88s ease-in-out infinite !important;
+  transition: none !important;
+}
+
 .sl-pet-character[data-moving="true"] .sl-pet-face {
   animation: none !important;
   transition: none !important;
+}
+
+@keyframes slPetWalkBob {
+  0%, 100% { transform: translateY(0) scaleY(1); }
+  50% { transform: translateY(-1.6px) scaleY(1.012); }
 }
 
 .sl-pet-character[data-danger="true"] .sl-pet-visual {
@@ -1080,4 +1104,28 @@ html[data-theme="light"] .sl-pet-setting-buttons button {
 .sl-pet-thought-dot.d2 {
   left: calc(50% - 2px);
   bottom: -3px;
+}
+
+.sl-pet-character[data-state="sad"] .sl-pet-eye > i {
+  width: 18px;
+  height: 18px;
+  border-radius: 8px;
+  opacity: .72;
+}
+.sl-pet-character[data-state="sad"] .sl-pet-eye.left {
+  transform: rotate(10deg) translateY(4px);
+}
+.sl-pet-character[data-state="sad"] .sl-pet-eye.right {
+  transform: rotate(-10deg) translateY(4px);
+}
+.sl-pet-character[data-state="sad"] .sl-pet-mouth {
+  width: 17px;
+  height: 8px;
+  bottom: 10px;
+  border: 0;
+  border-top: 2px solid #a9c2d3;
+  border-radius: 14px 14px 0 0;
+}
+.sl-pet-character[data-eye="pink"][data-state="sad"] .sl-pet-mouth {
+  border-color: #d39abc;
 }
