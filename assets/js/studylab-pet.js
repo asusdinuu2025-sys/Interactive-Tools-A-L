@@ -1810,13 +1810,26 @@
     launcher.classList.remove("is-open");
   });
 
-  enableButton.addEventListener("click", () => {
+  /*
+   * Keep Pet Enable/Disable control handling on the panel itself.
+   * The pet stage can be hidden, faded, or non-interactive, but the control panel
+   * remains authoritative and clickable.
+   */
+  panel.addEventListener("click", (ev) => {
+    const enable = ev.target.closest("[data-pet-enable]");
+    const disable = ev.target.closest("[data-pet-disable]");
+
+    if (!enable && !disable) return;
+
+    ev.preventDefault();
+    ev.stopPropagation();
     state.lastMeaningfulActivity = now();
-    setEnabled(true);
-  });
-  disableButton.addEventListener("click", () => {
-    state.lastMeaningfulActivity = now();
-    setEnabled(false);
+
+    if (enable) {
+      setEnabled(true);
+    } else if (disable) {
+      setEnabled(false);
+    }
   });
 
   eyeButtons.forEach((button) => {
