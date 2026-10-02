@@ -65,9 +65,9 @@
     lastWander: 0,
 
     nextBlink: now() + rand(6500, 10400),
-    nextWander: now() + rand(6500, 10500),
-    nextAmbient: now() + rand(5000, 9000),
-    nextThought: now() + rand(9000, 15500),
+    nextWander: now() + rand(12000, 19000),
+    nextAmbient: now() + rand(15000, 24000),
+    nextThought: now() + rand(18000, 30000),
 
     clickTimes: [],
     angerLevel: 0,
@@ -110,6 +110,7 @@
           '<div class="sl-pet-face" aria-hidden="true">' +
             '<div class="sl-pet-eye left"><i></i></div>' +
             '<div class="sl-pet-eye right"><i></i></div>' +
+            '<div class="sl-pet-mouth" aria-hidden="true"></div>' +
           '</div>' +
           '<svg class="sl-pet-crack" viewBox="0 0 32 26" aria-hidden="true">' +
             '<path d="M26 2L20 8L22 11L16 14L18 18L11 24"></path>' +
@@ -169,8 +170,7 @@
     character.style.top = state.y + "px";
 
     if (thought.classList.contains("is-visible")) {
-      thought.style.left = state.x + "px";
-      thought.style.top = Math.max(64, state.y - 45) + "px";
+      placeThought();
     }
 
     if (!state.dragging) {
@@ -191,14 +191,20 @@
     if (reason === "pointer") showThought("Oh. You're back.", 1300);
   }
 
+  function placeThought() {
+    const cloudHalf = window.innerWidth <= 720 ? 82 : 92;
+    const anchorX = clamp(state.x + 48, cloudHalf + 8, window.innerWidth - cloudHalf - 8);
+    thought.style.left = anchorX + "px";
+    thought.style.top = Math.max(58, state.y - 8) + "px";
+  }
+
   function showThought(message, duration = 1800) {
     if (!state.enabled || !message) return;
     thoughtText.textContent = message;
+    placeThought();
     thought.classList.add("is-visible");
     clearTimeout(state.bubbleTimer);
     state.bubbleTimer = setTimeout(() => thought.classList.remove("is-visible"), duration);
-    thought.style.left = state.x + "px";
-    thought.style.top = Math.max(64, state.y - 45) + "px";
   }
 
   function hideThought() {
@@ -363,7 +369,7 @@
     if (!state.enabled || !el || el === character || character.contains(el)) return;
 
     const time = now();
-    if (time - state.lastReaction < 220 && type === "hover") return;
+    if (time - state.lastReaction < (type === "hover" ? 850 : 300)) return;
 
     state.lastReaction = time;
     state.lastActivity = time;
@@ -375,10 +381,10 @@
 
     if (type === "click") {
       setExpression(expression, 1550);
-      if (Math.random() < 0.26) showThought(info.thought || pick(contextThoughts[state.context]), 1500);
+      if (Math.random() < 0.12) showThought(info.thought || pick(contextThoughts[state.context]), 1350);
     } else {
-      setExpression(expression, 950);
-      if (Math.random() < 0.13) showThought(info.thought || pick(contextThoughts[state.context]), 1350);
+      setExpression(expression, 900);
+      if (Math.random() < 0.045) showThought(info.thought || pick(contextThoughts[state.context]), 1200);
     }
 
     lookAtElement(el);
@@ -411,16 +417,15 @@
   }
 
   function updateGaze() {
-    state.gazeX += (state.gazeTargetX - state.gazeX) * 0.17;
-    state.gazeY += (state.gazeTargetY - state.gazeY) * 0.17;
+    if (state.enabled && !state.dragging && !state.sleeping && !state.evading) {
+      setGazeTarget(state.pointerX, state.pointerY, false);
+    }
+
+    state.gazeX += (state.gazeTargetX - state.gazeX) * 0.14;
+    state.gazeY += (state.gazeTargetY - state.gazeY) * 0.14;
 
     character.style.setProperty("--gaze-x", state.gazeX.toFixed(2) + "px");
     character.style.setProperty("--gaze-y", state.gazeY.toFixed(2) + "px");
-
-    if (state.enabled && !state.dragging && !state.sleeping) {
-      const dist = Math.hypot(state.pointerX - state.x, state.pointerY - state.y);
-      if (dist > 65) setGazeTarget(state.pointerX, state.pointerY, state.angerUntil > now());
-    }
   }
 
   function animationLoop() {
@@ -630,7 +635,7 @@
     state.danger = true;
     character.dataset.danger = "true";
     setExpression("angry", 1600, true);
-    setGazeTarget(state.pointerX, state.pointerY, false);
+    setGazeTarget(state.pointerX, state.pointerY, true);
 
     if (state.angerLevel >= 2) {
       showThought(state.angerLevel >= 4 ? "BACK OFF." : "...seriously?", 1100);
@@ -949,11 +954,11 @@
     if (t >= state.nextThought) {
       state.nextThought = t + (
         state.context === "study"
-          ? rand(8000, 14500)
-          : rand(12000, 22000)
+          ? rand(14000, 24000)
+          : rand(20000, 32000)
       );
 
-      if (Math.random() < (state.context === "study" ? 0.38 : 0.17)) {
+      if (Math.random() < (state.context === "study" ? 0.22 : 0.08)) {
         const text = pick(contextThoughts[state.context] || ["Hmm..."]);
         setExpression("thinking", 1050);
         showThought(text, 1500);
@@ -963,15 +968,15 @@
     if (t >= state.nextAmbient && state.angerUntil <= t) {
       state.nextAmbient = t + (
         state.context === "study"
-          ? rand(6500, 11500)
-          : rand(8500, 15500)
+          ? rand(12000, 19000)
+          : rand(18000, 28000)
       );
 
       const base = pick(contextMoods[state.context] || ["neutral"]);
       const expression = personaVariation(base);
       setExpression(expression, rand(800, 1500));
 
-      if (Math.random() < (state.context === "study" ? 0.24 : 0.11)) {
+      if (Math.random() < (state.context === "study" ? 0.12 : 0.05)) {
         showThought(pick(contextThoughts[state.context] || ["Hmm..."]), 1300);
       }
     }
