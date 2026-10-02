@@ -150,6 +150,7 @@
     '<div id="studylabPetStage">' +
       '<div class="sl-pet-character" data-state="neutral" data-eye="cyan" data-danger="false" data-blink="false" data-moving="false" data-direction="idle" role="button" tabindex="0" aria-label="StudyLab Pet">' +
         '<div class="sl-pet-visual">' +
+          '<div class="sl-pet-emote" data-pet-emote aria-hidden="true"><span data-pet-emote-icon>✦</span></div>' +
           '<div class="sl-pet-face" aria-hidden="true">' +
             '<div class="sl-pet-eye left"><i></i></div>' +
             '<div class="sl-pet-eye right"><i></i></div>' +
@@ -204,8 +205,18 @@
   const eyes = [...stage.querySelectorAll(".sl-pet-eye > i")];
   const thought = stage.querySelector("[data-pet-thought]");
   const thoughtText = stage.querySelector("[data-pet-thought-text]");
-  const emote = stage.querySelector("[data-pet-emote]");
-  const emoteIcon = stage.querySelector("[data-pet-emote-icon]");
+
+  const emote = stage.querySelector("[data-pet-emote]") || (() => {
+    const node = document.createElement("div");
+    node.className = "sl-pet-emote";
+    node.dataset.petEmote = "";
+    node.setAttribute("aria-hidden", "true");
+    node.innerHTML = '<span data-pet-emote-icon>✦</span>';
+    visual.appendChild(node);
+    return node;
+  })();
+
+  const emoteIcon = emote.querySelector("[data-pet-emote-icon]");
   const launcher = document.getElementById("studylabPetLauncher");
   const panel = document.getElementById("studylabPetPanel");
   const closeButton = panel.querySelector("[data-pet-close]");
@@ -408,7 +419,6 @@
     character.dataset.routine = "none";
     clearTimeout(state.emoteTimer);
     emote.classList.remove("is-visible");
-    emote.style.opacity = "";
     state.gazeTargetX = 0;
     state.gazeTargetY = 0;
   }
@@ -468,7 +478,6 @@
     emote.classList.remove("is-visible");
     void emote.offsetWidth;
     emote.classList.add("is-visible");
-    emote.style.opacity = "1";
 
     character.dataset.routine = name;
     setExpression(em.expression, name === "playful" ? 850 : 1550, true);
