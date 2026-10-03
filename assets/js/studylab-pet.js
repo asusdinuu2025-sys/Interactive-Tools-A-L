@@ -109,10 +109,15 @@
           arriveRadius: 13,
           waitMin: 8500,
           waitMax: 15000,
-          activeChance: 0.30,
-          idleExpressions: ["neutral", "curious", "focused"],
-          tapExpressions: ["curious", "alert", "focused"],
-          arriveExpressions: ["delighted", "happy", "focused"],
+          activeChance: .36,
+           gazeScaleX: 1.08,
+           gazeScaleY: 0.98,
+           gazeSmoothing: 0.17,
+           blinkMin: 5600,
+           blinkMax: 9200,
+           idleExpressions: ["neutral", "curious", "focused", "alert"],
+           tapExpressions: ["curious", "alert", "focused"],
+           arriveExpressions: ["delighted", "happy", "focused", "alert"],
           thoughts: ["I'm watching.", "Let's move.", "Easy.", "Keeping an eye on things."]
         }
       : {
@@ -121,10 +126,15 @@
           arriveRadius: 12,
           waitMin: 10000,
           waitMax: 17500,
-          activeChance: 0.25,
-          idleExpressions: ["neutral", "curious", "happy"],
-          tapExpressions: ["curious", "shy", "happy"],
-          arriveExpressions: ["happy", "delighted", "shy"],
+          activeChance: .28,
+           gazeScaleX: 0.88,
+           gazeScaleY: 0.90,
+           gazeSmoothing: 0.12,
+           blinkMin: 6500,
+           blinkMax: 10800,
+           idleExpressions: ["neutral", "curious", "happy", "shy"],
+           tapExpressions: ["curious", "shy", "happy"],
+           arriveExpressions: ["happy", "delighted", "shy", "curious"],
           thoughts: ["I'm here.", "Let's see.", "Hi.", "Still watching."]
         };
   }
@@ -316,8 +326,9 @@
     const gx = clamp(dx / 130, -1, 1) * 6.5 * scale;
     const gy = clamp(dy / 110, -1, 1) * 5.8 * scale;
 
-    state.gazeTargetX = clamp(gx, -7.2, 7.2);
-    state.gazeTargetY = clamp(gy, -6.2, 6.2);
+    const p = profile();
+    state.gazeTargetX = clamp(gx * (p.gazeScaleX || 1), -7.2, 7.2);
+    state.gazeTargetY = clamp(gy * (p.gazeScaleY || 1), -6.2, 6.2);
 
     if (immediate) {
       state.gazeX = state.gazeTargetX;
@@ -336,8 +347,10 @@
       setGazeTarget(state.pointerX, state.pointerY);
     }
 
-    state.gazeX += (state.gazeTargetX - state.gazeX) * 0.14;
-    state.gazeY += (state.gazeTargetY - state.gazeY) * 0.14;
+    const p = profile();
+    const smoothing = p.gazeSmoothing || 0.14;
+    state.gazeX += (state.gazeTargetX - state.gazeX) * smoothing;
+    state.gazeY += (state.gazeTargetY - state.gazeY) * smoothing;
 
     eyes.forEach((eye) => {
       eye.style.setProperty("--gaze-x", state.gazeX.toFixed(2) + "px");
@@ -570,6 +583,82 @@
     });
   }
 
+  function stopAngerEvade() {
+    state.angerVelocityX = 0;
+    state.angerVelocityY = 0;
+    state.nextEvadeAt = 0;
+    character.dataset.moving = "false";
+    character.dataset.direction = "idle";
+  }
+
+  function chooseAngerEvadeTarget() {
+    const dx = state.x - state.pointerX;
+    const dy = state.y - state.pointerY;
+    const distance = Math.max(1, Math.hypot(dx, dy));
+    let angle = Math.atan2(dy, dx);
+
+    if (!Number.isFinite(angle) || distance < 24) {
+      angle = Math.random() * Math.PI * 2;
+    }
+
+    angle += (Math.random() < 0.5 ? -1 : 1) * random(0.18, 0.42);
+
+    const preferred = random(215, 280);
+    const half = safeX();
+    const bounds = safeY();
+
+    state.evadeTargetX = clamp(state.x + Math.cos(angle) * preferred, half + 12, window.innerWidth - half - 12);
+    state.evadeTargetY = clamp(state.y + Math.sin(angle) * preferred * 0.82, bounds.min + 10, bounds.max - 10);
+    state.nextEvadeAt = now() + 300;
+    character.dataset.moving = "true";
+    character.dataset.direction = visualDirection(state.evadeTargetX - state.x, state.evadeTargetY - state.y);
+    setExpression("angry", 900, true);
+  }
+
+  function updateAngerEvade(timestamp) {
+    if (!state.enabled || state.dragging || state.sleeping || state.angerUntil <= now()) {
+      stopAngerEvade();
+      return;
+    }
+
+    if (reducedMotion) {
+      state.angerVelocityX = 0;
+      state.angerVelocityY = 0;
+      return;
+    }
+
+    const dt = clamp((timestamp - state.lastFrame) / 1000, 0.001, 0.04);
+    state.lastFrame = timestamp;
+
+    const distanceFromCursor = Math.hypot(state.x - state.pointerX, state.y - state.pointerY);
+    const distanceToTarget = Math.hypot(state.evadeTargetX - state.x, state.evadeTargetY - state.y);
+
+    if (!Number.isFinite(state.evadeTargetX) || !Number.isFinite(state.evadeTargetY) || now() >= state.nextEvadeAt || distanceToTarget < 24 || distanceFromCursor < 165) {
+      chooseAngerEvadeTarget();
+    }
+
+    const dx = state.evadeTargetX - state.x;
+    const dy = state.evadeTargetY - state.y;
+    const distance = Math.max(1, Math.hypot(dx, dy));
+    const dirX = dx / distance;
+    const dirY = dy / distance;
+    const maxSpeed = state.eye === "cyan" ? 190 : 170;
+    const acceleration = state.eye === "cyan" ? 10.5 : 8.6;
+    const response = 1 - Math.exp(-acceleration * dt);
+
+    state.angerVelocityX += (dirX * maxSpeed - state.angerVelocityX) * response;
+    state.angerVelocityY += (dirY * maxSpeed - state.angerVelocityY) * response;
+
+    const speed = Math.hypot(state.angerVelocityX, state.angerVelocityY);
+    if (speed > maxSpeed) {
+      const scale = maxSpeed / speed;
+      state.angerVelocityX *= scale;
+      state.angerVelocityY *= scale;
+    }
+
+    setPosition(state.x + state.angerVelocityX * dt, state.y + state.angerVelocityY * dt);
+  }
+
   function disablePet() {
     if (!state.enabled) {
       updateControls();
@@ -581,7 +670,7 @@
     state.dragging = false;
     state.angerLevel = 0;
     state.angerUntil = 0;
-
+    stopAngerEvade();
     clearTimeout(state.angerTimer);
     cancelEnableAnimation();
     stopNormalMove();
@@ -610,6 +699,11 @@
     state.sleeping = false;
     state.angerLevel = clamp(level, 3, 5);
     state.angerUntil = now() + random(3900, 5100);
+    state.angerVelocityX = 0;
+    state.angerVelocityY = 0;
+    state.evadeTargetX = state.x;
+    state.evadeTargetY = state.y;
+    state.nextEvadeAt = 0;
 
     stopNormalMove();
 
@@ -620,7 +714,7 @@
     state.gazeTargetY = 0;
     state.gazeX = 0;
     state.gazeY = 0;
-
+    chooseAngerEvadeTarget();
     showThought("Stop poking me.", 1100);
 
     clearTimeout(state.angerTimer);
@@ -628,6 +722,7 @@
       state.angerLevel = 0;
       state.angerUntil = 0;
       character.dataset.danger = "false";
+      stopAngerEvade();
       state.lastActivity = now();
       state.nextMoveAt = now() + random(7000, 11000);
       setExpression(pick(profile().idleExpressions), 950);
@@ -885,6 +980,17 @@
       state.eye = button.dataset.petEye === "pink" ? "pink" : "cyan";
       character.dataset.eye = state.eye;
       save(KEY.eye, state.eye);
+      clearTimeout(state.expressionTimer);
+      setExpression(
+        state.eye === "pink"
+          ? pick(["shy", "happy", "curious"])
+          : pick(["focused", "alert", "curious"]),
+        1500,
+        true
+      );
+      const p = profile();
+      state.nextBlink = now() + random(p.blinkMin, p.blinkMax);
+      setGazeTarget(state.pointerX, state.pointerY, true);
       updateControls();
     });
   });
@@ -1003,15 +1109,18 @@
     if (state.angerUntil > time) {
       state.gazeTargetX = 0;
       state.gazeTargetY = 0;
+      updateAngerEvade(timestamp);
     } else if (state.angerUntil <= time && state.angerLevel > 0) {
       state.angerLevel = 0;
       state.angerUntil = 0;
       character.dataset.danger = "false";
+      stopAngerEvade();
       setGazeTarget(state.pointerX, state.pointerY);
     }
 
     if (!state.sleeping && time >= state.nextBlink) {
-      state.nextBlink = time + random(6000, 10400);
+      const p = profile();
+      state.nextBlink = time + random(p.blinkMin || 6000, p.blinkMax || 10400);
       blink();
     }
 
