@@ -1221,6 +1221,7 @@
     #studylabLoader {
       position: fixed;
       inset: 0;
+      animation: studylabLoaderFailsafe .12s linear 4.35s forwards;
       z-index: 10000;
       display: grid;
       place-items: center;
@@ -1238,6 +1239,19 @@
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
+    }
+
+    @keyframes studylabLoaderFailsafe {
+      0%, 99% {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: all;
+      }
+      100% {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
     }
 
     .studylab-loader-scene {
