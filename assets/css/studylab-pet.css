@@ -298,8 +298,8 @@
 }
 
 @keyframes slPetDangerPulse {
-  from { transform: var(--pet-transform, translate3d(0,0,0)); }
-  to { transform: var(--pet-transform, translate3d(0,0,0)); }
+  from { box-shadow: 0 25px 56px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.06), 0 0 24px rgba(255,71,87,.10); }
+  to { box-shadow: 0 25px 56px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.06), 0 0 36px rgba(255,71,87,.22); }
 }
 
 .sl-pet-crack {
