@@ -82,7 +82,8 @@
     fadeTimer: null,
     thoughtTimer: null,
     expressionTimer: null,
-    enableAnimation: 0,
+    enableAnimationFrame: 0,
+    enableAnimationToken: 0,
 
     dragging: false,
     pointerId: null,
@@ -285,7 +286,7 @@
       !state.dragging &&
       !state.sleeping &&
       state.angerUntil <= now() &&
-      !state.enableAnimation
+      !state.enableAnimationFrame
     ) {
       setGazeTarget(state.pointerX, state.pointerY);
     }
@@ -320,7 +321,7 @@
       !state.enabled ||
       state.sleeping ||
       state.dragging ||
-      state.enableAnimation ||
+      state.enableAnimationFrame ||
       state.angerUntil > now() ||
       reducedMotion
     ) {
@@ -349,7 +350,7 @@
       !state.enabled ||
       state.sleeping ||
       state.dragging ||
-      state.enableAnimation ||
+      state.enableAnimationFrame ||
       state.angerUntil > now() ||
       reducedMotion
     ) {
@@ -419,10 +420,11 @@
   }
 
   function cancelEnableAnimation() {
-    if (state.enableAnimation) {
-      cancelAnimationFrame(state.enableAnimation);
-      state.enableAnimation = 0;
+    if (state.enableAnimationFrame) {
+      cancelAnimationFrame(state.enableAnimationFrame);
+      state.enableAnimationFrame = 0;
     }
+    state.enableAnimationToken += 1;
     character.dataset.enable = "false";
   }
 
@@ -444,10 +446,11 @@
       startY - safeY().min,
       safeY().max - startY
     );
-    const radius = clamp(Math.min(52, horizontalRoom, verticalRoom), 24, 52);
+    const room = Math.max(12, Math.min(horizontalRoom, verticalRoom));
+    const radius = Math.min(52, room);
     const started = performance.now();
     const duration = 900;
-    const token = ++state.enableAnimation;
+    const token = ++state.enableAnimationToken;
 
     character.dataset.enable = "true";
     character.dataset.state = "happy";
@@ -456,7 +459,7 @@
 
     const frame = (timestamp) => {
       if (
-        token !== state.enableAnimation ||
+        token !== state.enableAnimationToken ||
         !state.enabled ||
         state.dragging
       ) {
@@ -464,18 +467,18 @@
       }
 
       const progress = clamp((timestamp - started) / duration, 0, 1);
-      const angle = -Math.PI / 2 + progress * Math.PI * 4;
+      const angle = progress * Math.PI * 4;
       setPosition(
         startX + Math.cos(angle) * radius,
         startY + Math.sin(angle) * radius
       );
 
       if (progress < 1) {
-        state.enableAnimation = requestAnimationFrame(frame);
+        state.enableAnimationFrame = requestAnimationFrame(frame);
         return;
       }
 
-      state.enableAnimation = 0;
+      state.enableAnimationFrame = 0;
       character.dataset.enable = "false";
       setPosition(startX, startY);
       setExpression("delighted", 1000, true);
@@ -483,7 +486,7 @@
       done?.();
     };
 
-    state.enableAnimation = requestAnimationFrame(frame);
+    state.enableAnimationFrame = requestAnimationFrame(frame);
   }
 
   function enablePet() {
@@ -626,7 +629,7 @@
   }
 
   function blink() {
-    if (!state.enabled || state.sleeping || state.dragging || state.enableAnimation) return;
+    if (!state.enabled || state.sleeping || state.dragging || state.enableAnimationFrame) return;
 
     character.dataset.blink = "true";
     setTimeout(() => {
@@ -645,7 +648,7 @@
   }
 
   function startDrag(event) {
-    if (!state.enabled || state.angerUntil > now() || state.enableAnimation) return;
+    if (!state.enabled || state.angerUntil > now() || state.enableAnimationFrame) return;
 
     stopNormalMove();
 
@@ -801,7 +804,7 @@
       return;
     }
 
-    if (state.enabled && !state.dragging && state.angerUntil <= now() && !state.enableAnimation) {
+    if (state.enabled && !state.dragging && state.angerUntil <= now() && !state.enableAnimationFrame) {
       setGazeTarget(event.clientX, event.clientY);
     }
 
