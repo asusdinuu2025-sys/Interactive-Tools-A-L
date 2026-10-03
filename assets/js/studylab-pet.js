@@ -858,6 +858,7 @@
     }
 
     clearTimeout(state.evadeTimer);
+    clearBurstTimers();
     clearMovementFrame();
     stopNormalRoam();
 
