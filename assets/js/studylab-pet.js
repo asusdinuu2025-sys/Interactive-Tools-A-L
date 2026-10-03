@@ -82,6 +82,7 @@
     clickTimes: [],
 
     fadeTimer: null,
+    sadTimer: null,
     thoughtTimer: null,
     expressionTimer: null,
     enableAnimationFrame: 0,
@@ -593,7 +594,10 @@
       }
 
       const progress = clamp((timestamp - started) / duration, 0, 1);
-      const angle = progress * Math.PI * 4;
+      // Ease the angular motion to zero at the end so the final frame settles
+      // into the exact starting point instead of making a visible snap.
+      const easedProgress = 1 - Math.pow(1 - progress, 3);
+      const angle = easedProgress * Math.PI * 4;
       setPosition(
         startX + Math.cos(angle) * radius,
         startY + Math.sin(angle) * radius
@@ -622,6 +626,7 @@
     }
 
     clearTimeout(state.fadeTimer);
+    clearTimeout(state.sadTimer);
     clearTimeout(state.angerTimer);
 
     state.enabled = true;
@@ -655,32 +660,50 @@
     state.angerVelocityX = 0;
     state.angerVelocityY = 0;
     state.nextEvadeAt = 0;
+    state.angerFleeAngle = null;
     character.dataset.moving = "false";
     character.dataset.direction = "idle";
   }
 
+  // Cursor avoidance is deliberately continuous. The pet no longer jumps
+  // between distant flee targets and hope the browser notices.
   function chooseAngerEvadeTarget() {
-    const dx = state.x - state.pointerX;
-    const dy = state.y - state.pointerY;
-    const distance = Math.max(1, Math.hypot(dx, dy));
-    let angle = Math.atan2(dy, dx);
+    const half = safeX();
+    const bounds = safeY();
+    const cursorDx = state.x - state.pointerX;
+    const cursorDy = state.y - state.pointerY;
+    const cursorDistance = Math.hypot(cursorDx, cursorDy);
 
-    if (!Number.isFinite(angle) || distance < 24) {
+    let angle = state.angerFleeAngle;
+    if (cursorDistance > 8) {
+      angle = Math.atan2(cursorDy, cursorDx);
+    }
+    if (!Number.isFinite(angle)) {
       angle = Math.random() * Math.PI * 2;
     }
 
-    angle += (Math.random() < 0.5 ? -1 : 1) * random(0.18, 0.42);
+    // Add only a small random side bias so the pet does not look robotic.
+    angle += (Math.random() - 0.5) * 0.42;
+    state.angerFleeAngle = angle;
 
-    const preferred = random(215, 280);
-    const half = safeX();
-    const bounds = safeY();
+    const preferred = random(280, 390);
+    state.evadeTargetX = clamp(
+      state.x + Math.cos(angle) * preferred,
+      half + 16,
+      window.innerWidth - half - 16
+    );
+    state.evadeTargetY = clamp(
+      state.y + Math.sin(angle) * preferred,
+      bounds.min + 12,
+      bounds.max - 12
+    );
+    state.nextEvadeAt = now() + random(850, 1250);
 
-    state.evadeTargetX = clamp(state.x + Math.cos(angle) * preferred, half + 12, window.innerWidth - half - 12);
-    state.evadeTargetY = clamp(state.y + Math.sin(angle) * preferred * 0.82, bounds.min + 10, bounds.max - 10);
-    state.nextEvadeAt = now() + random(520, 760);
     character.dataset.moving = "true";
-    character.dataset.direction = visualDirection(state.evadeTargetX - state.x, state.evadeTargetY - state.y);
-    setExpression("angry", 900, true);
+    character.dataset.direction = visualDirection(
+      state.evadeTargetX - state.x,
+      state.evadeTargetY - state.y
+    );
   }
 
   function updateAngerEvade(timestamp) {
@@ -698,24 +721,78 @@
     const dt = clamp((timestamp - state.angerLastFrame) / 1000, 0.008, 0.04);
     state.angerLastFrame = timestamp;
 
-    const distanceFromCursor = Math.hypot(state.x - state.pointerX, state.y - state.pointerY);
-    const distanceToTarget = Math.hypot(state.evadeTargetX - state.x, state.evadeTargetY - state.y);
+    const cursorDx = state.x - state.pointerX;
+    const cursorDy = state.y - state.pointerY;
+    const cursorDistance = Math.hypot(cursorDx, cursorDy);
 
-    if (!Number.isFinite(state.evadeTargetX) || !Number.isFinite(state.evadeTargetY) || now() >= state.nextEvadeAt || distanceToTarget < 24 || distanceFromCursor < 165) {
+    if (
+      !Number.isFinite(state.evadeTargetX) ||
+      !Number.isFinite(state.evadeTargetY) ||
+      now() >= state.nextEvadeAt
+    ) {
       chooseAngerEvadeTarget();
     }
 
-    const dx = state.evadeTargetX - state.x;
-    const dy = state.evadeTargetY - state.y;
-    const distance = Math.max(1, Math.hypot(dx, dy));
-    const dirX = dx / distance;
-    const dirY = dy / distance;
+    let fleeX = 0;
+    let fleeY = 0;
+
+    if (cursorDistance > 8) {
+      // Continuously point away from the real cursor position.
+      const invDistance = 1 / cursorDistance;
+      fleeX = cursorDx * invDistance;
+      fleeY = cursorDy * invDistance;
+      state.angerFleeAngle = Math.atan2(fleeY, fleeX);
+    } else if (Number.isFinite(state.angerFleeAngle)) {
+      fleeX = Math.cos(state.angerFleeAngle);
+      fleeY = Math.sin(state.angerFleeAngle);
+    } else {
+      chooseAngerEvadeTarget();
+      fleeX = Math.cos(state.angerFleeAngle);
+      fleeY = Math.sin(state.angerFleeAngle);
+    }
+
+    const targetDx = state.evadeTargetX - state.x;
+    const targetDy = state.evadeTargetY - state.y;
+    const targetDistance = Math.max(1, Math.hypot(targetDx, targetDy));
+    const targetDirX = targetDx / targetDistance;
+    const targetDirY = targetDy / targetDistance;
+
+    // Near the cursor, flee direction dominates. Farther away, the pet
+    // smoothly bends toward the current safe waypoint instead of zig-zagging.
+    const fleeWeight = clamp((420 - cursorDistance) / 220, 0, 1);
+    let desiredX = fleeX * (0.72 + 0.28 * fleeWeight) +
+      targetDirX * (0.28 - 0.28 * fleeWeight);
+    let desiredY = fleeY * (0.72 + 0.28 * fleeWeight) +
+      targetDirY * (0.28 - 0.28 * fleeWeight);
+
+    // Keep the pet from pinning itself against screen edges while escaping.
+    const leftEdge = half + 28;
+    const rightEdge = window.innerWidth - half - 28;
+    const topEdge = bounds.min + 22;
+    const bottomEdge = bounds.max - 22;
+
+    if (state.x < leftEdge) desiredX += clamp((leftEdge - state.x) / 34, 0, 1);
+    if (state.x > rightEdge) desiredX -= clamp((state.x - rightEdge) / 34, 0, 1);
+    if (state.y < topEdge) desiredY += clamp((topEdge - state.y) / 34, 0, 1);
+    if (state.y > bottomEdge) desiredY -= clamp((state.y - bottomEdge) / 34, 0, 1);
+
+    const directionLength = Math.max(0.001, Math.hypot(desiredX, desiredY));
+    desiredX /= directionLength;
+    desiredY /= directionLength;
+
     const maxSpeed = state.eye === "cyan" ? 190 : 170;
-    const acceleration = state.eye === "cyan" ? 10.5 : 8.6;
+    const acceleration = state.eye === "cyan" ? 12.5 : 10.8;
+    const desiredSpeed = cursorDistance < 180
+      ? maxSpeed
+      : cursorDistance < 420
+        ? maxSpeed * 0.90
+        : maxSpeed * 0.72;
     const response = 1 - Math.exp(-acceleration * dt);
 
-    state.angerVelocityX += (dirX * maxSpeed - state.angerVelocityX) * response;
-    state.angerVelocityY += (dirY * maxSpeed - state.angerVelocityY) * response;
+    state.angerVelocityX +=
+      (desiredX * desiredSpeed - state.angerVelocityX) * response;
+    state.angerVelocityY +=
+      (desiredY * desiredSpeed - state.angerVelocityY) * response;
 
     const speed = Math.hypot(state.angerVelocityX, state.angerVelocityY);
     if (speed > maxSpeed) {
@@ -724,7 +801,15 @@
       state.angerVelocityY *= scale;
     }
 
-    setPosition(state.x + state.angerVelocityX * dt, state.y + state.angerVelocityY * dt);
+    setPosition(
+      state.x + state.angerVelocityX * dt,
+      state.y + state.angerVelocityY * dt
+    );
+
+    character.dataset.moving = speed > 4 ? "true" : "false";
+    character.dataset.direction = speed > 4
+      ? visualDirection(state.angerVelocityX, state.angerVelocityY)
+      : "idle";
   }
 
   function disablePet() {
@@ -740,6 +825,7 @@
     state.angerUntil = 0;
     stopAngerEvade();
     clearTimeout(state.angerTimer);
+    clearTimeout(state.expressionTimer);
     cancelEnableAnimation();
     stopNormalMove();
     hideThought();
@@ -751,12 +837,18 @@
     character.dataset.moving = "false";
     character.dataset.direction = "idle";
     character.dataset.state = "sad";
-    character.classList.add("is-fading-out");
+    character.classList.remove("is-fading-out");
     character.style.pointerEvents = "none";
 
-    state.fadeTimer = setTimeout(() => {
-      if (!state.enabled) stage.classList.add("is-disabled");
-    }, 1300);
+    // Give the sad face a real, readable moment before the fade begins.
+    state.sadTimer = setTimeout(() => {
+      if (state.enabled) return;
+
+      character.classList.add("is-fading-out");
+      state.fadeTimer = setTimeout(() => {
+        if (!state.enabled) stage.classList.add("is-disabled");
+      }, 1300);
+    }, 720);
 
     updateControls();
   }
@@ -770,6 +862,7 @@
     state.angerVelocityX = 0;
     state.angerVelocityY = 0;
     state.angerLastFrame = performance.now();
+    state.angerFleeAngle = null;
     state.evadeTargetX = state.x;
     state.evadeTargetY = state.y;
     state.nextEvadeAt = 0;
@@ -1053,11 +1146,10 @@
       character.dataset.eye = state.eye;
       save(KEY.eye, state.eye);
       clearTimeout(state.expressionTimer);
+      // One deliberate expression for the mode switch. No random sequence.
       setExpression(
-        state.eye === "pink"
-          ? pick(["shy", "happy", "curious"])
-          : pick(["sly", "focused", "alert", "curious"]),
-        1500,
+        state.eye === "pink" ? "happy" : "sly",
+        1700,
         true
       );
       const p = profile();
