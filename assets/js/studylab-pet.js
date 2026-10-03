@@ -211,22 +211,17 @@
 
   syncLoadingVisibility();
 
-  const loadingObserver = new MutationObserver(() => {
-    if (!document.getElementById("studylabLoader")) {
-      stage.classList.remove("is-site-loading-hidden");
-      launcher.classList.remove("is-site-loading-hidden");
-      loadingObserver.disconnect();
-      return;
-    }
-    syncLoadingVisibility();
-  });
+  let loadingPollTimer = null;
+  if (document.getElementById("studylabLoader")) {
+    loadingPollTimer = window.setInterval(() => {
+      syncLoadingVisibility();
 
-  loadingObserver.observe(document.body, {
-    childList: true,
-    attributes: true,
-    subtree: true,
-    attributeFilter: ["class"]
-  });
+      if (!document.getElementById("studylabLoader")) {
+        window.clearInterval(loadingPollTimer);
+        loadingPollTimer = null;
+      }
+    }, 100);
+  }
 
   const expressions = [
     "neutral", "curious", "happy", "focused", "alert", "thinking",
