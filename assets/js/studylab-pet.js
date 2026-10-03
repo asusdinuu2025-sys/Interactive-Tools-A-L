@@ -1,6 +1,7 @@
 /* =========================================================
    StudyLab Living Pet
-   Global page-level companion. No simulation integration.
+   EMO-style expressive display companion.
+   Global page-level only. No simulation internals.
    ========================================================= */
 (function () {
   "use strict";
@@ -10,11 +11,15 @@
 
   const STORAGE = {
     enabled: "studylab-pet-enabled",
-    eye: "studylab-pet-eye"
+    eye: "studylab-pet-eye",
+    messages: "studylab-pet-messages"
   };
 
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const now = () => Date.now();
+
+  function now() {
+    return Date.now();
+  }
 
   function readBool(key, fallback) {
     try {
@@ -35,37 +40,45 @@
 
   const state = {
     enabled: readBool(STORAGE.enabled, true),
+    messages: readBool(STORAGE.messages, true),
     eye: readEye(),
+
     context: "home",
-    mood: "idle",
+    expression: "idle",
     sleeping: false,
+
+    x: Math.min(window.innerWidth - 100, Math.max(100, window.innerWidth * 0.72)),
+    y: Math.min(window.innerHeight - 120, Math.max(120, window.innerHeight * 0.57)),
+
+    gazeTargetX: 0,
+    gazeTargetY: 0,
+    gazeX: 0,
+    gazeY: 0,
+
     dragging: false,
     dragged: false,
     pointerId: null,
     dragOffsetX: 0,
     dragOffsetY: 0,
-    pointerStartX: 0,
-    pointerStartY: 0,
-    lastActivity: now(),
+
+    lastInteraction: now(),
     lastReaction: 0,
     lastBlink: now(),
-    nextBlinkAt: now() + 10500,
-    lastAmbient: now(),
+    nextBlinkAt: now() + 8200 + Math.random() * 2600,
     lastMove: now(),
     lastHover: 0,
+    lastMicro: 0,
+
     anger: 0,
-    x: Math.min(window.innerWidth - 90, Math.max(90, window.innerWidth * 0.72)),
-    y: Math.min(window.innerHeight - 120, Math.max(110, window.innerHeight * 0.56)),
-    gazeTargetX: 0,
-    gazeTargetY: 0,
-    gazeX: 0,
-    gazeY: 0,
-    wanderTimer: null,
-    messageTimer: null,
-    nameTimer: null,
-    microTimer: null,
-    moveTimer: null,
-    expressionKey: "idle"
+    avoidUntil: 0,
+    lastFlee: 0,
+
+    wanderTimer: 0,
+    messageTimer: 0,
+    settleTimer: 0,
+    nameTimer: 0,
+
+    expressionVariant: 0
   };
 
   const styleLink = document.createElement("link");
@@ -77,7 +90,7 @@
     <div id="studylabPetStage" aria-hidden="false">
       <div
         class="sl-pet-character"
-        data-state="idle"
+        data-expression="idle"
         data-eye="cyan"
         role="button"
         tabindex="0"
@@ -90,7 +103,7 @@
           <span class="sl-pet-sleep-z z1">Z</span>
           <span class="sl-pet-sleep-z z2">z</span>
           <span class="sl-pet-sleep-z z3">z</span>
-          <span class="sl-pet-crack" aria-hidden="true"></span>
+          <span class="sl-pet-crack"></span>
         </div>
       </div>
       <div class="sl-pet-bubble" data-pet-bubble role="status" aria-live="polite"></div>
@@ -103,7 +116,7 @@
       aria-controls="studylabPetPanel"
       title="StudyLab Pet controls"
     >
-      <span class="sl-pet-launcher-icon" aria-hidden="true">🤖</span>
+      <span class="sl-pet-launcher-icon" aria-hidden="true">🐾</span>
       <span>Pet</span>
     </button>
 
@@ -135,6 +148,14 @@
       </div>
 
       <div class="sl-pet-setting">
+        <span>Messages</span>
+        <div class="sl-pet-setting-buttons" role="group" aria-label="Pet message state">
+          <button type="button" data-pet-messages-enable>Enable</button>
+          <button type="button" data-pet-messages-disable>Disable</button>
+        </div>
+      </div>
+
+      <div class="sl-pet-setting">
         <span>Eye colour</span>
         <div class="sl-pet-setting-buttons" role="group" aria-label="Pet eye colour">
           <button type="button" data-pet-eye="cyan">Cyan</button>
@@ -143,8 +164,8 @@
       </div>
 
       <p class="sl-pet-panel-note">
-        A small page companion that watches the cursor, wanders gently, reacts to StudyLab,
-        and sleeps when the page is quiet.
+        EMO-style expressive eyes, gentle wandering, cursor attention, sleep, drag-and-place,
+        contextual reactions and a few messages when useful.
       </p>
     </aside>
   `);
@@ -160,19 +181,22 @@
   const closeButton = panel.querySelector("[data-pet-close]");
   const enableButton = panel.querySelector("[data-pet-enable]");
   const disableButton = panel.querySelector("[data-pet-disable]");
+  const messagesEnableButton = panel.querySelector("[data-pet-messages-enable]");
+  const messagesDisableButton = panel.querySelector("[data-pet-messages-disable]");
   const eyeButtons = [...panel.querySelectorAll("[data-pet-eye]")];
 
-  function savePrefs() {
+  function savePreferences() {
     try {
       localStorage.setItem(STORAGE.enabled, String(state.enabled));
       localStorage.setItem(STORAGE.eye, state.eye);
+      localStorage.setItem(STORAGE.messages, String(state.messages));
     } catch (_) {}
   }
 
-  function pageContext() {
+  function getPageContext() {
     const path = location.pathname.toLowerCase();
     const title = (document.title || "").toLowerCase();
-    const text = (document.body?.innerText || "").slice(0, 6000).toLowerCase();
+    const text = (document.body?.innerText || "").slice(0, 6500).toLowerCase();
 
     if (path.includes("study-tools")) return "study";
     if (path.includes("physics")) return "physics";
@@ -181,43 +205,29 @@
     if (path.includes("biology")) return "biology";
     if (path.includes("exam-hub")) return "exam";
     if (path.includes("telegram")) return "social";
+    if (path.includes("audio_books")) return "audio";
 
-    if (/physics/.test(title + text)) return "physics";
-    if (/chemistry/.test(title + text)) return "chemistry";
-    if (/mathematics|combined maths|combined mathematics/.test(title + text)) return "maths";
-    if (/biology/.test(title + text)) return "biology";
-    if (/past papers|marking schemes|exam hub/.test(title + text)) return "exam";
+    const combined = title + " " + text;
+
+    if (/physics/.test(combined)) return "physics";
+    if (/chemistry/.test(combined)) return "chemistry";
+    if (/mathematics|combined maths|combined mathematics/.test(combined)) return "maths";
+    if (/biology/.test(combined)) return "biology";
+    if (/past papers|marking schemes|exam hub/.test(combined)) return "exam";
     return "home";
   }
 
-  state.context = pageContext();
+  state.context = getPageContext();
 
-  const messages = {
-    home: {
-      hover: ["👀", "Hmm.", "..."],
-      click: ["Got it.", "I saw that."]
-    },
-    physics: {
-      hover: ["Physics.", "Watching.", "Interesting."]
-    },
-    chemistry: {
-      hover: ["🧪", "Lab mode.", "Watching."]
-    },
-    maths: {
-      hover: ["📐", "Numbers.", "Calculating."]
-    },
-    biology: {
-      hover: ["🧬", "Observing.", "Interesting."]
-    },
-    study: {
-      hover: ["Focus.", "Study mode.", "Watching the tools."]
-    },
-    exam: {
-      hover: ["Exam mode.", "Serious.", "Paper hunt."]
-    },
-    social: {
-      hover: ["👀", "Community.", "I see."]
-    }
+  const contextMessages = {
+    home: ["Hmm.", "I noticed that.", "👀"],
+    physics: ["Physics.", "Watching.", "Interesting."],
+    chemistry: ["🧪", "Lab mode.", "Watching."],
+    maths: ["Maths.", "Numbers.", "Calculating."],
+    biology: ["🧬", "Observing.", "Interesting."],
+    exam: ["Exam mode.", "Serious.", "Paper hunt."],
+    social: ["👀", "Community.", "I see."],
+    audio: ["Listening.", "Audio time.", "I hear that."]
   };
 
   function utilityKind(el) {
@@ -235,6 +245,8 @@
     if (/study.?time|study planner|planner/.test(value)) return "planner";
     if (/mock exam|exam timer/.test(value)) return "mock";
     if (/unit converter|converter/.test(value)) return "converter";
+    if (/countdown|count down/.test(value)) return "countdown";
+    if (/search/.test(value)) return "search";
     return "";
   }
 
@@ -247,7 +259,7 @@
       el.textContent || ""
     ].join(" ").toLowerCase();
 
-    if (/study tools|study utilities|pomodoro|flashcard|mistake|planner|converter|marks calculator/.test(value)) return "study";
+    if (/study tools|study utilities|pomodoro|flashcard|mistake|planner|converter|marks calculator|mock exam|countdown/.test(value)) return "study";
     if (/physics|doppler|gravity|gravitational|projectile|wave|electricity/.test(value)) return "physics";
     if (/chemistry|රසායන|practical|organic|inorganic/.test(value)) return "chemistry";
     if (/maths|mathematics|සංයුක්ත ගණිතය|trigonometry|calculus|vector/.test(value)) return "maths";
@@ -257,74 +269,103 @@
     return state.context;
   }
 
-  function setStagePosition(x, y, options = {}) {
-    const marginX = window.innerWidth <= 720 ? 52 : 62;
-    const marginTop = 76;
-    const marginBottom = 82;
+  function clampPosition(x, y) {
+    const halfW = 48;
+    const halfH = 36;
+    return {
+      x: Math.max(halfW + 8, Math.min(window.innerWidth - halfW - 8, x)),
+      y: Math.max(halfH + 8, Math.min(window.innerHeight - halfH - 20, y))
+    };
+  }
 
-    const nextX = Math.max(marginX, Math.min(window.innerWidth - marginX, x));
-    const nextY = Math.max(marginTop, Math.min(window.innerHeight - marginBottom, y));
+  function setPosition(x, y, options = {}) {
+    const next = clampPosition(x, y);
 
     if (!options.drag) {
-      const dx = nextX - state.x;
-      const dy = nextY - state.y;
+      const dx = next.x - state.x;
+      const dy = next.y - state.y;
+      const distance = Math.hypot(dx, dy);
 
-      if (Math.hypot(dx, dy) > 16) {
-        const upward = dy < -14;
-        const downward = dy > 14;
-
+      if (distance > 26) {
         state.lastMove = now();
 
-        character.style.setProperty(
-          "--pet-move-duration",
-          upward ? "3600ms" : downward ? "1500ms" : "2900ms"
-        );
+        let duration;
+        let ease;
 
-        character.style.setProperty(
-          "--pet-move-ease",
-          upward
-            ? "cubic-bezier(.24,.56,.16,1)"
-            : downward
-              ? "cubic-bezier(.14,.88,.24,1.08)"
-              : "cubic-bezier(.20,.72,.20,1)"
-        );
+        if (dy < -22) {
+          duration = 6000 + Math.min(2600, Math.abs(dy) * 5);
+          ease = "cubic-bezier(.25,.58,.18,1)";
+          character.style.setProperty("--eye-width", "14px");
+          character.style.setProperty("--eye-height", "19px");
+          character.classList.remove("is-moving", "is-falling", "is-landed");
+          character.classList.add("is-climbing");
+        } else if (dy > 22) {
+          duration = 2800 + Math.min(1200, Math.abs(dy) * 2);
+          ease = "cubic-bezier(.15,.88,.25,1.12)";
+          character.classList.remove("is-moving", "is-climbing", "is-landed");
+          character.classList.add("is-falling");
+        } else {
+          duration = 5000 + Math.random() * 1800;
+          ease = "cubic-bezier(.20,.72,.20,1)";
+          character.classList.remove("is-climbing", "is-falling", "is-landed");
+          character.classList.add("is-moving");
+          character.style.setProperty("--eye-width", "15px");
+          character.style.setProperty("--eye-height", "21px");
+        }
 
-        character.classList.remove("is-moving", "is-climbing", "is-falling", "is-landed");
+        character.style.setProperty("--pet-move-duration", Math.round(duration) + "ms");
+        character.style.setProperty("--pet-move-ease", ease);
 
-        if (upward) character.classList.add("is-climbing");
-        else if (downward) character.classList.add("is-falling");
-        else character.classList.add("is-moving");
+        window.clearTimeout(state.settleTimer);
 
-        if (downward) {
-          window.clearTimeout(state.moveTimer);
-          state.moveTimer = window.setTimeout(() => {
+        if (dy > 22) {
+          state.settleTimer = window.setTimeout(() => {
             if (!state.dragging && state.enabled) {
               character.classList.remove("is-falling");
               character.classList.add("is-landed");
-              window.setTimeout(() => character.classList.remove("is-landed"), 550);
+              window.setTimeout(() => character.classList.remove("is-landed"), 520);
             }
-          }, 1550);
+          }, duration + 40);
         }
+
+        window.setTimeout(() => {
+          if (!state.dragging && state.enabled) {
+            character.classList.remove("is-moving", "is-climbing");
+            character.style.removeProperty("--eye-width");
+            character.style.removeProperty("--eye-height");
+          }
+        }, duration + 80);
       }
     }
 
-    state.x = nextX;
-    state.y = nextY;
-    character.style.left = nextX + "px";
-    character.style.top = nextY + "px";
-    bubble.style.left = nextX + "px";
-    bubble.style.top = Math.max(80, nextY - 36) + "px";
+    state.x = next.x;
+    state.y = next.y;
+
+    character.style.left = next.x + "px";
+    character.style.top = next.y + "px";
+
+    bubble.style.left = next.x + "px";
+    bubble.style.top = Math.max(80, next.y - 38) + "px";
   }
 
-  function randomWanderTarget() {
-    const maxDistance = state.context === "study" ? 105 : 82;
-    const angle = Math.random() * Math.PI * 2;
-    const distance = maxDistance * (0.45 + Math.random() * 0.55);
+  function chooseWanderTarget() {
+    const study = state.context === "study";
+    const longMove = Math.random() < (study ? 0.20 : 0.13);
 
-    return {
-      x: state.x + Math.cos(angle) * distance,
-      y: state.y + Math.sin(angle) * distance * 0.72
-    };
+    if (longMove) {
+      return clampPosition(
+        70 + Math.random() * Math.max(1, window.innerWidth - 140),
+        90 + Math.random() * Math.max(1, window.innerHeight - 185)
+      );
+    }
+
+    const distance = 60 + Math.random() * (study ? 75 : 55);
+    const angle = Math.random() * Math.PI * 2;
+
+    return clampPosition(
+      state.x + Math.cos(angle) * distance,
+      state.y + Math.sin(angle) * distance * .68
+    );
   }
 
   function scheduleWander(delay) {
@@ -332,23 +373,32 @@
 
     state.wanderTimer = window.setTimeout(() => {
       if (!state.enabled || state.sleeping || state.dragging || document.hidden) {
-        scheduleWander(state.sleeping ? 6000 : 5000);
+        scheduleWander(state.sleeping ? 5000 : 7000);
         return;
       }
 
-      const target = randomWanderTarget();
-      setStagePosition(target.x, target.y);
+      const cooldown = now() - state.lastMove;
 
-      const nextDelay = state.context === "study"
-        ? 15000 + Math.random() * 10000
-        : 23000 + Math.random() * 15000;
+      if (cooldown < 6500) {
+        scheduleWander(8500);
+        return;
+      }
 
-      scheduleWander(nextDelay);
+      if (Math.random() < (state.context === "study" ? 0.72 : 0.58)) {
+        const target = chooseWanderTarget();
+        setPosition(target.x, target.y);
+      }
+
+      scheduleWander(
+        state.context === "study"
+          ? 10500 + Math.random() * 6000
+          : 14500 + Math.random() * 9000
+      );
     }, delay);
   }
 
-  function showMessage(message, duration = 1500) {
-    if (!state.enabled) return;
+  function showMessage(message, duration = 1450, force = false) {
+    if ((!state.enabled || !state.messages) && !force) return;
 
     bubble.textContent = message;
     bubble.classList.add("is-visible");
@@ -359,169 +409,321 @@
     }, duration);
   }
 
-  function applyMood(mood) {
-    if (!state.enabled) return;
+  function maybeMessage(pool, chance = .18) {
+    if (!state.messages || Math.random() > chance) return;
+    if (bubble.classList.contains("is-visible")) return;
 
-    const next = mood || "idle";
-    state.mood = next;
-    state.expressionKey = next;
-    character.dataset.state = state.sleeping ? "sleeping" : next;
+    showMessage(pool[Math.floor(Math.random() * pool.length)], 1350);
   }
 
-  function settleMood() {
-    if (state.sleeping || state.dragging || !state.enabled) return;
+  function setExpression(expression, duration = 0) {
+    if (!state.enabled) return;
 
-    if (state.context === "study" && now() - state.lastActivity > 5000) {
-      applyMood("focused");
-    } else {
-      applyMood("idle");
+    state.expression = expression;
+    state.expressionVariant++;
+
+    /*
+     * Procedural variations are intentionally small. Combining eye width,
+     * height, tilt, asymmetry, gaze and mouth geometry produces thousands
+     * of visually distinct states without maintaining thousands of assets.
+     */
+    const jitter = () => (Math.random() * 2 - 1);
+
+    character.dataset.expression = expression;
+
+    character.style.setProperty("--eye-x", (jitter() * 1.4).toFixed(2) + "px");
+    character.style.setProperty("--eye-y", (jitter() * 1.1).toFixed(2) + "px");
+    character.style.setProperty("--eye-rotate", (jitter() * (expression === "angry" ? 3.5 : 2.2)).toFixed(2) + "deg");
+    character.style.setProperty("--eye-scale-x", (1 + jitter() * .045).toFixed(3));
+    character.style.setProperty("--eye-scale-y", (1 + jitter() * .045).toFixed(3));
+
+    if (expression === "curious") {
+      character.style.setProperty("--eye-y", (-1 + jitter() * 1.2).toFixed(2) + "px");
     }
+
+    if (duration > 0) {
+      window.clearTimeout(state.settleTimer);
+      state.settleTimer = window.setTimeout(() => {
+        if (!state.sleeping && !state.dragging && state.enabled) {
+          setExpression("idle");
+        }
+      }, duration);
+    }
+  }
+
+  function updateControls() {
+    stage.classList.toggle("is-disabled", !state.enabled);
+
+    character.dataset.eye = state.eye;
+
+    enableButton.classList.toggle("is-active", state.enabled);
+    disableButton.classList.toggle("is-active", !state.enabled);
+
+    messagesEnableButton.classList.toggle("is-active", state.messages);
+    messagesDisableButton.classList.toggle("is-active", !state.messages);
+
+    eyeButtons.forEach((button) => {
+      button.classList.toggle("is-active", button.dataset.petEye === state.eye);
+    });
+  }
+
+  function setEnabled(enabled) {
+    state.enabled = Boolean(enabled);
+    state.sleeping = false;
+    state.avoidUntil = 0;
+
+    if (!state.enabled) {
+      bubble.classList.remove("is-visible");
+      character.dataset.expression = "idle";
+      character.classList.remove("is-moving", "is-climbing", "is-falling", "is-landed", "is-dragging", "is-blinking");
+      window.clearTimeout(state.wanderTimer);
+    } else {
+      state.lastInteraction = now();
+      state.context = getPageContext();
+      setExpression("sleepy", 700);
+      showMessage("I'm back. 👀", 1350);
+      scheduleWander(4800);
+    }
+
+    updateControls();
+    savePreferences();
+  }
+
+  function setMessages(enabled) {
+    state.messages = Boolean(enabled);
+    if (!state.messages) bubble.classList.remove("is-visible");
+    updateControls();
+    savePreferences();
+
+    if (state.enabled && state.messages) {
+      showMessage("Message mode on.", 1000);
+    }
+  }
+
+  function setEye(eye) {
+    state.eye = eye === "pink" ? "pink" : "cyan";
+    updateControls();
+    savePreferences();
+
+    if (!state.enabled) return;
+
+    /*
+     * Cyan and Pink have different behavioral profiles while retaining
+     * the same physical character.
+     */
+    setExpression(state.eye === "pink" ? "playful" : "excited", 900);
+    showMessage(state.eye === "pink" ? "🩷" : "🩵", 950);
   }
 
   function react(type, detail = {}, force = false) {
     if (!state.enabled && !force) return;
 
     const timestamp = now();
-    if (!force && timestamp - state.lastReaction < 600) return;
+
+    if (!force && timestamp - state.lastReaction < 500) return;
 
     state.lastReaction = timestamp;
-    state.lastActivity = timestamp;
+    state.lastInteraction = timestamp;
     state.sleeping = false;
 
-    switch (type) {
-      case "wake":
-        applyMood("sleepy");
-        window.setTimeout(() => {
-          if (state.enabled && !state.sleeping) applyMood("curious");
-        }, 480);
-        return;
-
-      case "hover-card": {
-        const context = detail.context || state.context;
-        if (context === "study") applyMood("focused");
-        else applyMood("curious");
-
-        const utility = detail.element ? utilityKind(detail.element) : "";
-        if (utility === "pomodoro") applyMood("focused");
-        else if (utility === "marks") applyMood("surprised");
-        else if (utility === "mistake") applyMood("confused");
-
-        const pool = messages[context]?.hover;
-        if (pool && Math.random() < 0.16) {
-          showMessage(pool[Math.floor(Math.random() * pool.length)], 1200);
+    if (type === "wake") {
+      setExpression("sleepy", 500);
+      window.setTimeout(() => {
+        if (state.enabled && !state.sleeping) {
+          setExpression(state.eye === "pink" ? "playful" : "curious", 750);
         }
-        return;
+      }, 360);
+      return;
+    }
+
+    if (type === "hover-card") {
+      const context = detail.context || state.context;
+      const utility = detail.element ? utilityKind(detail.element) : "";
+
+      if (context === "study") {
+        if (utility === "pomodoro" || utility === "mock") setExpression("focused", 1000);
+        else if (utility === "marks") setExpression("surprised", 950);
+        else if (utility === "mistake") setExpression("confused", 950);
+        else if (utility === "flashcard") setExpression("curious", 850);
+        else setExpression(state.eye === "pink" ? "playful" : "curious", 850);
+      } else if (context === "chemistry") {
+        setExpression("excited", 1000);
+      } else if (context === "physics") {
+        setExpression("curious", 900);
+      } else if (context === "maths") {
+        setExpression("thinking", 900);
+      } else if (context === "biology") {
+        setExpression("curious", 850);
+      } else if (context === "exam") {
+        setExpression("focused", 1000);
+      } else {
+        setExpression(state.eye === "pink" ? "playful" : "curious", 850);
       }
 
-      case "click-card": {
-        const context = detail.context || state.context;
-        const utility = detail.element ? utilityKind(detail.element) : "";
+      const pool = contextMessages[context];
+      if (pool) maybeMessage(pool, .11);
+      return;
+    }
 
-        if (context === "study") {
-          if (utility === "pomodoro" || utility === "mock") applyMood("focused");
-          else if (utility === "marks") applyMood("surprised");
-          else if (utility === "mistake") applyMood("confused");
-          else if (utility === "flashcard") applyMood("curious");
-          else applyMood("focused");
-        } else if (context === "chemistry") applyMood("excited");
-        else if (context === "physics") applyMood("curious");
-        else if (context === "maths") applyMood("thinking");
-        else if (context === "biology") applyMood("happy");
-        else if (context === "exam") applyMood("focused");
-        else applyMood("happy");
+    if (type === "click-card") {
+      const context = detail.context || state.context;
+      const utility = detail.element ? utilityKind(detail.element) : "";
 
-        return;
-      }
-
-      case "typing":
-        applyMood("curious");
-        if (detail.name && Math.random() < 0.20) {
-          showMessage("👀", 1100);
-        }
-        return;
-
-      case "name-complete":
-        applyMood("happy");
-        showMessage("👋", 1200);
-        return;
-
-      case "theme":
-        applyMood("surprised");
-        return;
-
-      case "scroll":
-        applyMood("curious");
-        return;
-
-      case "scared":
-        applyMood("scared");
-        return;
-
-      case "anger":
-        state.anger += 1;
-        applyMood("angry");
-        if (state.anger >= 2 && Math.random() < 0.45) {
-          showMessage("...", 1000);
-        }
-
-        window.setTimeout(() => {
-          if (state.enabled && !state.dragging && !state.sleeping) settleMood();
-        }, 1500);
-        return;
-
-      case "micro":
-        if (state.context === "study") {
-          applyMood(["focused","thinking","curious","unimpressed"][Math.floor(Math.random() * 4)]);
+      if (context === "study") {
+        if (utility === "pomodoro" || utility === "mock") {
+          setExpression("focused", 1600);
+          maybeMessage(["Focus.", "Lock in.", "Study mode."], .38);
+        } else if (utility === "marks") {
+          setExpression("surprised", 1000);
+        } else if (utility === "mistake") {
+          setExpression("confused", 1100);
+        } else if (utility === "flashcard") {
+          setExpression("curious", 1000);
         } else {
-          applyMood(["idle","curious","bored","thinking"][Math.floor(Math.random() * 4)]);
+          setExpression(state.eye === "pink" ? "playful" : "focused", 950);
         }
+      } else if (context === "chemistry") {
+        setExpression("excited", 1100);
+      } else if (context === "physics") {
+        setExpression("curious", 1000);
+      } else if (context === "maths") {
+        setExpression("thinking", 1100);
+      } else if (context === "biology") {
+        setExpression("happy", 1000);
+      } else if (context === "exam") {
+        setExpression("focused", 1300);
+      } else {
+        setExpression(state.eye === "pink" ? "playful" : "happy", 900);
+      }
 
-        window.setTimeout(() => {
-          if (state.enabled && !state.sleeping && !state.dragging) settleMood();
-        }, 1200);
-        return;
+      return;
+    }
 
-      default:
-        applyMood("idle");
+    if (type === "typing") {
+      setExpression("curious", 750);
+      if (detail.name && state.messages && Math.random() < .16) {
+        showMessage("👀", 1050);
+      }
+      return;
+    }
+
+    if (type === "name-complete") {
+      setExpression(state.eye === "pink" ? "happy" : "excited", 1250);
+      maybeMessage(["Hi. 👋", "Nice to meet you.", "I noticed your name."], .42);
+      return;
+    }
+
+    if (type === "theme") {
+      setExpression("surprised", 700);
+      return;
+    }
+
+    if (type === "scroll") {
+      setExpression(state.eye === "pink" ? "playful" : "curious", 520);
+      return;
+    }
+
+    if (type === "anger") {
+      const recent = timestamp - state.lastReaction < 4600;
+      state.anger = Math.min(4, state.anger + (recent ? 1 : .5));
+      state.avoidUntil = timestamp + 4300 + state.anger * 450;
+
+      setExpression("angry", 1450);
+
+      if (state.messages) {
+        if (state.anger >= 3) showMessage("...", 1050);
+        else if (state.anger >= 2) showMessage("Stop.", 1000);
+        else showMessage("Hey.", 950);
+      }
+
+      fleeFromCursor(true);
+
+      window.setTimeout(() => {
+        if (state.enabled && !state.dragging && !state.sleeping) {
+          setExpression("annoyed", 650);
+        }
+      }, 1450);
+
+      return;
+    }
+
+    if (type === "scared") {
+      setExpression("scared", 900);
+      if (state.messages) maybeMessage(["😳", "Careful.", "Easy..."], .35);
+      return;
     }
   }
 
-  function blink() {
-    if (!state.enabled || state.sleeping || state.dragging || now() < state.nextBlinkAt) return;
+  function fleeFromCursor(force = false) {
+    if (!state.enabled || state.dragging || state.sleeping) return;
 
-    state.lastBlink = now();
-    state.nextBlinkAt = now() + 9000 + Math.random() * 4000;
+    const x = state.cursorX;
+    const y = state.cursorY;
+    const distance = Math.hypot(x - state.x, y - state.y);
 
-    eyeShells.forEach((eye) => {
-      eye.style.height = "4px";
-      eye.style.top = "12px";
-    });
+    if (!force && now() > state.avoidUntil) return;
+    if (!force && distance > 155) return;
+    if (!force && now() - state.lastFlee < 1200) return;
+
+    state.lastFlee = now();
+
+    let angle = Math.atan2(state.y - y, state.x - x);
+
+    if (!Number.isFinite(angle)) angle = Math.random() * Math.PI * 2;
+
+    const distanceOut = 150 + Math.random() * 90;
+    const target = clampPosition(
+      state.x + Math.cos(angle) * distanceOut,
+      state.y + Math.sin(angle) * distanceOut * .72
+    );
+
+    character.classList.remove("is-moving", "is-climbing", "is-falling", "is-landed");
+    character.style.setProperty("--pet-move-duration", "1750ms");
+    character.style.setProperty("--pet-move-ease", "cubic-bezier(.12,.86,.22,1)");
+    character.classList.add("is-moving");
+    character.style.setProperty("--eye-width", "15px");
+    character.style.setProperty("--eye-height", "21px");
+
+    setPosition(target.x, target.y);
 
     window.setTimeout(() => {
-      if (state.sleeping || state.dragging || !state.enabled) return;
-      eyeShells.forEach((eye) => {
-        eye.style.height = "";
-        eye.style.top = "";
-      });
-    }, 180);
+      character.classList.remove("is-moving");
+      character.style.removeProperty("--eye-width");
+      character.style.removeProperty("--eye-height");
+    }, 1900);
+  }
+
+  function blink() {
+    if (!state.enabled || state.sleeping || state.dragging) return;
+
+    state.lastBlink = now();
+    state.nextBlinkAt = now() + 8500 + Math.random() * 3000;
+    character.classList.add("is-blinking");
+
+    window.setTimeout(() => {
+      if (state.enabled && !state.sleeping && !state.dragging) {
+        character.classList.remove("is-blinking");
+      }
+    }, 190);
   }
 
   function gazeAt(x, y) {
-    const rect = character.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
+    const dx = Math.max(-1, Math.min(1, (x - state.x) / 210));
+    const dy = Math.max(-1, Math.min(1, (y - state.y) / 160));
 
-    state.gazeTargetX = Math.max(-1, Math.min(1, (x - centerX) / 190)) * 5.5;
-    state.gazeTargetY = Math.max(-1, Math.min(1, (y - centerY) / 145)) * 4.8;
+    state.gazeTargetX = dx * 6.0;
+    state.gazeTargetY = dy * 5.1;
   }
 
   function gazeLoop() {
     if (state.enabled) {
-      state.gazeX += (state.gazeTargetX - state.gazeX) * 0.075;
-      state.gazeY += (state.gazeTargetY - state.gazeY) * 0.075;
+      state.gazeX += (state.gazeTargetX - state.gazeX) * 0.08;
+      state.gazeY += (state.gazeTargetY - state.gazeY) * 0.08;
 
-      character.style.setProperty("--gaze-x", state.gazeX.toFixed(2) + "px");
-      character.style.setProperty("--gaze-y", state.gazeY.toFixed(2) + "px");
+      eyes.forEach((eye) => {
+        eye.style.setProperty("--gaze-x", state.gazeX.toFixed(2) + "px");
+        eye.style.setProperty("--gaze-y", state.gazeY.toFixed(2) + "px");
+      });
     }
 
     requestAnimationFrame(gazeLoop);
@@ -530,7 +732,8 @@
   function handlePointerMove(event) {
     if (!state.enabled) return;
 
-    state.lastActivity = now();
+    state.cursorX = event.clientX;
+    state.cursorY = event.clientY;
     gazeAt(event.clientX, event.clientY);
 
     if (state.sleeping) {
@@ -538,14 +741,12 @@
       react("wake", {}, true);
     }
 
-    if (!state.dragging) {
-      const distance = Math.hypot(
-        event.clientX - state.x,
-        event.clientY - state.y
-      );
-
-      if (distance < 82 && now() - state.lastReaction > 1400) {
-        applyMood("curious");
+    if (state.avoidUntil > now()) {
+      fleeFromCursor();
+    } else {
+      const distance = Math.hypot(event.clientX - state.x, event.clientY - state.y);
+      if (distance < 82 && now() - state.lastReaction > 1500) {
+        setExpression(state.eye === "pink" ? "playful" : "curious", 700);
       }
     }
   }
@@ -558,10 +759,14 @@
     );
 
     if (!card || card.contains(event.relatedTarget)) return;
-    if (now() - state.lastHover < 1400) return;
 
-    state.lastHover = now();
-    state.lastActivity = now();
+    const t = now();
+
+    if (t - state.lastHover < 1400) return;
+
+    state.lastHover = t;
+    state.lastInteraction = t;
+
     react("hover-card", {
       context: elementContext(card),
       element: card
@@ -578,7 +783,7 @@
     const label = (
       target.id + " " +
       target.textContent + " " +
-      target.getAttribute("aria-label")
+      (target.getAttribute("aria-label") || "")
     ).toLowerCase();
 
     if (/theme|dark mode|light mode/.test(label)) {
@@ -603,15 +808,16 @@
     if (!state.enabled) return;
 
     const target = event.target;
+
     if (!(target instanceof HTMLInputElement ||
           target instanceof HTMLTextAreaElement ||
           target instanceof HTMLSelectElement)) return;
 
-    state.lastActivity = now();
+    state.lastInteraction = now();
+
+    const value = String(target.value || "").trim();
 
     if (target.id === "profileName" || target.name === "name") {
-      const value = (target.value || "").trim();
-
       react("typing", { name: value });
 
       window.clearTimeout(state.nameTimer);
@@ -621,58 +827,63 @@
           if (String(target.value || "").trim() === value) {
             react("name-complete", { name: value });
           }
-        }, 1200);
+        }, 950);
       }
-    }
-  }
-
-  function handleKeydown(event) {
-    if (!state.enabled) return;
-
-    state.lastActivity = now();
-
-    if (event.key === "Escape") {
-      setOpen(false);
-    } else if (event.key === "Enter" || event.key === "Backspace" || event.key.length === 1) {
-      if (now() - state.lastReaction > 1600) applyMood("curious");
+    } else if (now() - state.lastReaction > 1000) {
+      react("typing");
     }
   }
 
   function handleFocus(event) {
     if (!state.enabled) return;
     if (event.target.matches?.("input,textarea,select")) {
-      applyMood("curious");
-      state.lastActivity = now();
+      state.lastInteraction = now();
+      react("typing");
     }
   }
 
   function handleScroll() {
     if (!state.enabled) return;
-    state.lastActivity = now();
 
-    if (now() - state.lastReaction > 1400) {
+    state.lastInteraction = now();
+
+    if (now() - state.lastReaction > 1200) {
       react("scroll");
+    }
+  }
+
+  function handleKeydown(event) {
+    if (!state.enabled) return;
+
+    if (event.key === "Escape") {
+      setOpen(false);
+      return;
+    }
+
+    state.lastInteraction = now();
+
+    if (event.key.length === 1 || event.key === "Backspace" || event.key === "Enter") {
+      if (now() - state.lastReaction > 1050) {
+        react("typing");
+      }
     }
   }
 
   function handlePetPointerDown(event) {
     if (!state.enabled) return;
 
-    const rect = character.getBoundingClientRect();
-
     state.dragging = true;
     state.dragged = false;
     state.pointerId = event.pointerId;
-    state.pointerStartX = event.clientX;
-    state.pointerStartY = event.clientY;
-    state.dragOffsetX = event.clientX - (rect.left + rect.width / 2);
-    state.dragOffsetY = event.clientY - (rect.top + rect.height / 2);
+    state.dragOffsetX = event.clientX - state.x;
+    state.dragOffsetY = event.clientY - state.y;
+
+    state.lastInteraction = now();
     state.sleeping = false;
 
     character.setPointerCapture?.(event.pointerId);
     character.classList.add("is-dragging");
-
-    react("scared", {}, true);
+    setExpression("scared", 0);
 
     event.preventDefault();
     event.stopPropagation();
@@ -681,17 +892,12 @@
   function handlePetPointerMove(event) {
     if (!state.dragging || event.pointerId !== state.pointerId) return;
 
-    const moved = Math.hypot(
-      event.clientX - state.pointerStartX,
-      event.clientY - state.pointerStartY
-    );
+    const dx = event.clientX - (state.x + state.dragOffsetX);
+    const dy = event.clientY - (state.y + state.dragOffsetY);
 
-    if (moved > 6) state.dragged = true;
-    if (!state.dragged) return;
+    if (Math.hypot(dx, dy) > 5) state.dragged = true;
 
-    state.lastActivity = now();
-
-    setStagePosition(
+    setPosition(
       event.clientX - state.dragOffsetX,
       event.clientY - state.dragOffsetY,
       { drag: true }
@@ -700,41 +906,42 @@
     gazeAt(event.clientX, event.clientY);
   }
 
-  function finishPetPointer(event) {
+  function handlePetPointerUp(event) {
     if (!state.dragging || event.pointerId !== state.pointerId) return;
 
-    const didDrag = state.dragged;
+    const dragged = state.dragged;
 
     state.dragging = false;
     state.pointerId = null;
-    character.classList.remove("is-dragging");
-    character.classList.remove("is-moving", "is-climbing", "is-falling");
 
+    character.classList.remove("is-dragging", "is-moving", "is-climbing", "is-falling");
     try {
       character.releasePointerCapture?.(event.pointerId);
     } catch (_) {}
 
-    if (didDrag) {
-      state.lastActivity = now();
+    if (dragged) {
       character.classList.add("is-landed");
-      applyMood("scared");
-      showMessage("😳", 1100);
-
-      window.setTimeout(() => {
-        character.classList.remove("is-landed");
-        if (state.enabled && !state.sleeping) settleMood();
-      }, 550);
+      setExpression("curious", 850);
+      window.setTimeout(() => character.classList.remove("is-landed"), 520);
     } else {
       react("anger", {}, true);
     }
+
+    state.lastInteraction = now();
 
     event.preventDefault();
     event.stopPropagation();
   }
 
+  function setOpen(open) {
+    panel.hidden = !open;
+    launcher.setAttribute("aria-expanded", String(open));
+  }
+
   function closeOtherPanels() {
     const feedbackPanel = document.querySelector("[data-feedback-panel]");
     const feedbackButton = document.querySelector("[data-feedback-button]");
+
     if (feedbackPanel && !feedbackPanel.hidden) {
       feedbackPanel.hidden = true;
       feedbackButton?.setAttribute("aria-expanded", "false");
@@ -743,6 +950,7 @@
 
     const chatPanel = document.getElementById("studyChatPanel");
     const chatButton = document.querySelector("[data-chat-button]");
+
     if (chatPanel && !chatPanel.hidden) {
       chatPanel.hidden = true;
       chatButton?.setAttribute("aria-expanded", "false");
@@ -750,60 +958,48 @@
     }
   }
 
-  function setOpen(open) {
-    panel.hidden = !open;
-    launcher.setAttribute("aria-expanded", String(open));
-  }
+  function activityLoop() {
+    if (state.enabled && !state.dragging && !document.hidden) {
+      const idleFor = now() - state.lastInteraction;
 
-  function setEnabled(enabled) {
-    state.enabled = Boolean(enabled);
-    state.sleeping = false;
+      if (idleFor >= 8000 && !state.sleeping) {
+        state.sleeping = true;
+        setExpression("sleeping", 0);
+        if (state.messages) showMessage("Zzz...", 1350);
+      }
 
-    if (!state.enabled) {
-      bubble.classList.remove("is-visible");
-      character.dataset.state = "idle";
-      character.classList.remove("is-moving", "is-climbing", "is-falling", "is-landed", "is-dragging");
-      window.clearTimeout(state.wanderTimer);
-      window.clearTimeout(state.messageTimer);
-    } else {
-      state.context = pageContext();
-      state.lastActivity = now();
-      state.nextBlinkAt = now() + 10000;
-      applyMood("curious");
-      showMessage("👀", 1100);
-      scheduleWander(9000);
+      if (!state.sleeping && now() >= state.nextBlinkAt) {
+        blink();
+      }
+
+      if (!state.sleeping &&
+          !state.dragging &&
+          now() - state.lastMicro > 9500 &&
+          Math.random() < 0.38) {
+        state.lastMicro = now();
+
+        const expressions = state.context === "study"
+          ? ["focused", "thinking", "curious", "unimpressed"]
+          : ["idle", "curious", "thinking", "bored"];
+
+        const expression = state.eye === "pink" && Math.random() < .58
+          ? "playful"
+          : expressions[Math.floor(Math.random() * expressions.length)];
+
+        setExpression(expression, 1150);
+      }
+
+      if (state.avoidUntil > now()) {
+        fleeFromCursor();
+      }
     }
 
-    updateControls();
-    savePrefs();
-  }
-
-  function setEye(eye) {
-    state.eye = eye === "pink" ? "pink" : "cyan";
-    updateControls();
-    savePrefs();
-
-    if (state.enabled) {
-      applyMood("happy");
-      window.setTimeout(settleMood, 850);
-    }
-  }
-
-  function updateControls() {
-    stage.classList.toggle("is-disabled", !state.enabled);
-    character.dataset.eye = state.eye;
-
-    enableButton.classList.toggle("is-active", state.enabled);
-    disableButton.classList.toggle("is-active", !state.enabled);
-
-    eyeButtons.forEach((button) => {
-      button.classList.toggle("is-active", button.dataset.petEye === state.eye);
-    });
+    window.setTimeout(activityLoop, 900);
   }
 
   launcher.addEventListener("click", (event) => {
-    closeOtherPanels();
     event.stopPropagation();
+    closeOtherPanels();
     setOpen(panel.hidden);
   });
 
@@ -819,14 +1015,17 @@
     setOpen(false);
   });
 
+  messagesEnableButton.addEventListener("click", () => setMessages(true));
+  messagesDisableButton.addEventListener("click", () => setMessages(false));
+
   eyeButtons.forEach((button) => {
     button.addEventListener("click", () => setEye(button.dataset.petEye));
   });
 
   character.addEventListener("pointerdown", handlePetPointerDown);
   character.addEventListener("pointermove", handlePetPointerMove);
-  character.addEventListener("pointerup", finishPetPointer);
-  character.addEventListener("pointercancel", finishPetPointer);
+  character.addEventListener("pointerup", handlePetPointerUp);
+  character.addEventListener("pointercancel", handlePetPointerUp);
 
   character.addEventListener("keydown", (event) => {
     if (!state.enabled) return;
@@ -861,22 +1060,25 @@
 
     if (document.hidden) {
       state.sleeping = true;
-      character.dataset.state = "sleeping";
+      setExpression("sleeping", 0);
       bubble.classList.remove("is-visible");
     } else {
       state.sleeping = false;
-      state.lastActivity = now();
+      state.lastInteraction = now();
       react("wake", {}, true);
     }
   });
 
   window.addEventListener("resize", () => {
-    setStagePosition(state.x, state.y, { drag: true });
+    const next = clampPosition(state.x, state.y);
+    setPosition(next.x, next.y, { drag: true });
   }, { passive: true });
 
   window.addEventListener("studylab-profile-updated", (event) => {
     const name = event.detail?.display_name || "";
-    if (state.enabled && name) react("name-complete", { name });
+    if (state.enabled && name) {
+      react("name-complete", { name });
+    }
   });
 
   const themeButton = document.querySelector("[data-theme-toggle]");
@@ -885,15 +1087,19 @@
   const observer = new MutationObserver(() => {
     if (!state.enabled) return;
 
-    const current = pageContext();
+    const current = getPageContext();
+
     if (current !== state.context) {
       state.context = current;
 
-      if (current === "study" || current === "exam") applyMood("focused");
-      else applyMood("curious");
-
-      window.clearTimeout(state.wanderTimer);
-      scheduleWander(current === "study" ? 6000 : 9000);
+      setExpression(
+        current === "study" || current === "exam"
+          ? "focused"
+          : state.eye === "pink"
+            ? "playful"
+            : "curious",
+        1200
+      );
     }
   });
 
@@ -904,50 +1110,21 @@
     attributeFilter: ["class", "hidden"]
   });
 
-  function activityLoop() {
-    if (state.enabled && !state.dragging && !document.hidden) {
-      const idleMs = now() - state.lastActivity;
-
-      if (idleMs >= 7000 && !state.sleeping) {
-        state.sleeping = true;
-        character.dataset.state = "sleeping";
-        showMessage("Zzz...", 1400);
-        window.clearTimeout(state.wanderTimer);
-      }
-
-      if (!state.sleeping && !reducedMotion) {
-        blink();
-
-        const microGap = state.context === "study" ? 17000 : 22000;
-        if (now() - state.lastAmbient > microGap) {
-          state.lastAmbient = now();
-
-          if (Math.random() < 0.42) {
-            react("micro");
-          }
-        }
-      }
-    }
-
-    window.setTimeout(activityLoop, 900);
-  }
+  state.cursorX = window.innerWidth * .72;
+  state.cursorY = window.innerHeight * .52;
 
   updateControls();
-  setStagePosition(state.x, state.y, { drag: true });
-  state.lastActivity = now();
+  setPosition(state.x, state.y, { drag: true });
+  gazeAt(state.cursorX, state.cursorY);
 
   if (state.enabled) {
-    applyMood("idle");
-    window.setTimeout(() => react("wake", {}, true), 900);
-    scheduleWander(9500);
+    setExpression("sleepy", 900);
+    if (state.messages) {
+      window.setTimeout(() => showMessage("👀", 950), 850);
+    }
+    scheduleWander(6200);
   }
 
   gazeLoop();
   activityLoop();
-
-  window.setInterval(() => {
-    if (state.anger > 0 && now() - state.lastReaction > 7000) {
-      state.anger = Math.max(0, state.anger - 1);
-    }
-  }, 2500);
 })();
