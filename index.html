@@ -2723,6 +2723,20 @@
   const loader = document.getElementById("studylabLoader");
   if (!loader) return;
 
+  const SESSION_KEY = "studylab-loader-shown";
+  let showLoader = true;
+
+  try {
+    showLoader = sessionStorage.getItem(SESSION_KEY) !== "1";
+    if (showLoader) sessionStorage.setItem(SESSION_KEY, "1");
+  } catch (_) {}
+
+  if (!showLoader) {
+    loader.classList.add("is-exiting");
+    window.setTimeout(() => loader.remove(), 80);
+    return;
+  }
+
   const start = performance.now();
   const MIN_VISIBLE_MS = 3380;
   const MAX_VISIBLE_MS = 3920;
@@ -2758,6 +2772,7 @@
 })();
 </script>
 
+  <script src="assets/js/studylab-pet.js"></script>
 
 </body>
 </html>
