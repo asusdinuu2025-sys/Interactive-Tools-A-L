@@ -1040,3 +1040,15 @@ html[data-theme="light"] .sl-pet-setting-buttons button[data-pet-eye="pink"].is-
     transition: opacity .25s ease, filter .25s ease;
   }
 }
+
+
+#studylabPetStage.is-site-loading-hidden,
+#studylabPetLauncher.is-site-loading-hidden {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+#studylabPetStage { z-index: 20000 !important; }
+#studylabPetLauncher { z-index: 20001 !important; }
+.sl-pet-panel { z-index: 20002 !important; }
