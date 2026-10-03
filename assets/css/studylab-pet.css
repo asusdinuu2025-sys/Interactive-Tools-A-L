@@ -334,6 +334,34 @@
   border-radius: 7px;
 }
 
+.sl-pet-character[data-state="sly"] .sl-pet-eye.left {
+  transform: rotate(7deg) translateY(4px) scaleY(.68);
+}
+
+.sl-pet-character[data-state="sly"] .sl-pet-eye.right {
+  transform: rotate(-9deg) translateY(3px) scaleY(.58);
+}
+
+.sl-pet-character[data-state="sly"] .sl-pet-eye > i {
+  width: 21px;
+  height: 18px;
+  border-radius: 7px 9px 6px 6px;
+}
+
+.sl-pet-character[data-state="sly"] .sl-pet-mouth {
+  width: 19px;
+  height: 6px;
+  bottom: 11px;
+  border: 0;
+  border-bottom: 2px solid #5de7ff;
+  border-radius: 0 0 13px 13px;
+  transform: translateX(-50%) rotate(-5deg);
+}
+
+.sl-pet-character[data-eye="pink"][data-state="sly"] .sl-pet-mouth {
+  border-color: #ff84c8;
+}
+
 .sl-pet-character[data-state="bored"] .sl-pet-eye > i {
   width: 21px;
   height: 8px;
