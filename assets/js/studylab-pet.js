@@ -1384,7 +1384,7 @@
         expression = state.eye === "pink" ? "cute" : "focused";
         messages = detail.value
           ? [
-              "Searching for "" + detail.value.slice(0, 28) + "". I’m following the trail.",
+              "Searching for \"" + detail.value.slice(0, 28) + "\". I’m following the trail.",
               "You have a target. I’m watching the search.",
               repeated ? "Searching again. You’re narrowing it down." : "Specific search detected. Something is clearly on your mind."
             ]
