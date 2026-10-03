@@ -688,7 +688,7 @@
 
     state.fadeTimer = setTimeout(() => {
       if (!state.enabled) stage.classList.add("is-disabled");
-    }, 900);
+    }, 1300);
 
     updateControls();
   }
