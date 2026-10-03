@@ -1,7 +1,7 @@
 /* =========================================================
    StudyLab Living Pet
-   EMO-style expressive display companion.
-   Global page-level only. No simulation internals.
+   EMO-inspired black display companion with procedural facial
+   expressions. Global page-level only. No simulation internals.
    ========================================================= */
 (function () {
   "use strict";
@@ -17,9 +17,47 @@
 
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  function now() {
-    return Date.now();
-  }
+  const state = {
+    enabled: readBool(STORAGE.enabled, true),
+    eye: readEye(),
+    messages: readBool(STORAGE.messages, true),
+
+    context: "home",
+    expression: "idle",
+    sleeping: false,
+
+    x: Math.min(window.innerWidth - 100, Math.max(100, window.innerWidth * 0.72)),
+    y: Math.min(window.innerHeight - 120, Math.max(120, window.innerHeight * 0.57)),
+
+    cursorX: window.innerWidth * 0.72,
+    cursorY: window.innerHeight * 0.55,
+
+    dragging: false,
+    dragged: false,
+    pointerId: null,
+    dragOffsetX: 0,
+    dragOffsetY: 0,
+
+    lastInteraction: Date.now(),
+    lastReaction: 0,
+    lastMove: 0,
+    lastBlink: Date.now(),
+    nextBlinkAt: Date.now() + 7500 + Math.random() * 4500,
+    lastAmbient: Date.now(),
+    lastHover: 0,
+    lastMicro: Date.now(),
+
+    anger: 0,
+    lastAngerAt: 0,
+    avoidUntil: 0,
+    lastFlee: 0,
+
+    wanderTimer: 0,
+    messageTimer: 0,
+    resetExpressionTimer: 0,
+    nameTimer: 0,
+    settleTimer: 0
+  };
 
   function readBool(key, fallback) {
     try {
@@ -38,48 +76,87 @@
     }
   }
 
-  const state = {
-    enabled: readBool(STORAGE.enabled, true),
-    messages: readBool(STORAGE.messages, true),
-    eye: readEye(),
+  function savePreferences() {
+    try {
+      localStorage.setItem(STORAGE.enabled, String(state.enabled));
+      localStorage.setItem(STORAGE.eye, state.eye);
+      localStorage.setItem(STORAGE.messages, String(state.messages));
+    } catch (_) {}
+  }
 
-    context: "home",
-    expression: "idle",
-    sleeping: false,
+  function now() {
+    return Date.now();
+  }
 
-    x: Math.min(window.innerWidth - 100, Math.max(100, window.innerWidth * 0.72)),
-    y: Math.min(window.innerHeight - 120, Math.max(120, window.innerHeight * 0.57)),
+  function pageContext() {
+    const path = location.pathname.toLowerCase();
+    const title = (document.title || "").toLowerCase();
+    const text = (document.body?.innerText || "").slice(0, 6500).toLowerCase();
 
-    gazeTargetX: 0,
-    gazeTargetY: 0,
-    gazeX: 0,
-    gazeY: 0,
+    if (path.includes("study-tools")) return "study";
+    if (path.includes("physics")) return "physics";
+    if (path.includes("chemistry")) return "chemistry";
+    if (path.includes("maths")) return "maths";
+    if (path.includes("biology")) return "biology";
+    if (path.includes("exam-hub")) return "exam";
+    if (path.includes("telegram")) return "social";
+    if (path.includes("audio_books")) return "audio";
 
-    dragging: false,
-    dragged: false,
-    pointerId: null,
-    dragOffsetX: 0,
-    dragOffsetY: 0,
+    const combined = title + " " + text;
 
-    lastInteraction: now(),
-    lastReaction: 0,
-    lastBlink: now(),
-    nextBlinkAt: now() + 8200 + Math.random() * 2600,
-    lastMove: now(),
-    lastHover: 0,
-    lastMicro: 0,
+    if (/physics/.test(combined)) return "physics";
+    if (/chemistry/.test(combined)) return "chemistry";
+    if (/mathematics|combined maths|combined mathematics/.test(combined)) return "maths";
+    if (/biology/.test(combined)) return "biology";
+    if (/past papers|marking schemes|exam hub/.test(combined)) return "exam";
+    return "home";
+  }
 
-    anger: 0,
-    lastAngerAt: 0,
-    avoidUntil: 0,
-    lastFlee: 0,
+  state.context = pageContext();
 
-    wanderTimer: 0,
-    messageTimer: 0,
-    settleTimer: 0,
-    nameTimer: 0,
+  const contextMessages = {
+    home: ["Hmm.", "I noticed that.", "👀"],
+    physics: ["Physics.", "Watching.", "Interesting."],
+    chemistry: ["🧪", "Lab mode.", "Watching."],
+    maths: ["Maths.", "Numbers.", "Calculating."],
+    biology: ["🧬", "Observing.", "Interesting."],
+    exam: ["Exam mode.", "Serious.", "Paper hunt."],
+    social: ["👀", "Community.", "I see."],
+    audio: ["Listening.", "Audio time.", "I hear that."],
+    study: ["Focus.", "Study mode.", "I'm watching."]
+  };
 
-    expressionVariant: 0
+  /*
+   * Facial-first expression profiles.
+   * Each profile combines asymmetric eye geometry, rounded-square
+   * proportions, tilt and mouth geometry. Random micro-variation
+   * on every transition produces thousands of distinct visual states.
+   */
+  const EXPRESSION_PROFILES = {
+    idle:        { lw:23, lh:30, rw:23, rh:30, lr:0, rr:0, mouth:"flat",  mw:17, mh:2, my:0, mr:0 },
+    curious:     { lw:26, lh:33, rw:22, rh:28, lr:-2, rr:1, mouth:"dot",   mw:7,  mh:7, my:0, mr:0 },
+    happy:       { lw:24, lh:14, rw:24, rh:14, lr:0, rr:0, mouth:"smile", mw:20, mh:8, my:0, mr:0 },
+    excited:     { lw:27, lh:34, rw:27, rh:34, lr:0, rr:0, mouth:"open",  mw:12, mh:11, my:0, mr:0 },
+    focused:     { lw:22, lh:27, rw:22, rh:27, lr:0, rr:0, mouth:"flat",  mw:15, mh:2, my:1, mr:0 },
+    thinking:    { lw:22, lh:28, rw:20, rh:25, lr:-3, rr:2, mouth:"flat",  mw:10, mh:2, my:1, mr:5 },
+    surprised:   { lw:28, lh:35, rw:28, rh:35, lr:0, rr:0, mouth:"open",  mw:11, mh:11, my:0, mr:0 },
+    shocked:     { lw:30, lh:36, rw:30, rh:36, lr:0, rr:0, mouth:"open",  mw:14, mh:14, my:0, mr:0 },
+    scared:     { lw:28, lh:35, rw:28, rh:35, lr:-3, rr:3, mouth:"open",   mw:10, mh:10, my:1, mr:0 },
+    sad:         { lw:22, lh:27, rw:22, rh:27, lr:-6, rr:6, mouth:"frown", mw:18, mh:7, my:1, mr:0 },
+    worried:     { lw:23, lh:29, rw:23, rh:29, lr:-6, rr:6, mouth:"frown", mw:15, mh:6, my:1, mr:-3 },
+    bored:       { lw:24, lh:10, rw:24, rh:10, lr:0, rr:0, mouth:"flat",  mw:14, mh:2, my:1, mr:0 },
+    sleepy:      { lw:23, lh:8, rw:23, rh:8, lr:0, rr:0, mouth:"flat",   mw:10, mh:2, my:3, mr:0 },
+    sleeping:    { lw:24, lh:4, rw:24, rh:4, lr:0, rr:0, mouth:"flat",   mw:8,  mh:2, my:4, mr:0 },
+    playful:     { lw:6,  lh:6, rw:24, rh:28, lr:-4, rr:2, mouth:"grin",  mw:21, mh:9, my:0, mr:-3 },
+    unimpressed: { lw:24, lh:9, rw:24, rh:9, lr:-2, rr:2, mouth:"flat",  mw:14, mh:2, my:1, mr:0 },
+    annoyed:     { lw:23, lh:13, rw:23, rh:13, lr:-6, rr:6, mouth:"frown", mw:15, mh:5, my:1, mr:0 },
+    angry:       { lw:24, lh:15, rw:24, rh:15, lr:-12, rr:12, mouth:"frown", mw:20, mh:5, my:2, mr:0 },
+    confused:    { lw:22, lh:25, rw:18, rh:22, lr:-7, rr:7, mouth:"dot",   mw:8,  mh:8, my:0, mr:-12 },
+    wink:        { lw:6,  lh:5, rw:24, rh:29, lr:-2, rr:1, mouth:"smile", mw:18, mh:7, my:0, mr:-2 },
+    smug:        { lw:23, lh:13, rw:21, rh:25, lr:-4, rr:2, mouth:"grin",  mw:17, mh:7, my:0, mr:2 },
+    dizzy:       { lw:20, lh:20, rw:20, rh:20, lr:20, rr:-20, mouth:"dot",  mw:7, mh:7, my:0, mr:0 },
+    deadpan:     { lw:24, lh:7, rw:24, rh:7, lr:0, rr:0, mouth:"flat",  mw:15, mh:2, my:0, mr:0 },
+    proud:       { lw:23, lh:25, rw:23, rh:25, lr:-3, rr:3, mouth:"grin", mw:19, mh:8, my:0, mr:0 }
   };
 
   const styleLink = document.createElement("link");
@@ -92,6 +169,7 @@
       <div
         class="sl-pet-character"
         data-expression="idle"
+        data-mouth="flat"
         data-eye="cyan"
         role="button"
         tabindex="0"
@@ -104,7 +182,7 @@
           <span class="sl-pet-sleep-z z1">Z</span>
           <span class="sl-pet-sleep-z z2">z</span>
           <span class="sl-pet-sleep-z z3">z</span>
-          <span class="sl-pet-crack"></span>
+          <span class="sl-pet-crack></span>
         </div>
       </div>
       <div class="sl-pet-bubble" data-pet-bubble role="status" aria-live="polite"></div>
@@ -132,12 +210,7 @@
           <strong>StudyLab Pet</strong>
           <small>Your little study companion</small>
         </div>
-        <button
-          class="sl-pet-panel-close"
-          type="button"
-          data-pet-close
-          aria-label="Close pet controls"
-        >×</button>
+        <button class="sl-pet-panel-close" type="button" data-pet-close aria-label="Close pet controls">×</button>
       </div>
 
       <div class="sl-pet-setting">
@@ -150,7 +223,7 @@
 
       <div class="sl-pet-setting">
         <span>Messages</span>
-        <div class="sl-pet-setting-buttons" role="group" aria-label="Pet message state">
+        <div class="sl-pet-setting-buttons" role="group" aria-label="Pet messages state">
           <button type="button" data-pet-messages-enable>Enable</button>
           <button type="button" data-pet-messages-disable>Disable</button>
         </div>
@@ -165,8 +238,8 @@
       </div>
 
       <p class="sl-pet-panel-note">
-        EMO-style expressive eyes, gentle wandering, cursor attention, sleep, drag-and-place,
-        contextual reactions and a few messages when useful.
+        EMO-inspired display eyes, slow wandering, cursor attention, sleep, drag-and-place,
+        contextual expressions and sparse messages.
       </p>
     </aside>
   `);
@@ -174,8 +247,8 @@
   const stage = document.getElementById("studylabPetStage");
   const character = stage.querySelector(".sl-pet-character");
   const bubble = stage.querySelector("[data-pet-bubble]");
-  const eyes = [...stage.querySelectorAll(".sl-pet-eye > i")];
   const eyeShells = [...stage.querySelectorAll(".sl-pet-eye")];
+  const eyes = [...stage.querySelectorAll(".sl-pet-eye > i")];
 
   const launcher = document.getElementById("studylabPetLauncher");
   const panel = document.getElementById("studylabPetPanel");
@@ -185,51 +258,6 @@
   const messagesEnableButton = panel.querySelector("[data-pet-messages-enable]");
   const messagesDisableButton = panel.querySelector("[data-pet-messages-disable]");
   const eyeButtons = [...panel.querySelectorAll("[data-pet-eye]")];
-
-  function savePreferences() {
-    try {
-      localStorage.setItem(STORAGE.enabled, String(state.enabled));
-      localStorage.setItem(STORAGE.eye, state.eye);
-      localStorage.setItem(STORAGE.messages, String(state.messages));
-    } catch (_) {}
-  }
-
-  function getPageContext() {
-    const path = location.pathname.toLowerCase();
-    const title = (document.title || "").toLowerCase();
-    const text = (document.body?.innerText || "").slice(0, 6500).toLowerCase();
-
-    if (path.includes("study-tools")) return "study";
-    if (path.includes("physics")) return "physics";
-    if (path.includes("chemistry")) return "chemistry";
-    if (path.includes("maths")) return "maths";
-    if (path.includes("biology")) return "biology";
-    if (path.includes("exam-hub")) return "exam";
-    if (path.includes("telegram")) return "social";
-    if (path.includes("audio_books")) return "audio";
-
-    const combined = title + " " + text;
-
-    if (/physics/.test(combined)) return "physics";
-    if (/chemistry/.test(combined)) return "chemistry";
-    if (/mathematics|combined maths|combined mathematics/.test(combined)) return "maths";
-    if (/biology/.test(combined)) return "biology";
-    if (/past papers|marking schemes|exam hub/.test(combined)) return "exam";
-    return "home";
-  }
-
-  state.context = getPageContext();
-
-  const contextMessages = {
-    home: ["Hmm.", "I noticed that.", "👀"],
-    physics: ["Physics.", "Watching.", "Interesting."],
-    chemistry: ["🧪", "Lab mode.", "Watching."],
-    maths: ["Maths.", "Numbers.", "Calculating."],
-    biology: ["🧬", "Observing.", "Interesting."],
-    exam: ["Exam mode.", "Serious.", "Paper hunt."],
-    social: ["👀", "Community.", "I see."],
-    audio: ["Listening.", "Audio time.", "I hear that."]
-  };
 
   function utilityKind(el) {
     const value = [
@@ -247,7 +275,6 @@
     if (/mock exam|exam timer/.test(value)) return "mock";
     if (/unit converter|converter/.test(value)) return "converter";
     if (/countdown|count down/.test(value)) return "countdown";
-    if (/search/.test(value)) return "search";
     return "";
   }
 
@@ -271,11 +298,14 @@
   }
 
   function clampPosition(x, y) {
-    const halfW = 48;
-    const halfH = 36;
+    const rectW = window.innerWidth;
+    const rectH = window.innerHeight;
+    const halfW = 54;
+    const halfH = 39;
+
     return {
-      x: Math.max(halfW + 8, Math.min(window.innerWidth - halfW - 8, x)),
-      y: Math.max(halfH + 8, Math.min(window.innerHeight - halfH - 20, y))
+      x: Math.max(halfW + 8, Math.min(rectW - halfW - 8, x)),
+      y: Math.max(halfH + 8, Math.min(rectH - halfH - 20, y))
     };
   }
 
@@ -290,32 +320,28 @@
       if (distance > 26) {
         state.lastMove = now();
 
-        let duration;
-        let ease;
-
         if (dy < -22) {
-          duration = 6000 + Math.min(2600, Math.abs(dy) * 5);
-          ease = "cubic-bezier(.25,.58,.18,1)";
-          character.style.setProperty("--eye-width", "14px");
-          character.style.setProperty("--eye-height", "19px");
+          const duration = 7000 + Math.min(2800, Math.abs(dy) * 6);
+          character.style.setProperty("--pet-move-duration", Math.round(duration) + "ms");
+          character.style.setProperty("--pet-move-ease", "cubic-bezier(.24,.57,.18,1)");
           character.classList.remove("is-moving", "is-falling", "is-landed");
           character.classList.add("is-climbing");
+          applyMovementFace("hard");
         } else if (dy > 22) {
-          duration = 2800 + Math.min(1200, Math.abs(dy) * 2);
-          ease = "cubic-bezier(.15,.88,.25,1.12)";
+          const duration = 2500 + Math.min(1300, Math.abs(dy) * 2.2);
+          character.style.setProperty("--pet-move-duration", Math.round(duration) + "ms");
+          character.style.setProperty("--pet-move-ease", "cubic-bezier(.14,.90,.25,1.18)");
           character.classList.remove("is-moving", "is-climbing", "is-landed");
           character.classList.add("is-falling");
+          applyMovementFace("down");
         } else {
-          duration = 5000 + Math.random() * 1800;
-          ease = "cubic-bezier(.20,.72,.20,1)";
+          const duration = 5600 + Math.random() * 2200;
+          character.style.setProperty("--pet-move-duration", Math.round(duration) + "ms");
+          character.style.setProperty("--pet-move-ease", "cubic-bezier(.20,.72,.20,1)");
           character.classList.remove("is-climbing", "is-falling", "is-landed");
           character.classList.add("is-moving");
-          character.style.setProperty("--eye-width", "15px");
-          character.style.setProperty("--eye-height", "21px");
+          applyMovementFace("walk");
         }
-
-        character.style.setProperty("--pet-move-duration", Math.round(duration) + "ms");
-        character.style.setProperty("--pet-move-ease", ease);
 
         window.clearTimeout(state.settleTimer);
 
@@ -324,39 +350,60 @@
             if (!state.dragging && state.enabled) {
               character.classList.remove("is-falling");
               character.classList.add("is-landed");
-              window.setTimeout(() => character.classList.remove("is-landed"), 520);
+              window.setTimeout(() => {
+                character.classList.remove("is-landed");
+                restoreExpressionFace();
+              }, 520);
             }
-          }, duration + 40);
+          }, parseInt(character.style.getPropertyValue("--pet-move-duration"), 10) + 60);
         }
 
         window.setTimeout(() => {
           if (!state.dragging && state.enabled) {
             character.classList.remove("is-moving", "is-climbing");
-            character.style.removeProperty("--eye-width");
-            character.style.removeProperty("--eye-height");
+            restoreExpressionFace();
           }
-        }, duration + 80);
+        }, parseInt(character.style.getPropertyValue("--pet-move-duration"), 10) + 90);
       }
     }
 
     state.x = next.x;
     state.y = next.y;
-
     character.style.left = next.x + "px";
     character.style.top = next.y + "px";
-
     bubble.style.left = next.x + "px";
-    bubble.style.top = Math.max(80, next.y - 38) + "px";
+    bubble.style.top = Math.max(80, next.y - 42) + "px";
+  }
+
+  function applyMovementFace(mode) {
+    const values = mode === "hard"
+      ? { width: 14, height: 18, radius: 5 }
+      : mode === "walk"
+        ? { width: 17, height: 22, radius: 6 }
+        : { width: 20, height: 25, radius: 7 };
+
+    eyes.forEach((eye) => {
+      eye.style.setProperty("--eye-width", values.width + "px");
+      eye.style.setProperty("--eye-height", values.height + "px");
+      eye.style.setProperty("--eye-radius", values.radius + "px");
+    });
+
+    character.style.setProperty("--mouth-opacity", mode === "hard" ? ".42" : ".65");
+  }
+
+  function restoreExpressionFace() {
+    if (!state.enabled) return;
+    setExpression(state.expression, 0, true);
   }
 
   function chooseWanderTarget() {
     const study = state.context === "study";
-    const longMove = Math.random() < (study ? 0.20 : 0.13);
+    const longMove = Math.random() < (study ? 0.15 : 0.10);
 
     if (longMove) {
       return clampPosition(
         70 + Math.random() * Math.max(1, window.innerWidth - 140),
-        90 + Math.random() * Math.max(1, window.innerHeight - 185)
+        88 + Math.random() * Math.max(1, window.innerHeight - 180)
       );
     }
 
@@ -365,7 +412,7 @@
 
     return clampPosition(
       state.x + Math.cos(angle) * distance,
-      state.y + Math.sin(angle) * distance * .68
+      state.y + Math.sin(angle) * distance * .62
     );
   }
 
@@ -374,32 +421,30 @@
 
     state.wanderTimer = window.setTimeout(() => {
       if (!state.enabled || state.sleeping || state.dragging || document.hidden) {
-        scheduleWander(state.sleeping ? 5000 : 7000);
+        scheduleWander(state.sleeping ? 5000 : 8000);
         return;
       }
 
-      const cooldown = now() - state.lastMove;
-
-      if (cooldown < 6500) {
-        scheduleWander(8500);
+      if (now() - state.lastMove < 7500) {
+        scheduleWander(9000);
         return;
       }
 
-      if (Math.random() < (state.context === "study" ? 0.72 : 0.58)) {
+      if (Math.random() < (state.context === "study" ? .70 : .52)) {
         const target = chooseWanderTarget();
         setPosition(target.x, target.y);
       }
 
       scheduleWander(
         state.context === "study"
-          ? 10500 + Math.random() * 6000
-          : 14500 + Math.random() * 9000
+          ? 12000 + Math.random() * 8500
+          : 17500 + Math.random() * 10500
       );
     }, delay);
   }
 
-  function showMessage(message, duration = 1450, force = false) {
-    if ((!state.enabled || !state.messages) && !force) return;
+  function showMessage(message, duration = 1450) {
+    if (!state.enabled || !state.messages) return;
 
     bubble.textContent = message;
     bubble.classList.add("is-visible");
@@ -410,41 +455,62 @@
     }, duration);
   }
 
-  function maybeMessage(pool, chance = .18) {
+  function maybeMessage(pool, chance = .10) {
     if (!state.messages || Math.random() > chance) return;
     if (bubble.classList.contains("is-visible")) return;
-
-    showMessage(pool[Math.floor(Math.random() * pool.length)], 1350);
+    showMessage(pool[Math.floor(Math.random() * pool.length)]);
   }
 
-  function setExpression(expression, duration = 0) {
+  function applyEyeValues(eye, profile, side, variant) {
+    const jitter = (amount) => (Math.random() * 2 - 1) * amount;
+
+    const baseW = side === "left" ? profile.lw : profile.rw;
+    const baseH = side === "left" ? profile.lh : profile.rh;
+    const baseR = Math.max(4, Math.round(Math.min(baseW, baseH) * .25));
+
+    eye.style.setProperty("--eye-width", Math.max(4, baseW + jitter(1.5) + variant.eyeScaleW) + "px");
+    eye.style.setProperty("--eye-height", Math.max(4, baseH + jitter(1.6) + variant.eyeScaleH) + "px");
+    eye.style.setProperty("--eye-radius", Math.max(3, baseR + jitter(1.3) + variant.radius) + "px");
+    eye.style.setProperty("--eye-x", (jitter(.9) + variant.offsetX) + "px");
+    eye.style.setProperty("--eye-y", (jitter(.8) + variant.offsetY) + "px");
+    eye.style.setProperty("--eye-rotate", ((side === "left" ? profile.lr : profile.rr) + jitter(1.2) + variant.rotate) + "deg");
+    eye.style.setProperty("--eye-scale-x", (1 + jitter(.035)) .toFixed(3));
+    eye.style.setProperty("--eye-scale-y", (1 + jitter(.035)) .toFixed(3));
+    eye.style.setProperty("--eye-highlight", (.20 + Math.random() * .18).toFixed(2));
+  }
+
+  function setExpression(expression, duration = 0, restoring = false) {
     if (!state.enabled) return;
+
+    const chosen = EXPRESSION_PROFILES[expression] || EXPRESSION_PROFILES.idle;
 
     state.expression = expression;
     state.expressionVariant++;
 
-    /*
-     * Procedural variations are intentionally small. Combining eye width,
-     * height, tilt, asymmetry, gaze and mouth geometry produces thousands
-     * of visually distinct states without maintaining thousands of assets.
-     */
-    const jitter = () => (Math.random() * 2 - 1);
-
     character.dataset.expression = expression;
+    character.dataset.mouth = chosen.mouth;
 
-    character.style.setProperty("--eye-x", (jitter() * 1.4).toFixed(2) + "px");
-    character.style.setProperty("--eye-y", (jitter() * 1.1).toFixed(2) + "px");
-    character.style.setProperty("--eye-rotate", (jitter() * (expression === "angry" ? 3.5 : 2.2)).toFixed(2) + "deg");
-    character.style.setProperty("--eye-scale-x", (1 + jitter() * .045).toFixed(3));
-    character.style.setProperty("--eye-scale-y", (1 + jitter() * .045).toFixed(3));
+    const variant = {
+      eyeScaleW: (Math.random() * 2 - 1) * 1.8,
+      eyeScaleH: (Math.random() * 2 - 1) * 2.1,
+      radius: (Math.random() * 2 - 1) * 1.0,
+      offsetX: (Math.random() * 2 - 1) * 1.3,
+      offsetY: (Math.random() * 2 - 1) * 1.1,
+      rotate: (Math.random() * 2 - 1) * (expression === "angry" ? 2.8 : 2.0)
+    };
 
-    if (expression === "curious") {
-      character.style.setProperty("--eye-y", (-1 + jitter() * 1.2).toFixed(2) + "px");
-    }
+    applyEyeValues(eyes[0], chosen, "left", variant);
+    applyEyeValues(eyes[1], chosen, "right", variant);
 
-    if (duration > 0) {
-      window.clearTimeout(state.settleTimer);
-      state.settleTimer = window.setTimeout(() => {
+    character.style.setProperty("--mouth-width", Math.max(2, chosen.mw + (Math.random() * 2 - 1) * 2.0) + "px");
+    character.style.setProperty("--mouth-height", Math.max(2, chosen.mh + (Math.random() * 2 - 1) * 1.5) + "px");
+    character.style.setProperty("--mouth-y", (chosen.my + (Math.random() * 2 - 1) * .8) + "px");
+    character.style.setProperty("--mouth-rotate", (chosen.mr + (Math.random() * 2 - 1) * 3) + "deg");
+    character.style.setProperty("--mouth-opacity", expression === "sleeping" ? ".48" : "1");
+
+    if (duration > 0 && !restoring) {
+      window.clearTimeout(state.resetExpressionTimer);
+      state.resetExpressionTimer = window.setTimeout(() => {
         if (!state.sleeping && !state.dragging && state.enabled) {
           setExpression("idle");
         }
@@ -452,88 +518,70 @@
     }
   }
 
-  function updateControls() {
-    stage.classList.toggle("is-disabled", !state.enabled);
+  function blink() {
+    if (!state.enabled || state.sleeping || state.dragging) return;
 
-    character.dataset.eye = state.eye;
+    state.lastBlink = now();
+    state.nextBlinkAt = now() + 7500 + Math.random() * 4500;
+    character.classList.add("is-blinking");
 
-    enableButton.classList.toggle("is-active", state.enabled);
-    disableButton.classList.toggle("is-active", !state.enabled);
-
-    messagesEnableButton.classList.toggle("is-active", state.messages);
-    messagesDisableButton.classList.toggle("is-active", !state.messages);
-
-    eyeButtons.forEach((button) => {
-      button.classList.toggle("is-active", button.dataset.petEye === state.eye);
-    });
+    window.setTimeout(() => {
+      if (state.enabled && !state.sleeping && !state.dragging) {
+        character.classList.remove("is-blinking");
+        restoreExpressionFace();
+      }
+    }, 180);
   }
 
-  function setEnabled(enabled) {
-    state.enabled = Boolean(enabled);
-    state.sleeping = false;
-    state.avoidUntil = 0;
-
-    if (!state.enabled) {
-      bubble.classList.remove("is-visible");
-      character.dataset.expression = "idle";
-      character.classList.remove("is-moving", "is-climbing", "is-falling", "is-landed", "is-dragging", "is-blinking");
-      window.clearTimeout(state.wanderTimer);
-    } else {
-      state.lastInteraction = now();
-      state.context = getPageContext();
-      setExpression("sleepy", 700);
-      showMessage("I'm back. 👀", 1350);
-      scheduleWander(4800);
-    }
-
-    updateControls();
-    savePreferences();
-  }
-
-  function setMessages(enabled) {
-    state.messages = Boolean(enabled);
-    if (!state.messages) bubble.classList.remove("is-visible");
-    updateControls();
-    savePreferences();
-
-    if (state.enabled && state.messages) {
-      showMessage("Message mode on.", 1000);
-    }
-  }
-
-  function setEye(eye) {
-    state.eye = eye === "pink" ? "pink" : "cyan";
-    updateControls();
-    savePreferences();
-
+  function gazeAt(x, y) {
     if (!state.enabled) return;
 
-    /*
-     * Cyan and Pink have different behavioral profiles while retaining
-     * the same physical character.
-     */
-    setExpression(state.eye === "pink" ? "playful" : "excited", 900);
-    showMessage(state.eye === "pink" ? "🩷" : "🩵", 950);
+    const dx = Math.max(-1, Math.min(1, (x - state.x) / 210));
+    const dy = Math.max(-1, Math.min(1, (y - state.y) / 160));
+
+    const gx = dx * 6.0;
+    const gy = dy * 5.0;
+
+    character.style.setProperty("--gaze-x-target", gx + "px");
+    character.style.setProperty("--gaze-y-target", gy + "px");
+  }
+
+  let gazeX = 0;
+  let gazeY = 0;
+  function gazeLoop() {
+    if (state.enabled) {
+      const targetX = parseFloat(getComputedStyle(character).getPropertyValue("--gaze-x-target")) || 0;
+      const targetY = parseFloat(getComputedStyle(character).getPropertyValue("--gaze-y-target")) || 0;
+
+      gazeX += (targetX - gazeX) * .08;
+      gazeY += (targetY - gazeY) * .08;
+
+      eyes.forEach((eye) => {
+        eye.style.setProperty("--gaze-x", gazeX.toFixed(2) + "px");
+        eye.style.setProperty("--gaze-y", gazeY.toFixed(2) + "px");
+      });
+    }
+
+    window.requestAnimationFrame(gazeLoop);
   }
 
   function react(type, detail = {}, force = false) {
     if (!state.enabled && !force) return;
 
-    const timestamp = now();
+    const t = now();
+    if (!force && t - state.lastReaction < 430) return;
 
-    if (!force && timestamp - state.lastReaction < 500) return;
-
-    state.lastReaction = timestamp;
-    state.lastInteraction = timestamp;
+    state.lastReaction = t;
+    state.lastInteraction = t;
     state.sleeping = false;
 
     if (type === "wake") {
-      setExpression("sleepy", 500);
+      setExpression("sleepy", 450);
       window.setTimeout(() => {
         if (state.enabled && !state.sleeping) {
-          setExpression(state.eye === "pink" ? "playful" : "curious", 750);
+          setExpression(state.eye === "pink" ? "playful" : "curious", 800);
         }
-      }, 360);
+      }, 330);
       return;
     }
 
@@ -542,27 +590,37 @@
       const utility = detail.element ? utilityKind(detail.element) : "";
 
       if (context === "study") {
-        if (utility === "pomodoro" || utility === "mock") setExpression("focused", 1000);
-        else if (utility === "marks") setExpression("surprised", 950);
-        else if (utility === "mistake") setExpression("confused", 950);
-        else if (utility === "flashcard") setExpression("curious", 850);
-        else setExpression(state.eye === "pink" ? "playful" : "curious", 850);
-      } else if (context === "chemistry") {
-        setExpression("excited", 1000);
-      } else if (context === "physics") {
-        setExpression("curious", 900);
-      } else if (context === "maths") {
-        setExpression("thinking", 900);
-      } else if (context === "biology") {
-        setExpression("curious", 850);
-      } else if (context === "exam") {
-        setExpression("focused", 1000);
+        const map = {
+          pomodoro: ["focused", "thinking", "proud"],
+          flashcard: ["curious", "surprised", "wink"],
+          mistake: ["confused", "worried", "sad"],
+          marks: ["surprised", "thinking", "shocked"],
+          planner: ["thinking", "focused", "proud"],
+          mock: ["focused", "worried", "deadpan"],
+          converter: ["curious", "thinking", "happy"]
+        };
+
+        const options = map[utility] || ["curious", "focused", "thinking", "playful"];
+        const chosen = options[Math.floor(Math.random() * options.length)];
+        setExpression(chosen, 1150);
       } else {
-        setExpression(state.eye === "pink" ? "playful" : "curious", 850);
+        const map = {
+          chemistry: ["excited", "curious", "surprised"],
+          physics: ["curious", "focused", "surprised"],
+          maths: ["thinking", "curious", "unimpressed"],
+          biology: ["curious", "happy", "surprised"],
+          exam: ["focused", "worried", "deadpan"],
+          social: ["curious", "playful"],
+          audio: ["curious", "happy"],
+          home: ["curious", "idle", "playful"]
+        };
+
+        const options = map[context] || map.home;
+        setExpression(options[Math.floor(Math.random() * options.length)], 1100);
       }
 
       const pool = contextMessages[context];
-      if (pool) maybeMessage(pool, .11);
+      if (pool) maybeMessage(pool, .09);
       return;
     }
 
@@ -571,70 +629,70 @@
       const utility = detail.element ? utilityKind(detail.element) : "";
 
       if (context === "study") {
-        if (utility === "pomodoro" || utility === "mock") {
-          setExpression("focused", 1600);
-          maybeMessage(["Focus.", "Lock in.", "Study mode."], .38);
-        } else if (utility === "marks") {
-          setExpression("surprised", 1000);
-        } else if (utility === "mistake") {
-          setExpression("confused", 1100);
-        } else if (utility === "flashcard") {
-          setExpression("curious", 1000);
-        } else {
-          setExpression(state.eye === "pink" ? "playful" : "focused", 950);
-        }
+        if (utility === "pomodoro" || utility === "mock") setExpression("focused", 1800);
+        else if (utility === "flashcard") setExpression("curious", 1100);
+        else if (utility === "mistake") setExpression("confused", 1200);
+        else if (utility === "marks") setExpression("surprised", 1050);
+        else setExpression(state.eye === "pink" ? "playful" : "focused", 1050);
       } else if (context === "chemistry") {
-        setExpression("excited", 1100);
+        setExpression("excited", 1200);
       } else if (context === "physics") {
-        setExpression("curious", 1000);
+        setExpression("curious", 1100);
       } else if (context === "maths") {
-        setExpression("thinking", 1100);
+        setExpression("thinking", 1200);
       } else if (context === "biology") {
-        setExpression("happy", 1000);
+        setExpression("happy", 1100);
       } else if (context === "exam") {
-        setExpression("focused", 1300);
+        setExpression("focused", 1400);
       } else {
-        setExpression(state.eye === "pink" ? "playful" : "happy", 900);
+        setExpression(state.eye === "pink" ? "playful" : "happy", 1000);
       }
-
       return;
     }
 
     if (type === "typing") {
-      setExpression("curious", 750);
-      if (detail.name && state.messages && Math.random() < .16) {
-        showMessage("👀", 1050);
-      }
+      setExpression("curious", 850);
+      if (detail.name) maybeMessage(["👀", "Hmm?", "I see."], .12);
       return;
     }
 
     if (type === "name-complete") {
-      setExpression(state.eye === "pink" ? "happy" : "excited", 1250);
-      maybeMessage(["Hi. 👋", "Nice to meet you.", "I noticed your name."], .42);
+      setExpression(state.eye === "pink" ? "happy" : "excited", 1350);
+      maybeMessage(["Hi. 👋", "Nice to meet you.", "I noticed your name."], .45);
       return;
     }
 
     if (type === "theme") {
-      setExpression("surprised", 700);
+      setExpression("surprised", 750);
       return;
     }
 
     if (type === "scroll") {
-      setExpression(state.eye === "pink" ? "playful" : "curious", 520);
+      setExpression(state.eye === "pink" ? "playful" : "curious", 650);
+      return;
+    }
+
+    if (type === "scared") {
+      setExpression("scared", 0);
+      character.classList.add("is-dragging");
       return;
     }
 
     if (type === "anger") {
-      const recent = timestamp - state.lastAngerAt < 5200;
-      state.anger = Math.min(4, recent ? state.anger + 1 : Math.max(1, state.anger));
-      state.lastAngerAt = timestamp;
-      state.avoidUntil = timestamp + 4300 + state.anger * 450;
+      const recent = t - state.lastAngerAt < 5600;
+
+      state.anger = Math.min(
+        4,
+        recent ? state.anger + 1 : Math.max(1, state.anger)
+      );
+      state.lastAngerAt = t;
+      state.avoidUntil = t + 4300 + state.anger * 520;
 
       setExpression("angry", 1450);
 
       if (state.messages) {
-        if (state.anger >= 4) showMessage("...", 1050);
-        else if (state.anger >= 3) showMessage("Stop.", 1000);
+        if (state.anger >= 4) showMessage("...", 1100);
+        else if (state.anger >= 3) showMessage("Stop.", 1050);
         else showMessage("Hey.", 950);
       }
 
@@ -642,16 +700,9 @@
 
       window.setTimeout(() => {
         if (state.enabled && !state.dragging && !state.sleeping) {
-          setExpression("annoyed", 650);
+          setExpression("annoyed", 700);
         }
-      }, 1450);
-
-      return;
-    }
-
-    if (type === "scared") {
-      setExpression("scared", 900);
-      if (state.messages) maybeMessage(["😳", "Careful.", "Easy..."], .35);
+      }, 1500);
       return;
     }
   }
@@ -659,76 +710,44 @@
   function fleeFromCursor(force = false) {
     if (!state.enabled || state.dragging || state.sleeping) return;
 
-    const x = state.cursorX;
-    const y = state.cursorY;
-    const distance = Math.hypot(x - state.x, y - state.y);
+    const distance = Math.hypot(
+      state.cursorX - state.x,
+      state.cursorY - state.y
+    );
 
     if (!force && now() > state.avoidUntil) return;
-    if (!force && distance > 155) return;
-    if (!force && now() - state.lastFlee < 1200) return;
+    if (!force && distance > 160) return;
+    if (!force && now() - state.lastFlee < 1300) return;
 
     state.lastFlee = now();
 
-    let angle = Math.atan2(state.y - y, state.x - x);
+    let angle = Math.atan2(
+      state.y - state.cursorY,
+      state.x - state.cursorX
+    );
 
     if (!Number.isFinite(angle)) angle = Math.random() * Math.PI * 2;
 
-    const distanceOut = 150 + Math.random() * 90;
+    const distanceOut = 145 + Math.random() * 100;
+
     const target = clampPosition(
       state.x + Math.cos(angle) * distanceOut,
-      state.y + Math.sin(angle) * distanceOut * .72
+      state.y + Math.sin(angle) * distanceOut * .68
     );
 
     character.classList.remove("is-moving", "is-climbing", "is-falling", "is-landed");
-    character.style.setProperty("--pet-move-duration", "1750ms");
-    character.style.setProperty("--pet-move-ease", "cubic-bezier(.12,.86,.22,1)");
+    character.style.setProperty("--pet-move-duration", "2300ms");
+    character.style.setProperty("--pet-move-ease", "cubic-bezier(.18,.85,.20,1)");
     character.classList.add("is-moving");
-    character.style.setProperty("--eye-width", "15px");
-    character.style.setProperty("--eye-height", "21px");
-
+    applyMovementFace("walk");
     setPosition(target.x, target.y);
 
     window.setTimeout(() => {
-      character.classList.remove("is-moving");
-      character.style.removeProperty("--eye-width");
-      character.style.removeProperty("--eye-height");
-    }, 1900);
-  }
-
-  function blink() {
-    if (!state.enabled || state.sleeping || state.dragging) return;
-
-    state.lastBlink = now();
-    state.nextBlinkAt = now() + 8500 + Math.random() * 3000;
-    character.classList.add("is-blinking");
-
-    window.setTimeout(() => {
-      if (state.enabled && !state.sleeping && !state.dragging) {
-        character.classList.remove("is-blinking");
+      if (state.enabled && !state.dragging) {
+        character.classList.remove("is-moving");
+        restoreExpressionFace();
       }
-    }, 190);
-  }
-
-  function gazeAt(x, y) {
-    const dx = Math.max(-1, Math.min(1, (x - state.x) / 210));
-    const dy = Math.max(-1, Math.min(1, (y - state.y) / 160));
-
-    state.gazeTargetX = dx * 6.0;
-    state.gazeTargetY = dy * 5.1;
-  }
-
-  function gazeLoop() {
-    if (state.enabled) {
-      state.gazeX += (state.gazeTargetX - state.gazeX) * 0.08;
-      state.gazeY += (state.gazeTargetY - state.gazeY) * 0.08;
-
-      eyes.forEach((eye) => {
-        eye.style.setProperty("--gaze-x", state.gazeX.toFixed(2) + "px");
-        eye.style.setProperty("--gaze-y", state.gazeY.toFixed(2) + "px");
-      });
-    }
-
-    requestAnimationFrame(gazeLoop);
+    }, 2400);
   }
 
   function handlePointerMove(event) {
@@ -736,6 +755,8 @@
 
     state.cursorX = event.clientX;
     state.cursorY = event.clientY;
+    state.lastInteraction = now();
+
     gazeAt(event.clientX, event.clientY);
 
     if (state.sleeping) {
@@ -745,11 +766,16 @@
 
     if (state.avoidUntil > now()) {
       fleeFromCursor();
-    } else {
-      const distance = Math.hypot(event.clientX - state.x, event.clientY - state.y);
-      if (distance < 82 && now() - state.lastReaction > 1500) {
-        setExpression(state.eye === "pink" ? "playful" : "curious", 700);
-      }
+      return;
+    }
+
+    const distance = Math.hypot(
+      event.clientX - state.x,
+      event.clientY - state.y
+    );
+
+    if (distance < 78 && now() - state.lastReaction > 1350) {
+      setExpression(state.eye === "pink" ? "playful" : "curious", 720);
     }
   }
 
@@ -763,7 +789,6 @@
     if (!card || card.contains(event.relatedTarget)) return;
 
     const t = now();
-
     if (t - state.lastHover < 1400) return;
 
     state.lastHover = t;
@@ -799,8 +824,7 @@
     if (
       target.matches(
         ".subject-card,.study-tools-card,.telegram-card,.utility-card,.tool-card,.live-card"
-      ) ||
-      utility
+      ) || utility
     ) {
       react("click-card", { context, element: target });
     }
@@ -831,13 +855,14 @@
           }
         }, 950);
       }
-    } else if (now() - state.lastReaction > 1000) {
+    } else if (now() - state.lastReaction > 1100) {
       react("typing");
     }
   }
 
   function handleFocus(event) {
     if (!state.enabled) return;
+
     if (event.target.matches?.("input,textarea,select")) {
       state.lastInteraction = now();
       react("typing");
@@ -849,7 +874,7 @@
 
     state.lastInteraction = now();
 
-    if (now() - state.lastReaction > 1200) {
+    if (now() - state.lastReaction > 1300) {
       react("scroll");
     }
   }
@@ -857,15 +882,15 @@
   function handleKeydown(event) {
     if (!state.enabled) return;
 
+    state.lastInteraction = now();
+
     if (event.key === "Escape") {
       setOpen(false);
       return;
     }
 
-    state.lastInteraction = now();
-
-    if (event.key.length === 1 || event.key === "Backspace" || event.key === "Enter") {
-      if (now() - state.lastReaction > 1050) {
+    if (event.key === "Enter" || event.key === "Backspace" || event.key.length === 1) {
+      if (now() - state.lastReaction > 1100) {
         react("typing");
       }
     }
@@ -879,13 +904,12 @@
     state.pointerId = event.pointerId;
     state.dragOffsetX = event.clientX - state.x;
     state.dragOffsetY = event.clientY - state.y;
-
     state.lastInteraction = now();
     state.sleeping = false;
 
     character.setPointerCapture?.(event.pointerId);
     character.classList.add("is-dragging");
-    setExpression("scared", 0);
+    react("scared", {}, true);
 
     event.preventDefault();
     event.stopPropagation();
@@ -894,18 +918,21 @@
   function handlePetPointerMove(event) {
     if (!state.dragging || event.pointerId !== state.pointerId) return;
 
-    const dx = event.clientX - (state.x + state.dragOffsetX);
-    const dy = event.clientY - (state.y + state.dragOffsetY);
+    const proposedX = event.clientX - state.dragOffsetX;
+    const proposedY = event.clientY - state.dragOffsetY;
 
-    if (Math.hypot(dx, dy) > 5) state.dragged = true;
+    if (
+      Math.hypot(
+        proposedX - state.x,
+        proposedY - state.y
+      ) > 5
+    ) {
+      state.dragged = true;
+    }
 
-    setPosition(
-      event.clientX - state.dragOffsetX,
-      event.clientY - state.dragOffsetY,
-      { drag: true }
-    );
-
+    setPosition(proposedX, proposedY, { drag: true });
     gazeAt(event.clientX, event.clientY);
+    state.lastInteraction = now();
   }
 
   function handlePetPointerUp(event) {
@@ -923,7 +950,7 @@
 
     if (dragged) {
       character.classList.add("is-landed");
-      setExpression("curious", 850);
+      setExpression("curious", 900);
       window.setTimeout(() => character.classList.remove("is-landed"), 520);
     } else {
       react("anger", {}, true);
@@ -960,43 +987,56 @@
     }
   }
 
-  function activityLoop() {
-    if (state.enabled && !state.dragging && !document.hidden) {
-      const idleFor = now() - state.lastInteraction;
+  function setEnabled(enabled) {
+    state.enabled = Boolean(enabled);
+    state.sleeping = false;
+    state.avoidUntil = 0;
+    state.lastInteraction = now();
 
-      if (idleFor >= 8000 && !state.sleeping) {
-        state.sleeping = true;
-        setExpression("sleeping", 0);
-        if (state.messages) showMessage("Zzz...", 1350);
-      }
-
-      if (!state.sleeping && now() >= state.nextBlinkAt) {
-        blink();
-      }
-
-      if (!state.sleeping &&
-          !state.dragging &&
-          now() - state.lastMicro > 9500 &&
-          Math.random() < 0.38) {
-        state.lastMicro = now();
-
-        const expressions = state.context === "study"
-          ? ["focused", "thinking", "curious", "unimpressed"]
-          : ["idle", "curious", "thinking", "bored"];
-
-        const expression = state.eye === "pink" && Math.random() < .58
-          ? "playful"
-          : expressions[Math.floor(Math.random() * expressions.length)];
-
-        setExpression(expression, 1150);
-      }
-
-      if (state.avoidUntil > now()) {
-        fleeFromCursor();
-      }
+    if (!state.enabled) {
+      bubble.classList.remove("is-visible");
+      character.dataset.expression = "idle";
+      character.dataset.mouth = "flat";
+      character.classList.remove(
+        "is-moving",
+        "is-climbing",
+        "is-falling",
+        "is-landed",
+        "is-dragging",
+        "is-blinking"
+      );
+      window.clearTimeout(state.wanderTimer);
+    } else {
+      state.context = pageContext();
+      setExpression("sleepy", 500);
+      showMessage("I'm back. 👀", 1300);
+      scheduleWander(4500);
     }
 
-    window.setTimeout(activityLoop, 900);
+    updateControls();
+    savePreferences();
+  }
+
+  function setMessages(enabled) {
+    state.messages = Boolean(enabled);
+    if (!state.messages) bubble.classList.remove("is-visible");
+    updateControls();
+    savePreferences();
+
+    if (state.enabled && state.messages) {
+      showMessage("Message mode on.", 1050);
+    }
+  }
+
+  function setEye(eye) {
+    state.eye = eye === "pink" ? "pink" : "cyan";
+    updateControls();
+    savePreferences();
+
+    if (!state.enabled) return;
+
+    setExpression(state.eye === "pink" ? "playful" : "excited", 950);
+    maybeMessage([state.eye === "pink" ? "🩷" : "🩵"], 1);
   }
 
   launcher.addEventListener("click", (event) => {
@@ -1006,16 +1046,8 @@
   });
 
   closeButton.addEventListener("click", () => setOpen(false));
-
-  enableButton.addEventListener("click", () => {
-    setEnabled(true);
-    setOpen(false);
-  });
-
-  disableButton.addEventListener("click", () => {
-    setEnabled(false);
-    setOpen(false);
-  });
+  enableButton.addEventListener("click", () => { setEnabled(true); setOpen(false); });
+  disableButton.addEventListener("click", () => { setEnabled(false); setOpen(false); });
 
   messagesEnableButton.addEventListener("click", () => setMessages(true));
   messagesDisableButton.addEventListener("click", () => setMessages(false));
@@ -1072,8 +1104,8 @@
   });
 
   window.addEventListener("resize", () => {
-    const next = clampPosition(state.x, state.y);
-    setPosition(next.x, next.y, { drag: true });
+    const p = clampPosition(state.x, state.y);
+    setPosition(p.x, p.y, { drag: true });
   }, { passive: true });
 
   window.addEventListener("studylab-profile-updated", (event) => {
@@ -1089,19 +1121,16 @@
   const observer = new MutationObserver(() => {
     if (!state.enabled) return;
 
-    const current = getPageContext();
-
+    const current = pageContext();
     if (current !== state.context) {
       state.context = current;
-
       setExpression(
         current === "study" || current === "exam"
           ? "focused"
-          : state.eye === "pink"
-            ? "playful"
-            : "curious",
-        1200
+          : "curious",
+        1250
       );
+      scheduleWander(current === "study" ? 5000 : 8000);
     }
   });
 
@@ -1112,21 +1141,70 @@
     attributeFilter: ["class", "hidden"]
   });
 
-  state.cursorX = window.innerWidth * .72;
-  state.cursorY = window.innerHeight * .52;
+  function activityLoop() {
+    if (state.enabled && !state.dragging && !document.hidden) {
+      const idleFor = now() - state.lastInteraction;
+
+      if (idleFor >= 8000 && !state.sleeping) {
+        state.sleeping = true;
+        setExpression("sleeping", 0);
+        if (state.messages) showMessage("Zzz...", 1450);
+      }
+
+      if (!state.sleeping && now() >= state.nextBlinkAt) {
+        blink();
+      }
+
+      if (!state.sleeping &&
+          now() - state.lastMicro > 7200 &&
+          Math.random() < .25) {
+        state.lastMicro = now();
+
+        const ambientExpressions = state.context === "study"
+          ? ["focused", "thinking", "curious", "unimpressed", "proud"]
+          : ["idle", "curious", "thinking", "bored", "playful", "deadpan"];
+
+        const chosen =
+          state.eye === "pink" && Math.random() < .35
+            ? "playful"
+            : ambientExpressions[Math.floor(Math.random() * ambientExpressions.length)];
+
+        setExpression(chosen, 1250);
+      }
+
+      if (!state.sleeping &&
+          now() - state.lastAmbient > (state.context === "study" ? 6500 : 10500) &&
+          Math.random() < (state.context === "study" ? .08 : .035)) {
+        state.lastAmbient = now();
+
+        const ambientPool = contextMessages[state.context] || contextMessages.home;
+        maybeMessage(ambientPool, 1);
+      }
+
+      if (state.avoidUntil > now()) {
+        fleeFromCursor();
+      }
+    }
+
+    window.setTimeout(activityLoop, 1000);
+  }
 
   updateControls();
   setPosition(state.x, state.y, { drag: true });
   gazeAt(state.cursorX, state.cursorY);
 
   if (state.enabled) {
-    setExpression("sleepy", 900);
-    if (state.messages) {
-      window.setTimeout(() => showMessage("👀", 950), 850);
-    }
-    scheduleWander(6200);
+    setExpression("idle", 0);
+    window.setTimeout(() => react("wake", {}, true), 700);
+    scheduleWander(7000);
   }
 
   gazeLoop();
   activityLoop();
+
+  window.setInterval(() => {
+    if (state.anger > 0 && now() - state.lastAngerAt > 6500) {
+      state.anger = Math.max(0, state.anger - 1);
+    }
+  }, 2200);
 })();
