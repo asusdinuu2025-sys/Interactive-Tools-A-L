@@ -15,7 +15,8 @@
     eye: "studylab-pet-eye",
     bubble: "studylab-pet-bubble",
     x: "studylab-pet-x",
-    y: "studylab-pet-y"
+    y: "studylab-pet-y",
+    memory: "studylab-pet-memory-v1"
   };
 
   const reducedMotion =
@@ -101,8 +102,67 @@
     nextSleepAt: now() + random(7000, 10000),
     hoverTimer: null,
     hoverTarget: null,
-    lastContextAt: 0
+    lastContextAt: 0,
+
+    brain: {
+      lastThought: "",
+      recentThoughts: [],
+      lastTopic: "",
+      lastKind: "",
+      topicVisits: {},
+      observations: 0
+    }
   };
+
+  function loadBrainMemory() {
+    try {
+      const raw = localStorage.getItem(KEY.memory);
+      if (!raw) return;
+      const saved = JSON.parse(raw);
+      if (!saved || typeof saved !== "object") return;
+      state.brain.lastThought = typeof saved.lastThought === "string" ? saved.lastThought : "";
+      state.brain.recentThoughts = Array.isArray(saved.recentThoughts)
+        ? saved.recentThoughts.filter((item) => typeof item === "string").slice(-6)
+        : [];
+      state.brain.lastTopic = typeof saved.lastTopic === "string" ? saved.lastTopic : "";
+      state.brain.lastKind = typeof saved.lastKind === "string" ? saved.lastKind : "";
+      state.brain.topicVisits = saved.topicVisits && typeof saved.topicVisits === "object"
+        ? saved.topicVisits
+        : {};
+      state.brain.observations = Number(saved.observations) || 0;
+    } catch (_) {}
+  }
+
+  function saveBrainMemory() {
+    try {
+      localStorage.setItem(KEY.memory, JSON.stringify({
+        lastThought: state.brain.lastThought,
+        recentThoughts: state.brain.recentThoughts.slice(-6),
+        lastTopic: state.brain.lastTopic,
+        lastKind: state.brain.lastKind,
+        topicVisits: state.brain.topicVisits,
+        observations: state.brain.observations
+      }));
+    } catch (_) {}
+  }
+
+  function rememberBrainThought(message, topic = "", kind = "") {
+    if (!message) return;
+    state.brain.lastThought = message;
+    state.brain.recentThoughts = [
+      ...state.brain.recentThoughts.filter((item) => item !== message),
+      message
+    ].slice(-6);
+    state.brain.lastTopic = topic;
+    state.brain.lastKind = kind;
+    state.brain.observations += 1;
+    if (topic) {
+      state.brain.topicVisits[topic] = (Number(state.brain.topicVisits[topic]) || 0) + 1;
+    }
+    saveBrainMemory();
+  }
+
+  loadBrainMemory();
 
   function profile() {
     return state.eye === "cyan"
@@ -239,7 +299,7 @@
   const expressions = [
     "neutral", "curious", "happy", "focused", "alert", "thinking",
     "worried", "confused", "bored", "sleeping", "relieved",
-    "angry", "scared", "annoyed", "delighted", "surprised", "shy", "sly"
+    "angry", "scared", "annoyed", "delighted", "surprised", "shy", "sly", "cute"
   ];
 
   function safeX() {
@@ -251,6 +311,13 @@
       min: 74,
       max: Math.max(94, window.innerHeight - 82)
     };
+  }
+
+  function visualDirection(dx, dy) {
+    if (Math.abs(dy) > Math.abs(dx) * 0.7) {
+      return dy < 0 ? "up" : "down";
+    }
+    return dx < 0 ? "left" : "right";
   }
 
   function setPosition(x, y) {
@@ -306,6 +373,7 @@
     if (!state.enabled || (!state.bubbleEnabled && !force) || !message) return;
 
     thoughtText.textContent = message;
+    rememberBrainThought(message, state.brain.lastTopic, state.brain.lastKind);
     positionThought();
     thought.classList.add("is-visible");
 
@@ -665,45 +733,33 @@
     character.dataset.direction = "idle";
   }
 
-  // Cursor avoidance is deliberately continuous. The pet no longer jumps
-  // between distant flee targets and hope the browser notices.
+  // Cursor avoidance is a continuous steering system. The Pet does not
+  // depend on a single waypoint, so moving the cursor cannot break the flee.
   function chooseAngerEvadeTarget() {
     const half = safeX();
     const bounds = safeY();
-    const cursorDx = state.x - state.pointerX;
-    const cursorDy = state.y - state.pointerY;
-    const cursorDistance = Math.hypot(cursorDx, cursorDy);
+    const dx = state.x - state.pointerX;
+    const dy = state.y - state.pointerY;
+    const distance = Math.max(1, Math.hypot(dx, dy));
 
-    let angle = state.angerFleeAngle;
-    if (cursorDistance > 8) {
-      angle = Math.atan2(cursorDy, cursorDx);
-    }
-    if (!Number.isFinite(angle)) {
-      angle = Math.random() * Math.PI * 2;
-    }
-
-    // Add only a small random side bias so the pet does not look robotic.
-    angle += (Math.random() - 0.5) * 0.42;
+    let angle = distance > 10 ? Math.atan2(dy, dx) : (state.angerFleeAngle ?? Math.random() * Math.PI * 2);
+    const sideBias = (Math.random() - 0.5) * 0.24;
+    angle += sideBias;
     state.angerFleeAngle = angle;
 
-    const preferred = random(280, 390);
+    const preferred = random(320, 470);
     state.evadeTargetX = clamp(
       state.x + Math.cos(angle) * preferred,
-      half + 16,
-      window.innerWidth - half - 16
+      half + 18,
+      window.innerWidth - half - 18
     );
     state.evadeTargetY = clamp(
       state.y + Math.sin(angle) * preferred,
-      bounds.min + 12,
-      bounds.max - 12
+      bounds.min + 16,
+      bounds.max - 16
     );
-    state.nextEvadeAt = now() + random(850, 1250);
-
+    state.nextEvadeAt = now() + random(950, 1350);
     character.dataset.moving = "true";
-    character.dataset.direction = visualDirection(
-      state.evadeTargetX - state.x,
-      state.evadeTargetY - state.y
-    );
   }
 
   function updateAngerEvade(timestamp) {
@@ -721,9 +777,9 @@
     const dt = clamp((timestamp - state.angerLastFrame) / 1000, 0.008, 0.04);
     state.angerLastFrame = timestamp;
 
-    const cursorDx = state.x - state.pointerX;
-    const cursorDy = state.y - state.pointerY;
-    const cursorDistance = Math.hypot(cursorDx, cursorDy);
+    const dx = state.x - state.pointerX;
+    const dy = state.y - state.pointerY;
+    const cursorDistance = Math.hypot(dx, dy);
 
     if (
       !Number.isFinite(state.evadeTargetX) ||
@@ -733,62 +789,47 @@
       chooseAngerEvadeTarget();
     }
 
-    let fleeX = 0;
-    let fleeY = 0;
+    const angleFromCursor =
+      cursorDistance > 9
+        ? Math.atan2(dy, dx)
+        : (state.angerFleeAngle ?? Math.random() * Math.PI * 2);
 
-    if (cursorDistance > 8) {
-      // Continuously point away from the real cursor position.
-      const invDistance = 1 / cursorDistance;
-      fleeX = cursorDx * invDistance;
-      fleeY = cursorDy * invDistance;
-      state.angerFleeAngle = Math.atan2(fleeY, fleeX);
-    } else if (Number.isFinite(state.angerFleeAngle)) {
-      fleeX = Math.cos(state.angerFleeAngle);
-      fleeY = Math.sin(state.angerFleeAngle);
-    } else {
-      chooseAngerEvadeTarget();
-      fleeX = Math.cos(state.angerFleeAngle);
-      fleeY = Math.sin(state.angerFleeAngle);
-    }
+    let desiredX = Math.cos(angleFromCursor);
+    let desiredY = Math.sin(angleFromCursor);
 
-    const targetDx = state.evadeTargetX - state.x;
-    const targetDy = state.evadeTargetY - state.y;
-    const targetDistance = Math.max(1, Math.hypot(targetDx, targetDy));
-    const targetDirX = targetDx / targetDistance;
-    const targetDirY = targetDy / targetDistance;
+    // Make the nearest screen edge push the Pet back toward open space.
+    const half = safeX();
+    const bounds = safeY();
+    const leftEdge = half + 34;
+    const rightEdge = window.innerWidth - half - 34;
+    const topEdge = bounds.min + 26;
+    const bottomEdge = bounds.max - 26;
 
-    // Near the cursor, flee direction dominates. Farther away, the pet
-    // smoothly bends toward the current safe waypoint instead of zig-zagging.
-    const fleeWeight = clamp((420 - cursorDistance) / 220, 0, 1);
-    let desiredX = fleeX * (0.72 + 0.28 * fleeWeight) +
-      targetDirX * (0.28 - 0.28 * fleeWeight);
-    let desiredY = fleeY * (0.72 + 0.28 * fleeWeight) +
-      targetDirY * (0.28 - 0.28 * fleeWeight);
+    if (state.x < leftEdge) desiredX += clamp((leftEdge - state.x) / 42, 0, 1.35);
+    if (state.x > rightEdge) desiredX -= clamp((state.x - rightEdge) / 42, 0, 1.35);
+    if (state.y < topEdge) desiredY += clamp((topEdge - state.y) / 42, 0, 1.35);
+    if (state.y > bottomEdge) desiredY -= clamp((state.y - bottomEdge) / 42, 0, 1.35);
 
-    // Keep the pet from pinning itself against screen edges while escaping.
-    const leftEdge = half + 28;
-    const rightEdge = window.innerWidth - half - 28;
-    const topEdge = bounds.min + 22;
-    const bottomEdge = bounds.max - 22;
+    // A little side steering prevents a cursor sitting directly behind the Pet
+    // from producing a boring straight-line escape.
+    const side = Math.sin((now() - (state.angerUntil - 5100)) * 0.0042);
+    desiredX += -desiredY * side * 0.10;
+    desiredY += desiredX * side * 0.10;
 
-    if (state.x < leftEdge) desiredX += clamp((leftEdge - state.x) / 34, 0, 1);
-    if (state.x > rightEdge) desiredX -= clamp((state.x - rightEdge) / 34, 0, 1);
-    if (state.y < topEdge) desiredY += clamp((topEdge - state.y) / 34, 0, 1);
-    if (state.y > bottomEdge) desiredY -= clamp((state.y - bottomEdge) / 34, 0, 1);
+    const length = Math.max(0.001, Math.hypot(desiredX, desiredY));
+    desiredX /= length;
+    desiredY /= length;
+    state.angerFleeAngle = Math.atan2(desiredY, desiredX);
 
-    const directionLength = Math.max(0.001, Math.hypot(desiredX, desiredY));
-    desiredX /= directionLength;
-    desiredY /= directionLength;
+    const maxSpeed = state.eye === "cyan" ? 205 : 185;
+    const acceleration = state.eye === "cyan" ? 15.5 : 13.5;
+    const desiredSpeed =
+      cursorDistance < 165 ? maxSpeed :
+      cursorDistance < 300 ? maxSpeed * 0.92 :
+      cursorDistance < 520 ? maxSpeed * 0.76 :
+      maxSpeed * 0.55;
 
-    const maxSpeed = state.eye === "cyan" ? 190 : 170;
-    const acceleration = state.eye === "cyan" ? 12.5 : 10.8;
-    const desiredSpeed = cursorDistance < 180
-      ? maxSpeed
-      : cursorDistance < 420
-        ? maxSpeed * 0.90
-        : maxSpeed * 0.72;
     const response = 1 - Math.exp(-acceleration * dt);
-
     state.angerVelocityX +=
       (desiredX * desiredSpeed - state.angerVelocityX) * response;
     state.angerVelocityY +=
@@ -907,6 +948,10 @@
       enterAnger(5);
       return;
     }
+
+    // Taps become observations for the local Pet brain, not just counters.
+    state.brain.observations += 1;
+    saveBrainMemory();
 
     setExpression(
       state.eye === "cyan"
@@ -1048,17 +1093,20 @@
       target.getAttribute?.("title") || "",
       heading,
       container.innerText || "",
-      target.getAttribute?.("href") || ""
-    ].join(" ").replace(/\s+/g, " ").trim().slice(0, 600);
+      target.getAttribute?.("href") || "",
+      document.title || "",
+      location.pathname || ""
+    ].join(" ").replace(/\s+/g, " ").trim().slice(0, 800);
   }
 
-  function contextMessage(target) {
-    const text = contextText(target).toLowerCase();
+  function analyzeContext(target) {
+    const raw = contextText(target);
+    const text = raw.toLowerCase();
     const label =
       (target?.innerText || target?.getAttribute?.("aria-label") ||
         target?.getAttribute?.("title") || "").replace(/\s+/g, " ").trim();
 
-    let topic = "";
+    let topic = "StudyLab";
     if (/combined\s*math|maths|mathematics|trigonometry|calculus|algebra|quadratic|differentiation|integration|vectors?|probability|binomial|straight.?line|series/.test(text)) {
       topic = "Maths";
     } else if (/physics|doppler|gravity|wave|oscillation|force|motion|electricity|optics|heat|pressure|mechanics|spectrometer|resonance|sonometer|pendulum/.test(text)) {
@@ -1071,30 +1119,135 @@
       topic = "General English";
     } else if (/\bgit\b|information\s*&?\s*communication|ict/.test(text)) {
       topic = "GIT";
-    } else if (/exam|past\s*paper|marking\s*scheme|school\s*paper|model\s*paper|timetable|evaluation/.test(text)) {
+    } else if (/past\s*paper|marking\s*scheme|school\s*paper|model\s*paper|timetable|evaluation|exam\s*hub/.test(text)) {
       topic = "Exam";
-    } else if (/study\s*tool|pomodoro|flashcard|calculator|planner|focus/.test(text)) {
-      topic = "Study Tools";
-    } else if (/telegram|channel|community/.test(text)) {
-      topic = "Telegram";
-    } else if (/audio|book|listen/.test(text)) {
-      topic = "Audio";
     }
 
-    const safeLabel = label ? label.slice(0, 70) : "";
+    let kind = "page";
+    if (/simulation|simulator|interactive/.test(text)) kind = "simulation";
+    else if (/past\s*paper|paper|marking\s*scheme|model\s*paper/.test(text)) kind = "paper";
+    else if (/study\s*tool|pomodoro|flashcard|calculator|planner|focus/.test(text)) kind = "study-tool";
+    else if (/telegram|channel|community/.test(text)) kind = "community";
+    else if (/audio|book|listen/.test(text)) kind = "audio";
+    else if (/exam|timetable|notice/.test(text)) kind = "exam";
+    else if (target?.tagName === "BUTTON") kind = "button";
+    else if (target?.tagName === "A") kind = "link";
 
-    if (topic === "Maths") return safeLabel ? "Maths: ready for " + safeLabel + "." : "Maths time. Keep those steps sharp.";
-    if (topic === "Physics") return safeLabel ? "Physics: " + safeLabel + " is ready to explore." : "Physics: watch how the variables move.";
-    if (topic === "Chemistry") return safeLabel ? "Chemistry: " + safeLabel + " is on the bench." : "Chemistry time. Watch the reaction.";
-    if (topic === "Biology") return safeLabel ? "Biology: " + safeLabel + " is ready." : "Biology: look closely at the system.";
-    if (topic === "General English") return safeLabel ? "English: " + safeLabel + "." : "English time. Keep the meaning clear.";
-    if (topic === "GIT") return safeLabel ? "GIT: " + safeLabel + "." : "GIT: time to check the details.";
-    if (topic === "Exam") return safeLabel ? "Exam mode: " + safeLabel + "." : "Exam resources. Keep checking carefully.";
-    if (topic === "Study Tools") return safeLabel ? "Study Tools: " + safeLabel + "." : "Study Tools are ready.";
-    if (topic === "Telegram") return safeLabel ? "Telegram: " + safeLabel + "." : "Study resources are waiting there.";
-    if (topic === "Audio") return safeLabel ? "Audio: " + safeLabel + "." : "Audio time. Give your ears some work.";
+    return {
+      raw,
+      text,
+      label: label.slice(0, 75),
+      topic,
+      kind,
+      heading: (target.closest?.("a,button,.card,.subject-card,.tool-card,.utility-card")?.querySelector?.("h1,h2,h3,h4,h5,h6,strong")?.textContent || "").trim()
+    };
+  }
 
-    return safeLabel ? "Ready to open " + safeLabel + "." : "Something interesting is here.";
+  function avoidRepeatedThought(options) {
+    const available = options.filter((item) => !state.brain.recentThoughts.includes(item));
+    return pick(available.length ? available : options);
+  }
+
+  function brainMood() {
+    if (state.angerUntil > now()) return "irritated";
+    if (state.sleeping) return "sleepy";
+
+    const idleMs = now() - state.lastActivity;
+    const cursorDistance = Math.hypot(state.pointerX - state.x, state.pointerY - state.y);
+
+    if (cursorDistance < 115) return "alert";
+    if (idleMs > 9000) return "bored";
+    return state.eye === "pink" ? "curious" : "confident";
+  }
+
+  function brainMessage(target) {
+    const info = analyzeContext(target);
+    const topicCount = Number(state.brain.topicVisits[info.topic]) || 0;
+    const repeated = state.brain.lastTopic === info.topic;
+    const label = info.label || info.heading;
+    const mood = brainMood();
+
+    let options = [];
+
+    if (info.kind === "simulation") {
+      options = [
+        "That looks interactive. I’m curious what you’ll change first.",
+        info.topic + " experiment detected. Watch the variables, not just the animation.",
+        "This one looks made for testing ideas. Go on, poke it.",
+        repeated ? "Back to " + info.topic + " again. I noticed." : "New " + info.topic + " territory. I’m watching."
+      ];
+    } else if (info.kind === "paper") {
+      options = [
+        "Paper mode. One question at a time. Humans somehow make this harder than it needs to be.",
+        "This looks like exam practice. Slow down before the easy marks escape.",
+        repeated ? "More " + info.topic + " practice. You’re clearly not finished with it." : "A fresh practice round. Keep the working neat."
+      ];
+    } else if (info.kind === "study-tool") {
+      options = [
+        "A study tool. Useful when motivation decides to become theoretical.",
+        "This is the kind of button that can actually save time. Use it wisely.",
+        "Tool detected. I’ll stay nearby while you work."
+      ];
+    } else if (info.kind === "audio") {
+      options = [
+        "Audio time. Give the eyes a little vacation.",
+        "Listening mode. Your screen can survive without constant staring.",
+        "A quieter study route. Not bad."
+      ];
+    } else if (info.kind === "community") {
+      options = [
+        "Resource channel spotted. More study material entering the ecosystem.",
+        "Community resources detected. Collect what helps, ignore the noise.",
+        "You’re checking the resource network. Efficient."
+      ];
+    } else if (info.kind === "exam") {
+      options = [
+        "Exam resources ahead. Strategy first, panic later.",
+        "This part looks important. Keep the useful bits and move on.",
+        "Exam mode detected. Details matter here."
+      ];
+    } else if (info.kind === "button" || info.kind === "link") {
+      options = [
+        "That looks useful. I’m watching where this leads.",
+        "Interesting choice. Let’s see what it actually contains.",
+        "That one has a purpose. Go investigate it.",
+        repeated ? "You keep coming back to " + info.topic + ". There’s probably a reason." : "You’re exploring " + info.topic + ". Keep going."
+      ];
+    } else {
+      options = [
+        info.topic + " detected. I’ll keep an eye on things.",
+        repeated ? "Back to " + info.topic + ". I remember the pattern." : info.topic + " is on the board. Let’s see what happens.",
+        topicCount > 1 ? "You’ve visited " + info.topic + " a few times. Apparently that topic has your attention." : "New area noticed. I’m curious what you’re looking for."
+      ];
+    }
+
+    if (mood === "alert" && info.kind !== "simulation") {
+      options.push("You’re close. I’m awake now.");
+    }
+    if (mood === "bored") {
+      options.push("It got quiet. I was starting to get suspicious.");
+    }
+    if (state.eye === "pink") {
+      options.push(
+        "That caught my attention. Let’s have a look.",
+        repeated ? "You’re back here. I remember this one." : "Hmm. Interesting. I’m watching."
+      );
+    }
+
+    const message = avoidRepeatedThought(options);
+    return {
+      message,
+      topic: info.topic,
+      kind: info.kind
+    };
+  }
+
+  function smartThought(target, duration = 1550) {
+    if (!target) return;
+    const result = brainMessage(target);
+    state.brain.lastTopic = result.topic;
+    state.brain.lastKind = result.kind;
+    showThought(result.message, duration);
   }
 
   function trackContextHover(target) {
@@ -1122,7 +1275,7 @@
       if (currentTime - state.lastContextAt < 900) return;
 
       state.lastContextAt = currentTime;
-      showThought(contextMessage(target), 1550);
+      smartThought(target, 1550);
     }, 560);
   }
 
@@ -1148,7 +1301,7 @@
       clearTimeout(state.expressionTimer);
       // One deliberate expression for the mode switch. No random sequence.
       setExpression(
-        state.eye === "pink" ? "happy" : "sly",
+        state.eye === "pink" ? "cute" : "sly",
         1700,
         true
       );
@@ -1217,6 +1370,13 @@
     event.preventDefault();
     registerTap();
   });
+
+  const rememberPointer = (event) => {
+    state.pointerX = event.clientX;
+    state.pointerY = event.clientY;
+  };
+
+  window.addEventListener("mousemove", rememberPointer, { passive: true });
 
   document.addEventListener("pointermove", (event) => {
     state.pointerX = event.clientX;

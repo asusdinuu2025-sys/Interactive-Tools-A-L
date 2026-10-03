@@ -405,6 +405,49 @@
   border-radius: 8px;
 }
 
+/* ---------- Pink cute mode ---------- */
+
+.sl-pet-character[data-state="cute"] .sl-pet-eye.left {
+  transform: rotate(-6deg) translateY(-1px);
+  animation: slPetCuteLeft 1.65s cubic-bezier(.36,.08,.18,1) infinite;
+}
+
+.sl-pet-character[data-state="cute"] .sl-pet-eye.right {
+  transform: rotate(6deg) translateY(-1px);
+  animation: slPetCuteRight 1.65s cubic-bezier(.36,.08,.18,1) infinite;
+}
+
+.sl-pet-character[data-state="cute"] .sl-pet-eye > i {
+  width: 23px;
+  height: 27px;
+  border-radius: 9px 10px 11px 10px;
+  box-shadow:
+    0 0 11px rgba(255,132,200,.9),
+    0 0 25px rgba(255,132,200,.30);
+}
+
+.sl-pet-character[data-state="cute"] .sl-pet-mouth {
+  width: 19px;
+  height: 8px;
+  bottom: 11px;
+  border-bottom-width: 2px;
+  border-radius: 0 0 14px 14px;
+}
+
+@keyframes slPetCuteLeft {
+  0%,100% { transform: rotate(-6deg) translateY(-1px); }
+  38% { transform: rotate(-2deg) translateY(-3px); }
+  58% { transform: rotate(-7deg) translateY(-1px); }
+  72% { transform: rotate(-4deg) translateY(1px) scaleY(.76); }
+}
+
+@keyframes slPetCuteRight {
+  0%,100% { transform: rotate(6deg) translateY(-1px); }
+  38% { transform: rotate(2deg) translateY(-3px); }
+  58% { transform: rotate(7deg) translateY(-1px); }
+  72% { transform: rotate(4deg) translateY(1px) scaleY(.76); }
+}
+
 .sl-pet-character[data-state="scared"] .sl-pet-eye > i {
   width: 22px;
   height: 30px;
