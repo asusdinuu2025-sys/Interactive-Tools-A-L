@@ -70,6 +70,7 @@
     lastMicro: 0,
 
     anger: 0,
+    lastAngerAt: 0,
     avoidUntil: 0,
     lastFlee: 0,
 
@@ -624,15 +625,16 @@
     }
 
     if (type === "anger") {
-      const recent = timestamp - state.lastReaction < 4600;
-      state.anger = Math.min(4, state.anger + (recent ? 1 : .5));
+      const recent = timestamp - state.lastAngerAt < 5200;
+      state.anger = Math.min(4, recent ? state.anger + 1 : Math.max(1, state.anger));
+      state.lastAngerAt = timestamp;
       state.avoidUntil = timestamp + 4300 + state.anger * 450;
 
       setExpression("angry", 1450);
 
       if (state.messages) {
-        if (state.anger >= 3) showMessage("...", 1050);
-        else if (state.anger >= 2) showMessage("Stop.", 1000);
+        if (state.anger >= 4) showMessage("...", 1050);
+        else if (state.anger >= 3) showMessage("Stop.", 1000);
         else showMessage("Hey.", 950);
       }
 
