@@ -992,8 +992,8 @@ html[data-theme="light"] .sl-pet-setting-buttons button {
   opacity: 0;
   filter: saturate(.55) brightness(.68);
   transition:
-    opacity .88s cubic-bezier(.22,.70,.20,1),
-    filter .88s ease;
+    opacity 1.28s cubic-bezier(.22,.70,.20,1),
+    filter 1.28s ease;
 }
 
 .sl-pet-character[data-enable="true"] .sl-pet-eye > i {
