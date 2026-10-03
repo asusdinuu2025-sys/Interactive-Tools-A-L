@@ -856,19 +856,6 @@
       showThought(pick(profile().thoughts), 1300);
     }
 
-    if (
-      !state.sleeping &&
-      time - state.lastActivity >= 45000 &&
-      !state.moving &&
-      state.angerUntil <= time
-    ) {
-      state.sleeping = true;
-      state.sleepStartedAt = time;
-      stopNormalMove();
-      character.dataset.state = "sleeping";
-      hideThought();
-    }
-
     requestAnimationFrame(lifeLoop);
   }
 
