@@ -1599,7 +1599,7 @@
       clearTimeout(state.expressionTimer);
       // One deliberate expression for the mode switch. No random sequence.
       setExpression(
-        state.eye === "pink" ? "cute" : "sly",
+        state.eye === "pink" ? "shy" : "sly",
         1700,
         true
       );
