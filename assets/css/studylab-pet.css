@@ -411,6 +411,44 @@
   border-radius: 8px;
 }
 
+/* ---------- Sad / disable ---------- */
+
+.sl-pet-character[data-state="sad"] .sl-pet-eye.left {
+  transform: rotate(7deg) translateY(3px);
+}
+
+.sl-pet-character[data-state="sad"] .sl-pet-eye.right {
+  transform: rotate(-7deg) translateY(3px);
+}
+
+.sl-pet-character[data-state="sad"] .sl-pet-eye > i {
+  width: 18px;
+  height: 16px;
+  border-radius: 7px 7px 10px 10px;
+  opacity: .72;
+}
+
+.sl-pet-character[data-state="sad"] .sl-pet-mouth {
+  width: 20px;
+  height: 8px;
+  bottom: 10px;
+  border: 0;
+  border-top: 2px solid #5de7ff;
+  border-radius: 13px 13px 0 0;
+  transform: translateX(-50%) rotate(3deg);
+}
+
+.sl-pet-character[data-eye="pink"][data-state="sad"] .sl-pet-mouth {
+  border-color: #ff84c8;
+}
+
+/* During the sad pause, keep the face fully readable before fading it out. */
+.sl-pet-character.is-fading-out[data-state="sad"] {
+  transition:
+    opacity 1.28s cubic-bezier(.22,.70,.20,1),
+    filter 1.28s ease;
+}
+
 .sl-pet-character[data-state="angry"] .sl-pet-eye.left {
   transform: rotate(28deg) translateY(3px);
 }
