@@ -83,7 +83,6 @@
     angerLevel: 0,
     angerUntil: 0,
     angerTimer: null,
-    evadeTimer: null,
 
     clickTimes: [],
     lastMeaningfulActivity: now(),
@@ -309,8 +308,16 @@
   }
 
   function setGazeTarget(x, y, immediate = false) {
-    state.gazeTargetX = clamp(x - state.x, -28, 28);
-    state.gazeTargetY = clamp(y - state.y, -18, 18);
+    const dx = x - state.x;
+    const dy = y - state.y;
+    const distance = Math.max(1, Math.hypot(dx, dy));
+    const scale = clamp(distance / 170, 0.45, 1);
+
+    const gx = clamp(dx / 130, -1, 1) * 6.5 * scale;
+    const gy = clamp(dy / 110, -1, 1) * 5.8 * scale;
+
+    state.gazeTargetX = clamp(gx, -7.2, 7.2);
+    state.gazeTargetY = clamp(gy, -6.2, 6.2);
 
     if (immediate) {
       state.gazeX = state.gazeTargetX;
@@ -319,13 +326,13 @@
   }
 
   function updateGaze() {
-    const ease = 0.12;
+    const ease = 0.14;
     state.gazeX += (state.gazeTargetX - state.gazeX) * ease;
     state.gazeY += (state.gazeTargetY - state.gazeY) * ease;
 
     eyes.forEach((eye) => {
-      eye.style.setProperty("--gaze-x", state.gazeX + "px");
-      eye.style.setProperty("--gaze-y", state.gazeY + "px");
+      eye.style.setProperty("--gaze-x", state.gazeX.toFixed(2) + "px");
+      eye.style.setProperty("--gaze-y", state.gazeY.toFixed(2) + "px");
     });
   }
 
@@ -610,7 +617,6 @@
     state.angerLevel = 0;
     state.angerUntil = 0;
     clearTimeout(state.angerTimer);
-    clearTimeout(state.evadeTimer);
 
     stage.classList.remove("is-disabled");
     character.classList.remove("is-fading-out");
@@ -641,7 +647,6 @@
     state.angerUntil = 0;
 
     clearTimeout(state.angerTimer);
-    clearTimeout(state.evadeTimer);
     hideThought();
     clearBurstTimers();
     clearMovementFrame();
@@ -662,58 +667,46 @@
     updateControls();
   }
 
-  panel.addEventListener(
-    "click",
-    (event) => {
-      const button = event.target.closest("button");
-      if (!button || !panel.contains(button)) return;
+  enableButton.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    enablePet();
+  });
 
-      if (button.matches("[data-pet-enable]")) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        enablePet();
-        return;
-      }
+  disableButton.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    disablePet();
+  });
 
-      if (button.matches("[data-pet-disable]")) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        disablePet();
-        return;
-      }
+  eyeButtons.forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      state.eye = button.dataset.petEye === "pink" ? "pink" : "cyan";
+      character.dataset.eye = state.eye;
+      save(KEY.eye, state.eye);
+      updateControls();
+    });
+  });
 
-      if (button.dataset.petEye) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        state.eye = button.dataset.petEye === "pink" ? "pink" : "cyan";
-        character.dataset.eye = state.eye;
-        save(KEY.eye, state.eye);
-        setExpression(state.eye === "pink" ? "shy" : "delighted", 850, true);
-        updateControls();
-        return;
-      }
+  bubbleEnableButton.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    state.bubbleEnabled = true;
+    save(KEY.bubble, true);
+    showThought("Message box enabled.", 1000, true);
+    updateControls();
+  });
 
-      if (button.matches("[data-pet-bubble-enable]")) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        state.bubbleEnabled = true;
-        save(KEY.bubble, true);
-        showThought("Message box enabled.", 1000, true);
-        updateControls();
-        return;
-      }
-
-      if (button.matches("[data-pet-bubble-disable]")) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        state.bubbleEnabled = false;
-        save(KEY.bubble, false);
-        hideThought();
-        updateControls();
-      }
-    },
-    true
-  );
+  bubbleDisableButton.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    state.bubbleEnabled = false;
+    save(KEY.bubble, false);
+    hideThought();
+    updateControls();
+  });
 
   closeButton.addEventListener("click", () => {
     panel.hidden = true;
@@ -758,7 +751,7 @@
       setExpression("annoyed", 800, true);
       showThought("Easy.", 800);
     } else {
-      setExpression(state.eye === "pink" ? "shy" : "curious", 800, true);
+      setExpression("curious", 800, true);
       showThought("Hm?", 750);
     }
   }
@@ -780,72 +773,6 @@
       character.dataset.danger = "false";
       if (!state.dragging && !state.sleeping) setExpression("neutral", 700);
     }, 5900);
-
-    evadeCursor();
-  }
-
-  function evadeCursor() {
-    if (!state.enabled || state.dragging || reducedMotion || state.sleeping) return;
-
-    const distance = Math.hypot(state.pointerX - state.x, state.pointerY - state.y);
-    const radius = state.angerLevel >= 4 ? 230 : 190;
-    if (distance >= radius) return;
-
-    stopNormalRoam();
-    const angle = Math.atan2(state.y - state.pointerY, state.x - state.pointerX) + random(-0.45, 0.45);
-    const distanceOut = random(230, 340);
-    const bounds = safeY();
-
-    const x = clamp(
-      state.x + Math.cos(angle) * distanceOut,
-      safeX() + 10,
-      window.innerWidth - safeX() - 10
-    );
-    const y = clamp(
-      state.y + Math.sin(angle) * distanceOut * 0.75,
-      bounds.min + 10,
-      bounds.max - 10
-    );
-
-    clearTimeout(state.evadeTimer);
-    state.evadeTimer = setTimeout(() => {
-      if (!state.enabled || state.dragging || state.sleeping) return;
-      startEvadeMove(x, y);
-    }, 120);
-  }
-
-  function startEvadeMove(targetX, targetY) {
-    clearMovementFrame();
-
-    const startX = state.x;
-    const startY = state.y;
-    const dx = targetX - startX;
-    const dy = targetY - startY;
-    const duration = 650;
-    const started = performance.now();
-    const token = state.moveToken;
-
-    character.dataset.moving = "true";
-    character.dataset.direction = Math.abs(dy) > Math.abs(dx) ? (dy < 0 ? "up" : "down") : (dx < 0 ? "left" : "right");
-
-    const frame = (timestamp) => {
-      if (token !== state.moveToken || !state.enabled || state.dragging || state.sleeping) return;
-
-      const p = clamp((timestamp - started) / duration, 0, 1);
-      const e = p * p * (3 - 2 * p);
-      setPosition(startX + dx * e, startY + dy * e);
-
-      if (p < 1) {
-        state.moveAnimation = requestAnimationFrame(frame);
-      } else {
-        state.moveAnimation = 0;
-        character.dataset.moving = "false";
-        character.dataset.direction = "idle";
-        if (state.angerUntil <= now()) startNormalRoam();
-      }
-    };
-
-    state.moveAnimation = requestAnimationFrame(frame);
   }
 
   function startDrag(event) {
@@ -856,8 +783,6 @@
       event.preventDefault();
       return;
     }
-
-    clearTimeout(state.evadeTimer);
     clearBurstTimers();
     clearMovementFrame();
     stopNormalRoam();
@@ -985,7 +910,6 @@
       if (state.angerUntil > now()) {
         const distance = Math.hypot(event.clientX - state.x, event.clientY - state.y);
         const radius = state.angerLevel >= 4 ? 230 : 190;
-        if (distance < radius) evadeCursor();
       }
     }
 
@@ -1061,7 +985,6 @@
     if (state.angerUntil > time && !state.dragging) {
       const distance = Math.hypot(state.pointerX - state.x, state.pointerY - state.y);
       const radius = state.angerLevel >= 4 ? 230 : 190;
-      if (distance < radius) evadeCursor();
     } else if (state.angerUntil <= time && state.angerLevel > 0) {
       state.angerLevel = 0;
       state.angerUntil = 0;
