@@ -91,7 +91,14 @@
     dragOffsetY: 0,
     pressX: 0,
     pressY: 0,
-    pointerMoved: false
+    pointerMoved: false,
+
+    lastPointerX: window.innerWidth * 0.72,
+    lastPointerY: window.innerHeight * 0.52,
+    nextSleepAt: now() + random(7000, 10000),
+    hoverTimer: null,
+    hoverTarget: null,
+    lastContextAt: 0
   };
 
   function profile() {
@@ -124,7 +131,9 @@
 
   const styleLink = document.createElement("link");
   styleLink.rel = "stylesheet";
-  styleLink.href = "assets/css/studylab-pet.css";
+  styleLink.href = document.currentScript
+    ? new URL("../css/studylab-pet.css", document.currentScript.src).href
+    : new URL("assets/css/studylab-pet.css", document.baseURI).href;
   document.head.appendChild(styleLink);
 
   document.body.insertAdjacentHTML(
@@ -186,6 +195,39 @@
   const bubbleEnableButton = panel.querySelector("[data-pet-bubble-enable]");
   const bubbleDisableButton = panel.querySelector("[data-pet-bubble-disable]");
 
+  function syncLoadingVisibility() {
+    const loader = document.getElementById("studylabLoader");
+    const loading = Boolean(loader && !loader.classList.contains("is-exiting"));
+
+    stage.classList.toggle("is-site-loading-hidden", loading);
+    launcher.classList.toggle("is-site-loading-hidden", loading);
+
+    if (loading) {
+      panel.hidden = true;
+      launcher.setAttribute("aria-expanded", "false");
+      launcher.classList.remove("is-open");
+    }
+  }
+
+  syncLoadingVisibility();
+
+  const loadingObserver = new MutationObserver(() => {
+    if (!document.getElementById("studylabLoader")) {
+      stage.classList.remove("is-site-loading-hidden");
+      launcher.classList.remove("is-site-loading-hidden");
+      loadingObserver.disconnect();
+      return;
+    }
+    syncLoadingVisibility();
+  });
+
+  loadingObserver.observe(document.body, {
+    childList: true,
+    attributes: true,
+    subtree: true,
+    attributeFilter: ["class"]
+  });
+
   const expressions = [
     "neutral", "curious", "happy", "focused", "alert", "thinking",
     "worried", "confused", "bored", "sleeping", "relieved",
@@ -227,6 +269,14 @@
     ) + "px";
     thought.style.top = Math.max(54, state.y - 40) + "px";
   }
+
+  function savePosition() {
+    save(KEY.x, Math.round(state.x));
+    save(KEY.y, Math.round(state.y));
+  }
+
+  window.addEventListener("pagehide", savePosition);
+  window.addEventListener("beforeunload", savePosition);
 
   function setExpression(name, duration = 900, force = false) {
     if (!state.enabled && !force) return;
@@ -543,6 +593,7 @@
     hideThought();
 
     save(KEY.enabled, false);
+    savePosition();
 
     character.dataset.danger = "false";
     character.dataset.moving = "false";
@@ -617,10 +668,14 @@
   }
 
   function wake() {
-    if (!state.sleeping) return;
+    if (!state.sleeping) {
+      state.nextSleepAt = now() + random(7000, 10000);
+      return;
+    }
 
     state.sleeping = false;
     state.lastActivity = now();
+    state.nextSleepAt = now() + random(7000, 10000);
     state.nextBlink = now() + random(2400, 4800);
     setExpression("curious", 850, true);
 
@@ -713,6 +768,109 @@
     return dragged;
   }
 
+  function nearestInteractiveTarget(element) {
+    return element?.closest?.(
+      "a, button, input, select, textarea, " +
+      ".subject-card, .tool-card, .utility-card, .telegram-card, " +
+      ".examhub-card, .resource-card, .study-tools-card, .card"
+    ) || null;
+  }
+
+  function contextText(target) {
+    if (!target) return "";
+    const container =
+      target.closest?.(
+        ".subject-card, .tool-card, .utility-card, .telegram-card, " +
+        ".examhub-card, .resource-card, .study-tools-card, .card"
+      ) || target;
+
+    const heading =
+      container.querySelector?.("h1,h2,h3,h4,h5,h6,strong")?.textContent || "";
+
+    return [
+      target.innerText || "",
+      target.getAttribute?.("aria-label") || "",
+      target.getAttribute?.("title") || "",
+      heading,
+      container.innerText || "",
+      target.getAttribute?.("href") || ""
+    ].join(" ").replace(/\s+/g, " ").trim().slice(0, 600);
+  }
+
+  function contextMessage(target) {
+    const text = contextText(target).toLowerCase();
+    const label =
+      (target?.innerText || target?.getAttribute?.("aria-label") ||
+        target?.getAttribute?.("title") || "").replace(/\s+/g, " ").trim();
+
+    let topic = "";
+    if (/combined\s*math|maths|mathematics|trigonometry|calculus|algebra|quadratic|differentiation|integration|vectors?|probability|binomial|straight.?line|series/.test(text)) {
+      topic = "Maths";
+    } else if (/physics|doppler|gravity|wave|oscillation|force|motion|electricity|optics|heat|pressure|mechanics|spectrometer|resonance|sonometer|pendulum/.test(text)) {
+      topic = "Physics";
+    } else if (/chemistry|chemical|practical|laboratory|reaction|titration|cation|anion|organic|inorganic|energetics|equilibrium|kinetics/.test(text)) {
+      topic = "Chemistry";
+    } else if (/biology|genetics|cell|ecology|organism|digestive|nervous|reproductive|circulatory|endocrine|osmoregulation/.test(text)) {
+      topic = "Biology";
+    } else if (/general\s*english|english/.test(text)) {
+      topic = "General English";
+    } else if (/\bgit\b|information\s*&?\s*communication|ict/.test(text)) {
+      topic = "GIT";
+    } else if (/exam|past\s*paper|marking\s*scheme|school\s*paper|model\s*paper|timetable|evaluation/.test(text)) {
+      topic = "Exam";
+    } else if (/study\s*tool|pomodoro|flashcard|calculator|planner|focus/.test(text)) {
+      topic = "Study Tools";
+    } else if (/telegram|channel|community/.test(text)) {
+      topic = "Telegram";
+    } else if (/audio|book|listen/.test(text)) {
+      topic = "Audio";
+    }
+
+    const safeLabel = label ? label.slice(0, 70) : "";
+
+    if (topic === "Maths") return safeLabel ? "Maths: ready for " + safeLabel + "." : "Maths time. Keep those steps sharp.";
+    if (topic === "Physics") return safeLabel ? "Physics: " + safeLabel + " is ready to explore." : "Physics: watch how the variables move.";
+    if (topic === "Chemistry") return safeLabel ? "Chemistry: " + safeLabel + " is on the bench." : "Chemistry time. Watch the reaction.";
+    if (topic === "Biology") return safeLabel ? "Biology: " + safeLabel + " is ready." : "Biology: look closely at the system.";
+    if (topic === "General English") return safeLabel ? "English: " + safeLabel + "." : "English time. Keep the meaning clear.";
+    if (topic === "GIT") return safeLabel ? "GIT: " + safeLabel + "." : "GIT: time to check the details.";
+    if (topic === "Exam") return safeLabel ? "Exam mode: " + safeLabel + "." : "Exam resources. Keep checking carefully.";
+    if (topic === "Study Tools") return safeLabel ? "Study Tools: " + safeLabel + "." : "Study Tools are ready.";
+    if (topic === "Telegram") return safeLabel ? "Telegram: " + safeLabel + "." : "Study resources are waiting there.";
+    if (topic === "Audio") return safeLabel ? "Audio: " + safeLabel + "." : "Audio time. Give your ears some work.";
+
+    return safeLabel ? "Ready to open " + safeLabel + "." : "Something interesting is here.";
+  }
+
+  function trackContextHover(target) {
+    if (!state.enabled || state.sleeping || state.angerUntil > now()) return;
+
+    if (target === state.hoverTarget) return;
+
+    clearTimeout(state.hoverTimer);
+    state.hoverTarget = target;
+
+    if (!target || target === character || character.contains(target) ||
+        target === launcher || panel.contains(target)) {
+      return;
+    }
+
+    state.hoverTimer = setTimeout(() => {
+      if (
+        target !== state.hoverTarget ||
+        !state.enabled ||
+        state.sleeping ||
+        state.angerUntil > now()
+      ) return;
+
+      const currentTime = now();
+      if (currentTime - state.lastContextAt < 900) return;
+
+      state.lastContextAt = currentTime;
+      showThought(contextMessage(target), 1550);
+    }, 560);
+  }
+
   enableButton.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -799,16 +957,30 @@
     state.pointerX = event.clientX;
     state.pointerY = event.clientY;
 
+    const pointerDistance = Math.hypot(
+      event.clientX - state.lastPointerX,
+      event.clientY - state.lastPointerY
+    );
+
+    state.lastPointerX = event.clientX;
+    state.lastPointerY = event.clientY;
+
     if (state.pointerId === event.pointerId) {
       moveDrag(event);
       return;
     }
 
-    if (state.enabled && !state.dragging && state.angerUntil <= now() && !state.enableAnimationFrame) {
-      setGazeTarget(event.clientX, event.clientY);
+    if (pointerDistance >= 2) {
+      state.lastActivity = now();
+      state.nextSleepAt = now() + random(7000, 10000);
     }
 
-    if (state.sleeping) wake();
+    if (state.enabled && !state.dragging && state.angerUntil <= now() && !state.enableAnimationFrame) {
+      setGazeTarget(event.clientX, event.clientY);
+      trackContextHover(nearestInteractiveTarget(event.target));
+    }
+
+    if (state.sleeping && pointerDistance >= 2) wake();
   }, { passive: true });
 
   document.addEventListener("visibilitychange", () => {
@@ -856,11 +1028,26 @@
       showThought(pick(profile().thoughts), 1300);
     }
 
+    if (
+      !state.sleeping &&
+      time >= state.nextSleepAt &&
+      !state.moving &&
+      state.angerUntil <= time &&
+      !state.enableAnimationFrame
+    ) {
+      state.sleeping = true;
+      state.sleepStartedAt = time;
+      stopNormalMove();
+      character.dataset.state = "sleeping";
+      hideThought();
+    }
+
     requestAnimationFrame(lifeLoop);
   }
 
   character.dataset.eye = state.eye;
   setPosition(state.x, state.y);
+  state.nextSleepAt = now() + random(7000, 10000);
   updateControls();
 
   if (!state.enabled) {
