@@ -58,9 +58,11 @@
     targetX: 0,
     targetY: 0,
     moving: false,
+    moveMode: "normal",
     nextMoveAt: now() + random(9000, 15000),
     pauseUntil: 0,
     lastFrame: performance.now(),
+    angerLastFrame: performance.now(),
 
     gazeX: 0,
     gazeY: 0,
@@ -115,9 +117,9 @@
            gazeSmoothing: 0.17,
            blinkMin: 5600,
            blinkMax: 9200,
-           idleExpressions: ["neutral", "curious", "focused", "alert"],
-           tapExpressions: ["curious", "alert", "focused"],
-           arriveExpressions: ["delighted", "happy", "focused", "alert"],
+           idleExpressions: ["neutral", "curious", "focused", "alert", "sly"],
+           tapExpressions: ["curious", "alert", "focused", "sly"],
+           arriveExpressions: ["delighted", "happy", "focused", "alert", "sly"],
           thoughts: ["I'm watching.", "Let's move.", "Easy.", "Keeping an eye on things."]
         }
       : {
@@ -236,7 +238,7 @@
   const expressions = [
     "neutral", "curious", "happy", "focused", "alert", "thinking",
     "worried", "confused", "bored", "sleeping", "relieved",
-    "angry", "scared", "annoyed", "delighted", "surprised", "shy"
+    "angry", "scared", "annoyed", "delighted", "surprised", "shy", "sly"
   ];
 
   function safeX() {
@@ -386,9 +388,59 @@
       return;
     }
 
-    chooseTarget();
+    state.moveMode =
+      Math.random() < (state.eye === "cyan" ? 0.24 : 0.17)
+        ? "burst"
+        : "normal";
+
+    if (state.moveMode === "burst") {
+      const half = safeX();
+      const bounds = safeY();
+      const marginX = half + 24;
+      const marginY = bounds.min + 12;
+      let bestX = state.x;
+      let bestY = state.y;
+      let bestDistance = 0;
+
+      for (let i = 0; i < 14; i++) {
+        const candidateX = random(
+          marginX,
+          Math.max(marginX + 25, window.innerWidth - marginX)
+        );
+        const candidateY = random(
+          marginY,
+          Math.max(marginY + 25, bounds.max - 10)
+        );
+        const candidateDistance = Math.hypot(
+          candidateX - state.x,
+          candidateY - state.y
+        );
+
+        if (candidateDistance > bestDistance) {
+          bestDistance = candidateDistance;
+          bestX = candidateX;
+          bestY = candidateY;
+        }
+      }
+
+      state.targetX = bestX;
+      state.targetY = bestY;
+    } else {
+      chooseTarget();
+    }
+
     state.moving = true;
     state.pauseUntil = 0;
+
+    if (state.moveMode === "burst") {
+      const dx = state.targetX - state.x;
+      const dy = state.targetY - state.y;
+      const distance = Math.max(1, Math.hypot(dx, dy));
+      const launchSpeed = profile().speed * 1.55;
+      state.velocityX = (dx / distance) * launchSpeed;
+      state.velocityY = (dy / distance) * launchSpeed;
+    }
+
     character.dataset.moving = "true";
     setExpression(pick(profile().arriveExpressions), 650);
   }
@@ -433,6 +485,7 @@
     const dx = state.targetX - state.x;
     const dy = state.targetY - state.y;
     const distance = Math.max(1, Math.hypot(dx, dy));
+    const burst = state.moveMode === "burst";
 
     if (distance <= p.arriveRadius && Math.hypot(state.velocityX, state.velocityY) < 16) {
       stopNormalMove();
@@ -445,20 +498,35 @@
     const dirX = dx / distance;
     const dirY = dy / distance;
 
-    let targetSpeed = p.speed;
-    if (distance < 180) targetSpeed *= clamp(distance / 180, 0.18, 1);
-    if (distance < 70) targetSpeed *= clamp(distance / 70, 0.16, 1);
+    let targetSpeed = burst ? p.speed * 2.35 : p.speed;
+    const acceleration = burst ? p.acceleration * 1.90 : p.acceleration;
+
+    if (distance < (burst ? 280 : 180)) {
+      targetSpeed *= clamp(
+        distance / (burst ? 280 : 180),
+        burst ? 0.10 : 0.18,
+        1
+      );
+    }
+    if (distance < (burst ? 110 : 70)) {
+      targetSpeed *= clamp(
+        distance / (burst ? 110 : 70),
+        burst ? 0.08 : 0.16,
+        1
+      );
+    }
 
     const desiredX = dirX * targetSpeed;
     const desiredY = dirY * targetSpeed;
 
-    const response = 1 - Math.exp(-p.acceleration * dt);
+    const response = 1 - Math.exp(-acceleration * dt);
     state.velocityX += (desiredX - state.velocityX) * response;
     state.velocityY += (desiredY - state.velocityY) * response;
 
     const speed = Math.hypot(state.velocityX, state.velocityY);
-    if (speed > p.speed) {
-      const scale = p.speed / speed;
+    const maxAllowedSpeed = burst ? p.speed * 2.35 : p.speed;
+    if (speed > maxAllowedSpeed) {
+      const scale = maxAllowedSpeed / speed;
       state.velocityX *= scale;
       state.velocityY *= scale;
     }
@@ -609,7 +677,7 @@
 
     state.evadeTargetX = clamp(state.x + Math.cos(angle) * preferred, half + 12, window.innerWidth - half - 12);
     state.evadeTargetY = clamp(state.y + Math.sin(angle) * preferred * 0.82, bounds.min + 10, bounds.max - 10);
-    state.nextEvadeAt = now() + 300;
+    state.nextEvadeAt = now() + random(520, 760);
     character.dataset.moving = "true";
     character.dataset.direction = visualDirection(state.evadeTargetX - state.x, state.evadeTargetY - state.y);
     setExpression("angry", 900, true);
@@ -627,8 +695,8 @@
       return;
     }
 
-    const dt = clamp((timestamp - state.lastFrame) / 1000, 0.001, 0.04);
-    state.lastFrame = timestamp;
+    const dt = clamp((timestamp - state.angerLastFrame) / 1000, 0.008, 0.04);
+    state.angerLastFrame = timestamp;
 
     const distanceFromCursor = Math.hypot(state.x - state.pointerX, state.y - state.pointerY);
     const distanceToTarget = Math.hypot(state.evadeTargetX - state.x, state.evadeTargetY - state.y);
@@ -701,6 +769,7 @@
     state.angerUntil = now() + random(3900, 5100);
     state.angerVelocityX = 0;
     state.angerVelocityY = 0;
+    state.angerLastFrame = performance.now();
     state.evadeTargetX = state.x;
     state.evadeTargetY = state.y;
     state.nextEvadeAt = 0;
@@ -746,13 +815,16 @@
       return;
     }
 
-    setExpression(pick(profile().tapExpressions), 800);
+    setExpression(
+      state.eye === "cyan"
+        ? pick(["sly", "focused", "alert", "curious"])
+        : pick(["shy", "happy", "curious"]),
+      900
+    );
     if (state.bubbleEnabled) {
       showThought(
-        state.eye === "cyan"
-          ? pick(["Hm?", "You called?", "I'm here."])
-          : pick(["Hm?", "Hi.", "You called?"]),
-        850
+        state.eye === "cyan" ? "Heh, dude." : "Hi, buddy.",
+        1000
       );
     }
   }
@@ -984,7 +1056,7 @@
       setExpression(
         state.eye === "pink"
           ? pick(["shy", "happy", "curious"])
-          : pick(["focused", "alert", "curious"]),
+          : pick(["sly", "focused", "alert", "curious"]),
         1500,
         true
       );
