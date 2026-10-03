@@ -1,13 +1,13 @@
 /* =========================================================
-   StudyLab Living Pet — active companion engine
-   Global/page-level companion only. No simulation integration.
+   StudyLab Living Pet — clean companion engine
+   Page-level only. No simulation integration.
    ========================================================= */
 
 (function () {
   "use strict";
 
-  if (window.__StudyLabLivingPetFinal) return;
-  window.__StudyLabLivingPetFinal = true;
+  if (window.__StudyLabLivingPetClean) return;
+  window.__StudyLabLivingPetClean = true;
 
   const KEY = {
     enabled: "studylab-pet-enabled",
@@ -17,50 +17,60 @@
     y: "studylab-pet-y"
   };
 
-  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const now = () => Date.now();
+  const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+  const random = (min, max) => min + Math.random() * (max - min);
+  const pick = (items) => items[Math.floor(Math.random() * items.length)];
 
-  const read = (key, fallback) => {
+  function read(key, fallback) {
     try {
       const value = localStorage.getItem(key);
       return value == null ? fallback : value;
     } catch (_) {
       return fallback;
     }
-  };
+  }
 
-  const save = (key, value) => {
-    try { localStorage.setItem(key, String(value)); } catch (_) {}
-  };
+  function save(key, value) {
+    try {
+      localStorage.setItem(key, String(value));
+    } catch (_) {}
+  }
 
-  const bool = (key, fallback) => read(key, String(fallback)) === "true";
-  const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
-  const rand = (min, max) => min + Math.random() * (max - min);
-  const pick = (items) => items[Math.floor(Math.random() * items.length)];
+  function readBool(key, fallback) {
+    return read(key, String(fallback)) === "true";
+  }
 
   const state = {
-    enabled: bool(KEY.enabled, true),
+    enabled: readBool(KEY.enabled, true),
     eye: read(KEY.eye, "cyan") === "pink" ? "pink" : "cyan",
-    bubbleEnabled: bool(KEY.bubble, true),
-    context: "home",
-    expression: "neutral",
-    sleeping: false,
-    dragging: false,
-    danger: false,
-    evading: false,
+    bubbleEnabled: readBool(KEY.bubble, true),
 
-    x: 0,
-    y: 0,
+    x: Number(read(KEY.x, Math.round(window.innerWidth * 0.72))) || window.innerWidth * 0.72,
+    y: Number(read(KEY.y, Math.round(window.innerHeight * 0.53))) || window.innerHeight * 0.53,
+
+    targetX: 0,
+    targetY: 0,
+    velocityX: 0,
+    velocityY: 0,
+    roamActive: false,
+    roamPauseUntil: 0,
+    roamLastFrame: performance.now(),
     moveAnimation: 0,
     moveToken: 0,
-    roamActive: false,
-    roamVelocityX: 0,
-    roamVelocityY: 0,
-    roamTargetX: 0,
-    roamTargetY: 0,
-    roamPausedUntil: 0,
-    roamBoostUntil: 0,
-    roamLastFrame: performance.now(),
+
+    burstActive: false,
+    burstTimers: [],
+    burstToken: 0,
+
+    dragging: false,
+    pointerId: null,
+    dragOffsetX: 0,
+    dragOffsetY: 0,
+    pressX: 0,
+    pressY: 0,
+    pointerMoved: false,
 
     pointerX: window.innerWidth * 0.72,
     pointerY: window.innerHeight * 0.52,
@@ -69,69 +79,52 @@
     gazeTargetX: 0,
     gazeTargetY: 0,
 
-    lastActivity: now(),
-    lastMeaningfulActivity: now(),
-    lastReaction: 0,
-    lastWander: 0,
-
-    nextBlink: now() + rand(6500, 10400),
-    nextWander: now() + rand(9000, 15000),
-    nextAmbient: now() + rand(10000, 18000),
-
-    clickTimes: [],
+    sleeping: false,
     angerLevel: 0,
     angerUntil: 0,
     angerTimer: null,
-    nextEvade: 0,
+    evadeTimer: null,
 
-    dragPointerId: null,
-    dragOffsetX: 0,
-    dragOffsetY: 0,
-    pressX: 0,
-    pressY: 0,
-    pointerMoved: false,
+    clickTimes: [],
+    lastMeaningfulActivity: now(),
+    lastInteraction: now(),
+    lastBlink: now(),
+    nextBlink: now() + random(5500, 9500),
+    nextThought: now() + random(11000, 19000),
+    sleepStartedAt: 0,
 
-    reactionTimer: null,
-    enableBurstActive: false,
-    enableBurstTimers: [],
     bubbleTimer: null,
-    blinkTimer: null,
+    expressionTimer: null,
     hoverTimer: null,
-    lastHoveredElement: null,
-    nameMessageShown: false,
-    studentName: "",
-    companionName: "Student 0000",
-    recentThoughts: [],
-    lastThoughtAt: 0,
-    recentInteractionKeys: [],
-    lastSleepAt: 0,
-    wakeGreetingShown: false
+    lastHover: null
   };
 
-  state.x = clamp(
-    Number(read(KEY.x, Math.round(window.innerWidth * 0.72))) || window.innerWidth * 0.72,
-    50,
-    window.innerWidth - 50
-  );
-  state.y = clamp(
-    Number(read(KEY.y, Math.round(window.innerHeight * 0.53))) || window.innerHeight * 0.53,
-    76,
-    window.innerHeight - 82
-  );
+  function safeX() {
+    return window.innerWidth <= 720 ? 42 : 48;
+  }
 
-  const link = document.createElement("link");
-  link.rel = "stylesheet";
-  link.href = "assets/css/studylab-pet.css";
-  document.head.appendChild(link);
+  function safeY() {
+    return {
+      min: 76,
+      max: Math.max(96, window.innerHeight - 84)
+    };
+  }
 
-  document.body.insertAdjacentHTML("beforeend",
+  state.x = clamp(state.x, safeX(), window.innerWidth - safeX());
+  {
+    const bounds = safeY();
+    state.y = clamp(state.y, bounds.min, bounds.max);
+  }
+
+  document.body.insertAdjacentHTML(
+    "beforeend",
     '<div id="studylabPetStage">' +
-      '<div class="sl-pet-character" data-state="neutral" data-eye="cyan" data-danger="false" data-blink="false" data-moving="false" data-direction="idle" role="button" tabindex="0" aria-label="StudyLab Pet">' +
+      '<div class="sl-pet-character" role="button" tabindex="0" aria-label="StudyLab Pet" data-state="neutral" data-eye="cyan" data-moving="false" data-direction="idle" data-danger="false" data-burst="false">' +
         '<div class="sl-pet-visual">' +
           '<div class="sl-pet-face" aria-hidden="true">' +
             '<div class="sl-pet-eye left"><i></i></div>' +
             '<div class="sl-pet-eye right"><i></i></div>' +
-            '<div class="sl-pet-mouth" aria-hidden="true"></div>' +
+            '<div class="sl-pet-mouth"></div>' +
           '</div>' +
           '<svg class="sl-pet-crack" viewBox="0 0 32 26" aria-hidden="true">' +
             '<path d="M26 2L20 8L22 11L16 14L18 18L11 24"></path>' +
@@ -146,26 +139,27 @@
         '<div class="sl-pet-thought-cloud"><b data-pet-thought-text>...</b></div>' +
       '</div>' +
     '</div>' +
-
     '<button id="studylabPetLauncher" type="button" aria-expanded="false" aria-controls="studylabPetPanel" title="StudyLab Pet controls">' +
       '<span class="sl-pet-launcher-icon" aria-hidden="true">🤖</span><span>Pet</span>' +
     '</button>' +
-
     '<aside class="sl-pet-panel" id="studylabPetPanel" hidden aria-label="StudyLab Pet controls">' +
       '<div class="sl-pet-panel-head">' +
         '<div><strong>StudyLab Pet</strong><small>Your little study companion</small></div>' +
         '<button class="sl-pet-panel-close" type="button" data-pet-close aria-label="Close pet controls">×</button>' +
       '</div>' +
       '<div class="sl-pet-setting"><span>Pet</span><div class="sl-pet-setting-buttons">' +
-        '<button type="button" data-pet-enable>Enable</button><button type="button" data-pet-disable>Disable</button>' +
+        '<button type="button" data-pet-enable>Enable</button>' +
+        '<button type="button" data-pet-disable>Disable</button>' +
       '</div></div>' +
       '<div class="sl-pet-setting"><span>Eye colour</span><div class="sl-pet-setting-buttons">' +
-        '<button type="button" data-pet-eye="cyan">Cyan</button><button type="button" data-pet-eye="pink">Pink</button>' +
+        '<button type="button" data-pet-eye="cyan">Cyan</button>' +
+        '<button type="button" data-pet-eye="pink">Pink</button>' +
       '</div></div>' +
       '<div class="sl-pet-setting"><span>Message box</span><div class="sl-pet-setting-buttons">' +
-        '<button type="button" data-pet-bubble-enable>Enable</button><button type="button" data-pet-bubble-disable>Disable</button>' +
+        '<button type="button" data-pet-bubble-enable>Enable</button>' +
+        '<button type="button" data-pet-bubble-disable>Disable</button>' +
       '</div></div>' +
-      '<p class="sl-pet-panel-note">Enable briefly wakes the Pet with a quick burst, then normal roaming resumes.</p>' +
+      '<p class="sl-pet-panel-note">Enable gives the Pet one quick movement burst, then normal roaming resumes.</p>' +
     '</aside>'
   );
 
@@ -175,7 +169,6 @@
   const eyes = [...stage.querySelectorAll(".sl-pet-eye > i")];
   const thought = stage.querySelector("[data-pet-thought]");
   const thoughtText = stage.querySelector("[data-pet-thought-text]");
-
   const launcher = document.getElementById("studylabPetLauncher");
   const panel = document.getElementById("studylabPetPanel");
   const closeButton = panel.querySelector("[data-pet-close]");
@@ -185,702 +178,358 @@
   const bubbleEnableButton = panel.querySelector("[data-pet-bubble-enable]");
   const bubbleDisableButton = panel.querySelector("[data-pet-bubble-disable]");
 
-  /*
-   * Single capture-phase settings handler. It owns the entire Pet control panel,
-   * so the controls keep working independently of pet movement/state handlers.
-   */
-  panel.addEventListener("click", (ev) => {
-    const target = ev.target.closest("button");
-    if (!target || !panel.contains(target)) return;
+  const expressionNames = [
+    "neutral", "curious", "happy", "thinking", "focused",
+    "alert", "surprised", "shy", "delighted", "annoyed",
+    "angry", "scared", "sleeping", "relieved", "sad"
+  ];
 
-    const petEnable = target.matches("[data-pet-enable]");
-    const petDisable = target.matches("[data-pet-disable]");
-    const petEye = target.dataset.petEye;
-    const bubbleEnable = target.matches("[data-pet-bubble-enable]");
-    const bubbleDisable = target.matches("[data-pet-bubble-disable]");
-
-    if (!petEnable && !petDisable && !petEye && !bubbleEnable && !bubbleDisable) return;
-
-    ev.preventDefault();
-    ev.stopImmediatePropagation();
-    state.lastMeaningfulActivity = now();
-
-    if (petEnable) {
-      setEnabled(true);
-      return;
-    }
-
-    if (petDisable) {
-      setEnabled(false);
-      return;
-    }
-
-
-    if (petEye) {
-      state.eye = petEye === "pink" ? "pink" : "cyan";
-      character.dataset.eye = state.eye;
-      save(KEY.eye, state.eye);
-      setExpression(state.eye === "cyan" ? "delighted" : "shy", 1000, true);
-      notifySetting("Eye colour: " + (state.eye === "cyan" ? "Cyan" : "Pink") + ".");
-      updateControls();
-      return;
-    }
-
-    if (bubbleEnable) {
-      setBubbleEnabled(true);
-      return;
-    }
-
-    if (bubbleDisable) {
-      setBubbleEnabled(false);
-    }
-  }, true);
+  const thoughts = [
+    "Still here.",
+    "Let's keep going.",
+    "Watching the page.",
+    "One thing at a time.",
+    "Study mode.",
+    "Keeping an eye on things."
+  ];
 
   function setPosition(x, y) {
-    const halfW = window.innerWidth <= 720 ? 41 : 45;
-    const minY = 74;
-    const maxY = Math.max(minY + 20, window.innerHeight - 82);
+    const half = safeX();
+    const bounds = safeY();
 
-    state.x = clamp(x, halfW, window.innerWidth - halfW);
-    state.y = clamp(y, minY, maxY);
+    state.x = clamp(x, half, window.innerWidth - half);
+    state.y = clamp(y, bounds.min, bounds.max);
 
     character.style.transform =
       "translate3d(" + state.x + "px, " + state.y + "px, 0) translate(-50%, -50%)";
 
-    if (thought.classList.contains("is-visible")) {
-      placeThought();
-    }
-
+    positionThought();
   }
 
-  setPosition(state.x, state.y);
-
-  function wake(reason) {
-    const t = now();
-    state.lastActivity = t;
-    if (!state.sleeping) return;
-
-    const sleptFor = state.lastSleepAt ? t - state.lastSleepAt : 0;
-    state.sleeping = false;
-    state.wakeGreetingShown = false;
-    character.dataset.state = "curious";
-    state.expression = "curious";
-    state.nextBlink = t + rand(2800, 5200);
-
-    if (sleptFor >= 5000 && state.enabled && state.bubbleEnabled) {
-      state.wakeGreetingShown = true;
-      setTimeout(() => {
-        if (!state.enabled || !state.bubbleEnabled || state.sleeping) return;
-        setExpression("delighted", 1200, true);
-        showThought("Oh, " + state.companionName + " is back.", 1900);
-      }, 130);
-    }
-  }
-
-  function placeThought() {
-    const cloudWidth = window.innerWidth <= 720 ? 82 : 90;
-    const petHalfHeight = window.innerWidth <= 720 ? 32 : 35;
-    const rightShift = window.innerWidth <= 720 ? 5 : 7;
-    const anchorX = clamp(
-      state.x - cloudWidth / 2 + rightShift,
+  function positionThought() {
+    const width = window.innerWidth <= 720 ? 100 : 110;
+    const left = clamp(
+      state.x - width * 0.50 + 6,
       8,
-      Math.max(8, window.innerWidth - cloudWidth - 8)
+      Math.max(8, window.innerWidth - width - 8)
     );
-    thought.style.left = anchorX + "px";
-    thought.style.top = Math.max(54, state.y - petHalfHeight - 2) + "px";
+    thought.style.left = left + "px";
+    thought.style.top = Math.max(52, state.y - 42) + "px";
   }
 
-  const thoughtVariants = {
-    "Focus, work, break.":["Focus, work, break.","One task at a time.","Keep the rhythm."],
-    "Recall before reveal.":["Try remembering first.","Give your memory a turn.","Don't reveal it yet."],
-    "Find the pattern.":["Mistakes leave clues.","Let's find what changed.","That one has a lesson."],
-    "Plan the next task.":["One step at a time.","What comes next?","Make the next move count."],
-    "Check before targeting.":["Measure first.","Check the target twice.","Numbers behave better when checked."],
-    "Time + accuracy.":["Watch both the clock and the answer.","Speed matters, but so does accuracy.","Stay sharp."],
-    "Convert, then verify.":["Convert it, then check it.","Units first. Confidence second.","Let's make the units behave."],
-    "Relative motion → frequency.":["Motion changes what you hear.","Relative motion matters here.","Listen for the shift."],
-    "Masses attract each other.":["Gravity never really clocks out.","Everything with mass pulls a little.","Tiny pull, big consequence."],
-    "Forces change motion.":["Forces leave fingerprints.","Watch what the force changes.","Motion follows the push and pull."],
-    "Amplitude • frequency • phase.":["Three clues: amplitude, frequency, phase.","Watch the pattern change.","Waves have a rhythm."],
-    "Current • voltage • resistance.":["Keep an eye on the circuit.","Current, voltage, resistance.","Let's follow the charge."],
-    "Watch the endpoint.":["The endpoint is hiding in plain sight.","Watch for the change.","Easy hand, sharp eye."],
-    "Particles • bonds • reactions.":["Something interesting is happening at the particle level.","Bonds, particles, reactions.","Chemistry likes to rearrange things."],
-    "Observe before concluding.":["Look closely first.","Observation before conclusion.","Tiny details can matter."],
-    "Check signs and quadrants.":["Signs matter here.","Quadrants can trick you.","Check the angle before trusting it."],
-    "Define the variable first.":["Name the variable before chasing it.","One clean definition helps.","Start with the variable."],
-    "Magnitude + direction.":["Size and direction.","Vectors like both parts.","Don't lose the direction."],
-    "Isolate x, then check.":["Move the pieces, then check.","One step at a time.","Solve it, then verify it."],
-    "Structure • function • systems.":["Structure tells a story.","Function follows the structure.","Biology is full of connections."],
-    "Spot repeated patterns.":["Past papers leave clues.","Look for recurring ideas.","Patterns show up eventually."],
-    "Change one variable.":["Change one thing and watch.","One variable at a time.","Let's see what moves."],
-    "Study resources live here.":["There's useful stuff here.","The study trail continues.","A little resource treasure."],
-    "Narrow the search term.":["A tighter search should help.","Try a sharper keyword.","Let's narrow it down."],
-    "Keep this for later.":["Good one to keep.","Save it before you forget.","That might be useful later."],
-    "Ready for the PDF.":["That one looks ready to take with you.","Paper time.","A PDF for future-you."],
-    "Open it and start.":["Go on, open it.","Ready when you are.","Let's see what's inside."],
-    "Careful: data may clear.":["Easy there.","That button deserves a second look.","Careful with the data."],
-    "Choose what to study.":["Where are we going?","What's interesting today?","Pick a path."],
-    "Choose the next study task.":["What's the next little task?","One useful thing at a time.","Let's pick the next move."]
-  };
-
-  function freshThought(message) {
-    if (!message) return "";
-    const candidates = Array.isArray(message)
-      ? message
-      : (thoughtVariants[message] || [message]);
-    const clean = [...new Set(candidates.filter(Boolean))];
-    if (!clean.length) return "";
-    const recent = new Set(state.recentThoughts);
-    const fresh = clean.filter((item) => !recent.has(item));
-    const selected = pick(fresh.length ? fresh : clean);
-    state.recentThoughts = [selected, ...state.recentThoughts.filter((item) => item !== selected)].slice(0, 6);
-    return selected;
-  }
-
-  function showThought(message, duration = 1800, force = false) {
-    if (!state.enabled || (!state.bubbleEnabled && !force) || !message) return;
-    const previous = state.recentThoughts[0];
-    const selected = freshThought(message);
-    if (!selected) return;
-    const t = now();
-    if (selected === previous && t - state.lastThoughtAt < 4200) return;
-    state.lastThoughtAt = t;
-    thoughtText.textContent = selected;
-    placeThought();
-    thought.classList.add("is-visible");
-    clearTimeout(state.bubbleTimer);
-    state.bubbleTimer = setTimeout(() => thought.classList.remove("is-visible"), duration);
-  }
-
-  function displayNameForBubble(name) {
-    const clean = String(name || "").trim().replace(/s+/g, " ");
-    const placeholder = clean.match(/^Students*([0-9]{4})$/i);
-    if (placeholder) return "Student " + placeholder[1];
-    if (!clean) return "Student";
-    const first = clean.split(" ")[0];
-    return first.length <= 14 ? first : first.slice(0, 13) + "…";
-  }
-
-  function setStudentIdentity(name) {
-    const clean = String(name || "").trim().replace(/s+/g, " ");
-    if (!clean) return false;
-    const next = displayNameForBubble(clean);
-    const changed = state.studentName !== clean;
-    state.studentName = clean;
-    state.companionName = next;
-    return changed;
-  }
-
-  function sessionFlag(key) {
-    try { return sessionStorage.getItem(key) === "1"; } catch (_) { return false; }
-  }
-
-  function setSessionFlag(key) {
-    try { sessionStorage.setItem(key, "1"); } catch (_) {}
-  }
-
-  function initialWelcome() {
-    if (!state.enabled || !state.bubbleEnabled || sessionFlag("studylab-pet-welcomed")) return;
-    setSessionFlag("studylab-pet-welcomed");
-    setTimeout(() => {
-      if (!state.enabled || !state.bubbleEnabled || state.sleeping) return;
-      setExpression("delighted", 1250, true);
-      showThought("Hi " + state.companionName + "!", 1900);
-    }, 600);
-  }
-
-  async function loadStudentIdentity() {
-    try {
-      const account = window.StudyLabAccount;
-      if (account?.ready) {
-        await account.ready;
-        const profile = await account.getProfile();
-        if (profile?.display_name) setStudentIdentity(profile.display_name);
-      }
-    } catch (_) {}
-    initialWelcome();
-  }
-
-  function hideThought() {
-    thought.classList.remove("is-visible");
-  }
-
-  const expressionNames = [
-    "neutral", "curious", "happy", "excited", "focused", "thinking",
-    "alert", "worried", "confused", "suspicious", "bored", "sleeping",
-    "relieved", "sad",
-    "angry", "scared", "annoyed", "delighted", "surprised", "shy"
-  ];
-
-  function setExpression(name, ttl = 1300, force = false) {
+  function setExpression(name, duration = 1000, force = false) {
     if (!state.enabled && !force) return;
 
     const next = expressionNames.includes(name) ? name : "neutral";
-    state.expression = next;
     character.dataset.state = state.sleeping ? "sleeping" : next;
 
-    clearTimeout(state.reactionTimer);
-    if (ttl > 0) {
-      state.reactionTimer = setTimeout(() => {
-        if (!state.dragging && !state.sleeping && now() > state.angerUntil) {
-          state.expression = "neutral";
-          character.dataset.state = "neutral";
-        }
-      }, ttl);
+    clearTimeout(state.expressionTimer);
+
+    if (duration > 0) {
+      state.expressionTimer = setTimeout(() => {
+        if (!state.enabled || state.dragging || state.sleeping || now() < state.angerUntil) return;
+        character.dataset.state = "neutral";
+      }, duration);
     }
   }
 
-  function contextFromPath() {
-    const path = location.pathname.toLowerCase();
-    if (path.includes("study-tools")) return "study";
-    if (path.includes("physics")) return "physics";
-    if (path.includes("chemistry")) return "chemistry";
-    if (path.includes("maths")) return "maths";
-    if (path.includes("biology")) return "biology";
-    if (path.includes("exam-hub")) return "exam";
-    if (path.includes("telegram")) return "social";
-    return "home";
+  function showThought(message, duration = 1500, force = false) {
+    if (!state.enabled || (!state.bubbleEnabled && !force) || !message) return;
+
+    thoughtText.textContent = message;
+    positionThought();
+    thought.classList.add("is-visible");
+
+    clearTimeout(state.bubbleTimer);
+    state.bubbleTimer = setTimeout(() => {
+      thought.classList.remove("is-visible");
+    }, duration);
   }
 
-  state.context = contextFromPath();
-
-  const contextMoods = {
-    home: ["curious", "calm", "neutral"],
-    physics: ["alert", "focused", "excited"],
-    chemistry: ["curious", "delighted", "focused"],
-    maths: ["thinking", "focused", "suspicious"],
-    biology: ["curious", "delighted", "alert"],
-    study: ["focused", "thinking", "curious"],
-    exam: ["alert", "focused", "worried"],
-    social: ["happy", "delighted", "curious"]
-  };
-
-  const contextHoverFallback = {
-    home:["Choose what to study.","What's interesting today?","Pick a path."],
-    physics:["Physics time.","Let's see what moves.","Watch the cause and effect."],
-    chemistry:["Chemistry time.","Something is reacting.","Let's see what changed."],
-    maths:["Maths time.","Think first, then solve.","Let's make the steps behave."],
-    biology:["Life is doing something interesting.","Look at the structure.","Biology has patterns everywhere."],
-    study:["Choose the next little task.","One useful thing at a time.","Let's pick the next move."],
-    exam:["Read carefully.","Stay calm and watch the time.","One question at a time."],
-    social:["Something useful may be hiding here.","Study resources live here.","The community shelf."]
-  };
-
-  const contextActionFallback = {
-    home:["Opening this StudyLab item.","Let's see.","Off we go."],
-    physics:["Opening physics work.","Let's follow the motion.","Physics is calling."],
-    chemistry:["Opening chemistry work.","Let's inspect the reaction.","Chemistry time."],
-    maths:["Opening maths work.","Let's solve it carefully.","Maths time."],
-    biology:["Opening biology work.","Let's inspect the system.","Biology time."],
-    study:["Opening this study tool.","Let's make this count.","One useful tool."],
-    exam:["Opening exam material.","Let's tackle it carefully.","Exam work."],
-    social:["Opening community resources.","Let's see what's there.","Community resources."]
-  };
-
-  const petProfile = {
-    moveScale: 1.00,
-    minMove: 320,
-    wanderWait: [18000, 30000],
-    initialWait: [9000, 15000],
-    sleepAfter: 34000,
-    cardBias: .46,
-    hoverDelay: 160,
-    expressionMoods: ["neutral","curious","thinking","happy"],
-    angerDuration: [4500,6500],
-    angerFactor: 1.00
-  };
-
-  function modeProfile() {
-    return petProfile;
+  function hideThought() {
+    clearTimeout(state.bubbleTimer);
+    thought.classList.remove("is-visible");
   }
 
-  function modeExpression(base) {
-    const profile = modeProfile();
-    return profile.expressionMoods?.length ? pick(profile.expressionMoods) : eyeVariation(base);
+  function clearMovementFrame() {
+    if (state.moveAnimation) cancelAnimationFrame(state.moveAnimation);
+    state.moveAnimation = 0;
+    state.moveToken += 1;
   }
 
-  const semanticRules = [
-    {re:/pomodoro|focus timer/,expression:"focused",hover:"Focus, work, break.",action:"Starting a focus session."},
-    {re:/flashcard|flash card/,expression:"curious",hover:"Recall before reveal.",action:"Opening flashcard practice."},
-    {re:/mistake|mistakes|error notebook/,expression:"worried",hover:"Find the pattern.",action:"Reviewing mistakes."},
-    {re:/planner|study plan/,expression:"thinking",hover:"Plan the next task.",action:"Planning the study session."},
-    {re:/marks|marks calculator|calculator|calculat/,expression:"thinking",hover:"Check before targeting.",action:"Calculating the marks."},
-    {re:/mock exam|exam timer|quiz/,expression:"alert",hover:"Time + accuracy.",action:"Starting mock-exam work."},
-    {re:/converter|convert/,expression:"curious",hover:"Convert, then verify.",action:"Converting units."},
-    {re:/doppler/,expression:"excited",hover:"Relative motion → frequency.",action:"Studying the Doppler effect."},
-    {re:/gravity|gravitation/,expression:"focused",hover:"Masses attract each other.",action:"Exploring gravity."},
-    {re:/newton|force|motion|kinematic|mechanic/,expression:"alert",hover:"Forces change motion.",action:"Working on mechanics."},
-    {re:/wave|oscillation|shm|simple harmonic/,expression:"focused",hover:"Amplitude • frequency • phase.",action:"Studying wave motion."},
-    {re:/electric|circuit|current|voltage|resistor/,expression:"alert",hover:"Current • voltage • resistance.",action:"Working on electricity."},
-    {re:/physics/,expression:"focused",hover:"Force • motion • energy.",action:"Opening physics work."},
-    {re:/titration|titrate|endpoint|end point/,expression:"focused",hover:"Watch the endpoint.",action:"Working on titration."},
-    {re:/reaction|chemical|organic|inorganic|mole|stoichiometr/,expression:"curious",hover:"Particles • bonds • reactions.",action:"Working on chemistry."},
-    {re:/practical|laboratory|lab/,expression:"delighted",hover:"Observe before concluding.",action:"Starting practical work."},
-    {re:/chemistry/,expression:"curious",hover:"Particles • bonds • reactions.",action:"Opening chemistry work."},
-    {re:/trigonometry|sine|cosine|tan/,expression:"thinking",hover:"Check signs and quadrants.",action:"Working on trigonometry."},
-    {re:/calculus|derivative|integral|differential/,expression:"focused",hover:"Define the variable first.",action:"Working on calculus."},
-    {re:/vector|vectors/,expression:"thinking",hover:"Magnitude + direction.",action:"Working on vectors."},
-    {re:/equation|algebra|polynomial/,expression:"thinking",hover:"Isolate x, then check.",action:"Working on algebra."},
-    {re:/maths|mathematics/,expression:"thinking",hover:"Plan • solve • verify.",action:"Opening maths work."},
-    {re:/genetics|gene|dna|chromosome/,expression:"curious",hover:"Genes carry information.",action:"Exploring genetics."},
-    {re:/cell|organelle|mitosis|meiosis/,expression:"focused",hover:"Structure and function.",action:"Studying cells."},
-    {re:/ecology|ecosystem|food chain/,expression:"alert",hover:"Watch system interactions.",action:"Exploring ecology."},
-    {re:/biology|organism/,expression:"curious",hover:"Structure • function • systems.",action:"Opening biology work."},
-    {re:/past paper|marking scheme|model paper|school paper/,expression:"focused",hover:"Spot repeated patterns.",action:"Opening exam material."},
-    {re:/exam hub|exam/,expression:"alert",hover:"Read carefully. Watch time.",action:"Opening exam work."},
-    {re:/simulation|simulat|interactive/,expression:"excited",hover:"Change one variable.",action:"Opening an interactive simulation."},
-    {re:/telegram|community|channel/,expression:"happy",hover:"Study resources live here.",action:"Opening community resources."},
-    {re:/search/,expression:"curious",hover:"Narrow the search term.",action:"Using StudyLab search."},
-    {re:/profile|account|name/,expression:"curious",hover:"Your StudyLab identity.",action:"Editing your profile."},
-    {re:/theme|dark mode|light mode/,expression:"surprised",hover:"New view, same StudyLab.",action:"Changing the theme."},
-    {re:/save|favorite|favourite|bookmark/,expression:"happy",hover:"Keep this for later.",action:"Saving this resource."},
-    {re:/download|pdf/,expression:"focused",hover:"Ready for the PDF.",action:"Downloading study material."},
-    {re:/open|view/,expression:"focused",hover:"Open it and start.",action:"Opening the material."},
-    {re:/delete|remove|reset|clear/,expression:"worried",hover:"Careful: data may clear.",action:"Editing or clearing this item."},
-    {re:/submit|finish|complete|start/,expression:"alert",hover:"Ready for the next step.",action:"Moving to the next step."}
-  ];
-
-  function descriptor(el) {
-    if (!el) return "";
-    return [
-      el.id || "",
-      typeof el.className === "string" ? el.className : "",
-      el.getAttribute("aria-label") || "",
-      el.getAttribute("title") || "",
-      el.getAttribute("data-tool") || "",
-      el.getAttribute("href") || "",
-      el.textContent || ""
-    ].join(" ").replace(/\s+/g, " ").toLowerCase();
+  function clearBurstTimers() {
+    state.burstToken += 1;
+    state.burstTimers.forEach((timer) => clearTimeout(timer));
+    state.burstTimers = [];
+    state.burstActive = false;
+    character.dataset.burst = "false";
   }
 
-  function elementName(el) {
-    if (!el) return "this";
+  function addBurstTimer(fn, delay) {
+    const timer = setTimeout(fn, delay);
+    state.burstTimers.push(timer);
+    return timer;
+  }
 
-    const preferred =
-      el.getAttribute("aria-label") ||
-      el.getAttribute("title") ||
-      el.getAttribute("data-tool");
+  function stopNormalRoam() {
+    state.roamActive = false;
+    state.roamPauseUntil = 0;
+    state.velocityX = 0;
+    state.velocityY = 0;
+  }
 
-    if (preferred && preferred.trim().length >= 2) {
-      return preferred.trim().replace(/\s+/g, " ").slice(0, 72);
+  function stopAllMovement() {
+    clearBurstTimers();
+    clearMovementFrame();
+    stopNormalRoam();
+    character.dataset.moving = "false";
+    character.dataset.direction = "idle";
+    visual.style.transform = "";
+  }
+
+  function wake() {
+    if (!state.sleeping) return;
+
+    state.sleeping = false;
+    state.lastMeaningfulActivity = now();
+    state.nextBlink = now() + random(2500, 5000);
+    character.dataset.state = "curious";
+    setExpression("curious", 900, true);
+  }
+
+  function blink() {
+    if (!state.enabled || state.sleeping || state.dragging) return;
+
+    character.dataset.blink = "true";
+    state.lastBlink = now();
+
+    setTimeout(() => {
+      if (state.enabled) character.dataset.blink = "false";
+    }, 140);
+  }
+
+  function setGazeTarget(x, y, immediate = false) {
+    state.gazeTargetX = clamp(x - state.x, -28, 28);
+    state.gazeTargetY = clamp(y - state.y, -18, 18);
+
+    if (immediate) {
+      state.gazeX = state.gazeTargetX;
+      state.gazeY = state.gazeTargetY;
     }
-
-    const heading = el.querySelector?.(
-      "h1,h2,h3,h4,h5,h6,.card-title,.utility-card-title,.subject-title,.tool-title,strong,b"
-    );
-    const headingText = heading?.textContent?.trim().replace(/\s+/g, " ");
-    if (headingText && headingText.length >= 2) return headingText.slice(0, 72);
-
-    const raw = (el.textContent || "").trim().replace(/\s+/g, " ");
-    return raw.slice(0, 72) || "this";
-  }
-
-  function infoFor(el, type = "hover") {
-    const text = descriptor(el);
-    const matched = semanticRules.find((item) => item.re.test(text));
-    const context = contextFromElement(el) || state.context;
-    const fallback = type === "click"
-      ? (contextActionFallback[context] || "Opening this StudyLab item.")
-      : (contextHoverFallback[context] || "Choose the next study task.");
-
-    return {
-      expression: matched ? matched.expression : pick(contextMoods[context] || ["neutral"]),
-      thought: matched ? (type === "click" ? matched.action : matched.hover) : fallback
-    };
-  }
-
-  function modeProfile() {
-    return combinedProfile();
-  }
-
-  function modeExpression(base) {
-    const profile = modeProfile();
-    return profile.expressionMoods?.length ? pick(profile.expressionMoods) : eyeVariation(base);
-  }
-
-  function contextFromElement(el) {
-    const text = descriptor(el);
-    if (!text) return state.context;
-    if (/pomodoro|focus timer|flashcard|mistake|planner|marks calculator|mock exam|converter/.test(text)) return "study";
-    if (/physics|doppler|gravity|wave|electricity|force|motion/.test(text)) return "physics";
-    if (/chemistry|chemical|practical|laboratory|reaction|titration/.test(text)) return "chemistry";
-    if (/maths|mathematics|trigonometry|calculus|vector|algebra/.test(text)) return "maths";
-    if (/biology|genetics|cell|ecology|organism/.test(text)) return "biology";
-    if (/exam|past paper|marking scheme|model paper|school paper|timetable/.test(text)) return "exam";
-    if (/telegram|community|channel/.test(text)) return "social";
-    return state.context;
-  }
-
-  function eyeVariation(base) {
-    if (state.eye === "cyan") {
-      const boyish = {
-        neutral: ["neutral", "suspicious", "calm"],
-        curious: ["curious", "alert"],
-        happy: ["happy", "excited"],
-        thinking: ["thinking", "focused"],
-        delighted: ["delighted", "excited"]
-      };
-      const pool = boyish[base];
-      return pool ? pick(pool) : base;
-    }
-
-    const girlish = {
-      neutral: ["neutral", "shy", "curious"],
-      curious: ["curious", "shy", "happy"],
-      happy: ["happy", "delighted"],
-      thinking: ["thinking", "curious"],
-      delighted: ["delighted", "happy", "shy"]
-    };
-    const pool = girlish[base];
-    return pool ? pick(pool) : base;
-  }
-
-  function interactionKey(el) {
-    if (!el) return "";
-    const href = el.getAttribute("href") || "";
-    const id = el.id || "";
-    const label = (el.getAttribute("aria-label") || el.getAttribute("title") || "").trim();
-    const heading = el.querySelector?.("h1,h2,h3,h4,h5,h6,.card-title,.utility-card-title,.subject-title,.tool-title,strong")?.textContent || "";
-    return [href, id, label, heading].join("|").replace(/s+/g, " ").slice(0, 180).toLowerCase();
-  }
-
-  function reactToElement(el, type) {
-    if (!state.enabled || !el || el === character || character.contains(el) || el === launcher || panel.contains(el)) return;
-
-    const time = now();
-    if (type === "click" && time - state.lastReaction < 350) return;
-
-    const key = interactionKey(el);
-    if (type === "hover" && key &&
-        state.recentInteractionKeys.some((item) => item.key === key && time - item.time < 6500)) {
-      return;
-    }
-
-    state.recentInteractionKeys = [
-      ...(key ? [{ key, time }] : []),
-      ...state.recentInteractionKeys.filter((item) => item.key !== key && time - item.time < 16000)
-    ].slice(0, 12);
-
-    state.lastReaction = time;
-    state.lastActivity = time;
-    state.lastMeaningfulActivity = time;
-    wake("pointer");
-
-    const info = infoFor(el, type);
-    const expression = modeExpression(info.expression || "neutral");
-    setExpression(expression, type === "hover" ? 1250 : 1550);
-    showThought(info.thought, type === "hover" ? 1450 : 1500);
-    lookAtElement(el);
-  }
-
-  function lookAtElement(el) {
-    const rect = el.getBoundingClientRect();
-    if (!rect.width && !rect.height) return;
-    const targetX = rect.left + rect.width / 2;
-    const targetY = rect.top + rect.height / 2;
-    setGazeTarget(targetX, targetY, false);
-  }
-
-  function setGazeTarget(x, y, reversed) {
-    const dx = x - state.x;
-    const dy = y - state.y;
-    const distance = Math.max(1, Math.hypot(dx, dy));
-    const scale = clamp(distance / 170, 0.45, 1);
-
-    let gx = clamp(dx / 130, -1, 1) * 6.5 * scale;
-    let gy = clamp(dy / 110, -1, 1) * 5.8 * scale;
-
-    if (reversed) {
-      gx *= -1.18;
-      gy *= -1.18;
-    }
-
-    state.gazeTargetX = clamp(gx, -7.2, 7.2);
-    state.gazeTargetY = clamp(gy, -6.2, 6.2);
   }
 
   function updateGaze() {
-    if (state.enabled && !state.dragging && !state.sleeping && !state.evading) {
-      setGazeTarget(
-        state.pointerX,
-        state.pointerY,
-        state.angerUntil > now()
-      );
+    const ease = 0.12;
+    state.gazeX += (state.gazeTargetX - state.gazeX) * ease;
+    state.gazeY += (state.gazeTargetY - state.gazeY) * ease;
+
+    eyes.forEach((eye) => {
+      eye.style.setProperty("--gaze-x", state.gazeX + "px");
+      eye.style.setProperty("--gaze-y", state.gazeY + "px");
+    });
+  }
+
+  function chooseNormalTarget() {
+    const marginX = safeX() + 30;
+    const bounds = safeY();
+
+    let x = random(marginX, Math.max(marginX + 20, window.innerWidth - marginX));
+    let y = random(bounds.min + 8, Math.max(bounds.min + 25, bounds.max - 8));
+
+    const distance = Math.hypot(x - state.x, y - state.y);
+    if (distance < 180) {
+      const angle = random(0, Math.PI * 2);
+      x = clamp(state.x + Math.cos(angle) * 280, marginX, window.innerWidth - marginX);
+      y = clamp(state.y + Math.sin(angle) * 220, bounds.min + 8, bounds.max - 8);
     }
 
-    state.gazeX += (state.gazeTargetX - state.gazeX) * 0.14;
-    state.gazeY += (state.gazeTargetY - state.gazeY) * 0.14;
-
-    character.style.setProperty("--gaze-x", state.gazeX.toFixed(2) + "px");
-    character.style.setProperty("--gaze-y", state.gazeY.toFixed(2) + "px");
+    state.targetX = x;
+    state.targetY = y;
   }
 
-  function animationLoop(timestamp) {
-    updateGaze();
-    updateRoam(timestamp);
-    requestAnimationFrame(animationLoop);
+  function startNormalRoam() {
+    if (!state.enabled || state.sleeping || state.dragging || reducedMotion || state.burstActive) return;
+
+    state.roamActive = true;
+    state.roamLastFrame = performance.now();
+    chooseNormalTarget();
+
+    if (state.velocityX === 0 && state.velocityY === 0) {
+      const angle = random(0, Math.PI * 2);
+      state.velocityX = Math.cos(angle) * 8;
+      state.velocityY = Math.sin(angle) * 7;
+    }
   }
-  requestAnimationFrame(animationLoop);
 
-  function blink() {
-    if (!state.enabled || state.sleeping || state.dragging || state.danger) return;
+  function updateNormalRoam(timestamp) {
+    if (
+      !state.enabled ||
+      state.sleeping ||
+      state.dragging ||
+      state.burstActive ||
+      reducedMotion ||
+      !state.roamActive
+    ) {
+      state.roamLastFrame = timestamp;
+      return;
+    }
 
-    character.dataset.blink = "true";
-    clearTimeout(state.blinkTimer);
+    const dt = clamp((timestamp - state.roamLastFrame) / 1000, 0.001, 0.04);
+    state.roamLastFrame = timestamp;
 
-    const double = Math.random() < 0.09;
-    state.blinkTimer = setTimeout(() => {
-      character.dataset.blink = "false";
+    if (now() < state.roamPauseUntil) {
+      const brake = Math.pow(0.025, dt);
+      state.velocityX *= brake;
+      state.velocityY *= brake;
+    } else {
+      const dx = state.targetX - state.x;
+      const dy = state.targetY - state.y;
+      const distance = Math.max(1, Math.hypot(dx, dy));
 
-      if (double && state.enabled && !state.sleeping && !state.danger) {
-        setTimeout(() => {
-          character.dataset.blink = "true";
-          setTimeout(() => { character.dataset.blink = "false"; }, 115);
-        }, 105);
+      if (distance < 42) {
+        chooseNormalTarget();
+        if (Math.random() < 0.22) {
+          state.roamPauseUntil = now() + random(600, 1200);
+        }
       }
-    }, 135);
 
-    state.nextBlink = now() + rand(6200, 10400);
-  }
+      const maxSpeed = 34 + Math.sin(now() * 0.0007) * 3;
+      const desiredSpeed = maxSpeed * clamp(distance / 190, 0.22, 1);
+      let desiredX = dx / distance * desiredSpeed;
+      let desiredY = dy / distance * desiredSpeed;
 
-  function minimumWalkDistance() {
-    const profile = modeProfile();
-    const possible = Math.hypot(
-      Math.max(0, window.innerWidth - 120),
-      Math.max(0, window.innerHeight - 210)
-    );
-    return Math.min(
-      profile.minMove,
-      Math.max(220, possible * 0.55)
-    );
-  }
+      const edge = 105;
+      if (state.x < edge) desiredX += (edge - state.x) / edge * 44;
+      if (state.x > window.innerWidth - edge) desiredX -= (state.x - (window.innerWidth - edge)) / edge * 44;
+      if (state.y < 95) desiredY += (95 - state.y) / 95 * 34;
+      if (state.y > window.innerHeight - 118) desiredY -= (state.y - (window.innerHeight - 118)) / 118 * 34;
 
-  function walkingDuration(distance, direction, reason = "wander") {
-    if (reason === "evade") {
-      return clamp(420 + distance * 0.68, 560, 1120);
+      const curve = Math.sin(now() * 0.00036) * 0.12;
+      desiredX += -desiredY * curve;
+      desiredY += desiredX * curve;
+
+      const response = 1 - Math.exp(-dt / 0.85);
+      state.velocityX += (desiredX - state.velocityX) * response;
+      state.velocityY += (desiredY - state.velocityY) * response;
+
+      const speed = Math.hypot(state.velocityX, state.velocityY);
+      if (speed > 42) {
+        const scale = 42 / speed;
+        state.velocityX *= scale;
+        state.velocityY *= scale;
+      }
     }
-    if (direction === "up") return clamp(1750 + distance * 1.95, 2000, 3900);
-    if (direction === "down") return clamp(1100 + distance * 0.95, 1200, 2600);
-    return clamp(1400 + distance * 1.42, 1550, 3200);
+
+    setPosition(
+      state.x + state.velocityX * dt,
+      state.y + state.velocityY * dt
+    );
+
+    const speed = Math.hypot(state.velocityX, state.velocityY);
+    character.dataset.moving = speed > 4 ? "true" : "false";
+    character.dataset.direction = speed > 4
+      ? (Math.abs(state.velocityY) > Math.abs(state.velocityX) * 0.7
+        ? (state.velocityY < 0 ? "up" : "down")
+        : (state.velocityX < 0 ? "left" : "right"))
+      : "idle";
   }
 
-  function visualDirection(dx, dy) {
-    if (Math.abs(dy) > Math.abs(dx) * 0.7) return dy < 0 ? "up" : "down";
-    return dx < 0 ? "left" : "right";
-  }
-
-  function easeInOut(t) {
-    const smooth = t * t * (3 - 2 * t);
-    return smooth;
-  }
-
-
-  function enableBurstTarget() {
+  function burstTarget() {
+    const marginX = 70;
+    const yMin = 88;
+    const yMax = Math.max(yMin + 25, window.innerHeight - 102);
     return {
-      x: 70 + Math.random() * Math.max(1, window.innerWidth - 140),
-      y: 88 + Math.random() * Math.max(1, window.innerHeight - 190)
+      x: random(marginX, Math.max(marginX + 20, window.innerWidth - marginX)),
+      y: random(yMin, yMax)
     };
   }
 
-  function cubicBezierY(t, p1, p2) {
-    const mt = 1 - t;
-    return 3 * mt * mt * t * p1 + 3 * mt * t * t * p2 + t * t * t;
+  function burstDuration(direction) {
+    if (direction === "up") return 1120;
+    if (direction === "down") return 520;
+    return 760;
   }
 
-  function cubicBezierX(t, p1, p2) {
-    const mt = 1 - t;
-    return 3 * mt * mt * t * p1 + 3 * mt * t * t * p2 + t * t * t;
-  }
+  function cubicBezierEase(t, x1, y1, x2, y2) {
+    let low = 0;
+    let high = 1;
+    let guess = t;
 
-  function cubicBezierEase(x, x1, y1, x2, y2) {
-    let lo = 0;
-    let hi = 1;
-    let t = x;
+    function cubicX(p) {
+      const m = 1 - p;
+      return 3 * m * m * p * x1 + 3 * m * p * p * x2 + p * p * p;
+    }
 
-    for (let i = 0; i < 9; i++) {
-      const bx = cubicBezierX(t, x1, x2) - x;
+    function cubicY(p) {
+      const m = 1 - p;
+      return 3 * m * m * p * y1 + 3 * m * p * p * y2 + p * p * p;
+    }
+
+    for (let i = 0; i < 8; i++) {
+      const current = cubicX(guess) - t;
       const derivative =
-        3 * (1 - t) * (1 - t) * x1 +
-        6 * (1 - t) * t * (x2 - x1) +
-        3 * t * t * (1 - x2);
+        3 * (1 - guess) * (1 - guess) * x1 +
+        6 * (1 - guess) * guess * (x2 - x1) +
+        3 * guess * guess * (1 - x2);
 
-      if (Math.abs(derivative) > 0.00001) {
-        t = clamp(t - bx / derivative, 0, 1);
-      } else {
-        break;
-      }
+      if (Math.abs(derivative) < 0.00001) break;
+      guess = clamp(guess - current / derivative, 0, 1);
     }
 
-    for (let i = 0; i < 12; i++) {
-      const bx = cubicBezierX(t, x1, x2);
-      if (Math.abs(bx - x) < 0.00001) break;
-      if (bx < x) lo = t;
-      else hi = t;
-      t = (lo + hi) / 2;
+    for (let i = 0; i < 10; i++) {
+      const current = cubicX(guess);
+      if (Math.abs(current - t) < 0.00001) break;
+      if (current < t) low = guess;
+      else high = guess;
+      guess = (low + high) / 2;
     }
 
-    return cubicBezierY(t, y1, y2);
+    return cubicY(guess);
   }
 
-  function enableBurstMoveDurationAndEase(direction) {
-    if (direction === "up") {
-      return { duration: 1120, ease: [0.22, 0.68, 0.18, 1] };
+  function runBurstMove(targetX, targetY, done) {
+    if (!state.enabled || state.dragging || state.sleeping || reducedMotion) {
+      done?.();
+      return;
     }
-    if (direction === "down") {
-      return { duration: 520, ease: [0.15, 0.90, 0.28, 1.25] };
-    }
-    return { duration: 760, ease: [0.22, 0.78, 0.20, 1] };
-  }
 
-  function animateEnableBurstMove(targetX, targetY, reason = "enable-burst", onComplete = null) {
-    if (!state.enabled || state.dragging || reduced || state.sleeping) return false;
-
-    stopMove();
+    clearMovementFrame();
 
     const startX = state.x;
     const startY = state.y;
     const dx = targetX - startX;
     const dy = targetY - startY;
-    const distance = Math.hypot(dx, dy);
-    const minimumDistance = reason === "evade" ? 150 : 0;
+    const direction =
+      Math.abs(dy) > Math.abs(dx) * 0.7
+        ? (dy < 0 ? "up" : "down")
+        : (dx < 0 ? "left" : "right");
 
-    if (distance < minimumDistance) return false;
-
-    const direction = visualDirection(dx, dy);
-    const motion = enableBurstMoveDurationAndEase(direction);
+    const duration = burstDuration(direction);
     const started = performance.now();
     const token = state.moveToken;
 
     character.dataset.moving = "true";
     character.dataset.direction = direction;
-    character.classList.remove("is-walking", "is-climbing", "is-falling", "is-landed");
 
-    if (direction === "up") {
-      character.classList.add("is-climbing");
-      setExpression(modeExpression("focused"), 1150);
-    } else if (direction === "down") {
-      character.classList.add("is-falling");
-      setExpression(modeExpression("alert"), 900);
-    } else {
-      character.classList.add("is-walking");
-      setExpression(modeExpression("neutral"), 1000);
-    }
+    const frame = (timestamp) => {
+      if (
+        token !== state.moveToken ||
+        !state.enabled ||
+        state.dragging ||
+        state.sleeping ||
+        !state.burstActive
+      ) return;
 
-    function frame(timestamp) {
-      if (token !== state.moveToken || state.dragging || !state.enabled) return;
+      const progress = clamp((timestamp - started) / duration, 0, 1);
+      const eased = direction === "down"
+        ? cubicBezierEase(progress, 0.15, 0.90, 0.28, 1.25)
+        : direction === "up"
+          ? cubicBezierEase(progress, 0.22, 0.68, 0.18, 1)
+          : cubicBezierEase(progress, 0.22, 0.78, 0.20, 1);
 
-      const p = clamp((timestamp - started) / motion.duration, 0, 1);
-      const e = cubicBezierEase(
-        p,
-        motion.ease[0],
-        motion.ease[1],
-        motion.ease[2],
-        motion.ease[3]
-      );
+      setPosition(startX + dx * eased, startY + dy * eased);
 
-      setPosition(startX + dx * e, startY + dy * e);
-
-      if (p < 1) {
+      if (progress < 1) {
         state.moveAnimation = requestAnimationFrame(frame);
         return;
       }
@@ -888,94 +537,303 @@
       state.moveAnimation = 0;
       character.dataset.moving = "false";
       character.dataset.direction = "idle";
-      character.classList.remove("is-walking", "is-climbing", "is-falling");
 
-      if (direction === "down") {
-        character.classList.add("is-landed");
-        setTimeout(() => character.classList.remove("is-landed"), 480);
-      }
-
-      if (reason === "wander") {
-        state.lastWander = now();
-        state.nextWander = now() + (
-          state.context === "study"
-            ? rand(9000, 16000)
-            : rand(11000, 19000)
-        );
-      }
-
-      if (reason === "evade") {
-        setTimeout(() => { state.evading = false; }, rand(450, 850));
-      }
-
-      if (reason === "enable-burst" && typeof onComplete === "function") {
-        onComplete();
-      }
-    }
+      if (typeof done === "function") done();
+    };
 
     state.moveAnimation = requestAnimationFrame(frame);
-    return true;
   }
 
-  function stopMove() {
-    if (state.moveAnimation) cancelAnimationFrame(state.moveAnimation);
-    state.moveAnimation = 0;
-    state.moveToken += 1;
-    state.roamActive = false;
-    state.roamPausedUntil = 0;
-    state.roamVelocityX = 0;
-    state.roamVelocityY = 0;
+  function runEnableBurst() {
+    if (!state.enabled || reducedMotion) {
+      startNormalRoam();
+      return;
+    }
+
+    clearBurstTimers();
+    clearMovementFrame();
+    stopNormalRoam();
+
+    state.burstActive = true;
+    state.burstToken += 1;
+    const token = state.burstToken;
+    character.dataset.burst = "true";
+
+    let hops = 0;
+
+    const finish = () => {
+      if (token !== state.burstToken || !state.enabled) return;
+      state.burstActive = false;
+      character.dataset.burst = "false";
+      state.nextBlink = now() + random(2500, 5000);
+      startNormalRoam();
+    };
+
+    const hop = () => {
+      if (token !== state.burstToken || !state.enabled || state.dragging || state.sleeping) return;
+
+      const target = burstTarget();
+      runBurstMove(target.x, target.y, () => {
+        if (token !== state.burstToken || !state.enabled) return;
+
+        hops += 1;
+        if (hops < 3) {
+          addBurstTimer(hop, 150);
+        } else {
+          addBurstTimer(finish, 420);
+        }
+      });
+    };
+
+    hop();
+  }
+
+  function updateControls() {
+    enableButton.classList.toggle("is-active", state.enabled);
+    disableButton.classList.toggle("is-active", !state.enabled);
+    eyeButtons.forEach((button) => {
+      button.classList.toggle("is-active", button.dataset.petEye === state.eye);
+    });
+    bubbleEnableButton.classList.toggle("is-active", state.bubbleEnabled);
+    bubbleDisableButton.classList.toggle("is-active", !state.bubbleEnabled);
+  }
+
+  function enablePet() {
+    if (state.enabled) {
+      updateControls();
+      return;
+    }
+
+    save(KEY.enabled, true);
+    state.enabled = true;
+    state.sleeping = false;
+    state.angerLevel = 0;
+    state.angerUntil = 0;
+    clearTimeout(state.angerTimer);
+    clearTimeout(state.evadeTimer);
+
+    stage.classList.remove("is-disabled");
+    character.classList.remove("is-fading-out");
+    character.style.pointerEvents = "auto";
+    character.dataset.danger = "false";
+    character.dataset.state = "delighted";
+
+    state.lastMeaningfulActivity = now();
+    state.lastInteraction = now();
+    updateControls();
+    setExpression("delighted", 1200, true);
+    showThought("I'm back.", 1100);
+
+    runEnableBurst();
+  }
+
+  function disablePet() {
+    if (!state.enabled) {
+      updateControls();
+      return;
+    }
+
+    save(KEY.enabled, false);
+    state.enabled = false;
+    state.sleeping = false;
+    state.dragging = false;
+    state.angerLevel = 0;
+    state.angerUntil = 0;
+
+    clearTimeout(state.angerTimer);
+    clearTimeout(state.evadeTimer);
+    hideThought();
+    clearBurstTimers();
+    clearMovementFrame();
+    stopNormalRoam();
+
     character.dataset.moving = "false";
     character.dataset.direction = "idle";
-    visual.style.transform = "";
+    character.dataset.danger = "false";
+    character.dataset.state = "sad";
+    character.style.pointerEvents = "none";
+    character.classList.add("is-fading-out");
+    stage.classList.remove("is-disabled");
+
+    setTimeout(() => {
+      if (!state.enabled) stage.classList.add("is-disabled");
+    }, 920);
+
+    updateControls();
   }
 
-  function animateMoveTo
-(targetX, targetY, reason = "wander") {
-    if (!state.enabled || state.dragging || reduced || state.sleeping) return false;
+  panel.addEventListener(
+    "click",
+    (event) => {
+      const button = event.target.closest("button");
+      if (!button || !panel.contains(button)) return;
 
-    stopMove();
+      if (button.matches("[data-pet-enable]")) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        enablePet();
+        return;
+      }
+
+      if (button.matches("[data-pet-disable]")) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        disablePet();
+        return;
+      }
+
+      if (button.dataset.petEye) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        state.eye = button.dataset.petEye === "pink" ? "pink" : "cyan";
+        character.dataset.eye = state.eye;
+        save(KEY.eye, state.eye);
+        setExpression(state.eye === "pink" ? "shy" : "delighted", 850, true);
+        updateControls();
+        return;
+      }
+
+      if (button.matches("[data-pet-bubble-enable]")) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        state.bubbleEnabled = true;
+        save(KEY.bubble, true);
+        showThought("Message box enabled.", 1000, true);
+        updateControls();
+        return;
+      }
+
+      if (button.matches("[data-pet-bubble-disable]")) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        state.bubbleEnabled = false;
+        save(KEY.bubble, false);
+        hideThought();
+        updateControls();
+      }
+    },
+    true
+  );
+
+  closeButton.addEventListener("click", () => {
+    panel.hidden = true;
+    launcher.setAttribute("aria-expanded", "false");
+    launcher.classList.remove("is-open");
+  });
+
+  launcher.addEventListener("click", () => {
+    const opening = panel.hidden;
+    panel.hidden = !opening;
+    launcher.setAttribute("aria-expanded", String(opening));
+    launcher.classList.toggle("is-open", opening);
+
+    if (opening) updateControls();
+  });
+
+  function registerMeaningfulActivity() {
+    state.lastMeaningfulActivity = now();
+    state.lastInteraction = now();
+  }
+
+  function handlePetPress(event) {
+    if (!state.enabled || state.sleeping) {
+      wake();
+      return;
+    }
+
+    if (state.angerUntil > now()) {
+      enterAnger(Math.max(3, state.angerLevel || 3));
+      return;
+    }
+
+    const time = now();
+    state.clickTimes = state.clickTimes.filter((stamp) => time - stamp < 1200);
+    state.clickTimes.push(time);
+
+    registerMeaningfulActivity();
+
+    if (state.clickTimes.length >= 3) {
+      enterAnger(Math.min(5, state.clickTimes.length));
+    } else if (state.clickTimes.length === 2) {
+      setExpression("annoyed", 800, true);
+      showThought("Easy.", 800);
+    } else {
+      setExpression(state.eye === "pink" ? "shy" : "curious", 800, true);
+      showThought("Hm?", 750);
+    }
+  }
+
+  function enterAnger(level) {
+    if (!state.enabled) return;
+
+    state.sleeping = false;
+    state.angerLevel = clamp(level, 1, 5);
+    state.angerUntil = now() + random(3800, 5600);
+    character.dataset.danger = "true";
+    setExpression("angry", 1200, true);
+    showThought(state.angerLevel >= 4 ? "Stop poking me." : "Easy there.", 1050);
+
+    clearTimeout(state.angerTimer);
+    state.angerTimer = setTimeout(() => {
+      state.angerLevel = 0;
+      state.angerUntil = 0;
+      character.dataset.danger = "false";
+      if (!state.dragging && !state.sleeping) setExpression("neutral", 700);
+    }, 5900);
+
+    evadeCursor();
+  }
+
+  function evadeCursor() {
+    if (!state.enabled || state.dragging || reducedMotion || state.sleeping) return;
+
+    const distance = Math.hypot(state.pointerX - state.x, state.pointerY - state.y);
+    const radius = state.angerLevel >= 4 ? 230 : 190;
+    if (distance >= radius) return;
+
+    stopNormalRoam();
+    const angle = Math.atan2(state.y - state.pointerY, state.x - state.pointerX) + random(-0.45, 0.45);
+    const distanceOut = random(230, 340);
+    const bounds = safeY();
+
+    const x = clamp(
+      state.x + Math.cos(angle) * distanceOut,
+      safeX() + 10,
+      window.innerWidth - safeX() - 10
+    );
+    const y = clamp(
+      state.y + Math.sin(angle) * distanceOut * 0.75,
+      bounds.min + 10,
+      bounds.max - 10
+    );
+
+    clearTimeout(state.evadeTimer);
+    state.evadeTimer = setTimeout(() => {
+      if (!state.enabled || state.dragging || state.sleeping) return;
+      startEvadeMove(x, y);
+    }, 120);
+  }
+
+  function startEvadeMove(targetX, targetY) {
+    clearMovementFrame();
 
     const startX = state.x;
     const startY = state.y;
     const dx = targetX - startX;
     const dy = targetY - startY;
-    const distance = Math.hypot(dx, dy);
-
-    const minimumDistance = reason === "evade" ? 150 : minimumWalkDistance();
-    if (distance < minimumDistance) return false;
-
-    const direction = visualDirection(dx, dy);
-    const duration = reason === "evade"
-      ? walkingDuration(distance, direction, reason)
-      : clamp(walkingDuration(distance, direction, reason) * modeProfile().moveScale * 1.40, 3200, 7000);
-    const started = now();
+    const duration = 650;
+    const started = performance.now();
     const token = state.moveToken;
 
     character.dataset.moving = "true";
-    character.dataset.direction = direction;
+    character.dataset.direction = Math.abs(dy) > Math.abs(dx) ? (dy < 0 ? "up" : "down") : (dx < 0 ? "left" : "right");
 
-    if (reason === "evade") {
-      setExpression("angry", 900, true);
-    } else if (direction === "up") {
-      setExpression(modeExpression("focused"), 1150);
-    } else if (direction === "down") {
-      setExpression(modeExpression("alert"), 900);
-    } else {
-      setExpression(modeExpression("neutral"), 1000);
-    }
+    const frame = (timestamp) => {
+      if (token !== state.moveToken || !state.enabled || state.dragging || state.sleeping) return;
 
-    function frame() {
-      if (token !== state.moveToken || state.dragging || !state.enabled) return;
-
-      const elapsed = now() - started;
-      const p = clamp(elapsed / duration, 0, 1);
-      const e = easeInOut(p);
-
-      setPosition(
-        startX + dx * e,
-        startY + dy * e
-      );
+      const p = clamp((timestamp - started) / duration, 0, 1);
+      const e = p * p * (3 - 2 * p);
+      setPosition(startX + dx * e, startY + dy * e);
 
       if (p < 1) {
         state.moveAnimation = requestAnimationFrame(frame);
@@ -983,820 +841,252 @@
         state.moveAnimation = 0;
         character.dataset.moving = "false";
         character.dataset.direction = "idle";
-        visual.style.transform = "";
-
-        if (direction === "down") {
-          character.classList.add("is-landed");
-          setTimeout(() => character.classList.remove("is-landed"), 500);
-        }
-
-        if (reason === "wander") {
-          state.lastWander = now();
-          state.nextWander = now() + rand(
-            modeProfile().wanderWait[0],
-            modeProfile().wanderWait[1]
-          );
-        }
-
-        if (reason === "evade") {
-          setTimeout(() => { state.evading = false; }, rand(450, 850));
-        }
+        if (state.angerUntil <= now()) startNormalRoam();
       }
-    }
+    };
 
     state.moveAnimation = requestAnimationFrame(frame);
-    return true;
   }
 
-  function roamSpeed() {
-    const profile = modeProfile();
-    const base = clamp(36 / profile.moveScale, 28, 48);
-    return base * (now() < state.roamBoostUntil ? 1.42 : 1);
-  }
-
-  function chooseRoamTarget(immediate = false) {
-    const speed = Math.hypot(state.roamVelocityX, state.roamVelocityY);
-    const profile = modeProfile();
-    const baseAngle = speed > 6
-      ? Math.atan2(state.roamVelocityY, state.roamVelocityX)
-      : rand(0, Math.PI * 2);
-    const turnRange = 0.82;
-    const angle = baseAngle + rand(-turnRange, turnRange);
-    const distance = immediate ? rand(450, 720) : rand(380, 760);
-
-    let x = state.x + Math.cos(angle) * distance;
-    let y = state.y + Math.sin(angle) * distance * 0.78;
-
-    if (x < 90 || x > window.innerWidth - 90 || y < 112 || y > window.innerHeight - 120) {
-      const safe = randomSafePoint();
-      x = safe.x;
-      y = safe.y;
-    }
-
-    state.roamTargetX = clamp(x, 65, Math.max(65, window.innerWidth - 65));
-    state.roamTargetY = clamp(y, 100, Math.max(100, window.innerHeight - 112));
-  }
-
-  function updateRoam(timestamp) {
-    if (!state.enabled || state.sleeping || state.dragging || state.evading ||
-        state.angerUntil > now() || reduced || !state.roamActive) {
-      state.roamLastFrame = timestamp;
-      return;
-    }
-
-    const previous = state.roamLastFrame || timestamp;
-    const dt = clamp((timestamp - previous) / 1000, 0.001, 0.040);
-    state.roamLastFrame = timestamp;
-    const t = now();
-    const profile = modeProfile();
-
-    if (!state.roamTargetX && !state.roamTargetY) chooseRoamTarget(true);
-
-    if (state.roamPausedUntil > t) {
-      const brake = Math.pow(0.035, dt);
-      state.roamVelocityX *= brake;
-      state.roamVelocityY *= brake;
-    } else {
-      const dx = state.roamTargetX - state.x;
-      const dy = state.roamTargetY - state.y;
-      const distance = Math.max(1, Math.hypot(dx, dy));
-      const currentSpeed = Math.hypot(state.roamVelocityX, state.roamVelocityY);
-      const maxSpeed = roamSpeed();
-      const pace = 1;
-
-      /* Smooth arrival and smooth acceleration. */
-      const arrival = clamp(distance / 210, 0.20, 1);
-      const desiredSpeed = maxSpeed * arrival * pace;
-      const desiredX = (dx / distance) * desiredSpeed;
-      const desiredY = (dy / distance) * desiredSpeed;
-
-      const edge = 120;
-      let steerX = desiredX;
-      let steerY = desiredY;
-
-      if (state.x < edge) steerX += (edge - state.x) / edge * maxSpeed * 2.2;
-      if (state.x > window.innerWidth - edge) steerX -= (state.x - (window.innerWidth - edge)) / edge * maxSpeed * 2.2;
-      if (state.y < edge) steerY += (edge - state.y) / edge * maxSpeed * 2.2;
-      if (state.y > window.innerHeight - 125) steerY -= (state.y - (window.innerHeight - 125)) / 125 * maxSpeed * 2.2;
-
-      /* Very small curved drift makes the path feel organic rather than programmed. */
-      const curve = Math.sin(t * 0.00037) * 0.16;
-      steerX += -desiredY * curve;
-      steerY += desiredX * curve;
-
-      const response = 1 - Math.exp(-dt / 0.95);
-      state.roamVelocityX += (steerX - state.roamVelocityX) * response;
-      state.roamVelocityY += (steerY - state.roamVelocityY) * response;
-
-      const nextSpeed = Math.hypot(state.roamVelocityX, state.roamVelocityY);
-      if (nextSpeed > maxSpeed) {
-        const scale = maxSpeed / nextSpeed;
-        state.roamVelocityX *= scale;
-        state.roamVelocityY *= scale;
-      }
-
-      if (distance < 95) {
-        const pause = Math.random() < 0.16;
-        if (pause) state.roamPausedUntil = t + rand(700, 1500);
-        chooseRoamTarget(false);
-      }
-    }
-
-    const nextX = state.x + state.roamVelocityX * dt;
-    const nextY = state.y + state.roamVelocityY * dt;
-    setPosition(
-      clamp(nextX, 58, Math.max(58, window.innerWidth - 58)),
-      clamp(nextY, 94, Math.max(94, window.innerHeight - 108))
-    );
-
-    const speed = Math.hypot(state.roamVelocityX, state.roamVelocityY);
-    character.dataset.moving = speed > 3.5 ? "true" : "false";
-    character.dataset.direction = speed > 3.5
-      ? visualDirection(state.roamVelocityX, state.roamVelocityY)
-      : "idle";
-
-    if (speed > 7 && state.expression === "neutral" && t - state.lastReaction > 3400) {
-      setExpression(modeExpression(pick(["curious","happy","focused","thinking"])), rand(900, 1500));
-    }
-  }
-
-  function clearEnableBurst() {
-    state.enableBurstActive = false;
-    state.enableBurstTimers.forEach((timer) => clearTimeout(timer));
-    state.enableBurstTimers = [];
-    character.dataset.enableBurst = "false";
-  }
-
-  function burstTimer(fn, delay) {
-    const timer = setTimeout(fn, delay);
-    state.enableBurstTimers.push(timer);
-    return timer;
-  }
-
-  function runEnableBurst() {
-    if (!state.enabled || reduced || state.sleeping || state.dragging) {
-      startRoam(false);
-      return;
-    }
-
-    clearEnableBurst();
-    state.enableBurstActive = true;
-    character.dataset.enableBurst = "true";
-    stopMove();
-
-    let hops = 0;
-
-    const finish = () => {
-      if (!state.enableBurstActive || !state.enabled) return;
-      state.enableBurstActive = false;
-      character.dataset.enableBurst = "false";
-      character.dataset.moving = "false";
-      character.dataset.direction = "idle";
-      startRoam(false);
-    };
-
-    const hop = () => {
-      if (!state.enableBurstActive || !state.enabled || state.dragging) return;
-
-      const target = enableBurstTarget();
-      const started = animateEnableBurstMove(
-        target.x,
-        target.y,
-        "enable-burst",
-        () => {
-          if (!state.enableBurstActive || !state.enabled) return;
-          hops += 1;
-          if (hops < 3) burstTimer(hop, 150);
-          else burstTimer(finish, 420);
-        }
-      );
-
-      if (!started) burstTimer(finish, 100);
-    };
-
-    hop();
-  }
-
-  function startRoam(boost = false) {
-    if (!state.enabled || state.sleeping || state.dragging || reduced) return;
-    state.roamActive = true;
-    state.roamLastFrame = performance.now();
-    state.roamBoostUntil = boost ? now() + 5200 : 0;
-    chooseRoamTarget(true);
-
-    if (boost) {
-      state.roamVelocityX *= 0.28;
-      state.roamVelocityY *= 0.28;
-      setExpression("delighted", 1450, true);
-    }
-  }
-
-  function randomSafePoint() {
-    const marginX = window.innerWidth <= 720 ? 55 : 70;
-    const marginTop = 95;
-    const marginBottom = 100;
-
-    const x = rand(marginX, Math.max(marginX + 20, window.innerWidth - marginX));
-    const y = rand(marginTop, Math.max(marginTop + 25, window.innerHeight - marginBottom));
-    return { x, y };
-  }
-
-  function visibleDestination() {
-    const profile = modeProfile();
-    const minDistance = minimumWalkDistance();
-    const candidates = [...document.querySelectorAll(
-      ".subject-card, .utility-card, .telegram-card, .card, .resource-card, .tool-card"
-    )].filter((el) => {
-      if (!el || el === launcher || panel.contains(el) || character.contains(el)) return false;
-      const r = el.getBoundingClientRect();
-      const style = getComputedStyle(el);
-      return r.width > 90 && r.height > 40 &&
-        r.bottom > 70 && r.top < window.innerHeight - 30 &&
-        style.display !== "none" && style.visibility !== "hidden";
-    });
-
-    let bestPoint = null;
-    let bestDistance = -1;
-
-    for (let attempt = 0; attempt < 24; attempt++) {
-      const point = candidates.length && Math.random() < profile.cardBias
-        ? (() => {
-            const el = pick(candidates);
-            const r = el.getBoundingClientRect();
-            const side = Math.random() < 0.5 ? -1 : 1;
-            return {
-              x: clamp(r.left + r.width / 2 + side * rand(120, 170), 60, window.innerWidth - 60),
-              y: clamp(r.top + r.height / 2 + rand(-100, 100), 105, window.innerHeight - 110)
-            };
-          })()
-        : randomSafePoint();
-
-      const distance = Math.hypot(point.x - state.x, point.y - state.y);
-      if (distance > bestDistance) {
-        bestDistance = distance;
-        bestPoint = point;
-      }
-      if (distance >= minDistance) return point;
-    }
-
-    return bestPoint || randomSafePoint();
-  }
-
-  function wander() {
-    if (!state.enabled || state.sleeping || state.dragging || reduced || state.angerUntil > now()) return;
-
-    startRoam(false);
-    state.lastWander = now();
-    state.nextWander = now() + rand(
-      modeProfile().wanderWait[0],
-      modeProfile().wanderWait[1]
-    );
-  }
-
-  function evadeCursor(force = false) {
-    if (!state.enabled || state.dragging || reduced) return false;
-    if (state.evading && !force) return false;
-    if (!force && now() < state.nextEvade) return false;
-    if (state.moveAnimation && !force) return false;
-
-    const pointerDx = state.x - state.pointerX;
-    const pointerDy = state.y - state.pointerY;
-    const pointerDistance = Math.hypot(pointerDx, pointerDy);
-    let baseAngle = Math.atan2(pointerDy, pointerDx);
-
-    if (!Number.isFinite(baseAngle) || pointerDistance < 28) {
-      baseAngle = rand(0, Math.PI * 2);
-    }
-
-    const avoidRadius = state.angerLevel >= 4 ? 255 : 225;
-    const distances = state.angerLevel >= 4 ? [300, 330, 360] : [260, 290, 320];
-    const angleOffsets = [0, -0.28, 0.28, -0.56, 0.56, -0.90, 0.90];
-
-    let best = null;
-    let bestScore = -Infinity;
-
-    for (const offset of angleOffsets) {
-      for (const distance of distances) {
-        const angle = baseAngle + offset;
-        const candidate = {
-          x: clamp(state.x + Math.cos(angle) * distance, 58, window.innerWidth - 58),
-          y: clamp(state.y + Math.sin(angle) * distance * 0.78, 94, window.innerHeight - 108)
-        };
-
-        const movement = Math.hypot(candidate.x - state.x, candidate.y - state.y);
-        const fromCursor = Math.hypot(candidate.x - state.pointerX, candidate.y - state.pointerY);
-        const score = fromCursor * 2.2 + movement * 0.35;
-
-        if (movement >= 150 && fromCursor >= avoidRadius && score > bestScore) {
-          best = candidate;
-          bestScore = score;
-        }
-      }
-    }
-
-    if (!best) {
-      const fallbackAngle = baseAngle + (Math.PI * (Math.random() < 0.5 ? 0.72 : -0.72));
-      best = {
-        x: clamp(state.x + Math.cos(fallbackAngle) * 280, 58, window.innerWidth - 58),
-        y: clamp(state.y + Math.sin(fallbackAngle) * 280 * 0.78, 94, window.innerHeight - 108)
-      };
-    }
-
-    setExpression("angry", 900, true);
-    state.nextEvade = now() + rand(520, 850);
-    state.evading = true;
-
-    const moved = animateMoveTo(best.x, best.y, "evade");
-    if (!moved) {
-      state.evading = false;
-      state.nextEvade = now() + 220;
-      return false;
-    }
-
-    return true;
-  }
-
-  function enterAnger(level = 1) {
+  function startDrag(event) {
     if (!state.enabled) return;
 
-    const profile = modeProfile();
-
-    state.sleeping = false;
-    state.angerLevel = clamp(Math.max(state.angerLevel, level), 1, 5);
-    state.angerUntil = now() + rand(
-      profile.angerDuration[0] * profile.angerFactor,
-      profile.angerDuration[1] * profile.angerFactor
-    );
-    state.danger = true;
-    character.dataset.danger = "true";
-    character.dataset.angerLevel = String(state.angerLevel);
-    clearTimeout(state.angerTimer);
-    setExpression("angry", 1700, true);
-    state.evading = false;
-    setGazeTarget(state.pointerX, state.pointerY, true);
-
-    if (state.angerLevel >= 2) {
-      const angerThoughts = state.angerLevel >= 4
-        ? ["Hey... easy.","Please stop.","Too much now."]
-        : ["Easy there.","Again?","Hey..."];
-      showThought(angerThoughts, 1100);
-    }
-
-    state.angerTimer = setTimeout(() => {
-      if (now() >= state.angerUntil) {
-        state.danger = false;
-        character.dataset.danger = "false";
-        character.dataset.angerLevel = "0";
-        state.angerLevel = 0;
-        state.evading = false;
-        if (!state.dragging && !state.sleeping) setExpression("neutral", 800);
-      }
-    }, 6300);
-
-    evadeCursor(true);
-  }
-
-  function handlePetTap() {
-    wake("pointer");
-
-    const t = now();
-    state.lastMeaningfulActivity = t;
-    state.clickTimes = state.clickTimes.filter((item) => t - item < 1200);
-    state.clickTimes.push(t);
-
-    const rapid = state.clickTimes.length;
-
-    if (rapid >= 3) {
-      enterAnger(Math.min(5, rapid));
-    } else if (rapid === 2) {
-      setExpression("annoyed", 850, true);
-      showThought(["Easy...","You clicked twice.","I'm right here."], 900);
-    } else {
-      setExpression(state.eye === "cyan" ? "curious" : "shy", 850, true);
-      showThought(["Hm?","You called?","I'm here."], 850);
-    }
-  }
-
-  function startDrag(ev) {
-    if (!state.enabled || state.angerUntil > now() && ev.pointerType === "mouse") {
-      if (state.angerUntil > now()) evadeCursor(true);
+    if (state.angerUntil > now()) {
+      enterAnger(Math.max(3, state.angerLevel || 3));
+      event.preventDefault();
       return;
     }
 
-    stopMove();
-    wake("pointer");
+    clearTimeout(state.evadeTimer);
+    clearMovementFrame();
+    stopNormalRoam();
 
     state.dragging = false;
-    state.evading = false;
-    state.dragPointerId = ev.pointerId;
-    state.dragOffsetX = ev.clientX - state.x;
-    state.dragOffsetY = ev.clientY - state.y;
-    state.pressX = ev.clientX;
-    state.pressY = ev.clientY;
+    state.pointerId = event.pointerId;
+    state.dragOffsetX = event.clientX - state.x;
+    state.dragOffsetY = event.clientY - state.y;
+    state.pressX = event.clientX;
+    state.pressY = event.clientY;
     state.pointerMoved = false;
 
-    character.setPointerCapture?.(ev.pointerId);
+    character.setPointerCapture?.(event.pointerId);
+    wake();
+    registerMeaningfulActivity();
   }
 
-  function drag(ev) {
-    if (state.dragPointerId !== ev.pointerId) return;
+  function moveDrag(event) {
+    if (event.pointerId !== state.pointerId) return;
 
-    const travel = Math.hypot(ev.clientX - state.pressX, ev.clientY - state.pressY);
+    const travel = Math.hypot(
+      event.clientX - state.pressX,
+      event.clientY - state.pressY
+    );
 
     if (!state.dragging && travel < 7) return;
 
     if (!state.dragging) {
       state.dragging = true;
       character.classList.add("is-dragging");
-      setExpression("scared", 1200, true);
+      setExpression("scared", 1000, true);
     }
 
     state.pointerMoved = true;
-    setPosition(ev.clientX - state.dragOffsetX, ev.clientY - state.dragOffsetY);
-    setGazeTarget(ev.clientX, ev.clientY, false);
-    state.lastActivity = now();
+    setPosition(
+      event.clientX - state.dragOffsetX,
+      event.clientY - state.dragOffsetY
+    );
+    setGazeTarget(event.clientX, event.clientY);
+    state.lastInteraction = now();
   }
 
-  function endDrag(ev) {
-    if (ev.pointerId !== state.dragPointerId) return false;
+  function endDrag(event) {
+    if (event.pointerId !== state.pointerId) return false;
 
-    const wasDragging = state.dragging || state.pointerMoved;
+    const dragged = state.dragging || state.pointerMoved;
+
     state.dragging = false;
-    state.dragPointerId = null;
+    state.pointerId = null;
+    state.pointerMoved = false;
     character.classList.remove("is-dragging");
+
+    character.releasePointerCapture?.(event.pointerId);
     save(KEY.x, Math.round(state.x));
     save(KEY.y, Math.round(state.y));
 
-    character.releasePointerCapture?.(ev.pointerId);
-
-    state.evading = false;
-    state.pointerMoved = false;
-
-    if (wasDragging) {
-      setExpression("relieved", 1050, true);
+    if (dragged) {
+      setExpression("relieved", 900, true);
+      if (state.enabled && !state.sleeping && state.angerUntil <= now()) {
+        startNormalRoam();
+      }
     }
 
-    return wasDragging;
+    return dragged;
   }
 
-  function nearestInteractive(el) {
-    return el?.closest?.(
-      ".subject-card, .utility-card, .telegram-card, .card, .resource-card, .tool-card, .tool-panel, button, a, input, select, textarea, .theme-toggle"
-    ) || null;
+  function trackPointerTarget() {
+    if (!state.enabled) return;
+
+    const element = document.elementFromPoint(
+      clamp(state.pointerX, 1, window.innerWidth - 1),
+      clamp(state.pointerY, 1, window.innerHeight - 1)
+    );
+
+    if (element === state.lastHover) return;
+
+    clearTimeout(state.hoverTimer);
+    state.lastHover = element;
+
+    const interactive = element?.closest?.("a, button, input, select, textarea, .subject-card, .utility-card, .telegram-card, .card, .resource-card, .tool-card");
+
+    if (!interactive || interactive === character || character.contains(interactive) || panel.contains(interactive)) return;
+
+    state.hoverTimer = setTimeout(() => {
+      if (!state.enabled || state.dragging || state.sleeping) return;
+      setExpression("curious", 650);
+    }, 180);
   }
 
-  document.addEventListener("pointermove", (ev) => {
-    if (!state.enabled) return;
-
-    state.pointerX = ev.clientX;
-    state.pointerY = ev.clientY;
-    state.lastActivity = now();
-
-    if (state.dragPointerId === ev.pointerId) {
-      drag(ev);
-      return;
-    }
-
-    trackHoverTarget();
-
-    if (state.sleeping) wake("pointer");
-
-    if (!state.dragging && state.angerUntil > now()) {
-      const distance = Math.hypot(ev.clientX - state.x, ev.clientY - state.y);
-      const avoidRadius = state.angerLevel >= 4 ? 235 : 195;
-      if (distance < avoidRadius && !state.evading) evadeCursor();
-    }
-
-    if (!state.dragging && state.angerUntil <= now() && !state.evading) {
-      setGazeTarget(ev.clientX, ev.clientY, false);
-    }
-  }, { passive: true });
-
-  character.addEventListener("pointerenter", () => {
-    if (!state.enabled) return;
-    wake("pointer");
-
-    if (state.angerUntil > now()) {
-      enterAnger(Math.max(2, state.angerLevel || 2));
-      return;
-    }
-
-    setExpression(state.eye === "cyan" ? "curious" : "shy", 900);
+  character.addEventListener("pointerdown", (event) => {
+    if (event.button !== 0) return;
+    event.stopPropagation();
+    startDrag(event);
+    event.preventDefault();
   });
 
-  character.addEventListener("pointerdown", (ev) => {
-    if (ev.button !== 0) return;
-    ev.stopPropagation();
-    if (state.angerUntil > now()) {
-      enterAnger(Math.max(3, state.angerLevel || 3));
-      ev.preventDefault();
-      return;
-    }
-    startDrag(ev);
-    ev.preventDefault();
-  });
+  character.addEventListener("pointermove", moveDrag);
 
-  character.addEventListener("pointerup", (ev) => {
-    const wasDragging = endDrag(ev);
-    if (!wasDragging) handlePetTap();
+  character.addEventListener("pointerup", (event) => {
+    const dragged = endDrag(event);
+    if (!dragged) handlePetPress(event);
   });
 
   character.addEventListener("pointercancel", endDrag);
-  character.addEventListener("dblclick", (ev) => {
-    ev.preventDefault();
-    enterAnger(4);
+
+  character.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    handlePetPress(event);
   });
 
-  character.addEventListener("keydown", (ev) => {
-    if (ev.key === "Enter" || ev.key === " ") {
-      ev.preventDefault();
-      handlePetTap();
-    }
-  });
+  document.addEventListener("pointermove", (event) => {
+    state.pointerX = event.clientX;
+    state.pointerY = event.clientY;
 
-  function trackHoverTarget() {
-    const target = nearestInteractive(
-      document.elementFromPoint(
-        clamp(state.pointerX, 1, window.innerWidth - 1),
-        clamp(state.pointerY, 1, window.innerHeight - 1)
-      )
-    );
-
-    if (target === state.lastHoveredElement) return;
-
-    clearTimeout(state.hoverTimer);
-    state.lastHoveredElement = target;
-
-    if (!target || target === character || character.contains(target) ||
-        target === launcher || panel.contains(target)) return;
-
-    const delay = modeProfile().hoverDelay;
-    state.hoverTimer = setTimeout(() => {
-      if (state.enabled && target === state.lastHoveredElement &&
-          !state.dragging && !state.sleeping) {
-        reactToElement(target, "hover");
-      }
-    }, delay);
-  }
-
-  document.addEventListener("click", (ev) => {
-    if (!state.enabled) return;
-    const interactive = nearestInteractive(ev.target);
-    if (!interactive || interactive === character || character.contains(interactive)) return;
-    reactToElement(interactive, "click");
-  }, { passive: true });
-
-  document.addEventListener("input", (ev) => {
-    if (!state.enabled) return;
-    const el = ev.target;
-    const text = descriptor(el);
-    const value = String(el.value || "");
-    state.lastMeaningfulActivity = now();
-    const isName = /name|profile|display name/.test(text);
-
-    if (isName) {
-      setExpression("curious", 850);
-      if (!value) {
-        state.nameMessageShown = false;
-      } else if (!state.nameMessageShown) {
-        state.nameMessageShown = true;
-        showThought(value.length >= 2 ? "I see the name." : "I'm watching.", 1050);
-      }
-    } else if (value) {
-      setExpression("focused", 650);
-    }
-  }, { passive: true });
-
-  document.addEventListener("scroll", () => {
-    if (!state.enabled) return;
-    state.lastActivity = now();
-    state.lastMeaningfulActivity = now();
-    if (Math.random() < 0.045 && !state.sleeping) {
-      setExpression("alert", 600);
-    }
-  }, { passive: true });
-
-  window.addEventListener("studylab-profile-updated", (event) => {
-    const nextName = event.detail?.display_name;
-    if (!nextName) return;
-    const changed = setStudentIdentity(nextName);
-    if (!changed || !state.enabled || !state.bubbleEnabled) return;
-    state.lastMeaningfulActivity = now();
-    setExpression("delighted", 1100);
-    showThought("Nice, " + state.companionName + ".", 1700);
-  }, { passive: true });
-
-  const themeToggle = document.querySelector(".theme-toggle");
-  if (themeToggle) {
-    themeToggle.addEventListener("click", () => {
-      setExpression("surprised", 850);
-      showThought("New lighting.", 900);
-    });
-  }
-
-  launcher.addEventListener("click", () => {
-    state.lastMeaningfulActivity = now();
-    const open = panel.hidden;
-    panel.hidden = !open;
-    launcher.setAttribute("aria-expanded", String(open));
-    if (open) {
-      launcher.classList.add("is-open");
-      updateControls();
-    } else {
-      launcher.classList.remove("is-open");
-    }
-  });
-
-  closeButton.addEventListener("click", () => {
-    state.lastMeaningfulActivity = now();
-    panel.hidden = true;
-    launcher.setAttribute("aria-expanded", "false");
-    launcher.classList.remove("is-open");
-  });
-
-
-  function setBubbleEnabled(enabled) {
-    if (enabled === state.bubbleEnabled) {
-      if (state.enabled && enabled) {
-        showThought("Message box already enabled.", 900);
-      }
+    if (state.pointerId === event.pointerId) {
+      moveDrag(event);
       return;
     }
 
-    if (!enabled) {
-      if (state.enabled && state.bubbleEnabled) {
-        showThought("Message box disabled.", 900);
+    if (state.enabled && !state.dragging) {
+      setGazeTarget(event.clientX, event.clientY);
+      trackPointerTarget();
+
+      if (state.angerUntil > now()) {
+        const distance = Math.hypot(event.clientX - state.x, event.clientY - state.y);
+        const radius = state.angerLevel >= 4 ? 230 : 190;
+        if (distance < radius) evadeCursor();
       }
-      state.bubbleEnabled = false;
-      save(KEY.bubble, false);
-      clearTimeout(state.bubbleTimer);
-      setTimeout(() => thought.classList.remove("is-visible"), 820);
-    } else {
-      state.bubbleEnabled = true;
-      save(KEY.bubble, true);
-      showThought("Message box enabled.", 1100);
     }
 
-    updateControls();
-  }
+    if (state.sleeping) wake();
+  }, { passive: true });
 
-  function updateControls() {
-    enableButton.classList.toggle("is-active", state.enabled);
-    disableButton.classList.toggle("is-active", !state.enabled);
+  document.addEventListener("click", (event) => {
+    if (!state.enabled) return;
+    if (panel.contains(event.target) || event.target === launcher || character.contains(event.target)) return;
 
-    eyeButtons.forEach((button) => {
-      button.classList.toggle("is-active", button.dataset.petEye === state.eye);
-    });
+    const target = event.target.closest?.("a, button, input, select, textarea, .subject-card, .utility-card, .telegram-card, .card, .resource-card, .tool-card");
+    if (!target) return;
 
+    registerMeaningfulActivity();
+  }, { passive: true });
 
-    bubbleEnableButton.classList.toggle("is-active", state.bubbleEnabled);
-    bubbleDisableButton.classList.toggle("is-active", !state.bubbleEnabled);
-  }
-
-    function setEnabled(enabled) {
-    enabled = Boolean(enabled);
-
-    if (enabled && state.enabled) {
-      stage.classList.remove("is-disabled");
-      character.classList.remove("is-fading-out");
-      state.sleeping = false;
-      state.dragging = false;
-      state.danger = false;
-      state.evading = false;
-      state.angerUntil = 0;
-      state.angerLevel = 0;
-      character.dataset.danger = "false";
-      character.dataset.angerLevel = "0";
-      state.lastActivity = now();
-      state.lastMeaningfulActivity = now();
-
-      setExpression("delighted", 1350, true);
-      if (state.bubbleEnabled) showThought("I'm back.", 1050);
-      updateControls();
-      return;
-    }
-
-    save(KEY.enabled, enabled);
-
-    if (!enabled) {
-      clearEnableBurst();
-      stopMove();
-      state.enabled = false;
-      state.sleeping = false;
-      state.dragging = false;
-      state.danger = false;
-      state.angerUntil = 0;
-      state.angerLevel = 0;
-      state.evading = false;
-      clearTimeout(state.angerTimer);
-      clearTimeout(state.hoverTimer);
-      state.lastHoveredElement = null;
-      character.dataset.danger = "false";
-      character.dataset.angerLevel = "0";
-      character.dataset.routine = "none";
-
-      if (state.bubbleEnabled) showThought("Pet disabled.", 1000);
-
-      character.dataset.state = "sad";
-      character.classList.add("is-fading-out");
-      stage.classList.remove("is-disabled");
-      window.setTimeout(() => {
-        if (!state.enabled) stage.classList.add("is-disabled");
-      }, 920);
-    } else {
-      stage.classList.remove("is-disabled");
-      character.classList.remove("is-fading-out");
-      character.style.pointerEvents = "auto";
-
-      state.enabled = true;
-      state.sleeping = false;
-      state.dragging = false;
-      state.danger = false;
-      state.evading = false;
-      state.angerUntil = 0;
-      state.angerLevel = 0;
-      character.dataset.danger = "false";
-      character.dataset.angerLevel = "0";
-      state.lastActivity = now();
-      state.lastMeaningfulActivity = now();
-      state.lastReaction = now();
-      state.lastHoveredElement = null;
-      clearTimeout(state.hoverTimer);
-
-      updateControls();
-      setGazeTarget(state.pointerX, state.pointerY, false);
-      setExpression("delighted", 1350, true);
-      runEnableBurst();
-
-      if (state.bubbleEnabled) showThought("I'm back.", 1050);
-    }
-
-    updateControls();
-  }
-
-  character.dataset.eye = state.eye;
-
-  state.nextWander = now() + rand(
-    modeProfile().initialWait[0],
-    modeProfile().initialWait[1]
-  );
-  stage.classList.toggle("is-disabled", !state.enabled);
-  updateControls();
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) return;
+    if (state.enabled && state.sleeping) wake();
+  });
 
   window.addEventListener("resize", () => {
     setPosition(
-      clamp(state.x, 55, window.innerWidth - 55),
-      clamp(state.y, 92, window.innerHeight - 105)
+      clamp(state.x, safeX(), window.innerWidth - safeX()),
+      clamp(state.y, safeY().min, safeY().max)
     );
+    if (state.enabled && !state.sleeping && !state.dragging && !state.burstActive && !state.roamActive) {
+      startNormalRoam();
+    }
   }, { passive: true });
 
-  function idleAndLife() {
-    if (!state.enabled || document.hidden || state.dragging) return;
+  function lifeLoop() {
+    const timestamp = performance.now();
 
-    const t = now();
-    const idleFor = t - state.lastMeaningfulActivity;
+    updateGaze();
+    updateNormalRoam(timestamp);
 
-    if (idleFor >= modeProfile().sleepAfter && !state.sleeping && state.angerUntil <= t) {
-      state.sleeping = true;
-      state.expression = "sleeping";
-      character.dataset.state = "sleeping";
-      character.dataset.blink = "false";
-      hideThought();
-      stopMove();
-      state.lastSleepAt = t;
-      state.wakeGreetingShown = false;
+    if (!state.enabled || document.hidden || state.dragging) {
+      requestAnimationFrame(lifeLoop);
       return;
     }
 
-    if (state.sleeping) return;
+    const time = now();
+    const idleFor = time - state.lastMeaningfulActivity;
 
-    if (t >= state.nextBlink) blink();
-
-    if (t >= state.nextWander && state.angerUntil <= t && idleFor >= 2600) wander();
-
-    if (t >= state.nextAmbient && state.angerUntil <= t) {
-      state.nextAmbient = t + (
-        state.context === "study"
-          ? rand(9500, 16500)
-          : rand(13000, 23000)
-      );
-
-      const base = pick(contextMoods[state.context] || ["neutral"]);
-      const expression = eyeVariation(base);
-      setExpression(expression, rand(800, 1500));
+    if (state.sleeping) {
+      if (time - state.sleepStartedAt > 5000 && Math.random() < 0.01) {
+        character.dataset.blink = "true";
+        setTimeout(() => { character.dataset.blink = "false"; }, 120);
+      }
+      requestAnimationFrame(lifeLoop);
+      return;
     }
 
-    if (state.angerUntil > t) {
+    if (time >= state.nextBlink) {
+      state.nextBlink = time + random(6000, 10400);
+      blink();
+    }
+
+    if (time >= state.nextThought && state.bubbleEnabled) {
+      state.nextThought = time + random(14000, 24000);
+      showThought(pick(thoughts), 1400);
+    }
+
+    if (idleFor >= 42000 && !state.burstActive && state.angerUntil <= time) {
+      state.sleeping = true;
+      state.sleepStartedAt = time;
+      character.dataset.state = "sleeping";
+      stopAllMovement();
+      hideThought();
+    }
+
+    if (state.angerUntil > time && !state.dragging) {
       const distance = Math.hypot(state.pointerX - state.x, state.pointerY - state.y);
-      const avoidRadius = state.angerLevel >= 4 ? 235 : 195;
-      if (distance < avoidRadius && !state.evading) evadeCursor();
-    } else if (state.angerUntil <= t && state.danger) {
-      state.danger = false;
+      const radius = state.angerLevel >= 4 ? 230 : 190;
+      if (distance < radius) evadeCursor();
+    } else if (state.angerUntil <= time && state.angerLevel > 0) {
+      state.angerLevel = 0;
+      state.angerUntil = 0;
       character.dataset.danger = "false";
     }
+
+    requestAnimationFrame(lifeLoop);
   }
 
-  setInterval(idleAndLife, 400);
-  setTimeout(() => setExpression("curious", 950, true), 850);
-  loadStudentIdentity();
+  character.dataset.eye = state.eye;
+  setPosition(state.x, state.y);
+  updateControls();
+
+  if (state.enabled) {
+    stage.classList.remove("is-disabled");
+    character.style.pointerEvents = "auto";
+    startNormalRoam();
+  } else {
+    stage.classList.add("is-disabled");
+    character.style.pointerEvents = "none";
+    character.dataset.state = "sad";
+  }
+
+  setTimeout(() => {
+    if (state.enabled && !state.sleeping) setExpression("curious", 900, true);
+  }, 650);
+
+  requestAnimationFrame(lifeLoop);
 })();
