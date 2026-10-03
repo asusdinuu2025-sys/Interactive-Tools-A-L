@@ -182,7 +182,7 @@
           <span class="sl-pet-sleep-z z1">Z</span>
           <span class="sl-pet-sleep-z z2">z</span>
           <span class="sl-pet-sleep-z z3">z</span>
-          <span class="sl-pet-crack></span>
+          <span class="sl-pet-crack"></span>
         </div>
       </div>
       <div class="sl-pet-bubble" data-pet-bubble role="status" aria-live="polite"></div>
