@@ -110,8 +110,12 @@
       lastTopic: "",
       lastKind: "",
       topicVisits: {},
-      observations: 0
-    }
+      observations: 0,
+      recentActions: []
+    },
+    profileTypingTimer: null,
+    searchTypingTimer: null,
+    reactionTimer: null
   };
 
   function loadBrainMemory() {
@@ -130,6 +134,9 @@
         ? saved.topicVisits
         : {};
       state.brain.observations = Number(saved.observations) || 0;
+      state.brain.recentActions = Array.isArray(saved.recentActions)
+        ? saved.recentActions.filter((item) => item && typeof item === "object").slice(-12)
+        : [];
     } catch (_) {}
   }
 
@@ -141,7 +148,8 @@
         lastTopic: state.brain.lastTopic,
         lastKind: state.brain.lastKind,
         topicVisits: state.brain.topicVisits,
-        observations: state.brain.observations
+        observations: state.brain.observations,
+        recentActions: state.brain.recentActions.slice(-12)
       }));
     } catch (_) {}
   }
@@ -163,6 +171,30 @@
   }
 
   loadBrainMemory();
+
+  function rememberBrainAction(action, detail = "") {
+    if (!action) return;
+    const stamp = now();
+    state.brain.recentActions = [
+      ...state.brain.recentActions.filter(
+        (item) => !item || item.action !== action || stamp - Number(item.time) > 20 * 60 * 1000
+      ),
+      {
+        action,
+        detail: String(detail || "").slice(0, 160),
+        time: stamp
+      }
+    ].slice(-12);
+    state.brain.observations += 1;
+    saveBrainMemory();
+  }
+
+  function hasRecentAction(action, withinMs = 10 * 60 * 1000) {
+    const stamp = now();
+    return state.brain.recentActions.some(
+      (item) => item && item.action === action && stamp - Number(item.time) < withinMs
+    );
+  }
 
   function profile() {
     return state.eye === "cyan"
@@ -821,8 +853,8 @@
     desiredY /= length;
     state.angerFleeAngle = Math.atan2(desiredY, desiredX);
 
-    const maxSpeed = state.eye === "cyan" ? 205 : 185;
-    const acceleration = state.eye === "cyan" ? 15.5 : 13.5;
+    const maxSpeed = state.eye === "cyan" ? 290 : 270;
+    const acceleration = state.eye === "cyan" ? 23.5 : 21.5;
     const desiredSpeed =
       cursorDistance < 165 ? maxSpeed :
       cursorDistance < 300 ? maxSpeed * 0.92 :
@@ -1249,6 +1281,272 @@
     state.brain.lastKind = result.kind;
     showThought(result.message, duration);
   }
+
+  function triggerReactionAnimation(duration = 720) {
+    character.classList.remove("is-reacting");
+    void character.offsetWidth;
+    character.classList.add("is-reacting");
+    clearTimeout(state.reactionTimer);
+    state.reactionTimer = setTimeout(
+      () => character.classList.remove("is-reacting"),
+      duration
+    );
+  }
+
+  function reactToAction(action, detail = {}) {
+    if (!state.enabled || state.angerUntil > now() || state.enableAnimationFrame) return;
+
+    const repeated = hasRecentAction(action);
+    rememberBrainAction(
+      action,
+      detail.topic || detail.value || detail.tool || detail.from || ""
+    );
+    state.lastActivity = now();
+    state.nextSleepAt = now() + random(7000, 10000);
+
+    let expression = state.eye === "pink" ? "curious" : "alert";
+    let messages = [];
+
+    switch (action) {
+      case "theme-change":
+        expression = detail.to === "light" ? "delighted" : "focused";
+        messages = detail.to === "light"
+          ? ["Light mode. I noticed that switch.", "You changed the atmosphere. I saw it.", "A brighter StudyLab now. Interesting."]
+          : ["Dark mode restored. Less glare, more focus.", "Back to dark mode. I noticed the mood change.", "You switched the screen back. I saw it."];
+        break;
+
+      case "profile-open":
+        expression = state.eye === "pink" ? "shy" : "curious";
+        messages = ["Creating your profile? I’m paying attention.", "Profile setup opened. I suspect a name is coming next.", "Making StudyLab a little more personal."];
+        break;
+
+      case "profile-typing":
+        expression = state.eye === "pink" ? "shy" : "thinking";
+        messages = [
+          "I saw the name. You’re building your StudyLab identity.",
+          repeated ? "Still editing the profile. I noticed you came back to it." : "Profile in progress. I’m quietly following along.",
+          "That looks like setup work. Saving it is probably next."
+        ];
+        break;
+
+      case "profile-save":
+        expression = "delighted";
+        messages = detail.name
+          ? [
+              detail.name + ", profile saved. Now the setup remembers you.",
+              "Saved. Your StudyLab profile is in place.",
+              "Profile stored. One less thing to configure."
+            ]
+          : ["Profile saved. That setup step is done.", "Saved. Your profile is in place."];
+        break;
+
+      case "utility-open":
+        expression =
+          detail.tool === "pomodoro" ? "focused" :
+          detail.tool === "mistakes" ? "worried" :
+          detail.tool === "mock" ? "alert" :
+          detail.tool === "random" ? "surprised" :
+          detail.tool === "flashcards" ? "curious" : "thinking";
+        messages = {
+          marks: ["Marks calculator open. You’re checking the numbers now.", "You opened the marks tool. A calculation is probably next."],
+          "study-time": ["Planning study time. You’re deciding where the hours go.", "Time allocation opened. I suspect you’re about to calculate a plan."],
+          pomodoro: ["Pomodoro opened. I suspect Start is coming next.", "Timer ready. Focus mode looks close."],
+          random: ["Random question generator. Your memory gets the first move.", "A revision question is about to appear. I’m watching."],
+          flashcards: ["Flashcards open. Active recall detected.", "Card mode. You’re building memory instead of just reading."],
+          mistakes: ["Mistake notebook. You’re turning errors into future marks.", "You opened the mistake log. Something is about to be fixed."],
+          daily: ["Daily practice planner. You’re organizing the next study block.", "A plan is forming. Now it needs a follow-through."],
+          mock: ["Mock exam timer. The clock is about to become important.", "Mock mode detected. Time pressure is coming."],
+          units: ["Unit converter open. Numbers are changing language.", "Conversion mode. I’m watching the units."]
+        }[detail.tool] || ["Study tool opened. I’ll watch what you do next.", "Tool ready. Your next action will tell me more."];
+        break;
+
+      case "pomodoro-start":
+        expression = "focused";
+        messages = [repeated ? "Another focus session. You’re keeping the pattern going." : "Focus session started. I’ll keep out of the way.", "Timer running. Now the useful part begins.", "Focus begins. I’m watching the clock with you."];
+        break;
+
+      case "pomodoro-pause":
+        expression = "relieved";
+        messages = ["Paused. A breath before the next move.", "Timer paused. You’re controlling the pace.", "Pause noticed. I’m waiting for the next decision."];
+        break;
+
+      case "pomodoro-reset":
+        expression = "curious";
+        messages = ["Reset. Clean clock, new attempt.", "Timer reset. Interesting restart.", "You rewound the session. I noticed."];
+        break;
+
+      case "telegram-open":
+        expression = state.eye === "pink" ? "happy" : "curious";
+        messages = ["Telegram route detected. You’re going resource hunting.", "Community resources next. I’m curious what you’ll find.", "You’re switching from study tools to the resource network."];
+        break;
+
+      case "search-typing":
+        expression = state.eye === "pink" ? "cute" : "focused";
+        messages = detail.value
+          ? [
+              "Searching for "" + detail.value.slice(0, 28) + "". I’m following the trail.",
+              "You have a target. I’m watching the search.",
+              repeated ? "Searching again. You’re narrowing it down." : "Specific search detected. Something is clearly on your mind."
+            ]
+          : ["Search opened. I’m curious what you’re hunting for."];
+        break;
+
+      case "subject-open":
+        expression =
+          detail.topic === "Chemistry" ? "curious" :
+          detail.topic === "Physics" ? "alert" :
+          detail.topic === "Maths" ? "focused" :
+          detail.topic === "Biology" ? "delighted" : "curious";
+        messages =
+          detail.topic === "Maths" ? ["Maths time. I’m watching the steps.", "Back to equations. Keep the working sharp."] :
+          detail.topic === "Physics" ? ["Physics detected. Something is about to move.", "Physics mode. I’m watching the variables."] :
+          detail.topic === "Chemistry" ? ["Chemistry detected. Lab brain engaged.", "Watch the reaction before the reaction watches you."] :
+          detail.topic === "Biology" ? ["Biology time. Zoom in on the system.", "Living system detected. I’m watching the details."] :
+          ["A new study area. I’m following along."];
+        break;
+
+      case "save-flashcard":
+        expression = "delighted";
+        messages = ["Flashcard saved. Future-you can be tested by past-you now.", "Card stored. Memory training continues."];
+        break;
+
+      case "save-mistake":
+        expression = "worried";
+        messages = ["Mistake saved. Good. Errors are useful when they stay visible.", "Logged. Next attempt has a chance to be smarter."];
+        break;
+
+      case "mock-start":
+        expression = "alert";
+        messages = ["Mock started. Now the clock gets serious.", "Exam simulation running. Keep your pace steady."];
+        break;
+
+      case "daily-generate":
+        expression = "focused";
+        messages = ["Practice plan generated. The next step is actually following it.", "Daily plan ready. Structure achieved."];
+        break;
+
+      case "random-question":
+        expression = "surprised";
+        messages = ["Question generated. Your memory gets the first move.", "A random question appeared. No hiding behind the easy one."];
+        break;
+
+      case "unit-convert":
+        expression = "thinking";
+        messages = ["Converted. Units have been persuaded to cooperate.", "Conversion done. Same quantity, different language."];
+        break;
+
+      case "generic":
+      default:
+        expression = state.eye === "pink" ? "curious" : "focused";
+        messages = ["I noticed that. Let’s see what you do next.", "Interesting move. I’m keeping track.", "That changed something. I noticed."];
+        break;
+    }
+
+    const message = avoidRepeatedThought(messages.length ? messages : ["I noticed that."]);
+    triggerReactionAnimation(
+      action === "pomodoro-start" || action === "mock-start" ? 860 : 700
+    );
+    setExpression(expression, 1250, true);
+    showThought(message, 1750, true);
+  }
+
+  function observeUserActions() {
+    document.addEventListener("click", (event) => {
+      const raw = event.target;
+      const target = raw?.closest?.("button, a, input, select, textarea, form");
+      if (!target || target === character || character.contains(target) ||
+          target === launcher || launcher.contains(target) ||
+          panel.contains(target)) return;
+
+      if (target.matches("[data-theme-toggle]")) {
+        const before = document.documentElement.getAttribute("data-theme") || "dark";
+        window.setTimeout(() => {
+          const after = document.documentElement.getAttribute("data-theme") || before;
+          reactToAction("theme-change", { from: before, to: after });
+        }, 80);
+        return;
+      }
+
+      if (target.matches("[data-open-tool]")) {
+        reactToAction("utility-open", { tool: target.dataset.openTool || "" });
+        return;
+      }
+
+      if (target.id === "profileButton") {
+        reactToAction("profile-open");
+        return;
+      }
+
+      const telegramLink = target.closest?.('a[href*="Telegram_Channels.html"], a[href*="t.me/"]');
+      if (telegramLink) {
+        reactToAction("telegram-open");
+        return;
+      }
+
+      const subjectCard = target.closest?.(".subject-card");
+      if (subjectCard) {
+        const info = analyzeContext(subjectCard);
+        reactToAction("subject-open", { topic: info.topic });
+        return;
+      }
+
+      const actionById = {
+        pomodoroStart: "pomodoro-start",
+        pomodoroPause: "pomodoro-pause",
+        pomodoroReset: "pomodoro-reset",
+        saveFlashcard: "save-flashcard",
+        saveMistake: "save-mistake",
+        mockStart: "mock-start",
+        mockPause: "pomodoro-pause",
+        mockReset: "pomodoro-reset",
+        generateDaily: "daily-generate",
+        generateQuestion: "random-question",
+        convertUnit: "unit-convert",
+        calculateMarks: "generic",
+        calculateStudyTime: "generic"
+      };
+
+      if (actionById[target.id]) {
+        reactToAction(actionById[target.id], { tool: target.id });
+      }
+    });
+
+    document.addEventListener("submit", (event) => {
+      const form = event.target;
+      if (form?.id !== "profileForm") return;
+      const name = document.getElementById("profileName")?.value?.trim() || "";
+      reactToAction("profile-save", { name });
+    });
+
+    document.addEventListener("input", (event) => {
+      const input = event.target;
+      if (!input || !(input instanceof HTMLInputElement)) return;
+
+      if (input.id === "profileName") {
+        clearTimeout(state.profileTypingTimer);
+        state.profileTypingTimer = setTimeout(() => {
+          const value = input.value.trim();
+          if (value) reactToAction("profile-typing", { value });
+        }, 850);
+      }
+
+      const isSearch = input.type === "search" ||
+        /search/i.test(input.id || "") ||
+        /search/i.test(input.name || "") ||
+        /search/i.test(input.placeholder || "") ||
+        /search/i.test(input.getAttribute("aria-label") || "");
+
+      if (isSearch) {
+        clearTimeout(state.searchTypingTimer);
+        state.searchTypingTimer = setTimeout(() => {
+          const value = input.value.trim();
+          if (value) reactToAction("search-typing", { value });
+        }, 700);
+      }
+    });
+  }
+
+  observeUserActions();
 
   function trackContextHover(target) {
     if (!state.enabled || state.sleeping || state.angerUntil > now()) return;
