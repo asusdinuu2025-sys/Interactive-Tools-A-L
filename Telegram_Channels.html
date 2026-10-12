@@ -344,10 +344,22 @@
     }
 
     .telegram-featured-avatar img {
+      position: relative;
+      z-index: 1;
       display: block;
       width: 100%;
       height: 100%;
       object-fit: cover;
+    }
+
+    .telegram-featured-avatar-fallback {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 1.25rem;
+      font-weight: 800;
     }
 
     .telegram-featured-copy {
@@ -490,6 +502,7 @@
     
     <section class="telegram-featured-channel" aria-label="Featured Telegram channel: A/L Lessons">
       <div class="telegram-featured-avatar" aria-label="A/L Lessons channel profile picture">
+        <span class="telegram-featured-avatar-fallback" aria-hidden="true">AL</span>
         <img
           src="https://cdn5.telesco.pe/file/OpsSc6qCSmS0tCc6d26yyVM6ekvIZuKO2uGnyVfWFgvlZTNa1mnH9tC7NtBRS8L7GIaMpnxZE2Son9ew94r4IZBM47XVIcAl65vQzqbN5ZCRz3NyH1WcoUJMrw6l0eUdwUz6NjKVXAjQzKbUeBfflj01sF43BKKELAhY7yW8qZqw0fMNU8rV0RlAk6GidNiyeYBP-oWWjwnlRBrXxXc1Pl9tCo0HehhACPEvMbNeAVLBRw5ERcWGBz2QpIZm2xoNMm8J_VNergZa5UYg4_1Rmxebd_nPo2_cOLhKJImRIdWIXMXBi-rARWzL0P091JMT3LtjbqBgpEkdBJBBFwJDBQ.jpg"
           alt="A/L Lessons Telegram channel DP"
