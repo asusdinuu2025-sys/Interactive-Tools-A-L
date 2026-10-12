@@ -477,6 +477,138 @@
       }
     }
 
+
+    /* Card-based directory layout: topic heading first, then matching channel cards. */
+    .telegram-sponsored-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      max-width: 760px;
+      margin: 0 auto 14px;
+      padding: 9px 14px;
+      border: 1px solid var(--card-border);
+      border-radius: 999px;
+      background: rgba(255,255,255,.035);
+      color: var(--text-secondary);
+      font-size: .78rem;
+      letter-spacing: .02em;
+    }
+
+    .telegram-sponsored-label {
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(77,216,240,.13);
+      color: #4dd8f0;
+      font-size: .65rem;
+      font-weight: 800;
+      letter-spacing: .1em;
+    }
+
+    .telegram-subject {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 245px), 1fr));
+      align-content: start;
+      gap: 14px;
+    }
+
+    .telegram-subject-head {
+      grid-column: 1 / -1;
+      margin-bottom: 2px;
+    }
+
+    .telegram-channel,
+    .telegram-all-channel {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+      gap: 12px;
+      min-width: 0;
+      height: 100%;
+      padding: 18px;
+      border-radius: 20px;
+      text-align: center;
+      background:
+        linear-gradient(160deg, rgba(255,255,255,.05), rgba(255,255,255,.018)),
+        rgba(255,255,255,.025);
+    }
+
+    .telegram-channel-icon {
+      width: 46px;
+      height: 46px;
+      flex: 0 0 46px;
+      margin: 0 auto;
+      border-radius: 15px;
+      font-size: 1.05rem;
+    }
+
+    .telegram-channel > span:nth-child(2),
+    .telegram-all-channel > span:nth-child(2) {
+      display: block;
+      width: 100%;
+      min-width: 0;
+      flex: 1 1 auto;
+      overflow-wrap: anywhere;
+    }
+
+    .telegram-channel > span:nth-child(2) strong,
+    .telegram-all-channel > span:nth-child(2) strong {
+      display: block;
+      margin-bottom: 8px;
+      line-height: 1.45;
+    }
+
+    .telegram-channel > span:nth-child(2) > span,
+    .telegram-all-channel > span:nth-child(2) > span {
+      display: block;
+      color: var(--text-secondary);
+      font-size: .82rem;
+      line-height: 1.6;
+    }
+
+    .telegram-channel .telegram-open,
+    .telegram-all-channel .telegram-open {
+      display: block;
+      width: 100%;
+      min-width: 0;
+      margin-top: auto;
+      white-space: normal;
+    }
+
+    .telegram-all-grid {
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 245px), 1fr));
+      align-items: stretch;
+    }
+
+    .telegram-all-channel {
+      height: auto;
+    }
+
+    @media (max-width: 720px) {
+      .telegram-subject {
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+        padding: 16px;
+      }
+
+      .telegram-channel,
+      .telegram-all-channel {
+        grid-template-columns: 1fr;
+        padding: 16px;
+      }
+
+      .telegram-channel .telegram-open,
+      .telegram-all-channel .telegram-open {
+        grid-column: auto;
+      }
+
+      .telegram-sponsored-bar {
+        border-radius: 16px;
+        text-align: center;
+      }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .telegram-back,
       .telegram-channel,
@@ -518,6 +650,12 @@
     </div>
 
     
+
+    <div class="telegram-sponsored-bar" aria-label="Sponsored channel">
+      <span class="telegram-sponsored-label">SPONSORED</span>
+      <span>Featured learning channel</span>
+    </div>
+
     <section class="telegram-featured-channel" aria-label="Featured Telegram channel: A/L Lessons">
       <div class="telegram-featured-avatar" aria-label="A/L Lessons channel profile picture">
         <span class="telegram-featured-avatar-fallback" aria-hidden="true">AL</span>
