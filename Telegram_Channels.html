@@ -304,6 +304,110 @@
       box-shadow: 0 13px 30px rgba(35,138,202,.28);
     }
 
+
+    .telegram-featured-channel {
+      position: relative;
+      display: grid;
+      grid-template-columns: 78px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 18px;
+      margin: 0 0 28px;
+      padding: clamp(18px, 3vw, 26px);
+      border-radius: var(--radius-lg);
+      background:
+        radial-gradient(circle at 0% 0%, rgba(77,216,240,.16), transparent 45%),
+        linear-gradient(135deg, rgba(77,216,240,.075), rgba(168,119,255,.07)),
+        var(--card-bg);
+      border: 1px solid rgba(77,216,240,.30);
+      box-shadow: 0 18px 48px rgba(30,60,160,.16), inset 0 1px 0 var(--card-highlight);
+      overflow: hidden;
+    }
+
+    .telegram-featured-channel > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .telegram-featured-avatar {
+      width: 78px;
+      height: 78px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border-radius: 22px;
+      background: linear-gradient(135deg, #229ED9, #1678b8);
+      border: 1px solid rgba(255,255,255,.22);
+      box-shadow: 0 10px 28px rgba(35,138,202,.24);
+      color: #fff;
+      font-size: 1.25rem;
+      font-weight: 800;
+    }
+
+    .telegram-featured-avatar img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .telegram-featured-copy {
+      min-width: 0;
+    }
+
+    .telegram-featured-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+      color: #4dd8f0;
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .telegram-featured-copy h2 {
+      margin: 0 0 7px;
+      font-size: clamp(1.05rem, 2.5vw, 1.3rem);
+      overflow-wrap: anywhere;
+    }
+
+    .telegram-featured-copy p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: .9rem;
+      line-height: 1.65;
+    }
+
+    .telegram-featured-count {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 11px;
+      color: var(--text-muted);
+      font-size: .78rem;
+    }
+
+    .telegram-featured-action {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+      min-width: 138px;
+    }
+
+    .telegram-featured-action .telegram-open {
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .telegram-featured-action small {
+      color: var(--text-muted);
+      font-size: .68rem;
+      text-align: center;
+      line-height: 1.4;
+    }
+
     .telegram-note {
       margin-top: 14px;
       color: var(--text-muted);
@@ -324,6 +428,22 @@
       .telegram-open {
         grid-column: 1 / -1;
         width: 100%;
+      }
+
+      .telegram-featured-channel {
+        grid-template-columns: 62px minmax(0, 1fr);
+        gap: 14px;
+      }
+
+      .telegram-featured-avatar {
+        width: 62px;
+        height: 62px;
+        border-radius: 18px;
+      }
+
+      .telegram-featured-action {
+        grid-column: 1 / -1;
+        min-width: 0;
       }
     }
 
@@ -366,6 +486,28 @@
     <div class="telegram-back-row">
       <a class="telegram-back" href="index.html">← Back to Subjects</a>
     </div>
+
+    
+    <section class="telegram-featured-channel" aria-label="Featured Telegram channel: A/L Lessons">
+      <div class="telegram-featured-avatar" aria-label="A/L Lessons channel profile picture">
+        <img
+          src="https://cdn5.telesco.pe/file/OpsSc6qCSmS0tCc6d26yyVM6ekvIZuKO2uGnyVfWFgvlZTNa1mnH9tC7NtBRS8L7GIaMpnxZE2Son9ew94r4IZBM47XVIcAl65vQzqbN5ZCRz3NyH1WcoUJMrw6l0eUdwUz6NjKVXAjQzKbUeBfflj01sF43BKKELAhY7yW8qZqw0fMNU8rV0RlAk6GidNiyeYBP-oWWjwnlRBrXxXc1Pl9tCo0HehhACPEvMbNeAVLBRw5ERcWGBz2QpIZm2xoNMm8J_VNergZa5UYg4_1Rmxebd_nPo2_cOLhKJImRIdWIXMXBi-rARWzL0P091JMT3LtjbqBgpEkdBJBBFwJDBQ.jpg"
+          alt="A/L Lessons Telegram channel DP"
+          loading="lazy"
+          onerror="this.style.display='none';"
+        >
+      </div>
+      <div class="telegram-featured-copy">
+        <span class="telegram-featured-eyebrow">✦ Featured Channel</span>
+        <h2>A/L Lessons — @AL_LESSONS</h2>
+        <p>📚 උසස් පෙළ සිසුන්ට අවශ්‍ය සියලුම අධ්‍යයන සම්පත් එකම තැනකින්! 🎥 පාඩම් වීඩියෝ, සියලුම විෂයන්ට අදාළ පාඩම්, 📄 පසුගිය විභාග ප්‍රශ්න පත්‍ර, 📝 කෙටි සටහන් සහ තවත් අධ්‍යයන සම්පත්.</p>
+        <span class="telegram-featured-count">👥 ග්‍රාහකයින්ගේ වත්මන් ගණන Telegram තුළ බලන්න</span>
+      </div>
+      <div class="telegram-featured-action">
+        <a class="telegram-open" href="https://t.me/AL_LESSONS" target="_blank" rel="noopener noreferrer">Join Now ↗</a>
+        <small>Current subscriber count<br>shown on Telegram</small>
+      </div>
+    </section>
 
     <section class="telegram-subject-grid" aria-label="Telegram channels by subject">
 
