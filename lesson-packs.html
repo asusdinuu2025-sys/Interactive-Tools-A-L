@@ -18,7 +18,9 @@
   <link rel="stylesheet" href="assets/css/main.css" />
   <style>
     .lesson-page { width: min(100% - 28px, 900px); margin: 0 auto; padding: clamp(24px, 5vw, 48px) 0 64px; }
-    .lesson-hero { text-align: center; margin-bottom: 26px; }
+    .lesson-hero { text-align: center; margin-bottom: 26px; padding-top: 36px; }
+    .lesson-theme-toggle { position: fixed; top: 16px; right: 16px; z-index: 1000; box-shadow: var(--shadow-glow); }
+    @media (max-width: 520px) { .lesson-theme-toggle { top: 10px; right: 10px; padding: 8px 11px; font-size: .78rem; } }
     .lesson-hero h1 { margin: 0 0 9px; font-size: clamp(1.8rem, 5vw, 2.65rem); font-weight: 850; letter-spacing: -.04em; }
     .lesson-hero p { margin: 0 auto; max-width: 620px; color: var(--text-secondary); line-height: 1.7; }
     .lesson-back { display: inline-flex; margin-top: 17px; padding: 9px 14px; border: 1px solid var(--card-border); border-radius: 999px; background: var(--card-bg); text-decoration: none; }
@@ -58,6 +60,7 @@
   </style>
 </head>
 <body>
+  <button class="theme-toggle lesson-theme-toggle" type="button" data-theme-toggle aria-label="Toggle light and dark theme">☀️ Light Mode</button>
   <main class="lesson-page">
     <header class="lesson-hero">
       <h1>Free Lessons &amp; Lesson Packs</h1>
@@ -158,5 +161,7 @@
       </article>
     </div>
   </main>
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/studylab-pet.js" defer></script>
 </body>
 </html>
