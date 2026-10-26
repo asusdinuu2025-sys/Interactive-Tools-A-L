@@ -126,7 +126,7 @@
     weeklyTab.setAttribute('aria-pressed', String(selectedBoard === 'weekly'));
   }
   async function loadRows() {
-    const {data,error} = await client.from('study_room_members').select(
+    const {data,error} = await client.from('study_room_live').select(
       'user_id,display_name,subject,is_studying,last_heartbeat_at,today_seconds,today_date,week_seconds,week_start'
     );
     if (error) throw error;
@@ -195,10 +195,7 @@
         session = data.session;
       }
       userId = session.user.id;
-      const savedName = localStorage.getItem('studylab-room-display-name');
-      const displayName = savedName || ('Student-' + Math.floor(1000 + Math.random()*9000));
-      localStorage.setItem('studylab-room-display-name', displayName);
-      await callRpc('study_room_ensure_profile', {p_display_name: displayName});
+      await callRpc('study_room_ensure_profile');
       await loadRows();
       const own = rows.find(r => r.user_id === userId);
       if (own && own.is_studying && own.last_heartbeat_at &&
@@ -208,17 +205,8 @@
         interval = setInterval(updatePersonal, 1000);
       } else updateSessionUI(false);
       client.channel('study-room-live')
-        .on('postgres_changes', {event:'*',schema:'public',table:'study_room_members'}, payload => {
-          const changed = payload.new && payload.new.user_id;
-          if (changed && payload.eventType !== 'DELETE') {
-            const index = rows.findIndex(r => r.user_id === changed);
-            if (index >= 0) rows[index] = payload.new;
-            else rows.push(payload.new);
-          } else if (payload.old && payload.old.user_id) {
-            rows = rows.filter(r => r.user_id !== payload.old.user_id);
-          }
-          member = rows.find(r => r.user_id === userId) || member;
-          renderPeople(); renderBoard(); updatePersonal();
+        .on('postgres_changes', {event:'*',schema:'public',table:'study_room_members'}, () => {
+          loadRows().catch(e => console.error('Could not refresh live Study Room data', e));
         }).subscribe();
       join.addEventListener('click', startStudy);
       leave.addEventListener('click', leaveStudy);
