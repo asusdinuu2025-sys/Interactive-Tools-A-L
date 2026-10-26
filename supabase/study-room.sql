@@ -1,8 +1,12 @@
--- StudyLab shared Study Room: run once in Supabase SQL Editor.
--- Uses anonymous Supabase Auth identities; no email/password is required.
+-- StudyLab live Study Room additions.
+-- Reuses the existing public.studylab_profiles table for display names.
+-- This script creates a separate table for room status/timers; it does not
+-- drop tables, drop policies, or alter/delete existing profile records.
+-- Run once in the Supabase SQL Editor after confirming studylab_profiles.id
+-- is the UUID that corresponds to auth.users.id.
+
 create table if not exists public.study_room_members (
   user_id uuid primary key references auth.users(id) on delete cascade,
-  display_name text not null check (char_length(display_name) between 3 and 24),
   subject text not null default 'Combined Mathematics'
     check (subject in ('Combined Mathematics', 'Physics', 'Chemistry')),
   is_studying boolean not null default false,
@@ -13,37 +17,55 @@ create table if not exists public.study_room_members (
   week_seconds integer not null default 0 check (week_seconds >= 0),
   week_start date not null default (
     timezone('Asia/Colombo', now())::date
-    - ((extract(isodow from timezone('Asia/Colombo', now()))::int) - 1)
+    - (extract(isodow from timezone('Asia/Colombo', now()))::int - 1)
   ),
   updated_at timestamptz not null default now()
 );
 
 alter table public.study_room_members enable row level security;
-drop policy if exists "Authenticated students can read the room" on public.study_room_members;
-create policy "Authenticated students can read the room"
-  on public.study_room_members for select to authenticated using (true);
 
--- Browser clients cannot directly write totals or attendance. Only these
--- server-side functions may mutate rows, and each function uses auth.uid().
+do $$
+begin
+  if not exists (select 1 from pg_policies
+    where schemaname='public' and tablename='study_room_members'
+      and policyname='Authenticated students can read room status') then
+    create policy "Authenticated students can read room status"
+      on public.study_room_members for select to authenticated using (true);
+  end if;
+end $$;
+
 revoke insert, update, delete on public.study_room_members from anon, authenticated;
 grant select on public.study_room_members to authenticated;
+
+-- Expose the existing profile display_name alongside live room stats.
+-- security_invoker keeps the underlying RLS policies in force.
+create or replace view public.study_room_live
+with (security_invoker = true) as
+select m.user_id,
+       coalesce(nullif(p.display_name, ''), 'Student') as display_name,
+       m.subject, m.is_studying, m.session_started_at, m.last_heartbeat_at,
+       m.today_seconds, m.today_date, m.week_seconds, m.week_start, m.updated_at
+from public.study_room_members m
+left join public.studylab_profiles p on p.id = m.user_id;
+
+grant select on public.study_room_live to authenticated;
 
 create or replace function public.study_room_local_week_start(d date)
 returns date language sql immutable as $$
   select d - (extract(isodow from d)::int - 1);
 $$;
 
-create or replace function public.study_room_ensure_profile(p_display_name text)
+create or replace function public.study_room_ensure_profile()
 returns void language plpgsql security definer set search_path = public as $$
 declare uid uuid := auth.uid();
 begin
   if uid is null then raise exception 'Sign-in required'; end if;
-  insert into public.study_room_members(user_id, display_name)
-  values (uid, left(regexp_replace(coalesce(p_display_name, ''), '[^[:alnum:] _.-]', '', 'g'), 24))
-  on conflict (user_id) do nothing;
-  if not exists (select 1 from public.study_room_members where user_id = uid) then
-    raise exception 'Could not create profile';
+  -- Do not create a second profile or overwrite the existing display name.
+  if not exists (select 1 from public.studylab_profiles where id = uid) then
+    raise exception 'Your StudyLab profile was not found. Create a profile first.';
   end if;
+  insert into public.study_room_members(user_id)
+  values (uid) on conflict (user_id) do nothing;
 end; $$;
 
 create or replace function public.study_room_set_subject(p_subject text)
@@ -69,7 +91,6 @@ begin
   if not found then raise exception 'Create a profile first'; end if;
 end; $$;
 
--- Replace heartbeat with an implementation that computes elapsed before UPDATE.
 create or replace function public.study_room_heartbeat()
 returns void language plpgsql security definer set search_path = public as $$
 declare
@@ -83,7 +104,8 @@ begin
   select * into previous from public.study_room_members
     where user_id = uid and is_studying for update;
   if not found then return; end if;
-  elapsed := greatest(0, least(90, floor(extract(epoch from (now() - previous.last_heartbeat_at)))::int));
+  elapsed := greatest(0, least(90,
+    floor(extract(epoch from (now() - previous.last_heartbeat_at)))::int));
   update public.study_room_members
   set today_seconds = (case when today_date = local_day then today_seconds else 0 end) + elapsed,
       today_date = local_day,
@@ -103,27 +125,26 @@ begin
   where user_id = auth.uid();
 end; $$;
 
-revoke all on function public.study_room_ensure_profile(text) from public, anon;
+revoke all on function public.study_room_ensure_profile() from public, anon;
 revoke all on function public.study_room_set_subject(text) from public, anon;
 revoke all on function public.study_room_start() from public, anon;
 revoke all on function public.study_room_heartbeat() from public, anon;
 revoke all on function public.study_room_leave() from public, anon;
-grant execute on function public.study_room_ensure_profile(text) to authenticated;
+grant execute on function public.study_room_ensure_profile() to authenticated;
 grant execute on function public.study_room_set_subject(text) to authenticated;
 grant execute on function public.study_room_start() to authenticated;
 grant execute on function public.study_room_heartbeat() to authenticated;
 grant execute on function public.study_room_leave() to authenticated;
 
--- Enable row-change broadcasts for live attendance and leaderboard refreshes.
 do $$
 begin
-  if not exists (
-    select 1 from pg_publication_tables
-    where pubname = 'supabase_realtime'
-      and schemaname = 'public' and tablename = 'study_room_members'
-  ) then
+  if exists (select 1 from pg_publication_tables
+    where pubname='supabase_realtime' and schemaname='public'
+      and tablename='study_room_members') then
+    null;
+  else
     alter publication supabase_realtime add table public.study_room_members;
   end if;
 exception when undefined_object then
-  raise notice 'Create/enable the supabase_realtime publication in Supabase first.';
+  raise notice 'The supabase_realtime publication was not found; enable Realtime for study_room_members in Supabase.';
 end $$;
