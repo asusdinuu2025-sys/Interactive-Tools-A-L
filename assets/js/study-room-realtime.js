@@ -27,11 +27,10 @@
     timeZone: 'Asia/Colombo', year: 'numeric', month: '2-digit', day: '2-digit'
   }).format(date);
   const weekStart = date => {
-    const d = new Date(date.toLocaleString('en-US', {timeZone:'Asia/Colombo'}));
-    d.setHours(0,0,0,0);
-    const offset = (d.getDay() + 6) % 7;
-    d.setDate(d.getDate() - offset);
-    return dayKey(d);
+    const [year, month, day] = dayKey(date).split('-').map(Number);
+    const d = new Date(Date.UTC(year, month - 1, day));
+    d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
+    return d.toISOString().slice(0, 10);
   };
   const fmt = seconds => {
     seconds = Math.max(0, Math.floor(seconds || 0));
