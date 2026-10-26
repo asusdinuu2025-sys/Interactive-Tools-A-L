@@ -447,12 +447,17 @@
       state.angerUntil <= now() &&
       !state.enableAnimationFrame
     ) {
-      const focusedName = character.dataset.profileField === "name"
-        ? document.getElementById("profileName") : null;
-      if (focusedName && focusedName.getClientRects().length) {
-        const rect = focusedName.getBoundingClientRect();
+      const activeProfileField = ({
+        name: document.getElementById("profileName"),
+        school: document.getElementById("profileSchool"),
+        phone: document.getElementById("profilePhone"),
+        year: document.getElementById("profileExamYear"),
+        stream: document.getElementById("profileStream")
+      })[character.dataset.profileField];
+      if (activeProfileField && activeProfileField.getClientRects().length) {
+        const rect = activeProfileField.getBoundingClientRect();
         setGazeTarget(
-          rect.left + Math.min(rect.width * 0.2, 110),
+          rect.left + Math.min(Math.max(rect.width * 0.15, 12), 80),
           rect.top + rect.height / 2
         );
       } else {
