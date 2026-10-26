@@ -1487,42 +1487,70 @@
     clearTimeout(profileFieldTimer);
     clearTimeout(profileFieldReleaseTimer);
 
-    if (field === "name" && String(detail.value || "").trim()) {
-      const rect = target.getBoundingClientRect();
-      const targetX = clamp(rect.left + Math.min(Math.max(rect.width * 0.20, 65), 115), safeX() + 4, window.innerWidth - safeX() - 4);
-      const targetY = clamp(rect.top + rect.height / 2 - 25, safeY().min + 5, safeY().max - 5);
-      state.targetX = targetX;
-      state.targetY = targetY;
-      state.moveMode = "burst";
-      state.moving = true;
-      state.sleeping = false;
-      state.pauseUntil = 0;
-      const dx = targetX - state.x;
-      const dy = targetY - state.y;
-      const distance = Math.max(1, Math.hypot(dx, dy));
-      const speed = Math.max(220, profile().speed * 3.1);
-      state.velocityX = dx / distance * speed;
-      state.velocityY = dy / distance * speed;
-      character.dataset.moving = "true";
-      setGazeTarget(rect.left + Math.min(rect.width * .2, 110), rect.top + rect.height / 2, true);
-      triggerReactionAnimation(900);
-    } else {
-      state.gazeTargetX = 0;
-      state.gazeTargetY = 0;
-      triggerReactionAnimation(520);
-    }
+    const rect = target.getBoundingClientRect();
 
+    // Keep the existing pet just to the left of the active field, never on top
+    // of the text or select control. Keep it there for as long as the field is active.
+    const petClearance = 48;
+    const targetX = clamp(
+      rect.left - petClearance,
+      safeX() + 4,
+      window.innerWidth - safeX() - 4
+    );
+    const targetY = clamp(
+      rect.top + rect.height / 2,
+      safeY().min + 5,
+      safeY().max - 5
+    );
+
+    state.targetX = targetX;
+    state.targetY = targetY;
+    state.moveMode = "burst";
+    state.moving = true;
+    state.sleeping = false;
+    state.pauseUntil = 0;
+
+    const dx = targetX - state.x;
+    const dy = targetY - state.y;
+    const distance = Math.max(1, Math.hypot(dx, dy));
+    const speed = Math.max(220, profile().speed * 2.35);
+    state.velocityX = dx / distance * speed;
+    state.velocityY = dy / distance * speed;
+    character.dataset.moving = "true";
+
+    // Look toward the beginning of the active field while staying outside it.
+    setGazeTarget(
+      rect.left + Math.min(Math.max(rect.width * 0.15, 12), 80),
+      rect.top + rect.height / 2,
+      true
+    );
+    triggerReactionAnimation(field === "name" ? 900 : 650);
     state.nextSleepAt = now() + 10000;
-    profileFieldReleaseTimer = setTimeout(() => {
-      if (character.dataset.profileField === field) {
-        delete character.dataset.profileField;
-        setGazeTarget(state.pointerX, state.pointerY);
-      }
-    }, field === "name" ? 1900 : 1250);
   }
 
   window.addEventListener("studylab-profile-field", event => {
-    reactToProfileField(event.detail || {});
+    const detail = event.detail || {};
+    if (detail.field === "idle") {
+      delete character.dataset.profileField;
+      character.dataset.state = "neutral";
+      clearTimeout(profileFieldReleaseTimer);
+      setGazeTarget(state.pointerX, state.pointerY);
+      return;
+    }
+    reactToProfileField(detail);
+  });
+
+  // Release the field-specific glow only after leaving the profile controls.
+  document.addEventListener("focusout", event => {
+    const field = event.target;
+    if (!field || !field.matches?.("#profileName, #profileSchool, #profilePhone, #profileExamYear, #profileStream")) return;
+    window.setTimeout(() => {
+      const active = document.activeElement;
+      if (active && active.matches?.("#profileName, #profileSchool, #profilePhone, #profileExamYear, #profileStream")) return;
+      delete character.dataset.profileField;
+      character.dataset.state = "neutral";
+      setGazeTarget(state.pointerX, state.pointerY);
+    }, 0);
   });
 
   function observeUserActions() {
