@@ -1496,9 +1496,12 @@
 
     // Keep the existing pet just to the left of the active field, never on top
     // of the text or select control. Keep it there for as long as the field is active.
-    const petClearance = 48;
+    // The pet is 90px wide and positioned by its center, so leave a clear gap
+    // between its right edge and the field's left edge.
+    const petHalfWidth = 45;
+    const fieldGap = 12;
     const targetX = clamp(
-      rect.left - petClearance,
+      rect.left - petHalfWidth - fieldGap,
       safeX() + 4,
       window.innerWidth - safeX() - 4
     );
