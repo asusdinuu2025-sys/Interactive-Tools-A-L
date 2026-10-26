@@ -22,7 +22,7 @@
   const dailyTab = $('dailyBoardTab');
   const weeklyTab = $('weeklyBoardTab');
   let client, userId = null, member = null, rows = [], interval = null;
-  let elapsed = 0, lastTick = Date.now(), selectedBoard = 'daily';
+  let lastTick = Date.now(), selectedBoard = 'daily';
   const dayKey = date => new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Asia/Colombo', year: 'numeric', month: '2-digit', day: '2-digit'
   }).format(date);
@@ -49,12 +49,16 @@
   function updatePersonal() {
     const localToday = dayKey(new Date());
     const seconds = member && member.today_date === localToday ? member.today_seconds : 0;
-    const total = seconds + elapsed;
+    const pending = member && member.is_studying && member.last_heartbeat_at
+      ? Math.max(0, Math.min(25, Math.floor((Date.now() - new Date(member.last_heartbeat_at).getTime()) / 1000))) : 0;
+    const total = seconds + pending;
     todayTotal.textContent = 'Today: ' + fmt(total);
     const percent = Math.min(100, Math.round(total / (Number(goal.value) || 14400) * 100));
     goalBar.style.width = percent + '%';
     goalText.textContent = percent >= 100 ? 'Goal reached!' : percent + '% completed';
-    timer.textContent = fmt(elapsed);
+    const sessionSeconds = member && member.is_studying && member.session_started_at
+      ? Math.max(0, Math.floor((Date.now() - new Date(member.session_started_at).getTime()) / 1000)) : 0;
+    timer.textContent = fmt(sessionSeconds);
   }
   function updateSessionUI(isJoined) {
     join.disabled = isJoined;
@@ -151,12 +155,11 @@
     try {
       await callRpc('study_room_set_subject', {p_subject: subject.value});
       await callRpc('study_room_start');
-      elapsed = 0; lastTick = Date.now();
+      lastTick = Date.now();
       updateSessionUI(true);
       if (interval) clearInterval(interval);
       interval = setInterval(async () => {
         const now = Date.now();
-        if (member && member.is_studying) elapsed += Math.max(0, Math.min(2, Math.floor((now-lastTick)/1000)));
         lastTick = now;
         updatePersonal();
       }, 1000);
@@ -168,7 +171,7 @@
     try {
       await callRpc('study_room_leave');
       if (interval) clearInterval(interval);
-      interval = null; elapsed = 0;
+      interval = null;
       updateSessionUI(false);
       await loadRows();
       say('You left the study room. Your recorded study time is saved.');
@@ -203,10 +206,7 @@
           Date.now() - new Date(own.last_heartbeat_at).getTime() < 90000) {
         member = own; updateSessionUI(true);
         lastTick = Date.now();
-        interval = setInterval(() => {
-          if (member && member.is_studying) elapsed++;
-          updatePersonal();
-        },1000);
+        interval = setInterval(updatePersonal, 1000);
       } else updateSessionUI(false);
       client.channel('study-room-live')
         .on('postgres_changes', {event:'*',schema:'public',table:'study_room_members'}, payload => {
