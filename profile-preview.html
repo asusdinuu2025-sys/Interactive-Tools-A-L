@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Student Profile Preview | StudyLab</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0b1220;--panel:#111c2e;--panel2:#16243a;--text:#edf4ff;--muted:#9aabc3;--line:#2a3a52;--accent:#60a5fa;--accent2:#3b82f6;--ok:#34d399;--shadow:0 24px 80px #0006}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#162d4d 0,transparent 48%),var(--bg);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;color:var(--text);display:grid;place-items:center;padding:28px 16px}
+    button,input,select{font:inherit}button{cursor:pointer}.shell{width:min(100%,760px)}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:26px}.brand{display:flex;align-items:center;gap:11px;font-weight:750;font-size:18px}.logo{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,#60a5fa,#818cf8);color:#081326;font-size:22px}.preview-tag{font-size:11px;letter-spacing:.08em;text-transform:uppercase;border:1px solid #3b5680;background:#162b48;color:#b8d8ff;border-radius:999px;padding:6px 10px;font-weight:750}
+    .intro{margin-bottom:22px}.eyebrow{color:#93c5fd;text-transform:uppercase;font-size:11px;font-weight:800;letter-spacing:.16em}.intro h1{font-size:clamp(27px,5vw,38px);line-height:1.12;letter-spacing:-.04em;margin:8px 0 10px}.intro p{color:var(--muted);margin:0;max-width:590px}
+    .switcher{display:flex;gap:8px;margin:22px 0 14px;flex-wrap:wrap}.switcher button{border:1px solid var(--line);border-radius:10px;padding:9px 13px;background:var(--panel);color:var(--muted)}.switcher button[aria-pressed=true]{border-color:#4f8fe9;background:#17345a;color:#eaf4ff}
+    .window{background:linear-gradient(145deg,#142238,#101a2b);border:1px solid #30415b;border-radius:22px;padding:clamp(20px,4vw,32px);box-shadow:var(--shadow);position:relative;overflow:hidden}.window:before{content:"";position:absolute;width:210px;height:210px;border-radius:50%;background:#3b82f611;right:-90px;top:-110px;pointer-events:none}.window-head{display:flex;gap:14px;align-items:flex-start;margin-bottom:22px;position:relative}.avatar{width:52px;height:52px;flex:0 0 52px;border-radius:16px;display:grid;place-items:center;background:#203c60;border:1px solid #365984;font-size:24px}.window h2{margin:0;font-size:22px;letter-spacing:-.025em}.window-head p{margin:5px 0 0;color:var(--muted);font-size:13px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.field{display:grid;gap:6px}.field.full{grid-column:1/-1}label{font-size:13px;font-weight:650;color:#dbe7f8}.optional{font-size:11px;color:#92a5bf;font-weight:500;margin-left:5px}.field input,.field select{width:100%;border:1px solid #34465f;background:#0c1626;color:var(--text);border-radius:10px;padding:12px 13px;outline:none;min-width:0}.field input:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px #60a5fa24}.field input::placeholder{color:#72839b}.hint{font-size:11px;color:var(--muted);margin:0}.privacy{display:flex;align-items:flex-start;gap:9px;border:1px solid #293b54;background:#0d1929;border-radius:11px;padding:12px;margin:19px 0 16px;color:#a9bbd2;font-size:12px}.privacy span:first-child{font-size:16px}.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.primary,.secondary{border-radius:10px;padding:11px 16px;font-weight:750;border:1px solid transparent}.primary{background:linear-gradient(135deg,#60a5fa,#3b82f6);color:#071426;flex:1}.secondary{background:transparent;border-color:#3b4d66;color:#c6d4e7}.primary:hover{filter:brightness(1.08)}.status{margin:14px 0 0;padding:11px 12px;border-radius:10px;background:#10362e;border:1px solid #1f6a55;color:#a7f3d0;font-size:13px}.status[hidden]{display:none}.existing-note{margin-top:16px;color:#b9c9dd;background:#17283d;border:1px solid #30445f;padding:12px;border-radius:10px;font-size:12px}.existing-note strong{color:#eaf3ff}.footer{font-size:11px;color:#7588a3;text-align:center;margin:18px 0 0}.footer a{color:#a7c9ff}.profile-strip{display:none;align-items:center;gap:12px;border:1px solid #2e435e;background:#111e30;border-radius:15px;padding:14px 16px;margin-bottom:14px}.profile-strip.visible{display:flex}.mini-avatar{display:grid;place-items:center;width:38px;height:38px;background:#203c60;border-radius:50%}.strip-text{flex:1}.strip-text strong{display:block;font-size:13px}.strip-text span{color:var(--muted);font-size:12px}.percent{font-weight:800;color:#93c5fd;font-size:13px}.progress{height:4px;background:#2b3d55;border-radius:99px;margin-top:8px;overflow:hidden}.progress span{display:block;width:40%;height:100%;background:#60a5fa}
+    @media(max-width:540px){body{padding:18px 12px;display:block}.shell{margin:0 auto}.top{align-items:flex-start}.form-grid{grid-template-columns:1fr;gap:13px}.field.full{grid-column:auto}.window{border-radius:17px}.window h2{font-size:20px}.actions{flex-direction:column-reverse;align-items:stretch}.primary,.secondary{width:100%}.intro h1{font-size:29px}}
+    @media(prefers-reduced-motion:no-preference){.window{animation:appear .25s ease-out}@keyframes appear{from{opacity:.6;transform:translateY(6px)}to{opacity:1;transform:none}}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="top"><div class="brand"><span class="logo" aria-hidden="true">✦</span><span>StudyLab <span style="color:#8fa5c3;font-weight:500">/ Student profile</span></span></div><span class="preview-tag">Preview only</span></header>
+    <section class="intro"><div class="eyebrow">Student experience concept</div><h1>A little about you.<br>More relevant learning.</h1><p>A profile completion flow for StudyLab students. This is a separate preview page, not connected to your live account or database.</p></section>
+    <div class="switcher" aria-label="Preview scenario"><button type="button" id="newMode" aria-pressed="true">New student</button><button type="button" id="existingMode" aria-pressed="false">Existing student</button></div>
+    <div class="profile-strip" id="profileStrip"><div class="mini-avatar">👤</div><div class="strip-text"><strong>Student profile</strong><span>Some details are still missing</span><div class="progress"><span></span></div></div><div class="percent">40%</div></div>
+    <section class="window" aria-labelledby="formTitle">
+      <div class="window-head"><div class="avatar" aria-hidden="true">🎓</div><div><h2 id="formTitle">Create your student profile</h2><p id="formSubtitle">Set up your profile so StudyLab can better understand your A/L study needs.</p></div></div>
+      <form id="profileForm">
+        <div class="form-grid">
+          <div class="field full"><label for="fullName">Full name <span aria-hidden="true">*</span></label><input id="fullName" name="fullName" autocomplete="name" maxlength="60" placeholder="Enter your name" required></div>
+          <div class="field"><label for="school">School <span class="optional">Optional</span></label><input id="school" name="school" autocomplete="organization" maxlength="120" placeholder="Your school name"></div>
+          <div class="field"><label for="phone">Phone number <span class="optional">Optional</span></label><input id="phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" maxlength="20" placeholder="07X XXX XXXX"><p class="hint">Not shown publicly in this concept.</p></div>
+          <div class="field"><label for="examYear">A/L examination year <span aria-hidden="true">*</span></label><select id="examYear" name="examYear" required><option value="">Choose exam year</option><option>2026</option><option selected>2027</option><option>2028</option><option>2029</option><option value="Other">Other / not decided</option></select></div>
+          <div class="field"><label for="stream">Study stream <span aria-hidden="true">*</span></label><select id="stream" name="stream" required><option value="">Choose your stream</option><option>Physical Science</option><option>Biological Science</option><option>Commerce</option><option>Arts</option><option>Engineering Technology</option><option>Bio Systems Technology</option><option>Other</option></select></div>
+        </div>
+        <div class="privacy"><span aria-hidden="true">🔒</span><span>Your profile details should be stored securely and visible only to you unless StudyLab clearly explains otherwise. This preview does not send or save any information.</span></div>
+        <div class="actions"><button class="secondary" id="skipButton" type="button">Skip for now</button><button class="primary" type="submit" id="saveButton">Save profile (preview)</button></div>
+        <p class="status" id="status" role="status" hidden></p>
+      </form>
+      <div class="existing-note" id="existingNote" hidden><strong>For existing students:</strong> their current profile name is kept. Only missing details are requested, and they can update everything later from their profile.</div>
+    </section>
+    <p class="footer">Design preview only · No Supabase writes · No changes to the live StudyLab site</p>
+  </main>
+  <script>
+    (function(){
+      const newMode=document.getElementById('newMode'),existingMode=document.getElementById('existingMode');
+      const title=document.getElementById('formTitle'),subtitle=document.getElementById('formSubtitle'),name=document.getElementById('fullName');
+      const strip=document.getElementById('profileStrip'),note=document.getElementById('existingNote'),status=document.getElementById('status'),save=document.getElementById('saveButton');
+      function mode(existing){
+        newMode.setAttribute('aria-pressed',String(!existing));existingMode.setAttribute('aria-pressed',String(existing));
+        title.textContent=existing?'Complete your student profile':'Create your student profile';
+        subtitle.textContent=existing?'Your current profile name is preserved. Add the details that are missing.':'Set up your profile so StudyLab can better understand your A/L study needs.';
+        name.value=existing?'StudyLab Student':'';
+        name.placeholder=existing?'Your current profile name':'Enter your name';
+        strip.classList.toggle('visible',existing);note.hidden=!existing;save.textContent=existing?'Update profile (preview)':'Save profile (preview)';
+        status.hidden=true;
+      }
+      newMode.addEventListener('click',()=>mode(false));existingMode.addEventListener('click',()=>mode(true));
+      document.getElementById('profileForm').addEventListener('submit',function(e){e.preventDefault();status.textContent='Preview only: the form looks good, but nothing was sent to Supabase or saved.';status.hidden=false;});
+      document.getElementById('skipButton').addEventListener('click',function(){status.textContent='Preview only: Skip for now would let the student continue to StudyLab.';status.hidden=false;});
+    })();
+  </script>
+</body>
+</html>
