@@ -97,10 +97,8 @@
     profileModal.classList.add("is-opening");
     document.body.classList.add("profile-modal-open");
     updateMascot();
-    window.requestAnimationFrame(() => {
-      profileModal.classList.remove("is-opening");
-      profileInput.focus();
-    });
+    window.requestAnimationFrame(() => profileInput.focus());
+    window.setTimeout(() => profileModal.classList.remove("is-opening"), 460);
   }
   function closeModal(animate = true) {
     if (closeTimer) window.clearTimeout(closeTimer);
