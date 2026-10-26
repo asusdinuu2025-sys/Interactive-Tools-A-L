@@ -1074,7 +1074,30 @@
     .profile-status{margin:13px 0 0!important;padding:10px 12px;border-radius:10px;font-size:.83rem;color:#a7f3d0!important;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25)}
     .profile-status[data-state="error"]{color:#fca5a5!important;background:rgba(239,68,68,.09);border-color:rgba(239,68,68,.25)}
     .profile-modal-open{overflow:hidden}
-    @media(max-width:600px){.header-actions{gap:6px}.profile-button{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:9px 10px}.profile-modal{padding:10px;place-items:center}.profile-dialog{max-height:94vh;border-radius:18px;padding:20px 17px}.profile-form-grid{grid-template-columns:1fr;gap:13px}.profile-field-full{grid-column:auto}.profile-window-head{margin-right:34px}.profile-avatar{width:45px;height:45px;flex-basis:45px;border-radius:13px}.profile-formula-one{left:2%;top:12%}.profile-formula-two{right:1%;top:25%;font-size:16px}.profile-formula-three{left:2%;bottom:12%}.profile-formula-four{right:2%;bottom:11%;font-size:16px}.profile-math-symbol-one{left:42%;top:4%}.profile-math-symbol-two{right:20%;bottom:4%}}
+
+    /* Profile modal: layered glass, responsive depth and field-aware mascot. */
+    .profile-modal{--profile-glow-x:50%;--profile-glow-y:10%;isolation:isolate;background:rgba(3,8,18,.62);backdrop-filter:blur(9px) saturate(125%);-webkit-backdrop-filter:blur(9px) saturate(125%);perspective:1200px}
+    .profile-dialog{overflow:hidden;isolation:isolate;transform:translateY(0) rotateX(0) rotateY(0);transform-style:preserve-3d;background:radial-gradient(ellipse at var(--profile-glow-x) var(--profile-glow-y),rgba(87,169,255,.19),transparent 42%),linear-gradient(145deg,rgba(26,43,68,.94),rgba(12,20,36,.97) 56%,rgba(35,30,72,.92));border:1px solid rgba(173,215,255,.24);box-shadow:0 38px 100px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.16),inset 0 -1px 0 rgba(115,155,230,.10);transition:transform .18s ease-out,border-color .25s ease,box-shadow .25s ease,background .25s ease}
+    .profile-dialog::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;border-radius:inherit;background:linear-gradient(115deg,rgba(255,255,255,.10),transparent 24%,transparent 70%,rgba(139,123,255,.09));opacity:.8}
+    .profile-dialog::after{content:"";position:absolute;top:-90px;right:-70px;z-index:-1;width:250px;height:250px;border-radius:50%;background:rgba(70,135,255,.17);filter:blur(42px);pointer-events:none}
+    .profile-dialog>*{z-index:1}
+    html[data-theme="light"] .profile-dialog{background:radial-gradient(ellipse at var(--profile-glow-x) var(--profile-glow-y),rgba(91,160,255,.17),transparent 43%),linear-gradient(145deg,rgba(255,255,255,.97),rgba(239,246,255,.97) 58%,rgba(245,241,255,.96));border-color:rgba(87,139,205,.27);box-shadow:0 35px 90px rgba(35,70,105,.22),inset 0 1px 0 rgba(255,255,255,.98),inset 0 -1px 0 rgba(80,120,180,.08)}
+    .profile-modal.is-opening .profile-dialog{animation:profileModalIn .42s cubic-bezier(.2,.8,.2,1) both}
+    .profile-modal.is-closing .profile-dialog{animation:profileModalOut .34s cubic-bezier(.32,.72,.2,1) both;pointer-events:none}
+    @keyframes profileModalIn{from{opacity:0;transform:translateY(22px) scale(.975)}to{opacity:1;transform:translateY(0) scale(1)}}
+    @keyframes profileModalOut{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(46px) scale(.975)}}
+    .profile-flask-icon{display:grid;place-items:center;flex:0 0 62px;width:62px;height:62px;border-radius:19px;background:linear-gradient(145deg,rgba(78,147,239,.24),rgba(115,91,224,.17));border:1px solid rgba(132,190,255,.32);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 10px 24px rgba(29,83,164,.18);font-size:32px;font-weight:700;line-height:1;font-family:ui-sans-serif,system-ui,sans-serif;color:var(--text-primary,#eaf3ff);transition:transform .25s ease}
+    .profile-flask-icon:hover{transform:translateY(-2px) rotate(-5deg)}
+    html[data-theme="light"] .profile-flask-icon{background:linear-gradient(145deg,rgba(93,168,255,.16),rgba(149,123,255,.11));border-color:rgba(84,139,202,.28)}
+    html[data-theme="dark"] .profile-select{color-scheme:dark;background:rgba(8,17,31,.72);color:#f4f8ff;border-color:rgba(145,177,218,.34)}
+    html[data-theme="dark"] .profile-select option{background:#111d30;color:#f4f8ff}
+    html[data-theme="light"] .profile-select{color-scheme:light;color:#17243a}
+    html[data-theme="light"] .profile-select option{background:#fff;color:#17243a}
+    .profile-input,.profile-select{transition:border-color .2s ease,box-shadow .2s ease,background .2s ease}
+    @media(hover:hover) and (pointer:fine){.profile-dialog{will-change:transform}}
+    @media(prefers-reduced-motion:reduce){.profile-dialog,.profile-flask-icon{transition:none!important}.profile-modal.is-opening .profile-dialog,.profile-modal.is-closing .profile-dialog{animation:none!important}}
+
+    @media(max-width:600px){.header-actions{gap:6px}.profile-button{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:9px 10px}.profile-modal{padding:10px;place-items:center}.profile-dialog{max-height:94vh;border-radius:18px;padding:20px 17px}.profile-form-grid{grid-template-columns:1fr;gap:13px}.profile-field-full{grid-column:auto}.profile-window-head{margin-right:34px}.profile-flask-icon{width:45px;height:45px;flex-basis:45px;border-radius:13px;font-size:25px}.profile-formula-one{left:2%;top:12%}.profile-formula-two{right:1%;top:25%;font-size:16px}.profile-formula-three{left:2%;bottom:12%}.profile-formula-four{right:2%;bottom:11%;font-size:16px}.profile-math-symbol-one{left:42%;top:4%}.profile-math-symbol-two{right:20%;bottom:4%}}
     @media(prefers-reduced-motion:reduce){.profile-formula,.profile-math-symbol{animation:none!important}}
 
     /* =========================================================
@@ -2521,7 +2544,7 @@
     <section class="profile-dialog">
       <button type="button" class="profile-close" id="profileClose" aria-label="Close profile dialog">✕</button>
       <div class="profile-window-head">
-        <div class="profile-avatar" aria-hidden="true">🎓</div>
+        <div class="profile-flask-icon" aria-hidden="true">ツ</div>
         <div>
           <p class="profile-eyebrow">StudyLab · Student profile</p>
           <h2 id="profileNameLabel">Create your student profile</h2>

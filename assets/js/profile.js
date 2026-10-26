@@ -15,6 +15,10 @@
   const profileStatus = document.getElementById("profileStatus");
   const profileNameLabel = document.getElementById("profileNameLabel");
   const profileSubtitle = document.getElementById("profileSubtitle");
+  const profileDialog = profileModal.querySelector(".profile-dialog");
+  const profileFields = [profileInput, profileSchool, profilePhone, profileExamYear, profileStream];
+  let closeTimer = null;
+
   const profileClose = document.getElementById("profileClose");
   const PROFILE_PROMPT_KEY = "studylabProfileCompletionPromptSeenV1";
 
@@ -88,13 +92,69 @@
       profileButton.disabled = false;
     }
     profileModal.hidden = false;
+    profileModal.classList.remove("is-closing");
+    profileModal.classList.add("is-opening");
     document.body.classList.add("profile-modal-open");
     window.requestAnimationFrame(() => profileInput.focus());
+    window.setTimeout(() => profileModal.classList.remove("is-opening"), 460);
   }
-  function closeModal() {
+  function closeModal(animate = true) {
+    if (closeTimer) window.clearTimeout(closeTimer);
+    if (animate && !profileModal.hidden && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      profileModal.classList.remove("is-opening");
+      profileModal.classList.add("is-closing");
+      closeTimer = window.setTimeout(() => {
+        profileModal.hidden = true;
+        profileModal.classList.remove("is-closing");
+        document.body.classList.remove("profile-modal-open");
+        closeTimer = null;
+      }, 340);
+      return;
+    }
     profileModal.hidden = true;
+    profileModal.classList.remove("is-opening", "is-closing");
     document.body.classList.remove("profile-modal-open");
   }
+  function signalPetField(field) {
+    const fieldName = field === profileInput ? "name"
+      : field === profileSchool ? "school"
+      : field === profilePhone ? "phone"
+      : field === profileExamYear ? "year"
+      : field === profileStream ? "stream" : "idle";
+    window.dispatchEvent(new CustomEvent("studylab-profile-field", {
+      detail: { field: fieldName, value: field?.value || "" }
+    }));
+  }
+
+
+  profileFields.forEach(field => {
+    field.addEventListener("focus", () => signalPetField(field));
+    field.addEventListener("input", () => signalPetField(field));
+    field.addEventListener("change", () => signalPetField(field));
+  });
+  profileModal.addEventListener("pointermove", event => {
+    if (!profileDialog || profileModal.hidden || event.pointerType === "touch" ||
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const rect = profileDialog.getBoundingClientRect();
+    const x = (event.clientX - rect.left) / rect.width;
+    const y = (event.clientY - rect.top) / rect.height;
+    const clampedX = Math.max(0, Math.min(1, x));
+    const clampedY = Math.max(0, Math.min(1, y));
+    profileModal.style.setProperty("--profile-glow-x", (clampedX * 100) + "%");
+    profileModal.style.setProperty("--profile-glow-y", (clampedY * 100) + "%");
+    if (x < 0 || x > 1 || y < 0 || y > 1) {
+      profileDialog.style.transform = "";
+      return;
+    }
+    const tiltX = (0.5 - clampedY) * 2.2;
+    const tiltY = (clampedX - 0.5) * 2.2;
+    profileDialog.style.transform = "perspective(1200px) rotateX(" + tiltX.toFixed(2) + "deg) rotateY(" + tiltY.toFixed(2) + "deg)";
+  });
+  profileModal.addEventListener("pointerleave", () => {
+    if (profileDialog) profileDialog.style.transform = "";
+    profileModal.style.setProperty("--profile-glow-x", "50%");
+    profileModal.style.setProperty("--profile-glow-y", "10%");
+  });
 
   profileButton.addEventListener("click", openModal);
   profileClose?.addEventListener("click", closeModal);
@@ -142,7 +202,7 @@
       markPromptSeen();
       showStatus("Your profile has been saved to your StudyLab account ✓");
       window.dispatchEvent(new CustomEvent("studylab-profile-updated", { detail: p }));
-      window.setTimeout(closeModal, 900);
+      window.setTimeout(() => closeModal(true), 420);
     } catch (error) {
       console.warn("StudyLab profile save:", error);
       showStatus(error?.message || "Your profile could not be saved. Please try again.", true);

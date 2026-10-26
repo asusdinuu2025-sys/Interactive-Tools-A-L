@@ -447,7 +447,22 @@
       state.angerUntil <= now() &&
       !state.enableAnimationFrame
     ) {
-      setGazeTarget(state.pointerX, state.pointerY);
+      const activeProfileField = ({
+        name: document.getElementById("profileName"),
+        school: document.getElementById("profileSchool"),
+        phone: document.getElementById("profilePhone"),
+        year: document.getElementById("profileExamYear"),
+        stream: document.getElementById("profileStream")
+      })[character.dataset.profileField];
+      if (activeProfileField && activeProfileField.getClientRects().length) {
+        const rect = activeProfileField.getBoundingClientRect();
+        setGazeTarget(
+          rect.left + Math.min(Math.max(rect.width * 0.15, 12), 80),
+          rect.top + rect.height / 2
+        );
+      } else {
+        setGazeTarget(state.pointerX, state.pointerY);
+      }
     }
 
     const p = profile();
@@ -1321,7 +1336,7 @@
         break;
 
       case "profile-typing":
-        expression = state.eye === "pink" ? "shy" : "thinking";
+        expression = "surprised";
         messages = [
           "I saw the name. You’re building your StudyLab identity.",
           repeated ? "Still editing the profile. I noticed you came back to it." : "Profile in progress. I’m quietly following along.",
@@ -1449,6 +1464,102 @@
     setExpression(expression, 1250, true);
     showThought(message, 1750, true);
   }
+
+  let profileFieldTimer = null;
+  let profileFieldReleaseTimer = null;
+
+  function reactToProfileField(detail = {}) {
+    if (!state.enabled || state.dragging || state.angerUntil > now()) return;
+    const field = detail.field || "idle";
+    const target = ({
+      name: document.getElementById("profileName"),
+      school: document.getElementById("profileSchool"),
+      phone: document.getElementById("profilePhone"),
+      year: document.getElementById("profileExamYear"),
+      stream: document.getElementById("profileStream")
+    })[field];
+    if (!target || !target.getClientRects().length) return;
+
+    character.dataset.profileField = field;
+    state.sleeping = false;
+    character.dataset.state = field === "name" ? "alert"
+      : field === "school" ? "curious"
+      : field === "phone" ? "shy"
+      : field === "year" ? "thinking"
+      : field === "stream" ? "delighted" : "neutral";
+
+    clearTimeout(state.expressionTimer);
+    clearTimeout(profileFieldTimer);
+    clearTimeout(profileFieldReleaseTimer);
+
+    const rect = target.getBoundingClientRect();
+
+    // Keep the existing pet just to the left of the active field, never on top
+    // of the text or select control. Keep it there for as long as the field is active.
+    // The pet is 90px wide and positioned by its center, so leave a clear gap
+    // between its right edge and the field's left edge.
+    const petHalfWidth = 45;
+    const fieldGap = 12;
+    const targetX = clamp(
+      rect.left - petHalfWidth - fieldGap,
+      safeX() + 4,
+      window.innerWidth - safeX() - 4
+    );
+    const targetY = clamp(
+      rect.top + rect.height / 2,
+      safeY().min + 5,
+      safeY().max - 5
+    );
+
+    state.targetX = targetX;
+    state.targetY = targetY;
+    state.moveMode = "burst";
+    state.moving = true;
+    state.sleeping = false;
+    state.pauseUntil = 0;
+
+    const dx = targetX - state.x;
+    const dy = targetY - state.y;
+    const distance = Math.max(1, Math.hypot(dx, dy));
+    const speed = Math.max(220, profile().speed * 2.35);
+    state.velocityX = dx / distance * speed;
+    state.velocityY = dy / distance * speed;
+    character.dataset.moving = "true";
+
+    // Look toward the beginning of the active field while staying outside it.
+    setGazeTarget(
+      rect.left + Math.min(Math.max(rect.width * 0.15, 12), 80),
+      rect.top + rect.height / 2,
+      true
+    );
+    triggerReactionAnimation(field === "name" ? 900 : 650);
+    state.nextSleepAt = now() + 10000;
+  }
+
+  window.addEventListener("studylab-profile-field", event => {
+    const detail = event.detail || {};
+    if (detail.field === "idle") {
+      delete character.dataset.profileField;
+      character.dataset.state = "neutral";
+      clearTimeout(profileFieldReleaseTimer);
+      setGazeTarget(state.pointerX, state.pointerY);
+      return;
+    }
+    reactToProfileField(detail);
+  });
+
+  // Release the field-specific glow only after leaving the profile controls.
+  document.addEventListener("focusout", event => {
+    const field = event.target;
+    if (!field || !field.matches?.("#profileName, #profileSchool, #profilePhone, #profileExamYear, #profileStream")) return;
+    window.setTimeout(() => {
+      const active = document.activeElement;
+      if (active && active.matches?.("#profileName, #profileSchool, #profilePhone, #profileExamYear, #profileStream")) return;
+      delete character.dataset.profileField;
+      character.dataset.state = "neutral";
+      setGazeTarget(state.pointerX, state.pointerY);
+    }, 0);
+  });
 
   function observeUserActions() {
     document.addEventListener("click", (event) => {
