@@ -1321,7 +1321,7 @@
         break;
 
       case "profile-typing":
-        expression = state.eye === "pink" ? "shy" : "thinking";
+        expression = "surprised";
         messages = [
           "I saw the name. You’re building your StudyLab identity.",
           repeated ? "Still editing the profile. I noticed you came back to it." : "Profile in progress. I’m quietly following along.",
@@ -1449,6 +1449,71 @@
     setExpression(expression, 1250, true);
     showThought(message, 1750, true);
   }
+
+  let profileFieldTimer = null;
+  let profileFieldReleaseTimer = null;
+
+  function reactToProfileField(detail = {}) {
+    if (!state.enabled || state.dragging || state.angerUntil > now()) return;
+    const field = detail.field || "idle";
+    const target = ({
+      name: document.getElementById("profileName"),
+      school: document.getElementById("profileSchool"),
+      phone: document.getElementById("profilePhone"),
+      year: document.getElementById("profileExamYear"),
+      stream: document.getElementById("profileStream")
+    })[field];
+    if (!target || !target.getClientRects().length) return;
+
+    character.dataset.profileField = field;
+    state.sleeping = false;
+    character.dataset.state = field === "name" ? "surprised"
+      : field === "school" ? "curious"
+      : field === "phone" ? "shy"
+      : field === "year" ? "thinking"
+      : field === "stream" ? "delighted" : "neutral";
+
+    clearTimeout(state.expressionTimer);
+    clearTimeout(profileFieldTimer);
+    clearTimeout(profileFieldReleaseTimer);
+
+    if (field === "name" && String(detail.value || "").trim()) {
+      const rect = target.getBoundingClientRect();
+      const targetX = clamp(rect.left + Math.min(Math.max(rect.width * 0.20, 65), 115), safeX() + 4, window.innerWidth - safeX() - 4);
+      const targetY = clamp(rect.top + rect.height / 2 - 25, safeY().min + 5, safeY().max - 5);
+      state.targetX = targetX;
+      state.targetY = targetY;
+      state.moveMode = "burst";
+      state.moving = true;
+      state.sleeping = false;
+      state.pauseUntil = 0;
+      const dx = targetX - state.x;
+      const dy = targetY - state.y;
+      const distance = Math.max(1, Math.hypot(dx, dy));
+      const speed = Math.max(220, profile().speed * 3.1);
+      state.velocityX = dx / distance * speed;
+      state.velocityY = dy / distance * speed;
+      character.dataset.moving = "true";
+      setGazeTarget(rect.left + Math.min(rect.width * .2, 110), rect.top + rect.height / 2, true);
+      triggerReactionAnimation(900);
+    } else {
+      state.gazeTargetX = 0;
+      state.gazeTargetY = 0;
+      triggerReactionAnimation(520);
+    }
+
+    state.nextSleepAt = now() + 10000;
+    profileFieldReleaseTimer = setTimeout(() => {
+      if (character.dataset.profileField === field) {
+        delete character.dataset.profileField;
+        setGazeTarget(state.pointerX, state.pointerY);
+      }
+    }, field === "name" ? 1900 : 1250);
+  }
+
+  window.addEventListener("studylab-profile-field", event => {
+    reactToProfileField(event.detail || {});
+  });
 
   function observeUserActions() {
     document.addEventListener("click", (event) => {
