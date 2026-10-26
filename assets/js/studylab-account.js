@@ -185,8 +185,22 @@
         const local = raw ? JSON.parse(raw) : null;
 
         if (local?.name) {
-          await saveProfile(local.name);
-          localStorage.removeItem("studyLabProfile");
+          // Preserve legacy names without falsely marking the full profile complete.
+          const legacyName = String(local.name).trim().replace(/\s+/g, " ");
+          if (legacyName.length >= 2 && legacyName.length <= 60) {
+            const { data: migratedProfile, error: migrationSaveError } = await client
+              .from("studylab_profiles")
+              .upsert({
+                id: user.id,
+                display_name: legacyName,
+                updated_at: new Date().toISOString()
+              }, { onConflict: "id" })
+              .select("id,display_name,school,phone,exam_year,study_stream,profile_completed_at,created_at,updated_at")
+              .single();
+            if (migrationSaveError) throw migrationSaveError;
+            profile = migratedProfile;
+            localStorage.removeItem("studyLabProfile");
+          }
         }
       } catch (migrationError) {
         console.warn("StudyLab profile migration:", migrationError);
