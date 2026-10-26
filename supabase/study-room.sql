@@ -69,29 +69,6 @@ begin
   if not found then raise exception 'Create a profile first'; end if;
 end; $$;
 
-create or replace function public.study_room_heartbeat()
-returns void language plpgsql security definer set search_path = public as $$
-declare
-  uid uuid := auth.uid();
-  local_day date := timezone('Asia/Colombo', now())::date;
-  monday date := public.study_room_local_week_start(timezone('Asia/Colombo', now())::date);
-  elapsed integer;
-begin
-  if uid is null then raise exception 'Sign-in required'; end if;
-  update public.study_room_members m
-  set today_seconds =
-        (case when m.today_date = local_day then m.today_seconds else 0 end) + elapsed,
-      today_date = local_day,
-      week_seconds =
-        (case when m.week_start = monday then m.week_seconds else 0 end) + elapsed,
-      week_start = monday,
-      last_heartbeat_at = now(),
-      updated_at = now()
-  where m.user_id = uid and m.is_studying
-    and m.last_heartbeat_at is not null;
-  -- elapsed is computed from the previously stored heartbeat, capped at 90s.
-end; $$;
-
 -- Replace heartbeat with an implementation that computes elapsed before UPDATE.
 create or replace function public.study_room_heartbeat()
 returns void language plpgsql security definer set search_path = public as $$
@@ -126,6 +103,11 @@ begin
   where user_id = auth.uid();
 end; $$;
 
+revoke all on function public.study_room_ensure_profile(text) from public, anon;
+revoke all on function public.study_room_set_subject(text) from public, anon;
+revoke all on function public.study_room_start() from public, anon;
+revoke all on function public.study_room_heartbeat() from public, anon;
+revoke all on function public.study_room_leave() from public, anon;
 grant execute on function public.study_room_ensure_profile(text) to authenticated;
 grant execute on function public.study_room_set_subject(text) to authenticated;
 grant execute on function public.study_room_start() to authenticated;
