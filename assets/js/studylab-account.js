@@ -68,7 +68,7 @@
 
     const { data, error } = await client
       .from("studylab_profiles")
-      .select("id,display_name,created_at,updated_at")
+      .select("id,display_name,school,phone,exam_year,study_stream,profile_completed_at,created_at,updated_at")
       .eq("id", user.id)
       .maybeSingle();
 
@@ -106,7 +106,7 @@
         },
         { onConflict: "id" }
       )
-      .select("id,display_name,created_at,updated_at")
+      .select("id,display_name,school,phone,exam_year,study_stream,profile_completed_at,created_at,updated_at")
       .single();
 
     if (error) throw error;
@@ -115,38 +115,46 @@
     return profile;
   }
 
-  async function saveProfile(name) {
+  async function saveProfile(name, details = {}) {
     const cleanName = String(name || "")
       .trim()
       .replace(/\s+/g, " ");
 
-    if (cleanName.length < 2) {
-      throw new Error("Please enter your name.");
+    if (cleanName.length < 2) throw new Error("Please enter your name.");
+    if (cleanName.length > 60) throw new Error("Please keep your name under 60 characters.");
+    if (!user) await ready;
+
+    const cleanOptional = value => {
+      const result = String(value || "").trim().replace(/\s+/g, " ");
+      return result || null;
+    };
+    const examYear = String(details.exam_year || "").trim();
+    const studyStream = String(details.study_stream || "").trim();
+
+    if (!["2026", "2027", "2028", "2029", "Other"].includes(examYear)) {
+      throw new Error("Please choose your A/L examination year.");
+    }
+    if (!["Physical Science", "Biological Science", "Commerce", "Arts", "Engineering Technology", "Bio Systems Technology", "Other"].includes(studyStream)) {
+      throw new Error("Please choose your study stream.");
     }
 
-    if (cleanName.length > 60) {
-      throw new Error("Please keep your name under 60 characters.");
-    }
-
-    if (!user) {
-      await ready;
-    }
-
+    const now = new Date().toISOString();
     const { data, error } = await client
       .from("studylab_profiles")
-      .upsert(
-        {
-          id: user.id,
-          display_name: cleanName,
-          updated_at: new Date().toISOString()
-        },
-        { onConflict: "id" }
-      )
-      .select("id,display_name,created_at,updated_at")
+      .upsert({
+        id: user.id,
+        display_name: cleanName,
+        school: cleanOptional(details.school),
+        phone: cleanOptional(details.phone),
+        exam_year: examYear,
+        study_stream: studyStream,
+        profile_completed_at: now,
+        updated_at: now
+      }, { onConflict: "id" })
+      .select("id,display_name,school,phone,exam_year,study_stream,profile_completed_at,created_at,updated_at")
       .single();
 
     if (error) throw error;
-
     profile = data;
     return profile;
   }
@@ -177,8 +185,22 @@
         const local = raw ? JSON.parse(raw) : null;
 
         if (local?.name) {
-          await saveProfile(local.name);
-          localStorage.removeItem("studyLabProfile");
+          // Preserve legacy names without falsely marking the full profile complete.
+          const legacyName = String(local.name).trim().replace(/\s+/g, " ");
+          if (legacyName.length >= 2 && legacyName.length <= 60) {
+            const { data: migratedProfile, error: migrationSaveError } = await client
+              .from("studylab_profiles")
+              .upsert({
+                id: user.id,
+                display_name: legacyName,
+                updated_at: new Date().toISOString()
+              }, { onConflict: "id" })
+              .select("id,display_name,school,phone,exam_year,study_stream,profile_completed_at,created_at,updated_at")
+              .single();
+            if (migrationSaveError) throw migrationSaveError;
+            profile = migratedProfile;
+            localStorage.removeItem("studyLabProfile");
+          }
         }
       } catch (migrationError) {
         console.warn("StudyLab profile migration:", migrationError);
