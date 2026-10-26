@@ -23,9 +23,22 @@ create table if not exists public.studylab_profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   display_name text not null
     check (char_length(btrim(display_name)) between 2 and 60),
+  school text,
+  phone text,
+  exam_year text,
+  study_stream text,
+  profile_completed_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Upgrade existing installations without removing any saved profiles.
+alter table public.studylab_profiles
+  add column if not exists school text,
+  add column if not exists phone text,
+  add column if not exists exam_year text,
+  add column if not exists study_stream text,
+  add column if not exists profile_completed_at timestamptz;
 
 alter table public.studylab_profiles enable row level security;
 
