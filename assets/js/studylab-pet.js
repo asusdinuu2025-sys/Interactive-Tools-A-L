@@ -1477,7 +1477,7 @@
 
     character.dataset.profileField = field;
     state.sleeping = false;
-    character.dataset.state = field === "name" ? "surprised"
+    character.dataset.state = field === "name" ? "alert"
       : field === "school" ? "curious"
       : field === "phone" ? "shy"
       : field === "year" ? "thinking"
