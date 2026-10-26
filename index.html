@@ -1080,7 +1080,7 @@
     .profile-dialog{overflow:hidden;isolation:isolate;transform:translateY(0) rotateX(0) rotateY(0);transform-style:preserve-3d;background:radial-gradient(ellipse at var(--profile-glow-x) var(--profile-glow-y),rgba(87,169,255,.19),transparent 42%),linear-gradient(145deg,rgba(26,43,68,.94),rgba(12,20,36,.97) 56%,rgba(35,30,72,.92));border:1px solid rgba(173,215,255,.24);box-shadow:0 38px 100px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.16),inset 0 -1px 0 rgba(115,155,230,.10);transition:transform .18s ease-out,border-color .25s ease,box-shadow .25s ease,background .25s ease}
     .profile-dialog::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;border-radius:inherit;background:linear-gradient(115deg,rgba(255,255,255,.10),transparent 24%,transparent 70%,rgba(139,123,255,.09));opacity:.8}
     .profile-dialog::after{content:"";position:absolute;top:-90px;right:-70px;z-index:-1;width:250px;height:250px;border-radius:50%;background:rgba(70,135,255,.17);filter:blur(42px);pointer-events:none}
-    .profile-dialog>*{position:relative;z-index:1}
+    .profile-dialog>*{z-index:1}
     html[data-theme="light"] .profile-dialog{background:radial-gradient(ellipse at var(--profile-glow-x) var(--profile-glow-y),rgba(91,160,255,.17),transparent 43%),linear-gradient(145deg,rgba(255,255,255,.97),rgba(239,246,255,.97) 58%,rgba(245,241,255,.96));border-color:rgba(87,139,205,.27);box-shadow:0 35px 90px rgba(35,70,105,.22),inset 0 1px 0 rgba(255,255,255,.98),inset 0 -1px 0 rgba(80,120,180,.08)}
     .profile-modal.is-opening .profile-dialog{animation:profileModalIn .42s cubic-bezier(.2,.8,.2,1) both}
     .profile-modal.is-closing .profile-dialog{animation:profileModalOut .34s cubic-bezier(.32,.72,.2,1) both;pointer-events:none}
