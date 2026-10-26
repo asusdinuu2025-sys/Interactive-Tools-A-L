@@ -1174,3 +1174,31 @@ html[data-theme="light"] .sl-pet-setting-buttons button[data-pet-eye="pink"].is-
   68% { transform: translateY(-1px) scale(1.015); }
   100% { transform: translateY(0) scale(1); }
 }
+
+/* Profile form focus: the existing floating StudyLab Pet reacts in place. */
+.sl-pet-character[data-profile-field="name"] .sl-pet-eye > i {
+  background: #ffb02e !important;
+  box-shadow: 0 0 12px rgba(255,176,46,.98), 0 0 28px rgba(255,126,24,.72) !important;
+}
+.sl-pet-character[data-profile-field="name"] .sl-pet-mouth {
+  border-color: #ffad2f !important;
+}
+.sl-pet-character[data-profile-field="school"] .sl-pet-eye > i {
+  background: #ffd166 !important;
+  box-shadow: 0 0 12px rgba(255,209,102,.9), 0 0 24px rgba(255,170,55,.45) !important;
+}
+.sl-pet-character[data-profile-field="phone"] .sl-pet-eye > i {
+  background: #9db6c9 !important;
+  box-shadow: 0 0 8px rgba(157,182,201,.65) !important;
+}
+.sl-pet-character[data-profile-field="year"] .sl-pet-eye > i {
+  background: #b99aff !important;
+  box-shadow: 0 0 12px rgba(185,154,255,.9), 0 0 24px rgba(137,108,255,.42) !important;
+}
+.sl-pet-character[data-profile-field="stream"] .sl-pet-eye > i {
+  background: #6dffc5 !important;
+  box-shadow: 0 0 12px rgba(109,255,197,.9), 0 0 24px rgba(42,220,160,.42) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sl-pet-character[data-profile-field="name"] { transition: none !important; }
+}
