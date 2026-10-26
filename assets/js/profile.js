@@ -15,7 +15,6 @@
   const profileStatus = document.getElementById("profileStatus");
   const profileNameLabel = document.getElementById("profileNameLabel");
   const profileSubtitle = document.getElementById("profileSubtitle");
-  const profileMascot = document.getElementById("profileMascot");
   const profileDialog = profileModal.querySelector(".profile-dialog");
   const profileFields = [profileInput, profileSchool, profilePhone, profileExamYear, profileStream];
   let closeTimer = null;
@@ -96,7 +95,6 @@
     profileModal.classList.remove("is-closing");
     profileModal.classList.add("is-opening");
     document.body.classList.add("profile-modal-open");
-    updateMascot();
     window.requestAnimationFrame(() => profileInput.focus());
     window.setTimeout(() => profileModal.classList.remove("is-opening"), 460);
   }
@@ -117,22 +115,22 @@
     profileModal.classList.remove("is-opening", "is-closing");
     document.body.classList.remove("profile-modal-open");
   }
-  function updateMascot(activeField) {
-    if (!profileMascot) return;
-    const field = activeField || document.activeElement;
-    const expression = field === profileInput ? "name"
+  function signalPetField(field) {
+    const fieldName = field === profileInput ? "name"
       : field === profileSchool ? "school"
+      : field === profilePhone ? "phone"
       : field === profileExamYear ? "year"
-      : field === profileStream ? "stream"
-      : field === profilePhone ? "private" : "idle";
-    profileMascot.dataset.expression = expression;
+      : field === profileStream ? "stream" : "idle";
+    window.dispatchEvent(new CustomEvent("studylab-profile-field", {
+      detail: { field: fieldName, value: field?.value || "" }
+    }));
   }
 
 
   profileFields.forEach(field => {
-    field.addEventListener("focus", () => updateMascot(field));
-    field.addEventListener("input", () => updateMascot(field));
-    field.addEventListener("change", () => updateMascot(field));
+    field.addEventListener("focus", () => signalPetField(field));
+    field.addEventListener("input", () => signalPetField(field));
+    field.addEventListener("change", () => signalPetField(field));
   });
   profileModal.addEventListener("pointermove", event => {
     if (!profileDialog || profileModal.hidden || event.pointerType === "touch" ||
