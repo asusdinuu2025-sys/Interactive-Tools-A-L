@@ -447,7 +447,17 @@
       state.angerUntil <= now() &&
       !state.enableAnimationFrame
     ) {
-      setGazeTarget(state.pointerX, state.pointerY);
+      const focusedName = character.dataset.profileField === "name"
+        ? document.getElementById("profileName") : null;
+      if (focusedName && focusedName.getClientRects().length) {
+        const rect = focusedName.getBoundingClientRect();
+        setGazeTarget(
+          rect.left + Math.min(rect.width * 0.2, 110),
+          rect.top + rect.height / 2
+        );
+      } else {
+        setGazeTarget(state.pointerX, state.pointerY);
+      }
     }
 
     const p = profile();
