@@ -276,7 +276,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 declare
   recent_count integer;
 begin
