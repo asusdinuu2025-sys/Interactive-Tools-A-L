@@ -87,6 +87,45 @@
       button.setAttribute("aria-pressed", String(active));
     });
   }
+  function updateStudyRoomValidation() {
+    if (!mandatoryProfile) {
+      [profileInput, profileSchool, profilePhone, profileExamYear, profileStream].forEach(field => {
+        field?.classList.remove("profile-field-invalid");
+        field?.removeAttribute("aria-invalid");
+      });
+      document.querySelector(".profile-gender-field")?.classList.remove("profile-field-invalid");
+      genderButtons.forEach(button => button.classList.remove("profile-field-invalid"));
+      return;
+    }
+
+    const phoneDigits = profilePhone.value.replace(/\\D/g, "");
+    const invalid = {
+      name: profileInput.value.trim().length < 2 || placeholderName(profileInput.value.trim()),
+      school: profileSchool.value.trim().length < 2,
+      phone: !profilePhone.value.trim() || phoneDigits.length < 9 || phoneDigits.length > 12,
+      year: !profileExamYear.value,
+      stream: !profileStream.value,
+      icon: !["male", "female"].includes(selectedGender)
+    };
+    const fields = [
+      [profileInput, invalid.name],
+      [profileSchool, invalid.school],
+      [profilePhone, invalid.phone],
+      [profileExamYear, invalid.year],
+      [profileStream, invalid.stream]
+    ];
+    fields.forEach(([field, isInvalid]) => {
+      field.classList.toggle("profile-field-invalid", isInvalid);
+      field.setAttribute("aria-invalid", String(isInvalid));
+    });
+    const iconField = document.querySelector(".profile-gender-field");
+    iconField?.classList.toggle("profile-field-invalid", invalid.icon);
+    genderButtons.forEach(button => {
+      button.classList.toggle("profile-field-invalid", invalid.icon);
+      button.setAttribute("aria-invalid", String(invalid.icon));
+    });
+  }
+
   function updateCopy(p) {
     const complete = mandatoryProfile ? isFullComplete(p) : isBasicComplete(p);
     profileNameLabel.textContent = complete ? "Your student profile" : "Complete your student profile";
@@ -111,6 +150,10 @@
       updateRequiredFields();
       fillForm(p);
       updateCopy(p);
+      updateStudyRoomValidation();
+      if (mandatoryProfile) {
+        showStatus("To enter the Study Room, you must fill in all fields, including your profile icon.", true);
+      }
       setButtonProfile(p);
     } catch (error) {
       console.warn("StudyLab profile load:", error);
@@ -193,7 +236,13 @@
       item.classList.toggle("is-selected", active);
       item.setAttribute("aria-pressed", String(active));
     });
+    updateStudyRoomValidation();
   }));
+
+  [profileInput, profileSchool, profilePhone, profileExamYear, profileStream].forEach(field => {
+    field.addEventListener("input", updateStudyRoomValidation);
+    field.addEventListener("change", updateStudyRoomValidation);
+  });
 
   profileButton.addEventListener("click", openModal);
   profileClose?.addEventListener("click", closeModal);
@@ -266,6 +315,7 @@
       updateCopy(p);
       mandatoryProfile = false;
       updateRequiredFields();
+      updateStudyRoomValidation();
       showStatus("Your profile has been saved to your StudyLab account ✓");
       window.dispatchEvent(new CustomEvent("studylab-profile-updated", { detail: p }));
       window.setTimeout(() => {
