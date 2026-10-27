@@ -13,10 +13,10 @@
   const countdownTarget = liveRoot?.dataset.countdownTarget;
 
   const countdown = {
-    days: liveRoot.querySelector("[data-cd-days]"),
-    hours: liveRoot.querySelector("[data-cd-hours]"),
-    minutes: liveRoot.querySelector("[data-cd-minutes]"),
-    seconds: liveRoot.querySelector("[data-cd-seconds]")
+    days: liveRoot?.querySelector("[data-cd-days]"),
+    hours: liveRoot?.querySelector("[data-cd-hours]"),
+    minutes: liveRoot?.querySelector("[data-cd-minutes]"),
+    seconds: liveRoot?.querySelector("[data-cd-seconds]")
   };
 
   function updateCountdown() {
@@ -40,7 +40,7 @@
     if (countdown.seconds) countdown.seconds.textContent = String(seconds).padStart(2, "0");
 
     if (diff <= 0) {
-      const note = liveRoot.querySelector("[data-countdown-note]");
+      const note = liveRoot?.querySelector("[data-countdown-note]");
       if (note) note.textContent = "A/L 2027 countdown target reached.";
     }
   }
