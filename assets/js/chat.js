@@ -9,7 +9,9 @@
   const pagePath = window.location.pathname.replace(/\/+$/, "") || "/";
   const isHomePage = pagePath === "/" || pagePath.endsWith("/index.html");
   const isStudyRoomPage = pagePath.endsWith("/study-room.html");
-  if (!isHomePage && !isStudyRoomPage) return;\n\n  const CONFIG = {
+  if (!isHomePage && !isStudyRoomPage) return;
+
+  const CONFIG = {
     supabaseUrl: "https://zpvatyxdbshjuqgtexzw.supabase.co",
     supabasePublishableKey: "sb_publishable_zd8S3PcyicJX6Cgyh0ez8A_sUSTCuiB",
     table: "studylab_chat_messages",
