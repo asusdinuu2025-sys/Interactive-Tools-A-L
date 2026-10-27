@@ -212,7 +212,7 @@ returns void
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 begin
   delete from public.studylab_chat_messages
   where id in (
@@ -230,7 +230,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 begin
   perform public.cleanup_studylab_chat();
   return null;
