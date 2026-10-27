@@ -78,11 +78,16 @@
     return profile;
   }
 
-  function isProfileComplete(p) {
-    return Boolean(p?.profile_completed_at && p?.display_name &&
+  function isBasicProfileComplete(p) {
+    return Boolean(p?.display_name &&
       !/^Student\d{4}$/.test(String(p.display_name)) &&
+      p?.exam_year && p?.study_stream);
+  }
+
+  function isFullProfileComplete(p) {
+    return Boolean(p?.profile_completed_at && isBasicProfileComplete(p) &&
       String(p.school || "").trim() && String(p.phone || "").trim() &&
-      p?.exam_year && p?.study_stream && ["male", "female"].includes(p?.gender));
+      ["male", "female"].includes(p?.gender));
   }
 
   function makeDefaultStudentName() {
@@ -140,9 +145,11 @@
     const examYear = String(details.exam_year || "").trim();
     const studyStream = String(details.study_stream || "").trim();
     const gender = String(details.gender || "").trim();
-    if (!school || school.length < 2) throw new Error("Please enter your school name.");
+    const requireFullProfile = details.require_full_profile === true;
+    if (requireFullProfile && (!school || school.length < 2)) throw new Error("Please enter your school name.");
     const phoneDigits = phone ? phone.replace(/\D/g, "") : "";
-    if (phoneDigits.length < 9 || phoneDigits.length > 12) throw new Error("Please enter a valid mobile number (9–12 digits, including country code if used).");
+    if (phone && (phoneDigits.length < 9 || phoneDigits.length > 12)) throw new Error("Please enter a valid mobile number (9–12 digits, including country code if used).");
+    if (requireFullProfile && !phone) throw new Error("Please enter your mobile number.");;
 
     if (!["2026", "2027", "2028", "2029", "Other"].includes(examYear)) {
       throw new Error("Please choose your A/L examination year.");
@@ -150,7 +157,7 @@
     if (!["Physical Science", "Biological Science", "Commerce", "Arts", "Engineering Technology", "Bio Systems Technology", "Other"].includes(studyStream)) {
       throw new Error("Please choose your study stream.");
     }
-    if (!["male", "female"].includes(gender)) {
+    if (requireFullProfile && !["male", "female"].includes(gender)) {
       throw new Error("Please choose a profile icon.");
     }
 
@@ -164,7 +171,7 @@
         phone,
         exam_year: examYear,
         study_stream: studyStream,
-        gender,
+        gender: ["male", "female"].includes(gender) ? gender : null,
         profile_completed_at: now,
         updated_at: now
       }, { onConflict: "id" })
@@ -257,13 +264,13 @@
     saveProfile
   };
 
-  // Anonymous sign-in happens automatically. Incomplete profiles are sent to
-  // the profile form before entering pages that initialise a StudyLab account.
+  // Only the shared Study Room requires the full profile. Other StudyLab pages
+  // remain accessible with a basic profile or without completing the prompt.
   ready.then(async function () {
     const path = window.location.pathname;
-    if (path === "/" || path.endsWith("/index.html")) return;
+    if (!path.endsWith("/study-room.html") && path !== "/study-room.html") return;
     const currentProfile = await getProfile(true);
-    if (isProfileComplete(currentProfile)) return;
+    if (isFullProfileComplete(currentProfile)) return;
     const returnTo = path + window.location.search + window.location.hash;
     window.location.replace("/index.html?completeProfile=1&returnTo=" + encodeURIComponent(returnTo));
   }).catch(function (error) {
