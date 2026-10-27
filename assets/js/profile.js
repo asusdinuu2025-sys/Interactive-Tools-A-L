@@ -50,7 +50,7 @@
   }
 
   function setButtonProfile(p) {
-    if (isComplete(p)) {
+    if (isBasicComplete(p)) {
       profileButton.textContent = "👤 " + p.display_name;
       profileButton.title = "Edit your student profile";
     } else if (p?.display_name && !placeholderName(p.display_name)) {
@@ -86,11 +86,13 @@
     });
   }
   function updateCopy(p) {
-    const complete = isComplete(p);
+    const complete = mandatoryProfile ? isFullComplete(p) : isBasicComplete(p);
     profileNameLabel.textContent = complete ? "Your student profile" : "Complete your student profile";
-    profileSubtitle.textContent = complete
-      ? "Keep your details up to date. Your information stays linked to your StudyLab account."
-      : "A few details help StudyLab tailor the experience to your Sri Lankan A/L study needs.";
+    profileSubtitle.textContent = mandatoryProfile
+      ? "All details are required to enter the Study Room."
+      : complete
+        ? "Keep your details up to date. Your information stays linked to your StudyLab account."
+        : "Add your name, A/L year and stream. You can skip this for now and keep using StudyLab.";
     const submit = profileForm.querySelector(".profile-save");
     if (submit) submit.textContent = complete ? "Save changes" : "Save profile";
   }
