@@ -20,9 +20,9 @@
   const profileDialog = profileModal.querySelector(".profile-dialog");
   const profileFields = [profileInput, profileSchool, profilePhone, profileExamYear, profileStream];
   let closeTimer = null;
+  let mandatoryProfile = true;
 
   const profileClose = document.getElementById("profileClose");
-  const PROFILE_PROMPT_KEY = "studylabProfileCompletionPromptSeenV1";
 
   if (!profileButton || !profileModal || !profileForm || !profileInput) return;
 
@@ -30,12 +30,6 @@
   const isComplete = p => Boolean(p?.profile_completed_at && p?.display_name &&
     !placeholderName(p.display_name) && p?.exam_year && p?.study_stream && ["male", "female"].includes(p?.gender));
 
-  function markPromptSeen() {
-    try { localStorage.setItem(PROFILE_PROMPT_KEY, "1"); } catch (_) {}
-  }
-  function hasSeenPrompt() {
-    try { return localStorage.getItem(PROFILE_PROMPT_KEY) === "1"; } catch (_) { return false; }
-  }
   function setButtonProfile(p) {
     if (isComplete(p)) {
       profileButton.textContent = "👤 " + p.display_name;
@@ -86,8 +80,12 @@
     profileStatus.textContent = "";
     profileStatus.dataset.state = "success";
     profileButton.disabled = true;
+    mandatoryProfile = true;
+    if (profileClose) { profileClose.hidden = true; profileClose.disabled = true; }
     try {
       const p = await getCloudProfile(true);
+      mandatoryProfile = !isComplete(p);
+      if (profileClose) { profileClose.hidden = mandatoryProfile; profileClose.disabled = mandatoryProfile; }
       fillForm(p);
       updateCopy(p);
       setButtonProfile(p);
@@ -107,6 +105,7 @@
     window.setTimeout(() => profileModal.classList.remove("is-opening"), 460);
   }
   function closeModal(animate = true) {
+    if (mandatoryProfile) return;
     if (closeTimer) window.clearTimeout(closeTimer);
     if (animate && !profileModal.hidden && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       profileModal.classList.remove("is-opening");
@@ -196,6 +195,19 @@
       profileInput.focus();
       return;
     }
+    const school = profileSchool.value.trim().replace(/\\s+/g, " ");
+    const phone = profilePhone.value.trim();
+    if (school.length < 2) {
+      showStatus("Please enter your school name.", true);
+      profileSchool.focus();
+      return;
+    }
+    const phoneDigits = phone.replace(/\\D/g, "");
+    if (phoneDigits.length < 9 || phoneDigits.length > 12) {
+      showStatus("Please enter a valid mobile number (9–12 digits, including country code if used).", true);
+      profilePhone.focus();
+      return;
+    }
     if (!profileExamYear.value || !profileStream.value) {
       showStatus("Please choose your A/L examination year and study stream.", true);
       return;
@@ -214,8 +226,8 @@
       if (!account?.ready) throw new Error("StudyLab account is unavailable.");
       await account.ready;
       const p = await account.saveProfile(name, {
-        school: profileSchool.value,
-        phone: profilePhone.value,
+        school,
+        phone,
         exam_year: profileExamYear.value,
         study_stream: profileStream.value,
         gender: selectedGender
@@ -223,14 +235,18 @@
       fillForm(p);
       setButtonProfile(p);
       updateCopy(p);
-      markPromptSeen();
+      mandatoryProfile = false;
+      if (profileClose) { profileClose.hidden = false; profileClose.disabled = false; }
       showStatus("Your profile has been saved to your StudyLab account ✓");
       window.dispatchEvent(new CustomEvent("studylab-profile-updated", { detail: p }));
       window.setTimeout(() => {
         closeModal(true);
         const params = new URLSearchParams(window.location.search);
-        if (params.get("completeProfile") === "1" && params.get("returnTo") === "study-room.html") {
-          window.setTimeout(() => window.location.replace("study-room.html"), 380);
+        if (params.get("completeProfile") === "1") {
+          const returnTo = params.get("returnTo") || "";
+          if (returnTo.startsWith("/") && !returnTo.startsWith("//") && !returnTo.includes("\\\\")) {
+            window.setTimeout(() => window.location.replace(returnTo), 380);
+          }
         }
       }, 420);
     } catch (error) {
@@ -247,8 +263,7 @@
       const p = await getCloudProfile();
       setButtonProfile(p);
       const params = new URLSearchParams(window.location.search);
-      if (!isComplete(p) && (!hasSeenPrompt() || params.get("completeProfile") === "1")) {
-        markPromptSeen();
+      if (!isComplete(p)) {
         await openModal();
       }
     } catch (error) {
