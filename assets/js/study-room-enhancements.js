@@ -2,6 +2,37 @@
 (() => {
 'use strict';
 function init(){
+
+  // Room Appearance is deliberately independent of the site's global appearance setting.
+  const initRoomAppearance=()=>{
+   const root=document.body,wrap=document.getElementById('roomAppearance'),trigger=document.getElementById('roomAppearanceTrigger'),menu=document.getElementById('roomAppearanceMenu'),current=document.getElementById('roomAppearanceCurrent');
+   if(!root||!wrap||!trigger||!menu||wrap.dataset.initialized==='true')return;
+   wrap.dataset.initialized='true';
+   const allowed=new Set(['dark','light','midnight-blue','forest-green','lavender','pinky','ocean','warm-sand']);
+   const labels={'dark':'Dark','light':'Light','midnight-blue':'Midnight Blue','forest-green':'Forest Green','lavender':'Lavender','pinky':'Pinky','ocean':'Ocean','warm-sand':'Warm Sand'};
+   const key='studylab-room-appearance-v1';
+   let saved='midnight-blue';try{const value=localStorage.getItem(key);if(allowed.has(value))saved=value;}catch(_){}
+   const close=()=>{menu.hidden=true;trigger.setAttribute('aria-expanded','false');};
+   const apply=value=>{
+    const theme=allowed.has(value)?value:'midnight-blue';
+    root.dataset.roomTheme=theme;
+    if(current)current.textContent=labels[theme];
+    menu.querySelectorAll('[data-room-theme-choice]').forEach(option=>{
+     const selected=option.dataset.roomThemeChoice===theme;
+     option.setAttribute('aria-checked',String(selected));
+     option.classList.toggle('is-selected',selected);
+    });
+    try{localStorage.setItem(key,theme);}catch(_){}
+   };
+   trigger.addEventListener('click',()=>{const opening=menu.hidden;menu.hidden=!opening;trigger.setAttribute('aria-expanded',String(opening));});
+   menu.querySelectorAll('[data-room-theme-choice]').forEach(option=>option.addEventListener('click',()=>{apply(option.dataset.roomThemeChoice);close();trigger.focus();}));
+   document.addEventListener('click',event=>{if(!wrap.contains(event.target))close();});
+   document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!menu.hidden){close();trigger.focus();}});
+   wrap.addEventListener('keydown',event=>{if(event.key==='ArrowDown'&&event.target===trigger){event.preventDefault();menu.querySelector('[data-room-theme-choice]')?.focus();}});
+   apply(saved);
+  };
+  initRoomAppearance();
+
  const hero=document.querySelector('.room-hero'),layout=document.querySelector('.room-layout'),actions=document.querySelector('.room-session-actions'),board=document.getElementById('leaderboardList');
  if(!hero||!layout||!actions||document.getElementById('slrEnhancementsReady'))return;
  const marker=document.createElement('span');marker.id='slrEnhancementsReady';marker.hidden=true;document.querySelector('.room-page')?.append(marker);
