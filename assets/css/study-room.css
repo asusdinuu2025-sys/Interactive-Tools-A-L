@@ -70,3 +70,43 @@ html[data-theme="light"] .study-room-launcher-vector svg path[stroke="#61e8ff"]{
 html[data-theme="light"] .study-room-launcher::before{
   filter:drop-shadow(0 0 4px rgba(8,125,98,.34));
 }
+
+
+/* Footer heading: a small neon filament that flickers like a bulb warming up. */
+.footer-title{
+  position:relative;
+  isolation:isolate;
+  padding-bottom:15px;
+}
+.footer-title::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:1px;
+  width:min(340px,76%);
+  height:3px;
+  border-radius:999px;
+  transform:translateX(-50%);
+  transform-origin:center;
+  background:linear-gradient(90deg,transparent 0%,#39ffb0 20%,#f5ed35 50%,#61e8ff 80%,transparent 100%);
+  box-shadow:0 0 4px rgba(57,255,176,.75),0 0 10px rgba(245,237,53,.48),0 0 20px rgba(97,232,255,.32);
+  opacity:.72;
+  animation:studyLabFilamentFlicker 3.1s linear infinite;
+  pointer-events:none;
+}
+@keyframes studyLabFilamentFlicker{
+  0%,14%,16%,18%,42%,44%,68%,100%{opacity:.78;filter:brightness(1);box-shadow:0 0 4px rgba(57,255,176,.65),0 0 10px rgba(245,237,53,.42),0 0 18px rgba(97,232,255,.25)}
+  15%,17%,43%{opacity:.18;filter:brightness(.55);box-shadow:0 0 2px rgba(57,255,176,.25)}
+  20%,41%,70%{opacity:1;filter:brightness(1.65);box-shadow:0 0 7px rgba(57,255,176,.95),0 0 16px rgba(245,237,53,.72),0 0 27px rgba(97,232,255,.48)}
+  72%{opacity:.55;filter:brightness(.8)}
+}
+html[data-theme="light"] .footer-title{
+  text-shadow:0 0 3px rgba(8,125,98,.22),0 0 8px rgba(8,125,98,.12);
+}
+html[data-theme="light"] .footer-title::after{
+  background:linear-gradient(90deg,transparent 0%,#087d62 20%,#9a7600 50%,#087d9b 80%,transparent 100%);
+  box-shadow:0 0 4px rgba(8,125,98,.38),0 0 9px rgba(154,118,0,.24),0 0 16px rgba(8,125,155,.18);
+}
+@media(prefers-reduced-motion:reduce){
+  .footer-title::after{animation:none;opacity:.82;filter:none}
+}
