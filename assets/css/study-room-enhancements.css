@@ -81,3 +81,27 @@ body.slr-theme-pinky .slr-theme-select{background:#351b32;color:#fff0fa}
 body.slr-theme-pinky .slr-focus-actions button:hover{border-color:rgba(255,155,214,.7)}
 body.slr-theme-pinky .sl-pet-character{border-color:rgba(255,145,211,.42);box-shadow:0 20px 42px rgba(0,0,0,.34),0 0 28px rgba(255,105,190,.15)}
 body.slr-theme-pinky .sl-pet-character[data-eye="cyan"] .sl-pet-mouth{border-color:#ff84c8}
+
+
+/* Extend Pinky to the shared floating controls and chat, not just room cards. */
+body.slr-theme-pinky .study-chat-button,
+body.slr-theme-pinky .study-feedback-button,
+body.slr-theme-pinky .study-quick-button,
+body.slr-theme-pinky #studylabPetLauncher{background:linear-gradient(145deg,rgba(255,118,199,.22),rgba(217,70,165,.12)),rgba(35,13,33,.94)!important;border-color:rgba(255,145,211,.55)!important;color:#fff0fa!important;box-shadow:0 8px 25px rgba(217,70,165,.18),0 0 18px rgba(255,118,199,.08)!important}
+body.slr-theme-pinky .study-chat-button:hover,
+body.slr-theme-pinky .study-chat-button.is-open,
+body.slr-theme-pinky .study-feedback-button:hover,
+body.slr-theme-pinky .study-quick-button:hover,
+body.slr-theme-pinky #studylabPetLauncher:hover{border-color:#ff9bd6!important;background:linear-gradient(145deg,rgba(255,118,199,.3),rgba(217,70,165,.18)),rgba(45,17,42,.97)!important}
+body.slr-theme-pinky .study-chat-button-icon,
+body.slr-theme-pinky .study-feedback-button-icon,
+body.slr-theme-pinky .study-quick-button-icon,
+body.slr-theme-pinky .sl-pet-launcher-icon{color:#ff9bd6!important;filter:drop-shadow(0 0 6px rgba(255,130,202,.45))}
+body.slr-theme-pinky .study-chat-panel{background:linear-gradient(160deg,#32152e,#1e1020)!important;border-color:rgba(255,145,211,.35)!important;color:#fff0fa!important;box-shadow:0 24px 70px rgba(10,0,12,.5),0 0 28px rgba(255,105,190,.08)!important}
+body.slr-theme-pinky .study-chat-head,body.slr-theme-pinky .study-chat-compose{background:rgba(255,145,211,.07)!important;border-color:rgba(255,145,211,.18)!important}
+body.slr-theme-pinky .study-chat-notice,body.slr-theme-pinky .study-chat-message{background:rgba(255,145,211,.07)!important;border-color:rgba(255,145,211,.17)!important;color:#fff0fa!important}
+body.slr-theme-pinky .study-chat-message.own{background:linear-gradient(135deg,rgba(217,70,165,.35),rgba(255,118,199,.16))!important;border-color:rgba(255,145,211,.3)!important}
+body.slr-theme-pinky .study-chat-input{background:#351b32!important;border-color:rgba(255,145,211,.25)!important;color:#fff0fa!important}
+body.slr-theme-pinky .study-chat-input::placeholder{color:#d9b5d0!important}
+body.slr-theme-pinky .study-chat-send{background:linear-gradient(135deg,#ff76c7,#d946a5)!important;color:#fff!important}
+body.slr-theme-pinky .study-chat-close{color:#fff0fa!important}
