@@ -103,7 +103,7 @@ html[data-theme="light"] .studylab-ai-tools-row .studylab-ai-launcher {
   .study-chat-button { right: 144px !important; width: 46px !important; min-width: 46px !important; padding: 0 !important; gap: 0 !important; }
   .study-chat-button > span:not(.study-chat-button-icon):not(.study-chat-unread) { display: none !important; }
   .study-feedback-button { right: 202px !important; }
-  .study-room-page .study-chat-button { right: 78px !important; }
+  .study-room-page .study-chat-button { right: 144px !important; }
 }
 
 /* Light theme: solid, readable surfaces rather than relying on glow. */
@@ -218,5 +218,5 @@ html[data-theme="light"] .room-avatar-female { color: #c0278d; background: #fff0
 @media (min-width: 721px) {
   .study-chat-button { width: 46px !important; min-width: 46px !important; padding: 0 !important; gap: 0 !important; }
   .study-chat-button > span:not(.study-chat-button-icon):not(.study-chat-unread) { display: none !important; }
-  .study-room-page .study-chat-button { right: 78px !important; }
+  .study-room-page .study-chat-button { right: 144px !important; }
 }
