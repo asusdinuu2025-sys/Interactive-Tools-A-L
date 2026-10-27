@@ -13,3 +13,131 @@ html[data-theme="light"] .study-room-launcher-arrow { color:#168a6d; }
 @media (max-width:900px) { .study-room-tools-row { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media (max-width:720px) { .study-room-tools-row { grid-template-columns:1fr; width:calc(100% - 16px); gap:10px; } .study-room-launcher { min-height:154px; padding:13px 15px; } }
 @media (max-width:430px) { .study-room-launcher { padding-left:12px; padding-right:12px; } .study-room-launcher-icon { width:43px; height:43px; } }
+
+
+/* Neon vector artwork for the homepage utility cards. */
+.student-milestone-plant{color:#39ff78;filter:drop-shadow(0 0 7px rgba(57,255,120,.32))}
+.student-milestone-plant svg{display:block;width:100%;height:100%;overflow:visible}
+.study-room-launcher{position:relative;isolation:isolate;overflow:hidden}
+@property --study-room-neon-angle{syntax:"<angle>";inherits:false;initial-value:0deg}
+.study-room-launcher::before{content:"";position:absolute;z-index:0;inset:0;padding:2px;border-radius:inherit;background:conic-gradient(from var(--study-room-neon-angle),transparent 0deg 225deg,#39ffb0 260deg,#f5ed35 285deg,#61e8ff 310deg,transparent 345deg 360deg);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;filter:drop-shadow(0 0 5px rgba(57,255,176,.45));animation:studyRoomNeonBorder 4.2s linear infinite;pointer-events:none}
+.study-room-launcher::after{content:"";position:absolute;z-index:0;inset:0;border-radius:inherit;border:1px solid rgba(57,255,176,.12);box-shadow:inset 0 0 18px rgba(57,255,176,.035);pointer-events:none}
+.study-room-launcher>*{position:relative;z-index:1}
+.study-room-launcher-vector{color:#39ffb0;filter:drop-shadow(0 0 7px rgba(57,255,176,.45))}
+.study-room-launcher-vector svg{display:block;width:100%;height:100%;overflow:visible}
+.study-room-launcher:hover::before{filter:drop-shadow(0 0 8px rgba(57,255,176,.8)) drop-shadow(0 0 12px rgba(97,232,255,.4));animation-duration:2.4s}
+@keyframes studyRoomNeonBorder{to{--study-room-neon-angle:360deg}}
+.footer-title{color:var(--text-primary,#eafcff);text-shadow:0 0 5px rgba(57,255,176,.55),0 0 14px rgba(57,255,176,.35),0 0 26px rgba(97,232,255,.22);animation:studyLabTitleGlow 3.6s ease-in-out infinite alternate}
+@keyframes studyLabTitleGlow{from{text-shadow:0 0 4px rgba(57,255,176,.38),0 0 10px rgba(57,255,176,.24),0 0 18px rgba(97,232,255,.14)}to{text-shadow:0 0 7px rgba(57,255,176,.7),0 0 18px rgba(57,255,176,.42),0 0 30px rgba(97,232,255,.3)}}
+@media(prefers-reduced-motion:reduce){.study-room-launcher::before,.footer-title{animation:none}.study-room-launcher::before{opacity:.8}}
+
+
+/* Light-theme contrast fixes for the homepage milestone and study-room artwork. */
+html[data-theme="light"] .student-milestone-plant{
+  color:#168a3b;
+  filter:drop-shadow(0 0 5px rgba(22,138,59,.24));
+}
+html[data-theme="light"] .student-milestone-plant svg path{
+  stroke:#168a3b;
+}
+html[data-theme="light"] .student-milestone-plant svg path[fill="#39ff78"],
+html[data-theme="light"] .student-milestone-plant svg path[fill="#25f76a"],
+html[data-theme="light"] .student-milestone-plant svg path[fill="#78ff5b"]{
+  fill:#168a3b;
+  stroke:#168a3b;
+}
+html[data-theme="light"] .student-milestone-plant svg path[stroke="#f5ed35"]{
+  stroke:#a97900;
+}
+html[data-theme="light"] .study-room-launcher-icon{
+  background:rgba(13,132,93,.10);
+  border-color:rgba(13,132,93,.32);
+}
+html[data-theme="light"] .study-room-launcher-vector{
+  color:#087d62;
+  filter:drop-shadow(0 0 4px rgba(8,125,98,.24));
+}
+html[data-theme="light"] .study-room-launcher-vector svg path,
+html[data-theme="light"] .study-room-launcher-vector svg circle{
+  stroke:#087d62;
+}
+html[data-theme="light"] .study-room-launcher-vector svg path[stroke="#f5ed35"]{
+  stroke:#9a7600;
+}
+html[data-theme="light"] .study-room-launcher-vector svg path[stroke="#61e8ff"]{
+  stroke:#087d9b;
+}
+html[data-theme="light"] .study-room-launcher::before{
+  filter:drop-shadow(0 0 4px rgba(8,125,98,.34));
+}
+
+
+/* Footer filament: a clean, straight line without the foggy glow. */
+.footer-title{
+  position:relative;
+  isolation:isolate;
+  padding-bottom:15px;
+  text-shadow:none;
+  animation:none;
+}
+.footer-title::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:1px;
+  width:min(340px,76%);
+  height:2px;
+  border-radius:0;
+  transform:translateX(-50%);
+  background:linear-gradient(90deg,transparent 0%,#39ffb0 12%,#f5ed35 50%,#61e8ff 88%,transparent 100%);
+  box-shadow:none;
+  opacity:.9;
+  animation:studyLabFilamentFlicker 3.1s linear infinite;
+  pointer-events:none;
+}
+@keyframes studyLabFilamentFlicker{
+  0%,14%,16%,18%,42%,44%,68%,100%{opacity:.9}
+  15%,17%,43%{opacity:.35}
+  20%,41%,70%{opacity:1}
+  72%{opacity:.65}
+}
+html[data-theme="light"] .footer-title{color:#203342;text-shadow:none}
+html[data-theme="light"] .footer-title::after{
+  background:linear-gradient(90deg,transparent 0%,#087d62 12%,#9a7600 50%,#087d9b 88%,transparent 100%);
+  box-shadow:none;
+}
+
+/* Per-letter hero glow, like small neon filaments behind the title. */
+.hero h1{ text-shadow:none !important; }
+.hero h1 .hero-title-letter{
+  display:inline-block;
+  animation:studyLabLetterFlicker 3.4s steps(1,end) infinite;
+  animation-delay:var(--letter-delay, 0ms);
+  will-change:text-shadow;
+}
+.hero h1 .hero-title-space{display:inline-block;width:.28em}
+@keyframes studyLabLetterFlicker{
+  0%,18%,20%,57%,59%,100%{
+    text-shadow:0 0 2px rgba(57,255,176,.28),0 0 7px rgba(57,255,176,.18);
+  }
+  19%,58%{text-shadow:none}
+  23%,55%{
+    text-shadow:0 0 3px rgba(57,255,176,.65),0 0 10px rgba(97,232,255,.34);
+  }
+  60%,63%{text-shadow:0 0 4px rgba(245,237,53,.58),0 0 11px rgba(57,255,176,.30)}
+}
+html[data-theme="light"] .hero h1 .hero-title-letter{
+  animation-name:studyLabLetterFlickerLight;
+}
+@keyframes studyLabLetterFlickerLight{
+  0%,18%,20%,57%,59%,100%{text-shadow:0 0 2px rgba(8,125,98,.18),0 0 6px rgba(8,125,98,.12)}
+  19%,58%{text-shadow:none}
+  23%,55%{text-shadow:0 0 3px rgba(8,125,98,.42),0 0 8px rgba(8,125,155,.20)}
+  60%,63%{text-shadow:0 0 3px rgba(154,118,0,.38),0 0 8px rgba(8,125,98,.18)}
+}
+@media(prefers-reduced-motion:reduce){
+  .study-room-launcher::before,.footer-title::after,.hero h1 .hero-title-letter{animation:none}
+  .study-room-launcher::before{opacity:.8}
+  .hero h1 .hero-title-letter{text-shadow:0 0 3px rgba(57,255,176,.22)}
+  html[data-theme="light"] .hero h1 .hero-title-letter{text-shadow:0 0 2px rgba(8,125,98,.18)}
+}
