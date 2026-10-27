@@ -220,3 +220,31 @@ html[data-theme="light"] .room-avatar-female { color: #c0278d; background: #fff0
   .study-chat-button > span:not(.study-chat-button-icon):not(.study-chat-unread) { display: none !important; }
   .study-room-page .study-chat-button { right: 144px !important; }
 }
+
+
+/* Ensure the Live Study Room chat launcher remains visible beside Quick Access. */
+body.study-room-page .study-chat-button {
+  position: fixed !important;
+  right: 144px !important;
+  bottom: 20px !important;
+  z-index: 960 !important;
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+@media (max-width: 720px) {
+  body.study-room-page .study-chat-button {
+    right: 74px !important;
+    bottom: 12px !important;
+    width: 46px !important;
+    min-width: 46px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    padding: 0 !important;
+    justify-content: center !important;
+    gap: 0 !important;
+  }
+  body.study-room-page .study-chat-button > span:not(.study-chat-button-icon):not(.study-chat-unread) {
+    display: none !important;
+  }
+}
