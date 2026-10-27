@@ -116,6 +116,9 @@ html[data-theme="light"] .room-hero{background:linear-gradient(120deg,rgba(224,2
 body.study-room-page.profile-modal-open > :not(#profileModal):not(script):not(style) { filter: blur(5px); transition: filter .3s ease; }
 #profileModal { filter: none !important; }
 .profile-modal-open { overflow:hidden; }
+/* Hide the profile gate's visible white scrollbars without changing scroll behavior. */
+.profile-modal, .profile-dialog { scrollbar-width:none; -ms-overflow-style:none; }
+.profile-modal::-webkit-scrollbar, .profile-dialog::-webkit-scrollbar { display:none; width:0; height:0; }
 </style><link rel="stylesheet" href="assets/css/floating-controls.css?v=20261027-chatfix">
 </head>
 <body class="study-room-page">
