@@ -30,3 +30,43 @@ html[data-theme="light"] .study-room-launcher-arrow { color:#168a6d; }
 .footer-title{color:var(--text-primary,#eafcff);text-shadow:0 0 5px rgba(57,255,176,.55),0 0 14px rgba(57,255,176,.35),0 0 26px rgba(97,232,255,.22);animation:studyLabTitleGlow 3.6s ease-in-out infinite alternate}
 @keyframes studyLabTitleGlow{from{text-shadow:0 0 4px rgba(57,255,176,.38),0 0 10px rgba(57,255,176,.24),0 0 18px rgba(97,232,255,.14)}to{text-shadow:0 0 7px rgba(57,255,176,.7),0 0 18px rgba(57,255,176,.42),0 0 30px rgba(97,232,255,.3)}}
 @media(prefers-reduced-motion:reduce){.study-room-launcher::before,.footer-title{animation:none}.study-room-launcher::before{opacity:.8}}
+
+
+/* Light-theme contrast fixes for the homepage milestone and study-room artwork. */
+html[data-theme="light"] .student-milestone-plant{
+  color:#168a3b;
+  filter:drop-shadow(0 0 5px rgba(22,138,59,.24));
+}
+html[data-theme="light"] .student-milestone-plant svg path{
+  stroke:#168a3b;
+}
+html[data-theme="light"] .student-milestone-plant svg path[fill="#39ff78"],
+html[data-theme="light"] .student-milestone-plant svg path[fill="#25f76a"],
+html[data-theme="light"] .student-milestone-plant svg path[fill="#78ff5b"]{
+  fill:#168a3b;
+  stroke:#168a3b;
+}
+html[data-theme="light"] .student-milestone-plant svg path[stroke="#f5ed35"]{
+  stroke:#a97900;
+}
+html[data-theme="light"] .study-room-launcher-icon{
+  background:rgba(13,132,93,.10);
+  border-color:rgba(13,132,93,.32);
+}
+html[data-theme="light"] .study-room-launcher-vector{
+  color:#087d62;
+  filter:drop-shadow(0 0 4px rgba(8,125,98,.24));
+}
+html[data-theme="light"] .study-room-launcher-vector svg path,
+html[data-theme="light"] .study-room-launcher-vector svg circle{
+  stroke:#087d62;
+}
+html[data-theme="light"] .study-room-launcher-vector svg path[stroke="#f5ed35"]{
+  stroke:#9a7600;
+}
+html[data-theme="light"] .study-room-launcher-vector svg path[stroke="#61e8ff"]{
+  stroke:#087d9b;
+}
+html[data-theme="light"] .study-room-launcher::before{
+  filter:drop-shadow(0 0 4px rgba(8,125,98,.34));
+}
