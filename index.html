@@ -2489,10 +2489,23 @@
       </div>
       <form id="profileForm">
         <div class="profile-form-grid">
-          <div class="profile-field profile-field-full">
-            <label for="profileName">Full name <span aria-hidden="true">*</span></label>
-            <input class="profile-input" id="profileName" name="name" type="text" maxlength="60"
-                   autocomplete="name" placeholder="Enter your name" required />
+          <div class="profile-field profile-field-full profile-name-gender-row">
+            <div class="profile-name-entry">
+              <label for="profileName">Full name <span aria-hidden="true">*</span></label>
+              <input class="profile-input" id="profileName" name="name" type="text" maxlength="60"
+                     autocomplete="name" placeholder="Enter your name" required />
+            </div>
+            <fieldset class="profile-gender-field">
+              <legend>Profile icon <span aria-hidden="true">*</span></legend>
+              <div class="profile-gender-options" role="group" aria-label="Choose your profile icon">
+                <button type="button" class="profile-gender-choice profile-gender-male" data-profile-gender="male" aria-label="Male profile icon" aria-pressed="false">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3.2"/><path d="M5.5 20v-2.1a6.5 6.5 0 0 1 13 0V20z"/></svg>
+                </button>
+                <button type="button" class="profile-gender-choice profile-gender-female" data-profile-gender="female" aria-label="Female profile icon" aria-pressed="false">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3.2"/><path d="M5.5 20v-2.1a6.5 6.5 0 0 1 13 0V20z"/></svg>
+                </button>
+              </div>
+            </fieldset>
           </div>
           <div class="profile-field">
             <label for="profileSchool">School <span class="profile-optional">Optional</span></label>
