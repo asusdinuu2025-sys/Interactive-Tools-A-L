@@ -182,3 +182,26 @@ html[data-theme="light"] .study-tools-card-icon.vector-card-icon { color: #285f9
 .theme-toggle-icon { color: #79e5ff; }
 html[data-theme="light"] .theme-toggle-icon { color: #1768a8; }
 .theme-toggle { display: inline-flex; align-items: center; gap: 8px; }
+
+
+/* Profile gender selection: compact, theme-aware square icon controls. */
+.profile-name-gender-row { display: grid !important; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: end; }
+.profile-name-entry { min-width: 0; }
+.profile-gender-field { min-width: 0; margin: 0; padding: 0; border: 0; }
+.profile-gender-field legend { margin: 0 0 8px; padding: 0; color: var(--text-secondary, #cbd5e1); font-size: .76rem; font-weight: 750; white-space: nowrap; }
+.profile-gender-options { display: flex; gap: 7px; }
+.profile-gender-choice { width: 43px; height: 43px; display: grid; place-items: center; padding: 8px; border: 1px solid rgba(140,160,185,.28); border-radius: 11px; background: rgba(120,145,175,.08); color: #53baff; cursor: pointer; transition: background .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+.profile-gender-choice svg { width: 25px; height: 25px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.profile-gender-male { color: #43b7ff; }
+.profile-gender-female { color: #ff66c4; }
+.profile-gender-choice.is-selected { background: rgba(60,175,255,.14); border-color: currentColor; box-shadow: 0 0 0 2px color-mix(in srgb, currentColor 18%, transparent), 0 0 16px color-mix(in srgb, currentColor 26%, transparent); }
+.profile-gender-female.is-selected { background: rgba(255,75,180,.12); }
+.profile-gender-choice:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+html[data-theme="light"] .profile-gender-field legend { color: #40556b; }
+html[data-theme="light"] .profile-gender-choice { background: #fff; border-color: rgba(55,85,115,.24); }
+html[data-theme="light"] .profile-gender-male { color: #087ac4; }
+html[data-theme="light"] .profile-gender-female { color: #c0278d; }
+html[data-theme="light"] .profile-gender-male.is-selected { background: #eaf6ff; }
+html[data-theme="light"] .profile-gender-female.is-selected { background: #fff0f8; }
+@media(max-width:520px) { .profile-name-gender-row { grid-template-columns: minmax(0,1fr) auto; gap: 8px; } .profile-gender-choice { width: 40px; height: 42px; } }
+@media(prefers-reduced-motion:reduce) { .profile-gender-choice { transition: none; } }
