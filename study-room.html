@@ -100,6 +100,146 @@ html[data-theme="light"] #roomProfileGate .gate-icon[aria-pressed="true"]{backgr
 <script src="assets/js/main.js?v=20261027-system-theme"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/js/studylab-account.js"></script>
+
+<script>
+(function () {
+  "use strict";
+  const gate = document.getElementById("roomProfileGate");
+  const form = document.getElementById("roomProfileForm");
+  if (!gate || !form) return;
+  const fields = {
+    name: document.getElementById("gateName"),
+    school: document.getElementById("gateSchool"),
+    phone: document.getElementById("gatePhone"),
+    year: document.getElementById("gateYear"),
+    stream: document.getElementById("gateStream")
+  };
+  const iconField = document.getElementById("gateGenderField");
+  const iconButtons = [...gate.querySelectorAll("[data-gate-gender]")];
+  const errorBox = document.getElementById("roomProfileError");
+  const status = document.getElementById("gateStatus");
+  const save = document.getElementById("gateSave");
+  let gender = "";
+
+  const placeholderName = value => /^Student\d{4}$/.test(String(value || "").trim());
+  const isFullComplete = p => Boolean(
+    p?.profile_completed_at &&
+    p?.display_name && !placeholderName(p.display_name) &&
+    p?.exam_year && p?.study_stream &&
+    String(p?.school || "").trim() &&
+    String(p?.phone || "").trim() &&
+    ["male", "female"].includes(p?.gender)
+  );
+
+  function setError(message) {
+    errorBox.textContent = message;
+    errorBox.hidden = false;
+  }
+
+  function validate(showMessage = false) {
+    const digits = fields.phone.value.replace(/\D/g, "");
+    const invalid = {
+      name: fields.name.value.trim().length < 2 || placeholderName(fields.name.value),
+      school: fields.school.value.trim().length < 2,
+      phone: !fields.phone.value.trim() || digits.length < 9 || digits.length > 12,
+      year: !fields.year.value,
+      stream: !fields.stream.value,
+      gender: !["male", "female"].includes(gender)
+    };
+    Object.entries(fields).forEach(([key, field]) => {
+      field.classList.toggle("gate-invalid", Boolean(invalid[key]));
+      field.setAttribute("aria-invalid", String(Boolean(invalid[key])));
+    });
+    iconField.classList.toggle("gate-invalid", invalid.gender);
+    iconButtons.forEach(button => {
+      button.classList.toggle("gate-invalid", invalid.gender);
+      button.setAttribute("aria-invalid", String(invalid.gender));
+    });
+    if (showMessage && Object.values(invalid).some(Boolean)) {
+      setError("To enter the Study Room, you must fill in all fields, including your profile icon.");
+      status.textContent = "Complete the red-highlighted fields.";
+    }
+    return !Object.values(invalid).some(Boolean);
+  }
+
+  function showGate(p) {
+    fields.name.value = p?.display_name && !placeholderName(p.display_name) ? p.display_name : "";
+    fields.school.value = p?.school || "";
+    fields.phone.value = p?.phone || "";
+    fields.year.value = p?.exam_year || "";
+    fields.stream.value = p?.study_stream || "";
+    gender = ["male", "female"].includes(p?.gender) ? p.gender : "";
+    iconButtons.forEach(button => button.setAttribute("aria-pressed", String(button.dataset.gateGender === gender)));
+    gate.hidden = false;
+    document.body.style.overflow = "hidden";
+    setError("To enter the Study Room, you must fill in all fields, including your profile icon.");
+    validate(false);
+    const firstInvalid = Object.values(fields).find(field => field.classList.contains("gate-invalid"));
+    window.setTimeout(() => (firstInvalid || iconButtons[0]).focus(), 30);
+  }
+
+  Object.values(fields).forEach(field => {
+    field.addEventListener("input", () => validate(false));
+    field.addEventListener("change", () => validate(false));
+  });
+  iconButtons.forEach(button => button.addEventListener("click", () => {
+    gender = button.dataset.gateGender;
+    iconButtons.forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+    validate(false);
+  }));
+
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+    status.textContent = "";
+    if (!validate(true)) {
+      const firstInvalid = Object.values(fields).find(field => field.classList.contains("gate-invalid"));
+      (firstInvalid || iconButtons[0]).focus();
+      return;
+    }
+    save.disabled = true;
+    save.textContent = "Saving profile…";
+    try {
+      const account = window.StudyLabAccount;
+      if (!account?.ready) throw new Error("Your StudyLab account is still starting. Please try again.");
+      await account.ready;
+      await account.saveProfile(fields.name.value, {
+        school: fields.school.value,
+        phone: fields.phone.value,
+        exam_year: fields.year.value,
+        study_stream: fields.stream.value,
+        gender,
+        require_full_profile: true
+      });
+      const p = await account.getProfile(true);
+      if (!isFullComplete(p)) throw new Error("Your profile was saved, but some required details are still missing. Check the highlighted fields.");
+      gate.hidden = true;
+      document.body.style.overflow = "";
+    } catch (error) {
+      setError(error?.message || "Your profile could not be saved. Please try again.");
+      status.textContent = "Check your details and try again.";
+      validate(false);
+    } finally {
+      save.disabled = false;
+      save.textContent = "Save profile and enter Study Room";
+    }
+  });
+
+  (async function boot() {
+    try {
+      const account = window.StudyLabAccount;
+      if (!account?.ready) throw new Error("StudyLab account is unavailable.");
+      await account.ready;
+      const p = await account.getProfile(true);
+      if (!isFullComplete(p)) showGate(p);
+    } catch (error) {
+      console.warn("Study Room profile gate:", error);
+      showGate(null);
+      setError("We couldn't verify your profile yet. Check your connection, then try saving again.");
+    }
+  })();
+})();
+</script>
+
 <script src="assets/js/study-room-config.js"></script>
 <script src="assets/js/live-layer.js"></script>
 <script src="assets/js/study-room-realtime.js"></script>
