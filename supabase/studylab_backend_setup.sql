@@ -143,7 +143,7 @@ create policy "StudyLab progress own"
   with check (user_id = auth.uid());
 
 -- =========================================================
--- TEMPORARY CHAT
+-- SHARED STUDY CHAT
 -- =========================================================
 
 create table if not exists public.studylab_chat_messages (
@@ -224,7 +224,7 @@ begin
 end;
 $$;
 
-revoke all on function public.cleanup_studylab_chat() from public;
+revoke all on function public.cleanup_studylab_chat() from public, anon, authenticated;
 create or replace function public.trim_studylab_chat_after_insert()
 returns trigger
 language plpgsql
@@ -244,6 +244,8 @@ create trigger studylab_chat_trim_after_insert
 after insert on public.studylab_chat_messages
 for each statement
 execute function public.trim_studylab_chat_after_insert();
+
+revoke all on function public.trim_studylab_chat_after_insert() from public, anon, authenticated;
 
 do $$
 begin
@@ -273,8 +275,8 @@ create or replace function public.enforce_studylab_chat_rate_limit()
 returns trigger
 language plpgsql
 security definer
-set search_path = public
-as $$
+set search_path = ''
+as $
 declare
   recent_count integer;
 begin
@@ -300,7 +302,7 @@ begin
 end;
 $$;
 
-revoke all on function public.enforce_studylab_chat_rate_limit() from public;
+revoke all on function public.enforce_studylab_chat_rate_limit() from public, anon, authenticated;
 
 drop trigger if exists studylab_chat_rate_limit_before_insert
   on public.studylab_chat_messages;
