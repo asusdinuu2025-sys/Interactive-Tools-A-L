@@ -113,7 +113,7 @@ html[data-theme="light"] .room-hero{background:linear-gradient(120deg,rgba(224,2
 
     
 /* Keep the room visible but softly blurred behind the required profile window. */
-body.study-room-page.profile-modal-open > :not(#profileModal):not(script):not(style) { filter: blur(5px); transition: filter .3s ease; }
+body.study-room-page.profile-modal-open > :not(#profileModal):not(#studyRoomProfileGateToast):not(script):not(style) { filter: blur(5px); transition: filter .3s ease; }
 #profileModal { filter: none !important; }
 .profile-modal-open { overflow:hidden; }
 /* Hide the profile gate's visible white scrollbars without changing scroll behavior. */
