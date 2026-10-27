@@ -6,6 +6,7 @@
   const liveLabel = $('roomLiveLabel');
   const activeCount = $('activeCount');
   const weeklyHours = $('weeklyHours');
+  const yourRank = $('yourRank');
   const status = $('yourStatus');
   const subject = $('studySubject');
   const goal = $('dailyGoal');
@@ -90,6 +91,15 @@
       now - new Date(r.last_heartbeat_at).getTime() < 90000);
     activeCount.textContent = String(active.length);
     const own = rows.find(r => r.user_id === userId) || member;
+    const currentWeek = weekStart(new Date());
+    const weeklyRanked = rows
+      .map(r => ({...r, rankScore: r.week_start === currentWeek ? Number(r.week_seconds) || 0 : 0}))
+      .sort((a,b) => b.rankScore - a.rankScore);
+    const ownRankIndex = weeklyRanked.findIndex(r => r.user_id === userId);
+    yourRank.textContent = ownRankIndex >= 0 ? '#' + (ownRankIndex + 1) : '—';
+    yourRank.title = ownRankIndex >= 0
+      ? 'Ranked by total study time this week among Study Room members'
+      : 'Your rank appears after your Study Room record is available';
     const thisWeek = own && own.week_start === weekStart(new Date())
       ? Number(own.week_seconds) || 0 : 0;
     const pendingWeek = own && own.is_studying && own.last_heartbeat_at
