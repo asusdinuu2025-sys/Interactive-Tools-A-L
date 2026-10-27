@@ -24,7 +24,7 @@ function init(){
      document.documentElement.dataset.studylabGlow=key;
      menu.querySelectorAll('[data-studylab-glow-choice]').forEach(button=>{const selected=button.dataset.studylabGlowChoice===key;button.setAttribute('aria-pressed',String(selected));button.classList.toggle('is-selected',selected);});
      if(save){try{localStorage.setItem(glowKey,key);}catch(_){}}
-     document.dispatchEvent(new CustomEvent('studylab:glow-colour-change',{detail:{colour:key}}));
+     if(save)document.dispatchEvent(new CustomEvent('studylab:glow-colour-change',{detail:{colour:key}}));
     };
     const glowSection=document.createElement('div');
     glowSection.className='slr-glow-picker';
