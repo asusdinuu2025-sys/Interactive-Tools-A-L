@@ -78,6 +78,13 @@
     return profile;
   }
 
+  function isProfileComplete(p) {
+    return Boolean(p?.profile_completed_at && p?.display_name &&
+      !/^Student\d{4}$/.test(String(p.display_name)) &&
+      String(p.school || "").trim() && String(p.phone || "").trim() &&
+      p?.exam_year && p?.study_stream && ["male", "female"].includes(p?.gender));
+  }
+
   function makeDefaultStudentName() {
     if (!user?.id) return "Student0000";
 
@@ -128,9 +135,14 @@
       const result = String(value || "").trim().replace(/\s+/g, " ");
       return result || null;
     };
+    const school = cleanOptional(details.school);
+    const phone = cleanOptional(details.phone);
     const examYear = String(details.exam_year || "").trim();
     const studyStream = String(details.study_stream || "").trim();
     const gender = String(details.gender || "").trim();
+    if (!school || school.length < 2) throw new Error("Please enter your school name.");
+    const phoneDigits = phone ? phone.replace(/\D/g, "") : "";
+    if (phoneDigits.length < 9 || phoneDigits.length > 12) throw new Error("Please enter a valid mobile number (9–12 digits, including country code if used).");
 
     if (!["2026", "2027", "2028", "2029", "Other"].includes(examYear)) {
       throw new Error("Please choose your A/L examination year.");
@@ -148,8 +160,8 @@
       .upsert({
         id: user.id,
         display_name: cleanName,
-        school: cleanOptional(details.school),
-        phone: cleanOptional(details.phone),
+        school,
+        phone,
         exam_year: examYear,
         study_stream: studyStream,
         gender,
@@ -244,4 +256,17 @@
     getProfile,
     saveProfile
   };
+
+  // Anonymous sign-in happens automatically. Incomplete profiles are sent to
+  // the profile form before entering pages that initialise a StudyLab account.
+  ready.then(async function () {
+    const path = window.location.pathname;
+    if (path === "/" || path.endsWith("/index.html")) return;
+    const currentProfile = await getProfile(true);
+    if (isProfileComplete(currentProfile)) return;
+    const returnTo = path + window.location.search + window.location.hash;
+    window.location.replace("/index.html?completeProfile=1&returnTo=" + encodeURIComponent(returnTo));
+  }).catch(function (error) {
+    console.warn("StudyLab required profile gate:", error);
+  });
 })();
