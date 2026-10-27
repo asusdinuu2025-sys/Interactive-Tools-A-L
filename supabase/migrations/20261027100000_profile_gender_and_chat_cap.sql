@@ -71,7 +71,7 @@ BEGIN
   WHERE id IN (
     SELECT id
     FROM public.studylab_chat_messages
-    ORDER BY created_at ASC, id ASC
+    ORDER BY created_at DESC, id DESC
     OFFSET 100
   );
 END;
