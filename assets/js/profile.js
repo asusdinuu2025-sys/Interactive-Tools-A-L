@@ -28,7 +28,8 @@
 
   const placeholderName = name => /^Student\d{4}$/.test(String(name || ""));
   const isComplete = p => Boolean(p?.profile_completed_at && p?.display_name &&
-    !placeholderName(p.display_name) && p?.exam_year && p?.study_stream && ["male", "female"].includes(p?.gender));
+    !placeholderName(p.display_name) && String(p.school || "").trim() && String(p.phone || "").trim() &&
+    p?.exam_year && p?.study_stream && ["male", "female"].includes(p?.gender));
 
   function setButtonProfile(p) {
     if (isComplete(p)) {
@@ -244,7 +245,7 @@
         const params = new URLSearchParams(window.location.search);
         if (params.get("completeProfile") === "1") {
           const returnTo = params.get("returnTo") || "";
-          if (returnTo.startsWith("/") && !returnTo.startsWith("//") && !returnTo.includes("\\\\")) {
+          if (returnTo.startsWith("/") && !returnTo.startsWith("//") && !returnTo.includes("\\")) {
             window.setTimeout(() => window.location.replace(returnTo), 380);
           }
         }
