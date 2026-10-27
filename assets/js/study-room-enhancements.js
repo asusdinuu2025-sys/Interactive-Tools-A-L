@@ -84,7 +84,8 @@ function init(){
  renderStreak();renderAchievements();const weekly=document.getElementById('weeklyHours');if(weekly)new MutationObserver(renderAchievements).observe(weekly,{childList:true,characterData:true,subtree:true});setInterval(renderAchievements,15000);
  const decorate=()=>{
   if(!board)return;
-  const period=document.getElementById('dailyBoardTab')?.classList.contains('active')?'Today':'This week';
+  const isDaily=document.getElementById('dailyBoardTab')?.classList.contains('active');
+  const period='Today';
   const rankedRows=[...board.querySelectorAll('.room-rank')];
   let winner=null,winnerScore=0;
   rankedRows.forEach((row,i)=>{
@@ -93,7 +94,7 @@ function init(){
    const time=row.querySelector('.room-time')?.textContent.trim()||'';
    const match=time.match(/^(\d+):(\d{2}):(\d{2})$/);
    const score=match?Number(match[1])*3600+Number(match[2])*60+Number(match[3]):0;
-   if(!winner&&score>0){winner=row;winnerScore=score;}
+   if(isDaily&&!winner&&score>0){winner=row;winnerScore=score;}
   });
   rankedRows.forEach(row=>{
    const avatar=row.querySelector('.room-avatar');
@@ -109,7 +110,7 @@ function init(){
    }
    const isQueen=gender==='female';
    const crown=isQueen?'♕':'♛';
-   const label=isQueen?'Study Queen · '+period+' leader':'Study King · '+period+' leader';
+   const label=isQueen?'Study Queen':'Study King';
    avatar.classList.add('slr-crown-avatar');
    avatar.setAttribute('data-slr-crown',crown);
    avatar.setAttribute('aria-label',label);
