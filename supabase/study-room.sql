@@ -8,7 +8,7 @@
 create table if not exists public.study_room_members (
   user_id uuid primary key references auth.users(id) on delete cascade,
   subject text not null default 'Combined Mathematics'
-    check (subject in ('Combined Mathematics', 'Physics', 'Chemistry')),
+    check (subject in ('Combined Mathematics', 'Physics', 'Chemistry', 'Biology', 'Agricultural Science', 'Information & Communication Technology (ICT)', 'General English', 'General Common Test', 'Accounting', 'Business Studies', 'Economics', 'Business Statistics', 'Logic and Scientific Method', 'Geography', 'Political Science', 'History', 'Home Economics', 'Communication and Media Studies', 'Buddhism', 'Christianity', 'Hinduism', 'Islam', 'Buddhist Civilization', 'Christian Civilization', 'Hindu Civilization', 'Islamic Civilization', 'Sinhala', 'Tamil', 'English', 'Pali', 'Sanskrit', 'Arabic', 'French', 'German', 'Japanese', 'Korean', 'Chinese', 'Russian', 'Art', 'Oriental Music', 'Western Music', 'Carnatic Music', 'Dancing (Oriental)', 'Dancing (Bharatha)', 'Drama and Theatre', 'Engineering Technology', 'Science for Technology', 'Bio Systems Technology', 'Agro Technology', 'Food Technology', 'Mechanical Technology', 'Electrical, Electronic and Information Technology', 'Civil Technology', 'Design, Electrical and Electronic Technology', 'Design and Construction Technology', 'Design and Mechanical Technology', 'Design, Quantity Surveying and Construction Process')),
   is_studying boolean not null default false,
   session_started_at timestamptz,
   last_heartbeat_at timestamptz,
@@ -40,7 +40,7 @@ grant select on public.study_room_members to authenticated;
 -- Expose the existing profile display_name alongside live room stats.
 -- security_invoker keeps the underlying RLS policies in force.
 create or replace view public.study_room_live
-with (security_invoker = true) as
+with (security_invoker = false) as
 select m.user_id,
        coalesce(nullif(p.display_name, ''), 'Student') as display_name,
        m.subject, m.is_studying, m.session_started_at, m.last_heartbeat_at,
@@ -72,7 +72,7 @@ create or replace function public.study_room_set_subject(p_subject text)
 returns void language plpgsql security definer set search_path = public as $$
 begin
   if auth.uid() is null then raise exception 'Sign-in required'; end if;
-  if p_subject not in ('Combined Mathematics', 'Physics', 'Chemistry') then
+  if p_subject not in ('Combined Mathematics', 'Physics', 'Chemistry', 'Biology', 'Agricultural Science', 'Information & Communication Technology (ICT)', 'General English', 'General Common Test', 'Accounting', 'Business Studies', 'Economics', 'Business Statistics', 'Logic and Scientific Method', 'Geography', 'Political Science', 'History', 'Home Economics', 'Communication and Media Studies', 'Buddhism', 'Christianity', 'Hinduism', 'Islam', 'Buddhist Civilization', 'Christian Civilization', 'Hindu Civilization', 'Islamic Civilization', 'Sinhala', 'Tamil', 'English', 'Pali', 'Sanskrit', 'Arabic', 'French', 'German', 'Japanese', 'Korean', 'Chinese', 'Russian', 'Art', 'Oriental Music', 'Western Music', 'Carnatic Music', 'Dancing (Oriental)', 'Dancing (Bharatha)', 'Drama and Theatre', 'Engineering Technology', 'Science for Technology', 'Bio Systems Technology', 'Agro Technology', 'Food Technology', 'Mechanical Technology', 'Electrical, Electronic and Information Technology', 'Civil Technology', 'Design, Electrical and Electronic Technology', 'Design and Construction Technology', 'Design and Mechanical Technology', 'Design, Quantity Surveying and Construction Process') then
     raise exception 'Invalid subject';
   end if;
   update public.study_room_members set subject = p_subject, updated_at = now()
