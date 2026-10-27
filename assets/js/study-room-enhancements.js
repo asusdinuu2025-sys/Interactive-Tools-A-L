@@ -13,8 +13,9 @@ function init(){
    const key='studylab-room-appearance-v1';
    let saved='midnight-blue';try{const value=localStorage.getItem(key);if(allowed.has(value))saved=value;}catch(_){}
    const close=()=>{menu.hidden=true;trigger.setAttribute('aria-expanded','false');};
-   const apply=value=>{
+   const apply=(value,announce=false)=>{
     const theme=allowed.has(value)?value:'midnight-blue';
+    const previous=root.dataset.roomTheme||'midnight-blue';
     root.dataset.roomTheme=theme;
     if(current)current.textContent=labels[theme];
     menu.querySelectorAll('[data-room-theme-choice]').forEach(option=>{
@@ -23,9 +24,12 @@ function init(){
      option.classList.toggle('is-selected',selected);
     });
     try{localStorage.setItem(key,theme);}catch(_){}
+    if(announce&&previous!==theme){
+     document.dispatchEvent(new CustomEvent('studylab:room-theme-change',{detail:{theme,previous}}));
+    }
    };
    trigger.addEventListener('click',()=>{const opening=menu.hidden;menu.hidden=!opening;trigger.setAttribute('aria-expanded',String(opening));});
-   menu.querySelectorAll('[data-room-theme-choice]').forEach(option=>option.addEventListener('click',()=>{apply(option.dataset.roomThemeChoice);close();trigger.focus();}));
+   menu.querySelectorAll('[data-room-theme-choice]').forEach(option=>option.addEventListener('click',()=>{apply(option.dataset.roomThemeChoice,true);close();trigger.focus();}));
    document.addEventListener('click',event=>{if(!wrap.contains(event.target))close();});
    document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!menu.hidden){close();trigger.focus();}});
    wrap.addEventListener('keydown',event=>{if(event.key==='ArrowDown'&&event.target===trigger){event.preventDefault();menu.querySelector('[data-room-theme-choice]')?.focus();}});
