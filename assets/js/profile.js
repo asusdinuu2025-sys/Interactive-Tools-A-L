@@ -24,7 +24,6 @@
   let requireFullProfile = false;
 
   const profileClose = document.getElementById("profileClose");
-  const profileSkip = document.getElementById("profileSkip");
 
   if (!profileButton || !profileModal || !profileForm || !profileInput) return;
 
@@ -50,7 +49,6 @@
       ? "Required to enter the Study Room. Enter 9–12 digits, including country code if used."
       : "Optional. Required only to enter the Study Room.";
     if (profileClose) { profileClose.hidden = mandatoryProfile; profileClose.disabled = mandatoryProfile; }
-    if (profileSkip) profileSkip.hidden = mandatoryProfile;
   }
 
   function setButtonProfile(p) {
@@ -199,7 +197,6 @@
 
   profileButton.addEventListener("click", openModal);
   profileClose?.addEventListener("click", closeModal);
-  profileSkip?.addEventListener("click", closeModal);
   profileModal.addEventListener("click", event => {
     if (event.target === profileModal) closeModal();
   });
