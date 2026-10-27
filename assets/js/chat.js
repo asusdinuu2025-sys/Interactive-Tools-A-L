@@ -7,8 +7,10 @@
   "use strict";
 
   const pagePath = window.location.pathname.replace(/\/+$/, "") || "/";
-  const isHomePage = pagePath === "/" || pagePath.endsWith("/index.html");
-  const isStudyRoomPage = pagePath.endsWith("/study-room.html");
+  const normalizedPath = pagePath.toLowerCase();
+  const isHomePage = normalizedPath === "/" || normalizedPath.endsWith("/index.html");
+  // Netlify may serve the same page through either /study-room.html or a clean /study-room route.
+  const isStudyRoomPage = /\/study-room(?:\.html)?$/i.test(normalizedPath);
   if (!isHomePage && !isStudyRoomPage) return;
 
   const CONFIG = {
