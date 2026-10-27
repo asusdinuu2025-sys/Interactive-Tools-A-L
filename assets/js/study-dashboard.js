@@ -175,7 +175,7 @@
 
     // One-time migration: read existing cloud records, never write dashboard data to Supabase.
     let account = getCloudAccount();
-    if (readLocalJson(LOCAL_KEYS.migrated, "") !== "1" && account?.ready) {
+    if ((() => { try { return localStorage.getItem(LOCAL_KEYS.migrated) !== "1"; } catch (_) { return true; } })() && account?.ready) {
       try {
         await account.ready;
         const client = account.client;
