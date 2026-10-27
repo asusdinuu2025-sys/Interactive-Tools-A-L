@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#0b1220">
 <title>Live Study Room | StudyLab</title>
-<link rel="stylesheet" href="assets/css/main.css"><link rel="stylesheet" href="assets/css/study-room.css"><link rel="stylesheet" href="assets/css/floating-controls.css?v=20261027-chatlabel"><link rel="stylesheet" href="assets/css/chat.css?v=20261027-chatfix"><link rel="stylesheet" href="assets/css/live-layer.css"><link rel="stylesheet" href="assets/css/studylab-pet.css">
+<link rel="stylesheet" href="assets/css/main.css"><link rel="stylesheet" href="assets/css/study-room.css?v=20261028-neon-profile-icons-v3"><link rel="stylesheet" href="assets/css/floating-controls.css?v=20261027-chatlabel"><link rel="stylesheet" href="assets/css/chat.css?v=20261027-chatfix"><link rel="stylesheet" href="assets/css/live-layer.css"><link rel="stylesheet" href="assets/css/studylab-pet.css">
 <style>
 .room-page{width:min(1100px,calc(100% - 28px));margin:34px auto 60px}.room-top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:24px}.room-back{color:var(--accent-cyan);text-decoration:none;font-weight:700}.room-hero,.room-panel{border:1px solid rgba(255,255,255,.11);border-radius:24px;background:rgba(18,27,42,.55);backdrop-filter:blur(24px);box-shadow:0 20px 55px rgba(0,0,0,.18)}html[data-theme="light"] .room-hero,html[data-theme="light"] .room-panel{background:rgba(255,255,255,.68);border-color:rgba(255,255,255,.85);box-shadow:0 20px 55px rgba(35,70,105,.09)}.room-hero{padding:clamp(22px,4vw,40px);margin-bottom:20px}.room-kicker{color:#72e6c2;font-size:.76rem;font-weight:800;letter-spacing:.12em}.room-hero h1{font-size:clamp(2rem,5vw,3.2rem);letter-spacing:-.04em;margin:10px 0}.room-hero p{max-width:680px;color:var(--text-muted);line-height:1.7}.room-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:24px}.room-stat{padding:16px;border-radius:17px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08)}html[data-theme="light"] .room-stat{background:rgba(70,110,145,.045);border-color:rgba(70,110,145,.09)}.room-stat strong{display:block;font-size:clamp(1.2rem,3vw,1.8rem);font-variant-numeric:tabular-nums}.room-stat span{display:block;margin-top:5px;color:var(--text-muted);font-size:.8rem}.room-layout{display:grid;grid-template-columns:minmax(220px,.55fr) minmax(0,1.45fr);gap:18px;align-items:stretch}.room-panel{padding:22px;min-width:0}.room-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.room-panel h2{font-size:1.1rem;margin:0}.room-live{display:inline-flex;align-items:center;gap:7px;font-size:.75rem;color:#72e6c2;font-weight:800}.room-live:before{content:"";width:7px;height:7px;border-radius:50%;background:#46d9a8;box-shadow:0 0 12px rgba(70,217,168,.6)}.room-notice{padding:12px 14px;border-radius:13px;background:rgba(49,208,160,.08);border:1px solid rgba(93,230,190,.15);color:var(--text-muted);font-size:.82rem;line-height:1.5;margin-bottom:16px}.room-action{width:100%;border:0;border-radius:14px;padding:14px 18px;background:linear-gradient(135deg,#26b98d,#168b78);color:#fff;font:inherit;font-weight:800;cursor:pointer;box-shadow:0 12px 26px rgba(24,160,125,.18);transition:transform .2s ease,opacity .2s ease}.room-action:hover{transform:translateY(-2px)}.room-action.leave{background:rgba(255,105,105,.12);border:1px solid rgba(255,105,105,.28);color:#ffb4b4;box-shadow:none}.room-session{margin:16px 0 0;padding:16px;border-radius:15px;background:rgba(255,255,255,.035);text-align:center}.room-session strong{display:block;font-size:2rem;font-variant-numeric:tabular-nums;letter-spacing:.04em}.room-session span{font-size:.8rem;color:var(--text-muted)}.room-list{display:flex;flex-direction:column;gap:9px;max-height:840px;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-gutter:stable;padding:2px 8px 2px 2px;scrollbar-width:thin;scrollbar-color:rgba(126,220,255,.72) rgba(120,135,160,.18)}
 .room-list::-webkit-scrollbar{width:9px}
@@ -87,6 +87,16 @@ html[data-theme="light"] .room-hero{background:linear-gradient(120deg,rgba(224,2
     .profile-input.profile-field-invalid,.profile-select.profile-field-invalid{border-color:#ef4444!important;box-shadow:0 0 0 2px rgba(239,68,68,.2)!important;background:rgba(239,68,68,.08)!important}
     .profile-gender-field.profile-field-invalid{border:1px solid #ef4444!important;border-radius:12px;padding:8px;box-shadow:0 0 0 2px rgba(239,68,68,.14)}
     .profile-gender-choice.profile-field-invalid{border-color:#ef4444!important;box-shadow:0 0 0 2px rgba(239,68,68,.22)!important}
+    /* Profile icon colours are scoped to the completion modal only. */
+    .profile-modal .profile-gender-choice{display:grid;place-items:center;width:44px;height:44px;min-width:44px;min-height:44px;padding:9px;border:1px solid rgba(127,148,175,.28);border-radius:12px;background:rgba(127,148,175,.08);transition:background .2s ease,border-color .2s ease,box-shadow .2s ease}
+    .profile-modal .profile-gender-male svg{display:block!important;width:24px!important;height:24px!important;max-width:24px!important;max-height:24px!important;fill:none!important;stroke:#39a8ff!important;color:#39a8ff!important;stroke-width:1.9!important;stroke-linecap:round;stroke-linejoin:round;flex:none;overflow:visible;filter:drop-shadow(0 0 2px #39a8ff) drop-shadow(0 0 5px #39a8ff)}
+    .profile-modal .profile-gender-female svg{display:block!important;width:24px!important;height:24px!important;max-width:24px!important;max-height:24px!important;fill:none!important;stroke:#ff4fa3!important;color:#ff4fa3!important;stroke-width:1.9!important;stroke-linecap:round;stroke-linejoin:round;flex:none;overflow:visible;filter:drop-shadow(0 0 2px #ff4fa3) drop-shadow(0 0 5px #ff4fa3)}
+    .profile-modal .profile-gender-male{color:#39a8ff!important;border-color:rgba(57,168,255,.62);background:rgba(59,130,246,.09)}
+    .profile-modal .profile-gender-female{color:#ff4fa3!important;border-color:rgba(255,79,163,.62);background:rgba(255,92,168,.09)}
+    .profile-modal .profile-gender-male.is-selected{border-color:#39a8ff;background:rgba(59,130,246,.17);box-shadow:0 0 0 1px rgba(57,168,255,.25),0 0 16px rgba(57,168,255,.22)}
+    .profile-modal .profile-gender-female.is-selected{border-color:#ff4fa3;background:rgba(255,79,163,.17);box-shadow:0 0 0 1px rgba(255,79,163,.25),0 0 16px rgba(255,79,163,.22)}
+    .profile-modal .profile-gender-choice:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+
     .profile-field-invalid:focus{outline-color:#ef4444!important}
 
     .profile-modal-open{overflow:hidden}
@@ -118,7 +128,7 @@ html[data-theme="light"] .room-hero{background:linear-gradient(120deg,rgba(224,2
 
     
 /* Keep the room visible but softly blurred behind the required profile window. */
-body.study-room-page.profile-modal-open > :not(#profileModal):not(#studyRoomProfileGateToast):not(script):not(style) { filter: blur(5px); transition: filter .3s ease; }
+body.study-room-page.profile-modal-open > :not(#profileModal):not(#studyRoomProfileGateToast):not(#studylabPetStage):not(#studylabPetLauncher):not(#studylabPetPanel):not(script):not(style) { filter: blur(5px); transition: filter .3s ease; }
 #profileModal { filter: none !important; }
 .profile-modal-open { overflow:hidden; }
 /* Hide the profile gate's visible white scrollbars without changing scroll behavior. */
@@ -171,12 +181,36 @@ body.study-room-page.profile-modal-open > :not(#profileModal):not(#studyRoomProf
 @media(prefers-reduced-motion:reduce){.room-rank-link{transition:none}}
 
 </style><link rel="stylesheet" href="assets/css/floating-controls.css?v=20261027-chatfix">
+<link rel="stylesheet" href="assets/css/study-room-enhancements.css?v=20261027-premium-additions">
+<link rel="stylesheet" href="assets/css/study-room-themes.css?v=20261027-room-themes-v4">
 </head>
-<body class="study-room-page">
+<body class="study-room-page" data-room-theme="midnight-blue">
 <div class="room-science-bg" aria-hidden="true"><span class="room-science-symbol">∫ f(x) dx</span><span class="room-science-symbol">F = ma</span><span class="room-science-symbol">a² + b² = c²</span><span class="room-science-symbol">PV = nRT</span><span class="room-science-symbol">∑ F = ma</span><span class="room-science-symbol">λ = h / p</span></div>
-<header class="site-header" style="padding:16px 22px"><a href="index.html" class="room-back" aria-label="Back to StudyLab home">← StudyLab</a><button type="button" class="theme-toggle" data-theme-toggle aria-label="Cycle dark, light, and system themes">☀️ Light Mode</button></header>
+<header class="site-header room-site-header" style="padding:16px 22px"><a href="index.html" class="room-back" aria-label="Back to StudyLab home">← StudyLab</a></header>
 <main class="room-page">
-<div class="room-top"><div><div class="room-kicker">FOCUS TOGETHER</div><h1 style="margin:8px 0 0">Live Study Room</h1></div><span class="room-live" id="roomLiveLabel">Connecting…</span></div>
+<div class="room-top"><div><div class="room-kicker">FOCUS TOGETHER</div><h1 style="margin:8px 0 0">Live Study Room</h1></div>
+<div class="room-dashboard-controls">
+  <div class="room-mode-control" role="group" aria-label="Study Room appearance mode">
+    <span class="room-mode-label">Mode</span>
+    <button type="button" class="room-mode-option" data-room-mode-choice="light" aria-pressed="false">☀️ Light</button>
+    <button type="button" class="room-mode-option" data-room-mode-choice="dark" aria-pressed="false">🌙 Dark</button>
+    <button type="button" class="room-mode-option" data-room-mode-choice="system" aria-pressed="true">⚙ System</button>
+  </div>
+  <div class="room-appearance" id="roomAppearance">
+    <button type="button" class="room-appearance-trigger" id="roomAppearanceTrigger" aria-haspopup="true" aria-expanded="false" aria-controls="roomAppearanceMenu"><span class="room-appearance-icon" aria-hidden="true">◐</span><span>Room theme</span><span class="room-appearance-current" id="roomAppearanceCurrent">Midnight Blue</span><span class="room-appearance-chevron" aria-hidden="true">⌄</span></button>
+    <div class="room-appearance-menu" id="roomAppearanceMenu" role="menu" aria-label="Choose Study Room theme" hidden>
+      <button type="button" class="room-theme-option" role="menuitemradio" aria-checked="false" data-room-theme-choice="charcoal"><span class="room-theme-swatches"><i></i><i></i></span><span><strong>Charcoal</strong><small>Dark gray and OLED black</small></span><span class="room-theme-check" aria-hidden="true">✓</span></button>
+      <button type="button" class="room-theme-option" role="menuitemradio" aria-checked="false" data-room-theme-choice="mint"><span class="room-theme-swatches"><i></i><i></i></span><span><strong>Mint</strong><small>Existing light appearance</small></span><span class="room-theme-check" aria-hidden="true">✓</span></button>
+      <button type="button" class="room-theme-option" role="menuitemradio" aria-checked="true" data-room-theme-choice="midnight-blue"><span class="room-theme-swatches"><i></i><i></i></span><span><strong>Midnight Blue</strong><small>Original blue night palette</small></span><span class="room-theme-check" aria-hidden="true">✓</span></button>
+      <button type="button" class="room-theme-option" role="menuitemradio" aria-checked="false" data-room-theme-choice="pinky"><span class="room-theme-swatches"><i></i><i></i></span><span><strong>Pinky</strong><small>Light pink or dark berry</small></span><span class="room-theme-check" aria-hidden="true">✓</span></button>
+      <button type="button" class="room-theme-option" role="menuitemradio" aria-checked="false" data-room-theme-choice="forest-green"><span class="room-theme-swatches"><i></i><i></i></span><span><strong>Forest Green</strong><small>Light sage or deep forest</small></span><span class="room-theme-check" aria-hidden="true">✓</span></button>
+      <button type="button" class="room-theme-option" role="menuitemradio" aria-checked="false" data-room-theme-choice="lavender"><span class="room-theme-swatches"><i></i><i></i></span><span><strong>Lavender</strong><small>Soft lilac or deep violet</small></span><span class="room-theme-check" aria-hidden="true">✓</span></button>
+      <button type="button" class="room-theme-option" role="menuitemradio" aria-checked="false" data-room-theme-choice="warm-sand"><span class="room-theme-swatches"><i></i><i></i></span><span><strong>Warm Sand</strong><small>Light cream or dark brown</small></span><span class="room-theme-check" aria-hidden="true">✓</span></button>
+      <button type="button" class="room-theme-option" role="menuitemradio" aria-checked="false" data-room-theme-choice="ocean"><span class="room-theme-swatches"><i></i><i></i></span><span><strong>Ocean</strong><small>Light cyan or dark teal</small></span><span class="room-theme-check" aria-hidden="true">✓</span></button>
+    </div>
+  </div>
+  <span class="room-live" id="roomLiveLabel">Connecting…</span>
+</div></div>
 <section class="room-hero"><div class="room-kicker">ONE ROOM. ONE GOAL.</div><h1>Make your study time count.</h1><p>Join the shared study room, focus on your work, and build your weekly study streak. No friend groups, no voice chat, no complicated setup.</p>
 <div class="room-stats"><div class="room-stat"><strong id="activeCount">—</strong><span>Students studying now*</span></div><div class="room-stat"><strong id="weeklyHours">—</strong><span>Your study time this week</span></div><div class="room-stat"><strong id="yourStatus">Not studying</strong><span>Your room status</span></div><div class="room-stat room-rank-stat"><strong id="yourRank">—</strong><span>Your rank this week</span><a class="room-rank-link" href="#leaderboardSection">View all ranking</a></div></div></section>
 <div class="room-layout">
@@ -275,8 +309,10 @@ body.study-room-page.profile-modal-open > :not(#profileModal):not(#studyRoomProf
 <script src="assets/js/profile.js"></script>
 <script src="assets/js/study-room-config.js"></script>
 <script src="assets/js/live-layer.js"></script>
-<script src="assets/js/study-room-realtime.js"></script>
+<script src="assets/js/study-room-realtime.js?v=20261028-gender-neon-v2"></script>
 <script src="assets/js/study-dashboard.js"></script>
 <script src="assets/js/chat.js?v=20261027-chat-route-fix"></script>
 
+<script src="assets/js/study-room-enhancements.js?v=20261028-static-neon-ring-v6"></script>
+<script src="assets/js/studylab-pet-room.js?v=20261027-pet-theme-reactions" defer></script>
 </body></html>

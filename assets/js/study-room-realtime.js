@@ -53,9 +53,11 @@
     const kind = gender === "female" ? "female" : "male";
     element.classList.add("room-avatar-gender", "room-avatar-" + kind);
     element.setAttribute("aria-label", kind + " profile icon");
+    element.style.setProperty('--slr-gender-neon', kind === "female" ? '#ff4fa3' : '#39a8ff');
+    element.style.setProperty('color', kind === "female" ? '#ff4fa3' : '#39a8ff', 'important');
     element.innerHTML = kind === "female"
-      ? '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3.2"></circle><path d="M7 20l1-4.2a4.1 4.1 0 0 1 8 0l1 4.2z"></path></svg>'
-      : '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3.2"></circle><path d="M4.5 20v-2.5a7.5 7.5 0 0 1 15 0V20z"></path></svg>';
+      ? '<svg viewBox="0 0 24 24" aria-hidden="true" style="color:#ff4fa3!important;stroke:#ff4fa3!important;filter:drop-shadow(0 0 2px #ff4fa3) drop-shadow(0 0 5px #ff4fa3)"><circle cx="12" cy="7" r="3.2"></circle><path d="M7 20l1-4.2a4.1 4.1 0 0 1 8 0l1 4.2z" style="stroke:#ff4fa3!important"></path></svg>'
+      : '<svg viewBox="0 0 24 24" aria-hidden="true" style="color:#39a8ff!important;stroke:#39a8ff!important;filter:drop-shadow(0 0 2px #39a8ff) drop-shadow(0 0 5px #39a8ff)"><circle cx="12" cy="7" r="3.2"></circle><path d="M4.5 20v-2.5a7.5 7.5 0 0 1 15 0V20z" style="stroke:#39a8ff!important"></path></svg>';
   }
   function say(text, isError = false) {
     notice.textContent = text;
@@ -116,7 +118,17 @@
         card.innerHTML = '<div class="room-person-card-top"><div class="room-avatar"></div><span class="room-person-status">Studying now</span></div>' +
           '<div class="room-person-card-name"></div><div class="room-person-card-subject"></div>' +
           '<div class="room-person-card-divider"></div><div class="room-person-card-time-label">Today\'s study time</div><div class="room-person-card-time"></div>';
-        setGenderIcon(card.querySelector('.room-avatar'), r.gender);
+        const avatar = card.querySelector('.room-avatar');
+        setGenderIcon(avatar, r.gender);
+        const neonPalette = [['#45ddff','#087da0'],['#b79aff','#7040c7'],['#55edb0','#08794e'],['#ffd166','#9a5b00'],['#ff83c8','#b21b70'],['#ff8b6b','#b83b22']];
+        const identity = String(r.user_id || r.display_name || 'student');
+        let colourHash = 0;
+        for (let index = 0; index < identity.length; index++) colourHash = (colourHash * 31 + identity.charCodeAt(index)) | 0;
+        const neon = neonPalette[Math.abs(colourHash) % neonPalette.length];
+        avatar.classList.add('slr-neon-avatar');
+        avatar.style.setProperty('--slr-neon-dark', neon[0]);
+        avatar.style.setProperty('--slr-neon-light', neon[1]);
+        avatar.title = 'Studying now';
         card.querySelector('.room-person-card-name').textContent = r.display_name;
         card.querySelector('.room-person-card-subject').textContent = r.subject;
         card.querySelector('.room-person-card-time').textContent = fmt(today);
