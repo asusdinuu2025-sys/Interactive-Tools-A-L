@@ -80,7 +80,7 @@
 
   function isProfileComplete(p) {
     return Boolean(p?.profile_completed_at && p?.display_name &&
-      !/^Student\\d{4}$/.test(String(p.display_name)) &&
+      !/^Student\d{4}$/.test(String(p.display_name)) &&
       String(p.school || "").trim() && String(p.phone || "").trim() &&
       p?.exam_year && p?.study_stream && ["male", "female"].includes(p?.gender));
   }
@@ -141,7 +141,7 @@
     const studyStream = String(details.study_stream || "").trim();
     const gender = String(details.gender || "").trim();
     if (!school || school.length < 2) throw new Error("Please enter your school name.");
-    const phoneDigits = phone ? phone.replace(/\\D/g, "") : "";
+    const phoneDigits = phone ? phone.replace(/\D/g, "") : "";
     if (phoneDigits.length < 9 || phoneDigits.length > 12) throw new Error("Please enter a valid mobile number (9–12 digits, including country code if used).");
 
     if (!["2026", "2027", "2028", "2029", "Other"].includes(examYear)) {
