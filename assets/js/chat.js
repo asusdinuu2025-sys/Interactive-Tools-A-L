@@ -6,11 +6,11 @@
 (function () {
   "use strict";
 
-  const CONFIG = {
+  const pagePath = window.location.pathname.replace(/\\/+$/, "") || "/";\n  const isHomePage = pagePath === "/" || pagePath.endsWith("/index.html");\n  const isStudyRoomPage = pagePath.endsWith("/study-room.html");\n  if (!isHomePage && !isStudyRoomPage) return;\n\n  const CONFIG = {
     supabaseUrl: "https://zpvatyxdbshjuqgtexzw.supabase.co",
     supabasePublishableKey: "sb_publishable_zd8S3PcyicJX6Cgyh0ez8A_sUSTCuiB",
     table: "studylab_chat_messages",
-    maxMessages: 50,
+    maxMessages: 100,
     maxLength: 500,
     rateLimitMs: 2500
   };
@@ -49,7 +49,7 @@
         </div>
 
         <div class="study-chat-notice">
-          🎓 Temporary study chat • newest 50 messages • messages older than 24 hours are removed.
+          🎓 Study chat • keeps the newest 100 messages. When a new message makes 101, the oldest is removed.
           <strong>Please keep conversations educational and respectful.</strong>
         </div>
 
