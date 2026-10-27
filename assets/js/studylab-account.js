@@ -274,18 +274,7 @@
     saveProfile
   };
 
-  // Anonymous sign-in happens automatically. Incomplete profiles are sent to
-  // the profile form before entering pages that initialise a StudyLab account.
-  ready.then(async function () {
-    const path = window.location.pathname;
-    // Full profile details are required only for the live Study Room.
-    // All other StudyLab pages remain accessible with a basic/incomplete profile.
-    if (!path.endsWith("/study-room.html")) return;
-    const currentProfile = await getProfile(true);
-    if (isProfileComplete(currentProfile)) return;
-    const returnTo = path + window.location.search + window.location.hash;
-    window.location.replace("/index.html?completeProfile=1&returnTo=" + encodeURIComponent(returnTo));
-  }).catch(function (error) {
-    console.warn("StudyLab required profile gate:", error);
-  });
+  // The Study Room page now owns its profile gate and displays the existing
+  // profile modal over the room itself. Do not redirect away from the room.
+
 })();
