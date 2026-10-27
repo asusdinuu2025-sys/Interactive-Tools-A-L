@@ -196,14 +196,14 @@
       profileInput.focus();
       return;
     }
-    const school = profileSchool.value.trim().replace(/\\s+/g, " ");
+    const school = profileSchool.value.trim().replace(/\s+/g, " ");
     const phone = profilePhone.value.trim();
     if (school.length < 2) {
       showStatus("Please enter your school name.", true);
       profileSchool.focus();
       return;
     }
-    const phoneDigits = phone.replace(/\\D/g, "");
+    const phoneDigits = phone.replace(/\D/g, "");
     if (phoneDigits.length < 9 || phoneDigits.length > 12) {
       showStatus("Please enter a valid mobile number (9–12 digits, including country code if used).", true);
       profilePhone.focus();
