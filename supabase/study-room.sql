@@ -47,6 +47,21 @@ grant select on public.study_room_members to authenticated;
 -- Expose only the display name needed by the live room. The helper is
 -- outside the exposed public schema, uses a fixed search_path, and only returns
 -- a name for an existing room member.
+ALTER TABLE public.studylab_profiles ADD COLUMN IF NOT EXISTS gender text;
+DO $
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'studylab_profiles_gender_check'
+      AND conrelid = 'public.studylab_profiles'::regclass
+  ) THEN
+    ALTER TABLE public.studylab_profiles
+      ADD CONSTRAINT studylab_profiles_gender_check
+      CHECK (gender IS NULL OR gender IN ('male', 'female'));
+  END IF;
+END
+$;
+
 create schema if not exists study_room_private;
 revoke all on schema study_room_private from public, anon;
 grant usage on schema study_room_private to authenticated;
@@ -80,7 +95,8 @@ with (security_invoker = true) as
 select m.user_id,
        study_room_private.display_name_for_member(m.user_id) as display_name,
        m.subject, m.is_studying, m.session_started_at, m.last_heartbeat_at,
-       m.today_seconds, m.today_date, m.week_seconds, m.week_start, m.updated_at
+       m.today_seconds, m.today_date, m.week_seconds, m.week_start, m.updated_at,
+       study_room_private.gender_for_member(m.user_id) as gender
 from public.study_room_members m;
 
 revoke all on public.study_room_live from public, anon, authenticated;
@@ -188,3 +204,91 @@ begin
 exception when undefined_object then
   raise notice 'The supabase_realtime publication was not found; enable Realtime for study_room_members in Supabase.';
 end $$;
+
+
+-- Require a completed profile before any student can enter or start a room session.
+create or replace function study_room_private.profile_is_complete(p_user_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $function$
+  select exists (
+    select 1 from public.studylab_profiles p
+    where p.id = p_user_id
+      and p.profile_completed_at is not null
+      and length(btrim(p.display_name)) >= 2
+      and p.display_name !~ '^Student[0-9]{4}$'
+      and p.exam_year is not null
+      and p.study_stream is not null
+      and p.gender in ('male', 'female')
+  );
+$function$;
+revoke all on function study_room_private.profile_is_complete(uuid) from public, anon;
+grant execute on function study_room_private.profile_is_complete(uuid) to authenticated;
+
+create or replace function public.study_room_ensure_profile()
+returns void language plpgsql security definer set search_path = ''
+as $function$
+declare uid uuid := auth.uid();
+begin
+  if uid is null then raise exception 'Sign-in required'; end if;
+  if not study_room_private.profile_is_complete(uid) then
+    raise exception 'Complete your StudyLab profile before entering the Live Study Room.';
+  end if;
+  insert into public.study_room_members(user_id) values (uid)
+  on conflict (user_id) do nothing;
+end;
+$function$;
+
+create or replace function public.study_room_set_subject(p_subject text)
+returns void language plpgsql security definer set search_path = ''
+as $function$
+begin
+  if auth.uid() is null then raise exception 'Sign-in required'; end if;
+  if not study_room_private.profile_is_complete(auth.uid()) then
+    raise exception 'Complete your StudyLab profile before entering the Live Study Room.';
+  end if;
+  if p_subject not in (
+    'Combined Mathematics','Physics','Chemistry','Biology','Agricultural Science',
+    'Information & Communication Technology (ICT)','General English','General Common Test',
+    'Accounting','Business Studies','Economics','Business Statistics','Logic and Scientific Method',
+    'Geography','Political Science','History','Home Economics','Communication and Media Studies',
+    'Buddhism','Christianity','Hinduism','Islam','Buddhist Civilization','Christian Civilization',
+    'Hindu Civilization','Islamic Civilization','Sinhala','Tamil','English','Pali','Sanskrit','Arabic',
+    'French','German','Japanese','Korean','Chinese','Russian','Art','Oriental Music','Western Music',
+    'Carnatic Music','Dancing (Oriental)','Dancing (Bharatha)','Drama and Theatre',
+    'Engineering Technology','Science for Technology','Bio Systems Technology','Agro Technology',
+    'Food Technology','Mechanical Technology','Electrical, Electronic and Information Technology',
+    'Civil Technology','Design, Electrical and Electronic Technology','Design and Construction Technology',
+    'Design and Mechanical Technology','Design, Quantity Surveying and Construction Process'
+  ) then raise exception 'Invalid subject'; end if;
+  update public.study_room_members set subject = p_subject, updated_at = now()
+  where user_id = auth.uid();
+  if not found then raise exception 'Create a profile first'; end if;
+end;
+$function$;
+
+create or replace function public.study_room_start()
+returns void language plpgsql security definer set search_path = ''
+as $function$
+begin
+  if auth.uid() is null then raise exception 'Sign-in required'; end if;
+  if not study_room_private.profile_is_complete(auth.uid()) then
+    raise exception 'Complete your StudyLab profile before entering the Live Study Room.';
+  end if;
+  update public.study_room_members
+    set is_studying = true, session_started_at = now(),
+        last_heartbeat_at = now(), updated_at = now()
+    where user_id = auth.uid();
+  if not found then raise exception 'Create a profile first'; end if;
+end;
+$function$;
+
+revoke all on function public.study_room_ensure_profile() from public, anon;
+revoke all on function public.study_room_set_subject(text) from public, anon;
+revoke all on function public.study_room_start() from public, anon;
+grant execute on function public.study_room_ensure_profile() to authenticated;
+grant execute on function public.study_room_set_subject(text) to authenticated;
+grant execute on function public.study_room_start() to authenticated;
