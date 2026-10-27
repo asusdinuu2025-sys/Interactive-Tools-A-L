@@ -6,6 +6,9 @@
 (function () {
   "use strict";
 
+  const pagePath = window.location.pathname.replace(/\/+$/, "") || "/";
+  if (!(pagePath === "/" || pagePath.endsWith("/index.html"))) return;
+
   const CONFIG = {
     table: "studylab_feedback",
     maxLength: 1200,
@@ -22,7 +25,7 @@
         aria-controls="studyFeedbackPanel"
         aria-label="Open StudyLab feedback"
       >
-        <span aria-hidden="true">💡</span>
+        <span class="study-feedback-button-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M9 18h6M10 21h4M8.5 14.5a6 6 0 1 1 7 0c-.9.65-1.5 1.55-1.5 2.5h-4c0-.95-.6-1.85-1.5-2.5Z"/><path d="M12 3v2M4.9 5.9l1.4 1.4M19.1 5.9l-1.4 1.4"/></svg></span>
         <span>Feedback</span>
       </button>
 

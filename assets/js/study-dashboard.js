@@ -1,14 +1,14 @@
 /*
  * Study-Lab personal study dashboard
  *
- * Cloud-backed student dashboard:
+ * Browser-local student dashboard:
  * - Quick Find search
  * - Favorites
  * - Recently opened
  * - Unique tools explored progress
  * - Floating Quick Access panel
  *
- * Supabase is the source of truth for student dashboard data.
+ * Favorites and progress are stored in this browser's localStorage.
  */
 (function () {
   "use strict";
@@ -22,13 +22,9 @@
   };
 
   /*
-   * Supabase is now the source of truth for:
-   * - favorites
-   * - explored-tool progress
-   * - recently opened (derived from progress)
-   *
-   * Old localStorage data is migrated once after the cloud
-   * student account is ready, then the old app-data keys are removed.
+   * localStorage is the source of truth for dashboard data.
+   * A one-time read of old cloud rows is attempted while the legacy
+   * tables still exist, so returning students can keep their saved items.
    */
   const cloud = {
     client: null,
@@ -84,263 +80,186 @@
     }));
   }
 
-  async function migrateLocalDashboardData(client, userId) {
+  const LOCAL_KEYS = {
+    favorites: "studyLabFavorites",
+    favoriteMeta: "studyLabFavoriteMeta",
+    explored: "studyLabExploredTools",
+    recent: "studyLabRecent",
+    migrated: "studyLabLocalDashboardV1"
+  };
+
+  function readLocalJson(key, fallback) {
     try {
-      const oldFavorites = (() => {
-        try {
-          const raw = localStorage.getItem("studyLabFavorites");
-          const value = raw ? JSON.parse(raw) : [];
-          return Array.isArray(value) ? value : [];
-        } catch {
-          return [];
-        }
-      })();
-
-      const oldMeta = (() => {
-        try {
-          const raw = localStorage.getItem("studyLabFavoriteMeta");
-          const value = raw ? JSON.parse(raw) : {};
-          return value && typeof value === "object" && !Array.isArray(value) ? value : {};
-        } catch {
-          return {};
-        }
-      })();
-
-      const oldExplored = (() => {
-        try {
-          const raw = localStorage.getItem("studyLabExploredTools");
-          const value = raw ? JSON.parse(raw) : [];
-          return Array.isArray(value) ? value : [];
-        } catch {
-          return [];
-        }
-      })();
-
-      const oldRecent = (() => {
-        try {
-          const raw = localStorage.getItem("studyLabRecent");
-          const value = raw ? JSON.parse(raw) : [];
-          return Array.isArray(value) ? value : [];
-        } catch {
-          return [];
-        }
-      })();
-
-      const favoriteRows = oldFavorites
-        .map(item => typeof item === "string" ? item : item?.url)
-        .filter(Boolean)
-        .map(url => {
-          const meta = oldMeta[url] || {};
-          return {
-            user_id: userId,
-            tool_url: url,
-            title: meta.title || "",
-            description: meta.description || "",
-            subject: meta.subject || "study-lab"
-          };
-        });
-
-      const progressMap = new Map();
-
-      oldExplored.forEach(item => {
-        if (!item?.url) return;
-        const existing = progressMap.get(item.url);
-        const stamp = item.savedAt || Date.now();
-
-        if (!existing || stamp > existing.last_opened_at) {
-          progressMap.set(item.url, {
-            user_id: userId,
-            tool_url: item.url,
-            title: item.title || "Untitled tool",
-            subject: item.subject || "study-lab",
-            first_opened_at: new Date(existing?.first_opened_at || stamp).toISOString(),
-            last_opened_at: new Date(stamp).toISOString()
-          });
-        }
-      });
-
-      oldRecent.forEach(item => {
-        if (!item?.url) return;
-        const stamp = item.savedAt || Date.now();
-        const existing = progressMap.get(item.url);
-
-        if (!existing) {
-          progressMap.set(item.url, {
-            user_id: userId,
-            tool_url: item.url,
-            title: item.title || "Untitled tool",
-            subject: item.subject || "study-lab",
-            first_opened_at: new Date(stamp).toISOString(),
-            last_opened_at: new Date(stamp).toISOString()
-          });
-          return;
-        }
-
-        if (stamp > new Date(existing.last_opened_at).getTime()) {
-          existing.last_opened_at = new Date(stamp).toISOString();
-        }
-      });
-
-      if (favoriteRows.length) {
-        const { error } = await client
-          .from("studylab_favorites")
-          .upsert(favoriteRows, { onConflict: "user_id,tool_url" });
-
-        if (error) throw error;
-      }
-
-      const progressRows = [...progressMap.values()].map(row => ({
-        ...row,
-        open_count: 1
-      }));
-
-      if (progressRows.length) {
-        const { error } = await client
-          .from("studylab_progress")
-          .upsert(progressRows, { onConflict: "user_id,tool_url" });
-
-        if (error) throw error;
-      }
-
-      /*
-       * Only remove the old browser app-data after cloud writes
-       * have succeeded. Supabase Auth itself still uses browser
-       * storage to keep the authentication session alive.
-       */
-      [
-        "studyLabFavorites",
-        "studyLabFavoriteMeta",
-        "studyLabRecent",
-        "studyLabExploredTools"
-      ].forEach(key => localStorage.removeItem(key));
-    } catch (error) {
-      console.warn("StudyLab dashboard migration:", error);
+      const raw = localStorage.getItem(key);
+      return raw == null ? fallback : JSON.parse(raw);
+    } catch (_) {
+      return fallback;
     }
+  }
+
+  function writeLocalJson(key, value) {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+      return true;
+    } catch (error) {
+      console.warn("StudyLab local dashboard storage:", error);
+      return false;
+    }
+  }
+
+  function persistDashboardLocal() {
+    const favorites = [...cloud.favorites.keys()];
+    const favoriteMeta = {};
+    cloud.favorites.forEach((row, url) => {
+      favoriteMeta[url] = {
+        title: row.title || "",
+        description: row.description || "",
+        subject: row.subject || "study-lab"
+      };
+    });
+    const explored = [...cloud.progress.values()].map(row => ({
+      url: row.tool_url,
+      title: row.title || "Untitled tool",
+      description: row.description || "",
+      subject: row.subject || "study-lab",
+      savedAt: new Date(row.last_opened_at || Date.now()).getTime(),
+      firstOpenedAt: row.first_opened_at || row.last_opened_at || new Date().toISOString(),
+      openCount: Number(row.open_count) || 1
+    }));
+    const recent = [...explored]
+      .sort((a, b) => b.savedAt - a.savedAt)
+      .slice(0, MAX_RECENT);
+
+    writeLocalJson(LOCAL_KEYS.favorites, favorites);
+    writeLocalJson(LOCAL_KEYS.favoriteMeta, favoriteMeta);
+    writeLocalJson(LOCAL_KEYS.explored, explored);
+    writeLocalJson(LOCAL_KEYS.recent, recent);
   }
 
   async function loadCloudDashboard() {
-    const account = getCloudAccount();
-    if (!account?.ready) {
-      throw new Error("StudyLab cloud account unavailable.");
+    const oldFavorites = readLocalJson(LOCAL_KEYS.favorites, []);
+    const oldMeta = readLocalJson(LOCAL_KEYS.favoriteMeta, {});
+    const oldExplored = readLocalJson(LOCAL_KEYS.explored, []);
+    const oldRecent = readLocalJson(LOCAL_KEYS.recent, []);
+    const favorites = new Map();
+    const progress = new Map();
+
+    (Array.isArray(oldFavorites) ? oldFavorites : []).forEach(item => {
+      const url = typeof item === "string" ? item : item?.url;
+      if (!url) return;
+      const meta = oldMeta && typeof oldMeta === "object" ? (oldMeta[url] || {}) : {};
+      favorites.set(url, {
+        tool_url: url,
+        title: meta.title || item?.title || "",
+        description: meta.description || item?.description || "",
+        subject: meta.subject || item?.subject || "study-lab"
+      });
+    });
+
+    [...(Array.isArray(oldExplored) ? oldExplored : []), ...(Array.isArray(oldRecent) ? oldRecent : [])]
+      .forEach(item => {
+        if (!item?.url) return;
+        const stamp = Number(item.savedAt) || Date.now();
+        const existing = progress.get(item.url);
+        progress.set(item.url, {
+          tool_url: item.url,
+          title: item.title || existing?.title || "Untitled tool",
+          description: item.description || existing?.description || "",
+          subject: item.subject || existing?.subject || "study-lab",
+          first_opened_at: item.firstOpenedAt || existing?.first_opened_at || new Date(stamp).toISOString(),
+          last_opened_at: new Date(Math.max(stamp, new Date(existing?.last_opened_at || 0).getTime())).toISOString(),
+          open_count: Math.max(Number(item.openCount) || 1, Number(existing?.open_count) || 0)
+        });
+      });
+
+    // One-time migration: read existing cloud records, never write dashboard data to Supabase.
+    let account = getCloudAccount();
+    let migrationSucceeded = false;
+    if ((() => { try { return localStorage.getItem(LOCAL_KEYS.migrated) !== "1"; } catch (_) { return true; } })() && account?.ready) {
+      try {
+        await account.ready;
+        const client = account.client;
+        const user = account.getUser?.();
+        if (client && user?.id) {
+          const [favResult, progressResult] = await Promise.all([
+            client.from("studylab_favorites")
+              .select("tool_url,title,description,subject,created_at")
+              .eq("user_id", user.id),
+            client.from("studylab_progress")
+              .select("tool_url,title,subject,first_opened_at,last_opened_at,open_count")
+              .eq("user_id", user.id)
+          ]);
+          if (!favResult.error) {
+            (favResult.data || []).forEach(row => {
+              if (!favorites.has(row.tool_url)) favorites.set(row.tool_url, row);
+            });
+          }
+          if (!progressResult.error) {
+            (progressResult.data || []).forEach(row => {
+              const existing = progress.get(row.tool_url);
+              progress.set(row.tool_url, {
+                ...row,
+                description: existing?.description || "",
+                first_opened_at: existing?.first_opened_at || row.first_opened_at,
+                last_opened_at: new Date(Math.max(
+                  new Date(existing?.last_opened_at || 0).getTime(),
+                  new Date(row.last_opened_at || 0).getTime()
+                )).toISOString(),
+                open_count: Math.max(Number(existing?.open_count) || 0, Number(row.open_count) || 1)
+              });
+            });
+          }
+          migrationSucceeded = !favResult.error && !progressResult.error;
+        }
+      } catch (error) {
+        // Tables may already have been removed; local dashboard remains usable.
+        console.info("StudyLab local dashboard migration skipped:", error?.message || error);
+      }
     }
 
-    await account.ready;
-
-    const client = account.client;
-    const user = account.getUser?.();
-
-    if (!client || !user?.id) {
-      throw new Error("StudyLab student account is unavailable.");
-    }
-
-    cloud.client = client;
-    cloud.userId = user.id;
-
-    await migrateLocalDashboardData(client, user.id);
-
-    const [favoritesResult, progressResult] = await Promise.all([
-      client
-        .from("studylab_favorites")
-        .select("tool_url,title,description,subject,created_at")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false }),
-
-      client
-        .from("studylab_progress")
-        .select("tool_url,title,subject,first_opened_at,last_opened_at,open_count")
-        .eq("user_id", user.id)
-        .order("last_opened_at", { ascending: false })
-    ]);
-
-    if (favoritesResult.error) throw favoritesResult.error;
-    if (progressResult.error) throw progressResult.error;
-
-    cloud.favorites = new Map(
-      (favoritesResult.data || []).map(row => [row.tool_url, row])
-    );
-
-    cloud.progress = new Map(
-      (progressResult.data || []).map(row => [row.tool_url, row])
-    );
-
+    cloud.favorites = favorites;
+    cloud.progress = progress;
+    cloud.client = null;
+    cloud.userId = null;
     cloud.ready = true;
     cloud.error = null;
+    if (migrationSucceeded) {
+      try { localStorage.setItem(LOCAL_KEYS.migrated, "1"); } catch (_) {}
+    }
+    persistDashboardLocal();
   }
 
   async function saveFavoriteCloud(card) {
-    if (!cloud.ready || !cloud.client || !cloud.userId) return;
-
-    const meta = buildMeta(
-      card,
-      card.dataset.studySubject || subject
-    );
-
-    const { error } = await cloud.client
-      .from("studylab_favorites")
-      .upsert({
-        user_id: cloud.userId,
-        tool_url: meta.url,
-        title: meta.title,
-        description: meta.description,
-        subject: meta.subject
-      }, { onConflict: "user_id,tool_url" });
-
-    if (error) throw error;
-
+    const meta = buildMeta(card, card.dataset.studySubject || subject);
     cloud.favorites.set(meta.url, {
-      user_id: cloud.userId,
       tool_url: meta.url,
       title: meta.title,
       description: meta.description,
       subject: meta.subject
     });
+    persistDashboardLocal();
   }
 
   async function deleteFavoriteCloud(url) {
-    if (!cloud.ready || !cloud.client || !cloud.userId) return;
-
-    const { error } = await cloud.client
-      .from("studylab_favorites")
-      .delete()
-      .eq("user_id", cloud.userId)
-      .eq("tool_url", url);
-
-    if (error) throw error;
-
     cloud.favorites.delete(url);
+    persistDashboardLocal();
   }
 
   async function saveProgressCloud(meta) {
-    if (!cloud.ready || !cloud.client || !cloud.userId || !meta?.url) return;
-
-    const now = new Date().toISOString();
+    if (!meta?.url) return;
     const existing = cloud.progress.get(meta.url);
-
-    const payload = {
-      user_id: cloud.userId,
-      tool_url: meta.url,
-      title: meta.title || "Untitled tool",
-      subject: meta.subject || "study-lab",
-      last_opened_at: now,
-      open_count: (existing?.open_count || 0) + 1
-    };
-
-    if (!existing?.first_opened_at) {
-      payload.first_opened_at = now;
-    }
-
-    const { data, error } = await cloud.client
-      .from("studylab_progress")
-      .upsert(payload, { onConflict: "user_id,tool_url" })
-      .select("tool_url,title,subject,first_opened_at,last_opened_at,open_count")
-      .single();
-
-    if (error) throw error;
-
+    const now = new Date().toISOString();
     cloud.progress.set(meta.url, {
-      ...data,
-      user_id: cloud.userId
+      ...(existing || {}),
+      tool_url: meta.url,
+      title: meta.title || existing?.title || "Untitled tool",
+      description: meta.description || existing?.description || "",
+      subject: meta.subject || existing?.subject || "study-lab",
+      first_opened_at: existing?.first_opened_at || now,
+      last_opened_at: now,
+      open_count: Number(existing?.open_count || 0) || 1
     });
+    persistDashboardLocal();
   }
 
   function getCardUrl(card) {
@@ -734,6 +653,9 @@
   }
 
   function createQuickAccess() {
+    // Quick Access belongs on study resource pages, not the Live Study Room.
+    // The room uses the Chat launcher in this floating-control area instead.
+    if (document.body.classList.contains("study-room-page")) return;
     if (document.getElementById("studyQuickAccess")) return;
 
     const button = document.createElement("button");
@@ -743,7 +665,7 @@
     button.setAttribute("aria-expanded", "false");
     button.setAttribute("aria-controls", "studyQuickAccessPanel");
     button.innerHTML =
-      '<span aria-hidden="true">⚡</span><span>Quick</span>';
+      '<span class="study-quick-button-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M13.2 2.5 5.8 13h5l-.7 8.5L18.2 11h-5.1l.1-8.5Z"/></svg></span><span>Quick</span>';
 
     const panel = document.createElement("aside");
     panel.className = "study-quick-panel";

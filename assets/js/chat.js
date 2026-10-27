@@ -1,16 +1,23 @@
 /* =========================================================
-   STUDY LAB — TEMPORARY 24-HOUR CHAT
+   STUDY LAB — SHARED STUDY CHAT
    Anonymous, text-only, Realtime Supabase chat.
    ========================================================= */
 
 (function () {
   "use strict";
 
+  const pagePath = window.location.pathname.replace(/\/+$/, "") || "/";
+  const normalizedPath = pagePath.toLowerCase();
+  const isHomePage = normalizedPath === "/" || normalizedPath.endsWith("/index.html");
+  // Netlify may serve the same page through either /study-room.html or a clean /study-room route.
+  const isStudyRoomPage = /\/study-room(?:\.html)?$/i.test(normalizedPath);
+  if (!isHomePage && !isStudyRoomPage) return;
+
   const CONFIG = {
     supabaseUrl: "https://zpvatyxdbshjuqgtexzw.supabase.co",
     supabasePublishableKey: "sb_publishable_zd8S3PcyicJX6Cgyh0ez8A_sUSTCuiB",
     table: "studylab_chat_messages",
-    maxMessages: 50,
+    maxMessages: 100,
     maxLength: 500,
     rateLimitMs: 2500
   };
@@ -23,9 +30,9 @@
         data-chat-button
         aria-expanded="false"
         aria-controls="studyChatPanel"
-        aria-label="Open StudyLab temporary chat"
+        aria-label="Open StudyLab chat"
       >
-        <span class="study-chat-button-icon" aria-hidden="true">💬</span>
+        <span class="study-chat-button-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5 8 8 0 0 1-3.2-.65L4 20l1.65-4.15A7.5 7.5 0 1 1 20 11.5Z"/><path d="M8 11h8M8 14h5"/></svg></span>
         <span>Chat</span>
         <span class="study-chat-unread" data-chat-unread hidden aria-label="Unread messages"></span>
       </button>
@@ -35,7 +42,7 @@
         id="studyChatPanel"
         data-chat-panel
         hidden
-        aria-label="StudyLab temporary chat"
+        aria-label="StudyLab chat"
       >
         <div class="study-chat-head">
           <div class="study-chat-title-wrap">
@@ -49,7 +56,7 @@
         </div>
 
         <div class="study-chat-notice">
-          🎓 Temporary study chat • newest 50 messages • messages older than 24 hours are removed.
+          🎓 Study chat • keeps the newest 100 messages. When a new message makes 101, the oldest is removed.
           <strong>Please keep conversations educational and respectful.</strong>
         </div>
 
@@ -178,6 +185,7 @@
 
     const article = document.createElement("article");
     article.className = "study-chat-message";
+    article.dataset.messageId = row.id;
 
     if ((row.user_id && row.user_id === userId) || (!row.user_id && row.session_id === sessionKey)) {
       article.classList.add("own");
@@ -200,7 +208,10 @@
 
     while (list.querySelectorAll(".study-chat-message").length > CONFIG.maxMessages) {
       const oldest = list.querySelector(".study-chat-message");
-      oldest?.remove();
+      if (oldest) {
+        messagesById.delete(oldest.dataset.messageId);
+        oldest.remove();
+      }
     }
   }
 
@@ -259,7 +270,8 @@
     const { data, error } = await client
       .from(CONFIG.table)
       .select("id,message,created_at,session_id,user_id,nickname")
-      .order("created_at", { ascending: true })
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
       .limit(CONFIG.maxMessages);
 
     if (error) {
@@ -269,7 +281,7 @@
       return;
     }
 
-    renderInitial(data || []);
+    renderInitial((data || []).reverse());
   }
 
   function subscribe() {
@@ -303,7 +315,7 @@
       )
       .subscribe(status => {
         if (status === "SUBSCRIBED") {
-          setStatus(true, "Live • temporary 24-hour chat");
+          setStatus(true, "Live • newest 100 messages");
         } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
           setStatus(false, "Live connection unavailable");
         }

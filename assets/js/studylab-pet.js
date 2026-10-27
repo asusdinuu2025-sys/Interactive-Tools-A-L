@@ -7,6 +7,9 @@
 (function () {
   "use strict";
 
+  const pagePath = window.location.pathname.replace(/\/+$/, "") || "/";
+  if (!(pagePath === "/" || pagePath.endsWith("/index.html"))) return;
+
   if (window.__StudyLabLivingPetPR30) return;
   window.__StudyLabLivingPetPR30 = true;
 
@@ -266,7 +269,7 @@
       '</div>' +
     '</div>' +
     '<button id="studylabPetLauncher" type="button" aria-expanded="false" aria-controls="studylabPetPanel" title="StudyLab Pet controls">' +
-      '<span class="sl-pet-launcher-icon" aria-hidden="true">🤖</span><span>Pet</span>' +
+      '<span class="sl-pet-launcher-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 3v4M9 12h.01M15 12h.01M9 16h6M2 11v4M22 11v4"/></svg></span><span>Pet</span>' +
     '</button>' +
     '<aside class="sl-pet-panel" id="studylabPetPanel" hidden aria-label="StudyLab Pet controls">' +
       '<div class="sl-pet-panel-head">' +

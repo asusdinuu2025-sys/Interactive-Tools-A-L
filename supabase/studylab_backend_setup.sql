@@ -6,7 +6,7 @@
 --   1) anonymous/cloud student profiles
 --   2) cloud favorites
 --   3) cloud study progress
---   4) the 24-hour / 50-message chat
+--   4) a shared chat retaining only the latest 100 messages
 --
 -- IMPORTANT:
 -- Enable Anonymous Sign-Ins in:
@@ -143,7 +143,7 @@ create policy "StudyLab progress own"
   with check (user_id = auth.uid());
 
 -- =========================================================
--- TEMPORARY CHAT
+-- SHARED STUDY CHAT
 -- =========================================================
 
 create table if not exists public.studylab_chat_messages (
@@ -180,14 +180,14 @@ drop policy if exists "StudyLab chat read recent messages"
 
 drop policy if exists "StudyLab chat read recent authenticated messages"
   on public.studylab_chat_messages;
+drop policy if exists "StudyLab chat read latest 100 messages"
+  on public.studylab_chat_messages;
 
-create policy "StudyLab chat read recent authenticated messages"
+create policy "StudyLab chat read latest 100 messages"
   on public.studylab_chat_messages
   for select
   to authenticated
-  using (
-    created_at > now() - interval '24 hours'
-  );
+  using (true);
 
 drop policy if exists "StudyLab chat insert messages"
   on public.studylab_chat_messages;
@@ -211,28 +211,25 @@ create or replace function public.cleanup_studylab_chat()
 returns void
 language plpgsql
 security definer
-set search_path = public
+set search_path = ''
 as $$
 begin
-  delete from public.studylab_chat_messages
-  where created_at < now() - interval '24 hours';
-
   delete from public.studylab_chat_messages
   where id in (
     select id
     from public.studylab_chat_messages
     order by created_at desc, id desc
-    offset 50
+    offset 100
   );
 end;
 $$;
 
-revoke all on function public.cleanup_studylab_chat() from public;
+revoke all on function public.cleanup_studylab_chat() from public, anon, authenticated;
 create or replace function public.trim_studylab_chat_after_insert()
 returns trigger
 language plpgsql
 security definer
-set search_path = public
+set search_path = ''
 as $$
 begin
   perform public.cleanup_studylab_chat();
@@ -247,6 +244,8 @@ create trigger studylab_chat_trim_after_insert
 after insert on public.studylab_chat_messages
 for each statement
 execute function public.trim_studylab_chat_after_insert();
+
+revoke all on function public.trim_studylab_chat_after_insert() from public, anon, authenticated;
 
 do $$
 begin
@@ -268,7 +267,7 @@ select public.cleanup_studylab_chat();
 
 -- =========================================================
 -- SERVER-SIDE CHAT RATE LIMIT
--- Protects the temporary chat even if client-side throttling
+-- Protects the shared study chat even if client-side throttling
 -- is bypassed.
 -- =========================================================
 
@@ -276,7 +275,7 @@ create or replace function public.enforce_studylab_chat_rate_limit()
 returns trigger
 language plpgsql
 security definer
-set search_path = public
+set search_path = ''
 as $$
 declare
   recent_count integer;
@@ -303,7 +302,7 @@ begin
 end;
 $$;
 
-revoke all on function public.enforce_studylab_chat_rate_limit() from public;
+revoke all on function public.enforce_studylab_chat_rate_limit() from public, anon, authenticated;
 
 drop trigger if exists studylab_chat_rate_limit_before_insert
   on public.studylab_chat_messages;

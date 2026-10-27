@@ -68,7 +68,7 @@
 
     const { data, error } = await client
       .from("studylab_profiles")
-      .select("id,display_name,school,phone,exam_year,study_stream,profile_completed_at,created_at,updated_at")
+      .select("id,display_name,school,phone,exam_year,study_stream,gender,profile_completed_at,created_at,updated_at")
       .eq("id", user.id)
       .maybeSingle();
 
@@ -106,7 +106,7 @@
         },
         { onConflict: "id" }
       )
-      .select("id,display_name,school,phone,exam_year,study_stream,profile_completed_at,created_at,updated_at")
+      .select("id,display_name,school,phone,exam_year,study_stream,gender,profile_completed_at,created_at,updated_at")
       .single();
 
     if (error) throw error;
@@ -130,12 +130,16 @@
     };
     const examYear = String(details.exam_year || "").trim();
     const studyStream = String(details.study_stream || "").trim();
+    const gender = String(details.gender || "").trim();
 
     if (!["2026", "2027", "2028", "2029", "Other"].includes(examYear)) {
       throw new Error("Please choose your A/L examination year.");
     }
     if (!["Physical Science", "Biological Science", "Commerce", "Arts", "Engineering Technology", "Bio Systems Technology", "Other"].includes(studyStream)) {
       throw new Error("Please choose your study stream.");
+    }
+    if (!["male", "female"].includes(gender)) {
+      throw new Error("Please choose a profile icon.");
     }
 
     const now = new Date().toISOString();
@@ -148,10 +152,11 @@
         phone: cleanOptional(details.phone),
         exam_year: examYear,
         study_stream: studyStream,
+        gender,
         profile_completed_at: now,
         updated_at: now
       }, { onConflict: "id" })
-      .select("id,display_name,school,phone,exam_year,study_stream,profile_completed_at,created_at,updated_at")
+      .select("id,display_name,school,phone,exam_year,study_stream,gender,profile_completed_at,created_at,updated_at")
       .single();
 
     if (error) throw error;
@@ -195,7 +200,7 @@
                 display_name: legacyName,
                 updated_at: new Date().toISOString()
               }, { onConflict: "id" })
-              .select("id,display_name,school,phone,exam_year,study_stream,profile_completed_at,created_at,updated_at")
+              .select("id,display_name,school,phone,exam_year,study_stream,gender,profile_completed_at,created_at,updated_at")
               .single();
             if (migrationSaveError) throw migrationSaveError;
             profile = migratedProfile;

@@ -12,6 +12,8 @@
   const profilePhone = document.getElementById("profilePhone");
   const profileExamYear = document.getElementById("profileExamYear");
   const profileStream = document.getElementById("profileStream");
+  const genderButtons = [...document.querySelectorAll("[data-profile-gender]")];
+  let selectedGender = "";
   const profileStatus = document.getElementById("profileStatus");
   const profileNameLabel = document.getElementById("profileNameLabel");
   const profileSubtitle = document.getElementById("profileSubtitle");
@@ -26,7 +28,7 @@
 
   const placeholderName = name => /^Student\d{4}$/.test(String(name || ""));
   const isComplete = p => Boolean(p?.profile_completed_at && p?.display_name &&
-    !placeholderName(p.display_name) && p?.exam_year && p?.study_stream);
+    !placeholderName(p.display_name) && p?.exam_year && p?.study_stream && ["male", "female"].includes(p?.gender));
 
   function markPromptSeen() {
     try { localStorage.setItem(PROFILE_PROMPT_KEY, "1"); } catch (_) {}
@@ -63,6 +65,12 @@
     profilePhone.value = p?.phone || "";
     profileExamYear.value = p?.exam_year || "";
     profileStream.value = p?.study_stream || "";
+    selectedGender = ["male", "female"].includes(p?.gender) ? p.gender : "";
+    genderButtons.forEach(button => {
+      const active = button.dataset.profileGender === selectedGender;
+      button.classList.toggle("is-selected", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
   }
   function updateCopy(p) {
     const complete = isComplete(p);
@@ -156,6 +164,15 @@
     profileModal.style.setProperty("--profile-glow-y", "10%");
   });
 
+  genderButtons.forEach(button => button.addEventListener("click", () => {
+    selectedGender = button.dataset.profileGender;
+    genderButtons.forEach(item => {
+      const active = item === button;
+      item.classList.toggle("is-selected", active);
+      item.setAttribute("aria-pressed", String(active));
+    });
+  }));
+
   profileButton.addEventListener("click", openModal);
   profileClose?.addEventListener("click", closeModal);
   profileModal.addEventListener("click", event => {
@@ -184,6 +201,12 @@
       return;
     }
 
+    if (!["male", "female"].includes(selectedGender)) {
+      showStatus("Please choose a profile icon.", true);
+      genderButtons[0]?.focus();
+      return;
+    }
+
     const submit = profileForm.querySelector(".profile-save");
     if (submit) { submit.disabled = true; submit.textContent = "Saving securely…"; }
     try {
@@ -194,7 +217,8 @@
         school: profileSchool.value,
         phone: profilePhone.value,
         exam_year: profileExamYear.value,
-        study_stream: profileStream.value
+        study_stream: profileStream.value,
+        gender: selectedGender
       });
       fillForm(p);
       setButtonProfile(p);
@@ -202,7 +226,13 @@
       markPromptSeen();
       showStatus("Your profile has been saved to your StudyLab account ✓");
       window.dispatchEvent(new CustomEvent("studylab-profile-updated", { detail: p }));
-      window.setTimeout(() => closeModal(true), 420);
+      window.setTimeout(() => {
+        closeModal(true);
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("completeProfile") === "1" && params.get("returnTo") === "study-room.html") {
+          window.setTimeout(() => window.location.replace("study-room.html"), 380);
+        }
+      }, 420);
     } catch (error) {
       console.warn("StudyLab profile save:", error);
       showStatus(error?.message || "Your profile could not be saved. Please try again.", true);
@@ -216,7 +246,8 @@
     try {
       const p = await getCloudProfile();
       setButtonProfile(p);
-      if (!isComplete(p) && !hasSeenPrompt()) {
+      const params = new URLSearchParams(window.location.search);
+      if (!isComplete(p) && (!hasSeenPrompt() || params.get("completeProfile") === "1")) {
         markPromptSeen();
         await openModal();
       }

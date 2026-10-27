@@ -1202,3 +1202,30 @@ html[data-theme="light"] .sl-pet-setting-buttons button[data-pet-eye="pink"].is-
 @media (prefers-reduced-motion: reduce) {
   .sl-pet-character[data-profile-field="name"] { transition: none !important; }
 }
+
+/* Floating Pet launcher: robot icon only, aligned with the Gemini launcher. */
+#studylabPetLauncher {
+  left: 20px;
+  bottom: 20px;
+  width: 46px;
+  min-width: 46px;
+  height: 46px;
+  min-height: 46px;
+  padding: 0;
+  gap: 0;
+  justify-content: center;
+  border-radius: 15px;
+}
+#studylabPetLauncher .sl-pet-launcher-icon { font-size: 1.2rem; }
+#studylabPetLauncher .sl-pet-launcher-icon + span { display: none !important; }
+@media (max-width: 720px) {
+  #studylabPetLauncher {
+    left: 12px;
+    bottom: 12px;
+    width: 46px;
+    min-width: 46px;
+    height: 46px;
+    min-height: 46px;
+    padding: 0;
+  }
+}

@@ -464,6 +464,17 @@ html[data-theme="light"] .study-chat-watermark {
   .study-chat-button {
     right: 99px;
     bottom: 12px;
+    min-width: 46px;
+    width: 46px;
+    height: 46px;
+    justify-content: center;
+    padding: 10px;
+    gap: 0;
+  }
+
+  /* Keep the chat launcher compact on all phone-sized layouts. */
+  .study-chat-button > span:last-of-type {
+    display: none;
   }
 
   .study-chat-panel {

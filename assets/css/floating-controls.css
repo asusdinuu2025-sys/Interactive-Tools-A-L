@@ -1,0 +1,315 @@
+/* StudyLab floating utility controls: consistent neon-vector icon system. */
+.study-chat-button,
+.study-feedback-button,
+.study-quick-button,
+#studylabPetLauncher,
+.studylab-ai-tools-row .studylab-ai-launcher {
+  box-sizing: border-box;
+  border: 1px solid rgba(126, 220, 255, .48) !important;
+  background: linear-gradient(145deg, rgba(65, 170, 255, .14), rgba(126, 220, 255, .035)), rgba(8, 17, 31, .78) !important;
+  box-shadow: 0 0 0 1px rgba(70, 190, 255, .06), 0 0 13px rgba(61, 190, 255, .20), 0 0 28px rgba(61, 150, 255, .10), inset 0 0 13px rgba(61, 190, 255, .055), inset 0 1px 0 rgba(255,255,255,.10) !important;
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  transition: border-color .2s ease, box-shadow .2s ease, background .2s ease, transform .2s ease;
+}
+.study-chat-button:hover,
+.study-chat-button.is-open,
+.study-feedback-button:hover,
+.study-feedback-button.is-open,
+.study-quick-button:hover,
+.study-quick-button.is-open,
+#studylabPetLauncher:hover,
+.studylab-ai-tools-row .studylab-ai-launcher:hover,
+.studylab-ai-tools-row .studylab-ai-launcher.is-open {
+  border-color: rgba(126, 220, 255, .9) !important;
+  box-shadow: 0 0 0 1px rgba(70, 190, 255, .12), 0 0 17px rgba(61, 190, 255, .32), 0 0 34px rgba(61, 150, 255, .16), inset 0 0 16px rgba(61, 190, 255, .08), inset 0 1px 0 rgba(255,255,255,.13) !important;
+}
+.study-chat-button-icon,
+.study-feedback-button-icon,
+.study-quick-button-icon,
+.sl-pet-launcher-icon {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #79e5ff;
+  filter: drop-shadow(0 0 5px rgba(65, 205, 255, .65));
+}
+.study-chat-button-icon svg,
+.study-feedback-button-icon svg,
+.study-quick-button-icon svg,
+.sl-pet-launcher-icon svg {
+  display: block;
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.study-feedback-button-icon { color: #ffe18a; filter: drop-shadow(0 0 5px rgba(255, 205, 83, .7)); }
+.study-quick-button-icon { color: #c7a7ff; filter: drop-shadow(0 0 6px rgba(173, 125, 255, .75)); }
+.sl-pet-launcher-icon { color: #80ffd8; filter: drop-shadow(0 0 6px rgba(74, 255, 207, .72)); }
+.studylab-ai-tools-row .studylab-ai-launcher-icon svg { filter: drop-shadow(0 0 7px rgba(126, 170, 255, .65)); }
+html[data-theme="light"] .study-chat-button,
+html[data-theme="light"] .study-feedback-button,
+html[data-theme="light"] .study-quick-button,
+html[data-theme="light"] #studylabPetLauncher,
+html[data-theme="light"] .studylab-ai-tools-row .studylab-ai-launcher {
+  background: linear-gradient(145deg, rgba(255,255,255,.92), rgba(220,244,255,.76)) !important;
+  border-color: rgba(37, 153, 207, .52) !important;
+  box-shadow: 0 0 0 1px rgba(70,190,255,.05), 0 0 14px rgba(61,150,220,.14), inset 0 1px 0 rgba(255,255,255,.95) !important;
+}
+@media (max-width: 720px) {
+  .study-quick-button,
+  .study-chat-button,
+  .study-feedback-button {
+    width: 46px !important;
+    min-width: 46px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    padding: 0 !important;
+    justify-content: center !important;
+    gap: 0 !important;
+    border-radius: 15px !important;
+  }
+  .study-quick-button > span:last-child,
+  .study-chat-button > span:not(.study-chat-button-icon):not(.study-chat-unread),
+  .study-feedback-button > span:last-child { display: none !important; }
+  .study-quick-button { right: 12px !important; }
+  .study-chat-button { right: 74px !important; }
+  .study-feedback-button { right: 136px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .study-chat-button, .study-feedback-button, .study-quick-button, #studylabPetLauncher, .studylab-ai-tools-row .studylab-ai-launcher { transition: none !important; }
+}
+
+
+/* Desktop utility row: equal-width slots make the gaps truly equal. */
+@media (min-width: 721px) {
+  .study-quick-button,
+  .study-chat-button,
+  .study-feedback-button {
+    width: 112px !important;
+    min-width: 112px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    justify-content: center !important;
+  }
+  .study-quick-button { right: 20px !important; }
+  .study-chat-button { right: 144px !important; width: 46px !important; min-width: 46px !important; padding: 0 !important; gap: 0 !important; }
+  .study-chat-button > span:not(.study-chat-button-icon):not(.study-chat-unread) { display: none !important; }
+  .study-feedback-button { right: 202px !important; }
+  .study-room-page .study-chat-button { right: 144px !important; }
+}
+
+/* Light theme: solid, readable surfaces rather than relying on glow. */
+html[data-theme="light"] .study-chat-button,
+html[data-theme="light"] .study-feedback-button,
+html[data-theme="light"] .study-quick-button,
+html[data-theme="light"] #studylabPetLauncher,
+html[data-theme="light"] .studylab-ai-tools-row .studylab-ai-launcher,
+html[data-theme="light"] .theme-toggle,
+html[data-theme="light"] .profile-button {
+  background: #ffffff !important;
+  color: #17283c !important;
+  border: 1px solid #b8c8d8 !important;
+  box-shadow: 0 3px 10px rgba(28, 55, 83, .12), inset 0 1px 0 #ffffff !important;
+}
+html[data-theme="light"] .study-chat-button:hover,
+html[data-theme="light"] .study-feedback-button:hover,
+html[data-theme="light"] .study-quick-button:hover,
+html[data-theme="light"] #studylabPetLauncher:hover,
+html[data-theme="light"] .studylab-ai-tools-row .studylab-ai-launcher:hover,
+html[data-theme="light"] .theme-toggle:hover,
+html[data-theme="light"] .profile-button:hover {
+  background: #f0f7fc !important;
+  border-color: #7898b8 !important;
+  box-shadow: 0 5px 14px rgba(28, 55, 83, .16), inset 0 1px 0 #ffffff !important;
+}
+html[data-theme="light"] .study-chat-button-icon { color: #1768a8; filter: none; }
+html[data-theme="light"] .study-feedback-button-icon { color: #936200; filter: none; }
+html[data-theme="light"] .study-quick-button-icon { color: #6941a5; filter: none; }
+html[data-theme="light"] .sl-pet-launcher-icon { color: #087b65; filter: none; }
+html[data-theme="light"] .studylab-ai-tools-row .studylab-ai-launcher-icon svg { filter: none; }
+
+/* Inline vector icon system for the brand, subjects and theme/profile controls. */
+.brand-vector-icon, .header-action-icon, .theme-toggle-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.brand-vector-icon svg { width: 30px; height: 30px; fill: none; stroke: #79e5ff; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.header-action-icon svg, .theme-toggle-icon svg {
+  width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+}
+html[data-theme="light"] .brand-vector-icon svg { stroke: #1768a8; }
+.vector-card-icon svg {
+  width: 34px; height: 34px; display: block; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+}
+.card-icon.vector-card-icon {
+  color: #79e5ff;
+  filter: drop-shadow(0 0 7px rgba(75, 190, 255, .30));
+}
+.card-icon.icon-maths { color: #7fcaff; }
+.card-icon.icon-biology { color: #79e7bd; }
+.card-icon.icon-chemistry { color: #ffd27e; }
+.card-icon.icon-physics { color: #c5a5ff; }
+.card-icon.icon-computer { color: #7ddcff; }
+.card-icon.icon-document { color: #9fc4ff; }
+.card-icon.icon-brain { color: #f4a8df; }
+.card-icon.icon-books { color: #9dbbff; }
+.card-icon.icon-toolbox { color: #8ce6cf; }
+.card-icon.icon-pencil { color: #ffc98b; }
+.study-tools-card-icon.vector-card-icon { display: inline-flex; align-items: center; justify-content: center; }
+.study-tools-card-icon.vector-card-icon svg { width: 32px; height: 32px; }
+html[data-theme="light"] .card-icon.vector-card-icon {
+  filter: none; background: #f1f6fb !important; border: 1px solid #d1deea;
+}
+html[data-theme="light"] .card-icon.icon-maths { color: #1768a8; }
+html[data-theme="light"] .card-icon.icon-biology { color: #13785b; }
+html[data-theme="light"] .card-icon.icon-chemistry { color: #986100; }
+html[data-theme="light"] .card-icon.icon-physics { color: #6941a5; }
+html[data-theme="light"] .card-icon.icon-computer { color: #1768a8; }
+html[data-theme="light"] .card-icon.icon-document { color: #285f9e; }
+html[data-theme="light"] .card-icon.icon-brain { color: #9b397e; }
+html[data-theme="light"] .card-icon.icon-books { color: #345eae; }
+html[data-theme="light"] .card-icon.icon-toolbox { color: #087b65; }
+html[data-theme="light"] .card-icon.icon-pencil { color: #94500b; }
+html[data-theme="light"] .study-tools-card-icon.vector-card-icon { color: #285f9e; }
+.theme-toggle-icon { color: #79e5ff; }
+html[data-theme="light"] .theme-toggle-icon { color: #1768a8; }
+.theme-toggle { display: inline-flex; align-items: center; gap: 8px; }
+
+
+/* Profile gender selection: compact, theme-aware square icon controls. */
+.profile-name-gender-row { display: grid !important; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: end; }
+.profile-name-entry { min-width: 0; }
+.profile-gender-field { min-width: 0; margin: 0; padding: 0; border: 0; }
+.profile-gender-field legend { margin: 0 0 8px; padding: 0; color: var(--text-secondary, #cbd5e1); font-size: .76rem; font-weight: 750; white-space: nowrap; }
+.profile-gender-options { display: flex; gap: 7px; }
+.profile-gender-choice { width: 43px; height: 43px; display: grid; place-items: center; padding: 8px; border: 1px solid rgba(140,160,185,.28); border-radius: 11px; background: rgba(120,145,175,.08); color: #53baff; cursor: pointer; transition: background .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+.profile-gender-choice svg { width: 25px; height: 25px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.profile-gender-male { color: #43b7ff; }
+.profile-gender-female { color: #ff66c4; }
+.profile-gender-choice.is-selected { background: rgba(60,175,255,.14); border-color: currentColor; box-shadow: 0 0 0 2px color-mix(in srgb, currentColor 18%, transparent), 0 0 16px color-mix(in srgb, currentColor 26%, transparent); }
+.profile-gender-female.is-selected { background: rgba(255,75,180,.12); }
+.profile-gender-choice:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+html[data-theme="light"] .profile-gender-field legend { color: #40556b; }
+html[data-theme="light"] .profile-gender-choice { background: #fff; border-color: rgba(55,85,115,.24); }
+html[data-theme="light"] .profile-gender-male { color: #087ac4; }
+html[data-theme="light"] .profile-gender-female { color: #c0278d; }
+html[data-theme="light"] .profile-gender-male.is-selected { background: #eaf6ff; }
+html[data-theme="light"] .profile-gender-female.is-selected { background: #fff0f8; }
+@media(max-width:520px) { .profile-name-gender-row { grid-template-columns: minmax(0,1fr) auto; gap: 8px; } .profile-gender-choice { width: 40px; height: 42px; } }
+@media(prefers-reduced-motion:reduce) { .profile-gender-choice { transition: none; } }
+
+/* Study Room profile icons. */
+.room-avatar-gender { display: grid; place-items: center; }
+.room-avatar-gender svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.room-avatar-male { color: #43b7ff; background: rgba(35, 160, 255, .12); border: 1px solid rgba(67, 183, 255, .25); }
+.room-avatar-female { color: #ff66c4; background: rgba(255, 75, 180, .12); border: 1px solid rgba(255, 102, 196, .25); }
+html[data-theme="light"] .room-avatar-male { color: #087ac4; background: #eaf6ff; border-color: #b6dfff; }
+html[data-theme="light"] .room-avatar-female { color: #c0278d; background: #fff0f8; border-color: #f6c1e1; }
+@media (min-width: 721px) {
+  .study-chat-button { width: 46px !important; min-width: 46px !important; padding: 0 !important; gap: 0 !important; }
+  .study-chat-button > span:not(.study-chat-button-icon):not(.study-chat-unread) { display: none !important; }
+  .study-room-page .study-chat-button { right: 144px !important; }
+}
+
+
+/* Ensure the Live Study Room chat launcher remains visible beside Quick Access. */
+body.study-room-page .study-chat-button {
+  position: fixed !important;
+  right: 144px !important;
+  bottom: 20px !important;
+  z-index: 960 !important;
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+@media (max-width: 720px) {
+  body.study-room-page .study-chat-button {
+    right: 74px !important;
+    bottom: 12px !important;
+    width: 46px !important;
+    min-width: 46px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    padding: 0 !important;
+    justify-content: center !important;
+    gap: 0 !important;
+  }
+  body.study-room-page .study-chat-button > span:not(.study-chat-button-icon):not(.study-chat-unread) {
+    display: none !important;
+  }
+}
+
+
+/* Study Room: keep the chat launcher visible once chat.js injects it. */
+body.study-room-page .study-chat {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+body.study-room-page .study-chat-button {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: fixed !important;
+  right: 144px !important;
+  bottom: 20px !important;
+  z-index: 1200 !important;
+}
+@media (max-width: 720px) {
+  body.study-room-page .study-chat-button {
+    right: 74px !important;
+    bottom: 12px !important;
+  }
+}
+
+
+/* Study Room: show both the chat icon and its text label on desktop and mobile. */
+body.study-room-page .study-chat-button {
+  right: 20px !important;
+  width: auto !important;
+  min-width: 104px !important;
+  height: 46px !important;
+  min-height: 46px !important;
+  padding: 0 16px !important;
+  gap: 8px !important;
+  justify-content: center !important;
+  border-radius: 999px !important;
+  white-space: nowrap !important;
+}
+body.study-room-page .study-chat-button > span:not(.study-chat-button-icon):not(.study-chat-unread) {
+  display: inline !important;
+}
+body.study-room-page .study-chat-button .study-chat-button-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 auto !important;
+}
+body.study-room-page .study-chat-button .study-chat-button-icon svg {
+  display: block !important;
+}
+@media (max-width: 720px) {
+  body.study-room-page .study-chat-button {
+    right: 12px !important;
+    width: auto !important;
+    min-width: 104px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    padding: 0 14px !important;
+    gap: 8px !important;
+    bottom: 12px !important;
+  }
+  body.study-room-page .study-chat-button > span:not(.study-chat-button-icon):not(.study-chat-unread) {
+    display: inline !important;
+  }
+}
