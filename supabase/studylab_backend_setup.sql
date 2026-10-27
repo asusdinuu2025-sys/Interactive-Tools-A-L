@@ -6,7 +6,7 @@
 --   1) anonymous/cloud student profiles
 --   2) cloud favorites
 --   3) cloud study progress
---   4) the 24-hour / 50-message chat
+--   4) a shared chat retaining only the latest 100 messages
 --
 -- IMPORTANT:
 -- Enable Anonymous Sign-Ins in:
@@ -181,13 +181,11 @@ drop policy if exists "StudyLab chat read recent messages"
 drop policy if exists "StudyLab chat read recent authenticated messages"
   on public.studylab_chat_messages;
 
-create policy "StudyLab chat read recent authenticated messages"
+create policy "StudyLab chat read latest 100 messages"
   on public.studylab_chat_messages
   for select
   to authenticated
-  using (
-    created_at > now() - interval '24 hours'
-  );
+  using (true);
 
 drop policy if exists "StudyLab chat insert messages"
   on public.studylab_chat_messages;
@@ -215,14 +213,11 @@ set search_path = public
 as $$
 begin
   delete from public.studylab_chat_messages
-  where created_at < now() - interval '24 hours';
-
-  delete from public.studylab_chat_messages
   where id in (
     select id
     from public.studylab_chat_messages
     order by created_at desc, id desc
-    offset 50
+    offset 100
   );
 end;
 $$;
@@ -268,7 +263,7 @@ select public.cleanup_studylab_chat();
 
 -- =========================================================
 -- SERVER-SIDE CHAT RATE LIMIT
--- Protects the temporary chat even if client-side throttling
+-- Protects the shared study chat even if client-side throttling
 -- is bypassed.
 -- =========================================================
 
