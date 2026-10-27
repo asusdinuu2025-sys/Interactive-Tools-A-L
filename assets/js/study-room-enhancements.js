@@ -15,44 +15,9 @@ function init(){
    let savedTheme='midnight-blue',savedMode='system';
    try{const value=localStorage.getItem(themeKey);if(allowed.has(value))savedTheme=value;else if(legacy[value])savedTheme=legacy[value];const mode=localStorage.getItem(modeKey);if(['light','dark','system'].includes(mode))savedMode=mode;}catch(_){}
    const modeButtons=[...document.querySelectorAll('[data-room-mode-choice]')];
-    const glowKey='studylab-profile-neon-colour-v1';
-    const glowColours={cyan:['#45ddff','#087da0'],violet:['#b79aff','#7040c7'],emerald:['#55edb0','#08794e'],amber:['#ffd166','#9a5b00'],rose:['#ff83c8','#b21b70']};
-    const applyGlow=(value,save=true)=>{
-     const key=glowColours[value]?value:'cyan',colours=glowColours[key];
-     document.documentElement.style.setProperty('--studylab-profile-glow-dark',colours[0]);
-     document.documentElement.style.setProperty('--studylab-profile-glow-light',colours[1]);
-     document.documentElement.dataset.studylabGlow=key;
-     menu.querySelectorAll('[data-studylab-glow-choice]').forEach(button=>{const selected=button.dataset.studylabGlowChoice===key;button.setAttribute('aria-pressed',String(selected));button.classList.toggle('is-selected',selected);});
-     if(save){try{localStorage.setItem(glowKey,key);}catch(_){}}
-     if(save)document.dispatchEvent(new CustomEvent('studylab:glow-colour-change',{detail:{colour:key}}));
-    };
-    const glowSection=document.createElement('div');
-    glowSection.className='slr-glow-picker';
-    glowSection.setAttribute('role','group');
-    glowSection.setAttribute('aria-label','Profile neon glow colour');
-    glowSection.innerHTML='<div class="slr-glow-title">Profile neon glow</div><div class="slr-glow-options"></div>';
-    const glowStyle=document.createElement('style');
-    glowStyle.textContent=`
-      .slr-glow-picker{padding:12px 14px;border-top:1px solid var(--card-border,rgba(127,148,175,.18))}
-      .slr-glow-title{margin-bottom:9px;font-size:.76rem;font-weight:800;color:var(--text-secondary)}
-      .slr-glow-options{display:flex;flex-wrap:wrap;gap:8px}
-      .slr-glow-choice{display:inline-flex;align-items:center;gap:6px;padding:6px 8px;border:1px solid var(--card-border,rgba(127,148,175,.22));border-radius:999px;background:var(--card-bg,rgba(127,148,175,.07));color:var(--text-primary);font:inherit;font-size:.72rem;cursor:pointer}
-      .slr-glow-choice:before{content:"";width:10px;height:10px;border-radius:50%;background:var(--swatch);box-shadow:0 0 8px var(--swatch)}
-      .slr-glow-choice.is-selected{border-color:var(--swatch);box-shadow:0 0 0 1px var(--swatch)}
-      .room-avatar.slr-own-avatar{position:relative;isolation:isolate;overflow:visible}
-      .room-avatar.slr-own-avatar.is-studying:after{content:"";position:absolute;z-index:-1;inset:-5px;border-radius:inherit;padding:2px;background:conic-gradient(from 0deg,transparent 0 28%,var(--studylab-profile-glow-dark,#45ddff) 44%,var(--studylab-profile-glow-dark,#45ddff) 52%,transparent 68% 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;filter:drop-shadow(0 0 4px var(--studylab-profile-glow-dark,#45ddff));animation:slr-neon-orbit 2.6s linear infinite;pointer-events:none}
-      html[data-theme="light"] .room-avatar.slr-own-avatar.is-studying:after,body[data-room-mode="light"] .room-avatar.slr-own-avatar.is-studying:after{background:conic-gradient(from 0deg,transparent 0 28%,var(--studylab-profile-glow-light,#087da0) 44%,var(--studylab-profile-glow-light,#087da0) 52%,transparent 68% 100%);filter:drop-shadow(0 0 3px var(--studylab-profile-glow-light,#087da0))}
-      @keyframes slr-neon-orbit{to{transform:rotate(360deg)}}
-      @media(prefers-reduced-motion:reduce){.room-avatar.slr-own-avatar.is-studying:after{animation:none!important}}
-    `;
+    const glowStyle=document.createElement("style");
+    glowStyle.textContent='.room-avatar.slr-neon-avatar{position:relative;isolation:isolate;overflow:visible} .room-avatar.slr-neon-avatar:after{content:"";position:absolute;z-index:2;inset:-5px;border-radius:inherit;padding:2px;background:conic-gradient(from 0deg,transparent 0 28%,var(--slr-neon-dark,#45ddff) 44%,var(--slr-neon-dark,#45ddff) 52%,transparent 68% 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;filter:drop-shadow(0 0 4px var(--slr-neon-dark,#45ddff));animation:slr-neon-orbit 2.6s linear infinite;pointer-events:none} html[data-theme="light"] .room-avatar.slr-neon-avatar:after,body[data-room-mode="light"] .room-avatar.slr-neon-avatar:after{background:conic-gradient(from 0deg,transparent 0 28%,var(--slr-neon-light,#087da0) 44%,var(--slr-neon-light,#087da0) 52%,transparent 68% 100%);filter:drop-shadow(0 0 3px var(--slr-neon-light,#087da0))} @keyframes slr-neon-orbit{to{transform:rotate(360deg)}} @media(prefers-reduced-motion:reduce){.room-avatar.slr-neon-avatar:after{animation:none!important}}';
     document.head.appendChild(glowStyle);
-    Object.entries({cyan:'Cyan',violet:'Violet',emerald:'Emerald',amber:'Amber',rose:'Rose'}).forEach(([key,label])=>{
-     const button=document.createElement('button');button.type='button';button.className='slr-glow-choice';button.dataset.studylabGlowChoice=key;button.style.setProperty('--swatch',glowColours[key][0]);button.textContent=label;button.setAttribute('aria-pressed','false');button.addEventListener('click',()=>applyGlow(key));glowSection.querySelector('.slr-glow-options').append(button);
-    });
-    menu.append(glowSection);
-    let savedGlow='cyan';try{const value=localStorage.getItem(glowKey);if(glowColours[value])savedGlow=value;}catch(_){}
-    applyGlow(savedGlow,false);
-    window.addEventListener('studylab:glow-colour-change',event=>applyGlow(event.detail?.colour||'cyan',false));
    let systemQuery=null;
    try{systemQuery=window.matchMedia('(prefers-color-scheme: dark)');}catch(_){}
    const close=()=>{menu.hidden=true;trigger.setAttribute('aria-expanded','false');};
