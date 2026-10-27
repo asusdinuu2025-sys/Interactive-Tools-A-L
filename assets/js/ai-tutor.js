@@ -201,10 +201,19 @@
           32000
         );
 
+        const account = window.StudyLabAccount;
+        if (!account?.ready) throw new Error("StudyLab student account is unavailable.");
+        await account.ready;
+        const { data: sessionData, error: sessionError } = await account.client.auth.getSession();
+        if (sessionError) throw sessionError;
+        const accessToken = sessionData?.session?.access_token;
+        if (!accessToken) throw new Error("Please refresh StudyLab to reconnect your student account.");
+
         const response = await fetch(CONFIG.endpoint, {
           method: "POST",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + accessToken
           },
           body: JSON.stringify({
             message,
@@ -244,7 +253,7 @@
 
         if (Number(data?.remaining) === 0) {
           lockedForLimit = true;
-          setStatus("ready", "Daily AI limit reached");
+          setStatus("ready", "Weekly AI limit reached");
         } else {
           setStatus("ready", "A/L study assistant");
         }
@@ -255,13 +264,13 @@
           if (isOpen) {
             setStatus("error", "Request cancelled");
           }
-        } else if (error?.code === "DAILY_LIMIT") {
+        } else if (error?.code === "WEEKLY_LIMIT") {
           lockedForLimit = true;
           appendMessage(
             "model",
-            "Daily AI limit reached. Please try again after the daily limit resets."
+            "Your StudyLab AI weekly limit has been reached. It resets every Monday at midnight Sri Lanka time."
           );
-          setStatus("error", "Daily AI limit reached");
+          setStatus("error", "Weekly AI limit reached");
         } else if (error?.code === "PROVIDER_LIMIT") {
           lockedForLimit = true;
           appendMessage(
