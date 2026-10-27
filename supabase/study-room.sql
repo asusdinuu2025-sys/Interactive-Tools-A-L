@@ -44,23 +44,56 @@ end $$;
 revoke insert, update, delete on public.study_room_members from anon, authenticated;
 grant select on public.study_room_members to authenticated;
 
--- Expose the existing profile display_name alongside live room stats.
--- security_invoker keeps the underlying RLS policies in force.
+-- Expose only the display name needed by the live room. The helper is
+-- outside the exposed public schema, uses a fixed search_path, and only returns
+-- a name for an existing room member.
+create schema if not exists study_room_private;
+revoke all on schema study_room_private from public, anon;
+grant usage on schema study_room_private to authenticated;
+
+create or replace function study_room_private.display_name_for_member(p_user_id uuid)
+returns text
+language sql
+stable
+security definer
+set search_path = ''
+as $function$
+  select coalesce(
+    (select nullif(p.display_name, '')
+     from public.studylab_profiles p
+     where p.id = p_user_id),
+    'Student'
+  )
+  where exists (
+    select 1
+    from public.study_room_members m
+    where m.user_id = p_user_id
+  );
+$function$;
+
+revoke all on function study_room_private.display_name_for_member(uuid) from public, anon;
+grant execute on function study_room_private.display_name_for_member(uuid) to authenticated;
+
+-- SECURITY INVOKER keeps the room-members RLS policy in force.
 create or replace view public.study_room_live
-with (security_invoker = false) as
+with (security_invoker = true) as
 select m.user_id,
-       coalesce(nullif(p.display_name, ''), 'Student') as display_name,
+       study_room_private.display_name_for_member(m.user_id) as display_name,
        m.subject, m.is_studying, m.session_started_at, m.last_heartbeat_at,
        m.today_seconds, m.today_date, m.week_seconds, m.week_start, m.updated_at
-from public.study_room_members m
-left join public.studylab_profiles p on p.id = m.user_id;
+from public.study_room_members m;
 
+revoke all on public.study_room_live from public, anon, authenticated;
 grant select on public.study_room_live to authenticated;
 
 create or replace function public.study_room_local_week_start(d date)
-returns date language sql immutable as $$
+returns date
+language sql
+immutable
+set search_path = ''
+as $function$
   select d - (extract(isodow from d)::int - 1);
-$$;
+$function$;
 
 create or replace function public.study_room_ensure_profile()
 returns void language plpgsql security definer set search_path = public as $$
