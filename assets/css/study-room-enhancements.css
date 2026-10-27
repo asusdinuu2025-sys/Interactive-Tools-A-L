@@ -1,0 +1,61 @@
+/* StudyLab Live Study Room premium additions.
+   Intentionally isolated in slr-* selectors; existing components and logic remain intact. */
+.slr-enhancements{margin-top:18px}
+.slr-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:18px;padding:12px 14px;border:1px solid rgba(126,220,255,.16);border-radius:16px;background:rgba(8,17,32,.25)}
+.slr-toolbar-copy{display:flex;flex-direction:column;gap:3px}
+.slr-toolbar-copy strong{font-size:.84rem}
+.slr-toolbar-copy span{font-size:.73rem;color:var(--text-muted)}
+.slr-theme-select{max-width:100%;min-height:40px;padding:8px 34px 8px 12px;border:1px solid rgba(126,220,255,.24);border-radius:11px;background:var(--bg-mid,#101b2b);color:var(--text-primary,#eef5ff);font:inherit;font-size:.82rem}
+.slr-focus-card{margin-top:15px;padding:15px;border:1px solid rgba(126,220,255,.16);border-radius:17px;background:linear-gradient(130deg,rgba(126,220,255,.055),rgba(114,230,194,.055))}
+.slr-focus-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
+.slr-focus-head strong{display:block;font-size:.9rem}
+.slr-focus-head small,.slr-focus-note{display:block;color:var(--text-muted);font-size:.72rem;line-height:1.5}
+.slr-focus-mode{padding:4px 8px;border-radius:99px;background:rgba(114,230,194,.1);color:#72e6c2;font-size:.68rem;font-weight:800;white-space:nowrap}
+.slr-focus-clock{font-size:clamp(2rem,5vw,2.65rem);font-weight:850;letter-spacing:-.045em;font-variant-numeric:tabular-nums;text-align:center;margin:7px 0}
+.slr-focus-track{height:5px;border-radius:99px;background:rgba(120,135,160,.2);overflow:hidden}
+.slr-focus-track span{display:block;width:100%;height:100%;border-radius:inherit;background:linear-gradient(90deg,#26b98d,#72e6c2);transition:width .35s linear}
+.slr-focus-actions{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:12px}
+.slr-focus-actions button{min-height:38px;padding:8px 12px;border:1px solid rgba(126,220,255,.2);border-radius:10px;background:rgba(126,220,255,.07);color:var(--text-primary);font:inherit;font-size:.78rem;font-weight:750;transition:transform .18s,border-color .18s}
+.slr-focus-actions button:hover{transform:translateY(-1px);border-color:rgba(114,230,194,.5)}
+.slr-focus-actions .slr-focus-primary{background:linear-gradient(135deg,#26b98d,#168b78);border-color:transparent;color:white}
+.slr-achievements{margin-top:18px}
+.slr-achievements .room-panel-head{margin-bottom:13px}
+.slr-achievement-summary{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.slr-streak-orb{width:58px;height:58px;display:grid;place-items:center;flex:0 0 auto;border-radius:18px;background:linear-gradient(145deg,rgba(255,174,75,.18),rgba(255,95,95,.08));border:1px solid rgba(255,174,75,.24);font-size:1.7rem}
+.slr-streak-copy{flex:1;min-width:150px}
+.slr-streak-copy strong{display:block;font-size:1rem}
+.slr-streak-copy span{display:block;color:var(--text-muted);font-size:.76rem;margin-top:3px}
+.slr-progress-label{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0 8px;font-size:.78rem}
+.slr-progress-label span:last-child{color:var(--text-muted);font-variant-numeric:tabular-nums}
+.slr-achievement-track{height:9px;border-radius:99px;overflow:hidden;background:rgba(120,135,160,.18)}
+.slr-achievement-track span{display:block;height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,#8c7cff,#72e6c2);transition:width .45s ease}
+.slr-badges{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
+.slr-badge{min-width:0;padding:12px 10px;border:1px solid rgba(126,220,255,.12);border-radius:14px;background:rgba(126,220,255,.035);opacity:.58;transition:transform .2s,border-color .2s,opacity .2s}
+.slr-badge.is-earned{opacity:1;border-color:rgba(114,230,194,.32);background:rgba(49,208,160,.065)}
+.slr-badge:hover{transform:translateY(-2px)}
+.slr-badge-icon{font-size:1.35rem;display:block;margin-bottom:5px}
+.slr-badge strong{display:block;font-size:.76rem;overflow-wrap:anywhere}
+.slr-badge small{display:block;margin-top:4px;color:var(--text-muted);font-size:.67rem;line-height:1.4}
+.slr-small-note{margin:12px 0 0;color:var(--text-muted);font-size:.7rem;line-height:1.5}
+#leaderboardList .room-rank{transition:transform .2s,border-color .2s,box-shadow .2s}
+#leaderboardList .room-rank.slr-podium-1{border-color:rgba(255,204,92,.38);background:linear-gradient(100deg,rgba(255,204,92,.09),rgba(255,255,255,.025));box-shadow:inset 0 0 0 1px rgba(255,204,92,.035)}
+#leaderboardList .room-rank.slr-podium-2{border-color:rgba(191,207,231,.25)}
+#leaderboardList .room-rank.slr-podium-3{border-color:rgba(204,143,98,.24)}
+#leaderboardList .room-avatar.slr-crown-avatar{position:relative;outline:2px solid rgba(255,204,92,.7);outline-offset:2px;box-shadow:0 0 18px rgba(255,204,92,.13)}
+#leaderboardList .room-avatar.slr-crown-avatar:after{content:attr(data-slr-crown);position:absolute;right:-8px;top:-11px;width:20px;height:20px;display:grid;place-items:center;border-radius:50%;background:#f6ca62;color:#34250a;border:2px solid var(--bg-dark,#0b1220);font-size:11px;font-weight:900;line-height:1}
+#leaderboardList .room-rank-info .slr-leader-title{display:inline-block;margin:4px 0 0;padding:2px 7px;border-radius:99px;background:rgba(255,204,92,.12);color:#e9bd54;font-size:.63rem;font-weight:850;letter-spacing:.03em}
+body.slr-theme-warm{background-color:#17140f}
+body.slr-theme-warm .room-hero,body.slr-theme-warm .room-panel{background:linear-gradient(135deg,rgba(57,43,28,.91),rgba(35,31,27,.92));border-color:rgba(255,205,135,.2);color:#fff3df}
+body.slr-theme-warm .room-stat,body.slr-theme-warm .room-person-card,body.slr-theme-warm .room-rank{background:rgba(255,205,135,.055);border-color:rgba(255,205,135,.13)}
+body.slr-theme-warm .room-field,body.slr-theme-warm .room-theme-select,body.slr-theme-warm .slr-theme-select{background:#30271d;color:#fff3df;border-color:rgba(255,205,135,.25)}
+body.slr-theme-warm .room-kicker,body.slr-theme-warm .room-live,body.slr-theme-warm .room-person-status{color:#b9e2b0}
+body.slr-theme-warm .slr-toolbar,body.slr-theme-warm .slr-focus-card,body.slr-theme-warm .slr-achievement-track{border-color:rgba(255,205,135,.18);background-color:rgba(255,205,135,.045)}
+body.slr-theme-light{background-color:#eef3fa;color:#17233b}
+body.slr-theme-light .room-hero,body.slr-theme-light .room-panel{background:linear-gradient(135deg,rgba(255,255,255,.97),rgba(243,248,255,.96));border-color:rgba(60,90,130,.15);color:#17233b;box-shadow:0 18px 48px rgba(33,55,90,.08)}
+body.slr-theme-light .room-stat,body.slr-theme-light .room-person-card,body.slr-theme-light .room-rank{background:rgba(69,104,150,.045);border-color:rgba(60,90,130,.12)}
+body.slr-theme-light .room-field,body.slr-theme-light .slr-theme-select{background:#fff;color:#17233b;border-color:rgba(60,90,130,.2)}
+body.slr-theme-light .room-hero p,body.slr-theme-light .room-stat span,body.slr-theme-light .room-person-card-subject,body.slr-theme-light .room-person-card-time-label,body.slr-theme-light .room-rank-info span,body.slr-theme-light .room-footer-note,body.slr-theme-light .slr-small-note,body.slr-theme-light .slr-toolbar-copy span,body.slr-theme-light .slr-focus-head small,body.slr-theme-light .slr-focus-note,body.slr-theme-light .slr-streak-copy span,body.slr-theme-light .slr-badge small{color:#68758b}
+body.slr-theme-light .slr-toolbar,body.slr-theme-light .slr-focus-card,body.slr-theme-light .slr-badge{background:rgba(76,112,160,.045);border-color:rgba(60,90,130,.14)}
+body.slr-theme-light .slr-focus-actions button{color:#17233b;background:#edf3fa;border-color:rgba(60,90,130,.17)}
+@media(max-width:520px){.slr-toolbar{align-items:stretch}.slr-theme-select{width:100%}.slr-badges{grid-template-columns:1fr}.slr-badge{display:grid;grid-template-columns:30px minmax(0,1fr);column-gap:8px;align-items:center;padding:10px}.slr-badge-icon{grid-row:span 2;margin:0}.slr-badge small{margin-top:2px}}
+@media(prefers-reduced-motion:reduce){.slr-focus-track span,.slr-achievement-track span,.slr-badge,#leaderboardList .room-rank,#leaderboardList .room-avatar.slr-crown-avatar{transition:none!important}}
