@@ -86,25 +86,22 @@ function init(){
   if(!board)return;
   const period=document.getElementById('dailyBoardTab')?.classList.contains('active')?'Today':'This week';
   const rankedRows=[...board.querySelectorAll('.room-rank')];
-  let king=null,queen=null;
+  let winner=null,winnerScore=0;
   rankedRows.forEach((row,i)=>{
    row.classList.remove('slr-podium-1','slr-podium-2','slr-podium-3');
    if(i<3)row.classList.add('slr-podium-'+(i+1));
-   const avatar=row.querySelector('.room-avatar');
-   if(!avatar)return;
-   if(avatar.classList.contains('room-avatar-male')&&!king)king=row;
-   if(avatar.classList.contains('room-avatar-female')&&!queen)queen=row;
+   const time=row.querySelector('.room-time')?.textContent.trim()||'';
+   const match=time.match(/^(\d+):(\d{2}):(\d{2})$/);
+   const score=match?Number(match[1])*3600+Number(match[2])*60+Number(match[3]):0;
+   if(!winner&&score>0){winner=row;winnerScore=score;}
   });
-  const winners=new Map();
-  if(king)winners.set(king,'male');
-  if(queen)winners.set(queen,'female');
   rankedRows.forEach(row=>{
    const avatar=row.querySelector('.room-avatar');
    const info=row.querySelector('.room-rank-info');
    if(!avatar||!info)return;
-   const gender=winners.get(row);
    let title=info.querySelector('.slr-leader-title');
-   if(!gender){
+   const gender=avatar.classList.contains('room-avatar-female')?'female':avatar.classList.contains('room-avatar-male')?'male':'';
+   if(row!==winner||winnerScore<=0||!gender){
     avatar.classList.remove('slr-crown-avatar');
     avatar.removeAttribute('data-slr-crown');
     title?.remove();
@@ -112,10 +109,10 @@ function init(){
    }
    const isQueen=gender==='female';
    const crown=isQueen?'♕':'♛';
-   const label=(isQueen?'Study Queen':'Study King')+' · '+period+' leader';
+   const label=isQueen?'Study Queen · '+period+' leader':'Study King · '+period+' leader';
    avatar.classList.add('slr-crown-avatar');
-   if(avatar.getAttribute('data-slr-crown')!==crown)avatar.setAttribute('data-slr-crown',crown);
-   if(avatar.getAttribute('aria-label')!==label)avatar.setAttribute('aria-label',label);
+   avatar.setAttribute('data-slr-crown',crown);
+   avatar.setAttribute('aria-label',label);
    if(!title){title=document.createElement('span');title.className='slr-leader-title';info.append(title);}
    if(title.textContent!==label)title.textContent=label;
   });
