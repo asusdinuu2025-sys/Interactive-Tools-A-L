@@ -20,28 +20,6 @@
   const goalText = $('goalProgressText');
   const people = $('peopleGrid');
   const board = $('leaderboardList');
-  // Give scrollable panels a small elastic response when a wheel gesture hits an edge.
-  function addRubberBandFeedback(element) {
-    if (!element) return;
-    element.addEventListener('wheel', event => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !event.deltaY) return;
-      const maxScroll = Math.max(0, element.scrollHeight - element.clientHeight);
-      const atTop = element.scrollTop <= 0;
-      const atBottom = element.scrollTop >= maxScroll - 1;
-      const pullingPastEdge = (atTop && event.deltaY < 0) || (atBottom && event.deltaY > 0);
-      if (!pullingPastEdge) return;
-      event.preventDefault();
-      const edgeClass = event.deltaY < 0 ? 'rubberband-top' : 'rubberband-bottom';
-      element.classList.remove('rubberband-top', 'rubberband-bottom');
-      void element.offsetWidth;
-      element.classList.add(edgeClass);
-    }, {passive: false});
-    element.addEventListener('animationend', event => {
-      if (event.target === element) element.classList.remove('rubberband-top', 'rubberband-bottom');
-    });
-  }
-  addRubberBandFeedback(people);
-  addRubberBandFeedback(board);
   const dailyTab = $('dailyBoardTab');
   const weeklyTab = $('weeklyBoardTab');
   let client, userId = null, member = null, rows = [], interval = null;
