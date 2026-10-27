@@ -51,6 +51,65 @@
     if (profileClose) { profileClose.hidden = mandatoryProfile; profileClose.disabled = mandatoryProfile; }
   }
 
+  function showStudyRoomGateToast() {
+    const toastId = "studyRoomProfileGateToast";
+    document.getElementById(toastId)?.remove();
+
+    const styleId = "studyRoomProfileGateToastStyle";
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement("style");
+      style.id = styleId;
+      style.textContent = `
+        #studyRoomProfileGateToast {
+          position: fixed;
+          z-index: 1200;
+          top: max(18px, env(safe-area-inset-top));
+          left: 50%;
+          transform: translate(-50%, -10px);
+          width: max-content;
+          max-width: min(92vw, 420px);
+          padding: 12px 17px;
+          border: 1px solid rgba(126, 220, 255, .32);
+          border-radius: 14px;
+          background: rgba(15, 28, 46, .96);
+          color: #f3f8ff;
+          box-shadow: 0 14px 38px rgba(0, 0, 0, .28);
+          font: 600 14px/1.45 system-ui, sans-serif;
+          text-align: center;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity .22s ease, transform .22s ease;
+        }
+        #studyRoomProfileGateToast.is-visible {
+          opacity: 1;
+          transform: translate(-50%, 0);
+        }
+        html[data-theme="light"] #studyRoomProfileGateToast {
+          background: rgba(255, 255, 255, .98);
+          color: #17243a;
+          border-color: rgba(70, 110, 145, .24);
+          box-shadow: 0 14px 38px rgba(35, 70, 105, .18);
+        }
+        @media (prefers-reduced-motion: reduce) {
+          #studyRoomProfileGateToast { transition: none; }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    const toast = document.createElement("div");
+    toast.id = toastId;
+    toast.setAttribute("role", "status");
+    toast.setAttribute("aria-live", "polite");
+    toast.textContent = "To enter study room complete the profile.";
+    document.body.appendChild(toast);
+    window.requestAnimationFrame(() => toast.classList.add("is-visible"));
+    window.setTimeout(() => {
+      toast.classList.remove("is-visible");
+      window.setTimeout(() => toast.remove(), 260);
+    }, 3600);
+  }
+
   function setButtonProfile(p) {
     if (isBasicComplete(p)) {
       profileButton.textContent = "👤 " + p.display_name;
@@ -345,7 +404,10 @@
       const returnTo = params.get("returnTo") || "";
       requireFullProfile = params.get("completeProfile") === "1" &&
         returnTo.startsWith("/study-room.html") && !returnTo.startsWith("//") && !returnTo.includes("\\");
-      if (requireFullProfile ? !isFullComplete(p) : !isBasicComplete(p)) {
+      if (requireFullProfile && !isFullComplete(p)) {
+        await openModal();
+        showStudyRoomGateToast();
+      } else if (!requireFullProfile && !isBasicComplete(p)) {
         await openModal();
       }
     } catch (error) {
