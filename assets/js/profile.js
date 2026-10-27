@@ -20,16 +20,34 @@
   const profileDialog = profileModal.querySelector(".profile-dialog");
   const profileFields = [profileInput, profileSchool, profilePhone, profileExamYear, profileStream];
   let closeTimer = null;
-  let mandatoryProfile = true;
+  let mandatoryProfile = false;
+  let requireFullProfile = false;
 
   const profileClose = document.getElementById("profileClose");
+  const profileSkip = document.getElementById("profileSkip");
 
   if (!profileButton || !profileModal || !profileForm || !profileInput) return;
 
   const placeholderName = name => /^Student\d{4}$/.test(String(name || ""));
-  const isComplete = p => Boolean(p?.profile_completed_at && p?.display_name &&
-    !placeholderName(p.display_name) && String(p.school || "").trim() && String(p.phone || "").trim() &&
-    p?.exam_year && p?.study_stream && ["male", "female"].includes(p?.gender));
+  const isBasicComplete = p => Boolean(p?.display_name && !placeholderName(p.display_name) &&
+    p?.exam_year && p?.study_stream);
+  const isFullComplete = p => Boolean(p?.profile_completed_at && isBasicComplete(p) &&
+    String(p.school || "").trim() && String(p.phone || "").trim() &&
+    ["male", "female"].includes(p?.gender));
+  const isComplete = isFullComplete;
+
+  function updateRequiredFields() {
+    profileSchool.required = mandatoryProfile;
+    profilePhone.required = mandatoryProfile;
+    const schoolLabel = document.querySelector('label[for="profileSchool"]');
+    const phoneLabel = document.querySelector('label[for="profilePhone"]');
+    const genderLegend = document.querySelector(".profile-gender-field legend");
+    if (schoolLabel) schoolLabel.innerHTML = mandatoryProfile ? 'School <span aria-hidden="true">*</span>' : 'School <span class="profile-optional">Optional</span>';
+    if (phoneLabel) phoneLabel.innerHTML = mandatoryProfile ? 'Mobile number <span aria-hidden="true">*</span>' : 'Mobile number <span class="profile-optional">Optional</span>';
+    if (genderLegend) genderLegend.innerHTML = mandatoryProfile ? 'Profile icon <span aria-hidden="true">*</span>' : 'Profile icon <span class="profile-optional">Optional</span>';
+    if (profileClose) { profileClose.hidden = mandatoryProfile; profileClose.disabled = mandatoryProfile; }
+    if (profileSkip) profileSkip.hidden = mandatoryProfile;
+  }
 
   function setButtonProfile(p) {
     if (isComplete(p)) {
@@ -81,12 +99,12 @@
     profileStatus.textContent = "";
     profileStatus.dataset.state = "success";
     profileButton.disabled = true;
-    mandatoryProfile = true;
-    if (profileClose) { profileClose.hidden = true; profileClose.disabled = true; }
+    mandatoryProfile = requireFullProfile;
+    updateRequiredFields();
     try {
       const p = await getCloudProfile(true);
-      mandatoryProfile = !isComplete(p);
-      if (profileClose) { profileClose.hidden = mandatoryProfile; profileClose.disabled = mandatoryProfile; }
+      mandatoryProfile = requireFullProfile && !isFullComplete(p);
+      updateRequiredFields();
       fillForm(p);
       updateCopy(p);
       setButtonProfile(p);
@@ -175,6 +193,7 @@
 
   profileButton.addEventListener("click", openModal);
   profileClose?.addEventListener("click", closeModal);
+  profileSkip?.addEventListener("click", closeModal);
   profileModal.addEventListener("click", event => {
     if (event.target === profileModal) closeModal();
   });
@@ -198,14 +217,19 @@
     }
     const school = profileSchool.value.trim().replace(/\s+/g, " ");
     const phone = profilePhone.value.trim();
-    if (school.length < 2) {
+    if (mandatoryProfile && school.length < 2) {
       showStatus("Please enter your school name.", true);
       profileSchool.focus();
       return;
     }
     const phoneDigits = phone.replace(/\D/g, "");
-    if (phoneDigits.length < 9 || phoneDigits.length > 12) {
+    if (phone && (phoneDigits.length < 9 || phoneDigits.length > 12)) {
       showStatus("Please enter a valid mobile number (9–12 digits, including country code if used).", true);
+      profilePhone.focus();
+      return;
+    }
+    if (mandatoryProfile && !phone) {
+      showStatus("Please enter your mobile number.", true);
       profilePhone.focus();
       return;
     }
@@ -214,7 +238,7 @@
       return;
     }
 
-    if (!["male", "female"].includes(selectedGender)) {
+    if (mandatoryProfile && !["male", "female"].includes(selectedGender)) {
       showStatus("Please choose a profile icon.", true);
       genderButtons[0]?.focus();
       return;
@@ -231,13 +255,15 @@
         phone,
         exam_year: profileExamYear.value,
         study_stream: profileStream.value,
-        gender: selectedGender
+        gender: selectedGender,
+        require_full_profile: mandatoryProfile
       });
       fillForm(p);
       setButtonProfile(p);
       updateCopy(p);
       mandatoryProfile = false;
-      if (profileClose) { profileClose.hidden = false; profileClose.disabled = false; }
+      mandatoryProfile = false;
+      updateRequiredFields();
       showStatus("Your profile has been saved to your StudyLab account ✓");
       window.dispatchEvent(new CustomEvent("studylab-profile-updated", { detail: p }));
       window.setTimeout(() => {
@@ -264,7 +290,10 @@
       const p = await getCloudProfile();
       setButtonProfile(p);
       const params = new URLSearchParams(window.location.search);
-      if (!isComplete(p)) {
+      const returnTo = params.get("returnTo") || "";
+      requireFullProfile = params.get("completeProfile") === "1" &&
+        returnTo.startsWith("/study-room.html") && !returnTo.startsWith("//") && !returnTo.includes("\\");
+      if (requireFullProfile ? !isFullComplete(p) : !isBasicComplete(p)) {
         await openModal();
       }
     } catch (error) {
