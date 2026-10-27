@@ -8,11 +8,9 @@
   "use strict";
 
   const liveRoot = document.querySelector("[data-live-layer]");
-  if (!liveRoot) return;
-
-  const onlineNumber = liveRoot.querySelector("[data-live-online]");
-  const liveStatus = liveRoot.querySelector("[data-live-status]");
-  const countdownTarget = liveRoot.dataset.countdownTarget;
+  const onlineNumber = liveRoot?.querySelector("[data-live-online]");
+  const liveStatus = liveRoot?.querySelector("[data-live-status]");
+  const countdownTarget = liveRoot?.dataset.countdownTarget;
 
   const countdown = {
     days: liveRoot.querySelector("[data-cd-days]"),
@@ -59,14 +57,14 @@
 
     if (!Number.isFinite(count)) {
       onlineNumber.textContent = "—";
-      liveRoot.classList.remove("is-low", "is-live");
+      liveRoot?.classList.remove("is-low", "is-live");
       return;
     }
 
     const safeCount = Math.max(0, Math.floor(count));
     onlineNumber.textContent = safeCount.toLocaleString();
-    liveRoot.classList.toggle("is-low", safeCount < 2);
-    liveRoot.classList.toggle("is-live", safeCount >= 2);
+    liveRoot?.classList.toggle("is-low", safeCount < 2);
+    liveRoot?.classList.toggle("is-live", safeCount >= 2);
   }
 
   async function startPresence() {
