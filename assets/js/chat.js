@@ -6,7 +6,10 @@
 (function () {
   "use strict";
 
-  const pagePath = window.location.pathname.replace(/\\/+$/, "") || "/";\n  const isHomePage = pagePath === "/" || pagePath.endsWith("/index.html");\n  const isStudyRoomPage = pagePath.endsWith("/study-room.html");\n  if (!isHomePage && !isStudyRoomPage) return;\n\n  const CONFIG = {
+  const pagePath = window.location.pathname.replace(/\/+$/, "") || "/";
+  const isHomePage = pagePath === "/" || pagePath.endsWith("/index.html");
+  const isStudyRoomPage = pagePath.endsWith("/study-room.html");
+  if (!isHomePage && !isStudyRoomPage) return;\n\n  const CONFIG = {
     supabaseUrl: "https://zpvatyxdbshjuqgtexzw.supabase.co",
     supabasePublishableKey: "sb_publishable_zd8S3PcyicJX6Cgyh0ez8A_sUSTCuiB",
     table: "studylab_chat_messages",
@@ -178,6 +181,7 @@
 
     const article = document.createElement("article");
     article.className = "study-chat-message";
+    article.dataset.messageId = row.id;
 
     if ((row.user_id && row.user_id === userId) || (!row.user_id && row.session_id === sessionKey)) {
       article.classList.add("own");
@@ -200,7 +204,10 @@
 
     while (list.querySelectorAll(".study-chat-message").length > CONFIG.maxMessages) {
       const oldest = list.querySelector(".study-chat-message");
-      oldest?.remove();
+      if (oldest) {
+        messagesById.delete(oldest.dataset.messageId);
+        oldest.remove();
+      }
     }
   }
 
@@ -259,7 +266,8 @@
     const { data, error } = await client
       .from(CONFIG.table)
       .select("id,message,created_at,session_id,user_id,nickname")
-      .order("created_at", { ascending: true })
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
       .limit(CONFIG.maxMessages);
 
     if (error) {
@@ -269,7 +277,7 @@
       return;
     }
 
-    renderInitial(data || []);
+    renderInitial((data || []).reverse());
   }
 
   function subscribe() {
@@ -303,7 +311,7 @@
       )
       .subscribe(status => {
         if (status === "SUBSCRIBED") {
-          setStatus(true, "Live • temporary 24-hour chat");
+          setStatus(true, "Live • newest 100 messages");
         } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
           setStatus(false, "Live connection unavailable");
         }
