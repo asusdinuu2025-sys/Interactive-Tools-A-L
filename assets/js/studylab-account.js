@@ -264,16 +264,6 @@
     saveProfile
   };
 
-  // Only the shared Study Room requires the full profile. Other StudyLab pages
-  // remain accessible with a basic profile or without completing the prompt.
-  ready.then(async function () {
-    const path = window.location.pathname;
-    if (!path.endsWith("/study-room.html") && path !== "/study-room.html") return;
-    const currentProfile = await getProfile(true);
-    if (isFullProfileComplete(currentProfile)) return;
-    const returnTo = path + window.location.search + window.location.hash;
-    window.location.replace("/index.html?completeProfile=1&returnTo=" + encodeURIComponent(returnTo));
-  }).catch(function (error) {
-    console.warn("StudyLab required profile gate:", error);
-  });
+  // Study Room access is gated in place by its own blurred profile modal.
+  // Keep navigation on the Study Room page while the student completes the profile.
 })();
