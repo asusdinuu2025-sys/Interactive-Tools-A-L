@@ -25,7 +25,7 @@
         aria-controls="studyChatPanel"
         aria-label="Open StudyLab temporary chat"
       >
-        <span class="study-chat-button-icon" aria-hidden="true">💬</span>
+        <span class="study-chat-button-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5 8 8 0 0 1-3.2-.65L4 20l1.65-4.15A7.5 7.5 0 1 1 20 11.5Z"/><path d="M8 11h8M8 14h5"/></svg></span>
         <span>Chat</span>
         <span class="study-chat-unread" data-chat-unread hidden aria-label="Unread messages"></span>
       </button>
