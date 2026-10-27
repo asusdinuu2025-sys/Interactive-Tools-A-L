@@ -2478,7 +2478,7 @@
       <span class="profile-math-symbol profile-math-symbol-two">π</span>
     </div>
     <section class="profile-dialog">
-      <button type="button" class="profile-close" id="profileClose" aria-label="Close profile dialog">✕</button>
+      <button type="button" class="profile-close" id="profileClose" aria-label="Close profile dialog" hidden disabled>✕</button>
       <div class="profile-window-head">
         <div class="profile-flask-icon" aria-hidden="true">ツ</div>
         <div>
@@ -2508,15 +2508,15 @@
             </fieldset>
           </div>
           <div class="profile-field">
-            <label for="profileSchool">School <span class="profile-optional">Optional</span></label>
+            <label for="profileSchool">School <span aria-hidden="true">*</span></label>
             <input class="profile-input" id="profileSchool" name="school" type="text" maxlength="120"
-                   autocomplete="organization" placeholder="Your school name" />
+                   autocomplete="organization" placeholder="Enter your school name" required />
           </div>
           <div class="profile-field">
-            <label for="profilePhone">Phone number <span class="profile-optional">Optional</span></label>
+            <label for="profilePhone">Mobile number <span aria-hidden="true">*</span></label>
             <input class="profile-input" id="profilePhone" name="phone" type="tel" maxlength="20"
-                   autocomplete="tel" inputmode="tel" placeholder="07X XXX XXXX" />
-            <p class="profile-hint">Optional and private to your account.</p>
+                   autocomplete="tel" inputmode="tel" placeholder="07X XXX XXXX" required />
+            <p class="profile-hint">Required to complete your student profile. Enter 9–12 digits, including country code if used.</p>
           </div>
           <div class="profile-field">
             <label for="profileExamYear">A/L examination year <span aria-hidden="true">*</span></label>
