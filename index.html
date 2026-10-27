@@ -1152,8 +1152,8 @@
     #studylabLoader {
       position: fixed;
       inset: 0;
-      animation: studylabLoaderFailsafe .12s linear 4.35s forwards;
-      z-index: 10000;
+      animation: studylabLoaderFailsafe .12s linear 3.95s forwards;
+      z-index: 30000;
       display: grid;
       place-items: center;
       overflow: hidden;
@@ -1205,7 +1205,7 @@
       opacity: 0;
       z-index: 4;
       filter: drop-shadow(0 0 10px rgba(72, 226, 255, .16));
-      animation: loaderFlaskIn .72s ease-out .06s forwards;
+      animation: loaderFlaskIn .65s ease-out .05s forwards;
     }
 
     .studylab-loader-flask svg,
@@ -1286,7 +1286,7 @@
       opacity: 0;
       z-index: 7;
       filter: drop-shadow(0 0 7px rgba(145, 237, 255, .18));
-      animation: loaderDropperAction 1.28s cubic-bezier(.18,.86,.18,1) .40s forwards;
+      animation: loaderDropperAction 1.15s cubic-bezier(.18,.86,.18,1) .35s forwards;
     }
 
     .loader-test-tube {
@@ -1324,7 +1324,7 @@
       filter:
         drop-shadow(0 0 8px rgba(178, 255, 64, .96))
         drop-shadow(0 0 22px rgba(85, 255, 67, .68));
-      animation: loaderGreenDrop 1.06s cubic-bezier(.12,.9,.18,1) 1.60s forwards;
+      animation: loaderGreenDrop .95s cubic-bezier(.12,.9,.18,1) 1.45s forwards;
     }
 
     .studylab-loader-green-drop svg {
@@ -1348,7 +1348,7 @@
       box-shadow:
         0 0 16px rgba(109, 255, 102, .88),
         0 0 34px rgba(72, 231, 255, .48);
-      animation: loaderCriticalHit .28s ease-out 2.50s forwards;
+      animation: loaderCriticalHit .25s ease-out 2.25s forwards;
     }
 
     .studylab-loader-splash {
@@ -1361,8 +1361,8 @@
       transform-origin: 50% 58%;
       mix-blend-mode: screen;
       animation:
-        loaderSplashHit .24s ease-out 2.58s forwards,
-        loaderSplashSlip .76s cubic-bezier(.15,.8,.18,1) 2.86s forwards;
+        loaderSplashHit .22s ease-out 2.32s forwards,
+        loaderSplashSlip .68s cubic-bezier(.15,.8,.18,1) 2.58s forwards;
     }
 
     .studylab-loader-splash svg {
@@ -1471,7 +1471,7 @@
       opacity: 0;
       z-index: 14;
       text-shadow: 0 0 16px rgba(104, 233, 255, .30);
-      animation: loaderWordmark .70s ease-out 2.02s forwards;
+      animation: loaderWordmark .63s ease-out 1.84s forwards;
     }
 
     html[data-theme="light"] .studylab-loader-wordmark {
@@ -2648,8 +2648,8 @@
   if (!loader) return;
 
   const start = performance.now();
-  const MIN_VISIBLE_MS = 3380;
-  const MAX_VISIBLE_MS = 3920;
+  const MIN_VISIBLE_MS = 3150;
+  const MAX_VISIBLE_MS = 3550;
   let finished = false;
 
   function hideLoader() {
@@ -2683,11 +2683,19 @@
 </script>
 
 
+  <style>
+    /* Keep the floating AI control off the entry animation. */
+    body:has(#studylabLoader:not(.is-exiting)) .studylab-ai-tools-row {
+      visibility: hidden !important;
+      opacity: 0 !important;
+    }
+  </style>
+
   <div class="studylab-ai-tools-row" data-studylab-ai>
-    <button type="button" class="studylab-ai-launcher" data-ai-launcher aria-expanded="false" aria-controls="studylabAiPanel" title="Open StudyLab AI Agent">
+    <button type="button" class="studylab-ai-launcher" data-ai-launcher aria-expanded="false" aria-controls="studylabAiPanel" title="Open StudyLab AI">
       <span class="studylab-ai-launcher-icon" aria-hidden="true">✨</span>
       <span class="studylab-ai-launcher-copy">
-        <span class="studylab-ai-launcher-title">AI Agent</span>
+        <span class="studylab-ai-launcher-title">AI</span>
         <span class="studylab-ai-launcher-subtitle">StudyLab AI Tutor</span>
       </span>
     </button>
