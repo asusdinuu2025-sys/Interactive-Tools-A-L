@@ -1,4 +1,6 @@
 /* Unified in-page launcher for StudyLab Pet and AI. */
+body:has(#studylabLoader:not(.is-exiting)) .studylab-assistant-tray { visibility: hidden !important; opacity: 0 !important; }
+
 #studylabPetLauncher,
 .studylab-ai-tools-row .studylab-ai-launcher { display: none !important; }
 .studylab-assistant-tray {
