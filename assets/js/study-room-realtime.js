@@ -116,7 +116,13 @@
         card.innerHTML = '<div class="room-person-card-top"><div class="room-avatar"></div><span class="room-person-status">Studying now</span></div>' +
           '<div class="room-person-card-name"></div><div class="room-person-card-subject"></div>' +
           '<div class="room-person-card-divider"></div><div class="room-person-card-time-label">Today\'s study time</div><div class="room-person-card-time"></div>';
-        setGenderIcon(card.querySelector('.room-avatar'), r.gender);
+        const ownAvatar = card.querySelector('.room-avatar');
+        setGenderIcon(ownAvatar, r.gender);
+        if (r.user_id === userId) {
+          ownAvatar.classList.add('slr-own-avatar');
+          ownAvatar.classList.toggle('is-studying', Boolean(r.is_studying && r.last_heartbeat_at &&
+            now - new Date(r.last_heartbeat_at).getTime() < 90000));
+        }
         card.querySelector('.room-person-card-name').textContent = r.display_name;
         card.querySelector('.room-person-card-subject').textContent = r.subject;
         card.querySelector('.room-person-card-time').textContent = fmt(today);
