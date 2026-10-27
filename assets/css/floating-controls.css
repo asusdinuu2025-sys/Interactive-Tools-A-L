@@ -271,3 +271,44 @@ body.study-room-page .study-chat-button {
     bottom: 12px !important;
   }
 }
+
+
+/* Study Room: show both the chat icon and its text label on desktop and mobile. */
+body.study-room-page .study-chat-button {
+  width: auto !important;
+  min-width: 104px !important;
+  height: 46px !important;
+  min-height: 46px !important;
+  padding: 0 16px !important;
+  gap: 8px !important;
+  justify-content: center !important;
+  border-radius: 999px !important;
+  white-space: nowrap !important;
+}
+body.study-room-page .study-chat-button > span:not(.study-chat-button-icon):not(.study-chat-unread) {
+  display: inline !important;
+}
+body.study-room-page .study-chat-button .study-chat-button-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 auto !important;
+}
+body.study-room-page .study-chat-button .study-chat-button-icon svg {
+  display: block !important;
+}
+@media (max-width: 720px) {
+  body.study-room-page .study-chat-button {
+    width: auto !important;
+    min-width: 104px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    padding: 0 14px !important;
+    gap: 8px !important;
+    right: 74px !important;
+    bottom: 12px !important;
+  }
+  body.study-room-page .study-chat-button > span:not(.study-chat-button-icon):not(.study-chat-unread) {
+    display: inline !important;
+  }
+}
