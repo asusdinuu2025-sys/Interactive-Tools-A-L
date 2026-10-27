@@ -3,12 +3,12 @@ const crypto = require("node:crypto");
 const MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
 
 /*
- * Conservative application-side cap.
- * Google says active Gemini limits vary by project/model and should be
- * checked in AI Studio. This site-side cap is intentionally much lower
- * than the commonly reported 20-request/day free-tier ceiling.
+ * Per-student weekly cap. The Supabase access token is verified server-side,
+ * so clients cannot choose another student's quota identity.
  */
-const DAILY_LIMIT = 8;
+const WEEKLY_LIMIT = 56;
+const SUPABASE_URL = process.env.SUPABASE_URL || "https://zpvatyxdbshjuqgtexzw.supabase.co";
+const SUPABASE_PUBLIC_KEY = process.env.SUPABASE_PUBLISHABLE_KEY || "sb_publishable_zd8S3PcyicJX6Cgyh0ez8A_sUSTCuiB";
 
 const IP_WINDOW_MS = 60 * 1000;
 const IP_LIMIT = 1;
@@ -18,7 +18,7 @@ const MAX_MESSAGE_LENGTH = 3000;
 const MAX_BODY_LENGTH = 14000;
 const MAX_OUTPUT_TOKENS = 800;
 
-const DAILY_KEY_PREFIX = "daily/";
+const WEEKLY_KEY_PREFIX = "weekly/";
 const RATE_KEY_PREFIX = "rate/";
 
 const SYSTEM_INSTRUCTION = [
@@ -79,21 +79,40 @@ function currentMinuteBucket() {
   return Math.floor(Date.now() / IP_WINDOW_MS);
 }
 
-function pacificDateKey() {
+function colomboWeekKey() {
   const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Los_Angeles",
+    timeZone: "Asia/Colombo",
     year: "numeric",
     month: "2-digit",
     day: "2-digit"
   }).formatToParts(new Date());
-
   const values = Object.fromEntries(
-    parts
-      .filter(part => part.type !== "literal")
-      .map(part => [part.type, part.value])
+    parts.filter(part => part.type !== "literal").map(part => [part.type, part.value])
   );
+  const day = new Date(Date.UTC(Number(values.year), Number(values.month) - 1, Number(values.day)));
+  day.setUTCDate(day.getUTCDate() - ((day.getUTCDay() + 6) % 7));
+  return day.toISOString().slice(0, 10);
+}
 
-  return values.year + "-" + values.month + "-" + values.day;
+async function getAuthenticatedUserId(event) {
+  const authorization = event?.headers?.authorization || event?.headers?.Authorization || "";
+  const token = authorization.match(/^Bearer\s+(.+)$/i)?.[1];
+  if (!token) return null;
+  try {
+    const response = await fetch(SUPABASE_URL + "/auth/v1/user", {
+      method: "GET",
+      headers: {
+        apikey: SUPABASE_PUBLIC_KEY,
+        Authorization: "Bearer " + token
+      }
+    });
+    if (!response.ok) return null;
+    const user = await response.json();
+    return typeof user?.id === "string" ? user.id : null;
+  } catch (error) {
+    console.error("StudyLab AI auth verification failed:", error);
+    return null;
+  }
 }
 
 function normalizeHistory(history) {
@@ -121,36 +140,23 @@ function normalizeHistory(history) {
     .filter(Boolean);
 }
 
-async function reserveQuota(event, store) {
-  const dailyKey = DAILY_KEY_PREFIX + pacificDateKey();
-
-  let dailyCount = 0;
+async function reserveQuota(event, store, userId) {
+  const weeklyKey = WEEKLY_KEY_PREFIX + userId + "/" + colomboWeekKey();
+  let weeklyCount = 0;
 
   try {
-    const storedDaily = await store.get(dailyKey);
-
-    if (storedDaily) {
-      const parsed = Number(storedDaily);
-
-      if (Number.isFinite(parsed) && parsed >= 0) {
-        dailyCount = Math.floor(parsed);
-      }
+    const storedWeekly = await store.get(weeklyKey);
+    if (storedWeekly) {
+      const parsed = Number(storedWeekly);
+      if (Number.isFinite(parsed) && parsed >= 0) weeklyCount = Math.floor(parsed);
     }
   } catch (error) {
-    console.error("StudyLab AI daily quota read failed:", error);
-
-    return {
-      ok: false,
-      reason: "storage"
-    };
+    console.error("StudyLab AI weekly quota read failed:", error);
+    return { ok: false, reason: "storage" };
   }
 
-  if (dailyCount >= DAILY_LIMIT) {
-    return {
-      ok: false,
-      reason: "daily_limit",
-      remaining: 0
-    };
+  if (weeklyCount >= WEEKLY_LIMIT) {
+    return { ok: false, reason: "weekly_limit", remaining: 0 };
   }
 
   const ipKey = RATE_KEY_PREFIX + hashIp(getClientIp(event));
@@ -188,7 +194,7 @@ async function reserveQuota(event, store) {
     return {
       ok: false,
       reason: "ip_limit",
-      remaining: Math.max(0, DAILY_LIMIT - dailyCount),
+      remaining: Math.max(0, WEEKLY_LIMIT - weeklyCount),
       retryAfter: 60 - Math.floor((now / 1000) % 60)
     };
   }
@@ -199,7 +205,7 @@ async function reserveQuota(event, store) {
    * free a slot and permit the site to overshoot its conservative budget.
    */
   try {
-    await store.set(dailyKey, String(dailyCount + 1));
+    await store.set(weeklyKey, String(weeklyCount + 1));
 
     await store.set(
       ipKey,
@@ -219,7 +225,7 @@ async function reserveQuota(event, store) {
 
   return {
     ok: true,
-    remaining: Math.max(0, DAILY_LIMIT - dailyCount - 1)
+    remaining: Math.max(0, WEEKLY_LIMIT - weeklyCount - 1)
   };
 }
 
@@ -309,6 +315,14 @@ exports.handler = async function handler(event) {
     });
   }
 
+  const userId = await getAuthenticatedUserId(event);
+  if (!userId) {
+    return jsonResponse(401, {
+      code: "AUTH_REQUIRED",
+      error: "Please refresh StudyLab and sign in to use the AI tutor."
+    });
+  }
+
   let store;
 
   try {
@@ -322,15 +336,14 @@ exports.handler = async function handler(event) {
     });
   }
 
-  const quota = await reserveQuota(event, store);
+  const quota = await reserveQuota(event, store, userId);
 
   if (!quota.ok) {
-    if (quota.reason === "daily_limit") {
+    if (quota.reason === "weekly_limit") {
       return jsonResponse(429, {
-        code: "DAILY_LIMIT",
-        error:
-          "StudyLab AI's daily free limit has been reached. Please try again after the daily limit resets.",
-        dailyLimit: DAILY_LIMIT,
+        code: "WEEKLY_LIMIT",
+        error: "Your StudyLab AI weekly limit has been reached. It resets every Monday at midnight Sri Lanka time.",
+        weeklyLimit: WEEKLY_LIMIT,
         remaining: 0
       });
     }
@@ -451,7 +464,7 @@ exports.handler = async function handler(event) {
     return jsonResponse(200, {
       text: answer,
       model: MODEL,
-      dailyLimit: DAILY_LIMIT,
+      weeklyLimit: WEEKLY_LIMIT,
       remaining: quota.remaining
     });
   } catch (error) {
