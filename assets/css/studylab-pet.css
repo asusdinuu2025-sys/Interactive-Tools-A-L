@@ -1232,7 +1232,7 @@ html[data-theme="light"] .sl-pet-setting-buttons button[data-pet-eye="pink"].is-
 
 
 /* Study Room companion: no separate floating bot launcher, only the living character. */
-#studylabPetLauncher { display:none !important; visibility:hidden !important; pointer-events:none !important; }
+body.study-room-page #studylabPetLauncher { display:none !important; visibility:hidden !important; pointer-events:none !important; }
 .sl-pet-character.is-theme-reacting .sl-pet-visual {
   animation: slPetThemeBurst .92s cubic-bezier(.2,.85,.25,1) 2;
 }
