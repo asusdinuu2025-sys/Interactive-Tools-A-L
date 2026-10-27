@@ -462,7 +462,7 @@ html[data-theme="light"] .study-chat-watermark {
 
 @media (max-width: 720px) {
   .study-chat-button {
-    right: 99px;
+    right: 12px;
     bottom: 12px;
   }
 
