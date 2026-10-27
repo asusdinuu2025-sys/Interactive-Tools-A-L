@@ -119,6 +119,27 @@ body.study-room-page.profile-modal-open > :not(#profileModal):not(#studyRoomProf
 /* Hide the profile gate's visible white scrollbars without changing scroll behavior. */
 .profile-modal, .profile-dialog { scrollbar-width:none; -ms-overflow-style:none; }
 .profile-modal::-webkit-scrollbar, .profile-dialog::-webkit-scrollbar { display:none; width:0; height:0; }
+
+/* Keep the live student cards in their own scroll area so the leaderboard stays reachable. */
+.room-page .room-people-grid{
+  max-height:min(68vh,680px);
+  overflow-y:auto;
+  overflow-x:hidden;
+  overscroll-behavior:contain;
+  scrollbar-gutter:stable;
+  align-content:start;
+  padding:2px 6px 2px 2px;
+}
+.room-page .room-people-grid::-webkit-scrollbar{width:6px}
+.room-page .room-people-grid::-webkit-scrollbar-thumb{background:rgba(126,220,255,.28);border-radius:999px}
+.room-page .room-people-grid::-webkit-scrollbar-track{background:rgba(120,135,160,.08);border-radius:999px}
+@media(max-width:760px){
+  .room-page .room-people-grid{max-height:min(56vh,480px)}
+}
+@media(prefers-reduced-motion:reduce){
+  .room-page .room-people-grid{scroll-behavior:auto}
+}
+
 </style><link rel="stylesheet" href="assets/css/floating-controls.css?v=20261027-chatfix">
 </head>
 <body class="study-room-page">
