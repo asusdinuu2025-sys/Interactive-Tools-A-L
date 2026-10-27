@@ -559,3 +559,39 @@ revoke all on function public.study_room_start() from public, anon;
 grant execute on function public.study_room_ensure_profile() to authenticated;
 grant execute on function public.study_room_set_subject(text) to authenticated;
 grant execute on function public.study_room_start() to authenticated;
+
+
+-- Security hardening applied to the production database on 2026-10-27.
+-- Keep SECURITY DEFINER functions on an empty search_path and qualify objects
+-- explicitly to avoid object-shadowing attacks through mutable schemas.
+ALTER FUNCTION public.study_room_ensure_profile() SET search_path = '';
+ALTER FUNCTION public.study_room_heartbeat() SET search_path = '';
+ALTER FUNCTION public.study_room_leave() SET search_path = '';
+ALTER FUNCTION public.study_room_set_subject(text) SET search_path = '';
+ALTER FUNCTION public.study_room_start() SET search_path = '';
+ALTER FUNCTION public.studylab_public_student_count() SET search_path = '';
+ALTER FUNCTION public.studylab_release_ai_quota() SET search_path = '';
+ALTER FUNCTION public.studylab_reserve_ai_quota() SET search_path = '';
+
+-- Evaluate auth.uid() once per statement instead of once per candidate row.
+ALTER POLICY "StudyLab profile read own" ON public.studylab_profiles
+  USING (id = (select auth.uid()));
+ALTER POLICY "StudyLab profile insert own" ON public.studylab_profiles
+  WITH CHECK (id = (select auth.uid()));
+ALTER POLICY "StudyLab profile update own" ON public.studylab_profiles
+  USING (id = (select auth.uid()))
+  WITH CHECK (id = (select auth.uid()));
+ALTER POLICY "StudyLab chat insert own authenticated messages" ON public.studylab_chat_messages
+  WITH CHECK (
+    user_id = (select auth.uid())
+    AND char_length(btrim(message)) BETWEEN 1 AND 500
+    AND char_length(btrim(nickname)) BETWEEN 1 AND 60
+    AND created_at >= now() - interval '30 seconds'
+    AND created_at <= now() + interval '5 minutes'
+  );
+ALTER POLICY "StudyLab feedback insert own" ON public.studylab_feedback
+  WITH CHECK (
+    user_id = (select auth.uid())
+    AND char_length(btrim(message)) BETWEEN 2 AND 1200
+    AND category IN ('bug', 'suggestion', 'resource')
+  );
