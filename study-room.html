@@ -42,13 +42,13 @@ html[data-theme="light"] .room-hero{background:linear-gradient(120deg,rgba(224,2
 #roomProfileGate .gate-card{width:min(560px,100%);max-height:min(92vh,900px);overflow:auto;padding:clamp(20px,4vw,32px);border:1px solid rgba(255,255,255,.16);border-radius:24px;background:rgba(14,23,39,.96);color:#f1f5f9;box-shadow:0 30px 100px rgba(0,0,0,.45)}
 #roomProfileGate h2{margin:0 0 8px;font-size:1.55rem}
 #roomProfileGate .gate-intro{margin:0 0 16px;color:#bdc8d8;line-height:1.55;font-size:.9rem}
-#roomProfileGate .gate-error{margin:0 0 16px;padding:11px 13px;border:1px solid rgba(239,68,68,.6);border-radius:12px;background:rgba(239,68,68,.12);color:#fecaca;font-size:.86rem;font-weight:700}
+#roomProfileGate .gate-error{position:fixed;z-index:100001;top:18px;left:50%;width:min(560px,calc(100% - 32px));margin:0;padding:12px 16px;transform:translate(-50%,-10px);border:1px solid rgba(239,68,68,.55);border-radius:12px;background:rgba(127,29,29,.96);color:#fee2e2;font-size:.88rem;font-weight:700;text-align:center;box-shadow:0 12px 35px rgba(0,0,0,.28);opacity:0;pointer-events:none;transition:opacity .45s ease,transform .45s ease}#roomProfileGate .gate-error.is-visible{opacity:1;transform:translate(-50%,0)}#roomProfileGate .gate-error[hidden]{display:none!important}
 #roomProfileGate .gate-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 #roomProfileGate .gate-field{display:grid;gap:6px;min-width:0;margin-bottom:12px}
 #roomProfileGate .gate-field label,#roomProfileGate legend{font-size:.8rem;font-weight:750;color:#dbe5f2}
 #roomProfileGate input,#roomProfileGate select{width:100%;min-height:45px;padding:10px 12px;border:1px solid rgba(148,163,184,.35);border-radius:11px;background:#101b2d;color:#f8fafc;font:inherit}
 #roomProfileGate input:focus,#roomProfileGate select:focus{outline:2px solid rgba(96,165,250,.55);outline-offset:1px}
-#roomProfileGate .gate-invalid{border-color:#ef4444!important;box-shadow:0 0 0 2px rgba(239,68,68,.22)!important;background-color:rgba(127,29,29,.22)!important}
+#roomProfileGate .gate-invalid{border-color:#ef4444!important;box-shadow:0 0 0 2px rgba(239,68,68,.2)!important;background-color:rgba(127,29,29,.18)!important}#roomProfileGate .gate-valid{border-color:#22c55e!important;box-shadow:0 0 0 2px rgba(34,197,94,.15)!important;background-color:rgba(20,83,45,.18)!important}#roomProfileGate .gate-icon.gate-valid{border-color:#22c55e!important;box-shadow:0 0 0 2px rgba(34,197,94,.15)!important}
 #roomProfileGate fieldset{margin:0 0 14px;padding:0;border:0}
 #roomProfileGate .gate-icons{display:flex;gap:10px;margin-top:8px}
 #roomProfileGate .gate-icon{flex:1;min-height:54px;border:1px solid rgba(148,163,184,.35);border-radius:12px;background:#101b2d;color:#f8fafc;font:inherit;font-weight:700;cursor:pointer}
@@ -81,7 +81,7 @@ html[data-theme="light"] #roomProfileGate .gate-icon[aria-pressed="true"]{backgr
   <section class="gate-card" role="dialog" aria-modal="true" aria-labelledby="roomProfileTitle" aria-describedby="roomProfileError">
     <h2 id="roomProfileTitle">Complete your profile</h2>
     <p class="gate-intro">Your Study Room is ready. Complete all profile fields once to enter. You will not see this window again after your profile is complete.</p>
-    <p class="gate-error" id="roomProfileError" role="alert">To enter the Study Room, you must fill in all fields, including your profile icon.</p>
+    <p class="gate-error" id="roomProfileError" role="alert" hidden>To enter the Study Room, you must fill in all required fields.</p>
     <form id="roomProfileForm" novalidate>
       <div class="gate-grid">
         <div class="gate-field"><label for="gateName">Full name *</label><input id="gateName" autocomplete="name" maxlength="60" required></div>
@@ -131,9 +131,16 @@ html[data-theme="light"] #roomProfileGate .gate-icon[aria-pressed="true"]{backgr
     ["male", "female"].includes(p?.gender)
   );
 
+  let toastTimer;
   function setError(message) {
     errorBox.textContent = message;
     errorBox.hidden = false;
+    requestAnimationFrame(() => errorBox.classList.add("is-visible"));
+    window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(() => {
+      errorBox.classList.remove("is-visible");
+      window.setTimeout(() => { errorBox.hidden = true; }, 500);
+    }, 3200);
   }
 
   function validate(showMessage = false) {
@@ -148,18 +155,21 @@ html[data-theme="light"] #roomProfileGate .gate-icon[aria-pressed="true"]{backgr
     };
     Object.entries(fields).forEach(([key, field]) => {
       field.classList.toggle("gate-invalid", Boolean(invalid[key]));
+      field.classList.toggle("gate-valid", !invalid[key]);
       field.setAttribute("aria-invalid", String(Boolean(invalid[key])));
     });
     iconField.classList.toggle("gate-invalid", invalid.gender);
     iconButtons.forEach(button => {
       button.classList.toggle("gate-invalid", invalid.gender);
+      button.classList.toggle("gate-valid", !invalid.gender && button.dataset.gateGender === gender);
       button.setAttribute("aria-invalid", String(invalid.gender));
     });
-    if (showMessage && Object.values(invalid).some(Boolean)) {
-      setError("To enter the Study Room, you must fill in all fields, including your profile icon.");
-      status.textContent = "Complete the red-highlighted fields.";
+    const hasInvalid = Object.values(invalid).some(Boolean);
+    if (showMessage && hasInvalid) {
+      setError("Please fill in all required fields to enter the Study Room.");
+      status.textContent = "";
     }
-    return !Object.values(invalid).some(Boolean);
+    return !hasInvalid;
   }
 
   function showGate(p) {
@@ -172,7 +182,6 @@ html[data-theme="light"] #roomProfileGate .gate-icon[aria-pressed="true"]{backgr
     iconButtons.forEach(button => button.setAttribute("aria-pressed", String(button.dataset.gateGender === gender)));
     gate.hidden = false;
     document.body.style.overflow = "hidden";
-    setError("To enter the Study Room, you must fill in all fields, including your profile icon.");
     validate(false);
     const firstInvalid = Object.values(fields).find(field => field.classList.contains("gate-invalid"));
     window.setTimeout(() => (firstInvalid || iconButtons[0]).focus(), 30);
@@ -216,7 +225,7 @@ html[data-theme="light"] #roomProfileGate .gate-icon[aria-pressed="true"]{backgr
       document.body.style.overflow = "";
     } catch (error) {
       setError(error?.message || "Your profile could not be saved. Please try again.");
-      status.textContent = "Check your details and try again.";
+      status.textContent = "";
       validate(false);
     } finally {
       save.disabled = false;
