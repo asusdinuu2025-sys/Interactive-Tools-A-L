@@ -275,6 +275,7 @@ body.study-room-page .study-chat-button {
 
 /* Study Room: show both the chat icon and its text label on desktop and mobile. */
 body.study-room-page .study-chat-button {
+  right: 20px !important;
   width: auto !important;
   min-width: 104px !important;
   height: 46px !important;
@@ -306,7 +307,6 @@ body.study-room-page .study-chat-button .study-chat-button-icon svg {
     min-height: 46px !important;
     padding: 0 14px !important;
     gap: 8px !important;
-    right: 74px !important;
     bottom: 12px !important;
   }
   body.study-room-page .study-chat-button > span:not(.study-chat-button-icon):not(.study-chat-unread) {
