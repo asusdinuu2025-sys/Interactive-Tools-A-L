@@ -11,7 +11,7 @@ const SUPABASE_URL = process.env.SUPABASE_URL || "https://zpvatyxdbshjuqgtexzw.s
 const SUPABASE_PUBLIC_KEY = process.env.SUPABASE_PUBLISHABLE_KEY || "sb_publishable_zd8S3PcyicJX6Cgyh0ez8A_sUSTCuiB";
 
 const IP_WINDOW_MS = 60 * 1000;
-const IP_LIMIT = 1;
+const IP_LIMIT = 5;
 
 const MAX_HISTORY = 8;
 const MAX_MESSAGE_LENGTH = 3000;
