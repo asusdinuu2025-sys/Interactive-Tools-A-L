@@ -261,7 +261,9 @@
   // the profile form before entering pages that initialise a StudyLab account.
   ready.then(async function () {
     const path = window.location.pathname;
-    if (path === "/" || path.endsWith("/index.html")) return;
+    // Full profile details are required only for the live Study Room.
+    // All other StudyLab pages remain accessible with a basic/incomplete profile.
+    if (!path.endsWith("/study-room.html")) return;
     const currentProfile = await getProfile(true);
     if (isProfileComplete(currentProfile)) return;
     const returnTo = path + window.location.search + window.location.hash;
