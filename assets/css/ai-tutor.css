@@ -604,9 +604,9 @@ html[data-theme="light"] .studylab-ai-compose {
 }
 @media (max-width: 600px) {
   .studylab-ai-tools-row {
-    left: 104px;
+    left: 12px;
     bottom: 12px;
-    max-width: calc(100vw - 116px);
+    max-width: calc(50vw - 24px);
   }
   .studylab-ai-tools-row .studylab-ai-launcher {
     min-height: 46px;
@@ -624,7 +624,7 @@ html[data-theme="light"] .studylab-ai-compose {
   }
 }
 @media (max-width: 350px) {
-  .studylab-ai-tools-row { left: 96px; }
+  .studylab-ai-tools-row { left: 12px; max-width: calc(50vw - 18px); }
   .studylab-ai-tools-row .studylab-ai-launcher { padding-left: 9px; padding-right: 9px; }
 }
 @media (prefers-reduced-motion: reduce) {
