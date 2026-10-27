@@ -107,37 +107,48 @@ html[data-theme="light"] .footer-title::after{
   box-shadow:none;
 }
 
-/* Per-letter hero glow, like small neon filaments behind the title. */
+/* Homepage title: independently reveal each letter's neon outline, then let it fade away. */
 .hero h1{ text-shadow:none !important; }
+.hero h1 .hero-title-letters{display:inline}
 .hero h1 .hero-title-letter{
+  position:relative;
   display:inline-block;
-  animation:studyLabLetterFlicker 3.4s steps(1,end) infinite;
+  isolation:isolate;
+  animation:studyLabLetterBase 7.4s ease-in-out infinite;
   animation-delay:var(--letter-delay, 0ms);
-  will-change:text-shadow;
+}
+.hero h1 .hero-title-letter::after{
+  content:attr(data-letter);
+  position:absolute;
+  inset:0;
+  color:transparent;
+  -webkit-text-fill-color:transparent;
+  -webkit-text-stroke:1.15px #39ffb0;
+  text-shadow:0 0 5px rgba(57,255,176,.65),0 0 12px rgba(97,232,255,.36);
+  clip-path:inset(0 100% 0 0);
+  opacity:0;
+  pointer-events:none;
+  animation:studyLabLetterOutlineDraw 7.4s ease-in-out infinite;
+  animation-delay:var(--letter-delay, 0ms);
 }
 .hero h1 .hero-title-space{display:inline-block;width:.28em}
-@keyframes studyLabLetterFlicker{
-  0%,18%,20%,57%,59%,100%{
-    text-shadow:0 0 2px rgba(57,255,176,.28),0 0 7px rgba(57,255,176,.18);
-  }
-  19%,58%{text-shadow:none}
-  23%,55%{
-    text-shadow:0 0 3px rgba(57,255,176,.65),0 0 10px rgba(97,232,255,.34);
-  }
-  60%,63%{text-shadow:0 0 4px rgba(245,237,53,.58),0 0 11px rgba(57,255,176,.30)}
+@keyframes studyLabLetterBase{
+  0%,8%{color:inherit}
+  82%,100%{color:inherit}
 }
-html[data-theme="light"] .hero h1 .hero-title-letter{
-  animation-name:studyLabLetterFlickerLight;
+@keyframes studyLabLetterOutlineDraw{
+  0%,4%{clip-path:inset(0 100% 0 0);opacity:0}
+  9%{opacity:1}
+  42%{clip-path:inset(0 0 0 0);opacity:1}
+  68%{clip-path:inset(0 0 0 0);opacity:.95}
+  88%,100%{clip-path:inset(0 0 0 0);opacity:0}
 }
-@keyframes studyLabLetterFlickerLight{
-  0%,18%,20%,57%,59%,100%{text-shadow:0 0 2px rgba(8,125,98,.18),0 0 6px rgba(8,125,98,.12)}
-  19%,58%{text-shadow:none}
-  23%,55%{text-shadow:0 0 3px rgba(8,125,98,.42),0 0 8px rgba(8,125,155,.20)}
-  60%,63%{text-shadow:0 0 3px rgba(154,118,0,.38),0 0 8px rgba(8,125,98,.18)}
+html[data-theme="light"] .hero h1 .hero-title-letter::after{
+  -webkit-text-stroke-color:#087d9b;
+  text-shadow:0 0 4px rgba(8,125,98,.4),0 0 9px rgba(8,125,155,.22);
 }
 @media(prefers-reduced-motion:reduce){
-  .study-room-launcher::before,.footer-title::after,.hero h1 .hero-title-letter{animation:none}
+  .study-room-launcher::before,.footer-title::after,.hero h1 .hero-title-letter,.hero h1 .hero-title-letter::after{animation:none}
   .study-room-launcher::before{opacity:.8}
-  .hero h1 .hero-title-letter{text-shadow:0 0 3px rgba(57,255,176,.22)}
-  html[data-theme="light"] .hero h1 .hero-title-letter{text-shadow:0 0 2px rgba(8,125,98,.18)}
+  .hero h1 .hero-title-letter::after{clip-path:none;opacity:.45}
 }
