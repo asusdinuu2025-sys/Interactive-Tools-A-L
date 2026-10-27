@@ -174,6 +174,7 @@
 
     // One-time migration: read existing cloud records, never write dashboard data to Supabase.
     let account = getCloudAccount();
+    let migrationSucceeded = false;
     if ((() => { try { return localStorage.getItem(LOCAL_KEYS.migrated) !== "1"; } catch (_) { return true; } })() && account?.ready) {
       try {
         await account.ready;
@@ -208,6 +209,7 @@
               });
             });
           }
+          migrationSucceeded = !favResult.error && !progressResult.error;
         }
       } catch (error) {
         // Tables may already have been removed; local dashboard remains usable.
@@ -221,7 +223,7 @@
     cloud.userId = null;
     cloud.ready = true;
     cloud.error = null;
-    if (account?.ready) {
+    if (migrationSucceeded) {
       try { localStorage.setItem(LOCAL_KEYS.migrated, "1"); } catch (_) {}
     }
     persistDashboardLocal();
