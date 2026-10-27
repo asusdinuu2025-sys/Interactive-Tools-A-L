@@ -108,10 +108,11 @@ html[data-theme="light"] .footer-title::after{
 }
 
 /* Per-letter hero glow, like small neon filaments behind the title. */
+.hero h1{ text-shadow:none !important; }
 .hero h1 .hero-title-letter{
   display:inline-block;
   animation:studyLabLetterFlicker 3.4s steps(1,end) infinite;
-  animation-delay:calc(var(--letter-index, 0) * 85ms);
+  animation-delay:var(--letter-delay, 0ms);
   will-change:text-shadow;
 }
 .hero h1 .hero-title-space{display:inline-block;width:.28em}
