@@ -110,15 +110,85 @@
     }, 3600);
   }
 
+  const glowKey = "studylab-profile-neon-colour-v1";
+  const glowColours = {
+    cyan: {label:"Cyan",dark:"#45ddff",light:"#087da0"},
+    violet: {label:"Violet",dark:"#b79aff",light:"#7040c7"},
+    emerald: {label:"Emerald",dark:"#55edb0",light:"#08794e"},
+    amber: {label:"Amber",dark:"#ffd166",light:"#9a5b00"},
+    rose: {label:"Rose",dark:"#ff83c8",light:"#b21b70"}
+  };
+  function getGlowColour() {
+    try { const value = localStorage.getItem(glowKey); if (glowColours[value]) return value; } catch (_) {}
+    return "cyan";
+  }
+  function applyGlowColour(value, save = true) {
+    const choice = glowColours[value] ? value : "cyan";
+    const colour = glowColours[choice];
+    document.documentElement.style.setProperty("--studylab-profile-glow-dark", colour.dark);
+    document.documentElement.style.setProperty("--studylab-profile-glow-light", colour.light);
+    document.documentElement.dataset.studylabGlow = choice;
+    document.querySelectorAll("[data-studylab-glow-choice]").forEach(button => {
+      const active = button.dataset.studylabGlowChoice === choice;
+      button.setAttribute("aria-pressed", String(active));
+      button.classList.toggle("is-selected", active);
+    });
+    if (save) { try { localStorage.setItem(glowKey, choice); } catch (_) {} }
+    window.dispatchEvent(new CustomEvent("studylab:glow-colour-change", {detail:{colour:choice}}));
+  }
+  function initGlowPicker() {
+    if (document.getElementById("studylabGlowPicker") || !profileForm) return;
+    const style = document.createElement("style");
+    style.id = "studylabGlowPickerStyle";
+    style.textContent = `
+      .studylab-glow-field{grid-column:1/-1;margin:0;padding:12px;border:1px solid var(--card-border,rgba(127,148,175,.22));border-radius:13px}
+      .studylab-glow-field legend{padding:0 5px;font-size:.83rem;font-weight:700;color:var(--text-primary)}
+      .studylab-glow-options{display:flex;flex-wrap:wrap;gap:9px}
+      .studylab-glow-choice{display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:6px 10px;border:1px solid var(--card-border,rgba(127,148,175,.22));border-radius:999px;background:var(--card-bg,rgba(127,148,175,.07));color:var(--text-primary);font:inherit;font-size:.78rem;cursor:pointer}
+      .studylab-glow-swatch{width:13px;height:13px;border-radius:50%;background:var(--swatch);box-shadow:0 0 10px color-mix(in srgb,var(--swatch) 50%,transparent)}
+      .studylab-glow-choice.is-selected{border-color:var(--swatch);box-shadow:0 0 0 1px var(--swatch),0 0 12px color-mix(in srgb,var(--swatch) 20%,transparent)}
+      .profile-button .header-action-icon{display:inline-grid;place-items:center;width:20px;height:20px;flex:0 0 20px;color:var(--studylab-profile-glow-dark,#45ddff)}
+      .profile-button .header-action-icon svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 4px currentColor)}
+      html[data-theme="light"] .profile-button .header-action-icon{color:var(--studylab-profile-glow-light,#087da0)}
+      @media(max-width:600px){.studylab-glow-field{grid-column:auto}}
+    `;
+    document.head.appendChild(style);
+    const field = document.createElement("fieldset");
+    field.className = "studylab-glow-field";
+    field.id = "studylabGlowPicker";
+    field.innerHTML = '<legend>Study glow colour</legend><div class="studylab-glow-options" role="group" aria-label="Choose your Study Room neon glow colour"></div>';
+    const options = field.querySelector(".studylab-glow-options");
+    Object.entries(glowColours).forEach(([key, colour]) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "studylab-glow-choice";
+      button.dataset.studylabGlowChoice = key;
+      button.setAttribute("aria-pressed", "false");
+      button.innerHTML = '<span class="studylab-glow-swatch" style="--swatch:' + colour.dark + '"></span><span></span>';
+      button.querySelector("span:last-child").textContent = colour.label;
+      button.addEventListener("click", () => applyGlowColour(key));
+      options.appendChild(button);
+    });
+    const genderField = profileForm.querySelector(".profile-gender-field");
+    if (genderField) genderField.insertAdjacentElement("afterend", field);
+    else profileForm.querySelector(".profile-form-grid")?.append(field);
+    applyGlowColour(getGlowColour(), false);
+  }
   function setButtonProfile(p) {
+    const gender = p?.gender === "female" ? "female" : "male";
+    const icon = gender === "female"
+      ? '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="7" r="3.2"/><path d="M7 20l1-4.2a4.1 4.1 0 0 1 8 0l1 4.2z"/></svg>'
+      : '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="7" r="3.2"/><path d="M4.5 20v-2.5a7.5 7.5 0 0 1 15 0V20z"/></svg>';
+    profileButton.innerHTML = '<span class="header-action-icon" aria-hidden="true">' + icon + '</span><span class="profile-button-label"></span>';
+    const label = profileButton.querySelector(".profile-button-label");
     if (isBasicComplete(p)) {
-      profileButton.textContent = "👤 " + p.display_name;
+      label.textContent = p.display_name;
       profileButton.title = "Edit your student profile";
     } else if (p?.display_name && !placeholderName(p.display_name)) {
-      profileButton.textContent = "👤 Complete Profile";
+      label.textContent = "Complete Profile";
       profileButton.title = "Finish setting up your student profile";
     } else {
-      profileButton.textContent = "👤 Create Profile";
+      label.textContent = "Create Profile";
       profileButton.title = "Create your student profile";
     }
   }
@@ -303,6 +373,8 @@
     field.addEventListener("change", updateStudyRoomValidation);
   });
 
+  initGlowPicker();
+  applyGlowColour(getGlowColour(), false);
   profileButton.addEventListener("click", openModal);
   profileClose?.addEventListener("click", closeModal);
   profileModal.addEventListener("click", event => {
@@ -416,7 +488,7 @@
       }
     } catch (error) {
       console.warn("StudyLab profile startup:", error);
-      profileButton.textContent = "👤 Create Profile";
+      setButtonProfile(null);
     }
   })();
 })();
