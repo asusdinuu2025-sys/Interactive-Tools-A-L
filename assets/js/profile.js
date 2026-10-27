@@ -111,14 +111,14 @@
   }
 
   const profileIconStyle = document.createElement("style");
-  profileIconStyle.textContent = '.profile-button .header-action-icon{display:inline-grid;place-items:center;width:20px;height:20px;flex:0 0 20px;color:var(--studylab-profile-glow-dark,#45ddff)} .profile-button .header-action-icon svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 4px currentColor)} html[data-theme="light"] .profile-button .header-action-icon{color:var(--studylab-profile-glow-light,#087da0)}';
+  profileIconStyle.textContent = '.profile-button .header-action-icon{display:inline-grid;place-items:center;width:20px;height:20px;flex:0 0 20px} .profile-button .header-action-icon-female{color:#ff4fa3!important} .profile-button .header-action-icon-male{color:#39a8ff!important} .profile-button .header-action-icon svg{width:20px;height:20px;fill:none;stroke:currentColor!important;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 2px currentColor) drop-shadow(0 0 4px currentColor)}';
   document.head.appendChild(profileIconStyle);
   function setButtonProfile(p) {
     const gender = p?.gender === "female" ? "female" : "male";
     const icon = gender === "female"
       ? '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="7" r="3.2"/><path d="M7 20l1-4.2a4.1 4.1 0 0 1 8 0l1 4.2z"/></svg>'
       : '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="7" r="3.2"/><path d="M4.5 20v-2.5a7.5 7.5 0 0 1 15 0V20z"/></svg>';
-    profileButton.innerHTML = '<span class="header-action-icon" aria-hidden="true">' + icon + '</span><span class="profile-button-label"></span>';
+    profileButton.innerHTML = '<span class="header-action-icon header-action-icon-' + gender + '\" aria-hidden="true">' + icon + '</span><span class="profile-button-label"></span>';
     const label = profileButton.querySelector(".profile-button-label");
     if (isBasicComplete(p)) {
       label.textContent = p.display_name;
