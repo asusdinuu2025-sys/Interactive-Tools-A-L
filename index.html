@@ -2527,6 +2527,13 @@
               </div>
             </fieldset>
           </div>
+          <div class="profile-field profile-field-full">
+            <label for="profileUsername">Username <span aria-hidden="true">*</span></label>
+            <input class="profile-input" id="profileUsername" name="username" type="text" maxlength="24"
+                   minlength="3" pattern="[a-z0-9_]{3,24}" autocomplete="username" autocapitalize="none" spellcheck="false"
+                   placeholder="e.g. dinusha_27" required />
+            <p class="profile-hint">3–24 characters: lowercase letters, numbers, and underscores. Each username can belong to only one student.</p>
+          </div>
           <div class="profile-field">
             <label for="profileSchool">School <span class="profile-optional">Optional</span></label>
             <input class="profile-input" id="profileSchool" name="school" type="text" maxlength="120"
