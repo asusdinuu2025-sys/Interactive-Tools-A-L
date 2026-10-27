@@ -37,35 +37,36 @@ function init(){
   let king=null,queen=null;
   rankedRows.forEach((row,i)=>{
    row.classList.remove('slr-podium-1','slr-podium-2','slr-podium-3');
-   const avatar=row.querySelector('.room-avatar');
-   const info=row.querySelector('.room-rank-info');
-   const title=info?.querySelector('.slr-leader-title');
-   avatar?.classList.remove('slr-crown-avatar');
-   avatar?.removeAttribute('data-slr-crown');
-   title?.remove();
    if(i<3)row.classList.add('slr-podium-'+(i+1));
+   const avatar=row.querySelector('.room-avatar');
    if(!avatar)return;
    if(avatar.classList.contains('room-avatar-male')&&!king)king=row;
    if(avatar.classList.contains('room-avatar-female')&&!queen)queen=row;
   });
-  const crownWinner=(row,gender)=>{
-   if(!row)return;
+  const winners=new Map();
+  if(king)winners.set(king,'male');
+  if(queen)winners.set(queen,'female');
+  rankedRows.forEach(row=>{
    const avatar=row.querySelector('.room-avatar');
    const info=row.querySelector('.room-rank-info');
    if(!avatar||!info)return;
+   const gender=winners.get(row);
+   let title=info.querySelector('.slr-leader-title');
+   if(!gender){
+    avatar.classList.remove('slr-crown-avatar');
+    avatar.removeAttribute('data-slr-crown');
+    title?.remove();
+    return;
+   }
    const isQueen=gender==='female';
    const crown=isQueen?'♕':'♛';
    const label=(isQueen?'Study Queen':'Study King')+' · '+period+' leader';
    avatar.classList.add('slr-crown-avatar');
-   avatar.setAttribute('data-slr-crown',crown);
-   avatar.setAttribute('aria-label',label);
-   const title=document.createElement('span');
-   title.className='slr-leader-title';
-   title.textContent=label;
-   info.append(title);
-  };
-  crownWinner(king,'male');
-  crownWinner(queen,'female');
+   if(avatar.getAttribute('data-slr-crown')!==crown)avatar.setAttribute('data-slr-crown',crown);
+   if(avatar.getAttribute('aria-label')!==label)avatar.setAttribute('aria-label',label);
+   if(!title){title=document.createElement('span');title.className='slr-leader-title';info.append(title);}
+   if(title.textContent!==label)title.textContent=label;
+  });
  }; if(board)new MutationObserver(decorate).observe(board,{childList:true,subtree:true});document.getElementById('weeklyBoardTab')?.addEventListener('click',()=>setTimeout(decorate,0));document.getElementById('dailyBoardTab')?.addEventListener('click',()=>setTimeout(decorate,0));decorate();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
