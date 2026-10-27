@@ -13,3 +13,17 @@ html[data-theme="light"] .study-room-launcher-arrow { color:#168a6d; }
 @media (max-width:900px) { .study-room-tools-row { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media (max-width:720px) { .study-room-tools-row { grid-template-columns:1fr; width:calc(100% - 16px); gap:10px; } .study-room-launcher { min-height:154px; padding:13px 15px; } }
 @media (max-width:430px) { .study-room-launcher { padding-left:12px; padding-right:12px; } .study-room-launcher-icon { width:43px; height:43px; } }
+
+
+/* Neon vector artwork for the homepage utility cards. */
+.student-milestone-plant{color:#39ff78;filter:drop-shadow(0 0 7px rgba(57,255,120,.32))}
+.student-milestone-plant svg{display:block;width:100%;height:100%;overflow:visible}
+.study-room-launcher{position:relative;isolation:isolate;overflow:hidden}
+.study-room-launcher::before{content:"";position:absolute;z-index:0;top:0;left:-42%;width:42%;height:3px;border-radius:999px;background:linear-gradient(90deg,transparent,#39ffb0 28%,#f5ed35 68%,#61e8ff 88%,transparent);box-shadow:0 0 8px #39ffb0,0 0 18px rgba(57,255,176,.68);animation:studyRoomNeonStrip 3.4s linear infinite;pointer-events:none}
+.study-room-launcher::after{content:"";position:absolute;z-index:0;inset:0;border-radius:inherit;border:1px solid rgba(57,255,176,.12);box-shadow:inset 0 0 18px rgba(57,255,176,.035);pointer-events:none}
+.study-room-launcher>*{position:relative;z-index:1}
+.study-room-launcher-vector{color:#39ffb0;filter:drop-shadow(0 0 7px rgba(57,255,176,.45))}
+.study-room-launcher-vector svg{display:block;width:100%;height:100%;overflow:visible}
+.study-room-launcher:hover::before{animation-duration:1.9s;box-shadow:0 0 10px #39ffb0,0 0 24px rgba(57,255,176,.85)}
+@keyframes studyRoomNeonStrip{0%{left:-42%}100%{left:110%}}
+@media(prefers-reduced-motion:reduce){.study-room-launcher::before{animation:none;left:0;width:100%;opacity:.65}}
