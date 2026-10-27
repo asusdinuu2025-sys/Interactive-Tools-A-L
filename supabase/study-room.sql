@@ -112,7 +112,10 @@ select m.user_id,
        m.subject, m.is_studying, m.session_started_at, m.last_heartbeat_at,
        m.today_seconds, m.today_date, m.week_seconds, m.week_start, m.updated_at,
        study_room_private.gender_for_member(m.user_id) as gender,
-       m.today_time, m.week_time
+       case when m.today_date = timezone('Asia/Colombo', now())::date
+            then m.today_time else '00:00:00' end as today_time,
+       case when m.week_start = public.study_room_local_week_start(timezone('Asia/Colombo', now())::date)
+            then m.week_time else '00:00:00' end as week_time
 from public.study_room_members m;
 
 revoke all on public.study_room_live from public, anon, authenticated;
@@ -173,6 +176,14 @@ declare
   previous public.study_room_members%rowtype;
 begin
   if uid is null then raise exception 'Sign-in required'; end if;
+  update public.study_room_members
+  set today_seconds = case when today_date = local_day then today_seconds else 0 end,
+      today_date = local_day,
+      week_seconds = case when week_start = monday then week_seconds else 0 end,
+      week_start = monday,
+      updated_at = now()
+  where today_date <> local_day or week_start <> monday;
+
   select * into previous from public.study_room_members
     where user_id = uid and is_studying for update;
   if not found then return; end if;
@@ -247,12 +258,22 @@ grant execute on function study_room_private.profile_is_complete(uuid) to authen
 create or replace function public.study_room_ensure_profile()
 returns void language plpgsql security definer set search_path = ''
 as $function$
-declare uid uuid := auth.uid();
+declare
+  uid uuid := auth.uid();
+  local_day date := timezone('Asia/Colombo', now())::date;
+  monday date := public.study_room_local_week_start(timezone('Asia/Colombo', now())::date);
 begin
   if uid is null then raise exception 'Sign-in required'; end if;
   if not study_room_private.profile_is_complete(uid) then
     raise exception 'Complete your StudyLab profile before entering the Live Study Room.';
   end if;
+  update public.study_room_members
+  set today_seconds = case when today_date = local_day then today_seconds else 0 end,
+      today_date = local_day,
+      week_seconds = case when week_start = monday then week_seconds else 0 end,
+      week_start = monday,
+      updated_at = now()
+  where today_date <> local_day or week_start <> monday;
   insert into public.study_room_members(user_id) values (uid)
   on conflict (user_id) do nothing;
 end;
