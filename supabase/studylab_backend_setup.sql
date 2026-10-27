@@ -180,6 +180,8 @@ drop policy if exists "StudyLab chat read recent messages"
 
 drop policy if exists "StudyLab chat read recent authenticated messages"
   on public.studylab_chat_messages;
+drop policy if exists "StudyLab chat read latest 100 messages"
+  on public.studylab_chat_messages;
 
 create policy "StudyLab chat read latest 100 messages"
   on public.studylab_chat_messages
@@ -209,8 +211,8 @@ create or replace function public.cleanup_studylab_chat()
 returns void
 language plpgsql
 security definer
-set search_path = public
-as $$
+set search_path = ''
+as $
 begin
   delete from public.studylab_chat_messages
   where id in (
@@ -227,8 +229,8 @@ create or replace function public.trim_studylab_chat_after_insert()
 returns trigger
 language plpgsql
 security definer
-set search_path = public
-as $$
+set search_path = ''
+as $
 begin
   perform public.cleanup_studylab_chat();
   return null;
