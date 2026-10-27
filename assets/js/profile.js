@@ -8,6 +8,7 @@
   const profileModal = document.getElementById("profileModal");
   const profileForm = document.getElementById("profileForm");
   const profileInput = document.getElementById("profileName");
+  const profileUsername = document.getElementById("profileUsername");
   const profileSchool = document.getElementById("profileSchool");
   const profilePhone = document.getElementById("profilePhone");
   const profileExamYear = document.getElementById("profileExamYear");
@@ -18,7 +19,7 @@
   const profileNameLabel = document.getElementById("profileNameLabel");
   const profileSubtitle = document.getElementById("profileSubtitle");
   const profileDialog = profileModal.querySelector(".profile-dialog");
-  const profileFields = [profileInput, profileSchool, profilePhone, profileExamYear, profileStream];
+  const profileFields = [profileInput, profileUsername, profileSchool, profilePhone, profileExamYear, profileStream];
   let closeTimer = null;
   let mandatoryProfile = false;
   let requireFullProfile = false;
@@ -144,6 +145,7 @@
   }
   function fillForm(p) {
     profileInput.value = p?.display_name && !placeholderName(p.display_name) ? p.display_name : "";
+    profileUsername.value = p?.username || "";
     profileSchool.value = p?.school || "";
     profilePhone.value = p?.phone || "";
     profileExamYear.value = p?.exam_year || "";
@@ -325,6 +327,12 @@
     event.preventDefault();
     profileStatus.hidden = true;
     const name = profileInput.value.trim().replace(/\s+/g, " ");
+    const username = profileUsername.value.trim().toLowerCase();
+    if (!/^[a-z0-9_]{3,24}$/.test(username)) {
+      showStatus("Username must be 3–24 characters using lowercase letters, numbers, or underscores.", true);
+      profileUsername.focus();
+      return;
+    }
     if (name.length < 2) {
       showStatus("Please enter your full name.", true);
       profileInput.focus();
@@ -371,6 +379,7 @@
       if (!account?.ready) throw new Error("StudyLab account is unavailable.");
       await account.ready;
       const p = await account.saveProfile(name, {
+        username,
         school,
         phone,
         exam_year: profileExamYear.value,
