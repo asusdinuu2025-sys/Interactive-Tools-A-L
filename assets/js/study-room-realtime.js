@@ -85,9 +85,12 @@
     const active = rows.filter(r => r.is_studying && r.last_heartbeat_at &&
       now - new Date(r.last_heartbeat_at).getTime() < 90000);
     activeCount.textContent = String(active.length);
-    const totalWeek = rows.reduce((sum, r) => sum +
-      (r.week_start === weekStart(new Date()) ? Number(r.week_seconds) || 0 : 0), 0);
-    weeklyHours.textContent = compact(totalWeek);
+    const own = rows.find(r => r.user_id === userId) || member;
+    const thisWeek = own && own.week_start === weekStart(new Date())
+      ? Number(own.week_seconds) || 0 : 0;
+    const pendingWeek = own && own.is_studying && own.last_heartbeat_at
+      ? Math.max(0, Math.min(25, Math.floor((Date.now() - new Date(own.last_heartbeat_at).getTime()) / 1000))) : 0;
+    weeklyHours.textContent = compact(thisWeek + pendingWeek);
     people.replaceChildren();
     if (!active.length) {
       people.innerHTML = '<p class="room-empty">No one is studying right now. Be the first to join.</p>';
