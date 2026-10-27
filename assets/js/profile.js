@@ -356,7 +356,7 @@
     }
 
     const submit = profileForm.querySelector(".profile-save");
-    if (submit) { submit.disabled = true; submit.textContent = "Saving securely…"; }
+    if (submit) submit.disabled = true;
     try {
       const account = window.StudyLabAccount;
       if (!account?.ready) throw new Error("StudyLab account is unavailable.");
@@ -375,12 +375,16 @@
       mandatoryProfile = false;
       updateRequiredFields();
       updateStudyRoomValidation();
-      showStatus("Your profile has been saved to your StudyLab account ✓");
+      profileStatus.hidden = true;
+      profileStatus.textContent = "";
       window.dispatchEvent(new CustomEvent("studylab-profile-updated", { detail: p }));
       window.setTimeout(() => {
         closeModal(true);
         const params = new URLSearchParams(window.location.search);
-        if (params.get("completeProfile") === "1") {
+        // On the Study Room page, close the modal in place so the room appears
+        // immediately behind it. The redirect is only for legacy home-page gates.
+        if (!window.location.pathname.endsWith("/study-room.html") &&
+            params.get("completeProfile") === "1") {
           const returnTo = params.get("returnTo") || "";
           if (returnTo.startsWith("/") && !returnTo.startsWith("//") && !returnTo.includes("\\")) {
             window.setTimeout(() => window.location.replace(returnTo), 380);
@@ -392,7 +396,7 @@
       showStatus(error?.message || "Your profile could not be saved. Please try again.", true);
       if (submit) submit.textContent = "Try saving again";
     } finally {
-      if (submit) submit.disabled = false;
+      if (submit) { submit.disabled = false; submit.textContent = "Save profile"; }
     }
   });
 
