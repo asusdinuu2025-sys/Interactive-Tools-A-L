@@ -1748,6 +1748,7 @@
     panel.hidden = true;
     launcher.setAttribute("aria-expanded", "false");
     launcher.classList.remove("is-open");
+    character.setAttribute("aria-expanded", "false");
   });
 
   launcher.addEventListener("click", (event) => {
@@ -1780,7 +1781,63 @@
   character.addEventListener("keydown", (event) => {
     if (event.key !== "Enter" && event.key !== " ") return;
     event.preventDefault();
+    if (event.key === "Enter") {
+      const opening = panel.hidden;
+      panel.hidden = !opening;
+      character.setAttribute("aria-expanded", String(opening));
+      if (opening) updateControls();
+      return;
+    }
     registerTap();
+  });
+
+  // The bot itself replaces the separate floating Pet icon. Double-click it to open controls.
+  character.setAttribute("aria-controls", "studylabPetPanel");
+  character.setAttribute("aria-expanded", "false");
+  character.addEventListener("dblclick", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const opening = panel.hidden;
+    panel.hidden = !opening;
+    character.setAttribute("aria-expanded", String(opening));
+    if (opening) updateControls();
+  });
+
+  document.addEventListener("studylab:room-theme-change", (event) => {
+    if (!state.enabled) return;
+    const theme = event.detail?.theme || "midnight-blue";
+    const reactions = {
+      dark: ["focused", "alert", "sly"],
+      light: ["delighted", "happy", "curious"],
+      "midnight-blue": ["focused", "curious", "alert"],
+      "forest-green": ["happy", "curious", "delighted"],
+      lavender: ["shy", "curious", "delighted"],
+      pinky: ["cute", "happy", "shy"],
+      ocean: ["surprised", "delighted", "curious"],
+      "warm-sand": ["relieved", "happy", "focused"]
+    };
+    const messages = {
+      dark: "Charcoal mode. Quiet, sharp, focused.",
+      light: "A brighter room! My eyes are ready.",
+      "midnight-blue": "Midnight Blue restored. Home screen energy.",
+      "forest-green": "Fresh forest colors. Let’s grow that focus.",
+      lavender: "Lavender mode. Calm vibes, clever ideas.",
+      pinky: "Pinky! That’s a lively change.",
+      ocean: "Ocean mode activated. Cool colors, clear mind.",
+      "warm-sand": "Warm Sand. Cozy colors, serious studying."
+    };
+    setExpression(pick(reactions[theme] || reactions["midnight-blue"]), 1500, true);
+    showThought(messages[theme] || messages["midnight-blue"], 2100, true);
+    character.classList.remove("is-theme-reacting");
+    void character.offsetWidth;
+    character.classList.add("is-theme-reacting");
+    clearTimeout(state.themeReactionTimer);
+    state.themeReactionTimer = setTimeout(() => character.classList.remove("is-theme-reacting"), 1250);
+    state.sleeping = false;
+    state.lastActivity = now();
+    state.nextSleepAt = now() + random(10000, 15000);
+    state.nextMoveAt = now() + random(180, 420);
+    triggerReactionAnimation(1050);
   });
 
   const rememberPointer = (event) => {
