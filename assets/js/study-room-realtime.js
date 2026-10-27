@@ -48,7 +48,9 @@
     const kind = gender === "female" ? "female" : "male";
     element.classList.add("room-avatar-gender", "room-avatar-" + kind);
     element.setAttribute("aria-label", kind + " profile icon");
-    element.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3.2"></circle><path d="M5.5 20v-2.1a6.5 6.5 0 0 1 13 0V20z"></path></svg>';
+    element.innerHTML = kind === "female"
+      ? '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3.2"></circle><path d="M7 20l1-4.2a4.1 4.1 0 0 1 8 0l1 4.2z"></path></svg>'
+      : '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3.2"></circle><path d="M4.5 20v-2.5a7.5 7.5 0 0 1 15 0V20z"></path></svg>';
   }
   function say(text, isError = false) {
     notice.textContent = text;
