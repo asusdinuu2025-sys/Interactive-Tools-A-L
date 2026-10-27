@@ -37,10 +37,19 @@
     return [Math.floor(seconds/3600), Math.floor(seconds%3600/60), seconds%60]
       .map(n => String(n).padStart(2,'0')).join(':');
   };
-  const compact = seconds => {
-    seconds = Math.max(0, Math.floor(seconds || 0));
-    return Math.floor(seconds/3600) + 'h ' + Math.floor(seconds%3600/60) + 'm';
-  };
+  const compact = seconds => fmt(seconds);
+  function isProfileComplete(p) {
+    return Boolean(p?.profile_completed_at && p?.display_name &&
+      !/^Student\d{4}$/.test(p.display_name) && p?.exam_year &&
+      p?.study_stream && ["male", "female"].includes(p?.gender));
+  }
+  function setGenderIcon(element, gender) {
+    if (!element) return;
+    const kind = gender === "female" ? "female" : "male";
+    element.classList.add("room-avatar-gender", "room-avatar-" + kind);
+    element.setAttribute("aria-label", kind + " profile icon");
+    element.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3.2"></circle><path d="M5.5 20v-2.1a6.5 6.5 0 0 1 13 0V20z"></path></svg>';
+  }
   function say(text, isError = false) {
     notice.textContent = text;
     notice.style.borderColor = isError ? 'rgba(255,105,105,.35)' : '';
@@ -84,12 +93,11 @@
       active.sort((a,b) => a.display_name.localeCompare(b.display_name)).forEach(r => {
         const card = document.createElement('article');
         card.className = 'room-person-card';
-        const initial = (r.display_name || 'S').trim().charAt(0).toUpperCase();
         const today = r.today_date === dayKey(new Date()) ? r.today_seconds : 0;
         card.innerHTML = '<div class="room-person-card-top"><div class="room-avatar"></div><span class="room-person-status">Studying now</span></div>' +
           '<div class="room-person-card-name"></div><div class="room-person-card-subject"></div>' +
           '<div class="room-person-card-divider"></div><div class="room-person-card-time-label">Today\'s study time</div><div class="room-person-card-time"></div>';
-        card.querySelector('.room-avatar').textContent = initial;
+        setGenderIcon(card.querySelector('.room-avatar'), r.gender);
         card.querySelector('.room-person-card-name').textContent = r.display_name;
         card.querySelector('.room-person-card-subject').textContent = r.subject;
         card.querySelector('.room-person-card-time').textContent = fmt(today);
@@ -113,7 +121,7 @@
         item.innerHTML = '<span class="room-rank-number"></span><div class="room-avatar"></div>' +
           '<div class="room-rank-info"><strong></strong><span></span></div><span class="room-time"></span>';
         item.querySelector('.room-rank-number').textContent = String(i+1);
-        item.querySelector('.room-avatar').textContent = (r.display_name || 'S').trim().charAt(0).toUpperCase();
+        setGenderIcon(item.querySelector('.room-avatar'), r.gender);
         item.querySelector('.room-rank-info strong').textContent = r.display_name;
         item.querySelector('.room-rank-info span').textContent = r.subject;
         item.querySelector('.room-time').textContent = compact(r.score);
@@ -127,7 +135,7 @@
   }
   async function loadRows() {
     const {data,error} = await client.from('study_room_live').select(
-      'user_id,display_name,subject,is_studying,session_started_at,last_heartbeat_at,today_seconds,today_date,week_seconds,week_start'
+      'user_id,display_name,gender,subject,is_studying,session_started_at,last_heartbeat_at,today_seconds,today_date,week_seconds,week_start'
     );
     if (error) throw error;
     rows = data || [];
@@ -194,6 +202,11 @@
       const user = account.getUser?.();
       if (!client || !user?.id) throw new Error('StudyLab student identity is unavailable.');
       userId = user.id;
+      const profile = await account.getProfile(true);
+      if (!isProfileComplete(profile)) {
+        window.location.replace('index.html?completeProfile=1&returnTo=study-room.html');
+        return;
+      }
       await callRpc('study_room_ensure_profile');
       await loadRows();
       const own = rows.find(r => r.user_id === userId);
@@ -230,5 +243,7 @@
     }
   }
   updateSessionUI(false);
+  join.disabled = true;
+  leave.disabled = true;
   init();
 })();
