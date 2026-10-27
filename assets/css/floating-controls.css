@@ -299,6 +299,7 @@ body.study-room-page .study-chat-button .study-chat-button-icon svg {
 }
 @media (max-width: 720px) {
   body.study-room-page .study-chat-button {
+    right: 12px !important;
     width: auto !important;
     min-width: 104px !important;
     height: 46px !important;
