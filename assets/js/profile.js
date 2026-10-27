@@ -268,7 +268,6 @@
       setButtonProfile(p);
       updateCopy(p);
       mandatoryProfile = false;
-      mandatoryProfile = false;
       updateRequiredFields();
       showStatus("Your profile has been saved to your StudyLab account ✓");
       window.dispatchEvent(new CustomEvent("studylab-profile-updated", { detail: p }));
