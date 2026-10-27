@@ -1229,3 +1229,24 @@ html[data-theme="light"] .sl-pet-setting-buttons button[data-pet-eye="pink"].is-
     padding: 0;
   }
 }
+
+
+/* Study Room companion: no separate floating bot launcher, only the living character. */
+#studylabPetLauncher { display:none !important; visibility:hidden !important; pointer-events:none !important; }
+.sl-pet-character.is-theme-reacting .sl-pet-visual {
+  animation: slPetThemeBurst .92s cubic-bezier(.2,.85,.25,1) 2;
+}
+.sl-pet-character.is-theme-reacting {
+  filter: drop-shadow(0 0 12px var(--room-pet-accent, #79dfff));
+}
+@keyframes slPetThemeBurst {
+  0%,100% { transform:translateY(0) scale(1) rotate(0); }
+  18% { transform:translateY(-13px) scale(1.06,1.12) rotate(-4deg); }
+  34% { transform:translateY(0) scale(1.12,.88) rotate(3deg); }
+  50% { transform:translateY(-8px) scale(.98,1.07) rotate(2deg); }
+  68% { transform:translateY(0) scale(1.04,.96) rotate(-2deg); }
+  82% { transform:translateY(-3px) scale(1.01,1.02) rotate(1deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sl-pet-character.is-theme-reacting .sl-pet-visual { animation:none !important; }
+}
