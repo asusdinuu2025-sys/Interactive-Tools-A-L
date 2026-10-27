@@ -743,7 +743,7 @@
     button.setAttribute("aria-expanded", "false");
     button.setAttribute("aria-controls", "studyQuickAccessPanel");
     button.innerHTML =
-      '<span aria-hidden="true">⚡</span><span>Quick</span>';
+      '<span class="study-quick-button-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M13.2 2.5 5.8 13h5l-.7 8.5L18.2 11h-5.1l.1-8.5Z"/></svg></span><span>Quick</span>';
 
     const panel = document.createElement("aside");
     panel.className = "study-quick-panel";
