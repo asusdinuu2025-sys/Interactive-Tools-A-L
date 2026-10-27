@@ -6,6 +6,7 @@
   const liveLabel = $('roomLiveLabel');
   const activeCount = $('activeCount');
   const weeklyHours = $('weeklyHours');
+  const yourRank = $('yourRank');
   const status = $('yourStatus');
   const subject = $('studySubject');
   const goal = $('dailyGoal');
@@ -39,9 +40,13 @@
   };
   const compact = seconds => fmt(seconds);
   function isProfileComplete(p) {
+    const phoneDigits = String(p?.phone || "").replace(/\D/g, "");
     return Boolean(p?.profile_completed_at && p?.display_name &&
-      !/^Student\d{4}$/.test(p.display_name) && p?.exam_year &&
-      p?.study_stream && ["male", "female"].includes(p?.gender));
+      !/^Student\d{4}$/.test(String(p.display_name)) &&
+      String(p?.school || "").trim().length >= 2 &&
+      phoneDigits.length >= 9 && phoneDigits.length <= 12 &&
+      p?.exam_year && p?.study_stream &&
+      ["male", "female"].includes(p?.gender));
   }
   function setGenderIcon(element, gender) {
     if (!element) return;
@@ -86,6 +91,15 @@
       now - new Date(r.last_heartbeat_at).getTime() < 90000);
     activeCount.textContent = String(active.length);
     const own = rows.find(r => r.user_id === userId) || member;
+    const currentWeek = weekStart(new Date());
+    const weeklyRanked = rows
+      .map(r => ({...r, rankScore: r.week_start === currentWeek ? Number(r.week_seconds) || 0 : 0}))
+      .sort((a,b) => b.rankScore - a.rankScore);
+    const ownRankIndex = weeklyRanked.findIndex(r => r.user_id === userId);
+    yourRank.textContent = ownRankIndex >= 0 ? '#' + (ownRankIndex + 1) : '—';
+    yourRank.title = ownRankIndex >= 0
+      ? 'Ranked by total study time this week among Study Room members'
+      : 'Your rank appears after your Study Room record is available';
     const thisWeek = own && own.week_start === weekStart(new Date())
       ? Number(own.week_seconds) || 0 : 0;
     const pendingWeek = own && own.is_studying && own.last_heartbeat_at
@@ -115,7 +129,7 @@
     const bucket = selectedBoard === 'daily' ? 'today_date' : 'week_start';
     const expected = selectedBoard === 'daily' ? dayKey(new Date()) : weekStart(new Date());
     const ranked = rows.map(r => ({...r, score: r[bucket] === expected ? Number(r[field]) || 0 : 0}))
-      .sort((a,b) => b.score - a.score).slice(0,10);
+      .sort((a,b) => b.score - a.score);
     board.replaceChildren();
     if (!ranked.length) {
       board.innerHTML = '<p class="room-empty">The leaderboard will appear as students study.</p>';
@@ -209,7 +223,17 @@
       userId = user.id;
       const profile = await account.getProfile(true);
       if (!isProfileComplete(profile)) {
-        window.location.replace('index.html?completeProfile=1&returnTo=study-room.html');
+        join.disabled = true;
+        leave.disabled = true;
+        say('Complete your profile to enter the Study Room.', true);
+        // The profile window is displayed over this page. Once its save event
+        // confirms a complete profile, initialise the live room in place.
+        const resumeAfterProfileSave = event => {
+          if (!isProfileComplete(event.detail)) return;
+          window.removeEventListener('studylab-profile-updated', resumeAfterProfileSave);
+          init();
+        };
+        window.addEventListener('studylab-profile-updated', resumeAfterProfileSave);
         return;
       }
       await callRpc('study_room_ensure_profile');

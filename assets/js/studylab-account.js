@@ -131,6 +131,7 @@
     if (cleanName.length > 60) throw new Error("Please keep your name under 60 characters.");
     if (!user) await ready;
 
+    const requireFullProfile = details.require_full_profile === true;
     const cleanOptional = value => {
       const result = String(value || "").trim().replace(/\s+/g, " ");
       return result || null;
@@ -140,9 +141,17 @@
     const examYear = String(details.exam_year || "").trim();
     const studyStream = String(details.study_stream || "").trim();
     const gender = String(details.gender || "").trim();
-    if (!school || school.length < 2) throw new Error("Please enter your school name.");
+
+    if (school && school.length < 2) throw new Error("Please enter a valid school name.");
+    if (requireFullProfile && !school) throw new Error("Please enter your school name.");
+
     const phoneDigits = phone ? phone.replace(/\D/g, "") : "";
-    if (phoneDigits.length < 9 || phoneDigits.length > 12) throw new Error("Please enter a valid mobile number (9–12 digits, including country code if used).");
+    if (phone && (phoneDigits.length < 9 || phoneDigits.length > 12)) {
+      throw new Error("Please enter a valid mobile number (9–12 digits, including country code if used).");
+    }
+    if (requireFullProfile && !phone) {
+      throw new Error("Please enter your mobile number.");
+    }
 
     if (!["2026", "2027", "2028", "2029", "Other"].includes(examYear)) {
       throw new Error("Please choose your A/L examination year.");
@@ -150,10 +159,18 @@
     if (!["Physical Science", "Biological Science", "Commerce", "Arts", "Engineering Technology", "Bio Systems Technology", "Other"].includes(studyStream)) {
       throw new Error("Please choose your study stream.");
     }
-    if (!["male", "female"].includes(gender)) {
+    if (gender && !["male", "female"].includes(gender)) {
+      throw new Error("Please choose a valid profile icon.");
+    }
+    if (requireFullProfile && !["male", "female"].includes(gender)) {
       throw new Error("Please choose a profile icon.");
     }
 
+    const fullDetailsComplete = Boolean(
+      school && school.length >= 2 &&
+      phone && phoneDigits.length >= 9 && phoneDigits.length <= 12 &&
+      ["male", "female"].includes(gender)
+    );
     const now = new Date().toISOString();
     const { data, error } = await client
       .from("studylab_profiles")
@@ -164,8 +181,8 @@
         phone,
         exam_year: examYear,
         study_stream: studyStream,
-        gender,
-        profile_completed_at: now,
+        gender: gender || null,
+        profile_completed_at: fullDetailsComplete ? (profile?.profile_completed_at || now) : null,
         updated_at: now
       }, { onConflict: "id" })
       .select("id,display_name,school,phone,exam_year,study_stream,gender,profile_completed_at,created_at,updated_at")
@@ -257,16 +274,7 @@
     saveProfile
   };
 
-  // Anonymous sign-in happens automatically. Incomplete profiles are sent to
-  // the profile form before entering pages that initialise a StudyLab account.
-  ready.then(async function () {
-    const path = window.location.pathname;
-    if (path === "/" || path.endsWith("/index.html")) return;
-    const currentProfile = await getProfile(true);
-    if (isProfileComplete(currentProfile)) return;
-    const returnTo = path + window.location.search + window.location.hash;
-    window.location.replace("/index.html?completeProfile=1&returnTo=" + encodeURIComponent(returnTo));
-  }).catch(function (error) {
-    console.warn("StudyLab required profile gate:", error);
-  });
+  // The Study Room page now owns its profile gate and displays the existing
+  // profile modal over the room itself. Do not redirect away from the room.
+
 })();
