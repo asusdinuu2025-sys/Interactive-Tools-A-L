@@ -7,7 +7,10 @@
 (function () {
   "use strict";
 
-  const pagePath = window.location.pathname.replace(/\\/+$/, "") || "/";\n  if (!(pagePath === "/" || pagePath.endsWith("/index.html"))) return;\n\n  if (window.__StudyLabLivingPetPR30) return;
+  const pagePath = window.location.pathname.replace(/\/+$/, "") || "/";
+  if (!(pagePath === "/" || pagePath.endsWith("/index.html"))) return;
+
+  if (window.__StudyLabLivingPetPR30) return;
   window.__StudyLabLivingPetPR30 = true;
 
   const KEY = {
