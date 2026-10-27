@@ -42,9 +42,13 @@
     const schoolLabel = document.querySelector('label[for="profileSchool"]');
     const phoneLabel = document.querySelector('label[for="profilePhone"]');
     const genderLegend = document.querySelector(".profile-gender-field legend");
+    const phoneHint = document.getElementById("profilePhoneHint");
     if (schoolLabel) schoolLabel.innerHTML = mandatoryProfile ? 'School <span aria-hidden="true">*</span>' : 'School <span class="profile-optional">Optional</span>';
     if (phoneLabel) phoneLabel.innerHTML = mandatoryProfile ? 'Mobile number <span aria-hidden="true">*</span>' : 'Mobile number <span class="profile-optional">Optional</span>';
     if (genderLegend) genderLegend.innerHTML = mandatoryProfile ? 'Profile icon <span aria-hidden="true">*</span>' : 'Profile icon <span class="profile-optional">Optional</span>';
+    if (phoneHint) phoneHint.textContent = mandatoryProfile
+      ? "Required to enter the Study Room. Enter 9–12 digits, including country code if used."
+      : "Optional. Required only to enter the Study Room.";
     if (profileClose) { profileClose.hidden = mandatoryProfile; profileClose.disabled = mandatoryProfile; }
     if (profileSkip) profileSkip.hidden = mandatoryProfile;
   }
