@@ -116,13 +116,17 @@
         card.innerHTML = '<div class="room-person-card-top"><div class="room-avatar"></div><span class="room-person-status">Studying now</span></div>' +
           '<div class="room-person-card-name"></div><div class="room-person-card-subject"></div>' +
           '<div class="room-person-card-divider"></div><div class="room-person-card-time-label">Today\'s study time</div><div class="room-person-card-time"></div>';
-        const ownAvatar = card.querySelector('.room-avatar');
-        setGenderIcon(ownAvatar, r.gender);
-        if (r.user_id === userId) {
-          ownAvatar.classList.add('slr-own-avatar');
-          ownAvatar.classList.toggle('is-studying', Boolean(r.is_studying && r.last_heartbeat_at &&
-            now - new Date(r.last_heartbeat_at).getTime() < 90000));
-        }
+        const avatar = card.querySelector('.room-avatar');
+        setGenderIcon(avatar, r.gender);
+        const neonPalette = [['#45ddff','#087da0'],['#b79aff','#7040c7'],['#55edb0','#08794e'],['#ffd166','#9a5b00'],['#ff83c8','#b21b70'],['#ff8b6b','#b83b22']];
+        const identity = String(r.user_id || r.display_name || 'student');
+        let colourHash = 0;
+        for (let index = 0; index < identity.length; index++) colourHash = (colourHash * 31 + identity.charCodeAt(index)) | 0;
+        const neon = neonPalette[Math.abs(colourHash) % neonPalette.length];
+        avatar.classList.add('slr-neon-avatar');
+        avatar.style.setProperty('--slr-neon-dark', neon[0]);
+        avatar.style.setProperty('--slr-neon-light', neon[1]);
+        avatar.title = 'Studying now';
         card.querySelector('.room-person-card-name').textContent = r.display_name;
         card.querySelector('.room-person-card-subject').textContent = r.subject;
         card.querySelector('.room-person-card-time').textContent = fmt(today);
