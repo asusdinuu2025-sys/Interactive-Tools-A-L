@@ -5,12 +5,6 @@ function init(){
  const hero=document.querySelector('.room-hero'),layout=document.querySelector('.room-layout'),actions=document.querySelector('.room-session-actions'),board=document.getElementById('leaderboardList');
  if(!hero||!layout||!actions||document.getElementById('slrEnhancementsReady'))return;
  const marker=document.createElement('span');marker.id='slrEnhancementsReady';marker.hidden=true;document.querySelector('.room-page')?.append(marker);
- const toolbar=document.createElement('div');toolbar.className='slr-toolbar';toolbar.innerHTML='<div class="slr-toolbar-copy"><strong>Room appearance</strong><span>Personal theme · only changes this page</span></div><label><span class="sr-only">Choose room theme</span><select class="slr-theme-select" id="slrThemeSelect"><option value="midnight">🌌 Midnight Blue</option><option value="warm">📚 Warm Library</option><option value="light">☀️ Clean Light</option><option value="pinky">🌸 Pinky</option></select></label>';
- const stats=hero.querySelector('.room-stats');if(stats)stats.insertAdjacentElement('afterend',toolbar);else hero.append(toolbar);
- const themeSelect=document.getElementById('slrThemeSelect'),themeKey='studylab-room-theme-v1';
- const applyTheme=value=>{document.body.classList.remove('slr-theme-warm','slr-theme-light','slr-theme-pinky');if(value==='warm')document.body.classList.add('slr-theme-warm');if(value==='light')document.body.classList.add('slr-theme-light');if(value==='pinky')document.body.classList.add('slr-theme-pinky');themeSelect.value=value;};
- try{applyTheme(localStorage.getItem(themeKey)||'midnight')}catch(_){applyTheme('midnight')}
- themeSelect.addEventListener('change',()=>{applyTheme(themeSelect.value);try{localStorage.setItem(themeKey,themeSelect.value)}catch(_){}});
  const focus=document.createElement('section');focus.className='slr-focus-card';focus.setAttribute('aria-label','Optional focus timer');
  focus.innerHTML='<div class="slr-focus-head"><div><strong>Optional focus timer</strong><small>Separate from your official Study Room time</small></div><span class="slr-focus-mode" id="slrFocusMode">FOCUS</span></div><div class="slr-focus-clock" id="slrFocusClock" role="timer" aria-live="off">25:00</div><div class="slr-focus-track" aria-hidden="true"><span id="slrFocusProgress"></span></div><div class="slr-focus-actions"><button type="button" class="slr-focus-primary" id="slrFocusStart">▶ Start</button><button type="button" id="slrFocusReset">↺ Reset</button><button type="button" id="slrFocusBreak">☕ 5-min break</button></div><small class="slr-focus-note">A gentle focus guide. The existing Join Study / Leave Study buttons still control official room time.</small>';
  actions.insertAdjacentElement('afterend',focus);
@@ -36,8 +30,43 @@ function init(){
  let startedAt=null;const status=document.getElementById('yourStatus');if(status?.textContent.trim()==='Studying')startedAt=Date.now();
  if(status)new MutationObserver(()=>{const v=status.textContent.trim();if(v==='Studying'&&!startedAt)startedAt=Date.now();if(v!=='Studying'&&startedAt){const elapsed=Date.now()-startedAt;startedAt=null;if(elapsed>=600000)qualify();}}).observe(status,{childList:true,characterData:true,subtree:true});
  renderStreak();renderAchievements();const weekly=document.getElementById('weeklyHours');if(weekly)new MutationObserver(renderAchievements).observe(weekly,{childList:true,characterData:true,subtree:true});setInterval(renderAchievements,15000);
- const decorate=()=>{if(!board)return;const period=document.getElementById('dailyBoardTab')?.classList.contains('active')?'Today':'This week';board.querySelectorAll('.room-rank').forEach((row,i)=>{row.classList.remove('slr-podium-1','slr-podium-2','slr-podium-3');const avatar=row.querySelector('.room-avatar');const info=row.querySelector('.room-rank-info');let title=info?.querySelector('.slr-leader-title');if(i>2){avatar?.classList.remove('slr-crown-avatar');avatar?.removeAttribute('data-slr-crown');title?.remove();return;}row.classList.add('slr-podium-'+(i+1));if(i!==0||!avatar){avatar?.classList.remove('slr-crown-avatar');avatar?.removeAttribute('data-slr-crown');title?.remove();return;}const female=avatar.classList.contains('room-avatar-female')||avatar.classList.contains('room-avatar-gender')&&/female/i.test(avatar.getAttribute('aria-label')||'')||!!avatar.querySelector('svg path[d*="M7 20"]');const crown=female?'♕':'♛';const label=female?'Study Queen · '+period+' leader':'Study King · '+period+' leader';avatar.classList.add('slr-crown-avatar');avatar.setAttribute('data-slr-crown',crown);avatar.setAttribute('aria-label',label);if(!title){title=document.createElement('span');title.className='slr-leader-title';info?.append(title);}if(title.textContent!==label)title.textContent=label;});};
- if(board)new MutationObserver(decorate).observe(board,{childList:true,subtree:true});document.getElementById('weeklyBoardTab')?.addEventListener('click',()=>setTimeout(decorate,0));document.getElementById('dailyBoardTab')?.addEventListener('click',()=>setTimeout(decorate,0));decorate();
+ const decorate=()=>{
+  if(!board)return;
+  const period=document.getElementById('dailyBoardTab')?.classList.contains('active')?'Today':'This week';
+  const rankedRows=[...board.querySelectorAll('.room-rank')];
+  let king=null,queen=null;
+  rankedRows.forEach((row,i)=>{
+   row.classList.remove('slr-podium-1','slr-podium-2','slr-podium-3');
+   const avatar=row.querySelector('.room-avatar');
+   const info=row.querySelector('.room-rank-info');
+   const title=info?.querySelector('.slr-leader-title');
+   avatar?.classList.remove('slr-crown-avatar');
+   avatar?.removeAttribute('data-slr-crown');
+   title?.remove();
+   if(i<3)row.classList.add('slr-podium-'+(i+1));
+   if(!avatar)return;
+   if(avatar.classList.contains('room-avatar-male')&&!king)king=row;
+   if(avatar.classList.contains('room-avatar-female')&&!queen)queen=row;
+  });
+  const crownWinner=(row,gender)=>{
+   if(!row)return;
+   const avatar=row.querySelector('.room-avatar');
+   const info=row.querySelector('.room-rank-info');
+   if(!avatar||!info)return;
+   const isQueen=gender==='female';
+   const crown=isQueen?'♕':'♛';
+   const label=(isQueen?'Study Queen':'Study King')+' · '+period+' leader';
+   avatar.classList.add('slr-crown-avatar');
+   avatar.setAttribute('data-slr-crown',crown);
+   avatar.setAttribute('aria-label',label);
+   const title=document.createElement('span');
+   title.className='slr-leader-title';
+   title.textContent=label;
+   info.append(title);
+  };
+  crownWinner(king,'male');
+  crownWinner(queen,'female');
+ }; if(board)new MutationObserver(decorate).observe(board,{childList:true,subtree:true});document.getElementById('weeklyBoardTab')?.addEventListener('click',()=>setTimeout(decorate,0));document.getElementById('dailyBoardTab')?.addEventListener('click',()=>setTimeout(decorate,0));decorate();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
