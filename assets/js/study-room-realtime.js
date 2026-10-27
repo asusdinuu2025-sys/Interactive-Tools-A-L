@@ -129,7 +129,7 @@
     const bucket = selectedBoard === 'daily' ? 'today_date' : 'week_start';
     const expected = selectedBoard === 'daily' ? dayKey(new Date()) : weekStart(new Date());
     const ranked = rows.map(r => ({...r, score: r[bucket] === expected ? Number(r[field]) || 0 : 0}))
-      .sort((a,b) => b.score - a.score).slice(0,10);
+      .sort((a,b) => b.score - a.score);
     board.replaceChildren();
     if (!ranked.length) {
       board.innerHTML = '<p class="room-empty">The leaderboard will appear as students study.</p>';
