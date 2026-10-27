@@ -35,6 +35,33 @@ html[data-theme="light"] .room-hero{background:linear-gradient(120deg,rgba(224,2
 @keyframes room-orbit-drift{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 @media(max-width:600px){.room-science-bg:before{background-size:38px 38px;opacity:.5}.room-science-symbol{font-size:17px;opacity:.6}.room-science-symbol:nth-child(2){right:2%;top:28%}.room-science-symbol:nth-child(4){right:3%;bottom:9%}.room-science-bg:after{width:95vw;right:-55vw;top:30vh}.room-hero:after{right:-190px;top:-110px;width:250px;height:250px}}
 @media(prefers-reduced-motion:reduce){.room-science-symbol,.room-science-bg:after{animation:none!important}.room-panel{transition:none!important}}
+
+/* Full-profile gate: blur the room in place without redirecting students home. */
+#roomProfileGate[hidden]{display:none!important}
+#roomProfileGate{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;padding:18px;background:rgba(5,10,20,.48);backdrop-filter:blur(12px) saturate(80%);-webkit-backdrop-filter:blur(12px) saturate(80%);overflow-y:auto}
+#roomProfileGate .gate-card{width:min(560px,100%);max-height:min(92vh,900px);overflow:auto;padding:clamp(20px,4vw,32px);border:1px solid rgba(255,255,255,.16);border-radius:24px;background:rgba(14,23,39,.96);color:#f1f5f9;box-shadow:0 30px 100px rgba(0,0,0,.45)}
+#roomProfileGate h2{margin:0 0 8px;font-size:1.55rem}
+#roomProfileGate .gate-intro{margin:0 0 16px;color:#bdc8d8;line-height:1.55;font-size:.9rem}
+#roomProfileGate .gate-error{margin:0 0 16px;padding:11px 13px;border:1px solid rgba(239,68,68,.6);border-radius:12px;background:rgba(239,68,68,.12);color:#fecaca;font-size:.86rem;font-weight:700}
+#roomProfileGate .gate-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#roomProfileGate .gate-field{display:grid;gap:6px;min-width:0;margin-bottom:12px}
+#roomProfileGate .gate-field label,#roomProfileGate legend{font-size:.8rem;font-weight:750;color:#dbe5f2}
+#roomProfileGate input,#roomProfileGate select{width:100%;min-height:45px;padding:10px 12px;border:1px solid rgba(148,163,184,.35);border-radius:11px;background:#101b2d;color:#f8fafc;font:inherit}
+#roomProfileGate input:focus,#roomProfileGate select:focus{outline:2px solid rgba(96,165,250,.55);outline-offset:1px}
+#roomProfileGate .gate-invalid{border-color:#ef4444!important;box-shadow:0 0 0 2px rgba(239,68,68,.22)!important;background-color:rgba(127,29,29,.22)!important}
+#roomProfileGate fieldset{margin:0 0 14px;padding:0;border:0}
+#roomProfileGate .gate-icons{display:flex;gap:10px;margin-top:8px}
+#roomProfileGate .gate-icon{flex:1;min-height:54px;border:1px solid rgba(148,163,184,.35);border-radius:12px;background:#101b2d;color:#f8fafc;font:inherit;font-weight:700;cursor:pointer}
+#roomProfileGate .gate-icon[aria-pressed="true"]{border-color:#60a5fa;background:rgba(59,130,246,.18)}
+#roomProfileGate .gate-save{width:100%;min-height:48px;border:0;border-radius:13px;background:linear-gradient(135deg,#26b98d,#168b78);color:white;font:inherit;font-weight:850;cursor:pointer}
+#roomProfileGate .gate-save:disabled{opacity:.65;cursor:wait}
+#roomProfileGate .gate-status{min-height:1.2em;margin:10px 0 0;color:#fca5a5;font-size:.82rem}
+@media(max-width:520px){#roomProfileGate .gate-grid{grid-template-columns:1fr;gap:0}#roomProfileGate .gate-card{padding:20px}}
+html[data-theme="light"] #roomProfileGate .gate-card{background:rgba(255,255,255,.98);color:#172033;border-color:#d8e2ef}
+html[data-theme="light"] #roomProfileGate .gate-intro,html[data-theme="light"] #roomProfileGate .gate-field label,html[data-theme="light"] #roomProfileGate legend{color:#475569}
+html[data-theme="light"] #roomProfileGate input,html[data-theme="light"] #roomProfileGate select,html[data-theme="light"] #roomProfileGate .gate-icon{background:#f3f6fb;color:#172033;border-color:#cbd5e1}
+html[data-theme="light"] #roomProfileGate .gate-icon[aria-pressed="true"]{background:#dbeafe}
+
 </style><link rel="stylesheet" href="assets/css/floating-controls.css?v=20261027-chatfix">
 </head>
 <body class="study-room-page">
@@ -49,6 +76,27 @@ html[data-theme="light"] .room-hero{background:linear-gradient(120deg,rgba(224,2
 <section class="room-panel"><div class="room-panel-head"><h2>Studying now</h2><span class="room-live">Live attendance</span></div><div class="room-people-grid" id="peopleGrid"><p class="room-empty">Loading live attendance…</p></div></section>
 <section class="room-panel" style="grid-column:1/-1"><div class="room-panel-head"><h2>Study leaderboard</h2><div class="room-tabs" role="group" aria-label="Leaderboard period"><button type="button" class="room-tab active" id="dailyBoardTab" aria-pressed="true">Today</button><button type="button" class="room-tab" id="weeklyBoardTab" aria-pressed="false">This week</button></div></div><div class="room-list" id="leaderboardList"><p class="room-empty">Loading real study totals…</p></div></section></div><p class="room-footer-note">Study Room profiles use anonymous sign-in. Shared study totals are calculated by the server and displayed live.</p>
 </main>
+
+<div id="roomProfileGate" hidden>
+  <section class="gate-card" role="dialog" aria-modal="true" aria-labelledby="roomProfileTitle" aria-describedby="roomProfileError">
+    <h2 id="roomProfileTitle">Complete your profile</h2>
+    <p class="gate-intro">Your Study Room is ready. Complete all profile fields once to enter. You will not see this window again after your profile is complete.</p>
+    <p class="gate-error" id="roomProfileError" role="alert">To enter the Study Room, you must fill in all fields, including your profile icon.</p>
+    <form id="roomProfileForm" novalidate>
+      <div class="gate-grid">
+        <div class="gate-field"><label for="gateName">Full name *</label><input id="gateName" autocomplete="name" maxlength="60" required></div>
+        <div class="gate-field"><label for="gateSchool">School *</label><input id="gateSchool" autocomplete="organization" maxlength="120" required></div>
+        <div class="gate-field"><label for="gatePhone">Mobile number *</label><input id="gatePhone" autocomplete="tel" inputmode="tel" maxlength="24" required></div>
+        <div class="gate-field"><label for="gateYear">A/L examination year *</label><select id="gateYear" required><option value="">Choose year</option><option>2026</option><option>2027</option><option>2028</option><option>2029</option><option>Other</option></select></div>
+      </div>
+      <div class="gate-field"><label for="gateStream">Study stream *</label><select id="gateStream" required><option value="">Choose stream</option><option>Physical Science</option><option>Biological Science</option><option>Commerce</option><option>Arts</option><option>Engineering Technology</option><option>Bio Systems Technology</option><option>Other</option></select></div>
+      <fieldset id="gateGenderField"><legend>Profile icon *</legend><div class="gate-icons"><button type="button" class="gate-icon" data-gate-gender="male" aria-pressed="false">👨 Male</button><button type="button" class="gate-icon" data-gate-gender="female" aria-pressed="false">👩 Female</button></div></fieldset>
+      <button type="submit" class="gate-save" id="gateSave">Save profile and enter Study Room</button>
+      <p class="gate-status" id="gateStatus" role="status" aria-live="polite"></p>
+    </form>
+  </section>
+</div>
+
 <script src="assets/js/main.js?v=20261027-system-theme"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/js/studylab-account.js"></script>
