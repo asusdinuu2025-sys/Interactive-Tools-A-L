@@ -100,8 +100,10 @@ html[data-theme="light"] .studylab-ai-tools-row .studylab-ai-launcher {
     justify-content: center !important;
   }
   .study-quick-button { right: 20px !important; }
-  .study-chat-button { right: 144px !important; }
-  .study-feedback-button { right: 268px !important; }
+  .study-chat-button { right: 144px !important; width: 46px !important; min-width: 46px !important; padding: 0 !important; gap: 0 !important; }
+  .study-chat-button > span:not(.study-chat-button-icon):not(.study-chat-unread) { display: none !important; }
+  .study-feedback-button { right: 202px !important; }
+  .study-room-page .study-chat-button { right: 78px !important; }
 }
 
 /* Light theme: solid, readable surfaces rather than relying on glow. */
@@ -205,3 +207,16 @@ html[data-theme="light"] .profile-gender-male.is-selected { background: #eaf6ff;
 html[data-theme="light"] .profile-gender-female.is-selected { background: #fff0f8; }
 @media(max-width:520px) { .profile-name-gender-row { grid-template-columns: minmax(0,1fr) auto; gap: 8px; } .profile-gender-choice { width: 40px; height: 42px; } }
 @media(prefers-reduced-motion:reduce) { .profile-gender-choice { transition: none; } }
+
+/* Study Room profile icons. */
+.room-avatar-gender { display: grid; place-items: center; }
+.room-avatar-gender svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.room-avatar-male { color: #43b7ff; background: rgba(35, 160, 255, .12); border: 1px solid rgba(67, 183, 255, .25); }
+.room-avatar-female { color: #ff66c4; background: rgba(255, 75, 180, .12); border: 1px solid rgba(255, 102, 196, .25); }
+html[data-theme="light"] .room-avatar-male { color: #087ac4; background: #eaf6ff; border-color: #b6dfff; }
+html[data-theme="light"] .room-avatar-female { color: #c0278d; background: #fff0f8; border-color: #f6c1e1; }
+@media (min-width: 721px) {
+  .study-chat-button { width: 46px !important; min-width: 46px !important; padding: 0 !important; gap: 0 !important; }
+  .study-chat-button > span:not(.study-chat-button-icon):not(.study-chat-unread) { display: none !important; }
+  .study-room-page .study-chat-button { right: 78px !important; }
+}
