@@ -1627,7 +1627,6 @@
   </style>
 
   <link rel="stylesheet" href="assets/css/ai-tutor.css">
-  <link rel="stylesheet" href="assets/css/assistant-tray.css">
 </head>
 
 
@@ -2694,7 +2693,12 @@
 
   <div class="studylab-ai-tools-row" data-studylab-ai>
     <button type="button" class="studylab-ai-launcher" data-ai-launcher aria-expanded="false" aria-controls="studylabAiPanel" title="Open StudyLab AI">
-      <span class="studylab-ai-launcher-icon" aria-hidden="true">✨</span>
+      <span class="studylab-ai-launcher-icon" aria-hidden="true">
+        <svg viewBox="0 0 48 48" width="25" height="25" role="img" aria-label="Gemini">
+          <defs><linearGradient id="studylabGeminiGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#4285F4"/><stop offset="48%" stop-color="#9B72CB"/><stop offset="100%" stop-color="#D96570"/></linearGradient></defs>
+          <path fill="url(#studylabGeminiGradient)" d="M24 2.5C21.4 14.7 14.7 21.4 2.5 24 14.7 26.6 21.4 33.3 24 45.5 26.6 33.3 33.3 26.6 45.5 24 33.3 21.4 26.6 14.7 24 2.5Z"/>
+        </svg>
+      </span>
       <span class="studylab-ai-launcher-copy">
         <span class="studylab-ai-launcher-title">AI</span>
         <span class="studylab-ai-launcher-subtitle">StudyLab AI Tutor</span>
@@ -2720,20 +2724,10 @@
     </aside>
   </div>
 
-  <!-- Unified floating launcher for StudyLab Pet and AI. -->
-  <div class="studylab-assistant-tray" data-assistant-tray>
-    <button type="button" class="studylab-assistant-tray-button" data-assistant-tray-toggle
-      aria-expanded="false" aria-controls="studylabAssistantTrayMenu" aria-label="Open StudyLab assistants"
-      title="StudyLab assistants"><span aria-hidden="true">✦</span></button>
-    <div class="studylab-assistant-tray-menu" id="studylabAssistantTrayMenu" data-assistant-tray-menu hidden>
-      <button type="button" data-assistant-open="pet"><span aria-hidden="true">🤖</span><span>StudyLab Pet</span></button>
-      <button type="button" data-assistant-open="ai"><span aria-hidden="true">✨</span><span>StudyLab AI</span></button>
-    </div>
   </div>
 
   <script src="assets/js/ai-tutor.js" defer></script>
   <script src="assets/js/studylab-pet.js" defer></script>
-  <script src="assets/js/assistant-tray.js" defer></script>
 
 </body>
 </html>
