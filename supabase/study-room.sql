@@ -22,6 +22,21 @@ create table if not exists public.study_room_members (
   updated_at timestamptz not null default now()
 );
 
+ALTER TABLE public.study_room_members
+  ADD COLUMN IF NOT EXISTS today_time text
+  GENERATED ALWAYS AS (
+    lpad((today_seconds / 3600)::text, 2, '0') || ':' ||
+    lpad(((today_seconds % 3600) / 60)::text, 2, '0') || ':' ||
+    lpad((today_seconds % 60)::text, 2, '0')
+  ) STORED;
+ALTER TABLE public.study_room_members
+  ADD COLUMN IF NOT EXISTS week_time text
+  GENERATED ALWAYS AS (
+    lpad((week_seconds / 3600)::text, 2, '0') || ':' ||
+    lpad(((week_seconds % 3600) / 60)::text, 2, '0') || ':' ||
+    lpad((week_seconds % 60)::text, 2, '0')
+  ) STORED;
+
 -- Keep the subject constraint in sync when this script is rerun on an existing table.
 alter table public.study_room_members
   drop constraint if exists study_room_members_subject_check;
@@ -96,7 +111,8 @@ select m.user_id,
        study_room_private.display_name_for_member(m.user_id) as display_name,
        m.subject, m.is_studying, m.session_started_at, m.last_heartbeat_at,
        m.today_seconds, m.today_date, m.week_seconds, m.week_start, m.updated_at,
-       study_room_private.gender_for_member(m.user_id) as gender
+       study_room_private.gender_for_member(m.user_id) as gender,
+       m.today_time, m.week_time
 from public.study_room_members m;
 
 revoke all on public.study_room_live from public, anon, authenticated;
