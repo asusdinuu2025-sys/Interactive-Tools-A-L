@@ -2508,15 +2508,15 @@
             </fieldset>
           </div>
           <div class="profile-field">
-            <label for="profileSchool">School <span aria-hidden="true">*</span></label>
+            <label for="profileSchool">School <span class="profile-optional">Optional</span></label>
             <input class="profile-input" id="profileSchool" name="school" type="text" maxlength="120"
-                   autocomplete="organization" placeholder="Enter your school name" required />
+                   autocomplete="organization" placeholder="Enter your school name" />
           </div>
           <div class="profile-field">
-            <label for="profilePhone">Mobile number <span aria-hidden="true">*</span></label>
+            <label for="profilePhone">Mobile number <span class="profile-optional">Optional</span></label>
             <input class="profile-input" id="profilePhone" name="phone" type="tel" maxlength="20"
-                   autocomplete="tel" inputmode="tel" placeholder="07X XXX XXXX" required />
-            <p class="profile-hint">Required to complete your student profile. Enter 9–12 digits, including country code if used.</p>
+                   autocomplete="tel" inputmode="tel" placeholder="07X XXX XXXX" />
+            <p class="profile-hint" id="profilePhoneHint">Optional. Required only to enter the Study Room.</p>
           </div>
           <div class="profile-field">
             <label for="profileExamYear">A/L examination year <span aria-hidden="true">*</span></label>
@@ -2542,9 +2542,11 @@
         </div>
         <div class="profile-privacy">
           <span class="profile-privacy-icon" aria-hidden="true">🔒</span>
-          <span>Your profile is linked to your StudyLab student account. Row-level security restricts these details to your account. School and phone are optional; your phone number is not displayed publicly.</span>
+          <span>Your profile is linked to your StudyLab student account. School and mobile number are required only to enter the Study Room. Your phone number is not displayed publicly.</span>
         </div>
         <button class="profile-save" type="submit">Save profile</button>
+        <button class="profile-skip" id="profileSkip" type="button" hidden
+                style="width:100%;margin-top:10px;padding:11px 14px;border:1px solid rgba(150,190,220,.3);border-radius:12px;background:transparent;color:inherit;font:inherit;cursor:pointer;">Skip for now</button>
         <p class="profile-status" id="profileStatus" role="status" aria-live="polite" hidden></p>
       </form>
     </section>
