@@ -43,7 +43,6 @@ WITH (security_invoker = true) AS
 SELECT
   m.user_id,
   study_room_private.display_name_for_member(m.user_id) AS display_name,
-  study_room_private.gender_for_member(m.user_id) AS gender,
   m.subject,
   m.is_studying,
   m.session_started_at,
@@ -52,7 +51,8 @@ SELECT
   m.today_date,
   m.week_seconds,
   m.week_start,
-  m.updated_at
+  m.updated_at,
+  study_room_private.gender_for_member(m.user_id) AS gender
 FROM public.study_room_members m;
 
 REVOKE ALL ON public.study_room_live FROM PUBLIC, anon, authenticated;
