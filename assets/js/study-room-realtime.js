@@ -127,7 +127,7 @@
   }
   async function loadRows() {
     const {data,error} = await client.from('study_room_live').select(
-      'user_id,display_name,subject,is_studying,last_heartbeat_at,today_seconds,today_date,week_seconds,week_start'
+      'user_id,display_name,subject,is_studying,session_started_at,last_heartbeat_at,today_seconds,today_date,week_seconds,week_start'
     );
     if (error) throw error;
     rows = data || [];
@@ -177,7 +177,7 @@
     } catch (e) { say('Could not leave the room: ' + e.message, true); }
   }
   async function init() {
-    if (!cfg || !window.supabase) {
+    if (!cfg || !window.supabase || !window.StudyLabAccount) {
       say('Real-time sync is not configured yet. Add your Supabase Project URL and anon/public key in assets/js/study-room-config.js, then run the SQL in supabase/study-room.sql.', true);
       join.disabled = true; leave.disabled = true;
       liveLabel.textContent = 'Setup required';
@@ -186,15 +186,14 @@
       board.innerHTML = '<p class="room-empty">Real rankings will appear after setup. No sample scores are shown.</p>';
       return;
     }
-    client = window.supabase.createClient(window.STUDYLAB_SUPABASE_URL, window.STUDYLAB_SUPABASE_ANON_KEY);
     try {
-      let {data:{session}} = await client.auth.getSession();
-      if (!session) {
-        const {data,error} = await client.auth.signInAnonymously();
-        if (error) throw error;
-        session = data.session;
-      }
-      userId = session.user.id;
+      const account = window.StudyLabAccount;
+      if (!account?.ready) throw new Error('StudyLab account is unavailable. Reload the page and try again.');
+      await account.ready;
+      client = account.client;
+      const user = account.getUser?.();
+      if (!client || !user?.id) throw new Error('StudyLab student identity is unavailable.');
+      userId = user.id;
       await callRpc('study_room_ensure_profile');
       await loadRows();
       const own = rows.find(r => r.user_id === userId);
