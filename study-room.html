@@ -35,7 +35,6 @@ html[data-theme="light"] .room-hero{background:linear-gradient(120deg,rgba(224,2
 @keyframes room-orbit-drift{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 @media(max-width:600px){.room-science-bg:before{background-size:38px 38px;opacity:.5}.room-science-symbol{font-size:17px;opacity:.6}.room-science-symbol:nth-child(2){right:2%;top:28%}.room-science-symbol:nth-child(4){right:3%;bottom:9%}.room-science-bg:after{width:95vw;right:-55vw;top:30vh}.room-hero:after{right:-190px;top:-110px;width:250px;height:250px}}
 @media(prefers-reduced-motion:reduce){.room-science-symbol,.room-science-bg:after{animation:none!important}.room-panel{transition:none!important}}
-
 </style><link rel="stylesheet" href="assets/css/floating-controls.css?v=20261027-chatfix">
 </head>
 <body class="study-room-page">
@@ -50,65 +49,13 @@ html[data-theme="light"] .room-hero{background:linear-gradient(120deg,rgba(224,2
 <section class="room-panel"><div class="room-panel-head"><h2>Studying now</h2><span class="room-live">Live attendance</span></div><div class="room-people-grid" id="peopleGrid"><p class="room-empty">Loading live attendance…</p></div></section>
 <section class="room-panel" style="grid-column:1/-1"><div class="room-panel-head"><h2>Study leaderboard</h2><div class="room-tabs" role="group" aria-label="Leaderboard period"><button type="button" class="room-tab active" id="dailyBoardTab" aria-pressed="true">Today</button><button type="button" class="room-tab" id="weeklyBoardTab" aria-pressed="false">This week</button></div></div><div class="room-list" id="leaderboardList"><p class="room-empty">Loading real study totals…</p></div></section></div><p class="room-footer-note">Study Room profiles use anonymous sign-in. Shared study totals are calculated by the server and displayed live.</p>
 </main>
-
-<div id="roomProfileGate" hidden>
-  <section class="gate-card" role="dialog" aria-modal="true" aria-labelledby="roomProfileTitle" aria-describedby="roomProfileError">
-    <h2 id="roomProfileTitle">Complete your profile</h2>
-    <p class="gate-intro">Your Study Room is ready. Complete all profile fields once to enter. You will not see this window again after your profile is complete.</p>
-    <p class="gate-error" id="roomProfileError" role="alert" hidden>To enter the Study Room, you must fill in all required fields.</p>
-    <form id="roomProfileForm" novalidate>
-      <div class="gate-grid">
-        <div class="gate-field"><label for="gateName">Full name *</label><input id="gateName" autocomplete="name" maxlength="60" required></div>
-        <div class="gate-field"><label for="gateSchool">School *</label><input id="gateSchool" autocomplete="organization" maxlength="120" required></div>
-        <div class="gate-field"><label for="gatePhone">Mobile number *</label><input id="gatePhone" autocomplete="tel" inputmode="tel" maxlength="24" required></div>
-        <div class="gate-field"><label for="gateYear">A/L examination year *</label><select id="gateYear" required><option value="">Choose year</option><option>2026</option><option>2027</option><option>2028</option><option>2029</option><option>Other</option></select></div>
-      </div>
-      <div class="gate-field"><label for="gateStream">Study stream *</label><select id="gateStream" required><option value="">Choose stream</option><option>Physical Science</option><option>Biological Science</option><option>Commerce</option><option>Arts</option><option>Engineering Technology</option><option>Bio Systems Technology</option><option>Other</option></select></div>
-      <fieldset id="gateGenderField"><legend>Profile icon *</legend><div class="gate-icons"><button type="button" class="gate-icon" data-gate-gender="male" aria-pressed="false">👨 Male</button><button type="button" class="gate-icon" data-gate-gender="female" aria-pressed="false">👩 Female</button></div></fieldset>
-      <button type="submit" class="gate-save" id="gateSave">Save profile and enter Study Room</button>
-      <p class="gate-status" id="gateStatus" role="status" aria-live="polite"></p>
-    </form>
-  </section>
-</div>
-
 <script src="assets/js/main.js?v=20261027-system-theme"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/js/studylab-account.js"></script>
+<script src="assets/js/study-room-config.js"></script>
+<script src="assets/js/live-layer.js"></script>
+<script src="assets/js/study-room-realtime.js"></script>
+<script src="assets/js/study-dashboard.js"></script>
+<script src="assets/js/chat.js?v=20261027-chat-route-fix"></script>
 
-<script>
-(function () {
-  "use strict";
-  const gate = document.getElementById("roomProfileGate");
-  const form = document.getElementById("roomProfileForm");
-  if (!gate || !form) return;
-  const fields = {
-    name: document.getElementById("gateName"),
-    school: document.getElementById("gateSchool"),
-    phone: document.getElementById("gatePhone"),
-    year: document.getElementById("gateYear"),
-    stream: document.getElementById("gateStream")
-  };
-  const iconField = document.getElementById("gateGenderField");
-  const iconButtons = [...gate.querySelectorAll("[data-gate-gender]")];
-  const errorBox = document.getElementById("roomProfileError");
-  const status = document.getElementById("gateStatus");
-  const save = document.getElementById("gateSave");
-  let gender = "";
-
-  const placeholderName = value => /^Student\d{4}$/.test(String(value || "").trim());
-  const isFullComplete = p => Boolean(
-    p?.profile_completed_at &&
-    p?.display_name && !placeholderName(p.display_name) &&
-    p?.exam_year && p?.study_stream &&
-    String(p?.school || "").trim() &&
-    String(p?.phone || "").trim() &&
-    ["male", "female"].includes(p?.gender)
-  );
-
-  let toastTimer;
-  function setError(message) {
-    errorBox.textContent = message;
-    errorBox.hidden = false;
-    requestAnimationFrame(() => errorBox.classList.add("is-visible"));
-    window.clearTimeout(toastTimer);
-    toastTimer = window.set
+</body></html>
