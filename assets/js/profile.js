@@ -134,8 +134,11 @@
       button.classList.toggle("is-selected", active);
     });
     if (save) { try { localStorage.setItem(glowKey, choice); } catch (_) {} }
-    window.dispatchEvent(new CustomEvent("studylab:glow-colour-change", {detail:{colour:choice}}));
+    if (save) window.dispatchEvent(new CustomEvent("studylab:glow-colour-change", {detail:{colour:choice}}));
   }
+  window.addEventListener("studylab:glow-colour-change", event => {
+    if (event.detail?.colour && glowColours[event.detail.colour]) applyGlowColour(event.detail.colour, false);
+  });
   function initGlowPicker() {
     if (document.getElementById("studylabGlowPicker") || !profileForm) return;
     const style = document.createElement("style");
