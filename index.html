@@ -1624,7 +1624,8 @@
         animation: none !important;
       }
     }
-  </style></head>
+  </style>  <link rel="stylesheet" href="assets/css/ai-tutor.css">
+</head>
 
 
 <body>
@@ -2679,6 +2680,36 @@
 })();
 </script>
 
+
+  <div class="studylab-ai-tools-row" data-studylab-ai>
+    <button type="button" class="studylab-ai-launcher" data-ai-launcher aria-expanded="false" aria-controls="studylabAiPanel" title="Open StudyLab AI Agent">
+      <span class="studylab-ai-launcher-icon" aria-hidden="true">✨</span>
+      <span class="studylab-ai-launcher-copy">
+        <span class="studylab-ai-launcher-title">AI Agent</span>
+        <span class="studylab-ai-launcher-subtitle">StudyLab AI Tutor</span>
+      </span>
+    </button>
+    <aside class="studylab-ai-panel" id="studylabAiPanel" data-ai-panel aria-label="StudyLab AI Tutor" aria-hidden="true" inert>
+      <div class="studylab-ai-head">
+        <div class="studylab-ai-head-left">
+          <h2 class="studylab-ai-title">StudyLab AI Tutor</h2>
+          <div class="studylab-ai-meta">
+            <span class="studylab-ai-status-dot" data-ai-status-dot aria-hidden="true"></span>
+            <span data-ai-status>A/L study assistant</span>
+          </div>
+        </div>
+        <button type="button" class="studylab-ai-close" data-ai-close aria-label="Close StudyLab AI">×</button>
+      </div>
+      <div class="studylab-ai-notice">Sinhala, English හෝ mixed language වලින් අහන්න. Ask anything, and use follow-up questions while this chat is open.</div>
+      <div class="studylab-ai-list" data-ai-list aria-live="polite"></div>
+      <form class="studylab-ai-compose" data-ai-form>
+        <textarea class="studylab-ai-input" data-ai-input rows="1" maxlength="3000" autocomplete="off" spellcheck="true" placeholder="Ask anything..." aria-label="Ask StudyLab AI a question"></textarea>
+        <button type="submit" class="studylab-ai-send" data-ai-send disabled aria-label="Send question">➤</button>
+      </form>
+    </aside>
+  </div>
+
+  <script src="assets/js/ai-tutor.js" defer></script>
   <script src="assets/js/studylab-pet.js" defer></script>
 
 </body>
