@@ -653,6 +653,9 @@
   }
 
   function createQuickAccess() {
+    // Quick Access belongs on study resource pages, not the Live Study Room.
+    // The room uses the Chat launcher in this floating-control area instead.
+    if (document.body.classList.contains("study-room-page")) return;
     if (document.getElementById("studyQuickAccess")) return;
 
     const button = document.createElement("button");
