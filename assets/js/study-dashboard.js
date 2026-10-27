@@ -134,7 +134,6 @@
     writeLocalJson(LOCAL_KEYS.favoriteMeta, favoriteMeta);
     writeLocalJson(LOCAL_KEYS.explored, explored);
     writeLocalJson(LOCAL_KEYS.recent, recent);
-    try { localStorage.setItem(LOCAL_KEYS.migrated, "1"); } catch (_) {}
   }
 
   async function loadCloudDashboard() {
@@ -222,6 +221,9 @@
     cloud.userId = null;
     cloud.ready = true;
     cloud.error = null;
+    if (account?.ready) {
+      try { localStorage.setItem(LOCAL_KEYS.migrated, "1"); } catch (_) {}
+    }
     persistDashboardLocal();
   }
 
