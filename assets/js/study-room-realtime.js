@@ -39,9 +39,13 @@
   };
   const compact = seconds => fmt(seconds);
   function isProfileComplete(p) {
+    const phoneDigits = String(p?.phone || "").replace(/\D/g, "");
     return Boolean(p?.profile_completed_at && p?.display_name &&
-      !/^Student\d{4}$/.test(p.display_name) && p?.exam_year &&
-      p?.study_stream && ["male", "female"].includes(p?.gender));
+      !/^Student\d{4}$/.test(String(p.display_name)) &&
+      String(p?.school || "").trim().length >= 2 &&
+      phoneDigits.length >= 9 && phoneDigits.length <= 12 &&
+      p?.exam_year && p?.study_stream &&
+      ["male", "female"].includes(p?.gender));
   }
   function setGenderIcon(element, gender) {
     if (!element) return;
@@ -209,7 +213,17 @@
       userId = user.id;
       const profile = await account.getProfile(true);
       if (!isProfileComplete(profile)) {
-        window.location.replace('index.html?completeProfile=1&returnTo=study-room.html');
+        join.disabled = true;
+        leave.disabled = true;
+        say('Complete your profile to enter the Study Room.', true);
+        // The profile window is displayed over this page. Once its save event
+        // confirms a complete profile, initialise the live room in place.
+        const resumeAfterProfileSave = event => {
+          if (!isProfileComplete(event.detail)) return;
+          window.removeEventListener('studylab-profile-updated', resumeAfterProfileSave);
+          init();
+        };
+        window.addEventListener('studylab-profile-updated', resumeAfterProfileSave);
         return;
       }
       await callRpc('study_room_ensure_profile');
