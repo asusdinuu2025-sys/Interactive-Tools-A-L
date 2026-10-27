@@ -35,8 +35,9 @@ html[data-theme="light"] .room-hero{background:linear-gradient(120deg,rgba(224,2
 @keyframes room-orbit-drift{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 @media(max-width:600px){.room-science-bg:before{background-size:38px 38px;opacity:.5}.room-science-symbol{font-size:17px;opacity:.6}.room-science-symbol:nth-child(2){right:2%;top:28%}.room-science-symbol:nth-child(4){right:3%;bottom:9%}.room-science-bg:after{width:95vw;right:-55vw;top:30vh}.room-hero:after{right:-190px;top:-110px;width:250px;height:250px}}
 @media(prefers-reduced-motion:reduce){.room-science-symbol,.room-science-bg:after{animation:none!important}.room-panel{transition:none!important}}
-</style></head>
-<body>
+</style><link rel="stylesheet" href="assets/css/floating-controls.css">
+</head>
+<body class="study-room-page">
 <div class="room-science-bg" aria-hidden="true"><span class="room-science-symbol">∫ f(x) dx</span><span class="room-science-symbol">F = ma</span><span class="room-science-symbol">a² + b² = c²</span><span class="room-science-symbol">PV = nRT</span><span class="room-science-symbol">∑ F = ma</span><span class="room-science-symbol">λ = h / p</span></div>
 <header class="site-header" style="padding:16px 22px"><a href="index.html" class="room-back" aria-label="Back to StudyLab home">← StudyLab</a><button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle light and dark mode">☀️ Light Mode</button></header>
 <main class="room-page">
@@ -54,6 +55,7 @@ html[data-theme="light"] .room-hero{background:linear-gradient(120deg,rgba(224,2
 <script src="assets/js/study-room-config.js"></script>
 <script src="assets/js/live-layer.js"></script>
 <script src="assets/js/study-room-realtime.js"></script>
+<script src="assets/js/study-dashboard.js"></script>
 <script src="assets/js/chat.js"></script>
-<script src="assets/js/studylab-pet.js" defer></script>
+
 </body></html>
