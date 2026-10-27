@@ -2719,8 +2719,20 @@
     </aside>
   </div>
 
+  <!-- Unified floating launcher for StudyLab Pet and AI. -->
+  <div class="studylab-assistant-tray" data-assistant-tray>
+    <button type="button" class="studylab-assistant-tray-button" data-assistant-tray-toggle
+      aria-expanded="false" aria-controls="studylabAssistantTrayMenu" aria-label="Open StudyLab assistants"
+      title="StudyLab assistants"><span aria-hidden="true">✦</span></button>
+    <div class="studylab-assistant-tray-menu" id="studylabAssistantTrayMenu" data-assistant-tray-menu hidden>
+      <button type="button" data-assistant-open="pet"><span aria-hidden="true">🤖</span><span>StudyLab Pet</span></button>
+      <button type="button" data-assistant-open="ai"><span aria-hidden="true">✨</span><span>StudyLab AI</span></button>
+    </div>
+  </div>
+
   <script src="assets/js/ai-tutor.js" defer></script>
   <script src="assets/js/studylab-pet.js" defer></script>
+  <script src="assets/js/assistant-tray.js" defer></script>
 
 </body>
 </html>
