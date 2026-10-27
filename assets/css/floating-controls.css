@@ -248,3 +248,26 @@ body.study-room-page .study-chat-button {
     display: none !important;
   }
 }
+
+
+/* Study Room: keep the chat launcher visible once chat.js injects it. */
+body.study-room-page .study-chat {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+body.study-room-page .study-chat-button {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: fixed !important;
+  right: 144px !important;
+  bottom: 20px !important;
+  z-index: 1200 !important;
+}
+@media (max-width: 720px) {
+  body.study-room-page .study-chat-button {
+    right: 74px !important;
+    bottom: 12px !important;
+  }
+}
