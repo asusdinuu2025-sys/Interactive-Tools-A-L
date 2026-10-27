@@ -6,7 +6,7 @@
 (function () {
   "use strict";
 
-  const CONFIG = {
+  const pagePath = window.location.pathname.replace(/\\/+$/, "") || "/";\n  if (!(pagePath === "/" || pagePath.endsWith("/index.html"))) return;\n\n  const CONFIG = {
     table: "studylab_feedback",
     maxLength: 1200,
     cooldownMs: 15000
