@@ -86,3 +86,99 @@ html[data-theme="light"] .studylab-ai-tools-row .studylab-ai-launcher {
 @media (prefers-reduced-motion: reduce) {
   .study-chat-button, .study-feedback-button, .study-quick-button, #studylabPetLauncher, .studylab-ai-tools-row .studylab-ai-launcher { transition: none !important; }
 }
+
+
+/* Desktop utility row: equal-width slots make the gaps truly equal. */
+@media (min-width: 721px) {
+  .study-quick-button,
+  .study-chat-button,
+  .study-feedback-button {
+    width: 112px !important;
+    min-width: 112px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    justify-content: center !important;
+  }
+  .study-quick-button { right: 20px !important; }
+  .study-chat-button { right: 144px !important; }
+  .study-feedback-button { right: 268px !important; }
+}
+
+/* Light theme: solid, readable surfaces rather than relying on glow. */
+html[data-theme="light"] .study-chat-button,
+html[data-theme="light"] .study-feedback-button,
+html[data-theme="light"] .study-quick-button,
+html[data-theme="light"] #studylabPetLauncher,
+html[data-theme="light"] .studylab-ai-tools-row .studylab-ai-launcher,
+html[data-theme="light"] .theme-toggle,
+html[data-theme="light"] .profile-button {
+  background: #ffffff !important;
+  color: #17283c !important;
+  border: 1px solid #b8c8d8 !important;
+  box-shadow: 0 3px 10px rgba(28, 55, 83, .12), inset 0 1px 0 #ffffff !important;
+}
+html[data-theme="light"] .study-chat-button:hover,
+html[data-theme="light"] .study-feedback-button:hover,
+html[data-theme="light"] .study-quick-button:hover,
+html[data-theme="light"] #studylabPetLauncher:hover,
+html[data-theme="light"] .studylab-ai-tools-row .studylab-ai-launcher:hover,
+html[data-theme="light"] .theme-toggle:hover,
+html[data-theme="light"] .profile-button:hover {
+  background: #f0f7fc !important;
+  border-color: #7898b8 !important;
+  box-shadow: 0 5px 14px rgba(28, 55, 83, .16), inset 0 1px 0 #ffffff !important;
+}
+html[data-theme="light"] .study-chat-button-icon { color: #1768a8; filter: none; }
+html[data-theme="light"] .study-feedback-button-icon { color: #936200; filter: none; }
+html[data-theme="light"] .study-quick-button-icon { color: #6941a5; filter: none; }
+html[data-theme="light"] .sl-pet-launcher-icon { color: #087b65; filter: none; }
+html[data-theme="light"] .studylab-ai-tools-row .studylab-ai-launcher-icon svg { filter: none; }
+
+/* Inline vector icon system for the brand, subjects and theme/profile controls. */
+.brand-vector-icon, .header-action-icon, .theme-toggle-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.brand-vector-icon svg { width: 30px; height: 30px; fill: none; stroke: #79e5ff; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.header-action-icon svg, .theme-toggle-icon svg {
+  width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+}
+html[data-theme="light"] .brand-vector-icon svg { stroke: #1768a8; }
+.vector-card-icon svg {
+  width: 34px; height: 34px; display: block; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+}
+.card-icon.vector-card-icon {
+  color: #79e5ff;
+  filter: drop-shadow(0 0 7px rgba(75, 190, 255, .30));
+}
+.card-icon.icon-maths { color: #7fcaff; }
+.card-icon.icon-biology { color: #79e7bd; }
+.card-icon.icon-chemistry { color: #ffd27e; }
+.card-icon.icon-physics { color: #c5a5ff; }
+.card-icon.icon-computer { color: #7ddcff; }
+.card-icon.icon-document { color: #9fc4ff; }
+.card-icon.icon-brain { color: #f4a8df; }
+.card-icon.icon-books { color: #9dbbff; }
+.card-icon.icon-toolbox { color: #8ce6cf; }
+.card-icon.icon-pencil { color: #ffc98b; }
+.study-tools-card-icon.vector-card-icon { display: inline-flex; align-items: center; justify-content: center; }
+.study-tools-card-icon.vector-card-icon svg { width: 32px; height: 32px; }
+html[data-theme="light"] .card-icon.vector-card-icon {
+  filter: none; background: #f1f6fb !important; border: 1px solid #d1deea;
+}
+html[data-theme="light"] .card-icon.icon-maths { color: #1768a8; }
+html[data-theme="light"] .card-icon.icon-biology { color: #13785b; }
+html[data-theme="light"] .card-icon.icon-chemistry { color: #986100; }
+html[data-theme="light"] .card-icon.icon-physics { color: #6941a5; }
+html[data-theme="light"] .card-icon.icon-computer { color: #1768a8; }
+html[data-theme="light"] .card-icon.icon-document { color: #285f9e; }
+html[data-theme="light"] .card-icon.icon-brain { color: #9b397e; }
+html[data-theme="light"] .card-icon.icon-books { color: #345eae; }
+html[data-theme="light"] .card-icon.icon-toolbox { color: #087b65; }
+html[data-theme="light"] .card-icon.icon-pencil { color: #94500b; }
+html[data-theme="light"] .study-tools-card-icon.vector-card-icon { color: #285f9e; }
+.theme-toggle-icon { color: #79e5ff; }
+html[data-theme="light"] .theme-toggle-icon { color: #1768a8; }
+.theme-toggle { display: inline-flex; align-items: center; gap: 8px; }
