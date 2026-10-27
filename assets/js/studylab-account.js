@@ -149,7 +149,7 @@
     if (requireFullProfile && (!school || school.length < 2)) throw new Error("Please enter your school name.");
     const phoneDigits = phone ? phone.replace(/\D/g, "") : "";
     if (phone && (phoneDigits.length < 9 || phoneDigits.length > 12)) throw new Error("Please enter a valid mobile number (9–12 digits, including country code if used).");
-    if (requireFullProfile && !phone) throw new Error("Please enter your mobile number.");;
+    if (requireFullProfile && !phone) throw new Error("Please enter your mobile number.");
 
     if (!["2026", "2027", "2028", "2029", "Other"].includes(examYear)) {
       throw new Error("Please choose your A/L examination year.");
