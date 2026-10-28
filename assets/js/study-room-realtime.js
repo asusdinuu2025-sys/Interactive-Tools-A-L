@@ -238,8 +238,9 @@
         join.disabled = true;
         leave.disabled = true;
         say('Complete your profile to enter the Study Room.', true);
-        // The profile window is displayed over this page. Once its save event
-        // confirms a complete profile, initialise the live room in place.
+        // Force the shared profile editor into required mode, including for
+        // students who opened this URL directly without query parameters.
+        window.dispatchEvent(new CustomEvent('studylab:require-full-profile'));
         const resumeAfterProfileSave = event => {
           if (!isProfileComplete(event.detail)) return;
           window.removeEventListener('studylab-profile-updated', resumeAfterProfileSave);
