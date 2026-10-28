@@ -2762,40 +2762,18 @@
 
 
 <style id="profile-modal-scrollbar-theme">
-/* Keep profile-modal scrolling, but style its scrollbar to match both themes. */
+/* Keep the profile dialog scrollable on small screens without showing a scrollbar. */
 .profile-modal,
 .profile-dialog {
-  scrollbar-width: thin !important;
-  scrollbar-color: rgba(126, 220, 255, .72) rgba(120, 135, 160, .18) !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
 .profile-modal::-webkit-scrollbar,
-.profile-dialog::-webkit-scrollbar { width: 8px; height: 8px; display: initial !important; }
-.profile-modal::-webkit-scrollbar-track,
-.profile-dialog::-webkit-scrollbar-track {
-  background: rgba(120, 135, 160, .18);
-  border-radius: 999px;
+.profile-dialog::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
 }
-.profile-modal::-webkit-scrollbar-thumb,
-.profile-dialog::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #7edcff, #658cff);
-  border: 2px solid rgba(18, 27, 42, .72);
-  border-radius: 999px;
-}
-.profile-modal::-webkit-scrollbar-thumb:hover,
-.profile-dialog::-webkit-scrollbar-thumb:hover { background: #a1e8ff; }
-html[data-theme="light"] .profile-modal,
-html[data-theme="light"] .profile-dialog {
-  scrollbar-color: #8aa9c8 rgba(100, 125, 150, .12) !important;
-}
-html[data-theme="light"] .profile-modal::-webkit-scrollbar-track,
-html[data-theme="light"] .profile-dialog::-webkit-scrollbar-track { background: rgba(100, 125, 150, .12); }
-html[data-theme="light"] .profile-modal::-webkit-scrollbar-thumb,
-html[data-theme="light"] .profile-dialog::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #8ebde8, #7b8fe8);
-  border-color: rgba(239, 246, 255, .95);
-}
-html[data-theme="light"] .profile-modal::-webkit-scrollbar-thumb:hover,
-html[data-theme="light"] .profile-dialog::-webkit-scrollbar-thumb:hover { background: #6d9fd7; }
 </style>
 </body>
 </html>
