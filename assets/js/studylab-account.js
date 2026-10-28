@@ -131,10 +131,12 @@
     if (cleanName.length > 60) throw new Error("Please keep your name under 60 characters.");
     if (!user) await ready;
 
-    const cleanUsername = String(details.username || "").trim().toLowerCase();
-    if (!/^[a-z0-9_]{3,24}$/.test(cleanUsername)) {
+    const requestedUsername = String(details.username || "").trim().toLowerCase();
+    if (requestedUsername && !/^[a-z0-9_]{3,24}$/.test(requestedUsername)) {
       throw new Error("Username must be 3–24 characters using lowercase letters, numbers, or underscores.");
     }
+    // A custom username is optional. If the field is blank, preserve the
+    // existing handle; new rows use the database-generated default.
 
     const requireFullProfile = details.require_full_profile === true;
     const cleanOptional = value => {
@@ -177,20 +179,22 @@
       ["male", "female"].includes(gender)
     );
     const now = new Date().toISOString();
+    const profilePayload = {
+      id: user.id,
+      display_name: cleanName,
+      school,
+      phone,
+      exam_year: examYear,
+      study_stream: studyStream,
+      gender: gender || null,
+      profile_completed_at: fullDetailsComplete ? (profile?.profile_completed_at || now) : null,
+      updated_at: now
+    };
+    const cleanUsername = requestedUsername || profile?.username || "";
+    if (cleanUsername) profilePayload.username = cleanUsername;
     const { data, error } = await client
       .from("studylab_profiles")
-      .upsert({
-        id: user.id,
-        display_name: cleanName,
-        username: cleanUsername,
-        school,
-        phone,
-        exam_year: examYear,
-        study_stream: studyStream,
-        gender: gender || null,
-        profile_completed_at: fullDetailsComplete ? (profile?.profile_completed_at || now) : null,
-        updated_at: now
-      }, { onConflict: "id" })
+      .upsert(profilePayload, { onConflict: "id" })
       .select("id,display_name,username,school,phone,exam_year,study_stream,gender,profile_completed_at,created_at,updated_at")
       .single();
 
@@ -202,6 +206,17 @@
     }
     profile = data;
     return profile;
+  }
+
+  async function checkUsernameAvailable(username) {
+    if (!user) await ready;
+    const cleanUsername = String(username || "").trim().toLowerCase();
+    if (!/^[a-z0-9_]{3,24}$/.test(cleanUsername)) return false;
+    const { data, error } = await client.rpc("studylab_username_is_available", {
+      p_username: cleanUsername
+    });
+    if (error) throw error;
+    return data === true;
   }
 
   async function getProfile(force = false) {
@@ -282,6 +297,7 @@
     ready,
     getUser: () => user,
     getProfile,
+    checkUsernameAvailable,
     saveProfile
   };
 
