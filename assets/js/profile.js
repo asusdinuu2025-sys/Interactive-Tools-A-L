@@ -20,7 +20,6 @@
   const profileStatus = document.getElementById("profileStatus");
   const profileNameLabel = document.getElementById("profileNameLabel");
   const profileSubtitle = document.getElementById("profileSubtitle");
-  const profileDialog = profileModal.querySelector(".profile-dialog");
   const profileFields = [profileInput, profileUsername, profileSchool, profilePhone, profileExamYear, profileStream];
   let closeTimer = null;
   let nameCheckTimer = null;
@@ -35,6 +34,7 @@
   const profileClose = document.getElementById("profileClose");
 
   if (!profileButton || !profileModal || !profileForm || !profileInput) return;
+  const profileDialog = profileModal.querySelector(".profile-dialog");
 
   const placeholderName = name => /^Student\d{4}$/.test(String(name || ""));
   const isBasicComplete = p => Boolean(p?.display_name && !placeholderName(p.display_name) &&
