@@ -502,8 +502,12 @@
       setButtonProfile(p);
       const params = new URLSearchParams(window.location.search);
       const returnTo = params.get("returnTo") || "";
-      requireFullProfile = params.get("completeProfile") === "1" &&
+      const isStudyRoomPage = window.location.pathname.endsWith("/study-room.html");
+      const requestedStudyRoomGate = params.get("completeProfile") === "1" &&
         returnTo.startsWith("/study-room.html") && !returnTo.startsWith("//") && !returnTo.includes("\\");
+      // The room itself always requires a full profile, even when opened directly
+      // without the homepage launcher query parameters.
+      requireFullProfile = isStudyRoomPage || requestedStudyRoomGate;
       if (requireFullProfile && !isFullComplete(p)) {
         await openModal();
         showStudyRoomGateToast();
