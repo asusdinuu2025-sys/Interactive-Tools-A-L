@@ -216,7 +216,7 @@
 
   async function checkDisplayNameAvailable(name) {
     if (!user) await ready;
-    const cleanName = String(name || "").trim().replace(/\\s+/g, " ");
+    const cleanName = String(name || "").trim().replace(/\s+/g, " ");
     if (cleanName.length < 2 || cleanName.length > 60) return false;
     const { data, error } = await client.rpc(
       "check_studylab_display_name_available",
