@@ -1125,6 +1125,10 @@
     }
 
   
+    /* Hide profile-window scrollbars without disabling scrolling. */
+    .profile-modal,.profile-dialog{scrollbar-width:none;-ms-overflow-style:none}
+    .profile-modal::-webkit-scrollbar,.profile-dialog::-webkit-scrollbar{display:none;width:0;height:0}
+    
     /* Mobile profile modal: scroll the dialog itself and keep Save reachable. */
     .profile-dialog{overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
     .profile-save{position:sticky;bottom:0;z-index:5;margin-top:12px}
@@ -2649,7 +2653,7 @@
   <!-- Supabase must load before StudyLab cloud features. -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/studylab-account.js?v=20261028-name-check-v1"></script>
-  <script src="assets/js/profile.js?v=20261028-name-check-v1"></script>
+  <script src="assets/js/profile.js?v=20261028-profile-gate-v2"></script>
   <script src="assets/js/main.js?v=20261027-system-theme"></script>
   <script src="assets/js/study-dashboard.js"></script>
   <script src="assets/js/student-milestone.js"></script>
