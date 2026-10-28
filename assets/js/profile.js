@@ -71,7 +71,7 @@
     if (profileStatus.textContent.startsWith("Name already taken.")) profileStatus.hidden = true;
     if (nameCheckTimer) window.clearTimeout(nameCheckTimer);
     const version = ++nameCheckVersion;
-    const name = profileInput.value.trim().replace(/\\s+/g, " ");
+    const name = profileInput.value.trim().replace(/\s+/g, " ");
     if (name.length < 2 || name.length > 60 || placeholderName(name)) {
       setNameAvailability("", "");
       return;
@@ -84,7 +84,7 @@
         await account.ready;
         const available = await account.checkDisplayNameAvailable(name);
         if (version !== nameCheckVersion ||
-            profileInput.value.trim().replace(/\\s+/g, " ") !== name) return;
+            profileInput.value.trim().replace(/\s+/g, " ") !== name) return;
         setNameAvailability(
           available ? "Name available." : "Name already taken. Enter more of your name or try a new one.",
           available ? "available" : "taken"
