@@ -22,7 +22,7 @@
   const profileFields = [profileInput, profileUsername, profileSchool, profilePhone, profileExamYear, profileStream];
   let closeTimer = null;
   let mandatoryProfile = false;
-  let requireFullProfile = false;
+  let requireFullProfile = window.location.pathname.endsWith("/study-room.html");
 
   const profileClose = document.getElementById("profileClose");
 
@@ -35,6 +35,66 @@
     String(p.school || "").trim() && String(p.phone || "").trim() &&
     ["male", "female"].includes(p?.gender));
   const isComplete = isFullComplete;
+
+  const nameAvailability = document.createElement("p");
+  nameAvailability.id = "profileNameAvailability";
+  nameAvailability.className = "profile-name-availability";
+  nameAvailability.setAttribute("role", "status");
+  nameAvailability.setAttribute("aria-live", "polite");
+  nameAvailability.dataset.state = "";
+  profileInput.insertAdjacentElement("afterend", nameAvailability);
+
+  const nameAvailabilityStyle = document.createElement("style");
+  nameAvailabilityStyle.textContent = `
+    .profile-name-availability{min-height:1.15em;margin:6px 0 0;font-size:.78rem;line-height:1.4}
+    .profile-name-availability:empty{display:none}
+    .profile-name-availability[data-state="checking"]{color:var(--text-muted,#91a0b6)}
+    .profile-name-availability[data-state="available"]{color:#31c994}
+    .profile-name-availability[data-state="taken"]{color:#ff6685}
+    .profile-name-availability[data-state="error"]{color:#d7a957}
+  `;
+  document.head.appendChild(nameAvailabilityStyle);
+
+  let nameCheckTimer = null;
+  let nameCheckVersion = 0;
+  function setNameAvailability(message, state) {
+    nameAvailability.textContent = message;
+    nameAvailability.dataset.state = state || "";
+  }
+  function clearNameAvailability() {
+    nameCheckVersion++;
+    if (nameCheckTimer) window.clearTimeout(nameCheckTimer);
+    nameCheckTimer = null;
+    setNameAvailability("", "");
+  }
+  function scheduleNameAvailabilityCheck() {
+    if (profileStatus.textContent.startsWith("Name already taken.")) profileStatus.hidden = true;
+    if (nameCheckTimer) window.clearTimeout(nameCheckTimer);
+    const version = ++nameCheckVersion;
+    const name = profileInput.value.trim().replace(/\s+/g, " ");
+    if (name.length < 2 || name.length > 60 || placeholderName(name)) {
+      setNameAvailability("", "");
+      return;
+    }
+    setNameAvailability("Checking name availability…", "checking");
+    nameCheckTimer = window.setTimeout(async () => {
+      try {
+        const account = window.StudyLabAccount;
+        if (!account?.ready) throw new Error("StudyLab account is unavailable.");
+        await account.ready;
+        const available = await account.checkDisplayNameAvailable(name);
+        if (version !== nameCheckVersion ||
+            profileInput.value.trim().replace(/\s+/g, " ") !== name) return;
+        setNameAvailability(
+          available ? "Name available." : "Name already taken. Enter more of your name or try a new one.",
+          available ? "available" : "taken"
+        );
+      } catch (error) {
+        if (version !== nameCheckVersion) return;
+        setNameAvailability("Could not check right now. The name will be verified when you save.", "error");
+      }
+    }, 350);
+  }
 
   function updateRequiredFields() {
     profileSchool.required = mandatoryProfile;
@@ -144,6 +204,7 @@
     return account.getProfile(force);
   }
   function fillForm(p) {
+    clearNameAvailability();
     profileInput.value = p?.display_name && !placeholderName(p.display_name) ? p.display_name : "";
     profileUsername.value = p?.username || "";
     profileSchool.value = p?.school || "";
@@ -208,6 +269,10 @@
     if (submit) submit.textContent = complete ? "Save changes" : "Save profile";
   }
   async function openModal() {
+    if (window.location.pathname.endsWith("/study-room.html")) {
+      requireFullProfile = true;
+      mandatoryProfile = true;
+    }
     profileStatus.hidden = true;
     profileStatus.textContent = "";
     profileStatus.dataset.state = "success";
@@ -313,8 +378,16 @@
     field.addEventListener("input", updateStudyRoomValidation);
     field.addEventListener("change", updateStudyRoomValidation);
   });
+  profileInput.addEventListener("input", scheduleNameAvailabilityCheck);
+  profileInput.addEventListener("change", scheduleNameAvailabilityCheck);
 
   profileButton.addEventListener("click", openModal);
+  window.addEventListener("studylab:require-full-profile", async () => {
+    requireFullProfile = true;
+    mandatoryProfile = true;
+    updateRequiredFields();
+    if (profileModal.hidden) await openModal();
+  });
   profileClose?.addEventListener("click", closeModal);
   profileModal.addEventListener("click", event => {
     if (event.target === profileModal) closeModal();
@@ -328,6 +401,11 @@
     profileStatus.hidden = true;
     const name = profileInput.value.trim().replace(/\s+/g, " ");
     const username = profileUsername.value.trim().toLowerCase();
+    if (window.location.pathname.endsWith("/study-room.html")) {
+      requireFullProfile = true;
+      mandatoryProfile = true;
+      updateRequiredFields();
+    }
     if (!/^[a-z0-9_]{3,24}$/.test(username)) {
       showStatus("Username must be 3–24 characters using lowercase letters, numbers, or underscores.", true);
       profileUsername.focus();
@@ -378,6 +456,19 @@
       const account = window.StudyLabAccount;
       if (!account?.ready) throw new Error("StudyLab account is unavailable.");
       await account.ready;
+      try {
+        const available = await account.checkDisplayNameAvailable(name);
+        if (!available) {
+          const message = "Name already taken. Enter more of your name or try a new one.";
+          setNameAvailability(message, "taken");
+          showStatus(message, true);
+          profileInput.focus();
+          return;
+        }
+      } catch (availabilityError) {
+        // The database trigger remains the final authority if the live check is temporarily unavailable.
+        console.warn("StudyLab display-name check:", availabilityError);
+      }
       const p = await account.saveProfile(name, {
         username,
         school,
@@ -411,7 +502,9 @@
       }, 420);
     } catch (error) {
       console.warn("StudyLab profile save:", error);
-      showStatus(error?.message || "Your profile could not be saved. Please try again.", true);
+      const errorMessage = error?.message || "Your profile could not be saved. Please try again.";
+      if (errorMessage.startsWith("Name already taken.")) setNameAvailability(errorMessage, "taken");
+      showStatus(errorMessage, true);
       if (submit) submit.textContent = "Try saving again";
     } finally {
       if (submit) { submit.disabled = false; submit.textContent = "Save profile"; }
@@ -424,8 +517,10 @@
       setButtonProfile(p);
       const params = new URLSearchParams(window.location.search);
       const returnTo = params.get("returnTo") || "";
-      requireFullProfile = params.get("completeProfile") === "1" &&
-        returnTo.startsWith("/study-room.html") && !returnTo.startsWith("//") && !returnTo.includes("\\");
+      const isStudyRoomPage = window.location.pathname.endsWith("/study-room.html");
+      requireFullProfile = isStudyRoomPage ||
+        (params.get("completeProfile") === "1" &&
+         returnTo.startsWith("/study-room.html") && !returnTo.startsWith("//") && !returnTo.includes("\\"));
       if (requireFullProfile && !isFullComplete(p)) {
         await openModal();
         showStudyRoomGateToast();

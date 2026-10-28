@@ -1633,6 +1633,79 @@
 
   <link rel="stylesheet" href="assets/css/ai-tutor.css">
   <link rel="stylesheet" href="assets/css/floating-controls.css" />
+
+<style id="profile-static-window-fix">
+/* Static profile window: keep every field visible without either overlay or dialog scrolling. */
+#profileModal.profile-modal{
+  display:grid!important;place-items:center!important;
+  overflow:hidden!important;overflow-y:hidden!important;overflow-x:hidden!important;
+  padding:clamp(5px,1.1dvh,14px)!important;
+  scrollbar-width:none!important;-ms-overflow-style:none!important;
+}
+#profileModal.profile-modal::-webkit-scrollbar,
+#profileModal .profile-dialog::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}
+#profileModal .profile-dialog{
+  width:min(760px,calc(100vw - 18px))!important;
+  max-height:none!important;height:auto!important;min-height:0!important;
+  overflow:hidden!important;overflow-y:hidden!important;overflow-x:hidden!important;
+  overscroll-behavior:none!important;-webkit-overflow-scrolling:auto!important;
+  padding:clamp(8px,1.6dvh,22px) clamp(12px,2.4vw,28px)!important;
+  margin:0!important;border-radius:clamp(13px,2vw,22px)!important;
+}
+#profileModal .profile-window-head{
+  gap:10px!important;margin:0 34px clamp(7px,1.1dvh,14px) 0!important;
+}
+#profileModal .profile-flask-icon{
+  width:clamp(36px,5.6dvh,54px)!important;height:clamp(36px,5.6dvh,54px)!important;
+  flex-basis:clamp(36px,5.6dvh,54px)!important;font-size:clamp(21px,3.2dvh,28px)!important;
+  border-radius:13px!important;
+}
+#profileModal .profile-dialog h2{font-size:clamp(1rem,2.4dvh,1.45rem)!important;margin-bottom:3px!important}
+#profileModal .profile-subtitle{font-size:clamp(.68rem,1.55dvh,.82rem)!important;line-height:1.3!important}
+#profileModal .profile-form-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:clamp(5px,1dvh,11px)!important;
+}
+#profileModal .profile-field-full{grid-column:1/-1!important}
+#profileModal .profile-field{gap:4px!important}
+#profileModal .profile-field label{font-size:clamp(.7rem,1.5dvh,.8rem)!important}
+#profileModal .profile-input,#profileModal .profile-select{
+  min-height:clamp(32px,5.5dvh,42px)!important;padding:clamp(5px,.9dvh,9px) 10px!important;
+  font-size:clamp(.76rem,1.65dvh,.88rem)!important;border-radius:10px!important;
+}
+#profileModal .profile-hint{font-size:clamp(.58rem,1.2dvh,.68rem)!important;line-height:1.2!important}
+#profileModal .profile-name-gender-row{min-width:0!important}
+#profileModal .profile-gender-field{padding:5px 7px!important;min-width:0!important}
+#profileModal .profile-gender-options{gap:6px!important}
+#profileModal .profile-gender-choice{width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important;padding:6px!important}
+#profileModal .profile-gender-choice svg{width:22px!important;height:22px!important;max-width:22px!important;max-height:22px!important}
+#profileModal .profile-privacy{
+  gap:7px!important;margin:clamp(6px,1dvh,11px) 0!important;
+  padding:clamp(6px,.9dvh,9px) 10px!important;font-size:clamp(.62rem,1.35dvh,.72rem)!important;line-height:1.3!important;
+}
+#profileModal .profile-save{
+  position:static!important;min-height:clamp(34px,5.7dvh,44px)!important;
+  margin-top:3px!important;padding:clamp(7px,1dvh,10px) 12px!important;font-size:.86rem!important;
+}
+#profileModal .profile-status{margin-top:6px!important;padding:6px 9px!important;font-size:.72rem!important;line-height:1.25!important}
+@media(max-width:600px){
+  #profileModal.profile-modal{padding:5px!important}
+  #profileModal .profile-dialog{width:calc(100vw - 10px)!important;padding:clamp(7px,1.3dvh,13px) 11px!important}
+  #profileModal .profile-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important}
+  #profileModal .profile-field-full{grid-column:1/-1!important}
+  #profileModal .profile-window-head{margin-right:27px!important;margin-bottom:6px!important}
+  #profileModal .profile-subtitle{max-width:100%!important}
+  #profileModal .profile-name-gender-row{grid-column:1/-1!important}
+  #profileModal .profile-privacy{margin:6px 0!important}
+}
+@media(max-height:620px){
+  #profileModal .profile-window-head{margin-bottom:5px!important}
+  #profileModal .profile-privacy{margin:5px 0!important}
+  #profileModal .profile-form-grid{gap:5px!important}
+  #profileModal .profile-dialog{padding-top:7px!important;padding-bottom:7px!important}
+  #profileModal .profile-input,#profileModal .profile-select{min-height:30px!important}
+}
+</style>
 </head>
 
 
@@ -2655,8 +2728,8 @@
 
   <!-- Supabase must load before StudyLab cloud features. -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="assets/js/studylab-account.js"></script>
-  <script src="assets/js/profile.js?v=20261028-gender-neon-v2"></script>
+  <script src="assets/js/studylab-account.js?v=20261028-name-check-v2"></script>
+  <script src="assets/js/profile.js?v=20261028-name-check-v2"></script>
   <script src="assets/js/main.js?v=20261027-system-theme"></script>
   <script src="assets/js/study-dashboard.js"></script>
   <script src="assets/js/student-milestone.js"></script>
