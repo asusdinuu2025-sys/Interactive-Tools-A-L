@@ -36,6 +36,65 @@
     ["male", "female"].includes(p?.gender));
   const isComplete = isFullComplete;
 
+  const nameAvailability = document.createElement("p");
+  nameAvailability.id = "profileNameAvailability";
+  nameAvailability.className = "profile-name-availability";
+  nameAvailability.setAttribute("role", "status");
+  nameAvailability.setAttribute("aria-live", "polite");
+  nameAvailability.dataset.state = "";
+  profileInput.insertAdjacentElement("afterend", nameAvailability);
+
+  const nameAvailabilityStyle = document.createElement("style");
+  nameAvailabilityStyle.textContent = `
+    .profile-name-availability{min-height:1.15em;margin:6px 0 0;font-size:.78rem;line-height:1.4}
+    .profile-name-availability:empty{display:none}
+    .profile-name-availability[data-state="checking"]{color:var(--text-muted,#91a0b6)}
+    .profile-name-availability[data-state="available"]{color:#31c994}
+    .profile-name-availability[data-state="taken"]{color:#ff6685}
+    .profile-name-availability[data-state="error"]{color:#d7a957}
+  `;
+  document.head.appendChild(nameAvailabilityStyle);
+
+  let nameCheckTimer = null;
+  let nameCheckVersion = 0;
+  function setNameAvailability(message, state) {
+    nameAvailability.textContent = message;
+    nameAvailability.dataset.state = state || "";
+  }
+  function clearNameAvailability() {
+    nameCheckVersion++;
+    if (nameCheckTimer) window.clearTimeout(nameCheckTimer);
+    nameCheckTimer = null;
+    setNameAvailability("", "");
+  }
+  function scheduleNameAvailabilityCheck() {
+    if (nameCheckTimer) window.clearTimeout(nameCheckTimer);
+    const version = ++nameCheckVersion;
+    const name = profileInput.value.trim().replace(/\\s+/g, " ");
+    if (name.length < 2 || name.length > 60 || placeholderName(name)) {
+      setNameAvailability("", "");
+      return;
+    }
+    setNameAvailability("Checking name availability…", "checking");
+    nameCheckTimer = window.setTimeout(async () => {
+      try {
+        const account = window.StudyLabAccount;
+        if (!account?.ready) throw new Error("StudyLab account is unavailable.");
+        await account.ready;
+        const available = await account.checkDisplayNameAvailable(name);
+        if (version !== nameCheckVersion ||
+            profileInput.value.trim().replace(/\\s+/g, " ") !== name) return;
+        setNameAvailability(
+          available ? "Name available." : "Name already taken. Enter more of your name or try a new one.",
+          available ? "available" : "taken"
+        );
+      } catch (error) {
+        if (version !== nameCheckVersion) return;
+        setNameAvailability("Could not check right now. The name will be verified when you save.", "error");
+      }
+    }, 350);
+  }
+
   function updateRequiredFields() {
     profileSchool.required = mandatoryProfile;
     profilePhone.required = mandatoryProfile;
@@ -144,6 +203,7 @@
     return account.getProfile(force);
   }
   function fillForm(p) {
+    clearNameAvailability();
     profileInput.value = p?.display_name && !placeholderName(p.display_name) ? p.display_name : "";
     profileUsername.value = p?.username || "";
     profileSchool.value = p?.school || "";
@@ -313,6 +373,8 @@
     field.addEventListener("input", updateStudyRoomValidation);
     field.addEventListener("change", updateStudyRoomValidation);
   });
+  profileInput.addEventListener("input", scheduleNameAvailabilityCheck);
+  profileInput.addEventListener("change", scheduleNameAvailabilityCheck);
 
   profileButton.addEventListener("click", openModal);
   profileClose?.addEventListener("click", closeModal);
@@ -378,6 +440,19 @@
       const account = window.StudyLabAccount;
       if (!account?.ready) throw new Error("StudyLab account is unavailable.");
       await account.ready;
+      try {
+        const available = await account.checkDisplayNameAvailable(name);
+        if (!available) {
+          const message = "Name already taken. Enter more of your name or try a new one.";
+          setNameAvailability(message, "taken");
+          showStatus(message, true);
+          profileInput.focus();
+          return;
+        }
+      } catch (availabilityError) {
+        // The database trigger remains the final authority if the live check is temporarily unavailable.
+        console.warn("StudyLab display-name check:", availabilityError);
+      }
       const p = await account.saveProfile(name, {
         username,
         school,
