@@ -261,6 +261,14 @@ body.study-room-page.profile-modal-open > :not(#profileModal):not(#studyRoomProf
               </div>
             </fieldset>
           </div>
+          <div class="profile-field profile-field-full">
+            <label for="profileUsername">Username <span aria-hidden="true">*</span></label>
+            <input class="profile-input" id="profileUsername" name="username" type="text" maxlength="24"
+                   minlength="3" pattern="[a-z0-9_]{3,24}" autocomplete="username" autocapitalize="none" spellcheck="false"
+                   placeholder="e.g. dinusha_27" required />
+            <p class="profile-hint">3–24 characters: lowercase letters, numbers, and underscores. Each username can belong to only one student.</p>
+            <p class="profile-hint profile-username-status" id="profileUsernameStatus" role="status" aria-live="polite" hidden></p>
+          </div>
           <div class="profile-field">
             <label for="profileSchool">School <span class="profile-optional">Optional</span></label>
             <input class="profile-input" id="profileSchool" name="school" type="text" maxlength="120"
@@ -293,10 +301,6 @@ body.study-room-page.profile-modal-open > :not(#profileModal):not(#studyRoomProf
               <option value="Other">Other</option>
             </select>
           </div>
-        </div>
-        <div class="profile-privacy">
-          <span class="profile-privacy-icon" aria-hidden="true">🔒</span>
-          <span>Your profile is linked to your StudyLab student account. School and mobile number are required only to enter the Study Room. Your phone number is not displayed publicly.</span>
         </div>
         <button class="profile-save" type="submit">Save profile</button>
         <p class="profile-status" id="profileStatus" role="status" aria-live="polite" hidden></p>
