@@ -487,7 +487,9 @@
       }, 420);
     } catch (error) {
       console.warn("StudyLab profile save:", error);
-      showStatus(error?.message || "Your profile could not be saved. Please try again.", true);
+      const errorMessage = error?.message || "Your profile could not be saved. Please try again.";
+      if (errorMessage.startsWith("Name already taken.")) setNameAvailability(errorMessage, "taken");
+      showStatus(errorMessage, true);
       if (submit) submit.textContent = "Try saving again";
     } finally {
       if (submit) { submit.disabled = false; submit.textContent = "Save profile"; }
