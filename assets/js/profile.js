@@ -8,6 +8,7 @@
   const profileModal = document.getElementById("profileModal");
   const profileForm = document.getElementById("profileForm");
   const profileInput = document.getElementById("profileName");
+  const profileNameStatus = document.getElementById("profileNameStatus");
   const profileUsername = document.getElementById("profileUsername");
   const profileUsernameStatus = document.getElementById("profileUsernameStatus");
   const profileSchool = document.getElementById("profileSchool");
@@ -22,6 +23,9 @@
   const profileDialog = profileModal.querySelector(".profile-dialog");
   const profileFields = [profileInput, profileUsername, profileSchool, profilePhone, profileExamYear, profileStream];
   let closeTimer = null;
+  let nameCheckTimer = null;
+  let nameCheckSequence = 0;
+  let savedDisplayName = "";
   let usernameCheckTimer = null;
   let usernameCheckSequence = 0;
   let savedUsername = "";
@@ -116,7 +120,7 @@
   }
 
   const usernameFeedbackStyle = document.createElement("style");
-  usernameFeedbackStyle.textContent = '.profile-username-status{margin-top:4px;font-weight:650}.profile-username-status[data-state="error"]{color:#ff626f!important}.profile-username-status[data-state="success"]{color:#35c98a!important}.profile-username-status[data-state="checking"]{color:var(--text-secondary)!important}';
+  usernameFeedbackStyle.textContent = '.profile-username-status,.profile-name-status{margin-top:4px;font-weight:650}.profile-username-status[data-state="error"],.profile-name-status[data-state="error"]{color:#ff626f!important}.profile-username-status[data-state="success"],.profile-name-status[data-state="success"]{color:#35c98a!important}.profile-username-status[data-state="checking"],.profile-name-status[data-state="checking"]{color:var(--text-secondary)!important}';
   document.head.appendChild(usernameFeedbackStyle);
 
   const profileIconStyle = document.createElement("style");
@@ -153,6 +157,12 @@
   }
   function fillForm(p) {
     profileInput.value = p?.display_name && !placeholderName(p.display_name) ? p.display_name : "";
+    savedDisplayName = normalizeDisplayName(profileInput.value).toLowerCase();
+    if (profileNameStatus) {
+      profileNameStatus.hidden = true;
+      profileNameStatus.textContent = "";
+      profileNameStatus.dataset.state = "";
+    }
     profileUsername.value = p?.username || "";
     savedUsername = String(p?.username || "").trim().toLowerCase();
     if (profileUsernameStatus) {
@@ -171,6 +181,90 @@
       button.setAttribute("aria-pressed", String(active));
     });
   }
+  function normalizeDisplayName(value) {
+    return String(value || "").trim().replace(/\s+/g, " ");
+  }
+
+  function setNameStatus(message, state = "error") {
+    if (!profileNameStatus) return;
+    profileNameStatus.textContent = message;
+    profileNameStatus.dataset.state = state;
+    profileNameStatus.hidden = !message;
+  }
+
+  async function checkNameAvailability() {
+    const name = normalizeDisplayName(profileInput?.value);
+    const normalizedName = name.toLowerCase();
+    const sequence = ++nameCheckSequence;
+    if (nameCheckTimer) window.clearTimeout(nameCheckTimer);
+    if (!name) {
+      setNameStatus("");
+      return false;
+    }
+    if (name.length < 2) {
+      setNameStatus("Enter at least 2 characters for your name.");
+      return false;
+    }
+    if (name.length > 60) {
+      setNameStatus("Please keep your name under 60 characters.");
+      return false;
+    }
+    if (/^Student\d{4}$/.test(name)) {
+      setNameStatus("Please enter your real display name.");
+      return false;
+    }
+    if (normalizedName === savedDisplayName) {
+      setNameStatus("");
+      return true;
+    }
+    setNameStatus("Checking name…", "checking");
+    try {
+      const account = window.StudyLabAccount;
+      if (!account?.ready) throw new Error("Account is unavailable");
+      await account.ready;
+      const { data, error } = await account.client.rpc("studylab_display_name_available", {
+        p_display_name: name
+      });
+      if (sequence !== nameCheckSequence) return false;
+      if (error) throw error;
+      if (data !== true) {
+        setNameStatus("That name is already in use. Please choose another.");
+        return false;
+      }
+      setNameStatus("Name is available.", "success");
+      return true;
+    } catch (error) {
+      if (sequence !== nameCheckSequence) return false;
+      console.warn("StudyLab name availability check:", error);
+      setNameStatus("Could not check name availability. It will be verified when you save.");
+      return false;
+    }
+  }
+
+  function scheduleNameAvailabilityCheck() {
+    nameCheckSequence++;
+    if (nameCheckTimer) window.clearTimeout(nameCheckTimer);
+    const name = normalizeDisplayName(profileInput?.value);
+    if (!name || name.toLowerCase() === savedDisplayName) {
+      setNameStatus("");
+      return;
+    }
+    if (name.length < 2) {
+      setNameStatus("Enter at least 2 characters for your name.");
+      return;
+    }
+    if (name.length > 60) {
+      setNameStatus("Please keep your name under 60 characters.");
+      return;
+    }
+    if (/^Student\d{4}$/.test(name)) {
+      setNameStatus("Please enter your real display name.");
+      return;
+    }
+    setNameStatus("Checking name…", "checking");
+    nameCheckTimer = window.setTimeout(() => { checkNameAvailability(); }, 250);
+  }
+
   function setUsernameStatus(message, state = "error") {
     if (!profileUsernameStatus) return;
     profileUsernameStatus.textContent = message;
@@ -393,6 +487,8 @@
   });
 
   profileButton.addEventListener("click", openModal);
+  profileInput?.addEventListener("input", scheduleNameAvailabilityCheck);
+  profileInput?.addEventListener("change", checkNameAvailability);
   profileUsername?.addEventListener("input", scheduleUsernameAvailabilityCheck);
   profileUsername?.addEventListener("change", checkUsernameAvailability);
   profileClose?.addEventListener("click", closeModal);
@@ -430,6 +526,14 @@
       showStatus("Please keep your name under 60 characters.", true);
       profileInput.focus();
       return;
+    }
+    if (name.toLowerCase() !== savedDisplayName) {
+      const nameAvailable = await checkNameAvailability();
+      if (!nameAvailable) {
+        showStatus(profileNameStatus?.textContent || "Please choose an available name.", true);
+        profileInput.focus();
+        return;
+      }
     }
     const school = profileSchool.value.trim().replace(/\s+/g, " ");
     const phone = profilePhone.value.trim();
@@ -476,6 +580,7 @@
         require_full_profile: mandatoryProfile
       });
       fillForm(p);
+      savedDisplayName = normalizeDisplayName(p?.display_name).toLowerCase();
       savedUsername = String(p?.username || "").trim().toLowerCase();
       setButtonProfile(p);
       updateCopy(p);
