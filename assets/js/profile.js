@@ -162,7 +162,7 @@
   function queueNameAvailabilityCheck() {
     if (nameAvailabilityTimer) window.clearTimeout(nameAvailabilityTimer);
     const requestId = ++nameAvailabilityRequest;
-    const name = profileInput.value.trim().replace(/\\s+/g, " ");
+    const name = profileInput.value.trim().replace(/\s+/g, " ");
     if (name.length < 2) {
       setNameAvailability("");
       return;
@@ -178,7 +178,7 @@
         await account.ready;
         const available = await account.checkDisplayNameAvailable(name);
         if (requestId !== nameAvailabilityRequest ||
-            name !== profileInput.value.trim().replace(/\\s+/g, " ")) return;
+            name !== profileInput.value.trim().replace(/\s+/g, " ")) return;
         setNameAvailability(
           available ? "Name available." : "Name already taken. Enter more of your name or try a new one.",
           available ? "success" : "error"
