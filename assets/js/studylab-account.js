@@ -195,13 +195,35 @@
       .single();
 
     if (error) {
-      if (error.code === "23505" && String(error.message || "").includes("studylab_profiles_username_unique")) {
+      const message = String(error.message || "").toLowerCase();
+      const details = String(error.details || "").toLowerCase();
+      if (error.code === "23505" &&
+          (message.includes("studylab_profiles_username_unique") ||
+           message.includes("studylab_profiles_username"))) {
         throw new Error("That username is already taken. Please choose another.");
+      }
+      if (error.code === "23505" &&
+          (message.includes("studylab_profiles_display_name_normalized_uidx") ||
+           message.includes("name already taken") ||
+           details.includes("display_name_taken"))) {
+        throw new Error("Name already taken. Enter more of your name or try a new one.");
       }
       throw error;
     }
     profile = data;
     return profile;
+  }
+
+  async function checkDisplayNameAvailable(name) {
+    if (!user) await ready;
+    const cleanName = String(name || "").trim().replace(/\s+/g, " ");
+    if (cleanName.length < 2 || cleanName.length > 60) return false;
+    const { data, error } = await client.rpc(
+      "check_studylab_display_name_available",
+      { p_display_name: cleanName }
+    );
+    if (error) throw error;
+    return data === true;
   }
 
   async function getProfile(force = false) {
@@ -282,6 +304,7 @@
     ready,
     getUser: () => user,
     getProfile,
+    checkDisplayNameAvailable,
     saveProfile
   };
 
