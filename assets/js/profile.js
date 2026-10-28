@@ -221,6 +221,7 @@
       button.classList.toggle("is-selected", active);
       button.setAttribute("aria-pressed", String(active));
     });
+    setNameAvailability("");
   }
   function updateStudyRoomValidation() {
     if (!mandatoryProfile) {
