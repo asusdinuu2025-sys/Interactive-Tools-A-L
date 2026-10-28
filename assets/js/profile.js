@@ -9,6 +9,7 @@
   const profileForm = document.getElementById("profileForm");
   const profileInput = document.getElementById("profileName");
   const profileUsername = document.getElementById("profileUsername");
+  const profileUsernameStatus = document.getElementById("profileUsernameStatus");
   const profileSchool = document.getElementById("profileSchool");
   const profilePhone = document.getElementById("profilePhone");
   const profileExamYear = document.getElementById("profileExamYear");
@@ -21,6 +22,9 @@
   const profileDialog = profileModal.querySelector(".profile-dialog");
   const profileFields = [profileInput, profileUsername, profileSchool, profilePhone, profileExamYear, profileStream];
   let closeTimer = null;
+  let usernameCheckTimer = null;
+  let usernameCheckSequence = 0;
+  let savedUsername = "";
   let mandatoryProfile = false;
   let requireFullProfile = false;
 
@@ -111,6 +115,10 @@
     }, 3600);
   }
 
+  const usernameFeedbackStyle = document.createElement("style");
+  usernameFeedbackStyle.textContent = '.profile-username-status{margin-top:4px;font-weight:650}.profile-username-status[data-state="error"]{color:#ff626f!important}.profile-username-status[data-state="success"]{color:#35c98a!important}.profile-username-status[data-state="checking"]{color:var(--text-secondary)!important}';
+  document.head.appendChild(usernameFeedbackStyle);
+
   const profileIconStyle = document.createElement("style");
   profileIconStyle.textContent = '.profile-button .header-action-icon{display:inline-grid;place-items:center;width:20px;height:20px;flex:0 0 20px} .profile-button .header-action-icon-female{color:#ff4fa3!important} .profile-button .header-action-icon-male{color:#39a8ff!important} .profile-button .header-action-icon svg{width:20px;height:20px;fill:none;stroke:currentColor!important;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 2px currentColor) drop-shadow(0 0 4px currentColor)}';
   document.head.appendChild(profileIconStyle);
@@ -146,6 +154,12 @@
   function fillForm(p) {
     profileInput.value = p?.display_name && !placeholderName(p.display_name) ? p.display_name : "";
     profileUsername.value = p?.username || "";
+    savedUsername = String(p?.username || "").trim().toLowerCase();
+    if (profileUsernameStatus) {
+      profileUsernameStatus.hidden = true;
+      profileUsernameStatus.textContent = "";
+      profileUsernameStatus.dataset.state = "";
+    }
     profileSchool.value = p?.school || "";
     profilePhone.value = p?.phone || "";
     profileExamYear.value = p?.exam_year || "";
@@ -157,6 +171,69 @@
       button.setAttribute("aria-pressed", String(active));
     });
   }
+  function setUsernameStatus(message, state = "error") {
+    if (!profileUsernameStatus) return;
+    profileUsernameStatus.textContent = message;
+    profileUsernameStatus.dataset.state = state;
+    profileUsernameStatus.hidden = !message;
+  }
+
+  async function checkUsernameAvailability() {
+    const username = String(profileUsername?.value || "").trim().toLowerCase();
+    const sequence = ++usernameCheckSequence;
+    if (usernameCheckTimer) window.clearTimeout(usernameCheckTimer);
+    if (!username) {
+      setUsernameStatus("");
+      return false;
+    }
+    if (!/^[a-z0-9_]{3,24}$/.test(username)) {
+      setUsernameStatus("Use 3–24 lowercase letters, numbers, or underscores.");
+      return false;
+    }
+    if (username === savedUsername) {
+      setUsernameStatus("");
+      return true;
+    }
+    setUsernameStatus("Checking username…", "checking");
+    try {
+      const account = window.StudyLabAccount;
+      if (!account?.ready) throw new Error("Account is unavailable");
+      await account.ready;
+      const { data, error } = await account.client.rpc("studylab_username_available", {
+        p_username: username
+      });
+      if (sequence !== usernameCheckSequence) return false;
+      if (error) throw error;
+      if (data !== true) {
+        setUsernameStatus("That username is already taken. Please choose another.");
+        return false;
+      }
+      setUsernameStatus("Username is available.", "success");
+      return true;
+    } catch (error) {
+      if (sequence !== usernameCheckSequence) return false;
+      console.warn("StudyLab username availability check:", error);
+      setUsernameStatus("Could not check username availability. It will be verified when you save.");
+      return false;
+    }
+  }
+
+  function scheduleUsernameAvailabilityCheck() {
+    if (usernameCheckTimer) window.clearTimeout(usernameCheckTimer);
+    const username = String(profileUsername?.value || "").trim().toLowerCase();
+    if (!username || !/^[a-z0-9_]{3,24}$/.test(username) || username === savedUsername) {
+      usernameCheckSequence++;
+      setUsernameStatus("");
+      if (username && username === savedUsername) return;
+      if (username && !/^[a-z0-9_]{3,24}$/.test(username)) {
+        setUsernameStatus("Use 3–24 lowercase letters, numbers, or underscores.");
+      }
+      return;
+    }
+    setUsernameStatus("Checking username…", "checking");
+    usernameCheckTimer = window.setTimeout(() => { checkUsernameAvailability(); }, 250);
+  }
+
   function updateStudyRoomValidation() {
     if (!mandatoryProfile) {
       [profileInput, profileSchool, profilePhone, profileExamYear, profileStream].forEach(field => {
@@ -315,6 +392,8 @@
   });
 
   profileButton.addEventListener("click", openModal);
+  profileUsername?.addEventListener("input", scheduleUsernameAvailabilityCheck);
+  profileUsername?.addEventListener("change", checkUsernameAvailability);
   profileClose?.addEventListener("click", closeModal);
   profileModal.addEventListener("click", event => {
     if (event.target === profileModal) closeModal();
@@ -332,6 +411,14 @@
       showStatus("Username must be 3–24 characters using lowercase letters, numbers, or underscores.", true);
       profileUsername.focus();
       return;
+    }
+    if (username !== savedUsername) {
+      const usernameAvailable = await checkUsernameAvailability();
+      if (!usernameAvailable) {
+        showStatus(profileUsernameStatus?.textContent || "Please choose an available username.", true);
+        profileUsername.focus();
+        return;
+      }
     }
     if (name.length < 2) {
       showStatus("Please enter your full name.", true);
@@ -388,6 +475,7 @@
         require_full_profile: mandatoryProfile
       });
       fillForm(p);
+      savedUsername = String(p?.username || "").trim().toLowerCase();
       setButtonProfile(p);
       updateCopy(p);
       mandatoryProfile = false;
@@ -424,8 +512,9 @@
       setButtonProfile(p);
       const params = new URLSearchParams(window.location.search);
       const returnTo = params.get("returnTo") || "";
-      requireFullProfile = params.get("completeProfile") === "1" &&
-        returnTo.startsWith("/study-room.html") && !returnTo.startsWith("//") && !returnTo.includes("\\");
+      const isStudyRoomPage = window.location.pathname.endsWith("/study-room.html");
+      requireFullProfile = isStudyRoomPage || (params.get("completeProfile") === "1" &&
+        returnTo.startsWith("/study-room.html") && !returnTo.startsWith("//") && !returnTo.includes("\\"));
       if (requireFullProfile && !isFullComplete(p)) {
         await openModal();
         showStudyRoomGateToast();
