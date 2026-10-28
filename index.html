@@ -2514,6 +2514,7 @@
               <label for="profileName">Full name <span aria-hidden="true">*</span></label>
               <input class="profile-input" id="profileName" name="name" type="text" maxlength="60"
                      autocomplete="name" placeholder="Enter your name" required />
+              <p class="profile-hint profile-name-status" id="profileNameStatus" role="status" aria-live="polite" hidden></p>
             </div>
             <fieldset class="profile-gender-field">
               <legend>Profile icon <span aria-hidden="true">*</span></legend>
@@ -2653,7 +2654,7 @@
   <!-- Supabase must load before StudyLab cloud features. -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/studylab-account.js"></script>
-  <script src="assets/js/profile.js?v=20261028-profile-gate-v1"></script>
+  <script src="assets/js/profile.js?v=20261028-name-availability-v1"></script>
   <script src="assets/js/main.js?v=20261027-system-theme"></script>
   <script src="assets/js/study-dashboard.js"></script>
   <script src="assets/js/student-milestone.js"></script>
