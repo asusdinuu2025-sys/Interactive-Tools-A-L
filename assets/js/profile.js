@@ -68,6 +68,7 @@
     setNameAvailability("", "");
   }
   function scheduleNameAvailabilityCheck() {
+    if (profileStatus.textContent.startsWith("Name already taken.")) profileStatus.hidden = true;
     if (nameCheckTimer) window.clearTimeout(nameCheckTimer);
     const version = ++nameCheckVersion;
     const name = profileInput.value.trim().replace(/\\s+/g, " ");
