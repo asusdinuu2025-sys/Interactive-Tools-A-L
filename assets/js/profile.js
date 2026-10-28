@@ -131,6 +131,73 @@
       profileButton.title = "Create your student profile";
     }
   }
+  let nameAvailabilityTimer = null;
+  let nameAvailabilityRequest = 0;
+  let nameAvailabilityMessage = null;
+
+  function ensureNameAvailabilityMessage() {
+    if (nameAvailabilityMessage || !profileInput) return nameAvailabilityMessage;
+    nameAvailabilityMessage = document.createElement("p");
+    nameAvailabilityMessage.id = "profileNameAvailability";
+    nameAvailabilityMessage.className = "profile-name-availability";
+    nameAvailabilityMessage.setAttribute("role", "status");
+    nameAvailabilityMessage.setAttribute("aria-live", "polite");
+    nameAvailabilityMessage.hidden = true;
+    profileInput.insertAdjacentElement("afterend", nameAvailabilityMessage);
+    const style = document.createElement("style");
+    style.textContent = ".profile-name-availability{margin:6px 0 0;font-size:.82rem;line-height:1.4;color:#91a2b8}.profile-name-availability[data-state=success]{color:#32c98a}.profile-name-availability[data-state=error]{color:#ff6b8a}.profile-name-availability[hidden]{display:none}";
+    document.head.appendChild(style);
+    return nameAvailabilityMessage;
+  }
+
+  function setNameAvailability(message, state = "neutral") {
+    const element = ensureNameAvailabilityMessage();
+    if (!element) return;
+    element.textContent = message;
+    element.dataset.state = state;
+    element.hidden = !message;
+  }
+
+  function queueNameAvailabilityCheck() {
+    if (nameAvailabilityTimer) window.clearTimeout(nameAvailabilityTimer);
+    const requestId = ++nameAvailabilityRequest;
+    const name = profileInput.value.trim().replace(/\\s+/g, " ");
+    if (name.length < 2) {
+      setNameAvailability("");
+      return;
+    }
+    setNameAvailability("Checking name availability…");
+    nameAvailabilityTimer = window.setTimeout(async () => {
+      try {
+        const account = window.StudyLabAccount;
+        if (!account?.ready || typeof account.checkDisplayNameAvailable !== "function") {
+          setNameAvailability("Name will be checked when you save.");
+          return;
+        }
+        await account.ready;
+        const available = await account.checkDisplayNameAvailable(name);
+        if (requestId !== nameAvailabilityRequest ||
+            name !== profileInput.value.trim().replace(/\\s+/g, " ")) return;
+        setNameAvailability(
+          available ? "Name available." : "Name already taken. Enter more of your name or try a new one.",
+          available ? "success" : "error"
+        );
+      } catch (error) {
+        if (requestId === nameAvailabilityRequest) {
+          setNameAvailability("Could not check right now. The name will be checked when you save.");
+        }
+      }
+    }, 350);
+  }
+
+  function isDisplayNameTakenError(error) {
+    const message = String(error?.message || "").toLowerCase();
+    const details = String(error?.details || "").toLowerCase();
+    return message.includes("display_name_taken") ||
+      message.includes("studylab_profiles_display_name_normalized_uidx") ||
+      details.includes("studylab_profiles_display_name_normalized_uidx");
+  }
+
   function showStatus(message, isError = false) {
     profileStatus.textContent = message;
     profileStatus.hidden = false;
@@ -157,7 +224,9 @@
   }
   function updateStudyRoomValidation() {
     if (!mandatoryProfile) {
-      [profileInput, profileSchool, profilePhone, profileExamYear, profileStream].forEach(field => {
+      profileInput.addEventListener("input", queueNameAvailabilityCheck);
+
+  [profileInput, profileSchool, profilePhone, profileExamYear, profileStream].forEach(field => {
         field?.classList.remove("profile-field-invalid");
         field?.removeAttribute("aria-invalid");
       });
@@ -370,6 +439,16 @@
       const account = window.StudyLabAccount;
       if (!account?.ready) throw new Error("StudyLab account is unavailable.");
       await account.ready;
+      if (typeof account.checkDisplayNameAvailable === "function") {
+        const available = await account.checkDisplayNameAvailable(name);
+        if (!available) {
+          const message = "Name already taken. Enter more of your name or try a new one.";
+          setNameAvailability(message, "error");
+          showStatus(message, true);
+          profileInput.focus();
+          return;
+        }
+      }
       const p = await account.saveProfile(name, {
         school,
         phone,
@@ -402,7 +481,14 @@
       }, 420);
     } catch (error) {
       console.warn("StudyLab profile save:", error);
-      showStatus(error?.message || "Your profile could not be saved. Please try again.", true);
+      if (isDisplayNameTakenError(error)) {
+        const message = "Name already taken. Enter more of your name or try a new one.";
+        setNameAvailability(message, "error");
+        showStatus(message, true);
+        profileInput.focus();
+      } else {
+        showStatus(error?.message || "Your profile could not be saved. Please try again.", true);
+      }
       if (submit) submit.textContent = "Try saving again";
     } finally {
       if (submit) { submit.disabled = false; submit.textContent = "Save profile"; }
