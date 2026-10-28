@@ -9,6 +9,7 @@
   const profileForm = document.getElementById("profileForm");
   const profileInput = document.getElementById("profileName");
   const profileUsername = document.getElementById("profileUsername");
+  const profileUsernameStatus = document.getElementById("profileUsernameStatus");
   const profileSchool = document.getElementById("profileSchool");
   const profilePhone = document.getElementById("profilePhone");
   const profileExamYear = document.getElementById("profileExamYear");
@@ -110,6 +111,51 @@
       window.setTimeout(() => toast.remove(), 260);
     }, 3600);
   }
+
+  const usernameStatusStyle = document.createElement("style");
+  usernameStatusStyle.textContent = '.profile-username-status{margin:6px 0 0!important;font-size:.76rem;line-height:1.4}.profile-username-status[data-state="available"]{color:#34d399}.profile-username-status[data-state="taken"],.profile-username-status[data-state="invalid"]{color:#fb7185}.profile-username-status[data-state="checking"]{color:var(--text-secondary)}';
+  document.head.appendChild(usernameStatusStyle);
+  let usernameCheckTimer = null;
+  let usernameCheckSequence = 0;
+  function setUsernameStatus(message, state = "checking") {
+    if (!profileUsernameStatus) return;
+    profileUsernameStatus.textContent = message;
+    profileUsernameStatus.dataset.state = state;
+    profileUsernameStatus.hidden = !message;
+  }
+  async function checkUsernameAvailabilityNow(value, sequence) {
+    const username = String(value || "").trim().toLowerCase();
+    if (!username) { setUsernameStatus(""); return; }
+    if (!/^[a-z0-9_]{3,24}$/.test(username)) {
+      setUsernameStatus("Use 3–24 lowercase letters, numbers, or underscores.", "invalid");
+      return;
+    }
+    setUsernameStatus("Checking username availability…", "checking");
+    try {
+      const account = window.StudyLabAccount;
+      if (!account?.ready) throw new Error("Account service unavailable");
+      await account.ready;
+      const available = await account.checkUsernameAvailable(username);
+      if (sequence !== usernameCheckSequence || profileUsername.value.trim().toLowerCase() !== username) return;
+      setUsernameStatus(available ? "Username is available." : "Username already taken. Try another.", available ? "available" : "taken");
+    } catch (_) {
+      if (sequence !== usernameCheckSequence) return;
+      setUsernameStatus("Could not check now. It will be checked again when you save.", "checking");
+    }
+  }
+  profileUsername?.addEventListener("input", () => {
+    if (usernameCheckTimer) window.clearTimeout(usernameCheckTimer);
+    const sequence = ++usernameCheckSequence;
+    const value = profileUsername.value;
+    if (!value.trim()) { setUsernameStatus(""); return; }
+    const normalized = value.trim().toLowerCase();
+    if (!/^[a-z0-9_]{3,24}$/.test(normalized)) {
+      setUsernameStatus("Use 3–24 lowercase letters, numbers, or underscores.", "invalid");
+      return;
+    }
+    setUsernameStatus("Checking username availability…", "checking");
+    usernameCheckTimer = window.setTimeout(() => checkUsernameAvailabilityNow(normalized, sequence), 300);
+  });
 
   const profileIconStyle = document.createElement("style");
   profileIconStyle.textContent = '.profile-button .header-action-icon{display:inline-grid;place-items:center;width:20px;height:20px;flex:0 0 20px} .profile-button .header-action-icon-female{color:#ff4fa3!important} .profile-button .header-action-icon-male{color:#39a8ff!important} .profile-button .header-action-icon svg{width:20px;height:20px;fill:none;stroke:currentColor!important;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 2px currentColor) drop-shadow(0 0 4px currentColor)}';
@@ -328,7 +374,7 @@
     profileStatus.hidden = true;
     const name = profileInput.value.trim().replace(/\s+/g, " ");
     const username = profileUsername.value.trim().toLowerCase();
-    if (!/^[a-z0-9_]{3,24}$/.test(username)) {
+    if (username && !/^[a-z0-9_]{3,24}$/.test(username)) {
       showStatus("Username must be 3–24 characters using lowercase letters, numbers, or underscores.", true);
       profileUsername.focus();
       return;
@@ -378,6 +424,11 @@
       const account = window.StudyLabAccount;
       if (!account?.ready) throw new Error("StudyLab account is unavailable.");
       await account.ready;
+      if (username && !(await account.checkUsernameAvailable(username))) {
+        showStatus("That username is already taken. Please choose another.", true);
+        profileUsername.focus();
+        return;
+      }
       const p = await account.saveProfile(name, {
         username,
         school,
