@@ -219,6 +219,7 @@
   }
 
   function scheduleUsernameAvailabilityCheck() {
+    usernameCheckSequence++;
     if (usernameCheckTimer) window.clearTimeout(usernameCheckTimer);
     const username = String(profileUsername?.value || "").trim().toLowerCase();
     if (!username || !/^[a-z0-9_]{3,24}$/.test(username) || username === savedUsername) {
