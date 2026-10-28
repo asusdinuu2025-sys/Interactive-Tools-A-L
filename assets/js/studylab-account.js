@@ -68,7 +68,7 @@
 
     const { data, error } = await client
       .from("studylab_profiles")
-      .select("id,display_name,username,school,phone,exam_year,study_stream,gender,profile_completed_at,created_at,updated_at")
+      .select("id,display_name,school,phone,exam_year,study_stream,gender,profile_completed_at,created_at,updated_at")
       .eq("id", user.id)
       .maybeSingle();
 
@@ -113,7 +113,7 @@
         },
         { onConflict: "id" }
       )
-      .select("id,display_name,username,school,phone,exam_year,study_stream,gender,profile_completed_at,created_at,updated_at")
+      .select("id,display_name,school,phone,exam_year,study_stream,gender,profile_completed_at,created_at,updated_at")
       .single();
 
     if (error) throw error;
@@ -130,11 +130,6 @@
     if (cleanName.length < 2) throw new Error("Please enter your name.");
     if (cleanName.length > 60) throw new Error("Please keep your name under 60 characters.");
     if (!user) await ready;
-
-    const cleanUsername = String(details.username || "").trim().toLowerCase();
-    if (!/^[a-z0-9_]{3,24}$/.test(cleanUsername)) {
-      throw new Error("Username must be 3–24 characters using lowercase letters, numbers, or underscores.");
-    }
 
     const requireFullProfile = details.require_full_profile === true;
     const cleanOptional = value => {
@@ -182,7 +177,6 @@
       .upsert({
         id: user.id,
         display_name: cleanName,
-        username: cleanUsername,
         school,
         phone,
         exam_year: examYear,
@@ -191,17 +185,24 @@
         profile_completed_at: fullDetailsComplete ? (profile?.profile_completed_at || now) : null,
         updated_at: now
       }, { onConflict: "id" })
-      .select("id,display_name,username,school,phone,exam_year,study_stream,gender,profile_completed_at,created_at,updated_at")
+      .select("id,display_name,school,phone,exam_year,study_stream,gender,profile_completed_at,created_at,updated_at")
       .single();
 
-    if (error) {
-      if (error.code === "23505" && String(error.message || "").includes("studylab_profiles_username_unique")) {
-        throw new Error("That username is already taken. Please choose another.");
-      }
-      throw error;
-    }
+    if (error) throw error;
     profile = data;
     return profile;
+  }
+
+  async function checkDisplayNameAvailable(name) {
+    if (!user) await ready;
+    const cleanName = String(name || "").trim().replace(/\s+/g, " ");
+    if (cleanName.length < 2 || cleanName.length > 60) return false;
+    const { data, error } = await client.rpc(
+      "check_studylab_display_name_available",
+      { p_display_name: cleanName }
+    );
+    if (error) throw error;
+    return data === true;
   }
 
   async function getProfile(force = false) {
@@ -240,7 +241,7 @@
                 display_name: legacyName,
                 updated_at: new Date().toISOString()
               }, { onConflict: "id" })
-              .select("id,display_name,username,school,phone,exam_year,study_stream,gender,profile_completed_at,created_at,updated_at")
+              .select("id,display_name,school,phone,exam_year,study_stream,gender,profile_completed_at,created_at,updated_at")
               .single();
             if (migrationSaveError) throw migrationSaveError;
             profile = migratedProfile;
@@ -282,6 +283,7 @@
     ready,
     getUser: () => user,
     getProfile,
+    checkDisplayNameAvailable,
     saveProfile
   };
 
