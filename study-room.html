@@ -261,6 +261,14 @@ body.study-room-page.profile-modal-open > :not(#profileModal):not(#studyRoomProf
               </div>
             </fieldset>
           </div>
+          <div class="profile-field profile-field-full">
+            <label for="profileUsername">Username <span class="profile-optional">Optional</span></label>
+            <input class="profile-input" id="profileUsername" name="username" type="text" maxlength="24"
+                   minlength="3" pattern="[a-z0-9_]{3,24}" autocomplete="username" autocapitalize="none" spellcheck="false"
+                   placeholder="Choose a username (optional)" />
+            <p class="profile-hint">Optional custom handle. 3–24 lowercase letters, numbers, or underscores. Availability is checked as you type.</p>
+            <p class="profile-username-status" id="profileUsernameStatus" role="status" aria-live="polite" hidden></p>
+          </div>
           <div class="profile-field">
             <label for="profileSchool">School <span class="profile-optional">Optional</span></label>
             <input class="profile-input" id="profileSchool" name="school" type="text" maxlength="120"
@@ -305,8 +313,8 @@ body.study-room-page.profile-modal-open > :not(#profileModal):not(#studyRoomProf
   </div>
 <script src="assets/js/main.js?v=20261027-system-theme"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/js/studylab-account.js"></script>
-<script src="assets/js/profile.js"></script>
+<script src="assets/js/studylab-account.js?v=20261028-optional-username-v1"></script>
+<script src="assets/js/profile.js?v=20261028-optional-username-v1"></script>
 <script src="assets/js/study-room-config.js"></script>
 <script src="assets/js/live-layer.js"></script>
 <script src="assets/js/study-room-realtime.js?v=20261028-gender-neon-v2"></script>
