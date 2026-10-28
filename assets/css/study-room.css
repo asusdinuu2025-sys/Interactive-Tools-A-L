@@ -152,3 +152,15 @@ html[data-theme="light"] .hero h1 .hero-title-letter::after{
   .study-room-launcher::before{opacity:.8}
   .hero h1 .hero-title-letter::after{clip-path:none;opacity:.45}
 }
+
+
+/* The room's profile editor is opened only by its completion gate; hide its floating trigger here. */
+body.study-room-page #profileButton,
+body.study-room-page .profile-button { display: none !important; }
+
+
+/* Live username availability feedback. */
+.profile-username-status { margin-top: 4px; font-weight: 650; }
+.profile-username-status[data-state="error"] { color: #ff626f !important; }
+.profile-username-status[data-state="success"] { color: #35c98a !important; }
+.profile-username-status[data-state="checking"] { color: var(--text-secondary) !important; }

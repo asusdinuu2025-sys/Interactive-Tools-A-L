@@ -2514,6 +2514,7 @@
               <label for="profileName">Full name <span aria-hidden="true">*</span></label>
               <input class="profile-input" id="profileName" name="name" type="text" maxlength="60"
                      autocomplete="name" placeholder="Enter your name" required />
+              <p class="profile-hint profile-name-status" id="profileNameStatus" role="status" aria-live="polite" hidden></p>
             </div>
             <fieldset class="profile-gender-field">
               <legend>Profile icon <span aria-hidden="true">*</span></legend>
@@ -2533,6 +2534,7 @@
                    minlength="3" pattern="[a-z0-9_]{3,24}" autocomplete="username" autocapitalize="none" spellcheck="false"
                    placeholder="e.g. dinusha_27" required />
             <p class="profile-hint">3–24 characters: lowercase letters, numbers, and underscores. Each username can belong to only one student.</p>
+            <p class="profile-hint profile-username-status" id="profileUsernameStatus" role="status" aria-live="polite" hidden></p>
           </div>
           <div class="profile-field">
             <label for="profileSchool">School <span class="profile-optional">Optional</span></label>
@@ -2566,10 +2568,6 @@
               <option value="Other">Other</option>
             </select>
           </div>
-        </div>
-        <div class="profile-privacy">
-          <span class="profile-privacy-icon" aria-hidden="true">🔒</span>
-          <span>Your profile is linked to your StudyLab student account. School and mobile number are required only to enter the Study Room. Your phone number is not displayed publicly.</span>
         </div>
         <button class="profile-save" type="submit">Save profile</button>
         <p class="profile-status" id="profileStatus" role="status" aria-live="polite" hidden></p>
@@ -2656,7 +2654,7 @@
   <!-- Supabase must load before StudyLab cloud features. -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/studylab-account.js"></script>
-  <script src="assets/js/profile.js?v=20261028-gender-neon-v2"></script>
+  <script src="assets/js/profile.js?v=20261028-availability-colors-v1"></script>
   <script src="assets/js/main.js?v=20261027-system-theme"></script>
   <script src="assets/js/study-dashboard.js"></script>
   <script src="assets/js/student-milestone.js"></script>
@@ -2761,5 +2759,21 @@
   <script src="assets/js/ai-tutor.js" defer></script>
   <script src="assets/js/studylab-pet.js" defer></script>
 
+
+
+<style id="profile-modal-scrollbar-theme">
+/* Keep the profile dialog scrollable on small screens without showing a scrollbar. */
+.profile-modal,
+.profile-dialog {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+.profile-modal::-webkit-scrollbar,
+.profile-dialog::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}
+</style>
 </body>
 </html>
