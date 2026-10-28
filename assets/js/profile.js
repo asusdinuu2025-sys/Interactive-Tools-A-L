@@ -22,7 +22,7 @@
   const profileFields = [profileInput, profileUsername, profileSchool, profilePhone, profileExamYear, profileStream];
   let closeTimer = null;
   let mandatoryProfile = false;
-  let requireFullProfile = false;
+  let requireFullProfile = window.location.pathname.endsWith("/study-room.html");
 
   const profileClose = document.getElementById("profileClose");
 
@@ -269,6 +269,10 @@
     if (submit) submit.textContent = complete ? "Save changes" : "Save profile";
   }
   async function openModal() {
+    if (window.location.pathname.endsWith("/study-room.html")) {
+      requireFullProfile = true;
+      mandatoryProfile = true;
+    }
     profileStatus.hidden = true;
     profileStatus.textContent = "";
     profileStatus.dataset.state = "success";
@@ -378,6 +382,12 @@
   profileInput.addEventListener("change", scheduleNameAvailabilityCheck);
 
   profileButton.addEventListener("click", openModal);
+  window.addEventListener("studylab:require-full-profile", async () => {
+    requireFullProfile = true;
+    mandatoryProfile = true;
+    updateRequiredFields();
+    if (profileModal.hidden) await openModal();
+  });
   profileClose?.addEventListener("click", closeModal);
   profileModal.addEventListener("click", event => {
     if (event.target === profileModal) closeModal();
@@ -391,6 +401,11 @@
     profileStatus.hidden = true;
     const name = profileInput.value.trim().replace(/\s+/g, " ");
     const username = profileUsername.value.trim().toLowerCase();
+    if (window.location.pathname.endsWith("/study-room.html")) {
+      requireFullProfile = true;
+      mandatoryProfile = true;
+      updateRequiredFields();
+    }
     if (!/^[a-z0-9_]{3,24}$/.test(username)) {
       showStatus("Username must be 3–24 characters using lowercase letters, numbers, or underscores.", true);
       profileUsername.focus();
@@ -502,8 +517,10 @@
       setButtonProfile(p);
       const params = new URLSearchParams(window.location.search);
       const returnTo = params.get("returnTo") || "";
-      requireFullProfile = params.get("completeProfile") === "1" &&
-        returnTo.startsWith("/study-room.html") && !returnTo.startsWith("//") && !returnTo.includes("\\");
+      const isStudyRoomPage = window.location.pathname.endsWith("/study-room.html");
+      requireFullProfile = isStudyRoomPage ||
+        (params.get("completeProfile") === "1" &&
+         returnTo.startsWith("/study-room.html") && !returnTo.startsWith("//") && !returnTo.includes("\\"));
       if (requireFullProfile && !isFullComplete(p)) {
         await openModal();
         showStudyRoomGateToast();
