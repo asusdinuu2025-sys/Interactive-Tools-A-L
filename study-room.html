@@ -132,6 +132,7 @@ body.study-room-page.profile-modal-open > :not(#profileModal):not(#studyRoomProf
 #profileModal { filter: none !important; }
 .profile-modal-open { overflow:hidden; }
 /* Hide the profile gate's visible white scrollbars without changing scroll behavior. */
+/* PR #56: hide profile-window scrollbars while preserving mouse, touch and keyboard scrolling. */
 .profile-modal, .profile-dialog { scrollbar-width:none; -ms-overflow-style:none; }
 .profile-modal::-webkit-scrollbar, .profile-dialog::-webkit-scrollbar { display:none; width:0; height:0; }
 
