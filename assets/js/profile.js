@@ -189,6 +189,7 @@
     if (!profileNameStatus) return;
     profileNameStatus.textContent = message;
     profileNameStatus.dataset.state = state;
+    profileNameStatus.style.setProperty("color", state === "error" ? "#ff626f" : state === "success" ? "#35c98a" : "var(--text-secondary)", "important");
     profileNameStatus.hidden = !message;
   }
 
@@ -269,6 +270,7 @@
     if (!profileUsernameStatus) return;
     profileUsernameStatus.textContent = message;
     profileUsernameStatus.dataset.state = state;
+    profileUsernameStatus.style.setProperty("color", state === "error" ? "#ff626f" : state === "success" ? "#35c98a" : "var(--text-secondary)", "important");
     profileUsernameStatus.hidden = !message;
   }
 
