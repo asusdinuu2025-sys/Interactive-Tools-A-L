@@ -73,7 +73,8 @@
     const percent = Math.min(100, Math.round(total / (Number(goal.value) || 14400) * 100));
     goalBar.style.width = percent + '%';
     goalText.textContent = percent >= 100 ? 'Goal reached!' : percent + '% completed';
-    const savedSessionSeconds = member ? Math.max(0, Number(member.session_elapsed_seconds) || 0) : 0;
+    const savedSessionSeconds = member && member.session_date === dayKey(new Date())
+      ? Math.max(0, Number(member.session_elapsed_seconds) || 0) : 0;
     const liveSessionSeconds = member && member.is_studying && member.session_started_at
       ? Math.max(0, Math.floor((Date.now() - new Date(member.session_started_at).getTime()) / 1000)) : 0;
     timer.textContent = fmt(savedSessionSeconds + liveSessionSeconds);
