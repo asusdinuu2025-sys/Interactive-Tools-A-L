@@ -17,21 +17,17 @@ select m.user_id,
        study_room_private.display_name_for_member(m.user_id) as display_name,
        m.subject, m.is_studying, m.session_started_at, m.last_heartbeat_at,
        m.today_seconds, m.today_date, m.week_seconds, m.week_start, m.updated_at,
-       m.session_elapsed_seconds, m.session_date,
        study_room_private.gender_for_member(m.user_id) as gender,
        case when m.today_date = timezone('Asia/Colombo', now())::date
             then m.today_time else '00:00:00' end as today_time,
        case when m.week_start = public.study_room_local_week_start(timezone('Asia/Colombo', now())::date)
-            then m.week_time else '00:00:00' end as week_time
+            then m.week_time else '00:00:00' end as week_time,
+       m.session_elapsed_seconds,
+       m.session_date
 from public.study_room_members m
-where exists (
-  select 1 from public.studylab_profiles p
-  where p.id = m.user_id
-    and p.profile_completed_at is not null
-    and length(btrim(p.display_name)) >= 2
-    and p.display_name !~ '^Student[0-9]{4}
-
+where study_room_private.profile_is_complete(m.user_id);
 revoke all on public.study_room_live from public, anon, authenticated;
+grant select on public.study_room_live to authenticated;
 
 CREATE OR REPLACE FUNCTION public.study_room_start()
 RETURNS void
@@ -99,8 +95,7 @@ BEGIN
       -- Save only the bounded final interval, then pause the session.
       UPDATE public.study_room_members
       SET today_seconds = CASE WHEN today_date = local_day
-            THEN today_seconds + CASE WHEN today_date = local_day THEN elapsed ELSE 0 END
-            ELSE elapsed END,
+            THEN today_seconds + elapsed ELSE elapsed END,
           today_date = local_day,
           week_seconds = CASE WHEN week_start = monday
             THEN week_seconds + elapsed ELSE elapsed END,
