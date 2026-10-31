@@ -3,6 +3,12 @@
 <head>
   <meta name="google-site-verification" content="KHZ9LEmkDAOm7Gwg3SgnB23RXtq5mvN73bnRTgbt9EA" />
   <link rel="icon" type="image/png" href="assets/icon/icon2.png">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/assets/icon/icon2.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="StudyLab">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
@@ -25,6 +31,7 @@
   <meta name="twitter:description" content="StudyLab is a Sri Lankan G.C.E. A/L 2027 study resource hub with interactive tools, simulations, calculators, practical-learning resources and past-paper resources for Combined Mathematics, Physics, Chemistry and Biology." />
 
   <link rel="stylesheet" href="assets/css/main.css" />
+  <link rel="stylesheet" href="assets/css/pwa.css?v=1.0.0">
 
   <!-- =========================================================
        STUDY LAB LK — GLASS UI START
@@ -1768,6 +1775,16 @@
     <div class="header-actions">
       <button
         type="button"
+        class="pwa-install-button"
+        id="installStudyLabButton"
+        aria-label="Install StudyLab as an app"
+        title="Install StudyLab as an app"
+      >
+        <span class="pwa-install-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M12 3v12m-5-5 5 5 5-5"/><path d="M5 17v3h14v-3"/></svg></span>
+        <span class="pwa-install-label">Install App</span>
+      </button>
+      <button
+        type="button"
         class="profile-button"
         id="profileButton"
         aria-haspopup="dialog"
@@ -1788,6 +1805,14 @@
 
   </header>
 
+  <dialog class="pwa-install-dialog" id="pwaInstallHelp" aria-labelledby="pwaInstallHelpTitle">
+    <div class="pwa-dialog-head">
+      <button type="button" class="pwa-dialog-close" id="pwaInstallHelpClose" aria-label="Close installation instructions">×</button>
+      <h2 id="pwaInstallHelpTitle">Install StudyLab</h2>
+    </div>
+    <p id="pwaInstallHelpText">Install StudyLab as an app. It stays connected to the live website and receives updates online.</p>
+    <ol id="pwaInstallHelpSteps"></ol>
+  </dialog>
 
   <!-- =========================================================
        STUDY LAB LK — MAIN CONTENT
@@ -2775,5 +2800,7 @@
   display: none !important;
 }
 </style>
+  <script src="assets/js/pwa.js?v=1.0.0"></script>
+
 </body>
 </html>
