@@ -102,7 +102,8 @@ BEGIN
           week_start = monday,
           session_elapsed_seconds = CASE
             WHEN session_date = local_day
-              THEN session_elapsed_seconds + elapsed
+              THEN session_elapsed_seconds + greatest(0,
+                floor(extract(epoch FROM (now() - previous.session_started_at)))::integer)
             ELSE 0 END,
           session_date = local_day,
           is_studying = false,
