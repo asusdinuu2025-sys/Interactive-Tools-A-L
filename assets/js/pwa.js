@@ -160,8 +160,6 @@
       if (choice?.outcome === "accepted") {
         getInstallationIdentity();
         await recordInstallation();
-        button.textContent = "Installing…";
-        button.disabled = true;
       }
     } catch (error) {
       console.warn("StudyLab PWA install prompt:", error);
