@@ -11,6 +11,28 @@ UPDATE public.study_room_members
 SET session_date = timezone('Asia/Colombo', now())::date
 WHERE session_date IS NULL;
 
+create or replace view public.study_room_live
+with (security_invoker = true) as
+select m.user_id,
+       study_room_private.display_name_for_member(m.user_id) as display_name,
+       m.subject, m.is_studying, m.session_started_at, m.last_heartbeat_at,
+       m.today_seconds, m.today_date, m.week_seconds, m.week_start, m.updated_at,
+       m.session_elapsed_seconds, m.session_date,
+       study_room_private.gender_for_member(m.user_id) as gender,
+       case when m.today_date = timezone('Asia/Colombo', now())::date
+            then m.today_time else '00:00:00' end as today_time,
+       case when m.week_start = public.study_room_local_week_start(timezone('Asia/Colombo', now())::date)
+            then m.week_time else '00:00:00' end as week_time
+from public.study_room_members m
+where exists (
+  select 1 from public.studylab_profiles p
+  where p.id = m.user_id
+    and p.profile_completed_at is not null
+    and length(btrim(p.display_name)) >= 2
+    and p.display_name !~ '^Student[0-9]{4}
+
+revoke all on public.study_room_live from public, anon, authenticated;
+
 CREATE OR REPLACE FUNCTION public.study_room_start()
 RETURNS void
 LANGUAGE plpgsql
