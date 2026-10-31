@@ -73,9 +73,10 @@
     const percent = Math.min(100, Math.round(total / (Number(goal.value) || 14400) * 100));
     goalBar.style.width = percent + '%';
     goalText.textContent = percent >= 100 ? 'Goal reached!' : percent + '% completed';
-    const sessionSeconds = member && member.is_studying && member.session_started_at
+    const savedSessionSeconds = member ? Math.max(0, Number(member.session_elapsed_seconds) || 0) : 0;
+    const liveSessionSeconds = member && member.is_studying && member.session_started_at
       ? Math.max(0, Math.floor((Date.now() - new Date(member.session_started_at).getTime()) / 1000)) : 0;
-    timer.textContent = fmt(sessionSeconds);
+    timer.textContent = fmt(savedSessionSeconds + liveSessionSeconds);
   }
   function updateSessionUI(isJoined) {
     join.disabled = isJoined;
@@ -166,12 +167,17 @@
   }
   async function loadRows() {
     const {data,error} = await client.from('study_room_live').select(
-      'user_id,display_name,gender,subject,is_studying,session_started_at,last_heartbeat_at,today_seconds,today_date,week_seconds,week_start'
+      'user_id,display_name,gender,subject,is_studying,session_started_at,session_elapsed_seconds,session_date,last_heartbeat_at,today_seconds,today_date,week_seconds,week_start'
     );
     if (error) throw error;
     rows = data || [];
     const current = rows.find(r => r.user_id === userId);
-    if (current) member = current;
+    if (current) {
+      member = current;
+      const heartbeatFresh = current.last_heartbeat_at &&
+        Date.now() - new Date(current.last_heartbeat_at).getTime() < 90000;
+      updateSessionUI(Boolean(current.is_studying && heartbeatFresh));
+    }
     renderPeople();
     renderBoard();
     updatePersonal();
