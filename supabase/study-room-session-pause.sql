@@ -95,10 +95,10 @@ BEGIN
       -- Save only the bounded final interval, then pause the session.
       UPDATE public.study_room_members
       SET today_seconds = CASE WHEN today_date = local_day
-            THEN today_seconds + elapsed ELSE elapsed END,
+            THEN today_seconds + elapsed ELSE 0 END,
           today_date = local_day,
           week_seconds = CASE WHEN week_start = monday
-            THEN week_seconds + elapsed ELSE elapsed END,
+            THEN week_seconds + elapsed ELSE 0 END,
           week_start = monday,
           session_elapsed_seconds = CASE
             WHEN session_date = local_day
