@@ -25,7 +25,9 @@ panel.innerHTML=[
 '<article class="sl-card sl-wide"><div class="sl-head"><h3>Completed tasks</h3><small>Same selected period</small></div><div class="sl-summary sl-task-summary"><article><span>Completed</span><strong id="slTasksDone">0</strong></article><article><span>Remaining</span><strong id="slTasksPending">0</strong></article><article><span>Completion rate</span><strong id="slTasksRate">0%</strong></article></div><div class="sl-task-history-head"><strong>Daily completions</strong><small>Last 7 days</small></div><div class="sl-bars sl-task-bars" id="slTaskBars"><p class="sl-empty">Completed tasks will appear here.</p></div></article>',
 '<p class="sl-foot">Time is recorded while your Study Room status is “Studying”. History and tasks stay in this browser, are not shared with other students, and do not sync across devices.</p><p id="slNotice" class="sl-notice" role="status" hidden></p>'
 ].join("");
-layout.insertAdjacentElement("afterend",panel);
+const content=document.querySelector(".sl-room-content");
+const attendance=document.getElementById("peopleGrid")?.closest(".room-panel");
+if(attendance) attendance.insertAdjacentElement("afterend",panel); else (content||layout).append(panel);
 const css=[
 '.sl-analytics{grid-column:1/-1;margin-top:18px}.sl-sub{margin:5px 0 0;color:var(--text-muted);font-size:.76rem}.sl-local{color:#39d6ad;font-size:.65rem;font-weight:850;letter-spacing:.08em}',
 '.sl-tabs{display:flex;flex-wrap:wrap;gap:5px;padding:4px;margin-bottom:15px;border-radius:12px;background:rgba(120,135,160,.1);width:max-content;max-width:100%}.sl-tabs button{border:0;border-radius:9px;padding:8px 11px;background:transparent;color:var(--text-muted);font:inherit;font-size:.75rem;font-weight:750;cursor:pointer}.sl-tabs button.active{background:var(--card-bg);color:var(--text-primary)}',
