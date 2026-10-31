@@ -8,8 +8,7 @@ const key="studylab-local-study-analytics-v1:"+(uid||"this-browser");
 const today=()=>new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Colombo",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
 const dateAgo=n=>{const d=new Date(Date.now()+19800000);d.setUTCHours(12,0,0,0);d.setUTCDate(d.getUTCDate()-n);return d.toISOString().slice(0,10);};
 const fmt=s=>{s=Math.max(0,Math.floor(s||0));const h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?h+"h "+String(m).padStart(2,"0")+"m":m+"m";};
-const palette=["#58a6ff","#ffb454","#b69cff","#39d6ad","#ff78b7","#e5d45b","#66c7d8","#ff826e","#91c96b","#c58be8","#d5a56b","#8d9aaa"];
-const color=n=>{const i=[...subject.options].findIndex(o=>o.text===n);return palette[Math.max(0,i)%palette.length];};
+const color=n=>{const i=Math.max(0,[...subject.options].findIndex(o=>o.text===n));return "hsl("+((i*137.508)%360).toFixed(1)+" 72% 62%)";};
 const blank=()=>({days:{},tasks:[]});
 function read(){try{const d=JSON.parse(localStorage.getItem(key)||"null");return d&&typeof d==="object"?{days:d.days||{},tasks:Array.isArray(d.tasks)?d.tasks:[]}:blank();}catch(_){return blank();}}
 let data=read(),active=null,period="today";
