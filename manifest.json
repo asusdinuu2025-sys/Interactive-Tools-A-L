@@ -6,12 +6,24 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui"],
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
   "orientation": "any",
   "background_color": "#0b1220",
   "theme_color": "#0b1220",
-  "categories": ["education", "productivity"],
+  "categories": [
+    "education",
+    "productivity"
+  ],
   "icons": [
+    {
+      "src": "/assets/icon/studylab-pwa.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
     {
       "src": "/assets/icon/icon2.png",
       "sizes": "512x512",
@@ -24,5 +36,6 @@
       "type": "image/svg+xml",
       "purpose": "any"
     }
-  ]
+  ],
+  "prefer_related_applications": false
 }
