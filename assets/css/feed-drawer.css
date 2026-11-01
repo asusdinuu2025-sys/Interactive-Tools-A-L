@@ -452,3 +452,19 @@ html[data-theme="light"] .sl-feed-create-trigger span:first-child { color:#147ba
 @media (prefers-reduced-motion:reduce) {
   .sl-feed-toggle,.sl-feed-skeleton { animation:none !important; }
 }
+
+/* Keep advertisement rails useful only when the viewport has enough room. */
+@media (max-width:1250px) {
+  .sl-feed-panel[data-size="full"] .sl-feed-stage { display:block; }
+  .sl-feed-panel[data-size="full"] .sl-feed-ad-rail { display:none; }
+}
+.sl-feed-avatar-male {
+  color:var(--sl-avatar-accent,#48caff);
+  border-color:var(--sl-avatar-accent,#48caff);
+  box-shadow:0 0 5px var(--sl-avatar-accent,#48caff),0 0 12px color-mix(in srgb,var(--sl-avatar-accent,#48caff) 42%,transparent);
+}
+.sl-feed-avatar-female {
+  color:var(--sl-avatar-accent,#ff75cf);
+  border-color:var(--sl-avatar-accent,#ff75cf);
+  box-shadow:0 0 5px var(--sl-avatar-accent,#ff75cf),0 0 12px color-mix(in srgb,var(--sl-avatar-accent,#ff75cf) 42%,transparent);
+}
