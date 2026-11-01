@@ -178,6 +178,8 @@ body.sl-community-open .study-quick-button {
 .sl-feed-post-body { margin:10px 0 0; font-size:.82rem; line-height:1.55; white-space:pre-wrap; overflow-wrap:anywhere; }
 .sl-feed-status-pending { display:inline-flex; width:max-content; margin-top:8px; padding:3px 7px; border-radius:7px; background:rgba(230,174,73,.12); color:#d8b76f; font-size:.64rem; font-weight:700; }
 .sl-feed-gallery { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin-top:10px; }
+.sl-feed-gallery[data-count="1"] { grid-template-columns:minmax(0,1fr); }
+.sl-feed-gallery[data-count="1"] img { max-height: min(58vh, 620px); aspect-ratio:auto; }
 .sl-feed-gallery img { display:block; width:100%; max-height:420px; aspect-ratio:4/3; object-fit:contain; border-radius:10px; background:rgba(130,160,190,.08); }
 .sl-feed-post-actions { display:flex; gap:8px; margin-top:11px; padding-top:9px; border-top:1px solid rgba(130,160,190,.12); }
 .sl-feed-action { border:1px solid rgba(126,220,255,.16); border-radius:9px; padding:6px 9px; background:rgba(126,220,255,.06); color:var(--text-primary,#eef2ff); font:inherit; font-size:.7rem; font-weight:600; cursor:pointer; }
@@ -189,6 +191,7 @@ body.sl-community-open .study-quick-button {
 .sl-feed-comment-form { display:flex; gap:7px; margin-top:10px; }
 .sl-feed-comment-form input { flex:1; min-width:0; padding:8px 10px; border:1px solid rgba(130,160,190,.2); border-radius:9px; background:rgba(130,160,190,.07); color:inherit; font:inherit; font-size:.75rem; }
 .sl-feed-loading { margin:8px 0; color:#91a3b5; font-size:.72rem; }
+.sl-feed-admin-mode { display:inline-flex; align-items:center; margin-left:8px; padding:3px 7px; border:1px solid rgba(53,201,138,.28); border-radius:999px; background:rgba(53,201,138,.10); color:#43d59a; font-size:.58rem; font-weight:800; letter-spacing:.06em; vertical-align:middle; }
 .sl-feed-admin-queue { margin:0 3px 10px; padding:10px; border:1px solid rgba(230,174,73,.2); border-radius:13px; background:rgba(230,174,73,.045); }
 .sl-feed-admin-heading { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:.76rem; }
 .sl-feed-admin-heading span { color:#d8b76f; font-size:.65rem; font-weight:750; text-transform:uppercase; letter-spacing:.06em; }
@@ -199,6 +202,7 @@ body.sl-community-open .study-quick-button {
 .sl-feed-admin-actions button { padding:6px 9px; border-radius:8px; font:inherit; font-size:.68rem; font-weight:600; cursor:pointer; }
 .sl-feed-admin-approve { border:1px solid rgba(53,201,138,.3); background:rgba(53,201,138,.1); color:#43d59a; }
 .sl-feed-admin-reject { border:1px solid rgba(255,98,111,.25); background:rgba(255,98,111,.08); color:#ff7885; }
+html[data-theme="light"] .sl-feed-admin-mode { color:#168a60; background:rgba(53,201,138,.09); border-color:rgba(30,160,105,.25); }
 html[data-theme="light"] .sl-feed-post { background:rgba(255,255,255,.65); border-color:rgba(70,110,145,.18); }
 html[data-theme="light"] .sl-feed-action, html[data-theme="light"] .sl-feed-file-button { color:#20364a; }
 html[data-theme="light"] .sl-feed-post-username, html[data-theme="light"] .sl-feed-post-date, html[data-theme="light"] .sl-feed-file-count, html[data-theme="light"] .sl-feed-loading { color:#687e91; }
