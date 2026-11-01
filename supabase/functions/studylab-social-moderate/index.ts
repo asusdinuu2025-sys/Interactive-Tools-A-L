@@ -17,7 +17,7 @@ type ContentType = "post" | "comment";
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return json({ error: "POST required" }, 405);
-  if (!SUPABASE_URL || !SERVICE_ROLE_KEY || !OPENAI_API_KEY) {
+  if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
     return json({ error: "Moderation service is not configured" }, 503);
   }
 
@@ -75,6 +75,9 @@ Deno.serve(async (req: Request) => {
 
     // Image-only posts have no text to screen. Keep them pending for manual review.
     if (text.trim()) {
+      if (!OPENAI_API_KEY) {
+        return json({ error: "Text moderation is not configured" }, 503);
+      }
       const response = await fetch("https://api.openai.com/v1/moderations", {
         method: "POST",
         headers: {
