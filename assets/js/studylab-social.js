@@ -49,6 +49,7 @@
   let isAdmin = false;
   let adminRefreshAttempted = false;
   let sortMode = "newest";
+  let feedHasLoaded = false;
   status.hidden = true;
 
   function accountClient() {
@@ -189,6 +190,19 @@
     date.title = new Intl.DateTimeFormat(undefined,{dateStyle:"medium",timeStyle:"short"}).format(new Date(post.created_at));
     top.append(identity, date);
     card.append(top);
+    identity.addEventListener("click",() => {
+      const existing = card.querySelector(".sl-feed-profile-popover");
+      if (existing) { existing.remove(); return; }
+      panel.querySelectorAll(".sl-feed-profile-popover").forEach(item => item.remove());
+      const popover = make("div","sl-feed-profile-popover");
+      popover.append(make("strong","",post.author_display_name || "Student"));
+      popover.append(make("span","", "@" + (post.author_username || "student")));
+      const details = [];
+      if (profile.study_stream) details.push(profile.study_stream);
+      if (profile.exam_year) details.push("A/L " + profile.exam_year);
+      popover.append(make("small","",details.join(" · ") || "StudyLab student"));
+      card.append(popover);
+    });
 
     if (post.status === "pending" && post.author_id === currentUserId) {
       card.append(make("span", "sl-feed-status-pending", "Pending review"));
@@ -408,7 +422,7 @@
     if (!list.childElementCount) list.append(make("p", "sl-feed-loading", "Nothing is waiting for review."));
   }
   async function loadFeed() {
-    if (!stream.childElementCount) showSkeletons();
+    if (!feedHasLoaded) showSkeletons();
     try {
       const account = accountClient();
       await account.ready;
@@ -483,6 +497,7 @@
       if (isAdmin) await renderAdminQueue(account.client);
       else panel.querySelector(".sl-feed-admin-queue")?.remove();
       if (note) note.hidden = true;
+      feedHasLoaded = true;
     } catch (error) {
       console.error("StudyLab Social:", error);
       emptyState("Social is temporarily unavailable");
@@ -490,6 +505,7 @@
         note.hidden = false;
         note.textContent = error.message || "Could not connect to StudyLab Social. Please try again.";
       }
+      feedHasLoaded = true;
     }
   }
 
