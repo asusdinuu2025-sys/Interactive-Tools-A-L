@@ -32,7 +32,6 @@
         </div>
         <div class="sl-feed-size-controls" role="group" aria-label="Social panel size">
           <button type="button" data-feed-size="half" aria-label="Expand Social to half screen" title="Half screen">½</button>
-          <button type="button" data-feed-size="three-quarter" aria-label="Expand Social to three-quarter screen" title="Three-quarter screen">¾</button>
           <button type="button" data-feed-size="full" aria-label="Open Social fullscreen" title="Fullscreen">⛶</button>
         </div>
         <button class="sl-feed-close" type="button" data-feed-close aria-label="Close Social panel">×</button>
@@ -53,6 +52,23 @@
       </div>
       <p class="sl-feed-setup-note" role="status">Connecting to StudyLab Social…</p>
     </div>`;
+
+  // Full-screen mode uses a centered reading column with reserved ad placements.
+  const feedInner = panel.querySelector(".sl-feed-inner");
+  const feedStage = document.createElement("div");
+  feedStage.className = "sl-feed-stage";
+  const feedCenter = document.createElement("div");
+  feedCenter.className = "sl-feed-center";
+  const makeAdSlot = side => {
+    const slot = document.createElement("aside");
+    slot.className = "sl-feed-ad-rail sl-feed-ad-rail-" + side;
+    slot.setAttribute("aria-label", "Reserved banner advertisement space");
+    slot.innerHTML = '<div class="sl-feed-ad-placeholder"><span>ADVERTISEMENT</span><strong>Reserved space</strong><small>Banner placement</small></div>';
+    return slot;
+  };
+  feedInner.parentNode.replaceChild(feedStage,feedInner);
+  feedCenter.append(feedInner);
+  feedStage.append(makeAdSlot("left"),feedCenter,makeAdSlot("right"));
 
   const actions = header.querySelector(".header-actions");
   if (!actions) return;
