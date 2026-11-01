@@ -7,7 +7,7 @@ const HIGH_WATER_BYTES = 768 * 1024 * 1024; // 75% of the 1 GiB Free storage all
 const LOW_WATER_BYTES = 665 * 1024 * 1024;  // target about 65%
 const OLD_CONTENT_DAYS = 30;
 
-type ImageRow = { post_id: string; bucket_path: string; size_bytes: number };
+type ImageRow = { post_id: string; bucket_path: string };
 type PostRow = { id: string; status: string; created_at: string };
 
 Deno.serve(async (req: Request) => {
@@ -47,10 +47,10 @@ Deno.serve(async (req: Request) => {
 
     const { data: imageRows, error: imageError } = await supabase
       .from("studylab_social_post_images")
-      .select("post_id,bucket_path,size_bytes");
+      .select("post_id,bucket_path");
     if (imageError) throw imageError;
     const images = (imageRows || []) as ImageRow[];
-    let usedBytes = images.reduce((sum, image) => sum + Number(image.size_bytes || 0), 0);
+    let usedBytes = await getStorageUsage(supabase);
     let storageTrimmedPosts = 0;
 
     if (usedBytes > HIGH_WATER_BYTES) {
@@ -64,14 +64,12 @@ Deno.serve(async (req: Request) => {
 
       for (const post of (oldest || []) as PostRow[]) {
         if (usedBytes <= LOW_WATER_BYTES) break;
-        const attached = images.filter(image => image.post_id === post.id);
-        if (!attached.length) continue;
-        const bytes = attached.reduce((sum, image) => sum + Number(image.size_bytes || 0), 0);
+        if (!images.some(image => image.post_id === post.id)) continue;
         const result = await deletePost(supabase, post.id);
         if (result.ok) {
-          usedBytes = Math.max(0, usedBytes - bytes);
           storageTrimmedPosts++;
           deletedObjects += result.objects;
+          usedBytes = await getStorageUsage(supabase);
         }
       }
     }
@@ -90,6 +88,12 @@ Deno.serve(async (req: Request) => {
     return json({ error: "Maintenance failed" }, 500);
   }
 });
+
+async function getStorageUsage(supabase: ReturnType<typeof createClient>): Promise<number> {
+  const { data, error } = await supabase.rpc("studylab_social_storage_usage_bytes");
+  if (error) throw error;
+  return Number(data || 0);
+}
 
 async function deletePost(supabase: ReturnType<typeof createClient>, postId: string) {
   const { data: rows, error: readError } = await supabase
