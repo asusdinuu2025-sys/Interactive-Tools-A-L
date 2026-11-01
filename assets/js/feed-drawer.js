@@ -20,7 +20,7 @@
   const panel = document.createElement("aside");
   panel.className = "sl-feed-panel";
   panel.id = "studyLabFeedPanel";
-  panel.setAttribute("aria-label", "StudyLab Community");
+  panel.setAttribute("aria-label", "StudyLab Social");
   panel.setAttribute("aria-hidden", "true");
   panel.inert = true;
   panel.innerHTML = `
@@ -30,9 +30,9 @@
           <span class="sl-feed-mark" aria-hidden="true">
             <svg viewBox="0 0 24 24"><path d="M4 5.5h16v11H9l-5 3v-14Z"/><path d="M8 9h8M8 13h5"/></svg>
           </span>
-          <div><h2 class="sl-feed-title">StudyLab Feed</h2><p class="sl-feed-subtitle">A shared space for A/L students</p></div>
+          <div><h2 class="sl-feed-title">StudyLab Social</h2><p class="sl-feed-subtitle">A shared space for A/L students</p></div>
         </div>
-        <button class="sl-feed-close" type="button" data-feed-close aria-label="Close community">×</button>
+        <button class="sl-feed-close" type="button" data-feed-close aria-label="Close Social panel">×</button>
       </div>
       <form class="sl-feed-compose" aria-label="Create a feed post">
         <textarea maxlength="2000" disabled placeholder="Share something with other students..." aria-label="Write a post"></textarea>
@@ -41,14 +41,14 @@
           <button class="sl-feed-post-button" type="button" disabled>Post</button>
         </div>
       </form>
-      <div class="sl-feed-stream" role="feed" aria-label="Recent community posts">
+      <div class="sl-feed-stream" role="feed" aria-label="Recent Social posts">
         <div class="sl-feed-empty">
           <span class="sl-feed-empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5.5h16v11H9l-5 3v-14Z"/><path d="M8 9h8M8 13h5"/></svg></span>
-          <h3>Your student community starts here</h3>
+          <h3>Your student social space starts here</h3>
           <p>Posts from StudyLab students will appear here, newest first.</p>
         </div>
       </div>
-      <p class="sl-feed-setup-note" role="status">Community setup is in progress. Posting and image uploads will be enabled after database security and content moderation are configured.</p>
+      <p class="sl-feed-setup-note" role="status">Social posting and photo uploads are being prepared. Publishing will open after security and moderation checks are in place.</p>
     </div>`;
 
   const actions = header.querySelector(".header-actions");
@@ -58,7 +58,7 @@
   toggle.type = "button";
   toggle.setAttribute("aria-expanded", "false");
   toggle.setAttribute("aria-controls", panel.id);
-  toggle.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16v11H9l-5 3v-14Z"/><path d="M8 9h8M8 13h5"/></svg><span>Community</span>';
+  toggle.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16v11H9l-5 3v-14Z"/><path d="M8 9h8M8 13h5"/></svg><span>Social</span>';
 
   actions.insertBefore(toggle, actions.firstChild);
   header.parentNode.insertBefore(layout, header);
