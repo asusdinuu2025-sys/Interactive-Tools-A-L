@@ -1,0 +1,19 @@
+.sl-mini-timer-launcher{position:fixed;right:22px;bottom:82px;z-index:950;display:inline-flex;align-items:center;gap:8px;padding:11px 15px;border:1px solid rgba(126,220,255,.28);border-radius:999px;background:rgba(12,25,43,.92);color:#eaf6ff;font:inherit;font-size:.8rem;font-weight:800;box-shadow:0 12px 32px rgba(0,0,0,.24),0 0 20px rgba(57,214,173,.08);backdrop-filter:blur(16px);cursor:pointer;transition:transform .2s ease,border-color .2s ease}
+.sl-mini-timer-launcher:hover{transform:translateY(-2px);border-color:rgba(114,230,194,.65)}
+.sl-mini-timer-launcher span:first-child{font-size:1.1rem;color:#72e6c2}
+.sl-mini-timer-panel{position:fixed;right:22px;bottom:142px;z-index:951;width:min(290px,calc(100vw - 28px));padding:13px;border:1px solid rgba(126,220,255,.22);border-radius:18px;background:rgba(13,25,42,.96);color:#edf5ff;box-shadow:0 20px 55px rgba(0,0,0,.32);backdrop-filter:blur(22px)}
+.sl-mini-timer-panel[hidden]{display:none}
+.sl-mini-timer-head{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:move;touch-action:none;font-size:.82rem}
+.sl-mini-close{width:28px;height:28px;border:0;border-radius:50%;background:rgba(120,135,160,.15);color:inherit;font-size:1.2rem;cursor:pointer}
+.sl-mini-timer-clock{text-align:center;margin:8px 0 2px;font-size:2rem;font-weight:850;letter-spacing:.02em;font-variant-numeric:tabular-nums}
+.sl-mini-timer-status{text-align:center;color:#9aabc3;font-size:.68rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sl-mini-timer-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:11px}
+.sl-mini-timer-actions button{min-height:36px;border:1px solid rgba(126,220,255,.2);border-radius:9px;background:rgba(126,220,255,.08);color:inherit;font:inherit;font-size:.74rem;font-weight:800;cursor:pointer}
+.sl-mini-timer-actions button:first-child{background:linear-gradient(135deg,#26b98d,#168b78);border-color:transparent;color:white}
+.sl-mini-timer-actions button:disabled{opacity:.35;cursor:not-allowed}
+.sl-mini-timer-hint{margin-top:8px;text-align:center;color:#7f91aa;font-size:.61rem}
+html[data-theme="light"] .sl-mini-timer-launcher{background:rgba(255,255,255,.92);color:#17233b;border-color:rgba(60,90,130,.2)}
+html[data-theme="light"] .sl-mini-timer-panel{background:rgba(255,255,255,.97);color:#17233b;border-color:rgba(60,90,130,.18)}
+html[data-theme="light"] .sl-mini-timer-status,html[data-theme="light"] .sl-mini-timer-hint{color:#68758b}
+@media(max-width:520px){.sl-mini-timer-launcher{right:14px;bottom:82px;padding:10px 13px}.sl-mini-timer-panel{right:14px;bottom:142px}}
+@media(prefers-reduced-motion:reduce){.sl-mini-timer-launcher{transition:none}}

@@ -14,6 +14,7 @@
   const label = $('sessionLabel');
   const panel = $('sessionPanel');
   const join = $('joinStudy');
+  const pause = $('pauseStudy');
   const leave = $('leaveStudy');
   const todayTotal = $('todayTotal');
   const goalBar = $('goalProgressBar');
@@ -22,8 +23,8 @@
   const board = $('leaderboardList');
   const dailyTab = $('dailyBoardTab');
   const weeklyTab = $('weeklyBoardTab');
-  let client, userId = null, member = null, rows = [], interval = null;
-  let lastTick = Date.now(), selectedBoard = 'daily';
+  let client, userId = null, member = null, rows = [], heartbeatInterval = null, uiInterval = null;
+  let selectedBoard = 'daily';
   const dayKey = date => new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Asia/Colombo', year: 'numeric', month: '2-digit', day: '2-digit'
   }).format(date);
@@ -39,6 +40,12 @@
       .map(n => String(n).padStart(2,'0')).join(':');
   };
   const compact = seconds => fmt(seconds);
+  const startOfDay = key => new Date(key + 'T00:00:00+05:30').getTime();
+  function pendingSeconds(row, boundary) {
+    if (!row?.is_studying || !row.last_heartbeat_at) return 0;
+    const heartbeatAt = new Date(row.last_heartbeat_at).getTime();
+    return Math.max(0, Math.floor((Date.now() - Math.max(heartbeatAt, boundary)) / 1000));
+  }
   function isProfileComplete(p) {
     const phoneDigits = String(p?.phone || "").replace(/\D/g, "");
     return Boolean(p?.profile_completed_at && p?.display_name &&
@@ -64,59 +71,62 @@
     notice.style.borderColor = isError ? 'rgba(255,105,105,.35)' : '';
   }
   function updatePersonal() {
-    const localToday = dayKey(new Date());
-    const seconds = member && member.today_date === localToday ? member.today_seconds : 0;
-    const pending = member && member.is_studying && member.last_heartbeat_at
-      ? Math.max(0, Math.min(25, Math.floor((Date.now() - new Date(member.last_heartbeat_at).getTime()) / 1000))) : 0;
-    const total = seconds + pending;
+    const today = dayKey(new Date());
+    const todaySeconds = member && member.today_date === today ? Number(member.today_seconds) || 0 : 0;
+    const pendingToday = pendingSeconds(member, startOfDay(today));
+    const total = todaySeconds + pendingToday;
     todayTotal.textContent = 'Today: ' + fmt(total);
     const percent = Math.min(100, Math.round(total / (Number(goal.value) || 14400) * 100));
     goalBar.style.width = percent + '%';
     goalText.textContent = percent >= 100 ? 'Goal reached!' : percent + '% completed';
-    const savedSessionSeconds = member && member.session_date === dayKey(new Date())
+    const savedSessionSeconds = member && member.session_date === today
       ? Math.max(0, Number(member.session_elapsed_seconds) || 0) : 0;
-    const liveSessionSeconds = member && member.is_studying && member.session_started_at
-      ? Math.max(0, Math.floor((Date.now() - new Date(member.session_started_at).getTime()) / 1000)) : 0;
+    const liveSessionSeconds = member?.is_studying && member.last_heartbeat_at
+      ? Math.max(0, Math.floor((Date.now() - new Date(member.last_heartbeat_at).getTime()) / 1000)) : 0;
     timer.textContent = fmt(savedSessionSeconds + liveSessionSeconds);
+    emitTimerState();
   }
-  function updateSessionUI(isJoined) {
-    join.disabled = isJoined;
-    leave.disabled = !isJoined;
-    status.textContent = isJoined ? 'Studying' : 'Not studying';
-    panel.classList.toggle('is-studying', isJoined);
-    label.textContent = isJoined
-      ? 'Studying ' + subject.value + ' · session in progress'
-      : 'Not studying · timer paused';
+  function updateSessionUI(row) {
+    const isRunning = Boolean(row?.is_studying);
+    const hasSession = Boolean(row?.session_active);
+    join.disabled = isRunning;
+    pause.disabled = !isRunning;
+    leave.disabled = !hasSession;
+    join.textContent = 'Start';
+    pause.textContent = 'Pause';
+    leave.textContent = 'End';
+    status.textContent = isRunning ? 'Studying' : hasSession ? 'Paused' : 'Not studying';
+    panel.classList.toggle('is-studying', isRunning);
+    label.textContent = isRunning
+      ? 'Studying ' + (row?.subject || subject.value) + ' · session in progress'
+      : hasSession ? 'Paused · press Start to resume' : 'Not studying · press Start to begin';
     liveLabel.textContent = 'Live shared room';
+    emitTimerState();
   }
   function renderPeople() {
-    const now = Date.now();
-    const active = rows.filter(r => r.is_studying && r.last_heartbeat_at &&
-      now - new Date(r.last_heartbeat_at).getTime() < 90000);
+    const active = rows.filter(r => r.is_studying);
     activeCount.textContent = String(active.length);
     const own = rows.find(r => r.user_id === userId) || member;
     const currentWeek = weekStart(new Date());
-    const weeklyRanked = rows
-      .map(r => ({...r, rankScore: r.week_start === currentWeek ? Number(r.week_seconds) || 0 : 0}))
-      .sort((a,b) => b.rankScore - a.rankScore);
+    const weeklyRanked = rows.map(r => ({
+      ...r, rankScore: r.week_start === currentWeek ? Number(r.week_seconds) || 0 : 0
+    })).sort((a,b) => b.rankScore - a.rankScore);
     const ownRankIndex = weeklyRanked.findIndex(r => r.user_id === userId);
     yourRank.textContent = ownRankIndex >= 0 ? '#' + (ownRankIndex + 1) : '—';
     yourRank.title = ownRankIndex >= 0
       ? 'Ranked by total study time this week among Study Room members'
       : 'Your rank appears after your Study Room record is available';
-    const thisWeek = own && own.week_start === weekStart(new Date())
-      ? Number(own.week_seconds) || 0 : 0;
-    const pendingWeek = own && own.is_studying && own.last_heartbeat_at
-      ? Math.max(0, Math.min(25, Math.floor((Date.now() - new Date(own.last_heartbeat_at).getTime()) / 1000))) : 0;
-    weeklyHours.textContent = compact(thisWeek + pendingWeek);
+    const thisWeek = own && own.week_start === currentWeek ? Number(own.week_seconds) || 0 : 0;
+    weeklyHours.textContent = compact(thisWeek + pendingSeconds(own, startOfDay(currentWeek)));
     people.replaceChildren();
     if (!active.length) {
-      people.innerHTML = '<p class="room-empty">No one is studying right now. Be the first to join.</p>';
+      people.innerHTML = '<p class="room-empty">No one is studying right now. Be the first to start.</p>';
     } else {
       active.sort((a,b) => a.display_name.localeCompare(b.display_name)).forEach(r => {
         const card = document.createElement('article');
         card.className = 'room-person-card';
-        const today = r.today_date === dayKey(new Date()) ? r.today_seconds : 0;
+        const today = r.today_date === dayKey(new Date()) ? Number(r.today_seconds) || 0 : 0;
+        const liveToday = pendingSeconds(r, startOfDay(dayKey(new Date())));
         card.innerHTML = '<div class="room-person-card-top"><div class="room-avatar"></div><span class="room-person-status">Studying now</span></div>' +
           '<div class="room-person-card-name"></div><div class="room-person-card-subject"></div>' +
           '<div class="room-person-card-divider"></div><div class="room-person-card-time-label">Today\'s study time</div><div class="room-person-card-time"></div>';
@@ -133,7 +143,7 @@
         avatar.title = 'Studying now';
         card.querySelector('.room-person-card-name').textContent = r.display_name;
         card.querySelector('.room-person-card-subject').textContent = r.subject;
-        card.querySelector('.room-person-card-time').textContent = fmt(today);
+        card.querySelector('.room-person-card-time').textContent = fmt(today + liveToday);
         people.appendChild(card);
       });
     }
@@ -142,8 +152,12 @@
     const field = selectedBoard === 'daily' ? 'today_seconds' : 'week_seconds';
     const bucket = selectedBoard === 'daily' ? 'today_date' : 'week_start';
     const expected = selectedBoard === 'daily' ? dayKey(new Date()) : weekStart(new Date());
-    const ranked = rows.map(r => ({...r, score: r[bucket] === expected ? Number(r[field]) || 0 : 0}))
-      .sort((a,b) => b.score - a.score);
+    const boundary = startOfDay(expected);
+    const ranked = rows.map(r => ({
+      ...r,
+      score: (r[bucket] === expected ? Number(r[field]) || 0 : 0) +
+        (r.is_studying ? pendingSeconds(r, boundary) : 0)
+    })).sort((a,b) => b.score - a.score);
     board.replaceChildren();
     if (!ranked.length) {
       board.innerHTML = '<p class="room-empty">The leaderboard will appear as students study.</p>';
@@ -168,17 +182,12 @@
   }
   async function loadRows() {
     const {data,error} = await client.from('study_room_live').select(
-      'user_id,display_name,gender,subject,is_studying,session_started_at,session_elapsed_seconds,session_date,last_heartbeat_at,today_seconds,today_date,week_seconds,week_start'
+      'user_id,display_name,gender,subject,is_studying,session_active,session_started_at,session_elapsed_seconds,session_date,last_heartbeat_at,today_seconds,today_date,week_seconds,week_start,updated_at'
     );
     if (error) throw error;
     rows = data || [];
-    const current = rows.find(r => r.user_id === userId);
-    if (current) {
-      member = current;
-      const heartbeatFresh = current.last_heartbeat_at &&
-        Date.now() - new Date(current.last_heartbeat_at).getTime() < 90000;
-      updateSessionUI(Boolean(current.is_studying && heartbeatFresh));
-    }
+    member = rows.find(r => r.user_id === userId) || null;
+    updateSessionUI(member);
     renderPeople();
     renderBoard();
     updatePersonal();
@@ -192,40 +201,56 @@
     try {
       await callRpc('study_room_heartbeat');
       await loadRows();
-    } catch (e) {
-      console.error('Study Room heartbeat failed', e);
-    }
+    } catch (e) { console.error('Study Room heartbeat failed', e); }
   }
   async function startStudy() {
     try {
       await callRpc('study_room_set_subject', {p_subject: subject.value});
       await callRpc('study_room_start');
-      lastTick = Date.now();
-      updateSessionUI(true);
-      if (interval) clearInterval(interval);
-      interval = setInterval(async () => {
-        const now = Date.now();
-        lastTick = now;
-        updatePersonal();
-      }, 1000);
-      await heartbeat();
-      say('You are in the shared room. Updates are live across connected devices.');
-    } catch (e) { say('Could not join the room: ' + e.message, true); }
-  }
-  async function leaveStudy() {
-    try {
-      await callRpc('study_room_leave');
-      if (interval) clearInterval(interval);
-      interval = null;
-      updateSessionUI(false);
       await loadRows();
-      say('You left the study room. Your recorded study time is saved.');
-    } catch (e) { say('Could not leave the room: ' + e.message, true); }
+      await heartbeat();
+      say('Your study session has started. The timer continues while you switch tabs or minimize the browser.');
+    } catch (e) { say('Could not start the study session: ' + e.message, true); }
   }
+  async function pauseStudy() {
+    try {
+      await callRpc('study_room_pause');
+      await loadRows();
+      say('Your study session is paused. Press Start to resume it.');
+    } catch (e) { say('Could not pause the study session: ' + e.message, true); }
+  }
+  async function endStudy() {
+    try {
+      await callRpc('study_room_end');
+      await loadRows();
+      say('Your study session has ended. Your recorded study time is saved.');
+    } catch (e) { say('Could not end the study session: ' + e.message, true); }
+  }
+  function timerSnapshot() {
+    const today = dayKey(new Date());
+    const base = member && member.session_date === today
+      ? Math.max(0, Number(member.session_elapsed_seconds) || 0) : 0;
+    const live = member?.is_studying && member.last_heartbeat_at
+      ? Math.max(0, Math.floor((Date.now() - new Date(member.last_heartbeat_at).getTime()) / 1000)) : 0;
+    return {
+      ready: Boolean(member),
+      isStudying: Boolean(member?.is_studying),
+      sessionActive: Boolean(member?.session_active),
+      elapsedSeconds: base + live,
+      subject: member?.subject || subject.value || '',
+      status: member?.is_studying ? 'Studying' : member?.session_active ? 'Paused' : 'Not studying',
+      lastHeartbeatAt: member?.last_heartbeat_at || null,
+      updatedAt: member?.updated_at || null
+    };
+  }
+  function emitTimerState() {
+    window.dispatchEvent(new CustomEvent('studylab:study-room-timer', {detail: timerSnapshot()}));
+  }
+  window.StudyRoomTimer = {getState:timerSnapshot,start:startStudy,pause:pauseStudy,end:endStudy};
   async function init() {
     if (!cfg || !window.supabase || !window.StudyLabAccount) {
       say('Real-time sync is not configured yet. Add your Supabase Project URL and anon/public key in assets/js/study-room-config.js, then run the SQL in supabase/study-room.sql.', true);
-      join.disabled = true; leave.disabled = true;
+      join.disabled = true; pause.disabled = true; leave.disabled = true;
       liveLabel.textContent = 'Setup required';
       activeCount.textContent = '—'; weeklyHours.textContent = '—';
       people.innerHTML = '<p class="room-empty">Live attendance appears after the database is connected.</p>';
@@ -242,11 +267,8 @@
       userId = user.id;
       const profile = await account.getProfile(true);
       if (!isProfileComplete(profile)) {
-        join.disabled = true;
-        leave.disabled = true;
+        join.disabled = true; pause.disabled = true; leave.disabled = true;
         say('Complete your profile to enter the Study Room.', true);
-        // The profile window is displayed over this page. Once its save event
-        // confirms a complete profile, initialise the live room in place.
         const resumeAfterProfileSave = event => {
           if (!isProfileComplete(event.detail)) return;
           window.removeEventListener('studylab-profile-updated', resumeAfterProfileSave);
@@ -257,41 +279,39 @@
       }
       await callRpc('study_room_ensure_profile');
       await loadRows();
-      const own = rows.find(r => r.user_id === userId);
-      if (own && own.is_studying && own.last_heartbeat_at &&
-          Date.now() - new Date(own.last_heartbeat_at).getTime() < 90000) {
-        member = own; updateSessionUI(true);
-        lastTick = Date.now();
-        interval = setInterval(updatePersonal, 1000);
-      } else updateSessionUI(false);
       client.channel('study-room-live')
         .on('postgres_changes', {event:'*',schema:'public',table:'study_room_members'}, () => {
           loadRows().catch(e => console.error('Could not refresh live Study Room data', e));
         }).subscribe();
       join.addEventListener('click', startStudy);
-      leave.addEventListener('click', leaveStudy);
+      pause.addEventListener('click', pauseStudy);
+      leave.addEventListener('click', endStudy);
       subject.addEventListener('change', async () => {
-        try { await callRpc('study_room_set_subject', {p_subject: subject.value}); }
+        try { await callRpc('study_room_set_subject', {p_subject: subject.value}); await loadRows(); }
         catch(e) { say('Could not update subject: ' + e.message, true); }
       });
       dailyTab.addEventListener('click', () => { selectedBoard = 'daily'; renderBoard(); });
       weeklyTab.addEventListener('click', () => { selectedBoard = 'weekly'; renderBoard(); });
       goal.addEventListener('change', updatePersonal);
-      setInterval(heartbeat, 20000);
+      heartbeatInterval = setInterval(heartbeat, 30000);
+      uiInterval = setInterval(updatePersonal, 1000);
+      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') heartbeat(); });
+      window.addEventListener('online', heartbeat);
       await heartbeat();
       say('Connected to the shared Study Room. Attendance and leaderboard updates are live.');
     } catch (e) {
       console.error(e);
       say('Supabase connection failed: ' + e.message + '. Check the project URL/key, anonymous sign-in, and SQL setup.', true);
       liveLabel.textContent = 'Connection error';
-      join.disabled = true; leave.disabled = true;
+      join.disabled = true; pause.disabled = true; leave.disabled = true;
       activeCount.textContent = '—'; weeklyHours.textContent = '—';
       people.innerHTML = '<p class="room-empty">Live data is unavailable until the connection is fixed.</p>';
       board.innerHTML = '<p class="room-empty">Leaderboard unavailable.</p>';
     }
   }
-  updateSessionUI(false);
+  updateSessionUI(null);
   join.disabled = true;
+  pause.disabled = true;
   leave.disabled = true;
   init();
 })();
