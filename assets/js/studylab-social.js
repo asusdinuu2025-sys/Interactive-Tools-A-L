@@ -122,6 +122,7 @@
     const imageRows = post.studylab_social_post_images || [];
     if (imageRows.length) {
       const gallery = make("div", "sl-feed-gallery");
+      gallery.dataset.count = String(Math.min(imageRows.length, MAX_IMAGES));
       for (const imageRow of imageRows.slice(0, MAX_IMAGES)) {
         try {
           const url = await signedImageUrl(client, imageRow.bucket_path);
@@ -294,6 +295,7 @@
       const imageRows = post.studylab_social_post_images || [];
       if (imageRows.length) {
         const preview = make("div", "sl-feed-gallery");
+        preview.dataset.count = String(Math.min(imageRows.length, MAX_IMAGES));
         for (const imageRow of imageRows.slice(0, MAX_IMAGES)) {
           try {
             const url = await signedImageUrl(client, imageRow.bucket_path);
