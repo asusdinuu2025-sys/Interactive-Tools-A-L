@@ -477,3 +477,27 @@ html[data-home-palette] .pwa-install-icon{
 }
 .home-pointer-glow.is-idle{opacity:0!important;transition:opacity 1.05s ease!important}
 @media(prefers-reduced-motion:reduce){.home-pointer-glow{display:none!important}}
+
+
+/* Room palette accents are shared with the homepage without replacing its glass fills. */
+html[data-home-palette="midnight-blue"]{--home-accent:#4dd8f0;--home-accent-strong:#5b8cff}
+html[data-home-palette="charcoal"]{--home-accent:#d0d2d7;--home-accent-strong:#9699a1}
+html[data-home-palette="mint"]{--home-accent:#42a98b;--home-accent-strong:#287a64}
+html[data-home-palette="pinky"]{--home-accent:#ff8fc5;--home-accent-strong:#c83e80}
+html[data-home-palette="forest-green"]{--home-accent:#80d99c;--home-accent-strong:#287a49}
+html[data-home-palette="lavender"]{--home-accent:#d1b4ff;--home-accent-strong:#8254b5}
+html[data-home-palette="warm-sand"]{--home-accent:#e9bf6b;--home-accent-strong:#98651d}
+html[data-home-palette="ocean"]{--home-accent:#65d6e8;--home-accent-strong:#087e9c}
+
+html[data-home-palette] .subject-card:hover,
+html[data-home-palette] .study-tools-card:hover,
+html[data-home-palette] .telegram-card:hover,
+html[data-home-palette] .mcq-practice-card:hover,
+html[data-home-palette] .chemistry-resources-card:hover{
+  border-color:color-mix(in srgb,var(--home-accent) 34%,transparent)!important;
+  box-shadow:0 28px 68px color-mix(in srgb,var(--home-accent) 12%,transparent),
+    inset 0 1px 0 rgba(255,255,255,.92)!important;
+}
+html[data-home-palette] .study-tools-card-cta,
+html[data-home-palette] .theme-toggle-icon,
+html[data-home-palette] .pwa-install-icon{color:var(--home-accent-strong)}
