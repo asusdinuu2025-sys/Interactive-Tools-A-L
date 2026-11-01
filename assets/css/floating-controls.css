@@ -340,6 +340,7 @@ body:not(.study-room-page) .study-chat-panel {
 
 /* Separate labelled launcher. The original header Social icon is left untouched. */
 .sl-feed-floating-shortcut {
+  animation:sl-feed-shortcut-attention 3.2s ease-in-out infinite;
   position:fixed !important;
   right:144px !important;
   bottom:20px !important;
@@ -389,6 +390,18 @@ html[data-theme="light"] .sl-feed-floating-shortcut {
   box-shadow:0 3px 12px rgba(28,85,120,.13),0 0 12px rgba(45,160,220,.12) !important;
 }
 html[data-theme="light"] .sl-feed-floating-shortcut svg { stroke:#1768a8; filter:none; }
+
+@keyframes sl-feed-shortcut-attention {
+  0%,100% {
+    opacity:1;
+    box-shadow:0 0 0 1px rgba(85,205,255,.08),0 0 10px rgba(55,190,255,.15),0 0 20px rgba(55,155,255,.08);
+  }
+  50% {
+    opacity:.82;
+    box-shadow:0 0 0 1px rgba(85,205,255,.18),0 0 17px rgba(55,190,255,.34),0 0 30px rgba(55,155,255,.18);
+  }
+}
+
 @media (min-width:721px) {
   body:not(.study-room-page) .study-feedback-button { right:268px !important; }
 }
@@ -413,5 +426,5 @@ body.sl-community-open .sl-feed-floating-shortcut {
   pointer-events:none !important;
 }
 @media (prefers-reduced-motion:reduce) {
-  .sl-feed-floating-shortcut { transition:none !important; }
+  .sl-feed-floating-shortcut { transition:none !important; animation:none !important; }
 }
