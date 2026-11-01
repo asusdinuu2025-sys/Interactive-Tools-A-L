@@ -32,6 +32,11 @@
           </span>
           <div><h2 class="sl-feed-title">StudyLab Social</h2><p class="sl-feed-subtitle">A shared space for A/L students</p></div>
         </div>
+        <div class="sl-feed-size-controls" role="group" aria-label="Social panel size">
+          <button type="button" data-feed-size="half" aria-label="Expand Social to half screen" title="Half screen">½</button>
+          <button type="button" data-feed-size="three-quarter" aria-label="Expand Social to three-quarter screen" title="Three-quarter screen">¾</button>
+          <button type="button" data-feed-size="full" aria-label="Open Social fullscreen" title="Fullscreen">⛶</button>
+        </div>
         <button class="sl-feed-close" type="button" data-feed-close aria-label="Close Social panel">×</button>
       </div>
       <form class="sl-feed-compose" aria-label="Create a feed post">
@@ -64,8 +69,26 @@
   header.parentNode.insertBefore(layout, header);
   content.append(header, main);
   layout.append(content, panel);
+  const backdrop = document.createElement("button");
+  backdrop.className = "sl-feed-backdrop";
+  backdrop.type = "button";
+  backdrop.setAttribute("aria-label", "Close Social panel");
+  backdrop.hidden = true;
+  layout.insertBefore(backdrop, panel);
 
   let previousFocus = null;
+  function setSize(size) {
+    panel.dataset.size = size;
+    panel.querySelectorAll("[data-feed-size]").forEach(button => {
+      const active = button.dataset.feedSize === size;
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
+  }
+  panel.querySelectorAll("[data-feed-size]").forEach(button => {
+    button.addEventListener("click", () => setSize(button.dataset.feedSize));
+  });
+  setSize("compact");
   function closeFloatingTools() {
     ["[data-chat-close]", "[data-feedback-close]", "#studyQuickAccessPanel .study-quick-close", "#studyQuickAccessPanel [aria-label='Close Quick Access']"]
       .forEach(selector => {
@@ -78,6 +101,7 @@
     if (open) closeFloatingTools();
     layout.classList.toggle("is-feed-open", open);
     document.body.classList.toggle("sl-community-open", open);
+    backdrop.hidden = !open;
     toggle.setAttribute("aria-expanded", String(open));
     panel.setAttribute("aria-hidden", String(!open));
     panel.inert = !open;
@@ -91,6 +115,7 @@
   }
   toggle.addEventListener("click", () => setOpen(toggle.getAttribute("aria-expanded") !== "true"));
   panel.querySelector("[data-feed-close]").addEventListener("click", () => setOpen(false));
+  backdrop.addEventListener("click", () => setOpen(false));
   document.addEventListener("keydown", event => {
     if (event.key === "Escape" && toggle.getAttribute("aria-expanded") === "true") setOpen(false);
   });
