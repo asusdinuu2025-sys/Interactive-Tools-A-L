@@ -178,7 +178,9 @@
     avatar.style.setProperty("--sl-avatar-accent", profileAccent(post.author_id,gender));
     avatar.innerHTML = gender === "female"
       ? '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3.2"/><path d="M7 20l1-4.2a4.1 4.1 0 0 1 8 0l1 4.2z"/></svg>'
-      : '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3.2"/><path d="M4.5 20v-2.5a7.5 7.5 0 0 1 15 0V20z"/></svg>';
+      : gender === "male"
+        ? '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3.2"/><path d="M4.5 20v-2.5a7.5 7.5 0 0 1 15 0V20z"/></svg>'
+        : '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.1"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>';
     const identityCopy = make("span","sl-feed-profile-copy");
     const name = make("strong", "sl-feed-post-name", post.author_display_name || "Student");
     const username = make("span", "sl-feed-post-username", "@" + (post.author_username || "student"));
