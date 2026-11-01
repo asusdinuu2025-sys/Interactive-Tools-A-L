@@ -13,7 +13,7 @@ const color=n=>{const i=Math.max(0,[...subject.options].findIndex(o=>o.text===n)
 const blank=()=>({days:{},tasks:[]});
 function read(){try{const d=JSON.parse(localStorage.getItem(key)||"null");return d&&typeof d==="object"?{days:d.days||{},tasks:Array.isArray(d.tasks)?d.tasks:[]}:blank();}catch(_){return blank();}}
 let data=read(),active=null,period="today";
-function save(){try{const cutoff=dateAgo(370);Object.keys(data.days).forEach(k=>{if(k<cutoff)delete data.days[k];});localStorage.setItem(key,JSON.stringify(data));}catch(e){console.warn("StudyLab tracker storage:",e);notice("Browser storage is unavailable or full.");}}
+function save(){try{const cutoff=dateAgo(365);Object.keys(data.days).forEach(k=>{if(k<cutoff)delete data.days[k];});localStorage.setItem(key,JSON.stringify(data));}catch(e){console.warn("StudyLab tracker storage:",e);notice("Browser storage is unavailable or full.");}}
 const panel=document.createElement("section");panel.className="room-panel sl-analytics";panel.id="slLocalStudyAnalytics";
 panel.innerHTML=[
 '<div class="room-panel-head"><div><h2>My Study Analytics</h2><p class="sl-sub">Personal study history · saved on this device</p></div><span class="sl-local">● LOCAL</span></div>',
