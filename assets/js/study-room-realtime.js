@@ -40,7 +40,7 @@
       .map(n => String(n).padStart(2,'0')).join(':');
   };
   const compact = seconds => fmt(seconds);
-  const profileDuration = seconds => { const total=Math.max(0,Math.floor(Number(seconds)||0)); const hours=Math.floor(total/3600), minutes=Math.floor(total%3600/60); return hours ? hours+"h "+minutes+"mins" : minutes+"mins"; };
+  const profileDuration = seconds => { const total=Math.max(0,Math.floor(Number(seconds)||0)); const hours=Math.floor(total/3600), minutes=Math.floor(total%3600/60); return hours ? hours+"h"+(minutes ? " "+minutes+"m" : "") : minutes+"m"; };
   const startOfDay = key => new Date(key + 'T00:00:00+05:30').getTime();
   function pendingSeconds(row, boundary) {
     if (!row?.is_studying || !row.last_heartbeat_at) return 0;
@@ -210,6 +210,7 @@
       subject.classList.add('room-subject-required');
       subject.style.setProperty('border-color', '#ef4444', 'important');
       subject.style.setProperty('box-shadow', '0 0 0 3px rgba(239,68,68,.18)', 'important');
+      subject.style.setProperty('color', '#ef4444', 'important');
       say('Please select subject first', true);
       subject.focus();
       return;
@@ -218,6 +219,7 @@
     subject.classList.remove('room-subject-required');
     subject.style.removeProperty('border-color');
     subject.style.removeProperty('box-shadow');
+        subject.style.removeProperty('color');
     try {
       await callRpc('study_room_set_subject', {p_subject: subject.value});
       await callRpc('study_room_start');
