@@ -339,7 +339,7 @@
       if (refreshError) console.warn("StudyLab admin session refresh:", refreshError);
       const user = refreshedSession?.user || account.getUser();
       if (!user?.id) throw new Error("Student account not ready.");
-      isAdmin = user.app_metadata?.role === "admin';
+      isAdmin = user.app_metadata?.role === "admin";
       const heading = panel.querySelector(".sl-feed-heading");
       let adminBadge = panel.querySelector(".sl-feed-admin-mode");
       if (isAdmin && !adminBadge) {
