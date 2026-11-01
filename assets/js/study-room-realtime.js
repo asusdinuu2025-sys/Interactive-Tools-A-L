@@ -42,8 +42,13 @@
   const compact = seconds => fmt(seconds);
   const profileDuration = seconds => { const total=Math.max(0,Math.floor(Number(seconds)||0)); const hours=Math.floor(total/3600), minutes=Math.floor(total%3600/60); return hours ? hours+"h"+(minutes ? " "+minutes+"m" : "") : minutes+"m"; };
   const startOfDay = key => new Date(key + 'T00:00:00+05:30').getTime();
+  function heartbeatIsFresh(row) {
+    if (!row?.is_studying || !row.last_heartbeat_at) return false;
+    const age = Date.now() - new Date(row.last_heartbeat_at).getTime();
+    return Number.isFinite(age) && age >= 0 && age < 90000;
+  }
   function pendingSeconds(row, boundary) {
-    if (!row?.is_studying || !row.last_heartbeat_at) return 0;
+    if (!heartbeatIsFresh(row)) return 0;
     const heartbeatAt = new Date(row.last_heartbeat_at).getTime();
     return Math.max(0, Math.floor((Date.now() - Math.max(heartbeatAt, boundary)) / 1000));
   }
@@ -83,8 +88,7 @@
     goalText.textContent = percent >= 100 ? 'Goal reached!' : percent + '% completed';
     const savedSessionSeconds = member && member.session_date === today
       ? Math.max(0, Number(member.session_elapsed_seconds) || 0) : 0;
-    const liveSessionSeconds = member?.is_studying && member.last_heartbeat_at
-      ? Math.max(0, Math.floor((Date.now() - new Date(member.last_heartbeat_at).getTime()) / 1000)) : 0;
+    const liveSessionSeconds = pendingSeconds(member, 0);
     timer.textContent = fmt(savedSessionSeconds + liveSessionSeconds);
     emitTimerState();
   }
@@ -106,7 +110,7 @@
     emitTimerState();
   }
   function renderPeople() {
-    const active = rows.filter(r => r.is_studying);
+    const active = rows.filter(heartbeatIsFresh);
     activeCount.textContent = String(active.length);
     const own = rows.find(r => r.user_id === userId) || member;
     const currentWeek = weekStart(new Date());
@@ -247,8 +251,7 @@
     const today = dayKey(new Date());
     const base = member && member.session_date === today
       ? Math.max(0, Number(member.session_elapsed_seconds) || 0) : 0;
-    const live = member?.is_studying && member.last_heartbeat_at
-      ? Math.max(0, Math.floor((Date.now() - new Date(member.last_heartbeat_at).getTime()) / 1000)) : 0;
+    const live = pendingSeconds(member, 0);
     return {
       ready: Boolean(member),
       isStudying: Boolean(member?.is_studying),
