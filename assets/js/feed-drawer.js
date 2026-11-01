@@ -81,6 +81,8 @@
   toggle.type = "button";
   toggle.setAttribute("aria-expanded", "false");
   toggle.setAttribute("aria-controls", panel.id);
+  toggle.setAttribute("aria-label", "Open StudyLab Social");
+  toggle.title = "StudyLab Social";
   toggle.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16v11H9l-5 3v-14Z"/><path d="M8 9h8M8 13h5"/></svg><span>Social</span>';
 
   actions.insertBefore(toggle, actions.firstChild);
