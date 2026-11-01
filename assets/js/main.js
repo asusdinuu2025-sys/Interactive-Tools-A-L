@@ -7,14 +7,15 @@
 (function () {
   "use strict";
 
-  const STORAGE_KEY = "etools-theme";
+  const STORAGE_KEY = "studylab-room-mode-v1";
+  const LEGACY_STORAGE_KEY = "etools-theme";
   const root = document.documentElement;
   const media = window.matchMedia("(prefers-color-scheme: dark)");
   const validModes = ["dark", "light", "system"];
 
   function readSavedMode() {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+      const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
       return validModes.includes(saved) ? saved : null;
     } catch (_) {
       return null;
@@ -62,6 +63,7 @@
     if (persist) {
       try {
         localStorage.setItem(STORAGE_KEY, themeMode);
+        localStorage.setItem(LEGACY_STORAGE_KEY, themeMode);
       } catch (_) {}
     }
 
@@ -97,9 +99,15 @@
     media.addListener(handleSystemThemeChange);
   }
 
+  // The Live Study Room keeps its own controller; this event bridges its selected mode.
+  document.addEventListener("studylab:room-mode-change", function (event) {
+    const mode = event.detail && event.detail.mode;
+    if (validModes.includes(mode)) applyTheme(mode, true);
+  });
+
   // Keep theme changes made in another StudyLab tab in sync.
   window.addEventListener("storage", function (event) {
-    if (event.key !== STORAGE_KEY) return;
+    if (event.key !== STORAGE_KEY && event.key !== LEGACY_STORAGE_KEY) return;
     const saved = validModes.includes(event.newValue) ? event.newValue : "dark";
     applyTheme(saved, false);
   });

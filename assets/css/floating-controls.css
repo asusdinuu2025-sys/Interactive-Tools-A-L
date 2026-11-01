@@ -313,3 +313,118 @@ body.study-room-page .study-chat-button .study-chat-button-icon svg {
     display: inline !important;
   }
 }
+
+
+/* Homepage floating controls: Chat stays beside AI; the extra Social shortcut sits in the right utility row. */
+body:not(.study-room-page) .study-chat-button {
+  left:132px !important;
+  right:auto !important;
+  bottom:20px !important;
+  z-index:1201 !important;
+}
+body:not(.study-room-page) .study-chat-panel {
+  left:12px;
+  right:auto;
+}
+@media (max-width:720px) {
+  body:not(.study-room-page) .study-chat-button {
+    left:124px !important;
+    right:auto !important;
+    bottom:12px !important;
+  }
+  body:not(.study-room-page) .study-chat-panel {
+    left:8px;
+    right:8px;
+  }
+}
+
+/* Separate labelled launcher. The original header Social icon is left untouched. */
+.sl-feed-floating-shortcut {
+  animation:sl-feed-shortcut-attention 3.2s ease-in-out infinite;
+  position:fixed !important;
+  right:144px !important;
+  bottom:20px !important;
+  z-index:1202 !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:8px !important;
+  width:112px !important;
+  min-width:112px !important;
+  height:46px !important;
+  min-height:46px !important;
+  padding:0 14px !important;
+  border:1px solid rgba(75,205,255,.48) !important;
+  border-radius:999px !important;
+  background:linear-gradient(135deg,rgba(48,171,235,.18),rgba(104,115,255,.12)),rgba(8,17,31,.88) !important;
+  color:var(--text-primary,#eef2ff) !important;
+  box-shadow:0 0 0 1px rgba(85,205,255,.08),0 0 13px rgba(55,190,255,.2),0 0 25px rgba(55,155,255,.1) !important;
+  backdrop-filter:blur(18px) saturate(145%);
+  -webkit-backdrop-filter:blur(18px) saturate(145%);
+  font-family:inherit !important;
+  font-size:.84rem !important;
+  font-weight:650 !important;
+  line-height:1 !important;
+  cursor:pointer;
+}
+.sl-feed-floating-shortcut svg {
+  width:20px !important;
+  height:20px !important;
+  flex:0 0 20px;
+  fill:none;
+  stroke:#79dcff;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  filter:drop-shadow(0 0 5px rgba(65,205,255,.6));
+}
+.sl-feed-floating-shortcut:hover {
+  border-color:rgba(93,218,255,.82) !important;
+  box-shadow:0 0 0 1px rgba(85,205,255,.14),0 0 17px rgba(55,190,255,.32),0 0 32px rgba(55,155,255,.16) !important;
+  transform:translateY(-1px);
+}
+html[data-theme="light"] .sl-feed-floating-shortcut {
+  color:#174765 !important;
+  background:linear-gradient(135deg,#fff,#e2f5ff) !important;
+  border-color:rgba(39,151,205,.42) !important;
+  box-shadow:0 3px 12px rgba(28,85,120,.13),0 0 12px rgba(45,160,220,.12) !important;
+}
+html[data-theme="light"] .sl-feed-floating-shortcut svg { stroke:#1768a8; filter:none; }
+
+@keyframes sl-feed-shortcut-attention {
+  0%,100% {
+    opacity:1;
+    box-shadow:0 0 0 1px rgba(85,205,255,.08),0 0 10px rgba(55,190,255,.15),0 0 20px rgba(55,155,255,.08);
+  }
+  50% {
+    opacity:.82;
+    box-shadow:0 0 0 1px rgba(85,205,255,.18),0 0 17px rgba(55,190,255,.34),0 0 30px rgba(55,155,255,.18);
+  }
+}
+
+@media (min-width:721px) {
+  body:not(.study-room-page) .study-feedback-button { right:268px !important; }
+}
+@media (max-width:720px) {
+  .sl-feed-floating-shortcut {
+    right:74px !important;
+    bottom:12px !important;
+    width:46px !important;
+    min-width:46px !important;
+    height:46px !important;
+    min-height:46px !important;
+    padding:0 !important;
+    gap:0 !important;
+    border-radius:15px !important;
+  }
+  .sl-feed-floating-shortcut > span { display:none !important; }
+  body:not(.study-room-page) .study-feedback-button { right:136px !important; }
+}
+body.sl-community-open .sl-feed-floating-shortcut {
+  opacity:0 !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+@media (prefers-reduced-motion:reduce) {
+  .sl-feed-floating-shortcut { transition:none !important; animation:none !important; }
+}

@@ -28,6 +28,7 @@ function init(){
     root.dataset.roomModeChoice=choice;
     modeButtons.forEach(button=>{const selected=button.dataset.roomModeChoice===choice;button.setAttribute('aria-pressed',String(selected));button.classList.toggle('is-selected',selected);});
     if(save){try{localStorage.setItem(modeKey,choice);}catch(_){}}
+    document.dispatchEvent(new CustomEvent('studylab:room-mode-change',{detail:{mode:choice,effective}}));
    };
    const applyTheme=(value,announce=false)=>{
     const theme=allowed.has(value)?value:'midnight-blue';
@@ -43,6 +44,7 @@ function init(){
     if(announce&&previous!==theme)document.dispatchEvent(new CustomEvent('studylab:room-theme-change',{detail:{theme,previous}}));
    };
    modeButtons.forEach(button=>button.addEventListener('click',()=>applyMode(button.dataset.roomModeChoice)));
+   window.addEventListener('storage',event=>{if(event.key===modeKey&&['light','dark','system'].includes(event.newValue))applyMode(event.newValue,false);});
    if(systemQuery&&typeof systemQuery.addEventListener==='function')systemQuery.addEventListener('change',()=>{if(root.dataset.roomModeChoice==='system')applyMode('system',false);});
    trigger.addEventListener('click',()=>{const opening=menu.hidden;menu.hidden=!opening;trigger.setAttribute('aria-expanded',String(opening));});
    menu.querySelectorAll('[data-room-theme-choice]').forEach(option=>option.addEventListener('click',()=>{applyTheme(option.dataset.roomThemeChoice,true);close();trigger.focus();}));

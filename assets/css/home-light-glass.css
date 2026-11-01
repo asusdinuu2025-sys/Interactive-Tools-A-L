@@ -1,0 +1,432 @@
+/* Homepage-only light appearance: translucent blue glass and soft acrylic depth. */
+html[data-theme="light"] body {
+  background:
+    radial-gradient(ellipse at 8% 4%, rgba(116, 197, 255, .34), transparent 38%),
+    radial-gradient(ellipse at 92% 12%, rgba(163, 190, 255, .28), transparent 34%),
+    linear-gradient(135deg, #edf7ff 0%, #e7f3ff 46%, #f0f2ff 100%) !important;
+  background-attachment: fixed !important;
+}
+
+html[data-theme="light"] body::before {
+  background: rgba(80, 174, 255, .20) !important;
+  filter: blur(115px) !important;
+}
+
+html[data-theme="light"] body::after {
+  background: rgba(130, 151, 255, .17) !important;
+  filter: blur(120px) !important;
+}
+
+html[data-theme="light"] .site-header,
+html[data-theme="light"] .student-counter,
+html[data-theme="light"] .subject-card,
+html[data-theme="light"] .site-footer,
+html[data-theme="light"] .telegram-card,
+html[data-theme="light"] .study-findbar {
+  -webkit-backdrop-filter: blur(30px) saturate(165%) !important;
+  backdrop-filter: blur(30px) saturate(165%) !important;
+  border-color: rgba(255, 255, 255, .76) !important;
+  box-shadow:
+    0 22px 58px rgba(47, 105, 155, .105),
+    inset 0 1px 0 rgba(255, 255, 255, .94),
+    inset 0 0 0 1px rgba(135, 190, 235, .10) !important;
+}
+
+html[data-theme="light"] .site-header {
+  background: linear-gradient(120deg, rgba(255,255,255,.66), rgba(221,241,255,.48)) !important;
+}
+
+html[data-theme="light"] .student-counter {
+  background: linear-gradient(135deg, rgba(188,229,255,.56), rgba(218,222,255,.48)) !important;
+}
+
+html[data-theme="light"] .subject-card {
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.67), rgba(222,240,255,.43)) !important;
+  color: #183550 !important;
+}
+
+html[data-theme="light"] .subject-card:hover {
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.82), rgba(218,238,255,.62)) !important;
+  border-color: rgba(119, 185, 232, .52) !important;
+  box-shadow:
+    0 28px 68px rgba(47, 105, 155, .15),
+    inset 0 1px 0 rgba(255,255,255,.98),
+    0 0 26px rgba(104, 183, 245, .12) !important;
+}
+
+html[data-theme="light"] .site-footer {
+  background: linear-gradient(120deg, rgba(255,255,255,.56), rgba(224,240,255,.42)) !important;
+}
+
+html[data-theme="light"] .telegram-card {
+  background:
+    linear-gradient(125deg, rgba(199,235,255,.66), rgba(226,224,255,.48)),
+    rgba(255,255,255,.48) !important;
+  border-color: rgba(140, 195, 235, .48) !important;
+}
+
+html[data-theme="light"] .study-findbar {
+  background: rgba(255,255,255,.54) !important;
+}
+
+html[data-theme="light"] .theme-toggle,
+html[data-theme="light"] .pwa-install-button {
+  -webkit-backdrop-filter: blur(22px) saturate(165%) !important;
+  backdrop-filter: blur(22px) saturate(165%) !important;
+  background: linear-gradient(135deg, rgba(255,255,255,.72), rgba(211,235,255,.54)) !important;
+  border-color: rgba(255,255,255,.86) !important;
+  box-shadow:
+    0 10px 28px rgba(47,105,155,.10),
+    inset 0 1px 0 rgba(255,255,255,.98) !important;
+}
+
+html[data-theme="light"] .subject-card h2,
+html[data-theme="light"] .subject-card p,
+html[data-theme="light"] .subject-card .card-cta,
+html[data-theme="light"] .site-header,
+html[data-theme="light"] .site-footer {
+  color: #183550;
+}
+
+html[data-theme="light"] .science-symbol {
+  color: rgba(35, 112, 170, .12) !important;
+  text-shadow: 0 0 22px rgba(65, 150, 215, .10) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme="light"] .subject-card,
+  html[data-theme="light"] .theme-toggle {
+    transition: none !important;
+  }
+}
+
+
+/* Long-form home cards share the same translucent acrylic treatment. */
+html[data-theme="light"] .study-tools-card {
+  -webkit-backdrop-filter: blur(30px) saturate(165%) !important;
+  backdrop-filter: blur(30px) saturate(165%) !important;
+  background: linear-gradient(135deg, rgba(255,255,255,.68), rgba(218,239,255,.46)) !important;
+  border: 1px solid rgba(255,255,255,.78) !important;
+  box-shadow:
+    0 22px 58px rgba(47,105,155,.11),
+    inset 0 1px 0 rgba(255,255,255,.96),
+    inset 0 0 0 1px rgba(135,190,235,.10) !important;
+}
+
+html[data-theme="light"] .study-tools-card:hover {
+  background: linear-gradient(135deg, rgba(255,255,255,.82), rgba(213,235,255,.62)) !important;
+  border-color: rgba(119,185,232,.52) !important;
+  box-shadow:
+    0 28px 68px rgba(47,105,155,.15),
+    inset 0 1px 0 rgba(255,255,255,.98) !important;
+}
+
+
+/* Premium 3D glass finish for light-mode homepage cards. */
+html[data-theme="light"] .subject-card,
+html[data-theme="light"] .study-tools-card,
+html[data-theme="light"] .telegram-card {
+  position: relative !important;
+  isolation: isolate;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  -webkit-backdrop-filter: blur(34px) saturate(180%) !important;
+  backdrop-filter: blur(34px) saturate(180%) !important;
+  background:
+    linear-gradient(148deg,
+      rgba(255,255,255,.88) 0%,
+      rgba(255,255,255,.60) 18%,
+      rgba(218,239,255,.43) 52%,
+      rgba(196,225,250,.34) 100%) !important;
+  border: 1px solid rgba(255,255,255,.92) !important;
+  box-shadow:
+    0 2px 5px rgba(255,255,255,.72),
+    0 12px 24px rgba(73,128,176,.09),
+    0 28px 62px rgba(48,96,143,.14),
+    inset 0 2px 0 rgba(255,255,255,.98),
+    inset 1px 0 0 rgba(255,255,255,.70),
+    inset -1px 0 0 rgba(111,165,207,.10),
+    inset 0 -2px 0 rgba(111,165,207,.10),
+    inset 0 0 34px rgba(255,255,255,.25) !important;
+  transition:
+    transform .42s cubic-bezier(.2,.8,.2,1),
+    background .42s ease,
+    border-color .42s ease,
+    box-shadow .42s ease !important;
+}
+
+html[data-theme="light"] .subject-card::before,
+html[data-theme="light"] .study-tools-card::before,
+html[data-theme="light"] .telegram-card::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  top: 0 !important;
+  width: auto !important;
+  height: 100% !important;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    linear-gradient(132deg,
+      rgba(255,255,255,.72) 0%,
+      rgba(255,255,255,.20) 17%,
+      transparent 38%,
+      transparent 72%,
+      rgba(133,190,232,.12) 100%),
+    linear-gradient(180deg,
+      rgba(255,255,255,.20) 0%,
+      transparent 34%,
+      rgba(117,174,218,.07) 100%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.98),
+    inset 0 0 0 1px rgba(255,255,255,.26),
+    inset 0 -1px 0 rgba(103,157,201,.13) !important;
+  opacity: .95;
+}
+
+html[data-theme="light"] .subject-card::after,
+html[data-theme="light"] .study-tools-card::after,
+html[data-theme="light"] .telegram-card::after {
+  content: "" !important;
+  position: absolute !important;
+  width: 250px !important;
+  height: 250px !important;
+  right: -145px !important;
+  top: -155px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle, rgba(255,255,255,.92) 0%, rgba(155,211,255,.27) 34%, rgba(127,180,230,0) 72%) !important;
+  filter: blur(12px) !important;
+  pointer-events: none;
+  z-index: 0;
+  opacity: .72;
+  transition: transform .6s ease, opacity .4s ease !important;
+}
+
+html[data-theme="light"] .subject-card > *,
+html[data-theme="light"] .study-tools-card > *,
+html[data-theme="light"] .telegram-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+html[data-theme="light"] .subject-card:hover,
+html[data-theme="light"] .study-tools-card:hover,
+html[data-theme="light"] .telegram-card:hover {
+  transform: translateY(-8px) perspective(900px) rotateX(.7deg) scale(1.012) !important;
+  background:
+    linear-gradient(148deg,
+      rgba(255,255,255,.96) 0%,
+      rgba(255,255,255,.72) 22%,
+      rgba(214,237,255,.56) 58%,
+      rgba(190,222,250,.43) 100%) !important;
+  border-color: rgba(255,255,255,.99) !important;
+  box-shadow:
+    0 3px 8px rgba(255,255,255,.88),
+    0 18px 34px rgba(66,124,174,.13),
+    0 38px 82px rgba(48,96,143,.19),
+    inset 0 2px 0 rgba(255,255,255,1),
+    inset 1px 0 0 rgba(255,255,255,.82),
+    inset -1px 0 0 rgba(111,165,207,.13),
+    inset 0 -2px 0 rgba(111,165,207,.12),
+    inset 0 0 42px rgba(255,255,255,.32) !important;
+}
+
+html[data-theme="light"] .subject-card:hover::after,
+html[data-theme="light"] .study-tools-card:hover::after,
+html[data-theme="light"] .telegram-card:hover::after {
+  transform: scale(1.22) translate(-14px, 14px) !important;
+  opacity: .95;
+}
+
+html[data-theme="light"] .subject-card h2,
+html[data-theme="light"] .study-tools-card h2 {
+  color: #153550 !important;
+  text-shadow: 0 1px 0 rgba(255,255,255,.72);
+}
+
+html[data-theme="light"] .subject-card p,
+html[data-theme="light"] .study-tools-card p {
+  color: #45647d !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme="light"] .subject-card,
+  html[data-theme="light"] .study-tools-card,
+  html[data-theme="light"] .telegram-card {
+    transition: none !important;
+  }
+}
+
+
+/* v1.0.2: neutralise the light palette while retaining a restrained icy-blue accent. */
+html[data-theme="light"] body {
+  background:
+    radial-gradient(ellipse at 9% 3%, rgba(142, 198, 235, .12), transparent 38%),
+    radial-gradient(ellipse at 92% 14%, rgba(174, 190, 224, .09), transparent 34%),
+    linear-gradient(135deg, #f7f9fc 0%, #f1f5f9 48%, #f6f7fb 100%) !important;
+  background-attachment: fixed !important;
+}
+html[data-theme="light"] body::before {
+  background: rgba(118, 183, 224, .09) !important;
+}
+html[data-theme="light"] body::after {
+  background: rgba(153, 163, 213, .075) !important;
+}
+
+/* Keep every homepage entry card in the same light-glass family. */
+html[data-theme="light"] .subject-card,
+html[data-theme="light"] .study-tools-card,
+html[data-theme="light"] .telegram-card,
+html[data-theme="light"] .mcq-practice-card,
+html[data-theme="light"] .chemistry-resources-card {
+  background:
+    linear-gradient(148deg,
+      rgba(255,255,255,.91) 0%,
+      rgba(255,255,255,.76) 35%,
+      rgba(230,239,247,.55) 100%) !important;
+  border-color: rgba(255,255,255,.94) !important;
+  box-shadow:
+    0 2px 5px rgba(255,255,255,.82),
+    0 13px 27px rgba(53,76,98,.075),
+    0 28px 62px rgba(45,67,90,.105),
+    inset 0 2px 0 rgba(255,255,255,.99),
+    inset 1px 0 0 rgba(255,255,255,.75),
+    inset 0 -2px 0 rgba(91,132,166,.065) !important;
+}
+html[data-theme="light"] .subject-card:hover,
+html[data-theme="light"] .study-tools-card:hover,
+html[data-theme="light"] .telegram-card:hover,
+html[data-theme="light"] .mcq-practice-card:hover,
+html[data-theme="light"] .chemistry-resources-card:hover {
+  background:
+    linear-gradient(148deg,
+      rgba(255,255,255,.97) 0%,
+      rgba(255,255,255,.84) 38%,
+      rgba(226,238,248,.67) 100%) !important;
+  border-color: rgba(255,255,255,1) !important;
+  box-shadow:
+    0 3px 8px rgba(255,255,255,.92),
+    0 18px 36px rgba(53,76,98,.10),
+    0 38px 82px rgba(45,67,90,.14),
+    inset 0 2px 0 #fff,
+    inset 0 -2px 0 rgba(91,132,166,.075) !important;
+}
+html[data-theme="light"] .site-header,
+html[data-theme="light"] .site-footer,
+html[data-theme="light"] .student-counter,
+html[data-theme="light"] .study-findbar {
+  background: linear-gradient(135deg, rgba(255,255,255,.78), rgba(239,244,249,.62)) !important;
+  border-color: rgba(255,255,255,.9) !important;
+  box-shadow:
+    0 16px 42px rgba(45,67,90,.075),
+    inset 0 1px 0 rgba(255,255,255,.98) !important;
+}
+html[data-theme="light"] .student-counter {
+  background: linear-gradient(135deg, rgba(255,255,255,.86), rgba(229,239,247,.72)) !important;
+}
+html[data-theme="light"] .telegram-card {
+  color: #20384d !important;
+}
+html[data-theme="light"] .study-tools-card h2,
+html[data-theme="light"] .mcq-practice-card h2,
+html[data-theme="light"] .chemistry-resources-card h2 {
+  color: #20384d !important;
+}
+html[data-theme="light"] .study-tools-card p,
+html[data-theme="light"] .mcq-practice-card p,
+html[data-theme="light"] .chemistry-resources-card p {
+  color: #53697c !important;
+}
+html[data-theme="light"] .study-tools-card-badge {
+  background: rgba(70,160,145,.08) !important;
+  border-color: rgba(70,160,145,.15) !important;
+  color: #327f72 !important;
+}
+html[data-theme="light"] .study-tools-card-cta {
+  color: #327f72 !important;
+}
+html[data-theme="light"] .theme-toggle,
+html[data-theme="light"] .pwa-install-button,
+html[data-theme="light"] .profile-button {
+  background: linear-gradient(135deg, rgba(255,255,255,.88), rgba(235,241,247,.70)) !important;
+  border-color: rgba(255,255,255,.96) !important;
+  color: #263d51 !important;
+  box-shadow: 0 9px 24px rgba(45,67,90,.075), inset 0 1px 0 #fff !important;
+}
+html[data-theme="light"] .hero h1 {
+  text-shadow: 0 8px 28px rgba(42,65,88,.08) !important;
+}
+html[data-theme="light"] .science-symbol {
+  color: rgba(48,100,137,.075) !important;
+  text-shadow: 0 0 18px rgba(85,145,185,.05) !important;
+}
+
+/* Shared pointer glow layer. The original glass surfaces and card content remain intact. */
+.home-pointer-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    190px circle at var(--home-glow-x, 50%) var(--home-glow-y, 50%),
+    rgba(105,190,245,.17),
+    rgba(105,190,245,.065) 34%,
+    transparent 72%
+  );
+  transition: opacity .22s ease;
+}
+html[data-theme="dark"] .home-pointer-glow {
+  background: radial-gradient(
+    190px circle at var(--home-glow-x, 50%) var(--home-glow-y, 50%),
+    rgba(91,190,255,.18),
+    rgba(91,190,255,.065) 34%,
+    transparent 72%
+  );
+}
+.home-pointer-glow.is-visible { opacity: 1; }
+.subject-card > :not(.home-pointer-glow),
+.study-tools-card > :not(.home-pointer-glow),
+.telegram-card > :not(.home-pointer-glow),
+.mcq-practice-card > :not(.home-pointer-glow),
+.chemistry-resources-card > :not(.home-pointer-glow) {
+  position: relative;
+  z-index: 2;
+}
+@media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .home-pointer-glow { display: none !important; }
+}
+
+
+/* Ensure every homepage card is a stable clipping/stacking context for its glow. */
+.subject-card,
+.study-tools-card,
+.telegram-card,
+.mcq-practice-card,
+.chemistry-resources-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+
+
+.home-pointer-glow{
+  position:absolute !important;
+  inset:0 !important;
+  display:block !important;
+  z-index:1 !important;
+  pointer-events:none !important;
+  border-radius:inherit;
+  background:radial-gradient(190px circle at var(--home-glow-x,50%) var(--home-glow-y,50%),
+    color-mix(in srgb,var(--home-accent,#4dd8f0) 26%,transparent),
+    color-mix(in srgb,var(--home-accent,#4dd8f0) 10%,transparent) 38%,transparent 74%);
+  transition:opacity .24s ease;
+}
+.home-pointer-glow.is-idle{opacity:0;transition:opacity 1.05s ease}
