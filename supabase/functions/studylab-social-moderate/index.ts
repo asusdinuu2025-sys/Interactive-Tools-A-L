@@ -3,7 +3,6 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.0";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY") || "";
-const BUCKET = "studylab-social";
 const MODEL = "omni-moderation-latest";
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -44,7 +43,7 @@ Deno.serve(async (req: Request) => {
     }
 
     let text = "";
-    let imageRows: { bucket_path: string; mime_type: string }[] = [];
+    let imageCount = 0;
     let table = contentType === "post" ? "studylab_social_posts" : "studylab_social_comments";
 
     if (contentType === "post") {
@@ -55,10 +54,10 @@ Deno.serve(async (req: Request) => {
       if (post.status !== "pending") return json({ status: post.status, already_processed: true });
       text = post.body || "";
 
-      const { data: images, error: imageError } = await admin.from("studylab_social_post_images")
-        .select("bucket_path,mime_type").eq("post_id", contentId);
+      const { count, error: imageError } = await admin.from("studylab_social_post_images")
+        .select("id", { count: "exact", head: true }).eq("post_id", contentId);
       if (imageError) throw imageError;
-      imageRows = images || [];
+      imageCount = count || 0;
     } else {
       const { data: comment, error } = await admin.from(table)
         .select("id,author_id,body,status").eq("id", contentId).maybeSingle();
@@ -68,44 +67,37 @@ Deno.serve(async (req: Request) => {
       text = comment.body || "";
     }
 
-    const inputs: Record<string, unknown>[] = [];
-    if (text.trim()) inputs.push({ type: "text", text });
+    // Never transmit student-uploaded images to the external moderation API.
+    // Image-containing posts always remain pending for a human admin to inspect.
+    const imageReviewRequired = contentType === "post" && imageCount > 0;
+    let flagged: boolean | null = null;
+    let aiChecked = false;
 
-    for (const image of imageRows) {
-      const { data: file, error } = await admin.storage.from(BUCKET).download(image.bucket_path);
-      if (error || !file) throw new Error("Could not retrieve an uploaded image for moderation");
-      const base64 = await blobToBase64(file);
-      inputs.push({
-        type: "image_url",
-        image_url: { url: `data:${image.mime_type};base64,${base64}` }
+    // Image-only posts have no text to screen. Keep them pending for manual review.
+    if (text.trim()) {
+      const response = await fetch("https://api.openai.com/v1/moderations", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${OPENAI_API_KEY}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ model: MODEL, input: text })
       });
+      if (!response.ok) {
+        console.error("OpenAI moderation request failed:", response.status);
+        return json({ error: "AI moderation is temporarily unavailable" }, 502);
+      }
+
+      const payload = await response.json();
+      const result = payload?.results?.[0];
+      if (!result || typeof result.flagged !== "boolean") {
+        return json({ error: "AI moderation returned an invalid result" }, 502);
+      }
+      flagged = result.flagged;
+      aiChecked = true;
     }
 
-    if (!inputs.length) return json({ error: "No content to moderate" }, 400);
-
-    const response = await fetch("https://api.openai.com/v1/moderations", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${OPENAI_API_KEY}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ model: MODEL, input: inputs })
-    });
-    if (!response.ok) {
-      console.error("OpenAI moderation request failed:", response.status);
-      return json({ error: "AI moderation is temporarily unavailable" }, 502);
-    }
-
-    const payload = await response.json();
-    const result = payload?.results?.[0];
-    if (!result || typeof result.flagged !== "boolean") {
-      return json({ error: "AI moderation returned an invalid result" }, 502);
-    }
-
-    // Image posts always remain private until a human admin reviews them.
-    // The moderation model is not a CSAM detector and cannot replace child-safety review.
-    const imageReviewRequired = contentType === "post" && imageRows.length > 0;
-    const autoApprove = !result.flagged && !imageReviewRequired;
+    const autoApprove = aiChecked && flagged === false && !imageReviewRequired;
     let finalStatus = "pending";
 
     if (autoApprove) {
@@ -122,10 +114,11 @@ Deno.serve(async (req: Request) => {
     return json({
       success: true,
       status: finalStatus,
-      flagged: result.flagged,
+      flagged,
+      ai_checked: aiChecked,
       image_review_required: imageReviewRequired,
       review_required: finalStatus !== "approved",
-      model: MODEL
+      model: aiChecked ? MODEL : null
     });
   } catch (error) {
     console.error("StudyLab Social AI moderation failed:", error);
@@ -133,15 +126,6 @@ Deno.serve(async (req: Request) => {
   }
 });
 
-async function blobToBase64(blob: Blob): Promise<string> {
-  const bytes = new Uint8Array(await blob.arrayBuffer());
-  let binary = "";
-  const chunkSize = 0x8000;
-  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
-    binary += String.fromCharCode(...bytes.subarray(offset, offset + chunkSize));
-  }
-  return btoa(binary);
-}
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: CORS });
