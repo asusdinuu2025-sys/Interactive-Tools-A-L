@@ -313,3 +313,98 @@ body.study-room-page .study-chat-button .study-chat-button-icon svg {
     display: inline !important;
   }
 }
+
+
+/* Homepage floating controls: Chat joins Pet + AI; Social occupies the vacated right slot. */
+body:not(.study-room-page) .study-chat-button {
+  left:132px !important;
+  right:auto !important;
+  bottom:20px !important;
+  z-index:1201 !important;
+}
+body:not(.study-room-page) .study-chat-panel {
+  left:12px;
+  right:auto;
+}
+#studyLabHomeLayout .sl-feed-toggle {
+  position:fixed !important;
+  right:144px !important;
+  bottom:20px !important;
+  z-index:1202 !important;
+  width:46px !important;
+  min-width:46px !important;
+  height:46px !important;
+  min-height:46px !important;
+  padding:0 !important;
+  gap:0 !important;
+  border-radius:15px !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  isolation:isolate;
+  overflow:visible !important;
+}
+#studyLabHomeLayout .sl-feed-toggle > span { display:none !important; }
+#studyLabHomeLayout .sl-feed-toggle svg {
+  width:22px !important;
+  height:22px !important;
+}
+#studyLabHomeLayout .sl-feed-toggle::before {
+  content:"";
+  position:absolute;
+  inset:-3px;
+  z-index:-1;
+  padding:2px;
+  border-radius:18px;
+  background:conic-gradient(from 0deg,transparent 0deg,transparent 38deg,#55dcff 88deg,#9b83ff 154deg,#55dcff 224deg,transparent 282deg,transparent 360deg);
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;
+  mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  mask-composite:exclude;
+  animation:sl-social-ring-rotate 2.5s linear infinite;
+  pointer-events:none;
+}
+#studyLabHomeLayout .sl-feed-toggle::after {
+  content:"";
+  position:absolute;
+  inset:-5px;
+  z-index:-2;
+  border-radius:20px;
+  background:rgba(68,195,255,.18);
+  filter:blur(9px);
+  opacity:.7;
+  pointer-events:none;
+}
+@keyframes sl-social-ring-rotate {
+  to { transform:rotate(360deg); }
+}
+html[data-theme="light"] #studyLabHomeLayout .sl-feed-toggle {
+  color:#155b7c !important;
+  background:linear-gradient(145deg,#fff,#e2f5ff) !important;
+}
+html[data-theme="light"] #studyLabHomeLayout .sl-feed-toggle::after {
+  background:rgba(45,160,220,.17);
+}
+@media (max-width:720px) {
+  body:not(.study-room-page) .study-chat-button {
+    left:124px !important;
+    right:auto !important;
+    bottom:12px !important;
+  }
+  body:not(.study-room-page) .study-chat-panel {
+    left:8px;
+    right:8px;
+  }
+  #studyLabHomeLayout .sl-feed-toggle {
+    right:74px !important;
+    bottom:12px !important;
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  #studyLabHomeLayout .sl-feed-toggle::before { animation:none !important; }
+}
+body.sl-community-open #studyLabHomeLayout .sl-feed-toggle {
+  opacity:0 !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
