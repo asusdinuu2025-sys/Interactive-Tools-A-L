@@ -236,6 +236,7 @@
             .insert({ post_id: post.id, author_id: currentUserId, body });
           if (error) throw error;
           field.value = "";
+          area.remove();
           await toggleComments(card, post, client, currentUserId);
           setStatus("Comment submitted for review.");
         } catch (error) {
