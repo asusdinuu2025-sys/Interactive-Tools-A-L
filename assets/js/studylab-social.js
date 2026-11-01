@@ -14,8 +14,8 @@
   if (!panel) return;
 
   const form = panel.querySelector(".sl-feed-compose");
-  const textarea = form?.querySelector("textarea");
-  const postButton = form?.querySelector(".sl-feed-post-button");
+  let textarea = form?.querySelector("textarea");
+  let postButton = form?.querySelector(".sl-feed-post-button");
   const stream = panel.querySelector(".sl-feed-stream");
   const note = panel.querySelector(".sl-feed-setup-note");
   if (!form || !textarea || !postButton || !stream) return;
@@ -34,6 +34,8 @@
       <button class="sl-feed-post-button" type="submit">Post</button>
     </div>
     <p class="sl-feed-compose-status" role="status" aria-live="polite"></p>`;
+  textarea = form.querySelector("textarea");
+  postButton = form.querySelector(".sl-feed-post-button");
   const input = form.querySelector(".sl-feed-file-input");
   const fileCount = form.querySelector(".sl-feed-file-count");
   const status = form.querySelector(".sl-feed-compose-status");
