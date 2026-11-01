@@ -44,3 +44,4 @@ body.study-room-page[data-room-theme] .sl-mini-timer-actions button:first-child{
   color:var(--room-button-text,#fff)!important;border-color:transparent!important
 }
 body.study-room-page[data-room-theme] .sl-mini-timer-actions button:disabled{opacity:.38}
+\n/* Analytics period charts can display the full selected date range. */\n.sl-analytics .sl-bars{overflow-x:auto;overflow-y:hidden;max-width:100%;padding-bottom:5px;align-items:end}\n.sl-analytics .sl-bars .sl-day{min-width:28px}\n
