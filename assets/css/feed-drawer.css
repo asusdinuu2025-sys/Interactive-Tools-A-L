@@ -211,11 +211,15 @@ html[data-theme="light"] .sl-feed-post-username, html[data-theme="light"] .sl-fe
   border-color: rgba(75,205,255,.42);
   background: linear-gradient(135deg,rgba(48,171,235,.15),rgba(104,115,255,.11));
   box-shadow: 0 0 0 1px rgba(85,205,255,.08),0 0 13px rgba(55,190,255,.20),0 0 28px rgba(55,155,255,.10);
-  animation: sl-feed-toggle-pulse 3.4s ease-in-out infinite;
+  animation: sl-feed-toggle-pulse 3.4s ease-in-out infinite, sl-feed-attention 3.4s ease-in-out infinite;
 }
 .sl-feed-toggle:hover,.sl-feed-toggle[aria-expanded="true"] {
   border-color:rgba(93,218,255,.78);
   box-shadow:0 0 0 1px rgba(85,205,255,.14),0 0 17px rgba(55,190,255,.32),0 0 36px rgba(55,155,255,.17);
+}
+@keyframes sl-feed-attention {
+  0%,100% { opacity:1; }
+  50% { opacity:.84; }
 }
 @keyframes sl-feed-toggle-pulse {
   0%,100% { box-shadow:0 0 0 1px rgba(85,205,255,.07),0 0 10px rgba(55,190,255,.14),0 0 22px rgba(55,155,255,.07); }
@@ -497,7 +501,7 @@ html[data-theme="light"] .sl-feed-create-trigger span:first-child { color:#147ba
   background:linear-gradient(135deg,rgba(26,153,220,.24),rgba(89,91,230,.19)) !important;
   box-shadow:0 0 0 1px rgba(87,211,255,.20),0 0 9px rgba(48,192,255,.62),0 0 22px rgba(48,174,255,.42),inset 0 0 12px rgba(48,192,255,.13) !important;
   text-shadow:0 0 8px rgba(90,214,255,.46);
-  animation:sl-feed-neon-border 2.8s ease-in-out infinite !important;
+  animation:sl-feed-neon-border 2.8s ease-in-out infinite, sl-feed-attention 2.8s ease-in-out infinite !important;
 }
 #studyLabHomeLayout .sl-feed-toggle:hover,
 #studyLabHomeLayout .sl-feed-toggle[aria-expanded="true"] {
@@ -623,7 +627,7 @@ html[data-theme="light"] .sl-feed-panel[data-size="full"] .sl-feed-ad-placeholde
   }
 }
 @media (prefers-reduced-motion:reduce) {
-  #studyLabHomeLayout .sl-feed-toggle { animation:none !important; }
+  .sl-feed-toggle { animation:none !important; }
 }
 
 
