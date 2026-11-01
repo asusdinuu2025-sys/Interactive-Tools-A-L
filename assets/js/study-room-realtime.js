@@ -109,7 +109,7 @@
     const own = rows.find(r => r.user_id === userId) || member;
     const currentWeek = weekStart(new Date());
     const weeklyRanked = rows.map(r => ({
-      ...r, rankScore: r.week_start === currentWeek ? Number(r.week_seconds) || 0 : 0
+      ...r, rankScore: (r.week_start === currentWeek ? Number(r.week_seconds) || 0 : 0) + pendingSeconds(r, startOfDay(currentWeek))
     })).sort((a,b) => b.rankScore - a.rankScore);
     const ownRankIndex = weeklyRanked.findIndex(r => r.user_id === userId);
     yourRank.textContent = ownRankIndex >= 0 ? '#' + (ownRankIndex + 1) : '—';
@@ -297,6 +297,14 @@
       uiInterval = setInterval(updatePersonal, 1000);
       document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') heartbeat(); });
       window.addEventListener('online', heartbeat);
+      // A real page close/navigation ends the current segment; tab switching and minimizing do not fire pagehide.
+      window.addEventListener('pagehide', () => {
+        if (member?.is_studying && client) {
+          client.rpc('study_room_pause').then(({error}) => {
+            if (error) console.warn('Could not pause the session during page exit', error);
+          }).catch(error => console.warn('Could not pause the session during page exit', error));
+        }
+      });
       await heartbeat();
       say('Connected to the shared Study Room. Attendance and leaderboard updates are live.');
     } catch (e) {
