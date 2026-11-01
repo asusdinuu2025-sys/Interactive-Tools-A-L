@@ -135,7 +135,6 @@ body.sl-community-open .study-quick-button {
 }
 
 @media (max-width: 900px) {
-  .sl-home-layout.is-feed-open { grid-template-columns: minmax(0,1fr) minmax(290px, 330px); }
   .sl-feed-panel { padding-left: 16px; }
   .sl-feed-toggle { padding-inline: 11px; }
 }
