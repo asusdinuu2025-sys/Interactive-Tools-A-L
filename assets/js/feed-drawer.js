@@ -115,7 +115,30 @@
   panel.querySelector("[data-feed-close]").addEventListener("click", () => setOpen(false));
   backdrop.addEventListener("click", () => setOpen(false));
   document.addEventListener("keydown", event => {
-    if (event.key === "Escape" && toggle.getAttribute("aria-expanded") === "true") setOpen(false);
+    const isOpen = toggle.getAttribute("aria-expanded") === "true";
+    if (event.key === "Escape" && isOpen) {
+      event.preventDefault();
+      setOpen(false);
+      return;
+    }
+    if (event.key !== "Tab" || !isOpen) return;
+    const focusable = [...panel.querySelectorAll(
+      'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )].filter(element => !element.hidden && element.getAttribute("aria-hidden") !== "true");
+    if (!focusable.length) {
+      event.preventDefault();
+      panel.querySelector("[data-feed-close]")?.focus();
+      return;
+    }
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && (document.activeElement === first || !panel.contains(document.activeElement))) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && (document.activeElement === last || !panel.contains(document.activeElement))) {
+      event.preventDefault();
+      first.focus();
+    }
   });
   window.addEventListener("resize", () => {
     document.body.classList.toggle("sl-community-open", toggle.getAttribute("aria-expanded") === "true");
