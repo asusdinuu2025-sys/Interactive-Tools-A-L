@@ -1,4 +1,4 @@
-/* StudyLab homepage Feed drawer shell.
+/* StudyLab integrated homepage Community column.
    Posting stays disabled until the isolated feed database, storage and moderation
    setup is installed. This keeps the preview safe and avoids fake/demo posts. */
 (function () {
@@ -20,7 +20,7 @@
   const panel = document.createElement("aside");
   panel.className = "sl-feed-panel";
   panel.id = "studyLabFeedPanel";
-  panel.setAttribute("aria-label", "StudyLab Feed");
+  panel.setAttribute("aria-label", "StudyLab Community");
   panel.setAttribute("aria-hidden", "true");
   panel.inert = true;
   panel.innerHTML = `
@@ -32,7 +32,7 @@
           </span>
           <div><h2 class="sl-feed-title">StudyLab Feed</h2><p class="sl-feed-subtitle">A shared space for A/L students</p></div>
         </div>
-        <button class="sl-feed-close" type="button" data-feed-close aria-label="Close feed">×</button>
+        <button class="sl-feed-close" type="button" data-feed-close aria-label="Close community">×</button>
       </div>
       <form class="sl-feed-compose" aria-label="Create a feed post">
         <textarea maxlength="2000" disabled placeholder="Share something with other students..." aria-label="Write a post"></textarea>
@@ -41,20 +41,15 @@
           <button class="sl-feed-post-button" type="button" disabled>Post</button>
         </div>
       </form>
-      <div class="sl-feed-stream" role="feed" aria-label="Recent posts">
+      <div class="sl-feed-stream" role="feed" aria-label="Recent community posts">
         <div class="sl-feed-empty">
           <span class="sl-feed-empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5.5h16v11H9l-5 3v-14Z"/><path d="M8 9h8M8 13h5"/></svg></span>
-          <h3>Your student feed starts here</h3>
+          <h3>Your student community starts here</h3>
           <p>Posts from StudyLab students will appear here, newest first.</p>
         </div>
       </div>
-      <p class="sl-feed-setup-note" role="status">Feed setup is in progress. Posting and image uploads will be enabled after database security and content moderation are configured.</p>
+      <p class="sl-feed-setup-note" role="status">Community setup is in progress. Posting and image uploads will be enabled after database security and content moderation are configured.</p>
     </div>`;
-
-  const backdrop = document.createElement("button");
-  backdrop.className = "sl-feed-backdrop";
-  backdrop.type = "button";
-  backdrop.setAttribute("aria-label", "Close feed");
 
   const actions = header.querySelector(".header-actions");
   if (!actions) return;
@@ -63,18 +58,26 @@
   toggle.type = "button";
   toggle.setAttribute("aria-expanded", "false");
   toggle.setAttribute("aria-controls", panel.id);
-  toggle.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16v11H9l-5 3v-14Z"/><path d="M8 9h8M8 13h5"/></svg><span>Feed</span>';
+  toggle.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16v11H9l-5 3v-14Z"/><path d="M8 9h8M8 13h5"/></svg><span>Community</span>';
 
   actions.insertBefore(toggle, actions.firstChild);
   header.parentNode.insertBefore(layout, header);
   content.append(header, main);
   layout.append(content, panel);
-  document.body.insertBefore(backdrop, layout);
 
   let previousFocus = null;
+  function closeFloatingTools() {
+    ["[data-chat-close]", "[data-feedback-close]", "#studyQuickAccessPanel .study-quick-close", "#studyQuickAccessPanel [aria-label='Close Quick Access']"]
+      .forEach(selector => {
+        const close = document.querySelector(selector);
+        if (close && close.offsetParent !== null) close.click();
+      });
+  }
+
   function setOpen(open) {
+    if (open) closeFloatingTools();
     layout.classList.toggle("is-feed-open", open);
-    document.body.classList.toggle("sl-feed-open", open && window.matchMedia("(max-width: 720px)").matches);
+    document.body.classList.toggle("sl-community-open", open);
     toggle.setAttribute("aria-expanded", String(open));
     panel.setAttribute("aria-hidden", String(!open));
     panel.inert = !open;
@@ -88,12 +91,10 @@
   }
   toggle.addEventListener("click", () => setOpen(toggle.getAttribute("aria-expanded") !== "true"));
   panel.querySelector("[data-feed-close]").addEventListener("click", () => setOpen(false));
-  backdrop.addEventListener("click", () => setOpen(false));
   document.addEventListener("keydown", event => {
     if (event.key === "Escape" && toggle.getAttribute("aria-expanded") === "true") setOpen(false);
   });
   window.addEventListener("resize", () => {
-    document.body.classList.toggle("sl-feed-open",
-      toggle.getAttribute("aria-expanded") === "true" && window.matchMedia("(max-width: 720px)").matches);
+    document.body.classList.toggle("sl-community-open", toggle.getAttribute("aria-expanded") === "true");
   });
 })();
