@@ -27,7 +27,7 @@
   border-radius: 14px;
   background: rgba(126,220,255,.075);
   color: var(--text-primary, #eef2ff);
-  font: 650 .88rem/1.2 inherit;
+  font-family: inherit; font-size: .88rem; font-weight: 650; line-height: 1.2;
   cursor: pointer;
   transition: transform .22s ease, background .22s ease, border-color .22s ease, box-shadow .22s ease;
 }
