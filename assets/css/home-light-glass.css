@@ -101,3 +101,24 @@ html[data-theme="light"] .science-symbol {
     transition: none !important;
   }
 }
+
+
+/* Long-form home cards share the same translucent acrylic treatment. */
+html[data-theme="light"] .study-tools-card {
+  -webkit-backdrop-filter: blur(30px) saturate(165%) !important;
+  backdrop-filter: blur(30px) saturate(165%) !important;
+  background: linear-gradient(135deg, rgba(255,255,255,.68), rgba(218,239,255,.46)) !important;
+  border: 1px solid rgba(255,255,255,.78) !important;
+  box-shadow:
+    0 22px 58px rgba(47,105,155,.11),
+    inset 0 1px 0 rgba(255,255,255,.96),
+    inset 0 0 0 1px rgba(135,190,235,.10) !important;
+}
+
+html[data-theme="light"] .study-tools-card:hover {
+  background: linear-gradient(135deg, rgba(255,255,255,.82), rgba(213,235,255,.62)) !important;
+  border-color: rgba(119,185,232,.52) !important;
+  box-shadow:
+    0 28px 68px rgba(47,105,155,.15),
+    inset 0 1px 0 rgba(255,255,255,.98) !important;
+}
