@@ -132,26 +132,19 @@ body.study-room-page[data-room-theme] .room-stat,body.study-room-page[data-room-
 body.study-room-page[data-room-theme="charcoal"] .room-theme-option[data-room-theme-choice="charcoal"] .room-theme-swatches i:first-child{background:#45474d}
 
 
-/* Theme-aware pointer glow for Live Study Room glass cards.
-   Only the colour overlay is added; existing card fills, blur, borders and shadows stay intact. */
-.room-hero,.room-panel,.room-stat,.room-person-card,.room-session,.room-goal,
+
+/* Theme-aware pointer glow. Existing card fills, blur, borders and shadows remain untouched. */
+.room-hero,.room-panel,.room-stat,.room-person-card,.room-session,
 .slr-toolbar,.slr-focus-card,.slr-badge,.live-card{
   position:relative;
   isolation:isolate;
 }
 .room-pointer-glow{
-  position:absolute;
-  inset:0;
-  z-index:0;
-  border-radius:inherit;
-  pointer-events:none;
+  position:absolute;inset:0;z-index:0;border-radius:inherit;pointer-events:none;
   opacity:0;
-  background:radial-gradient(
-    190px circle at var(--pointer-glow-x,50%) var(--pointer-glow-y,50%),
-    color-mix(in srgb,var(--room-accent,#4dd8f0) 24%,transparent),
-    color-mix(in srgb,var(--room-accent,#4dd8f0) 9%,transparent) 36%,
-    transparent 74%
-  );
+  background:radial-gradient(190px circle at var(--room-glow-x,50%) var(--room-glow-y,50%),
+    color-mix(in srgb,var(--room-accent,#4dd8f0) 26%,transparent),
+    color-mix(in srgb,var(--room-accent,#4dd8f0) 10%,transparent) 38%,transparent 74%);
   transition:opacity .24s ease;
 }
 .room-pointer-glow.is-visible{opacity:1}
@@ -161,14 +154,8 @@ body.study-room-page[data-room-theme="charcoal"] .room-theme-option[data-room-th
 .room-stat>:not(.room-pointer-glow),
 .room-person-card>:not(.room-pointer-glow),
 .room-session>:not(.room-pointer-glow),
-.room-goal>:not(.room-pointer-glow),
 .slr-toolbar>:not(.room-pointer-glow),
 .slr-focus-card>:not(.room-pointer-glow),
 .slr-badge>:not(.room-pointer-glow),
-.live-card>:not(.room-pointer-glow){
-  position:relative;
-  z-index:1;
-}
-@media(hover:none),(pointer:coarse),(prefers-reduced-motion:reduce){
-  .room-pointer-glow{display:none!important}
-}
+.live-card>:not(.room-pointer-glow){position:relative;z-index:1}
+@media(hover:none),(pointer:coarse),(prefers-reduced-motion:reduce){.room-pointer-glow{display:none!important}}
