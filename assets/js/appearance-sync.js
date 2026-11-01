@@ -90,6 +90,35 @@
     button.addEventListener("click", () => setPalette(button.dataset.roomThemeChoice));
   });
 
+  // Keep the existing Room Theme control fully keyboard and pointer accessible.
+  const appearance = document.getElementById("roomAppearance");
+  const appearanceTrigger = document.getElementById("roomAppearanceTrigger");
+  const appearanceMenu = document.getElementById("roomAppearanceMenu");
+  function closeAppearanceMenu() {
+    if (!appearanceMenu || !appearanceTrigger) return;
+    appearanceMenu.hidden = true;
+    appearanceTrigger.setAttribute("aria-expanded", "false");
+  }
+  if (appearance && appearanceTrigger && appearanceMenu) {
+    appearanceTrigger.addEventListener("click", () => {
+      const opening = appearanceMenu.hidden;
+      appearanceMenu.hidden = !opening;
+      appearanceTrigger.setAttribute("aria-expanded", String(opening));
+    });
+    appearanceMenu.addEventListener("click", event => {
+      if (event.target.closest("[data-room-theme-choice]")) closeAppearanceMenu();
+    });
+    document.addEventListener("pointerdown", event => {
+      if (!appearance.contains(event.target)) closeAppearanceMenu();
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") {
+        closeAppearanceMenu();
+        appearanceTrigger.focus();
+      }
+    });
+  }
+
   const homePaletteSelect = document.getElementById("homePaletteSelect");
   if (homePaletteSelect) {
     homePaletteSelect.addEventListener("change", () => setPalette(homePaletteSelect.value));
