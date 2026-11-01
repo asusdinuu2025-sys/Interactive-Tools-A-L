@@ -86,6 +86,17 @@
   toggle.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16v11H9l-5 3v-14Z"/><path d="M8 9h8M8 13h5"/></svg><span>Social</span>';
 
   actions.insertBefore(toggle, actions.firstChild);
+
+  // Add a second, labelled shortcut to the floating utility row.
+  // The existing header Social icon remains in its original position and style.
+  const floatingShortcut = document.createElement("button");
+  floatingShortcut.className = "sl-feed-floating-shortcut";
+  floatingShortcut.type = "button";
+  floatingShortcut.setAttribute("aria-label", "Open StudyLab Social");
+  floatingShortcut.title = "Social";
+  floatingShortcut.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16v11H9l-5 3v-14Z"/><path d="M8 9h8M8 13h5"/></svg><span>Social</span>';
+  floatingShortcut.addEventListener("click", () => toggle.click());
+  document.body.append(floatingShortcut);
   header.parentNode.insertBefore(layout, header);
   content.append(header, main);
   layout.append(content, panel);
