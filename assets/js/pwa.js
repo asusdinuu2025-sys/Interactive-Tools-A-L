@@ -148,7 +148,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", function () {
-      navigator.serviceWorker.register("/service-worker.js?v=1.0.1", {
+      navigator.serviceWorker.register("/service-worker.js?v=1.0.2", {
         scope: "/",
         updateViaCache: "none"
       }).catch(error => {
