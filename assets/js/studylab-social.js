@@ -158,19 +158,18 @@
   }
   async function getPostRows(client, ownId) {
     const { data, error } = await client.from("studylab_social_posts")
-      .select("id,author_id,author_display_name,author_username,body,status,created_at,studylab_social_post_images(id,bucket_path,mime_type,size_bytes)")
+      .select("id,author_id,author_display_name,author_username,author_gender,body,status,created_at,studylab_social_post_images(id,bucket_path,mime_type,size_bytes)")
       .order("created_at", { ascending: false }).limit(40);
     if (error) throw error;
     return (data || []).filter(post => post.status === "approved" || post.author_id === ownId);
   }
-  async function renderPost(client, post, currentUserId, likesByPost, profilesById, commentCountsByPost) {
+  async function renderPost(client, post, currentUserId, likesByPost, commentCountsByPost) {
     const card = make("article", "sl-feed-post");
     card.dataset.postId = post.id;
     card.dataset.authorId = post.author_id;
     card.dataset.authorUsername = post.author_username || "student";
     card.style.setProperty("--sl-post-accent", "hsl(" + (hashNumber(post.id) % 360) + " 82% 64%)");
-    const profile = profilesById.get(post.author_id) || {};
-    const gender = profile.gender === "female" ? "female" : "male";
+    const gender = post.author_gender === "female" ? "female" : post.author_gender === "male" ? "male" : "neutral";
     const top = make("div", "sl-feed-post-top");
     const identity = make("button", "sl-feed-post-identity sl-feed-profile-trigger");
     identity.type = "button";
@@ -197,10 +196,7 @@
       const popover = make("div","sl-feed-profile-popover");
       popover.append(make("strong","",post.author_display_name || "Student"));
       popover.append(make("span","", "@" + (post.author_username || "student")));
-      const details = [];
-      if (profile.study_stream) details.push(profile.study_stream);
-      if (profile.exam_year) details.push("A/L " + profile.exam_year);
-      popover.append(make("small","",details.join(" · ") || "StudyLab student"));
+      popover.append(make("small","","StudyLab student"));
       card.append(popover);
     });
 
@@ -282,14 +278,17 @@
     card.append(area);
     try {
       const { data, error } = await client.from("studylab_social_comments")
-        .select("id,author_id,author_display_name,author_username,body,status,created_at")
+        .select("id,author_id,author_display_name,author_username,author_gender,body,status,created_at")
         .eq("post_id", post.id).order("created_at", { ascending: true }).limit(50);
       if (error) throw error;
       area.replaceChildren();
       (data || []).forEach(comment => {
         const item = make("div", "sl-feed-comment");
         const header = make("div", "sl-feed-comment-head");
-        header.append(make("strong", "", comment.author_display_name || "Student"));
+        const commentGender = comment.author_gender === "female" ? "female" : comment.author_gender === "male" ? "male" : "neutral";
+        const commentAvatar = make("span","sl-feed-comment-avatar sl-feed-avatar-" + commentGender);
+        commentAvatar.textContent = commentGender === "female" ? "♀" : commentGender === "male" ? "♂" : "•";
+        header.append(commentAvatar,make("strong", "", comment.author_display_name || "Student"));
         if (comment.status === "pending" && comment.author_id === currentUserId) {
           header.append(make("span", "sl-feed-status-pending", "Pending"));
         }
@@ -458,18 +457,6 @@
           likesByPost.get(row.post_id).push(row);
         }
       }
-      const authorIds = [...new Set(posts.map(post => post.author_id).filter(Boolean))];
-      const profilesById = new Map();
-      if (authorIds.length) {
-        try {
-          const { data: profileRows, error: profileError } = await account.client.from("studylab_profiles")
-            .select("id,gender,exam_year,study_stream").in("id",authorIds);
-          if (profileError) throw profileError;
-          for (const profile of profileRows || []) profilesById.set(profile.id,profile);
-        } catch (profileError) {
-          console.info("Social public profile details are unavailable:",profileError);
-        }
-      }
       const commentCountsByPost = new Map();
       if (approvedIds.length) {
         try {
@@ -491,7 +478,7 @@
       stream.replaceChildren();
       if (!posts.length) emptyState("No approved posts yet");
       for (const post of posts) {
-        const card = await renderPost(account.client, post, user.id, likesByPost, profilesById, commentCountsByPost);
+        const card = await renderPost(account.client, post, user.id, likesByPost, commentCountsByPost);
         stream.append(card);
       }
       if (isAdmin) await renderAdminQueue(account.client);
