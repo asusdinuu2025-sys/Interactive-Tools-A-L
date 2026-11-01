@@ -7,8 +7,8 @@
   window.__studyLabSocialLoaded = true;
 
   const BUCKET = "studylab-social";
-  const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
-  const MAX_IMAGES = 3;
+  const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+  const MAX_IMAGES = 4;
   const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
   const panel = document.getElementById("studyLabFeedPanel");
   if (!panel) return;
@@ -75,10 +75,10 @@
     stream.append(box);
   }
   function validFiles(files) {
-    if (files.length > MAX_IMAGES) throw new Error("You can attach up to 3 photos to one post.");
+    if (files.length > MAX_IMAGES) throw new Error("You can attach up to 4 photos to one post.");
     for (const file of files) {
       if (!ALLOWED_TYPES.includes(file.type)) throw new Error("Only JPEG, PNG and WebP images are allowed.");
-      if (file.size <= 0 || file.size > MAX_IMAGE_BYTES) throw new Error("Each photo must be 5 MB or smaller.");
+      if (file.size <= 0 || file.size > MAX_IMAGE_BYTES) throw new Error("Each photo must be 4 MB or smaller.");
     }
   }
   function fileExtension(file) {
@@ -333,9 +333,22 @@
     try {
       const account = accountClient();
       await account.ready;
-      const user = account.getUser();
+      // Refresh the anonymous Supabase session so recently granted app_metadata
+      // admin privileges are reflected without signing out and losing the identity.
+      const { data: refreshedSession, error: refreshError } = await account.client.auth.refreshSession();
+      if (refreshError) console.warn("StudyLab admin session refresh:", refreshError);
+      const user = refreshedSession?.user || account.getUser();
       if (!user?.id) throw new Error("Student account not ready.");
-      isAdmin = user.app_metadata?.role === "admin";
+      isAdmin = user.app_metadata?.role === "admin';
+      const heading = panel.querySelector(".sl-feed-heading");
+      let adminBadge = panel.querySelector(".sl-feed-admin-mode");
+      if (isAdmin && !adminBadge) {
+        adminBadge = make("span", "sl-feed-admin-mode", "ADMIN");
+        adminBadge.setAttribute("aria-label", "Administrator mode enabled");
+        heading?.append(adminBadge);
+      } else if (!isAdmin) {
+        adminBadge?.remove();
+      }
       const posts = await getPostRows(account.client, user.id);
       const approvedIds = posts.filter(post => post.status === "approved").map(post => post.id);
       const likesByPost = new Map();
