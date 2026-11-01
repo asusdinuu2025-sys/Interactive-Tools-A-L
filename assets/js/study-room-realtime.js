@@ -45,7 +45,7 @@
   function heartbeatIsFresh(row) {
     if (!row?.is_studying || !row.last_heartbeat_at) return false;
     const age = Date.now() - new Date(row.last_heartbeat_at).getTime();
-    return Number.isFinite(age) && age < 90000;
+    return Number.isFinite(age) && age < 24 * 60 * 60 * 1000;
   }
   function pendingSeconds(row, boundary) {
     if (!heartbeatIsFresh(row)) return 0;
@@ -323,14 +323,6 @@
       uiInterval = setInterval(updatePersonal, 1000);
       document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') heartbeat(); });
       window.addEventListener('online', heartbeat);
-      // A real page close/navigation ends the current segment; tab switching and minimizing do not fire pagehide.
-      window.addEventListener('pagehide', () => {
-        if (member?.is_studying && client) {
-          client.rpc('study_room_pause').then(({error}) => {
-            if (error) console.warn('Could not pause the session during page exit', error);
-          }).catch(error => console.warn('Could not pause the session during page exit', error));
-        }
-      });
       await heartbeat();
       say('Connected to the shared Study Room. Attendance and leaderboard updates are live.');
     } catch (e) {
