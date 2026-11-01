@@ -468,3 +468,22 @@ html[data-theme="light"] .sl-feed-create-trigger span:first-child { color:#147ba
   border-color:var(--sl-avatar-accent,#ff75cf);
   box-shadow:0 0 5px var(--sl-avatar-accent,#ff75cf),0 0 12px color-mix(in srgb,var(--sl-avatar-accent,#ff75cf) 42%,transparent);
 }
+
+
+.sl-feed-avatar-neutral {
+  color:#a8b8c8;
+  border-color:#8fa4b8;
+  box-shadow:0 0 5px rgba(145,170,195,.72),0 0 11px rgba(110,145,175,.28);
+}
+.sl-feed-comment-head { align-items:center; }
+.sl-feed-comment-avatar {
+  display:grid;
+  place-items:center;
+  width:25px;
+  height:25px;
+  flex:0 0 25px;
+  border-width:1.5px;
+  font-size:.68rem;
+  font-weight:800;
+}
+.sl-feed-comment-head strong { flex:1; min-width:0; }
