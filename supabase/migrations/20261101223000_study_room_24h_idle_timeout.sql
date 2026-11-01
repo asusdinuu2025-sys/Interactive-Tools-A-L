@@ -161,7 +161,7 @@ BEGIN
 
   elapsed_total := greatest(0, floor(extract(epoch FROM (now() - previous.last_heartbeat_at)))::integer);
   elapsed_today := greatest(0, floor(extract(epoch FROM (now() - greatest(previous.last_heartbeat_at, day_start)))::integer));
-  elapsed_week := greatest(0, floor(extract(epoch FROM (now() - greatest(previous.last_heartbeat_at, week_start_ts)))::integer);
+  elapsed_week := greatest(0, floor(extract(epoch FROM (now() - greatest(previous.last_heartbeat_at, week_start_ts)))::integer));
 
   UPDATE public.study_room_members
   SET today_seconds = CASE WHEN today_date = local_day THEN today_seconds + elapsed_today ELSE elapsed_today END,
