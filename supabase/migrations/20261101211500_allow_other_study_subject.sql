@@ -3,14 +3,14 @@ CREATE OR REPLACE FUNCTION public.study_room_set_subject(p_subject text)
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = ''
 AS $$
 BEGIN
   IF auth.uid() IS NULL THEN
     RAISE EXCEPTION 'Sign-in required';
   END IF;
 
-  IF p_subject NOT IN (
+  IF p_subject IS NULL OR p_subject NOT IN (
     'Combined Mathematics', 'Physics', 'Chemistry', 'Biology',
     'Agricultural Science', 'Information & Communication Technology (ICT)',
     'General English', 'General Common Test', 'Accounting', 'Business Studies',
@@ -42,3 +42,6 @@ BEGIN
   END IF;
 END;
 $$;
+
+REVOKE ALL ON FUNCTION public.study_room_set_subject(text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.study_room_set_subject(text) TO authenticated;
