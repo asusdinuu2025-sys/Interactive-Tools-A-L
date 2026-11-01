@@ -117,6 +117,9 @@
   let isOpen = false;
   let unreadCount = 0;
   let lastSentAt = 0;
+  let isSending = false;
+  let reconnecting = null;
+  let reconnectTimer = 0;
   let messagesById = new Map();
 
   async function loadChatIdentity() {
@@ -250,6 +253,7 @@
         !length ||
         length > CONFIG.maxLength ||
         !client ||
+        isSending ||
         Date.now() - lastSentAt < CONFIG.rateLimitMs;
     }
   }
@@ -323,7 +327,7 @@
   }
 
   async function sendMessage() {
-    if (!client || !input) return;
+    if (!client || !input || isSending) return;
 
     const now = Date.now();
     if (now - lastSentAt < CONFIG.rateLimitMs) {
@@ -337,28 +341,32 @@
     }
 
     lastSentAt = now;
+    isSending = true;
     updateComposer();
 
-    const { error } = await client
-      .from(CONFIG.table)
-      .insert({
-        message,
-        session_id: sessionKey,
-        user_id: userId,
-        nickname
-      });
+    try {
+      const { error } = await client
+        .from(CONFIG.table)
+        .insert({
+          message,
+          session_id: sessionKey,
+          user_id: userId,
+          nickname
+        });
 
-    if (error) {
+      if (error) throw error;
+
+      input.value = "";
+      setStatus(true, "Message sent • live chat");
+    } catch (error) {
       console.warn("StudyLab Chat send:", error);
-      setStatus(false, "Message could not be sent");
+      setStatus(false, navigator.onLine ? "Message could not be sent. Retry." : "Waiting for internet connection");
       lastSentAt = 0;
+    } finally {
+      isSending = false;
       updateComposer();
-      return;
+      window.setTimeout(updateComposer, CONFIG.rateLimitMs + 20);
     }
-
-    input.value = "";
-    updateComposer();
-    window.setTimeout(updateComposer, CONFIG.rateLimitMs + 20);
   }
 
   function closeQuickAccess() {
@@ -439,6 +447,60 @@
     updateComposer();
   }
 
+  async function reconnectChat() {
+    if (!client || !navigator.onLine || document.visibilityState === "hidden") return;
+    if (reconnecting) return reconnecting;
+
+    reconnecting = (async () => {
+      try {
+        setStatus(false, "Reconnecting chat…");
+
+        // Refresh an expiring auth session before opening a new Realtime channel.
+        const { data: sessionData, error: sessionError } = await client.auth.getSession();
+        if (sessionError) throw sessionError;
+        let session = sessionData?.session;
+        if (!session) {
+          const { data, error } = await client.auth.signInAnonymously();
+          if (error) throw error;
+          session = data?.session;
+        } else if (session.expires_at && session.expires_at * 1000 < Date.now() + 60000) {
+          const { data, error } = await client.auth.refreshSession();
+          if (error) throw error;
+          session = data?.session || session;
+        }
+        if (!session?.user?.id) throw new Error("Student chat session is unavailable.");
+        userId = session.user.id;
+
+        if (channel) {
+          const oldChannel = channel;
+          channel = null;
+          await client.removeChannel(oldChannel);
+        }
+
+        await loadMessages();
+        subscribe();
+      } catch (error) {
+        console.warn("StudyLab Chat reconnect:", error);
+        setStatus(false, navigator.onLine ? "Chat connection unavailable" : "Waiting for internet connection");
+      }
+    })().finally(() => { reconnecting = null; });
+
+    return reconnecting;
+  }
+
+  function scheduleReconnect() {
+    window.clearTimeout(reconnectTimer);
+    reconnectTimer = window.setTimeout(reconnectChat, 350);
+  }
+
+  window.addEventListener("online", scheduleReconnect);
+  window.addEventListener("offline", () => setStatus(false, "Waiting for internet connection"));
+  window.addEventListener("pageshow", scheduleReconnect);
+  window.addEventListener("focus", scheduleReconnect);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") scheduleReconnect();
+  });
+
   async function boot() {
     setupUI();
 
@@ -459,8 +521,12 @@
         CONFIG.supabasePublishableKey
       );
 
-      await loadMessages();
-      subscribe();
+      if (!navigator.onLine) {
+        setStatus(false, "Waiting for internet connection");
+      } else {
+        await loadMessages();
+        subscribe();
+      }
 
     } catch (error) {
       console.warn("StudyLab Chat:", error);
