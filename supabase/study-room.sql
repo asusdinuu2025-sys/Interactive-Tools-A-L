@@ -917,3 +917,36 @@ $$;
 
 REVOKE ALL ON FUNCTION public.study_room_set_subject(text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.study_room_set_subject(text) TO authenticated;
+
+
+-- Schedule the 24-hour idle-session cleanup (safe to rerun from this setup script).
+DO $schedule$
+DECLARE existing_job bigint;
+BEGIN
+  FOR existing_job IN
+    SELECT jobid FROM cron.job WHERE jobname = 'study-room-expire-idle-sessions'
+  LOOP
+    PERFORM cron.unschedule(existing_job);
+  END LOOP;
+  PERFORM cron.schedule(
+    'study-room-expire-idle-sessions',
+    '* * * * *',
+    $job$
+      UPDATE public.study_room_members
+      SET is_studying = false,
+          session_active = false,
+          session_started_at = NULL,
+          last_heartbeat_at = NULL,
+          session_elapsed_seconds = 0,
+          session_date = timezone('Asia/Colombo', now())::date,
+          today_seconds = 0,
+          today_date = timezone('Asia/Colombo', now())::date,
+          week_seconds = 0,
+          week_start = public.study_room_local_week_start(timezone('Asia/Colombo', now())::date),
+          updated_at = now()
+      WHERE is_studying = true
+        AND (last_heartbeat_at IS NULL OR last_heartbeat_at <= now() - interval '24 hours');
+    $job$
+  );
+END;
+$schedule$;
