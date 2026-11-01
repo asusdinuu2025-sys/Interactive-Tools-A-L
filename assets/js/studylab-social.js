@@ -62,6 +62,48 @@
     status.dataset.state = error ? "error" : "info";
     status.hidden = !message;
   }
+
+  function showPostGateToast(message) {
+    const toastId = "studyLabSocialGateToast";
+    document.getElementById(toastId)?.remove();
+    const styleId = "studyLabSocialGateToastStyle";
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement("style");
+      style.id = styleId;
+      style.textContent = `
+        #studyLabSocialGateToast {
+          position:fixed; z-index:1300; top:max(18px,env(safe-area-inset-top)); right:18px;
+          width:max-content; max-width:min(92vw,430px); padding:13px 17px;
+          border:1px solid rgba(91,205,255,.34); border-radius:14px;
+          background:rgba(15,28,46,.97); color:#f3f8ff;
+          box-shadow:0 14px 38px rgba(0,0,0,.3),0 0 18px rgba(65,180,255,.12);
+          font:650 14px/1.45 system-ui,sans-serif; text-align:left;
+          opacity:0; transform:translateX(calc(100% + 30px)); pointer-events:none;
+          transition:transform .42s cubic-bezier(.2,.8,.2,1),opacity .28s ease;
+        }
+        #studyLabSocialGateToast.is-visible { opacity:1; transform:translateX(0); }
+        #studyLabSocialGateToast.is-leaving { opacity:0; transform:translateX(calc(100% + 30px)); }
+        html[data-theme="light"] #studyLabSocialGateToast {
+          background:rgba(255,255,255,.98); color:#17243a; border-color:rgba(55,155,205,.3);
+          box-shadow:0 14px 38px rgba(35,70,105,.18);
+        }
+        @media(prefers-reduced-motion:reduce) { #studyLabSocialGateToast { transition:none; } }
+      `;
+      document.head.appendChild(style);
+    }
+    const toast = document.createElement("div");
+    toast.id = toastId;
+    toast.setAttribute("role","alert");
+    toast.setAttribute("aria-live","assertive");
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add("is-visible"));
+    window.setTimeout(() => {
+      toast.classList.remove("is-visible");
+      toast.classList.add("is-leaving");
+      window.setTimeout(() => toast.remove(),450);
+    },2200);
+  }
   function setBusy(value) {
     busy = value;
     postButton.disabled = value;
@@ -509,11 +551,17 @@
       const account = accountClient();
       await account.ready;
       const user = account.getUser();
+      if (!user?.id) {
+        const message = "Create your basic StudyLab profile before posting.";
+        showPostGateToast(message);
+        throw new Error(message);
+      }
       const profile = await account.getProfile(true);
-      if (!user?.id) throw new Error("Student account not ready.");
       if (!profile?.display_name || /^Student\d{4}$/.test(profile.display_name) ||
           !profile?.username || !profile?.exam_year || !profile?.study_stream) {
-        throw new Error("Complete your basic StudyLab profile before posting.");
+        const message = "Complete your basic StudyLab profile before posting.";
+        showPostGateToast(message);
+        throw new Error(message);
       }
       const files = [...(input.files || [])];
       validFiles(files);
