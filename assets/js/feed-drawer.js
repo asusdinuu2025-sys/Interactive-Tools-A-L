@@ -1,6 +1,4 @@
-/* StudyLab integrated homepage Community column.
-   Posting stays disabled until the isolated feed database, storage and moderation
-   setup is installed. This keeps the preview safe and avoids fake/demo posts. */
+/* StudyLab Social floating panel. Feed data and moderation are provided by Supabase. */
 (function () {
   "use strict";
   if (window.__studyLabFeedDrawerLoaded) return;
@@ -42,7 +40,7 @@
       <form class="sl-feed-compose" aria-label="Create a feed post">
         <textarea maxlength="2000" disabled placeholder="Share something with other students..." aria-label="Write a post"></textarea>
         <div class="sl-feed-compose-foot">
-          <span class="sl-feed-image-note"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m21 15-5-5L5 20"/></svg> Photos · up to 5 MB each</span>
+          <span class="sl-feed-image-note"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m21 15-5-5L5 20"/></svg> Photos · up to 4 MB each · max 4 photos</span>
           <button class="sl-feed-post-button" type="button" disabled>Post</button>
         </div>
       </form>
@@ -53,7 +51,7 @@
           <p>Posts from StudyLab students will appear here, newest first.</p>
         </div>
       </div>
-      <p class="sl-feed-setup-note" role="status">Social posting and photo uploads are being prepared. Publishing will open after security and moderation checks are in place.</p>
+      <p class="sl-feed-setup-note" role="status">Connecting to StudyLab Social…</p>
     </div>`;
 
   const actions = header.querySelector(".header-actions");
