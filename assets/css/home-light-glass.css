@@ -261,3 +261,144 @@ html[data-theme="light"] .study-tools-card p {
     transition: none !important;
   }
 }
+
+
+/* v1.0.2: neutralise the light palette while retaining a restrained icy-blue accent. */
+html[data-theme="light"] body {
+  background:
+    radial-gradient(ellipse at 9% 3%, rgba(142, 198, 235, .12), transparent 38%),
+    radial-gradient(ellipse at 92% 14%, rgba(174, 190, 224, .09), transparent 34%),
+    linear-gradient(135deg, #f7f9fc 0%, #f1f5f9 48%, #f6f7fb 100%) !important;
+  background-attachment: fixed !important;
+}
+html[data-theme="light"] body::before {
+  background: rgba(118, 183, 224, .09) !important;
+}
+html[data-theme="light"] body::after {
+  background: rgba(153, 163, 213, .075) !important;
+}
+
+/* Keep every homepage entry card in the same light-glass family. */
+html[data-theme="light"] .subject-card,
+html[data-theme="light"] .study-tools-card,
+html[data-theme="light"] .telegram-card,
+html[data-theme="light"] .mcq-practice-card,
+html[data-theme="light"] .chemistry-resources-card {
+  background:
+    linear-gradient(148deg,
+      rgba(255,255,255,.91) 0%,
+      rgba(255,255,255,.76) 35%,
+      rgba(230,239,247,.55) 100%) !important;
+  border-color: rgba(255,255,255,.94) !important;
+  box-shadow:
+    0 2px 5px rgba(255,255,255,.82),
+    0 13px 27px rgba(53,76,98,.075),
+    0 28px 62px rgba(45,67,90,.105),
+    inset 0 2px 0 rgba(255,255,255,.99),
+    inset 1px 0 0 rgba(255,255,255,.75),
+    inset 0 -2px 0 rgba(91,132,166,.065) !important;
+}
+html[data-theme="light"] .subject-card:hover,
+html[data-theme="light"] .study-tools-card:hover,
+html[data-theme="light"] .telegram-card:hover,
+html[data-theme="light"] .mcq-practice-card:hover,
+html[data-theme="light"] .chemistry-resources-card:hover {
+  background:
+    linear-gradient(148deg,
+      rgba(255,255,255,.97) 0%,
+      rgba(255,255,255,.84) 38%,
+      rgba(226,238,248,.67) 100%) !important;
+  border-color: rgba(255,255,255,1) !important;
+  box-shadow:
+    0 3px 8px rgba(255,255,255,.92),
+    0 18px 36px rgba(53,76,98,.10),
+    0 38px 82px rgba(45,67,90,.14),
+    inset 0 2px 0 #fff,
+    inset 0 -2px 0 rgba(91,132,166,.075) !important;
+}
+html[data-theme="light"] .site-header,
+html[data-theme="light"] .site-footer,
+html[data-theme="light"] .student-counter,
+html[data-theme="light"] .study-findbar {
+  background: linear-gradient(135deg, rgba(255,255,255,.78), rgba(239,244,249,.62)) !important;
+  border-color: rgba(255,255,255,.9) !important;
+  box-shadow:
+    0 16px 42px rgba(45,67,90,.075),
+    inset 0 1px 0 rgba(255,255,255,.98) !important;
+}
+html[data-theme="light"] .student-counter {
+  background: linear-gradient(135deg, rgba(255,255,255,.86), rgba(229,239,247,.72)) !important;
+}
+html[data-theme="light"] .telegram-card {
+  color: #20384d !important;
+}
+html[data-theme="light"] .study-tools-card h2,
+html[data-theme="light"] .mcq-practice-card h2,
+html[data-theme="light"] .chemistry-resources-card h2 {
+  color: #20384d !important;
+}
+html[data-theme="light"] .study-tools-card p,
+html[data-theme="light"] .mcq-practice-card p,
+html[data-theme="light"] .chemistry-resources-card p {
+  color: #53697c !important;
+}
+html[data-theme="light"] .study-tools-card-badge {
+  background: rgba(70,160,145,.08) !important;
+  border-color: rgba(70,160,145,.15) !important;
+  color: #327f72 !important;
+}
+html[data-theme="light"] .study-tools-card-cta {
+  color: #327f72 !important;
+}
+html[data-theme="light"] .theme-toggle,
+html[data-theme="light"] .pwa-install-button,
+html[data-theme="light"] .profile-button {
+  background: linear-gradient(135deg, rgba(255,255,255,.88), rgba(235,241,247,.70)) !important;
+  border-color: rgba(255,255,255,.96) !important;
+  color: #263d51 !important;
+  box-shadow: 0 9px 24px rgba(45,67,90,.075), inset 0 1px 0 #fff !important;
+}
+html[data-theme="light"] .hero h1 {
+  text-shadow: 0 8px 28px rgba(42,65,88,.08) !important;
+}
+html[data-theme="light"] .science-symbol {
+  color: rgba(48,100,137,.075) !important;
+  text-shadow: 0 0 18px rgba(85,145,185,.05) !important;
+}
+
+/* Shared pointer glow layer. The original glass surfaces and card content remain intact. */
+.home-pointer-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    190px circle at var(--home-glow-x, 50%) var(--home-glow-y, 50%),
+    rgba(105,190,245,.17),
+    rgba(105,190,245,.065) 34%,
+    transparent 72%
+  );
+  transition: opacity .22s ease;
+}
+html[data-theme="dark"] .home-pointer-glow {
+  background: radial-gradient(
+    190px circle at var(--home-glow-x, 50%) var(--home-glow-y, 50%),
+    rgba(91,190,255,.18),
+    rgba(91,190,255,.065) 34%,
+    transparent 72%
+  );
+}
+.home-pointer-glow.is-visible { opacity: 1; }
+.subject-card > :not(.home-pointer-glow),
+.study-tools-card > :not(.home-pointer-glow),
+.telegram-card > :not(.home-pointer-glow),
+.mcq-practice-card > :not(.home-pointer-glow),
+.chemistry-resources-card > :not(.home-pointer-glow) {
+  position: relative;
+  z-index: 2;
+}
+@media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .home-pointer-glow { display: none !important; }
+}
