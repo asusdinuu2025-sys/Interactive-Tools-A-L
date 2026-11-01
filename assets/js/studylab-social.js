@@ -271,7 +271,7 @@
     }
     const list = queue.querySelector(".sl-feed-admin-list");
     const [{ data: posts, error: postError }, { data: comments, error: commentError }] = await Promise.all([
-      client.from("studylab_social_posts").select("id,author_display_name,author_username,body,created_at").eq("status", "pending").order("created_at", { ascending: true }).limit(50),
+      client.from("studylab_social_posts").select("id,author_display_name,author_username,body,created_at,studylab_social_post_images(bucket_path)").eq("status", "pending").order("created_at", { ascending: true }).limit(50),
       client.from("studylab_social_comments").select("id,post_id,author_display_name,body,created_at").eq("status", "pending").order("created_at", { ascending: true }).limit(50)
     ]);
     if (postError) throw postError;
@@ -280,6 +280,23 @@
     for (const post of posts || []) {
       const item = make("div", "sl-feed-admin-item");
       item.append(make("strong", "", "Post · " + (post.author_display_name || "Student")), make("p", "", post.body || "[Photo post]"));
+      const imageRows = post.studylab_social_post_images || [];
+      if (imageRows.length) {
+        const preview = make("div", "sl-feed-gallery");
+        for (const imageRow of imageRows.slice(0, MAX_IMAGES)) {
+          try {
+            const url = await signedImageUrl(client, imageRow.bucket_path);
+            const img = document.createElement("img");
+            img.src = url;
+            img.alt = "Photo awaiting moderation";
+            img.loading = "lazy";
+            preview.append(img);
+          } catch (error) {
+            console.warn("Pending Social image preview:", error);
+          }
+        }
+        if (preview.childElementCount) item.append(preview);
+      }
       const actions = make("div", "sl-feed-admin-actions");
       const yes = make("button", "sl-feed-admin-approve", "Approve");
       const no = make("button", "sl-feed-admin-reject", "Reject");
