@@ -208,12 +208,16 @@
     if (!subject.value) {
       subject.setAttribute('aria-invalid', 'true');
       subject.classList.add('room-subject-required');
+      subject.style.setProperty('border-color', '#ef4444', 'important');
+      subject.style.setProperty('box-shadow', '0 0 0 3px rgba(239,68,68,.18)', 'important');
       say('Please select subject first', true);
       subject.focus();
       return;
     }
     subject.removeAttribute('aria-invalid');
     subject.classList.remove('room-subject-required');
+    subject.style.removeProperty('border-color');
+    subject.style.removeProperty('box-shadow');
     try {
       await callRpc('study_room_set_subject', {p_subject: subject.value});
       await callRpc('study_room_start');
@@ -300,6 +304,8 @@
       subject.addEventListener('change', async () => {
         subject.removeAttribute('aria-invalid');
         subject.classList.remove('room-subject-required');
+        subject.style.removeProperty('border-color');
+        subject.style.removeProperty('box-shadow');
         try { await callRpc('study_room_set_subject', {p_subject: subject.value}); await loadRows(); }
         catch(e) { say('Could not update subject: ' + e.message, true); }
       });
