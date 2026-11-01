@@ -38,7 +38,6 @@
   transition: width .42s cubic-bezier(.22,1,.36,1), opacity .25s ease, transform .42s cubic-bezier(.22,1,.36,1), visibility .42s;
 }
 .sl-feed-panel[data-size="half"] { width: min(50vw, 920px); }
-.sl-feed-panel[data-size="three-quarter"] { width: min(75vw, 1280px); }
 .sl-feed-panel[data-size="full"] {
   inset: 0; width: 100vw; height: 100dvh; border-radius: 0; padding: 22px;
 }
@@ -139,7 +138,7 @@ body.sl-community-open .study-quick-button {
   .sl-feed-toggle { padding-inline: 11px; }
 }
 @media (max-width: 720px) {
-  .sl-feed-panel, .sl-feed-panel[data-size="half"], .sl-feed-panel[data-size="three-quarter"] {
+  .sl-feed-panel, .sl-feed-panel[data-size="half"] {
     top: 8px; right: 8px; bottom: 8px; left: 8px; width: auto; height: auto;
     padding: 14px; border-radius: 18px;
   }
