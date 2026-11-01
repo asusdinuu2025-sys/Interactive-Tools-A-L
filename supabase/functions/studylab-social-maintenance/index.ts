@@ -76,27 +76,7 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    // Remove storage objects left behind by interrupted client uploads.
-    const { data: objects, error: objectsError } = await supabase
-      .schema("storage").from("objects")
-      .select("name,created_at")
-      .eq("bucket_id", BUCKET)
-      .lt("created_at", new Date(Date.now() - 86400000).toISOString())
-      .limit(1000);
-    if (objectsError) throw objectsError;
-    const { data: remainingImages, error: remainingError } = await supabase
-      .from("studylab_social_post_images").select("bucket_path");
-    if (remainingError) throw remainingError;
-    const referenced = new Set((remainingImages || []).map((row: { bucket_path: string }) => row.bucket_path));
-    const orphanPaths = (objects || [])
-      .map((row: { name: string }) => row.name)
-      .filter((name: string) => !referenced.has(name));
-    for (const batch of chunks(orphanPaths, 100)) {
-      if (!batch.length) continue;
-      const { error } = await supabase.storage.from(BUCKET).remove(batch);
-      if (error) throw error;
-      deletedObjects += batch.length;
-    }
+
 
     return json({
       success: true,
