@@ -21,3 +21,6 @@ html[data-theme="light"] .sl-mini-timer-status,html[data-theme="light"] .sl-mini
 body.slr-theme-light .sl-mini-timer-launcher{background:rgba(255,255,255,.94);color:#17233b;border-color:rgba(60,90,130,.2)}
 body.slr-theme-light .sl-mini-timer-panel{background:rgba(255,255,255,.97);color:#17233b;border-color:rgba(60,90,130,.18)}
 body.slr-theme-light .sl-mini-timer-status,body.slr-theme-light .sl-mini-timer-hint{color:#68758b}
+
+.room-session-actions .room-action.pause{background:rgba(120,145,175,.12);border:1px solid rgba(120,145,175,.24);color:inherit;box-shadow:none}
+.room-session-actions .room-action.pause:hover{background:rgba(120,145,175,.2)}
