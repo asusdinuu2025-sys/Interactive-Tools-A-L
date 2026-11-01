@@ -40,8 +40,8 @@
   const fileCount = form.querySelector(".sl-feed-file-count");
   const status = form.querySelector(".sl-feed-compose-status");
   let busy = false;
-  let loadedOnce = false;
   let isAdmin = false;
+  status.hidden = true;
 
   function accountClient() {
     const account = window.StudyLabAccount;
@@ -101,7 +101,7 @@
     if (Number.isNaN(date.getTime())) return "";
     return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(date);
   }
-  async function renderPost(client, post, currentUserId) {
+  async function renderPost(client, post, currentUserId, likesByPost) {
     const card = make("article", "sl-feed-post");
     card.dataset.postId = post.id;
     const top = make("div", "sl-feed-post-top");
@@ -140,15 +140,12 @@
 
     const actions = make("div", "sl-feed-post-actions");
     if (post.status === "approved") {
-      const { count, error: countError } = await client.from("studylab_social_likes")
-        .select("*", { count: "exact", head: true }).eq("post_id", post.id);
-      if (countError) console.warn("Social like count:", countError);
-      const { data: mine, error: mineError } = await client.from("studylab_social_likes")
-        .select("post_id").eq("post_id", post.id).eq("user_id", currentUserId).maybeSingle();
-      if (mineError) console.warn("Social like state:", mineError);
-      const like = make("button", "sl-feed-action", (mine ? "♥ Liked" : "♡ Like") + " · " + (count || 0));
+      const postLikes = likesByPost.get(post.id) || [];
+      const mine = postLikes.some(row => row.user_id === currentUserId);
+      const count = postLikes.length;
+      const like = make("button", "sl-feed-action", (mine ? "♥ Liked" : "♡ Like") + " · " + count);
       like.type = "button";
-      like.setAttribute("aria-pressed", String(Boolean(mine)));
+      like.setAttribute("aria-pressed", String(mine));
       like.addEventListener("click", async () => {
         like.disabled = true;
         try {
@@ -312,15 +309,25 @@
       if (!user?.id) throw new Error("Student account not ready.");
       isAdmin = user.app_metadata?.role === "admin";
       const posts = await getPostRows(account.client, user.id);
+      const approvedIds = posts.filter(post => post.status === "approved").map(post => post.id);
+      const likesByPost = new Map();
+      if (approvedIds.length) {
+        const { data: likeRows, error: likesError } = await account.client.from("studylab_social_likes")
+          .select("post_id,user_id").in("post_id", approvedIds);
+        if (likesError) throw likesError;
+        for (const row of likeRows || []) {
+          if (!likesByPost.has(row.post_id)) likesByPost.set(row.post_id, []);
+          likesByPost.get(row.post_id).push(row);
+        }
+      }
       stream.replaceChildren();
       if (!posts.length) emptyState("No posts yet");
       for (const post of posts) {
-        const card = await renderPost(account.client, post, user.id);
+        const card = await renderPost(account.client, post, user.id, likesByPost);
         stream.append(card);
       }
       if (isAdmin) await renderAdminQueue(account.client);
       else panel.querySelector(".sl-feed-admin-queue")?.remove();
-      loadedOnce = true;
       if (note) note.hidden = true;
     } catch (error) {
       console.error("StudyLab Social:", error);
@@ -400,7 +407,7 @@
 
   document.addEventListener("click", event => {
     const toggle = event.target.closest(".sl-feed-toggle");
-    if (toggle?.getAttribute("aria-expanded") === "true" && !loadedOnce) loadFeed();
+    if (toggle?.getAttribute("aria-expanded") === "true") loadFeed();
   });
   panel.querySelector("[data-feed-close]")?.addEventListener("click", () => {});
   window.addEventListener("focus", () => {
