@@ -30,7 +30,7 @@
       <span class="sl-feed-file-count">No photos selected</span>
     </div>
     <div class="sl-feed-compose-foot">
-      <span class="sl-feed-image-note">JPEG, PNG or WebP · up to 5 MB each · max 3 photos</span>
+      <span class="sl-feed-image-note">JPEG, PNG or WebP · up to 4 MB each · max 4 photos</span>
       <button class="sl-feed-post-button" type="submit">Post</button>
     </div>
     <p class="sl-feed-compose-status" role="status" aria-live="polite"></p>`;
