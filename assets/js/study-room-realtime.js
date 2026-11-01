@@ -40,7 +40,7 @@
       .map(n => String(n).padStart(2,'0')).join(':');
   };
   const compact = seconds => fmt(seconds);
-  const profileDuration = seconds => { const total=Math.max(0,Math.floor(Number(seconds)||0)); const hours=Math.floor(total/3600), minutes=Math.floor(total%3600/60); return hours ? hours+"h "+minutes+" minutes" : minutes+" minutes"; };
+  const profileDuration = seconds => { const total=Math.max(0,Math.floor(Number(seconds)||0)); const hours=Math.floor(total/3600), minutes=Math.floor(total%3600/60); return hours ? hours+"h "+minutes+"mins" : minutes+"mins"; };
   const startOfDay = key => new Date(key + 'T00:00:00+05:30').getTime();
   function pendingSeconds(row, boundary) {
     if (!row?.is_studying || !row.last_heartbeat_at) return 0;
@@ -205,6 +205,15 @@
     } catch (e) { console.error('Study Room heartbeat failed', e); }
   }
   async function startStudy() {
+    if (!subject.value) {
+      subject.setAttribute('aria-invalid', 'true');
+      subject.classList.add('room-subject-required');
+      say('Please select subject first', true);
+      subject.focus();
+      return;
+    }
+    subject.removeAttribute('aria-invalid');
+    subject.classList.remove('room-subject-required');
     try {
       await callRpc('study_room_set_subject', {p_subject: subject.value});
       await callRpc('study_room_start');
@@ -289,6 +298,8 @@
       pause.addEventListener('click', pauseStudy);
       leave.addEventListener('click', endStudy);
       subject.addEventListener('change', async () => {
+        subject.removeAttribute('aria-invalid');
+        subject.classList.remove('room-subject-required');
         try { await callRpc('study_room_set_subject', {p_subject: subject.value}); await loadRows(); }
         catch(e) { say('Could not update subject: ' + e.message, true); }
       });
