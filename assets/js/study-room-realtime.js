@@ -240,6 +240,7 @@
       subject: member?.subject || subject.value || '',
       status: member?.is_studying ? 'Studying' : member?.session_active ? 'Paused' : 'Not studying',
       lastHeartbeatAt: member?.last_heartbeat_at || null,
+      sessionStartedAt: member?.session_started_at || null,
       updatedAt: member?.updated_at || null
     };
   }

@@ -24,3 +24,23 @@ body.slr-theme-light .sl-mini-timer-status,body.slr-theme-light .sl-mini-timer-h
 
 .room-session-actions .room-action.pause{background:rgba(120,145,175,.12);border:1px solid rgba(120,145,175,.24);color:inherit;box-shadow:none}
 .room-session-actions .room-action.pause:hover{background:rgba(120,145,175,.2)}
+
+/* Floating timer follows the active Study Room palette and appearance mode. */
+body.study-room-page[data-room-theme] .sl-mini-timer-launcher,
+body.study-room-page[data-room-theme] .sl-mini-timer-panel{
+  background:var(--room-card)!important;color:var(--room-text)!important;
+  border-color:var(--room-border)!important;
+  box-shadow:0 14px 38px rgba(0,0,0,.2),0 0 18px color-mix(in srgb,var(--room-accent) 12%,transparent)!important;
+}
+body.study-room-page[data-room-theme] .sl-mini-timer-launcher span:first-child{color:var(--room-accent)!important}
+body.study-room-page[data-room-theme] .sl-mini-timer-status,
+body.study-room-page[data-room-theme] .sl-mini-timer-hint{color:var(--room-muted)!important}
+body.study-room-page[data-room-theme] .sl-mini-close,
+body.study-room-page[data-room-theme] .sl-mini-timer-actions button{
+  background:var(--room-chip)!important;border-color:var(--room-border)!important;color:var(--room-text)!important
+}
+body.study-room-page[data-room-theme] .sl-mini-timer-actions button:first-child{
+  background:linear-gradient(135deg,var(--room-accent-strong),var(--room-accent))!important;
+  color:var(--room-button-text,#fff)!important;border-color:transparent!important
+}
+body.study-room-page[data-room-theme] .sl-mini-timer-actions button:disabled{opacity:.38}
