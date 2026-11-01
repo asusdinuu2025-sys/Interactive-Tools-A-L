@@ -5,7 +5,8 @@ const $=id=>document.getElementById(id), status=$("yourStatus"), subject=$("stud
 if(!status||!subject||!layout||$("slLocalStudyAnalytics"))return;
 let uid="";try{uid=window.StudyLabAccount?.getUser?.()?.id||"";}catch(_){}
 const key="studylab-local-study-analytics-v1:"+(uid||"this-browser");
-const dayKey=date=>new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Colombo",year:"numeric",month:"2-digit",day:"2-digit"}).format(date);\nconst today=()=>dayKey(new Date());
+const dayKey=date=>new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Colombo",year:"numeric",month:"2-digit",day:"2-digit"}).format(date);
+const today=()=>dayKey(new Date());
 const dateAgo=n=>{const d=new Date(Date.now()+19800000);d.setUTCHours(12,0,0,0);d.setUTCDate(d.getUTCDate()-n);return d.toISOString().slice(0,10);};
 const fmt=s=>{s=Math.max(0,Math.floor(s||0));const h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?h+"h "+String(m).padStart(2,"0")+"m":m+"m";};
 const color=n=>{const i=Math.max(0,[...subject.options].findIndex(o=>o.text===n));return "hsl("+((i*137.508)%360).toFixed(1)+" 72% 62%)";};

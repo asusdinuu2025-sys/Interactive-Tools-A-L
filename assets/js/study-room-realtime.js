@@ -39,7 +39,8 @@
     return [Math.floor(seconds/3600), Math.floor(seconds%3600/60), seconds%60]
       .map(n => String(n).padStart(2,'0')).join(':');
   };
-  const compact = seconds => fmt(seconds);\n  const profileDuration = seconds => { const total=Math.max(0,Math.floor(Number(seconds)||0)); const hours=Math.floor(total/3600), minutes=Math.floor(total%3600/60); return hours ? hours+"h "+minutes+" minutes" : minutes+" minutes"; };
+  const compact = seconds => fmt(seconds);
+  const profileDuration = seconds => { const total=Math.max(0,Math.floor(Number(seconds)||0)); const hours=Math.floor(total/3600), minutes=Math.floor(total%3600/60); return hours ? hours+"h "+minutes+" minutes" : minutes+" minutes"; };
   const startOfDay = key => new Date(key + 'T00:00:00+05:30').getTime();
   function pendingSeconds(row, boundary) {
     if (!row?.is_studying || !row.last_heartbeat_at) return 0;
