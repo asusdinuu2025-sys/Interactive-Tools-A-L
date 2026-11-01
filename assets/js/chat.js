@@ -102,13 +102,23 @@
   const unread = root.querySelector("[data-chat-unread]");
   const inputWrap = root.querySelector(".study-chat-input-wrap");
 
-  const sessionKey =
-    sessionStorage.getItem("studylab_chat_session") ||
-    (window.crypto && crypto.randomUUID
+  function getChatSessionKey() {
+    const fallback = () => window.crypto && crypto.randomUUID
       ? crypto.randomUUID()
-      : "guest-" + Date.now() + "-" + Math.random().toString(36).slice(2));
-
-  sessionStorage.setItem("studylab_chat_session", sessionKey);
+      : "guest-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+    try {
+      let value = sessionStorage.getItem("studylab_chat_session");
+      if (!value) {
+        value = fallback();
+        sessionStorage.setItem("studylab_chat_session", value);
+      }
+      return value;
+    } catch (_) {
+      // Storage can be restricted in some installed-browser contexts.
+      return fallback();
+    }
+  }
+  const sessionKey = getChatSessionKey();
 
   let client = null;
   let userId = null;
@@ -320,8 +330,9 @@
       .subscribe(status => {
         if (status === "SUBSCRIBED") {
           setStatus(true, "Live • newest 100 messages");
-        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
-          setStatus(false, "Live connection unavailable");
+        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
+          setStatus(false, "Live connection interrupted • reconnecting…");
+          scheduleReconnect();
         }
       });
   }
