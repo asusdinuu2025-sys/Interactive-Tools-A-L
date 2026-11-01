@@ -19,22 +19,21 @@
   function clearTimers() {
     window.clearTimeout(idleTimer);
     window.clearTimeout(leaveTimer);
+    idleTimer = 0;
+    leaveTimer = 0;
   }
 
-  function fadeCurrentCard(quickly) {
-    clearTimers();
-    if (activeGlow) {
-      activeGlow.classList.add("is-idle");
-      if (quickly) {
-        leaveTimer = window.setTimeout(() => {
-          activeGlow?.classList.remove("is-visible", "is-idle");
-          activeCard = null;
-          activeGlow = null;
-        }, 320);
+  function fadeCard(card, glow, clearActive) {
+    if (!glow) return;
+    glow.classList.add("is-idle");
+    const timeout = window.setTimeout(() => {
+      glow.classList.remove("is-visible", "is-idle");
+      if (clearActive && activeCard === card && activeGlow === glow) {
+        activeCard = null;
+        activeGlow = null;
       }
-    } else {
-      activeCard = null;
-    }
+    }, 1080);
+    return timeout;
   }
 
   function getGlow(card) {
@@ -50,19 +49,35 @@
 
   function onPointerMove(event) {
     if (event.pointerType !== "mouse" || !finePointer.matches || reducedMotion.matches) {
-      fadeCurrentCard(true);
+      if (activeCard && activeGlow) {
+        clearTimers();
+        const oldCard = activeCard, oldGlow = activeGlow;
+        activeCard = null;
+        activeGlow = null;
+        fadeCard(oldCard, oldGlow, false);
+      }
       return;
     }
 
     const hit = document.elementFromPoint(event.clientX, event.clientY);
     const card = hit instanceof Element ? hit.closest(selector) : null;
     if (!card) {
-      if (activeCard) fadeCurrentCard(true);
+      if (activeCard && activeGlow) {
+        clearTimers();
+        const oldCard = activeCard, oldGlow = activeGlow;
+        activeCard = null;
+        activeGlow = null;
+        leaveTimer = fadeCard(oldCard, oldGlow, false);
+      }
       return;
     }
 
     if (card !== activeCard) {
-      fadeCurrentCard(true);
+      clearTimers();
+      if (activeGlow) {
+        const previousCard = activeCard, previousGlow = activeGlow;
+        fadeCard(previousCard, previousGlow, false);
+      }
       activeCard = card;
       activeGlow = getGlow(card);
     }
@@ -90,11 +105,28 @@
   document.addEventListener("pointerout", event => {
     if (!activeCard || !(event.target instanceof Element) || !activeCard.contains(event.target)) return;
     if (event.relatedTarget instanceof Node && activeCard.contains(event.relatedTarget)) return;
-    fadeCurrentCard(true);
+    clearTimers();
+    const oldCard = activeCard, oldGlow = activeGlow;
+    activeCard = null;
+    activeGlow = null;
+    leaveTimer = fadeCard(oldCard, oldGlow, false);
   }, { passive: true });
 
-  window.addEventListener("blur", () => fadeCurrentCard(true));
+  window.addEventListener("blur", () => {
+    clearTimers();
+    if (!activeCard || !activeGlow) return;
+    const oldCard = activeCard, oldGlow = activeGlow;
+    activeCard = null;
+    activeGlow = null;
+    fadeCard(oldCard, oldGlow, false);
+  });
+
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden) fadeCurrentCard(true);
+    if (!document.hidden || !activeCard || !activeGlow) return;
+    clearTimers();
+    const oldCard = activeCard, oldGlow = activeGlow;
+    activeCard = null;
+    activeGlow = null;
+    fadeCard(oldCard, oldGlow, false);
   });
 })();
