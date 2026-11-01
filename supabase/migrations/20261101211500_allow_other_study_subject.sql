@@ -1,4 +1,29 @@
--- Allow the existing "Other" dropdown option in the Study Room subject RPC.
+-- Allow the existing Other dropdown option while preserving profile requirements and safe function resolution.
+ALTER TABLE public.study_room_members
+  DROP CONSTRAINT IF EXISTS study_room_members_subject_check;
+ALTER TABLE public.study_room_members
+  ADD CONSTRAINT study_room_members_subject_check
+  CHECK (subject IN (
+    'Combined Mathematics', 'Physics', 'Chemistry', 'Biology',
+    'Agricultural Science', 'Information & Communication Technology (ICT)',
+    'General English', 'General Common Test', 'Accounting', 'Business Studies',
+    'Economics', 'Business Statistics', 'Logic and Scientific Method',
+    'Geography', 'Political Science', 'History', 'Home Economics',
+    'Communication and Media Studies', 'Buddhism', 'Christianity', 'Hinduism',
+    'Islam', 'Buddhist Civilization', 'Christian Civilization',
+    'Hindu Civilization', 'Islamic Civilization', 'Sinhala', 'Tamil',
+    'English', 'Pali', 'Sanskrit', 'Arabic', 'French', 'German', 'Japanese',
+    'Korean', 'Chinese', 'Russian', 'Art', 'Oriental Music', 'Western Music',
+    'Carnatic Music', 'Dancing (Oriental)', 'Dancing (Bharatha)',
+    'Drama and Theatre', 'Engineering Technology', 'Science for Technology',
+    'Bio Systems Technology', 'Agro Technology', 'Food Technology',
+    'Mechanical Technology',
+    'Electrical, Electronic and Information Technology', 'Civil Technology',
+    'Design, Electrical and Electronic Technology',
+    'Design and Construction Technology', 'Design and Mechanical Technology',
+    'Design, Quantity Surveying and Construction Process', 'Other'
+  ));
+
 CREATE OR REPLACE FUNCTION public.study_room_set_subject(p_subject text)
 RETURNS void
 LANGUAGE plpgsql
@@ -8,6 +33,10 @@ AS $$
 BEGIN
   IF auth.uid() IS NULL THEN
     RAISE EXCEPTION 'Sign-in required';
+  END IF;
+
+  IF NOT study_room_private.profile_is_complete(auth.uid()) THEN
+    RAISE EXCEPTION 'Complete your StudyLab profile before entering the Live Study Room.';
   END IF;
 
   IF p_subject IS NULL OR p_subject NOT IN (
