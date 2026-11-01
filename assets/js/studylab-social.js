@@ -232,13 +232,23 @@
         if (!body) return;
         send.disabled = true;
         try {
-          const { error } = await client.from("studylab_social_comments")
-            .insert({ post_id: post.id, author_id: currentUserId, body });
+          const { data: newComment, error } = await client.from("studylab_social_comments")
+            .insert({ post_id: post.id, author_id: currentUserId, body })
+            .select("id").single();
           if (error) throw error;
+          const moderation = await client.functions.invoke("studylab-social-moderate", {
+            body: { content_type: "comment", content_id: newComment.id }
+          });
           field.value = "";
           area.remove();
           await toggleComments(card, post, client, currentUserId);
-          setStatus("Comment submitted for review.");
+          if (moderation.error) {
+            setStatus("Comment submitted. It remains hidden until admin review.");
+          } else if (moderation.data?.status === "approved") {
+            setStatus("Comment approved by AI moderation.");
+          } else {
+            setStatus("Comment sent to the admin review queue.");
+          }
         } catch (error) {
           setStatus(error.message || "Could not submit comment.", true);
           send.disabled = false;
@@ -399,10 +409,21 @@
         await account.client.rpc("studylab_social_delete_own_pending_post", { p_post_id: post.id }).catch(() => {});
         throw uploadError;
       }
+      const moderation = await account.client.functions.invoke("studylab-social-moderate", {
+        body: { content_type: "post", content_id: post.id }
+      });
       textarea.value = "";
       input.value = "";
       fileCount.textContent = "No photos selected";
-      setStatus("Post submitted. It will appear after moderation approval.");
+      if (moderation.error) {
+        setStatus("Post submitted. It remains hidden until admin review.");
+      } else if (moderation.data?.status === "approved") {
+        setStatus("Your text post was approved by AI moderation.");
+      } else if (moderation.data?.image_review_required) {
+        setStatus("Post submitted. Photos require admin approval before appearing.");
+      } else {
+        setStatus("Post sent to the admin review queue.");
+      }
       await loadFeed();
     } catch (error) {
       setStatus(error.message || "Could not submit your post.", true);
