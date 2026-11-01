@@ -53,10 +53,14 @@
       <p class="sl-feed-setup-note" role="status">Connecting to StudyLab Social…</p>
     </div>`;
 
-  // Full-screen mode uses a centered reading column with reserved ad placements.
+  // Full-screen mode keeps the feed centered and moves the composer into a compact side rail.
   const feedInner = panel.querySelector(".sl-feed-inner");
+  const compose = feedInner.querySelector(".sl-feed-compose");
   const feedStage = document.createElement("div");
   feedStage.className = "sl-feed-stage";
+  const composeRail = document.createElement("aside");
+  composeRail.className = "sl-feed-compose-rail";
+  composeRail.setAttribute("aria-label", "Create a Social post");
   const feedCenter = document.createElement("div");
   feedCenter.className = "sl-feed-center";
   const makeAdSlot = side => {
@@ -68,7 +72,7 @@
   };
   feedInner.parentNode.replaceChild(feedStage,feedInner);
   feedCenter.append(feedInner);
-  feedStage.append(makeAdSlot("left"),feedCenter,makeAdSlot("right"));
+  feedStage.append(composeRail,feedCenter,makeAdSlot("right"));
 
   const actions = header.querySelector(".header-actions");
   if (!actions) return;
@@ -93,6 +97,11 @@
   let previousFocus = null;
   function setSize(size) {
     panel.dataset.size = size;
+    if (size === "full") {
+      composeRail.append(compose);
+    } else {
+      feedInner.querySelector(".sl-feed-head").after(compose);
+    }
     panel.querySelectorAll("[data-feed-size]").forEach(button => {
       const active = button.dataset.feedSize === size;
       button.classList.toggle("is-active", active);
