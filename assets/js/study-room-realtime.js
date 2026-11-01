@@ -70,6 +70,7 @@
   function say(text, isError = false) {
     notice.textContent = text;
     notice.style.borderColor = isError ? 'rgba(255,105,105,.35)' : '';
+    notice.style.color = isError ? '#ef4444' : '';
   }
   function updatePersonal() {
     const today = dayKey(new Date());
@@ -308,6 +309,7 @@
         subject.classList.remove('room-subject-required');
         subject.style.removeProperty('border-color');
         subject.style.removeProperty('box-shadow');
+        subject.style.removeProperty('color');
         try { await callRpc('study_room_set_subject', {p_subject: subject.value}); await loadRows(); }
         catch(e) { say('Could not update subject: ' + e.message, true); }
       });
