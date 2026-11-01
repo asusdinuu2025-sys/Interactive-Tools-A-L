@@ -1,4 +1,4 @@
-/* StudyLab PWA service worker v1.0.0.
+/* StudyLab PWA service worker v1.0.1.
    Network-only: every request goes to the live StudyLab website.
    No Cache Storage is created, so online updates remain authoritative. */
 self.addEventListener("install", event => {
