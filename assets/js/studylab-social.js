@@ -41,6 +41,7 @@
   const status = form.querySelector(".sl-feed-compose-status");
   let busy = false;
   let isAdmin = false;
+  let adminRefreshAttempted = false;
   status.hidden = true;
 
   function accountClient() {
@@ -335,11 +336,15 @@
     try {
       const account = accountClient();
       await account.ready;
-      // Refresh the anonymous Supabase session so recently granted app_metadata
-      // admin privileges are reflected without signing out and losing the identity.
-      const { data: refreshedSession, error: refreshError } = await account.client.auth.refreshSession();
-      if (refreshError) console.warn("StudyLab admin session refresh:", refreshError);
-      const user = refreshedSession?.user || account.getUser();
+      let user = account.getUser();
+      // Refresh once per page load so newly granted app_metadata admin privileges
+      // appear without signing out and losing the anonymous student identity.
+      if (!adminRefreshAttempted) {
+        adminRefreshAttempted = true;
+        const { data: refreshedSession, error: refreshError } = await account.client.auth.refreshSession();
+        if (refreshError) console.warn("StudyLab admin session refresh:", refreshError);
+        user = refreshedSession?.user || account.getUser();
+      }
       if (!user?.id) throw new Error("Student account not ready.");
       isAdmin = user.app_metadata?.role === "admin";
       const heading = panel.querySelector(".sl-feed-heading");
