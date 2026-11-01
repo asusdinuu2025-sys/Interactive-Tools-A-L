@@ -1,5 +1,5 @@
 /* StudyLab homepage feed drawer. Isolated from existing homepage cards and theme rules. */
-/* Integrated homepage community column. No floating/modal card treatment. */
+/* Integrated homepage Social column. No floating/modal card treatment. */
 .sl-home-layout {
   --sl-feed-width: 370px;
   width: min(100%, 1560px);
@@ -103,7 +103,7 @@ html[data-theme="light"] .sl-feed-empty p { color: #687e91; }
   color: #d9b979; font-size: .7rem; line-height: 1.5;
 }
 html[data-theme="light"] .sl-feed-setup-note { color: #80652f; }
-/* Keep floating utility launchers from colliding with the open community column. */
+/* Keep floating utility launchers from colliding with the open Social column. */
 body.sl-community-open .study-chat-button,
 body.sl-community-open .study-feedback-button,
 body.sl-community-open #studyQuickButton,
@@ -129,8 +129,11 @@ body.sl-community-open .study-quick-button {
     background: linear-gradient(90deg, transparent, #55c9ff 25%, rgba(116,112,255,.65) 75%, transparent);
   }
   .sl-home-layout.is-feed-open .sl-feed-panel { transform: translateY(0); }
+  .sl-feed-panel { height: auto; max-height: none; overflow: visible; }
+  .sl-feed-inner { height: auto; }
+  .sl-feed-stream { flex: none; min-height: 230px; max-height: none; overflow: visible; padding-bottom: 14px; }
+  .sl-feed-empty { height: auto; min-height: 230px; }
   .sl-feed-head { padding-top: 0; }
-  .sl-feed-stream { padding-bottom: 14px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .sl-home-layout, .sl-feed-panel, .sl-feed-toggle, .sl-feed-backdrop { transition: none !important; }
