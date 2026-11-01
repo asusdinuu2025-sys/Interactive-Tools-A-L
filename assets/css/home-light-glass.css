@@ -414,3 +414,66 @@ html[data-theme="dark"] .home-pointer-glow {
   isolation: isolate;
   overflow: hidden;
 }
+
+
+/* Shared Study Room palette accents on the homepage.
+   Neutral light glass and the existing dark glass surfaces are intentionally preserved. */
+html[data-home-palette="midnight-blue"]{--home-accent:#4dd8f0;--home-accent-strong:#5b8cff}
+html[data-home-palette="charcoal"]{--home-accent:#d0d2d7;--home-accent-strong:#9699a1}
+html[data-home-palette="mint"]{--home-accent:#42a98b;--home-accent-strong:#287a64}
+html[data-home-palette="pinky"]{--home-accent:#ff8fc5;--home-accent-strong:#c83e80}
+html[data-home-palette="forest-green"]{--home-accent:#80d99c;--home-accent-strong:#287a49}
+html[data-home-palette="lavender"]{--home-accent:#d1b4ff;--home-accent-strong:#8254b5}
+html[data-home-palette="warm-sand"]{--home-accent:#e9bf6b;--home-accent-strong:#98651d}
+html[data-home-palette="ocean"]{--home-accent:#65d6e8;--home-accent-strong:#087e9c}
+
+.home-palette-select{
+  min-height:42px;
+  max-width:170px;
+  padding:9px 34px 9px 13px;
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:14px;
+  background:rgba(255,255,255,.055);
+  color:var(--text-primary,#eef2ff);
+  font:inherit;
+  font-size:.82rem;
+  font-weight:700;
+  cursor:pointer;
+  -webkit-backdrop-filter:blur(16px);
+  backdrop-filter:blur(16px);
+}
+.home-palette-select:focus-visible{outline:2px solid var(--home-accent);outline-offset:3px}
+.home-palette-select option{background:#182235;color:#eef2ff}
+html[data-theme="light"] .home-palette-select{
+  background:linear-gradient(135deg,rgba(255,255,255,.9),rgba(239,244,249,.72));
+  border-color:rgba(255,255,255,.96);
+  color:#263d51;
+  box-shadow:0 9px 24px rgba(45,67,90,.075),inset 0 1px 0 #fff;
+}
+html[data-theme="light"] .home-palette-select option{background:#fff;color:#263d51}
+
+html[data-home-palette] .subject-card:hover,
+html[data-home-palette] .study-tools-card:hover,
+html[data-home-palette] .telegram-card:hover,
+html[data-home-palette] .mcq-practice-card:hover,
+html[data-home-palette] .chemistry-resources-card:hover{
+  border-color:color-mix(in srgb,var(--home-accent) 34%,transparent)!important;
+}
+html[data-home-palette] .study-tools-card-cta,
+html[data-home-palette] .theme-toggle-icon,
+html[data-home-palette] .pwa-install-icon{
+  color:var(--home-accent-strong);
+}
+
+/* The pointer layer is independent of the existing 3D glass reflections. */
+.home-pointer-glow{
+  background:radial-gradient(
+    190px circle at var(--pointer-glow-x,50%) var(--pointer-glow-y,50%),
+    color-mix(in srgb,var(--home-accent,#4dd8f0) 24%,transparent),
+    color-mix(in srgb,var(--home-accent,#4dd8f0) 9%,transparent) 36%,
+    transparent 74%
+  )!important;
+  transition:opacity .24s ease!important;
+}
+.home-pointer-glow.is-idle{opacity:0!important;transition:opacity 1.05s ease!important}
+@media(prefers-reduced-motion:reduce){.home-pointer-glow{display:none!important}}
