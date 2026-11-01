@@ -25,9 +25,9 @@
       "purpose": "any"
     },
     {
-      "src": "/assets/icon/icon2.png",
+      "src": "/assets/icon/studylab-pwa.svg",
       "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     },
     {
