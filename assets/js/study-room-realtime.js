@@ -45,7 +45,7 @@
   function heartbeatIsFresh(row) {
     if (!row?.is_studying || !row.last_heartbeat_at) return false;
     const age = Date.now() - new Date(row.last_heartbeat_at).getTime();
-    return Number.isFinite(age) && age >= 0 && age < 90000;
+    return Number.isFinite(age) && age < 90000;
   }
   function pendingSeconds(row, boundary) {
     if (!heartbeatIsFresh(row)) return 0;
