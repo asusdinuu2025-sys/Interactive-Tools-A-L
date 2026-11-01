@@ -402,3 +402,15 @@ html[data-theme="dark"] .home-pointer-glow {
 @media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
   .home-pointer-glow { display: none !important; }
 }
+
+
+/* Ensure every homepage card is a stable clipping/stacking context for its glow. */
+.subject-card,
+.study-tools-card,
+.telegram-card,
+.mcq-practice-card,
+.chemistry-resources-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
