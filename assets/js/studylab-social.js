@@ -63,6 +63,25 @@
     status.hidden = !message;
   }
 
+  async function requireBasicProfile() {
+    const account = accountClient();
+    await account.ready;
+    const user = account.getUser();
+    if (!user?.id) {
+      const message = "Create your basic StudyLab profile before posting.";
+      showPostGateToast(message);
+      throw new Error(message);
+    }
+    const profile = await account.getProfile(true);
+    if (!profile?.display_name || /^Student\\d{4}$/.test(profile.display_name) ||
+        !profile?.username || !profile?.exam_year || !profile?.study_stream) {
+      const message = "Complete your basic StudyLab profile before posting.";
+      showPostGateToast(message);
+      throw new Error(message);
+    }
+    return user;
+  }
+
   function showPostGateToast(message) {
     const toastId = "studyLabSocialGateToast";
     document.getElementById(toastId)?.remove();
@@ -366,8 +385,9 @@
         if (!body) return;
         send.disabled = true;
         try {
+          const commenter = await requireBasicProfile();
           const { data: newComment, error } = await client.from("studylab_social_comments")
-            .insert({ post_id: post.id, author_id: currentUserId, body })
+            .insert({ post_id: post.id, author_id: commenter.id, body })
             .select("id").single();
           if (error) throw error;
           const moderation = await client.functions.invoke("studylab-social-moderate", {
@@ -549,20 +569,7 @@
     if (busy) return;
     try {
       const account = accountClient();
-      await account.ready;
-      const user = account.getUser();
-      if (!user?.id) {
-        const message = "Create your basic StudyLab profile before posting.";
-        showPostGateToast(message);
-        throw new Error(message);
-      }
-      const profile = await account.getProfile(true);
-      if (!profile?.display_name || /^Student\d{4}$/.test(profile.display_name) ||
-          !profile?.username || !profile?.exam_year || !profile?.study_stream) {
-        const message = "Complete your basic StudyLab profile before posting.";
-        showPostGateToast(message);
-        throw new Error(message);
-      }
+      const user = await requireBasicProfile();
       const files = [...(input.files || [])];
       validFiles(files);
       const body = textarea.value.trim();
