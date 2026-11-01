@@ -102,23 +102,13 @@
   const unread = root.querySelector("[data-chat-unread]");
   const inputWrap = root.querySelector(".study-chat-input-wrap");
 
-  function getChatSessionKey() {
-    const fallback = () => window.crypto && crypto.randomUUID
+  const sessionKey =
+    sessionStorage.getItem("studylab_chat_session") ||
+    (window.crypto && crypto.randomUUID
       ? crypto.randomUUID()
-      : "guest-" + Date.now() + "-" + Math.random().toString(36).slice(2);
-    try {
-      let value = sessionStorage.getItem("studylab_chat_session");
-      if (!value) {
-        value = fallback();
-        sessionStorage.setItem("studylab_chat_session", value);
-      }
-      return value;
-    } catch (_) {
-      // Storage can be restricted in some installed-browser contexts.
-      return fallback();
-    }
-  }
-  const sessionKey = getChatSessionKey();
+      : "guest-" + Date.now() + "-" + Math.random().toString(36).slice(2));
+
+  sessionStorage.setItem("studylab_chat_session", sessionKey);
 
   let client = null;
   let userId = null;
@@ -127,9 +117,6 @@
   let isOpen = false;
   let unreadCount = 0;
   let lastSentAt = 0;
-  let isSending = false;
-  let reconnecting = null;
-  let reconnectTimer = 0;
   let messagesById = new Map();
 
   async function loadChatIdentity() {
@@ -263,7 +250,6 @@
         !length ||
         length > CONFIG.maxLength ||
         !client ||
-        isSending ||
         Date.now() - lastSentAt < CONFIG.rateLimitMs;
     }
   }
@@ -330,15 +316,14 @@
       .subscribe(status => {
         if (status === "SUBSCRIBED") {
           setStatus(true, "Live • newest 100 messages");
-        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
-          setStatus(false, "Live connection interrupted • reconnecting…");
-          scheduleReconnect();
+        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          setStatus(false, "Live connection unavailable");
         }
       });
   }
 
   async function sendMessage() {
-    if (!client || !input || isSending) return;
+    if (!client || !input) return;
 
     const now = Date.now();
     if (now - lastSentAt < CONFIG.rateLimitMs) {
@@ -352,32 +337,28 @@
     }
 
     lastSentAt = now;
-    isSending = true;
     updateComposer();
 
-    try {
-      const { error } = await client
-        .from(CONFIG.table)
-        .insert({
-          message,
-          session_id: sessionKey,
-          user_id: userId,
-          nickname
-        });
+    const { error } = await client
+      .from(CONFIG.table)
+      .insert({
+        message,
+        session_id: sessionKey,
+        user_id: userId,
+        nickname
+      });
 
-      if (error) throw error;
-
-      input.value = "";
-      setStatus(true, "Message sent • live chat");
-    } catch (error) {
+    if (error) {
       console.warn("StudyLab Chat send:", error);
-      setStatus(false, navigator.onLine ? "Message could not be sent. Retry." : "Waiting for internet connection");
+      setStatus(false, "Message could not be sent");
       lastSentAt = 0;
-    } finally {
-      isSending = false;
       updateComposer();
-      window.setTimeout(updateComposer, CONFIG.rateLimitMs + 20);
+      return;
     }
+
+    input.value = "";
+    updateComposer();
+    window.setTimeout(updateComposer, CONFIG.rateLimitMs + 20);
   }
 
   function closeQuickAccess() {
@@ -458,60 +439,6 @@
     updateComposer();
   }
 
-  async function reconnectChat() {
-    if (!client || !navigator.onLine || document.visibilityState === "hidden") return;
-    if (reconnecting) return reconnecting;
-
-    reconnecting = (async () => {
-      try {
-        setStatus(false, "Reconnecting chat…");
-
-        // Refresh an expiring auth session before opening a new Realtime channel.
-        const { data: sessionData, error: sessionError } = await client.auth.getSession();
-        if (sessionError) throw sessionError;
-        let session = sessionData?.session;
-        if (!session) {
-          const { data, error } = await client.auth.signInAnonymously();
-          if (error) throw error;
-          session = data?.session;
-        } else if (session.expires_at && session.expires_at * 1000 < Date.now() + 60000) {
-          const { data, error } = await client.auth.refreshSession();
-          if (error) throw error;
-          session = data?.session || session;
-        }
-        if (!session?.user?.id) throw new Error("Student chat session is unavailable.");
-        userId = session.user.id;
-
-        if (channel) {
-          const oldChannel = channel;
-          channel = null;
-          await client.removeChannel(oldChannel);
-        }
-
-        await loadMessages();
-        subscribe();
-      } catch (error) {
-        console.warn("StudyLab Chat reconnect:", error);
-        setStatus(false, navigator.onLine ? "Chat connection unavailable" : "Waiting for internet connection");
-      }
-    })().finally(() => { reconnecting = null; });
-
-    return reconnecting;
-  }
-
-  function scheduleReconnect() {
-    window.clearTimeout(reconnectTimer);
-    reconnectTimer = window.setTimeout(reconnectChat, 350);
-  }
-
-  window.addEventListener("online", scheduleReconnect);
-  window.addEventListener("offline", () => setStatus(false, "Waiting for internet connection"));
-  window.addEventListener("pageshow", scheduleReconnect);
-  window.addEventListener("focus", scheduleReconnect);
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") scheduleReconnect();
-  });
-
   async function boot() {
     setupUI();
 
@@ -532,12 +459,8 @@
         CONFIG.supabasePublishableKey
       );
 
-      if (!navigator.onLine) {
-        setStatus(false, "Waiting for internet connection");
-      } else {
-        await loadMessages();
-        subscribe();
-      }
+      await loadMessages();
+      subscribe();
 
     } catch (error) {
       console.warn("StudyLab Chat:", error);
