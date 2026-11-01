@@ -366,9 +366,9 @@
       const user = account.getUser();
       const profile = await account.getProfile(true);
       if (!user?.id) throw new Error("Student account not ready.");
-      if (!profile?.profile_completed_at || !profile?.display_name || !profile?.username ||
-          !profile?.school || !profile?.phone || !profile?.gender) {
-        throw new Error("Complete your StudyLab profile before posting.");
+      if (!profile?.display_name || /^Student\d{4}$/.test(profile.display_name) ||
+          !profile?.username || !profile?.exam_year || !profile?.study_stream) {
+        throw new Error("Complete your basic StudyLab profile before posting.");
       }
       const files = [...(input.files || [])];
       validFiles(files);
