@@ -733,3 +733,32 @@ html[data-theme="light"] .sl-feed-panel[data-size="full"] .sl-feed-compose-rail 
   .sl-feed-panel[data-size="full"] .sl-feed-compose-rail { max-height:36%; }
   .sl-feed-panel[data-size="full"] .sl-feed-compose textarea { min-height:58px; }
 }
+
+
+/* Slightly denser post cards and calmer image sizing in compact and half views.
+   Keep the gallery grid and contain behavior so photos are never distorted. */
+.sl-feed-panel[data-size="compact"] .sl-feed-stream,
+.sl-feed-panel[data-size="half"] .sl-feed-stream {
+  padding:11px 3px;
+}
+.sl-feed-panel[data-size="compact"] .sl-feed-post,
+.sl-feed-panel[data-size="half"] .sl-feed-post {
+  padding:12px 13px;
+  margin-bottom:10px;
+}
+.sl-feed-panel[data-size="compact"] .sl-feed-gallery,
+.sl-feed-panel[data-size="half"] .sl-feed-gallery {
+  gap:5px;
+  margin-top:8px;
+}
+.sl-feed-panel[data-size="compact"] .sl-feed-gallery img,
+.sl-feed-panel[data-size="half"] .sl-feed-gallery img {
+  max-height:300px;
+  aspect-ratio:4/3;
+  object-fit:contain;
+}
+.sl-feed-panel[data-size="compact"] .sl-feed-gallery[data-count="1"] img,
+.sl-feed-panel[data-size="half"] .sl-feed-gallery[data-count="1"] img {
+  max-height:360px;
+  aspect-ratio:auto;
+}
