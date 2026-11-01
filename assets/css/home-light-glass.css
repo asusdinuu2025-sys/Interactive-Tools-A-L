@@ -1,0 +1,103 @@
+/* Homepage-only light appearance: translucent blue glass and soft acrylic depth. */
+html[data-theme="light"] body {
+  background:
+    radial-gradient(ellipse at 8% 4%, rgba(116, 197, 255, .34), transparent 38%),
+    radial-gradient(ellipse at 92% 12%, rgba(163, 190, 255, .28), transparent 34%),
+    linear-gradient(135deg, #edf7ff 0%, #e7f3ff 46%, #f0f2ff 100%) !important;
+  background-attachment: fixed !important;
+}
+
+html[data-theme="light"] body::before {
+  background: rgba(80, 174, 255, .20) !important;
+  filter: blur(115px) !important;
+}
+
+html[data-theme="light"] body::after {
+  background: rgba(130, 151, 255, .17) !important;
+  filter: blur(120px) !important;
+}
+
+html[data-theme="light"] .site-header,
+html[data-theme="light"] .student-counter,
+html[data-theme="light"] .subject-card,
+html[data-theme="light"] .site-footer,
+html[data-theme="light"] .telegram-card,
+html[data-theme="light"] .study-findbar {
+  -webkit-backdrop-filter: blur(30px) saturate(165%) !important;
+  backdrop-filter: blur(30px) saturate(165%) !important;
+  border-color: rgba(255, 255, 255, .76) !important;
+  box-shadow:
+    0 22px 58px rgba(47, 105, 155, .105),
+    inset 0 1px 0 rgba(255, 255, 255, .94),
+    inset 0 0 0 1px rgba(135, 190, 235, .10) !important;
+}
+
+html[data-theme="light"] .site-header {
+  background: linear-gradient(120deg, rgba(255,255,255,.66), rgba(221,241,255,.48)) !important;
+}
+
+html[data-theme="light"] .student-counter {
+  background: linear-gradient(135deg, rgba(188,229,255,.56), rgba(218,222,255,.48)) !important;
+}
+
+html[data-theme="light"] .subject-card {
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.67), rgba(222,240,255,.43)) !important;
+  color: #183550 !important;
+}
+
+html[data-theme="light"] .subject-card:hover {
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.82), rgba(218,238,255,.62)) !important;
+  border-color: rgba(119, 185, 232, .52) !important;
+  box-shadow:
+    0 28px 68px rgba(47, 105, 155, .15),
+    inset 0 1px 0 rgba(255,255,255,.98),
+    0 0 26px rgba(104, 183, 245, .12) !important;
+}
+
+html[data-theme="light"] .site-footer {
+  background: linear-gradient(120deg, rgba(255,255,255,.56), rgba(224,240,255,.42)) !important;
+}
+
+html[data-theme="light"] .telegram-card {
+  background:
+    linear-gradient(125deg, rgba(199,235,255,.66), rgba(226,224,255,.48)),
+    rgba(255,255,255,.48) !important;
+  border-color: rgba(140, 195, 235, .48) !important;
+}
+
+html[data-theme="light"] .study-findbar {
+  background: rgba(255,255,255,.54) !important;
+}
+
+html[data-theme="light"] .theme-toggle,
+html[data-theme="light"] .pwa-install-button {
+  -webkit-backdrop-filter: blur(22px) saturate(165%) !important;
+  backdrop-filter: blur(22px) saturate(165%) !important;
+  background: linear-gradient(135deg, rgba(255,255,255,.72), rgba(211,235,255,.54)) !important;
+  border-color: rgba(255,255,255,.86) !important;
+  box-shadow:
+    0 10px 28px rgba(47,105,155,.10),
+    inset 0 1px 0 rgba(255,255,255,.98) !important;
+}
+
+html[data-theme="light"] .subject-card h2,
+html[data-theme="light"] .subject-card p,
+html[data-theme="light"] .subject-card .card-cta,
+html[data-theme="light"] .site-header,
+html[data-theme="light"] .site-footer {
+  color: #183550;
+}
+
+html[data-theme="light"] .science-symbol {
+  color: rgba(35, 112, 170, .12) !important;
+  text-shadow: 0 0 22px rgba(65, 150, 215, .10) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme="light"] .subject-card,
+  html[data-theme="light"] .theme-toggle {
+    transition: none !important;
+  }
+}
