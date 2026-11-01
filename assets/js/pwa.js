@@ -1,4 +1,4 @@
-/* StudyLab PWA installation and privacy-conscious installation analytics. */
+/* StudyLab PWA installation and minimal Yes/No installation status. */
 (function () {
   "use strict";
 
@@ -9,48 +9,14 @@
   const closeButton = document.getElementById("pwaInstallHelpClose");
   if (!button) return;
 
-  const INSTALL_ID_KEY = "studylabPwaInstallationIdV1";
-  const INSTALLED_AT_KEY = "studylabPwaInstalledAtV1";
   let deferredPrompt = null;
-  let lastRecordPromise = null;
+  let markingPromise = null;
 
   function isStandalone() {
     return window.matchMedia("(display-mode: standalone)").matches ||
       window.matchMedia("(display-mode: minimal-ui)").matches ||
       navigator.standalone === true ||
       document.referrer.startsWith("android-app://");
-  }
-
-  function createUuid() {
-    if (window.crypto?.randomUUID) return window.crypto.randomUUID();
-    const bytes = new Uint8Array(16);
-    window.crypto.getRandomValues(bytes);
-    bytes[6] = (bytes[6] & 0x0f) | 0x40;
-    bytes[8] = (bytes[8] & 0x3f) | 0x80;
-    const hex = [...bytes].map(value => value.toString(16).padStart(2, "0")).join("");
-    return hex.slice(0, 8) + "-" + hex.slice(8, 12) + "-" + hex.slice(12, 16) + "-" +
-      hex.slice(16, 20) + "-" + hex.slice(20);
-  }
-
-  function getInstallationIdentity() {
-    let installationId = "";
-    let installedAt = "";
-    try {
-      installationId = localStorage.getItem(INSTALL_ID_KEY) || "";
-      if (!/^[0-9a-f-]{36}$/i.test(installationId)) {
-        installationId = createUuid();
-        localStorage.setItem(INSTALL_ID_KEY, installationId);
-      }
-      installedAt = localStorage.getItem(INSTALLED_AT_KEY) || "";
-      if (!installedAt || Number.isNaN(Date.parse(installedAt))) {
-        installedAt = new Date().toISOString();
-        localStorage.setItem(INSTALLED_AT_KEY, installedAt);
-      }
-    } catch (_) {
-      installationId = createUuid();
-      installedAt = new Date().toISOString();
-    }
-    return { installationId, installedAt };
   }
 
   function getPlatform() {
@@ -73,36 +39,30 @@
     return "Other";
   }
 
-  async function recordInstallation() {
-    if (lastRecordPromise) return lastRecordPromise;
-    lastRecordPromise = (async function () {
+  async function markInstalled() {
+    if (markingPromise) return markingPromise;
+    markingPromise = (async function () {
       const account = window.StudyLabAccount;
       if (!account?.ready || !account?.client) return;
       await account.ready;
       const user = account.getUser?.();
       if (!user?.id) return;
 
-      const identity = getInstallationIdentity();
-      const now = new Date().toISOString();
       const { error } = await account.client
-        .from("studylab_pwa_installations")
-        .upsert({
-          user_id: user.id,
-          installation_id: identity.installationId,
-          platform: getPlatform(),
-          browser: getBrowser(),
-          installed_at: identity.installedAt,
-          last_opened_at: now,
-          updated_at: now
-        }, { onConflict: "user_id,installation_id" });
+        .from("studylab_profiles")
+        .update({
+          pwa_installed: "Yes",
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", user.id);
 
       if (error) throw error;
     })().catch(error => {
-      console.warn("StudyLab PWA installation analytics:", error);
+      console.warn("StudyLab PWA installation status:", error);
     }).finally(() => {
-      lastRecordPromise = null;
+      markingPromise = null;
     });
-    return lastRecordPromise;
+    return markingPromise;
   }
 
   function hideInstallButton() {
@@ -156,11 +116,7 @@
     deferredPrompt = null;
     try {
       await promptEvent.prompt();
-      const choice = await promptEvent.userChoice;
-      if (choice?.outcome === "accepted") {
-        getInstallationIdentity();
-        await recordInstallation();
-      }
+      await promptEvent.userChoice;
     } catch (error) {
       console.warn("StudyLab PWA install prompt:", error);
       showInstallHelp();
@@ -174,15 +130,13 @@
   });
 
   window.addEventListener("appinstalled", function () {
-    getInstallationIdentity();
-    recordInstallation();
+    markInstalled();
     hideInstallButton();
   });
 
   if (isStandalone()) {
     hideInstallButton();
-    getInstallationIdentity();
-    recordInstallation();
+    markInstalled();
   }
 
   if (closeButton && dialog) {
@@ -194,7 +148,7 @@
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", function () {
-      navigator.serviceWorker.register("/service-worker.js?v=1.0.0", {
+      navigator.serviceWorker.register("/service-worker.js?v=1.0.1", {
         scope: "/",
         updateViaCache: "none"
       }).catch(error => {
