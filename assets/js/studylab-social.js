@@ -151,6 +151,25 @@
     if (text !== undefined) node.textContent = text;
     return node;
   }
+  function setButtonBusy(button, label) {
+    const original = button.textContent;
+    button.disabled = true;
+    button.classList.add("is-action-pending");
+    button.replaceChildren(make("span", "sl-feed-action-spinner"));
+    button.append(document.createTextNode(label));
+    return () => {
+      button.disabled = false;
+      button.classList.remove("is-action-pending");
+      button.textContent = original;
+    };
+  }
+  function adjustCommentCount(card, delta) {
+    const counter = card.querySelector("[data-comment-count]");
+    if (!counter) return;
+    const count = Math.max(0, Number(counter.dataset.commentCount || 0) + delta);
+    counter.dataset.commentCount = String(count);
+    counter.textContent = "Comments · " + count;
+  }
   function animateOut(node, className) {
     if (!node?.isConnected) return Promise.resolve();
     node.classList.add(className);
@@ -290,7 +309,7 @@
     return (data || []).filter(post => post.status === "approved");
   }
   function renderPost(client, post, currentUserId, likesByPost, commentCountsByPost, signedImageUrls) {
-    const card = make("article", "sl-feed-post");
+    const card = make("article", "sl-feed-post is-entering");
     card.dataset.postId = post.id;
     card.dataset.authorId = post.author_id;
     card.dataset.authorUsername = post.author_username || "student";
@@ -421,14 +440,16 @@
     if (post.status === "approved") {
       const postLikes = likesByPost.get(post.id) || [];
       const mine = postLikes.some(row => row.user_id === currentUserId);
-      const count = postLikes.length;
-      const like = make("button", "sl-feed-action", (mine ? "♥ Liked" : "♡ Like") + " · " + count);
+      let liked = mine;
+      let likeCount = postLikes.length;
+      const like = make("button", "sl-feed-action", (liked ? "♥ Liked" : "♡ Like") + " · " + likeCount);
       like.type = "button";
-      like.setAttribute("aria-pressed", String(mine));
+      like.setAttribute("aria-pressed", String(liked));
       like.addEventListener("click", async () => {
-        like.disabled = true;
+        if (like.disabled) return;
+        const restore = setButtonBusy(like, "Updating…");
         try {
-          if (mine) {
+          if (liked) {
             const { error } = await client.from("studylab_social_likes").delete()
               .eq("post_id", post.id).eq("user_id", currentUserId);
             if (error) throw error;
@@ -437,14 +458,20 @@
               .insert({ post_id: post.id, user_id: currentUserId });
             if (error) throw error;
           }
-          await loadFeed();
+          liked = !liked;
+          likeCount = Math.max(0, likeCount + (liked ? 1 : -1));
+          restore();
+          like.textContent = (liked ? "♥ Liked" : "♡ Like") + " · " + likeCount;
+          like.setAttribute("aria-pressed", String(liked));
+          like.classList.toggle("is-liked", liked);
         } catch (error) {
+          restore();
           setStatus(error.message || "Could not update like.", true);
-          like.disabled = false;
         }
       });
       const commentsButton = make("button", "sl-feed-action", "Comments · " + (commentCountsByPost.get(post.id) || 0));
       commentsButton.type = "button";
+      commentsButton.dataset.commentCount = String(commentCountsByPost.get(post.id) || 0);
       commentsButton.addEventListener("click", () => toggleComments(card, post, client, currentUserId));
       actions.append(like, commentsButton);
     }
@@ -476,7 +503,7 @@
           setStatus(cleanupWarning ? "Post deleted. Some image storage may need cleanup." :
             (deletingAnotherStudentPost ? "Student post deleted." : "Your post was deleted."));
           await animateOut(card, "is-removing");
-          await loadFeed();
+          if (!stream.querySelector(".sl-feed-post")) emptyState("No posts yet");
         } catch (error) {
           setStatus(error.message || "Could not delete this post.", true);
           removePost.disabled = false;
@@ -525,7 +552,8 @@
           removeComment.addEventListener("click", async () => {
             if (!window.confirm("Delete this comment permanently? This cannot be undone.")) return;
             commentMenu.open = false;
-            removeComment.disabled = true;
+            const restore = setButtonBusy(removeComment, "Deleting…");
+            item.classList.add("is-action-pending");
             try {
               let deletion = client.from("studylab_social_comments").delete().eq("id", comment.id);
               if (!isAdmin) deletion = deletion.eq("author_id", currentUserId);
@@ -533,12 +561,16 @@
               if (deleteError) throw deleteError;
               if (!deleted) throw new Error("This comment could not be deleted. Check your permissions.");
               setStatus("Comment deleted.");
+              adjustCommentCount(card, -1);
               await animateOut(item, "is-removing");
-              await toggleComments(card, post, client, currentUserId);
-              await loadFeed();
+              if (!area.querySelector(".sl-feed-comment")) {
+                const empty = make("p", "sl-feed-loading", "No comments yet.");
+                area.insertBefore(empty, area.querySelector(".sl-feed-comment-form"));
+              }
             } catch (deleteError) {
+              restore();
+              item.classList.remove("is-action-pending");
               setStatus(deleteError.message || "Could not delete comment.", true);
-              removeComment.disabled = false;
             }
           });
           menuPanel.append(removeComment);
@@ -562,19 +594,22 @@
         event.preventDefault();
         const body = field.value.trim();
         if (!body) return;
-        send.disabled = true;
+        const restore = setButtonBusy(send, "Sending…");
+        field.disabled = true;
         try {
           const commenter = await requireBasicProfile();
           const { error } = await client.from("studylab_social_comments")
             .insert({ post_id: post.id, author_id: commenter.id, body });
           if (error) throw error;
+          adjustCommentCount(card, 1);
           field.value = "";
           area.remove();
           await toggleComments(card, post, client, currentUserId);
           setStatus("Comment published.");
         } catch (error) {
+          restore();
+          field.disabled = false;
           setStatus(error.message || "Could not submit comment.", true);
-          send.disabled = false;
         }
       });
       area.append(commentForm);
@@ -609,11 +644,14 @@
     }
   }
   let feedLoadCount = 0;
+  let lastFeedLoadedAt = 0;
   async function loadFeed() {
+    if (feedLoadCount > 0) return;
     feedLoadCount++;
     const refreshButton = panel.querySelector(".sl-feed-refresh");
     refreshButton?.classList.add("is-refreshing");
     refreshButton?.setAttribute("aria-busy", "true");
+    stream.classList.add("is-loading");
     if (!feedHasLoaded) showSkeletons();
     try {
       const account = accountClient();
@@ -692,9 +730,11 @@
         note.textContent = error.message || "Could not connect to StudyLab Social. Please try again.";
       }
       feedHasLoaded = true;
+      lastFeedLoadedAt = Date.now();
     } finally {
       feedLoadCount = Math.max(0, feedLoadCount - 1);
       if (feedLoadCount === 0) {
+        stream.classList.remove("is-loading");
         refreshButton?.classList.remove("is-refreshing");
         refreshButton?.removeAttribute("aria-busy");
       }
@@ -816,6 +856,8 @@
   window.addEventListener("studylab-social-refresh", () => loadFeed());
   panel.querySelector("[data-feed-close]")?.addEventListener("click", () => {});
   window.addEventListener("focus", () => {
-    if (document.visibilityState === "visible" && panel.getAttribute("aria-hidden") === "false") loadFeed();
+    if (document.visibilityState === "visible" &&
+        panel.getAttribute("aria-hidden") === "false" &&
+        Date.now() - lastFeedLoadedAt > 90000) loadFeed();
   });
 })();
