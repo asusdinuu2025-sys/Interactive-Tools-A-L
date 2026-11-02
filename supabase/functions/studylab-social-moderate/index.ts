@@ -17,7 +17,7 @@ type ContentType = "post" | "comment";
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return json({ error: "POST required" }, 405);
-  if (!SUPABASE_URL || !SERVICE_ROLE_KEY || !OPENAI_API_KEY) {
+  if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
     return json({ error: "Moderation service is not configured" }, 503);
   }
 
@@ -67,14 +67,14 @@ Deno.serve(async (req: Request) => {
       text = comment.body || "";
     }
 
-    // Never transmit student-uploaded images to the external moderation API.
-    // Image-containing posts always remain pending for a human admin to inspect.
-    const imageReviewRequired = contentType === "post" && imageCount > 0;
+    // Uploaded images are never sent to the external text moderation API.
+    // Image-only posts publish immediately; captions still pass through text moderation.
+    const imageReviewRequired = false;
     let flagged: boolean | null = null;
     let aiChecked = false;
 
-    // Image-only posts have no text to screen. Keep them pending for manual review.
     if (text.trim()) {
+      if (!OPENAI_API_KEY) return json({ error: "Text moderation is not configured" }, 503);
       const response = await fetch("https://api.openai.com/v1/moderations", {
         method: "POST",
         headers: {
@@ -97,7 +97,8 @@ Deno.serve(async (req: Request) => {
       aiChecked = true;
     }
 
-    const autoApprove = aiChecked && flagged === false && !imageReviewRequired;
+    const imageOnlyPost = contentType === "post" && imageCount > 0 && !text.trim();
+    const autoApprove = imageOnlyPost || (aiChecked && flagged === false);
     let finalStatus = "pending";
 
     if (autoApprove) {
