@@ -11,6 +11,50 @@ ALTER TABLE public.study_room_members
       (extract(isodow FROM timezone('Asia/Colombo', now()))::integer - 1)),
   ADD COLUMN IF NOT EXISTS session_expired_at timestamptz;
 
+-- Backfill the currently uninterrupted active segment for rows already studying
+-- when this migration is installed. Older paused portions cannot be attributed
+-- safely from the aggregate counters and are intentionally not guessed.
+WITH clock AS (
+  SELECT
+    timezone('Asia/Colombo', now())::date AS local_day,
+    public.study_room_local_week_start(timezone('Asia/Colombo', now())::date) AS local_week,
+    (timezone('Asia/Colombo', now())::date::timestamp AT TIME ZONE 'Asia/Colombo') AS day_start,
+    (public.study_room_local_week_start(timezone('Asia/Colombo', now())::date)::timestamp AT TIME ZONE 'Asia/Colombo') AS week_start_ts
+),
+active_run AS (
+  SELECT
+    m.user_id,
+    c.local_day,
+    c.local_week,
+    greatest(0, floor(extract(epoch FROM (
+      m.last_heartbeat_at - greatest(m.session_started_at, c.day_start)
+    )))::integer) AS run_today,
+    greatest(0, floor(extract(epoch FROM (
+      m.last_heartbeat_at - greatest(m.session_started_at, c.week_start_ts)
+    )))::integer) AS run_week
+  FROM public.study_room_members AS m
+  CROSS JOIN clock AS c
+  WHERE m.is_studying = true
+    AND m.last_heartbeat_at IS NOT NULL
+    AND m.session_started_at IS NOT NULL
+)
+UPDATE public.study_room_members AS m
+SET
+  session_today_seconds = CASE
+    WHEN m.today_date = active_run.local_day
+      THEN least(coalesce(m.today_seconds, 0), active_run.run_today)
+    ELSE 0
+  END,
+  session_today_date = active_run.local_day,
+  session_week_seconds = CASE
+    WHEN m.week_start = active_run.local_week
+      THEN least(coalesce(m.week_seconds, 0), active_run.run_week)
+    ELSE 0
+  END,
+  session_week_start = active_run.local_week
+FROM active_run
+WHERE m.user_id = active_run.user_id;
+
 -- Keep the current daily/weekly rank totals visible, but hide the current session's
 -- contribution immediately when its heartbeat has been absent for 12 hours.
 -- Crucially, do not zero session_elapsed_seconds just because the date changed.
