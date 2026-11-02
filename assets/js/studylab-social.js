@@ -509,10 +509,20 @@
         header.append(commentAvatar,make("strong", "", comment.author_display_name || "Student"));
         item.append(header, make("p", "", comment.body));
         if (comment.author_id === currentUserId || isAdmin) {
-          const removeComment = make("button", "sl-feed-action sl-feed-delete-comment", "Delete");
+          const commentMenu = document.createElement("details");
+          commentMenu.className = "sl-feed-comment-menu";
+          commentMenu.setAttribute("name", "sl-social-comment-menu");
+          const menuToggle = document.createElement("summary");
+          menuToggle.className = "sl-feed-comment-menu-toggle";
+          menuToggle.setAttribute("aria-label", "Comment options");
+          menuToggle.setAttribute("title", "Comment options");
+          menuToggle.textContent = "⋯";
+          const menuPanel = make("div", "sl-feed-comment-menu-panel");
+          const removeComment = make("button", "sl-feed-comment-menu-delete sl-feed-delete-comment", "Delete");
           removeComment.type = "button";
           removeComment.addEventListener("click", async () => {
             if (!window.confirm("Delete this comment permanently? This cannot be undone.")) return;
+            commentMenu.open = false;
             removeComment.disabled = true;
             try {
               let deletion = client.from("studylab_social_comments").delete().eq("id", comment.id);
@@ -529,7 +539,9 @@
               removeComment.disabled = false;
             }
           });
-          item.append(removeComment);
+          menuPanel.append(removeComment);
+          commentMenu.append(menuToggle, menuPanel);
+          header.append(commentMenu);
         }
         area.append(item);
       });
