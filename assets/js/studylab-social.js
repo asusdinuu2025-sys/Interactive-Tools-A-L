@@ -702,6 +702,12 @@
         throw uploadError;
       }
       setStatus("Publishing your post…");
+      const { data: published, error: publishError } = await account.client.rpc(
+        "studylab_social_publish_own_post",
+        { p_post_id: post.id }
+      );
+      if (publishError) throw publishError;
+      if (!published) throw new Error("Your post could not be published. Please try again.");
       textarea.value = "";
       input.value = "";
       fileCount.textContent = "No photos selected";
