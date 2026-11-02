@@ -484,6 +484,32 @@
     }
     if (!list.childElementCount) list.append(make("p", "sl-feed-loading", "Nothing is waiting for review."));
   }
+  function renderCommunityProfiles(posts) {
+    const list = panel.querySelector(".sl-feed-member-list");
+    if (!list) return;
+    const faces = [":)", ";D", ":D", "☺", "✦", "★", "☀", "♡", "⚡", "🌈", "✨", "☻"];
+    const unique = new Map();
+    for (const post of posts) {
+      if (post.status !== "approved" || !post.author_id || unique.has(post.author_id)) continue;
+      unique.set(post.author_id, post);
+    }
+    const members = [...unique.values()].slice(0, 8);
+    list.replaceChildren();
+    if (!members.length) {
+      list.append(make("p", "sl-feed-members-empty", "Student profiles will appear here as they post."));
+      return;
+    }
+    for (const member of members) {
+      const row = make("div", "sl-feed-member");
+      const avatar = make("span", "sl-feed-member-avatar", faces[hashNumber(member.author_id) % faces.length]);
+      avatar.style.setProperty("--sl-member-hue", String(hashNumber(member.author_id + "profile") % 360));
+      const copy = make("span", "sl-feed-member-copy");
+      copy.append(make("strong", "", member.author_display_name || "Student"));
+      copy.append(make("small", "", "@" + (member.author_username || "student")));
+      row.append(avatar, copy);
+      list.append(row);
+    }
+  }
   async function loadFeed() {
     if (!feedHasLoaded) showSkeletons();
     try {
@@ -510,6 +536,7 @@
         adminBadge?.remove();
       }
       const posts = await getPostRows(account.client, user.id);
+      renderCommunityProfiles(posts);
       const approvedIds = posts.filter(post => post.status === "approved").map(post => post.id);
       const likesByPost = new Map();
       if (approvedIds.length) {
