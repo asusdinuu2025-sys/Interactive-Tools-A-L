@@ -1690,3 +1690,54 @@ html:not([data-theme="light"]) .sl-feed-panel[data-size="full"] .sl-feed-stream 
   }
   .sl-feed-panel[data-size="full"] .sl-feed-right-rail { display: none !important; }
 }
+
+
+/* Final phone-only Social refinements: collapse the composer on downward feed scroll
+   and keep the refresh control precisely centred in its hit area. */
+@media (max-width: 600px) {
+  .sl-feed-panel[data-size="full"] .sl-feed-left-rail {
+    transition: max-height .22s ease, flex-basis .22s ease, opacity .18s ease, padding .22s ease;
+  }
+  .sl-feed-panel[data-size="full"].is-feed-scrolled > .sl-feed-stage {
+    gap: 0 !important;
+  }
+  .sl-feed-panel[data-size="full"].is-feed-scrolled .sl-feed-left-rail {
+    flex-basis: 0 !important;
+    max-height: 0 !important;
+    min-height: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    opacity: 0;
+    overflow: hidden !important;
+    pointer-events: none;
+  }
+  .sl-feed-panel[data-size="full"] .sl-feed-head-actions {
+    display: flex !important;
+    align-items: center !important;
+    align-self: center !important;
+    justify-content: flex-end !important;
+    min-width: 0;
+    height: 100%;
+    flex: 0 0 auto !important;
+    box-sizing: border-box;
+  }
+  .sl-feed-panel[data-size="full"] .sl-feed-refresh {
+    position: relative !important;
+    display: grid !important;
+    place-items: center !important;
+    box-sizing: border-box !important;
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    max-width: 28px !important;
+    flex: 0 0 28px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    transform-origin: center center;
+  }
+}
