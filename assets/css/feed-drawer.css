@@ -1527,3 +1527,12 @@ html:not([data-theme="light"]) .sl-feed-panel[data-size="full"] .sl-feed-post {
 .sl-feed-panel[data-size="full"] .sl-feed-stream {
   padding-top: 0 !important;
 }
+
+
+/* Dark Social performance: skip off-screen post rendering without changing visible styling. */
+@supports (content-visibility: auto) {
+  html:not([data-theme="light"]) .sl-feed-panel[data-size="full"] .sl-feed-post {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 320px;
+  }
+}
