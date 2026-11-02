@@ -1501,3 +1501,10 @@ html[data-theme="light"] .sl-feed-gallery-arrow {
   }
   .sl-feed-panel[data-size="full"] > .sl-feed-stage { gap:10px !important; }
 }
+
+
+/* Improve social post readability without changing the glass UI. */
+.sl-feed-panel[data-size="full"] .sl-feed-post-body {
+  font-size: 15px;
+  font-weight: 600;
+}
