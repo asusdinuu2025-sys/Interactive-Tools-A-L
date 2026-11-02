@@ -376,9 +376,9 @@ html[data-theme="light"] .science-symbol {
   opacity: 0;
   background: radial-gradient(
     190px circle at var(--home-glow-x, 50%) var(--home-glow-y, 50%),
-    rgba(105,190,245,.17),
-    rgba(105,190,245,.065) 34%,
-    transparent 72%
+    color-mix(in srgb, var(--home-accent, #4dd8f0) 26%, transparent),
+    color-mix(in srgb, var(--home-accent, #4dd8f0) 10%, transparent) 38%,
+    transparent 74%
   );
   transition: opacity .22s ease;
 }
@@ -391,6 +391,10 @@ html[data-theme="dark"] .home-pointer-glow {
   );
 }
 .home-pointer-glow.is-visible { opacity: 1; }
+.home-pointer-glow.is-idle { opacity: 0; transition: opacity 1.05s ease; }
+@media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .home-pointer-glow { display: none !important; }
+}
 .subject-card > :not(.home-pointer-glow),
 .study-tools-card > :not(.home-pointer-glow),
 .telegram-card > :not(.home-pointer-glow),
@@ -399,9 +403,7 @@ html[data-theme="dark"] .home-pointer-glow {
   position: relative;
   z-index: 2;
 }
-@media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
-  .home-pointer-glow { display: none !important; }
-}
+
 
 
 /* Ensure every homepage card is a stable clipping/stacking context for its glow. */
@@ -415,21 +417,6 @@ html[data-theme="dark"] .home-pointer-glow {
   overflow: hidden;
 }
 
-
-
-.home-pointer-glow{
-  position:absolute !important;
-  inset:0 !important;
-  display:block !important;
-  z-index:1 !important;
-  pointer-events:none !important;
-  border-radius:inherit;
-  background:radial-gradient(190px circle at var(--home-glow-x,50%) var(--home-glow-y,50%),
-    color-mix(in srgb,var(--home-accent,#4dd8f0) 26%,transparent),
-    color-mix(in srgb,var(--home-accent,#4dd8f0) 10%,transparent) 38%,transparent 74%);
-  transition:opacity .24s ease;
-}
-.home-pointer-glow.is-idle{opacity:0;transition:opacity 1.05s ease}
 
 
 /* Mobile-only homepage alignment correction. Tablet and desktop rules remain unchanged. */

@@ -215,67 +215,20 @@ html[data-theme="light"] .profile-gender-female.is-selected { background: #fff0f
 .room-avatar-female { color: #ff66c4; background: rgba(255, 75, 180, .12); border: 1px solid rgba(255, 102, 196, .25); }
 html[data-theme="light"] .room-avatar-male { color: #087ac4; background: #eaf6ff; border-color: #b6dfff; }
 html[data-theme="light"] .room-avatar-female { color: #c0278d; background: #fff0f8; border-color: #f6c1e1; }
-@media (min-width: 721px) {
-  .study-chat-button { width: 46px !important; min-width: 46px !important; padding: 0 !important; gap: 0 !important; }
-  .study-chat-button > span:not(.study-chat-button-icon):not(.study-chat-unread) { display: none !important; }
-  .study-room-page .study-chat-button { right: 144px !important; }
-}
-
-
-/* Ensure the Live Study Room chat launcher remains visible beside Quick Access. */
-body.study-room-page .study-chat-button {
-  position: fixed !important;
-  right: 144px !important;
-  bottom: 20px !important;
-  z-index: 960 !important;
-  display: inline-flex !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-@media (max-width: 720px) {
-  body.study-room-page .study-chat-button {
-    right: 74px !important;
-    bottom: 12px !important;
-    width: 46px !important;
-    min-width: 46px !important;
-    height: 46px !important;
-    min-height: 46px !important;
-    padding: 0 !important;
-    justify-content: center !important;
-    gap: 0 !important;
-  }
-  body.study-room-page .study-chat-button > span:not(.study-chat-button-icon):not(.study-chat-unread) {
-    display: none !important;
-  }
-}
-
-
-/* Study Room: keep the chat launcher visible once chat.js injects it. */
+/* Live Study Room chat launcher: one source of truth for its labelled desktop/mobile layout. */
 body.study-room-page .study-chat {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
 }
 body.study-room-page .study-chat-button {
+  position: fixed !important;
+  right: 20px !important;
+  bottom: 20px !important;
+  z-index: 1200 !important;
   display: inline-flex !important;
   visibility: visible !important;
   opacity: 1 !important;
-  position: fixed !important;
-  right: 144px !important;
-  bottom: 20px !important;
-  z-index: 1200 !important;
-}
-@media (max-width: 720px) {
-  body.study-room-page .study-chat-button {
-    right: 74px !important;
-    bottom: 12px !important;
-  }
-}
-
-
-/* Study Room: show both the chat icon and its text label on desktop and mobile. */
-body.study-room-page .study-chat-button {
-  right: 20px !important;
   width: auto !important;
   min-width: 104px !important;
   height: 46px !important;
@@ -301,19 +254,10 @@ body.study-room-page .study-chat-button .study-chat-button-icon svg {
 @media (max-width: 720px) {
   body.study-room-page .study-chat-button {
     right: 12px !important;
-    width: auto !important;
-    min-width: 104px !important;
-    height: 46px !important;
-    min-height: 46px !important;
-    padding: 0 14px !important;
-    gap: 8px !important;
     bottom: 12px !important;
-  }
-  body.study-room-page .study-chat-button > span:not(.study-chat-button-icon):not(.study-chat-unread) {
-    display: inline !important;
+    padding: 0 14px !important;
   }
 }
-
 
 /* Homepage floating controls: Chat stays beside AI; the extra Social shortcut sits in the right utility row. */
 body:not(.study-room-page) .study-chat-button {

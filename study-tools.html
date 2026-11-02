@@ -717,7 +717,7 @@
     });
 
     // ---------- Pomodoro ----------
-    const pomodoro = { remaining: 25 * 60, running: false, mode: "Focus", interval: null };
+    const pomodoro = { remaining: 25 * 60, running: false, mode: "Focus", interval: null, endAt: null };
 
     function formatSeconds(total) {
       total = Math.max(0, Math.floor(total));
@@ -729,13 +729,33 @@
         : String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
     }
 
-    function resetPomodoro() {
-      clearInterval(pomodoro.interval);
-      pomodoro.running = false;
-      pomodoro.mode = "Focus";
-      pomodoro.remaining = Math.max(1, parseInt($("#focusMinutes").value, 10) || 25) * 60;
+    function renderPomodoro() {
       $("#pomodoroMode").textContent = pomodoro.mode;
       $("#pomodoroDisplay").textContent = formatSeconds(pomodoro.remaining);
+    }
+
+    function tickPomodoro() {
+      if (!pomodoro.running || !pomodoro.endAt) return;
+      const now = Date.now();
+      while (pomodoro.endAt <= now) {
+        pomodoro.mode = pomodoro.mode === "Focus" ? "Break" : "Focus";
+        const duration = (pomodoro.mode === "Focus"
+          ? Math.max(1, parseInt($("#focusMinutes").value, 10) || 25)
+          : Math.max(1, parseInt($("#breakMinutes").value, 10) || 5)) * 60;
+        pomodoro.endAt += duration * 1000;
+      }
+      pomodoro.remaining = Math.max(0, Math.ceil((pomodoro.endAt - now) / 1000));
+      renderPomodoro();
+    }
+
+    function resetPomodoro() {
+      clearInterval(pomodoro.interval);
+      pomodoro.interval = null;
+      pomodoro.running = false;
+      pomodoro.endAt = null;
+      pomodoro.mode = "Focus";
+      pomodoro.remaining = Math.max(1, parseInt($("#focusMinutes").value, 10) || 25) * 60;
+      renderPomodoro();
     }
 
     $("#focusMinutes").addEventListener("change", () => { if (!pomodoro.running) resetPomodoro(); });
@@ -744,22 +764,20 @@
     $("#pomodoroStart").addEventListener("click", () => {
       if (pomodoro.running) return;
       pomodoro.running = true;
-      pomodoro.interval = setInterval(() => {
-        pomodoro.remaining -= 1;
-        if (pomodoro.remaining <= 0) {
-          pomodoro.mode = pomodoro.mode === "Focus" ? "Break" : "Focus";
-          pomodoro.remaining = (pomodoro.mode === "Focus"
-            ? Math.max(1, parseInt($("#focusMinutes").value, 10) || 25)
-            : Math.max(1, parseInt($("#breakMinutes").value, 10) || 5)) * 60;
-          $("#pomodoroMode").textContent = pomodoro.mode;
-        }
-        $("#pomodoroDisplay").textContent = formatSeconds(pomodoro.remaining);
-      }, 1000);
+      pomodoro.endAt = Date.now() + pomodoro.remaining * 1000;
+      tickPomodoro();
+      pomodoro.interval = setInterval(tickPomodoro, 250);
     });
 
     $("#pomodoroPause").addEventListener("click", () => {
+      if (pomodoro.running && pomodoro.endAt) {
+        pomodoro.remaining = Math.max(0, Math.ceil((pomodoro.endAt - Date.now()) / 1000));
+      }
       clearInterval(pomodoro.interval);
+      pomodoro.interval = null;
+      pomodoro.endAt = null;
       pomodoro.running = false;
+      renderPomodoro();
     });
 
     $("#pomodoroReset").addEventListener("click", resetPomodoro);
@@ -819,8 +837,42 @@
     });
 
     // ---------- Flashcards ----------
+    function readStoredArray(key, validator, label) {
+      let raw = null;
+      try {
+        raw = localStorage.getItem(key);
+        if (raw === null) return [];
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) throw new Error("Stored value is not an array.");
+        return parsed.filter(validator);
+      } catch (error) {
+        console.warn("StudyLab " + label + " storage could not be read:", error);
+        if (raw !== null) {
+          try {
+            const backupKey = key + ":recovery-backup";
+            if (localStorage.getItem(backupKey) === null) localStorage.setItem(backupKey, raw);
+          } catch (_) {}
+        }
+        return [];
+      }
+    }
+
+    function writeStoredArray(key, value, label) {
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+        return true;
+      } catch (error) {
+        console.warn("StudyLab " + label + " storage could not be saved:", error);
+        return false;
+      }
+    }
+
     const FLASH_KEY = "studylab_flashcards_v1";
-    let flashcards = JSON.parse(localStorage.getItem(FLASH_KEY) || "[]");
+    let flashcards = readStoredArray(
+      FLASH_KEY,
+      card => card && typeof card.front === "string" && typeof card.back === "string",
+      "flashcard"
+    );
     let flashIndex = -1;
     let flashShowingBack = false;
 
@@ -865,7 +917,11 @@
       const back = $("#flashBack").value.trim();
       if (!front || !back) return;
       flashcards.push({ front, back });
-      localStorage.setItem(FLASH_KEY, JSON.stringify(flashcards));
+      if (!writeStoredArray(FLASH_KEY, flashcards, "flashcard")) {
+        flashcards.pop();
+        $("#flashText").textContent = "Could not save this card. Check browser storage and try again.";
+        return;
+      }
       $("#flashFront").value = "";
       $("#flashBack").value = "";
       flashIndex = flashcards.length - 1;
@@ -898,7 +954,12 @@
 
     // ---------- Mistake notebook ----------
     const MISTAKE_KEY = "studylab_mistakes_v1";
-    let mistakes = JSON.parse(localStorage.getItem(MISTAKE_KEY) || "[]");
+    let mistakes = readStoredArray(
+      MISTAKE_KEY,
+      item => item && typeof item.subject === "string" &&
+        typeof item.question === "string" && typeof item.correction === "string",
+      "mistake notebook"
+    );
 
     function renderMistakes() {
       const list = $("#mistakeList");
@@ -928,7 +989,15 @@
         correction,
         createdAt: new Date().toISOString()
       });
-      localStorage.setItem(MISTAKE_KEY, JSON.stringify(mistakes));
+      if (!writeStoredArray(MISTAKE_KEY, mistakes, "mistake notebook")) {
+        mistakes.pop();
+        const list = $("#mistakeList");
+        const warning = document.createElement("small");
+        warning.className = "tool-result";
+        warning.textContent = "Could not save this entry. Check browser storage and try again.";
+        list.prepend(warning);
+        return;
+      }
       $("#mistakeQuestion").value = "";
       $("#mistakeCorrection").value = "";
       renderMistakes();
@@ -964,10 +1033,25 @@
     });
 
     // ---------- Mock exam timer ----------
-    const mock = { remaining: 180 * 60, running: false, interval: null };
+    const mock = { remaining: 180 * 60, running: false, interval: null, endAt: null };
+
+    function tickMock() {
+      if (!mock.running || !mock.endAt) return;
+      mock.remaining = Math.max(0, Math.ceil((mock.endAt - Date.now()) / 1000));
+      $("#mockDisplay").textContent = formatSeconds(mock.remaining);
+      if (mock.remaining <= 0) {
+        clearInterval(mock.interval);
+        mock.interval = null;
+        mock.endAt = null;
+        mock.running = false;
+        $("#mockStatus").textContent = "Time is up.";
+      }
+    }
 
     function resetMock() {
       clearInterval(mock.interval);
+      mock.interval = null;
+      mock.endAt = null;
       mock.running = false;
       mock.remaining = Math.max(1, parseInt($("#mockMinutes").value, 10) || 180) * 60;
       $("#mockDisplay").textContent = formatSeconds(mock.remaining);
@@ -979,21 +1063,21 @@
     $("#mockStart").addEventListener("click", () => {
       if (mock.running) return;
       mock.running = true;
+      mock.endAt = Date.now() + mock.remaining * 1000;
       $("#mockStatus").textContent = "Exam in progress.";
-      mock.interval = setInterval(() => {
-        mock.remaining -= 1;
-        $("#mockDisplay").textContent = formatSeconds(mock.remaining);
-        if (mock.remaining <= 0) {
-          clearInterval(mock.interval);
-          mock.running = false;
-          $("#mockStatus").textContent = "Time is up.";
-        }
-      }, 1000);
+      tickMock();
+      if (mock.running) mock.interval = setInterval(tickMock, 250);
     });
 
     $("#mockPause").addEventListener("click", () => {
+      if (mock.running && mock.endAt) {
+        mock.remaining = Math.max(0, Math.ceil((mock.endAt - Date.now()) / 1000));
+      }
       clearInterval(mock.interval);
+      mock.interval = null;
+      mock.endAt = null;
       mock.running = false;
+      $("#mockDisplay").textContent = formatSeconds(mock.remaining);
       $("#mockStatus").textContent = "Paused.";
     });
 
