@@ -45,7 +45,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = public, pg_temp
-as $
+as $$
 declare
   post_author uuid;
   existing_images integer;
@@ -86,7 +86,7 @@ begin
   new.created_at := now();
   return new;
 end;
-$;
+$$;
 
 create or replace function public.studylab_social_prepare_comment()
 returns trigger
