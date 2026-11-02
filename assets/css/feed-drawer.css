@@ -493,7 +493,7 @@ html[data-theme="light"] .sl-feed-create-trigger span:first-child { color:#147ba
   width:25px;
   height:25px;
   flex:0 0 25px;
-  border:1.5px solid #8fa4b8;
+  border:1.5px solid currentColor;
   border-radius:50%;
   background:rgba(80,160,210,.08);
   font-size:.68rem;
