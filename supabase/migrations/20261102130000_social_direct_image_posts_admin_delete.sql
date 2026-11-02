@@ -85,6 +85,11 @@ alter table public.studylab_social_comments
   add constraint studylab_social_comments_status_check
   check (status in ('approved', 'rejected', 'removed'));
 
+alter table public.studylab_social_posts
+  alter column status set default 'uploading';
+alter table public.studylab_social_comments
+  alter column status set default 'approved';
+
 -- The temporary uploading state is never exposed in the feed or review queue.
 drop policy if exists "Students create pending social posts" on public.studylab_social_posts;
 drop policy if exists "Students create published social posts" on public.studylab_social_posts;
