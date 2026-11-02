@@ -1390,3 +1390,114 @@ html[data-theme="light"] .sl-feed-gallery-arrow {
   margin-left:auto !important;
   flex:0 0 auto;
 }
+
+
+/* Final layout and scroll-performance pass for StudyLab Social. */
+.sl-feed-panel[data-size="full"] > .sl-feed-head {
+  flex:0 0 44px !important;
+  height:44px !important;
+  min-height:44px !important;
+  box-sizing:border-box;
+  padding:3px clamp(14px,2vw,26px) !important;
+  gap:10px !important;
+}
+.sl-feed-panel[data-size="full"] .sl-feed-head-brand { gap:7px; }
+.sl-feed-panel[data-size="full"] .sl-feed-head-brand strong { font-size:.94rem; }
+.sl-feed-panel[data-size="full"] .sl-feed-head-brand .sl-feed-mark {
+  width:25px; height:25px; flex-basis:25px; border-radius:8px; font-size:.8rem;
+}
+.sl-feed-panel[data-size="full"] .sl-feed-head-actions { gap:6px; }
+.sl-feed-panel[data-size="full"] .sl-feed-refresh,
+.sl-feed-panel[data-size="full"] .sl-feed-head-actions .sl-feed-close {
+  width:28px; height:28px; min-width:28px; flex-basis:28px; border-radius:9px;
+}
+.sl-feed-panel[data-size="full"] > .sl-feed-stage {
+  display:grid !important;
+  grid-template-columns:minmax(250px,285px) minmax(420px,760px) minmax(220px,250px) !important;
+  justify-content:center;
+  align-items:start;
+  gap:clamp(18px,2vw,28px) !important;
+  width:100%;
+  max-width:1600px;
+  min-height:0 !important;
+  height:auto !important;
+  flex:1 1 0;
+  box-sizing:border-box;
+  margin:0 auto;
+  padding:16px clamp(12px,2vw,28px) 20px !important;
+  overflow:hidden !important;
+}
+.sl-feed-panel[data-size="full"] .sl-feed-left-rail,
+.sl-feed-panel[data-size="full"] .sl-feed-right-rail {
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  align-self:start;
+  gap:16px;
+  width:100%;
+  min-width:0;
+  margin:0;
+}
+.sl-feed-panel[data-size="full"] .sl-feed-center {
+  align-self:stretch;
+  width:100%;
+  min-width:0;
+  min-height:0;
+  height:100% !important;
+}
+.sl-feed-panel[data-size="full"] .sl-feed-center > .sl-feed-inner {
+  width:100%;
+  min-width:0;
+  box-sizing:border-box;
+}
+.sl-feed-panel[data-size="full"] .sl-feed-post {
+  content-visibility:auto;
+  contain-intrinsic-size:auto 380px;
+}
+.sl-feed-panel[data-size="full"] .sl-feed-stream {
+  scroll-behavior:auto !important;
+  overscroll-behavior-y:contain;
+}
+@media(max-width:1180px) {
+  .sl-feed-panel[data-size="full"] > .sl-feed-stage {
+    grid-template-columns:minmax(240px,280px) minmax(0,760px) !important;
+    gap:20px !important;
+  }
+  .sl-feed-panel[data-size="full"] .sl-feed-right-rail { display:none !important; }
+}
+@media(max-width:850px) {
+  .sl-feed-panel[data-size="full"] > .sl-feed-stage {
+    display:flex !important;
+    flex-direction:column;
+    align-items:stretch;
+    justify-content:flex-start;
+    gap:14px !important;
+    overflow:hidden !important;
+    padding:12px 12px 16px !important;
+  }
+  .sl-feed-panel[data-size="full"] .sl-feed-left-rail {
+    flex:0 0 auto;
+    max-height:30%;
+    overflow-y:auto !important;
+    padding:0 2px 2px;
+  }
+  .sl-feed-panel[data-size="full"] .sl-feed-center {
+    flex:1 1 0;
+    min-height:0;
+    height:auto !important;
+  }
+  .sl-feed-panel[data-size="full"] .sl-feed-right-rail { display:none !important; }
+}
+@media(max-width:760px) {
+  .sl-feed-panel[data-size="full"] > .sl-feed-head {
+    flex-basis:42px !important;
+    height:42px !important;
+    min-height:42px !important;
+    padding:2px 10px !important;
+  }
+  .sl-feed-panel[data-size="full"] .sl-feed-head-brand strong { font-size:.78rem; }
+  .sl-feed-panel[data-size="full"] .sl-feed-head-brand .sl-feed-mark {
+    width:23px; height:23px; flex-basis:23px;
+  }
+  .sl-feed-panel[data-size="full"] > .sl-feed-stage { gap:10px !important; }
+}
