@@ -806,3 +806,8 @@ html[data-theme="light"] .sl-feed-panel[data-size="full"] .sl-feed-center .sl-fe
 @media(max-width:1050px){.sl-feed-panel[data-size="full"] .sl-feed-stage{grid-template-columns:minmax(0,min(720px,70vw)) minmax(220px,260px);gap:14px}}
 @media(max-width:850px){.sl-feed-panel[data-size="full"] .sl-feed-stage{display:flex!important;flex-direction:column;gap:10px;overflow:hidden}.sl-feed-panel[data-size="full"] .sl-feed-center{flex:1 1 auto;min-height:0}.sl-feed-panel[data-size="full"] .sl-feed-social-rail{display:none}}
 @media(max-width:720px){.sl-feed-panel[data-size="full"] .sl-feed-center .sl-feed-inner{padding:11px;border-radius:14px}}
+
+/* The community identity now lives in the right sidebar; keep the top row for controls. */
+.sl-feed-panel[data-size="full"] .sl-feed-head .sl-feed-heading { display:none; }
+.sl-feed-panel[data-size="full"] .sl-feed-head { justify-content:flex-end; }
+.sl-feed-sidebar-ad + .sl-feed-sidebar-ad { min-height:92px; }
