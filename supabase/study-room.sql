@@ -980,10 +980,24 @@ BEGIN
     elapsed_week := greatest(0, floor(extract(epoch FROM (credit_until - greatest(member_row.last_heartbeat_at, week_start_ts)))::integer));
 
     UPDATE public.study_room_members
-    SET today_seconds = CASE WHEN today_date = credit_day THEN today_seconds + elapsed_today ELSE elapsed_today END,
-        today_date = credit_day,
-        week_seconds = CASE WHEN week_start = monday THEN week_seconds + elapsed_week ELSE elapsed_week END,
-        week_start = monday,
+    SET today_seconds = CASE
+          WHEN today_date = credit_day THEN today_seconds + elapsed_today
+          WHEN today_date IS NULL OR today_date < credit_day THEN elapsed_today
+          ELSE today_seconds
+        END,
+        today_date = CASE
+          WHEN today_date IS NULL OR today_date < credit_day THEN credit_day
+          ELSE today_date
+        END,
+        week_seconds = CASE
+          WHEN week_start = monday THEN week_seconds + elapsed_week
+          WHEN week_start IS NULL OR week_start < monday THEN elapsed_week
+          ELSE week_seconds
+        END,
+        week_start = CASE
+          WHEN week_start IS NULL OR week_start < monday THEN monday
+          ELSE week_start
+        END,
         session_elapsed_seconds = CASE WHEN credit_day = current_day
           THEN coalesce(session_elapsed_seconds, 0) + elapsed_total ELSE 0 END,
         session_date = credit_day,
