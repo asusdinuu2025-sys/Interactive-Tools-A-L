@@ -26,11 +26,11 @@ begin
   new.author_display_name := profile_row.display_name;
   new.author_username := profile_row.username;
   new.body := btrim(coalesce(new.body, ''));
-  new.status := 'approved';
+  new.status := 'uploading';
   new.created_at := now();
   return new;
 end;
-$$;
+$;
 
 create or replace function public.studylab_social_prepare_comment()
 returns trigger
@@ -69,17 +69,30 @@ begin
 end;
 $$;
 
--- Existing pending content becomes visible under the new direct-publish model.
+-- Old pending items are published. New post rows stay invisible only while files upload.
 update public.studylab_social_posts set status = 'approved' where status = 'pending';
 update public.studylab_social_comments set status = 'approved' where status = 'pending';
 
--- New posts and comments are inserted as published rows by the trigger above.
+alter table public.studylab_social_posts
+  drop constraint if exists studylab_social_posts_status_check;
+alter table public.studylab_social_posts
+  add constraint studylab_social_posts_status_check
+  check (status in ('uploading', 'approved', 'rejected', 'removed'));
+
+alter table public.studylab_social_comments
+  drop constraint if exists studylab_social_comments_status_check;
+alter table public.studylab_social_comments
+  add constraint studylab_social_comments_status_check
+  check (status in ('approved', 'rejected', 'removed'));
+
+-- The temporary uploading state is never exposed in the feed or review queue.
 drop policy if exists "Students create pending social posts" on public.studylab_social_posts;
 drop policy if exists "Students create published social posts" on public.studylab_social_posts;
-create policy "Students create published social posts"
+drop policy if exists "Students create uploading social posts" on public.studylab_social_posts;
+create policy "Students create uploading social posts"
 on public.studylab_social_posts
 for insert to authenticated
-with check (author_id = (select auth.uid()) and status = 'approved');
+with check (author_id = (select auth.uid()) and status = 'uploading');
 
 drop policy if exists "Students add pending comments to approved posts" on public.studylab_social_comments;
 drop policy if exists "Students add published comments to approved posts" on public.studylab_social_comments;
@@ -88,10 +101,11 @@ on public.studylab_social_comments
 for insert to authenticated
 with check (author_id = (select auth.uid()) and status = 'approved');
 
--- Image metadata must also be attachable to the newly published post.
+-- Image metadata is attached only while the author's post is in its hidden upload state.
 drop policy if exists "Students attach images to their pending posts" on public.studylab_social_post_images;
 drop policy if exists "Students attach images to their published posts" on public.studylab_social_post_images;
-create policy "Students attach images to their published posts"
+drop policy if exists "Students attach images to their uploading posts" on public.studylab_social_post_images;
+create policy "Students attach images to their uploading posts"
 on public.studylab_social_post_images
 for insert to authenticated
 with check (
@@ -100,14 +114,15 @@ with check (
     select 1 from public.studylab_social_posts p
     where p.id = post_id
       and p.author_id = (select auth.uid())
-      and p.status = 'approved'
+      and p.status = 'uploading'
   )
 );
 
--- Uploads can attach to the already-published post created immediately before them.
+-- Uploads are permitted only into the author's hidden uploading post.
 drop policy if exists "Social users upload only into their own pending posts" on storage.objects;
 drop policy if exists "Social users upload into own published posts" on storage.objects;
-create policy "Social users upload into own published posts"
+drop policy if exists "Social users upload into own uploading posts" on storage.objects;
+create policy "Social users upload into own uploading posts"
 on storage.objects
 for insert to authenticated
 with check (
@@ -117,9 +132,33 @@ with check (
     select 1 from public.studylab_social_posts p
     where p.id::text = (storage.foldername(name))[2]
       and p.author_id = (select auth.uid())
-      and p.status = 'approved'
+      and p.status = 'uploading'
   )
 );
+
+-- Publish only after every selected photo and metadata row has uploaded.
+create or replace function public.studylab_social_publish_own_post(p_post_id uuid)
+returns boolean
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $
+begin
+  if auth.uid() is null then
+    raise exception 'Authentication required';
+  end if;
+
+  update public.studylab_social_posts
+  set status = 'approved'
+  where id = p_post_id
+    and author_id = auth.uid()
+    and status = 'uploading';
+
+  return found;
+end;
+$;
+revoke all on function public.studylab_social_publish_own_post(uuid) from public, anon;
+grant execute on function public.studylab_social_publish_own_post(uuid) to authenticated;
 
 -- Preserve students' existing own-post delete policy and add admin-wide deletion.
 grant delete on table public.studylab_social_posts to authenticated;
@@ -159,6 +198,6 @@ drop function if exists public.studylab_social_moderate_comment(uuid, text);
 drop function if exists public.studylab_social_delete_own_pending_post(uuid);
 
 comment on table public.studylab_social_posts is
-  'StudyLab Social posts. New posts are published immediately; authors and admins may delete.';
+  'StudyLab Social posts publish immediately after upload completes; authors and admins may delete.';
 comment on table public.studylab_social_comments is
   'StudyLab Social comments. New comments are published immediately; authors and admins may delete.';
