@@ -55,24 +55,24 @@ for (const page of requiredPages) {
   const html = read(page);
   if (!html) continue;
 
-  if (!/<meta\\s+name=["']viewport["'][^>]*>/i.test(html)) {
+  if (!/<meta\s+name=["']viewport["'][^>]*>/i.test(html)) {
     fail(page + " is missing a viewport meta tag.");
   }
-  if (/<meta\\s+name=["']viewport["'][^>]*(?:user-scalable\\s*=\\s*no|maximum-scale\\s*=\\s*1)/i.test(html)) {
+  if (/<meta\s+name=["']viewport["'][^>]*(?:user-scalable\s*=\s*no|maximum-scale\s*=\s*1)/i.test(html)) {
     fail(page + " prevents normal mobile zoom.");
   }
 
   if (page === "study-room.html" || page === "study-room-mini.html") {
-    if (!/<meta\\s+name=["']robots["'][^>]*content=["'][^"']*noindex/i.test(html)) {
+    if (!/<meta\s+name=["']robots["'][^>]*content=["'][^"']*noindex/i.test(html)) {
       fail(page + " should remain noindex.");
     }
   }
 
-  for (const match of html.matchAll(/<(script|link)\\b([^>]*)>/gi)) {
+  for (const match of html.matchAll(/<(script|link)\b([^>]*)>/gi)) {
     const tag = match[1].toLowerCase();
     const attrs = match[2];
     const reference = tag === "script" ? attribute(attrs, "src") : attribute(attrs, "href");
-    if (tag === "link" && !/\\brel=["'][^"']*stylesheet|manifest|icon/i.test(attrs)) continue;
+    if (tag === "link" && !/\brel=["'][^"']*stylesheet|manifest|icon/i.test(attrs)) continue;
     if (!reference) continue;
     const target = localFile(page, reference);
     if (target && !existsSync(target)) {
@@ -94,11 +94,11 @@ if (toolsHtml) {
   const tempDir = mkdtempSync(path.join(os.tmpdir(), "studylab-release-check-"));
   try {
     let index = 0;
-    for (const match of toolsHtml.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script\\s*>/gi)) {
+    for (const match of toolsHtml.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)) {
       const attrs = match[1];
-      if (/\\bsrc\\s*=/i.test(attrs)) continue;
+      if (/\bsrc\s*=/i.test(attrs)) continue;
       const type = attribute(attrs, "type").toLowerCase();
-      if (type && !/^(?:module|text\\/(?:java|ecma)script|application\\/(?:java|ecma)script)$/.test(type)) continue;
+      if (type && !/^(?:module|text\/(?:java|ecma)script|application\/(?:java|ecma)script)$/.test(type)) continue;
       const extension = type === "module" ? ".mjs" : ".js";
       const tempFile = path.join(tempDir, "inline-" + (++index) + extension);
       writeFileSync(tempFile, match[2], "utf8");
@@ -112,13 +112,13 @@ if (toolsHtml) {
 // Validate the sitemap declaration, duplicate URLs and every local URL target.
 const sitemap = read("sitemap.xml");
 if (sitemap) {
-  if (!/^\\s*<\\?xml\\s+version=["']1\\.0["']/i.test(sitemap)) {
+  if (!/^\s*<\?xml\s+version=["']1\.0["']/i.test(sitemap)) {
     fail("sitemap.xml must begin with an XML declaration.");
   }
-  if (!/<urlset\\b[\\s\\S]*<\\/urlset>/i.test(sitemap)) {
+  if (!/<urlset\b[\s\S]*<\/urlset>/i.test(sitemap)) {
     fail("sitemap.xml has no complete urlset.");
   }
-  const locations = [...sitemap.matchAll(/<loc>([\\s\\S]*?)<\\/loc>/gi)]
+  const locations = [...sitemap.matchAll(/<loc>([\s\S]*?)<\/loc>/gi)]
     .map(match => match[1].trim());
   if (!locations.length) fail("sitemap.xml contains no URL entries.");
 
@@ -132,7 +132,7 @@ if (sitemap) {
         fail("Unexpected sitemap origin: " + url.origin);
         continue;
       }
-      const relative = decodeURIComponent(url.pathname.replace(/^\\/+/, "")) || "index.html";
+      const relative = decodeURIComponent(url.pathname.replace(/^\/+/, "")) || "index.html";
       const target = path.join(root, relative);
       if (!existsSync(target)) fail("Sitemap target does not exist: " + url.pathname);
     } catch {
