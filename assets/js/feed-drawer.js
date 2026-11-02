@@ -30,11 +30,11 @@
           </span>
           <div><h2 class="sl-feed-title">StudyLab Social</h2><p class="sl-feed-subtitle">Student community</p></div>
         </div>
-        <div class="sl-feed-size-controls" role="group" aria-label="Social panel size">
-          <button type="button" data-feed-size="half" aria-label="Expand Social to half screen" title="Half screen">½</button>
-          <button type="button" data-feed-size="full" aria-label="Open Social fullscreen" title="Fullscreen">⛶</button>
+        <div class="sl-feed-head-brand"><span class="sl-feed-mark" aria-hidden="true">✦</span><strong>StudyLab Social Network</strong></div>
+        <div class="sl-feed-head-actions">
+          <button class="sl-feed-refresh" type="button" aria-label="Refresh posts" title="Refresh posts">↻</button>
+          <button class="sl-feed-close" type="button" data-feed-close aria-label="Close Social panel">×</button>
         </div>
-        <button class="sl-feed-close" type="button" data-feed-close aria-label="Close Social panel">×</button>
       </div>
       <form class="sl-feed-compose" aria-label="Create a feed post">
         <textarea maxlength="2000" disabled placeholder="Share something with other students..." aria-label="Write a post"></textarea>
@@ -55,6 +55,7 @@
 
   // Full-screen layout: wider composer left, natural-flow feed centre, community rail right.
   const feedInner = panel.querySelector(".sl-feed-inner");
+  const feedHead = feedInner.querySelector(".sl-feed-head");
   const composer = feedInner.querySelector(".sl-feed-compose");
   const feedStage = document.createElement("div");
   feedStage.className = "sl-feed-stage";
@@ -87,9 +88,11 @@
   membersCard.className = "sl-feed-members-card";
   membersCard.innerHTML = '<div class="sl-feed-members-heading"><strong>Community profiles</strong><span>From recent posts</span></div><div class="sl-feed-member-list" aria-live="polite"><p class="sl-feed-members-empty">Student profiles will appear here as they post.</p></div>';
   feedInner.parentNode.replaceChild(feedStage, feedInner);
+  feedInner.removeChild(feedHead);
+  panel.insertBefore(feedHead, feedStage);
   leftRail.append(composer, adSlot("left", "12171550"));
   center.append(feedInner);
-  rightRail.append(communityIntro, membersCard, adSlot("right", "12171551"));
+  rightRail.append(membersCard, adSlot("right", "12171551"));
   feedStage.append(leftRail, center, rightRail);
 
   const actions = header.querySelector(".header-actions");
@@ -126,18 +129,10 @@
   layout.insertBefore(backdrop, panel);
 
   let previousFocus = null;
-  function setSize(size) {
-    panel.dataset.size = size;
-    panel.querySelectorAll("[data-feed-size]").forEach(button => {
-      const active = button.dataset.feedSize === size;
-      button.classList.toggle("is-active", active);
-      button.setAttribute("aria-pressed", String(active));
-    });
-  }
-  panel.querySelectorAll("[data-feed-size]").forEach(button => {
-    button.addEventListener("click", () => setSize(button.dataset.feedSize));
+  panel.dataset.size = "full";
+  panel.querySelector(".sl-feed-refresh")?.addEventListener("click", () => {
+    window.dispatchEvent(new CustomEvent("studylab-social-refresh"));
   });
-  setSize("full");
   function closeFloatingTools() {
     ["[data-chat-close]", "[data-feedback-close]", "#studyQuickAccessPanel .study-quick-close", "#studyQuickAccessPanel [aria-label='Close Quick Access']"]
       .forEach(selector => {
@@ -149,7 +144,7 @@
   function setOpen(open) {
     if (open) {
       closeFloatingTools();
-      setSize("full");
+      panel.dataset.size = "full";
     }
     layout.classList.toggle("is-feed-open", open);
     document.body.classList.toggle("sl-community-open", open);
