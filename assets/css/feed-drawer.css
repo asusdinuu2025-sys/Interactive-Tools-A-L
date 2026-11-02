@@ -1277,3 +1277,18 @@ html[data-theme="light"] .sl-feed-read-more { color:#167eae; }
   .sl-feed-panel[data-size="full"] .sl-feed-left-rail { overflow:visible !important; }
   .sl-feed-panel[data-size="full"] .sl-feed-center { flex:1 1 0; }
 }
+
+
+/* Centre the network title independently of the right-side controls. */
+.sl-feed-panel[data-size="full"] > .sl-feed-head { position:relative; }
+.sl-feed-panel[data-size="full"] > .sl-feed-head .sl-feed-head-brand {
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  justify-content:center;
+  white-space:nowrap;
+}
+@media(max-width:480px) {
+  .sl-feed-head-brand strong { font-size:.86rem; }
+  .sl-feed-head-brand .sl-feed-mark { width:30px; height:30px; }
+}
