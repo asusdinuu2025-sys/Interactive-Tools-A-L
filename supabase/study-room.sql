@@ -665,7 +665,7 @@ BEGIN
  IF uid IS NULL THEN RAISE EXCEPTION 'Sign-in required'; END IF;
  PERFORM public.study_room_heartbeat();
  UPDATE public.study_room_members SET is_studying=false,session_active=true,session_started_at=NULL,last_heartbeat_at=NULL,updated_at=now()
- WHERE user_id=uid AND session_active=true;
+ WHERE user_id=uid AND is_studying=true AND session_active=true;
 END;
 $function$;
 CREATE OR REPLACE FUNCTION public.study_room_end()
@@ -747,6 +747,7 @@ DECLARE
   elapsed_total integer;
   elapsed_today integer;
   elapsed_week integer;
+  elapsed_session integer;
   previous public.study_room_members%rowtype;
 BEGIN
   IF uid IS NULL THEN RAISE EXCEPTION 'Sign-in required'; END IF;
@@ -783,14 +784,15 @@ BEGIN
 
   elapsed_total := greatest(0, floor(extract(epoch FROM (now() - previous.last_heartbeat_at)))::integer);
   elapsed_today := greatest(0, floor(extract(epoch FROM (now() - greatest(previous.last_heartbeat_at, day_start)))::integer));
-  elapsed_week := greatest(0, floor(extract(epoch FROM (now() - greatest(previous.last_heartbeat_at, week_start_ts)))::integer);
+  elapsed_week := greatest(0, floor(extract(epoch FROM (now() - greatest(previous.last_heartbeat_at, week_start_ts)))::integer));
+  elapsed_session := greatest(0, floor(extract(epoch FROM (now() - greatest(previous.last_heartbeat_at, day_start)))::integer));
 
   UPDATE public.study_room_members
   SET today_seconds = CASE WHEN today_date = local_day THEN today_seconds + elapsed_today ELSE elapsed_today END,
       today_date = local_day,
       week_seconds = CASE WHEN week_start = monday THEN week_seconds + elapsed_week ELSE elapsed_week END,
       week_start = monday,
-      session_elapsed_seconds = CASE WHEN session_date = local_day THEN session_elapsed_seconds + elapsed_total ELSE elapsed_total END,
+      session_elapsed_seconds = CASE WHEN previous.session_date = local_day THEN previous.session_elapsed_seconds + elapsed_total ELSE elapsed_session END,
       session_date = local_day, last_heartbeat_at = now(), updated_at = now()
   WHERE user_id = uid;
 END;
