@@ -88,6 +88,22 @@ on public.studylab_social_comments
 for insert to authenticated
 with check (author_id = (select auth.uid()) and status = 'approved');
 
+-- Image metadata must also be attachable to the newly published post.
+drop policy if exists "Students attach images to their pending posts" on public.studylab_social_post_images;
+drop policy if exists "Students attach images to their published posts" on public.studylab_social_post_images;
+create policy "Students attach images to their published posts"
+on public.studylab_social_post_images
+for insert to authenticated
+with check (
+  author_id = (select auth.uid())
+  and exists (
+    select 1 from public.studylab_social_posts p
+    where p.id = post_id
+      and p.author_id = (select auth.uid())
+      and p.status = 'approved'
+  )
+);
+
 -- Uploads can attach to the already-published post created immediately before them.
 drop policy if exists "Social users upload only into their own pending posts" on storage.objects;
 drop policy if exists "Social users upload into own published posts" on storage.objects;
