@@ -1535,3 +1535,14 @@ html:not([data-theme="light"]) .sl-feed-panel[data-size="full"] .sl-feed-post {
 .sl-feed-panel[data-size="full"] .sl-feed-stream {
   padding-top: 0 !important;
 }
+
+/* Dark Social scroll performance: avoid per-card backdrop-filter and virtual-size jumps. */
+.sl-feed-panel[data-size="full"] .sl-feed-post {
+  content-visibility:visible !important;
+  contain-intrinsic-size:none !important;
+}
+html:not([data-theme="light"]) .sl-feed-panel[data-size="full"] .sl-feed-post {
+  background:rgba(8,16,29,.92) !important;
+  -webkit-backdrop-filter:none !important;
+  backdrop-filter:none !important;
+}
