@@ -419,23 +419,29 @@
       commentsButton.addEventListener("click", () => toggleComments(card, post, client, currentUserId));
       actions.append(like, commentsButton);
     }
-    if (post.author_id === currentUserId) {
-      const removePost = make("button", "sl-feed-action sl-feed-delete-post", "Delete post");
+    if (post.author_id === currentUserId || isAdmin) {
+      const deletingAnotherStudentPost = post.author_id !== currentUserId;
+      const removePost = make("button", "sl-feed-action sl-feed-delete-post",
+        deletingAnotherStudentPost ? "Admin · Delete post" : "Delete post");
       removePost.type = "button";
       removePost.addEventListener("click", async () => {
-        if (!window.confirm("Delete this post permanently? This cannot be undone.")) return;
+        const confirmation = deletingAnotherStudentPost
+          ? "As an admin, permanently delete this student's post? This cannot be undone."
+          : "Delete this post permanently? This cannot be undone.";
+        if (!window.confirm(confirmation)) return;
         removePost.disabled = true;
         try {
           const imagePaths = imageRows.map(row => row.bucket_path).filter(Boolean);
-          const { data: deleted, error } = await client.from("studylab_social_posts")
-            .delete().eq("id", post.id).eq("author_id", currentUserId).select("id").maybeSingle();
-          if (error) throw error;
-          if (!deleted) throw new Error("This post could not be deleted. It may not be eligible for deletion.");
           if (imagePaths.length) {
             const { error: storageError } = await client.storage.from(BUCKET).remove(imagePaths);
-            if (storageError) console.warn("Post deleted, but some attached image files could not be removed:", storageError);
+            if (storageError) throw storageError;
           }
-          setStatus("Your post was deleted.");
+          let deletion = client.from("studylab_social_posts").delete().eq("id", post.id);
+          if (!isAdmin) deletion = deletion.eq("author_id", currentUserId);
+          const { data: deleted, error } = await deletion.select("id").maybeSingle();
+          if (error) throw error;
+          if (!deleted) throw new Error("This post could not be deleted. Check your permissions and try again.");
+          setStatus(deletingAnotherStudentPost ? "Student post deleted." : "Your post was deleted.");
           await loadFeed();
         } catch (error) {
           setStatus(error.message || "Could not delete this post.", true);
@@ -769,11 +775,9 @@
       fileCount.textContent = "No photos selected";
       renderImagePreviews([]);
       if (moderation.error) {
-        setStatus("Post submitted. It remains hidden until admin review.");
+        setStatus("Post submitted, but could not be published automatically. It remains hidden until review.");
       } else if (moderation.data?.status === "approved") {
-        setStatus("Your text post was approved by AI moderation.");
-      } else if (moderation.data?.image_review_required) {
-        setStatus("Post submitted. Photos require admin approval before appearing.");
+        setStatus(files.length ? "Your photo post is live." : "Your text post was approved by AI moderation.");
       } else {
         setStatus("Post sent to the admin review queue.");
       }
