@@ -698,13 +698,13 @@ GRANT EXECUTE ON FUNCTION public.study_room_end() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.study_room_leave() TO authenticated;
 
 
--- Expire an abandoned running Study Room session after 24 hours without a heartbeat.
+-- Expire an abandoned running Study Room session after 12 hours without a heartbeat.
 -- A successful heartbeat refreshes last_heartbeat_at and starts a fresh 24-hour window.
 
 CREATE OR REPLACE VIEW public.study_room_live WITH (security_invoker = true) AS
 WITH member_state AS (
   SELECT m.*,
-    (m.is_studying AND (m.last_heartbeat_at IS NULL OR m.last_heartbeat_at <= now() - interval '24 hours')) AS idle_expired
+    (m.is_studying AND (m.last_heartbeat_at IS NULL OR m.last_heartbeat_at <= now() - interval '12 hours')) AS idle_expired
   FROM public.study_room_members AS m
 )
 SELECT
@@ -767,7 +767,7 @@ BEGIN
       session_date = local_day, today_seconds = 0, today_date = local_day,
       week_seconds = 0, week_start = monday, updated_at = now()
   WHERE is_studying = true
-    AND (last_heartbeat_at IS NULL OR last_heartbeat_at <= now() - interval '24 hours');
+    AND (last_heartbeat_at IS NULL OR last_heartbeat_at <= now() - interval '12 hours');
 
   week_start_ts := (monday::timestamp AT TIME ZONE 'Asia/Colombo');
   SELECT * INTO previous
@@ -921,34 +921,22 @@ REVOKE ALL ON FUNCTION public.study_room_set_subject(text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.study_room_set_subject(text) TO authenticated;
 
 
--- Schedule the 24-hour idle-session cleanup (safe to rerun from this setup script).
+-- Run the abandoned-session watchdog once per minute.
+-- It credits the last bounded interval, pauses the session, and never wipes
+-- daily or weekly totals. Re-running this setup replaces the named job safely.
 DO $schedule$
 DECLARE existing_job bigint;
 BEGIN
   FOR existing_job IN
-    SELECT jobid FROM cron.job WHERE jobname = 'study-room-expire-idle-sessions'
+    SELECT jobid FROM cron.job
+    WHERE jobname IN ('study-room-expire-idle-sessions', 'study-room-pause-stale-sessions')
   LOOP
     PERFORM cron.unschedule(existing_job);
   END LOOP;
   PERFORM cron.schedule(
-    'study-room-expire-idle-sessions',
+    'study-room-pause-stale-sessions',
     '* * * * *',
-    $job$
-      UPDATE public.study_room_members
-      SET is_studying = false,
-          session_active = false,
-          session_started_at = NULL,
-          last_heartbeat_at = NULL,
-          session_elapsed_seconds = 0,
-          session_date = timezone('Asia/Colombo', now())::date,
-          today_seconds = 0,
-          today_date = timezone('Asia/Colombo', now())::date,
-          week_seconds = 0,
-          week_start = public.study_room_local_week_start(timezone('Asia/Colombo', now())::date),
-          updated_at = now()
-      WHERE is_studying = true
-        AND (last_heartbeat_at IS NULL OR last_heartbeat_at <= now() - interval '24 hours');
-    $job$
+    'SELECT public.study_room_pause_stale_sessions();'
   );
 END;
 $schedule$;
@@ -956,7 +944,7 @@ $schedule$;
 
 -- Final background-tab grace period.
 -- Browsers may throttle timers when the Study Room is in a background tab
--- or another app is in the foreground. Keep students active for up to 24 hours without a heartbeat, then pause abandoned sessions and credit elapsed time
+-- or another app is in the foreground. Keep students active for up to 12 hours without a heartbeat, then pause abandoned sessions and credit elapsed time
 -- through that bounded grace period (never across the Sri Lanka midnight boundary).
 CREATE OR REPLACE FUNCTION public.study_room_pause_stale_sessions(p_user_id uuid DEFAULT NULL::uuid)
 RETURNS void
@@ -968,7 +956,8 @@ DECLARE
   member_row public.study_room_members%rowtype;
   reference_now timestamptz := now();
   credit_until timestamptz;
-  local_day date;
+  credit_day date;
+  current_day date := timezone('Asia/Colombo', now())::date;
   monday date;
   day_start timestamptz;
   week_start_ts timestamptz;
@@ -981,26 +970,33 @@ BEGIN
     FROM public.study_room_members
     WHERE is_studying = true
       AND (p_user_id IS NULL OR user_id = p_user_id)
-      AND (last_heartbeat_at IS NULL OR last_heartbeat_at <= reference_now - interval '24 hours')
+      AND (last_heartbeat_at IS NULL OR last_heartbeat_at <= reference_now - interval '12 hours')
     FOR UPDATE SKIP LOCKED
   LOOP
     IF member_row.last_heartbeat_at IS NULL THEN
       UPDATE public.study_room_members
-      SET is_studying = false, session_active = true,
-          session_started_at = NULL, last_heartbeat_at = NULL,
+      SET is_studying = false,
+          session_active = coalesce(session_date = current_day, false),
+          session_started_at = NULL,
+          last_heartbeat_at = NULL,
+          session_elapsed_seconds = CASE WHEN session_date = current_day
+            THEN coalesce(session_elapsed_seconds, 0) ELSE 0 END,
+          session_date = CASE WHEN session_date = current_day THEN session_date ELSE current_day END,
           updated_at = reference_now
       WHERE user_id = member_row.user_id;
       CONTINUE;
     END IF;
 
+    -- Credit only the Colombo day on which the last confirmed heartbeat occurred.
+    -- If the watchdog runs after midnight, the old session is expired, not resumable.
+    credit_day := timezone('Asia/Colombo', member_row.last_heartbeat_at)::date;
     credit_until := LEAST(
       reference_now,
-      member_row.last_heartbeat_at + interval '24 hours',
-      ((timezone('Asia/Colombo', member_row.last_heartbeat_at)::date + 1)::timestamp AT TIME ZONE 'Asia/Colombo')
+      member_row.last_heartbeat_at + interval '12 hours',
+      ((credit_day + 1)::timestamp AT TIME ZONE 'Asia/Colombo')
     );
-    local_day := timezone('Asia/Colombo', credit_until)::date;
-    monday := public.study_room_local_week_start(local_day);
-    day_start := (local_day::timestamp AT TIME ZONE 'Asia/Colombo');
+    monday := public.study_room_local_week_start(credit_day);
+    day_start := (credit_day::timestamp AT TIME ZONE 'Asia/Colombo');
     week_start_ts := (monday::timestamp AT TIME ZONE 'Asia/Colombo');
 
     elapsed_total := greatest(0, floor(extract(epoch FROM (credit_until - member_row.last_heartbeat_at)))::integer);
@@ -1008,13 +1004,15 @@ BEGIN
     elapsed_week := greatest(0, floor(extract(epoch FROM (credit_until - greatest(member_row.last_heartbeat_at, week_start_ts)))::integer));
 
     UPDATE public.study_room_members
-    SET today_seconds = CASE WHEN today_date = local_day THEN today_seconds + elapsed_today ELSE elapsed_today END,
-        today_date = local_day,
+    SET today_seconds = CASE WHEN today_date = credit_day THEN today_seconds + elapsed_today ELSE elapsed_today END,
+        today_date = credit_day,
         week_seconds = CASE WHEN week_start = monday THEN week_seconds + elapsed_week ELSE elapsed_week END,
         week_start = monday,
-        session_elapsed_seconds = coalesce(session_elapsed_seconds, 0) + elapsed_total,
+        session_elapsed_seconds = CASE WHEN credit_day = current_day
+          THEN coalesce(session_elapsed_seconds, 0) + elapsed_total ELSE 0 END,
+        session_date = credit_day,
         is_studying = false,
-        session_active = true,
+        session_active = (credit_day = current_day),
         session_started_at = NULL,
         last_heartbeat_at = NULL,
         updated_at = credit_until
@@ -1030,7 +1028,7 @@ WITH member_state AS (
     timezone('Asia/Colombo', now())::date AS local_day,
     (m.is_studying AND (
       m.last_heartbeat_at IS NULL
-      OR m.last_heartbeat_at <= now() - interval '24 hours'
+      OR m.last_heartbeat_at <= now() - interval '12 hours'
     )) AS idle_stale,
     (m.session_active AND NOT m.is_studying
       AND m.session_date IS DISTINCT FROM timezone('Asia/Colombo', now())::date
