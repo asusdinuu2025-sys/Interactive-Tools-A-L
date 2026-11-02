@@ -1546,3 +1546,16 @@ html:not([data-theme="light"]) .sl-feed-panel[data-size="full"] .sl-feed-post {
   -webkit-backdrop-filter:none !important;
   backdrop-filter:none !important;
 }
+
+/* Dark-theme scroll fix: the full-screen overlay blur repaints the page behind
+   the entire feed on every scroll. Keep the dark glass surface, remove that
+   expensive backdrop sampling, and leave the light theme unchanged. */
+html:not([data-theme="light"]) .sl-feed-panel[data-size="full"] {
+  background:rgba(8,17,31,.93) !important;
+  -webkit-backdrop-filter:none !important;
+  backdrop-filter:none !important;
+}
+html:not([data-theme="light"]) .sl-feed-panel[data-size="full"] .sl-feed-center .sl-feed-inner {
+  -webkit-backdrop-filter:none !important;
+  backdrop-filter:none !important;
+}
