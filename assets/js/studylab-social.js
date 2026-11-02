@@ -269,7 +269,7 @@
       .select("id,author_id,author_display_name,author_username,author_gender,body,status,created_at,studylab_social_post_images(id,bucket_path,mime_type,size_bytes)")
       .order("created_at", { ascending: false }).limit(40);
     if (error) throw error;
-    return (data || []).filter(post => post.status === "approved" || post.author_id === ownId);
+    return (data || []).filter(post => post.status === "approved");
   }
   function renderPost(client, post, currentUserId, likesByPost, commentCountsByPost, signedImageUrls) {
     const card = make("article", "sl-feed-post");
@@ -478,7 +478,7 @@
     try {
       const { data, error } = await client.from("studylab_social_comments")
         .select("id,author_id,author_display_name,author_username,author_gender,body,status,created_at")
-        .eq("post_id", post.id).order("created_at", { ascending: true }).limit(50);
+        .eq("post_id", post.id).eq("status", "approved").order("created_at", { ascending: true }).limit(50);
       if (error) throw error;
       area.replaceChildren();
       (data || []).forEach(comment => {
