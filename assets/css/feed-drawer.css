@@ -493,9 +493,13 @@ html[data-theme="light"] .sl-feed-create-trigger span:first-child { color:#147ba
   width:25px;
   height:25px;
   flex:0 0 25px;
-  border-width:1.5px;
+  border:1.5px solid currentColor;
+  border-radius:50%;
+  background:rgba(80,160,210,.08);
   font-size:.68rem;
   font-weight:800;
+  line-height:1;
+  letter-spacing:0;
 }
 .sl-feed-comment-head strong { flex:1; min-width:0; }
 
@@ -1741,3 +1745,94 @@ html:not([data-theme="light"]) .sl-feed-panel[data-size="full"] .sl-feed-stream 
     transform-origin: center center;
   }
 }
+
+/* Compact per-comment options menu. Keep deletion available without a full-width action button. */
+.sl-feed-comment-head { align-items:center; }
+.sl-feed-comment-menu {
+  position:relative;
+  flex:0 0 auto;
+  margin-left:auto;
+}
+.sl-feed-comment-menu > summary {
+  list-style:none;
+}
+.sl-feed-comment-menu > summary::-webkit-details-marker {
+  display:none;
+}
+.sl-feed-comment-menu-toggle {
+  display:grid;
+  place-items:center;
+  width:29px;
+  height:29px;
+  padding:0 0 5px;
+  border:1px solid rgba(126,190,220,.17);
+  border-radius:9px;
+  background:rgba(126,190,220,.07);
+  color:#b9c9d9;
+  font:700 1.25rem/1 Inter,ui-sans-serif,system-ui,sans-serif;
+  cursor:pointer;
+  transition:background .16s ease,border-color .16s ease,color .16s ease;
+}
+.sl-feed-comment-menu-toggle:hover,
+.sl-feed-comment-menu[open] > .sl-feed-comment-menu-toggle {
+  border-color:rgba(91,196,245,.42);
+  background:rgba(91,196,245,.13);
+  color:#e8f7ff;
+}
+.sl-feed-comment-menu-panel {
+  position:absolute;
+  z-index:30;
+  top:calc(100% + 5px);
+  right:0;
+  min-width:116px;
+  padding:5px;
+  border:1px solid rgba(130,160,190,.22);
+  border-radius:10px;
+  background:rgba(18,29,45,.98);
+  box-shadow:0 9px 24px rgba(0,0,0,.28);
+}
+.sl-feed-comment-menu-delete {
+  display:block;
+  width:100%;
+  padding:8px 10px;
+  border:0;
+  border-radius:7px;
+  background:transparent;
+  color:#ff8792;
+  font-family:inherit;
+  font-size:.72rem;
+  font-weight:600;
+  line-height:1.2;
+  text-align:left;
+  cursor:pointer;
+}
+.sl-feed-comment-menu-delete:hover {
+  background:rgba(255,105,120,.12);
+}
+.sl-feed-comment-menu-delete:disabled {
+  opacity:.5;
+  cursor:wait;
+}
+html[data-theme="light"] .sl-feed-comment-menu-toggle {
+  border-color:rgba(70,110,145,.2);
+  background:rgba(90,130,160,.07);
+  color:#526b80;
+}
+html[data-theme="light"] .sl-feed-comment-menu-toggle:hover,
+html[data-theme="light"] .sl-feed-comment-menu[open] > .sl-feed-comment-menu-toggle {
+  border-color:rgba(45,145,195,.35);
+  background:rgba(65,165,215,.12);
+  color:#244b65;
+}
+html[data-theme="light"] .sl-feed-comment-menu-panel {
+  border-color:rgba(70,110,145,.2);
+  background:rgba(250,253,255,.99);
+  box-shadow:0 9px 24px rgba(30,55,75,.16);
+}
+html[data-theme="light"] .sl-feed-comment-menu-delete {
+  color:#c23848;
+}
+html[data-theme="light"] .sl-feed-comment-menu-delete:hover {
+  background:rgba(220,65,85,.09);
+}
+
