@@ -8,7 +8,8 @@ ALTER TABLE public.study_room_members
   ADD COLUMN IF NOT EXISTS session_week_seconds integer NOT NULL DEFAULT 0,
   ADD COLUMN IF NOT EXISTS session_week_start date NOT NULL DEFAULT
     ((timezone('Asia/Colombo', now()))::date -
-      (extract(isodow FROM timezone('Asia/Colombo', now()))::integer - 1));
+      (extract(isodow FROM timezone('Asia/Colombo', now()))::integer - 1)),
+  ADD COLUMN IF NOT EXISTS session_expired_at timestamptz;
 
 -- Keep the current daily/weekly rank totals visible, but hide the current session's
 -- contribution immediately when its heartbeat has been absent for 12 hours.
@@ -92,7 +93,8 @@ SELECT
   CASE
     WHEN m.idle_stale OR m.paused_session_expired THEN false
     ELSE m.session_active
-  END AS session_active
+  END AS session_active,
+  m.session_expired_at
 FROM visible_totals AS m
 WHERE study_room_private.profile_is_complete(m.user_id);
 
@@ -147,6 +149,7 @@ BEGIN
       session_today_date = local_day,
       session_week_seconds = 0,
       session_week_start = monday,
+      session_expired_at = reference_now,
       updated_at = reference_now
     WHERE user_id = member_row.user_id;
   END LOOP;
@@ -307,6 +310,7 @@ BEGIN
       ELSE 0
     END,
     session_week_start = monday,
+    session_expired_at = NULL,
     session_started_at = now(),
     last_heartbeat_at = now(),
     updated_at = now()
@@ -361,6 +365,7 @@ BEGIN
       session_today_date = local_day,
       session_week_seconds = 0,
       session_week_start = monday,
+      session_expired_at = NULL,
       last_heartbeat_at = NULL,
       updated_at = CASE WHEN is_studying THEN now() ELSE updated_at END
   WHERE user_id = uid;
@@ -402,6 +407,7 @@ BEGIN
           session_today_date = timezone('Asia/Colombo', now())::date,
           session_week_seconds = 0,
           session_week_start = public.study_room_local_week_start(timezone('Asia/Colombo', now())::date),
+          session_expired_at = NULL,
           updated_at = now()
       WHERE is_studying = false
         AND session_active = true
