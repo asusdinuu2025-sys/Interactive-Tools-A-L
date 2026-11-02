@@ -1836,3 +1836,90 @@ html[data-theme="light"] .sl-feed-comment-menu-delete:hover {
   background:rgba(220,65,85,.09);
 }
 
+
+
+/* Social interaction polish: keep comment menus clear of following replies and
+   animate only the element that is actually changing. */
+.sl-feed-comment { position:relative; }
+.sl-feed-comment-menu[open] { z-index:40; }
+.sl-feed-comment-menu-panel {
+  top:auto;
+  bottom:calc(100% + 5px);
+  transform-origin:bottom right;
+  animation:sl-social-menu-in .16s cubic-bezier(.2,.8,.2,1) both;
+}
+.sl-feed-comment-menu[open] > .sl-feed-comment-menu-toggle {
+  transform:scale(1.04);
+}
+.sl-feed-comment-menu-toggle { transition:transform .16s ease,background .16s ease,border-color .16s ease,color .16s ease; }
+.sl-feed-post.is-entering {
+  animation:sl-social-post-in .34s cubic-bezier(.2,.8,.2,1) both;
+}
+.sl-feed-post-actions .sl-feed-action {
+  transition:transform .16s ease,background .16s ease,border-color .16s ease,box-shadow .16s ease;
+}
+.sl-feed-post-actions .sl-feed-action:hover:not(:disabled) {
+  transform:translateY(-1px);
+  border-color:rgba(91,196,245,.4);
+  box-shadow:0 5px 14px rgba(45,150,210,.12);
+}
+.sl-feed-post-actions .sl-feed-action.is-liked {
+  animation:sl-social-like-pop .28s cubic-bezier(.2,.8,.2,1);
+}
+.sl-feed-action-spinner {
+  display:inline-block;
+  width:11px;
+  height:11px;
+  margin-right:6px;
+  border:2px solid currentColor;
+  border-right-color:transparent;
+  border-radius:50%;
+  vertical-align:-1px;
+  animation:sl-feed-upload-spin .65s linear infinite;
+}
+.sl-feed-stream::before { content:none; }
+.sl-feed-stream.is-loading::before {
+  content:"";
+  position:sticky;
+  top:0;
+  z-index:25;
+  display:block;
+  width:100%;
+  height:3px;
+  margin:0 0 8px;
+  border-radius:99px;
+  background:linear-gradient(90deg,transparent 0%,#55c9ff 38%,#8b82ff 58%,transparent 100%);
+  background-size:200% 100%;
+  box-shadow:0 0 10px rgba(85,201,255,.35);
+  animation:sl-feed-loading-sweep 1.05s linear infinite;
+  pointer-events:none;
+}
+.sl-feed-comment.is-action-pending { opacity:.78; }
+.sl-feed-comment-form button:disabled { cursor:wait; }
+@keyframes sl-social-menu-in {
+  from { opacity:0; transform:translateY(4px) scale(.97); }
+  to { opacity:1; transform:translateY(0) scale(1); }
+}
+@keyframes sl-social-post-in {
+  from { opacity:0; transform:translateY(9px) scale(.992); }
+  to { opacity:1; transform:translateY(0) scale(1); }
+}
+@keyframes sl-social-like-pop {
+  0% { transform:scale(1); }
+  45% { transform:scale(1.08); }
+  100% { transform:scale(1); }
+}
+@keyframes sl-feed-loading-sweep {
+  from { background-position:100% 0; }
+  to { background-position:-100% 0; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .sl-feed-comment-menu-panel,.sl-feed-post.is-entering,
+  .sl-feed-post-actions .sl-feed-action.is-liked,
+  .sl-feed-stream.is-loading::before {
+    animation:none !important;
+  }
+  .sl-feed-post-actions .sl-feed-action,
+  .sl-feed-comment-menu-toggle { transition:none !important; }
+  .sl-feed-action-spinner { animation:none !important; border-right-color:currentColor; }
+}
