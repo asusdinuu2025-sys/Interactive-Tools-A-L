@@ -198,6 +198,58 @@ BEGIN
 END;
 $function$;
 
+-- Preserve the exact stale-session credit endpoint if a returning student presses End.
+-- A normal active Pause/End still records the current server time.
+CREATE OR REPLACE FUNCTION public.study_room_pause()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $function$
+DECLARE
+  uid uuid := auth.uid();
+BEGIN
+  IF uid IS NULL THEN RAISE EXCEPTION 'Sign-in required'; END IF;
+
+  PERFORM public.study_room_heartbeat();
+
+  UPDATE public.study_room_members
+  SET is_studying = false,
+      session_active = true,
+      session_started_at = NULL,
+      last_heartbeat_at = NULL,
+      updated_at = CASE WHEN is_studying THEN now() ELSE updated_at END
+  WHERE user_id = uid
+    AND session_active = true;
+END;
+$function$;
+
+CREATE OR REPLACE FUNCTION public.study_room_end()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $function$
+DECLARE
+  uid uuid := auth.uid();
+  local_day date := timezone('Asia/Colombo', now())::date;
+BEGIN
+  IF uid IS NULL THEN RAISE EXCEPTION 'Sign-in required'; END IF;
+
+  PERFORM public.study_room_heartbeat();
+
+  UPDATE public.study_room_members
+  SET is_studying = false,
+      session_active = false,
+      session_started_at = NULL,
+      session_elapsed_seconds = 0,
+      session_date = local_day,
+      last_heartbeat_at = NULL,
+      updated_at = CASE WHEN is_studying THEN now() ELSE updated_at END
+  WHERE user_id = uid;
+END;
+$function$;
+
 -- Clear only paused sessions from a previous Sri Lanka calendar day.
 -- Daily and weekly ranking totals are deliberately not touched here.
 CREATE OR REPLACE FUNCTION public.study_room_run_maintenance()
