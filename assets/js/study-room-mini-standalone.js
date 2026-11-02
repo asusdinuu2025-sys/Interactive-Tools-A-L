@@ -6,7 +6,6 @@
   const startButton = $("start"), pauseButton = $("pause"), endButton = $("end");
   let client = null, userId = null, row = null, heartbeatRetry = null, heartbeatBusy = false;
   const HEARTBEAT_MS = 60000;
-  const TIMEOUT_MS = 90000;
   const dayKey = date => new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Colombo", year: "numeric", month: "2-digit", day: "2-digit"
   }).format(date);
@@ -18,11 +17,11 @@
   function pendingSeconds() {
     if (!row?.is_studying || !row.last_heartbeat_at) return 0;
     const age = Date.now() - new Date(row.last_heartbeat_at).getTime();
-    if (!Number.isFinite(age) || age >= TIMEOUT_MS) return 0;
-    return Math.min(90, Math.max(0, Math.floor(age / 1000)));
+    if (!Number.isFinite(age)) return 0;
+    return Math.max(0, Math.floor(age / 1000));
   }
   function render() {
-    // The server-side view already applies the authoritative 90-second timeout.
+    // The server-side view expires abandoned sessions after 24 hours.
     const active = Boolean(row?.is_studying && row.last_heartbeat_at);
     const hasSession = Boolean(row?.session_active);
     const base = row && (row.session_active || row.is_studying)
