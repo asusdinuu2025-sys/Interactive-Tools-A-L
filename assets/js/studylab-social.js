@@ -233,6 +233,23 @@
     if (error) throw error;
     return data.signedUrl;
   }
+  async function getSignedImageUrls(client, posts) {
+    const paths = [...new Set(posts.flatMap(post =>
+      (post.studylab_social_post_images || []).slice(0, MAX_IMAGES)
+        .map(image => image.bucket_path).filter(Boolean)
+    ))];
+    if (!paths.length) return new Map();
+    const { data, error } = await client.storage.from(BUCKET).createSignedUrls(paths, 3600);
+    if (error) {
+      console.warn("Social image URLs could not be prepared:", error);
+      return new Map();
+    }
+    const urls = new Map();
+    for (const item of data || []) {
+      if (item.path && item.signedUrl && !item.error) urls.set(item.path, item.signedUrl);
+    }
+    return urls;
+  }
   async function getPostRows(client, ownId) {
     const { data, error } = await client.from("studylab_social_posts")
       .select("id,author_id,author_display_name,author_username,author_gender,body,status,created_at,studylab_social_post_images(id,bucket_path,mime_type,size_bytes)")
@@ -240,7 +257,7 @@
     if (error) throw error;
     return (data || []).filter(post => post.status === "approved" || post.author_id === ownId);
   }
-  async function renderPost(client, post, currentUserId, likesByPost, commentCountsByPost) {
+  function renderPost(client, post, currentUserId, likesByPost, commentCountsByPost, signedImageUrls) {
     const card = make("article", "sl-feed-post");
     card.dataset.postId = post.id;
     card.dataset.authorId = post.author_id;
@@ -307,17 +324,14 @@
       gallery.dataset.count = String(Math.min(imageRows.length, MAX_IMAGES));
       galleryWrap.dataset.count = String(Math.min(imageRows.length, MAX_IMAGES));
       for (const imageRow of imageRows.slice(0, MAX_IMAGES)) {
-        try {
-          const url = await signedImageUrl(client, imageRow.bucket_path);
-          const img = document.createElement("img");
-          img.src = url;
-          img.alt = "Photo shared in a StudyLab Social post";
-          img.loading = "lazy";
-          img.decoding = "async";
-          gallery.append(img);
-        } catch (error) {
-          console.warn("Social image could not be loaded:", error);
-        }
+        const url = signedImageUrls.get(imageRow.bucket_path);
+        if (!url) continue;
+        const img = document.createElement("img");
+        img.src = url;
+        img.alt = "Photo shared in a StudyLab Social post";
+        img.loading = "lazy";
+        img.decoding = "async";
+        gallery.append(img);
       }
       gallery.dataset.count = String(gallery.childElementCount);
       galleryWrap.dataset.count = String(gallery.childElementCount);
@@ -677,11 +691,17 @@
         posts.sort((a,b) => new Date(b.created_at)-new Date(a.created_at));
       }
       ensureFeedControls();
-      stream.replaceChildren();
-      if (!posts.length) emptyState("No approved posts yet");
-      for (const post of posts) {
-        const card = await renderPost(account.client, post, user.id, likesByPost, commentCountsByPost);
-        stream.append(card);
+      if (!posts.length) {
+        emptyState("No approved posts yet");
+      } else {
+        // Sign all post images in one Storage request instead of waiting on
+        // a separate network round-trip for each image in every post.
+        const signedImageUrls = await getSignedImageUrls(account.client, posts);
+        const cards = posts.map(post =>
+          renderPost(account.client, post, user.id, likesByPost, commentCountsByPost, signedImageUrls)
+        );
+        // Replace the feed once to avoid repeated layout and paint work per post.
+        stream.replaceChildren(...cards);
       }
       if (isAdmin) await renderAdminQueue(account.client);
       else panel.querySelector(".sl-feed-admin-queue")?.remove();
