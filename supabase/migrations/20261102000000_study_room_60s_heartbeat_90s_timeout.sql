@@ -47,7 +47,7 @@ GRANT SELECT ON public.study_room_live TO authenticated;
 -- Pause stale running sessions and credit no more than the 90-second grace window.
 -- Do not advance session_date here: midnight cleanup must still recognize a session
 -- abandoned on the previous local day.
-CREATE OR REPLACE FUNCTION public.study_room_pause_stale_sessions()
+CREATE OR REPLACE FUNCTION public.study_room_pause_stale_sessions(p_user_id uuid DEFAULT NULL)
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -69,6 +69,7 @@ BEGIN
     SELECT *
     FROM public.study_room_members
     WHERE is_studying = true
+      AND (p_user_id IS NULL OR user_id = p_user_id)
       AND (
         last_heartbeat_at IS NULL
         OR last_heartbeat_at <= reference_now - interval '90 seconds'
@@ -145,7 +146,7 @@ DECLARE
 BEGIN
   IF uid IS NULL THEN RAISE EXCEPTION 'Sign-in required'; END IF;
 
-  PERFORM public.study_room_pause_stale_sessions();
+  PERFORM public.study_room_pause_stale_sessions(uid);
 
   IF NOT study_room_private.profile_is_complete(uid) THEN
     UPDATE public.study_room_members
@@ -223,7 +224,7 @@ BEGIN
 END;
 $function$;
 
-REVOKE ALL ON FUNCTION public.study_room_pause_stale_sessions() FROM public, anon, authenticated;
+REVOKE ALL ON FUNCTION public.study_room_pause_stale_sessions(uuid) FROM public, anon, authenticated;
 REVOKE ALL ON FUNCTION public.study_room_run_maintenance() FROM public, anon, authenticated;
 REVOKE ALL ON FUNCTION public.study_room_heartbeat() FROM public, anon;
 GRANT EXECUTE ON FUNCTION public.study_room_heartbeat() TO authenticated;
