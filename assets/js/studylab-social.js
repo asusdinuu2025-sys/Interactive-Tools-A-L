@@ -600,7 +600,29 @@
       yes.type = no.type = "button";
       yes.addEventListener("click", () => moderate(client, "studylab_social_moderate_post", post.id, "approved"));
       no.addEventListener("click", () => moderate(client, "studylab_social_moderate_post", post.id, "rejected"));
-      actions.append(yes, no); item.append(actions); list.append(item);
+      const remove = make("button", "sl-feed-delete-post", "Delete post");
+      remove.type = "button";
+      remove.addEventListener("click", async () => {
+        if (!window.confirm("Permanently delete this student's post? This cannot be undone.")) return;
+        remove.disabled = true;
+        try {
+          const imagePaths = imageRows.map(row => row.bucket_path).filter(Boolean);
+          if (imagePaths.length) {
+            const { error: storageError } = await client.storage.from(BUCKET).remove(imagePaths);
+            if (storageError) throw storageError;
+          }
+          const { data: deleted, error } = await client.from("studylab_social_posts")
+            .delete().eq("id", post.id).select("id").maybeSingle();
+          if (error) throw error;
+          if (!deleted) throw new Error("This post could not be deleted.");
+          setStatus("Student post deleted.");
+          await loadFeed();
+        } catch (error) {
+          setStatus(error.message || "Could not delete this post.", true);
+          remove.disabled = false;
+        }
+      });
+      actions.append(yes, no, remove); item.append(actions); list.append(item);
     }
     for (const comment of comments || []) {
       const item = make("div", "sl-feed-admin-item");
