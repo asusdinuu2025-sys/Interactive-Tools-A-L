@@ -319,6 +319,8 @@
           console.warn("Social image could not be loaded:", error);
         }
       }
+      gallery.dataset.count = String(gallery.childElementCount);
+      galleryWrap.dataset.count = String(gallery.childElementCount);
       if (gallery.childElementCount > 1) {
         const previous = make("button", "sl-feed-gallery-arrow sl-feed-gallery-prev", "‹");
         previous.type = "button";
