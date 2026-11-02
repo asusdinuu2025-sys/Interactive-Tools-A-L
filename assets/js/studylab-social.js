@@ -151,11 +151,28 @@
     if (text !== undefined) node.textContent = text;
     return node;
   }
+  function animateOut(node, className) {
+    if (!node?.isConnected) return Promise.resolve();
+    node.classList.add(className);
+    return new Promise(resolve => {
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        node.removeEventListener("animationend", finish);
+        node.remove();
+        resolve();
+      };
+      node.addEventListener("animationend", finish, { once: true });
+      window.setTimeout(finish, 360);
+    });
+  }
   function emptyState(message) {
     stream.replaceChildren();
     const box = make("div", "sl-feed-empty");
-    const icon = make("span", "sl-feed-empty-icon", "✦");
+    const icon = make("span", "sl-feed-empty-icon");
     icon.setAttribute("aria-hidden", "true");
+    icon.innerHTML = '<svg viewBox="0 0 64 64"><path d="m5 23 27-12 27 12-27 12L5 23Z"/><path d="M16 28v13c9 8 23 8 32 0V28M58 24v17"/><path d="M55 44h6"/></svg>';
     const heading = make("h3", "", message);
     const detail = make("p", "", "Be the first to share a useful question, study tip or learning moment with the StudyLab community.");
     box.append(icon, heading, detail);
@@ -458,6 +475,7 @@
           }
           setStatus(cleanupWarning ? "Post deleted. Some image storage may need cleanup." :
             (deletingAnotherStudentPost ? "Student post deleted." : "Your post was deleted."));
+          await animateOut(card, "is-removing");
           await loadFeed();
         } catch (error) {
           setStatus(error.message || "Could not delete this post.", true);
@@ -483,7 +501,7 @@
       if (error) throw error;
       area.replaceChildren();
       (data || []).forEach(comment => {
-        const item = make("div", "sl-feed-comment");
+        const item = make("div", "sl-feed-comment is-entering");
         const header = make("div", "sl-feed-comment-head");
         const commentGender = comment.author_gender === "female" ? "female" : comment.author_gender === "male" ? "male" : "neutral";
         const commentAvatar = make("span","sl-feed-comment-avatar sl-feed-avatar-" + commentGender);
@@ -503,6 +521,7 @@
               if (deleteError) throw deleteError;
               if (!deleted) throw new Error("This comment could not be deleted. Check your permissions.");
               setStatus("Comment deleted.");
+              await animateOut(item, "is-removing");
               await toggleComments(card, post, client, currentUserId);
               await loadFeed();
             } catch (deleteError) {
@@ -575,7 +594,12 @@
       list.append(row);
     }
   }
+  let feedLoadCount = 0;
   async function loadFeed() {
+    feedLoadCount++;
+    const refreshButton = panel.querySelector(".sl-feed-refresh");
+    refreshButton?.classList.add("is-refreshing");
+    refreshButton?.setAttribute("aria-busy", "true");
     if (!feedHasLoaded) showSkeletons();
     try {
       const account = accountClient();
@@ -654,6 +678,12 @@
         note.textContent = error.message || "Could not connect to StudyLab Social. Please try again.";
       }
       feedHasLoaded = true;
+    } finally {
+      feedLoadCount = Math.max(0, feedLoadCount - 1);
+      if (feedLoadCount === 0) {
+        refreshButton?.classList.remove("is-refreshing");
+        refreshButton?.removeAttribute("aria-busy");
+      }
     }
   }
 
