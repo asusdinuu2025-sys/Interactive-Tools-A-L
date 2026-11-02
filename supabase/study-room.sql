@@ -915,25 +915,7 @@ REVOKE ALL ON FUNCTION public.study_room_set_subject(text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.study_room_set_subject(text) TO authenticated;
 
 
--- Run the abandoned-session watchdog once per minute.
--- It credits the last bounded interval, pauses the session, and never wipes
--- daily or weekly totals. Re-running this setup replaces the named job safely.
-DO $schedule$
-DECLARE existing_job bigint;
-BEGIN
-  FOR existing_job IN
-    SELECT jobid FROM cron.job
-    WHERE jobname IN ('study-room-expire-idle-sessions', 'study-room-pause-stale-sessions')
-  LOOP
-    PERFORM cron.unschedule(existing_job);
-  END LOOP;
-  PERFORM cron.schedule(
-    'study-room-pause-stale-sessions',
-    '* * * * *',
-    'SELECT public.study_room_pause_stale_sessions();'
-  );
-END;
-$schedule$;
+
 
 
 -- Final background-tab grace period.
@@ -1018,6 +1000,24 @@ $function$;
 -- This SECURITY DEFINER function is internal-only. The optional user ID is
 -- used by the authenticated heartbeat RPC and the scheduled database job.
 REVOKE ALL ON FUNCTION public.study_room_pause_stale_sessions(uuid) FROM PUBLIC, anon, authenticated;
+
+-- Schedule only after the watchdog function exists. Re-running this setup is safe.
+DO $schedule$
+DECLARE existing_job bigint;
+BEGIN
+  FOR existing_job IN
+    SELECT jobid FROM cron.job
+    WHERE jobname IN ('study-room-expire-idle-sessions', 'study-room-pause-stale-sessions')
+  LOOP
+    PERFORM cron.unschedule(existing_job);
+  END LOOP;
+  PERFORM cron.schedule(
+    'study-room-pause-stale-sessions',
+    '* * * * *',
+    'SELECT public.study_room_pause_stale_sessions();'
+  );
+END;
+$schedule$;
 
 CREATE OR REPLACE VIEW public.study_room_live
 WITH (security_invoker = true) AS
