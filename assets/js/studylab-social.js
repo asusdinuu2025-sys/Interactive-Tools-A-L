@@ -376,10 +376,13 @@
         const url = signedImageUrls.get(imageRow.bucket_path);
         if (!url) continue;
         const img = document.createElement("img");
-        img.src = url;
         img.alt = "Photo shared in a StudyLab Social post";
         img.loading = "lazy";
         img.decoding = "async";
+        img.addEventListener("load", () => img.classList.add("is-loaded"), { once: true });
+        img.addEventListener("error", () => img.classList.add("is-error"), { once: true });
+        img.src = url;
+        if (img.complete && img.naturalWidth) img.classList.add("is-loaded");
         gallery.append(img);
       }
       gallery.dataset.count = String(gallery.childElementCount);
@@ -671,6 +674,7 @@
     refreshButton?.classList.add("is-refreshing");
     refreshButton?.setAttribute("aria-busy", "true");
     stream.classList.add("is-loading");
+    stream.setAttribute("aria-busy", "true");
     if (!feedHasLoaded) showSkeletons();
     try {
       const account = accountClient();
@@ -699,26 +703,30 @@
       renderCommunityProfiles(posts);
       const approvedIds = posts.filter(post => post.status === "approved").map(post => post.id);
       const likesByPost = new Map();
+      const commentCountsByPost = new Map();
+      // Fetch engagement data and signed image URLs concurrently so the feed
+      // does not wait through several serial network round-trips.
       if (approvedIds.length) {
-        const { data: likeRows, error: likesError } = await account.client.from("studylab_social_likes")
-          .select("post_id,user_id").in("post_id", approvedIds);
-        if (likesError) throw likesError;
-        for (const row of likeRows || []) {
+        const [likesResult, commentsResult] = await Promise.all([
+          account.client.from("studylab_social_likes")
+            .select("post_id,user_id").in("post_id", approvedIds),
+          account.client.from("studylab_social_comments")
+            .select("post_id").in("post_id", approvedIds).eq("status", "approved")
+        ]);
+        if (likesResult.error) throw likesResult.error;
+        for (const row of likesResult.data || []) {
           if (!likesByPost.has(row.post_id)) likesByPost.set(row.post_id, []);
           likesByPost.get(row.post_id).push(row);
         }
-      }
-      const commentCountsByPost = new Map();
-      if (approvedIds.length) {
-        try {
-          const { data: commentRows, error: commentsError } = await account.client.from("studylab_social_comments")
-            .select("post_id").in("post_id",approvedIds).eq("status","approved");
-          if (commentsError) throw commentsError;
-          for (const row of commentRows || []) commentCountsByPost.set(row.post_id,(commentCountsByPost.get(row.post_id)||0)+1);
-        } catch (commentsError) {
-          console.info("Social comment counts are unavailable:",commentsError);
+        if (commentsResult.error) {
+          console.info("Social comment counts are unavailable:", commentsResult.error);
+        } else {
+          for (const row of commentsResult.data || []) {
+            commentCountsByPost.set(row.post_id, (commentCountsByPost.get(row.post_id) || 0) + 1);
+          }
         }
       }
+      const signedImageUrls = await getSignedImageUrls(account.client, posts);
       if (sortMode === "popular") {
         posts.sort((a,b) => ((likesByPost.get(b.id)||[]).length - (likesByPost.get(a.id)||[]).length) ||
           (new Date(b.created_at)-new Date(a.created_at)));
@@ -729,9 +737,6 @@
       if (!posts.length) {
         emptyState("No posts yet");
       } else {
-        // Sign all post images in one Storage request instead of waiting on
-        // a separate network round-trip for each image in every post.
-        const signedImageUrls = await getSignedImageUrls(account.client, posts);
         const existingCards = new Map(
           [...stream.querySelectorAll(".sl-feed-post[data-post-id]")]
             .map(card => [card.dataset.postId, card])
@@ -776,6 +781,7 @@
       feedLoadCount = Math.max(0, feedLoadCount - 1);
       if (feedLoadCount === 0) {
         stream.classList.remove("is-loading");
+        stream.removeAttribute("aria-busy");
         refreshButton?.classList.remove("is-refreshing");
         refreshButton?.removeAttribute("aria-busy");
       }
