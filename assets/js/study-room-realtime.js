@@ -28,7 +28,7 @@
 
   // Keep a per-user list of open Study Room pages so closing one tab does not
   // pause a session that is still open in another tab or the detached timer.
-  const ROOM_PAGE_PRESENCE_TTL_MS = 5 * 60 * 1000;
+  const ROOM_PAGE_PRESENCE_TTL_MS = 12 * 60 * 60 * 1000;
   let roomPagePresencePrefix = null;
   let roomPagePresenceKey = null;
   let roomPagePresenceInterval = null;
@@ -88,7 +88,7 @@
     if (!url || !apiKey || !accessToken) return;
 
     // Best effort: keepalive lets the pause RPC finish while the page unloads.
-    // If the browser is killed without a lifecycle event, the 24-hour server
+    // If the browser is killed without a lifecycle event, the 12-hour server
     // fallback handles the abandoned session instead.
     try {
       window.fetch(url + "/rest/v1/rpc/study_room_pause", {
@@ -136,7 +136,7 @@
   const compact = seconds => fmt(seconds);
   const profileDuration = seconds => { const total=Math.max(0,Math.floor(Number(seconds)||0)); const hours=Math.floor(total/3600), minutes=Math.floor(total%3600/60); return hours ? hours+"h"+(minutes ? " "+minutes+"m" : "") : minutes+"m"; };
   const startOfDay = key => new Date(key + 'T00:00:00+05:30').getTime();
-  // Do not cap elapsed time: background tabs can throttle heartbeats, while the server keeps active sessions alive for up to 24 hours.
+  // Do not cap elapsed time: background tabs can throttle heartbeats, while the server keeps active sessions alive for up to 12 hours.
   function heartbeatIsFresh(row) {
     return Boolean(row?.is_studying && row.last_heartbeat_at);
   }
