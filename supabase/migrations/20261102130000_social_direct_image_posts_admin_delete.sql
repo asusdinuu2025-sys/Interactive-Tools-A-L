@@ -30,7 +30,7 @@ begin
   new.created_at := now();
   return new;
 end;
-$;
+$$;
 
 create or replace function public.studylab_social_prepare_comment()
 returns trigger
@@ -147,7 +147,7 @@ returns boolean
 language plpgsql
 security definer
 set search_path = public, pg_temp
-as $
+as $$
 begin
   if auth.uid() is null then
     raise exception 'Authentication required';
@@ -161,7 +161,7 @@ begin
 
   return found;
 end;
-$;
+$$;
 revoke all on function public.studylab_social_publish_own_post(uuid) from public, anon;
 grant execute on function public.studylab_social_publish_own_post(uuid) to authenticated;
 
