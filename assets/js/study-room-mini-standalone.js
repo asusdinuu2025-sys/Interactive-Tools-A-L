@@ -50,7 +50,7 @@
   function heartbeatWasRecentlySuccessful() {
     try {
       const key = "studylab:study-room-heartbeat:" + userId;
-      return Date.now() - Number(localStorage.getItem(key) || 0) < 45000;
+      return Date.now() - Number(localStorage.getItem(key) || 0) < 55000;
     } catch (_) { return false; }
   }
   async function heartbeat(isRetry = false) {
