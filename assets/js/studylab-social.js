@@ -704,8 +704,9 @@
       const approvedIds = posts.filter(post => post.status === "approved").map(post => post.id);
       const likesByPost = new Map();
       const commentCountsByPost = new Map();
-      // Fetch engagement data and signed image URLs concurrently so the feed
-      // does not wait through several serial network round-trips.
+      // Start image signing alongside engagement queries instead of waiting
+      // for one network stage to finish before starting the next.
+      const signedImageUrlsPromise = getSignedImageUrls(account.client, posts);
       if (approvedIds.length) {
         const [likesResult, commentsResult] = await Promise.all([
           account.client.from("studylab_social_likes")
@@ -726,7 +727,7 @@
           }
         }
       }
-      const signedImageUrls = await getSignedImageUrls(account.client, posts);
+      const signedImageUrls = await signedImageUrlsPromise;
       if (sortMode === "popular") {
         posts.sort((a,b) => ((likesByPost.get(b.id)||[]).length - (likesByPost.get(a.id)||[]).length) ||
           (new Date(b.created_at)-new Date(a.created_at)));
