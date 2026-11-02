@@ -1025,10 +1025,17 @@ CREATE OR REPLACE VIEW public.study_room_live
 WITH (security_invoker = true) AS
 WITH member_state AS (
   SELECT m.*,
+    timezone('Asia/Colombo', now())::date AS local_day,
     (m.is_studying AND (
       m.last_heartbeat_at IS NULL
       OR m.last_heartbeat_at <= now() - interval '24 hours'
-    )) AS idle_stale
+    )) AS idle_stale,
+    (m.session_active AND NOT m.is_studying
+      AND m.session_date IS DISTINCT FROM timezone('Asia/Colombo', now())::date
+    ) AS paused_session_expired,
+    (m.is_studying
+      AND m.session_date IS DISTINCT FROM timezone('Asia/Colombo', now())::date
+    ) AS session_day_changed
   FROM public.study_room_members AS m
 )
 SELECT
@@ -1036,23 +1043,60 @@ SELECT
   study_room_private.display_name_for_member(m.user_id) AS display_name,
   m.subject,
   CASE WHEN m.idle_stale THEN false ELSE m.is_studying END AS is_studying,
-  CASE WHEN m.idle_stale THEN NULL::timestamptz ELSE m.session_started_at END AS session_started_at,
-  CASE WHEN m.idle_stale THEN NULL::timestamptz ELSE m.last_heartbeat_at END AS last_heartbeat_at,
+  CASE WHEN m.idle_stale OR m.paused_session_expired THEN NULL::timestamptz ELSE m.session_started_at END AS session_started_at,
+  CASE WHEN m.idle_stale OR m.paused_session_expired THEN NULL::timestamptz ELSE m.last_heartbeat_at END AS last_heartbeat_at,
   m.today_seconds,
   m.today_date,
   m.week_seconds,
   m.week_start,
   m.updated_at,
   study_room_private.gender_for_member(m.user_id) AS gender,
-  CASE WHEN m.today_date = timezone('Asia/Colombo', now())::date
+  CASE WHEN m.today_date = m.local_day
        THEN m.today_time ELSE '00:00:00'::text END AS today_time,
-  CASE WHEN m.week_start = public.study_room_local_week_start(timezone('Asia/Colombo', now())::date)
+  CASE WHEN m.week_start = public.study_room_local_week_start(m.local_day)
        THEN m.week_time ELSE '00:00:00'::text END AS week_time,
-  m.session_elapsed_seconds,
-  m.session_date,
-  CASE WHEN m.idle_stale THEN true ELSE m.session_active END AS session_active
+  CASE WHEN m.idle_stale OR m.paused_session_expired OR m.session_day_changed
+       THEN 0 ELSE m.session_elapsed_seconds END AS session_elapsed_seconds,
+  CASE WHEN m.idle_stale OR m.paused_session_expired OR m.session_day_changed
+       THEN m.local_day ELSE m.session_date END AS session_date,
+  CASE WHEN m.idle_stale OR m.paused_session_expired
+       THEN false ELSE m.session_active END AS session_active
 FROM member_state AS m
 WHERE study_room_private.profile_is_complete(m.user_id);
 
 REVOKE ALL ON public.study_room_live FROM public, anon, authenticated;
 GRANT SELECT ON public.study_room_live TO authenticated;
+
+
+-- Physically expire paused sessions after Sri Lankan midnight.
+-- The live view masks these immediately; this minute-level cleanup keeps the
+-- underlying member row consistent even if the student does not return.
+DO $paused_session_schedule$
+DECLARE
+  existing_job bigint;
+BEGIN
+  FOR existing_job IN
+    SELECT jobid FROM cron.job WHERE jobname = 'study-room-expire-paused-sessions'
+  LOOP
+    PERFORM cron.unschedule(existing_job);
+  END LOOP;
+
+  PERFORM cron.schedule(
+    'study-room-expire-paused-sessions',
+    '* * * * *',
+    $job$
+      UPDATE public.study_room_members
+      SET is_studying = false,
+          session_active = false,
+          session_started_at = NULL,
+          last_heartbeat_at = NULL,
+          session_elapsed_seconds = 0,
+          session_date = timezone('Asia/Colombo', now())::date,
+          updated_at = now()
+      WHERE is_studying = false
+        AND session_active = true
+        AND session_date IS DISTINCT FROM timezone('Asia/Colombo', now())::date;
+    $job$
+  );
+END;
+$paused_session_schedule$;
