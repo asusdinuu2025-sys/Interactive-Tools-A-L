@@ -3,6 +3,10 @@ import path from "node:path";
 
 const ROOT = process.cwd();
 const BASE_URL = "https://studylablk.netlify.app/";
+const EXCLUDED_HTML_PATHS = new Set([
+  "study-room.html",
+  "study-room-mini.html"
+]);
 
 function xmlEscape(value) {
   return value
@@ -34,6 +38,7 @@ async function collectHtmlFiles(directory) {
 
 const files = (await collectHtmlFiles(ROOT))
   .map(file => path.relative(ROOT, file).split(path.sep).join("/"))
+  .filter(relative => !EXCLUDED_HTML_PATHS.has(relative))
   .sort();
 
 const urls = files.map(relative => {

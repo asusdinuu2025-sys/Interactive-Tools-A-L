@@ -23,8 +23,8 @@
   const board = $('leaderboardList');
   const dailyTab = $('dailyBoardTab');
   const weeklyTab = $('weeklyBoardTab');
-  let client, userId = null, member = null, rows = [], heartbeatInterval = null, uiInterval = null;
-  let heartbeatRetryTimer = null, heartbeatPromise = null;
+  let client, userId = null, member = null, rows = [], heartbeatInterval = null, uiInterval = null, rankRefreshInterval = null;
+  let heartbeatRetryTimer = null, heartbeatPromise = null, unloadPauseRequest = null, unloadPauseRequested = false;
 
   // Keep a per-user list of open Study Room pages so closing one tab does not
   // pause a session that is still open in another tab or the detached timer.
@@ -76,22 +76,22 @@
     return anotherPageOpen;
   }
 
-  function pauseWhenLastRoomPageCloses(event) {
-    // A page in the back/forward cache is frozen, not terminated.
-    if (event?.persisted || !roomPagePresenceKey) return;
-    try { localStorage.removeItem(roomPagePresenceKey); } catch (_) { roomPagePresenceStorageAvailable = false; }
-    if (hasAnotherRoomPageOpen()) return;
+  function removeRoomPagePresence() {
+    if (!roomPagePresenceKey) return;
+    try { localStorage.removeItem(roomPagePresenceKey); }
+    catch (_) { roomPagePresenceStorageAvailable = false; }
+  }
 
+  function sendUnloadPause() {
+    if (unloadPauseRequest) return unloadPauseRequest;
     let url = String(window.STUDYLAB_SUPABASE_URL || "");
     while (url.endsWith("/")) url = url.slice(0, -1);
     const apiKey = window.STUDYLAB_SUPABASE_ANON_KEY;
-    if (!url || !apiKey || !accessToken) return;
-
-    // Best effort: keepalive lets the pause RPC finish while the page unloads.
-    // If the browser is killed without a lifecycle event, the 12-hour server
-    // fallback handles the abandoned session instead.
+    if (!url || !apiKey || !accessToken) return Promise.resolve(false);
+    // A keepalive fetch can continue after the document starts unloading.
+    // The RPC is intentionally tiny and authenticates with the student's own token.
     try {
-      window.fetch(url + "/rest/v1/rpc/study_room_pause", {
+      unloadPauseRequest = window.fetch(url + "/rest/v1/rpc/study_room_pause", {
         method: "POST",
         headers: {
           apikey: apiKey,
@@ -101,10 +101,86 @@
         body: "{}",
         keepalive: true,
         credentials: "omit"
-      }).catch(error => console.warn("Study Room close-pause request failed", error));
+      }).then(response => {
+        if (!response.ok) throw new Error("Pause request returned HTTP " + response.status);
+        return true;
+      }).catch(error => {
+        console.warn("Study Room close-pause request failed", error);
+        return false;
+      });
+      return unloadPauseRequest;
     } catch (error) {
       console.warn("Could not send Study Room close-pause request", error);
+      unloadPauseRequest = Promise.resolve(false);
+      return unloadPauseRequest;
     }
+  }
+
+  function applyImmediateLocalPause() {
+    if (!member?.is_studying) return;
+    member = {
+      ...member,
+      is_studying: false,
+      session_active: true,
+      session_started_at: null,
+      last_heartbeat_at: null,
+      updated_at: new Date().toISOString()
+    };
+    rows = rows.map(row => row.user_id === userId ? { ...row, ...member } : row);
+    updateSessionUI(member);
+    updatePersonal();
+    renderPeople();
+    renderBoard();
+  }
+
+  async function resumeAfterCanceledUnload() {
+    if (!unloadPauseRequested || document.visibilityState !== "visible" || !document.hasFocus()) return;
+    unloadPauseRequested = false;
+    registerRoomPagePresence();
+    const pauseWasSaved = await (unloadPauseRequest || Promise.resolve(false));
+    unloadPauseRequest = null;
+    try {
+      await loadRows();
+      // If the user chose Stay, restore the running session only after the pause
+      // request has settled, avoiding a pause/start race at the database.
+      if (pauseWasSaved && member?.session_active && !member?.is_studying) {
+        await callRpc("study_room_start");
+        await loadRows();
+      }
+      say(member?.is_studying
+        ? "You stayed in the Study Room, so your session has resumed."
+        : "Your session is paused. Press Start when you are ready to continue.");
+    } catch (error) {
+      console.warn("Could not restore the Study Room after canceling navigation", error);
+      say("Your session is paused. Press Start to continue.", true);
+    }
+  }
+
+  function pauseWhenLastRoomPageCloses(event) {
+    // A page in the back/forward cache is frozen, not terminated.
+    if (event?.persisted || !roomPagePresenceKey) return;
+    removeRoomPagePresence();
+    if (hasAnotherRoomPageOpen() || !member?.is_studying || unloadPauseRequest) return;
+    applyImmediateLocalPause();
+    sendUnloadPause();
+  }
+
+  function warnBeforeLeavingRoom(event) {
+    if (!roomPagePresenceKey || !member?.is_studying) return;
+    removeRoomPagePresence();
+    if (hasAnotherRoomPageOpen()) return;
+
+    // Pause locally before the browser displays its generic unsaved-changes dialog.
+    // Browsers do not allow custom dialog text or waiting for a network request here.
+    applyImmediateLocalPause();
+    unloadPauseRequested = true;
+    sendUnloadPause();
+    event.preventDefault();
+    event.returnValue = "";
+
+    // If the student chooses Stay, the page becomes active again. Wait for the
+    // keepalive pause to settle before restarting the same session.
+    window.setTimeout(resumeAfterCanceledUnload, 1500);
   }
 
   function startRoomPagePresenceLifecycle() {
@@ -112,6 +188,7 @@
     if (!roomPagePresenceInterval) {
       roomPagePresenceInterval = window.setInterval(registerRoomPagePresence, 60000);
     }
+    window.addEventListener("beforeunload", warnBeforeLeavingRoom);
     window.addEventListener("pagehide", pauseWhenLastRoomPageCloses);
     window.addEventListener("pageshow", event => {
       if (event.persisted) registerRoomPagePresence();
@@ -216,7 +293,7 @@
       ? 'Ranked by total study time this week among Study Room members'
       : 'Your rank appears after your Study Room record is available';
     const thisWeek = own && own.week_start === currentWeek ? Number(own.week_seconds) || 0 : 0;
-    weeklyHours.textContent = compact(thisWeek + pendingSeconds(own, startOfDay(currentWeek)));
+    weeklyHours.textContent = profileDuration(thisWeek + pendingSeconds(own, startOfDay(currentWeek)));
     people.replaceChildren();
     if (!active.length) {
       people.innerHTML = '<p class="room-empty">No one is studying right now. Be the first to start.</p>';
@@ -281,7 +358,7 @@
   }
   async function loadRows() {
     const {data,error} = await client.from('study_room_live').select(
-      'user_id,display_name,gender,subject,is_studying,session_active,session_started_at,session_elapsed_seconds,session_date,last_heartbeat_at,today_seconds,today_date,week_seconds,week_start,updated_at'
+      'user_id,display_name,gender,subject,is_studying,session_active,session_started_at,session_elapsed_seconds,session_date,last_heartbeat_at,today_seconds,today_date,week_seconds,week_start,updated_at,session_expired_at'
     );
     if (error) throw error;
     rows = data || [];
@@ -386,7 +463,8 @@
       status: member?.is_studying ? 'Studying' : member?.session_active ? 'Paused' : 'Not studying',
       lastHeartbeatAt: member?.last_heartbeat_at || null,
       sessionStartedAt: member?.session_started_at || null,
-      updatedAt: member?.updated_at || null
+      updatedAt: member?.updated_at || null,
+      sessionExpiredAt: member?.session_expired_at || null
     };
   }
   function emitTimerState() {
@@ -452,8 +530,23 @@
       weeklyTab.addEventListener('click', () => { selectedBoard = 'weekly'; renderBoard(); });
       goal.addEventListener('change', updatePersonal);
       heartbeatInterval = setInterval(heartbeat, 60000);
+      // Re-fetch the shared rows once per minute even if Realtime drops an event.
+      // This keeps both daily and weekly rankings fresh for paused and active members.
+      rankRefreshInterval = setInterval(() => {
+        // The normal heartbeat refreshes active members; this fallback covers
+        // paused members and cases where a Realtime event was missed.
+        if (!heartbeatPromise) {
+          loadRows().catch(error => console.error('Could not refresh Study Room rankings', error));
+        }
+      }, 60000);
       uiInterval = setInterval(updatePersonal, 1000);
-      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { registerRoomPagePresence(); heartbeat(); } });
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          registerRoomPagePresence();
+          heartbeat();
+          loadRows().catch(error => console.error('Could not refresh Study Room after returning', error));
+        }
+      });
       window.addEventListener('online', heartbeat);
       await heartbeat();
       say('Connected to the shared Study Room. Attendance and leaderboard updates are live.');

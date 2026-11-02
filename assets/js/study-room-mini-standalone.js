@@ -5,6 +5,7 @@
   const clock = $("clock"), status = $("status");
   const startButton = $("start"), pauseButton = $("pause"), endButton = $("end");
   let client = null, userId = null, row = null, heartbeatRetry = null, heartbeatBusy = false;
+  let unloadPauseRequest = null, unloadPauseRequested = false;
 
   // Keep a per-user list of open Study Room pages so closing one tab does not
   // pause a session that is still open in another tab or the detached timer.
@@ -56,22 +57,20 @@
     return anotherPageOpen;
   }
 
-  function pauseWhenLastRoomPageCloses(event) {
-    // A page in the back/forward cache is frozen, not terminated.
-    if (event?.persisted || !roomPagePresenceKey) return;
-    try { localStorage.removeItem(roomPagePresenceKey); } catch (_) { roomPagePresenceStorageAvailable = false; }
-    if (hasAnotherRoomPageOpen()) return;
+  function removeRoomPagePresence() {
+    if (!roomPagePresenceKey) return;
+    try { localStorage.removeItem(roomPagePresenceKey); }
+    catch (_) { roomPagePresenceStorageAvailable = false; }
+  }
 
+  function sendUnloadPause() {
+    if (unloadPauseRequest) return unloadPauseRequest;
     let url = String(window.STUDYLAB_SUPABASE_URL || "");
     while (url.endsWith("/")) url = url.slice(0, -1);
     const apiKey = window.STUDYLAB_SUPABASE_ANON_KEY;
-    if (!url || !apiKey || !accessToken) return;
-
-    // Best effort: keepalive lets the pause RPC finish while the page unloads.
-    // If the browser is killed without a lifecycle event, the 12-hour server
-    // fallback handles the abandoned session instead.
+    if (!url || !apiKey || !accessToken) return Promise.resolve(false);
     try {
-      window.fetch(url + "/rest/v1/rpc/study_room_pause", {
+      unloadPauseRequest = window.fetch(url + "/rest/v1/rpc/study_room_pause", {
         method: "POST",
         headers: {
           apikey: apiKey,
@@ -81,10 +80,73 @@
         body: "{}",
         keepalive: true,
         credentials: "omit"
-      }).catch(error => console.warn("Study Room close-pause request failed", error));
+      }).then(response => {
+        if (!response.ok) throw new Error("Pause request returned HTTP " + response.status);
+        return true;
+      }).catch(error => {
+        console.warn("Study Room close-pause request failed", error);
+        return false;
+      });
+      return unloadPauseRequest;
     } catch (error) {
       console.warn("Could not send Study Room close-pause request", error);
+      unloadPauseRequest = Promise.resolve(false);
+      return unloadPauseRequest;
     }
+  }
+
+  function applyImmediateLocalPause() {
+    if (!row?.is_studying) return;
+    row = {
+      ...row,
+      is_studying: false,
+      session_active: true,
+      session_started_at: null,
+      last_heartbeat_at: null,
+      updated_at: new Date().toISOString()
+    };
+    render();
+  }
+
+  async function resumeAfterCanceledUnload() {
+    if (!unloadPauseRequested || document.visibilityState !== "visible" || !document.hasFocus()) return;
+    unloadPauseRequested = false;
+    registerRoomPagePresence();
+    const pauseWasSaved = await (unloadPauseRequest || Promise.resolve(false));
+    unloadPauseRequest = null;
+    try {
+      await loadRow();
+      if (pauseWasSaved && row?.session_active && !row?.is_studying) {
+        await rpc("study_room_start");
+        await loadRow();
+      }
+      status.textContent = row?.is_studying
+        ? "You stayed, so your study session has resumed."
+        : "Your session is paused. Press Start to continue.";
+    } catch (error) {
+      console.warn("Could not restore the detached timer after canceling navigation", error);
+      status.textContent = "Your session is paused. Press Start to continue.";
+    }
+  }
+
+  function pauseWhenLastRoomPageCloses(event) {
+    if (event?.persisted || !roomPagePresenceKey) return;
+    removeRoomPagePresence();
+    if (hasAnotherRoomPageOpen() || !row?.is_studying || unloadPauseRequest) return;
+    applyImmediateLocalPause();
+    sendUnloadPause();
+  }
+
+  function warnBeforeLeavingRoom(event) {
+    if (!roomPagePresenceKey || !row?.is_studying) return;
+    removeRoomPagePresence();
+    if (hasAnotherRoomPageOpen()) return;
+    applyImmediateLocalPause();
+    unloadPauseRequested = true;
+    sendUnloadPause();
+    event.preventDefault();
+    event.returnValue = "";
+    window.setTimeout(resumeAfterCanceledUnload, 1500);
   }
 
   function startRoomPagePresenceLifecycle() {
@@ -92,6 +154,7 @@
     if (!roomPagePresenceInterval) {
       roomPagePresenceInterval = window.setInterval(registerRoomPagePresence, 60000);
     }
+    window.addEventListener("beforeunload", warnBeforeLeavingRoom);
     window.addEventListener("pagehide", pauseWhenLastRoomPageCloses);
     window.addEventListener("pageshow", event => {
       if (event.persisted) registerRoomPagePresence();

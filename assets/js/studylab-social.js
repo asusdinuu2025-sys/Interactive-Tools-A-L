@@ -151,6 +151,25 @@
     if (text !== undefined) node.textContent = text;
     return node;
   }
+  function setButtonBusy(button, label) {
+    const original = button.textContent;
+    button.disabled = true;
+    button.classList.add("is-action-pending");
+    button.replaceChildren(make("span", "sl-feed-action-spinner"));
+    button.append(document.createTextNode(label));
+    return () => {
+      button.disabled = false;
+      button.classList.remove("is-action-pending");
+      button.textContent = original;
+    };
+  }
+  function adjustCommentCount(card, delta) {
+    const counter = card.querySelector("[data-comment-count]");
+    if (!counter) return;
+    const count = Math.max(0, Number(counter.dataset.commentCount || 0) + delta);
+    counter.dataset.commentCount = String(count);
+    counter.textContent = "Comments · " + count;
+  }
   function animateOut(node, className) {
     if (!node?.isConnected) return Promise.resolve();
     node.classList.add(className);
@@ -293,6 +312,7 @@
     const card = make("article", "sl-feed-post");
     card.dataset.postId = post.id;
     card.dataset.authorId = post.author_id;
+    card.dataset.currentUserId = currentUserId;
     card.dataset.authorUsername = post.author_username || "student";
     card.style.setProperty("--sl-post-accent", "hsl(" + (hashNumber(post.id) % 360) + " 82% 64%)");
     const gender = post.author_gender === "female" ? "female" : post.author_gender === "male" ? "male" : "neutral";
@@ -356,10 +376,13 @@
         const url = signedImageUrls.get(imageRow.bucket_path);
         if (!url) continue;
         const img = document.createElement("img");
-        img.src = url;
         img.alt = "Photo shared in a StudyLab Social post";
         img.loading = "lazy";
         img.decoding = "async";
+        img.addEventListener("load", () => img.classList.add("is-loaded"), { once: true });
+        img.addEventListener("error", () => img.classList.add("is-error"), { once: true });
+        img.src = url;
+        if (img.complete && img.naturalWidth) img.classList.add("is-loaded");
         gallery.append(img);
       }
       gallery.dataset.count = String(gallery.childElementCount);
@@ -421,14 +444,17 @@
     if (post.status === "approved") {
       const postLikes = likesByPost.get(post.id) || [];
       const mine = postLikes.some(row => row.user_id === currentUserId);
-      const count = postLikes.length;
-      const like = make("button", "sl-feed-action", (mine ? "♥ Liked" : "♡ Like") + " · " + count);
+      const likeState = { liked: mine, count: postLikes.length, button: null };
+      const like = make("button", "sl-feed-action", (likeState.liked ? "♥ Liked" : "♡ Like") + " · " + likeState.count);
+      likeState.button = like;
+      card._slSocialLikeState = likeState;
       like.type = "button";
-      like.setAttribute("aria-pressed", String(mine));
+      like.setAttribute("aria-pressed", String(likeState.liked));
       like.addEventListener("click", async () => {
-        like.disabled = true;
+        if (like.disabled) return;
+        const restore = setButtonBusy(like, "Updating…");
         try {
-          if (mine) {
+          if (likeState.liked) {
             const { error } = await client.from("studylab_social_likes").delete()
               .eq("post_id", post.id).eq("user_id", currentUserId);
             if (error) throw error;
@@ -437,14 +463,20 @@
               .insert({ post_id: post.id, user_id: currentUserId });
             if (error) throw error;
           }
-          await loadFeed();
+          likeState.liked = !likeState.liked;
+          likeState.count = Math.max(0, likeState.count + (likeState.liked ? 1 : -1));
+          restore();
+          like.textContent = (likeState.liked ? "♥ Liked" : "♡ Like") + " · " + likeState.count;
+          like.setAttribute("aria-pressed", String(likeState.liked));
+          like.classList.toggle("is-liked", likeState.liked);
         } catch (error) {
+          restore();
           setStatus(error.message || "Could not update like.", true);
-          like.disabled = false;
         }
       });
       const commentsButton = make("button", "sl-feed-action", "Comments · " + (commentCountsByPost.get(post.id) || 0));
       commentsButton.type = "button";
+      commentsButton.dataset.commentCount = String(commentCountsByPost.get(post.id) || 0);
       commentsButton.addEventListener("click", () => toggleComments(card, post, client, currentUserId));
       actions.append(like, commentsButton);
     }
@@ -476,7 +508,7 @@
           setStatus(cleanupWarning ? "Post deleted. Some image storage may need cleanup." :
             (deletingAnotherStudentPost ? "Student post deleted." : "Your post was deleted."));
           await animateOut(card, "is-removing");
-          await loadFeed();
+          if (!stream.querySelector(".sl-feed-post")) emptyState("No posts yet");
         } catch (error) {
           setStatus(error.message || "Could not delete this post.", true);
           removePost.disabled = false;
@@ -487,6 +519,23 @@
     card.append(actions);
 
     return card;
+  }
+  function syncPostCardState(card, post, likesByPost, commentCountsByPost) {
+    const likeState = card._slSocialLikeState;
+    if (likeState) {
+      const rows = likesByPost.get(post.id) || [];
+      likeState.liked = rows.some(row => row.user_id === card.dataset.currentUserId);
+      likeState.count = rows.length;
+      likeState.button.textContent = (likeState.liked ? "♥ Liked" : "♡ Like") + " · " + likeState.count;
+      likeState.button.setAttribute("aria-pressed", String(likeState.liked));
+      likeState.button.classList.toggle("is-liked", likeState.liked);
+    }
+    const commentButton = card.querySelector("[data-comment-count]");
+    if (commentButton) {
+      const count = commentCountsByPost.get(post.id) || 0;
+      commentButton.dataset.commentCount = String(count);
+      commentButton.textContent = "Comments · " + count;
+    }
   }
   async function toggleComments(card, post, client, currentUserId) {
     let area = card.querySelector(".sl-feed-comments");
@@ -525,7 +574,8 @@
           removeComment.addEventListener("click", async () => {
             if (!window.confirm("Delete this comment permanently? This cannot be undone.")) return;
             commentMenu.open = false;
-            removeComment.disabled = true;
+            const restore = setButtonBusy(removeComment, "Deleting…");
+            item.classList.add("is-action-pending");
             try {
               let deletion = client.from("studylab_social_comments").delete().eq("id", comment.id);
               if (!isAdmin) deletion = deletion.eq("author_id", currentUserId);
@@ -533,12 +583,16 @@
               if (deleteError) throw deleteError;
               if (!deleted) throw new Error("This comment could not be deleted. Check your permissions.");
               setStatus("Comment deleted.");
+              adjustCommentCount(card, -1);
               await animateOut(item, "is-removing");
-              await toggleComments(card, post, client, currentUserId);
-              await loadFeed();
+              if (!area.querySelector(".sl-feed-comment")) {
+                const empty = make("p", "sl-feed-loading", "No comments yet.");
+                area.insertBefore(empty, area.querySelector(".sl-feed-comment-form"));
+              }
             } catch (deleteError) {
+              restore();
+              item.classList.remove("is-action-pending");
               setStatus(deleteError.message || "Could not delete comment.", true);
-              removeComment.disabled = false;
             }
           });
           menuPanel.append(removeComment);
@@ -562,19 +616,22 @@
         event.preventDefault();
         const body = field.value.trim();
         if (!body) return;
-        send.disabled = true;
+        const restore = setButtonBusy(send, "Sending…");
+        field.disabled = true;
         try {
           const commenter = await requireBasicProfile();
           const { error } = await client.from("studylab_social_comments")
             .insert({ post_id: post.id, author_id: commenter.id, body });
           if (error) throw error;
+          adjustCommentCount(card, 1);
           field.value = "";
           area.remove();
           await toggleComments(card, post, client, currentUserId);
           setStatus("Comment published.");
         } catch (error) {
+          restore();
+          field.disabled = false;
           setStatus(error.message || "Could not submit comment.", true);
-          send.disabled = false;
         }
       });
       area.append(commentForm);
@@ -609,11 +666,15 @@
     }
   }
   let feedLoadCount = 0;
+  let lastFeedLoadedAt = 0;
   async function loadFeed() {
+    if (feedLoadCount > 0) return;
     feedLoadCount++;
     const refreshButton = panel.querySelector(".sl-feed-refresh");
     refreshButton?.classList.add("is-refreshing");
     refreshButton?.setAttribute("aria-busy", "true");
+    stream.classList.add("is-loading");
+    stream.setAttribute("aria-busy", "true");
     if (!feedHasLoaded) showSkeletons();
     try {
       const account = accountClient();
@@ -642,26 +703,31 @@
       renderCommunityProfiles(posts);
       const approvedIds = posts.filter(post => post.status === "approved").map(post => post.id);
       const likesByPost = new Map();
+      const commentCountsByPost = new Map();
+      // Start image signing alongside engagement queries instead of waiting
+      // for one network stage to finish before starting the next.
+      const signedImageUrlsPromise = getSignedImageUrls(account.client, posts);
       if (approvedIds.length) {
-        const { data: likeRows, error: likesError } = await account.client.from("studylab_social_likes")
-          .select("post_id,user_id").in("post_id", approvedIds);
-        if (likesError) throw likesError;
-        for (const row of likeRows || []) {
+        const [likesResult, commentsResult] = await Promise.all([
+          account.client.from("studylab_social_likes")
+            .select("post_id,user_id").in("post_id", approvedIds),
+          account.client.from("studylab_social_comments")
+            .select("post_id").in("post_id", approvedIds).eq("status", "approved")
+        ]);
+        if (likesResult.error) throw likesResult.error;
+        for (const row of likesResult.data || []) {
           if (!likesByPost.has(row.post_id)) likesByPost.set(row.post_id, []);
           likesByPost.get(row.post_id).push(row);
         }
-      }
-      const commentCountsByPost = new Map();
-      if (approvedIds.length) {
-        try {
-          const { data: commentRows, error: commentsError } = await account.client.from("studylab_social_comments")
-            .select("post_id").in("post_id",approvedIds).eq("status","approved");
-          if (commentsError) throw commentsError;
-          for (const row of commentRows || []) commentCountsByPost.set(row.post_id,(commentCountsByPost.get(row.post_id)||0)+1);
-        } catch (commentsError) {
-          console.info("Social comment counts are unavailable:",commentsError);
+        if (commentsResult.error) {
+          console.info("Social comment counts are unavailable:", commentsResult.error);
+        } else {
+          for (const row of commentsResult.data || []) {
+            commentCountsByPost.set(row.post_id, (commentCountsByPost.get(row.post_id) || 0) + 1);
+          }
         }
       }
+      const signedImageUrls = await signedImageUrlsPromise;
       if (sortMode === "popular") {
         posts.sort((a,b) => ((likesByPost.get(b.id)||[]).length - (likesByPost.get(a.id)||[]).length) ||
           (new Date(b.created_at)-new Date(a.created_at)));
@@ -672,14 +738,33 @@
       if (!posts.length) {
         emptyState("No posts yet");
       } else {
-        // Sign all post images in one Storage request instead of waiting on
-        // a separate network round-trip for each image in every post.
-        const signedImageUrls = await getSignedImageUrls(account.client, posts);
-        const cards = posts.map(post =>
-          renderPost(account.client, post, user.id, likesByPost, commentCountsByPost, signedImageUrls)
+        const existingCards = new Map(
+          [...stream.querySelectorAll(".sl-feed-post[data-post-id]")]
+            .map(card => [card.dataset.postId, card])
         );
-        // Replace the feed once to avoid repeated layout and paint work per post.
-        stream.replaceChildren(...cards);
+        const orderedCards = posts.map(post => {
+          let card = existingCards.get(post.id);
+          if (card) {
+            existingCards.delete(post.id);
+            syncPostCardState(card, post, likesByPost, commentCountsByPost);
+          } else {
+            card = renderPost(account.client, post, user.id, likesByPost, commentCountsByPost, signedImageUrls);
+            // Animate only genuinely new cards, never the existing feed on refresh.
+            if (feedHasLoaded) card.classList.add("is-entering");
+          }
+          return card;
+        });
+        // Reconcile by post ID. Existing nodes, open comment threads, image state,
+        // focus and scroll position stay mounted across refreshes.
+        let cursor = stream.firstElementChild;
+        for (const card of orderedCards) {
+          if (card !== cursor) stream.insertBefore(card, cursor);
+          cursor = card.nextElementSibling;
+        }
+        const keep = new Set(orderedCards);
+        [...stream.children].forEach(child => {
+          if (!keep.has(child)) child.remove();
+        });
       }
       panel.querySelector(".sl-feed-admin-queue")?.remove();
       if (note) note.hidden = true;
@@ -692,9 +777,12 @@
         note.textContent = error.message || "Could not connect to StudyLab Social. Please try again.";
       }
       feedHasLoaded = true;
+      lastFeedLoadedAt = Date.now();
     } finally {
       feedLoadCount = Math.max(0, feedLoadCount - 1);
       if (feedLoadCount === 0) {
+        stream.classList.remove("is-loading");
+        stream.removeAttribute("aria-busy");
         refreshButton?.classList.remove("is-refreshing");
         refreshButton?.removeAttribute("aria-busy");
       }
@@ -811,11 +899,10 @@
 
   document.addEventListener("click", event => {
     const toggle = event.target.closest(".sl-feed-toggle");
-    if (toggle?.getAttribute("aria-expanded") === "true") loadFeed();
+    // Load once on first open. Reopening the panel must not rebuild or refetch
+    // a feed that is already in memory; the refresh button remains explicit.
+    if (toggle?.getAttribute("aria-expanded") === "true" && !feedHasLoaded) loadFeed();
   });
   window.addEventListener("studylab-social-refresh", () => loadFeed());
   panel.querySelector("[data-feed-close]")?.addEventListener("click", () => {});
-  window.addEventListener("focus", () => {
-    if (document.visibilityState === "visible" && panel.getAttribute("aria-hidden") === "false") loadFeed();
-  });
 })();

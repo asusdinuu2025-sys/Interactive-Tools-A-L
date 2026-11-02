@@ -395,8 +395,6 @@ exports.handler = async function handler(event) {
     },
     contents: history,
     generationConfig: {
-      temperature: 0.35,
-      topP: 0.9,
       maxOutputTokens: MAX_OUTPUT_TOKENS
     }
   };
