@@ -1,6 +1,6 @@
 /* StudyLab Social feed client.
    Uses the existing anonymous Supabase account; all user content is rendered as text.
-   Posts and comments stay private until Gemini moderation approves them. */
+   Posts and comments publish immediately; owners and admins control deletion. */
 (function () {
   "use strict";
   if (window.__studyLabSocialLoaded) return;
@@ -36,9 +36,6 @@
       <span class="sl-feed-image-note">JPEG, PNG or WebP · up to 4 MB each · max 4 photos</span>
       <button class="sl-feed-post-button" type="submit">Post</button>
     </div>
-    <label class="sl-feed-ai-consent"><input class="sl-feed-ai-consent-input" type="checkbox" required>
-      <span>I understand that my post text and photos are sent to Google Gemini for safety checks. Google's free tier may use submitted content to improve its products.</span>
-    </label>
     <div class="sl-feed-image-preview" aria-label="Selected photo previews"></div>
     <p class="sl-feed-compose-status" role="status" aria-live="polite"></p>`;
   textarea = form.querySelector("textarea");
@@ -46,7 +43,6 @@
   const input = form.querySelector(".sl-feed-file-input");
   const fileCount = form.querySelector(".sl-feed-file-count");
   const status = form.querySelector(".sl-feed-compose-status");
-  const moderationConsent = form.querySelector(".sl-feed-ai-consent-input");
   const imagePreview = form.querySelector(".sl-feed-image-preview");
   let previewUrls = [];
   let busy = false;
@@ -148,7 +144,6 @@
     }
     textarea.disabled = value;
     input.disabled = value;
-    if (moderationConsent) moderationConsent.disabled = value;
   }
   function make(tag, className, text) {
     const node = document.createElement(tag);
@@ -614,56 +609,28 @@
       field.maxLength = 500;
       field.placeholder = "Write a comment…";
       field.setAttribute("aria-label", "Write a comment");
-      const commentConsent = document.createElement("label");
-      commentConsent.className = "sl-feed-ai-consent sl-feed-comment-ai-consent";
-      const commentConsentInput = document.createElement("input");
-      commentConsentInput.type = "checkbox";
-      commentConsentInput.required = true;
-      const commentConsentText = make("span", "", "I understand this comment is sent to Google Gemini for safety checks. Google's free tier may use submitted content to improve its products.");
-      commentConsent.append(commentConsentInput, commentConsentText);
       const send = make("button", "sl-feed-action", "Send");
       send.type = "submit";
-      commentForm.append(field, commentConsent, send);
+      commentForm.append(field, send);
       commentForm.addEventListener("submit", async event => {
         event.preventDefault();
         const body = field.value.trim();
         if (!body) return;
-        if (!commentConsentInput.checked) {
-          setStatus("Confirm the AI moderation notice before sending your comment.", true);
-          return;
-        }
-        const restore = setButtonBusy(send, "Checking…");
+        const restore = setButtonBusy(send, "Sending…");
         field.disabled = true;
-        commentConsentInput.disabled = true;
         try {
           const commenter = await requireBasicProfile();
-          const { data: inserted, error: insertError } = await client.from("studylab_social_comments")
-            .insert({ post_id: post.id, author_id: commenter.id, body })
-            .select("id").single();
-          if (insertError) throw insertError;
-
-          const { data: moderation, error: moderationError } = await client.functions.invoke(
-            "studylab-social-moderate",
-            { body: { content_type: "comment", content_id: inserted.id } }
-          );
-          if (moderationError || !moderation?.success || moderation.status !== "approved") {
-            await client.from("studylab_social_comments").delete()
-              .eq("id", inserted.id).eq("author_id", commenter.id);
-            if (moderation?.status === "rejected") {
-              throw new Error("Your comment did not pass the community safety check. Please revise it and try again.");
-            }
-            throw new Error("AI moderation is temporarily unavailable. Your comment was not published; please try again later.");
-          }
-
+          const { error } = await client.from("studylab_social_comments")
+            .insert({ post_id: post.id, author_id: commenter.id, body });
+          if (error) throw error;
           adjustCommentCount(card, 1);
           field.value = "";
           area.remove();
           await toggleComments(card, post, client, currentUserId);
-          setStatus("Comment published after its safety check.");
+          setStatus("Comment published.");
         } catch (error) {
           restore();
           field.disabled = false;
-          commentConsentInput.disabled = false;
           setStatus(error.message || "Could not submit comment.", true);
         }
       });
@@ -858,9 +825,6 @@
       validFiles(files);
       const body = textarea.value.trim();
       if (!body && !files.length) throw new Error("Write something or attach a photo.");
-      if (!moderationConsent?.checked) {
-        throw new Error("Confirm the AI moderation notice before publishing.");
-      }
       setBusy(true);
       setStatus(files.length ? "Preparing your post…" : "Publishing your post…");
       const { data: post, error: postError } = await account.client.from("studylab_social_posts")
@@ -891,12 +855,12 @@
         }
         throw uploadError;
       }
-      setStatus("Sending your post for its safety check…");
-      const { data: queued, error: queueError } = await account.client.rpc(
+      setStatus("Publishing your post…");
+      const { data: published, error: publishError } = await account.client.rpc(
         "studylab_social_publish_own_post",
         { p_post_id: post.id }
       );
-      if (queueError || !queued) {
+      if (publishError || !published) {
         if (uploaded.length) {
           const { error: cleanupStorageError } = await account.client.storage.from(BUCKET).remove(uploaded);
           if (cleanupStorageError) console.warn("Could not clean up an unpublished Social upload:", cleanupStorageError);
@@ -904,35 +868,13 @@
         const { error: cleanupPostError } = await account.client.from("studylab_social_posts")
           .delete().eq("id", post.id).eq("author_id", user.id);
         if (cleanupPostError) console.warn("Could not remove an unpublished Social post:", cleanupPostError);
-        throw queueError || new Error("Your post could not enter moderation. Please try again.");
+        throw publishError || new Error("Your post could not be published. Please try again.");
       }
-
-      const { data: moderation, error: moderationError } = await account.client.functions.invoke(
-        "studylab-social-moderate",
-        { body: { content_type: "post", content_id: post.id } }
-      );
-
-      if (moderationError || !moderation?.success || moderation.status !== "approved") {
-        if (uploaded.length) {
-          const { error: cleanupStorageError } = await account.client.storage.from(BUCKET).remove(uploaded);
-          if (cleanupStorageError) console.warn("Could not clean up a post that was not published:", cleanupStorageError);
-        }
-        const { error: cleanupPostError } = await account.client.from("studylab_social_posts")
-          .delete().eq("id", post.id).eq("author_id", user.id);
-        if (cleanupPostError) console.warn("Could not remove a post that was not published:", cleanupPostError);
-
-        if (moderation?.status === "rejected") {
-          throw new Error("Your post did not pass the community safety check. Edit the text or photos and try again.");
-        }
-        throw new Error("AI moderation is unavailable. Your post was not published; please try again later.");
-      }
-
       textarea.value = "";
       input.value = "";
-      moderationConsent.checked = false;
       fileCount.textContent = "No photos selected";
       renderImagePreviews([]);
-      setStatus(files.length ? "Your photo post passed its safety check and is live." : "Your post passed its safety check and is live.");
+      setStatus(files.length ? "Your photo post is live." : "Your post is live.");
       await loadFeed();
     } catch (error) {
       setStatus(error.message || "Could not submit your post.", true);
