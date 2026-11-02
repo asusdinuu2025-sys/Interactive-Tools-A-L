@@ -43,14 +43,14 @@
   const compact = seconds => fmt(seconds);
   const profileDuration = seconds => { const total=Math.max(0,Math.floor(Number(seconds)||0)); const hours=Math.floor(total/3600), minutes=Math.floor(total%3600/60); return hours ? hours+"h"+(minutes ? " "+minutes+"m" : "") : minutes+"m"; };
   const startOfDay = key => new Date(key + 'T00:00:00+05:30').getTime();
-  // The database view is authoritative and masks attendance after 90 seconds.
+  // Do not cap elapsed time: background tabs can throttle heartbeats, while the server keeps active sessions alive for up to 24 hours.
   function heartbeatIsFresh(row) {
     return Boolean(row?.is_studying && row.last_heartbeat_at);
   }
   function pendingSeconds(row, boundary) {
     if (!heartbeatIsFresh(row)) return 0;
     const heartbeatAt = new Date(row.last_heartbeat_at).getTime();
-    return Math.min(90, Math.max(0, Math.floor((Date.now() - Math.max(heartbeatAt, boundary)) / 1000)));
+    return Math.max(0, Math.floor((Date.now() - Math.max(heartbeatAt, boundary)) / 1000));
   }
   function isProfileComplete(p) {
     const phoneDigits = String(p?.phone || "").replace(/\D/g, "");
