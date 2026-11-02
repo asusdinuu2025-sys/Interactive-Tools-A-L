@@ -58,7 +58,6 @@
   const feedHead = feedInner.querySelector(".sl-feed-head");
   const headBrand = feedHead.querySelector(".sl-feed-head-brand");
   const headActions = feedHead.querySelector(".sl-feed-head-actions");
-  if (headBrand && headActions) headActions.prepend(headBrand);
   const composer = feedInner.querySelector(".sl-feed-compose");
   const feedStage = document.createElement("div");
   feedStage.className = "sl-feed-stage";
