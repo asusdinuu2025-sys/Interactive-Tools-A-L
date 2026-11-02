@@ -189,7 +189,6 @@
       roomPagePresenceInterval = window.setInterval(registerRoomPagePresence, 60000);
     }
     window.addEventListener("beforeunload", warnBeforeLeavingRoom);
-    window.addEventListener("focus", resumeAfterCanceledUnload);
     window.addEventListener("pagehide", pauseWhenLastRoomPageCloses);
     window.addEventListener("pageshow", event => {
       if (event.persisted) registerRoomPagePresence();
@@ -534,7 +533,11 @@
       // Re-fetch the shared rows once per minute even if Realtime drops an event.
       // This keeps both daily and weekly rankings fresh for paused and active members.
       rankRefreshInterval = setInterval(() => {
-        loadRows().catch(error => console.error('Could not refresh Study Room rankings', error));
+        // The normal heartbeat refreshes active members; this fallback covers
+        // paused members and cases where a Realtime event was missed.
+        if (!heartbeatPromise) {
+          loadRows().catch(error => console.error('Could not refresh Study Room rankings', error));
+        }
       }, 60000);
       uiInterval = setInterval(updatePersonal, 1000);
       document.addEventListener('visibilitychange', () => {
