@@ -28,8 +28,10 @@ function read(relativePath) {
 }
 
 function attribute(attributes, name) {
-  const match = attributes.match(new RegExp("\\b" + name + "\\s*=\\s*([\\"'])(.*?)\\1", "i"));
-  return match ? match[2] : "";
+  const singleQuoted = attributes.match(new RegExp("\\b" + name + "\\s*=\\s*'([^']*)'", "i"));
+  const doubleQuoted = attributes.match(new RegExp('\\b' + name + '\\s*=\\s*"([^"]*)"', "i"));
+  const match = singleQuoted || doubleQuoted;
+  return match ? match[1] : "";
 }
 
 function localFile(page, reference) {
