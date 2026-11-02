@@ -12,6 +12,18 @@ ALTER TABLE public.studylab_social_comments
   ADD CONSTRAINT studylab_social_comments_status_check
   CHECK (status = ANY (ARRAY['pending'::text, 'approved'::text, 'rejected'::text, 'removed'::text]));
 
+-- The insert trigger changes a comment to pending before policy checks run.
+DROP POLICY IF EXISTS "Students add published comments to approved posts"
+  ON public.studylab_social_comments;
+CREATE POLICY "Students submit pending comments to approved posts"
+  ON public.studylab_social_comments
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (
+    author_id = (SELECT auth.uid())
+    AND status = 'pending'
+  );
+
 -- Comments are stored privately as pending until the moderation Edge Function approves them.
 CREATE OR REPLACE FUNCTION public.studylab_social_prepare_comment()
 RETURNS trigger
