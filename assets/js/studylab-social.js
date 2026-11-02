@@ -91,17 +91,17 @@
       style.id = styleId;
       style.textContent = `
         #studyLabSocialGateToast {
-          position:fixed; z-index:1300; top:max(18px,env(safe-area-inset-top)); right:18px;
+          position:fixed; z-index:1300; top:auto; right:18px; bottom:max(18px,env(safe-area-inset-bottom));
           width:max-content; max-width:min(92vw,430px); padding:13px 17px;
           border:1px solid rgba(91,205,255,.34); border-radius:14px;
           background:rgba(15,28,46,.97); color:#f3f8ff;
           box-shadow:0 14px 38px rgba(0,0,0,.3),0 0 18px rgba(65,180,255,.12);
           font:650 14px/1.45 system-ui,sans-serif; text-align:left;
-          opacity:0; transform:translateX(calc(100% + 30px)); pointer-events:none;
+          opacity:0; transform:translateY(18px); pointer-events:none;
           transition:transform .42s cubic-bezier(.2,.8,.2,1),opacity .28s ease;
         }
-        #studyLabSocialGateToast.is-visible { opacity:1; transform:translateX(0); }
-        #studyLabSocialGateToast.is-leaving { opacity:0; transform:translateX(calc(100% + 30px)); }
+        #studyLabSocialGateToast.is-visible { opacity:1; transform:translateY(0); }
+        #studyLabSocialGateToast.is-leaving { opacity:0; transform:translateY(18px); }
         html[data-theme="light"] #studyLabSocialGateToast {
           background:rgba(255,255,255,.98); color:#17243a; border-color:rgba(55,155,205,.3);
           box-shadow:0 14px 38px rgba(35,70,105,.18);
@@ -192,14 +192,30 @@
     previewUrls.forEach(url => URL.revokeObjectURL(url));
     previewUrls = [];
     imagePreview.replaceChildren();
-    for (const file of files.slice(0,MAX_IMAGES)) {
+    files.slice(0,MAX_IMAGES).forEach((file, index) => {
+      const item = make("div", "sl-feed-image-preview-item");
       const url = URL.createObjectURL(file);
       previewUrls.push(url);
       const img = document.createElement("img");
       img.src = url;
       img.alt = "Selected image preview";
-      imagePreview.append(img);
-    }
+      const remove = make("button", "sl-feed-image-remove", "×");
+      remove.type = "button";
+      remove.setAttribute("aria-label", "Remove selected photo " + (index + 1));
+      remove.title = "Remove photo";
+      remove.addEventListener("click", () => {
+        const transfer = new DataTransfer();
+        [...(input.files || [])].forEach((selected, selectedIndex) => {
+          if (selectedIndex !== index) transfer.items.add(selected);
+        });
+        input.files = transfer.files;
+        const remaining = [...input.files];
+        fileCount.textContent = remaining.length ? remaining.length + " photo(s) selected" : "No photos selected";
+        renderImagePreviews(remaining);
+      });
+      item.append(img, remove);
+      imagePreview.append(item);
+    });
     imagePreview.hidden = !files.length;
   }
   function validFiles(files) {
@@ -217,6 +233,23 @@
     if (error) throw error;
     return data.signedUrl;
   }
+  async function getSignedImageUrls(client, posts) {
+    const paths = [...new Set(posts.flatMap(post =>
+      (post.studylab_social_post_images || []).slice(0, MAX_IMAGES)
+        .map(image => image.bucket_path).filter(Boolean)
+    ))];
+    if (!paths.length) return new Map();
+    const { data, error } = await client.storage.from(BUCKET).createSignedUrls(paths, 3600);
+    if (error) {
+      console.warn("Social image URLs could not be prepared:", error);
+      return new Map();
+    }
+    const urls = new Map();
+    for (const item of data || []) {
+      if (item.path && item.signedUrl && !item.error) urls.set(item.path, item.signedUrl);
+    }
+    return urls;
+  }
   async function getPostRows(client, ownId) {
     const { data, error } = await client.from("studylab_social_posts")
       .select("id,author_id,author_display_name,author_username,author_gender,body,status,created_at,studylab_social_post_images(id,bucket_path,mime_type,size_bytes)")
@@ -224,7 +257,7 @@
     if (error) throw error;
     return (data || []).filter(post => post.status === "approved" || post.author_id === ownId);
   }
-  async function renderPost(client, post, currentUserId, likesByPost, commentCountsByPost) {
+  function renderPost(client, post, currentUserId, likesByPost, commentCountsByPost, signedImageUrls) {
     const card = make("article", "sl-feed-post");
     card.dataset.postId = post.id;
     card.dataset.authorId = post.author_id;
@@ -266,26 +299,93 @@
     if (post.status === "pending" && post.author_id === currentUserId) {
       card.append(make("span", "sl-feed-status-pending", "Pending review"));
     }
-    if (post.body) card.append(make("p", "sl-feed-post-body", post.body));
+    if (post.body) {
+      const body = make("p", "sl-feed-post-body", post.body);
+      card.append(body);
+      if (post.body.length > 260) {
+        body.classList.add("is-collapsed");
+        const readMore = make("button", "sl-feed-read-more", "Read more");
+        readMore.type = "button";
+        readMore.setAttribute("aria-expanded", "false");
+        readMore.addEventListener("click", () => {
+          const expanded = body.classList.toggle("is-expanded");
+          body.classList.toggle("is-collapsed", !expanded);
+          readMore.textContent = expanded ? "Show less" : "Read more";
+          readMore.setAttribute("aria-expanded", String(expanded));
+        });
+        card.append(readMore);
+      }
+    }
 
     const imageRows = post.studylab_social_post_images || [];
     if (imageRows.length) {
+      const galleryWrap = make("div", "sl-feed-gallery-wrap");
       const gallery = make("div", "sl-feed-gallery");
       gallery.dataset.count = String(Math.min(imageRows.length, MAX_IMAGES));
+      galleryWrap.dataset.count = String(Math.min(imageRows.length, MAX_IMAGES));
       for (const imageRow of imageRows.slice(0, MAX_IMAGES)) {
-        try {
-          const url = await signedImageUrl(client, imageRow.bucket_path);
-          const img = document.createElement("img");
-          img.src = url;
-          img.alt = "Photo shared in a StudyLab Social post";
-          img.loading = "lazy";
-          img.decoding = "async";
-          gallery.append(img);
-        } catch (error) {
-          console.warn("Social image could not be loaded:", error);
-        }
+        const url = signedImageUrls.get(imageRow.bucket_path);
+        if (!url) continue;
+        const img = document.createElement("img");
+        img.src = url;
+        img.alt = "Photo shared in a StudyLab Social post";
+        img.loading = "lazy";
+        img.decoding = "async";
+        gallery.append(img);
       }
-      if (gallery.childElementCount) card.append(gallery);
+      gallery.dataset.count = String(gallery.childElementCount);
+      galleryWrap.dataset.count = String(gallery.childElementCount);
+      if (gallery.childElementCount > 1) {
+        const previous = make("button", "sl-feed-gallery-arrow sl-feed-gallery-prev", "‹");
+        previous.type = "button";
+        previous.setAttribute("aria-label", "Previous photo");
+        const next = make("button", "sl-feed-gallery-arrow sl-feed-gallery-next", "›");
+        next.type = "button";
+        next.setAttribute("aria-label", "Next photo");
+        const dots = make("div", "sl-feed-gallery-dots");
+        dots.setAttribute("role", "group");
+        dots.setAttribute("aria-label", "Choose a photo");
+        const dotButtons = [];
+        for (let index = 0; index < gallery.childElementCount; index++) {
+          const dot = make("button", "sl-feed-gallery-dot");
+          dot.type = "button";
+          dot.setAttribute("aria-label", "Show photo " + (index + 1));
+          dot.addEventListener("click", () => {
+            const target = gallery.children[index];
+            gallery.scrollTo({ left: target.offsetLeft - gallery.offsetLeft, behavior: "smooth" });
+          });
+          dots.append(dot);
+          dotButtons.push(dot);
+        }
+        const updateGalleryControls = () => {
+          const current = [...gallery.children].reduce((best, image, index) => {
+            const distance = Math.abs((image.offsetLeft - gallery.offsetLeft) - gallery.scrollLeft);
+            return distance < best.distance ? { index, distance } : best;
+          }, { index: 0, distance: Infinity }).index;
+          dotButtons.forEach((dot, index) => {
+            dot.classList.toggle("is-active", index === current);
+            dot.setAttribute("aria-current", index === current ? "true" : "false");
+          });
+          previous.disabled = current === 0;
+          next.disabled = current === gallery.childElementCount - 1;
+        };
+        previous.addEventListener("click", () => {
+          const current = dotButtons.findIndex(dot => dot.classList.contains("is-active"));
+          const target = gallery.children[Math.max(0, current - 1)];
+          if (target) gallery.scrollTo({ left: target.offsetLeft - gallery.offsetLeft, behavior: "smooth" });
+        });
+        next.addEventListener("click", () => {
+          const current = dotButtons.findIndex(dot => dot.classList.contains("is-active"));
+          const target = gallery.children[Math.min(gallery.childElementCount - 1, current + 1)];
+          if (target) gallery.scrollTo({ left: target.offsetLeft - gallery.offsetLeft, behavior: "smooth" });
+        });
+        gallery.addEventListener("scroll", updateGalleryControls, { passive: true });
+        galleryWrap.append(previous, gallery, next, dots);
+        requestAnimationFrame(updateGalleryControls);
+      } else {
+        galleryWrap.append(gallery);
+      }
+      if (gallery.childElementCount) card.append(galleryWrap);
     }
 
     const actions = make("div", "sl-feed-post-actions");
@@ -318,6 +418,31 @@
       commentsButton.type = "button";
       commentsButton.addEventListener("click", () => toggleComments(card, post, client, currentUserId));
       actions.append(like, commentsButton);
+    }
+    if (post.author_id === currentUserId) {
+      const removePost = make("button", "sl-feed-action sl-feed-delete-post", "Delete post");
+      removePost.type = "button";
+      removePost.addEventListener("click", async () => {
+        if (!window.confirm("Delete this post permanently? This cannot be undone.")) return;
+        removePost.disabled = true;
+        try {
+          const imagePaths = imageRows.map(row => row.bucket_path).filter(Boolean);
+          const { data: deleted, error } = await client.from("studylab_social_posts")
+            .delete().eq("id", post.id).eq("author_id", currentUserId).select("id").maybeSingle();
+          if (error) throw error;
+          if (!deleted) throw new Error("This post could not be deleted. It may not be eligible for deletion.");
+          if (imagePaths.length) {
+            const { error: storageError } = await client.storage.from(BUCKET).remove(imagePaths);
+            if (storageError) console.warn("Post deleted, but some attached image files could not be removed:", storageError);
+          }
+          setStatus("Your post was deleted.");
+          await loadFeed();
+        } catch (error) {
+          setStatus(error.message || "Could not delete this post.", true);
+          removePost.disabled = false;
+        }
+      });
+      actions.append(removePost);
     }
     card.append(actions);
 
@@ -484,6 +609,32 @@
     }
     if (!list.childElementCount) list.append(make("p", "sl-feed-loading", "Nothing is waiting for review."));
   }
+  function renderCommunityProfiles(posts) {
+    const list = panel.querySelector(".sl-feed-member-list");
+    if (!list) return;
+    const faces = [":)", ";D", ":D", "☺", "✦", "★", "☀", "♡", "⚡", "🌈", "✨", "☻"];
+    const unique = new Map();
+    for (const post of posts) {
+      if (post.status !== "approved" || !post.author_id || unique.has(post.author_id)) continue;
+      unique.set(post.author_id, post);
+    }
+    const members = [...unique.values()].slice(0, 10);
+    list.replaceChildren();
+    if (!members.length) {
+      list.append(make("p", "sl-feed-members-empty", "Student profiles will appear here as they post."));
+      return;
+    }
+    for (const member of members) {
+      const row = make("div", "sl-feed-member");
+      const avatar = make("span", "sl-feed-member-avatar", faces[hashNumber(member.author_id) % faces.length]);
+      avatar.style.setProperty("--sl-member-hue", String(hashNumber(member.author_id + "profile") % 360));
+      const copy = make("span", "sl-feed-member-copy");
+      copy.append(make("strong", "", member.author_display_name || "Student"));
+      copy.append(make("small", "", "@" + (member.author_username || "student")));
+      row.append(avatar, copy);
+      list.append(row);
+    }
+  }
   async function loadFeed() {
     if (!feedHasLoaded) showSkeletons();
     try {
@@ -510,6 +661,7 @@
         adminBadge?.remove();
       }
       const posts = await getPostRows(account.client, user.id);
+      renderCommunityProfiles(posts);
       const approvedIds = posts.filter(post => post.status === "approved").map(post => post.id);
       const likesByPost = new Map();
       if (approvedIds.length) {
@@ -539,11 +691,17 @@
         posts.sort((a,b) => new Date(b.created_at)-new Date(a.created_at));
       }
       ensureFeedControls();
-      stream.replaceChildren();
-      if (!posts.length) emptyState("No approved posts yet");
-      for (const post of posts) {
-        const card = await renderPost(account.client, post, user.id, likesByPost, commentCountsByPost);
-        stream.append(card);
+      if (!posts.length) {
+        emptyState("No approved posts yet");
+      } else {
+        // Sign all post images in one Storage request instead of waiting on
+        // a separate network round-trip for each image in every post.
+        const signedImageUrls = await getSignedImageUrls(account.client, posts);
+        const cards = posts.map(post =>
+          renderPost(account.client, post, user.id, likesByPost, commentCountsByPost, signedImageUrls)
+        );
+        // Replace the feed once to avoid repeated layout and paint work per post.
+        stream.replaceChildren(...cards);
       }
       if (isAdmin) await renderAdminQueue(account.client);
       else panel.querySelector(".sl-feed-admin-queue")?.remove();
@@ -645,6 +803,7 @@
     const toggle = event.target.closest(".sl-feed-toggle");
     if (toggle?.getAttribute("aria-expanded") === "true") loadFeed();
   });
+  window.addEventListener("studylab-social-refresh", () => loadFeed());
   panel.querySelector("[data-feed-close]")?.addEventListener("click", () => {});
   window.addEventListener("focus", () => {
     if (document.visibilityState === "visible" && panel.getAttribute("aria-hidden") === "false") loadFeed();

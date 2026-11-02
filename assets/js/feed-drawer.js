@@ -28,13 +28,13 @@
           <span class="sl-feed-mark" aria-hidden="true">
             <svg viewBox="0 0 24 24"><path d="M4 5.5h16v11H9l-5 3v-14Z"/><path d="M8 9h8M8 13h5"/></svg>
           </span>
-          <div><h2 class="sl-feed-title">StudyLab Social</h2><p class="sl-feed-subtitle">A shared space for A/L students</p></div>
+          <div><h2 class="sl-feed-title">StudyLab Social</h2><p class="sl-feed-subtitle">Student community</p></div>
         </div>
-        <div class="sl-feed-size-controls" role="group" aria-label="Social panel size">
-          <button type="button" data-feed-size="half" aria-label="Expand Social to half screen" title="Half screen">½</button>
-          <button type="button" data-feed-size="full" aria-label="Open Social fullscreen" title="Fullscreen">⛶</button>
+        <div class="sl-feed-head-brand"><span class="sl-feed-mark" aria-hidden="true">✦</span><strong>StudyLab Social Network</strong></div>
+        <div class="sl-feed-head-actions">
+          <button class="sl-feed-refresh" type="button" aria-label="Refresh posts" title="Refresh posts">↻</button>
+          <button class="sl-feed-close" type="button" data-feed-close aria-label="Close Social panel">×</button>
         </div>
-        <button class="sl-feed-close" type="button" data-feed-close aria-label="Close Social panel">×</button>
       </div>
       <form class="sl-feed-compose" aria-label="Create a feed post">
         <textarea maxlength="2000" disabled placeholder="Share something with other students..." aria-label="Write a post"></textarea>
@@ -53,26 +53,35 @@
       <p class="sl-feed-setup-note" role="status">Connecting to StudyLab Social…</p>
     </div>`;
 
-  // Full-screen mode keeps the feed centered and moves the composer into a compact side rail.
+  // Full-screen layout: wider composer left, natural-flow feed centre, community rail right.
   const feedInner = panel.querySelector(".sl-feed-inner");
-  const compose = feedInner.querySelector(".sl-feed-compose");
+  const feedHead = feedInner.querySelector(".sl-feed-head");
+  const headBrand = feedHead.querySelector(".sl-feed-head-brand");
+  const headActions = feedHead.querySelector(".sl-feed-head-actions");
+  const composer = feedInner.querySelector(".sl-feed-compose");
   const feedStage = document.createElement("div");
   feedStage.className = "sl-feed-stage";
-  const composeRail = document.createElement("aside");
-  composeRail.className = "sl-feed-compose-rail";
-  composeRail.setAttribute("aria-label", "Create a Social post");
-  const feedCenter = document.createElement("div");
-  feedCenter.className = "sl-feed-center";
-  const makeAdSlot = side => {
-    const slot = document.createElement("aside");
-    slot.className = "sl-feed-ad-rail sl-feed-ad-rail-" + side;
-    slot.setAttribute("aria-label", "Reserved banner advertisement space");
-    slot.innerHTML = '<div class="sl-feed-ad-placeholder"><span>ADVERTISEMENT</span><strong>Reserved space</strong><small>Banner placement</small></div>';
-    return slot;
-  };
-  feedInner.parentNode.replaceChild(feedStage,feedInner);
-  feedCenter.append(feedInner);
-  feedStage.append(composeRail,feedCenter,makeAdSlot("right"));
+  const leftRail = document.createElement("aside");
+  leftRail.className = "sl-feed-left-rail";
+  leftRail.setAttribute("aria-label", "Create a post");
+  const center = document.createElement("main");
+  center.className = "sl-feed-center";
+  const rightRail = document.createElement("aside");
+  rightRail.className = "sl-feed-right-rail";
+  rightRail.setAttribute("aria-label", "StudyLab Social community");
+  const communityIntro = document.createElement("section");
+  communityIntro.className = "sl-feed-community-intro";
+  communityIntro.innerHTML = '<div class="sl-feed-community-cover"></div><div class="sl-feed-community-intro-copy"><span class="sl-feed-community-kicker">STUDYLAB COMMUNITY</span><h2>StudyLab Social</h2><p>A shared space for A/L students</p></div>';
+  const membersCard = document.createElement("section");
+  membersCard.className = "sl-feed-members-card";
+  membersCard.innerHTML = '<div class="sl-feed-members-heading"><strong>Community profiles</strong><span>From recent posts</span></div><div class="sl-feed-member-list" aria-live="polite"><p class="sl-feed-members-empty">Student profiles will appear here as they post.</p></div>';
+  feedInner.parentNode.replaceChild(feedStage, feedInner);
+  feedInner.removeChild(feedHead);
+  panel.insertBefore(feedHead, feedStage);
+  leftRail.append(composer);
+  center.append(feedInner);
+  rightRail.append(membersCard);
+  feedStage.append(leftRail, center, rightRail);
 
   const actions = header.querySelector(".header-actions");
   if (!actions) return;
@@ -108,23 +117,10 @@
   layout.insertBefore(backdrop, panel);
 
   let previousFocus = null;
-  function setSize(size) {
-    panel.dataset.size = size;
-    if (size === "full") {
-      composeRail.append(compose);
-    } else {
-      feedInner.querySelector(".sl-feed-head").after(compose);
-    }
-    panel.querySelectorAll("[data-feed-size]").forEach(button => {
-      const active = button.dataset.feedSize === size;
-      button.classList.toggle("is-active", active);
-      button.setAttribute("aria-pressed", String(active));
-    });
-  }
-  panel.querySelectorAll("[data-feed-size]").forEach(button => {
-    button.addEventListener("click", () => setSize(button.dataset.feedSize));
+  panel.dataset.size = "full";
+  panel.querySelector(".sl-feed-refresh")?.addEventListener("click", () => {
+    window.dispatchEvent(new CustomEvent("studylab-social-refresh"));
   });
-  setSize("compact");
   function closeFloatingTools() {
     ["[data-chat-close]", "[data-feedback-close]", "#studyQuickAccessPanel .study-quick-close", "#studyQuickAccessPanel [aria-label='Close Quick Access']"]
       .forEach(selector => {
@@ -134,7 +130,10 @@
   }
 
   function setOpen(open) {
-    if (open) closeFloatingTools();
+    if (open) {
+      closeFloatingTools();
+      panel.dataset.size = "full";
+    }
     layout.classList.toggle("is-feed-open", open);
     document.body.classList.toggle("sl-community-open", open);
     backdrop.hidden = !open;
