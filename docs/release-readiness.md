@@ -29,7 +29,7 @@ The workflow runs on pull requests to `main` and pushes to `main`. Its result mu
 
 ## Final manual browser smoke test
 
-These checks cannot be certified from repository inspection or a successful static deploy preview. Run them against the PR #74 Netlify preview before production deployment:
+These checks cannot be certified from repository inspection or a successful static deploy preview. Run them against the PR #75 Netlify preview before production deployment:
 
 - [ ] Desktop and mobile homepage layout, dark/light themes and navigation.
 - [ ] Profile completion modal, mobile keyboard/zoom and save validation.
@@ -45,6 +45,6 @@ These checks cannot be certified from repository inspection or a successful stat
 
 ## Release decision
 
-**Current state: release candidate prepared; manual browser smoke test and PR #74 automated workflow result are still pending.**
+**Current state: release candidate prepared; manual browser smoke test and PR #75 automated workflow result are still pending.**
 
-Do not treat a successful Netlify deploy preview as proof that timer lifecycle, cross-tab behavior, Supabase permissions or all interactive features have passed runtime testing. Merge PR #74 only after the automated check is green and the manual checklist is completed.
+Do not treat a successful Netlify deploy preview as proof that timer lifecycle, cross-tab behavior, Supabase permissions or all interactive features have passed runtime testing. Merge PR #75 only after the automated check is green and the manual checklist is completed.
