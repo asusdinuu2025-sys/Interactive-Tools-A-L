@@ -8,11 +8,12 @@
 
   // Keep a per-user list of open Study Room pages so closing one tab does not
   // pause a session that is still open in another tab or the detached timer.
-  const ROOM_PAGE_PRESENCE_TTL_MS = 24 * 60 * 60 * 1000;
+  const ROOM_PAGE_PRESENCE_TTL_MS = 5 * 60 * 1000;
   let roomPagePresencePrefix = null;
   let roomPagePresenceKey = null;
   let roomPagePresenceInterval = null;
   let accessToken = null;
+  let roomPagePresenceStorageAvailable = true;
 
   function registerRoomPagePresence() {
     if (!userId) return;
@@ -24,13 +25,16 @@
     }
     try {
       localStorage.setItem(roomPagePresenceKey, String(Date.now()));
+      roomPagePresenceStorageAvailable = true;
     } catch (error) {
+      roomPagePresenceStorageAvailable = false;
       console.warn("Study Room page-presence storage is unavailable", error);
     }
   }
 
   function hasAnotherRoomPageOpen() {
-    if (!roomPagePresencePrefix) return false;
+    // If storage cannot be checked safely, do not risk pausing another open page.
+    if (!roomPagePresencePrefix || !roomPagePresenceStorageAvailable) return true;
     const cutoff = Date.now() - ROOM_PAGE_PRESENCE_TTL_MS;
     let anotherPageOpen = false;
     try {
@@ -45,7 +49,9 @@
         }
       }
     } catch (error) {
+      roomPagePresenceStorageAvailable = false;
       console.warn("Could not inspect other Study Room pages", error);
+      return true;
     }
     return anotherPageOpen;
   }
@@ -53,7 +59,7 @@
   function pauseWhenLastRoomPageCloses(event) {
     // A page in the back/forward cache is frozen, not terminated.
     if (event?.persisted || !roomPagePresenceKey) return;
-    try { localStorage.removeItem(roomPagePresenceKey); } catch (_) {}
+    try { localStorage.removeItem(roomPagePresenceKey); } catch (_) { roomPagePresenceStorageAvailable = false; }
     if (hasAnotherRoomPageOpen()) return;
 
     let url = String(window.STUDYLAB_SUPABASE_URL || "");
@@ -103,9 +109,10 @@
   };
   function pendingSeconds() {
     if (!row?.is_studying || !row.last_heartbeat_at) return 0;
-    const age = Date.now() - new Date(row.last_heartbeat_at).getTime();
-    if (!Number.isFinite(age)) return 0;
-    return Math.max(0, Math.floor(age / 1000));
+    const heartbeatAt = new Date(row.last_heartbeat_at).getTime();
+    const todayStart = new Date(dayKey(new Date()) + "T00:00:00+05:30").getTime();
+    if (!Number.isFinite(heartbeatAt) || !Number.isFinite(todayStart)) return 0;
+    return Math.max(0, Math.floor((Date.now() - Math.max(heartbeatAt, todayStart)) / 1000));
   }
   function render() {
     // The server-side view expires abandoned sessions after 24 hours.
