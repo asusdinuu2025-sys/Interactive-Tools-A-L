@@ -8,7 +8,7 @@
 
   // Keep a per-user list of open Study Room pages so closing one tab does not
   // pause a session that is still open in another tab or the detached timer.
-  const ROOM_PAGE_PRESENCE_TTL_MS = 5 * 60 * 1000;
+  const ROOM_PAGE_PRESENCE_TTL_MS = 12 * 60 * 60 * 1000;
   let roomPagePresencePrefix = null;
   let roomPagePresenceKey = null;
   let roomPagePresenceInterval = null;
@@ -68,7 +68,7 @@
     if (!url || !apiKey || !accessToken) return;
 
     // Best effort: keepalive lets the pause RPC finish while the page unloads.
-    // If the browser is killed without a lifecycle event, the 24-hour server
+    // If the browser is killed without a lifecycle event, the 12-hour server
     // fallback handles the abandoned session instead.
     try {
       window.fetch(url + "/rest/v1/rpc/study_room_pause", {
@@ -115,7 +115,7 @@
     return Math.max(0, Math.floor((Date.now() - Math.max(heartbeatAt, todayStart)) / 1000));
   }
   function render() {
-    // The server-side view expires abandoned sessions after 24 hours.
+    // The server-side view expires abandoned sessions after 12 hours.
     const active = Boolean(row?.is_studying && row.last_heartbeat_at);
     const hasSession = Boolean(row?.session_active);
     const base = row && (row.session_active || row.is_studying)
