@@ -759,15 +759,9 @@ BEGIN
     RETURN;
   END IF;
 
-  -- Expire all abandoned running sessions so their attendance and rank totals
-  -- clear even when the student whose session expired does not return.
-  UPDATE public.study_room_members
-  SET is_studying = false, session_active = false, session_started_at = NULL,
-      last_heartbeat_at = NULL, session_elapsed_seconds = 0,
-      session_date = local_day, today_seconds = 0, today_date = local_day,
-      week_seconds = 0, week_start = monday, updated_at = now()
-  WHERE is_studying = true
-    AND (last_heartbeat_at IS NULL OR last_heartbeat_at <= now() - interval '12 hours');
+  -- Run the same bounded recovery path used by the scheduled watchdog.
+  -- This preserves credited daily/weekly totals instead of resetting them.
+  PERFORM public.study_room_pause_stale_sessions(uid);
 
   week_start_ts := (monday::timestamp AT TIME ZONE 'Asia/Colombo');
   SELECT * INTO previous
@@ -1020,6 +1014,10 @@ BEGIN
   END LOOP;
 END;
 $function$;
+
+-- This SECURITY DEFINER function is internal-only. The optional user ID is
+-- used by the authenticated heartbeat RPC and the scheduled database job.
+REVOKE ALL ON FUNCTION public.study_room_pause_stale_sessions(uuid) FROM PUBLIC, anon, authenticated;
 
 CREATE OR REPLACE VIEW public.study_room_live
 WITH (security_invoker = true) AS
