@@ -191,8 +191,8 @@
       client.auth.onAuthStateChange((_event, session) => {
         accessToken = session?.access_token || null;
       });
-      await loadRow();
       startRoomPagePresenceLifecycle();
+      await loadRow();
       client.channel("study-room-independent-timer")
         .on("postgres_changes", { event: "*", schema: "public", table: "study_room_members" }, () => {
           loadRow().catch(error => console.error("Mini timer refresh failed", error));
