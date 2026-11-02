@@ -706,8 +706,16 @@
         "studylab_social_publish_own_post",
         { p_post_id: post.id }
       );
-      if (publishError) throw publishError;
-      if (!published) throw new Error("Your post could not be published. Please try again.");
+      if (publishError || !published) {
+        if (uploaded.length) {
+          const { error: cleanupStorageError } = await account.client.storage.from(BUCKET).remove(uploaded);
+          if (cleanupStorageError) console.warn("Could not clean up an unpublished Social upload:", cleanupStorageError);
+        }
+        const { error: cleanupPostError } = await account.client.from("studylab_social_posts")
+          .delete().eq("id", post.id).eq("author_id", user.id);
+        if (cleanupPostError) console.warn("Could not remove an unpublished Social post:", cleanupPostError);
+        throw publishError || new Error("Your post could not be published. Please try again.");
+      }
       textarea.value = "";
       input.value = "";
       fileCount.textContent = "No photos selected";
