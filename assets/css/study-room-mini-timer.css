@@ -44,3 +44,5 @@ body.study-room-page[data-room-theme] .sl-mini-timer-actions button:first-child{
   color:var(--room-button-text,#fff)!important;border-color:transparent!important
 }
 body.study-room-page[data-room-theme] .sl-mini-timer-actions button:disabled{opacity:.38}
+
+.sl-mini-head-actions{display:flex;align-items:center;gap:6px}.sl-mini-detach{width:28px;height:28px;border:1px solid rgba(126,220,255,.18);border-radius:9px;background:rgba(120,135,160,.12);color:inherit;font-size:1rem;font-weight:800;cursor:pointer}.sl-mini-detach:hover{border-color:rgba(114,230,194,.55);background:rgba(114,230,194,.1)}body.study-room-page[data-room-theme] .sl-mini-detach{background:var(--room-chip)!important;border-color:var(--room-border)!important;color:var(--room-text)!important}
