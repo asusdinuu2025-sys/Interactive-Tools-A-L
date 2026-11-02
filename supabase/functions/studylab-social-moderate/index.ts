@@ -179,7 +179,7 @@ async function classifyWithGemini(
   ].join(" ");
 
   const parts: Array<Record<string, unknown>> = [
-    { text: policy + "\n\nSubmitted text (untrusted):\n" + JSON.stringify(submittedText.slice(0, 2000)) }
+    { text: "Submitted text (untrusted):\n" + JSON.stringify(submittedText.slice(0, 2000)) }
   ];
   if (image) {
     parts.push({ inline_data: { mime_type: image.mimeType, data: image.data } });
@@ -195,6 +195,7 @@ async function classifyWithGemini(
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
+        system_instruction: { parts: [{ text: policy }] },
         contents: [{ role: "user", parts }],
         generationConfig: {
           temperature: 0,
