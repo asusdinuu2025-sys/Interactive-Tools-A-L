@@ -221,7 +221,7 @@ BEGIN
 
   elapsed_total := greatest(0, floor(extract(epoch FROM (reference_now - previous.last_heartbeat_at)))::integer);
   elapsed_today := greatest(0, floor(extract(epoch FROM (reference_now - greatest(previous.last_heartbeat_at, day_start)))::integer));
-  elapsed_week := greatest(0, floor(extract(epoch FROM (reference_now - greatest(previous.last_heartbeat_at, week_start_ts)))::integer);
+  elapsed_week := greatest(0, floor(extract(epoch FROM (reference_now - greatest(previous.last_heartbeat_at, week_start_ts)))::integer));
 
   next_today := CASE
     WHEN previous.today_date = local_day THEN coalesce(previous.today_seconds, 0) + elapsed_today
