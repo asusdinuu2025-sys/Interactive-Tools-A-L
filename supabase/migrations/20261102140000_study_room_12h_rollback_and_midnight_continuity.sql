@@ -94,7 +94,14 @@ SELECT
     WHEN m.idle_stale OR m.paused_session_expired THEN false
     ELSE m.session_active
   END AS session_active,
-  m.session_expired_at
+  CASE
+    WHEN m.idle_stale THEN coalesce(
+      m.session_expired_at,
+      m.last_heartbeat_at + interval '12 hours',
+      now()
+    )
+    ELSE m.session_expired_at
+  END AS session_expired_at
 FROM visible_totals AS m
 WHERE study_room_private.profile_is_complete(m.user_id);
 
