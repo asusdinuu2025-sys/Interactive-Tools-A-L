@@ -123,7 +123,8 @@
       is_studying: false,
       session_active: true,
       session_started_at: null,
-      last_heartbeat_at: null
+      last_heartbeat_at: null,
+      updated_at: new Date().toISOString()
     };
     rows = rows.map(row => row.user_id === userId ? { ...row, ...member } : row);
     updateSessionUI(member);
@@ -146,7 +147,9 @@
         await callRpc("study_room_start");
         await loadRows();
       }
-      say("You stayed in the Study Room, so your session has resumed.");
+      say(member?.is_studying
+        ? "You stayed in the Study Room, so your session has resumed."
+        : "Your session is paused. Press Start when you are ready to continue.");
     } catch (error) {
       console.warn("Could not restore the Study Room after canceling navigation", error);
       say("Your session is paused. Press Start to continue.", true);
@@ -186,6 +189,7 @@
       roomPagePresenceInterval = window.setInterval(registerRoomPagePresence, 60000);
     }
     window.addEventListener("beforeunload", warnBeforeLeavingRoom);
+    window.addEventListener("focus", resumeAfterCanceledUnload);
     window.addEventListener("pagehide", pauseWhenLastRoomPageCloses);
     window.addEventListener("pageshow", event => {
       if (event.persisted) registerRoomPagePresence();
@@ -355,7 +359,7 @@
   }
   async function loadRows() {
     const {data,error} = await client.from('study_room_live').select(
-      'user_id,display_name,gender,subject,is_studying,session_active,session_started_at,session_elapsed_seconds,session_date,last_heartbeat_at,today_seconds,today_date,week_seconds,week_start,updated_at'
+      'user_id,display_name,gender,subject,is_studying,session_active,session_started_at,session_elapsed_seconds,session_date,last_heartbeat_at,today_seconds,today_date,week_seconds,week_start,updated_at,session_expired_at'
     );
     if (error) throw error;
     rows = data || [];
@@ -460,7 +464,8 @@
       status: member?.is_studying ? 'Studying' : member?.session_active ? 'Paused' : 'Not studying',
       lastHeartbeatAt: member?.last_heartbeat_at || null,
       sessionStartedAt: member?.session_started_at || null,
-      updatedAt: member?.updated_at || null
+      updatedAt: member?.updated_at || null,
+      sessionExpiredAt: member?.session_expired_at || null
     };
   }
   function emitTimerState() {
