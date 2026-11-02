@@ -1,6 +1,6 @@
 /* StudyLab Social feed client.
    Uses the existing anonymous Supabase account; all user content is rendered as text.
-   Posts/comments remain pending until an app_metadata admin approves them. */
+   Posts and comments publish immediately; owners and admins control deletion. */
 (function () {
   "use strict";
   if (window.__studyLabSocialLoaded) return;
@@ -58,9 +58,16 @@
     return account;
   }
   function setStatus(message, error = false) {
-    status.textContent = message;
+    status.replaceChildren();
     status.dataset.state = error ? "error" : "info";
     status.hidden = !message;
+    if (!message) return;
+    if (!error && busy) {
+      const spinner = make("span", "sl-feed-upload-spinner");
+      spinner.setAttribute("aria-hidden", "true");
+      status.append(spinner);
+    }
+    status.append(document.createTextNode(message));
   }
 
   async function requireBasicProfile() {
@@ -126,7 +133,15 @@
   function setBusy(value) {
     busy = value;
     postButton.disabled = value;
-    postButton.textContent = value ? "Posting…" : "Post";
+    postButton.replaceChildren();
+    if (value) {
+      const spinner = make("span", "sl-feed-upload-spinner");
+      spinner.setAttribute("aria-hidden", "true");
+      postButton.append(spinner, document.createTextNode("Posting…"));
+    } else {
+      postButton.textContent = "Post";
+      status.querySelector(".sl-feed-upload-spinner")?.remove();
+    }
     textarea.disabled = value;
     input.disabled = value;
   }
@@ -136,11 +151,28 @@
     if (text !== undefined) node.textContent = text;
     return node;
   }
+  function animateOut(node, className) {
+    if (!node?.isConnected) return Promise.resolve();
+    node.classList.add(className);
+    return new Promise(resolve => {
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        node.removeEventListener("animationend", finish);
+        node.remove();
+        resolve();
+      };
+      node.addEventListener("animationend", finish, { once: true });
+      window.setTimeout(finish, 360);
+    });
+  }
   function emptyState(message) {
     stream.replaceChildren();
     const box = make("div", "sl-feed-empty");
-    const icon = make("span", "sl-feed-empty-icon", "✦");
+    const icon = make("span", "sl-feed-empty-icon");
     icon.setAttribute("aria-hidden", "true");
+    icon.innerHTML = '<svg viewBox="0 0 64 64"><path d="m5 23 27-12 27 12-27 12L5 23Z"/><path d="M16 28v13c9 8 23 8 32 0V28M58 24v17"/><path d="M55 44h6"/></svg>';
     const heading = make("h3", "", message);
     const detail = make("p", "", "Be the first to share a useful question, study tip or learning moment with the StudyLab community.");
     box.append(icon, heading, detail);
@@ -255,7 +287,7 @@
       .select("id,author_id,author_display_name,author_username,author_gender,body,status,created_at,studylab_social_post_images(id,bucket_path,mime_type,size_bytes)")
       .order("created_at", { ascending: false }).limit(40);
     if (error) throw error;
-    return (data || []).filter(post => post.status === "approved" || post.author_id === ownId);
+    return (data || []).filter(post => post.status === "approved");
   }
   function renderPost(client, post, currentUserId, likesByPost, commentCountsByPost, signedImageUrls) {
     const card = make("article", "sl-feed-post");
@@ -296,9 +328,6 @@
       card.append(popover);
     });
 
-    if (post.status === "pending" && post.author_id === currentUserId) {
-      card.append(make("span", "sl-feed-status-pending", "Pending review"));
-    }
     if (post.body) {
       const body = make("p", "sl-feed-post-body", post.body);
       card.append(body);
@@ -419,23 +448,34 @@
       commentsButton.addEventListener("click", () => toggleComments(card, post, client, currentUserId));
       actions.append(like, commentsButton);
     }
-    if (post.author_id === currentUserId) {
+    if (post.author_id === currentUserId || isAdmin) {
+      const deletingAnotherStudentPost = post.author_id !== currentUserId;
       const removePost = make("button", "sl-feed-action sl-feed-delete-post", "Delete post");
       removePost.type = "button";
       removePost.addEventListener("click", async () => {
-        if (!window.confirm("Delete this post permanently? This cannot be undone.")) return;
+        const confirmation = deletingAnotherStudentPost
+          ? "As an admin, permanently delete this student's post? This cannot be undone."
+          : "Delete this post permanently? This cannot be undone.";
+        if (!window.confirm(confirmation)) return;
         removePost.disabled = true;
         try {
-          const imagePaths = imageRows.map(row => row.bucket_path).filter(Boolean);
-          const { data: deleted, error } = await client.from("studylab_social_posts")
-            .delete().eq("id", post.id).eq("author_id", currentUserId).select("id").maybeSingle();
+          let deletion = client.from("studylab_social_posts").delete().eq("id", post.id);
+          if (!isAdmin) deletion = deletion.eq("author_id", currentUserId);
+          const { data: deleted, error } = await deletion.select("id").maybeSingle();
           if (error) throw error;
-          if (!deleted) throw new Error("This post could not be deleted. It may not be eligible for deletion.");
+          if (!deleted) throw new Error("This post could not be deleted. Check your permissions and try again.");
+          const imagePaths = imageRows.map(row => row.bucket_path).filter(Boolean);
+          let cleanupWarning = false;
           if (imagePaths.length) {
             const { error: storageError } = await client.storage.from(BUCKET).remove(imagePaths);
-            if (storageError) console.warn("Post deleted, but some attached image files could not be removed:", storageError);
+            if (storageError) {
+              console.warn("Deleted Social post but could not clean up every image:", storageError);
+              cleanupWarning = true;
+            }
           }
-          setStatus("Your post was deleted.");
+          setStatus(cleanupWarning ? "Post deleted. Some image storage may need cleanup." :
+            (deletingAnotherStudentPost ? "Student post deleted." : "Your post was deleted."));
+          await animateOut(card, "is-removing");
           await loadFeed();
         } catch (error) {
           setStatus(error.message || "Could not delete this post.", true);
@@ -446,16 +486,6 @@
     }
     card.append(actions);
 
-    if (isAdmin && post.status === "pending") {
-      const admin = make("div", "sl-feed-admin-actions");
-      const approve = make("button", "sl-feed-admin-approve", "Approve post");
-      const reject = make("button", "sl-feed-admin-reject", "Reject");
-      approve.type = reject.type = "button";
-      approve.addEventListener("click", () => moderate(client, "studylab_social_moderate_post", post.id, "approved"));
-      reject.addEventListener("click", () => moderate(client, "studylab_social_moderate_post", post.id, "rejected"));
-      admin.append(approve, reject);
-      card.append(admin);
-    }
     return card;
   }
   async function toggleComments(card, post, client, currentUserId) {
@@ -467,29 +497,39 @@
     try {
       const { data, error } = await client.from("studylab_social_comments")
         .select("id,author_id,author_display_name,author_username,author_gender,body,status,created_at")
-        .eq("post_id", post.id).order("created_at", { ascending: true }).limit(50);
+        .eq("post_id", post.id).eq("status", "approved").order("created_at", { ascending: true }).limit(50);
       if (error) throw error;
       area.replaceChildren();
       (data || []).forEach(comment => {
-        const item = make("div", "sl-feed-comment");
+        const item = make("div", "sl-feed-comment is-entering");
         const header = make("div", "sl-feed-comment-head");
         const commentGender = comment.author_gender === "female" ? "female" : comment.author_gender === "male" ? "male" : "neutral";
         const commentAvatar = make("span","sl-feed-comment-avatar sl-feed-avatar-" + commentGender);
         commentAvatar.textContent = commentGender === "female" ? "♀" : commentGender === "male" ? "♂" : "•";
         header.append(commentAvatar,make("strong", "", comment.author_display_name || "Student"));
-        if (comment.status === "pending" && comment.author_id === currentUserId) {
-          header.append(make("span", "sl-feed-status-pending", "Pending"));
-        }
         item.append(header, make("p", "", comment.body));
-        if (isAdmin && comment.status === "pending") {
-          const controls = make("div", "sl-feed-admin-actions");
-          const yes = make("button", "sl-feed-admin-approve", "Approve");
-          const no = make("button", "sl-feed-admin-reject", "Reject");
-          yes.type = no.type = "button";
-          yes.addEventListener("click", () => moderate(client, "studylab_social_moderate_comment", comment.id, "approved"));
-          no.addEventListener("click", () => moderate(client, "studylab_social_moderate_comment", comment.id, "rejected"));
-          controls.append(yes, no);
-          item.append(controls);
+        if (comment.author_id === currentUserId || isAdmin) {
+          const removeComment = make("button", "sl-feed-action sl-feed-delete-comment", "Delete");
+          removeComment.type = "button";
+          removeComment.addEventListener("click", async () => {
+            if (!window.confirm("Delete this comment permanently? This cannot be undone.")) return;
+            removeComment.disabled = true;
+            try {
+              let deletion = client.from("studylab_social_comments").delete().eq("id", comment.id);
+              if (!isAdmin) deletion = deletion.eq("author_id", currentUserId);
+              const { data: deleted, error: deleteError } = await deletion.select("id").maybeSingle();
+              if (deleteError) throw deleteError;
+              if (!deleted) throw new Error("This comment could not be deleted. Check your permissions.");
+              setStatus("Comment deleted.");
+              await animateOut(item, "is-removing");
+              await toggleComments(card, post, client, currentUserId);
+              await loadFeed();
+            } catch (deleteError) {
+              setStatus(deleteError.message || "Could not delete comment.", true);
+              removeComment.disabled = false;
+            }
+          });
+          item.append(removeComment);
         }
         area.append(item);
       });
@@ -511,23 +551,13 @@
         send.disabled = true;
         try {
           const commenter = await requireBasicProfile();
-          const { data: newComment, error } = await client.from("studylab_social_comments")
-            .insert({ post_id: post.id, author_id: commenter.id, body })
-            .select("id").single();
+          const { error } = await client.from("studylab_social_comments")
+            .insert({ post_id: post.id, author_id: commenter.id, body });
           if (error) throw error;
-          const moderation = await client.functions.invoke("studylab-social-moderate", {
-            body: { content_type: "comment", content_id: newComment.id }
-          });
           field.value = "";
           area.remove();
           await toggleComments(card, post, client, currentUserId);
-          if (moderation.error) {
-            setStatus("Comment submitted. It remains hidden until admin review.");
-          } else if (moderation.data?.status === "approved") {
-            setStatus("Comment approved by AI moderation.");
-          } else {
-            setStatus("Comment sent to the admin review queue.");
-          }
+          setStatus("Comment published.");
         } catch (error) {
           setStatus(error.message || "Could not submit comment.", true);
           send.disabled = false;
@@ -537,77 +567,6 @@
     } catch (error) {
       area.replaceChildren(make("p", "sl-feed-error", error.message || "Could not load comments."));
     }
-  }
-  async function moderate(client, rpc, id, decision) {
-    try {
-      const { data, error } = await client.rpc(rpc, {
-        [rpc === "studylab_social_moderate_post" ? "p_post_id" : "p_comment_id"]: id,
-        p_status: decision
-      });
-      if (error) throw error;
-      if (!data) throw new Error("That item could not be updated.");
-      setStatus("Moderation decision saved.");
-      await loadFeed();
-    } catch (error) {
-      setStatus(error.message || "Moderation failed.", true);
-    }
-  }
-  async function renderAdminQueue(client) {
-    let queue = panel.querySelector(".sl-feed-admin-queue");
-    if (!queue) {
-      queue = make("section", "sl-feed-admin-queue");
-      queue.innerHTML = '<div class="sl-feed-admin-heading"><strong>Moderation queue</strong><span>Admin</span></div><div class="sl-feed-admin-list"></div>';
-      panel.querySelector(".sl-feed-head")?.after(queue);
-    }
-    const list = queue.querySelector(".sl-feed-admin-list");
-    const [{ data: posts, error: postError }, { data: comments, error: commentError }] = await Promise.all([
-      client.from("studylab_social_posts").select("id,author_display_name,author_username,body,created_at,studylab_social_post_images(bucket_path)").eq("status", "pending").order("created_at", { ascending: true }).limit(50),
-      client.from("studylab_social_comments").select("id,post_id,author_display_name,body,created_at").eq("status", "pending").order("created_at", { ascending: true }).limit(50)
-    ]);
-    if (postError) throw postError;
-    if (commentError) throw commentError;
-    list.replaceChildren();
-    for (const post of posts || []) {
-      const item = make("div", "sl-feed-admin-item");
-      item.append(make("strong", "", "Post · " + (post.author_display_name || "Student")), make("p", "", post.body || "[Photo post]"));
-      const imageRows = post.studylab_social_post_images || [];
-      if (imageRows.length) {
-        const preview = make("div", "sl-feed-gallery");
-        preview.dataset.count = String(Math.min(imageRows.length, MAX_IMAGES));
-        for (const imageRow of imageRows.slice(0, MAX_IMAGES)) {
-          try {
-            const url = await signedImageUrl(client, imageRow.bucket_path);
-            const img = document.createElement("img");
-            img.src = url;
-            img.alt = "Photo awaiting moderation";
-            img.loading = "lazy";
-            preview.append(img);
-          } catch (error) {
-            console.warn("Pending Social image preview:", error);
-          }
-        }
-        if (preview.childElementCount) item.append(preview);
-      }
-      const actions = make("div", "sl-feed-admin-actions");
-      const yes = make("button", "sl-feed-admin-approve", "Approve");
-      const no = make("button", "sl-feed-admin-reject", "Reject");
-      yes.type = no.type = "button";
-      yes.addEventListener("click", () => moderate(client, "studylab_social_moderate_post", post.id, "approved"));
-      no.addEventListener("click", () => moderate(client, "studylab_social_moderate_post", post.id, "rejected"));
-      actions.append(yes, no); item.append(actions); list.append(item);
-    }
-    for (const comment of comments || []) {
-      const item = make("div", "sl-feed-admin-item");
-      item.append(make("strong", "", "Comment · " + (comment.author_display_name || "Student")), make("p", "", comment.body));
-      const actions = make("div", "sl-feed-admin-actions");
-      const yes = make("button", "sl-feed-admin-approve", "Approve");
-      const no = make("button", "sl-feed-admin-reject", "Reject");
-      yes.type = no.type = "button";
-      yes.addEventListener("click", () => moderate(client, "studylab_social_moderate_comment", comment.id, "approved"));
-      no.addEventListener("click", () => moderate(client, "studylab_social_moderate_comment", comment.id, "rejected"));
-      actions.append(yes, no); item.append(actions); list.append(item);
-    }
-    if (!list.childElementCount) list.append(make("p", "sl-feed-loading", "Nothing is waiting for review."));
   }
   function renderCommunityProfiles(posts) {
     const list = panel.querySelector(".sl-feed-member-list");
@@ -635,7 +594,12 @@
       list.append(row);
     }
   }
+  let feedLoadCount = 0;
   async function loadFeed() {
+    feedLoadCount++;
+    const refreshButton = panel.querySelector(".sl-feed-refresh");
+    refreshButton?.classList.add("is-refreshing");
+    refreshButton?.setAttribute("aria-busy", "true");
     if (!feedHasLoaded) showSkeletons();
     try {
       const account = accountClient();
@@ -692,7 +656,7 @@
       }
       ensureFeedControls();
       if (!posts.length) {
-        emptyState("No approved posts yet");
+        emptyState("No posts yet");
       } else {
         // Sign all post images in one Storage request instead of waiting on
         // a separate network round-trip for each image in every post.
@@ -703,8 +667,7 @@
         // Replace the feed once to avoid repeated layout and paint work per post.
         stream.replaceChildren(...cards);
       }
-      if (isAdmin) await renderAdminQueue(account.client);
-      else panel.querySelector(".sl-feed-admin-queue")?.remove();
+      panel.querySelector(".sl-feed-admin-queue")?.remove();
       if (note) note.hidden = true;
       feedHasLoaded = true;
     } catch (error) {
@@ -715,6 +678,12 @@
         note.textContent = error.message || "Could not connect to StudyLab Social. Please try again.";
       }
       feedHasLoaded = true;
+    } finally {
+      feedLoadCount = Math.max(0, feedLoadCount - 1);
+      if (feedLoadCount === 0) {
+        refreshButton?.classList.remove("is-refreshing");
+        refreshButton?.removeAttribute("aria-busy");
+      }
     }
   }
 
@@ -733,14 +702,15 @@
       const body = textarea.value.trim();
       if (!body && !files.length) throw new Error("Write something or attach a photo.");
       setBusy(true);
-      setStatus("Submitting your post…");
+      setStatus(files.length ? "Preparing your post…" : "Publishing your post…");
       const { data: post, error: postError } = await account.client.from("studylab_social_posts")
         .insert({ author_id: user.id, body }).select("id").single();
       if (postError) throw postError;
 
       const uploaded = [];
       try {
-        for (const file of files) {
+        for (const [fileIndex, file] of files.entries()) {
+          setStatus("Uploading photo " + (fileIndex + 1) + " of " + files.length + "…");
           const path = user.id + "/" + post.id + "/" + crypto.randomUUID() + "." + fileExtension(file);
           const { error: uploadError } = await account.client.storage.from(BUCKET)
             .upload(path, file, { contentType: file.type, upsert: false, cacheControl: "3600" });
@@ -755,28 +725,32 @@
       } catch (uploadError) {
         if (uploaded.length) await account.client.storage.from(BUCKET).remove(uploaded).catch(() => {});
         try {
-          await account.client.rpc("studylab_social_delete_own_pending_post", { p_post_id: post.id });
+          await account.client.from("studylab_social_posts").delete().eq("id", post.id).eq("author_id", user.id);
         } catch (cleanupError) {
-          console.warn("Could not remove the failed pending Social post:",cleanupError);
+          console.warn("Could not remove the failed Social post:",cleanupError);
         }
         throw uploadError;
       }
-      const moderation = await account.client.functions.invoke("studylab-social-moderate", {
-        body: { content_type: "post", content_id: post.id }
-      });
+      setStatus("Publishing your post…");
+      const { data: published, error: publishError } = await account.client.rpc(
+        "studylab_social_publish_own_post",
+        { p_post_id: post.id }
+      );
+      if (publishError || !published) {
+        if (uploaded.length) {
+          const { error: cleanupStorageError } = await account.client.storage.from(BUCKET).remove(uploaded);
+          if (cleanupStorageError) console.warn("Could not clean up an unpublished Social upload:", cleanupStorageError);
+        }
+        const { error: cleanupPostError } = await account.client.from("studylab_social_posts")
+          .delete().eq("id", post.id).eq("author_id", user.id);
+        if (cleanupPostError) console.warn("Could not remove an unpublished Social post:", cleanupPostError);
+        throw publishError || new Error("Your post could not be published. Please try again.");
+      }
       textarea.value = "";
       input.value = "";
       fileCount.textContent = "No photos selected";
       renderImagePreviews([]);
-      if (moderation.error) {
-        setStatus("Post submitted. It remains hidden until admin review.");
-      } else if (moderation.data?.status === "approved") {
-        setStatus("Your text post was approved by AI moderation.");
-      } else if (moderation.data?.image_review_required) {
-        setStatus("Post submitted. Photos require admin approval before appearing.");
-      } else {
-        setStatus("Post sent to the admin review queue.");
-      }
+      setStatus(files.length ? "Your photo post is live." : "Your post is live.");
       await loadFeed();
     } catch (error) {
       setStatus(error.message || "Could not submit your post.", true);

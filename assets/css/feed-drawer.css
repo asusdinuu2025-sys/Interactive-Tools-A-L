@@ -165,6 +165,14 @@ body.sl-community-open .study-quick-button {
 .sl-feed-file-button input { position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
 .sl-feed-file-count { color:#91a3b5; font-size:.7rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .sl-feed-compose-status { margin:9px 2px 0; color:#8dbbd2; font-size:.73rem; line-height:1.45; }
+.sl-feed-upload-spinner {
+  display:inline-block; width:13px; height:13px; flex:0 0 13px; margin-right:7px;
+  border:2px solid currentColor; border-right-color:transparent; border-radius:50%;
+  vertical-align:-2px; animation:sl-feed-upload-spin .72s linear infinite;
+}
+.sl-feed-post-button .sl-feed-upload-spinner { width:12px; height:12px; flex-basis:12px; }
+@keyframes sl-feed-upload-spin { to { transform:rotate(360deg); } }
+@media (prefers-reduced-motion:reduce) { .sl-feed-upload-spinner { animation:none; border-right-color:currentColor; } }
 .sl-feed-compose-status[hidden] { display:none; }
 .sl-feed-compose-status[data-state="error"], .sl-feed-error { color:#ff7180; }
 .sl-feed-post { padding:14px 13px; margin:0 0 13px; border:1px solid rgba(130,160,190,.17); border-radius:16px; background:rgba(130,160,190,.055); }
@@ -1526,4 +1534,73 @@ html:not([data-theme="light"]) .sl-feed-panel[data-size="full"] .sl-feed-post {
 }
 .sl-feed-panel[data-size="full"] .sl-feed-stream {
   padding-top: 0 !important;
+}
+
+/* Dark Social scroll performance: avoid per-card backdrop-filter and virtual-size jumps. */
+.sl-feed-panel[data-size="full"] .sl-feed-post {
+  content-visibility:visible !important;
+  contain-intrinsic-size:none !important;
+}
+html:not([data-theme="light"]) .sl-feed-panel[data-size="full"] .sl-feed-post {
+  background:rgba(8,16,29,.92) !important;
+  -webkit-backdrop-filter:none !important;
+  backdrop-filter:none !important;
+}
+
+/* Dark-theme scroll fix: the full-screen overlay blur repaints the page behind
+   the entire feed on every scroll. Keep the dark glass surface, remove that
+   expensive backdrop sampling, and leave the light theme unchanged. */
+html:not([data-theme="light"]) .sl-feed-panel[data-size="full"] {
+  background:rgba(8,17,31,.93) !important;
+  -webkit-backdrop-filter:none !important;
+  backdrop-filter:none !important;
+}
+html:not([data-theme="light"]) .sl-feed-panel[data-size="full"] .sl-feed-center .sl-feed-inner {
+  -webkit-backdrop-filter:none !important;
+  backdrop-filter:none !important;
+}
+
+
+/* Dark Social: remove expensive nested glass sampling while preserving the dark palette. */
+html:not([data-theme="light"]) .sl-feed-panel[data-size="full"] *,
+html:not([data-theme="light"]) .sl-feed-panel[data-size="full"] *::before,
+html:not([data-theme="light"]) .sl-feed-panel[data-size="full"] *::after {
+  -webkit-backdrop-filter:none !important;
+  backdrop-filter:none !important;
+}
+html:not([data-theme="light"]) .sl-feed-panel[data-size="full"] .sl-feed-post,
+html:not([data-theme="light"]) .sl-feed-panel[data-size="full"] .sl-feed-comment,
+html:not([data-theme="light"]) .sl-feed-panel[data-size="full"] .sl-feed-compose,
+html:not([data-theme="light"]) .sl-feed-panel[data-size="full"] .sl-feed-members-card {
+  background-color:rgba(8,16,29,.94);
+}
+html:not([data-theme="light"]) .sl-feed-panel[data-size="full"] .sl-feed-stream {
+  isolation:isolate;
+  transform:translateZ(0);
+}
+.sl-feed-post.is-removing,
+.sl-feed-comment.is-removing {
+  pointer-events:none;
+  animation:sl-social-remove .28s cubic-bezier(.4,0,.2,1) forwards;
+}
+.sl-feed-comment.is-entering {
+  animation:sl-social-comment-in .3s cubic-bezier(.2,.8,.2,1) both;
+}
+.sl-feed-refresh.is-refreshing {
+  animation:sl-social-spin .8s linear infinite;
+  color:#83ddff;
+}
+@keyframes sl-social-remove {
+  0% { opacity:1; transform:translateY(0) scale(1); }
+  60% { opacity:0; transform:translateY(-7px) scale(.985); }
+  100% { opacity:0; transform:translateY(-7px) scale(.985); max-height:0; margin-block:0; padding-block:0; }
+}
+@keyframes sl-social-comment-in {
+  from { opacity:0; transform:translateY(7px); }
+  to { opacity:1; transform:translateY(0); }
+}
+@keyframes sl-social-spin { to { transform:rotate(360deg); } }
+@media (prefers-reduced-motion:reduce) {
+  .sl-feed-post.is-removing,.sl-feed-comment.is-removing,
+  .sl-feed-comment.is-entering,.sl-feed-refresh.is-refreshing { animation:none !important; }
 }
