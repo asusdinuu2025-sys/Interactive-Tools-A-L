@@ -117,7 +117,8 @@ BEGIN
         session_active = true,
         session_started_at = NULL,
         last_heartbeat_at = NULL,
-        updated_at = reference_now
+        -- Match the local tracker to the exact server-side credited endpoint.
+        updated_at = credit_until
     WHERE user_id = member_row.user_id;
   END LOOP;
 END;
@@ -215,8 +216,7 @@ BEGIN
       session_started_at = NULL,
       last_heartbeat_at = NULL,
       session_elapsed_seconds = 0,
-      session_date = local_day,
-      updated_at = now()
+      session_date = local_day
   WHERE is_studying = false
     AND session_active = true
     AND session_date < local_day;
