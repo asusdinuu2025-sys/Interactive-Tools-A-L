@@ -210,8 +210,9 @@
   }
   async function heartbeat(isRetry = false) {
     if (!client || !userId || !member?.is_studying) return;
-    if (!isRetry && heartbeatWasRecentlySuccessful()) {
-      await loadRows();
+    if (heartbeatWasRecentlySuccessful()) {
+      try { await loadRows(); }
+      catch (e) { console.error('Could not refresh shared Study Room timer state', e); }
       return;
     }
     if (heartbeatPromise) return heartbeatPromise;
