@@ -504,8 +504,10 @@
         const item = make("div", "sl-feed-comment is-entering");
         const header = make("div", "sl-feed-comment-head");
         const commentGender = comment.author_gender === "female" ? "female" : comment.author_gender === "male" ? "male" : "neutral";
-        const commentAvatar = make("span","sl-feed-comment-avatar sl-feed-avatar-" + commentGender);
-        commentAvatar.textContent = commentGender === "female" ? "♀" : commentGender === "male" ? "♂" : "•";
+        const commentAvatar = make("span","sl-feed-avatar sl-feed-comment-avatar sl-feed-avatar-" + commentGender);
+        const commentName = String(comment.author_display_name || "Student").trim();
+        commentAvatar.textContent = Array.from(commentName)[0]?.toLocaleUpperCase() || "S";
+        commentAvatar.setAttribute("aria-label", (comment.author_display_name || "Student") + " profile");
         header.append(commentAvatar,make("strong", "", comment.author_display_name || "Student"));
         item.append(header, make("p", "", comment.body));
         if (comment.author_id === currentUserId || isAdmin) {
