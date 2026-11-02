@@ -302,8 +302,10 @@
 
     const imageRows = post.studylab_social_post_images || [];
     if (imageRows.length) {
+      const galleryWrap = make("div", "sl-feed-gallery-wrap");
       const gallery = make("div", "sl-feed-gallery");
       gallery.dataset.count = String(Math.min(imageRows.length, MAX_IMAGES));
+      galleryWrap.dataset.count = String(Math.min(imageRows.length, MAX_IMAGES));
       for (const imageRow of imageRows.slice(0, MAX_IMAGES)) {
         try {
           const url = await signedImageUrl(client, imageRow.bucket_path);
@@ -317,7 +319,57 @@
           console.warn("Social image could not be loaded:", error);
         }
       }
-      if (gallery.childElementCount) card.append(gallery);
+      if (gallery.childElementCount > 1) {
+        const previous = make("button", "sl-feed-gallery-arrow sl-feed-gallery-prev", "‹");
+        previous.type = "button";
+        previous.setAttribute("aria-label", "Previous photo");
+        const next = make("button", "sl-feed-gallery-arrow sl-feed-gallery-next", "›");
+        next.type = "button";
+        next.setAttribute("aria-label", "Next photo");
+        const dots = make("div", "sl-feed-gallery-dots");
+        dots.setAttribute("role", "group");
+        dots.setAttribute("aria-label", "Choose a photo");
+        const dotButtons = [];
+        for (let index = 0; index < gallery.childElementCount; index++) {
+          const dot = make("button", "sl-feed-gallery-dot");
+          dot.type = "button";
+          dot.setAttribute("aria-label", "Show photo " + (index + 1));
+          dot.addEventListener("click", () => {
+            const target = gallery.children[index];
+            gallery.scrollTo({ left: target.offsetLeft - gallery.offsetLeft, behavior: "smooth" });
+          });
+          dots.append(dot);
+          dotButtons.push(dot);
+        }
+        const updateGalleryControls = () => {
+          const current = [...gallery.children].reduce((best, image, index) => {
+            const distance = Math.abs((image.offsetLeft - gallery.offsetLeft) - gallery.scrollLeft);
+            return distance < best.distance ? { index, distance } : best;
+          }, { index: 0, distance: Infinity }).index;
+          dotButtons.forEach((dot, index) => {
+            dot.classList.toggle("is-active", index === current);
+            dot.setAttribute("aria-current", index === current ? "true" : "false");
+          });
+          previous.disabled = current === 0;
+          next.disabled = current === gallery.childElementCount - 1;
+        };
+        previous.addEventListener("click", () => {
+          const current = dotButtons.findIndex(dot => dot.classList.contains("is-active"));
+          const target = gallery.children[Math.max(0, current - 1)];
+          if (target) gallery.scrollTo({ left: target.offsetLeft - gallery.offsetLeft, behavior: "smooth" });
+        });
+        next.addEventListener("click", () => {
+          const current = dotButtons.findIndex(dot => dot.classList.contains("is-active"));
+          const target = gallery.children[Math.min(gallery.childElementCount - 1, current + 1)];
+          if (target) gallery.scrollTo({ left: target.offsetLeft - gallery.offsetLeft, behavior: "smooth" });
+        });
+        gallery.addEventListener("scroll", updateGalleryControls, { passive: true });
+        galleryWrap.append(previous, gallery, next, dots);
+        requestAnimationFrame(updateGalleryControls);
+      } else {
+        galleryWrap.append(gallery);
+      }
+      if (gallery.childElementCount) card.append(galleryWrap);
     }
 
     const actions = make("div", "sl-feed-post-actions");
