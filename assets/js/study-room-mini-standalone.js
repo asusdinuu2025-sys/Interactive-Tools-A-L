@@ -55,7 +55,10 @@
   }
   async function heartbeat(isRetry = false) {
     if (!row?.is_studying || heartbeatBusy) return;
-    if (!isRetry && heartbeatWasRecentlySuccessful()) return;
+    if (!isRetry && heartbeatWasRecentlySuccessful()) {
+      await loadRow();
+      return;
+    }
     heartbeatBusy = true;
     try {
       await rpc("study_room_heartbeat");
