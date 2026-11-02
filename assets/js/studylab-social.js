@@ -493,7 +493,7 @@
       if (post.status !== "approved" || !post.author_id || unique.has(post.author_id)) continue;
       unique.set(post.author_id, post);
     }
-    const members = [...unique.values()].slice(0, 8);
+    const members = [...unique.values()].slice(0, 10);
     list.replaceChildren();
     if (!members.length) {
       list.append(make("p", "sl-feed-members-empty", "Student profiles will appear here as they post."));
