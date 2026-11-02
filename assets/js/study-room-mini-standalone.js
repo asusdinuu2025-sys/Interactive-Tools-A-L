@@ -55,8 +55,9 @@
   }
   async function heartbeat(isRetry = false) {
     if (!row?.is_studying || heartbeatBusy) return;
-    if (!isRetry && heartbeatWasRecentlySuccessful()) {
-      await loadRow();
+    if (heartbeatWasRecentlySuccessful()) {
+      try { await loadRow(); }
+      catch (error) { console.error("Detached timer refresh failed", error); }
       return;
     }
     heartbeatBusy = true;
