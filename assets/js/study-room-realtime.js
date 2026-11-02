@@ -202,12 +202,20 @@
     const {error} = await client.rpc(name, args || {});
     if (error) throw error;
   }
+  function heartbeatWasRecentlySuccessful() {
+    try {
+      const key = "studylab:study-room-heartbeat:" + userId;
+      return Date.now() - Number(localStorage.getItem(key) || 0) < 45000;
+    } catch (_) { return false; }
+  }
   async function heartbeat(isRetry = false) {
     if (!client || !userId || !member?.is_studying) return;
+    if (!isRetry && heartbeatWasRecentlySuccessful()) return;
     if (heartbeatPromise) return heartbeatPromise;
     heartbeatPromise = (async () => {
       try {
         await callRpc('study_room_heartbeat');
+        try { localStorage.setItem("studylab:study-room-heartbeat:" + userId, String(Date.now())); } catch (_) {}
         if (heartbeatRetryTimer) {
           clearTimeout(heartbeatRetryTimer);
           heartbeatRetryTimer = null;
