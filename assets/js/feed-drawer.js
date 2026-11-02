@@ -61,26 +61,12 @@
   feedStage.className = "sl-feed-stage";
   const leftRail = document.createElement("aside");
   leftRail.className = "sl-feed-left-rail";
-  leftRail.setAttribute("aria-label", "Create a post and advertisement");
+  leftRail.setAttribute("aria-label", "Create a post");
   const center = document.createElement("main");
   center.className = "sl-feed-center";
   const rightRail = document.createElement("aside");
   rightRail.className = "sl-feed-right-rail";
-  rightRail.setAttribute("aria-label", "StudyLab Social community and advertisements");
-  const adSlot = (side, zone) => {
-    const slot = document.createElement("div");
-    slot.className = "sl-feed-ad-slot sl-feed-ad-" + side;
-    slot.setAttribute("aria-label", "Advertisement");
-    const label = document.createElement("span");
-    label.className = "sl-feed-ad-label";
-    label.textContent = "ADVERTISEMENT";
-    slot.append(label);
-    const script = document.createElement("script");
-    script.dataset.zone = zone;
-    script.src = "https://nap5k.com/tag.min.js";
-    slot.append(script);
-    return slot;
-  };
+  rightRail.setAttribute("aria-label", "StudyLab Social community");
   const communityIntro = document.createElement("section");
   communityIntro.className = "sl-feed-community-intro";
   communityIntro.innerHTML = '<div class="sl-feed-community-cover"></div><div class="sl-feed-community-intro-copy"><span class="sl-feed-community-kicker">STUDYLAB COMMUNITY</span><h2>StudyLab Social</h2><p>A shared space for A/L students</p></div>';
@@ -90,9 +76,9 @@
   feedInner.parentNode.replaceChild(feedStage, feedInner);
   feedInner.removeChild(feedHead);
   panel.insertBefore(feedHead, feedStage);
-  leftRail.append(composer, adSlot("left", "12171550"));
+  leftRail.append(composer);
   center.append(feedInner);
-  rightRail.append(membersCard, adSlot("right", "12171551"));
+  rightRail.append(membersCard);
   feedStage.append(leftRail, center, rightRail);
 
   const actions = header.querySelector(".header-actions");
