@@ -91,17 +91,17 @@
       style.id = styleId;
       style.textContent = `
         #studyLabSocialGateToast {
-          position:fixed; z-index:1300; top:max(18px,env(safe-area-inset-top)); right:18px;
+          position:fixed; z-index:1300; top:auto; right:18px; bottom:max(18px,env(safe-area-inset-bottom));
           width:max-content; max-width:min(92vw,430px); padding:13px 17px;
           border:1px solid rgba(91,205,255,.34); border-radius:14px;
           background:rgba(15,28,46,.97); color:#f3f8ff;
           box-shadow:0 14px 38px rgba(0,0,0,.3),0 0 18px rgba(65,180,255,.12);
           font:650 14px/1.45 system-ui,sans-serif; text-align:left;
-          opacity:0; transform:translateX(calc(100% + 30px)); pointer-events:none;
+          opacity:0; transform:translateY(18px); pointer-events:none;
           transition:transform .42s cubic-bezier(.2,.8,.2,1),opacity .28s ease;
         }
-        #studyLabSocialGateToast.is-visible { opacity:1; transform:translateX(0); }
-        #studyLabSocialGateToast.is-leaving { opacity:0; transform:translateX(calc(100% + 30px)); }
+        #studyLabSocialGateToast.is-visible { opacity:1; transform:translateY(0); }
+        #studyLabSocialGateToast.is-leaving { opacity:0; transform:translateY(18px); }
         html[data-theme="light"] #studyLabSocialGateToast {
           background:rgba(255,255,255,.98); color:#17243a; border-color:rgba(55,155,205,.3);
           box-shadow:0 14px 38px rgba(35,70,105,.18);
@@ -266,7 +266,23 @@
     if (post.status === "pending" && post.author_id === currentUserId) {
       card.append(make("span", "sl-feed-status-pending", "Pending review"));
     }
-    if (post.body) card.append(make("p", "sl-feed-post-body", post.body));
+    if (post.body) {
+      const body = make("p", "sl-feed-post-body", post.body);
+      card.append(body);
+      if (post.body.length > 260) {
+        body.classList.add("is-collapsed");
+        const readMore = make("button", "sl-feed-read-more", "Read more");
+        readMore.type = "button";
+        readMore.setAttribute("aria-expanded", "false");
+        readMore.addEventListener("click", () => {
+          const expanded = body.classList.toggle("is-expanded");
+          body.classList.toggle("is-collapsed", !expanded);
+          readMore.textContent = expanded ? "Show less" : "Read more";
+          readMore.setAttribute("aria-expanded", String(expanded));
+        });
+        card.append(readMore);
+      }
+    }
 
     const imageRows = post.studylab_social_post_images || [];
     if (imageRows.length) {
@@ -672,6 +688,7 @@
     const toggle = event.target.closest(".sl-feed-toggle");
     if (toggle?.getAttribute("aria-expanded") === "true") loadFeed();
   });
+  window.addEventListener("studylab-social-refresh", () => loadFeed());
   panel.querySelector("[data-feed-close]")?.addEventListener("click", () => {});
   window.addEventListener("focus", () => {
     if (document.visibilityState === "visible" && panel.getAttribute("aria-hidden") === "false") loadFeed();
