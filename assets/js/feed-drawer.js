@@ -53,19 +53,35 @@
       <p class="sl-feed-setup-note" role="status">Connecting to StudyLab Social…</p>
     </div>`;
 
-  // Full-screen mode uses a Reddit-style central feed with a community sidebar.
+  // Full-screen layout: composer left, primary feed centre, owner/profile and ads right.
   const feedInner = panel.querySelector(".sl-feed-inner");
+  const composer = feedInner.querySelector(".sl-feed-compose");
   const feedStage = document.createElement("div");
   feedStage.className = "sl-feed-stage";
-  const feedCenter = document.createElement("div");
-  feedCenter.className = "sl-feed-center";
-  const socialRail = document.createElement("aside");
-  socialRail.className = "sl-feed-social-rail";
-  socialRail.setAttribute("aria-label", "StudyLab Social information");
-  socialRail.innerHTML = '<section class="sl-feed-community-card"><div class="sl-feed-community-cover" aria-hidden="true"></div><div class="sl-feed-community-mark" aria-hidden="true">S</div><h3>StudyLab Social</h3><p>A shared space for A/L students to ask questions, share study tips and learn together.</p><div class="sl-feed-community-meta"><span>✦</span> Sri Lankan A/L student community</div></section><section class="sl-feed-owner-card" aria-label="StudyLab owner profile"><p class="sl-feed-sidebar-label">COMMUNITY CREATOR</p><div class="sl-feed-owner-row"><span class="sl-feed-owner-avatar" aria-hidden="true">ツ</span><div><strong>Dinusha</strong><span>@dinusha_official</span></div></div><p class="sl-feed-owner-description">Founder &amp; creator of StudyLab</p><a href="https://t.me/dinusha_official" target="_blank" rel="noopener noreferrer">View profile ↗</a></section><div class="sl-feed-sidebar-ad" aria-label="Reserved banner advertisement space"><span>ADVERTISEMENT</span><strong>Banner space</strong><small>Placement reserved</small></div><div class="sl-feed-sidebar-ad" aria-label="Additional reserved banner advertisement space"><span>ADVERTISEMENT</span><strong>Small banner space</strong><small>Placement reserved</small></div>';
-  feedInner.parentNode.replaceChild(feedStage,feedInner);
-  feedCenter.append(feedInner);
-  feedStage.append(feedCenter,socialRail);
+  const leftRail = document.createElement("aside");
+  leftRail.className = "sl-feed-left-rail";
+  leftRail.setAttribute("aria-label", "Create a post and advertisement");
+  const center = document.createElement("div");
+  center.className = "sl-feed-center";
+  const rightRail = document.createElement("aside");
+  rightRail.className = "sl-feed-right-rail";
+  rightRail.setAttribute("aria-label", "StudyLab profile and advertisements");
+  const adSlot = (side, label) => {
+    const slot = document.createElement("div");
+    slot.className = "sl-feed-ad-slot sl-feed-ad-" + side;
+    slot.setAttribute("aria-label", "Reserved In-Page Push banner advertisement space");
+    slot.innerHTML = '<span>ADVERTISEMENT</span><strong>' + label + '</strong><small>In-Page Push · Banner</small>';
+    return slot;
+  };
+  const ownerCard = document.createElement("section");
+  ownerCard.className = "sl-feed-owner-card";
+  ownerCard.setAttribute("aria-label", "StudyLab owner profile");
+  ownerCard.innerHTML = '<div class="sl-feed-owner-cover"></div><div class="sl-feed-owner-row"><span class="sl-feed-owner-avatar" aria-hidden="true">ツ</span><div><strong>Dinusha</strong><span>@dinusha_official</span></div></div><p class="sl-feed-owner-description">Founder &amp; creator of StudyLab</p><a href="https://t.me/dinusha_official" target="_blank" rel="noopener noreferrer">View profile ↗</a>';
+  feedInner.parentNode.replaceChild(feedStage, feedInner);
+  leftRail.append(composer, adSlot("left", "Banner placement"));
+  center.append(feedInner);
+  rightRail.append(ownerCard, adSlot("right-top", "Banner placement"), adSlot("right-bottom", "Small banner placement"));
+  feedStage.append(leftRail, center, rightRail);
 
   const actions = header.querySelector(".header-actions");
   if (!actions) return;
