@@ -1292,3 +1292,25 @@ html[data-theme="light"] .sl-feed-read-more { color:#167eae; }
   .sl-feed-head-brand strong { font-size:.86rem; }
   .sl-feed-head-brand .sl-feed-mark { width:30px; height:30px; }
 }
+
+
+/* Compact Social header and removable image previews. */
+.sl-feed-panel[data-size="full"] .sl-feed-head {
+  min-height: 0;
+  padding: 2px 4px 6px;
+  gap: 8px;
+}
+.sl-feed-head-brand { gap: 7px; font-size: .9rem; }
+.sl-feed-head-brand .sl-feed-mark { width: 27px; height: 27px; flex-basis: 27px; border-radius: 9px; font-size: .85rem; }
+.sl-feed-head-actions { gap: 6px; }
+.sl-feed-refresh, .sl-feed-close { width: 29px; height: 29px; min-width: 29px; flex-basis: 29px; }
+.sl-feed-image-preview-item { position:relative; width:76px; height:76px; flex:0 0 76px; }
+.sl-feed-image-preview-item img { display:block; width:100%; height:100%; object-fit:cover; border-radius:10px; border:1px solid rgba(126,160,190,.25); }
+.sl-feed-image-remove {
+  position:absolute; top:-6px; right:-6px; display:grid; place-items:center;
+  width:21px; height:21px; padding:0; border:1px solid rgba(255,255,255,.65);
+  border-radius:50%; background:rgba(25,35,50,.92); color:#fff;
+  font:700 16px/1 inherit; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,.25);
+}
+.sl-feed-delete-post { margin-left:auto; border-color:rgba(255,105,120,.25); color:#ff8793; }
+html[data-theme="light"] .sl-feed-delete-post { color:#b43c4b; }
