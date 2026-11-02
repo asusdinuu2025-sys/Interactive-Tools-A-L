@@ -2000,3 +2000,31 @@ html[data-theme="light"] .sl-feed-comment-menu-delete:hover {
     transition:none !important;
   }
 }
+
+
+/* Clear third-party AI moderation disclosure for student-generated content. */
+.sl-feed-panel .sl-feed-ai-consent {
+  display:flex;
+  align-items:flex-start;
+  gap:9px;
+  margin:12px 0 4px;
+  color:var(--text-muted,#8b9bb0);
+  font-size:.72rem;
+  line-height:1.5;
+  text-align:left;
+}
+.sl-feed-panel .sl-feed-ai-consent input {
+  flex:0 0 auto;
+  width:15px;
+  height:15px;
+  margin:2px 0 0;
+  accent-color:#35bfa0;
+}
+.sl-feed-panel .sl-feed-comment-ai-consent {
+  width:100%;
+  margin:0 0 8px;
+  font-size:.68rem;
+}
+.sl-feed-panel .sl-feed-comment-ai-consent span {
+  min-width:0;
+}
