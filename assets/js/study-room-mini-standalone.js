@@ -56,7 +56,8 @@
     try { localStorage.removeItem(roomPagePresenceKey); } catch (_) {}
     if (hasAnotherRoomPageOpen()) return;
 
-    const url = String(window.STUDYLAB_SUPABASE_URL || "").replace(/\\/+$/, "");
+    let url = String(window.STUDYLAB_SUPABASE_URL || "");
+    while (url.endsWith("/")) url = url.slice(0, -1);
     const apiKey = window.STUDYLAB_SUPABASE_ANON_KEY;
     if (!url || !apiKey || !accessToken) return;
 
