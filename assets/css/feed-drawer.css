@@ -811,3 +811,6 @@ html[data-theme="light"] .sl-feed-panel[data-size="full"] .sl-feed-center .sl-fe
 .sl-feed-panel[data-size="full"] .sl-feed-head .sl-feed-heading { display:none; }
 .sl-feed-panel[data-size="full"] .sl-feed-head { justify-content:flex-end; }
 .sl-feed-sidebar-ad + .sl-feed-sidebar-ad { min-height:92px; }
+
+/* Keep the community sidebar exclusive to full-screen mode. */
+.sl-feed-social-rail { display:none; }
