@@ -22,8 +22,8 @@
     return Math.min(90, Math.max(0, Math.floor(age / 1000)));
   }
   function render() {
-    const active = Boolean(row?.is_studying && row.last_heartbeat_at &&
-      Date.now() - new Date(row.last_heartbeat_at).getTime() < TIMEOUT_MS);
+    // The server-side view already applies the authoritative 90-second timeout.
+    const active = Boolean(row?.is_studying && row.last_heartbeat_at);
     const hasSession = Boolean(row?.session_active);
     const base = row && (row.session_active || row.is_studying)
       ? Math.max(0, Number(row.session_elapsed_seconds) || 0) : 0;
@@ -47,11 +47,19 @@
     const { error } = await client.rpc(name);
     if (error) throw error;
   }
+  function heartbeatWasRecentlySuccessful() {
+    try {
+      const key = "studylab:study-room-heartbeat:" + userId;
+      return Date.now() - Number(localStorage.getItem(key) || 0) < 45000;
+    } catch (_) { return false; }
+  }
   async function heartbeat(isRetry = false) {
     if (!row?.is_studying || heartbeatBusy) return;
+    if (!isRetry && heartbeatWasRecentlySuccessful()) return;
     heartbeatBusy = true;
     try {
       await rpc("study_room_heartbeat");
+      try { localStorage.setItem("studylab:study-room-heartbeat:" + userId, String(Date.now())); } catch (_) {}
       if (heartbeatRetry) { clearTimeout(heartbeatRetry); heartbeatRetry = null; }
       await loadRow();
     } catch (error) {
