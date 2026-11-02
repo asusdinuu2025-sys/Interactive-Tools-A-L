@@ -210,7 +210,10 @@
   }
   async function heartbeat(isRetry = false) {
     if (!client || !userId || !member?.is_studying) return;
-    if (!isRetry && heartbeatWasRecentlySuccessful()) return;
+    if (!isRetry && heartbeatWasRecentlySuccessful()) {
+      await loadRows();
+      return;
+    }
     if (heartbeatPromise) return heartbeatPromise;
     heartbeatPromise = (async () => {
       try {
