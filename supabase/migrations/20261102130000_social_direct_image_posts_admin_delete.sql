@@ -19,18 +19,26 @@ begin
   from public.studylab_profiles
   where id = auth.uid();
 
-  if not found or profile_row.profile_completed_at is null then
-    raise exception 'Complete your StudyLab profile before posting';
+  if not found
+     or profile_row.display_name is null
+     or profile_row.display_name ~ '^Student[0-9]{4}$'
+     or profile_row.username is null
+     or profile_row.exam_year is null
+     or profile_row.study_stream is null then
+    raise exception 'Complete your basic StudyLab profile before posting';
   end if;
 
   new.author_display_name := profile_row.display_name;
   new.author_username := profile_row.username;
+  new.author_gender := profile_row.gender;
   new.body := btrim(coalesce(new.body, ''));
   new.status := 'uploading';
   new.created_at := now();
   return new;
 end;
 $$;
+
+
 
 create or replace function public.studylab_social_prepare_comment()
 returns trigger
@@ -49,8 +57,13 @@ begin
   from public.studylab_profiles
   where id = auth.uid();
 
-  if not found or profile_row.profile_completed_at is null then
-    raise exception 'Complete your StudyLab profile before commenting';
+  if not found
+     or profile_row.display_name is null
+     or profile_row.display_name ~ '^Student[0-9]{4}$'
+     or profile_row.username is null
+     or profile_row.exam_year is null
+     or profile_row.study_stream is null then
+    raise exception 'Complete your basic StudyLab profile before commenting';
   end if;
 
   if not exists (
@@ -62,12 +75,15 @@ begin
 
   new.author_display_name := profile_row.display_name;
   new.author_username := profile_row.username;
+  new.author_gender := profile_row.gender;
   new.body := btrim(coalesce(new.body, ''));
   new.status := 'approved';
   new.created_at := now();
   return new;
 end;
 $$;
+
+
 
 -- Old pending items are published. New post rows stay invisible only while files upload.
 update public.studylab_social_posts set status = 'approved' where status = 'pending';
