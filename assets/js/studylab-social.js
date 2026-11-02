@@ -133,7 +133,14 @@
   function setBusy(value) {
     busy = value;
     postButton.disabled = value;
-    postButton.textContent = value ? "Posting…" : "Post";
+    postButton.replaceChildren();
+    if (value) {
+      const spinner = make("span", "sl-feed-upload-spinner");
+      spinner.setAttribute("aria-hidden", "true");
+      postButton.append(spinner, document.createTextNode("Posting…"));
+    } else {
+      postButton.textContent = "Post";
+    }
     textarea.disabled = value;
     input.disabled = value;
   }
@@ -624,7 +631,7 @@
       }
       ensureFeedControls();
       if (!posts.length) {
-        emptyState("No approved posts yet");
+        emptyState("No posts yet");
       } else {
         // Sign all post images in one Storage request instead of waiting on
         // a separate network round-trip for each image in every post.
