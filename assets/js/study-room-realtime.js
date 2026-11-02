@@ -42,15 +42,14 @@
   const compact = seconds => fmt(seconds);
   const profileDuration = seconds => { const total=Math.max(0,Math.floor(Number(seconds)||0)); const hours=Math.floor(total/3600), minutes=Math.floor(total%3600/60); return hours ? hours+"h"+(minutes ? " "+minutes+"m" : "") : minutes+"m"; };
   const startOfDay = key => new Date(key + 'T00:00:00+05:30').getTime();
+  // The database view is authoritative and masks attendance after 90 seconds.
   function heartbeatIsFresh(row) {
-    if (!row?.is_studying || !row.last_heartbeat_at) return false;
-    const age = Date.now() - new Date(row.last_heartbeat_at).getTime();
-    return Number.isFinite(age) && age < 24 * 60 * 60 * 1000;
+    return Boolean(row?.is_studying && row.last_heartbeat_at);
   }
   function pendingSeconds(row, boundary) {
     if (!heartbeatIsFresh(row)) return 0;
     const heartbeatAt = new Date(row.last_heartbeat_at).getTime();
-    return Math.max(0, Math.floor((Date.now() - Math.max(heartbeatAt, boundary)) / 1000));
+    return Math.min(90, Math.max(0, Math.floor((Date.now() - Math.max(heartbeatAt, boundary)) / 1000)));
   }
   function isProfileComplete(p) {
     const phoneDigits = String(p?.phone || "").replace(/\D/g, "");
@@ -86,7 +85,7 @@
     const percent = Math.min(100, Math.round(total / (Number(goal.value) || 14400) * 100));
     goalBar.style.width = percent + '%';
     goalText.textContent = percent >= 100 ? 'Goal reached!' : percent + '% completed';
-    const savedSessionSeconds = member && member.session_date === today
+    const savedSessionSeconds = member && (member.session_active || member.is_studying)
       ? Math.max(0, Number(member.session_elapsed_seconds) || 0) : 0;
     const liveSessionSeconds = pendingSeconds(member, 0);
     timer.textContent = fmt(savedSessionSeconds + liveSessionSeconds);
@@ -249,7 +248,7 @@
   }
   function timerSnapshot() {
     const today = dayKey(new Date());
-    const base = member && member.session_date === today
+    const base = member && (member.session_active || member.is_studying)
       ? Math.max(0, Number(member.session_elapsed_seconds) || 0) : 0;
     const live = pendingSeconds(member, 0);
     return {
@@ -319,7 +318,7 @@
       dailyTab.addEventListener('click', () => { selectedBoard = 'daily'; renderBoard(); });
       weeklyTab.addEventListener('click', () => { selectedBoard = 'weekly'; renderBoard(); });
       goal.addEventListener('change', updatePersonal);
-      heartbeatInterval = setInterval(heartbeat, 30000);
+      heartbeatInterval = setInterval(heartbeat, 60000);
       uiInterval = setInterval(updatePersonal, 1000);
       document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') heartbeat(); });
       window.addEventListener('online', heartbeat);
