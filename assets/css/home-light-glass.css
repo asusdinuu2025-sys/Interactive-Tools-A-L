@@ -484,3 +484,12 @@ html[data-theme="dark"] .home-pointer-glow {
     box-sizing: border-box;
   }
 }
+
+
+/* Keep the animated country name together on narrow phone screens. */
+@media (max-width: 600px) {
+  .hero-title-country {
+    display: inline-block;
+    white-space: nowrap;
+  }
+}
