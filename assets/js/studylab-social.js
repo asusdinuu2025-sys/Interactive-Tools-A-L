@@ -192,14 +192,30 @@
     previewUrls.forEach(url => URL.revokeObjectURL(url));
     previewUrls = [];
     imagePreview.replaceChildren();
-    for (const file of files.slice(0,MAX_IMAGES)) {
+    files.slice(0,MAX_IMAGES).forEach((file, index) => {
+      const item = make("div", "sl-feed-image-preview-item");
       const url = URL.createObjectURL(file);
       previewUrls.push(url);
       const img = document.createElement("img");
       img.src = url;
       img.alt = "Selected image preview";
-      imagePreview.append(img);
-    }
+      const remove = make("button", "sl-feed-image-remove", "×");
+      remove.type = "button";
+      remove.setAttribute("aria-label", "Remove selected photo " + (index + 1));
+      remove.title = "Remove photo";
+      remove.addEventListener("click", () => {
+        const transfer = new DataTransfer();
+        [...(input.files || [])].forEach((selected, selectedIndex) => {
+          if (selectedIndex !== index) transfer.items.add(selected);
+        });
+        input.files = transfer.files;
+        const remaining = [...input.files];
+        fileCount.textContent = remaining.length ? remaining.length + " photo(s) selected" : "No photos selected";
+        renderImagePreviews(remaining);
+      });
+      item.append(img, remove);
+      imagePreview.append(item);
+    });
     imagePreview.hidden = !files.length;
   }
   function validFiles(files) {
@@ -334,6 +350,31 @@
       commentsButton.type = "button";
       commentsButton.addEventListener("click", () => toggleComments(card, post, client, currentUserId));
       actions.append(like, commentsButton);
+    }
+    if (post.author_id === currentUserId) {
+      const removePost = make("button", "sl-feed-action sl-feed-delete-post", "Delete post");
+      removePost.type = "button";
+      removePost.addEventListener("click", async () => {
+        if (!window.confirm("Delete this post permanently? This cannot be undone.")) return;
+        removePost.disabled = true;
+        try {
+          const imagePaths = imageRows.map(row => row.bucket_path).filter(Boolean);
+          const { data: deleted, error } = await client.from("studylab_social_posts")
+            .delete().eq("id", post.id).eq("author_id", currentUserId).select("id").maybeSingle();
+          if (error) throw error;
+          if (!deleted) throw new Error("This post could not be deleted. It may not be eligible for deletion.");
+          if (imagePaths.length) {
+            const { error: storageError } = await client.storage.from(BUCKET).remove(imagePaths);
+            if (storageError) console.warn("Post deleted, but some attached image files could not be removed:", storageError);
+          }
+          setStatus("Your post was deleted.");
+          await loadFeed();
+        } catch (error) {
+          setStatus(error.message || "Could not delete this post.", true);
+          removePost.disabled = false;
+        }
+      });
+      actions.append(removePost);
     }
     card.append(actions);
 
