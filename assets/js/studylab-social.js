@@ -687,7 +687,29 @@
     }
   }
 
+  const phoneFeedMedia = window.matchMedia("(max-width: 600px)");
+  let previousFeedScrollTop = stream.scrollTop;
+  stream.addEventListener("scroll", () => {
+    const currentFeedScrollTop = stream.scrollTop;
+    if (!phoneFeedMedia.matches || panel.dataset.size !== "full" || form.contains(document.activeElement)) {
+      panel.classList.remove("is-feed-scrolled");
+      previousFeedScrollTop = currentFeedScrollTop;
+      return;
+    }
+    if (currentFeedScrollTop <= 4 || currentFeedScrollTop < previousFeedScrollTop - 2) {
+      panel.classList.remove("is-feed-scrolled");
+    } else if (currentFeedScrollTop > previousFeedScrollTop + 2) {
+      panel.classList.add("is-feed-scrolled");
+    }
+    previousFeedScrollTop = currentFeedScrollTop;
+  }, { passive: true });
+  phoneFeedMedia.addEventListener?.("change", event => {
+    if (!event.matches) panel.classList.remove("is-feed-scrolled");
+    previousFeedScrollTop = stream.scrollTop;
+  });
+
   form.querySelector(".sl-feed-create-trigger")?.addEventListener("click",() => {
+    panel.classList.remove("is-feed-scrolled");
     textarea.focus();
     textarea.scrollIntoView({behavior:"smooth",block:"nearest"});
   });

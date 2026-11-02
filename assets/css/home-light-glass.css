@@ -430,3 +430,66 @@ html[data-theme="dark"] .home-pointer-glow {
   transition:opacity .24s ease;
 }
 .home-pointer-glow.is-idle{opacity:0;transition:opacity 1.05s ease}
+
+
+/* Mobile-only homepage alignment correction. Tablet and desktop rules remain unchanged. */
+@media (max-width: 600px) {
+  html, body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+  body { margin-inline: 0; }
+  .site-header {
+    width: 100%;
+    max-width: 1200px;
+    margin-inline: auto;
+    padding: 13px 14px;
+    box-sizing: border-box;
+    gap: 8px;
+  }
+  .brand { flex: 0 0 auto; min-width: 0; }
+  .header-actions {
+    min-width: 0;
+    max-width: 100%;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .container {
+    width: 100%;
+    max-width: 1200px;
+    margin-inline: auto;
+    padding-left: 16px;
+    padding-right: 16px;
+    box-sizing: border-box;
+  }
+  .hero, .card-grid, .homepage-utility-row, .study-room-tools-row {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .hero { padding-top: 26px; }
+  .hero h1 { overflow-wrap: anywhere; }
+  .card-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    margin-top: 26px;
+  }
+  .subject-card, .study-tools-card, .telegram-card,
+  .mcq-practice-card, .chemistry-resources-card {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+
+/* Keep the animated country name together on narrow phone screens. */
+@media (max-width: 600px) {
+  .hero-title-country {
+    display: inline-block;
+    white-space: nowrap;
+  }
+}
