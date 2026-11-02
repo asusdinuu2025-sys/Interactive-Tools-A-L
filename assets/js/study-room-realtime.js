@@ -411,6 +411,7 @@
       client.auth.onAuthStateChange((_event, session) => {
         accessToken = session?.access_token || null;
       });
+      startRoomPagePresenceLifecycle();
       const profile = await account.getProfile(true);
       if (!isProfileComplete(profile)) {
         join.disabled = true; pause.disabled = true; leave.disabled = true;
@@ -425,7 +426,6 @@
       }
       await callRpc('study_room_ensure_profile');
       await loadRows();
-      startRoomPagePresenceLifecycle();
       client.channel('study-room-live')
         .on('postgres_changes', {event:'*',schema:'public',table:'study_room_members'}, () => {
           loadRows().catch(e => console.error('Could not refresh live Study Room data', e));
