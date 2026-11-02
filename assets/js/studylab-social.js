@@ -309,9 +309,10 @@
     return (data || []).filter(post => post.status === "approved");
   }
   function renderPost(client, post, currentUserId, likesByPost, commentCountsByPost, signedImageUrls) {
-    const card = make("article", "sl-feed-post is-entering");
+    const card = make("article", "sl-feed-post");
     card.dataset.postId = post.id;
     card.dataset.authorId = post.author_id;
+    card.dataset.currentUserId = currentUserId;
     card.dataset.authorUsername = post.author_username || "student";
     card.style.setProperty("--sl-post-accent", "hsl(" + (hashNumber(post.id) % 360) + " 82% 64%)");
     const gender = post.author_gender === "female" ? "female" : post.author_gender === "male" ? "male" : "neutral";
@@ -440,16 +441,17 @@
     if (post.status === "approved") {
       const postLikes = likesByPost.get(post.id) || [];
       const mine = postLikes.some(row => row.user_id === currentUserId);
-      let liked = mine;
-      let likeCount = postLikes.length;
-      const like = make("button", "sl-feed-action", (liked ? "♥ Liked" : "♡ Like") + " · " + likeCount);
+      const likeState = { liked: mine, count: postLikes.length, button: null };
+      const like = make("button", "sl-feed-action", (likeState.liked ? "♥ Liked" : "♡ Like") + " · " + likeState.count);
+      likeState.button = like;
+      card._slSocialLikeState = likeState;
       like.type = "button";
-      like.setAttribute("aria-pressed", String(liked));
+      like.setAttribute("aria-pressed", String(likeState.liked));
       like.addEventListener("click", async () => {
         if (like.disabled) return;
         const restore = setButtonBusy(like, "Updating…");
         try {
-          if (liked) {
+          if (likeState.liked) {
             const { error } = await client.from("studylab_social_likes").delete()
               .eq("post_id", post.id).eq("user_id", currentUserId);
             if (error) throw error;
@@ -458,12 +460,12 @@
               .insert({ post_id: post.id, user_id: currentUserId });
             if (error) throw error;
           }
-          liked = !liked;
-          likeCount = Math.max(0, likeCount + (liked ? 1 : -1));
+          likeState.liked = !likeState.liked;
+          likeState.count = Math.max(0, likeState.count + (likeState.liked ? 1 : -1));
           restore();
-          like.textContent = (liked ? "♥ Liked" : "♡ Like") + " · " + likeCount;
-          like.setAttribute("aria-pressed", String(liked));
-          like.classList.toggle("is-liked", liked);
+          like.textContent = (likeState.liked ? "♥ Liked" : "♡ Like") + " · " + likeState.count;
+          like.setAttribute("aria-pressed", String(likeState.liked));
+          like.classList.toggle("is-liked", likeState.liked);
         } catch (error) {
           restore();
           setStatus(error.message || "Could not update like.", true);
@@ -514,6 +516,23 @@
     card.append(actions);
 
     return card;
+  }
+  function syncPostCardState(card, post, likesByPost, commentCountsByPost) {
+    const likeState = card._slSocialLikeState;
+    if (likeState) {
+      const rows = likesByPost.get(post.id) || [];
+      likeState.liked = rows.some(row => row.user_id === card.dataset.currentUserId);
+      likeState.count = rows.length;
+      likeState.button.textContent = (likeState.liked ? "♥ Liked" : "♡ Like") + " · " + likeState.count;
+      likeState.button.setAttribute("aria-pressed", String(likeState.liked));
+      likeState.button.classList.toggle("is-liked", likeState.liked);
+    }
+    const commentButton = card.querySelector("[data-comment-count]");
+    if (commentButton) {
+      const count = commentCountsByPost.get(post.id) || 0;
+      commentButton.dataset.commentCount = String(count);
+      commentButton.textContent = "Comments · " + count;
+    }
   }
   async function toggleComments(card, post, client, currentUserId) {
     let area = card.querySelector(".sl-feed-comments");
@@ -713,11 +732,33 @@
         // Sign all post images in one Storage request instead of waiting on
         // a separate network round-trip for each image in every post.
         const signedImageUrls = await getSignedImageUrls(account.client, posts);
-        const cards = posts.map(post =>
-          renderPost(account.client, post, user.id, likesByPost, commentCountsByPost, signedImageUrls)
+        const existingCards = new Map(
+          [...stream.querySelectorAll(".sl-feed-post[data-post-id]")]
+            .map(card => [card.dataset.postId, card])
         );
-        // Replace the feed once to avoid repeated layout and paint work per post.
-        stream.replaceChildren(...cards);
+        const orderedCards = posts.map(post => {
+          let card = existingCards.get(post.id);
+          if (card) {
+            existingCards.delete(post.id);
+            syncPostCardState(card, post, likesByPost, commentCountsByPost);
+          } else {
+            card = renderPost(account.client, post, user.id, likesByPost, commentCountsByPost, signedImageUrls);
+            // Animate only genuinely new cards, never the existing feed on refresh.
+            if (feedHasLoaded) card.classList.add("is-entering");
+          }
+          return card;
+        });
+        // Reconcile by post ID. Existing nodes, open comment threads, image state,
+        // focus and scroll position stay mounted across refreshes.
+        let cursor = stream.firstElementChild;
+        for (const card of orderedCards) {
+          if (card !== cursor) stream.insertBefore(card, cursor);
+          cursor = card.nextElementSibling;
+        }
+        const keep = new Set(orderedCards);
+        [...stream.children].forEach(child => {
+          if (!keep.has(child)) child.remove();
+        });
       }
       panel.querySelector(".sl-feed-admin-queue")?.remove();
       if (note) note.hidden = true;
@@ -851,13 +892,10 @@
 
   document.addEventListener("click", event => {
     const toggle = event.target.closest(".sl-feed-toggle");
-    if (toggle?.getAttribute("aria-expanded") === "true") loadFeed();
+    // Load once on first open. Reopening the panel must not rebuild or refetch
+    // a feed that is already in memory; the refresh button remains explicit.
+    if (toggle?.getAttribute("aria-expanded") === "true" && !feedHasLoaded) loadFeed();
   });
   window.addEventListener("studylab-social-refresh", () => loadFeed());
   panel.querySelector("[data-feed-close]")?.addEventListener("click", () => {});
-  window.addEventListener("focus", () => {
-    if (document.visibilityState === "visible" &&
-        panel.getAttribute("aria-hidden") === "false" &&
-        Date.now() - lastFeedLoadedAt > 90000) loadFeed();
-  });
 })();
