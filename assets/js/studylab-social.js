@@ -140,6 +140,7 @@
       postButton.append(spinner, document.createTextNode("Posting…"));
     } else {
       postButton.textContent = "Post";
+      status.querySelector(".sl-feed-upload-spinner")?.remove();
     }
     textarea.disabled = value;
     input.disabled = value;
@@ -696,7 +697,7 @@
         try {
           await account.client.from("studylab_social_posts").delete().eq("id", post.id).eq("author_id", user.id);
         } catch (cleanupError) {
-          console.warn("Could not remove the failed pending Social post:",cleanupError);
+          console.warn("Could not remove the failed Social post:",cleanupError);
         }
         throw uploadError;
       }
