@@ -25,6 +25,92 @@
   const weeklyTab = $('weeklyBoardTab');
   let client, userId = null, member = null, rows = [], heartbeatInterval = null, uiInterval = null;
   let heartbeatRetryTimer = null, heartbeatPromise = null;
+
+  // Keep a per-user list of open Study Room pages so closing one tab does not
+  // pause a session that is still open in another tab or the detached timer.
+  const ROOM_PAGE_PRESENCE_TTL_MS = 24 * 60 * 60 * 1000;
+  let roomPagePresencePrefix = null;
+  let roomPagePresenceKey = null;
+  let roomPagePresenceInterval = null;
+  let accessToken = null;
+
+  function registerRoomPagePresence() {
+    if (!userId) return;
+    roomPagePresencePrefix = "studylab:study-room-open:" + userId + ":";
+    if (!roomPagePresenceKey) {
+      const pageId = window.crypto?.randomUUID?.() ||
+        (Date.now() + "-" + Math.random().toString(36).slice(2));
+      roomPagePresenceKey = roomPagePresencePrefix + pageId;
+    }
+    try {
+      localStorage.setItem(roomPagePresenceKey, String(Date.now()));
+    } catch (error) {
+      console.warn("Study Room page-presence storage is unavailable", error);
+    }
+  }
+
+  function hasAnotherRoomPageOpen() {
+    if (!roomPagePresencePrefix) return false;
+    const cutoff = Date.now() - ROOM_PAGE_PRESENCE_TTL_MS;
+    let anotherPageOpen = false;
+    try {
+      for (let index = localStorage.length - 1; index >= 0; index--) {
+        const key = localStorage.key(index);
+        if (!key || !key.startsWith(roomPagePresencePrefix) || key === roomPagePresenceKey) continue;
+        const lastSeen = Number(localStorage.getItem(key));
+        if (!Number.isFinite(lastSeen) || lastSeen < cutoff) {
+          localStorage.removeItem(key);
+        } else {
+          anotherPageOpen = true;
+        }
+      }
+    } catch (error) {
+      console.warn("Could not inspect other Study Room pages", error);
+    }
+    return anotherPageOpen;
+  }
+
+  function pauseWhenLastRoomPageCloses(event) {
+    // A page in the back/forward cache is frozen, not terminated.
+    if (event?.persisted || !roomPagePresenceKey) return;
+    try { localStorage.removeItem(roomPagePresenceKey); } catch (_) {}
+    if (hasAnotherRoomPageOpen()) return;
+
+    const url = String(window.STUDYLAB_SUPABASE_URL || "").replace(/\\/+$/, "");
+    const apiKey = window.STUDYLAB_SUPABASE_ANON_KEY;
+    if (!url || !apiKey || !accessToken) return;
+
+    // Best effort: keepalive lets the pause RPC finish while the page unloads.
+    // If the browser is killed without a lifecycle event, the 24-hour server
+    // fallback handles the abandoned session instead.
+    try {
+      window.fetch(url + "/rest/v1/rpc/study_room_pause", {
+        method: "POST",
+        headers: {
+          apikey: apiKey,
+          Authorization: "Bearer " + accessToken,
+          "Content-Type": "application/json"
+        },
+        body: "{}",
+        keepalive: true,
+        credentials: "omit"
+      }).catch(error => console.warn("Study Room close-pause request failed", error));
+    } catch (error) {
+      console.warn("Could not send Study Room close-pause request", error);
+    }
+  }
+
+  function startRoomPagePresenceLifecycle() {
+    registerRoomPagePresence();
+    if (!roomPagePresenceInterval) {
+      roomPagePresenceInterval = window.setInterval(registerRoomPagePresence, 60000);
+    }
+    window.addEventListener("pagehide", pauseWhenLastRoomPageCloses);
+    window.addEventListener("pageshow", event => {
+      if (event.persisted) registerRoomPagePresence();
+    });
+  }
+
   let selectedBoard = 'daily';
   const dayKey = date => new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Asia/Colombo', year: 'numeric', month: '2-digit', day: '2-digit'
@@ -318,6 +404,12 @@
       const user = account.getUser?.();
       if (!client || !user?.id) throw new Error('StudyLab student identity is unavailable.');
       userId = user.id;
+      const {data: sessionData, error: sessionError} = await client.auth.getSession();
+      if (sessionError) throw sessionError;
+      accessToken = sessionData?.session?.access_token || null;
+      client.auth.onAuthStateChange((_event, session) => {
+        accessToken = session?.access_token || null;
+      });
       const profile = await account.getProfile(true);
       if (!isProfileComplete(profile)) {
         join.disabled = true; pause.disabled = true; leave.disabled = true;
@@ -332,6 +424,7 @@
       }
       await callRpc('study_room_ensure_profile');
       await loadRows();
+      startRoomPagePresenceLifecycle();
       client.channel('study-room-live')
         .on('postgres_changes', {event:'*',schema:'public',table:'study_room_members'}, () => {
           loadRows().catch(e => console.error('Could not refresh live Study Room data', e));
@@ -353,7 +446,7 @@
       goal.addEventListener('change', updatePersonal);
       heartbeatInterval = setInterval(heartbeat, 60000);
       uiInterval = setInterval(updatePersonal, 1000);
-      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') heartbeat(); });
+      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { registerRoomPagePresence(); heartbeat(); } });
       window.addEventListener('online', heartbeat);
       await heartbeat();
       say('Connected to the shared Study Room. Attendance and leaderboard updates are live.');
