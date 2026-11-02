@@ -80,7 +80,7 @@
   feedInner.parentNode.replaceChild(feedStage, feedInner);
   leftRail.append(composer, adSlot("left", "Banner placement"));
   center.append(feedInner);
-  rightRail.append(ownerCard, adSlot("right-top", "Banner placement"), adSlot("right-bottom", "Small banner placement"));
+  rightRail.append(ownerCard, adSlot("right", "Banner placement"));
   feedStage.append(leftRail, center, rightRail);
 
   const actions = header.querySelector(".header-actions");
