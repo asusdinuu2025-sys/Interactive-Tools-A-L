@@ -118,6 +118,49 @@
 
   let previousFocus = null;
   panel.dataset.size = "full";
+
+  // Mobile-only Social composer behavior: hide while scrolling down the post
+  // stream and reveal on upward movement. The stream remains the sole scroller.
+  const socialStream = panel.querySelector(".sl-feed-stream");
+  const mobileSocialLayout = window.matchMedia("(max-width: 760px)");
+  let lastSocialScrollTop = socialStream ? socialStream.scrollTop : 0;
+
+  function updateMobileComposerVisibility() {
+    if (!socialStream || !mobileSocialLayout.matches) {
+      panel.classList.remove("is-composer-hidden");
+      lastSocialScrollTop = socialStream ? socialStream.scrollTop : 0;
+      return;
+    }
+
+    const currentTop = Math.max(0, socialStream.scrollTop);
+    const movement = currentTop - lastSocialScrollTop;
+
+    if (currentTop <= 12) {
+      panel.classList.remove("is-composer-hidden");
+    } else if (movement > 7) {
+      panel.classList.add("is-composer-hidden");
+    } else if (movement < -7) {
+      panel.classList.remove("is-composer-hidden");
+    }
+
+    lastSocialScrollTop = currentTop;
+  }
+
+  if (socialStream) {
+    socialStream.addEventListener("scroll", updateMobileComposerVisibility, { passive: true });
+  }
+
+  const resetMobileComposer = () => {
+    panel.classList.remove("is-composer-hidden");
+    lastSocialScrollTop = socialStream ? socialStream.scrollTop : 0;
+  };
+
+  if (typeof mobileSocialLayout.addEventListener === "function") {
+    mobileSocialLayout.addEventListener("change", resetMobileComposer);
+  } else if (typeof mobileSocialLayout.addListener === "function") {
+    mobileSocialLayout.addListener(resetMobileComposer);
+  }
+
   panel.querySelector(".sl-feed-refresh")?.addEventListener("click", () => {
     window.dispatchEvent(new CustomEvent("studylab-social-refresh"));
   });
@@ -133,6 +176,9 @@
     if (open) {
       closeFloatingTools();
       panel.dataset.size = "full";
+      resetMobileComposer();
+    } else {
+      panel.classList.remove("is-composer-hidden");
     }
     layout.classList.toggle("is-feed-open", open);
     document.body.classList.toggle("sl-community-open", open);
