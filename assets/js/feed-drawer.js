@@ -53,7 +53,7 @@
       <p class="sl-feed-setup-note" role="status">Connecting to StudyLab Social…</p>
     </div>`;
 
-  // Full-screen layout: composer left, primary feed centre, owner/profile and ads right.
+  // Full-screen layout: wider composer left, natural-flow feed centre, community rail right.
   const feedInner = panel.querySelector(".sl-feed-inner");
   const composer = feedInner.querySelector(".sl-feed-compose");
   const feedStage = document.createElement("div");
@@ -61,26 +61,35 @@
   const leftRail = document.createElement("aside");
   leftRail.className = "sl-feed-left-rail";
   leftRail.setAttribute("aria-label", "Create a post and advertisement");
-  const center = document.createElement("div");
+  const center = document.createElement("main");
   center.className = "sl-feed-center";
   const rightRail = document.createElement("aside");
   rightRail.className = "sl-feed-right-rail";
-  rightRail.setAttribute("aria-label", "StudyLab profile and advertisements");
-  const adSlot = (side, label) => {
+  rightRail.setAttribute("aria-label", "StudyLab Social community and advertisements");
+  const adSlot = (side, zone) => {
     const slot = document.createElement("div");
     slot.className = "sl-feed-ad-slot sl-feed-ad-" + side;
-    slot.setAttribute("aria-label", "Reserved In-Page Push banner advertisement space");
-    slot.innerHTML = '<span>ADVERTISEMENT</span><strong>' + label + '</strong><small>In-Page Push · Banner</small>';
+    slot.setAttribute("aria-label", "Advertisement");
+    const label = document.createElement("span");
+    label.className = "sl-feed-ad-label";
+    label.textContent = "ADVERTISEMENT";
+    slot.append(label);
+    const script = document.createElement("script");
+    script.dataset.zone = zone;
+    script.src = "https://nap5k.com/tag.min.js";
+    slot.append(script);
     return slot;
   };
-  const ownerCard = document.createElement("section");
-  ownerCard.className = "sl-feed-owner-card";
-  ownerCard.setAttribute("aria-label", "StudyLab owner profile");
-  ownerCard.innerHTML = '<div class="sl-feed-owner-cover"></div><div class="sl-feed-owner-row"><span class="sl-feed-owner-avatar" aria-hidden="true">ツ</span><div><strong>Dinusha</strong><span>@dinusha_official</span></div></div><p class="sl-feed-owner-description">Founder &amp; creator of StudyLab</p><a href="https://t.me/dinusha_official" target="_blank" rel="noopener noreferrer">View profile ↗</a>';
+  const communityIntro = document.createElement("section");
+  communityIntro.className = "sl-feed-community-intro";
+  communityIntro.innerHTML = '<div class="sl-feed-community-cover"></div><div class="sl-feed-community-intro-copy"><span class="sl-feed-community-kicker">STUDYLAB COMMUNITY</span><h2>StudyLab Social</h2><p>A shared space for A/L students</p></div>';
+  const membersCard = document.createElement("section");
+  membersCard.className = "sl-feed-members-card";
+  membersCard.innerHTML = '<div class="sl-feed-members-heading"><strong>Community profiles</strong><span>From recent posts</span></div><div class="sl-feed-member-list" aria-live="polite"><p class="sl-feed-members-empty">Student profiles will appear here as they post.</p></div>';
   feedInner.parentNode.replaceChild(feedStage, feedInner);
-  leftRail.append(composer, adSlot("left", "Banner placement"));
+  leftRail.append(composer, adSlot("left", "12171550"));
   center.append(feedInner);
-  rightRail.append(ownerCard, adSlot("right", "Banner placement"));
+  rightRail.append(communityIntro, membersCard, adSlot("right", "12171551"));
   feedStage.append(leftRail, center, rightRail);
 
   const actions = header.querySelector(".header-actions");
