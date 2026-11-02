@@ -1503,8 +1503,27 @@ html[data-theme="light"] .sl-feed-gallery-arrow {
 }
 
 
-/* Improve social post readability without changing the glass UI. */
+/* Social readability and spacing refinement. */
 .sl-feed-panel[data-size="full"] .sl-feed-post-body {
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 400;
+}
+
+/* Dark theme: slightly deeper translucent post surfaces with more background blur. */
+html:not([data-theme="light"]) .sl-feed-panel[data-size="full"] .sl-feed-post {
+  background: rgba(7, 14, 25, .68);
+  -webkit-backdrop-filter: blur(14px) saturate(125%);
+  backdrop-filter: blur(14px) saturate(125%);
+}
+
+/* Bring the side panels, sort controls and feed closer to the compact header. */
+.sl-feed-panel[data-size="full"] > .sl-feed-stage {
+  padding-top: 5px !important;
+}
+.sl-feed-panel[data-size="full"] .sl-feed-center .sl-feed-sortbar {
+  padding-top: 3px;
+  padding-bottom: 2px;
+}
+.sl-feed-panel[data-size="full"] .sl-feed-stream {
+  padding-top: 0 !important;
 }
