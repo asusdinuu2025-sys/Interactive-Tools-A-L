@@ -24,6 +24,7 @@
   const dailyTab = $('dailyBoardTab');
   const weeklyTab = $('weeklyBoardTab');
   let client, userId = null, member = null, rows = [], heartbeatInterval = null, uiInterval = null;
+  let heartbeatRetryTimer = null, heartbeatPromise = null;
   let selectedBoard = 'daily';
   const dayKey = date => new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Asia/Colombo', year: 'numeric', month: '2-digit', day: '2-digit'
@@ -201,12 +202,32 @@
     const {error} = await client.rpc(name, args || {});
     if (error) throw error;
   }
-  async function heartbeat() {
-    if (!client || !userId) return;
-    try {
-      await callRpc('study_room_heartbeat');
-      await loadRows();
-    } catch (e) { console.error('Study Room heartbeat failed', e); }
+  async function heartbeat(isRetry = false) {
+    if (!client || !userId || !member?.is_studying) return;
+    if (heartbeatPromise) return heartbeatPromise;
+    heartbeatPromise = (async () => {
+      try {
+        await callRpc('study_room_heartbeat');
+        if (heartbeatRetryTimer) {
+          clearTimeout(heartbeatRetryTimer);
+          heartbeatRetryTimer = null;
+        }
+        await loadRows();
+      } catch (e) {
+        console.error('Study Room heartbeat failed', e);
+        // One short retry for a transient network failure; the next normal
+        // heartbeat remains on the regular 60-second schedule.
+        if (!isRetry && !heartbeatRetryTimer) {
+          heartbeatRetryTimer = setTimeout(() => {
+            heartbeatRetryTimer = null;
+            heartbeat(true);
+          }, 15000);
+        }
+      } finally {
+        heartbeatPromise = null;
+      }
+    })();
+    return heartbeatPromise;
   }
   async function startStudy() {
     if (!subject.value) {
