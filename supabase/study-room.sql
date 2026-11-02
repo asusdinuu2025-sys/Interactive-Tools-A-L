@@ -954,9 +954,8 @@ $schedule$;
 
 -- Final background-tab grace period.
 -- Browsers may throttle timers when the Study Room is in a background tab
--- or another app is in the foreground. Keep students active for up to five
--- minutes without a heartbeat, then pause abandoned sessions and credit only
--- the five-minute grace period (never across the Sri Lanka midnight boundary).
+-- or another app is in the foreground. Keep students active for up to 24 hours without a heartbeat, then pause abandoned sessions and credit elapsed time
+-- through that bounded grace period (never across the Sri Lanka midnight boundary).
 CREATE OR REPLACE FUNCTION public.study_room_pause_stale_sessions(p_user_id uuid DEFAULT NULL::uuid)
 RETURNS void
 LANGUAGE plpgsql
@@ -980,7 +979,7 @@ BEGIN
     FROM public.study_room_members
     WHERE is_studying = true
       AND (p_user_id IS NULL OR user_id = p_user_id)
-      AND (last_heartbeat_at IS NULL OR last_heartbeat_at <= reference_now - interval '5 minutes')
+      AND (last_heartbeat_at IS NULL OR last_heartbeat_at <= reference_now - interval '24 hours')
     FOR UPDATE SKIP LOCKED
   LOOP
     IF member_row.last_heartbeat_at IS NULL THEN
@@ -994,7 +993,7 @@ BEGIN
 
     credit_until := LEAST(
       reference_now,
-      member_row.last_heartbeat_at + interval '5 minutes',
+      member_row.last_heartbeat_at + interval '24 hours',
       ((timezone('Asia/Colombo', member_row.last_heartbeat_at)::date + 1)::timestamp AT TIME ZONE 'Asia/Colombo')
     );
     local_day := timezone('Asia/Colombo', credit_until)::date;
@@ -1028,7 +1027,7 @@ WITH member_state AS (
   SELECT m.*,
     (m.is_studying AND (
       m.last_heartbeat_at IS NULL
-      OR m.last_heartbeat_at <= now() - interval '5 minutes'
+      OR m.last_heartbeat_at <= now() - interval '24 hours'
     )) AS idle_stale
   FROM public.study_room_members AS m
 )
