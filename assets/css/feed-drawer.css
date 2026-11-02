@@ -1373,3 +1373,20 @@ html[data-theme="light"] .sl-feed-gallery-arrow {
   .sl-feed-head-actions { gap:5px; }
   .sl-feed-gallery-arrow { width:31px; height:31px; }
 }
+
+
+/* Social header: brand anchored left, actions anchored right, no centred content. */
+.sl-feed-panel[data-size="full"] > .sl-feed-head {
+  justify-content:space-between !important;
+}
+.sl-feed-panel[data-size="full"] > .sl-feed-head .sl-feed-head-brand {
+  position:static !important;
+  left:auto !important;
+  transform:none !important;
+  margin:0 auto 0 0 !important;
+  flex:0 1 auto;
+}
+.sl-feed-panel[data-size="full"] > .sl-feed-head .sl-feed-head-actions {
+  margin-left:auto !important;
+  flex:0 0 auto;
+}
