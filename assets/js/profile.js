@@ -127,7 +127,7 @@
       <div class="account-menu-heading">GUEST SESSION</div>
       <button type="button" role="menuitem" data-account-action="profile">
         <span class="account-menu-icon" aria-hidden="true">♙</span>
-        <span class="account-menu-copy"><strong>Create / edit profile</strong><small>Add your name, A/L year and study stream</small></span>
+        <span class="account-menu-copy"><strong>Edit profile</strong><small>Update your student details</small></span>
       </button>
       <div class="account-menu-divider"></div>
       <button type="button" role="menuitem" data-account-action="signup">
