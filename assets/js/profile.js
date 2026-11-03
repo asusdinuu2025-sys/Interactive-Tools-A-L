@@ -47,52 +47,76 @@
   accountMenu.id = "profileAccountMenu";
   accountMenu.hidden = true;
   accountMenu.setAttribute("role", "menu");
-  accountWrap.appendChild(accountMenu);
+  document.body.appendChild(accountMenu);
 
   const accountMenuStyle = document.createElement("style");
   accountMenuStyle.textContent = `
     .profile-account-wrap { position:relative;display:inline-flex;align-items:center; }
     .profile-button { gap:9px; }
-    .profile-button .profile-menu-caret { margin-left:1px;font-size:12px;opacity:.72;transition:transform .18s ease; }
-    .profile-button[aria-expanded="true"] .profile-menu-caret { transform:rotate(180deg); }
+    .profile-button .profile-menu-caret { display:inline-grid;place-items:center;margin-left:2px;opacity:.76; }
+    .profile-button .profile-menu-caret svg { display:block;width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round; }
     .profile-account-menu {
-      position:absolute;z-index:1205;top:calc(100% + 12px);right:0;width:min(310px,calc(100vw - 28px));
-      padding:9px;border:1px solid rgba(150,190,230,.2);border-radius:18px;
-      background:rgba(13,24,40,.96);color:#eaf3ff;
-      box-shadow:0 22px 65px rgba(0,0,0,.34),inset 0 1px rgba(255,255,255,.08);
-      backdrop-filter:blur(24px) saturate(145%);-webkit-backdrop-filter:blur(24px) saturate(145%);
+      position:fixed !important;z-index:2147483000 !important;top:0;left:0;
+      width:min(340px,calc(100vw - 24px));max-width:calc(100vw - 24px);
+      max-height:min(72vh,460px);overflow-y:auto;overscroll-behavior:contain;
+      padding:11px;border:1px solid rgba(150,190,230,.24);border-radius:20px;
+      background:rgba(13,24,40,.97);color:#eaf3ff;
+      box-shadow:0 24px 72px rgba(0,0,0,.46),0 4px 18px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.1);
+      backdrop-filter:blur(26px) saturate(150%);-webkit-backdrop-filter:blur(26px) saturate(150%);
       transform-origin:top right;animation:profileMenuIn .16s ease-out;
+      font-family:"Nirmala UI","Segoe UI",sans-serif !important;font-size:14px;
+      isolation:isolate;
     }
     .profile-account-menu[hidden] { display:none; }
-    .profile-account-menu .account-menu-heading { padding:9px 11px 8px;color:#8fa8c5;font-size:10px;font-weight:800;letter-spacing:.12em; }
+    .profile-account-menu, .profile-account-menu * { font-family:"Nirmala UI","Segoe UI",sans-serif !important; }
+    .profile-account-menu .account-menu-heading { padding:10px 12px 9px;color:#a9bfd8;font-size:12px;font-weight:800;letter-spacing:.11em; }
     .profile-account-menu button {
-      display:flex;width:100%;align-items:center;gap:11px;padding:11px;border:0;border-radius:12px;
-      background:transparent;color:inherit;text-align:left;cursor:pointer;font:inherit;transition:background .16s ease;
+      display:flex;width:100%;min-height:54px;align-items:center;gap:13px;padding:12px;border:0;border-radius:13px;
+      background:transparent;color:inherit;text-align:left;cursor:pointer;font-size:14px;transition:background .16s ease;
     }
-    .profile-account-menu button:hover,.profile-account-menu button:focus-visible { background:rgba(125,190,255,.12);outline:none; }
-    .profile-account-menu .account-menu-icon { display:grid;place-items:center;flex:0 0 34px;width:34px;height:34px;border:1px solid rgba(125,190,255,.18);border-radius:11px;background:rgba(90,160,230,.1);color:#9cddff;font-size:17px; }
-    .profile-account-menu .account-menu-copy { display:grid;gap:3px;min-width:0; }
-    .profile-account-menu .account-menu-copy strong { font-size:13px;font-weight:700; }
-    .profile-account-menu .account-menu-copy small { color:#9eb0c7;font-size:10px;line-height:1.4; }
-    .profile-account-menu .account-menu-divider { height:1px;margin:6px 7px;background:rgba(160,190,220,.13); }
-    .profile-account-menu .account-menu-status { margin:5px 9px 7px;color:#ff9b9b;font-size:11px;line-height:1.45; }
+    .profile-account-menu button:hover,.profile-account-menu button:focus-visible { background:rgba(125,190,255,.14);outline:2px solid rgba(125,190,255,.28);outline-offset:-2px; }
+    .profile-account-menu .account-menu-icon { display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;border:1px solid rgba(125,190,255,.22);border-radius:12px;background:rgba(90,160,230,.12);color:#a9dfff;font-size:19px; }
+    .profile-account-menu .account-menu-copy { display:grid;gap:4px;min-width:0; }
+    .profile-account-menu .account-menu-copy strong { font-size:15px;font-weight:700;line-height:1.25; }
+    .profile-account-menu .account-menu-copy small { color:#b3c3d8;font-size:12.5px;line-height:1.4; }
+    .profile-account-menu .account-menu-divider { height:1px;margin:7px 8px;background:rgba(160,190,220,.17); }
+    .profile-account-menu .account-menu-status { margin:7px 10px 8px;color:#ff9b9b;font-size:12px;line-height:1.5; }
     html[data-theme="light"] .profile-account-menu {
-      background:rgba(255,255,255,.97);color:#20344c;border-color:rgba(80,130,175,.2);
-      box-shadow:0 22px 55px rgba(35,70,105,.18),inset 0 1px #fff;
+      background:rgba(255,255,255,.985);color:#20344c;border-color:rgba(80,130,175,.24);
+      box-shadow:0 24px 65px rgba(35,70,105,.25),0 4px 16px rgba(35,70,105,.12),inset 0 1px #fff;
     }
     html[data-theme="light"] .profile-account-menu .account-menu-heading,
-    html[data-theme="light"] .profile-account-menu .account-menu-copy small { color:#647c96; }
+    html[data-theme="light"] .profile-account-menu .account-menu-copy small { color:#536b85; }
     html[data-theme="light"] .profile-account-menu button:hover,
-    html[data-theme="light"] .profile-account-menu button:focus-visible { background:rgba(70,145,220,.09); }
-    @keyframes profileMenuIn { from { opacity:0;transform:translateY(-5px) scale(.98); } to { opacity:1;transform:none; } }
+    html[data-theme="light"] .profile-account-menu button:focus-visible { background:rgba(70,145,220,.11);outline-color:rgba(70,145,220,.24); }
+    html[data-theme="light"] .profile-account-menu .account-menu-icon { color:#286b9e;background:rgba(70,145,220,.09);border-color:rgba(70,145,220,.2); }
+    @keyframes profileMenuIn { from { opacity:0;transform:translateY(-5px) scale(.985); } to { opacity:1;transform:none; } }
     @media(max-width:600px) {
-      .profile-account-menu { top:calc(100% + 9px);width:min(290px,calc(100vw - 22px)); }
-      .profile-account-menu button { min-height:48px; }
+      .profile-account-menu { width:min(320px,calc(100vw - 20px));max-height:min(70vh,440px); }
+      .profile-account-menu button { min-height:56px;padding:13px 12px; }
     }
     @media(prefers-reduced-motion:reduce) { .profile-account-menu { animation:none; } }
   `;
   document.head.appendChild(accountMenuStyle);
 
+  function positionAccountMenu() {
+    if (accountMenu.hidden) return;
+    const rect = profileButton.getBoundingClientRect();
+    const margin = 12;
+    const width = Math.min(340, window.innerWidth - margin * 2);
+    accountMenu.style.width = width + "px";
+    const menuHeight = accountMenu.getBoundingClientRect().height;
+    let left = Math.max(margin, Math.min(rect.right - width, window.innerWidth - width - margin));
+    let top = rect.bottom + 10;
+    if (top + menuHeight > window.innerHeight - margin && rect.top - menuHeight - 10 >= margin) {
+      top = rect.top - menuHeight - 10;
+      accountMenu.style.transformOrigin = "bottom right";
+    } else {
+      accountMenu.style.transformOrigin = "top right";
+    }
+    accountMenu.style.left = left + "px";
+    accountMenu.style.top = Math.max(margin, Math.min(top, window.innerHeight - menuHeight - margin)) + "px";
+  }
   function closeAccountMenu() {
     accountMenu.hidden = true;
     profileButton.setAttribute("aria-expanded", "false");
@@ -132,6 +156,8 @@
     renderAccountMenu();
     accountMenu.hidden = false;
     profileButton.setAttribute("aria-expanded", "true");
+    positionAccountMenu();
+    requestAnimationFrame(positionAccountMenu);
   }
   accountMenu.addEventListener("click", async event => {
     const action = event.target.closest("[data-account-action]")?.dataset.accountAction;
@@ -161,8 +187,10 @@
   profileButton.setAttribute("aria-controls", "profileAccountMenu");
   profileButton.setAttribute("aria-expanded", "false");
   document.addEventListener("click", event => {
-    if (!accountWrap.contains(event.target)) closeAccountMenu();
+    if (!accountWrap.contains(event.target) && !accountMenu.contains(event.target)) closeAccountMenu();
   });
+  window.addEventListener("resize", positionAccountMenu, { passive: true });
+  window.addEventListener("scroll", positionAccountMenu, { passive: true, capture: true });
   document.addEventListener("keydown", event => {
     if (event.key === "Escape" && !accountMenu.hidden) { closeAccountMenu(); profileButton.focus(); }
   });
@@ -255,7 +283,7 @@
   document.head.appendChild(usernameFeedbackStyle);
 
   const profileIconStyle = document.createElement("style");
-  profileIconStyle.textContent = '.profile-button .header-action-icon{display:inline-grid;place-items:center;width:20px;height:20px;flex:0 0 20px} .profile-button .header-action-icon-female{color:#ff4fa3!important} .profile-button .header-action-icon-male{color:#39a8ff!important} .profile-button .header-action-icon svg{width:20px;height:20px;fill:none;stroke:currentColor!important;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 2px currentColor) drop-shadow(0 0 4px currentColor)}';
+  profileIconStyle.textContent = '.profile-button .header-action-icon{display:inline-grid;place-items:center;width:20px;height:20px;flex:0 0 20px;color:#9299a5!important} .profile-button .header-action-icon-female{color:#ff4fa3!important} .profile-button .header-action-icon-male{color:#39a8ff!important} .profile-button .header-action-icon-neutral{color:#9299a5!important} .profile-button .header-action-icon svg{width:20px;height:20px;fill:none;stroke:currentColor!important;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 2px currentColor) drop-shadow(0 0 4px currentColor)}';
   document.head.appendChild(profileIconStyle);
   function setButtonProfile(p) {
     const gender = p?.gender === "female" ? "female" : "male";
@@ -263,7 +291,11 @@
       ? '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="7" r="3.2"/><path d="M7 20l1-4.2a4.1 4.1 0 0 1 8 0l1 4.2z"/></svg>'
       : '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="7" r="3.2"/><path d="M4.5 20v-2.5a7.5 7.5 0 0 1 15 0V20z"/></svg>';
     const isGuest = Boolean(window.StudyLabAccount?.getUser?.()?.is_anonymous);
-    profileButton.innerHTML = '<span class="header-action-icon header-action-icon-' + gender + '\" aria-hidden="true">' + icon + '</span><span class="profile-button-label"></span><span class="profile-menu-caret" aria-hidden="true">⌄</span>';
+    const iconTone = isGuest ? "neutral" : gender;
+    const profileGlyph = isGuest
+      ? '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="7.2" r="3.2"/><path d="M4.5 20v-1.5a7.5 7.5 0 0 1 15 0V20z"/></svg>'
+      : icon;
+    profileButton.innerHTML = '<span class="header-action-icon header-action-icon-' + iconTone + '\" aria-hidden="true">' + profileGlyph + '</span><span class="profile-button-label"></span><span class="profile-menu-caret" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="m6 9 6 6 6-6"/></svg></span>';
     const label = profileButton.querySelector(".profile-button-label");
     if (isGuest) {
       label.textContent = "Guest";
