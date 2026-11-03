@@ -36,8 +36,12 @@ const SYSTEM_INSTRUCTION = [
   "Help students learn rather than cheat during a live examination."
 ].join("\n");
 
-async function getUsageStore() {
-  const { getStore } = await import("@netlify/blobs");
+async function getUsageStore(event) {
+  // This function uses Netlify's Lambda-compatible handler signature.
+  // Blobs does not auto-initialize its environment in that runtime.
+  // connectLambda(event) must run immediately before getStore().
+  const { connectLambda, getStore } = await import("@netlify/blobs");
+  connectLambda(event);
   return getStore("studylab-ai-usage");
 }
 
@@ -323,11 +327,15 @@ exports.handler = async function handler(event) {
 
   let store;
   try {
-    store = await getUsageStore();
+    store = await getUsageStore(event);
   } catch (error) {
     console.error(
-      "StudyLab AI storage module failed:",
-      error?.name || "IMPORT_ERROR"
+      "StudyLab AI storage initialization failed:",
+      JSON.stringify({
+        name: cleanText(error?.name || "UNKNOWN_ERROR", 100),
+        message: cleanText(error?.message || "", 500),
+        code: cleanText(error?.code || "", 100)
+      })
     );
     return jsonResponse(503, {
       code: "QUOTA_SERVICE_UNAVAILABLE",
