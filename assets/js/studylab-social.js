@@ -169,13 +169,21 @@
   function linkifyEditor() {
     const caret = selectionCharacterOffset(editor);
     editor.querySelectorAll('a[data-auto-link="true"]').forEach(anchor => {
-      const destination = normalizeDetectedUrl(anchor.textContent);
+      // A space typed after a URL can remain inside the contenteditable link.
+      // Split it out immediately so the next word is not accidentally linked.
+      const original = anchor.textContent || "";
+      const token = original.match(/^\\S+/)?.[0] || "";
+      const cleanToken = token.replace(/[),.!?;:]+$/, "");
+      const suffix = token.slice(cleanToken.length) + original.slice(token.length);
+      const destination = normalizeDetectedUrl(cleanToken);
       if (destination) {
+        anchor.textContent = cleanToken;
         anchor.setAttribute("href", destination);
         anchor.target = "_blank";
         anchor.rel = "noopener noreferrer";
+        if (suffix) anchor.after(document.createTextNode(suffix));
       } else {
-        anchor.replaceWith(document.createTextNode(anchor.textContent));
+        anchor.replaceWith(document.createTextNode(original));
       }
     });
     const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT, {
