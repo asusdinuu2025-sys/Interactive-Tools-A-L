@@ -1,7 +1,11 @@
 (function () {
 "use strict";
 const account=window.StudyLabAccount;if(!account)return;
-const root=document.createElement("div");root.id="studylab-auth-gateway";root.hidden=true;\nconst systemTheme=window.matchMedia?window.matchMedia("(prefers-color-scheme: light)"):null;\nfunction syncAuthTheme(){root.dataset.authTheme=systemTheme&&systemTheme.matches?"light":"dark";}\nsyncAuthTheme();\nif(systemTheme){if(systemTheme.addEventListener)systemTheme.addEventListener("change",syncAuthTheme);else if(systemTheme.addListener)systemTheme.addListener(syncAuthTheme);}
+const root=document.createElement("div");root.id="studylab-auth-gateway";root.hidden=true;
+const systemTheme=window.matchMedia?window.matchMedia("(prefers-color-scheme: light)"):null;
+function syncAuthTheme(){root.dataset.authTheme=systemTheme&&systemTheme.matches?"light":"dark";}
+syncAuthTheme();
+if(systemTheme){if(systemTheme.addEventListener)systemTheme.addEventListener("change",syncAuthTheme);else if(systemTheme.addListener)systemTheme.addListener(syncAuthTheme);}
 root.innerHTML=`
 <div class="auth-glow auth-glow-a" aria-hidden="true"></div><div class="auth-glow auth-glow-b" aria-hidden="true"></div><div class="auth-pointer-glow" aria-hidden="true"></div><div class="auth-formula-field" aria-hidden="true"><span class="formula formula-one">F = ma</span><span class="formula formula-two">E = mc²</span><span class="formula formula-three">∫ f(x) dx</span><span class="formula formula-four">v = u + at</span><span class="formula formula-five">PV = nRT</span><span class="formula formula-six">sin²θ + cos²θ = 1</span><span class="formula formula-seven">λ = h / p</span></div>
 <main class="auth-layout">
