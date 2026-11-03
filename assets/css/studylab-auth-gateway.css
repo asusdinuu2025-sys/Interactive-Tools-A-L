@@ -319,3 +319,28 @@ html[data-theme="light"] #studylab-auth-gateway .auth-guest i{color:#2679b6}
 @media(prefers-reduced-motion:reduce) {
   #studylab-auth-gateway .auth-panel::before {animation:none;opacity:.8}
 }
+
+
+/* Match the system-selected welcome theme even when the main site theme differs. */
+html #studylab-auth-gateway[data-auth-theme="light"] {
+  background:
+    radial-gradient(ellipse at 9% 13%,#b8ddff55,transparent 34%),
+    radial-gradient(ellipse at 91% 82%,#d9caff45,transparent 32%),
+    linear-gradient(135deg,#ffffff 0%,#fbfdff 54%,#f8f6ff 100%);
+}
+html #studylab-auth-gateway[data-auth-theme="light"] .auth-panel {
+  border-color:#70b8e9a6;
+  background:linear-gradient(145deg,#ffffffed,#f7faffeb 66%,#f5f1ffdf);
+  box-shadow:0 28px 80px #34577a20,inset 0 1px #fff,0 0 58px #78baff2b;
+}
+html #studylab-auth-gateway[data-auth-theme="light"] .auth-guest {
+  border:1px solid #6689b5a6;
+  background:linear-gradient(135deg,#ffffff,#eef5ff);
+  color:#244765;
+  box-shadow:inset 0 1px #fff,0 5px 15px #34577a12;
+}
+html #studylab-auth-gateway[data-auth-theme="light"] .auth-guest:hover {
+  border-color:#398fca;
+  background:linear-gradient(135deg,#eaf6ff,#f1edff);
+  color:#163e62;
+}
