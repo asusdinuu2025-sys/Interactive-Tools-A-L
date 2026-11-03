@@ -3,24 +3,45 @@
 const account=window.StudyLabAccount;if(!account)return;
 const root=document.createElement("div");root.id="studylab-auth-gateway";root.hidden=true;
 root.innerHTML=`
-<div class="auth-glow auth-glow-a" aria-hidden="true"></div><div class="auth-glow auth-glow-b" aria-hidden="true"></div>
+<div class="auth-glow auth-glow-a" aria-hidden="true"></div><div class="auth-glow auth-glow-b" aria-hidden="true"></div><div class="auth-pointer-glow" aria-hidden="true"></div>
 <main class="auth-layout">
 <section class="auth-story"><a class="auth-brand" href="/"><img src="/assets/icon/studylab-pwa.svg" alt=""> <span>StudyLab</span></a>
-<div class="auth-story-copy"><p class="auth-eyebrow"><i></i> YOUR LEARNING SPACE</p><h1>Make room for<br><em>better learning.</em></h1><p>A focused space for your A/L journey. Pick up where you left off, keep your progress together, and make every study session count.</p></div>
+<div class="auth-story-copy"><p class="auth-eyebrow"><i></i> YOUR LEARNING SPACE</p><h1>All Resources for<br><em>G.C.E A/L Students</em><br>in One Place.</h1><p class="auth-story-subtitle">Make room for better learning.</p><p>A focused space for your A/L journey. Find learning resources, interactive tools, past papers and more, all in one place.</p></div>
 <div class="auth-features"><span>Interactive learning</span><span>Study together</span><span>Your progress</span></div><i class="auth-ring auth-ring-a"></i><i class="auth-ring auth-ring-b"></i></section>
 <section class="auth-panel" role="dialog" aria-modal="true" aria-labelledby="auth-heading">
 <div class="auth-panel-shine"></div><div class="auth-panel-brand"><b>ツ</b><span>STUDYLAB ACCOUNT</span></div>
-<div class="auth-screen" data-screen="welcome"><p class="auth-step">WELCOME</p><h2 id="auth-heading">Welcome to StudyLab</h2><p class="auth-desc">Choose how you would like to continue.</p>
+<div class="auth-screen" data-screen="welcome"><p class="auth-step">WELCOME</p><h2 id="auth-heading">Welcome to StudyLab</h2><p class="auth-desc">Choose how you would like to continue.</p><p class="auth-sinhala" lang="si">උසස් පෙළ සිසුන්ට අවශ්‍ය ඉගෙනුම් සම්පත්, පාඩම්, ප්‍රශ්න පත්‍ර සහ අධ්‍යයන මෙවලම් එකම තැනකින් පහසුවෙන් ලබාගන්න.</p>
 <div class="auth-options">
 <button class="auth-option" data-action="signup"><i class="auth-option-icon">＋</i><span><b>New User</b><small>Create your StudyLab account</small></span><i class="auth-arrow">›</i></button>
 <button class="auth-option" data-action="login"><i class="auth-option-icon auth-option-purple">↗</i><span><b>Existing User</b><small>Log in to your account</small></span><i class="auth-arrow">›</i></button></div>
-<div class="auth-or"><span>OR</span></div><button class="auth-guest" data-action="guest">Continue as Guest <span>↗</span></button><p class="auth-note">Guest access stays available. Your session is remembered on this browser.</p></div>
+<div class="auth-or"><span>OR</span></div><button class="auth-guest" data-action="guest"><span>Continue as Guest</span><i aria-hidden="true">↗</i></button><p class="auth-note">Guest access stays available. Your session is remembered on this browser.</p></div>
 <div class="auth-screen" data-screen="signup" hidden><button class="auth-back" data-action="back">← Back</button><p class="auth-step">NEW TO STUDYLAB</p><h2>Create your account</h2><p class="auth-desc">Choose your Google account to get started. Your student profile comes next.</p><button class="auth-google" data-action="google-signup"><span class="auth-google-mark">G</span><b>Continue with Google</b><i>→</i></button><p class="auth-secure">◇ Secure sign-in powered by Google</p></div>
 <div class="auth-screen" data-screen="login" hidden><button class="auth-back" data-action="back">← Back</button><p class="auth-step">WELCOME BACK</p><h2>Log in to StudyLab</h2><p class="auth-desc">Continue with the Google account you used when joining StudyLab.</p><button class="auth-google" data-action="google-login"><span class="auth-google-mark">G</span><b>Continue with Google</b><i>→</i></button><p class="auth-secure">◇ Your account and profile stay together</p></div>
 <div class="auth-status" role="status" aria-live="polite" hidden></div><footer class="auth-footer"><i></i> STUDY SMART. STAY CURIOUS. <i></i></footer>
 </section></main>`;
 document.body.appendChild(root);
-const status=root.querySelector(".auth-status"),screens=[...root.querySelectorAll("[data-screen]")],buttons=[...root.querySelectorAll("[data-action]")];
+const status=root.querySelector(".auth-status"),screens=[...root.querySelectorAll("[data-screen]")],buttons=[...root.querySelectorAll("[data-action]")],panel=root.querySelector(".auth-panel");
+const finePointer=window.matchMedia&&window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+if(finePointer){
+  root.addEventListener("pointermove",e=>{
+    const bounds=root.getBoundingClientRect();
+    root.style.setProperty("--auth-pointer-x",(e.clientX-bounds.left)+"px");
+    root.style.setProperty("--auth-pointer-y",(e.clientY-bounds.top)+"px");
+    const card=panel.getBoundingClientRect();
+    const nx=(e.clientX-card.left)/card.width-.5,ny=(e.clientY-card.top)/card.height-.5;
+    if(e.clientX>=card.left-35&&e.clientX<=card.right+35&&e.clientY>=card.top-35&&e.clientY<=card.bottom+35){
+      panel.style.setProperty("--auth-tilt-x",(-ny*5.5).toFixed(2)+"deg");
+      panel.style.setProperty("--auth-tilt-y",(nx*6.5).toFixed(2)+"deg");
+    }else{
+      panel.style.setProperty("--auth-tilt-x","0deg");
+      panel.style.setProperty("--auth-tilt-y","0deg");
+    }
+  });
+  root.addEventListener("pointerleave",()=>{
+    panel.style.setProperty("--auth-tilt-x","0deg");
+    panel.style.setProperty("--auth-tilt-y","0deg");
+  });
+}
 function view(name){screens.forEach(x=>x.hidden=x.dataset.screen!==name);status.hidden=true;status.textContent="";}
 function message(s,type="error"){status.textContent=s;status.dataset.type=type;status.hidden=!s;}
 function busy(v){buttons.forEach(b=>b.disabled=v);}
