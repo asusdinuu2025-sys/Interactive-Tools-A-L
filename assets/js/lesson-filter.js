@@ -200,7 +200,9 @@
     button.setAttribute("aria-expanded", "false");
     button.innerHTML =
       '<span class="lesson-filter-current">Filter</span>' +
-      '<span class="lesson-filter-arrow" aria-hidden="true">⌄</span>';
+      '<span class="lesson-filter-arrow" aria-hidden="true">' +
+      '<svg viewBox="0 0 20 20" focusable="false"><path d="m5.5 7.5 4.5 4.5 4.5-4.5"/></svg>' +
+      '</span>';
 
     const menu = document.createElement("div");
     menu.className = "lesson-filter-menu";
