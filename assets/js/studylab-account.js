@@ -237,7 +237,7 @@
           const raw = localStorage.getItem("studyLabProfile");
           const local = raw ? JSON.parse(raw) : null;
           if (local?.name) {
-            const legacyName = String(local.name).trim().replace(/\\s+/g, " ");
+            const legacyName = String(local.name).trim().replace(/\s+/g, " ");
             if (legacyName.length >= 2 && legacyName.length <= 60) {
               const { data: migrated, error: saveError } = await client.from("studylab_profiles")
                 .upsert({ id: user.id, display_name: legacyName, updated_at: new Date().toISOString() }, { onConflict: "id" })
