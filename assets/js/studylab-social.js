@@ -23,8 +23,8 @@
   if (!form || !textarea || !postButton || !stream) return;
 
   form.innerHTML = `
-    <button class="sl-feed-create-trigger" type="button" aria-label="Click here to create a post">
-      <span aria-hidden="true">✎</span><span>Click here to create a post</span>
+    <button class="sl-feed-create-trigger" type="button" aria-label="Click here to bigger view">
+      <span aria-hidden="true">✎</span><span>Click here to bigger view</span>
     </button>
     <div class="sl-feed-compose-expanded-head">
       <strong>Create a post</strong>
@@ -172,7 +172,7 @@
       // A space typed after a URL can remain inside the contenteditable link.
       // Split it out immediately so the next word is not accidentally linked.
       const original = anchor.textContent || "";
-      const token = original.match(/^\\S+/)?.[0] || "";
+      const token = original.match(/^\S+/)?.[0] || "";
       const cleanToken = token.replace(/[),.!?;:]+$/, "");
       const suffix = token.slice(cleanToken.length) + original.slice(token.length);
       const destination = normalizeDetectedUrl(cleanToken);
