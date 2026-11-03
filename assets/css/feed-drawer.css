@@ -2000,3 +2000,95 @@ html[data-theme="light"] .sl-feed-comment-menu-delete:hover {
     transition:none !important;
   }
 }
+
+
+/* Expanded rich-text post composer. Kept isolated from the existing Social layout. */
+.sl-feed-compose .sl-feed-compose-expanded-head { display:none; }
+.sl-feed-compose .sl-feed-format-toolbar { display:none; }
+.sl-feed-compose.is-expanded {
+  position:fixed !important;
+  z-index:1205 !important;
+  left:50% !important;
+  top:50% !important;
+  width:min(680px,calc(100vw - 32px)) !important;
+  height:min(50vh,560px) !important;
+  min-height:320px !important;
+  max-height:calc(100dvh - 28px) !important;
+  margin:0 !important;
+  padding:18px !important;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:12px !important;
+  overflow:auto !important;
+  border:1px solid rgba(126,205,245,.30) !important;
+  border-radius:22px !important;
+  background:rgba(13,24,41,.98) !important;
+  box-shadow:0 28px 100px rgba(0,0,0,.55),0 0 0 100vmax rgba(2,8,18,.48),inset 0 1px 0 rgba(255,255,255,.09) !important;
+  -webkit-backdrop-filter:blur(30px) saturate(155%);
+  backdrop-filter:blur(30px) saturate(155%);
+  transform:translate(-50%,-50%);
+  animation:sl-compose-expand .28s cubic-bezier(.2,.8,.2,1) both;
+}
+@keyframes sl-compose-expand {
+  from { opacity:0; transform:translate(-50%,-47%) scale(.97); }
+  to { opacity:1; transform:translate(-50%,-50%) scale(1); }
+}
+html[data-theme="light"] .sl-feed-compose.is-expanded {
+  background:rgba(248,252,255,.985) !important;
+  border-color:rgba(75,155,200,.28) !important;
+  box-shadow:0 28px 90px rgba(35,70,105,.25),0 0 0 100vmax rgba(25,45,65,.32),inset 0 1px 0 #fff !important;
+}
+.sl-feed-compose.is-expanded .sl-feed-create-trigger { display:none !important; }
+.sl-feed-compose.is-expanded .sl-feed-compose-expanded-head {
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  font-size:1rem; letter-spacing:-.02em;
+}
+.sl-feed-compose-collapse {
+  display:grid; place-items:center; width:34px; height:34px;
+  border:1px solid rgba(130,160,190,.22); border-radius:11px;
+  background:rgba(130,160,190,.09); color:inherit; font:inherit; font-size:1.3rem; cursor:pointer;
+}
+.sl-feed-compose.is-expanded .sl-feed-format-toolbar {
+  display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+}
+.sl-feed-format-toolbar button {
+  display:grid; place-items:center; min-width:34px; height:32px; padding:0 9px;
+  border:1px solid rgba(126,160,190,.22); border-radius:9px;
+  background:rgba(130,160,190,.08); color:inherit; font:inherit; font-size:.82rem; cursor:pointer;
+  transition:background .18s ease,border-color .18s ease,transform .18s ease;
+}
+.sl-feed-format-toolbar button:hover {
+  background:rgba(91,190,255,.15); border-color:rgba(91,190,255,.42); transform:translateY(-1px);
+}
+.sl-feed-format-divider { width:1px; height:22px; margin:0 3px; background:rgba(130,160,190,.28); }
+.sl-feed-compose.is-expanded textarea {
+  flex:1 1 auto !important; width:100% !important; min-height:100px !important;
+  max-height:none !important; height:auto !important; resize:none !important;
+  font-size:.94rem !important; line-height:1.65 !important;
+}
+.sl-feed-compose.is-expanded .sl-feed-file-row { flex-wrap:wrap; }
+.sl-feed-compose.is-expanded .sl-feed-compose-foot {
+  flex-direction:row !important; align-items:center !important; justify-content:space-between !important;
+}
+.sl-feed-compose.is-expanded .sl-feed-image-preview { max-height:92px; overflow:auto; }
+.sl-feed-compose.is-expanded .sl-feed-compose-status { flex:0 0 auto; }
+.sl-feed-post-body strong { font-weight:750; }
+.sl-feed-post-body em { font-style:italic; }
+.sl-feed-post-body u { text-decoration:underline; text-underline-offset:2px; }
+.sl-feed-post-body s { text-decoration:line-through; }
+.sl-feed-post-body a { color:#75cfff; text-decoration:underline; text-underline-offset:2px; overflow-wrap:anywhere; }
+html[data-theme="light"] .sl-feed-post-body a { color:#167bb5; }
+@media (max-width:600px) {
+  .sl-feed-compose.is-expanded {
+    width:calc(100vw - 24px) !important;
+    height:min(56vh,560px) !important;
+    min-height:300px !important;
+    padding:14px !important;
+    border-radius:18px !important;
+  }
+  .sl-feed-compose.is-expanded .sl-feed-compose-foot { align-items:stretch !important; }
+  .sl-feed-compose.is-expanded .sl-feed-image-note { font-size:.65rem; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .sl-feed-compose.is-expanded { animation:none !important; }
+}
