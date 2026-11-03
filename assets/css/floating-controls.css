@@ -372,3 +372,12 @@ body.sl-community-open .sl-feed-floating-shortcut {
 @media (prefers-reduced-motion:reduce) {
   .sl-feed-floating-shortcut { transition:none !important; animation:none !important; }
 }
+
+
+/* Keep Pet and AI launchers out of the way while the full-screen Social panel is open. */
+body.sl-community-open #studylabPetLauncher,
+body.sl-community-open .studylab-ai-tools-row .studylab-ai-launcher {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
