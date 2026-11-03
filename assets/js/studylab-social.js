@@ -221,7 +221,7 @@
     restoreCharacterOffset(editor, caret);
   }
   function countPostWords(value) {
-    const words = String(value || "").trim().match(/[\\p{L}\\p{N}]+(?:['’][\\p{L}\\p{N}]+)*/gu);
+    const words = String(value || "").trim().match(/[\p{L}\p{N}]+(?:['’][\p{L}\p{N}]+)*/gu);
     return words ? words.length : 0;
   }
   function updateWordCount() {
@@ -229,6 +229,7 @@
     wordCount.textContent = count.toLocaleString() + " / 1,000 words";
     wordCount.classList.toggle("is-over-limit", count > MAX_POST_WORDS);
   }
+  updateWordCount();
   formatToolbar.addEventListener("mousedown", event => event.preventDefault());
   formatToolbar.addEventListener("click", event => {
     const button = event.target.closest("[data-format]");
