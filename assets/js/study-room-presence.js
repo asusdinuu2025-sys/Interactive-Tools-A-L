@@ -12,6 +12,7 @@
     const windows = new Map();
     let awayTimer = null;
     let syncTimer = null;
+    let noActiveSince = null;
     let serverPresence = null;
     let pendingPresence = null;
     let lastPulseAt = 0;
@@ -76,8 +77,6 @@
           if (record.active === true) found = true;
         }
       } catch (_) {
-        // Fail closed: without reliable cross-window state, do not falsely declare
-        // the student away while this page itself is visible and focused.
         for (const win of windows.keys()) {
           try {
             if (win.document.visibilityState === "visible" && win.document.hasFocus()) return true;
@@ -87,11 +86,11 @@
       return found;
     }
 
-    async function setServerPresence(present) {
+    async function setServerPresence(present, changedAt) {
       if (stopped || pendingPresence === present || serverPresence === present) return;
       pendingPresence = present;
       try {
-        await onPresenceChange(present);
+        await onPresenceChange(present, changedAt || Date.now());
         serverPresence = present;
       } catch (error) {
         console.warn("Could not update Study Room presence", error);
@@ -128,7 +127,14 @@
           clearTimeout(awayTimer);
           awayTimer = null;
         }
-        setServerPresence(true);
+        const gapStart = noActiveSince;
+        noActiveSince = null;
+        if (gapStart != null && Date.now() - gapStart >= AWAY_GRACE_MS && serverPresence !== false) {
+          const graceExpiredAt = gapStart + AWAY_GRACE_MS;
+          setServerPresence(false, graceExpiredAt).then(() => setServerPresence(true, Date.now()));
+        } else {
+          setServerPresence(true, Date.now());
+        }
         pulse();
         return;
       }
@@ -136,20 +142,24 @@
       if (fromPageHide) {
         if (awayTimer) clearTimeout(awayTimer);
         awayTimer = null;
+        const closedAt = Date.now();
+        noActiveSince = closedAt;
         if (typeof onUnloadAway === "function") {
-          try { onUnloadAway(); } catch (error) { console.warn("Unload presence request failed", error); }
+          try { onUnloadAway(closedAt); } catch (error) { console.warn("Unload presence request failed", error); }
         } else {
-          setServerPresence(false);
+          setServerPresence(false, closedAt);
         }
         return;
       }
 
+      if (noActiveSince == null) noActiveSince = Date.now();
       if (!awayTimer) {
+        const graceExpiredAt = noActiveSince + AWAY_GRACE_MS;
         awayTimer = setTimeout(() => {
           awayTimer = null;
-          if (!hasAnyVisibleWindow()) setServerPresence(false);
+          if (!hasAnyVisibleWindow()) setServerPresence(false, graceExpiredAt);
           else sync();
-        }, AWAY_GRACE_MS);
+        }, Math.max(0, graceExpiredAt - Date.now()));
       }
     }
 
