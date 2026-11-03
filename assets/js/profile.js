@@ -30,6 +30,7 @@
   let savedUsername = "";
   let mandatoryProfile = false;
   let requireFullProfile = false;
+  let onboardingAuthIntent = "";
 
   const profileClose = document.getElementById("profileClose");
 
@@ -156,7 +157,8 @@
     return account.getProfile(force);
   }
   function fillForm(p) {
-    profileInput.value = p?.display_name && !placeholderName(p.display_name) ? p.display_name : "";
+    const googleName = window.StudyLabAccount?.getSuggestedDisplayName?.() || "";
+    profileInput.value = p?.display_name && !placeholderName(p.display_name) ? p.display_name : googleName;
     savedDisplayName = normalizeDisplayName(profileInput.value).toLowerCase();
     if (profileNameStatus) {
       profileNameStatus.hidden = true;
@@ -372,12 +374,15 @@
 
   function updateCopy(p) {
     const complete = mandatoryProfile ? isFullComplete(p) : isBasicComplete(p);
-    profileNameLabel.textContent = complete ? "Your student profile" : "Complete your student profile";
+    profileNameLabel.textContent = complete ? "Your student profile"
+      : onboardingAuthIntent === "signup" ? "Finish creating your StudyLab profile" : "Complete your student profile";
     profileSubtitle.textContent = mandatoryProfile
       ? "All details are required to enter the Study Room."
       : complete
         ? "Keep your details up to date. Your information stays linked to your StudyLab account."
-        : "Add your name, A/L year and stream. You can skip this for now and keep using StudyLab.";
+        : onboardingAuthIntent === "signup"
+          ? "Your Google account is connected. Add your student details to finish setting up StudyLab."
+          : "Add your name, A/L year and stream. You can skip this for now and keep using StudyLab.";
     const submit = profileForm.querySelector(".profile-save");
     if (submit) submit.textContent = complete ? "Save changes" : "Save profile";
   }
@@ -616,6 +621,7 @@
 
   (async function boot() {
     try {
+      onboardingAuthIntent = window.StudyLabAccount?.getAuthIntent?.() || "";
       const p = await getCloudProfile();
       setButtonProfile(p);
       const params = new URLSearchParams(window.location.search);
@@ -629,6 +635,8 @@
       } else if (!requireFullProfile && !isBasicComplete(p)) {
         await openModal();
       }
+      window.StudyLabAccount?.clearAuthIntent?.();
+      onboardingAuthIntent = "";
     } catch (error) {
       console.warn("StudyLab profile startup:", error);
       setButtonProfile(null);
