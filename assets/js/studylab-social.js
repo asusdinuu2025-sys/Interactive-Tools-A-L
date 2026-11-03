@@ -9,6 +9,8 @@
   const BUCKET = "studylab-social";
   const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
   const MAX_IMAGES = 4;
+  const MAX_POST_WORDS = 1000;
+  const MAX_POST_CHARS = 15000;
   const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
   const panel = document.getElementById("studyLabFeedPanel");
   if (!panel) return;
@@ -46,6 +48,7 @@
     </div>
     <div class="sl-feed-compose-foot">
       <span class="sl-feed-image-note">JPEG, PNG or WebP · up to 4 MB each · max 4 photos</span>
+      <span class="sl-feed-word-count" aria-live="polite">0 / 1,000 words</span>
       <button class="sl-feed-post-button" type="submit">Post</button>
     </div>
     <div class="sl-feed-image-preview" aria-label="Selected photo previews"></div>
@@ -66,6 +69,7 @@
   const input = form.querySelector(".sl-feed-file-input");
   const fileCount = form.querySelector(".sl-feed-file-count");
   const status = form.querySelector(".sl-feed-compose-status");
+  const wordCount = form.querySelector(".sl-feed-word-count");
   const imagePreview = form.querySelector(".sl-feed-image-preview");
   const collapseComposer = form.querySelector(".sl-feed-compose-collapse");
   const formatToolbar = form.querySelector(".sl-feed-format-toolbar");
@@ -129,61 +133,101 @@
     let node, remaining = offset, last = null;
     while ((node = walker.nextNode())) {
       last = node;
-      if (remaining <= node.nodeValue.length) {
+      const length = node.nodeValue.length;
+      if (remaining <= length) {
         const range = document.createRange();
-        range.setStart(node, remaining); range.collapse(true);
+        range.setStart(node, remaining);
+        range.collapse(true);
         const selection = window.getSelection();
-        selection.removeAllRanges(); selection.addRange(range);
+        selection.removeAllRanges();
+        selection.addRange(range);
         return;
       }
-      remaining -= node.nodeValue.length;
+      remaining -= length;
     }
     if (last) {
       const range = document.createRange();
-      range.setStart(last, last.nodeValue.length); range.collapse(true);
+      range.setStart(last, last.nodeValue.length);
+      range.collapse(true);
       const selection = window.getSelection();
-      selection.removeAllRanges(); selection.addRange(range);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+  }
+  function normalizeDetectedUrl(value) {
+    const clean = String(value || "").trim().replace(/[),.!?;:]+$/, "");
+    if (!clean) return null;
+    const candidate = /^https?:\/\//i.test(clean) ? clean : "https://" + clean;
+    try {
+      const url = new URL(candidate);
+      if (!["http:", "https:"].includes(url.protocol) || !url.hostname.includes(".")) return null;
+      return url.href;
+    } catch (_) {
+      return null;
     }
   }
   function linkifyEditor() {
     const caret = selectionCharacterOffset(editor);
     editor.querySelectorAll('a[data-auto-link="true"]').forEach(anchor => {
-      const current = anchor.textContent.trim().replace(/[),.!?;:]+$/,"");
-      if (/^https?:\/\//i.test(current)) {
-        anchor.href = current;
+      const destination = normalizeDetectedUrl(anchor.textContent);
+      if (destination) {
+        anchor.setAttribute("href", destination);
+        anchor.target = "_blank";
+        anchor.rel = "noopener noreferrer";
+      } else {
+        anchor.replaceWith(document.createTextNode(anchor.textContent));
       }
     });
     const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT, {
-      acceptNode(node) { return node.parentElement?.closest("a") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT; }
+      acceptNode(node) {
+        return node.parentElement?.closest("a") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+      }
     });
     const nodes = [];
     while (walker.nextNode()) nodes.push(walker.currentNode);
-    const urlPattern = /https?:\/\/[^\s<>]+/gi;
+    // Supports explicit URLs, www links, and ordinary domains such as studylablk.netlify.app.
+    const urlPattern = /https?:\/\/[^\s<>]+|www\.[^\s<>]+|(?<![@\w.-])(?:[a-z0-9-]+\.)+[a-z]{2,}(?:\/[^\s<>]*)?/gi;
     for (const node of nodes) {
-      const text = node.nodeValue || "";
-      const matches = [...text.matchAll(urlPattern)];
+      const value = node.nodeValue || "";
+      const matches = [...value.matchAll(urlPattern)];
       if (!matches.length) continue;
       const fragment = document.createDocumentFragment();
       let cursor = 0;
       for (const match of matches) {
         let raw = match[0];
         let trailing = "";
-        while (/[),.!?;:]$/.test(raw)) { trailing = raw.slice(-1) + trailing; raw = raw.slice(0,-1); }
-        if (!raw) continue;
-        fragment.append(document.createTextNode(text.slice(cursor, match.index)));
+        while (/[),.!?;:]$/.test(raw)) {
+          trailing = raw.slice(-1) + trailing;
+          raw = raw.slice(0, -1);
+        }
+        const destination = normalizeDetectedUrl(raw);
+        if (!destination) continue;
+        fragment.append(document.createTextNode(value.slice(cursor, match.index)));
         const anchor = document.createElement("a");
-        anchor.href = raw;
+        anchor.setAttribute("href", destination);
         anchor.textContent = raw;
         anchor.target = "_blank";
         anchor.rel = "noopener noreferrer";
         anchor.dataset.autoLink = "true";
-        fragment.append(anchor, document.createTextNode(trailing));
+        fragment.append(anchor);
+        if (trailing) fragment.append(document.createTextNode(trailing));
         cursor = match.index + match[0].length;
       }
-      fragment.append(document.createTextNode(text.slice(cursor)));
-      node.replaceWith(fragment);
+      if (cursor) {
+        fragment.append(document.createTextNode(value.slice(cursor)));
+        node.replaceWith(fragment);
+      }
     }
     restoreCharacterOffset(editor, caret);
+  }
+  function countPostWords(value) {
+    const words = String(value || "").trim().match(/[\\p{L}\\p{N}]+(?:['’][\\p{L}\\p{N}]+)*/gu);
+    return words ? words.length : 0;
+  }
+  function updateWordCount() {
+    const count = countPostWords(editor.textContent);
+    wordCount.textContent = count.toLocaleString() + " / 1,000 words";
+    wordCount.classList.toggle("is-over-limit", count > MAX_POST_WORDS);
   }
   formatToolbar.addEventListener("mousedown", event => event.preventDefault());
   formatToolbar.addEventListener("click", event => {
@@ -208,11 +252,15 @@
     editor.focus();
   });
   editor.addEventListener("input", () => {
-    if (editor.textContent.length > 2000) {
-      editor.textContent = editor.textContent.slice(0, 2000);
-      restoreCharacterOffset(editor, 2000);
-    }
     linkifyEditor();
+    updateWordCount();
+    if (editor.textContent.length > MAX_POST_CHARS) {
+      setStatus("Posts are limited to 15,000 characters and 1,000 words.", true);
+    } else if (countPostWords(editor.textContent) > MAX_POST_WORDS) {
+      setStatus("Your post is over the 1,000-word limit.", true);
+    } else {
+      setStatus("");
+    }
   });
   editor.addEventListener("paste", event => {
     event.preventDefault();
@@ -1002,7 +1050,9 @@
       const files = [...(input.files || [])];
       validFiles(files);
       const body = textarea.value.trim();
-      if (body.length > 2000) throw new Error("Your formatted post is too long. Keep it under 2,000 characters.");
+      const words = countPostWords(editor.textContent);
+      if (words > MAX_POST_WORDS) throw new Error("Your post is over the 1,000-word limit.");
+      if (body.length > MAX_POST_CHARS) throw new Error("Your formatted post is too long. Keep it under 15,000 characters.");
       if (!body && !files.length) throw new Error("Write something or attach a photo.");
       setBusy(true);
       setStatus(files.length ? "Preparing your post…" : "Publishing your post…");
@@ -1050,6 +1100,7 @@
         throw publishError || new Error("Your post could not be published. Please try again.");
       }
       textarea.value = "";
+      updateWordCount();
       setComposerExpanded(false);
       input.value = "";
       fileCount.textContent = "No photos selected";
