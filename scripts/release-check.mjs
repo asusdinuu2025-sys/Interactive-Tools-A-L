@@ -10,6 +10,7 @@ const syntaxFiles = [
   "assets/js/studylab-social.js",
   "assets/js/study-room-analytics.js",
   "assets/js/study-room-mini-standalone.js",
+  "assets/js/study-room-presence.js",
   "assets/js/study-room-realtime.js",
   "netlify/functions/gemini.js"
 ];
@@ -86,6 +87,12 @@ for (const file of syntaxFiles) {
   const absolutePath = path.join(root, file);
   if (!existsSync(absolutePath)) fail("Missing JavaScript file: " + file);
   else checkNode(absolutePath, file);
+}
+
+
+const timerTests = spawnSync(process.execPath, ["scripts/study-room-target-tests.mjs"], { encoding: "utf8" });
+if (timerTests.status !== 0) {
+  fail("Study Room target/presence logic tests failed:\n" + (timerTests.stderr || timerTests.stdout || "node test failed"));
 }
 
 // Parse inline JavaScript in the standalone Study Tools page without executing it.
