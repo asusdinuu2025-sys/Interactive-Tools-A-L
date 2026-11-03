@@ -8,20 +8,20 @@
   let accessToken = null;
   let presenceController = null;
 
-  function sendUnloadPresenceAway() {
+  function sendUnloadPresenceAway(transitionAt) {
     let url = String(window.STUDYLAB_SUPABASE_URL || "");
     while (url.endsWith("/")) url = url.slice(0, -1);
     const apiKey = window.STUDYLAB_SUPABASE_ANON_KEY;
     if (!url || !apiKey || !accessToken) return;
     try {
-      window.fetch(url + "/rest/v1/rpc/study_room_presence", {
+      window.fetch(url + "/rest/v1/rpc/study_room_presence_at", {
         method: "POST",
         headers: {
           apikey: apiKey,
           Authorization: "Bearer " + accessToken,
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ p_is_present: false }),
+        body: JSON.stringify({ p_is_present: false, p_transition_at: new Date(transitionAt || Date.now()).toISOString() }),
         keepalive: true,
         credentials: "omit"
       }).catch(error => console.warn("Detached timer unload presence request failed", error));
@@ -34,8 +34,8 @@
     if (presenceController || !window.StudyRoomPresence) return;
     presenceController = window.StudyRoomPresence.start({
       userId,
-      onPresenceChange: async present => {
-        await rpc("study_room_presence", { p_is_present: present });
+      onPresenceChange: async (present, changedAt) => {
+        await rpc("study_room_presence_at", { p_is_present: present, p_transition_at: new Date(changedAt || Date.now()).toISOString() });
         await loadRow();
       },
       onPulse: heartbeat,
