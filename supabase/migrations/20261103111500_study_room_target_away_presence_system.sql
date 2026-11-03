@@ -84,8 +84,8 @@ SET search_path = ''
 AS $function$
 DECLARE
   current_row public.study_room_members%rowtype;
-  local_day date := timezone('Asia/Colombo', p_until)::date;
-  monday date := public.study_room_local_week_start(timezone('Asia/Colombo', p_until)::date);
+  v_local_day date := timezone('Asia/Colombo', p_until)::date;
+  v_monday date := public.study_room_local_week_start(timezone('Asia/Colombo', p_until)::date);
   elapsed_total integer;
   elapsed_today integer;
   elapsed_week integer;
@@ -103,41 +103,41 @@ BEGIN
 
   SELECT
     coalesce(sum(parts.seconds), 0)::integer,
-    coalesce(sum(parts.seconds) FILTER (WHERE parts.local_day = local_day), 0)::integer,
-    coalesce(sum(parts.seconds) FILTER (WHERE parts.local_week = monday), 0)::integer
+    coalesce(sum(parts.seconds) FILTER (WHERE parts.local_day = v_local_day), 0)::integer,
+    coalesce(sum(parts.seconds) FILTER (WHERE parts.local_week = v_monday), 0)::integer
   INTO elapsed_total, elapsed_today, elapsed_week
   FROM study_room_private.split_credit_seconds(p_from, p_until) AS parts;
 
   UPDATE public.study_room_members
   SET
     today_seconds = CASE
-      WHEN today_date = local_day THEN coalesce(today_seconds, 0) + elapsed_today
+      WHEN today_date = v_local_day THEN coalesce(today_seconds, 0) + elapsed_today
       ELSE elapsed_today
     END,
-    today_date = local_day,
+    today_date = v_local_day,
     week_seconds = CASE
-      WHEN week_start = monday THEN coalesce(week_seconds, 0) + elapsed_week
+      WHEN week_start = v_monday THEN coalesce(week_seconds, 0) + elapsed_week
       ELSE elapsed_week
     END,
-    week_start = monday,
+    week_start = v_monday,
     session_elapsed_seconds = coalesce(current_row.session_elapsed_seconds, 0) + elapsed_total,
     session_date = local_day,
     session_today_seconds = CASE
-      WHEN current_row.session_today_date = local_day
+      WHEN current_row.session_today_date = v_local_day
         THEN coalesce(current_row.session_today_seconds, 0) + elapsed_today
       ELSE elapsed_today
     END,
-    session_today_date = local_day,
+    session_today_date = v_local_day,
     session_week_seconds = CASE
-      WHEN current_row.session_week_start = monday
+      WHEN current_row.session_week_start = v_monday
         THEN coalesce(current_row.session_week_seconds, 0) + elapsed_week
       ELSE elapsed_week
     END,
-    session_week_start = monday,
+    session_week_start = v_monday,
     session_away_pending_seconds = CASE
       WHEN p_is_away THEN
         CASE
-          WHEN current_row.session_away_pending_date = local_day
+          WHEN current_row.session_away_pending_date = v_local_day
             THEN coalesce(current_row.session_away_pending_seconds, 0) + elapsed_today
           ELSE elapsed_today
         END
@@ -208,7 +208,7 @@ BEGIN
     session_away_since_at = NULL,
     session_away_pending_seconds = 0,
     session_away_pending_date = local_day,
-    session_away_pending_week_start = monday,
+    session_away_pending_week_start = v_monday,
     session_started_at = NULL,
     last_heartbeat_at = NULL,
     session_elapsed_seconds = 0,
