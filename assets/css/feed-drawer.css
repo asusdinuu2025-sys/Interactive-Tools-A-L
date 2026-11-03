@@ -2191,6 +2191,6 @@ html[data-theme="light"] .sl-feed-compose .sl-feed-editor a { color:#147bb8; }
 }
 
 /* Nirmala UI is used when installed; platform fonts remain safe fallbacks. */
-.sl-feed-panel[data-size="full"] .sl-feed-post {
+.sl-feed-panel .sl-feed-post {
   font-family: "Nirmala UI", "Segoe UI", Arial, sans-serif;
 }
