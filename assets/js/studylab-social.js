@@ -174,8 +174,8 @@
     // Reattach the contiguous token before refreshing the link destination.
     editor.querySelectorAll('a[data-auto-link="true"]').forEach(anchor => {
       const next = anchor.nextSibling;
-      if (next && next.nodeType === Node.TEXT_NODE && next.nodeValue && !/^\\s/.test(next.nodeValue)) {
-        const continuation = next.nodeValue.match(/^\\S+/)?.[0] || "";
+      if (next && next.nodeType === Node.TEXT_NODE && next.nodeValue && !/^\s/.test(next.nodeValue)) {
+        const continuation = next.nodeValue.match(/^\S+/)?.[0] || "";
         if (continuation) {
           anchor.append(document.createTextNode(continuation));
           next.nodeValue = next.nodeValue.slice(continuation.length);
