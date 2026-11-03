@@ -50,7 +50,40 @@ function view(name){screens.forEach(x=>x.hidden=x.dataset.screen!==name);status.
 function message(s,type="error"){status.textContent=s;status.dataset.type=type;status.hidden=!s;}
 function busy(v){buttons.forEach(b=>b.disabled=v);}
 function close(){root.classList.add("auth-leaving");window.setTimeout(()=>root.hidden=true,280);}
-async function google(intent){busy(true);message("Connecting securely to Google…","info");try{await account.signInWithGoogle(intent);}catch(e){console.warn("StudyLab Google sign-in:",e);busy(false);message("Google sign-in is unavailable right now. Please try again.");}}
+function authErrorMessage(error,intent){
+  const raw=String(error?.message||error?.error_description||error?.msg||"").trim();
+  const detail=raw.toLowerCase();
+  if(/manual linking is disabled|manual linking.*disabled|linking.*disabled/.test(detail)){
+    return "Guest account linking is disabled in Supabase. Enable Authentication → Settings → Allow manual linking, then try Create StudyLab account again.";
+  }
+  if(/provider.*not enabled|unsupported provider|google.*not enabled/.test(detail)){
+    return "Google sign-in is not enabled for this Supabase project. Enable Authentication → Sign In / Providers → Google.";
+  }
+  if(/redirect.*(allow|url)|url.*not.*allowed|invalid redirect/.test(detail)){
+    return "Supabase rejected this website's return address. Add this site's URL to Authentication → URL Configuration → Redirect URLs.";
+  }
+  if(/network|fetch failed|failed to fetch|load failed|timeout/.test(detail)){
+    return "A network error stopped Google sign-in. Check your connection and try again.";
+  }
+  if(/already.*linked|identity.*exists/.test(detail)){
+    return "That Google account is already linked to another StudyLab account. Choose Sign In to use it.";
+  }
+  if(raw) return "Google sign-in could not start: "+raw.slice(0,220);
+  return intent==="signup"
+    ?"StudyLab could not start Google account creation. Check the Supabase Google provider and Guest account-linking settings."
+    :"StudyLab could not start Google login. Check the Supabase Google provider and redirect URL settings.";
+}
+async function google(intent){
+  busy(true);
+  message("Connecting securely to Google…","info");
+  try{
+    await account.signInWithGoogle(intent);
+  }catch(e){
+    console.warn("StudyLab Google sign-in:",e);
+    busy(false);
+    message(authErrorMessage(e,intent));
+  }
+}
 async function guest(){busy(true);message("Preparing your Guest session…","info");try{await account.continueAsGuest();close();}catch(e){console.warn("StudyLab Guest sign-in:",e);busy(false);message("Guest access could not start. Check your connection and try again.");}}
 root.addEventListener("click",e=>{const b=e.target.closest("[data-action]");if(!b||b.disabled)return;switch(b.dataset.action){case"signup":view("signup");break;case"login":view("login");break;case"back":view("welcome");break;case"guest":guest();break;case"google-signup":google("signup");break;case"google-login":google("login");break;}});
 let countersAnimated=false;
