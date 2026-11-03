@@ -1,12 +1,12 @@
 (function () {
 "use strict";
 const account=window.StudyLabAccount;if(!account)return;
-const root=document.createElement("div");root.id="studylab-auth-gateway";root.hidden=true;
+const root=document.createElement("div");root.id="studylab-auth-gateway";root.hidden=true;\nconst systemTheme=window.matchMedia?window.matchMedia("(prefers-color-scheme: light)"):null;\nfunction syncAuthTheme(){root.dataset.authTheme=systemTheme&&systemTheme.matches?"light":"dark";}\nsyncAuthTheme();\nif(systemTheme){if(systemTheme.addEventListener)systemTheme.addEventListener("change",syncAuthTheme);else if(systemTheme.addListener)systemTheme.addListener(syncAuthTheme);}
 root.innerHTML=`
-<div class="auth-glow auth-glow-a" aria-hidden="true"></div><div class="auth-glow auth-glow-b" aria-hidden="true"></div><div class="auth-pointer-glow" aria-hidden="true"></div>
+<div class="auth-glow auth-glow-a" aria-hidden="true"></div><div class="auth-glow auth-glow-b" aria-hidden="true"></div><div class="auth-pointer-glow" aria-hidden="true"></div><div class="auth-formula-field" aria-hidden="true"><span class="formula formula-one">F = ma</span><span class="formula formula-two">E = mc²</span><span class="formula formula-three">∫ f(x) dx</span><span class="formula formula-four">v = u + at</span><span class="formula formula-five">PV = nRT</span><span class="formula formula-six">sin²θ + cos²θ = 1</span><span class="formula formula-seven">λ = h / p</span></div>
 <main class="auth-layout">
 <section class="auth-story"><a class="auth-brand" href="/"><img src="/assets/icon/studylab-pwa.svg" alt=""> <span>StudyLab</span></a>
-<div class="auth-story-copy"><p class="auth-eyebrow"><i></i> YOUR LEARNING SPACE</p><h1>All Resources for<br><em>G.C.E A/L Students</em><br>in One Place.</h1><p class="auth-story-subtitle">Make room for better learning.</p><p>A focused space for your A/L journey. Find learning resources, interactive tools, past papers and more, all in one place.</p></div>
+<div class="auth-story-copy"><p class="auth-eyebrow"><i></i> YOUR LEARNING SPACE</p><h1>All Resources for<br><em>G.C.E A/L Students</em><br>in One Place.</h1><p class="auth-story-subtitle">Make room for better learning.</p><p>A focused space for your A/L journey. Find learning resources, practical simulations, interactive tools, past papers and more, all in one place.</p></div>
 <div class="auth-features"><span>Interactive learning</span><span>Study together</span><span>Your progress</span></div><i class="auth-ring auth-ring-a"></i><i class="auth-ring auth-ring-b"></i></section>
 <section class="auth-panel" role="dialog" aria-modal="true" aria-labelledby="auth-heading">
 <div class="auth-panel-shine"></div><div class="auth-panel-brand"><b>ツ</b><span>STUDYLAB ACCOUNT</span></div>
