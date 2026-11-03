@@ -121,7 +121,7 @@ BEGIN
     END,
     week_start = v_monday,
     session_elapsed_seconds = coalesce(current_row.session_elapsed_seconds, 0) + elapsed_total,
-    session_date = local_day,
+    session_date = v_local_day,
     session_today_seconds = CASE
       WHEN current_row.session_today_date = v_local_day
         THEN coalesce(current_row.session_today_seconds, 0) + elapsed_today
@@ -144,11 +144,11 @@ BEGIN
       ELSE coalesce(current_row.session_away_pending_seconds, 0)
     END,
     session_away_pending_date = CASE
-      WHEN p_is_away THEN local_day
+      WHEN p_is_away THEN v_local_day
       ELSE current_row.session_away_pending_date
     END,
     session_away_pending_week_start = CASE
-      WHEN p_is_away THEN monday
+      WHEN p_is_away THEN v_monday
       ELSE current_row.session_away_pending_week_start
     END,
     last_heartbeat_at = p_until,
