@@ -56,5 +56,23 @@ root.addEventListener("click",e=>{const b=e.target.closest("[data-action]");if(!
 let countersAnimated=false;
 function animateCounters(){if(countersAnimated)return;countersAnimated=true;const nodes=[...root.querySelectorAll("[data-count-to]")];const reduced=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;const duration=850;const start=performance.now();function frame(now){const progress=reduced?1:Math.min(1,(now-start)/duration);const eased=1-Math.pow(1-progress,3);nodes.forEach(node=>{const target=Number(node.dataset.countTo)||0;node.textContent=new Intl.NumberFormat().format(Math.round(target*eased))+(node.dataset.countSuffix||"");});if(progress<1)requestAnimationFrame(frame);}requestAnimationFrame(frame);}
 function show(){root.hidden=false;root.classList.remove("auth-leaving");animateCounters();requestAnimationFrame(()=>root.classList.add("auth-visible"));if(account.getStartupError?.()==="no-profile"){view("login");message("This Google account does not have a StudyLab profile yet. Choose New User to create one.","info");}else if(account.getStartupError?.()){message("StudyLab could not restore your saved session. Check your connection and choose an option to continue.");}if(new URLSearchParams(location.search).has("error_description"))message("Google sign-in was cancelled or could not be completed. Please try again.");}
+function open(intent){
+  const guest=Boolean(account.getUser?.()?.is_anonymous);
+  if(intent==="signup"){
+    const desc=root.querySelector('[data-screen="signup"] .auth-desc');
+    if(desc)desc.textContent=guest
+      ?"Connect Google to this Guest session. Your existing StudyLab profile and cloud activity will stay with you."
+      :"Choose your Google account to get started. Your student profile comes next.";
+  }
+  if(intent==="login"){
+    const desc=root.querySelector('[data-screen="login"] .auth-desc');
+    if(desc)desc.textContent=guest
+      ?"You are using Guest access. Signing in switches to your existing account; Guest data is not automatically transferred."
+      :"Continue with the Google account you used when joining StudyLab.";
+  }
+  show();
+  view(intent==="signup"||intent==="login"?intent:"welcome");
+}
+window.StudyLabAuthGateway={open};
 if(account.startup&&typeof account.startup.then==="function")account.startup.then(ok=>{if(!ok)show();});else show();
 })();
