@@ -135,10 +135,9 @@
     const hours = Number(hoursValue);
     const minutes = Number(minutesValue);
     if (!Number.isInteger(hours) || !Number.isInteger(minutes) ||
-        hours < 0 || hours > 12 || minutes < 0 || minutes > 59 ||
-        (hours === 12 && minutes > 0)) return null;
+        hours < 0 || hours > 10 || minutes < 0 || minutes > 59) return null;
     const total = (hours * 60 + minutes) * 60;
-    return total >= 60 && total <= 43200 ? total : null;
+    return total >= 60 && total <= 39540 ? total : null;
   }
 
   function clearTargetError() {
@@ -150,7 +149,7 @@
       input.style.removeProperty("box-shadow");
       input.style.removeProperty("color");
     });
-    if (targetHint) targetHint.textContent = "Choose a target from 1 minute up to 12 hours.";
+    if (targetHint) targetHint.textContent = "Choose a target from 1 minute up to 10 hours 59 minutes.";
   }
 
   function showTargetError() {
@@ -223,7 +222,8 @@
     emitTimerState();
   }
   function renderPeople() {
-    const active = rows.filter(heartbeatIsFresh);
+    const active = rows.filter(r => heartbeatIsFresh(r) ||
+      (r?.session_active && r?.session_presence_state === 'away'));
     activeCount.textContent = String(active.length);
     const own = rows.find(r => r.user_id === userId) || member;
     const currentWeek = weekStart(new Date());
@@ -259,7 +259,8 @@
         avatar.classList.add('slr-neon-avatar');
         avatar.style.setProperty('--slr-neon-dark', neon[0]);
         avatar.style.setProperty('--slr-neon-light', neon[1]);
-        avatar.title = 'Studying now';
+        avatar.title = r.session_presence_state === 'away' ? 'Away · timer continues to target' : 'Studying now';
+        card.querySelector('.room-person-status').textContent = r.session_presence_state === 'away' ? 'Away' : 'Studying now';
         card.querySelector('.room-person-card-name').textContent = r.display_name;
         card.querySelector('.room-person-card-subject').textContent = r.subject;
         card.querySelector('.room-person-card-time').textContent = profileDuration(today + liveToday);
@@ -369,7 +370,7 @@
     const target = member?.session_active
       ? Number(member.session_target_seconds) || selectedTargetSeconds()
       : selectedTargetSeconds();
-    if (!target || target < 60 || target > 43200) {
+    if (!target || target < 60 || target > 39540) {
       showTargetError();
       return;
     }
