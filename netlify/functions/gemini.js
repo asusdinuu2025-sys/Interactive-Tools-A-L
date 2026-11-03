@@ -1,6 +1,7 @@
 const crypto = require("node:crypto");
 
 const MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+const FALLBACK_MODEL = process.env.GEMINI_FALLBACK_MODEL || "gemini-3.7-flash";
 
 /*
  * Per-student weekly cap. The Supabase access token is verified server-side,
@@ -405,27 +406,51 @@ exports.handler = async function handler(event) {
     ":generateContent";
 
   try {
-    const controller = new AbortController();
+    async function requestModel(model, timeoutMs) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+      const modelEndpoint =
+        "https://generativelanguage.googleapis.com/v1beta/models/" +
+        encodeURIComponent(model) +
+        ":generateContent";
+      try {
+        return await fetch(modelEndpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": apiKey
+          },
+          body: JSON.stringify(requestBody),
+          signal: controller.signal
+        });
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    }
 
-    const timeoutId = setTimeout(
-      () => controller.abort(),
-      30000
-    );
+    const requestStartedAt = Date.now();
+    let activeModel = MODEL;
+    let apiResponse = await requestModel(MODEL, 30000);
 
-    let apiResponse;
-
-    try {
-      apiResponse = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": apiKey
-        },
-        body: JSON.stringify(requestBody),
-        signal: controller.signal
-      });
-    } finally {
-      clearTimeout(timeoutId);
+    // A short-lived provider outage on the primary model should not make
+    // the entire StudyLab tutor unavailable. Try the stable Flash fallback
+    // once, but keep the total request within the existing client timeout.
+    if (
+      !apiResponse.ok &&
+      apiResponse.status >= 500 &&
+      FALLBACK_MODEL &&
+      FALLBACK_MODEL !== MODEL &&
+      Date.now() - requestStartedAt < 19000
+    ) {
+      console.warn(
+        "StudyLab Gemini primary model returned a server error; trying fallback:",
+        MODEL,
+        apiResponse.status,
+        FALLBACK_MODEL
+      );
+      activeModel = FALLBACK_MODEL;
+      const remainingBudget = Math.max(1000, 29000 - (Date.now() - requestStartedAt));
+      apiResponse = await requestModel(FALLBACK_MODEL, Math.min(10000, remainingBudget));
     }
 
     const data = await apiResponse.json().catch(() => ({}));
@@ -461,7 +486,7 @@ exports.handler = async function handler(event) {
 
     return jsonResponse(200, {
       text: answer,
-      model: MODEL,
+      model: activeModel,
       weeklyLimit: WEEKLY_LIMIT,
       remaining: quota.remaining
     });
