@@ -183,10 +183,12 @@ BEGIN
   UPDATE public.study_room_members
   SET
     today_seconds = CASE
-      WHEN current_row.today_date = current_row.session_away_pending_date
-        THEN greatest(0, coalesce(current_row.today_seconds, 0) - pending)
-      WHEN current_row.today_date = local_day
-        THEN coalesce(current_row.today_seconds, 0)
+      WHEN current_row.today_date = local_day THEN
+        CASE
+          WHEN current_row.today_date = current_row.session_away_pending_date
+            THEN greatest(0, coalesce(current_row.today_seconds, 0) - pending)
+          ELSE coalesce(current_row.today_seconds, 0)
+        END
       ELSE 0
     END,
     today_date = local_day,
