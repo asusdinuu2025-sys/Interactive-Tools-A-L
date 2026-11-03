@@ -21,8 +21,8 @@
   if (!form || !textarea || !postButton || !stream) return;
 
   form.innerHTML = `
-    <button class="sl-feed-create-trigger" type="button" aria-label="Expand post composer">
-      <span aria-hidden="true">✎</span><span>Share something with students…</span>
+    <button class="sl-feed-create-trigger" type="button" aria-label="Click here to create a post">
+      <span aria-hidden="true">✎</span><span>Click here to create a post</span>
     </button>
     <div class="sl-feed-compose-expanded-head">
       <strong>Create a post</strong>
@@ -36,7 +36,7 @@
       <span class="sl-feed-format-divider" aria-hidden="true"></span>
       <button type="button" data-format="link" title="Insert link" aria-label="Insert link">↗</button>
     </div>
-    <textarea maxlength="2000" placeholder="Share something with other students..." aria-label="Write a post"></textarea>
+    <div class="sl-feed-editor" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="Write something with other students…" aria-label="Write a post"></div>
     <div class="sl-feed-file-row">
       <label class="sl-feed-file-button">
         <input class="sl-feed-file-input" type="file" accept="image/jpeg,image/png,image/webp" multiple>
@@ -50,8 +50,19 @@
     </div>
     <div class="sl-feed-image-preview" aria-label="Selected photo previews"></div>
     <p class="sl-feed-compose-status" role="status" aria-live="polite"></p>`;
-  textarea = form.querySelector("textarea");
+  textarea = form.querySelector(".sl-feed-editor");
   postButton = form.querySelector(".sl-feed-post-button");
+  const editor = textarea;
+  Object.defineProperty(editor, "value", {
+    configurable: true,
+    get() { return serializeEditor(editor); },
+    set(value) { editor.innerHTML = renderFormattedText(String(value || "")); }
+  });
+  Object.defineProperty(editor, "disabled", {
+    configurable: true,
+    get() { return editor.getAttribute("contenteditable") === "false"; },
+    set(value) { editor.setAttribute("contenteditable", value ? "false" : "true"); }
+  });
   const input = form.querySelector(".sl-feed-file-input");
   const fileCount = form.querySelector(".sl-feed-file-count");
   const status = form.querySelector(".sl-feed-compose-status");
@@ -68,19 +79,12 @@
       textarea.focus({ preventScroll: true });
     }
   }
-  function insertFormatting(before, after = before) {
-    const start = textarea.selectionStart ?? textarea.value.length;
-    const end = textarea.selectionEnd ?? start;
-    const selected = textarea.value.slice(start, end);
-    const replacement = before + (selected || "text") + after;
-    textarea.setRangeText(replacement, start, end, "select");
-    textarea.focus();
-    textarea.dispatchEvent(new Event("input", { bubbles: true }));
-  }
-  function renderFormattedText(value) {
-    const escapeHTML = text => String(text).replace(/[&<>"']/g, char => ({
+  function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, char => ({
       "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
     })[char]);
+  }
+  function renderFormattedText(value) {
     let safe = escapeHTML(value || "");
     safe = safe.replace(/\[([^\]]{1,200})\]\((https?:\/\/[^\s)]+)\)/g,
       '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
@@ -90,30 +94,129 @@
     safe = safe.replace(/~~([^~\n]+)~~/g, "<s>$1</s>");
     return safe.replace(/\n/g, "<br>");
   }
+  function serializeEditor(root) {
+    function visit(node) {
+      if (node.nodeType === Node.TEXT_NODE) return node.nodeValue || "";
+      if (node.nodeType !== Node.ELEMENT_NODE) return "";
+      const tag = node.tagName.toLowerCase();
+      const inner = [...node.childNodes].map(visit).join("");
+      if (tag === "br") return "\n";
+      if (tag === "strong" || tag === "b") return "**" + inner + "**";
+      if (tag === "em" || tag === "i") return "*" + inner + "*";
+      if (tag === "u") return "[u]" + inner + "[/u]";
+      if (tag === "s" || tag === "strike" || tag === "del") return "~~" + inner + "~~";
+      if (tag === "a") {
+        const href = node.getAttribute("href") || "";
+        if (/^https?:\/\//i.test(href)) return "[" + inner + "](" + href + ")";
+        return inner;
+      }
+      if (tag === "div" || tag === "p") return inner + "\n";
+      return inner;
+    }
+    return [...root.childNodes].map(visit).join("").replace(/\n+$/,"").replace(/\u00a0/g," ");
+  }
+  function selectionCharacterOffset(root) {
+    const selection = window.getSelection();
+    if (!selection?.rangeCount || !root.contains(selection.anchorNode)) return null;
+    const range = selection.getRangeAt(0).cloneRange();
+    range.selectNodeContents(root);
+    range.setEnd(selection.anchorNode, selection.anchorOffset);
+    return range.toString().length;
+  }
+  function restoreCharacterOffset(root, offset) {
+    if (offset == null) return;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let node, remaining = offset, last = null;
+    while ((node = walker.nextNode())) {
+      last = node;
+      if (remaining <= node.nodeValue.length) {
+        const range = document.createRange();
+        range.setStart(node, remaining); range.collapse(true);
+        const selection = window.getSelection();
+        selection.removeAllRanges(); selection.addRange(range);
+        return;
+      }
+      remaining -= node.nodeValue.length;
+    }
+    if (last) {
+      const range = document.createRange();
+      range.setStart(last, last.nodeValue.length); range.collapse(true);
+      const selection = window.getSelection();
+      selection.removeAllRanges(); selection.addRange(range);
+    }
+  }
+  function linkifyEditor() {
+    const caret = selectionCharacterOffset(editor);
+    const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) { return node.parentElement?.closest("a") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT; }
+    });
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    const urlPattern = /https?:\/\/[^\s<>]+/gi;
+    for (const node of nodes) {
+      const text = node.nodeValue || "";
+      const matches = [...text.matchAll(urlPattern)];
+      if (!matches.length) continue;
+      const fragment = document.createDocumentFragment();
+      let cursor = 0;
+      for (const match of matches) {
+        let raw = match[0];
+        let trailing = "";
+        while (/[),.!?;:]$/.test(raw)) { trailing = raw.slice(-1) + trailing; raw = raw.slice(0,-1); }
+        if (!raw) continue;
+        fragment.append(document.createTextNode(text.slice(cursor, match.index)));
+        const anchor = document.createElement("a");
+        anchor.href = raw;
+        anchor.textContent = raw;
+        anchor.target = "_blank";
+        anchor.rel = "noopener noreferrer";
+        fragment.append(anchor, document.createTextNode(trailing));
+        cursor = match.index + match[0].length;
+      }
+      fragment.append(document.createTextNode(text.slice(cursor)));
+      node.replaceWith(fragment);
+    }
+    restoreCharacterOffset(editor, caret);
+  }
+  formatToolbar.addEventListener("mousedown", event => event.preventDefault());
   formatToolbar.addEventListener("click", event => {
     const button = event.target.closest("[data-format]");
     if (!button || busy) return;
     const format = button.dataset.format;
+    editor.focus();
     if (format === "link") {
-      const selected = textarea.value.slice(textarea.selectionStart, textarea.selectionEnd);
-      const rawUrl = window.prompt("Paste a link (https://…)"); 
+      const selected = window.getSelection()?.toString() || "";
+      const rawUrl = window.prompt("Paste a link (https://…)");
       if (!rawUrl) return;
       let url;
       try { url = new URL(rawUrl.trim()); } catch (_) { setStatus("Enter a valid https:// or http:// link.", true); return; }
       if (!["https:", "http:"].includes(url.protocol)) { setStatus("Only http:// and https:// links are supported.", true); return; }
-      const label = selected || "link text";
-      const start = textarea.selectionStart ?? textarea.value.length;
-      const end = textarea.selectionEnd ?? start;
-      textarea.setRangeText("[" + label + "](" + url.href + ")", start, end, "select");
-      textarea.focus();
-      textarea.dispatchEvent(new Event("input", { bubbles: true }));
+      if (!selected) document.execCommand("insertText", false, url.href);
+      else document.execCommand("createLink", false, url.href);
+      linkifyEditor();
       return;
     }
-    const tokens = {
-      bold: ["**","**"], italic: ["*","*"],
-      underline: ["[u]","[/u]"], strike: ["~~","~~"]
-    }[format];
-    if (tokens) insertFormatting(tokens[0], tokens[1]);
+    const commands = { bold:"bold", italic:"italic", underline:"underline", strike:"strikeThrough" };
+    if (commands[format]) document.execCommand(commands[format], false, null);
+    editor.focus();
+  });
+  editor.addEventListener("input", () => {
+    if (editor.textContent.length > 2000) {
+      editor.textContent = editor.textContent.slice(0, 2000);
+      restoreCharacterOffset(editor, 2000);
+    }
+    linkifyEditor();
+  });
+  editor.addEventListener("paste", event => {
+    event.preventDefault();
+    const plain = (event.clipboardData || window.clipboardData).getData("text/plain");
+    document.execCommand("insertText", false, plain);
+  });
+  editor.addEventListener("keydown", event => {
+    if ((event.ctrlKey || event.metaKey) && ["b","i","u"].includes(event.key.toLowerCase())) {
+      event.preventDefault();
+      document.execCommand(({b:"bold",i:"italic",u:"underline"})[event.key.toLowerCase()], false, null);
+    }
   });
   let busy = false;
   let isAdmin = false;
