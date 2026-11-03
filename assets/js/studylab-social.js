@@ -102,11 +102,11 @@
       try { url = new URL(rawUrl.trim()); } catch (_) { setStatus("Enter a valid https:// or http:// link.", true); return; }
       if (!["https:", "http:"].includes(url.protocol)) { setStatus("Only http:// and https:// links are supported.", true); return; }
       const label = selected || "link text";
-      insertFormatting("[", "](" + url.href + ")");
-      if (!selected) {
-        const cursor = textarea.selectionStart;
-        textarea.setRangeText(label, cursor - ("](" + url.href + ")").length - 1, cursor - ("](" + url.href + ")").length - 1, "end");
-      }
+      const start = textarea.selectionStart ?? textarea.value.length;
+      const end = textarea.selectionEnd ?? start;
+      textarea.setRangeText("[" + label + "](" + url.href + ")", start, end, "select");
+      textarea.focus();
+      textarea.dispatchEvent(new Event("input", { bubbles: true }));
       return;
     }
     const tokens = {
