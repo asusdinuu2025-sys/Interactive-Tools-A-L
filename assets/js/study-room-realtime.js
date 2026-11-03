@@ -26,7 +26,7 @@
   const dailyTab = $('dailyBoardTab');
   const weeklyTab = $('weeklyBoardTab');
   let client, userId = null, member = null, rows = [], heartbeatInterval = null, uiInterval = null, rankRefreshInterval = null;
-  let heartbeatRetryTimer = null, heartbeatPromise = null, presenceController = null;
+  let heartbeatRetryTimer = null, heartbeatPromise = null, presenceController = null, hadActiveSession = false;
 
   let accessToken = null;
 
@@ -85,7 +85,7 @@
   const compact = seconds => fmt(seconds);
   const profileDuration = seconds => { const total=Math.max(0,Math.floor(Number(seconds)||0)); const hours=Math.floor(total/3600), minutes=Math.floor(total%3600/60); return hours ? hours+"h"+(minutes ? " "+minutes+"m" : "") : minutes+"m"; };
   const startOfDay = key => new Date(key + 'T00:00:00+05:30').getTime();
-  // Do not cap elapsed time: background tabs can throttle heartbeats, while the server keeps active sessions alive for up to 12 hours.
+  // Present sessions may exceed their target; away sessions are capped server-side at the selected target.
   function heartbeatIsFresh(row) {
     return Boolean(row?.is_studying && row.last_heartbeat_at);
   }
@@ -202,7 +202,11 @@
       targetHours.value = String(Math.floor(targetMinutesTotal / 60));
       targetMinutes.value = String(targetMinutesTotal % 60);
       clearTargetError();
+    } else if (!hasSession && hadActiveSession) {
+      targetHours.value = "";
+      targetMinutes.value = "";
     }
+    hadActiveSession = hasSession;
     join.textContent = "Start";
     pause.textContent = "Pause";
     leave.textContent = "End";
@@ -337,7 +341,7 @@
       } catch (e) {
         console.error('Study Room heartbeat failed', e);
         // One short retry for a transient network failure; the next normal
-        // heartbeat remains on the regular 60-second schedule.
+        // heartbeat remains on the regular 20-second schedule.
         if (!isRetry && !heartbeatRetryTimer) {
           heartbeatRetryTimer = setTimeout(() => {
             heartbeatRetryTimer = null;
@@ -408,7 +412,7 @@
     const today = dayKey(new Date());
     const base = member && (member.session_active || member.is_studying)
       ? Math.max(0, Number(member.session_elapsed_seconds) || 0) : 0;
-    const live = pendingSeconds(member, startOfDay(today));
+    const live = pendingSeconds(member, 0);
     return {
       ready: Boolean(member),
       isStudying: Boolean(member?.is_studying),
@@ -452,7 +456,6 @@
       client.auth.onAuthStateChange((_event, session) => {
         accessToken = session?.access_token || null;
       });
-      startRoomPagePresenceLifecycle();
       const profile = await account.getProfile(true);
       if (!isProfileComplete(profile)) {
         join.disabled = true; pause.disabled = true; leave.disabled = true;
