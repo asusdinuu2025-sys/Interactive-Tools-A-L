@@ -486,3 +486,49 @@ body:has(#studylab-auth-gateway:not([hidden])) {
 @media(prefers-reduced-motion:reduce) {
   #studylab-auth-gateway .formula {animation:none}
 }
+
+
+/* Desktop welcome layout: restore the fuller sign-in card proportions while
+   keeping the entire experience fitted to the viewport. Mobile sizing above
+   remains intentionally unchanged. */
+@media (min-width:851px) {
+  #studylab-auth-gateway {padding:clamp(12px,2vh,24px) clamp(28px,4vw,60px)}
+  #studylab-auth-gateway .auth-layout {
+    width:min(1280px,100%);
+    grid-template-columns:minmax(0,1fr) minmax(390px,490px);
+    gap:clamp(42px,6vw,92px);
+  }
+  #studylab-auth-gateway .auth-story-copy {padding:clamp(16px,2.5vh,30px) 0}
+  #studylab-auth-gateway .auth-story h1 {font-size:clamp(42px,4.8vw,68px)}
+  #studylab-auth-gateway .auth-story-description {font-size:clamp(13px,1.05vw,15px);line-height:1.75}
+  #studylab-auth-gateway .auth-stats {gap:14px;margin-top:clamp(16px,2.4vh,26px)}
+  #studylab-auth-gateway .auth-stat {padding:14px 18px}
+  #studylab-auth-gateway .auth-stat strong {font-size:clamp(25px,2.1vw,31px)}
+  #studylab-auth-gateway .auth-stat span {font-size:11px}
+  #studylab-auth-gateway .auth-panel {
+    width:100%;
+    padding:clamp(30px,3vw,40px);
+    border-radius:30px;
+  }
+  #studylab-auth-gateway .auth-panel-brand {margin-bottom:clamp(22px,2.8vh,32px)}
+  #studylab-auth-gateway .auth-screen h2 {font-size:clamp(27px,2.4vw,33px)}
+  #studylab-auth-gateway .auth-desc {margin:11px 0 21px;font-size:14px}
+  #studylab-auth-gateway .auth-sinhala {font-size:12px;margin-bottom:22px}
+  #studylab-auth-gateway .auth-options {gap:11px}
+  #studylab-auth-gateway .auth-option {min-height:70px;padding:13px 15px}
+  #studylab-auth-gateway .auth-option-icon {width:42px;height:42px;flex-basis:42px}
+  #studylab-auth-gateway .auth-option b {font-size:14px}
+  #studylab-auth-gateway .auth-option small {font-size:11px}
+  #studylab-auth-gateway .auth-or {margin:19px 0 10px}
+  #studylab-auth-gateway .auth-guest {min-height:43px;padding:10px 14px}
+  #studylab-auth-gateway .auth-note {margin-top:7px;font-size:10px}
+  #studylab-auth-gateway .auth-footer {margin-top:16px}
+}
+@media (min-width:851px) and (max-height:760px) {
+  #studylab-auth-gateway .auth-panel {padding:22px 30px}
+  #studylab-auth-gateway .auth-panel-brand {margin-bottom:14px}
+  #studylab-auth-gateway .auth-sinhala {margin-bottom:12px}
+  #studylab-auth-gateway .auth-option {min-height:58px}
+  #studylab-auth-gateway .auth-or {margin:10px 0 6px}
+  #studylab-auth-gateway .auth-footer {margin-top:9px}
+}
