@@ -14,7 +14,7 @@
     let syncTimer = null;
     let noActiveSince = null;
     let serverPresence = null;
-    let pendingPresence = null;
+    let transitionChain = Promise.resolve();
     let lastPulseAt = 0;
     let stopped = false;
 
@@ -86,17 +86,17 @@
       return found;
     }
 
-    async function setServerPresence(present, changedAt) {
-      if (stopped || pendingPresence === present || serverPresence === present) return;
-      pendingPresence = present;
-      try {
-        await onPresenceChange(present, changedAt || Date.now());
-        serverPresence = present;
-      } catch (error) {
-        console.warn("Could not update Study Room presence", error);
-      } finally {
-        pendingPresence = null;
-      }
+    function setServerPresence(present, changedAt) {
+      transitionChain = transitionChain.then(async () => {
+        if (stopped || serverPresence === present) return;
+        try {
+          await onPresenceChange(present, changedAt || Date.now());
+          serverPresence = present;
+        } catch (error) {
+          console.warn("Could not update Study Room presence", error);
+        }
+      });
+      return transitionChain;
     }
 
     function pulse() {
