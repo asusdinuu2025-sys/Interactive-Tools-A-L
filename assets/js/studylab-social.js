@@ -73,6 +73,16 @@
   const imagePreview = form.querySelector(".sl-feed-image-preview");
   const collapseComposer = form.querySelector(".sl-feed-compose-collapse");
   const formatToolbar = form.querySelector(".sl-feed-format-toolbar");
+  const phoneFeedMedia = window.matchMedia("(max-width: 600px)");
+  const createTrigger = form.querySelector(".sl-feed-create-trigger");
+  const createTriggerLabel = createTrigger?.querySelector("span:last-child");
+  function syncPhoneComposerLabel() {
+    const phoneLabel = "Click here to Upload / Create posts";
+    if (createTriggerLabel) createTriggerLabel.textContent = phoneFeedMedia.matches ? phoneLabel : "Click here to bigger view";
+    createTrigger?.setAttribute("aria-label", phoneFeedMedia.matches ? phoneLabel : "Click here to bigger view");
+  }
+  syncPhoneComposerLabel();
+  phoneFeedMedia.addEventListener?.("change", syncPhoneComposerLabel);
   let previewUrls = [];
 
   function setComposerExpanded(expanded) {
@@ -1043,11 +1053,12 @@
     }
   }
 
-  const phoneFeedMedia = window.matchMedia("(max-width: 600px)");
   let previousFeedScrollTop = stream.scrollTop;
   stream.addEventListener("scroll", () => {
     const currentFeedScrollTop = stream.scrollTop;
-    if (!phoneFeedMedia.matches || panel.dataset.size !== "full" || form.contains(document.activeElement)) {
+    // Phones keep the compact Upload/Create trigger visible while the feed scrolls.
+    // The full composer still opens only when the trigger is tapped.
+    if (phoneFeedMedia.matches || panel.dataset.size !== "full" || form.contains(document.activeElement)) {
       panel.classList.remove("is-feed-scrolled");
       previousFeedScrollTop = currentFeedScrollTop;
       return;
