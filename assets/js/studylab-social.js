@@ -98,8 +98,34 @@
       "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
     })[char]);
   }
+  const RICH_TEXT_PREFIX = "sl-rich-html-v1:";
+  function sanitizeRichHtml(value) {
+    const parsed = new DOMParser().parseFromString("<body>" + value + "</body>", "text/html");
+    const allowed = new Set(["STRONG", "B", "EM", "I", "U", "S", "STRIKE", "DEL", "BR", "A"]);
+    function clean(node) {
+      if (node.nodeType === Node.TEXT_NODE) return escapeHTML(node.nodeValue || "");
+      if (node.nodeType !== Node.ELEMENT_NODE) return "";
+      const tag = node.tagName;
+      const inner = [...node.childNodes].map(clean).join("");
+      if (!allowed.has(tag)) return inner;
+      if (tag === "BR") return "<br>";
+      if (tag === "A") {
+        const rawHref = node.getAttribute("href") || "";
+        try {
+          const url = new URL(rawHref, window.location.href);
+          if (!["http:", "https:"].includes(url.protocol)) return inner;
+          return '<a href="' + escapeHTML(url.href) + '" target="_blank" rel="noopener noreferrer">' + inner + "</a>";
+        } catch (_) { return inner; }
+      }
+      const outputTag = tag === "B" ? "strong" : tag === "I" ? "em" : ["STRIKE", "DEL"].includes(tag) ? "s" : tag.toLowerCase();
+      return "<" + outputTag + ">" + inner + "</" + outputTag + ">";
+    }
+    return [...parsed.body.childNodes].map(clean).join("");
+  }
   function renderFormattedText(value) {
-    let safe = escapeHTML(value || "");
+    const raw = String(value || "");
+    if (raw.startsWith(RICH_TEXT_PREFIX)) return sanitizeRichHtml(raw.slice(RICH_TEXT_PREFIX.length));
+    let safe = escapeHTML(raw);
     safe = safe.replace(/\[([^\]]{1,200})\]\((https?:\/\/[^\s)]+)\)/g,
       '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
     safe = safe.replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>");
@@ -110,24 +136,28 @@
   }
   function serializeEditor(root) {
     function visit(node) {
-      if (node.nodeType === Node.TEXT_NODE) return node.nodeValue || "";
+      if (node.nodeType === Node.TEXT_NODE) return escapeHTML(node.nodeValue || "");
       if (node.nodeType !== Node.ELEMENT_NODE) return "";
       const tag = node.tagName.toLowerCase();
       const inner = [...node.childNodes].map(visit).join("");
-      if (tag === "br") return "\n";
-      if (tag === "strong" || tag === "b") return "**" + inner + "**";
-      if (tag === "em" || tag === "i") return "*" + inner + "*";
-      if (tag === "u") return "[u]" + inner + "[/u]";
-      if (tag === "s" || tag === "strike" || tag === "del") return "~~" + inner + "~~";
+      if (tag === "br") return "<br>";
+      if (tag === "strong" || tag === "b") return "<strong>" + inner + "</strong>";
+      if (tag === "em" || tag === "i") return "<em>" + inner + "</em>";
+      if (tag === "u") return "<u>" + inner + "</u>";
+      if (tag === "s" || tag === "strike" || tag === "del") return "<s>" + inner + "</s>";
       if (tag === "a") {
         const href = node.getAttribute("href") || "";
-        if (/^https?:\/\//i.test(href)) return "[" + inner + "](" + href + ")";
+        try {
+          const url = new URL(href, window.location.href);
+          if (["http:", "https:"].includes(url.protocol)) return '<a href="' + escapeHTML(url.href) + '">' + inner + "</a>";
+        } catch (_) {}
         return inner;
       }
-      if (tag === "div" || tag === "p") return inner + "\n";
+      if (tag === "div" || tag === "p") return inner + "<br>";
       return inner;
     }
-    return [...root.childNodes].map(visit).join("").replace(/\n+$/,"").replace(/\u00a0/g," ");
+    const html = [...root.childNodes].map(visit).join("").replace(/(?:<br>)+$/g, "").replace(/\u00a0/g, " ");
+    return RICH_TEXT_PREFIX + html;
   }
   function selectionCharacterOffset(root) {
     const selection = window.getSelection();
@@ -264,27 +294,68 @@
     wordCount.classList.toggle("is-over-limit", count > MAX_POST_WORDS);
   }
   updateWordCount();
-  formatToolbar.addEventListener("mousedown", event => event.preventDefault());
+  let savedEditorRange = null;
+  function saveEditorSelection() {
+    const selection = window.getSelection();
+    if (selection?.rangeCount && editor.contains(selection.anchorNode) && editor.contains(selection.focusNode)) {
+      savedEditorRange = selection.getRangeAt(0).cloneRange();
+    }
+  }
+  function restoreEditorSelection() {
+    editor.focus({ preventScroll: true });
+    if (!savedEditorRange) return;
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(savedEditorRange);
+  }
+  function updateFormatToolbarState() {
+    const commands = { bold:"bold", italic:"italic", underline:"underline", strike:"strikeThrough" };
+    for (const [format, command] of Object.entries(commands)) {
+      const button = formatToolbar.querySelector('[data-format="' + format + '"]');
+      if (!button) continue;
+      let active = false;
+      try { active = document.queryCommandState(command); } catch (_) {}
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-pressed", String(active));
+    }
+  }
+  formatToolbar.addEventListener("pointerdown", saveEditorSelection);
+  formatToolbar.addEventListener("mousedown", event => {
+    saveEditorSelection();
+    event.preventDefault();
+  });
+  document.addEventListener("selectionchange", () => {
+    const selection = window.getSelection();
+    if (selection?.rangeCount && editor.contains(selection.anchorNode)) {
+      saveEditorSelection();
+      updateFormatToolbarState();
+    }
+  });
+  editor.addEventListener("keyup", updateFormatToolbarState);
+  editor.addEventListener("mouseup", updateFormatToolbarState);
   formatToolbar.addEventListener("click", event => {
     const button = event.target.closest("[data-format]");
     if (!button || busy) return;
     const format = button.dataset.format;
-    editor.focus();
+    restoreEditorSelection();
     if (format === "link") {
       const selected = window.getSelection()?.toString() || "";
       const rawUrl = window.prompt("Paste a link (https://…)");
-      if (!rawUrl) return;
+      if (!rawUrl) { updateFormatToolbarState(); return; }
       let url;
       try { url = new URL(rawUrl.trim()); } catch (_) { setStatus("Enter a valid https:// or http:// link.", true); return; }
       if (!["https:", "http:"].includes(url.protocol)) { setStatus("Only http:// and https:// links are supported.", true); return; }
       if (!selected) document.execCommand("insertText", false, url.href);
       else document.execCommand("createLink", false, url.href);
       linkifyEditor();
+      saveEditorSelection();
+      updateFormatToolbarState();
       return;
     }
     const commands = { bold:"bold", italic:"italic", underline:"underline", strike:"strikeThrough" };
     if (commands[format]) document.execCommand(commands[format], false, null);
-    editor.focus();
+    saveEditorSelection();
+    updateFormatToolbarState();
   });
   editor.addEventListener("input", () => {
     linkifyEditor();
@@ -296,6 +367,8 @@
     } else {
       setStatus("");
     }
+    saveEditorSelection();
+    updateFormatToolbarState();
   });
   editor.addEventListener("paste", event => {
     event.preventDefault();
