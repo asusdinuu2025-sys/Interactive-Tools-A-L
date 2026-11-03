@@ -147,6 +147,13 @@
   }
   function linkifyEditor() {
     const caret = selectionCharacterOffset(editor);
+    editor.querySelectorAll('a[data-auto-link="true"]').forEach(anchor => {
+      const current = anchor.textContent.trim().replace(/[),.!?;:]+$/,"");
+      if (/^https?:\/\//i.test(current)) {
+        anchor.href = current;
+        anchor.textContent = current;
+      }
+    });
     const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT, {
       acceptNode(node) { return node.parentElement?.closest("a") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT; }
     });
@@ -170,6 +177,7 @@
         anchor.textContent = raw;
         anchor.target = "_blank";
         anchor.rel = "noopener noreferrer";
+        anchor.dataset.autoLink = "true";
         fragment.append(anchor, document.createTextNode(trailing));
         cursor = match.index + match[0].length;
       }
