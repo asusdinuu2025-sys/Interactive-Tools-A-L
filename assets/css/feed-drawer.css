@@ -2133,3 +2133,81 @@ html[data-theme="light"] .sl-feed-compose .sl-feed-editor a { color:#147bb8; }
   .sl-feed-compose .sl-feed-compose-foot { gap:8px; }
   .sl-feed-compose .sl-feed-word-count { margin-left:0; }
 }
+
+
+/* Phone-only Social composer: keep a single Upload/Create entry above the feed.
+   The expanded editor remains the existing tap-to-open overlay. */
+@media (max-width: 600px) {
+  .sl-feed-panel[data-size="full"] .sl-feed-left-rail {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+    padding: 0 2px !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+  .sl-feed-panel[data-size="full"] .sl-feed-left-rail > :not(.sl-feed-compose) {
+    display: none !important;
+  }
+  .sl-feed-panel[data-size="full"] .sl-feed-left-rail .sl-feed-compose:not(.is-expanded) {
+    display: block !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+  .sl-feed-panel[data-size="full"] .sl-feed-left-rail .sl-feed-compose:not(.is-expanded) > :not(.sl-feed-create-trigger) {
+    display: none !important;
+  }
+  .sl-feed-panel[data-size="full"] .sl-feed-left-rail .sl-feed-compose:not(.is-expanded) .sl-feed-create-trigger {
+    display: flex !important;
+    width: 100% !important;
+    min-height: 48px !important;
+    margin: 0 !important;
+  }
+  /* Older scroll-collapse state must never hide the phone's upload entry. */
+  .sl-feed-panel[data-size="full"].is-feed-scrolled > .sl-feed-stage {
+    gap: 10px !important;
+  }
+  .sl-feed-panel[data-size="full"].is-feed-scrolled .sl-feed-left-rail {
+    flex: 0 0 auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    padding: 0 2px !important;
+    margin: 0 !important;
+    opacity: 1 !important;
+    overflow: visible !important;
+    pointer-events: auto !important;
+  }
+}
+
+/* Nirmala UI is used when installed; platform fonts remain safe fallbacks. */
+.sl-feed-panel .sl-feed-post {
+  font-family: "Nirmala UI", "Segoe UI", Arial, sans-serif;
+}
+
+
+/* Clear, persistent active states for rich-text formatting controls. */
+.sl-feed-format-toolbar button.is-active,
+.sl-feed-format-toolbar button[aria-pressed="true"] {
+  color:#eaf8ff;
+  background:rgba(55,165,225,.24);
+  border-color:rgba(91,190,255,.72);
+  box-shadow:inset 0 0 0 1px rgba(91,190,255,.16),0 0 0 2px rgba(91,190,255,.08);
+}
+html[data-theme="light"] .sl-feed-format-toolbar button.is-active,
+html[data-theme="light"] .sl-feed-format-toolbar button[aria-pressed="true"] {
+  color:#145c83;
+  background:rgba(55,155,210,.16);
+  border-color:rgba(35,130,185,.58);
+  box-shadow:inset 0 0 0 1px rgba(35,130,185,.12);
+}
