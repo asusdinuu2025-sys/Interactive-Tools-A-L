@@ -2,7 +2,7 @@ const crypto = require("node:crypto");
 
 const GROQ_MODEL = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
-const GROQ_API_KEY = process.env.STUDYLAB_AI_GROQ_API_KEY || process.env.GROQ_API_KEY;
+const GROQ_API_KEY = process.env.STUDYLAB_AI_GROQ || process.env.STUDYLAB_AI_GROQ_API_KEY || process.env.GROQ_API_KEY;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.STUDYLABAI_GEMINI_API_KEY;
 
 /*
