@@ -31,9 +31,16 @@ function parseTarget(hours, minutes) {
   if (hours === "" || minutes === "" || hours == null || minutes == null) return null;
   const h = Number(hours), m = Number(minutes);
   if (!Number.isInteger(h) || !Number.isInteger(m) ||
-      h < 0 || h > 12 || m < 0 || m > 59 || (h === 12 && m > 0)) return null;
+      h < 0 || h > 10 || m < 0 || m > 59) return null;
   const seconds = (h * 60 + m) * 60;
-  return seconds >= 60 && seconds <= 43200 ? seconds : null;
+  return seconds >= 60 && seconds <= 39540 ? seconds : null;
+}
+
+function shouldShowAttendanceCard(row) {
+  return Boolean(
+    (row?.is_studying && row?.last_heartbeat_at) ||
+    (row?.session_active && row?.session_presence_state === "away")
+  );
 }
 
 function awayCredit(elapsedBeforeAway, targetSeconds, awaySeconds) {
@@ -48,9 +55,31 @@ function discardUnconfirmed(preservedWeekSeconds, pendingTodaySeconds) {
 assert.equal(parseTarget("", ""), null, "a target must be explicitly selected");
 assert.equal(parseTarget("0", "0"), null, "zero target is invalid");
 assert.equal(parseTarget("0", "1"), 60, "one minute is valid");
-assert.equal(parseTarget("12", "0"), 43200, "12 hours is the maximum");
-assert.equal(parseTarget("12", "1"), null, "targets above 12 hours are rejected");
+assert.equal(parseTarget("10", "59"), 39540, "10 hours 59 minutes is the maximum");
+assert.equal(parseTarget("11", "0"), null, "targets above 10 hours 59 minutes are rejected");
+assert.equal(parseTarget("10", "60"), null, "minutes must be 0 through 59");
 assert.equal(parseTarget("1", "60"), null, "minutes must be 0 through 59");
+
+assert.equal(
+  shouldShowAttendanceCard({ is_studying: false, session_active: true, session_presence_state: "away", last_heartbeat_at: "2026-11-03T06:00:00Z" }),
+  true,
+  "away students remain visible while their session is active"
+);
+assert.equal(
+  shouldShowAttendanceCard({ is_studying: false, session_active: true, session_presence_state: "paused", last_heartbeat_at: null }),
+  false,
+  "manually paused students are removed from live attendance"
+);
+assert.equal(
+  shouldShowAttendanceCard({ is_studying: false, session_active: true, session_presence_state: "auto_paused", last_heartbeat_at: null }),
+  false,
+  "students are removed after their away target is reached and auto-paused"
+);
+assert.equal(
+  shouldShowAttendanceCard({ is_studying: false, session_active: false, session_presence_state: "paused", last_heartbeat_at: null }),
+  false,
+  "students are removed after ending or midnight expiry"
+);
 
 const fourHourOverMidnight = splitAtLocalMidnight(
   "2026-11-03T22:00:00+05:30",
@@ -108,4 +137,4 @@ assert.equal(graceSeconds, 60, "visibility grace is 60 seconds");
 assert.equal(heartbeatSeconds, 20, "visible heartbeat interval is 20 seconds");
 assert.equal(serverStaleSeconds, graceSeconds + heartbeatSeconds, "server fallback allows the 60-second grace plus one heartbeat interval");
 
-console.log("Study Room target and presence logic tests passed (16 assertions).");
+console.log("Study Room target, attendance presence, and midnight logic tests passed.");
