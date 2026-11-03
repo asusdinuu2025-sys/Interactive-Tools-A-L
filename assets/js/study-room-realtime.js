@@ -198,12 +198,25 @@
     targetMinutes.disabled = hasSession;
     if (hasSession && Number(row?.session_target_seconds) > 0) {
       const targetMinutesTotal = Math.floor(Number(row.session_target_seconds) / 60);
-      targetHours.value = String(Math.floor(targetMinutesTotal / 60));
+      const hoursValue = String(Math.floor(targetMinutesTotal / 60));
+      const legacyOption = targetHours.querySelector('option[data-legacy-target="true"]');
+      if (Number(hoursValue) > 10) {
+        const option = legacyOption || document.createElement("option");
+        option.value = hoursValue;
+        option.textContent = hoursValue + " (existing session)";
+        option.disabled = true;
+        option.dataset.legacyTarget = "true";
+        if (!legacyOption) targetHours.append(option);
+      } else if (legacyOption) {
+        legacyOption.remove();
+      }
+      targetHours.value = hoursValue;
       targetMinutes.value = String(targetMinutesTotal % 60);
       clearTargetError();
     } else if (!hasSession && hadActiveSession) {
       targetHours.value = "";
       targetMinutes.value = "";
+      targetHours.querySelector('option[data-legacy-target="true"]')?.remove();
     }
     hadActiveSession = hasSession;
     join.textContent = "Start";
@@ -367,10 +380,11 @@
       return;
     }
 
-    const target = member?.session_active
+    const hasExistingSession = Boolean(member?.session_active);
+    const target = hasExistingSession
       ? Number(member.session_target_seconds) || selectedTargetSeconds()
       : selectedTargetSeconds();
-    if (!target || target < 60 || target > 39540) {
+    if (!target || target < 60 || (!hasExistingSession && target > 39540)) {
       showTargetError();
       return;
     }
@@ -384,7 +398,9 @@
 
     try {
       await callRpc("study_room_set_subject", { p_subject: subject.value });
-      await callRpc("study_room_start", { p_target_seconds: target });
+      // The server preserves an existing session's original target on resume.
+      // Pass a valid new-target value so legacy 12-hour sessions remain resumable.
+      await callRpc("study_room_start", { p_target_seconds: hasExistingSession ? Math.min(target, 39540) : target });
       await loadRows();
       await heartbeat();
       say("Your study session has started. If you leave the Study Room, it continues until your target and then pauses.");
