@@ -197,11 +197,6 @@ BEGIN
         THEN greatest(0, coalesce(current_row.week_seconds, 0) - pending)
       ELSE coalesce(current_row.week_seconds, 0)
     END,
-    session_week_seconds = CASE
-      WHEN current_row.session_week_start = current_row.session_away_pending_week_start
-        THEN greatest(0, coalesce(current_row.session_week_seconds, 0) - pending)
-      ELSE coalesce(current_row.session_week_seconds, 0)
-    END,
     is_studying = false,
     session_active = false,
     session_presence_state = 'paused',
