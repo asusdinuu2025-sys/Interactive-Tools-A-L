@@ -21,9 +21,21 @@
   if (!form || !textarea || !postButton || !stream) return;
 
   form.innerHTML = `
-    <button class="sl-feed-create-trigger" type="button" aria-label="Start creating a post">
+    <button class="sl-feed-create-trigger" type="button" aria-label="Expand post composer">
       <span aria-hidden="true">✎</span><span>Share something with students…</span>
     </button>
+    <div class="sl-feed-compose-expanded-head">
+      <strong>Create a post</strong>
+      <button class="sl-feed-compose-collapse" type="button" aria-label="Close expanded composer">×</button>
+    </div>
+    <div class="sl-feed-format-toolbar" role="toolbar" aria-label="Text formatting">
+      <button type="button" data-format="bold" title="Bold" aria-label="Bold"><strong>B</strong></button>
+      <button type="button" data-format="italic" title="Italic" aria-label="Italic"><em>I</em></button>
+      <button type="button" data-format="underline" title="Underline" aria-label="Underline"><u>U</u></button>
+      <button type="button" data-format="strike" title="Strikethrough" aria-label="Strikethrough"><s>S</s></button>
+      <span class="sl-feed-format-divider" aria-hidden="true"></span>
+      <button type="button" data-format="link" title="Insert link" aria-label="Insert link">↗</button>
+    </div>
     <textarea maxlength="2000" placeholder="Share something with other students..." aria-label="Write a post"></textarea>
     <div class="sl-feed-file-row">
       <label class="sl-feed-file-button">
@@ -44,7 +56,65 @@
   const fileCount = form.querySelector(".sl-feed-file-count");
   const status = form.querySelector(".sl-feed-compose-status");
   const imagePreview = form.querySelector(".sl-feed-image-preview");
+  const collapseComposer = form.querySelector(".sl-feed-compose-collapse");
+  const formatToolbar = form.querySelector(".sl-feed-format-toolbar");
   let previewUrls = [];
+
+  function setComposerExpanded(expanded) {
+    form.classList.toggle("is-expanded", expanded);
+    form.setAttribute("aria-label", expanded ? "Expanded post composer" : "Create a feed post");
+    if (expanded) {
+      panel.classList.remove("is-feed-scrolled");
+      textarea.focus({ preventScroll: true });
+    }
+  }
+  function insertFormatting(before, after = before) {
+    const start = textarea.selectionStart ?? textarea.value.length;
+    const end = textarea.selectionEnd ?? start;
+    const selected = textarea.value.slice(start, end);
+    const replacement = before + (selected || "text") + after;
+    textarea.setRangeText(replacement, start, end, "select");
+    textarea.focus();
+    textarea.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+  function renderFormattedText(value) {
+    const escapeHTML = text => String(text).replace(/[&<>"']/g, char => ({
+      "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+    })[char]);
+    let safe = escapeHTML(value || "");
+    safe = safe.replace(/\[([^\]]{1,200})\]\((https?:\/\/[^\s)]+)\)/g,
+      '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+    safe = safe.replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>");
+    safe = safe.replace(/\*([^*\n]+)\*/g, "<em>$1</em>");
+    safe = safe.replace(/\[u\]([^\n]+?)\[\/u\]/g, "<u>$1</u>");
+    safe = safe.replace(/~~([^~\n]+)~~/g, "<s>$1</s>");
+    return safe.replace(/\n/g, "<br>");
+  }
+  formatToolbar.addEventListener("click", event => {
+    const button = event.target.closest("[data-format]");
+    if (!button || busy) return;
+    const format = button.dataset.format;
+    if (format === "link") {
+      const selected = textarea.value.slice(textarea.selectionStart, textarea.selectionEnd);
+      const rawUrl = window.prompt("Paste a link (https://…)"); 
+      if (!rawUrl) return;
+      let url;
+      try { url = new URL(rawUrl.trim()); } catch (_) { setStatus("Enter a valid https:// or http:// link.", true); return; }
+      if (!["https:", "http:"].includes(url.protocol)) { setStatus("Only http:// and https:// links are supported.", true); return; }
+      const label = selected || "link text";
+      insertFormatting("[", "](" + url.href + ")");
+      if (!selected) {
+        const cursor = textarea.selectionStart;
+        textarea.setRangeText(label, cursor - ("](" + url.href + ")").length - 1, cursor - ("](" + url.href + ")").length - 1, "end");
+      }
+      return;
+    }
+    const tokens = {
+      bold: ["**","**"], italic: ["*","*"],
+      underline: ["[u]","[/u]"], strike: ["~~","~~"]
+    }[format];
+    if (tokens) insertFormatting(tokens[0], tokens[1]);
+  });
   let busy = false;
   let isAdmin = false;
   let adminRefreshAttempted = false;
@@ -349,7 +419,8 @@
     });
 
     if (post.body) {
-      const body = make("p", "sl-feed-post-body", post.body);
+      const body = make("p", "sl-feed-post-body");
+      body.innerHTML = renderFormattedText(post.body);
       card.append(body);
       if (post.body.length > 260) {
         body.classList.add("is-collapsed");
@@ -810,11 +881,8 @@
     previousFeedScrollTop = stream.scrollTop;
   });
 
-  form.querySelector(".sl-feed-create-trigger")?.addEventListener("click",() => {
-    panel.classList.remove("is-feed-scrolled");
-    textarea.focus();
-    textarea.scrollIntoView({behavior:"smooth",block:"nearest"});
-  });
+  form.querySelector(".sl-feed-create-trigger")?.addEventListener("click",() => setComposerExpanded(true));
+  collapseComposer?.addEventListener("click",() => setComposerExpanded(false));
   form.addEventListener("submit", async event => {
     event.preventDefault();
     if (busy) return;
@@ -824,6 +892,7 @@
       const files = [...(input.files || [])];
       validFiles(files);
       const body = textarea.value.trim();
+      if (body.length > 2000) throw new Error("Your formatted post is too long. Keep it under 2,000 characters.");
       if (!body && !files.length) throw new Error("Write something or attach a photo.");
       setBusy(true);
       setStatus(files.length ? "Preparing your post…" : "Publishing your post…");
@@ -871,6 +940,7 @@
         throw publishError || new Error("Your post could not be published. Please try again.");
       }
       textarea.value = "";
+      setComposerExpanded(false);
       input.value = "";
       fileCount.textContent = "No photos selected";
       renderImagePreviews([]);
