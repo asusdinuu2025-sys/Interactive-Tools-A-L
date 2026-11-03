@@ -1791,10 +1791,13 @@
         type="button"
         class="profile-button"
         id="profileButton"
-        aria-haspopup="dialog"
-        aria-controls="profileModal"
+        aria-haspopup="menu"
+        aria-controls="profileAccountMenu"
+        aria-expanded="false"
+        aria-label="Open StudyLab account options"
+        title="Open StudyLab account options"
       >
-        <span class="header-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><span>Create Profile</span>
+        <span class="header-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><span>Account</span><span class="profile-menu-caret" aria-hidden="true">⌄</span>
       </button>
 
       <button
@@ -2683,8 +2686,8 @@
   <!-- Supabase must load before StudyLab cloud features. -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/studylab-account.js"></script>
-  <script src="assets/js/studylab-auth-gateway.js?v=20261103-google-auth-v3"></script>
-  <script src="assets/js/profile.js?v=20261028-availability-colors-v1"></script>
+  <script src="assets/js/studylab-auth-gateway.js?v=20261103-account-menu-v1"></script>
+  <script src="assets/js/profile.js?v=20261103-account-menu-v1"></script>
   <script src="assets/js/main.js?v=20261101-shared-room-mode"></script>
   <script src="assets/js/study-dashboard.js"></script>
   <script src="assets/js/student-milestone.js"></script>
