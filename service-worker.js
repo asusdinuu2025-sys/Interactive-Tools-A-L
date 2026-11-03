@@ -1,4 +1,4 @@
-/* StudyLab PWA service worker v1.0.2.
+/* StudyLab PWA service worker v7.4.
    Network-only: every same-origin page request goes to the live site.
    Cross-origin Supabase REST/Auth/Realtime traffic is left entirely to the browser. */
 self.addEventListener("install", event => {

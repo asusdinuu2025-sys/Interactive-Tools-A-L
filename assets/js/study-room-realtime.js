@@ -9,7 +9,9 @@
   const yourRank = $('yourRank');
   const status = $('yourStatus');
   const subject = $('studySubject');
-  const goal = $('dailyGoal');
+  const targetHours = $('targetHours');
+  const targetMinutes = $('targetMinutes');
+  const targetHint = $('targetTimeHint');
   const timer = $('sessionTimer');
   const label = $('sessionLabel');
   const panel = $('sessionPanel');
@@ -24,175 +26,45 @@
   const dailyTab = $('dailyBoardTab');
   const weeklyTab = $('weeklyBoardTab');
   let client, userId = null, member = null, rows = [], heartbeatInterval = null, uiInterval = null, rankRefreshInterval = null;
-  let heartbeatRetryTimer = null, heartbeatPromise = null, unloadPauseRequest = null, unloadPauseRequested = false;
+  let heartbeatRetryTimer = null, heartbeatPromise = null, presenceController = null, hadActiveSession = false;
 
-  // Keep a per-user list of open Study Room pages so closing one tab does not
-  // pause a session that is still open in another tab or the detached timer.
-  const ROOM_PAGE_PRESENCE_TTL_MS = 12 * 60 * 60 * 1000;
-  let roomPagePresencePrefix = null;
-  let roomPagePresenceKey = null;
-  let roomPagePresenceInterval = null;
   let accessToken = null;
-  let roomPagePresenceStorageAvailable = true;
 
-  function registerRoomPagePresence() {
-    if (!userId) return;
-    roomPagePresencePrefix = "studylab:study-room-open:" + userId + ":";
-    if (!roomPagePresenceKey) {
-      const pageId = window.crypto?.randomUUID?.() ||
-        (Date.now() + "-" + Math.random().toString(36).slice(2));
-      roomPagePresenceKey = roomPagePresencePrefix + pageId;
-    }
-    try {
-      localStorage.setItem(roomPagePresenceKey, String(Date.now()));
-      roomPagePresenceStorageAvailable = true;
-    } catch (error) {
-      roomPagePresenceStorageAvailable = false;
-      console.warn("Study Room page-presence storage is unavailable", error);
-    }
-  }
-
-  function hasAnotherRoomPageOpen() {
-    // If storage cannot be checked safely, do not risk pausing another open page.
-    if (!roomPagePresencePrefix || !roomPagePresenceStorageAvailable) return true;
-    const cutoff = Date.now() - ROOM_PAGE_PRESENCE_TTL_MS;
-    let anotherPageOpen = false;
-    try {
-      for (let index = localStorage.length - 1; index >= 0; index--) {
-        const key = localStorage.key(index);
-        if (!key || !key.startsWith(roomPagePresencePrefix) || key === roomPagePresenceKey) continue;
-        const lastSeen = Number(localStorage.getItem(key));
-        if (!Number.isFinite(lastSeen) || lastSeen < cutoff) {
-          localStorage.removeItem(key);
-        } else {
-          anotherPageOpen = true;
-        }
-      }
-    } catch (error) {
-      roomPagePresenceStorageAvailable = false;
-      console.warn("Could not inspect other Study Room pages", error);
-      return true;
-    }
-    return anotherPageOpen;
-  }
-
-  function removeRoomPagePresence() {
-    if (!roomPagePresenceKey) return;
-    try { localStorage.removeItem(roomPagePresenceKey); }
-    catch (_) { roomPagePresenceStorageAvailable = false; }
-  }
-
-  function sendUnloadPause() {
-    if (unloadPauseRequest) return unloadPauseRequest;
+  function sendUnloadPresenceAway(transitionAt) {
     let url = String(window.STUDYLAB_SUPABASE_URL || "");
     while (url.endsWith("/")) url = url.slice(0, -1);
     const apiKey = window.STUDYLAB_SUPABASE_ANON_KEY;
-    if (!url || !apiKey || !accessToken) return Promise.resolve(false);
-    // A keepalive fetch can continue after the document starts unloading.
-    // The RPC is intentionally tiny and authenticates with the student's own token.
+    if (!url || !apiKey || !accessToken) return;
     try {
-      unloadPauseRequest = window.fetch(url + "/rest/v1/rpc/study_room_pause", {
+      window.fetch(url + "/rest/v1/rpc/study_room_presence_at", {
         method: "POST",
         headers: {
           apikey: apiKey,
           Authorization: "Bearer " + accessToken,
           "Content-Type": "application/json"
         },
-        body: "{}",
+        body: JSON.stringify({ p_is_present: false, p_transition_at: new Date(transitionAt || Date.now()).toISOString() }),
         keepalive: true,
         credentials: "omit"
-      }).then(response => {
-        if (!response.ok) throw new Error("Pause request returned HTTP " + response.status);
-        return true;
-      }).catch(error => {
-        console.warn("Study Room close-pause request failed", error);
-        return false;
-      });
-      return unloadPauseRequest;
+      }).catch(error => console.warn("Study Room unload presence request failed", error));
     } catch (error) {
-      console.warn("Could not send Study Room close-pause request", error);
-      unloadPauseRequest = Promise.resolve(false);
-      return unloadPauseRequest;
+      console.warn("Could not send Study Room unload presence request", error);
     }
   }
 
-  function applyImmediateLocalPause() {
-    if (!member?.is_studying) return;
-    member = {
-      ...member,
-      is_studying: false,
-      session_active: true,
-      session_started_at: null,
-      last_heartbeat_at: null,
-      updated_at: new Date().toISOString()
-    };
-    rows = rows.map(row => row.user_id === userId ? { ...row, ...member } : row);
-    updateSessionUI(member);
-    updatePersonal();
-    renderPeople();
-    renderBoard();
-  }
-
-  async function resumeAfterCanceledUnload() {
-    if (!unloadPauseRequested || document.visibilityState !== "visible" || !document.hasFocus()) return;
-    unloadPauseRequested = false;
-    registerRoomPagePresence();
-    const pauseWasSaved = await (unloadPauseRequest || Promise.resolve(false));
-    unloadPauseRequest = null;
-    try {
-      await loadRows();
-      // If the user chose Stay, restore the running session only after the pause
-      // request has settled, avoiding a pause/start race at the database.
-      if (pauseWasSaved && member?.session_active && !member?.is_studying) {
-        await callRpc("study_room_start");
+  function startRoomPresenceLifecycle() {
+    if (presenceController || !window.StudyRoomPresence) return;
+    presenceController = window.StudyRoomPresence.start({
+      userId,
+      onPresenceChange: async (present, changedAt) => {
+        if (!client || !userId) return;
+        await callRpc("study_room_presence_at", { p_is_present: present, p_transition_at: new Date(changedAt || Date.now()).toISOString() });
         await loadRows();
-      }
-      say(member?.is_studying
-        ? "You stayed in the Study Room, so your session has resumed."
-        : "Your session is paused. Press Start when you are ready to continue.");
-    } catch (error) {
-      console.warn("Could not restore the Study Room after canceling navigation", error);
-      say("Your session is paused. Press Start to continue.", true);
-    }
-  }
-
-  function pauseWhenLastRoomPageCloses(event) {
-    // A page in the back/forward cache is frozen, not terminated.
-    if (event?.persisted || !roomPagePresenceKey) return;
-    removeRoomPagePresence();
-    if (hasAnotherRoomPageOpen() || !member?.is_studying || unloadPauseRequest) return;
-    applyImmediateLocalPause();
-    sendUnloadPause();
-  }
-
-  function warnBeforeLeavingRoom(event) {
-    if (!roomPagePresenceKey || !member?.is_studying) return;
-    removeRoomPagePresence();
-    if (hasAnotherRoomPageOpen()) return;
-
-    // Pause locally before the browser displays its generic unsaved-changes dialog.
-    // Browsers do not allow custom dialog text or waiting for a network request here.
-    applyImmediateLocalPause();
-    unloadPauseRequested = true;
-    sendUnloadPause();
-    event.preventDefault();
-    event.returnValue = "";
-
-    // If the student chooses Stay, the page becomes active again. Wait for the
-    // keepalive pause to settle before restarting the same session.
-    window.setTimeout(resumeAfterCanceledUnload, 1500);
-  }
-
-  function startRoomPagePresenceLifecycle() {
-    registerRoomPagePresence();
-    if (!roomPagePresenceInterval) {
-      roomPagePresenceInterval = window.setInterval(registerRoomPagePresence, 60000);
-    }
-    window.addEventListener("beforeunload", warnBeforeLeavingRoom);
-    window.addEventListener("pagehide", pauseWhenLastRoomPageCloses);
-    window.addEventListener("pageshow", event => {
-      if (event.persisted) registerRoomPagePresence();
+      },
+      onPulse: heartbeat,
+      onUnloadAway: sendUnloadPresenceAway
     });
+    window.StudyRoomPresenceController = presenceController;
   }
 
   let selectedBoard = 'daily';
@@ -213,14 +85,23 @@
   const compact = seconds => fmt(seconds);
   const profileDuration = seconds => { const total=Math.max(0,Math.floor(Number(seconds)||0)); const hours=Math.floor(total/3600), minutes=Math.floor(total%3600/60); return hours ? hours+"h"+(minutes ? " "+minutes+"m" : "") : minutes+"m"; };
   const startOfDay = key => new Date(key + 'T00:00:00+05:30').getTime();
-  // Do not cap elapsed time: background tabs can throttle heartbeats, while the server keeps active sessions alive for up to 12 hours.
+  // Present sessions may exceed their target; away sessions are capped server-side at the selected target.
   function heartbeatIsFresh(row) {
     return Boolean(row?.is_studying && row.last_heartbeat_at);
   }
   function pendingSeconds(row, boundary) {
-    if (!heartbeatIsFresh(row)) return 0;
+    const present = heartbeatIsFresh(row);
+    const away = Boolean(row?.session_active && row?.session_presence_state === "away" && row?.last_heartbeat_at);
+    if (!present && !away) return 0;
     const heartbeatAt = new Date(row.last_heartbeat_at).getTime();
-    return Math.max(0, Math.floor((Date.now() - Math.max(heartbeatAt, boundary)) / 1000));
+    if (!Number.isFinite(heartbeatAt)) return 0;
+    let elapsed = Math.max(0, Math.floor((Date.now() - Math.max(heartbeatAt, boundary)) / 1000));
+    if (away) {
+      const base = Math.max(0, Number(row.session_elapsed_seconds) || 0);
+      const target = Number(row.session_target_seconds) || 43200;
+      elapsed = Math.min(elapsed, Math.max(0, target - base));
+    }
+    return elapsed;
   }
   function isProfileComplete(p) {
     const phoneDigits = String(p?.phone || "").replace(/\D/g, "");
@@ -247,40 +128,115 @@
     notice.style.borderColor = isError ? 'rgba(255,105,105,.35)' : '';
     notice.style.color = isError ? '#ef4444' : '';
   }
+  function selectedTargetSeconds() {
+    const hoursValue = targetHours?.value;
+    const minutesValue = targetMinutes?.value;
+    if (hoursValue === "" || minutesValue === "" || hoursValue == null || minutesValue == null) return null;
+    const hours = Number(hoursValue);
+    const minutes = Number(minutesValue);
+    if (!Number.isInteger(hours) || !Number.isInteger(minutes) ||
+        hours < 0 || hours > 10 || minutes < 0 || minutes > 59) return null;
+    const total = (hours * 60 + minutes) * 60;
+    return total >= 60 && total <= 39540 ? total : null;
+  }
+
+  function clearTargetError() {
+    [targetHours, targetMinutes].forEach(input => {
+      if (!input) return;
+      input.removeAttribute("aria-invalid");
+      input.classList.remove("room-subject-required");
+      input.style.removeProperty("border-color");
+      input.style.removeProperty("box-shadow");
+      input.style.removeProperty("color");
+    });
+    if (targetHint) targetHint.textContent = "Choose a target from 1 minute up to 10 hours 59 minutes.";
+  }
+
+  function showTargetError() {
+    [targetHours, targetMinutes].forEach(input => {
+      if (!input) return;
+      input.setAttribute("aria-invalid", "true");
+      input.style.setProperty("border-color", "#ef4444", "important");
+      input.style.setProperty("box-shadow", "0 0 0 3px rgba(239,68,68,.18)", "important");
+      input.style.setProperty("color", "#ef4444", "important");
+    });
+    if (targetHint) targetHint.textContent = "Please select a target time.";
+    say("Please select a target time.", true);
+    (targetHours?.value === "" ? targetHours : targetMinutes)?.focus();
+  }
+
   function updatePersonal() {
     const today = dayKey(new Date());
     const todaySeconds = member && member.today_date === today ? Number(member.today_seconds) || 0 : 0;
     const pendingToday = pendingSeconds(member, startOfDay(today));
-    const total = todaySeconds + pendingToday;
-    todayTotal.textContent = 'Today: ' + fmt(total);
-    const percent = Math.min(100, Math.round(total / (Number(goal.value) || 14400) * 100));
-    goalBar.style.width = percent + '%';
-    goalText.textContent = percent >= 100 ? 'Goal reached!' : percent + '% completed';
+    todayTotal.textContent = "Today: " + fmt(todaySeconds + pendingToday);
+
     const savedSessionSeconds = member && (member.session_active || member.is_studying)
       ? Math.max(0, Number(member.session_elapsed_seconds) || 0) : 0;
-    const liveSessionSeconds = pendingSeconds(member, startOfDay(today));
-    timer.textContent = fmt(savedSessionSeconds + liveSessionSeconds);
+    const liveSessionSeconds = pendingSeconds(member, 0);
+    const elapsed = savedSessionSeconds + liveSessionSeconds;
+    const target = member && (member.session_active || member.is_studying)
+      ? Number(member.session_target_seconds) || 0
+      : (selectedTargetSeconds() || 0);
+    const percent = target > 0 ? Math.min(100, Math.round(elapsed / target * 100)) : 0;
+    goalBar.style.width = percent + "%";
+    goalText.textContent = target > 0
+      ? (percent >= 100 ? "Target reached" : percent + "% of target")
+      : "Choose a target time";
+    timer.textContent = fmt(elapsed);
     emitTimerState();
   }
+
   function updateSessionUI(row) {
     const isRunning = Boolean(row?.is_studying);
+    const isAway = Boolean(row?.session_active && row?.session_presence_state === "away");
     const hasSession = Boolean(row?.session_active);
-    join.disabled = isRunning;
+    join.disabled = isRunning || isAway;
     pause.disabled = !isRunning;
     leave.disabled = !hasSession;
-    join.textContent = 'Start';
-    pause.textContent = 'Pause';
-    leave.textContent = 'End';
-    status.textContent = isRunning ? 'Studying' : hasSession ? 'Paused' : 'Not studying';
-    panel.classList.toggle('is-studying', isRunning);
-    label.textContent = isRunning
-      ? 'Studying ' + (row?.subject || subject.value) + ' · session in progress'
-      : hasSession ? 'Paused · press Start to resume' : 'Not studying · press Start to begin';
-    liveLabel.textContent = 'Live shared room';
+    targetHours.disabled = hasSession;
+    targetMinutes.disabled = hasSession;
+    if (hasSession && Number(row?.session_target_seconds) > 0) {
+      const targetMinutesTotal = Math.floor(Number(row.session_target_seconds) / 60);
+      const hoursValue = String(Math.floor(targetMinutesTotal / 60));
+      const legacyOption = targetHours.querySelector('option[data-legacy-target="true"]');
+      if (Number(hoursValue) > 10) {
+        const option = legacyOption || document.createElement("option");
+        option.value = hoursValue;
+        option.textContent = hoursValue + " (existing session)";
+        option.disabled = true;
+        option.dataset.legacyTarget = "true";
+        if (!legacyOption) targetHours.append(option);
+      } else if (legacyOption) {
+        legacyOption.remove();
+      }
+      targetHours.value = hoursValue;
+      targetMinutes.value = String(targetMinutesTotal % 60);
+      clearTargetError();
+    } else if (!hasSession && hadActiveSession) {
+      targetHours.value = "";
+      targetMinutes.value = "";
+      targetHours.querySelector('option[data-legacy-target="true"]')?.remove();
+    }
+    hadActiveSession = hasSession;
+    join.textContent = "Start";
+    pause.textContent = "Pause";
+    leave.textContent = "End";
+    status.textContent = isAway ? "Away" : isRunning ? "Studying" : hasSession ? "Paused" : "Not studying";
+    panel.classList.toggle("is-studying", isRunning);
+    label.textContent = isAway
+      ? "Away · timer continues until the selected target, then pauses"
+      : isRunning
+        ? "Studying " + (row?.subject || subject.value) + " · session in progress"
+        : row?.session_target_reached_at && hasSession
+          ? "Target reached · paused · resume before midnight to confirm away time"
+          : hasSession ? "Paused · press Start to resume" : "Not studying · select a subject and target to begin";
+    liveLabel.textContent = "Live shared room";
     emitTimerState();
   }
   function renderPeople() {
-    const active = rows.filter(heartbeatIsFresh);
+    const active = rows.filter(r => heartbeatIsFresh(r) ||
+      (r?.session_active && r?.session_presence_state === 'away'));
     activeCount.textContent = String(active.length);
     const own = rows.find(r => r.user_id === userId) || member;
     const currentWeek = weekStart(new Date());
@@ -316,7 +272,8 @@
         avatar.classList.add('slr-neon-avatar');
         avatar.style.setProperty('--slr-neon-dark', neon[0]);
         avatar.style.setProperty('--slr-neon-light', neon[1]);
-        avatar.title = 'Studying now';
+        avatar.title = r.session_presence_state === 'away' ? 'Away · timer continues to target' : 'Studying now';
+        card.querySelector('.room-person-status').textContent = r.session_presence_state === 'away' ? 'Away' : 'Studying now';
         card.querySelector('.room-person-card-name').textContent = r.display_name;
         card.querySelector('.room-person-card-subject').textContent = r.subject;
         card.querySelector('.room-person-card-time').textContent = profileDuration(today + liveToday);
@@ -332,7 +289,7 @@
     const ranked = rows.map(r => ({
       ...r,
       score: (r[bucket] === expected ? Number(r[field]) || 0 : 0) +
-        (r.is_studying ? pendingSeconds(r, boundary) : 0)
+        ((r.is_studying || r.session_presence_state === 'away') ? pendingSeconds(r, boundary) : 0)
     })).sort((a,b) => b.score - a.score);
     board.replaceChildren();
     if (!ranked.length) {
@@ -358,7 +315,7 @@
   }
   async function loadRows() {
     const {data,error} = await client.from('study_room_live').select(
-      'user_id,display_name,gender,subject,is_studying,session_active,session_started_at,session_elapsed_seconds,session_date,last_heartbeat_at,today_seconds,today_date,week_seconds,week_start,updated_at,session_expired_at'
+      'user_id,display_name,gender,subject,is_studying,session_active,session_started_at,session_elapsed_seconds,session_date,last_heartbeat_at,today_seconds,today_date,week_seconds,week_start,updated_at,session_expired_at,session_presence_state,session_target_seconds,session_target_reached_at,session_away_since_at,session_away_pending_seconds'
     );
     if (error) throw error;
     rows = data || [];
@@ -375,7 +332,7 @@
   function heartbeatWasRecentlySuccessful() {
     try {
       const key = "studylab:study-room-heartbeat:" + userId;
-      return Date.now() - Number(localStorage.getItem(key) || 0) < 55000;
+      return Date.now() - Number(localStorage.getItem(key) || 0) < 15000;
     } catch (_) { return false; }
   }
   async function heartbeat(isRetry = false) {
@@ -398,7 +355,7 @@
       } catch (e) {
         console.error('Study Room heartbeat failed', e);
         // One short retry for a transient network failure; the next normal
-        // heartbeat remains on the regular 60-second schedule.
+        // heartbeat remains on the regular 20-second schedule.
         if (!isRetry && !heartbeatRetryTimer) {
           heartbeatRetryTimer = setTimeout(() => {
             heartbeatRetryTimer = null;
@@ -413,27 +370,43 @@
   }
   async function startStudy() {
     if (!subject.value) {
-      subject.setAttribute('aria-invalid', 'true');
-      subject.classList.add('room-subject-required');
-      subject.style.setProperty('border-color', '#ef4444', 'important');
-      subject.style.setProperty('box-shadow', '0 0 0 3px rgba(239,68,68,.18)', 'important');
-      subject.style.setProperty('color', '#ef4444', 'important');
-      say('Please select subject first', true);
+      subject.setAttribute("aria-invalid", "true");
+      subject.classList.add("room-subject-required");
+      subject.style.setProperty("border-color", "#ef4444", "important");
+      subject.style.setProperty("box-shadow", "0 0 0 3px rgba(239,68,68,.18)", "important");
+      subject.style.setProperty("color", "#ef4444", "important");
+      say("Please select subject first", true);
       subject.focus();
       return;
     }
-    subject.removeAttribute('aria-invalid');
-    subject.classList.remove('room-subject-required');
-    subject.style.removeProperty('border-color');
-    subject.style.removeProperty('box-shadow');
-        subject.style.removeProperty('color');
+
+    const hasExistingSession = Boolean(member?.session_active);
+    const target = hasExistingSession
+      ? Number(member.session_target_seconds) || selectedTargetSeconds()
+      : selectedTargetSeconds();
+    if (!target || target < 60 || (!hasExistingSession && target > 39540)) {
+      showTargetError();
+      return;
+    }
+
+    subject.removeAttribute("aria-invalid");
+    subject.classList.remove("room-subject-required");
+    subject.style.removeProperty("border-color");
+    subject.style.removeProperty("box-shadow");
+    subject.style.removeProperty("color");
+    clearTargetError();
+
     try {
-      await callRpc('study_room_set_subject', {p_subject: subject.value});
-      await callRpc('study_room_start');
+      await callRpc("study_room_set_subject", { p_subject: subject.value });
+      // The server preserves an existing session's original target on resume.
+      // Pass a valid new-target value so legacy 12-hour sessions remain resumable.
+      await callRpc("study_room_start", { p_target_seconds: hasExistingSession ? Math.min(target, 39540) : target });
       await loadRows();
       await heartbeat();
-      say('Your study session has started. The timer continues while you switch tabs or minimize the browser.');
-    } catch (e) { say('Could not start the study session: ' + e.message, true); }
+      say("Your study session has started. If you leave the Study Room, it continues until your target and then pauses.");
+    } catch (e) {
+      say("Could not start the study session: " + e.message, true);
+    }
   }
   async function pauseStudy() {
     try {
@@ -446,6 +419,9 @@
     try {
       await callRpc('study_room_end');
       await loadRows();
+      targetHours.value = '';
+      targetMinutes.value = '';
+      updatePersonal();
       say('Your study session has ended. Your recorded study time is saved.');
     } catch (e) { say('Could not end the study session: ' + e.message, true); }
   }
@@ -453,14 +429,16 @@
     const today = dayKey(new Date());
     const base = member && (member.session_active || member.is_studying)
       ? Math.max(0, Number(member.session_elapsed_seconds) || 0) : 0;
-    const live = pendingSeconds(member, startOfDay(today));
+    const live = pendingSeconds(member, 0);
     return {
       ready: Boolean(member),
       isStudying: Boolean(member?.is_studying),
       sessionActive: Boolean(member?.session_active),
       elapsedSeconds: base + live,
       subject: member?.subject || subject.value || '',
-      status: member?.is_studying ? 'Studying' : member?.session_active ? 'Paused' : 'Not studying',
+      status: member?.session_presence_state === 'away' ? 'Away' : member?.is_studying ? 'Studying' : member?.session_active ? 'Paused' : 'Not studying',
+      sessionPresenceState: member?.session_presence_state || 'paused',
+      targetSeconds: Number(member?.session_target_seconds) || 0,
       lastHeartbeatAt: member?.last_heartbeat_at || null,
       sessionStartedAt: member?.session_started_at || null,
       updatedAt: member?.updated_at || null,
@@ -495,7 +473,6 @@
       client.auth.onAuthStateChange((_event, session) => {
         accessToken = session?.access_token || null;
       });
-      startRoomPagePresenceLifecycle();
       const profile = await account.getProfile(true);
       if (!isProfileComplete(profile)) {
         join.disabled = true; pause.disabled = true; leave.disabled = true;
@@ -510,6 +487,7 @@
       }
       await callRpc('study_room_ensure_profile');
       await loadRows();
+      startRoomPresenceLifecycle();
       client.channel('study-room-live')
         .on('postgres_changes', {event:'*',schema:'public',table:'study_room_members'}, () => {
           loadRows().catch(e => console.error('Could not refresh live Study Room data', e));
@@ -528,8 +506,11 @@
       });
       dailyTab.addEventListener('click', () => { selectedBoard = 'daily'; renderBoard(); });
       weeklyTab.addEventListener('click', () => { selectedBoard = 'weekly'; renderBoard(); });
-      goal.addEventListener('change', updatePersonal);
-      heartbeatInterval = setInterval(heartbeat, 60000);
+      [targetHours, targetMinutes].forEach(input => input.addEventListener('input', () => {
+        clearTargetError();
+        updatePersonal();
+      }));
+      if (!window.StudyRoomPresence) heartbeatInterval = setInterval(heartbeat, 20000);
       // Re-fetch the shared rows once per minute even if Realtime drops an event.
       // This keeps both daily and weekly rankings fresh for paused and active members.
       rankRefreshInterval = setInterval(() => {
@@ -540,14 +521,11 @@
         }
       }, 60000);
       uiInterval = setInterval(updatePersonal, 1000);
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
-          registerRoomPagePresence();
-          heartbeat();
-          loadRows().catch(error => console.error('Could not refresh Study Room after returning', error));
-        }
+      window.addEventListener('online', () => {
+        presenceController?.refresh();
+        heartbeat();
+        loadRows().catch(error => console.error("Could not refresh Study Room after reconnecting", error));
       });
-      window.addEventListener('online', heartbeat);
       await heartbeat();
       say('Connected to the shared Study Room. Attendance and leaderboard updates are live.');
     } catch (e) {
