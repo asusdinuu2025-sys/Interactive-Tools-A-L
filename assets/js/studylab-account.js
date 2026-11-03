@@ -278,8 +278,12 @@
       const { error } = await client.auth.linkIdentity({ provider: "google", options });
       if (error) {
         setAuthIntent("");
-        if (/identity.*already|already.*linked/i.test(String(error.message || ""))) {
+        const detail = String(error.message || "");
+        if (/identity.*already|already.*linked/i.test(detail)) {
           throw new Error("That Google account is already connected to a StudyLab account. Choose Sign In instead.");
+        }
+        if (/manual linking|linking.*disabled|enable.*linking/i.test(detail)) {
+          throw new Error("Guest account conversion is not enabled yet. Enable Manual Linking in Supabase Authentication settings, then try again.");
         }
         throw error;
       }
