@@ -154,7 +154,8 @@
     }
 
     registerWindow(window, true);
-    window.addEventListener("storage", () => sync());
+    const onStorage = () => sync();
+    window.addEventListener("storage", onStorage);
     sync();
     syncTimer = setInterval(sync, 10000);
 
@@ -168,7 +169,7 @@
         stopped = true;
         if (awayTimer) clearTimeout(awayTimer);
         if (syncTimer) clearInterval(syncTimer);
-        window.removeEventListener("storage", sync);
+        window.removeEventListener("storage", onStorage);
         for (const [win, record] of windows) {
           try {
             win.document.removeEventListener("visibilitychange", record.onState);
