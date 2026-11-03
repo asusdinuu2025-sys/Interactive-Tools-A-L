@@ -2095,7 +2095,7 @@ html[data-theme="light"] .sl-feed-post-body a { color:#167bb5; }
 
 
 /* Compact composer is taller and its formatting tools stay available while typing. */
-.sl-feed-panel .sl-feed-compose { min-height:230px; padding:16px 14px; border:1px solid rgba(126,160,190,.18); border-radius:17px; background:rgba(90,130,165,.055); }
+.sl-feed-panel .sl-feed-compose { min-height:330px; padding:16px 14px; border:1px solid rgba(126,160,190,.18); border-radius:17px; background:rgba(90,130,165,.055); }
 .sl-feed-compose .sl-feed-create-trigger { min-height:54px; padding:13px 15px; font-weight:650; letter-spacing:.005em; transition:background .2s ease,border-color .2s ease,transform .2s ease; }
 .sl-feed-compose .sl-feed-create-trigger:hover { border-color:rgba(91,190,255,.42); background:rgba(91,190,255,.12); transform:translateY(-1px); }
 .sl-feed-compose .sl-feed-format-toolbar { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin:10px 0 8px; }
@@ -2110,7 +2110,26 @@ html[data-theme="light"] .sl-feed-compose .sl-feed-editor a { color:#147bb8; }
 .sl-feed-compose.is-expanded .sl-feed-format-toolbar { margin:0; }
 .sl-feed-compose.is-expanded .sl-feed-create-trigger { display:none !important; }
 @media (max-width:600px) {
-  .sl-feed-panel .sl-feed-compose { min-height:205px; padding:12px; }
+  .sl-feed-panel .sl-feed-compose { min-height:300px; padding:12px; }
   .sl-feed-compose .sl-feed-editor { min-height:84px; }
   .sl-feed-compose.is-expanded { height:min(62vh,640px) !important; }
+}
+
+
+/* More room for the compact composer and a visible post-length indicator. */
+.sl-feed-compose .sl-feed-word-count {
+  margin-left:auto;
+  color:var(--sl-muted,#8b9bad);
+  font-size:.68rem;
+  font-weight:650;
+  white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+}
+.sl-feed-compose .sl-feed-word-count.is-over-limit { color:#ff7887; }
+.sl-feed-compose .sl-feed-compose-foot { flex-wrap:wrap; }
+@media (max-width:600px) {
+  .sl-feed-panel[data-size="full"] .sl-feed-left-rail { max-height:48% !important; }
+  .sl-feed-panel .sl-feed-compose { min-height:300px; }
+  .sl-feed-compose .sl-feed-compose-foot { gap:8px; }
+  .sl-feed-compose .sl-feed-word-count { margin-left:0; }
 }
