@@ -671,7 +671,52 @@
     const date = make("time", "sl-feed-post-date", relativeTime(post.created_at));
     date.dateTime = post.created_at;
     date.title = new Intl.DateTimeFormat(undefined,{dateStyle:"medium",timeStyle:"short"}).format(new Date(post.created_at));
+    const postMenu = post.author_id !== currentUserId ? make("details", "sl-feed-post-menu") : null;
+    if (postMenu) {
+      const menuToggle = make("summary", "sl-feed-post-menu-toggle", "⋯");
+      menuToggle.setAttribute("aria-label", "Post options");
+      menuToggle.title = "Post options";
+      const menuPanel = make("div", "sl-feed-post-menu-panel");
+      menuPanel.append(make("div", "sl-feed-post-menu-label", "Report post"));
+      const reportReasons = [
+        ["spam", "Spam"],
+        ["harassment", "Harassment or bullying"],
+        ["inappropriate_content", "Inappropriate content"],
+        ["misinformation", "False or misleading information"],
+        ["other", "Other"]
+      ];
+      for (const [reason, label] of reportReasons) {
+        const reportButton = make("button", "sl-feed-post-report-reason", label);
+        reportButton.type = "button";
+        reportButton.addEventListener("click", async () => {
+          if (reportButton.disabled) return;
+          reportButton.disabled = true;
+          postMenu.open = false;
+          try {
+            const { error } = await client.from("studylab_social_reports").insert({
+              post_id: post.id,
+              reporter_id: currentUserId,
+              reason
+            });
+            if (error?.code === "23505") {
+              postMenu.remove();
+              setStatus("You have already reported this post.");
+              return;
+            }
+            if (error) throw error;
+            postMenu.remove();
+            setStatus("Report submitted. Thank you.");
+          } catch (error) {
+            setStatus(error.message || "Could not submit your report.", true);
+            reportButton.disabled = false;
+          }
+        });
+        menuPanel.append(reportButton);
+      }
+      postMenu.append(menuToggle, menuPanel);
+    }
     top.append(identity, date);
+    if (postMenu) top.append(postMenu);
     card.append(top);
     identity.addEventListener("click",() => {
       const existing = card.querySelector(".sl-feed-profile-popover");
