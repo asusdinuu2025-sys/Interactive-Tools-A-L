@@ -268,11 +268,34 @@
   async function signInWithGoogle(intent) {
     if (intent !== "signup" && intent !== "login") throw new Error("Choose New User or Existing User.");
     setAuthIntent(intent);
-    const { error } = await client.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: window.location.origin + "/", queryParams: { prompt: "select_account" } }
-    });
+    const options = {
+      redirectTo: window.location.origin + "/",
+      queryParams: { prompt: "select_account" }
+    };
+    // Link Google to the current anonymous identity for Guest account creation.
+    // This preserves the same user ID and the Guest's cloud profile/activity.
+    if (intent === "signup" && user?.is_anonymous) {
+      const { error } = await client.auth.linkIdentity({ provider: "google", options });
+      if (error) {
+        setAuthIntent("");
+        if (/identity.*already|already.*linked/i.test(String(error.message || ""))) {
+          throw new Error("That Google account is already connected to a StudyLab account. Choose Sign In instead.");
+        }
+        throw error;
+      }
+      return;
+    }
+    const { error } = await client.auth.signInWithOAuth({ provider: "google", options });
     if (error) { setAuthIntent(""); throw error; }
+  }
+
+  async function signOut() {
+    const { error } = await client.auth.signOut();
+    if (error) throw error;
+    user = null;
+    profile = null;
+    initializedUserId = "";
+    setAuthIntent("");
   }
 
   async function retryStartup() {
@@ -315,7 +338,7 @@
   });
 
   window.StudyLabAccount = {
-    client, ready, startup, continueAsGuest, signInWithGoogle, retryStartup,
+    client, ready, startup, continueAsGuest, signInWithGoogle, signOut, retryStartup,
     getStartupError: () => startupError,
     getAuthIntent: () => authIntent,
     clearAuthIntent: () => setAuthIntent(""),
