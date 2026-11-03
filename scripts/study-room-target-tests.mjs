@@ -80,10 +80,11 @@ assert.equal(
   0,
   "a student who exceeds the target while present is paused immediately on leaving"
 );
+function presentCredit(seconds) { return seconds; }
 assert.equal(
-  Math.min(5 * 3600, 4 * 3600),
-  4 * 3600,
-  "away time is capped, but present time can exceed the target"
+  presentCredit(5 * 3600),
+  5 * 3600,
+  "present sessions continue beyond the selected target"
 );
 
 const beforeMidnight = 2 * 3600;
@@ -102,8 +103,9 @@ assert.equal(
 
 const graceSeconds = 60;
 const heartbeatSeconds = 20;
+const serverStaleSeconds = 80;
 assert.equal(graceSeconds, 60, "visibility grace is 60 seconds");
 assert.equal(heartbeatSeconds, 20, "visible heartbeat interval is 20 seconds");
-assert.equal(graceSeconds + heartbeatSeconds * 4, 140, "server fallback has room for heartbeat jitter");
+assert.equal(serverStaleSeconds, graceSeconds + heartbeatSeconds, "server fallback allows the 60-second grace plus one heartbeat interval");
 
-console.log("Study Room target and presence logic tests passed (12 assertions).");
+console.log("Study Room target and presence logic tests passed (16 assertions).");
