@@ -151,7 +151,6 @@
       const current = anchor.textContent.trim().replace(/[),.!?;:]+$/,"");
       if (/^https?:\/\//i.test(current)) {
         anchor.href = current;
-        anchor.textContent = current;
       }
     });
     const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT, {
