@@ -30,11 +30,170 @@
   let savedUsername = "";
   let mandatoryProfile = false;
   let requireFullProfile = false;
+  let onboardingAuthIntent = "";
 
   const profileClose = document.getElementById("profileClose");
 
   if (!profileButton || !profileModal || !profileForm || !profileInput) return;
   const profileDialog = profileModal.querySelector(".profile-dialog");
+
+  // Keep profile editing and authentication in one clear account menu.
+  const accountWrap = document.createElement("div");
+  accountWrap.className = "profile-account-wrap";
+  profileButton.parentNode.insertBefore(accountWrap, profileButton);
+  accountWrap.appendChild(profileButton);
+  const accountMenu = document.createElement("div");
+  accountMenu.className = "profile-account-menu";
+  accountMenu.id = "profileAccountMenu";
+  accountMenu.hidden = true;
+  accountMenu.setAttribute("role", "menu");
+  document.body.appendChild(accountMenu);
+
+  const accountMenuStyle = document.createElement("style");
+  accountMenuStyle.textContent = `
+    .profile-account-wrap { position:relative;display:inline-flex;align-items:center; }
+    .profile-button { gap:9px; }
+    .profile-button .profile-menu-caret { display:inline-grid;place-items:center;margin-left:2px;opacity:.76; }
+    .profile-button .profile-menu-caret svg { display:block;width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round; }
+    .profile-account-menu {
+      position:fixed !important;z-index:2147483000 !important;top:0;left:0;
+      width:min(340px,calc(100vw - 24px));max-width:calc(100vw - 24px);
+      max-height:min(72vh,460px);overflow-y:auto;overscroll-behavior:contain;
+      padding:11px;border:1px solid rgba(150,190,230,.24);border-radius:20px;
+      background:rgba(13,24,40,.97);color:#eaf3ff;
+      box-shadow:0 24px 72px rgba(0,0,0,.46),0 4px 18px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.1);
+      backdrop-filter:blur(26px) saturate(150%);-webkit-backdrop-filter:blur(26px) saturate(150%);
+      transform-origin:top right;animation:profileMenuIn .16s ease-out;
+      font-family:"Nirmala UI","Segoe UI",sans-serif !important;font-size:14px;
+      isolation:isolate;
+    }
+    .profile-account-menu[hidden] { display:none; }
+    .profile-account-menu, .profile-account-menu * { font-family:"Nirmala UI","Segoe UI",sans-serif !important; }
+    .profile-account-menu .account-menu-heading { padding:10px 12px 9px;color:#a9bfd8;font-size:12px;font-weight:800;letter-spacing:.11em; }
+    .profile-account-menu button {
+      display:flex;width:100%;min-height:54px;align-items:center;gap:13px;padding:12px;border:0;border-radius:13px;
+      background:transparent;color:inherit;text-align:left;cursor:pointer;font-size:14px;transition:background .16s ease;
+    }
+    .profile-account-menu button:hover,.profile-account-menu button:focus-visible { background:rgba(125,190,255,.14);outline:2px solid rgba(125,190,255,.28);outline-offset:-2px; }
+    .profile-account-menu .account-menu-icon { display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;border:1px solid rgba(125,190,255,.22);border-radius:12px;background:rgba(90,160,230,.12);color:#a9dfff;font-size:19px; }
+    .profile-account-menu .account-menu-copy { display:grid;gap:4px;min-width:0; }
+    .profile-account-menu .account-menu-copy strong { font-size:15px;font-weight:700;line-height:1.25; }
+    .profile-account-menu .account-menu-copy small { color:#b3c3d8;font-size:12.5px;line-height:1.4; }
+    .profile-account-menu .account-menu-divider { height:1px;margin:7px 8px;background:rgba(160,190,220,.17); }
+    .profile-account-menu .account-menu-status { margin:7px 10px 8px;color:#ff9b9b;font-size:12px;line-height:1.5; }
+    html[data-theme="light"] .profile-account-menu {
+      background:rgba(255,255,255,.985);color:#20344c;border-color:rgba(80,130,175,.24);
+      box-shadow:0 24px 65px rgba(35,70,105,.25),0 4px 16px rgba(35,70,105,.12),inset 0 1px #fff;
+    }
+    html[data-theme="light"] .profile-account-menu .account-menu-heading,
+    html[data-theme="light"] .profile-account-menu .account-menu-copy small { color:#536b85; }
+    html[data-theme="light"] .profile-account-menu button:hover,
+    html[data-theme="light"] .profile-account-menu button:focus-visible { background:rgba(70,145,220,.11);outline-color:rgba(70,145,220,.24); }
+    html[data-theme="light"] .profile-account-menu .account-menu-icon { color:#286b9e;background:rgba(70,145,220,.09);border-color:rgba(70,145,220,.2); }
+    @keyframes profileMenuIn { from { opacity:0;transform:translateY(-5px) scale(.985); } to { opacity:1;transform:none; } }
+    @media(max-width:600px) {
+      .profile-account-menu { width:min(320px,calc(100vw - 20px));max-height:min(70vh,440px); }
+      .profile-account-menu button { min-height:56px;padding:13px 12px; }
+    }
+    @media(prefers-reduced-motion:reduce) { .profile-account-menu { animation:none; } }
+  `;
+  document.head.appendChild(accountMenuStyle);
+
+  function positionAccountMenu() {
+    if (accountMenu.hidden) return;
+    const rect = profileButton.getBoundingClientRect();
+    const margin = 12;
+    const width = Math.min(340, window.innerWidth - margin * 2);
+    accountMenu.style.width = width + "px";
+    const menuHeight = accountMenu.getBoundingClientRect().height;
+    let left = Math.max(margin, Math.min(rect.right - width, window.innerWidth - width - margin));
+    let top = rect.bottom + 10;
+    if (top + menuHeight > window.innerHeight - margin && rect.top - menuHeight - 10 >= margin) {
+      top = rect.top - menuHeight - 10;
+      accountMenu.style.transformOrigin = "bottom right";
+    } else {
+      accountMenu.style.transformOrigin = "top right";
+    }
+    accountMenu.style.left = left + "px";
+    accountMenu.style.top = Math.max(margin, Math.min(top, window.innerHeight - menuHeight - margin)) + "px";
+  }
+  function closeAccountMenu() {
+    accountMenu.hidden = true;
+    profileButton.setAttribute("aria-expanded", "false");
+  }
+  function renderAccountMenu() {
+    const isGuest = Boolean(window.StudyLabAccount?.getUser?.()?.is_anonymous);
+    accountMenu.innerHTML = isGuest ? `
+      <div class="account-menu-heading">GUEST SESSION</div>
+      <button type="button" role="menuitem" data-account-action="profile">
+        <span class="account-menu-icon" aria-hidden="true">♙</span>
+        <span class="account-menu-copy"><strong>Edit profile</strong><small>Update your student details</small></span>
+      </button>
+      <div class="account-menu-divider"></div>
+      <button type="button" role="menuitem" data-account-action="signup">
+        <span class="account-menu-icon" aria-hidden="true">＋</span>
+        <span class="account-menu-copy"><strong>Create StudyLab account</strong><small>Connect Google and keep this Guest session</small></span>
+      </button>
+      <button type="button" role="menuitem" data-account-action="login">
+        <span class="account-menu-icon" aria-hidden="true">↗</span>
+        <span class="account-menu-copy"><strong>Sign in to existing account</strong><small>Continue with your registered Google account</small></span>
+      </button>
+      <p class="account-menu-status" role="status" hidden></p>` : `
+      <div class="account-menu-heading">YOUR STUDYLAB ACCOUNT</div>
+      <button type="button" role="menuitem" data-account-action="profile">
+        <span class="account-menu-icon" aria-hidden="true">♙</span>
+        <span class="account-menu-copy"><strong>Edit student profile</strong><small>Update your StudyLab profile details</small></span>
+      </button>
+      <div class="account-menu-divider"></div>
+      <button type="button" role="menuitem" data-account-action="signout">
+        <span class="account-menu-icon" aria-hidden="true">⇥</span>
+        <span class="account-menu-copy"><strong>Sign out</strong><small>Sign out of this StudyLab account</small></span>
+      </button>
+      <p class="account-menu-status" role="status" hidden></p>`;
+  }
+  function toggleAccountMenu() {
+    if (!accountMenu.hidden) { closeAccountMenu(); return; }
+    renderAccountMenu();
+    accountMenu.hidden = false;
+    profileButton.setAttribute("aria-expanded", "true");
+    positionAccountMenu();
+    requestAnimationFrame(positionAccountMenu);
+  }
+  accountMenu.addEventListener("click", async event => {
+    const action = event.target.closest("[data-account-action]")?.dataset.accountAction;
+    if (!action) return;
+    if (action === "profile") { closeAccountMenu(); openModal(); return; }
+    if (action === "signup" || action === "login") {
+      closeAccountMenu();
+      window.StudyLabAuthGateway?.open(action);
+      return;
+    }
+    if (action === "signout") {
+      const status = accountMenu.querySelector(".account-menu-status");
+      const button = accountMenu.querySelector('[data-account-action="signout"]');
+      if (button) button.disabled = true;
+      if (status) { status.hidden = false; status.textContent = "Signing out…"; }
+      try {
+        await window.StudyLabAccount.signOut();
+        window.location.reload();
+      } catch (error) {
+        console.warn("StudyLab sign out:", error);
+        if (status) status.textContent = "Could not sign out. Please try again.";
+        if (button) button.disabled = false;
+      }
+    }
+  });
+  profileButton.setAttribute("aria-haspopup", "menu");
+  profileButton.setAttribute("aria-controls", "profileAccountMenu");
+  profileButton.setAttribute("aria-expanded", "false");
+  document.addEventListener("click", event => {
+    if (!accountWrap.contains(event.target) && !accountMenu.contains(event.target)) closeAccountMenu();
+  });
+  window.addEventListener("resize", positionAccountMenu, { passive: true });
+  window.addEventListener("scroll", positionAccountMenu, { passive: true, capture: true });
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && !accountMenu.hidden) { closeAccountMenu(); profileButton.focus(); }
+  });
 
   const placeholderName = name => /^Student\d{4}$/.test(String(name || ""));
   const isBasicComplete = p => Boolean(p?.display_name && !placeholderName(p.display_name) &&
@@ -124,25 +283,38 @@
   document.head.appendChild(usernameFeedbackStyle);
 
   const profileIconStyle = document.createElement("style");
-  profileIconStyle.textContent = '.profile-button .header-action-icon{display:inline-grid;place-items:center;width:20px;height:20px;flex:0 0 20px} .profile-button .header-action-icon-female{color:#ff4fa3!important} .profile-button .header-action-icon-male{color:#39a8ff!important} .profile-button .header-action-icon svg{width:20px;height:20px;fill:none;stroke:currentColor!important;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 2px currentColor) drop-shadow(0 0 4px currentColor)}';
+  profileIconStyle.textContent = '.profile-button .header-action-icon{display:inline-grid;place-items:center;width:20px;height:20px;flex:0 0 20px;color:#9299a5!important} .profile-button .header-action-icon-female{color:#ff4fa3!important} .profile-button .header-action-icon-male{color:#39a8ff!important} .profile-button .header-action-icon-neutral{color:#9299a5!important} .profile-button .header-action-icon svg{width:20px;height:20px;fill:none;stroke:currentColor!important;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 2px currentColor) drop-shadow(0 0 4px currentColor)}';
   document.head.appendChild(profileIconStyle);
   function setButtonProfile(p) {
     const gender = p?.gender === "female" ? "female" : "male";
     const icon = gender === "female"
       ? '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="7" r="3.2"/><path d="M7 20l1-4.2a4.1 4.1 0 0 1 8 0l1 4.2z"/></svg>'
       : '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="7" r="3.2"/><path d="M4.5 20v-2.5a7.5 7.5 0 0 1 15 0V20z"/></svg>';
-    profileButton.innerHTML = '<span class="header-action-icon header-action-icon-' + gender + '\" aria-hidden="true">' + icon + '</span><span class="profile-button-label"></span>';
+    const isGuest = Boolean(window.StudyLabAccount?.getUser?.()?.is_anonymous);
+    const iconTone = isGuest ? "neutral" : gender;
+    const profileGlyph = isGuest
+      ? '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="7.2" r="3.2"/><path d="M4.5 20v-1.5a7.5 7.5 0 0 1 15 0V20z"/></svg>'
+      : icon;
+    profileButton.innerHTML = '<span class="header-action-icon header-action-icon-' + iconTone + '\" aria-hidden="true">' + profileGlyph + '</span><span class="profile-button-label"></span><span class="profile-menu-caret" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="m6 9 6 6 6-6"/></svg></span>';
     const label = profileButton.querySelector(".profile-button-label");
-    if (isBasicComplete(p)) {
+    if (isGuest) {
+      label.textContent = "Guest";
+      profileButton.title = "Open Guest and account options";
+      profileButton.setAttribute("aria-label", "Guest account options");
+    } else if (isBasicComplete(p)) {
       label.textContent = p.display_name;
-      profileButton.title = "Edit your student profile";
+      profileButton.title = "Open your StudyLab account options";
+      profileButton.setAttribute("aria-label", "Account options for " + p.display_name);
     } else if (p?.display_name && !placeholderName(p.display_name)) {
       label.textContent = "Complete Profile";
-      profileButton.title = "Finish setting up your student profile";
+      profileButton.title = "Open account options and complete your student profile";
+      profileButton.setAttribute("aria-label", "Complete your student profile");
     } else {
-      label.textContent = "Create Profile";
-      profileButton.title = "Create your student profile";
+      label.textContent = "Account";
+      profileButton.title = "Open your StudyLab account options";
+      profileButton.setAttribute("aria-label", "Open StudyLab account options");
     }
+    if (accountMenu && !accountMenu.hidden) renderAccountMenu();
   }
   function showStatus(message, isError = false) {
     profileStatus.textContent = message;
@@ -156,7 +328,8 @@
     return account.getProfile(force);
   }
   function fillForm(p) {
-    profileInput.value = p?.display_name && !placeholderName(p.display_name) ? p.display_name : "";
+    const googleName = window.StudyLabAccount?.getSuggestedDisplayName?.() || "";
+    profileInput.value = p?.display_name && !placeholderName(p.display_name) ? p.display_name : googleName;
     savedDisplayName = normalizeDisplayName(profileInput.value).toLowerCase();
     if (profileNameStatus) {
       profileNameStatus.hidden = true;
@@ -372,16 +545,20 @@
 
   function updateCopy(p) {
     const complete = mandatoryProfile ? isFullComplete(p) : isBasicComplete(p);
-    profileNameLabel.textContent = complete ? "Your student profile" : "Complete your student profile";
+    profileNameLabel.textContent = complete ? "Your student profile"
+      : onboardingAuthIntent === "signup" ? "Finish creating your StudyLab profile" : "Complete your student profile";
     profileSubtitle.textContent = mandatoryProfile
       ? "All details are required to enter the Study Room."
       : complete
         ? "Keep your details up to date. Your information stays linked to your StudyLab account."
-        : "Add your name, A/L year and stream. You can skip this for now and keep using StudyLab.";
+        : onboardingAuthIntent === "signup"
+          ? "Your Google account is connected. Add your student details to finish setting up StudyLab."
+          : "Add your name, A/L year and stream. You can skip this for now and keep using StudyLab.";
     const submit = profileForm.querySelector(".profile-save");
     if (submit) submit.textContent = complete ? "Save changes" : "Save profile";
   }
   async function openModal() {
+    closeAccountMenu();
     profileStatus.hidden = true;
     profileStatus.textContent = "";
     profileStatus.dataset.state = "success";
@@ -488,7 +665,7 @@
     field.addEventListener("change", updateStudyRoomValidation);
   });
 
-  profileButton.addEventListener("click", openModal);
+  profileButton.addEventListener("click", toggleAccountMenu);
   profileInput?.addEventListener("input", scheduleNameAvailabilityCheck);
   profileInput?.addEventListener("change", checkNameAvailability);
   profileUsername?.addEventListener("input", scheduleUsernameAvailabilityCheck);
@@ -616,6 +793,7 @@
 
   (async function boot() {
     try {
+      onboardingAuthIntent = window.StudyLabAccount?.getAuthIntent?.() || "";
       const p = await getCloudProfile();
       setButtonProfile(p);
       const params = new URLSearchParams(window.location.search);
@@ -629,6 +807,8 @@
       } else if (!requireFullProfile && !isBasicComplete(p)) {
         await openModal();
       }
+      window.StudyLabAccount?.clearAuthIntent?.();
+      onboardingAuthIntent = "";
     } catch (error) {
       console.warn("StudyLab profile startup:", error);
       setButtonProfile(null);

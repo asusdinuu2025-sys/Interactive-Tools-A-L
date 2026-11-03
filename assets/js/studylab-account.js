@@ -1,6 +1,6 @@
 /* =========================================================
    STUDY LAB — SUPABASE STUDENT ACCOUNT
-   Anonymous Supabase identity + cloud profile.
+   Google and guest Supabase identity + cloud profile.
    The browser stores only the Supabase auth session so the
    same student can be recognised on later visits to this browser.
    ========================================================= */
@@ -33,7 +33,7 @@
       auth: {
         persistSession: true,
         autoRefreshToken: true,
-        detectSessionInUrl: false
+        detectSessionInUrl: true
       }
     }
   );
@@ -41,26 +41,13 @@
   let user = null;
   let profile = null;
 
-  async function ensureSignedIn() {
-    const { data: sessionData, error: sessionError } =
-      await client.auth.getSession();
-
-    if (sessionError) throw sessionError;
-
-    let session = sessionData?.session || null;
-
-    if (!session) {
-      const { data, error } = await client.auth.signInAnonymously();
-      if (error) throw error;
-      session = data?.session || null;
-    }
-
-    if (!session?.user) {
-      throw new Error("StudyLab could not create a student account.");
-    }
-
-    user = session.user;
-    return user;
+  // Restore existing sessions only. New visitors choose Google or Guest.
+  async function restoreSession() {
+    const { data, error } = await client.auth.getSession();
+    if (error) throw error;
+    const session = data?.session || null;
+    if (session?.user) user = session.user;
+    return session;
   }
 
   async function loadProfile() {
@@ -216,73 +203,154 @@
     return profile;
   }
 
-  const ready = (async function () {
-    const currentUser = await ensureSignedIn();
-    await loadProfile();
+  let resolveReady;
+  let readyResolved = false;
+  let initializedUserId = "";
+  let activationPromise = null;
+  let startupError = null;
+  let authIntent = "";
+  try {
+    const stored = sessionStorage.getItem("studylab-auth-intent");
+    if (stored === "signup" || stored === "login") authIntent = stored;
+  } catch (_) {}
 
-    /*
-     * One-time migration of the old local profile.
-     * Once the cloud profile is confirmed, the old profile is removed.
-     */
-    if (!profile) {
-      try {
-        const raw = localStorage.getItem("studyLabProfile");
-        const local = raw ? JSON.parse(raw) : null;
+  const ready = new Promise(resolve => { resolveReady = resolve; });
 
-        if (local?.name) {
-          // Preserve legacy names without falsely marking the full profile complete.
-          const legacyName = String(local.name).trim().replace(/\s+/g, " ");
-          if (legacyName.length >= 2 && legacyName.length <= 60) {
-            const { data: migratedProfile, error: migrationSaveError } = await client
-              .from("studylab_profiles")
-              .upsert({
-                id: user.id,
-                display_name: legacyName,
-                updated_at: new Date().toISOString()
-              }, { onConflict: "id" })
-              .select("id,display_name,username,school,phone,exam_year,study_stream,gender,profile_completed_at,created_at,updated_at")
-              .single();
-            if (migrationSaveError) throw migrationSaveError;
-            profile = migratedProfile;
-            localStorage.removeItem("studyLabProfile");
+  function setAuthIntent(value) {
+    authIntent = value === "signup" || value === "login" ? value : "";
+    try {
+      if (authIntent) sessionStorage.setItem("studylab-auth-intent", authIntent);
+      else sessionStorage.removeItem("studylab-auth-intent");
+    } catch (_) {}
+  }
+
+  async function activateSession(session, options = {}) {
+    if (!session?.user) throw new Error("StudyLab could not start your account session.");
+    if (initializedUserId === session.user.id) return user;
+    if (activationPromise) return activationPromise;
+    activationPromise = (async function () {
+      user = session.user;
+      await loadProfile();
+      // Only anonymous Guest sessions may absorb the old local-only profile.
+      if (!profile && options.migrateLegacy && user.is_anonymous) {
+        try {
+          const raw = localStorage.getItem("studyLabProfile");
+          const local = raw ? JSON.parse(raw) : null;
+          if (local?.name) {
+            const legacyName = String(local.name).trim().replace(/\s+/g, " ");
+            if (legacyName.length >= 2 && legacyName.length <= 60) {
+              const { data: migrated, error: saveError } = await client.from("studylab_profiles")
+                .upsert({ id: user.id, display_name: legacyName, updated_at: new Date().toISOString() }, { onConflict: "id" })
+                .select("id,display_name,username,school,phone,exam_year,study_stream,gender,profile_completed_at,created_at,updated_at").single();
+              if (saveError) throw saveError;
+              profile = migrated;
+              localStorage.removeItem("studyLabProfile");
+            }
           }
+        } catch (error) { console.warn("StudyLab legacy profile migration:", error); }
+      }
+      if (!profile) await ensureProfileRow();
+      initializedUserId = user.id;
+      if (!readyResolved) { readyResolved = true; resolveReady(user); }
+      return user;
+    })();
+    try { return await activationPromise; }
+    finally { activationPromise = null; }
+  }
+
+  async function continueAsGuest() {
+    const { data, error } = await client.auth.signInAnonymously();
+    if (error) throw error;
+    setAuthIntent("");
+    return activateSession(data?.session, { migrateLegacy: true });
+  }
+
+  async function signInWithGoogle(intent) {
+    if (intent !== "signup" && intent !== "login") throw new Error("Choose New User or Existing User.");
+    setAuthIntent(intent);
+    const options = {
+      redirectTo: window.location.origin + "/",
+      queryParams: { prompt: "select_account" }
+    };
+    // Link Google to the current anonymous identity for Guest account creation.
+    // This preserves the same user ID and the Guest's cloud profile/activity.
+    if (intent === "signup" && user?.is_anonymous) {
+      const { error } = await client.auth.linkIdentity({ provider: "google", options });
+      if (error) {
+        setAuthIntent("");
+        const detail = String(error.message || "");
+        if (/identity.*already|already.*linked/i.test(detail)) {
+          throw new Error("That Google account is already connected to a StudyLab account. Choose Sign In instead.");
         }
-      } catch (migrationError) {
-        console.warn("StudyLab profile migration:", migrationError);
+        if (/manual linking|linking.*disabled|enable.*linking/i.test(detail)) {
+          throw new Error("Guest account conversion is not enabled yet. Enable Manual Linking in Supabase Authentication settings, then try again.");
+        }
+        throw error;
+      }
+      return;
+    }
+    const { error } = await client.auth.signInWithOAuth({ provider: "google", options });
+    if (error) { setAuthIntent(""); throw error; }
+  }
+
+  async function signOut() {
+    const { error } = await client.auth.signOut();
+    if (error) throw error;
+    user = null;
+    profile = null;
+    initializedUserId = "";
+    setAuthIntent("");
+  }
+
+  async function retryStartup() {
+    startupError = null;
+    const session = await restoreSession();
+    if (!session) return false;
+    await activateSession(session, { migrateLegacy: true });
+    return true;
+  }
+
+  const startup = (async function () {
+    const session = await restoreSession();
+    if (!session) return false;
+    // OAuth login is sign-in only at the StudyLab UI level. If Supabase created
+    // a new identity for an unknown Google account, don't create its profile.
+    if (authIntent === "login" && !session.user.is_anonymous) {
+      await loadProfile();
+      if (!profile) {
+        await client.auth.signOut();
+        user = null; profile = null;
+        startupError = "no-profile";
+        return false;
       }
     }
-
-    /*
-     * Every anonymous StudyLab account gets a cloud profile row.
-     * A stable placeholder name is used until the student chooses
-     * a display name. The UUID and AI quota identity are unchanged.
-     */
-    if (!profile) {
-      try {
-        await ensureProfileRow();
-      } catch (profileError) {
-        console.warn("StudyLab default profile:", profileError);
-      }
-    }
-
-    return currentUser;
-  })();
+    await activateSession(session, { migrateLegacy: true });
+    return true;
+  })().catch(error => {
+    startupError = error;
+    console.warn("StudyLab session restore:", error);
+    return false;
+  });
 
   client.auth.onAuthStateChange((event, session) => {
     if (session?.user) {
       user = session.user;
-      if (event === "USER_UPDATED") {
-        updateProfileFromAuth();
-      }
+      if (event === "USER_UPDATED" && initializedUserId) Promise.resolve().then(updateProfileFromAuth);
+    } else if (event === "SIGNED_OUT") {
+      user = null; profile = null; initializedUserId = "";
     }
   });
 
   window.StudyLabAccount = {
-    client,
-    ready,
-    getUser: () => user,
-    getProfile,
-    saveProfile
+    client, ready, startup, continueAsGuest, signInWithGoogle, signOut, retryStartup,
+    getStartupError: () => startupError,
+    getAuthIntent: () => authIntent,
+    clearAuthIntent: () => setAuthIntent(""),
+    getSuggestedDisplayName: () => {
+      const metadata = user?.user_metadata || {};
+      return String(metadata.full_name || metadata.name || metadata.given_name || "").trim();
+    },
+    getUser: () => user, getProfile, saveProfile
   };
 
   // The Study Room page now owns its profile gate and displays the existing

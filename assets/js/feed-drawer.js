@@ -122,11 +122,17 @@
     window.dispatchEvent(new CustomEvent("studylab-social-refresh"));
   });
   function closeFloatingTools() {
-    ["[data-chat-close]", "[data-feedback-close]", "#studyQuickAccessPanel .study-quick-close", "#studyQuickAccessPanel [aria-label='Close Quick Access']"]
-      .forEach(selector => {
-        const close = document.querySelector(selector);
-        if (close && close.offsetParent !== null) close.click();
-      });
+    [
+      "[data-chat-close]",
+      "[data-feedback-close]",
+      "[data-ai-close]",
+      "[data-pet-close]",
+      "#studyQuickAccessPanel .study-quick-close",
+      "#studyQuickAccessPanel [aria-label='Close Quick Access']"
+    ].forEach(selector => {
+      const close = document.querySelector(selector);
+      if (close && close.offsetParent !== null) close.click();
+    });
   }
 
   function setOpen(open) {

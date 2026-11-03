@@ -1155,3 +1155,44 @@ html[data-theme="light"] .phet-card .phet-badge {
     left: 16px;
   }
 }
+
+
+/* Consistent subject-page filter chevron alignment across Maths, Biology,
+   Chemistry and Physics. */
+.lesson-filter-button {
+  min-height: 44px;
+  align-items: center;
+  line-height: 1.2;
+}
+.lesson-filter-button .lesson-filter-current {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+}
+.lesson-filter-button .lesson-filter-arrow {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  margin-left: 2px;
+  opacity: .82;
+  line-height: 0;
+}
+.lesson-filter-button .lesson-filter-arrow svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.lesson-filter.open .lesson-filter-arrow {
+  transform: rotate(180deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .lesson-filter-button .lesson-filter-arrow { transition: none; }
+}

@@ -1,0 +1,722 @@
+#studylab-auth-gateway,#studylab-auth-gateway *{box-sizing:border-box}#studylab-auth-gateway[hidden]{display:none!important}
+#studylab-auth-gateway{position:fixed;inset:0;z-index:100000;display:grid;place-items:center;overflow:auto;padding:clamp(16px,3vw,46px);isolation:isolate;color:#f2f7ff;background:radial-gradient(ellipse at 12% 12%,#1d579044,transparent 38%),radial-gradient(ellipse at 88% 85%,#7048a044,transparent 35%),linear-gradient(135deg,#07101f,#0b1629 54%,#11152b);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;opacity:0;transition:opacity .38s ease}
+#studylab-auth-gateway.auth-visible{opacity:1}#studylab-auth-gateway.auth-leaving{opacity:0;pointer-events:none}
+#studylab-auth-gateway:before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.17;background-image:linear-gradient(#b4d2ff12 1px,transparent 1px),linear-gradient(90deg,#b4d2ff12 1px,transparent 1px);background-size:62px 62px;mask-image:radial-gradient(ellipse,#000 12%,transparent 80%)}
+#studylab-auth-gateway .auth-glow{position:absolute;z-index:-1;border-radius:50%;filter:blur(75px);pointer-events:none;animation:authGlow 14s ease-in-out infinite alternate}
+#studylab-auth-gateway .auth-glow-a{width:min(42vw,520px);height:min(42vw,520px);left:-13%;top:-20%;background:#2389f52c}
+#studylab-auth-gateway .auth-glow-b{width:min(38vw,460px);height:min(38vw,460px);right:-12%;bottom:-22%;background:#8959ff2c;animation-delay:-6s}
+@keyframes authGlow{to{transform:translate(30px,-22px) scale(1.08)}}
+#studylab-auth-gateway .auth-layout{width:min(1120px,100%);min-height:min(680px,calc(100dvh - 48px));margin:auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(340px,450px);align-items:center;gap:clamp(36px,7vw,100px)}
+#studylab-auth-gateway .auth-story{position:relative;min-height:490px;display:flex;flex-direction:column;justify-content:space-between;padding:18px 0 28px;overflow:hidden}
+#studylab-auth-gateway .auth-brand{position:relative;z-index:2;display:flex;align-items:center;gap:12px;width:max-content;color:#f7fbff;text-decoration:none;font-size:19px;font-weight:760;letter-spacing:-.035em}
+#studylab-auth-gateway .auth-brand img{width:42px;height:42px;object-fit:contain;filter:drop-shadow(0 8px 22px #3daeff40)}
+#studylab-auth-gateway .auth-story-copy{position:relative;z-index:2;max-width:590px;padding:46px 0}
+#studylab-auth-gateway .auth-eyebrow,#studylab-auth-gateway .auth-step{margin:0 0 16px;color:#8bd8ff;font-size:10px;font-weight:800;letter-spacing:.19em}
+#studylab-auth-gateway .auth-eyebrow{display:flex;align-items:center;gap:10px}#studylab-auth-gateway .auth-eyebrow i{width:7px;height:7px;border-radius:50%;background:#72d6ff;box-shadow:0 0 15px #72d6ff}
+#studylab-auth-gateway .auth-story h1{margin:0;color:#f5f8ff;font-size:clamp(42px,5.2vw,72px);line-height:1.04;font-weight:760;letter-spacing:-.065em}
+#studylab-auth-gateway .auth-story h1 em{font-style:normal;background:linear-gradient(100deg,#9be5ff,#82baff 48%,#b6a1ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+#studylab-auth-gateway .auth-story-copy>p:last-child{max-width:490px;margin:24px 0 0;color:#aebed2;font-size:clamp(14px,1.2vw,16px);line-height:1.85}
+#studylab-auth-gateway .auth-features{position:relative;z-index:2;display:flex;flex-wrap:wrap;gap:10px 24px;color:#aabbd0;font-size:11px;font-weight:650}
+#studylab-auth-gateway .auth-features span:before{content:"";display:inline-block;width:5px;height:5px;margin:0 8px 1px 0;border-radius:50%;background:#70d4f8;box-shadow:0 0 10px #70d4f8}
+#studylab-auth-gateway .auth-ring{position:absolute;z-index:0;border:1px solid #7ebeff1a;border-radius:50%;pointer-events:none}
+#studylab-auth-gateway .auth-ring-a{width:410px;height:190px;right:-8%;top:14%;transform:rotate(-24deg);box-shadow:0 0 80px #4499ff12,inset 0 0 55px #4499ff09}
+#studylab-auth-gateway .auth-ring-b{width:340px;height:155px;right:1%;top:20%;transform:rotate(32deg);border-color:#ae93ff18}
+#studylab-auth-gateway .auth-panel{position:relative;isolation:isolate;overflow:hidden;width:100%;padding:clamp(25px,3.2vw,38px);border:1px solid #cee4ff30;border-radius:28px;background:linear-gradient(145deg,#1c2f48b0,#0f192b99);box-shadow:0 32px 90px #0006,inset 0 1px #ffffff1f,0 0 70px #3991ff12;-webkit-backdrop-filter:blur(34px) saturate(155%);backdrop-filter:blur(34px) saturate(155%);animation:authCardIn .72s cubic-bezier(.2,.8,.2,1) both}
+@keyframes authCardIn{from{opacity:0;transform:translateY(22px) scale(.985)}to{opacity:1;transform:none}}
+#studylab-auth-gateway .auth-panel-shine{position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(128deg,#ffffff14,transparent 30%,transparent 72%,#91b0ff0e)}
+#studylab-auth-gateway .auth-panel-brand{display:flex;align-items:center;gap:10px;margin-bottom:34px;color:#91a8c5;font-size:9px;font-weight:800;letter-spacing:.18em}
+#studylab-auth-gateway .auth-panel-brand b{display:grid;place-items:center;width:31px;height:31px;border:1px solid #88d4ff4d;border-radius:10px;background:#53b1ff1f;color:#a7e3ff;font-size:18px}
+#studylab-auth-gateway .auth-screen h2{margin:0;color:#f5f8ff;font-size:clamp(25px,2.6vw,31px);line-height:1.18;font-weight:740;letter-spacing:-.045em}
+#studylab-auth-gateway .auth-desc{margin:11px 0 27px;color:#aab9cc;font-size:13px;line-height:1.7}
+#studylab-auth-gateway .auth-options{display:grid;gap:12px}
+#studylab-auth-gateway .auth-option{display:flex;align-items:center;gap:14px;width:100%;min-height:76px;padding:14px 15px;border:1px solid #c1dcff24;border-radius:17px;background:#ffffff0b;color:#f4f8ff;text-align:left;cursor:pointer;transition:transform .22s,border-color .22s,background .22s,box-shadow .22s}
+#studylab-auth-gateway .auth-option:hover{transform:translateY(-2px);border-color:#78ccff61;background:#65abff1a;box-shadow:0 12px 30px #0003}
+#studylab-auth-gateway .auth-option-icon{display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border:1px solid #65c7ff33;border-radius:13px;background:#43a7ff1f;color:#8ddcff;font-size:24px;font-style:normal}
+#studylab-auth-gateway .auth-option-purple{border-color:#b19bff33;background:#8f71ff1f;color:#c2b2ff}
+#studylab-auth-gateway .auth-option>span{display:grid;gap:5px;min-width:0;flex:1}#studylab-auth-gateway .auth-option b{font-size:14px;font-weight:720}#studylab-auth-gateway .auth-option small{color:#a5b6ca;font-size:11px}
+#studylab-auth-gateway .auth-arrow{color:#9db4d0;font-size:25px;font-style:normal}
+#studylab-auth-gateway .auth-or{display:flex;align-items:center;gap:13px;margin:23px 0 12px;color:#8298b3;font-size:9px;font-weight:800;letter-spacing:.18em}
+#studylab-auth-gateway .auth-or:before,#studylab-auth-gateway .auth-or:after{content:"";height:1px;flex:1;background:linear-gradient(90deg,transparent,#b8d2f433,transparent)}
+#studylab-auth-gateway .auth-guest{display:flex;justify-content:center;gap:8px;width:100%;padding:12px;border:0;background:transparent;color:#b6c8de;font-family:inherit;font-size:12px;font-weight:650;cursor:pointer}
+#studylab-auth-gateway .auth-guest:hover{color:#a5e5ff}#studylab-auth-gateway .auth-note{margin:9px 0 0;color:#8297b1;font-size:10px;line-height:1.55;text-align:center}
+#studylab-auth-gateway .auth-back{margin:-8px 0 29px;padding:7px 0;border:0;background:transparent;color:#a9bdd4;font-family:inherit;font-size:12px;font-weight:650;cursor:pointer}#studylab-auth-gateway .auth-back:hover{color:white}
+#studylab-auth-gateway .auth-google{display:flex;align-items:center;gap:12px;width:100%;min-height:55px;margin-top:28px;padding:12px 16px;border:1px solid #ffffffc7;border-radius:14px;background:linear-gradient(#fff,#edf3fb);color:#1c293a;font-family:inherit;font-size:13px;font-weight:720;cursor:pointer;box-shadow:0 10px 28px #0003,inset 0 1px #fff;transition:transform .2s,box-shadow .2s}
+#studylab-auth-gateway .auth-google:hover{transform:translateY(-2px);box-shadow:0 15px 32px #0004,inset 0 1px #fff}
+#studylab-auth-gateway .auth-google-mark{display:grid;place-items:center;width:21px;height:21px;border-radius:50%;background:conic-gradient(from -45deg,#4285f4 0 25%,#34a853 25% 50%,#fbbc05 50% 75%,#ea4335 75%);color:white;font-size:13px;font-weight:800}
+#studylab-auth-gateway .auth-google i{margin-left:auto;color:#60748c;font-size:18px;font-style:normal}
+#studylab-auth-gateway .auth-secure{margin:15px 0 0;color:#8fa4bd;font-size:10px;text-align:center}
+#studylab-auth-gateway .auth-status{margin:18px 0 0;padding:11px 13px;border:1px solid #ff808b40;border-radius:12px;background:#ff556814;color:#ffd0d5;font-size:11px;line-height:1.55}
+#studylab-auth-gateway .auth-status[data-type="info"]{border-color:#70cbff38;background:#52acff14;color:#c5eaff}
+#studylab-auth-gateway .auth-footer{display:flex;align-items:center;justify-content:center;gap:9px;margin-top:32px;color:#7188a4;font-size:8px;font-weight:800;letter-spacing:.16em;white-space:nowrap}
+#studylab-auth-gateway .auth-footer i{width:22px;height:1px;background:#9dbce033}
+#studylab-auth-gateway button:focus-visible,#studylab-auth-gateway a:focus-visible{outline:2px solid #8bdcff;outline-offset:4px}#studylab-auth-gateway button:disabled{opacity:.58;cursor:wait}
+@media(max-width:850px){#studylab-auth-gateway .auth-layout{width:min(520px,100%);min-height:0;grid-template-columns:1fr;gap:12px}#studylab-auth-gateway .auth-story{min-height:0;padding:5px 3px 8px}#studylab-auth-gateway .auth-story-copy{padding:28px 0 22px}#studylab-auth-gateway .auth-story h1{font-size:clamp(36px,8vw,52px)}#studylab-auth-gateway .auth-story-copy>p:last-child{margin-top:14px;font-size:13px;line-height:1.65}#studylab-auth-gateway .auth-features{gap:8px 16px;font-size:10px}#studylab-auth-gateway .auth-ring{display:none}#studylab-auth-gateway .auth-panel{padding:26px;border-radius:24px}#studylab-auth-gateway .auth-panel-brand{margin-bottom:25px}}
+@media(max-width:520px){#studylab-auth-gateway{padding:18px 14px max(18px,env(safe-area-inset-bottom));align-items:start}#studylab-auth-gateway .auth-layout{width:100%;gap:12px;min-height:calc(100dvh - 36px);align-content:center}#studylab-auth-gateway .auth-brand{font-size:17px}#studylab-auth-gateway .auth-brand img{width:36px;height:36px}#studylab-auth-gateway .auth-story-copy{padding:22px 0 18px}#studylab-auth-gateway .auth-story h1{font-size:clamp(34px,10vw,45px)}#studylab-auth-gateway .auth-story-copy>p:last-child{font-size:12px;margin-top:12px}#studylab-auth-gateway .auth-features{display:none}#studylab-auth-gateway .auth-panel{padding:22px 19px;border-radius:21px}#studylab-auth-gateway .auth-panel-brand{margin-bottom:22px}#studylab-auth-gateway .auth-desc{margin-bottom:21px}#studylab-auth-gateway .auth-option{min-height:70px;padding:12px}#studylab-auth-gateway .auth-option-icon{width:39px;height:39px;flex-basis:39px}#studylab-auth-gateway .auth-footer{margin-top:25px;font-size:7px}}
+@media(prefers-reduced-motion:reduce){#studylab-auth-gateway *,#studylab-auth-gateway *:before,#studylab-auth-gateway *:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+#studylab-auth-gateway[data-auth-theme="light"]{color:#17253a;background:radial-gradient(ellipse at 12% 15%,#50a6ff3b,transparent 38%),radial-gradient(ellipse at 88% 82%,#977aff2e,transparent 36%),linear-gradient(135deg,#eaf3ff,#edf4fb 48%,#f4f0ff)}
+#studylab-auth-gateway[data-auth-theme="light"]:before{opacity:.28;background-image:linear-gradient(#44689614 1px,transparent 1px),linear-gradient(90deg,#44689614 1px,transparent 1px)}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-brand,#studylab-auth-gateway[data-auth-theme="light"] .auth-story h1,#studylab-auth-gateway[data-auth-theme="light"] .auth-screen h2{color:#182941}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-story-copy>p:last-child,#studylab-auth-gateway[data-auth-theme="light"] .auth-desc{color:#5d7088}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-features,#studylab-auth-gateway[data-auth-theme="light"] .auth-panel-brand,#studylab-auth-gateway[data-auth-theme="light"] .auth-footer{color:#637891}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-panel{border-color:#5b7eaa38;background:linear-gradient(145deg,#ffffffc7,#f5f9ffab);box-shadow:0 30px 75px #385b882b,inset 0 1px #ffffffeb}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-option{border-color:#5577a033;background:#ffffff8a;color:#1b2d45}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-option:hover{border-color:#4297da66;background:#ffffffd9}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-option small,#studylab-auth-gateway[data-auth-theme="light"] .auth-guest,#studylab-auth-gateway[data-auth-theme="light"] .auth-back{color:#61758e}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-note,#studylab-auth-gateway[data-auth-theme="light"] .auth-secure{color:#71859e}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-status{color:#a32b40}#studylab-auth-gateway[data-auth-theme="light"] .auth-status[data-type="info"]{color:#245c85}
+
+/* Welcome-page pointer glow and restrained 3D interaction. */
+#studylab-auth-gateway .auth-pointer-glow{
+  position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.9;
+  background:radial-gradient(340px circle at var(--auth-pointer-x,50%) var(--auth-pointer-y,50%),rgba(75,169,255,.16),rgba(102,117,255,.055) 42%,transparent 72%);
+  transition:opacity .2s ease;
+}
+#studylab-auth-gateway .auth-layout{position:relative;z-index:1}
+#studylab-auth-gateway .auth-story-copy>p.auth-story-subtitle{
+  margin:15px 0 0;color:#8bd8ff;font-size:clamp(15px,1.35vw,18px);font-weight:700;letter-spacing:-.015em;line-height:1.4
+}
+#studylab-auth-gateway .auth-story-copy>p.auth-story-subtitle+p{margin-top:12px}
+#studylab-auth-gateway .auth-sinhala{
+  margin:-16px 0 23px;color:#a9bdd1;font-family:system-ui,"Noto Sans Sinhala",sans-serif;
+  font-size:11px;line-height:1.75;font-weight:400;letter-spacing:0
+}
+#studylab-auth-gateway .auth-guest{
+  align-items:center;min-height:45px;padding:11px 16px;border:1px solid #c1dcff35;border-radius:13px;
+  background:linear-gradient(135deg,#ffffff12,#ffffff08);color:#d9eaff;
+  box-shadow:inset 0 1px #ffffff12;transition:transform .2s,border-color .2s,background .2s,box-shadow .2s
+}
+#studylab-auth-gateway .auth-guest i{font-style:normal;font-size:17px;color:#91dfff}
+#studylab-auth-gateway .auth-guest:hover{
+  transform:translateY(-2px);border-color:#78ccff78;background:#65abff20;
+  box-shadow:0 10px 25px #0003,inset 0 1px #ffffff18
+}
+#studylab-auth-gateway .auth-panel{
+  transform:perspective(1100px) rotateX(var(--auth-tilt-x,0deg)) rotateY(var(--auth-tilt-y,0deg));
+  transform-style:preserve-3d;transition:transform .16s ease-out;
+}
+@keyframes authCardIn{
+  from{opacity:0;transform:perspective(1100px) translateY(22px) scale(.985)}
+  to{opacity:1;transform:perspective(1100px) rotateX(var(--auth-tilt-x,0deg)) rotateY(var(--auth-tilt-y,0deg))}
+}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-story-copy>p.auth-story-subtitle{color:#2679b6}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-sinhala{color:#657a91}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-guest{
+  border-color:#5577a044;background:linear-gradient(135deg,#ffffffbd,#f3f8ff99);color:#34536f;box-shadow:inset 0 1px #fff
+}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-guest i{color:#2679b6}
+@media(hover:none),(pointer:coarse){
+  #studylab-auth-gateway .auth-pointer-glow{display:none}
+  #studylab-auth-gateway .auth-panel{transform:none!important;transition:none}
+}
+@media(max-width:520px){
+  #studylab-auth-gateway .auth-story h1{font-size:clamp(30px,8.7vw,40px);line-height:1.06}
+  #studylab-auth-gateway .auth-sinhala{font-size:10px;margin-top:-12px;margin-bottom:18px}
+  #studylab-auth-gateway .auth-story-copy>p.auth-story-subtitle{font-size:14px;margin-top:10px}
+}
+@media(prefers-reduced-motion:reduce){
+  #studylab-auth-gateway .auth-pointer-glow{display:none}
+  #studylab-auth-gateway .auth-panel,#studylab-auth-gateway .auth-guest{transition:none!important;transform:none!important}
+}
+
+
+/* Theme-aware welcome screen: follow the operating system appearance. */
+#studylab-auth-gateway[data-auth-theme="light"] {
+  color:#182941;
+  background:
+    radial-gradient(ellipse at 12% 12%,#6ebaff55,transparent 39%),
+    radial-gradient(ellipse at 88% 85%,#a78bfa3b,transparent 36%),
+    linear-gradient(135deg,#edf5ff,#f7faff 52%,#f3efff);
+}
+#studylab-auth-gateway[data-auth-theme="light"]:before {
+  opacity:.35;
+  background-image:linear-gradient(#44689616 1px,transparent 1px),linear-gradient(90deg,#44689616 1px,transparent 1px);
+}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-brand,
+#studylab-auth-gateway[data-auth-theme="light"] .auth-story h1,
+#studylab-auth-gateway[data-auth-theme="light"] .auth-screen h2 {color:#172b45}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-eyebrow,
+#studylab-auth-gateway[data-auth-theme="light"] .auth-step {color:#2876a8}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-eyebrow i {background:#329bd1;box-shadow:0 0 12px #329bd177}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-story h1 em {
+  background:linear-gradient(100deg,#258bb9,#477fd0 48%,#8066c7);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-story-copy>p:last-child,
+#studylab-auth-gateway[data-auth-theme="light"] .auth-desc {color:#526b84}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-features {color:#536c85}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-features span:before {background:#328fc1;box-shadow:0 0 9px #328fc155}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-panel {
+  border-color:#ffffffd9;
+  background:linear-gradient(145deg,#ffffffd9,#f2f7ffcc);
+  box-shadow:0 28px 80px #34577a24,inset 0 1px #fff,0 0 65px #78baff24;
+}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-panel-brand {color:#647e99}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-panel-brand b {border-color:#65a9d65c;background:#d9efff;color:#287caf}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-option {
+  border-color:#9eb9d43d;background:#ffffffa8;color:#1d3550;
+  box-shadow:0 5px 18px #43658a0b;
+}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-option:hover {
+  border-color:#68a9d8;background:#e8f5ff;box-shadow:0 10px 24px #45698a1a;
+}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-option-icon {border-color:#76b8df55;background:#e1f3ff;color:#287eae}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-option-purple {border-color:#a99ae655;background:#f0eaff;color:#7456b6}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-option small {color:#637991}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-arrow {color:#64809c}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-guest {color:#42627f}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-guest:hover {color:#176d9d}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-note,
+#studylab-auth-gateway[data-auth-theme="light"] .auth-secure {color:#71869b}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-back {color:#486783}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-back:hover {color:#174d75}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-footer {color:#70869e}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-ring {border-color:#5c9ed21c}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-ring-b {border-color:#9177d51c}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-sinhala {color:#486783}
+
+/* Subtle A/L subject formulas drifting behind the content. */
+#studylab-auth-gateway .auth-formula-field {
+  position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;user-select:none;
+}
+#studylab-auth-gateway .formula {
+  position:absolute;display:block;white-space:nowrap;
+  color:#9bd8ff;opacity:.16;font:600 clamp(13px,1.35vw,19px)/1.2 "Segoe UI",sans-serif;
+  text-shadow:0 0 18px #65baff2b;
+  animation:authFormulaDrift 18s ease-in-out infinite alternate;
+}
+#studylab-auth-gateway .formula-one {top:18%;left:5%;animation-delay:-3s}
+#studylab-auth-gateway .formula-two {top:39%;right:4%;font-size:22px;animation-delay:-9s}
+#studylab-auth-gateway .formula-three {bottom:19%;left:12%;animation-delay:-13s}
+#studylab-auth-gateway .formula-four {top:68%;right:13%;animation-delay:-6s}
+#studylab-auth-gateway .formula-five {top:11%;right:25%;animation-delay:-11s}
+#studylab-auth-gateway .formula-six {bottom:9%;right:31%;font-size:13px;animation-delay:-4s}
+#studylab-auth-gateway .formula-seven {top:52%;left:44%;animation-delay:-15s}
+@keyframes authFormulaDrift {
+  from {transform:translate3d(-5px,8px,0) rotate(-5deg)}
+  to {transform:translate3d(9px,-12px,0) rotate(5deg)}
+}
+#studylab-auth-gateway .auth-story,
+#studylab-auth-gateway .auth-panel {z-index:1}
+#studylab-auth-gateway .auth-story-copy,
+#studylab-auth-gateway .auth-brand,
+#studylab-auth-gateway .auth-features {z-index:2}
+#studylab-auth-gateway[data-auth-theme="light"] .formula {
+  color:#4385b2;opacity:.13;text-shadow:0 0 16px #5b9bc51c;
+}
+@media(max-width:850px) {
+  #studylab-auth-gateway .formula {opacity:.11;font-size:13px}
+  #studylab-auth-gateway .formula-seven,
+  #studylab-auth-gateway .formula-six {display:none}
+}
+@media(prefers-reduced-motion:reduce) {
+  #studylab-auth-gateway .formula {animation:none;opacity:.09}
+}
+
+
+/* Welcome page finishing pass: theme-safe stats, animated panel edge and Sinhala font. */
+#studylab-auth-gateway .auth-story-description {
+  max-width:490px;margin:12px 0 0;color:#aebed2;
+  font-size:clamp(14px,1.2vw,16px);line-height:1.85;
+}
+#studylab-auth-gateway .auth-sinhala {
+  font-family:"Nirmala UI","Nirmala", "Noto Sans Sinhala", sans-serif;
+}
+#studylab-auth-gateway .auth-stats {
+  display:flex;flex-wrap:wrap;gap:12px;margin-top:25px;
+}
+#studylab-auth-gateway .auth-stat {
+  min-width:155px;padding:12px 16px;border:1px solid #80caff2b;border-radius:14px;
+  background:linear-gradient(135deg,#122a4580,#18274470);
+  box-shadow:inset 0 1px #ffffff0c,0 8px 22px #0002;
+}
+#studylab-auth-gateway .auth-stat strong {
+  display:block;color:#9be6ff;font-size:clamp(23px,2.5vw,30px);
+  line-height:1.1;font-weight:800;letter-spacing:-.04em;font-variant-numeric:tabular-nums;
+  text-shadow:0 0 18px #39baff55;
+}
+#studylab-auth-gateway .auth-stat span {
+  display:block;margin-top:5px;color:#b7c9dc;font-size:10px;font-weight:700;
+  letter-spacing:.025em;
+}
+#studylab-auth-gateway .auth-panel {
+  border-color:#63d9ff68;
+  box-shadow:0 32px 90px #0006,inset 0 1px #ffffff1f,0 0 55px #168dff25;
+}
+#studylab-auth-gateway .auth-panel::before {
+  content:"";position:absolute;inset:0;z-index:1;padding:1.5px;border-radius:inherit;
+  background:conic-gradient(from var(--auth-border-angle,0deg),transparent 0 52%,#00e5ff 62%,#287bff 76%,#6a5cff 84%,transparent 96% 100%);
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;
+  animation:authPanelBorder 5s linear infinite;
+}
+#studylab-auth-gateway .auth-panel > :not(.auth-panel-shine) {
+  position:relative;z-index:2;
+}
+@keyframes authPanelBorder {
+  to { --auth-border-angle:360deg; }
+}
+@property --auth-border-angle {
+  syntax:"<angle>";inherits:false;initial-value:0deg;
+}
+#studylab-auth-gateway .auth-guest {
+  min-height:45px;padding:11px 16px;border:1px solid #83cfff55;
+  border-radius:12px;background:linear-gradient(135deg,#17304b,#14233a);
+  color:#d9efff;box-shadow:inset 0 1px #ffffff14,0 5px 16px #0002;
+}
+#studylab-auth-gateway .auth-guest:hover {
+  border-color:#6edcff;background:linear-gradient(135deg,#1b4265,#1c3151);
+  color:#fff;box-shadow:0 0 20px #2caeff2c;
+}
+
+/* Light theme: white remains dominant, with restrained blue, purple and navy accents. */
+#studylab-auth-gateway[data-auth-theme="light"] {
+  background:
+    radial-gradient(ellipse at 9% 13%,#b8ddff55,transparent 34%),
+    radial-gradient(ellipse at 91% 82%,#d9caff45,transparent 32%),
+    linear-gradient(135deg,#ffffff 0%,#fbfdff 54%,#f8f6ff 100%);
+  color:#172b45;
+}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-story-description {
+  color:#526b84;
+}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-stat {
+  border-color:#9bbce64a;
+  background:linear-gradient(135deg,#ffffffed,#f2f7ffed 72%,#f7f3ffed);
+  box-shadow:inset 0 1px #fff,0 8px 22px #42658a12;
+}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-stat strong {
+  color:#174f82;text-shadow:0 0 14px #64bfff30;
+}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-stat span {color:#526b84}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-panel {
+  border-color:#70b8e9a6;
+  background:linear-gradient(145deg,#ffffffed,#f7faffeb 66%,#f5f1ffdf);
+  box-shadow:0 28px 80px #34577a20,inset 0 1px #fff,0 0 58px #78baff2b;
+}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-panel::before {
+  background:conic-gradient(from var(--auth-border-angle,0deg),transparent 0 52%,#00a9d8 62%,#286ee8 76%,#7256d9 84%,transparent 96% 100%);
+}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-guest {
+  border-color:#6689b5a6;background:linear-gradient(135deg,#ffffff,#eef5ff);
+  color:#244765;box-shadow:inset 0 1px #fff,0 5px 15px #34577a12;
+}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-guest:hover {
+  border-color:#398fca;background:linear-gradient(135deg,#eaf6ff,#f1edff);
+  color:#163e62;box-shadow:0 0 18px #4b9fe52b;
+}
+@media(max-width:850px) {
+  #studylab-auth-gateway .auth-story-description {margin-top:12px;font-size:13px;line-height:1.65}
+  #studylab-auth-gateway .auth-stats {gap:9px;margin-top:17px}
+  #studylab-auth-gateway .auth-stat {min-width:0;flex:1;padding:10px 12px}
+}
+@media(max-width:520px) {
+  #studylab-auth-gateway .auth-story-description {font-size:12px;margin-top:10px}
+  #studylab-auth-gateway .auth-stats {gap:8px;margin-top:13px}
+  #studylab-auth-gateway .auth-stat {padding:9px 10px}
+  #studylab-auth-gateway .auth-stat strong {font-size:22px}
+  #studylab-auth-gateway .auth-stat span {font-size:9px}
+}
+@media(prefers-reduced-motion:reduce) {
+  #studylab-auth-gateway .auth-panel::before {animation:none;opacity:.8}
+}
+
+
+/* Match the system-selected welcome theme even when the main site theme differs. */
+html #studylab-auth-gateway[data-auth-theme="light"] {
+  background:
+    radial-gradient(ellipse at 9% 13%,#b8ddff55,transparent 34%),
+    radial-gradient(ellipse at 91% 82%,#d9caff45,transparent 32%),
+    linear-gradient(135deg,#ffffff 0%,#fbfdff 54%,#f8f6ff 100%);
+}
+html #studylab-auth-gateway[data-auth-theme="light"] .auth-panel {
+  border-color:#70b8e9a6;
+  background:linear-gradient(145deg,#ffffffed,#f7faffeb 66%,#f5f1ffdf);
+  box-shadow:0 28px 80px #34577a20,inset 0 1px #fff,0 0 58px #78baff2b;
+}
+html #studylab-auth-gateway[data-auth-theme="light"] .auth-guest {
+  border:1px solid #6689b5a6;
+  background:linear-gradient(135deg,#ffffff,#eef5ff);
+  color:#244765;
+  box-shadow:inset 0 1px #fff,0 5px 15px #34577a12;
+}
+html #studylab-auth-gateway[data-auth-theme="light"] .auth-guest:hover {
+  border-color:#398fca;
+  background:linear-gradient(135deg,#eaf6ff,#f1edff);
+  color:#163e62;
+}
+
+
+/* Fixed, viewport-fitted welcome screen: no page or overlay scrollbars. */
+html:has(#studylab-auth-gateway:not([hidden])),
+body:has(#studylab-auth-gateway:not([hidden])) {
+  overflow:hidden !important;
+  overscroll-behavior:none;
+}
+#studylab-auth-gateway {
+  inset:0;
+  width:100%;
+  height:100vh;
+  height:100dvh;
+  min-height:0;
+  overflow:hidden;
+  overflow:clip;
+  padding:clamp(10px,1.8vh,22px) clamp(18px,3vw,42px);
+  scrollbar-width:none;
+}
+#studylab-auth-gateway::-webkit-scrollbar {display:none;width:0;height:0}
+#studylab-auth-gateway .auth-layout {
+  width:min(1120px,100%);
+  height:100%;
+  min-height:0;
+  max-height:100%;
+  gap:clamp(24px,4.5vw,68px);
+}
+#studylab-auth-gateway .auth-story {
+  min-height:0;
+  height:100%;
+  padding:0;
+  justify-content:space-evenly;
+}
+#studylab-auth-gateway .auth-story-copy {padding:clamp(10px,1.8vh,22px) 0}
+#studylab-auth-gateway .auth-story h1 {font-size:clamp(34px,4.5vw,62px)}
+#studylab-auth-gateway .auth-story-copy>p.auth-story-subtitle {margin-top:10px}
+#studylab-auth-gateway .auth-story-description {font-size:clamp(12px,1vw,14px);line-height:1.65}
+#studylab-auth-gateway .auth-stats {margin-top:clamp(12px,1.8vh,20px)}
+#studylab-auth-gateway .auth-panel {max-height:100%;padding:clamp(20px,2.6vw,32px)}
+#studylab-auth-gateway .auth-panel-brand {margin-bottom:clamp(14px,2vh,23px)}
+#studylab-auth-gateway .auth-option {min-height:clamp(58px,8vh,70px);padding:11px 13px}
+#studylab-auth-gateway .auth-options {gap:9px}
+#studylab-auth-gateway .auth-desc {margin:8px 0 16px}
+#studylab-auth-gateway .auth-or {margin:14px 0 8px}
+#studylab-auth-gateway .auth-guest {min-height:40px;padding:9px 14px}
+#studylab-auth-gateway .auth-note {margin-top:6px}
+#studylab-auth-gateway .auth-footer {margin-top:18px}
+#studylab-auth-gateway .formula {
+  font-size:clamp(16px,1.7vw,23px);
+  opacity:.21;
+  animation-duration:12s;
+}
+#studylab-auth-gateway .formula-two {font-size:clamp(22px,2.2vw,29px)}
+#studylab-auth-gateway .formula-six {font-size:clamp(15px,1.5vw,19px)}
+#studylab-auth-gateway[data-auth-theme="light"] .formula {opacity:.17}
+
+@media(max-width:850px) {
+  #studylab-auth-gateway {padding:clamp(8px,1.4vh,14px) clamp(12px,3vw,22px)}
+  #studylab-auth-gateway .auth-layout {
+    width:min(560px,100%);
+    height:100%;
+    min-height:0;
+    grid-template-columns:minmax(0,1fr);
+    grid-template-rows:auto auto;
+    align-content:center;
+    justify-content:center;
+    gap:clamp(5px,1vh,10px);
+  }
+  #studylab-auth-gateway .auth-story {
+    height:auto;
+    min-height:0;
+    padding:0;
+    justify-content:center;
+  }
+  #studylab-auth-gateway .auth-story-copy {padding:clamp(5px,1vh,10px) 0}
+  #studylab-auth-gateway .auth-brand {font-size:15px;gap:8px}
+  #studylab-auth-gateway .auth-brand img {width:30px;height:30px}
+  #studylab-auth-gateway .auth-eyebrow {margin-bottom:8px;font-size:9px}
+  #studylab-auth-gateway .auth-story h1 {font-size:clamp(28px,5.4vw,42px);line-height:1.02}
+  #studylab-auth-gateway .auth-story-copy>p.auth-story-subtitle {margin-top:6px;font-size:13px}
+  #studylab-auth-gateway .auth-story-description {margin-top:5px;font-size:11px;line-height:1.45}
+  #studylab-auth-gateway .auth-stats {gap:7px;margin-top:8px}
+  #studylab-auth-gateway .auth-stat {min-width:0;flex:1;padding:7px 9px}
+  #studylab-auth-gateway .auth-stat strong {font-size:20px}
+  #studylab-auth-gateway .auth-stat span {margin-top:3px;font-size:8px}
+  #studylab-auth-gateway .auth-panel {
+    width:100%;
+    max-height:none;
+    padding:clamp(13px,2.3vh,20px) clamp(16px,3vw,22px);
+    border-radius:19px;
+  }
+  #studylab-auth-gateway .auth-panel-brand {margin-bottom:9px;font-size:8px}
+  #studylab-auth-gateway .auth-panel-brand b {width:25px;height:25px}
+  #studylab-auth-gateway .auth-step {margin-bottom:7px;font-size:9px}
+  #studylab-auth-gateway .auth-screen h2 {font-size:clamp(21px,4.8vw,26px)}
+  #studylab-auth-gateway .auth-desc {margin:5px 0 9px;font-size:11px;line-height:1.4}
+  #studylab-auth-gateway .auth-sinhala {margin:0 0 9px;font-size:10px;line-height:1.45}
+  #studylab-auth-gateway .auth-options {gap:7px}
+  #studylab-auth-gateway .auth-option {min-height:51px;padding:8px 10px;border-radius:12px;gap:9px}
+  #studylab-auth-gateway .auth-option-icon {width:32px;height:32px;flex-basis:32px;font-size:19px}
+  #studylab-auth-gateway .auth-option b {font-size:12px}
+  #studylab-auth-gateway .auth-option small {font-size:9px}
+  #studylab-auth-gateway .auth-arrow {font-size:20px}
+  #studylab-auth-gateway .auth-or {margin:7px 0 3px;font-size:8px}
+  #studylab-auth-gateway .auth-guest {min-height:34px;padding:6px 10px;font-size:11px}
+  #studylab-auth-gateway .auth-note {margin-top:3px;font-size:8px;line-height:1.3}
+  #studylab-auth-gateway .auth-footer {margin-top:8px;font-size:7px}
+  #studylab-auth-gateway .formula {font-size:15px;opacity:.15;animation-duration:11s}
+}
+@media(max-width:520px) {
+  #studylab-auth-gateway {padding: max(7px,env(safe-area-inset-top)) 11px max(7px,env(safe-area-inset-bottom))}
+  #studylab-auth-gateway .auth-layout {width:100%;gap:6px;align-content:center}
+  #studylab-auth-gateway .auth-story-copy {padding:5px 0}
+  #studylab-auth-gateway .auth-story h1 {font-size:clamp(27px,7.4vw,35px);line-height:1.02}
+  #studylab-auth-gateway .auth-story-description {font-size:10px;line-height:1.38}
+  #studylab-auth-gateway .auth-stats {gap:6px;margin-top:7px}
+  #studylab-auth-gateway .auth-stat {padding:6px 8px;border-radius:10px}
+  #studylab-auth-gateway .auth-stat strong {font-size:18px}
+  #studylab-auth-gateway .auth-stat span {font-size:7px}
+  #studylab-auth-gateway .auth-panel {padding:12px 15px;border-radius:17px}
+  #studylab-auth-gateway .auth-panel-brand {margin-bottom:7px}
+  #studylab-auth-gateway .auth-desc {margin:4px 0 7px}
+  #studylab-auth-gateway .auth-sinhala {font-size:9px;margin-bottom:7px}
+  #studylab-auth-gateway .auth-option {min-height:46px;padding:7px 9px}
+  #studylab-auth-gateway .auth-option-icon {width:29px;height:29px;flex-basis:29px}
+  #studylab-auth-gateway .auth-or {margin:5px 0 2px}
+  #studylab-auth-gateway .auth-guest {min-height:30px;padding:5px}
+  #studylab-auth-gateway .auth-note {font-size:7px}
+  #studylab-auth-gateway .auth-footer {margin-top:6px;font-size:6px}
+  #studylab-auth-gateway .formula {font-size:13px;opacity:.13;animation-duration:10s}
+}
+@media(max-height:700px) {
+  #studylab-auth-gateway .auth-story h1 {font-size:clamp(26px,4vw,48px)}
+  #studylab-auth-gateway .auth-story-copy {padding:4px 0}
+  #studylab-auth-gateway .auth-panel {padding-top:12px;padding-bottom:12px}
+  #studylab-auth-gateway .auth-panel-brand {margin-bottom:7px}
+  #studylab-auth-gateway .auth-option {min-height:46px}
+  #studylab-auth-gateway .auth-footer {margin-top:7px}
+}
+@media(prefers-reduced-motion:reduce) {
+  #studylab-auth-gateway .formula {animation:none}
+}
+
+
+/* Desktop welcome layout: restore the fuller sign-in card proportions while
+   keeping the entire experience fitted to the viewport. Mobile sizing above
+   remains intentionally unchanged. */
+@media (min-width:851px) {
+  #studylab-auth-gateway {padding:clamp(12px,2vh,24px) clamp(28px,4vw,60px)}
+  #studylab-auth-gateway .auth-layout {
+    width:min(1280px,100%);
+    grid-template-columns:minmax(0,1fr) minmax(390px,490px);
+    gap:clamp(42px,6vw,92px);
+  }
+  #studylab-auth-gateway .auth-story-copy {padding:clamp(16px,2.5vh,30px) 0}
+  #studylab-auth-gateway .auth-story h1 {font-size:clamp(42px,4.8vw,68px)}
+  #studylab-auth-gateway .auth-story-description {font-size:clamp(13px,1.05vw,15px);line-height:1.75}
+  #studylab-auth-gateway .auth-stats {gap:14px;margin-top:clamp(16px,2.4vh,26px)}
+  #studylab-auth-gateway .auth-stat {padding:14px 18px}
+  #studylab-auth-gateway .auth-stat strong {font-size:clamp(25px,2.1vw,31px)}
+  #studylab-auth-gateway .auth-stat span {font-size:11px}
+  #studylab-auth-gateway .auth-panel {
+    width:100%;
+    padding:clamp(30px,3vw,40px);
+    border-radius:30px;
+  }
+  #studylab-auth-gateway .auth-panel-brand {margin-bottom:clamp(22px,2.8vh,32px)}
+  #studylab-auth-gateway .auth-screen h2 {font-size:clamp(27px,2.4vw,33px)}
+  #studylab-auth-gateway .auth-desc {margin:11px 0 21px;font-size:14px}
+  #studylab-auth-gateway .auth-sinhala {font-size:12px;margin-bottom:22px}
+  #studylab-auth-gateway .auth-options {gap:11px}
+  #studylab-auth-gateway .auth-option {min-height:70px;padding:13px 15px}
+  #studylab-auth-gateway .auth-option-icon {width:42px;height:42px;flex-basis:42px}
+  #studylab-auth-gateway .auth-option b {font-size:14px}
+  #studylab-auth-gateway .auth-option small {font-size:11px}
+  #studylab-auth-gateway .auth-or {margin:19px 0 10px}
+  #studylab-auth-gateway .auth-guest {min-height:43px;padding:10px 14px}
+  #studylab-auth-gateway .auth-note {margin-top:7px;font-size:10px}
+  #studylab-auth-gateway .auth-footer {margin-top:16px}
+}
+@media (min-width:851px) and (max-height:760px) {
+  #studylab-auth-gateway .auth-panel {padding:22px 30px}
+  #studylab-auth-gateway .auth-panel-brand {margin-bottom:14px}
+  #studylab-auth-gateway .auth-sinhala {margin-bottom:12px}
+  #studylab-auth-gateway .auth-option {min-height:58px}
+  #studylab-auth-gateway .auth-or {margin:10px 0 6px}
+  #studylab-auth-gateway .auth-footer {margin-top:9px}
+}
+
+
+/* Welcome layout refinement: place the descriptive copy and counters after
+   the account panel on tablet/mobile, while keeping the headline above it. */
+@media (max-width:850px) {
+  #studylab-auth-gateway .auth-layout {
+    grid-template-columns:minmax(0,1fr);
+    grid-template-areas:
+      "brand"
+      "eyebrow"
+      "heading"
+      "subtitle"
+      "panel"
+      "description"
+      "stats"
+      "features";
+    grid-template-rows:repeat(8,auto);
+    align-content:center;
+    justify-items:stretch;
+  }
+  #studylab-auth-gateway .auth-story,
+  #studylab-auth-gateway .auth-story-copy {
+    display:contents;
+  }
+  #studylab-auth-gateway .auth-brand {grid-area:brand}
+  #studylab-auth-gateway .auth-eyebrow {grid-area:eyebrow}
+  #studylab-auth-gateway .auth-story h1 {grid-area:heading}
+  #studylab-auth-gateway .auth-story-subtitle {grid-area:subtitle}
+  #studylab-auth-gateway .auth-panel {grid-area:panel;align-self:center}
+  #studylab-auth-gateway .auth-story-description {grid-area:description}
+  #studylab-auth-gateway .auth-stats {grid-area:stats}
+  #studylab-auth-gateway .auth-features {grid-area:features}
+  #studylab-auth-gateway .auth-ring {display:none}
+  #studylab-auth-gateway .auth-story-description {margin-top:8px}
+  #studylab-auth-gateway .auth-stats {margin-top:8px}
+}
+@media (max-width:520px) {
+  #studylab-auth-gateway .auth-layout {gap:5px}
+  #studylab-auth-gateway .auth-story-description {margin-top:6px}
+  #studylab-auth-gateway .auth-stats {margin-top:6px}
+}
+
+/* Give the desktop account panel more presence without squeezing the story
+   column or changing the compact tablet/mobile layout. */
+@media (min-width:851px) {
+  #studylab-auth-gateway .auth-layout {
+    width:min(1320px,100%);
+    grid-template-columns:minmax(0,1fr) minmax(420px,520px);
+    gap:clamp(38px,5.2vw,78px);
+  }
+  #studylab-auth-gateway .auth-panel {
+    padding:clamp(34px,3.1vw,44px);
+    border-radius:32px;
+  }
+  #studylab-auth-gateway .auth-option {
+    min-height:76px;
+    padding:15px 17px;
+  }
+  #studylab-auth-gateway .auth-option-icon {
+    width:45px;height:45px;flex-basis:45px;
+  }
+}
+@media (min-width:851px) and (max-height:760px) {
+  #studylab-auth-gateway .auth-panel {padding:22px 32px}
+  #studylab-auth-gateway .auth-option {min-height:60px}
+}
+
+
+/* Final viewport safety: keep every control reachable on short screens,
+   landscape phones/tablets, split-screen windows and browser zoom. */
+#studylab-auth-gateway {
+  box-sizing:border-box;
+  max-width:100vw;
+  overflow-x:hidden;
+  padding-left:max(12px,env(safe-area-inset-left));
+  padding-right:max(12px,env(safe-area-inset-right));
+}
+#studylab-auth-gateway .auth-layout,
+#studylab-auth-gateway .auth-story,
+#studylab-auth-gateway .auth-panel,
+#studylab-auth-gateway .auth-option {
+  min-width:0;
+}
+#studylab-auth-gateway .auth-story h1,
+#studylab-auth-gateway .auth-story-description,
+#studylab-auth-gateway .auth-option b,
+#studylab-auth-gateway .auth-option small {
+  overflow-wrap:anywhere;
+}
+
+/* A no-scroll layout is used when it genuinely fits. If the viewport is
+   unusually short, vertical scrolling is safer than clipping the form. */
+@media (max-height:760px) {
+  #studylab-auth-gateway {
+    overflow-x:hidden;
+    overflow-y:auto;
+    overscroll-behavior-y:contain;
+    align-items:start;
+    scrollbar-width:thin;
+  }
+  #studylab-auth-gateway .auth-layout {
+    height:auto;
+    min-height:100%;
+    max-height:none;
+    padding-top:8px;
+    padding-bottom:8px;
+  }
+  #studylab-auth-gateway .auth-story {
+    height:auto;
+  }
+}
+
+/* Landscape phones and compact split-screen/tablet windows. */
+@media (max-width:850px) and (max-height:520px) {
+  #studylab-auth-gateway {
+    padding-top:max(8px,env(safe-area-inset-top));
+    padding-bottom:max(8px,env(safe-area-inset-bottom));
+  }
+  #studylab-auth-gateway .auth-layout {
+    align-content:start;
+    gap:8px;
+  }
+  #studylab-auth-gateway .auth-brand img {width:26px;height:26px}
+  #studylab-auth-gateway .auth-story-copy {padding:3px 0}
+  #studylab-auth-gateway .auth-story h1 {font-size:clamp(25px,5vw,34px)}
+  #studylab-auth-gateway .auth-eyebrow {margin-bottom:5px}
+  #studylab-auth-gateway .auth-story-description {font-size:10px}
+  #studylab-auth-gateway .auth-stats {margin-top:5px}
+  #studylab-auth-gateway .auth-panel {padding:12px 16px}
+  #studylab-auth-gateway .auth-panel-brand {margin-bottom:6px}
+  #studylab-auth-gateway .auth-footer {margin-top:5px}
+}
+
+/* iOS Safari and modern mobile browsers: respect dynamic viewport changes. */
+@supports (height: 100svh) {
+  #studylab-auth-gateway {min-height:100svh}
+}
+
+
+/* Larger account card: more breathing room on desktop, still adaptive on compact screens. */
+#studylab-auth-gateway .auth-layout{
+  width:min(1260px,100%);
+  min-height:min(760px,calc(100dvh - 48px));
+  grid-template-columns:minmax(0,1fr) minmax(420px,540px);
+  gap:clamp(42px,6vw,92px);
+}
+#studylab-auth-gateway .auth-panel{
+  min-height:560px;
+  padding:clamp(36px,3.6vw,48px);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+#studylab-auth-gateway .auth-panel-brand{margin-bottom:42px;font-size:10px}
+#studylab-auth-gateway .auth-panel-brand b{width:36px;height:36px;font-size:20px}
+#studylab-auth-gateway .auth-screen h2{font-size:clamp(29px,2.8vw,35px)}
+#studylab-auth-gateway .auth-desc{font-size:14px;line-height:1.8;margin:14px 0 31px}
+#studylab-auth-gateway .auth-option{min-height:86px;padding:17px 18px;gap:17px}
+#studylab-auth-gateway .auth-option-icon{width:48px;height:48px;flex-basis:48px;font-size:27px}
+#studylab-auth-gateway .auth-option b{font-size:15px}
+#studylab-auth-gateway .auth-option small{font-size:12px}
+#studylab-auth-gateway .auth-or{margin:27px 0 15px}
+#studylab-auth-gateway .auth-guest{min-height:50px;font-size:13px}
+#studylab-auth-gateway .auth-note{font-size:11px}
+#studylab-auth-gateway .auth-google{min-height:64px;font-size:14px;margin-top:34px}
+#studylab-auth-gateway .auth-secure{font-size:11px;margin-top:18px}
+#studylab-auth-gateway .auth-status{font-size:12px;padding:13px 15px}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-status{border-color:#e5a1aa;background:#fff0f1;color:#922d3d}
+#studylab-auth-gateway[data-auth-theme="light"] .auth-status[data-type="info"]{border-color:#9bc9e5;background:#eaf6ff;color:#245c85}
+@media(max-width:850px){
+  #studylab-auth-gateway .auth-layout{width:min(580px,100%);grid-template-columns:1fr;gap:14px;min-height:0}
+  #studylab-auth-gateway .auth-panel{min-height:520px;padding:34px}
+  #studylab-auth-gateway .auth-panel-brand{margin-bottom:34px}
+}
+@media(max-width:520px){
+  #studylab-auth-gateway{padding:16px 13px max(18px,env(safe-area-inset-bottom))}
+  #studylab-auth-gateway .auth-layout{width:100%;min-height:calc(100dvh - 34px);gap:10px}
+  #studylab-auth-gateway .auth-panel{min-height:490px;padding:29px 23px;border-radius:23px}
+  #studylab-auth-gateway .auth-panel-brand{margin-bottom:29px}
+  #studylab-auth-gateway .auth-option{min-height:78px;padding:14px}
+  #studylab-auth-gateway .auth-google{min-height:60px}
+}
+@media(max-height:760px) and (min-width:521px){
+  #studylab-auth-gateway{align-items:start}
+  #studylab-auth-gateway .auth-layout{min-height:0;padding:18px 0}
+  #studylab-auth-gateway .auth-story{min-height:440px}
+  #studylab-auth-gateway .auth-panel{min-height:520px}
+}
