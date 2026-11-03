@@ -9,6 +9,8 @@
   const BUCKET = "studylab-social";
   const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
   const MAX_IMAGES = 4;
+  const MAX_POST_WORDS = 1000;
+  const MAX_POST_CHARS = 15000;
   const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
   const panel = document.getElementById("studyLabFeedPanel");
   if (!panel) return;
@@ -21,10 +23,22 @@
   if (!form || !textarea || !postButton || !stream) return;
 
   form.innerHTML = `
-    <button class="sl-feed-create-trigger" type="button" aria-label="Start creating a post">
-      <span aria-hidden="true">✎</span><span>Share something with students…</span>
+    <button class="sl-feed-create-trigger" type="button" aria-label="Click here to bigger view">
+      <span aria-hidden="true">✎</span><span>Click here to bigger view</span>
     </button>
-    <textarea maxlength="2000" placeholder="Share something with other students..." aria-label="Write a post"></textarea>
+    <div class="sl-feed-compose-expanded-head">
+      <strong>Create a post</strong>
+      <button class="sl-feed-compose-collapse" type="button" aria-label="Close expanded composer">×</button>
+    </div>
+    <div class="sl-feed-format-toolbar" role="toolbar" aria-label="Text formatting">
+      <button type="button" data-format="bold" title="Bold" aria-label="Bold"><strong>B</strong></button>
+      <button type="button" data-format="italic" title="Italic" aria-label="Italic"><em>I</em></button>
+      <button type="button" data-format="underline" title="Underline" aria-label="Underline"><u>U</u></button>
+      <button type="button" data-format="strike" title="Strikethrough" aria-label="Strikethrough"><s>S</s></button>
+      <span class="sl-feed-format-divider" aria-hidden="true"></span>
+      <button type="button" data-format="link" title="Insert link" aria-label="Insert link">↗</button>
+    </div>
+    <div class="sl-feed-editor" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="Write something with other students…" aria-label="Write a post"></div>
     <div class="sl-feed-file-row">
       <label class="sl-feed-file-button">
         <input class="sl-feed-file-input" type="file" accept="image/jpeg,image/png,image/webp" multiple>
@@ -34,17 +48,256 @@
     </div>
     <div class="sl-feed-compose-foot">
       <span class="sl-feed-image-note">JPEG, PNG or WebP · up to 4 MB each · max 4 photos</span>
+      <span class="sl-feed-word-count" aria-live="polite">0 / 1,000 words</span>
       <button class="sl-feed-post-button" type="submit">Post</button>
     </div>
     <div class="sl-feed-image-preview" aria-label="Selected photo previews"></div>
     <p class="sl-feed-compose-status" role="status" aria-live="polite"></p>`;
-  textarea = form.querySelector("textarea");
+  textarea = form.querySelector(".sl-feed-editor");
   postButton = form.querySelector(".sl-feed-post-button");
+  const editor = textarea;
+  Object.defineProperty(editor, "value", {
+    configurable: true,
+    get() { return serializeEditor(editor); },
+    set(value) { editor.innerHTML = renderFormattedText(String(value || "")); }
+  });
+  Object.defineProperty(editor, "disabled", {
+    configurable: true,
+    get() { return editor.getAttribute("contenteditable") === "false"; },
+    set(value) { editor.setAttribute("contenteditable", value ? "false" : "true"); }
+  });
   const input = form.querySelector(".sl-feed-file-input");
   const fileCount = form.querySelector(".sl-feed-file-count");
   const status = form.querySelector(".sl-feed-compose-status");
+  const wordCount = form.querySelector(".sl-feed-word-count");
   const imagePreview = form.querySelector(".sl-feed-image-preview");
+  const collapseComposer = form.querySelector(".sl-feed-compose-collapse");
+  const formatToolbar = form.querySelector(".sl-feed-format-toolbar");
   let previewUrls = [];
+
+  function setComposerExpanded(expanded) {
+    form.classList.toggle("is-expanded", expanded);
+    form.setAttribute("aria-label", expanded ? "Expanded post composer" : "Create a feed post");
+    if (expanded) {
+      panel.classList.remove("is-feed-scrolled");
+      textarea.focus({ preventScroll: true });
+    }
+  }
+  function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, char => ({
+      "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+    })[char]);
+  }
+  function renderFormattedText(value) {
+    let safe = escapeHTML(value || "");
+    safe = safe.replace(/\[([^\]]{1,200})\]\((https?:\/\/[^\s)]+)\)/g,
+      '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+    safe = safe.replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>");
+    safe = safe.replace(/\*([^*\n]+)\*/g, "<em>$1</em>");
+    safe = safe.replace(/\[u\]([^\n]+?)\[\/u\]/g, "<u>$1</u>");
+    safe = safe.replace(/~~([^~\n]+)~~/g, "<s>$1</s>");
+    return safe.replace(/\n/g, "<br>");
+  }
+  function serializeEditor(root) {
+    function visit(node) {
+      if (node.nodeType === Node.TEXT_NODE) return node.nodeValue || "";
+      if (node.nodeType !== Node.ELEMENT_NODE) return "";
+      const tag = node.tagName.toLowerCase();
+      const inner = [...node.childNodes].map(visit).join("");
+      if (tag === "br") return "\n";
+      if (tag === "strong" || tag === "b") return "**" + inner + "**";
+      if (tag === "em" || tag === "i") return "*" + inner + "*";
+      if (tag === "u") return "[u]" + inner + "[/u]";
+      if (tag === "s" || tag === "strike" || tag === "del") return "~~" + inner + "~~";
+      if (tag === "a") {
+        const href = node.getAttribute("href") || "";
+        if (/^https?:\/\//i.test(href)) return "[" + inner + "](" + href + ")";
+        return inner;
+      }
+      if (tag === "div" || tag === "p") return inner + "\n";
+      return inner;
+    }
+    return [...root.childNodes].map(visit).join("").replace(/\n+$/,"").replace(/\u00a0/g," ");
+  }
+  function selectionCharacterOffset(root) {
+    const selection = window.getSelection();
+    if (!selection?.rangeCount || !root.contains(selection.anchorNode)) return null;
+    const range = selection.getRangeAt(0).cloneRange();
+    range.selectNodeContents(root);
+    range.setEnd(selection.anchorNode, selection.anchorOffset);
+    return range.toString().length;
+  }
+  function restoreCharacterOffset(root, offset) {
+    if (offset == null) return;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let node, remaining = offset, last = null;
+    while ((node = walker.nextNode())) {
+      last = node;
+      const length = node.nodeValue.length;
+      if (remaining <= length) {
+        const range = document.createRange();
+        range.setStart(node, remaining);
+        range.collapse(true);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        return;
+      }
+      remaining -= length;
+    }
+    if (last) {
+      const range = document.createRange();
+      range.setStart(last, last.nodeValue.length);
+      range.collapse(true);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+  }
+  function normalizeDetectedUrl(value) {
+    const clean = String(value || "").trim().replace(/[),.!?;:]+$/, "");
+    if (!clean) return null;
+    const candidate = /^https?:\/\//i.test(clean) ? clean : "https://" + clean;
+    try {
+      const url = new URL(candidate);
+      if (!["http:", "https:"].includes(url.protocol) || !url.hostname.includes(".")) return null;
+      return url.href;
+    } catch (_) {
+      return null;
+    }
+  }
+  function linkifyEditor() {
+    const caret = selectionCharacterOffset(editor);
+
+    // Browsers can place the character typed immediately after an auto-link
+    // in a sibling text node instead of keeping it inside the anchor.
+    // Reattach the contiguous token before refreshing the link destination.
+    editor.querySelectorAll('a[data-auto-link="true"]').forEach(anchor => {
+      const next = anchor.nextSibling;
+      if (next && next.nodeType === Node.TEXT_NODE && next.nodeValue && !/^\s/.test(next.nodeValue)) {
+        const continuation = next.nodeValue.match(/^\S+/)?.[0] || "";
+        if (continuation) {
+          anchor.append(document.createTextNode(continuation));
+          next.nodeValue = next.nodeValue.slice(continuation.length);
+          if (!next.nodeValue) next.remove();
+        }
+      }
+    });
+
+    editor.querySelectorAll('a[data-auto-link="true"]').forEach(anchor => {
+      // A space typed after a URL can remain inside the contenteditable link.
+      // Split it out immediately so the next word is not accidentally linked.
+      const original = anchor.textContent || "";
+      const token = original.match(/^\S+/)?.[0] || "";
+      const cleanToken = token.replace(/[),.!?;:]+$/, "");
+      const suffix = token.slice(cleanToken.length) + original.slice(token.length);
+      const destination = normalizeDetectedUrl(cleanToken);
+      if (destination) {
+        anchor.textContent = cleanToken;
+        anchor.setAttribute("href", destination);
+        anchor.target = "_blank";
+        anchor.rel = "noopener noreferrer";
+        if (suffix) anchor.after(document.createTextNode(suffix));
+      } else {
+        anchor.replaceWith(document.createTextNode(original));
+      }
+    });
+    const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        return node.parentElement?.closest("a") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    // Supports explicit URLs, www links, and ordinary domains such as studylablk.netlify.app.
+    const urlPattern = /https?:\/\/[^\s<>]+|www\.[^\s<>]+|(?<![@\w.-])(?:[a-z0-9-]+\.)+[a-z]{2,}(?:\/[^\s<>]*)?/gi;
+    for (const node of nodes) {
+      const value = node.nodeValue || "";
+      const matches = [...value.matchAll(urlPattern)];
+      if (!matches.length) continue;
+      const fragment = document.createDocumentFragment();
+      let cursor = 0;
+      for (const match of matches) {
+        let raw = match[0];
+        let trailing = "";
+        while (/[),.!?;:]$/.test(raw)) {
+          trailing = raw.slice(-1) + trailing;
+          raw = raw.slice(0, -1);
+        }
+        const destination = normalizeDetectedUrl(raw);
+        if (!destination) continue;
+        fragment.append(document.createTextNode(value.slice(cursor, match.index)));
+        const anchor = document.createElement("a");
+        anchor.setAttribute("href", destination);
+        anchor.textContent = raw;
+        anchor.target = "_blank";
+        anchor.rel = "noopener noreferrer";
+        anchor.dataset.autoLink = "true";
+        fragment.append(anchor);
+        if (trailing) fragment.append(document.createTextNode(trailing));
+        cursor = match.index + match[0].length;
+      }
+      if (cursor) {
+        fragment.append(document.createTextNode(value.slice(cursor)));
+        node.replaceWith(fragment);
+      }
+    }
+    restoreCharacterOffset(editor, caret);
+  }
+  function countPostWords(value) {
+    const words = String(value || "").trim().match(/[\p{L}\p{N}]+(?:['’][\p{L}\p{N}]+)*/gu);
+    return words ? words.length : 0;
+  }
+  function updateWordCount() {
+    const count = countPostWords(editor.textContent);
+    wordCount.textContent = count.toLocaleString() + " / 1,000 words";
+    wordCount.classList.toggle("is-over-limit", count > MAX_POST_WORDS);
+  }
+  updateWordCount();
+  formatToolbar.addEventListener("mousedown", event => event.preventDefault());
+  formatToolbar.addEventListener("click", event => {
+    const button = event.target.closest("[data-format]");
+    if (!button || busy) return;
+    const format = button.dataset.format;
+    editor.focus();
+    if (format === "link") {
+      const selected = window.getSelection()?.toString() || "";
+      const rawUrl = window.prompt("Paste a link (https://…)");
+      if (!rawUrl) return;
+      let url;
+      try { url = new URL(rawUrl.trim()); } catch (_) { setStatus("Enter a valid https:// or http:// link.", true); return; }
+      if (!["https:", "http:"].includes(url.protocol)) { setStatus("Only http:// and https:// links are supported.", true); return; }
+      if (!selected) document.execCommand("insertText", false, url.href);
+      else document.execCommand("createLink", false, url.href);
+      linkifyEditor();
+      return;
+    }
+    const commands = { bold:"bold", italic:"italic", underline:"underline", strike:"strikeThrough" };
+    if (commands[format]) document.execCommand(commands[format], false, null);
+    editor.focus();
+  });
+  editor.addEventListener("input", () => {
+    linkifyEditor();
+    updateWordCount();
+    if (editor.textContent.length > MAX_POST_CHARS) {
+      setStatus("Posts are limited to 15,000 characters and 1,000 words.", true);
+    } else if (countPostWords(editor.textContent) > MAX_POST_WORDS) {
+      setStatus("Your post is over the 1,000-word limit.", true);
+    } else {
+      setStatus("");
+    }
+  });
+  editor.addEventListener("paste", event => {
+    event.preventDefault();
+    const plain = (event.clipboardData || window.clipboardData).getData("text/plain");
+    document.execCommand("insertText", false, plain);
+  });
+  editor.addEventListener("keydown", event => {
+    if ((event.ctrlKey || event.metaKey) && ["b","i","u"].includes(event.key.toLowerCase())) {
+      event.preventDefault();
+      document.execCommand(({b:"bold",i:"italic",u:"underline"})[event.key.toLowerCase()], false, null);
+    }
+  });
   let busy = false;
   let isAdmin = false;
   let adminRefreshAttempted = false;
@@ -349,7 +602,8 @@
     });
 
     if (post.body) {
-      const body = make("p", "sl-feed-post-body", post.body);
+      const body = make("p", "sl-feed-post-body");
+      body.innerHTML = renderFormattedText(post.body);
       card.append(body);
       if (post.body.length > 260) {
         body.classList.add("is-collapsed");
@@ -810,11 +1064,8 @@
     previousFeedScrollTop = stream.scrollTop;
   });
 
-  form.querySelector(".sl-feed-create-trigger")?.addEventListener("click",() => {
-    panel.classList.remove("is-feed-scrolled");
-    textarea.focus();
-    textarea.scrollIntoView({behavior:"smooth",block:"nearest"});
-  });
+  form.querySelector(".sl-feed-create-trigger")?.addEventListener("click",() => setComposerExpanded(true));
+  collapseComposer?.addEventListener("click",() => setComposerExpanded(false));
   form.addEventListener("submit", async event => {
     event.preventDefault();
     if (busy) return;
@@ -824,6 +1075,9 @@
       const files = [...(input.files || [])];
       validFiles(files);
       const body = textarea.value.trim();
+      const words = countPostWords(editor.textContent);
+      if (words > MAX_POST_WORDS) throw new Error("Your post is over the 1,000-word limit.");
+      if (body.length > MAX_POST_CHARS) throw new Error("Your formatted post is too long. Keep it under 15,000 characters.");
       if (!body && !files.length) throw new Error("Write something or attach a photo.");
       setBusy(true);
       setStatus(files.length ? "Preparing your post…" : "Publishing your post…");
@@ -871,6 +1125,8 @@
         throw publishError || new Error("Your post could not be published. Please try again.");
       }
       textarea.value = "";
+      updateWordCount();
+      setComposerExpanded(false);
       input.value = "";
       fileCount.textContent = "No photos selected";
       renderImagePreviews([]);
