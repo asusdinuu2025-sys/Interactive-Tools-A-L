@@ -2092,3 +2092,25 @@ html[data-theme="light"] .sl-feed-post-body a { color:#167bb5; }
 @media (prefers-reduced-motion:reduce) {
   .sl-feed-compose.is-expanded { animation:none !important; }
 }
+
+
+/* Compact composer is taller and its formatting tools stay available while typing. */
+.sl-feed-panel .sl-feed-compose { min-height:230px; padding:16px 14px; border:1px solid rgba(126,160,190,.18); border-radius:17px; background:rgba(90,130,165,.055); }
+.sl-feed-compose .sl-feed-create-trigger { min-height:54px; padding:13px 15px; font-weight:650; letter-spacing:.005em; transition:background .2s ease,border-color .2s ease,transform .2s ease; }
+.sl-feed-compose .sl-feed-create-trigger:hover { border-color:rgba(91,190,255,.42); background:rgba(91,190,255,.12); transform:translateY(-1px); }
+.sl-feed-compose .sl-feed-format-toolbar { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin:10px 0 8px; }
+.sl-feed-compose .sl-feed-editor { display:block; width:100%; min-height:108px; max-height:220px; overflow:auto; padding:12px 13px; border:1px solid rgba(130,160,190,.22); border-radius:14px; background:rgba(130,160,190,.07); color:inherit; font:inherit; font-size:.86rem; line-height:1.6; white-space:pre-wrap; overflow-wrap:anywhere; outline:none; cursor:text; }
+.sl-feed-compose .sl-feed-editor:focus { border-color:rgba(91,190,255,.52); box-shadow:0 0 0 3px rgba(91,190,255,.09); }
+.sl-feed-compose .sl-feed-editor:empty::before { content:attr(data-placeholder); color:#8b9bad; pointer-events:none; }
+.sl-feed-compose .sl-feed-editor[contenteditable="false"] { opacity:.7; cursor:not-allowed; }
+.sl-feed-compose .sl-feed-editor a { color:#69c9ff; text-decoration:underline; text-decoration-color:rgba(105,201,255,.55); text-underline-offset:2px; overflow-wrap:anywhere; }
+html[data-theme="light"] .sl-feed-compose .sl-feed-editor a { color:#147bb8; }
+.sl-feed-compose.is-expanded { min-height:0 !important; height:min(58vh,640px) !important; }
+.sl-feed-compose.is-expanded .sl-feed-editor { flex:1 1 auto; min-height:120px; max-height:none; height:auto; font-size:.95rem; }
+.sl-feed-compose.is-expanded .sl-feed-format-toolbar { margin:0; }
+.sl-feed-compose.is-expanded .sl-feed-create-trigger { display:none !important; }
+@media (max-width:600px) {
+  .sl-feed-panel .sl-feed-compose { min-height:205px; padding:12px; }
+  .sl-feed-compose .sl-feed-editor { min-height:84px; }
+  .sl-feed-compose.is-expanded { height:min(62vh,640px) !important; }
+}
