@@ -159,3 +159,46 @@ body.study-room-page[data-room-theme="charcoal"] .room-theme-option[data-room-th
 .slr-badge>:not(.room-pointer-glow),
 .live-card>:not(.room-pointer-glow){position:relative;z-index:1}
 @media(hover:none),(pointer:coarse),(prefers-reduced-motion:reduce){.room-pointer-glow{display:none!important}}
+
+
+/* Clear, theme-aware exit control for the Live Study Room. */
+.room-site-header .room-back {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  min-height:42px;
+  padding:9px 15px;
+  border:1px solid var(--room-border,rgba(126,220,255,.24));
+  border-radius:12px;
+  background:linear-gradient(145deg,var(--room-card,rgba(255,255,255,.07)),var(--room-input,rgba(120,135,160,.08)));
+  color:var(--room-text,#eef2ff)!important;
+  font:inherit;
+  font-size:.84rem;
+  font-weight:800;
+  line-height:1.2;
+  text-decoration:none;
+  box-shadow:0 6px 18px rgba(0,0,0,.12);
+  transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease;
+}
+.room-site-header .room-back span:first-child {
+  color:var(--room-accent,var(--accent-cyan));
+  font-size:1.12rem;
+  line-height:1;
+}
+.room-site-header .room-back:hover {
+  border-color:var(--room-accent,var(--accent-cyan));
+  background:var(--room-chip,rgba(126,220,255,.12));
+  box-shadow:0 8px 22px rgba(0,0,0,.17);
+  transform:translateY(-1px);
+}
+.room-site-header .room-back:focus-visible {
+  outline:3px solid var(--room-accent,var(--accent-cyan));
+  outline-offset:3px;
+}
+@media(max-width:520px) {
+  .room-site-header .room-back { min-height:40px; padding:8px 12px; font-size:.8rem; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .room-site-header .room-back { transition:none; }
+}
