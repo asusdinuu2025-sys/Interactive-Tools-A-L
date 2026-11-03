@@ -615,8 +615,13 @@
               reporter_id: currentUserId,
               reason
             });
-            if (error?.code === "23505") throw new Error("You have already reported this post.");
+            if (error?.code === "23505") {
+              postMenu.remove();
+              setStatus("You have already reported this post.");
+              return;
+            }
             if (error) throw error;
+            postMenu.remove();
             setStatus("Report submitted. Thank you.");
           } catch (error) {
             setStatus(error.message || "Could not submit your report.", true);
