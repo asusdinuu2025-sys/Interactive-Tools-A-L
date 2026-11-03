@@ -5,8 +5,6 @@
   const clock = $("clock"), status = $("status");
   const startButton = $("start"), pauseButton = $("pause"), endButton = $("end");
   let client = null, userId = null, row = null, heartbeatRetry = null, heartbeatBusy = false;
-  let unloadPauseRequest = null, unloadPauseRequested = false;
-
   let accessToken = null;
   let presenceController = null;
 
@@ -171,7 +169,6 @@
       pauseButton.addEventListener("click", () => run("pause"));
       endButton.addEventListener("click", () => run("end"));
       $("close").addEventListener("click", () => window.close());
-      window.addEventListener("online", () => heartbeat());
       window.addEventListener("online", () => {
         presenceController?.refresh();
         heartbeat();
