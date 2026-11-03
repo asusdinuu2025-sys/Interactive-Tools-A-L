@@ -1,7 +1,9 @@
 const crypto = require("node:crypto");
 
-const MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
-const FALLBACK_MODEL = process.env.GEMINI_FALLBACK_MODEL || "gemini-3.7-flash";
+const GROQ_MODEL = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+const GROQ_API_KEY = process.env.STUDYLAB_AI_GROQ_API_KEY || process.env.GROQ_API_KEY;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.STUDYLABAI_GEMINI_API_KEY;
 
 /*
  * Per-student weekly cap. The Supabase access token is verified server-side,
@@ -230,34 +232,27 @@ async function reserveQuota(event, store, userId) {
   };
 }
 
-function providerError(statusCode, data) {
-  console.error(
-    "StudyLab Gemini provider response:",
-    statusCode,
-    data?.error?.message || ""
-  );
+function providerError(statusCode, provider) {
+  console.error("StudyLab AI provider failed:", provider, statusCode);
 
   if (statusCode === 429) {
     return {
       code: "PROVIDER_LIMIT",
-      error:
-        "The AI service has reached its current rate or quota limit. Please try again later."
+      error: "The AI service has reached its current rate or quota limit. Please try again later."
     };
   }
 
-  if (statusCode === 403) {
+  if (statusCode === 401 || statusCode === 403) {
     return {
       code: "PROVIDER_ACCESS",
-      error:
-        "The AI service rejected this request. Check the Gemini project and API key settings."
+      error: "The AI provider rejected its API credentials or access permissions."
     };
   }
 
   if (statusCode >= 500) {
     return {
       code: "PROVIDER_ERROR",
-      error:
-        "The AI service is temporarily unavailable. Please try again later."
+      error: "The AI service is temporarily unavailable. Please try again later."
     };
   }
 
@@ -275,12 +270,10 @@ exports.handler = async function handler(event) {
     });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
-
-  if (!apiKey) {
+  if (!GROQ_API_KEY && !GEMINI_API_KEY) {
     return jsonResponse(503, {
       code: "NOT_CONFIGURED",
-      error: "Gemini API is not configured."
+      error: "No AI provider is configured. Please contact the StudyLab administrator."
     });
   }
 
@@ -390,7 +383,7 @@ exports.handler = async function handler(event) {
     ].slice(-MAX_HISTORY);
   }
 
-  const requestBody = {
+  const geminiRequestBody = {
     systemInstruction: {
       parts: [{ text: SYSTEM_INSTRUCTION }]
     },
@@ -400,112 +393,140 @@ exports.handler = async function handler(event) {
     }
   };
 
-  const endpoint =
-    "https://generativelanguage.googleapis.com/v1beta/models/" +
-    encodeURIComponent(MODEL) +
-    ":generateContent";
+  const groqMessages = [
+    { role: "system", content: SYSTEM_INSTRUCTION },
+    ...history.map(item => ({
+      role: item.role === "model" ? "assistant" : "user",
+      content: item.parts.map(part => part.text || "").join("\n")
+    }))
+  ];
 
-  try {
-    async function requestModel(model, timeoutMs) {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-      const modelEndpoint =
-        "https://generativelanguage.googleapis.com/v1beta/models/" +
-        encodeURIComponent(model) +
-        ":generateContent";
-      try {
-        return await fetch(modelEndpoint, {
+  async function fetchWithTimeout(url, options, timeoutMs) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      return await fetch(url, {
+        ...options,
+        signal: controller.signal
+      });
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
+  async function readProviderResponse(response) {
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const error = new Error(data?.error?.message || "Provider request failed.");
+      error.status = response.status;
+      throw error;
+    }
+    return data;
+  }
+
+  let answer = "";
+  let activeProvider = "";
+  let lastProviderError = null;
+
+  // Groq is the primary provider. Its OpenAI-compatible chat endpoint accepts
+  // the same conversation roles used by the StudyLab tutor.
+  if (GROQ_API_KEY) {
+    try {
+      const response = await fetchWithTimeout(
+        "https://api.groq.com/openai/v1/chat/completions",
+        {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "x-goog-api-key": apiKey
+            Authorization: "Bearer " + GROQ_API_KEY
           },
-          body: JSON.stringify(requestBody),
-          signal: controller.signal
-        });
-      } finally {
-        clearTimeout(timeoutId);
+          body: JSON.stringify({
+            model: GROQ_MODEL,
+            messages: groqMessages,
+            max_completion_tokens: MAX_OUTPUT_TOKENS
+          })
+        },
+        17000
+      );
+
+      const data = await readProviderResponse(response);
+      answer = String(data?.choices?.[0]?.message?.content || "").trim();
+
+      if (!answer) {
+        const error = new Error("Groq returned an empty response.");
+        error.status = 502;
+        throw error;
       }
-    }
 
-    const requestStartedAt = Date.now();
-    let activeModel = MODEL;
-    let apiResponse = await requestModel(MODEL, 30000);
-
-    // A short-lived provider outage on the primary model should not make
-    // the entire StudyLab tutor unavailable. Try the stable Flash fallback
-    // once, but keep the total request within the existing client timeout.
-    if (
-      !apiResponse.ok &&
-      apiResponse.status >= 500 &&
-      FALLBACK_MODEL &&
-      FALLBACK_MODEL !== MODEL &&
-      Date.now() - requestStartedAt < 19000
-    ) {
-      console.warn(
-        "StudyLab Gemini primary model returned a server error; trying fallback:",
-        MODEL,
-        apiResponse.status,
-        FALLBACK_MODEL
+      activeProvider = "groq";
+    } catch (error) {
+      lastProviderError = error;
+      console.error(
+        "StudyLab Groq request failed:",
+        error?.status || (error?.name === "AbortError" ? "TIMEOUT" : "NETWORK_ERROR")
       );
-      activeModel = FALLBACK_MODEL;
-      const remainingBudget = Math.max(1000, 29000 - (Date.now() - requestStartedAt));
-      apiResponse = await requestModel(FALLBACK_MODEL, Math.min(10000, remainingBudget));
     }
+  }
 
-    const data = await apiResponse.json().catch(() => ({}));
-
-    if (!apiResponse.ok) {
-      const friendly = providerError(
-        apiResponse.status,
-        data
-      );
-
-      return jsonResponse(
-        apiResponse.status === 429 ? 429 : 502,
+  // Gemini is an independent fallback for Groq quota, credential, model,
+  // network, timeout, or service errors.
+  if (!answer && GEMINI_API_KEY) {
+    try {
+      const response = await fetchWithTimeout(
+        "https://generativelanguage.googleapis.com/v1beta/models/" +
+          encodeURIComponent(GEMINI_MODEL) +
+          ":generateContent",
         {
-          ...friendly,
-          remaining: quota.remaining
-        }
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": GEMINI_API_KEY
+          },
+          body: JSON.stringify(geminiRequestBody)
+        },
+        12000
+      );
+
+      const data = await readProviderResponse(response);
+      answer = data?.candidates?.[0]?.content?.parts
+        ?.map(part => part?.text || "")
+        .join("")
+        .trim();
+
+      if (!answer) {
+        const error = new Error("Gemini returned an empty response.");
+        error.status = 502;
+        throw error;
+      }
+
+      activeProvider = "gemini";
+    } catch (error) {
+      lastProviderError = error;
+      console.error(
+        "StudyLab Gemini fallback failed:",
+        error?.status || (error?.name === "AbortError" ? "TIMEOUT" : "NETWORK_ERROR")
       );
     }
+  }
 
-    const answer = data?.candidates?.[0]?.content?.parts
-      ?.map(part => part?.text || "")
-      .join("")
-      .trim();
+  if (!answer) {
+    const statusCode = Number(lastProviderError?.status) || 502;
+    const friendly = providerError(
+      statusCode,
+      GEMINI_API_KEY && GROQ_API_KEY ? "Groq and Gemini" : (GROQ_API_KEY ? "Groq" : "Gemini")
+    );
 
-    if (!answer) {
-      return jsonResponse(502, {
-        code: "EMPTY_PROVIDER_RESPONSE",
-        error:
-          "The AI returned no answer. Please try again later.",
-        remaining: quota.remaining
-      });
-    }
-
-    return jsonResponse(200, {
-      text: answer,
-      model: activeModel,
-      weeklyLimit: WEEKLY_LIMIT,
+    return jsonResponse(statusCode === 429 ? 429 : 502, {
+      ...friendly,
       remaining: quota.remaining
     });
-  } catch (error) {
-    console.error("StudyLab Gemini request failed:", error);
-
-    return jsonResponse(
-      error?.name === "AbortError" ? 504 : 502,
-      {
-        code:
-          error?.name === "AbortError"
-            ? "TIMEOUT"
-            : "NETWORK_ERROR",
-        error:
-          error?.name === "AbortError"
-            ? "The AI took too long to respond. Please try again later."
-            : "The AI service is temporarily unavailable. Please try again later.",
-        remaining: quota.remaining
-      }
-    );
   }
+
+  return jsonResponse(200, {
+    text: answer,
+    provider: activeProvider,
+    model: activeProvider === "groq" ? GROQ_MODEL : GEMINI_MODEL,
+    weeklyLimit: WEEKLY_LIMIT,
+    remaining: quota.remaining
+  });
 };
