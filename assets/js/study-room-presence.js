@@ -41,9 +41,10 @@
       const remove = event => {
         if (event?.persisted) {
           storageSet(key, { at: Date.now(), active: false });
-        } else {
-          storageRemove(key);
+          sync(true);
+          return;
         }
+        storageRemove(key);
         windows.delete(win);
         sync(true);
       };
@@ -153,7 +154,7 @@
     }
 
     registerWindow(window, true);
-    window.addEventListener("storage", sync);
+    window.addEventListener("storage", () => sync());
     sync();
     syncTimer = setInterval(sync, 10000);
 
