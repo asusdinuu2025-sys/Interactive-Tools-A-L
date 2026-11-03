@@ -168,6 +168,22 @@
   }
   function linkifyEditor() {
     const caret = selectionCharacterOffset(editor);
+
+    // Browsers can place the character typed immediately after an auto-link
+    // in a sibling text node instead of keeping it inside the anchor.
+    // Reattach the contiguous token before refreshing the link destination.
+    editor.querySelectorAll('a[data-auto-link="true"]').forEach(anchor => {
+      const next = anchor.nextSibling;
+      if (next && next.nodeType === Node.TEXT_NODE && next.nodeValue && !/^\\s/.test(next.nodeValue)) {
+        const continuation = next.nodeValue.match(/^\\S+/)?.[0] || "";
+        if (continuation) {
+          anchor.append(document.createTextNode(continuation));
+          next.nodeValue = next.nodeValue.slice(continuation.length);
+          if (!next.nodeValue) next.remove();
+        }
+      }
+    });
+
     editor.querySelectorAll('a[data-auto-link="true"]').forEach(anchor => {
       // A space typed after a URL can remain inside the contenteditable link.
       // Split it out immediately so the next word is not accidentally linked.
