@@ -13,6 +13,7 @@ const color=n=>{const i=Math.max(0,[...subject.options].findIndex(o=>o.text===n)
 const blank=()=>({days:{},tasks:[]});
 function read(){try{const d=JSON.parse(localStorage.getItem(key)||"null");return d&&typeof d==="object"?{days:d.days||{},tasks:Array.isArray(d.tasks)?d.tasks:[]}:blank();}catch(_){return blank();}}
 let data=read(),period="today",activeSession=null;
+try{activeSession=JSON.parse(localStorage.getItem(key+":active")||"null");}catch(_){activeSession=null;}
 const cursorKey=key+":server-cursor";
 function readCursor(){try{return JSON.parse(localStorage.getItem(cursorKey)||"null");}catch(_){return null;}}
 let serverCursor=readCursor();
@@ -117,8 +118,8 @@ window.addEventListener("studylab:study-room-timer",event=>syncRoomSession(event
 if(window.StudyRoomTimer?.getState)syncRoomSession(window.StudyRoomTimer.getState());
 // Subject changes are committed by the server. The subject cursor changes only
 // after the server has credited the preceding interval and returned fresh state.
-function days(){if(period==="today")return[today()];if(period==="7")return Array.from({length:7},(_,i)=>dateAgo(6-i));if(period==="30")return Array.from({length:30},(_,i)=>dateAgo(29-i));const keys=Object.keys(data.days);if(active)keys.push(today());return [...new Set(keys)].sort();}
-function totalsFor(list){const out={};list.forEach(day=>Object.entries(data.days[day]||{}).forEach(([n,s])=>out[n]=(out[n]||0)+(Number(s)||0)));if(active&&!active.paused){let cursor=active.at;const now=Date.now();while(cursor<now){const day=dayKey(new Date(cursor));const stop=Math.min(now,nextDayStart(day));if(list.includes(day))out[active.subject]=(out[active.subject]||0)+(stop-cursor)/1000;cursor=stop;}}return Object.entries(out).filter(([,s])=>s>0).sort((a,b)=>b[1]-a[1]);}
+function days(){if(period==="today")return[today()];if(period==="7")return Array.from({length:7},(_,i)=>dateAgo(6-i));if(period==="30")return Array.from({length:30},(_,i)=>dateAgo(29-i));return Object.keys(data.days).sort();}
+function totalsFor(list){const out={};list.forEach(day=>Object.entries(data.days[day]||{}).forEach(([n,s])=>out[n]=(out[n]||0)+(Number(s)||0)));return Object.entries(out).filter(([,s])=>s>0).sort((a,b)=>b[1]-a[1]);}
 function render(){if(!panel.isConnected)return;const list=days(),totals=totalsFor(list),sum=totals.reduce((a,r)=>a+r[1],0);$("slTotal").textContent=fmt(sum);$("slSubjects").textContent=totals.length;$("slTop").textContent=totals[0]?.[0]||"—";$("slPiePeriod").textContent=period==="today"?"Today":period==="7"?"7 days":period==="30"?"30 days":"All time";
 const pie=$("slPie");let cursor=0;const stops=totals.map(([n,s])=>{const start=cursor/Math.max(1,sum)*100;cursor+=s;return color(n)+" "+start+"% "+(cursor/Math.max(1,sum)*100)+"%";});pie.style.background=stops.length?"conic-gradient("+stops.join(",")+")":"conic-gradient(rgba(120,135,160,.18) 0 100%)";pie.querySelector("span").textContent=fmt(sum);
 const legend=$("slLegend");legend.replaceChildren();if(!totals.length){legend.innerHTML='<p class="sl-empty">Start studying to build your chart.</p>';}else totals.forEach(([n,s])=>{const row=document.createElement("div");row.className="sl-legend-row";const dot=document.createElement("i");dot.style.background=color(n);const name=document.createElement("span");name.textContent=n;const value=document.createElement("b");value.textContent=fmt(s);row.append(dot,name,value);legend.append(row);});
