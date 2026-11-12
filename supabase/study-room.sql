@@ -1109,3 +1109,66 @@ BEGIN
   );
 END;
 $paused_session_schedule$;
+
+
+-- Make explicit pause idempotent and tolerant of legacy rows where is_studying
+-- is true but session_active was not migrated correctly.
+CREATE OR REPLACE FUNCTION public.study_room_pause()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $function$
+DECLARE
+  uid uuid := auth.uid();
+  reference_now timestamptz := now();
+  member_row public.study_room_members%rowtype;
+BEGIN
+  IF uid IS NULL THEN
+    RAISE EXCEPTION 'Sign-in required';
+  END IF;
+
+  -- First apply the normal presence transition, which settles present/away time.
+  PERFORM public.study_room_presence(true);
+
+  SELECT * INTO member_row
+  FROM public.study_room_members
+  WHERE user_id = uid
+  FOR UPDATE;
+
+  IF NOT FOUND OR NOT (member_row.session_active OR member_row.is_studying) THEN
+    RETURN;
+  END IF;
+
+  -- Fallback for an inconsistent legacy row: settle any remaining present interval.
+  -- Normally presence(true) has already moved last_heartbeat_at to reference_now.
+  IF member_row.is_studying
+    AND member_row.session_presence_state = 'present'
+    AND member_row.last_heartbeat_at IS NOT NULL
+    AND member_row.last_heartbeat_at < reference_now THEN
+    PERFORM study_room_private.credit_session_interval(
+      uid, member_row.last_heartbeat_at, reference_now, false
+    );
+  END IF;
+
+  UPDATE public.study_room_members
+  SET
+    is_studying = false,
+    session_active = true,
+    session_presence_state = 'paused',
+    session_started_at = NULL,
+    session_away_since_at = NULL,
+    session_away_pending_seconds = 0,
+    session_away_pending_date = timezone('Asia/Colombo', reference_now)::date,
+    session_away_pending_week_start = public.study_room_local_week_start(
+      timezone('Asia/Colombo', reference_now)::date
+    ),
+    last_heartbeat_at = NULL,
+    updated_at = reference_now
+  WHERE user_id = uid
+    AND (session_active = true OR is_studying = true);
+END;
+$function$;
+
+REVOKE ALL ON FUNCTION public.study_room_pause() FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.study_room_pause() TO authenticated;
