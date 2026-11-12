@@ -74,22 +74,24 @@ function syncRoomSession(state){
  const day=state.todayDate||today();
  const seconds=Math.max(0,Math.floor(Number(state.todaySeconds)||0));
  const currentSubject=state.subject||subject.value||"Other";
+ const stateUpdatedAt=state.updatedAt?new Date(state.updatedAt).getTime():0;
+ if(serverCursor&&stateUpdatedAt&&Number(serverCursor.updatedAt||0)>stateUpdatedAt)return;
  if(state.sessionExpiredAt){
   if(!activeSession){try{activeSession=JSON.parse(localStorage.getItem(key+":active")||"null");}catch(_){activeSession=null;}}
   subtractSessionCredits(activeSession);
-  activeSession=null;saveSession();serverCursor={day,seconds,subject:currentSubject};persistCursor();save();render();
+  activeSession=null;saveSession();serverCursor={day,seconds,subject:currentSubject,updatedAt:state.updatedAt||null};persistCursor();save();render();
   if(typeof renderStreaks==="function")renderStreaks();
   return;
  }
  if(!serverCursor){
   // Establish a baseline without importing old server totals into local history.
   // Existing browser history is retained; future increments follow server credits.
-  serverCursor={day,seconds,subject:currentSubject};
+  serverCursor={day,seconds,subject:currentSubject,updatedAt:state.updatedAt||null};
   persistCursor();
  }else if(serverCursor.day!==day){
   // Colombo midnight resets the server's daily counter. Never carry yesterday's
   // cursor into the new day or manufacture a negative/duplicate interval.
-  serverCursor={day,seconds,subject:currentSubject};
+  serverCursor={day,seconds,subject:currentSubject,updatedAt:state.updatedAt||null};
   persistCursor();
  }else{
   const delta=seconds- Math.max(0,Math.floor(Number(serverCursor.seconds)||0));
@@ -102,7 +104,7 @@ function syncRoomSession(state){
    save();
    if(typeof renderStreaks==="function")renderStreaks();
   }
-  serverCursor={day,seconds,subject:currentSubject};
+  serverCursor={day,seconds,subject:currentSubject,updatedAt:state.updatedAt||null};
   persistCursor();
  }
  if(state.sessionActive){
