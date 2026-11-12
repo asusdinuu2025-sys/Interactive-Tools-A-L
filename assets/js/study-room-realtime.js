@@ -451,6 +451,7 @@
       sessionActive: Boolean(member?.session_active),
       elapsedSeconds: base + live,
       todaySeconds: member && member.today_date === today ? Math.max(0, Number(member.today_seconds) || 0) : 0,
+      pendingTodaySeconds: pendingSeconds(member, startOfDay(today)),
       todayDate: today,
       subject: member?.subject || subject.value || '',
       status: member?.session_presence_state === 'away' ? 'Away' : member?.is_studying ? 'Studying' : member?.session_active ? 'Paused' : 'Not studying',
