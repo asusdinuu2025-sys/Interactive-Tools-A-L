@@ -26,7 +26,7 @@
   const dailyTab = $('dailyBoardTab');
   const weeklyTab = $('weeklyBoardTab');
   let client, userId = null, member = null, rows = [], heartbeatInterval = null, uiInterval = null, rankRefreshInterval = null;
-  let heartbeatRetryTimer = null, heartbeatPromise = null, presenceController = null, hadActiveSession = false;
+  let heartbeatRetryTimer = null, heartbeatPromise = null, presenceController = null, hadActiveSession = false, sessionAction = null;
 
   let accessToken = null;
 
@@ -191,9 +191,9 @@
     const isRunning = Boolean(row?.is_studying);
     const isAway = Boolean(row?.session_active && row?.session_presence_state === "away");
     const hasSession = Boolean(row?.session_active);
-    join.disabled = isRunning || isAway;
-    pause.disabled = !isRunning;
-    leave.disabled = !hasSession;
+    join.disabled = isRunning || isAway || Boolean(sessionAction);
+    pause.disabled = !isRunning || Boolean(sessionAction);
+    leave.disabled = !hasSession || Boolean(sessionAction);
     targetHours.disabled = hasSession;
     targetMinutes.disabled = hasSession;
     if (hasSession && Number(row?.session_target_seconds) > 0) {
@@ -409,11 +409,24 @@
     }
   }
   async function pauseStudy() {
+    if (sessionAction || !member?.is_studying) return;
+    sessionAction = 'pause';
+    updateSessionUI(member);
+    pause.textContent = 'Pausing…';
     try {
+      // Let an already-running heartbeat finish before the explicit pause RPC.
+      // The database pause function then settles the final interval atomically.
+      if (heartbeatPromise) await heartbeatPromise;
       await callRpc('study_room_pause');
       await loadRows();
       say('Your study session is paused. Press Start to resume it.');
-    } catch (e) { say('Could not pause the study session: ' + e.message, true); }
+    } catch (e) {
+      say('Could not pause the study session: ' + e.message, true);
+      try { await loadRows(); } catch (_) {}
+    } finally {
+      sessionAction = null;
+      updateSessionUI(member);
+    }
   }
   async function endStudy() {
     try {
@@ -435,6 +448,8 @@
       isStudying: Boolean(member?.is_studying),
       sessionActive: Boolean(member?.session_active),
       elapsedSeconds: base + live,
+      todaySeconds: member && member.today_date === today ? Math.max(0, Number(member.today_seconds) || 0) : 0,
+      todayDate: today,
       subject: member?.subject || subject.value || '',
       status: member?.session_presence_state === 'away' ? 'Away' : member?.is_studying ? 'Studying' : member?.session_active ? 'Paused' : 'Not studying',
       sessionPresenceState: member?.session_presence_state || 'paused',
