@@ -1,0 +1,56 @@
+-- Keep browser-local subject analytics aligned with the server's credited Study Room time.
+-- Settle the running interval under the previous subject before changing the subject label.
+CREATE OR REPLACE FUNCTION public.study_room_set_subject(p_subject text)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $function$
+BEGIN
+  IF auth.uid() IS NULL THEN
+    RAISE EXCEPTION 'Sign-in required';
+  END IF;
+
+  IF NOT study_room_private.profile_is_complete(auth.uid()) THEN
+    RAISE EXCEPTION 'Complete your StudyLab profile before entering the Live Study Room.';
+  END IF;
+
+  IF p_subject IS NULL OR p_subject NOT IN (
+    'Combined Mathematics', 'Physics', 'Chemistry', 'Biology',
+    'Agricultural Science', 'Information & Communication Technology (ICT)',
+    'General English', 'General Common Test', 'Accounting', 'Business Studies',
+    'Economics', 'Business Statistics', 'Logic and Scientific Method',
+    'Geography', 'Political Science', 'History', 'Home Economics',
+    'Communication and Media Studies', 'Buddhism', 'Christianity', 'Hinduism',
+    'Islam', 'Buddhist Civilization', 'Christian Civilization',
+    'Hindu Civilization', 'Islamic Civilization', 'Sinhala', 'Tamil',
+    'English', 'Pali', 'Sanskrit', 'Arabic', 'French', 'German', 'Japanese',
+    'Korean', 'Chinese', 'Russian', 'Art', 'Oriental Music', 'Western Music',
+    'Carnatic Music', 'Dancing (Oriental)', 'Dancing (Bharatha)',
+    'Drama and Theatre', 'Engineering Technology', 'Science for Technology',
+    'Bio Systems Technology', 'Agro Technology', 'Food Technology',
+    'Mechanical Technology',
+    'Electrical, Electronic and Information Technology', 'Civil Technology',
+    'Design, Electrical and Electronic Technology',
+    'Design and Construction Technology', 'Design and Mechanical Technology',
+    'Design, Quantity Surveying and Construction Process', 'Other'
+  ) THEN
+    RAISE EXCEPTION 'Invalid subject';
+  END IF;
+
+  -- The heartbeat uses the same server-side presence/credit path as the live timer.
+  -- It is a no-op for paused sessions and commits the old subject's interval first.
+  PERFORM public.study_room_heartbeat();
+
+  UPDATE public.study_room_members
+  SET subject = p_subject, updated_at = now()
+  WHERE user_id = auth.uid();
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Create a profile first';
+  END IF;
+END;
+$function$;
+
+REVOKE ALL ON FUNCTION public.study_room_set_subject(text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.study_room_set_subject(text) TO authenticated;
