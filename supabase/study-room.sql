@@ -868,16 +868,14 @@ RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = ''
-AS $$
+AS $function$
 BEGIN
   IF auth.uid() IS NULL THEN
     RAISE EXCEPTION 'Sign-in required';
   END IF;
-
   IF NOT study_room_private.profile_is_complete(auth.uid()) THEN
     RAISE EXCEPTION 'Complete your StudyLab profile before entering the Live Study Room.';
   END IF;
-
   IF p_subject IS NULL OR p_subject NOT IN (
     'Combined Mathematics', 'Physics', 'Chemistry', 'Biology',
     'Agricultural Science', 'Information & Communication Technology (ICT)',
@@ -900,16 +898,15 @@ BEGIN
   ) THEN
     RAISE EXCEPTION 'Invalid subject';
   END IF;
-
+  PERFORM public.study_room_heartbeat();
   UPDATE public.study_room_members
   SET subject = p_subject, updated_at = now()
   WHERE user_id = auth.uid();
-
   IF NOT FOUND THEN
     RAISE EXCEPTION 'Create a profile first';
   END IF;
 END;
-$$;
+$function$;
 
 REVOKE ALL ON FUNCTION public.study_room_set_subject(text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.study_room_set_subject(text) TO authenticated;
