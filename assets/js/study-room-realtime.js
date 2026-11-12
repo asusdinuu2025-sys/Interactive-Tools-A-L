@@ -369,6 +369,7 @@
     return heartbeatPromise;
   }
   async function startStudy() {
+    if (sessionAction) return;
     if (!subject.value) {
       subject.setAttribute("aria-invalid", "true");
       subject.classList.add("room-subject-required");
@@ -429,6 +430,7 @@
     }
   }
   async function endStudy() {
+    if (sessionAction) return;
     try {
       await callRpc('study_room_end');
       await loadRows();
