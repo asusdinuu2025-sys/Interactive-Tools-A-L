@@ -8,6 +8,7 @@
     let previousReached = null;
     let dialog = null;
     let returnFocus = null;
+    let previousOverflow = '';
 
     const formatDuration = seconds => {
       const total = Math.max(0, Math.floor(Number(seconds) || 0));
@@ -21,7 +22,7 @@
       if (!dialog || dialog.hidden) return;
       dialog.classList.remove('is-visible');
       dialog.hidden = true;
-      document.body.style.removeProperty('overflow');
+      document.body.style.overflow = previousOverflow;
       if (returnFocus?.isConnected) returnFocus.focus();
     };
 
@@ -61,6 +62,7 @@
     const celebrate = state => {
       const layer = ensureDialog();
       returnFocus = document.activeElement;
+      previousOverflow = document.body.style.overflow;
       layer.querySelector('#slGoalCelebrationTime').textContent = formatDuration(state.elapsedSeconds);
       layer.querySelector('#slGoalCelebrationDescription').textContent =
         'You reached your ' + formatDuration(state.targetSeconds) + ' session target. Every focused minute added up.';
