@@ -1,0 +1,220 @@
+/* Study Room Liquid Glass refresh. Palette is inherited from the existing theme + mode tokens. */
+body.study-room-page[data-room-theme]{
+  background-image:
+    radial-gradient(ellipse at 12% 8%, color-mix(in srgb,var(--room-accent) 16%,transparent),transparent 42%),
+    radial-gradient(ellipse at 88% 22%, color-mix(in srgb,var(--room-accent-strong) 14%,transparent),transparent 38%),
+    linear-gradient(145deg,color-mix(in srgb,var(--room-page-bg) 94%,transparent),var(--room-page-bg))!important;
+  background-attachment:fixed;
+}
+body.study-room-page[data-room-theme] .room-hero,
+body.study-room-page[data-room-theme] .room-panel{
+  background:linear-gradient(135deg,
+    color-mix(in srgb,var(--room-card) 72%,transparent),
+    color-mix(in srgb,var(--room-page-bg) 38%,transparent))!important;
+  border:1px solid color-mix(in srgb,var(--room-text) 13%,transparent)!important;
+  border-top-color:color-mix(in srgb,var(--room-text) 23%,transparent)!important;
+  border-radius:26px!important;
+  box-shadow:0 22px 64px rgba(0,0,0,.13),inset 0 1px 0 color-mix(in srgb,var(--room-text) 13%,transparent)!important;
+  -webkit-backdrop-filter:blur(30px) saturate(165%)!important;
+  backdrop-filter:blur(30px) saturate(165%)!important;
+}
+body.study-room-page[data-room-theme] .room-hero{
+  position:relative;overflow:hidden;
+  background:
+    radial-gradient(ellipse at 90% 0%,color-mix(in srgb,var(--room-accent) 19%,transparent),transparent 48%),
+    linear-gradient(135deg,color-mix(in srgb,var(--room-card) 74%,transparent),color-mix(in srgb,var(--room-page-bg) 34%,transparent))!important;
+}
+body.study-room-page[data-room-theme] .room-hero:before{
+  content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  background:linear-gradient(115deg,rgba(255,255,255,.12),transparent 34%,transparent 70%,rgba(255,255,255,.035));
+}
+body.study-room-page[data-room-theme] .room-stat,
+body.study-room-page[data-room-theme] .room-person-card,
+body.study-room-page[data-room-theme] .room-session,
+body.study-room-page[data-room-theme] .room-goal,
+body.study-room-page[data-room-theme] .room-rank,
+body.study-room-page[data-room-theme] .room-notice,
+body.study-room-page[data-room-theme] .slr-toolbar,
+body.study-room-page[data-room-theme] .slr-focus-card,
+body.study-room-page[data-room-theme] .slr-badge{
+  background:color-mix(in srgb,var(--room-card) 60%,transparent)!important;
+  border:1px solid color-mix(in srgb,var(--room-text) 11%,transparent)!important;
+  border-radius:19px!important;
+  box-shadow:inset 0 1px 0 color-mix(in srgb,var(--room-text) 9%,transparent),0 9px 28px rgba(0,0,0,.055);
+  -webkit-backdrop-filter:blur(22px) saturate(150%);
+  backdrop-filter:blur(22px) saturate(150%);
+}
+body.study-room-page[data-room-theme] .room-person-card{
+  border-radius:22px!important;
+  transition:transform .28s cubic-bezier(.2,.75,.25,1),border-color .28s ease,box-shadow .28s ease,background .28s ease!important;
+}
+body.study-room-page[data-room-theme] .room-person-card:hover{
+  transform:translateY(-3px);
+  border-color:color-mix(in srgb,var(--room-accent) 44%,transparent)!important;
+  box-shadow:0 16px 34px rgba(0,0,0,.11),0 0 24px color-mix(in srgb,var(--room-accent) 9%,transparent);
+}
+body.study-room-page[data-room-theme] .room-session{
+  position:relative;overflow:hidden;
+  border-radius:22px!important;
+  background:
+    radial-gradient(ellipse at 50% 0%,color-mix(in srgb,var(--room-accent) 13%,transparent),transparent 70%),
+    color-mix(in srgb,var(--room-card) 64%,transparent)!important;
+  padding:20px 14px!important;
+}
+body.study-room-page[data-room-theme] .room-session strong{
+  font-size:clamp(2rem,5vw,2.65rem)!important;
+  letter-spacing:-.045em!important;
+  font-variant-numeric:tabular-nums;
+}
+body.study-room-page[data-room-theme] .room-field,
+body.study-room-page[data-room-theme] .room-target-part .room-field,
+body.study-room-page[data-room-theme] .profile-input,
+body.study-room-page[data-room-theme] .profile-select{
+  border:1px solid color-mix(in srgb,var(--room-text) 16%,transparent)!important;
+  border-radius:14px!important;
+  background:color-mix(in srgb,var(--room-input) 76%,transparent)!important;
+  color:var(--room-text)!important;
+  box-shadow:inset 0 1px 0 color-mix(in srgb,var(--room-text) 8%,transparent);
+  -webkit-backdrop-filter:blur(16px);
+  backdrop-filter:blur(16px);
+}
+body.study-room-page[data-room-theme] .room-field:focus,
+body.study-room-page[data-room-theme] .profile-input:focus,
+body.study-room-page[data-room-theme] .profile-select:focus{
+  outline:2px solid color-mix(in srgb,var(--room-accent) 66%,transparent);
+  outline-offset:2px;
+}
+body.study-room-page[data-room-theme] .room-action{
+  min-height:48px;border-radius:16px!important;
+  background:linear-gradient(135deg,var(--room-accent-strong),var(--room-accent))!important;
+  color:#fff!important;
+  border:1px solid color-mix(in srgb,var(--room-text) 17%,transparent)!important;
+  box-shadow:0 10px 26px color-mix(in srgb,var(--room-accent) 20%,transparent),inset 0 1px 0 rgba(255,255,255,.2)!important;
+  transition:transform .25s ease,filter .25s ease,box-shadow .25s ease!important;
+}
+body.study-room-page[data-room-theme] .room-action:not(:disabled):hover{
+  transform:translateY(-2px);
+  filter:brightness(1.08);
+  box-shadow:0 14px 32px color-mix(in srgb,var(--room-accent) 26%,transparent),inset 0 1px 0 rgba(255,255,255,.25)!important;
+}
+body.study-room-page[data-room-theme] .room-action.leave{
+  background:color-mix(in srgb,#e65d70 14%,transparent)!important;
+  color:var(--room-text)!important;border-color:rgba(230,93,112,.32)!important;box-shadow:none!important;
+}
+body.study-room-page[data-room-theme] .room-mode-control,
+body.study-room-page[data-room-theme] .room-tabs{
+  padding:5px;border:1px solid color-mix(in srgb,var(--room-text) 12%,transparent);
+  border-radius:15px;background:color-mix(in srgb,var(--room-card) 58%,transparent);
+  -webkit-backdrop-filter:blur(20px) saturate(150%);backdrop-filter:blur(20px) saturate(150%);
+}
+body.study-room-page[data-room-theme] .room-mode-option,
+body.study-room-page[data-room-theme] .room-tab,
+body.study-room-page[data-room-theme] .room-appearance-trigger,
+body.study-room-page[data-room-theme] .slr-focus-actions button{
+  border-radius:11px!important;transition:background .22s ease,color .22s ease,border-color .22s ease,transform .22s ease!important;
+}
+body.study-room-page[data-room-theme] .room-mode-option[aria-pressed="true"],
+body.study-room-page[data-room-theme] .room-tab.active{
+  background:color-mix(in srgb,var(--room-accent) 19%,var(--room-card))!important;
+  color:var(--room-text)!important;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--room-accent) 24%,transparent),0 3px 12px rgba(0,0,0,.07)!important;
+}
+body.study-room-page[data-room-theme] .room-appearance-trigger,
+body.study-room-page[data-room-theme] .room-appearance-menu{
+  background:color-mix(in srgb,var(--room-card) 76%,transparent)!important;
+  border:1px solid color-mix(in srgb,var(--room-text) 16%,transparent)!important;
+  border-radius:16px!important;
+  -webkit-backdrop-filter:blur(28px) saturate(170%)!important;
+  backdrop-filter:blur(28px) saturate(170%)!important;
+  box-shadow:0 18px 48px rgba(0,0,0,.15),inset 0 1px 0 color-mix(in srgb,var(--room-text) 10%,transparent)!important;
+}
+body.study-room-page[data-room-theme] .room-theme-option{border-radius:12px}
+body.study-room-page[data-room-theme] .room-theme-option.is-selected{
+  background:color-mix(in srgb,var(--room-accent) 13%,transparent)!important;
+  border-color:color-mix(in srgb,var(--room-accent) 25%,transparent)!important;
+}
+body.study-room-page[data-room-theme] .room-goal-track,
+body.study-room-page[data-room-theme] .slr-achievement-track{
+  background:color-mix(in srgb,var(--room-text) 12%,transparent)!important;
+  border:1px solid color-mix(in srgb,var(--room-text) 8%,transparent);
+}
+body.study-room-page[data-room-theme] .room-goal-track span{
+  background:linear-gradient(90deg,var(--room-accent-strong),var(--room-accent))!important;
+  box-shadow:0 0 14px color-mix(in srgb,var(--room-accent) 38%,transparent);
+}
+body.study-room-page[data-room-theme] .room-list::-webkit-scrollbar-thumb{
+  background:color-mix(in srgb,var(--room-accent) 48%,transparent);
+  border-color:color-mix(in srgb,var(--room-page-bg) 60%,transparent);
+}
+body.study-room-page[data-room-theme] .room-live:before{
+  background:var(--room-accent);box-shadow:0 0 12px color-mix(in srgb,var(--room-accent) 68%,transparent);
+}
+body.study-room-page[data-room-theme] .room-person-status{color:var(--room-accent)!important}
+body.study-room-page[data-room-theme] .room-avatar{border:1px solid color-mix(in srgb,var(--room-accent) 25%,transparent)}
+body.study-room-page[data-room-theme] .profile-dialog{
+  background:color-mix(in srgb,var(--room-card) 84%,transparent)!important;
+  border:1px solid color-mix(in srgb,var(--room-text) 16%,transparent)!important;
+  border-radius:26px!important;
+  -webkit-backdrop-filter:blur(30px) saturate(160%);
+  backdrop-filter:blur(30px) saturate(160%);
+}
+body.study-room-page[data-room-theme] .room-pointer-glow{opacity:0!important}
+body.study-room-page[data-room-theme] .room-page .room-panel:hover{box-shadow:0 24px 64px rgba(0,0,0,.15),inset 0 1px 0 color-mix(in srgb,var(--room-text) 13%,transparent)!important}
+body.study-room-page[data-room-theme] .room-notice{color:var(--room-secondary)!important}
+.sl-goal-celebration[hidden]{display:none!important}
+.sl-goal-celebration{
+  position:fixed;inset:0;z-index:2600;display:grid;place-items:center;padding:20px;
+  background:rgba(3,8,18,.48);-webkit-backdrop-filter:blur(13px);backdrop-filter:blur(13px);
+  opacity:0;transition:opacity .32s ease;
+}
+.sl-goal-celebration.is-visible{opacity:1}
+.sl-goal-celebration-card{
+  position:relative;isolation:isolate;overflow:hidden;width:min(440px,100%);padding:34px 28px 28px;
+  text-align:center;border-radius:30px;
+  border:1px solid color-mix(in srgb,var(--room-text) 22%,transparent);
+  background:linear-gradient(145deg,color-mix(in srgb,var(--room-card) 84%,transparent),color-mix(in srgb,var(--room-page-bg) 78%,transparent));
+  color:var(--room-text);box-shadow:0 32px 100px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.22);
+  -webkit-backdrop-filter:blur(34px) saturate(175%);backdrop-filter:blur(34px) saturate(175%);
+  transform:translateY(16px) scale(.97);transition:transform .42s cubic-bezier(.2,.8,.2,1);
+}
+.sl-goal-celebration.is-visible .sl-goal-celebration-card{transform:translateY(0) scale(1)}
+.sl-goal-celebration-card:before{
+  content:"";position:absolute;z-index:-1;inset:-30%;pointer-events:none;
+  background:radial-gradient(circle at 50% 28%,color-mix(in srgb,var(--room-accent) 24%,transparent),transparent 48%);
+}
+.sl-goal-celebration-mark{
+  width:78px;height:78px;margin:0 auto 18px;display:grid;place-items:center;border-radius:25px;
+  color:var(--room-accent);font-size:38px;
+  background:color-mix(in srgb,var(--room-accent) 13%,transparent);
+  border:1px solid color-mix(in srgb,var(--room-accent) 35%,transparent);
+  box-shadow:0 0 0 9px color-mix(in srgb,var(--room-accent) 5%,transparent),0 0 42px color-mix(in srgb,var(--room-accent) 20%,transparent);
+  animation:slGoalMarkPop .75s cubic-bezier(.2,.8,.2,1) both;
+}
+.sl-goal-celebration-card h2{margin:0 0 9px;color:var(--room-text);font-size:clamp(1.45rem,5vw,1.85rem);letter-spacing:-.04em}
+.sl-goal-celebration-card p{margin:0;color:var(--room-muted);font-size:.92rem;line-height:1.65}
+.sl-goal-celebration-time{display:inline-block;margin:18px 0 22px;padding:9px 15px;border-radius:99px;background:color-mix(in srgb,var(--room-accent) 12%,transparent);border:1px solid color-mix(in srgb,var(--room-accent) 25%,transparent);color:var(--room-text);font-size:1rem;font-weight:850;font-variant-numeric:tabular-nums}
+.sl-goal-celebration-close{
+  display:block;width:100%;min-height:46px;border:1px solid color-mix(in srgb,var(--room-accent) 28%,transparent);
+  border-radius:15px;background:linear-gradient(135deg,var(--room-accent-strong),var(--room-accent));
+  color:#fff;font:inherit;font-weight:800;cursor:pointer;box-shadow:0 10px 24px color-mix(in srgb,var(--room-accent) 19%,transparent);
+}
+.sl-goal-celebration-close:focus-visible{outline:3px solid var(--room-accent);outline-offset:4px}
+.sl-goal-sparkles{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.sl-goal-sparkles i{position:absolute;top:52%;left:50%;width:6px;height:10px;border-radius:3px;background:var(--spark-color,var(--room-accent));opacity:0;animation:slGoalSpark 1.5s ease-out both;animation-delay:var(--spark-delay,0ms)}
+.sl-goal-sparkles i:nth-child(1){--spark-x:-130px;--spark-y:-125px;--spark-color:var(--room-accent);--spark-delay:0ms}
+.sl-goal-sparkles i:nth-child(2){--spark-x:125px;--spark-y:-115px;--spark-color:var(--room-accent-strong);--spark-delay:70ms}
+.sl-goal-sparkles i:nth-child(3){--spark-x:-155px;--spark-y:5px;--spark-color:#f3c86a;--spark-delay:110ms}
+.sl-goal-sparkles i:nth-child(4){--spark-x:155px;--spark-y:12px;--spark-color:var(--room-accent);--spark-delay:150ms}
+.sl-goal-sparkles i:nth-child(5){--spark-x:-105px;--spark-y:125px;--spark-color:#b79aff;--spark-delay:190ms}
+.sl-goal-sparkles i:nth-child(6){--spark-x:110px;--spark-y:130px;--spark-color:var(--room-accent-strong);--spark-delay:230ms}
+.sl-goal-sparkles i:nth-child(7){--spark-x:-55px;--spark-y:-155px;--spark-color:#f3c86a;--spark-delay:260ms}
+.sl-goal-sparkles i:nth-child(8){--spark-x:65px;--spark-y:-160px;--spark-color:var(--room-accent);--spark-delay:300ms}
+.sl-goal-sparkles i:nth-child(9){--spark-x:-175px;--spark-y:-65px;--spark-color:#b79aff;--spark-delay:340ms}
+.sl-goal-sparkles i:nth-child(10){--spark-x:175px;--spark-y:-60px;--spark-color:#f3c86a;--spark-delay:380ms}
+@keyframes slGoalMarkPop{0%{transform:scale(.55) rotate(-12deg);opacity:0}65%{transform:scale(1.08) rotate(4deg)}100%{transform:scale(1);opacity:1}}
+@keyframes slGoalSpark{0%{opacity:0;transform:translate(-50%,-50%) scale(.3) rotate(0)}18%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--spark-x)),calc(-50% + var(--spark-y))) scale(1) rotate(150deg)}}
+@media(max-width:520px){.sl-goal-celebration-card{padding:28px 21px 22px;border-radius:25px}.sl-goal-sparkles i{width:5px;height:8px}}
+@media(prefers-reduced-motion:reduce){
+  .sl-goal-celebration,.sl-goal-celebration-card{transition:none!important}
+  .sl-goal-celebration-mark,.sl-goal-sparkles i{animation:none!important}
+  .sl-goal-celebration.is-visible .sl-goal-celebration-card{transform:none}
+}
