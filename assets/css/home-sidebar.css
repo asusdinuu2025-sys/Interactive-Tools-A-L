@@ -886,7 +886,8 @@ html[data-theme="light"] .study-header-search-panel .study-find-meta { color: rg
   .sl-home-sidebar.is-collapsed .sl-home-quick-actions > button > span:not(:first-child) { display: none !important; }
   .sl-home-sidebar.is-collapsed .sl-home-quick-actions { gap: 7px; }
   .studylab-ai-tools-row .studylab-ai-panel,
-  .study-chat-panel { left: 258px !important; right: auto !important; bottom: 22px !important; }
+  .study-chat-panel,
+  .sl-pet-panel { left: 258px !important; right: auto !important; bottom: 22px !important; }
   html[data-theme="light"] .sl-home-sidebar {
     border-color: rgba(255,255,255,.68) !important;
     background: radial-gradient(ellipse at 0 0, rgba(115,190,245,.17), transparent 48%), linear-gradient(145deg, rgba(255,255,255,.52), rgba(226,241,252,.38) 58%, rgba(237,233,255,.36)) !important;
@@ -917,4 +918,74 @@ html[data-theme="light"] body header.site-header {
   background: linear-gradient(135deg, rgba(255,255,255,.39), rgba(225,241,255,.28) 55%, rgba(239,235,255,.30)) !important;
   border-color: rgba(255,255,255,.88) !important;
   box-shadow: 0 20px 54px rgba(45,83,122,.13), inset 0 1.5px 0 rgba(255,255,255,.99) !important;
+}
+
+
+/* Extend the same transparent glass material across the Home workspace. */
+@media (min-width: 1180px) {
+  .sl-home-layout .homepage-overview-panel,
+  .sl-home-layout .homepage-overview-panel .live-card,
+  .sl-home-layout .homepage-overview-panel .student-milestone,
+  .sl-home-layout .homepage-overview-panel .study-room-launcher,
+  .sl-home-layout .subject-card,
+  .sl-home-layout .study-tools-card,
+  .sl-home-layout .telegram-card,
+  .sl-home-layout .mcq-practice-card,
+  .sl-home-layout .chemistry-resources-card,
+  .sl-home-layout .student-counter {
+    -webkit-backdrop-filter: blur(34px) saturate(180%) !important;
+    backdrop-filter: blur(34px) saturate(180%) !important;
+  }
+  .sl-home-layout .homepage-overview-panel {
+    background:
+      radial-gradient(ellipse at 10% 0%, rgba(117,202,255,.13), transparent 48%),
+      radial-gradient(ellipse at 100% 100%, rgba(153,142,255,.10), transparent 48%),
+      linear-gradient(135deg, rgba(255,255,255,.075), rgba(255,255,255,.018)),
+      rgba(9,20,36,.23) !important;
+    border-color: rgba(205,228,248,.25) !important;
+    box-shadow: 0 28px 70px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.24) !important;
+  }
+  .sl-home-layout .homepage-overview-panel .live-card,
+  .sl-home-layout .homepage-overview-panel .student-milestone,
+  .sl-home-layout .homepage-overview-panel .study-room-launcher {
+    background: linear-gradient(135deg, rgba(255,255,255,.105), rgba(255,255,255,.025)), rgba(17,32,52,.22) !important;
+    border-color: rgba(190,220,245,.22) !important;
+    box-shadow: 0 10px 26px rgba(0,0,0,.10), inset 0 1px 0 rgba(255,255,255,.18) !important;
+  }
+  .sl-home-layout .subject-card,
+  .sl-home-layout .study-tools-card,
+  .sl-home-layout .telegram-card,
+  .sl-home-layout .mcq-practice-card,
+  .sl-home-layout .chemistry-resources-card,
+  .sl-home-layout .student-counter {
+    background: linear-gradient(135deg, rgba(255,255,255,.075), rgba(255,255,255,.018)), rgba(18,31,49,.20) !important;
+    border-color: rgba(190,215,239,.18) !important;
+    box-shadow: 0 14px 32px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.16) !important;
+  }
+  html[data-theme="light"] .sl-home-layout .homepage-overview-panel {
+    background:
+      radial-gradient(ellipse at 10% 0%, rgba(117,202,255,.13), transparent 48%),
+      radial-gradient(ellipse at 100% 100%, rgba(153,142,255,.08), transparent 48%),
+      linear-gradient(135deg, rgba(255,255,255,.64), rgba(255,255,255,.28)),
+      rgba(236,245,253,.38) !important;
+    border-color: rgba(255,255,255,.88) !important;
+    box-shadow: 0 26px 66px rgba(45,83,122,.10), inset 0 1px 0 rgba(255,255,255,.98) !important;
+  }
+  html[data-theme="light"] .sl-home-layout .homepage-overview-panel .live-card,
+  html[data-theme="light"] .sl-home-layout .homepage-overview-panel .student-milestone,
+  html[data-theme="light"] .sl-home-layout .homepage-overview-panel .study-room-launcher {
+    background: linear-gradient(135deg, rgba(255,255,255,.74), rgba(255,255,255,.34)), rgba(224,239,251,.30) !important;
+    border-color: rgba(255,255,255,.88) !important;
+    box-shadow: 0 10px 26px rgba(45,83,122,.075), inset 0 1px 0 rgba(255,255,255,.98) !important;
+  }
+  html[data-theme="light"] .sl-home-layout .subject-card,
+  html[data-theme="light"] .sl-home-layout .study-tools-card,
+  html[data-theme="light"] .sl-home-layout .telegram-card,
+  html[data-theme="light"] .sl-home-layout .mcq-practice-card,
+  html[data-theme="light"] .sl-home-layout .chemistry-resources-card,
+  html[data-theme="light"] .sl-home-layout .student-counter {
+    background: linear-gradient(135deg, rgba(255,255,255,.62), rgba(255,255,255,.25)), rgba(232,242,251,.28) !important;
+    border-color: rgba(255,255,255,.82) !important;
+    box-shadow: 0 12px 28px rgba(45,83,122,.07), inset 0 1px 0 rgba(255,255,255,.96) !important;
+  }
 }
