@@ -1169,13 +1169,10 @@
   async function openSocialNotification(row) {
     try {
       const client = accountClient().client;
-      await client.from("studylab_social_notifications")
+      const { error: readError } = await client.from("studylab_social_notifications")
         .update({ is_read: true }).eq("id", row.id).eq("recipient_id", socialNotificationUserId);
-      socialNotificationRows = socialNotificationRows.map(item =>
-        item.id === row.id ? { ...item, is_read: true } : item);
-      const unread = socialNotificationRows.filter(item => !item.is_read).length;
-      updateSocialNotificationBadge(unread);
-      renderSocialNotifications();
+      if (readError) throw readError;
+      await loadSocialNotifications(client, socialNotificationUserId);
       if (socialNotificationPopover) socialNotificationPopover.hidden = true;
       const card = [...stream.querySelectorAll(".sl-feed-post[data-post-id]")]
         .find(item => item.dataset.postId === row.post_id);
