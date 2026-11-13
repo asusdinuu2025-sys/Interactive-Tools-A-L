@@ -610,3 +610,204 @@ html body header.site-header .header-actions {
   .sl-home-sidebar.is-transitioning { animation: none !important; }
   .sl-home-nav-indicator { transition: none !important; }
 }
+
+
+/* Refinement: steady sidebar motion, no page reflow, and clearer glass depth. */
+.sl-home-sidebar {
+  isolation: isolate;
+  border-color: rgba(177, 222, 255, .30);
+  background:
+    linear-gradient(145deg, rgba(44, 70, 101, .80), rgba(12, 24, 42, .76) 58%, rgba(29, 39, 68, .74));
+  box-shadow:
+    0 25px 66px rgba(0, 0, 0, .32),
+    0 7px 22px rgba(16, 45, 78, .18),
+    0 0 32px rgba(67, 163, 255, .10),
+    inset 0 2px 0 rgba(255, 255, 255, .24),
+    inset 1px 0 0 rgba(255, 255, 255, .12),
+    inset -1px 0 0 rgba(130, 195, 245, .10),
+    inset 0 -2px 0 rgba(5, 12, 24, .22) !important;
+  transition:
+    width .30s cubic-bezier(.2, .75, .25, 1),
+    padding .30s cubic-bezier(.2, .75, .25, 1),
+    opacity .2s ease,
+    border-radius .30s ease !important;
+}
+.sl-home-sidebar::before {
+  z-index: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.66), transparent);
+  opacity: .8;
+}
+.sl-home-sidebar::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 1px;
+  border: 1px solid rgba(255,255,255,.055);
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 24px rgba(160, 213, 255, .035),
+    inset 0 -12px 26px rgba(0, 0, 0, .08);
+  pointer-events: none;
+}
+.sl-home-sidebar-head,
+.sl-home-sidebar-nav,
+.sl-home-sidebar-hint { position: relative; z-index: 1; }
+
+/* Fine separators divide navigation into calm visual groups. */
+.sl-home-nav-item[data-nav-id="practical-simulations"],
+.sl-home-nav-item[data-nav-id="past-papers"],
+.sl-home-nav-item[data-nav-id="productivity"] {
+  margin-top: 8px;
+}
+.sl-home-nav-item[data-nav-id="practical-simulations"]::before,
+.sl-home-nav-item[data-nav-id="past-papers"]::before,
+.sl-home-nav-item[data-nav-id="productivity"]::before {
+  content: "";
+  position: absolute;
+  top: -5px;
+  left: 12px;
+  right: 12px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(190, 224, 250, .25), transparent);
+  pointer-events: none;
+}
+html[data-theme="light"] .sl-home-sidebar {
+  border-color: rgba(255, 255, 255, .96);
+  background: linear-gradient(145deg, rgba(255,255,255,.91), rgba(231,243,253,.84) 58%, rgba(239,239,251,.82));
+  box-shadow:
+    0 25px 66px rgba(42, 78, 111, .17),
+    0 7px 22px rgba(67, 120, 160, .08),
+    inset 0 2px 0 rgba(255,255,255,1),
+    inset 1px 0 0 rgba(255,255,255,.92),
+    inset -1px 0 0 rgba(90,145,190,.10),
+    inset 0 -2px 0 rgba(88,130,165,.08) !important;
+}
+html[data-theme="light"] .sl-home-sidebar::before {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,1), transparent);
+}
+html[data-theme="light"] .sl-home-nav-item[data-nav-id="practical-simulations"]::before,
+html[data-theme="light"] .sl-home-nav-item[data-nav-id="past-papers"]::before,
+html[data-theme="light"] .sl-home-nav-item[data-nav-id="productivity"]::before {
+  background: linear-gradient(90deg, transparent, rgba(70, 120, 160, .19), transparent);
+}
+
+/* Keep the content in one position whether the sidebar is open or closed. */
+@media (min-width: 1180px) {
+  .sl-home-layout .sl-home-content,
+  .sl-home-layout.is-sidebar-collapsed .sl-home-content {
+    box-sizing: border-box;
+    padding-left: 250px !important;
+    transition: none !important;
+  }
+}
+
+/* A balanced, slightly wider header with breathing room between brand and actions. */
+html body header.site-header {
+  min-width: min(760px, calc(100vw - 40px)) !important;
+  padding-inline: 30px !important;
+  gap: 32px !important;
+}
+@media (max-width: 760px) {
+  html body header.site-header {
+    min-width: 0 !important;
+    padding-inline: 10px !important;
+    gap: 8px !important;
+  }
+}
+
+/* Search control lives in the top glass bar; its panel floats below the bar. */
+.site-header .study-header-search-trigger {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid rgba(183, 222, 255, .19);
+  border-radius: 13px;
+  color: #c9edff;
+  background: rgba(255,255,255,.075);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.13), 0 5px 14px rgba(0,0,0,.08);
+  cursor: pointer;
+  transition: background .2s ease, border-color .2s ease, transform .2s ease;
+}
+.site-header .study-header-search-trigger:hover,
+.site-header .study-header-search-trigger[aria-expanded="true"] {
+  background: rgba(105,190,255,.16);
+  border-color: rgba(126,220,255,.38);
+}
+.site-header .study-header-search-trigger:active { transform: scale(.96); }
+.site-header .study-header-search-trigger svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+html[data-theme="light"] .site-header .study-header-search-trigger {
+  color: #287eb3;
+  border-color: rgba(70,140,190,.20);
+  background: rgba(255,255,255,.62);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.96), 0 5px 14px rgba(45,83,122,.08);
+}
+.study-header-search-panel {
+  position: fixed;
+  z-index: 1010;
+  top: 88px;
+  left: 50%;
+  width: min(520px, calc(100vw - 24px));
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(178,220,255,.25);
+  border-radius: 18px;
+  color: #eaf4ff;
+  background: linear-gradient(135deg, rgba(37,59,87,.91), rgba(13,25,43,.90));
+  -webkit-backdrop-filter: blur(32px) saturate(175%);
+  backdrop-filter: blur(32px) saturate(175%);
+  box-shadow: 0 20px 55px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.20);
+  transform: translateX(-50%);
+}
+.study-header-search-panel[hidden] { display: none !important; }
+.study-header-search-panel input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: .94rem;
+}
+.study-header-search-panel input::placeholder { color: rgba(205,225,244,.60); }
+.study-header-search-panel .study-find-meta {
+  flex: 0 0 auto;
+  color: rgba(200,224,244,.65);
+  font-size: .72rem;
+  white-space: nowrap;
+}
+.study-header-search-panel .study-find-clear {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 9px;
+  color: inherit;
+  background: rgba(255,255,255,.10);
+  cursor: pointer;
+}
+html[data-theme="light"] .study-header-search-panel {
+  border-color: rgba(255,255,255,.96);
+  color: #20384d;
+  background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(232,242,251,.94));
+  box-shadow: 0 20px 55px rgba(45,83,122,.16), inset 0 1px 0 #fff;
+}
+html[data-theme="light"] .study-header-search-panel input::placeholder,
+html[data-theme="light"] .study-header-search-panel .study-find-meta { color: rgba(48,75,99,.56); }
+@media (max-width: 640px) {
+  .study-header-search-panel { top: 78px; }
+  .study-header-search-panel .study-find-meta { display: none; }
+}
