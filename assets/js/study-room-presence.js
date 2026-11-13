@@ -47,7 +47,7 @@
         }
         storageRemove(key);
         windows.delete(win);
-        sync(true);
+        sync();
       };
       const onState = () => sync();
       try {
