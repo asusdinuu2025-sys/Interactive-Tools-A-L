@@ -411,3 +411,26 @@
     transition: none !important;
   }
 }
+
+
+/* Home Chat window: open directly beside the navigation rail, not at the far edge. */
+@media (min-width: 1180px) {
+  body:not(.study-room-page) .study-chat-panel {
+    position: fixed !important;
+    top: auto !important;
+    bottom: 22px !important;
+    left: max(248px, calc((100vw - 1560px) / 2 + 248px)) !important;
+    right: auto !important;
+    width: min(410px, calc(100vw - max(248px, (100vw - 1560px) / 2 + 248px) - 24px)) !important;
+    max-width: calc(100vw - max(248px, (100vw - 1560px) / 2 + 248px) - 24px) !important;
+    max-height: calc(100dvh - 44px) !important;
+    z-index: 1200 !important;
+  }
+
+  /* When the rail is collapsed, keep the chat window tucked beside its narrower edge. */
+  html:has(.sl-home-sidebar.is-collapsed) body:not(.study-room-page) .study-chat-panel {
+    left: max(106px, calc((100vw - 1560px) / 2 + 106px)) !important;
+    width: min(410px, calc(100vw - max(106px, (100vw - 1560px) / 2 + 106px) - 24px)) !important;
+    max-width: calc(100vw - max(106px, (100vw - 1560px) / 2 + 106px) - 24px) !important;
+  }
+}
