@@ -1556,9 +1556,6 @@ body:not(.study-room-page) .study-quick-button,
 body:not(.study-room-page) .study-feedback-button,
 body:not(.study-room-page) .sl-feed-floating-shortcut {
   bottom: calc(20px + var(--sl-home-floating-footer-lift, 0px)) !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  pointer-events: auto !important;
 }
 @media (max-width: 720px) {
   html[data-theme="dark"] body,
