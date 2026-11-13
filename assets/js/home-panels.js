@@ -13,7 +13,7 @@
   const todayTime = rankRoot.querySelector("[data-home-rank-today-time]");
   const weekName = rankRoot.querySelector("[data-home-rank-week-name]");
   const weekTime = rankRoot.querySelector("[data-home-rank-week-time]");
-  const fallbackName = "Waiting for the first study session";
+  const fallbackName = "No ranking recorded yet";
 
   const dayKey = date => new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Colombo", year: "numeric", month: "2-digit", day: "2-digit"
@@ -27,6 +27,7 @@
   const startOfDay = key => new Date(key + "T00:00:00+05:30").getTime();
   const duration = seconds => {
     const total = Math.max(0, Math.floor(Number(seconds) || 0));
+    if (total > 0 && total < 60) return "<1m";
     const hours = Math.floor(total / 3600);
     const minutes = Math.floor((total % 3600) / 60);
     return hours ? hours + "h" + (minutes ? " " + minutes + "m" : "") : minutes + "m";
