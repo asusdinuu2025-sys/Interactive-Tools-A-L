@@ -1449,3 +1449,126 @@ html[data-theme="light"] .sl-pet-panel .sl-pet-setting-buttons button[data-pet-e
 .sl-pet-setting-buttons button[data-pet-eye][aria-pressed="true"]::after {
   content: "✓" !important;
 }
+
+
+/* =========================================================
+   HOME REFERENCE WALLPAPERS — Windows ribbon palette
+   The optional reference WebP sits over the previous Home WebP,
+   so an unavailable asset still leaves a usable background.
+   The supplied originals are 2048x1152; keep background sharp.
+   ========================================================= */
+html[data-theme="dark"] body {
+  background-color: #081127 !important;
+  background-image:
+    linear-gradient(180deg, rgba(5, 12, 32, .18), rgba(5, 12, 31, .28)),
+    url("../images/studylab-home-reference-dark.webp"),
+    url("../images/studylab-home-dark.webp"),
+    linear-gradient(145deg, #081127, #075ac4 62%, #191756) !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+  background-attachment: fixed !important;
+}
+html[data-theme="light"] body {
+  background-color: #dceeff !important;
+  background-image:
+    linear-gradient(180deg, rgba(246,251,255,.12), rgba(228,242,255,.18)),
+    url("../images/studylab-home-reference-light.webp"),
+    url("../images/studylab-home-light.webp"),
+    linear-gradient(145deg, #e7f1fc, #88cefa 62%, #e7c8ff) !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+  background-attachment: fixed !important;
+}
+
+/* Keep translucent glass distinct from the bright ribbons behind it. */
+html[data-theme="dark"] .sl-home-section {
+  background: rgba(7,16,39,.40) !important;
+  border-color: rgba(183,223,255,.25) !important;
+}
+html[data-theme="dark"] .sl-home-section .subject-card,
+html[data-theme="dark"] .sl-home-section .study-tools-card,
+html[data-theme="dark"] .sl-home-section .telegram-card,
+html[data-theme="dark"] .sl-home-room-panel,
+html[data-theme="dark"] .sl-home-feature-card,
+html[data-theme="dark"] .sl-home-rank-card {
+  background: rgba(8,19,46,.35) !important;
+}
+html[data-theme="light"] .sl-home-section {
+  color: #183653 !important;
+  background: rgba(250,253,255,.61) !important;
+  border-color: rgba(255,255,255,.75) !important;
+  box-shadow: 0 15px 40px rgba(27,69,124,.11), inset 0 1px 0 rgba(255,255,255,.85) !important;
+}
+html[data-theme="light"] .sl-home-home-section .homepage-overview-panel {
+  background: rgba(255,255,255,.32) !important;
+}
+html[data-theme="light"] .sl-home-section .subject-card,
+html[data-theme="light"] .sl-home-section .study-tools-card,
+html[data-theme="light"] .sl-home-section .telegram-card,
+html[data-theme="light"] .sl-home-room-panel,
+html[data-theme="light"] .sl-home-feature-card,
+html[data-theme="light"] .sl-home-rank-card {
+  background: rgba(250,253,255,.49) !important;
+  border-color: rgba(255,255,255,.78) !important;
+}
+html[data-theme="light"] .sl-home-section-heading h2,
+html[data-theme="light"] .sl-home-room-copy h3,
+html[data-theme="light"] .sl-home-feature-card h3,
+html[data-theme="light"] .sl-home-section .subject-card h2,
+html[data-theme="light"] .sl-home-section .study-tools-card h2,
+html[data-theme="light"] .sl-home-section .telegram-card h2,
+html[data-theme="light"] .sl-home-rank-card strong {
+  color: #163655 !important;
+}
+html[data-theme="light"] .sl-home-section-heading p,
+html[data-theme="light"] .sl-home-room-copy p,
+html[data-theme="light"] .sl-home-feature-card p,
+html[data-theme="light"] .sl-home-section .subject-card p,
+html[data-theme="light"] .sl-home-section .study-tools-card p,
+html[data-theme="light"] .sl-home-section .telegram-card p {
+  color: #395873 !important;
+}
+
+/* Same cyan vector tone for the sidebar's Pet, AI and Chat icons. */
+.sl-home-sidebar .sl-home-quick-actions #studylabPetLauncher .sl-pet-launcher-icon,
+.sl-home-sidebar .sl-home-quick-actions .studylab-ai-launcher-icon,
+.sl-home-sidebar .sl-home-quick-actions .study-chat-button-icon {
+  color: #9ce2ff !important;
+  filter: none !important;
+}
+.sl-home-sidebar .sl-home-quick-actions .study-chat-button-icon svg {
+  color: inherit !important;
+  stroke: currentColor !important;
+  filter: none !important;
+}
+html[data-theme="light"] .sl-home-sidebar {
+  background: rgba(247,252,255,.65) !important;
+  border-color: rgba(255,255,255,.77) !important;
+}
+html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions #studylabPetLauncher .sl-pet-launcher-icon,
+html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions .studylab-ai-launcher-icon,
+html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions .study-chat-button-icon {
+  color: #185f99 !important;
+}
+
+/* Float the entire bottom-right action trio above the footer, not beneath it.
+   The existing Home sidebar script updates --sl-home-floating-footer-lift. */
+body:not(.study-room-page) .study-quick-button,
+body:not(.study-room-page) .study-feedback-button,
+body:not(.study-room-page) .sl-feed-floating-shortcut {
+  bottom: calc(20px + var(--sl-home-floating-footer-lift, 0px)) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+@media (max-width: 720px) {
+  html[data-theme="dark"] body,
+  html[data-theme="light"] body { background-attachment: scroll !important; }
+  body:not(.study-room-page) .study-quick-button,
+  body:not(.study-room-page) .study-feedback-button,
+  body:not(.study-room-page) .sl-feed-floating-shortcut {
+    bottom: calc(12px + var(--sl-home-floating-footer-lift, 0px)) !important;
+  }
+}
