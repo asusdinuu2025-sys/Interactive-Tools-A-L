@@ -1880,6 +1880,7 @@
 
       <h1 class="home-hero-title-spacer" aria-label="Study-Lab for G.C.E A/L Sri Lanka"><span class="sr-only">Study-Lab for G.C.E A/L Sri Lanka</span></h1>
 
+      <section class="homepage-overview-panel" aria-label="StudyLab overview">
       <div class="homepage-greeting" id="homeGreeting" aria-live="polite">
         <p class="homepage-greeting-time" id="homeGreetingTime">Good morning</p>
         <h2 class="homepage-greeting-name" id="homeGreetingName">Student</h2>
@@ -1986,6 +1987,7 @@
       </div>
 
       </div>
+      </section>
 
       <style>
         /* =====================================================
@@ -2116,6 +2118,133 @@
             min-height: 154px;
             height: 154px;
           }
+        }
+
+        /* Unified Home overview: greeting and four compact glass tiles. */
+        .homepage-overview-panel {
+          position: relative;
+          isolation: isolate;
+          width: min(100%, 1180px);
+          box-sizing: border-box;
+          margin: 22px auto 38px;
+          padding: clamp(18px, 2.3vw, 30px);
+          overflow: hidden;
+          border: 1px solid rgba(165, 218, 255, .19);
+          border-radius: 30px;
+          background:
+            radial-gradient(ellipse at 8% 0%, rgba(72, 174, 255, .13), transparent 42%),
+            linear-gradient(135deg, rgba(32, 54, 80, .42), rgba(12, 24, 41, .34) 58%, rgba(47, 43, 83, .30));
+          box-shadow: 0 24px 65px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.12);
+          -webkit-backdrop-filter: blur(30px) saturate(145%);
+          backdrop-filter: blur(30px) saturate(145%);
+        }
+        .homepage-overview-panel::before {
+          content: "";
+          position: absolute;
+          z-index: -1;
+          inset: 1px;
+          border-radius: inherit;
+          pointer-events: none;
+          background: linear-gradient(115deg, rgba(255,255,255,.055), transparent 38%, rgba(100,170,255,.035));
+        }
+        .homepage-overview-panel .homepage-greeting {
+          width: 100%;
+          max-width: none;
+          box-sizing: border-box;
+          margin: 0 0 22px;
+          padding: 0 2px;
+          display: flex;
+          flex-direction: row;
+          align-items: baseline;
+          justify-content: flex-start;
+          flex-wrap: nowrap;
+          gap: 9px;
+          white-space: nowrap;
+        }
+        .homepage-overview-panel .homepage-greeting-time,
+        .homepage-overview-panel .homepage-greeting-name,
+        .homepage-overview-panel .homepage-greeting-welcome {
+          display: inline;
+          margin: 0;
+          white-space: nowrap;
+        }
+        .homepage-overview-panel .homepage-greeting-time {
+          font-size: clamp(17px, 1.8vw, 22px);
+          line-height: 1.2;
+        }
+        .homepage-overview-panel .homepage-greeting-time::after { content: ","; }
+        .homepage-overview-panel .homepage-greeting-name {
+          font-size: clamp(21px, 2.35vw, 29px);
+          line-height: 1.2;
+          letter-spacing: -.035em;
+        }
+        .homepage-overview-panel .homepage-greeting-name::after { content: "."; }
+        .homepage-overview-panel .homepage-greeting-welcome {
+          margin-left: 1px;
+          font-size: clamp(15px, 1.45vw, 18px);
+          line-height: 1.3;
+        }
+        .homepage-overview-panel .homepage-utility-row {
+          margin: 0;
+          gap: 12px;
+        }
+        .homepage-overview-panel .live-card,
+        .homepage-overview-panel .student-milestone,
+        .homepage-overview-panel .study-room-launcher {
+          min-height: 142px;
+          height: 142px;
+          border-radius: 20px;
+          border: 1px solid rgba(177, 220, 255, .15);
+          background: rgba(255,255,255,.055);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,.09), 0 10px 28px rgba(0,0,0,.09);
+          -webkit-backdrop-filter: blur(16px) saturate(135%);
+          backdrop-filter: blur(16px) saturate(135%);
+        }
+        .homepage-overview-panel .live-card { order: 1; }
+        .homepage-overview-panel .study-room-launcher { order: 2; }
+        .homepage-overview-panel .live-card:nth-child(2) { order: 3; }
+        .homepage-overview-panel .student-milestone { order: 4; }
+        .homepage-overview-panel .live-card:hover,
+        .homepage-overview-panel .student-milestone:hover,
+        .homepage-overview-panel .study-room-launcher:hover {
+          transform: translateY(-3px);
+          border-color: rgba(135, 210, 255, .29);
+          background: rgba(255,255,255,.085);
+        }
+        html[data-theme="light"] .homepage-overview-panel {
+          border-color: rgba(255,255,255,.94);
+          background:
+            radial-gradient(ellipse at 8% 0%, rgba(105,190,245,.17), transparent 42%),
+            linear-gradient(135deg, rgba(255,255,255,.78), rgba(235,246,255,.65) 58%, rgba(243,240,255,.67));
+          box-shadow: 0 24px 60px rgba(45,85,120,.12), inset 0 1px 0 rgba(255,255,255,.98);
+        }
+        html[data-theme="light"] .homepage-overview-panel .live-card,
+        html[data-theme="light"] .homepage-overview-panel .student-milestone,
+        html[data-theme="light"] .homepage-overview-panel .study-room-launcher {
+          border-color: rgba(105,155,195,.18);
+          background: rgba(255,255,255,.46);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,.95), 0 9px 24px rgba(55,95,130,.07);
+        }
+        @media (max-width: 900px) {
+          .homepage-overview-panel { padding: 20px; border-radius: 26px; }
+          .homepage-overview-panel .homepage-greeting { flex-wrap: wrap; row-gap: 5px; }
+        }
+        @media (max-width: 720px) {
+          .homepage-overview-panel { margin: 16px auto 26px; padding: 16px; border-radius: 22px; }
+          .homepage-overview-panel .homepage-greeting { margin-bottom: 16px; gap: 6px; }
+          .homepage-overview-panel .homepage-greeting-time { font-size: 16px; }
+          .homepage-overview-panel .homepage-greeting-name { font-size: 21px; }
+          .homepage-overview-panel .homepage-greeting-welcome { font-size: 14px; }
+          .homepage-overview-panel .homepage-utility-row { gap: 10px; }
+          .homepage-overview-panel .live-card,
+          .homepage-overview-panel .student-milestone,
+          .homepage-overview-panel .study-room-launcher { min-height: 136px; height: 136px; }
+        }
+        @media (max-width: 390px) {
+          .homepage-overview-panel .homepage-greeting { gap: 4px; }
+          .homepage-overview-panel .homepage-greeting-time { font-size: 14px; }
+          .homepage-overview-panel .homepage-greeting-name { font-size: 19px; }
+          .homepage-overview-panel .homepage-greeting-welcome { font-size: 12px; }
         }
       </style>
 
