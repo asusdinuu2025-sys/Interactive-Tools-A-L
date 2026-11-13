@@ -2435,6 +2435,52 @@
           .homepage-overview-panel .student-milestone,
           .homepage-overview-panel .study-room-launcher { transition: none; }
         }
+
+        /* Align the Home content surface directly beneath the fixed top bar.
+           The header itself is intentionally untouched. */
+        @media (min-width: 1180px) {
+          .sl-home-layout .sl-home-content > main.container {
+            box-sizing: border-box !important;
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+            padding: 96px 24px 0 clamp(18px, 2.2vw, 34px) !important;
+          }
+          .sl-home-layout .sl-home-content > main.container > .hero {
+            width: 100%;
+            max-width: none;
+            margin-inline: 0;
+            padding-top: 0;
+          }
+          .sl-home-layout .hero .home-hero-title-spacer {
+            display: none !important;
+          }
+          .sl-home-layout .homepage-overview-panel {
+            width: 100%;
+            max-width: none;
+            margin: 0 0 38px;
+          }
+        }
+        @media (max-width: 1179px) {
+          .sl-home-layout .sl-home-content > main.container {
+            box-sizing: border-box !important;
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+            padding-top: 88px !important;
+          }
+          .sl-home-layout .hero .home-hero-title-spacer {
+            display: none !important;
+          }
+          .sl-home-layout .homepage-overview-panel {
+            margin-top: 0;
+          }
+        }
+        @media (max-width: 640px) {
+          .sl-home-layout .sl-home-content > main.container {
+            padding-top: 78px !important;
+          }
+        }
       </style>
 
 
