@@ -85,7 +85,8 @@
     indicator.style.height = item.offsetHeight + "px";
     indicator.style.transform = "translate3d(0," + item.offsetTop + "px,0)";
     if (item.offsetTop < nav.scrollTop || item.offsetTop + item.offsetHeight > nav.scrollTop + nav.clientHeight) {
-      item.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      const targetTop = Math.max(0, item.offsetTop - nav.offsetTop - (nav.clientHeight - item.offsetHeight) / 2);
+      nav.scrollTo({ top: targetTop, behavior: "smooth" });
     }
   }
 
@@ -119,23 +120,14 @@
     });
   });
 
-  sidebar.addEventListener("animationend", event => {
-    if (event.animationName === "slSidebarSoftSnap") sidebar.classList.remove("is-transitioning");
-  });
-
   collapseButton.addEventListener("click", () => {
-    sidebar.classList.remove("is-transitioning");
-    void sidebar.offsetWidth;
-    sidebar.classList.add("is-transitioning");
     const collapsed = sidebar.classList.toggle("is-collapsed");
-    layout.classList.toggle("is-sidebar-collapsed", collapsed);
     collapseButton.setAttribute("aria-expanded", String(!collapsed));
     collapseButton.setAttribute("aria-label", collapsed ? "Expand navigation" : "Collapse navigation");
     collapseButton.title = collapsed ? "Expand navigation" : "Collapse navigation";
     collapseButton.innerHTML = collapsed
       ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 5 7 7-7 7"/></svg>'
       : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>';
-    requestAnimationFrame(() => setActive(activeId));
   });
 
   const socialToggle = document.querySelector(".sl-feed-toggle");
