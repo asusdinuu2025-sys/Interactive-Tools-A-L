@@ -292,6 +292,7 @@
 }
 
 .home-hub-ai-card {
+  max-width: 760px;
   background:
     linear-gradient(145deg, rgba(91,140,255,.13), rgba(168,119,255,.10)),
     var(--card-bg);
