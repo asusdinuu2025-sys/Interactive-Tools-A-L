@@ -118,6 +118,7 @@
       sidebar.style.removeProperty("--sl-home-footer-opacity");
       sidebar.classList.remove("is-footer-hidden");
       document.documentElement.style.removeProperty("--sl-home-floating-footer-opacity");
+      document.documentElement.style.removeProperty("--sl-home-floating-footer-lift");
       document.body.classList.remove("is-footer-near-floating-controls");
       return;
     }
@@ -125,14 +126,12 @@
     const footerRect = footer.getBoundingClientRect();
     const viewportHeight = window.innerHeight;
 
-    // Bottom-right floating shortcuts fade out before the footer reaches their row.
-    const floatingFadeStart = viewportHeight - 190;
-    const floatingFadeEnd = viewportHeight - 74;
-    const floatingOpacity = Math.max(0, Math.min(1,
-      (footerRect.top - floatingFadeEnd) / (floatingFadeStart - floatingFadeEnd)
-    ));
-    document.documentElement.style.setProperty("--sl-home-floating-footer-opacity", floatingOpacity.toFixed(3));
-    document.body.classList.toggle("is-footer-near-floating-controls", floatingOpacity <= 0.025);
+    // Keep the right-side shortcut row just above the footer as it enters view.
+    // Use the actual footer position rather than hiding or layering buttons over it.
+    const footerLift = Math.max(0, Math.ceil(viewportHeight - footerRect.top + 12));
+    document.documentElement.style.setProperty("--sl-home-floating-footer-lift", footerLift + "px");
+    document.documentElement.style.removeProperty("--sl-home-floating-footer-opacity");
+    document.body.classList.remove("is-footer-near-floating-controls");
 
     // The desktop rail keeps its navigation visible and fades only its own quick-action dock.
     if (!desktopDock.matches) {
