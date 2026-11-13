@@ -1453,15 +1453,13 @@ html[data-theme="light"] .sl-pet-panel .sl-pet-setting-buttons button[data-pet-e
 
 /* =========================================================
    HOME REFERENCE WALLPAPERS — Windows ribbon palette
-   The optional reference WebP sits over the previous Home WebP,
-   so an unavailable asset still leaves a usable background.
-   The supplied originals are 2048x1152; keep background sharp.
+   Uses the existing Home image asset paths so both themes keep
+   working while upgraded 2048x1152 wallpapers are uploaded.
    ========================================================= */
 html[data-theme="dark"] body {
   background-color: #081127 !important;
   background-image:
     linear-gradient(180deg, rgba(5, 12, 32, .18), rgba(5, 12, 31, .28)),
-    url("../images/studylab-home-reference-dark.webp"),
     url("../images/studylab-home-dark.webp"),
     linear-gradient(145deg, #081127, #075ac4 62%, #191756) !important;
   background-position: center center !important;
@@ -1473,7 +1471,6 @@ html[data-theme="light"] body {
   background-color: #dceeff !important;
   background-image:
     linear-gradient(180deg, rgba(246,251,255,.12), rgba(228,242,255,.18)),
-    url("../images/studylab-home-reference-light.webp"),
     url("../images/studylab-home-light.webp"),
     linear-gradient(145deg, #e7f1fc, #88cefa 62%, #e7c8ff) !important;
   background-position: center center !important;
