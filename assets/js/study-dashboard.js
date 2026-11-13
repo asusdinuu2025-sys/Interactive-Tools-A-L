@@ -463,6 +463,7 @@
   let searchInput = null;
   let searchMeta = null;
   let searchClear = null;
+  let openHeaderSearch = null;
 
   function currentSearchCards() {
     const toolGrid = document.querySelector(SELECTORS.toolGrid);
@@ -516,6 +517,7 @@
   }
 
   function focusSearch() {
+    openHeaderSearch?.();
     const target = searchInput || document.querySelector("#studyQuickSearch");
     if (target) {
       target.focus();
@@ -529,9 +531,88 @@
     const toolGrid = document.querySelector(SELECTORS.toolGrid);
     const subjectGrid = document.querySelector(SELECTORS.subjectGrid);
     const targetGrid = toolGrid || subjectGrid;
+    if (!targetGrid) return;
 
-    if (!targetGrid || document.querySelector(".study-findbar")) return;
+    const homeHeader = document.querySelector("header.site-header#home-top");
+    if (homeHeader) {
+      const actions = homeHeader.querySelector(".header-actions");
+      if (!actions || document.getElementById("studyHeaderSearchButton")) return;
 
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "study-header-search-trigger";
+      button.id = "studyHeaderSearchButton";
+      button.setAttribute("aria-label", "Search StudyLab");
+      button.setAttribute("title", "Search StudyLab");
+      button.setAttribute("aria-expanded", "false");
+      button.setAttribute("aria-controls", "studyHeaderSearchPanel");
+      button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>';
+
+      const panel = document.createElement("div");
+      panel.className = "study-header-search-panel";
+      panel.id = "studyHeaderSearchPanel";
+      panel.setAttribute("role", "search");
+      panel.hidden = true;
+
+      searchInput = document.createElement("input");
+      searchInput.type = "search";
+      searchInput.className = "study-find-input";
+      searchInput.id = "studyQuickSearch";
+      searchInput.autocomplete = "off";
+      searchInput.spellcheck = false;
+      searchInput.placeholder = toolGrid
+        ? "Search tools, lessons, topics..."
+        : "Search subjects...";
+      searchInput.setAttribute("aria-label", searchInput.placeholder);
+
+      searchClear = document.createElement("button");
+      searchClear.type = "button";
+      searchClear.className = "study-find-clear";
+      searchClear.setAttribute("aria-label", "Clear search");
+      searchClear.textContent = "×";
+      searchClear.hidden = true;
+      searchClear.addEventListener("click", clearSearch);
+
+      searchMeta = document.createElement("span");
+      searchMeta.className = "study-find-meta";
+
+      searchInput.addEventListener("input", applySearch);
+      panel.append(searchInput, searchClear, searchMeta);
+      actions.appendChild(button);
+      document.body.appendChild(panel);
+
+      function setSearchOpen(open) {
+        panel.hidden = !open;
+        button.setAttribute("aria-expanded", String(open));
+        button.classList.toggle("is-open", open);
+        if (open) requestAnimationFrame(() => searchInput.focus());
+      }
+
+      openHeaderSearch = () => setSearchOpen(true);
+      button.addEventListener("click", event => {
+        event.stopPropagation();
+        setSearchOpen(panel.hidden);
+      });
+      panel.addEventListener("click", event => event.stopPropagation());
+      document.addEventListener("click", event => {
+        if (!panel.hidden && !panel.contains(event.target) &&
+            event.target !== button && !button.contains(event.target)) {
+          setSearchOpen(false);
+        }
+      });
+      document.addEventListener("keydown", event => {
+        if (event.key === "Escape" && !panel.hidden) {
+          setSearchOpen(false);
+          button.focus();
+        }
+      });
+
+      applySearch();
+      return;
+    }
+
+    // Keep the established compact search field on subject/resource pages.
+    if (document.querySelector(".study-findbar")) return;
     const wrap = document.createElement("div");
     wrap.className = "study-findbar";
     wrap.setAttribute("role", "search");
@@ -562,22 +643,16 @@
 
     searchMeta = document.createElement("span");
     searchMeta.className = "study-find-meta";
-
     searchInput.addEventListener("input", applySearch);
-
     wrap.append(icon, searchInput, searchClear, searchMeta);
 
     if (toolGrid) {
       const filter = document.getElementById("lessonFilter");
-      if (filter) {
-        filter.parentNode.insertBefore(wrap, filter);
-      } else {
-        targetGrid.parentNode.insertBefore(wrap, targetGrid);
-      }
+      if (filter) filter.parentNode.insertBefore(wrap, filter);
+      else targetGrid.parentNode.insertBefore(wrap, targetGrid);
     } else {
       targetGrid.parentNode.insertBefore(wrap, targetGrid);
     }
-
     applySearch();
   }
 

@@ -34,6 +34,7 @@
   <link rel="stylesheet" href="assets/css/main.css?v=20261103-filter-chevron-v1" />
   <link rel="stylesheet" href="assets/css/pwa.css?v=1.0.1">
   <link rel="stylesheet" href="assets/css/feed-drawer.css?v=29">
+  <link rel="stylesheet" href="assets/css/home-sidebar.css?v=14">
 
 
   <!-- =========================================================
@@ -283,6 +284,49 @@
       position: relative;
       z-index: 2;
       isolation: isolate;
+    }
+
+    /* Personalized Home greeting */
+    .homepage-greeting {
+      position: relative;
+      z-index: 2;
+      width: min(100%, 1120px);
+      margin: 24px auto 30px;
+      padding: 0 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      text-align: left;
+      gap: 3px;
+      isolation: isolate;
+    }
+    .homepage-greeting-time {
+      margin: 0 0 2px;
+      color: #8fcfff;
+      font: 650 clamp(14px, 1.35vw, 17px)/1.35 "Nirmala UI", "Segoe UI", sans-serif;
+      letter-spacing: .015em;
+    }
+    .homepage-greeting-name {
+      margin: 0;
+      color: var(--text-primary, #f4f8ff);
+      font: 750 clamp(30px, 4vw, 46px)/1.12 "Nirmala UI", "Segoe UI", sans-serif;
+      letter-spacing: -.045em;
+      text-shadow: 0 8px 28px rgba(0, 0, 0, .16);
+    }
+    .homepage-greeting-welcome {
+      margin: 4px 0 0;
+      color: var(--text-secondary, rgba(220, 232, 246, .78));
+      font: 450 clamp(14px, 1.3vw, 16px)/1.5 "Nirmala UI", "Segoe UI", sans-serif;
+      opacity: .9;
+    }
+    html[data-theme="light"] .homepage-greeting-time { color: #287db5; }
+    html[data-theme="light"] .homepage-greeting-name {
+      color: #182b42;
+      text-shadow: 0 7px 24px rgba(50, 95, 135, .10);
+    }
+    html[data-theme="light"] .homepage-greeting-welcome { color: #60758b; }
+    @media (max-width: 760px) {
+      .homepage-greeting { margin: 18px auto 24px; padding-inline: 4px; }
     }
 
     /* =========================================================
@@ -1643,7 +1687,12 @@
 
   <link rel="stylesheet" href="assets/css/ai-tutor.css">
   <link rel="stylesheet" href="assets/css/floating-controls.css?v=1.0.4" />
-  <link rel="stylesheet" href="assets/css/home-light-glass.css?v=20261103-clean-light-v1">
+  <link rel="stylesheet" href="assets/css/home-light-glass.css?v=20261113-centered-social-header-v3">
+  <link rel="stylesheet" href="assets/css/home-overview-polish.css?v=2">
+  <link rel="stylesheet" href="assets/css/home-sections-glass.css?v=5">
+  <link rel="stylesheet" href="assets/css/home-final-light-polish.css?v=2">
+  <link rel="stylesheet" href="assets/css/home-ambient-final.css?v=2">
+  <link rel="stylesheet" href="assets/css/home-dashboard-finish.css?v=3">
 </head>
 
 
@@ -1763,15 +1812,13 @@
        STUDY LAB LK — HEADER
        ========================================================= -->
 
-  <header class="site-header">
+  <header class="site-header" id="home-top">
 
     <div class="brand">
 
       <span class="brand-mark brand-vector-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m2 9 10-5 10 5-10 5L2 9Z"/><path d="M6 11v5c3.5 3 8.5 3 12 0v-5M22 9v6"/></svg></span>
 
-      <span>
-        Study-Lab
-      </span>
+      <span class="brand-title-text">Study-Lab for G.C.E. A/L Students in Sri Lanka</span>
 
     </div>
 
@@ -1825,6 +1872,8 @@
        STUDY LAB LK — MAIN CONTENT
        ========================================================= -->
 
+  <div id="studyLabHomeLayout" class="sl-home-layout">
+    <div class="sl-home-content">
   <main class="container">
 
 
@@ -1832,13 +1881,17 @@
          STUDY LAB LK — HERO
          ======================================================= -->
 
-    <section class="hero">
+    <section class="hero sl-home-section sl-home-home-section" id="home-overview" aria-label="Home">
+      <h1 class="home-hero-title-spacer" aria-label="Study-Lab for G.C.E A/L Sri Lanka"><span class="sr-only">Study-Lab for G.C.E A/L Sri Lanka</span></h1>
 
-      <h1 aria-label="Study-Lab for G.C.E A/L Sri Lanka"><span class="hero-title-letters" aria-hidden="true"><span class="hero-title-letter" data-letter="S" style="--letter-delay:0ms" aria-hidden="true">S</span><span class="hero-title-letter" data-letter="t" style="--letter-delay:85ms" aria-hidden="true">t</span><span class="hero-title-letter" data-letter="u" style="--letter-delay:170ms" aria-hidden="true">u</span><span class="hero-title-letter" data-letter="d" style="--letter-delay:255ms" aria-hidden="true">d</span><span class="hero-title-letter" data-letter="y" style="--letter-delay:340ms" aria-hidden="true">y</span><span class="hero-title-letter" data-letter="-" style="--letter-delay:425ms" aria-hidden="true">-</span><span class="hero-title-letter" data-letter="L" style="--letter-delay:510ms" aria-hidden="true">L</span><span class="hero-title-letter" data-letter="a" style="--letter-delay:595ms" aria-hidden="true">a</span><span class="hero-title-letter" data-letter="b" style="--letter-delay:680ms" aria-hidden="true">b</span><span class="hero-title-space" aria-hidden="true"></span><span class="hero-title-letter" data-letter="f" style="--letter-delay:850ms" aria-hidden="true">f</span><span class="hero-title-letter" data-letter="o" style="--letter-delay:935ms" aria-hidden="true">o</span><span class="hero-title-letter" data-letter="r" style="--letter-delay:1020ms" aria-hidden="true">r</span><span class="hero-title-space" aria-hidden="true"></span><span class="hero-title-letter" data-letter="G" style="--letter-delay:1190ms" aria-hidden="true">G</span><span class="hero-title-letter" data-letter="." style="--letter-delay:1275ms" aria-hidden="true">.</span><span class="hero-title-letter" data-letter="C" style="--letter-delay:1360ms" aria-hidden="true">C</span><span class="hero-title-letter" data-letter="." style="--letter-delay:1445ms" aria-hidden="true">.</span><span class="hero-title-letter" data-letter="E" style="--letter-delay:1530ms" aria-hidden="true">E</span><span class="hero-title-space" aria-hidden="true"></span><span class="hero-title-letter" data-letter="A" style="--letter-delay:1700ms" aria-hidden="true">A</span><span class="hero-title-letter" data-letter="/" style="--letter-delay:1785ms" aria-hidden="true">/</span><span class="hero-title-letter" data-letter="L" style="--letter-delay:1870ms" aria-hidden="true">L</span><span class="hero-title-space" aria-hidden="true"></span><span class="hero-title-country"><span class="hero-title-letter" data-letter="S" style="--letter-delay:2040ms" aria-hidden="true">S</span><span class="hero-title-letter" data-letter="r" style="--letter-delay:2125ms" aria-hidden="true">r</span><span class="hero-title-letter" data-letter="i" style="--letter-delay:2210ms" aria-hidden="true">i</span><span class="hero-title-space" aria-hidden="true"></span><span class="hero-title-letter" data-letter="L" style="--letter-delay:2380ms" aria-hidden="true">L</span><span class="hero-title-letter" data-letter="a" style="--letter-delay:2465ms" aria-hidden="true">a</span><span class="hero-title-letter" data-letter="n" style="--letter-delay:2550ms" aria-hidden="true">n</span><span class="hero-title-letter" data-letter="k" style="--letter-delay:2635ms" aria-hidden="true">k</span><span class="hero-title-letter" data-letter="a" style="--letter-delay:2720ms" aria-hidden="true">a</span></span></span></h1>
-
-      <p class="subtitle">
-        Practical simulations, A/L past papers, study tools, notes, exam resources, and more, all in one place.
-      </p>
+      <section class="homepage-overview-panel" aria-label="StudyLab overview">
+      <div class="homepage-greeting" id="homeGreeting" aria-live="polite">
+        <p class="homepage-greeting-hello">Hello,</p>
+        <p class="homepage-greeting-time" id="homeGreetingTime">Good morning</p>
+        <h2 class="homepage-greeting-name" id="homeGreetingName">Student</h2>
+        <p class="homepage-greeting-welcome">Welcome to Study Lab</p>
+      </div>
+      <p class="sl-home-overview-subtitle">Your space to explore, practise and make progress.</p>
 
 
       <!-- =====================================================
@@ -1886,13 +1939,10 @@
       <div class="study-room-tools-row" >
       <div class="student-milestone">
         <div class="student-milestone-icon student-milestone-plant" aria-hidden="true">
-          <svg viewBox="0 0 48 48" role="img" focusable="false">
-            <path d="M24 40V23" fill="none" stroke="#f5ed35" stroke-width="3.2" stroke-linecap="round"/>
-            <path d="M24 31c-5-1-8-4-9-9 5 0 9 3 9 9Z" fill="#f5ed35" opacity=".95"/>
-            <path d="M24 25c1-7 6-12 13-12-1 7-6 12-13 12Z" fill="#39ff78" stroke="#39ff78" stroke-width="1.2" stroke-linejoin="round"/>
-            <path d="M24 30c-1-7-6-12-13-12 1 7 6 12 13 12Z" fill="#25f76a" stroke="#25f76a" stroke-width="1.2" stroke-linejoin="round"/>
-            <path d="M24 19c-1-5 1-9 5-12 3 5 2 9-5 12Z" fill="#78ff5b" stroke="#78ff5b" stroke-width="1.2" stroke-linejoin="round"/>
-            <path d="M17 41h14" fill="none" stroke="#f5ed35" stroke-width="2.5" stroke-linecap="round"/>
+          <svg viewBox="0 0 48 48" focusable="false" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 38V28M18 38V21M27 38V27M36 38V15"/>
+            <path d="m8 19 11-8 9 5 11-9"/>
+            <path d="m32 7 7 0 0 7"/>
           </svg>
         </div>
 
@@ -1921,25 +1971,25 @@
         </div>
       </div>
 
-        <a class="study-room-launcher" href="study-room.html?completeProfile=1&amp;returnTo=%2Fstudy-room.html" aria-label="Open StudyLab Live Study Room">
+        <a class="study-room-launcher" id="live-study-room-section" href="study-room.html?completeProfile=1&amp;returnTo=%2Fstudy-room.html" aria-label="Open StudyLab Live Study Room">
           <span class="study-room-launcher-icon study-room-launcher-vector" aria-hidden="true">
-            <svg viewBox="0 0 48 48" focusable="false">
-              <circle cx="15" cy="11" r="4.5" fill="none" stroke="#39ffb0" stroke-width="2.5"/>
-              <circle cx="33" cy="11" r="4.5" fill="none" stroke="#61e8ff" stroke-width="2.5"/>
-              <path d="M6 23c.8-4.5 4-7 9-7s8.2 2.5 9 7M24 23c.8-4.5 4-7 9-7s8.2 2.5 9 7" fill="none" stroke="#39ffb0" stroke-width="2.5" stroke-linecap="round"/>
-              <path d="M5 27c6-2 12-2 19 2 7-4 13-4 19-2v11c-7-2-13-2-19 2-7-4-13-4-19-2z" fill="none" stroke="#f5ed35" stroke-width="2.5" stroke-linejoin="round"/>
-              <path d="M24 29v11M10 31c3-.5 6 0 9 1M29 32c3-1 6-1.5 9-1" fill="none" stroke="#61e8ff" stroke-width="1.8" stroke-linecap="round"/>
+            <svg viewBox="0 0 48 48" focusable="false" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="19" cy="17" r="6"/>
+              <path d="M7 38v-3c0-6.5 5.4-11 12-11s12 4.5 12 11v3"/>
+              <path d="M34 25a6 6 0 0 0-3-11M35 27c4 .8 6 3.8 6 8v3"/>
             </svg>
           </span>
           <span class="study-room-launcher-copy">
             <span class="study-room-launcher-title">LIVE STUDY ROOM</span>
-            <span class="study-room-launcher-subtitle">Join students and study together</span>
+            <span class="study-room-launcher-subtitle" data-home-room-occupancy>Checking live room…</span>
           </span>
-          <span class="study-room-launcher-arrow" aria-hidden="true">↗</span>
+          <span class="study-room-launcher-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 21H4V3h14v4M7 21V3h11v18H7z" opacity=".8"/><path d="M11 3 19 5v16l-8-2V3z" fill="currentColor" fill-opacity=".12"/><circle cx="16.3" cy="12" r=".9" fill="currentColor" stroke="none"/></svg></span>
         </a>
       </div>
 
       </div>
+
+      </section>
 
       <style>
         /* =====================================================
@@ -2069,6 +2119,346 @@
           .homepage-utility-row .study-room-launcher {
             min-height: 154px;
             height: 154px;
+          }
+        }
+
+        /* Unified Home overview: greeting and four compact glass tiles. */
+        .homepage-overview-panel {
+          position: relative;
+          isolation: isolate;
+          width: min(100%, 1180px);
+          box-sizing: border-box;
+          margin: 22px auto 38px;
+          padding: clamp(18px, 2.3vw, 30px);
+          overflow: hidden;
+          border: 1px solid rgba(165, 218, 255, .19);
+          border-radius: 30px;
+          background:
+            radial-gradient(ellipse at 8% 0%, rgba(72, 174, 255, .13), transparent 42%),
+            linear-gradient(135deg, rgba(32, 54, 80, .42), rgba(12, 24, 41, .34) 58%, rgba(47, 43, 83, .30));
+          box-shadow: 0 24px 65px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.12);
+          -webkit-backdrop-filter: blur(30px) saturate(145%);
+          backdrop-filter: blur(30px) saturate(145%);
+        }
+        .homepage-overview-panel::before {
+          content: "";
+          position: absolute;
+          z-index: -1;
+          inset: 1px;
+          border-radius: inherit;
+          pointer-events: none;
+          background: linear-gradient(115deg, rgba(255,255,255,.055), transparent 38%, rgba(100,170,255,.035));
+        }
+        .homepage-overview-panel .homepage-greeting {
+          width: 100%;
+          max-width: none;
+          box-sizing: border-box;
+          margin: 0 0 22px;
+          padding: 0 2px;
+          display: flex;
+          flex-direction: row;
+          align-items: baseline;
+          justify-content: flex-start;
+          flex-wrap: nowrap;
+          gap: 9px;
+          white-space: nowrap;
+        }
+        .homepage-overview-panel .homepage-greeting-time,
+        .homepage-overview-panel .homepage-greeting-name,
+        .homepage-overview-panel .homepage-greeting-welcome {
+          display: inline;
+          margin: 0;
+          white-space: nowrap;
+        }
+        .homepage-overview-panel .homepage-greeting-time {
+          font-size: clamp(17px, 1.8vw, 22px);
+          line-height: 1.2;
+        }
+        .homepage-overview-panel .homepage-greeting-time::after { content: ","; }
+        .homepage-overview-panel .homepage-greeting-name {
+          font-size: clamp(21px, 2.35vw, 29px);
+          line-height: 1.2;
+          letter-spacing: -.035em;
+        }
+        .homepage-overview-panel .homepage-greeting-name::after { content: "."; }
+        .homepage-overview-panel .homepage-greeting-welcome {
+          margin-left: 1px;
+          font-size: clamp(15px, 1.45vw, 18px);
+          line-height: 1.3;
+        }
+        .homepage-overview-panel .homepage-utility-row {
+          margin: 0;
+          gap: 12px;
+        }
+        .homepage-overview-panel .live-card,
+        .homepage-overview-panel .student-milestone,
+        .homepage-overview-panel .study-room-launcher {
+          min-height: 142px;
+          height: 142px;
+          border-radius: 20px;
+          border: 1px solid rgba(177, 220, 255, .15);
+          background: rgba(255,255,255,.055);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,.09), 0 10px 28px rgba(0,0,0,.09);
+          -webkit-backdrop-filter: blur(16px) saturate(135%);
+          backdrop-filter: blur(16px) saturate(135%);
+        }
+        .homepage-overview-panel .live-card { order: 1; }
+        .homepage-overview-panel .study-room-launcher { order: 2; }
+        .homepage-overview-panel .live-card:nth-child(2) { order: 3; }
+        .homepage-overview-panel .student-milestone { order: 4; }
+        .homepage-overview-panel .live-card:hover,
+        .homepage-overview-panel .student-milestone:hover,
+        .homepage-overview-panel .study-room-launcher:hover {
+          transform: translateY(-3px);
+          border-color: rgba(135, 210, 255, .29);
+          background: rgba(255,255,255,.085);
+        }
+        html[data-theme="light"] .homepage-overview-panel {
+          border-color: rgba(255,255,255,.94);
+          background:
+            radial-gradient(ellipse at 8% 0%, rgba(105,190,245,.17), transparent 42%),
+            linear-gradient(135deg, rgba(255,255,255,.78), rgba(235,246,255,.65) 58%, rgba(243,240,255,.67));
+          box-shadow: 0 24px 60px rgba(45,85,120,.12), inset 0 1px 0 rgba(255,255,255,.98);
+        }
+        html[data-theme="light"] .homepage-overview-panel .live-card,
+        html[data-theme="light"] .homepage-overview-panel .student-milestone,
+        html[data-theme="light"] .homepage-overview-panel .study-room-launcher {
+          border-color: rgba(105,155,195,.18);
+          background: rgba(255,255,255,.46);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,.95), 0 9px 24px rgba(55,95,130,.07);
+        }
+        @media (max-width: 900px) {
+          .homepage-overview-panel { padding: 20px; border-radius: 26px; }
+          .homepage-overview-panel .homepage-greeting { flex-wrap: wrap; row-gap: 5px; }
+        }
+        @media (max-width: 720px) {
+          .homepage-overview-panel { margin: 16px auto 26px; padding: 16px; border-radius: 22px; }
+          .homepage-overview-panel .homepage-greeting { margin-bottom: 16px; gap: 6px; }
+          .homepage-overview-panel .homepage-greeting-time { font-size: 16px; }
+          .homepage-overview-panel .homepage-greeting-name { font-size: 21px; }
+          .homepage-overview-panel .homepage-greeting-welcome { font-size: 14px; }
+          .homepage-overview-panel .homepage-utility-row { gap: 10px; }
+          .homepage-overview-panel .live-card,
+          .homepage-overview-panel .student-milestone,
+          .homepage-overview-panel .study-room-launcher { min-height: 136px; height: 136px; }
+        }
+        @media (max-width: 390px) {
+          .homepage-overview-panel .homepage-greeting { gap: 4px; }
+          .homepage-overview-panel .homepage-greeting-time { font-size: 14px; }
+          .homepage-overview-panel .homepage-greeting-name { font-size: 19px; }
+          .homepage-overview-panel .homepage-greeting-welcome { font-size: 12px; }
+        }
+
+        /* =====================================================
+           LIQUID GLASS FINISH — ambient light, depth and refraction
+           CSS-only atmosphere; no static wallpaper required.
+           ===================================================== */
+        .hero {
+          position: relative;
+          isolation: isolate;
+        }
+        .hero::before {
+          content: "";
+          position: absolute;
+          z-index: -1;
+          pointer-events: none;
+          inset: -150px -9vw -100px;
+          background:
+            radial-gradient(ellipse 38% 30% at 15% 18%, rgba(0, 190, 255, .19), transparent 72%),
+            radial-gradient(ellipse 34% 36% at 82% 22%, rgba(104, 94, 255, .17), transparent 74%),
+            radial-gradient(ellipse 42% 30% at 55% 82%, rgba(28, 125, 220, .12), transparent 76%);
+          filter: blur(28px);
+          opacity: .95;
+        }
+        .homepage-overview-panel {
+          border: 1px solid rgba(190, 230, 255, .27);
+          background:
+            linear-gradient(128deg, rgba(255,255,255,.105), rgba(255,255,255,.018) 34%, rgba(105,165,255,.055) 72%, rgba(255,255,255,.035)),
+            radial-gradient(ellipse at 12% 0%, rgba(57,190,255,.17), transparent 48%),
+            radial-gradient(ellipse at 100% 100%, rgba(135,105,255,.12), transparent 48%),
+            rgba(9, 22, 42, .43);
+          box-shadow:
+            0 30px 85px rgba(0, 5, 18, .28),
+            0 0 55px rgba(55, 165, 255, .085),
+            inset 0 1.5px 0 rgba(255,255,255,.31),
+            inset 0 -1px 0 rgba(145,205,255,.09);
+          -webkit-backdrop-filter: blur(38px) saturate(175%) contrast(108%);
+          backdrop-filter: blur(38px) saturate(175%) contrast(108%);
+        }
+        .homepage-overview-panel::before {
+          inset: 1px;
+          background:
+            linear-gradient(112deg, rgba(255,255,255,.17), transparent 22%, transparent 72%, rgba(165,205,255,.07)),
+            radial-gradient(ellipse at 50% -12%, rgba(255,255,255,.12), transparent 55%);
+          opacity: .9;
+        }
+        .homepage-overview-panel::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          pointer-events: none;
+          background: linear-gradient(180deg, rgba(255,255,255,.085), transparent 18%, transparent 82%, rgba(100,165,255,.045));
+          mask-image: linear-gradient(#000, transparent 55%);
+          opacity: .45;
+        }
+        .homepage-overview-panel .homepage-greeting {
+          position: relative;
+          z-index: 1;
+          text-shadow: 0 1px 18px rgba(80,175,255,.13);
+        }
+        .homepage-overview-panel .homepage-greeting-time {
+          color: rgba(222,240,255,.83);
+          font-weight: 550;
+          letter-spacing: -.025em;
+        }
+        .homepage-overview-panel .homepage-greeting-name {
+          color: #f2f9ff;
+          text-shadow: 0 0 28px rgba(88,190,255,.22);
+        }
+        .homepage-overview-panel .homepage-greeting-welcome {
+          color: rgba(192,220,245,.78);
+          font-weight: 450;
+        }
+        .homepage-overview-panel .live-card,
+        .homepage-overview-panel .student-milestone,
+        .homepage-overview-panel .study-room-launcher {
+          position: relative;
+          isolation: isolate;
+          overflow: hidden;
+          border: 1px solid rgba(185,225,255,.23);
+          background:
+            linear-gradient(140deg, rgba(255,255,255,.105), rgba(255,255,255,.025) 48%, rgba(100,155,255,.055)),
+            rgba(17, 34, 58, .31);
+          box-shadow:
+            0 12px 30px rgba(0,6,20,.13),
+            inset 0 1px 0 rgba(255,255,255,.23),
+            inset 0 -1px 0 rgba(160,210,255,.075);
+          -webkit-backdrop-filter: blur(24px) saturate(165%);
+          backdrop-filter: blur(24px) saturate(165%);
+          transition: transform .28s cubic-bezier(.2,.8,.2,1), border-color .28s ease, background .28s ease, box-shadow .28s ease;
+        }
+        .homepage-overview-panel .live-card::before,
+        .homepage-overview-panel .student-milestone::before,
+        .homepage-overview-panel .study-room-launcher::before {
+          content: "";
+          position: absolute;
+          z-index: -1;
+          inset: 0;
+          border-radius: inherit;
+          pointer-events: none;
+          background:
+            radial-gradient(ellipse at 0% 0%, rgba(100,205,255,.14), transparent 58%),
+            linear-gradient(115deg, rgba(255,255,255,.09), transparent 38%);
+          opacity: .85;
+        }
+        .homepage-overview-panel .live-card:hover,
+        .homepage-overview-panel .student-milestone:hover,
+        .homepage-overview-panel .study-room-launcher:hover {
+          transform: translateY(-4px);
+          border-color: rgba(155,225,255,.43);
+          background:
+            linear-gradient(140deg, rgba(255,255,255,.15), rgba(255,255,255,.045) 48%, rgba(100,155,255,.09)),
+            rgba(20, 42, 72, .39);
+          box-shadow: 0 18px 38px rgba(0,8,24,.2), 0 0 25px rgba(60,175,255,.11), inset 0 1px 0 rgba(255,255,255,.28);
+        }
+        .homepage-overview-panel .countdown-box {
+          border: 1px solid rgba(185,225,255,.13);
+          background: linear-gradient(145deg, rgba(255,255,255,.095), rgba(255,255,255,.025));
+          box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
+        }
+        html[data-theme="light"] .hero::before {
+          background:
+            radial-gradient(ellipse 38% 30% at 15% 18%, rgba(55,175,245,.17), transparent 72%),
+            radial-gradient(ellipse 34% 36% at 82% 22%, rgba(145,130,255,.14), transparent 74%),
+            radial-gradient(ellipse 42% 30% at 55% 82%, rgba(95,170,230,.11), transparent 76%);
+        }
+        html[data-theme="light"] .homepage-overview-panel {
+          border-color: rgba(255,255,255,.92);
+          background:
+            linear-gradient(128deg, rgba(255,255,255,.78), rgba(255,255,255,.43) 34%, rgba(190,225,255,.34) 72%, rgba(255,255,255,.52)),
+            radial-gradient(ellipse at 12% 0%, rgba(100,200,255,.18), transparent 48%),
+            radial-gradient(ellipse at 100% 100%, rgba(175,155,255,.13), transparent 48%),
+            rgba(238,247,255,.56);
+          box-shadow:
+            0 28px 75px rgba(54,105,150,.13),
+            0 0 48px rgba(95,175,235,.09),
+            inset 0 1.5px 0 rgba(255,255,255,.98),
+            inset 0 -1px 0 rgba(110,165,210,.08);
+        }
+        html[data-theme="light"] .homepage-overview-panel::before {
+          background:
+            linear-gradient(112deg, rgba(255,255,255,.82), transparent 25%, transparent 72%, rgba(130,185,230,.12)),
+            radial-gradient(ellipse at 50% -12%, rgba(255,255,255,.9), transparent 55%);
+        }
+        html[data-theme="light"] .homepage-overview-panel .homepage-greeting-time { color: #496780; }
+        html[data-theme="light"] .homepage-overview-panel .homepage-greeting-name {
+          color: #173d5b;
+          text-shadow: 0 0 25px rgba(70,160,220,.12);
+        }
+        html[data-theme="light"] .homepage-overview-panel .homepage-greeting-welcome { color: #5c7892; }
+        html[data-theme="light"] .homepage-overview-panel .live-card,
+        html[data-theme="light"] .homepage-overview-panel .student-milestone,
+        html[data-theme="light"] .homepage-overview-panel .study-room-launcher {
+          border-color: rgba(255,255,255,.83);
+          background:
+            linear-gradient(140deg, rgba(255,255,255,.83), rgba(255,255,255,.48) 48%, rgba(210,232,255,.38)),
+            rgba(247,251,255,.48);
+          box-shadow: 0 11px 28px rgba(65,110,150,.09), inset 0 1px 0 rgba(255,255,255,.98), inset 0 -1px 0 rgba(95,150,195,.07);
+        }
+        html[data-theme="light"] .homepage-overview-panel .live-card:hover,
+        html[data-theme="light"] .homepage-overview-panel .student-milestone:hover,
+        html[data-theme="light"] .homepage-overview-panel .study-room-launcher:hover {
+          border-color: rgba(100,175,225,.38);
+          background: linear-gradient(140deg, rgba(255,255,255,.95), rgba(225,241,255,.72));
+          box-shadow: 0 16px 34px rgba(65,125,170,.13), 0 0 22px rgba(95,180,235,.10), inset 0 1px 0 #fff;
+        }
+        html[data-theme="light"] .homepage-overview-panel .countdown-box {
+          border-color: rgba(100,155,195,.16);
+          background: linear-gradient(145deg, rgba(255,255,255,.78), rgba(220,239,255,.46));
+        }
+        @media (max-width: 900px) {
+          .homepage-overview-panel .homepage-greeting { flex-wrap: nowrap; }
+        }
+        @media (max-width: 720px) {
+          .homepage-overview-panel .homepage-greeting { flex-wrap: nowrap; gap: 5px; }
+          .homepage-overview-panel .homepage-greeting-time { font-size: clamp(12px, 3.1vw, 16px); }
+          .homepage-overview-panel .homepage-greeting-name { font-size: clamp(15px, 4.3vw, 21px); }
+          .homepage-overview-panel .homepage-greeting-welcome { font-size: clamp(10px, 2.8vw, 14px); }
+        }
+        @media (max-width: 390px) {
+          .homepage-overview-panel .homepage-greeting { gap: 3px; }
+          .homepage-overview-panel .homepage-greeting-time { font-size: 12px; }
+          .homepage-overview-panel .homepage-greeting-name { font-size: 15px; }
+          .homepage-overview-panel .homepage-greeting-welcome { font-size: 10px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .homepage-overview-panel .live-card,
+          .homepage-overview-panel .student-milestone,
+          .homepage-overview-panel .study-room-launcher { transition: none; }
+        }
+
+        /* Compact Home content offset: place the overview just below the fixed header.
+           Keep the header dimensions and position unchanged. */
+        @media (min-width: 1180px) {
+          /* Main top offset is owned by home-dashboard-finish.css.
+             Avoid stacking an extra 90px above the fixed header clearance. */
+          .sl-home-layout .hero .home-hero-title-spacer {
+            display: none !important;
+          }
+          .sl-home-layout .homepage-overview-panel {
+            width: min(100%, 1180px);
+            max-width: 1180px;
+            margin: 0 auto 38px;
+          }
+        }
+        @media (max-width: 1179px) {
+          /* Smaller screens use the same single-offset layout. */
+          .sl-home-layout .hero .home-hero-title-spacer {
+            display: none !important;
+          }
+          .sl-home-layout .homepage-overview-panel {
+            margin-top: 0;
           }
         }
       </style>
@@ -2233,20 +2623,17 @@
 
 
     <!-- =======================================================
-         STUDY LAB LK — SUBJECT CARDS START
+         STUDYLAB HOME — SECTION PANELS
          ======================================================= -->
 
-    <section
-      class="card-grid"
-      aria-label="Subjects"
-    >
-
-
-      <!-- =====================================================
-           MATHEMATICS CARD
-           ===================================================== -->
-
-      <a
+    <section class="sl-home-section sl-home-simulations" id="practical-simulations" aria-labelledby="practical-simulations-title">
+      
+  <header class="sl-home-section-heading">
+    <span class="sl-home-section-kicker">LEARN BY EXPLORING</span>
+    <h2 id="practical-simulations-title">Practical Simulations</h2>
+    <p>Interactive visual experiments and subject-based practical learning.</p>
+  </header>
+      <div class="card-grid sl-home-card-grid"><a
         class="subject-card"
         href="maths.html"
         aria-label="Open Mathematics simulations"
@@ -2267,13 +2654,7 @@
         </span>
 
       </a>
-
-
-      <!-- =====================================================
-           BIOLOGY CARD
-           ===================================================== -->
-
-      <a
+<a
         class="subject-card"
         href="biology.html"
         aria-label="Open Biology simulations"
@@ -2293,13 +2674,7 @@
         </span>
 
       </a>
-
-
-      <!-- =====================================================
-           CHEMISTRY CARD
-           ===================================================== -->
-
-      <a
+<a
         class="subject-card"
         href="chemistry.html"
         aria-label="Open Chemistry simulations"
@@ -2320,13 +2695,7 @@
         </span>
 
       </a>
-
-
-      <!-- =====================================================
-           PHYSICS CARD
-           ===================================================== -->
-
-      <a
+<a
         class="subject-card"
         href="physics.html"
         aria-label="Open Physics simulations"
@@ -2346,11 +2715,115 @@
           Explore Practical Simulations →
         </span>
 
-      </a>
+      </a></div>
+    </section>
 
-      <a
+    <section class="sl-home-section sl-home-live-room" id="live-study-room" aria-labelledby="live-study-room-title">
+      
+  <header class="sl-home-section-heading">
+    <span class="sl-home-section-kicker">STUDY TOGETHER</span>
+    <h2 id="live-study-room-title">Live Study Room</h2>
+    <p>Enter the shared room, focus on your work and follow the live study rankings.</p>
+  </header>
+      
+      <div class="sl-home-room-panel">
+        <div class="sl-home-room-copy">
+          <span class="sl-home-room-live"><span></span> LIVE COMMUNITY SPACE</span>
+          <h3>Your focus. Your progress. One shared room.</h3>
+          <p>Study alongside other A/L students, keep track of your focused time and climb the daily and weekly rankings.</p>
+          <a class="sl-home-room-entry" href="study-room.html?completeProfile=1&amp;returnTo=%2Fstudy-room.html">
+            <span class="sl-home-room-entry-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v5l3 2M9 2h6M12 2v3"/></svg></span>
+            <span class="sl-home-room-entry-copy"><small>ENTER LIVE STUDY ROOM</small><strong>Join the Study Room</strong><em data-home-room-occupancy>Checking live room…</em></span>
+            <span class="sl-home-room-entry-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 21H4V3h14v4M7 21V3h11v18H7z" opacity=".8"/><path d="M11 3 19 5v16l-8-2V3z" fill="currentColor" fill-opacity=".12"/><circle cx="16.3" cy="12" r=".9" fill="currentColor" stroke="none"/></svg></span>
+          </a>
+        </div>
+        <div class="sl-home-room-ranks" data-home-room-ranks aria-live="polite">
+          <article class="sl-home-rank-card sl-home-rank-today">
+            <span class="sl-home-rank-kicker"><i></i> TODAY · #1</span>
+            <strong data-home-rank-today-name>Loading live ranking…</strong>
+            <small data-home-rank-today-time>Connecting to Study Room</small>
+          </article>
+          <article class="sl-home-rank-card sl-home-rank-week">
+            <span class="sl-home-rank-kicker"><i></i> THIS WEEK · #1</span>
+            <strong data-home-rank-week-name>Loading live ranking…</strong>
+            <small data-home-rank-week-time>Connecting to Study Room</small>
+          </article>
+          <p class="sl-home-rank-footnote">Rankings are read from the live Study Room leaderboard.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="sl-home-section sl-home-social" id="social" aria-labelledby="social-title">
+      
+  <header class="sl-home-section-heading">
+    <span class="sl-home-section-kicker">STUDENTS, SHARING KNOWLEDGE</span>
+    <h2 id="social-title">StudyLab Social</h2>
+    <p>A community space for questions, study updates and useful discoveries.</p>
+  </header>
+      
+      <div class="sl-home-social-grid">
+        <article class="sl-home-feature-card">
+          <span class="sl-home-feature-icon" aria-hidden="true">✦</span>
+          <div><h3>Share your progress</h3><p>Post a study update, a useful resource or a milestone from your A/L journey.</p></div>
+          <span class="sl-home-feature-tag">YOUR JOURNEY</span>
+        </article>
+        <article class="sl-home-feature-card">
+          <span class="sl-home-feature-icon" aria-hidden="true">⌕</span>
+          <div><h3>Ask and discuss</h3><p>Bring questions to the community and continue the conversation through comments.</p></div>
+          <span class="sl-home-feature-tag">DISCUSS</span>
+        </article>
+        <article class="sl-home-feature-card">
+          <span class="sl-home-feature-icon" aria-hidden="true">↗</span>
+          <div><h3>Discover useful ideas</h3><p>See what other students are learning, sharing and recommending.</p></div>
+          <span class="sl-home-feature-tag">COMMUNITY</span>
+        </article>
+      </div>
+      <div class="sl-home-social-action">
+        <button type="button" class="sl-home-social-button" data-open-home-social>
+          <span class="sl-home-social-button-content">
+            <small class="sl-home-social-button-kicker">STUDYLAB COMMUNITY</small>
+            <strong>Open StudyLab Social</strong>
+            <span class="sl-home-social-button-description">One space for the StudyLab student community.</span>
+          </span>
+          <span class="sl-home-social-button-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5c0 4.4-3.6 8-8 8H6.5L3 22v-7a8 8 0 1 1 17-3.5Z"/><path d="M8 11h8M8 14h5"/></svg></span>
+        </button>
+      </div>
+    </section>
+
+    <section class="sl-home-section sl-home-pastpapers" id="past-papers" aria-labelledby="past-papers-title">
+      
+  <header class="sl-home-section-heading">
+    <span class="sl-home-section-kicker">PRACTICE WITH PURPOSE</span>
+    <h2 id="past-papers-title">Past Papers</h2>
+    <p>Find subject papers, revision material and examination resources.</p>
+  </header>
+      <div class="card-grid sl-home-card-grid"><a class="subject-card sl-home-paper-card" href="https://alapiedu.com/Category/paper_hub/PaperSubject?subject=Combined" target="_blank" rel="noopener noreferrer" aria-label="Open Mathematics past papers">
+  <span class="card-icon vector-card-icon icon-maths" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M8 8h32v32H8z"/><path d="M16 16h16M16 24h16M16 32h16M24 12v24"/><circle cx="16" cy="16" r="1"/><circle cx="32" cy="32" r="1"/></svg></span>
+  <h2>Mathematics Past Papers</h2>
+  <p>Combined Mathematics past papers and examination resources.</p>
+  <span class="card-cta">Open Past Papers ↗</span>
+</a>
+<a class="subject-card sl-home-paper-card" href="https://alapiedu.com/Category/paper_hub/PaperSubject?subject=Biology" target="_blank" rel="noopener noreferrer" aria-label="Open Biology past papers">
+  <span class="card-icon vector-card-icon icon-biology" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M13 6c22 8 0 28 22 36M35 6C13 14 35 34 13 42M17 11l14 0M14 18h20M15 27h18M17 35h14"/></svg></span>
+  <h2>Biology Past Papers</h2>
+  <p>Biology past papers and examination resources.</p>
+  <span class="card-cta">Open Past Papers ↗</span>
+</a>
+<a class="subject-card sl-home-paper-card" href="https://alapiedu.com/Category/paper_hub/PaperSubject?subject=Chemistry" target="_blank" rel="noopener noreferrer" aria-label="Open Chemistry past papers">
+  <span class="card-icon vector-card-icon icon-chemistry" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M18 6h12M21 6v13L10 37a4 4 0 0 0 3 6h22a4 4 0 0 0 3-6L27 19V6"/><path d="M16 33h16M20 27h8"/></svg></span>
+  <h2>Chemistry Past Papers</h2>
+  <p>Chemistry past papers and examination resources.</p>
+  <span class="card-cta">Open Past Papers ↗</span>
+</a>
+<a class="subject-card sl-home-paper-card" href="https://alapiedu.com/Category/paper_hub/PaperSubject?subject=Physics" target="_blank" rel="noopener noreferrer" aria-label="Open Physics past papers">
+  <span class="card-icon vector-card-icon icon-physics" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="3"/><ellipse cx="24" cy="24" rx="20" ry="8"/><ellipse cx="24" cy="24" rx="20" ry="8" transform="rotate(60 24 24)"/><ellipse cx="24" cy="24" rx="20" ry="8" transform="rotate(120 24 24)"/></svg></span>
+  <h2>Physics Past Papers</h2>
+  <p>Physics past papers and examination resources.</p>
+  <span class="card-cta">Open Past Papers ↗</span>
+</a>
+<a
         class="subject-card"
-        href="git.html"
+        href="https://alapiedu.com/Category/paper_hub/PaperSubject?paper_type=Past+Paper&amp;search=&amp;subject=ict" target="_blank" rel="noopener noreferrer"
         aria-label="Open General Information Technology resources"
       >
 
@@ -2366,10 +2839,9 @@
         </span>
 
       </a>
-
-      <a
+<a
         class="subject-card"
-        href="generalenglish.html"
+        href="https://alapiedu.com/Category/paper_hub/PaperSubject?paper_type=Past+Paper&amp;subject=General+English" target="_blank" rel="noopener noreferrer"
         aria-label="Open General English past papers"
       >
 
@@ -2387,10 +2859,9 @@
         </span>
 
       </a>
-
-      <a
+<a
         class="subject-card"
-        href="generalknowledge.html"        aria-label="Open General Knowledge past papers"
+        href="https://alapiedu.com/Category/paper_hub/PaperSubject?subject=General+knowledge" target="_blank" rel="noopener noreferrer"        aria-label="Open General Knowledge past papers"
       >
 
         <span class="card-icon vector-card-icon icon-brain"><svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="M24 12a7 7 0 0 0-13-2 7 7 0 0 0-3 12 8 8 0 0 0 6 13h10V12ZM24 12a7 7 0 0 1 13-2 7 7 0 0 1 3 12 8 8 0 0 1-6 13H24"/><path d="M16 17c5 0 5 5 2 7M32 17c-5 0-5 5-2 7M16 30h5M32 30h-5M24 12v26"/></svg></span>
@@ -2408,8 +2879,7 @@
         </span>
 
       </a>
-
-      <a
+<a
         class="subject-card"
         href="exam-hub.html"
         aria-label="Open A/L Exam Hub"
@@ -2429,42 +2899,17 @@
           Open Exam Hub →
         </span>
 
-      </a>
+      </a></div>
+    </section>
 
-      <a
-        class="study-tools-card lesson-resource-card"
-        href="lesson-packs.html"
-        aria-label="Open Free Lessons and Lesson Packs"
-      >
-        <span class="study-tools-card-icon vector-card-icon icon-books" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="M6 9h10v31H6zM19 6h10v34H19zM32 11h10v29H32z"/><path d="M9 15h4M22 13h4M35 18h4M6 40h36"/></svg></span>
-        <div class="study-tools-card-content">
-          <span class="study-tools-card-badge">FREE LESSONS</span>
-          <h2>Free Lessons &amp; Lesson Packs</h2>
-          <p>නොමිලේ පාඩම්, FULL THEORY, questions practice සහ 2027 A/L revision lesson packs එකම තැනකින්.</p>
-        </div>
-        <span class="study-tools-card-cta">Explore Lessons &amp; Packs →</span>
-      </a>
-
-      <a
-        class="study-tools-card"
-        href="study-tools.html"
-        aria-label="Open A/L Study Tools"
-      >
-
-        <span class="study-tools-card-icon vector-card-icon icon-toolbox" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><rect x="5" y="17" width="38" height="25" rx="4"/><path d="M17 17v-5a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v5M5 27h38M20 26v5h8v-5"/></svg></span>
-
-        <div class="study-tools-card-content">
-          <span class="study-tools-card-badge">STUDY UTILITIES</span>
-          <h2>A/L Study Tools</h2>
-          <p>
-            Marks calculator, study-time planner, Pomodoro timer, flashcards,
-            mistake notebook, practice planner, mock exam timer and unit converter.
-          </p>
-        </div>
-
-        <span class="study-tools-card-cta">Open Study Tools →</span>
-      </a>
-    <a
+    <section class="sl-home-section sl-home-telegram" id="telegram-links" aria-labelledby="telegram-links-title">
+      
+  <header class="sl-home-section-heading">
+    <span class="sl-home-section-kicker">STAY CONNECTED</span>
+    <h2 id="telegram-links-title">A/L Telegram Channels</h2>
+    <p>Find subject-based A/L Telegram channels and learning communities.</p>
+  </header>
+      <div class="sl-home-single-card"><a
       class="telegram-card"
       href="Telegram_Channels.html"
       aria-label="Open A/L Telegram Channels"
@@ -2488,9 +2933,17 @@
       </div>
 
       <span class="card-cta">Open Channels →</span>
-    </a>
+    </a></div>
+    </section>
 
-    <a
+    <section class="sl-home-section sl-home-other" id="other-al-resources" aria-labelledby="other-al-resources-title">
+      
+  <header class="sl-home-section-heading">
+    <span class="sl-home-section-kicker">MORE WAYS TO PREPARE</span>
+    <h2 id="other-al-resources-title">Other A/L Resources</h2>
+    <p>Online MCQ practice and useful tools for your everyday study routine.</p>
+  </header>
+      <div class="card-grid sl-home-card-grid sl-home-resource-grid"><a
       class="telegram-card mcq-practice-card"
       href="https://almcq.vercel.app"
       target="_blank"
@@ -2510,6 +2963,48 @@
 
       <span class="card-cta">Practice MCQs →</span>
     </a>
+<a
+        class="study-tools-card"
+        href="study-tools.html"
+        aria-label="Open A/L Study Tools"
+      >
+
+        <span class="study-tools-card-icon vector-card-icon icon-toolbox" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><rect x="5" y="17" width="38" height="25" rx="4"/><path d="M17 17v-5a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v5M5 27h38M20 26v5h8v-5"/></svg></span>
+
+        <div class="study-tools-card-content">
+          <span class="study-tools-card-badge">STUDY UTILITIES</span>
+          <h2>A/L Study Tools</h2>
+          <p>
+            Marks calculator, study-time planner, Pomodoro timer, flashcards,
+            mistake notebook, practice planner, mock exam timer and unit converter.
+          </p>
+        </div>
+
+        <span class="study-tools-card-cta">Open Study Tools →</span>
+      </a></div>
+    </section>
+
+    <section class="sl-home-section sl-home-lessons" id="free-lesson-packs" aria-labelledby="free-lesson-packs-title">
+      
+  <header class="sl-home-section-heading">
+    <span class="sl-home-section-kicker">LEARN MORE, AT NO COST</span>
+    <h2 id="free-lesson-packs-title">Free Lesson Packs</h2>
+    <p>Access free lessons, theory and revision packs in one place.</p>
+  </header>
+      <div class="sl-home-single-card"><a
+        class="study-tools-card lesson-resource-card"
+        href="lesson-packs.html"
+        aria-label="Open Free Lessons and Lesson Packs"
+      >
+        <span class="study-tools-card-icon vector-card-icon icon-books" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="M6 9h10v31H6zM19 6h10v34H19zM32 11h10v29H32z"/><path d="M9 15h4M22 13h4M35 18h4M6 40h36"/></svg></span>
+        <div class="study-tools-card-content">
+          <span class="study-tools-card-badge">FREE LESSONS</span>
+          <h2>Free Lessons &amp; Lesson Packs</h2>
+          <p>නොමිලේ පාඩම්, FULL THEORY, questions practice සහ 2027 A/L revision lesson packs එකම තැනකින්.</p>
+        </div>
+        <span class="study-tools-card-cta">Explore Lessons &amp; Packs →</span>
+      </a></div>
+    </section>
 
     <!-- =======================================================
          STUDY LAB LK — SUBJECT CARDS END
@@ -2517,6 +3012,8 @@
 
 
   </main>
+    </div>
+  </div>
 
   <!-- Student profile completion and editor. -->
   <div class="profile-modal" id="profileModal" role="dialog" aria-modal="true"
@@ -2689,10 +3186,10 @@
   <script src="assets/js/studylab-auth-gateway.js?v=20261103-google-auth-errors-v2"></script>
   <script src="assets/js/profile.js?v=20261103-guest-menu-final-v1"></script>
   <script src="assets/js/main.js?v=20261101-shared-room-mode"></script>
-  <script src="assets/js/study-dashboard.js"></script>
+  <script src="assets/js/study-dashboard.js?v=20261113-search-order-v2"></script>
   <script src="assets/js/student-milestone.js"></script>
   <script src="assets/js/live-layer.js"></script>
-  <script src="assets/js/chat.js?v=20261101-stable-chat-restore"></script>
+  <script src="assets/js/chat.js?v=20261113-numbered-unread-v1"></script>
   <script src="assets/js/feedback.js"></script>
   <script src="assets/js/loader-splash.js"></script>
 
@@ -2757,9 +3254,8 @@
   <div class="studylab-ai-tools-row" data-studylab-ai>
     <button type="button" class="studylab-ai-launcher" data-ai-launcher aria-expanded="false" aria-controls="studylabAiPanel" title="Open StudyLab AI">
       <span class="studylab-ai-launcher-icon" aria-hidden="true">
-        <svg viewBox="0 0 48 48" width="25" height="25" role="img" aria-label="Gemini">
-          <defs><linearGradient id="studylabGeminiGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#4285F4"/><stop offset="48%" stop-color="#9B72CB"/><stop offset="100%" stop-color="#D96570"/></linearGradient></defs>
-          <path fill="url(#studylabGeminiGradient)" d="M24 2.5C21.4 14.7 14.7 21.4 2.5 24 14.7 26.6 21.4 33.3 24 45.5 26.6 33.3 33.3 26.6 45.5 24 33.3 21.4 26.6 14.7 24 2.5Z"/>
+        <svg viewBox="0 0 24 24" width="25" height="25" role="img" aria-label="ChatGPT" focusable="false">
+          <path fill="currentColor" d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"/>
         </svg>
       </span>
       <span class="studylab-ai-launcher-copy">
@@ -2811,6 +3307,9 @@
 <script src="assets/js/home-card-glow.js?v=1.2.0" defer></script>
   <script src="assets/js/pwa.js?v=1.0.1"></script>
   <script src="assets/js/feed-drawer.js?v=19" defer></script>
+  <script src="assets/js/home-sidebar.js?v=8" defer></script>
+  <script src="assets/js/home-popup-clearance.js?v=1" defer></script>
+  <script src="assets/js/home-panels.js?v=2" defer></script>
   <script src="assets/js/studylab-social.js?v=22" defer></script>
 
 </body>

@@ -1,0 +1,1417 @@
+/* StudyLab Home floating liquid-glass navigation. Isolated to the homepage. */
+.sl-home-sidebar {
+  --sl-sidebar-width: 208px;
+  position: fixed;
+  z-index: 990;
+  top: 50%;
+  left: max(14px, calc((100vw - 1560px) / 2 + 14px));
+  width: var(--sl-sidebar-width);
+  max-height: calc(100vh - 32px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 13px;
+  overflow: hidden;
+  border: 1px solid rgba(175, 220, 255, .18);
+  border-radius: 25px;
+  color: #eaf4ff;
+  background:
+    linear-gradient(145deg, rgba(30, 52, 78, .72), rgba(12, 24, 42, .66));
+  -webkit-backdrop-filter: blur(30px) saturate(165%);
+  backdrop-filter: blur(30px) saturate(165%);
+  box-shadow:
+    0 26px 72px rgba(0, 0, 0, .30),
+    0 0 34px rgba(67, 163, 255, .075),
+    inset 0 1px 0 rgba(255, 255, 255, .14),
+    inset 0 0 0 1px rgba(255, 255, 255, .025);
+  transform: translateY(-50%);
+  transition:
+    width .42s cubic-bezier(.22, 1, .36, 1),
+    padding .42s cubic-bezier(.22, 1, .36, 1),
+    opacity .25s ease,
+    border-radius .35s ease;
+}
+.sl-home-sidebar::before {
+  content: "";
+  position: absolute;
+  inset: 0 12% auto;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.42), transparent);
+}
+.sl-home-sidebar-head {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 38px;
+  padding: 0 1px 8px 5px;
+  border-bottom: 1px solid rgba(190,220,255,.11);
+}
+.sl-home-sidebar-brand {
+  min-width: 0;
+  overflow: hidden;
+  color: rgba(225,240,255,.72);
+  font-size: .69rem;
+  font-weight: 800;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: opacity .2s ease, width .3s ease;
+}
+.sl-home-sidebar-collapse {
+  display: grid;
+  place-items: center;
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid rgba(185,220,255,.16);
+  border-radius: 11px;
+  color: #bfeaff;
+  background: rgba(255,255,255,.075);
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.10);
+  transition: transform .25s ease, background .25s ease, border-color .25s ease;
+}
+.sl-home-sidebar-collapse:hover {
+  transform: translateY(-1px);
+  background: rgba(105,190,255,.16);
+  border-color: rgba(126,220,255,.34);
+}
+.sl-home-sidebar-collapse svg,
+.sl-home-nav-icon svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.sl-home-sidebar-nav {
+  position: relative;
+  display: grid;
+  gap: 5px;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 2px 0;
+  scrollbar-width: none;
+  isolation: isolate;
+}
+.sl-home-sidebar-nav::-webkit-scrollbar { display: none; }
+.sl-home-nav-indicator {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 43px;
+  border: 1px solid rgba(129,210,255,.31);
+  border-radius: 14px;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    linear-gradient(110deg, rgba(90,190,255,.20), rgba(120,145,255,.13)),
+    rgba(255,255,255,.075);
+  box-shadow:
+    0 7px 22px rgba(30,130,220,.13),
+    inset 0 1px 0 rgba(255,255,255,.18),
+    0 0 18px rgba(86,190,255,.08);
+  -webkit-backdrop-filter: blur(18px) saturate(155%);
+  backdrop-filter: blur(18px) saturate(155%);
+  transform: translate3d(0,0,0);
+  transition:
+    transform .46s cubic-bezier(.22, 1, .36, 1),
+    height .35s cubic-bezier(.22, 1, .36, 1),
+    opacity .2s ease;
+}
+.sl-home-nav-item {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  height: 43px;
+  padding: 0 11px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  color: rgba(222,236,250,.76);
+  background: transparent;
+  font: inherit;
+  font-size: .82rem;
+  font-weight: 650;
+  line-height: 1.15;
+  text-align: left;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color .22s ease, transform .22s ease, padding .35s ease;
+}
+.sl-home-nav-item:hover { color: #fff; transform: translateX(2px); }
+.sl-home-nav-item.is-active { color: #f4fbff; }
+.sl-home-nav-item:focus-visible,
+.sl-home-sidebar-collapse:focus-visible {
+  outline: 2px solid rgba(126,220,255,.75);
+  outline-offset: 3px;
+}
+.sl-home-nav-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  color: #8bdcff;
+}
+.sl-home-nav-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 1;
+  transition: opacity .18s ease, max-width .35s ease;
+}
+.sl-home-sidebar-hint {
+  position: relative;
+  z-index: 1;
+  padding: 8px 5px 1px;
+  border-top: 1px solid rgba(190,220,255,.10);
+  color: rgba(190,215,238,.45);
+  font-size: .63rem;
+  line-height: 1.4;
+  text-align: center;
+  transition: opacity .18s ease;
+}
+.sl-home-sidebar.is-collapsed {
+  width: 70px;
+  padding-inline: 9px;
+  border-radius: 22px;
+}
+.sl-home-sidebar.is-collapsed .sl-home-sidebar-head { justify-content: center; padding-inline: 0; }
+.sl-home-sidebar.is-collapsed .sl-home-sidebar-brand,
+.sl-home-sidebar.is-collapsed .sl-home-nav-label,
+.sl-home-sidebar.is-collapsed .sl-home-sidebar-hint {
+  width: 0;
+  max-width: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.sl-home-sidebar.is-collapsed .sl-home-sidebar-nav { gap: 5px; }
+.sl-home-sidebar.is-collapsed .sl-home-nav-item {
+  justify-content: center;
+  gap: 0;
+  padding-inline: 0;
+}
+.sl-home-sidebar.is-collapsed .sl-home-nav-item:hover { transform: scale(1.04); }
+.sl-home-sidebar.is-collapsed .sl-home-nav-icon { color: #a4e4ff; }
+.sl-home-sidebar.is-collapsed .sl-home-nav-indicator { left: 0; right: 0; }
+html[data-theme="light"] .sl-home-sidebar {
+  color: #19334d;
+  border-color: rgba(255,255,255,.92);
+  background: linear-gradient(145deg, rgba(255,255,255,.82), rgba(235,246,255,.73));
+  box-shadow:
+    0 24px 68px rgba(43,83,120,.16),
+    0 0 30px rgba(80,160,220,.07),
+    inset 0 1px 0 rgba(255,255,255,.98);
+}
+html[data-theme="light"] .sl-home-sidebar-head { border-bottom-color: rgba(55,105,145,.12); }
+html[data-theme="light"] .sl-home-sidebar-brand { color: rgba(32,65,95,.62); }
+html[data-theme="light"] .sl-home-sidebar-collapse {
+  color: #287eb3;
+  border-color: rgba(70,140,190,.16);
+  background: rgba(255,255,255,.58);
+}
+html[data-theme="light"] .sl-home-nav-item { color: rgba(31,58,82,.76); }
+html[data-theme="light"] .sl-home-nav-item:hover,
+html[data-theme="light"] .sl-home-nav-item.is-active { color: #153d60; }
+html[data-theme="light"] .sl-home-nav-icon { color: #268ac4; }
+html[data-theme="light"] .sl-home-nav-indicator {
+  border-color: rgba(65,155,215,.27);
+  background: linear-gradient(110deg, rgba(100,190,245,.20), rgba(145,155,255,.12)), rgba(255,255,255,.55);
+  box-shadow: 0 7px 22px rgba(55,125,185,.10), inset 0 1px 0 rgba(255,255,255,.95);
+}
+html[data-theme="light"] .sl-home-sidebar-hint { color: rgba(40,80,115,.48); }
+.sl-home-layout .sl-home-content { transition: padding-left .42s cubic-bezier(.22,1,.36,1); }
+@media (min-width: 1180px) {
+  .sl-home-layout .sl-home-content { box-sizing: border-box; padding-left: 226px; }
+  .sl-home-layout.is-sidebar-collapsed .sl-home-content { padding-left: 96px; }
+}
+@media (max-width: 1179px) {
+  .sl-home-sidebar { display: none; }
+}
+body.sl-community-open .sl-home-sidebar {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+#practical-simulations,
+#live-study-room-section,
+#other-al-resources,
+#past-papers,
+#telegram-links,
+#free-lesson-packs,
+#productivity {
+  scroll-margin-top: 28px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sl-home-sidebar,
+  .sl-home-sidebar *,
+  .sl-home-layout .sl-home-content { transition: none !important; }
+}
+
+/* Sidebar brand mark replaces the temporary navigation heading. */
+.sl-home-sidebar-brand-mark {
+  display: grid;
+  place-items: center;
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(126,220,255,.22);
+  border-radius: 11px;
+  color: #a4e8ff;
+  background: linear-gradient(145deg, rgba(75,165,235,.22), rgba(105,110,220,.14));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 5px 16px rgba(45,130,210,.10);
+}
+.sl-home-sidebar-brand-mark svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.sl-home-sidebar.is-collapsed .sl-home-sidebar-head {
+  gap: 2px;
+  justify-content: center;
+  padding-inline: 0;
+}
+.sl-home-sidebar.is-collapsed .sl-home-sidebar-brand-mark {
+  flex-basis: 22px;
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+}
+.sl-home-sidebar.is-collapsed .sl-home-sidebar-brand-mark svg {
+  width: 15px;
+  height: 15px;
+}
+.sl-home-sidebar.is-collapsed .sl-home-sidebar-collapse {
+  flex-basis: 24px;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+}
+.sl-home-sidebar.is-collapsed .sl-home-sidebar-collapse svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* Floating top glass bar: fixed to the viewport and independent of sidebar width. */
+html body header.site-header {
+  position: fixed !important;
+  z-index: 1005 !important;
+  top: 14px !important;
+  left: 50% !important;
+  right: auto !important;
+  width: calc(100% - 32px) !important;
+  max-width: 1680px !important;
+  min-height: 68px !important;
+  height: 68px !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 8px clamp(18px, 2.2vw, 34px) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 18px !important;
+  overflow: hidden;
+  border: 1px solid rgba(178, 220, 255, .23) !important;
+  border-radius: 22px !important;
+  background:
+    linear-gradient(135deg, rgba(42, 66, 96, .76), rgba(15, 28, 48, .70) 55%, rgba(34, 43, 75, .72)) !important;
+  -webkit-backdrop-filter: blur(34px) saturate(180%) !important;
+  backdrop-filter: blur(34px) saturate(180%) !important;
+  box-shadow:
+    0 22px 58px rgba(0, 0, 0, .28),
+    0 7px 18px rgba(4, 13, 28, .18),
+    0 0 34px rgba(78, 170, 255, .10),
+    inset 0 1.5px 0 rgba(255, 255, 255, .27),
+    inset 0 -1px 0 rgba(115, 178, 235, .10),
+    inset 0 0 0 1px rgba(255, 255, 255, .035) !important;
+  transform: translateX(-50%) !important;
+  transition:
+    background .35s ease,
+    border-color .35s ease,
+    box-shadow .35s ease !important;
+}
+html body header.site-header::before {
+  content: "";
+  position: absolute;
+  inset: 0 8% auto;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.58), transparent);
+}
+html body header.site-header::after {
+  content: "";
+  position: absolute;
+  inset: auto 12% 0;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(117,196,255,.28), transparent);
+}
+html body header.site-header > * {
+  position: relative;
+  z-index: 1;
+}
+html[data-theme="light"] body header.site-header {
+  border-color: rgba(255,255,255,.94) !important;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.86), rgba(236,246,255,.77) 55%, rgba(242,240,255,.78)) !important;
+  box-shadow:
+    0 20px 54px rgba(45, 83, 122, .17),
+    0 6px 16px rgba(45, 83, 122, .08),
+    0 0 30px rgba(85, 160, 220, .09),
+    inset 0 1.5px 0 rgba(255,255,255,.99),
+    inset 0 -1px 0 rgba(105,155,200,.10) !important;
+}
+body > main.container {
+  margin-top: 96px !important;
+}
+@media (max-width: 640px) {
+  html body header.site-header {
+    top: 9px !important;
+    width: calc(100% - 18px) !important;
+    min-height: 60px !important;
+    height: 60px !important;
+    padding: 7px 12px !important;
+    gap: 8px !important;
+    border-radius: 18px !important;
+  }
+  body > main.container {
+    margin-top: 82px !important;
+  }
+}
+
+/* Header brand typography and luminous identity */
+.site-header .brand {
+  flex: 0 1 auto;
+  min-width: 0;
+  gap: 12px;
+}
+.site-header .brand-title-text {
+  display: inline-block;
+  max-width: 100%;
+  white-space: nowrap;
+  font-family: "Nirmala UI", "Noto Sans Sinhala", "Segoe UI", sans-serif;
+  font-size: clamp(.82rem, 1.18vw, 1.06rem);
+  font-weight: 650;
+  letter-spacing: .012em;
+  line-height: 1.2;
+  color: rgba(239, 249, 255, .98);
+  text-shadow: none;
+  filter: none;
+}
+html[data-theme="light"] .site-header .brand-title-text {
+  color: rgba(25, 61, 103, .98);
+  text-shadow: none;
+  filter: none;
+}
+
+/* Increase the glass clarity while keeping the contents beneath visible. */
+html body header.site-header {
+  background:
+    linear-gradient(135deg, rgba(43, 68, 101, .36), rgba(14, 28, 49, .28) 55%, rgba(35, 44, 78, .32)) !important;
+}
+html[data-theme="light"] body header.site-header {
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.52), rgba(236,246,255,.40) 55%, rgba(242,240,255,.44)) !important;
+}
+
+/* Keep the former hero-title footprint, but leave it visually empty. */
+.hero .home-hero-title-spacer {
+  display: block !important;
+  min-height: 1.15em;
+  margin-block: .67em;
+  line-height: 1.15;
+}
+.hero .home-hero-title-spacer .sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+@media (max-width: 640px) {
+  .site-header .brand {
+    gap: 7px;
+  }
+  .site-header .brand-title-text {
+    white-space: normal;
+    max-width: 210px;
+    font-size: 11px;
+    line-height: 1.15;
+  }
+}
+
+
+
+/* Active navigation marker: a glossy, translucent water-drop surface. */
+.sl-home-nav-indicator {
+  overflow: hidden;
+  border: 1px solid rgba(151, 224, 255, .48);
+  border-radius: 17px 21px 16px 20px / 17px 14px 20px 16px;
+  background:
+    radial-gradient(ellipse at 18% 8%, rgba(255,255,255,.42), transparent 43%),
+    radial-gradient(ellipse at 82% 100%, rgba(64,176,255,.22), transparent 58%),
+    linear-gradient(145deg, rgba(137,222,255,.23), rgba(100,143,255,.14) 58%, rgba(255,255,255,.09));
+  box-shadow:
+    0 8px 24px rgba(35,145,225,.20),
+    0 0 17px rgba(91,197,255,.15),
+    inset 0 1.5px 0 rgba(255,255,255,.46),
+    inset 0 -1px 0 rgba(111,202,255,.20),
+    inset 0 0 12px rgba(255,255,255,.10);
+}
+.sl-home-nav-indicator::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 12px;
+  right: 12px;
+  height: 42%;
+  border-radius: 999px;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255,255,255,.34), rgba(255,255,255,0));
+  filter: blur(.3px);
+}
+.sl-home-nav-indicator::after {
+  content: "";
+  position: absolute;
+  top: 7px;
+  left: 15px;
+  width: 8px;
+  height: 4px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: rgba(255,255,255,.78);
+  filter: blur(1px);
+}
+html[data-theme="light"] .sl-home-nav-indicator {
+  border-color: rgba(90,177,225,.38);
+  background:
+    radial-gradient(ellipse at 18% 8%, rgba(255,255,255,.96), transparent 43%),
+    radial-gradient(ellipse at 82% 100%, rgba(87,180,245,.17), transparent 58%),
+    linear-gradient(145deg, rgba(132,210,250,.25), rgba(151,164,255,.13) 58%, rgba(255,255,255,.48));
+  box-shadow:
+    0 8px 22px rgba(55,135,195,.15),
+    inset 0 1.5px 0 rgba(255,255,255,.98),
+    inset 0 -1px 0 rgba(90,165,220,.17),
+    inset 0 0 12px rgba(255,255,255,.36);
+}
+
+
+/* Calm, clear active marker with a soft spring-like tracking motion. */
+.sl-home-nav-indicator {
+  overflow: visible;
+  border: 1px solid rgba(137, 207, 245, .25);
+  border-radius: 13px;
+  background: rgba(94, 173, 224, .105);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.11);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+  backdrop-filter: blur(10px) saturate(120%);
+  transition:
+    transform .56s cubic-bezier(.22, 1.28, .36, 1),
+    height .34s cubic-bezier(.22, 1, .36, 1),
+    opacity .18s ease;
+}
+.sl-home-nav-indicator::before,
+.sl-home-nav-indicator::after {
+  content: none;
+}
+html[data-theme="light"] .sl-home-nav-indicator {
+  border-color: rgba(65, 145, 195, .20);
+  background: rgba(87, 164, 215, .095);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.55);
+}
+.sl-home-sidebar {
+  transition:
+    width .46s cubic-bezier(.22, 1.22, .36, 1),
+    padding .46s cubic-bezier(.22, 1.22, .36, 1),
+    opacity .25s ease,
+    border-radius .38s cubic-bezier(.22, 1.22, .36, 1);
+}
+.sl-home-sidebar.is-transitioning {
+  animation: slSidebarSoftSnap .42s cubic-bezier(.22, 1.2, .36, 1);
+}
+@keyframes slSidebarSoftSnap {
+  0% { transform: translateY(-50%) scale(.985); }
+  58% { transform: translateY(-50%) scale(1.008); }
+  100% { transform: translateY(-50%) scale(1); }
+}
+.sl-home-sidebar-collapse {
+  transition: transform .28s cubic-bezier(.22, 1.3, .36, 1), background .22s ease, border-color .22s ease;
+}
+.sl-home-sidebar-collapse:active {
+  transform: scale(.91);
+}
+
+/* Fit the floating header to its contents while keeping it centered. */
+html body header.site-header {
+  width: max-content !important;
+  max-width: calc(100vw - 40px) !important;
+  min-height: 64px !important;
+  height: 64px !important;
+  padding: 8px 22px !important;
+  gap: 24px !important;
+}
+html body header.site-header .brand {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+html body header.site-header .brand-title-text {
+  white-space: nowrap;
+  font-size: clamp(.78rem, 1.05vw, .98rem);
+}
+html body header.site-header .header-actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+@media (max-width: 760px) {
+  html body header.site-header {
+    width: calc(100vw - 18px) !important;
+    max-width: calc(100vw - 18px) !important;
+    min-height: 60px !important;
+    height: auto !important;
+    padding: 7px 10px !important;
+    gap: 8px !important;
+  }
+  html body header.site-header .brand-title-text {
+    white-space: normal;
+    max-width: 220px;
+    font-size: 10.5px;
+  }
+  html body header.site-header .header-actions {
+    gap: 5px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sl-home-sidebar.is-transitioning { animation: none !important; }
+  .sl-home-nav-indicator { transition: none !important; }
+}
+
+
+/* Refinement: steady sidebar motion, no page reflow, and clearer glass depth. */
+.sl-home-sidebar {
+  isolation: isolate;
+  border-color: rgba(177, 222, 255, .30);
+  background:
+    linear-gradient(145deg, rgba(44, 70, 101, .80), rgba(12, 24, 42, .76) 58%, rgba(29, 39, 68, .74));
+  box-shadow:
+    0 25px 66px rgba(0, 0, 0, .32),
+    0 7px 22px rgba(16, 45, 78, .18),
+    0 0 32px rgba(67, 163, 255, .10),
+    inset 0 2px 0 rgba(255, 255, 255, .24),
+    inset 1px 0 0 rgba(255, 255, 255, .12),
+    inset -1px 0 0 rgba(130, 195, 245, .10),
+    inset 0 -2px 0 rgba(5, 12, 24, .22) !important;
+  transition:
+    width .30s cubic-bezier(.2, .75, .25, 1),
+    padding .30s cubic-bezier(.2, .75, .25, 1),
+    opacity .2s ease,
+    border-radius .30s ease !important;
+}
+.sl-home-sidebar::before {
+  z-index: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.66), transparent);
+  opacity: .8;
+}
+.sl-home-sidebar::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 1px;
+  border: 1px solid rgba(255,255,255,.055);
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 24px rgba(160, 213, 255, .035),
+    inset 0 -12px 26px rgba(0, 0, 0, .08);
+  pointer-events: none;
+}
+.sl-home-sidebar-head,
+.sl-home-sidebar-nav,
+.sl-home-sidebar-hint { position: relative; z-index: 1; }
+
+/* Fine separators divide navigation into calm visual groups. */
+.sl-home-nav-item[data-nav-id="practical-simulations"],
+.sl-home-nav-item[data-nav-id="past-papers"],
+.sl-home-nav-item[data-nav-id="productivity"] {
+  margin-top: 8px;
+}
+.sl-home-nav-item[data-nav-id="practical-simulations"]::before,
+.sl-home-nav-item[data-nav-id="past-papers"]::before,
+.sl-home-nav-item[data-nav-id="productivity"]::before {
+  content: "";
+  position: absolute;
+  top: -5px;
+  left: 12px;
+  right: 12px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(190, 224, 250, .25), transparent);
+  pointer-events: none;
+}
+html[data-theme="light"] .sl-home-sidebar {
+  border-color: rgba(255, 255, 255, .96);
+  background: linear-gradient(145deg, rgba(255,255,255,.91), rgba(231,243,253,.84) 58%, rgba(239,239,251,.82));
+  box-shadow:
+    0 25px 66px rgba(42, 78, 111, .17),
+    0 7px 22px rgba(67, 120, 160, .08),
+    inset 0 2px 0 rgba(255,255,255,1),
+    inset 1px 0 0 rgba(255,255,255,.92),
+    inset -1px 0 0 rgba(90,145,190,.10),
+    inset 0 -2px 0 rgba(88,130,165,.08) !important;
+}
+html[data-theme="light"] .sl-home-sidebar::before {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,1), transparent);
+}
+html[data-theme="light"] .sl-home-nav-item[data-nav-id="practical-simulations"]::before,
+html[data-theme="light"] .sl-home-nav-item[data-nav-id="past-papers"]::before,
+html[data-theme="light"] .sl-home-nav-item[data-nav-id="productivity"]::before {
+  background: linear-gradient(90deg, transparent, rgba(70, 120, 160, .19), transparent);
+}
+
+/* Keep the content in one position whether the sidebar is open or closed. */
+@media (min-width: 1180px) {
+  .sl-home-layout .sl-home-content,
+  .sl-home-layout.is-sidebar-collapsed .sl-home-content {
+    box-sizing: border-box;
+    padding-left: 226px !important;
+    transition: none !important;
+  }
+}
+
+/* A balanced, slightly wider header with breathing room between brand and actions. */
+html body header.site-header {
+  min-width: min(760px, calc(100vw - 40px)) !important;
+  padding-inline: 30px !important;
+  gap: 32px !important;
+}
+@media (max-width: 760px) {
+  html body header.site-header {
+    min-width: 0 !important;
+    padding-inline: 10px !important;
+    gap: 8px !important;
+  }
+}
+
+/* Search control lives in the top glass bar; its panel floats below the bar. */
+.site-header .study-header-search-trigger {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid rgba(183, 222, 255, .19);
+  border-radius: 13px;
+  color: #c9edff;
+  background: rgba(255,255,255,.075);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.13), 0 5px 14px rgba(0,0,0,.08);
+  cursor: pointer;
+  transition: background .2s ease, border-color .2s ease, transform .2s ease;
+}
+.site-header .study-header-search-trigger:hover,
+.site-header .study-header-search-trigger[aria-expanded="true"] {
+  background: rgba(105,190,255,.16);
+  border-color: rgba(126,220,255,.38);
+}
+.site-header .study-header-search-trigger:active { transform: scale(.96); }
+.site-header .study-header-search-trigger svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+html[data-theme="light"] .site-header .study-header-search-trigger {
+  color: #287eb3;
+  border-color: rgba(70,140,190,.20);
+  background: rgba(255,255,255,.62);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.96), 0 5px 14px rgba(45,83,122,.08);
+}
+.study-header-search-panel {
+  position: fixed;
+  z-index: 1010;
+  top: 88px;
+  left: 50%;
+  width: min(520px, calc(100vw - 24px));
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(178,220,255,.25);
+  border-radius: 18px;
+  color: #eaf4ff;
+  background: linear-gradient(135deg, rgba(37,59,87,.91), rgba(13,25,43,.90));
+  -webkit-backdrop-filter: blur(32px) saturate(175%);
+  backdrop-filter: blur(32px) saturate(175%);
+  box-shadow: 0 20px 55px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.20);
+  transform: translateX(-50%);
+}
+.study-header-search-panel[hidden] { display: none !important; }
+.study-header-search-panel input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: .94rem;
+}
+.study-header-search-panel input::placeholder { color: rgba(205,225,244,.60); }
+.study-header-search-panel .study-find-meta {
+  flex: 0 0 auto;
+  color: rgba(200,224,244,.65);
+  font-size: .72rem;
+  white-space: nowrap;
+}
+.study-header-search-panel .study-find-clear {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 9px;
+  color: inherit;
+  background: rgba(255,255,255,.10);
+  cursor: pointer;
+}
+html[data-theme="light"] .study-header-search-panel {
+  border-color: rgba(255,255,255,.96);
+  color: #20384d;
+  background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(232,242,251,.94));
+  box-shadow: 0 20px 55px rgba(45,83,122,.16), inset 0 1px 0 #fff;
+}
+html[data-theme="light"] .study-header-search-panel input::placeholder,
+html[data-theme="light"] .study-header-search-panel .study-find-meta { color: rgba(48,75,99,.56); }
+@media (max-width: 640px) {
+  .study-header-search-panel { top: 78px; }
+  .study-header-search-panel .study-find-meta { display: none; }
+}
+
+
+/* Full-height StudyLab glass rail with integrated quick actions. */
+@media (min-width: 1180px) {
+  .sl-home-sidebar {
+    top: 0 !important; bottom: 0 !important; left: 0 !important;
+    width: 220px !important; max-height: none !important;
+    height: 100vh !important; height: 100dvh !important;
+    padding: 18px 14px calc(18px + env(safe-area-inset-bottom)) !important;
+    border-radius: 0 25px 25px 0 !important;
+    transform: none !important; gap: 13px !important; border-left: 0 !important;
+    background:
+      radial-gradient(ellipse at 0 0, rgba(104,190,255,.15), transparent 48%),
+      linear-gradient(145deg, rgba(36,64,94,.43), rgba(9,20,37,.34) 58%, rgba(25,35,64,.38)) !important;
+    -webkit-backdrop-filter: blur(42px) saturate(190%) !important;
+    backdrop-filter: blur(42px) saturate(190%) !important;
+    box-shadow: 14px 0 48px rgba(0,0,0,.18), inset -1px 0 0 rgba(190,225,255,.16), inset 0 1px 0 rgba(255,255,255,.25) !important;
+  }
+  .sl-home-sidebar.is-collapsed { width: 78px !important; border-radius: 0 22px 22px 0 !important; }
+  .sl-home-sidebar-nav { flex: 1 1 auto; }
+  .sl-home-layout .sl-home-content,
+  .sl-home-layout.is-sidebar-collapsed .sl-home-content {
+    padding-left: 236px !important;
+  }
+  html body header.site-header {
+    left: calc(50% + 106px) !important;
+    width: calc(100vw - 260px) !important;
+    min-width: 0 !important; max-width: 1500px !important;
+    transform: translateX(-50%) !important;
+  }
+  .sl-home-quick-actions {
+    position: relative; z-index: 2; display: grid; grid-template-columns: 1fr;
+    gap: 9px; padding-top: 13px; border-top: 1px solid rgba(205,230,255,.18);
+  }
+  .sl-home-quick-actions > button {
+    box-sizing: border-box !important;
+    position: relative !important; inset: auto !important;
+    display: flex !important; align-items: center !important; justify-content: flex-start !important;
+    gap: 12px !important; width: 100% !important; min-width: 0 !important;
+    max-width: none !important; height: 46px !important; min-height: 46px !important;
+    padding: 0 13px !important; border: 1px solid rgba(190,225,255,.22) !important;
+    border-radius: 15px !important; color: rgba(235,247,255,.96) !important;
+    background: linear-gradient(135deg, rgba(255,255,255,.12), rgba(120,175,230,.045)), rgba(18,34,54,.20) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 6px 18px rgba(0,0,0,.09) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(175%) !important;
+    backdrop-filter: blur(18px) saturate(175%) !important;
+    font: inherit !important; font-size: .82rem !important; font-weight: 720 !important;
+    letter-spacing: .01em !important; cursor: pointer;
+    transition: transform .2s ease, background .2s ease, border-color .2s ease !important;
+  }
+  .sl-home-quick-actions > button:hover,
+  .sl-home-quick-actions > button[aria-expanded="true"],
+  .sl-home-quick-actions > button.is-open {
+    transform: translateY(-1px) !important; border-color: rgba(133,213,255,.48) !important;
+    background: linear-gradient(135deg, rgba(88,175,245,.22), rgba(140,145,255,.12)), rgba(18,34,54,.28) !important;
+  }
+  .sl-home-quick-actions > button > span { display: inline-flex !important; align-items: center; justify-content: center; flex: 0 0 auto; width: auto; height: auto; color: inherit; }
+  .sl-home-quick-actions #studylabPetLauncher .sl-pet-launcher-icon,
+  .sl-home-quick-actions .studylab-ai-launcher-icon,
+  .sl-home-quick-actions .study-chat-button-icon {
+    width: 22px !important; height: 22px !important; font-size: 1rem !important; color: #a8e4ff !important;
+  }
+  .sl-home-quick-actions #studylabPetLauncher .sl-pet-launcher-icon + span,
+  .sl-home-quick-actions .studylab-ai-launcher-copy {
+    display: inline-flex !important; width: auto !important; max-width: none !important;
+    opacity: 1 !important; color: inherit !important; font-size: .82rem !important;
+  }
+  .sl-home-quick-actions .studylab-ai-launcher-copy { display: block !important; }
+  .sl-home-quick-actions .studylab-ai-launcher-title { font-size: .82rem !important; }
+  .sl-home-quick-actions .studylab-ai-launcher-subtitle { display: none !important; }
+  .sl-home-quick-actions .study-chat-button > span:last-of-type { display: inline !important; }
+  .sl-home-quick-actions .study-chat-unread { margin-left: auto; }
+  .sl-home-sidebar.is-collapsed .sl-home-quick-actions > button { justify-content: center !important; padding-inline: 0 !important; }
+  .sl-home-sidebar.is-collapsed .sl-home-quick-actions > button > span:not(:first-child) { display: none !important; }
+  .sl-home-sidebar.is-collapsed .sl-home-quick-actions { gap: 7px; }
+  .studylab-ai-tools-row .studylab-ai-panel,
+  .study-chat-panel,
+  .sl-pet-panel { left: 234px !important; right: auto !important; bottom: 22px !important; }
+  html[data-theme="light"] .sl-home-sidebar {
+    border-color: rgba(255,255,255,.68) !important;
+    background: radial-gradient(ellipse at 0 0, rgba(115,190,245,.17), transparent 48%), linear-gradient(145deg, rgba(255,255,255,.52), rgba(226,241,252,.38) 58%, rgba(237,233,255,.36)) !important;
+    box-shadow: 14px 0 48px rgba(40,75,110,.10), inset -1px 0 0 rgba(255,255,255,.72), inset 0 1px 0 rgba(255,255,255,.92) !important;
+  }
+  html[data-theme="light"] .sl-home-quick-actions > button {
+    color: #214764 !important; border-color: rgba(255,255,255,.78) !important;
+    background: linear-gradient(135deg, rgba(255,255,255,.48), rgba(140,190,230,.10)), rgba(255,255,255,.20) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.96), 0 6px 18px rgba(45,83,122,.07) !important;
+  }
+  html[data-theme="light"] .sl-home-quick-actions > button:hover,
+  html[data-theme="light"] .sl-home-quick-actions > button[aria-expanded="true"] {
+    background: linear-gradient(135deg, rgba(105,185,240,.22), rgba(150,155,255,.12)), rgba(255,255,255,.40) !important;
+  }
+  html[data-theme="light"] .sl-home-quick-actions .studylab-ai-launcher-icon { color: #6e73ce !important; }
+}
+@media (max-width: 1179px) { .sl-home-quick-actions { display: none !important; } }
+
+/* Stronger, genuinely see-through glass on the fixed header. */
+html body header.site-header {
+  background: linear-gradient(135deg, rgba(52,82,119,.27), rgba(13,28,49,.19) 55%, rgba(43,52,88,.22)) !important;
+  -webkit-backdrop-filter: blur(42px) saturate(205%) !important;
+  backdrop-filter: blur(42px) saturate(205%) !important;
+  border-color: rgba(190,225,255,.34) !important;
+  box-shadow: 0 22px 58px rgba(0,0,0,.20), 0 0 38px rgba(78,170,255,.12), inset 0 1.5px 0 rgba(255,255,255,.34), inset 0 -1px 0 rgba(115,178,235,.13) !important;
+}
+html[data-theme="light"] body header.site-header {
+  background: linear-gradient(135deg, rgba(255,255,255,.39), rgba(225,241,255,.28) 55%, rgba(239,235,255,.30)) !important;
+  border-color: rgba(255,255,255,.88) !important;
+  box-shadow: 0 20px 54px rgba(45,83,122,.13), inset 0 1.5px 0 rgba(255,255,255,.99) !important;
+}
+
+
+/* Extend the same transparent glass material across the Home workspace. */
+@media (min-width: 1180px) {
+  .sl-home-layout .homepage-overview-panel,
+  .sl-home-layout .homepage-overview-panel .live-card,
+  .sl-home-layout .homepage-overview-panel .student-milestone,
+  .sl-home-layout .homepage-overview-panel .study-room-launcher,
+  .sl-home-layout .subject-card,
+  .sl-home-layout .study-tools-card,
+  .sl-home-layout .telegram-card,
+  .sl-home-layout .mcq-practice-card,
+  .sl-home-layout .chemistry-resources-card,
+  .sl-home-layout .student-counter {
+    -webkit-backdrop-filter: blur(34px) saturate(180%) !important;
+    backdrop-filter: blur(34px) saturate(180%) !important;
+  }
+  .sl-home-layout .homepage-overview-panel {
+    background:
+      radial-gradient(ellipse at 10% 0%, rgba(117,202,255,.13), transparent 48%),
+      radial-gradient(ellipse at 100% 100%, rgba(153,142,255,.10), transparent 48%),
+      linear-gradient(135deg, rgba(255,255,255,.075), rgba(255,255,255,.018)),
+      rgba(9,20,36,.23) !important;
+    border-color: rgba(205,228,248,.25) !important;
+    box-shadow: 0 28px 70px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.24) !important;
+  }
+  .sl-home-layout .homepage-overview-panel .live-card,
+  .sl-home-layout .homepage-overview-panel .student-milestone,
+  .sl-home-layout .homepage-overview-panel .study-room-launcher {
+    background: linear-gradient(135deg, rgba(255,255,255,.105), rgba(255,255,255,.025)), rgba(17,32,52,.22) !important;
+    border-color: rgba(190,220,245,.22) !important;
+    box-shadow: 0 10px 26px rgba(0,0,0,.10), inset 0 1px 0 rgba(255,255,255,.18) !important;
+  }
+  .sl-home-layout .subject-card,
+  .sl-home-layout .study-tools-card,
+  .sl-home-layout .telegram-card,
+  .sl-home-layout .mcq-practice-card,
+  .sl-home-layout .chemistry-resources-card,
+  .sl-home-layout .student-counter {
+    background: linear-gradient(135deg, rgba(255,255,255,.075), rgba(255,255,255,.018)), rgba(18,31,49,.20) !important;
+    border-color: rgba(190,215,239,.18) !important;
+    box-shadow: 0 14px 32px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.16) !important;
+  }
+  html[data-theme="light"] .sl-home-layout .homepage-overview-panel {
+    background:
+      radial-gradient(ellipse at 10% 0%, rgba(117,202,255,.13), transparent 48%),
+      radial-gradient(ellipse at 100% 100%, rgba(153,142,255,.08), transparent 48%),
+      linear-gradient(135deg, rgba(255,255,255,.64), rgba(255,255,255,.28)),
+      rgba(236,245,253,.38) !important;
+    border-color: rgba(255,255,255,.88) !important;
+    box-shadow: 0 26px 66px rgba(45,83,122,.10), inset 0 1px 0 rgba(255,255,255,.98) !important;
+  }
+  html[data-theme="light"] .sl-home-layout .homepage-overview-panel .live-card,
+  html[data-theme="light"] .sl-home-layout .homepage-overview-panel .student-milestone,
+  html[data-theme="light"] .sl-home-layout .homepage-overview-panel .study-room-launcher {
+    background: linear-gradient(135deg, rgba(255,255,255,.74), rgba(255,255,255,.34)), rgba(224,239,251,.30) !important;
+    border-color: rgba(255,255,255,.88) !important;
+    box-shadow: 0 10px 26px rgba(45,83,122,.075), inset 0 1px 0 rgba(255,255,255,.98) !important;
+  }
+  html[data-theme="light"] .sl-home-layout .subject-card,
+  html[data-theme="light"] .sl-home-layout .study-tools-card,
+  html[data-theme="light"] .sl-home-layout .telegram-card,
+  html[data-theme="light"] .sl-home-layout .mcq-practice-card,
+  html[data-theme="light"] .sl-home-layout .chemistry-resources-card,
+  html[data-theme="light"] .sl-home-layout .student-counter {
+    background: linear-gradient(135deg, rgba(255,255,255,.62), rgba(255,255,255,.25)), rgba(232,242,251,.28) !important;
+    border-color: rgba(255,255,255,.82) !important;
+    box-shadow: 0 12px 28px rgba(45,83,122,.07), inset 0 1px 0 rgba(255,255,255,.96) !important;
+  }
+}
+
+
+
+/* Refined floating Home rail: cleaner spacing, stronger proportions and independent overlays. */
+@media (min-width: 1180px) {
+  .sl-home-sidebar {
+    top: 14px !important;
+    bottom: auto !important;
+    left: max(14px, calc((100vw - 1560px) / 2 + 14px)) !important;
+    width: 220px !important;
+    height: auto !important;
+    max-height: calc(100dvh - 28px) !important;
+    box-sizing: border-box !important;
+    padding: 14px !important;
+    gap: 10px !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    scrollbar-width: none !important;
+    border: 1px solid rgba(190,225,255,.28) !important;
+    border-radius: 24px !important;
+    transform: none !important;
+    background:
+      radial-gradient(ellipse at 8% 0%, rgba(120,205,255,.14), transparent 52%),
+      linear-gradient(145deg, rgba(38,65,96,.52), rgba(9,20,37,.43) 58%, rgba(31,39,70,.44)) !important;
+    -webkit-backdrop-filter: blur(38px) saturate(185%) !important;
+    backdrop-filter: blur(38px) saturate(185%) !important;
+    box-shadow:
+      0 20px 58px rgba(0,0,0,.24),
+      0 5px 18px rgba(0,0,0,.12),
+      0 0 32px rgba(86,175,255,.10),
+      inset 0 1.5px 0 rgba(255,255,255,.28),
+      inset 0 0 24px rgba(170,220,255,.035) !important;
+  }
+  .sl-home-sidebar::-webkit-scrollbar { display: none !important; }
+
+  .sl-home-sidebar.is-collapsed {
+    width: 78px !important;
+    padding-inline: 10px !important;
+    border-radius: 22px !important;
+  }
+
+  .sl-home-sidebar-head {
+    min-height: 42px !important;
+    padding: 3px 2px 10px 5px !important;
+  }
+
+  .sl-home-sidebar-nav {
+    flex: 0 0 auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    overflow-y: visible !important;
+    gap: 4px !important;
+    padding: 4px 0 2px !important;
+  }
+
+  .sl-home-nav-item {
+    height: 37px !important;
+    min-height: 37px !important;
+    padding-inline: 10px !important;
+    gap: 10px !important;
+    border-radius: 12px !important;
+    font-size: .79rem !important;
+  }
+
+  .sl-home-nav-item[data-nav-id="practical-simulations"],
+  .sl-home-nav-item[data-nav-id="past-papers"],
+  .sl-home-nav-item[data-nav-id="productivity"] {
+    margin-top: 6px !important;
+  }
+
+  .sl-home-sidebar-hint {
+    padding: 8px 4px 1px !important;
+    margin: 0 !important;
+    font-size: .59rem !important;
+    line-height: 1.3 !important;
+  }
+
+  .sl-home-quick-actions {
+    flex: 0 0 auto !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 12px 0 1px !important;
+  }
+
+  .sl-home-quick-actions > button,
+  .sl-home-quick-actions .study-chat-button {
+    box-sizing: border-box !important;
+    position: relative !important;
+    inset: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    margin: 0 !important;
+    padding: 0 12px !important;
+    border: 1px solid rgba(190,225,255,.23) !important;
+    border-radius: 14px !important;
+    color: rgba(235,247,255,.96) !important;
+    background: linear-gradient(135deg, rgba(255,255,255,.12), rgba(120,175,230,.045)), rgba(18,34,54,.20) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 6px 18px rgba(0,0,0,.09) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(175%) !important;
+    backdrop-filter: blur(18px) saturate(175%) !important;
+    font: inherit !important;
+    font-size: .82rem !important;
+    font-weight: 720 !important;
+    letter-spacing: .01em !important;
+    text-align: left !important;
+    cursor: pointer !important;
+  }
+
+  .sl-home-quick-actions > button:hover,
+  .sl-home-quick-actions > button[aria-expanded="true"],
+  .sl-home-quick-actions > button.is-open {
+    transform: translateY(-1px) !important;
+    border-color: rgba(133,213,255,.48) !important;
+    background: linear-gradient(135deg, rgba(88,175,245,.22), rgba(140,145,255,.12)), rgba(18,34,54,.28) !important;
+  }
+
+  .sl-home-quick-actions > button > span {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 auto !important;
+    width: auto !important;
+    height: auto !important;
+    color: inherit !important;
+  }
+
+  .sl-home-quick-actions #studylabPetLauncher .sl-pet-launcher-icon,
+  .sl-home-quick-actions .studylab-ai-launcher-icon,
+  .sl-home-quick-actions .study-chat-button-icon {
+    flex: 0 0 22px !important;
+    width: 22px !important;
+    height: 22px !important;
+    font-size: 1rem !important;
+    color: #a8e4ff !important;
+  }
+
+  .sl-home-quick-actions .study-chat-button-icon svg {
+    display: block !important;
+    width: 20px !important;
+    height: 20px !important;
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 1.7 !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+  }
+
+  .sl-home-quick-actions #studylabPetLauncher .sl-pet-launcher-icon + span,
+  .sl-home-quick-actions .studylab-ai-launcher-copy {
+    display: inline-flex !important;
+    width: auto !important;
+    max-width: none !important;
+    opacity: 1 !important;
+    color: inherit !important;
+    font-size: .82rem !important;
+  }
+
+  .sl-home-quick-actions .studylab-ai-launcher-copy { display: block !important; }
+  .sl-home-quick-actions .studylab-ai-launcher-title { font-size: .82rem !important; }
+  .sl-home-quick-actions .studylab-ai-launcher-subtitle { display: none !important; }
+
+  /* The global floating-controls stylesheet otherwise pins Chat to the viewport edge. */
+  body:not(.study-room-page) .sl-home-sidebar .sl-home-quick-actions .study-chat-button {
+    position: relative !important;
+    inset: auto !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    z-index: 2 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    padding: 0 12px !important;
+    gap: 10px !important;
+    border-radius: 14px !important;
+  }
+
+  body:not(.study-room-page) .sl-home-sidebar .sl-home-quick-actions .study-chat-button:hover,
+  body:not(.study-room-page) .sl-home-sidebar .sl-home-quick-actions .study-chat-button.is-open {
+    transform: translateY(-1px) !important;
+    border-color: rgba(133,213,255,.48) !important;
+    background: linear-gradient(135deg, rgba(88,175,245,.22), rgba(140,145,255,.12)), rgba(18,34,54,.28) !important;
+  }
+
+  body:not(.study-room-page) .sl-home-sidebar .sl-home-quick-actions .study-chat-button > span:not(.study-chat-button-icon):not(.study-chat-unread) {
+    display: inline !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: inherit !important;
+    font: inherit !important;
+    white-space: nowrap !important;
+  }
+
+  body:not(.study-room-page) .sl-home-sidebar .sl-home-quick-actions .study-chat-button .study-chat-button-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 22px !important;
+    width: 22px !important;
+    height: 22px !important;
+    color: #a8e4ff !important;
+  }
+
+  body:not(.study-room-page) .sl-home-sidebar .sl-home-quick-actions .study-chat-unread {
+    position: absolute !important;
+    top: -5px !important;
+    right: -5px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 auto !important;
+    width: auto !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    margin: 0 !important;
+    padding: 0 5px !important;
+    border-radius: 999px !important;
+    z-index: 3 !important;
+  }
+
+  .sl-home-quick-actions .study-chat-unread[hidden] { display: none !important; }
+
+  .sl-home-sidebar.is-collapsed .sl-home-quick-actions > button {
+    justify-content: center !important;
+    padding-inline: 0 !important;
+  }
+  .sl-home-sidebar.is-collapsed .sl-home-quick-actions > button > span:not(:first-child) {
+    display: none !important;
+  }
+  .sl-home-sidebar.is-collapsed .sl-home-quick-actions .study-chat-unread { display: none !important; }
+  .sl-home-sidebar.is-collapsed .sl-home-quick-actions { gap: 8px !important; }
+
+  .sl-home-layout .sl-home-content,
+  .sl-home-layout.is-sidebar-collapsed .sl-home-content {
+    padding-left: 236px !important;
+  }
+  .sl-home-layout.is-sidebar-collapsed .sl-home-content {
+    padding-left: 96px !important;
+  }
+
+  /* Shorter top bar, centred in the usable area beside the navigation rail. */
+  html body header.site-header {
+    left: calc(50% + 106px) !important;
+    right: auto !important;
+    width: min(720px, calc(100vw - 280px)) !important;
+    min-width: min(680px, calc(100vw - 280px)) !important;
+    max-width: calc(100vw - 280px) !important;
+    padding-inline: 26px !important;
+    gap: 28px !important;
+    transform: translateX(-50%) !important;
+  }
+  html body:has(.sl-home-sidebar.is-collapsed) header.site-header {
+    left: calc(50% + 35px) !important;
+  }
+
+  /* Chat's conversation window remains independent of the sidebar launcher. */
+  .study-chat-panel {
+    position: fixed !important;
+    left: auto !important;
+    right: 22px !important;
+    top: auto !important;
+    bottom: 22px !important;
+    width: min(410px, calc(100vw - 32px)) !important;
+    max-height: calc(100dvh - 44px) !important;
+    z-index: 1200 !important;
+    border-radius: 24px !important;
+    box-shadow: 0 28px 85px rgba(0,0,0,.34), 0 0 35px rgba(86,175,255,.10), inset 0 1px 0 rgba(255,255,255,.12) !important;
+  }
+
+  html[data-theme="light"] .sl-home-sidebar {
+    border-color: rgba(255,255,255,.90) !important;
+    background:
+      radial-gradient(ellipse at 8% 0%, rgba(120,205,255,.17), transparent 52%),
+      linear-gradient(145deg, rgba(255,255,255,.72), rgba(226,241,252,.58) 58%, rgba(238,234,255,.55)) !important;
+    box-shadow:
+      0 20px 58px rgba(45,83,122,.14),
+      0 5px 18px rgba(45,83,122,.07),
+      inset 0 1.5px 0 rgba(255,255,255,.98),
+      inset 0 0 24px rgba(255,255,255,.24) !important;
+  }
+
+  html[data-theme="light"] .sl-home-quick-actions > button,
+  html[data-theme="light"] body:not(.study-room-page) .sl-home-sidebar .sl-home-quick-actions .study-chat-button {
+    color: #214764 !important;
+    border-color: rgba(255,255,255,.82) !important;
+    background: linear-gradient(135deg, rgba(255,255,255,.52), rgba(140,190,230,.10)), rgba(255,255,255,.24) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.98), 0 6px 18px rgba(45,83,122,.07) !important;
+  }
+
+  html[data-theme="light"] .sl-home-quick-actions > button:hover,
+  html[data-theme="light"] body:not(.study-room-page) .sl-home-sidebar .sl-home-quick-actions .study-chat-button:hover,
+  html[data-theme="light"] .sl-home-quick-actions > button[aria-expanded="true"] {
+    background: linear-gradient(135deg, rgba(105,185,240,.22), rgba(150,155,255,.12)), rgba(255,255,255,.40) !important;
+  }
+
+  html[data-theme="light"] .sl-home-quick-actions .studylab-ai-launcher-icon,
+  html[data-theme="light"] .sl-home-quick-actions .study-chat-button-icon {
+    color: #6e73ce !important;
+  }
+}
+
+/* Card glass stays on actual card surfaces, not every nested element. */
+.sl-home-layout .subject-card,
+.sl-home-layout .study-tools-card,
+.sl-home-layout .telegram-card,
+.sl-home-layout .mcq-practice-card,
+.sl-home-layout .chemistry-resources-card,
+.sl-home-layout .homepage-overview-panel,
+.sl-home-layout .homepage-overview-panel > .live-card,
+.sl-home-layout .homepage-overview-panel > .student-milestone,
+.sl-home-layout .homepage-overview-panel > .study-room-launcher {
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  backdrop-filter: blur(30px) saturate(180%);
+}
+
+
+/* Final Home interaction polish: no empty unread dot, true icon-only collapse, responsive header spacing. */
+@media (min-width: 1180px) {
+  .sl-home-sidebar {
+    transition:
+      width .17s cubic-bezier(.2,.75,.25,1),
+      padding .17s cubic-bezier(.2,.75,.25,1),
+      border-radius .17s ease !important;
+  }
+  .sl-home-sidebar .sl-home-sidebar-brand {
+    transition: opacity .12s ease, width .16s ease !important;
+  }
+  .sl-home-sidebar .sl-home-nav-label {
+    transition: opacity .12s ease, max-width .16s ease !important;
+  }
+  .sl-home-sidebar .sl-home-nav-item {
+    transition: color .14s ease, transform .14s ease, padding .16s ease !important;
+  }
+  .sl-home-sidebar .sl-home-sidebar-collapse {
+    transition: transform .16s ease, background .16s ease, border-color .16s ease !important;
+  }
+
+  /* In the collapsed rail, keep only the Pet, AI and Chat icons visible. */
+  .sl-home-sidebar.is-collapsed .sl-home-quick-actions #studylabPetLauncher > span:not(.sl-pet-launcher-icon),
+  .sl-home-sidebar.is-collapsed .sl-home-quick-actions .studylab-ai-launcher-copy,
+  body:not(.study-room-page) .sl-home-sidebar.is-collapsed .sl-home-quick-actions .study-chat-button > span:not(.study-chat-button-icon):not(.study-chat-unread) {
+    display: none !important;
+    width: 0 !important;
+    max-width: 0 !important;
+    min-width: 0 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .sl-home-sidebar.is-collapsed .sl-home-quick-actions > button,
+  body:not(.study-room-page) .sl-home-sidebar.is-collapsed .sl-home-quick-actions .study-chat-button {
+    justify-content: center !important;
+    gap: 0 !important;
+    padding-inline: 0 !important;
+  }
+
+  /* Preserve a numbered badge for genuine unread messages, never an empty red dot. */
+  .study-chat-unread:empty,
+  .study-chat-unread[hidden],
+  .sl-home-sidebar .sl-home-quick-actions .study-chat-unread:empty,
+  .sl-home-sidebar .sl-home-quick-actions .study-chat-unread[hidden] {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  .sl-home-sidebar.is-collapsed .sl-home-quick-actions .study-chat-unread:not(:empty):not([hidden]) {
+    display: inline-flex !important;
+    visibility: visible !important;
+  }
+
+  /* Keep the header's original breathing room while shortening it only slightly. */
+  html body header.site-header {
+    left: calc(50% + 106px) !important;
+    right: auto !important;
+    width: min(1460px, calc(100vw - 310px)) !important;
+    min-width: min(720px, calc(100vw - 310px)) !important;
+    max-width: calc(100vw - 310px) !important;
+    padding-inline: 30px !important;
+    gap: 32px !important;
+    transform: translateX(-50%) !important;
+    transition: left .18s ease, width .18s ease, background .35s ease, border-color .35s ease, box-shadow .35s ease !important;
+  }
+  html body:has(.sl-home-sidebar.is-collapsed) header.site-header {
+    left: calc(50% + 35px) !important;
+    width: min(1600px, calc(100vw - 168px)) !important;
+    min-width: min(720px, calc(100vw - 168px)) !important;
+    max-width: calc(100vw - 168px) !important;
+  }
+  html body header.site-header .brand {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    gap: 12px !important;
+  }
+  html body header.site-header .header-actions {
+    flex: 0 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    flex-wrap: nowrap !important;
+  }
+}
+
+.study-chat-unread:empty,
+.study-chat-unread[hidden] {
+  display: none !important;
+  visibility: hidden !important;
+}

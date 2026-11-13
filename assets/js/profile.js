@@ -195,6 +195,36 @@
     if (event.key === "Escape" && !accountMenu.hidden) { closeAccountMenu(); profileButton.focus(); }
   });
 
+  let homeGreetingName = "Student";
+  function updateHomeGreeting(profile) {
+    const greeting = document.getElementById("homeGreeting");
+    if (!greeting) return;
+    const isGuest = Boolean(window.StudyLabAccount?.getUser?.()?.is_anonymous);
+    if (profile || isGuest) {
+      homeGreetingName = isGuest
+        ? "Guest"
+        : (profile?.display_name && !placeholderName(profile.display_name)
+          ? profile.display_name
+          : (window.StudyLabAccount?.getGoogleName?.() || "Student"));
+    }
+    const hour = Number(new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Asia/Colombo", hour: "2-digit", hourCycle: "h23"
+    }).format(new Date()));
+    const greetingTime = hour >= 5 && hour < 12 ? "Good morning"
+      : hour >= 12 && hour < 17 ? "Good afternoon"
+      : hour >= 17 && hour < 21 ? "Good evening" : "Good night";
+    const timeLabel = document.getElementById("homeGreetingTime");
+    const nameLabel = document.getElementById("homeGreetingName");
+    if (timeLabel) timeLabel.textContent = greetingTime;
+    if (nameLabel) nameLabel.textContent = homeGreetingName;
+  }
+
+  window.setInterval(() => updateHomeGreeting(), 60 * 1000);
+  window.addEventListener("focus", () => updateHomeGreeting());
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) updateHomeGreeting();
+  });
+
   const placeholderName = name => /^Student\d{4}$/.test(String(name || ""));
   const isBasicComplete = p => Boolean(p?.display_name && !placeholderName(p.display_name) &&
     p?.exam_year && p?.study_stream);
@@ -314,6 +344,7 @@
       profileButton.title = "Open your StudyLab account options";
       profileButton.setAttribute("aria-label", "Open StudyLab account options");
     }
+    updateHomeGreeting(p);
     if (accountMenu && !accountMenu.hidden) renderAccountMenu();
   }
   function showStatus(message, isError = false) {

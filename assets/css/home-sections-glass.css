@@ -1,0 +1,1568 @@
+/* StudyLab Home: image-backed section panels with restrained liquid glass. */
+html[data-theme="light"] body {
+  background-color: #b9cbd9 !important;
+  background-image:
+    linear-gradient(180deg, rgba(227, 238, 247, .12), rgba(226, 236, 245, .19)),
+    url("../images/studylab-home-light.webp") !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+  background-attachment: fixed !important;
+}
+html[data-theme="dark"] body {
+  background-color: #111a27 !important;
+  background-image:
+    linear-gradient(180deg, rgba(8, 15, 25, .38), rgba(8, 15, 25, .48)),
+    url("../images/studylab-home-dark.webp") !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+  background-attachment: fixed !important;
+}
+
+/* The animated formula layer is intentionally left untouched. */
+.sl-home-layout .sl-home-content > main.container {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  align-items: start !important;
+  gap: clamp(16px, 2vw, 22px) !important;
+  width: 100% !important;
+}
+.sl-home-section {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+  margin: 0 !important;
+  padding: clamp(18px, 2.2vw, 28px) !important;
+  border: 1px solid rgba(210, 230, 247, .23) !important;
+  border-radius: 25px !important;
+  background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.055)), rgba(16, 30, 47, .22) !important;
+  box-shadow:
+    0 18px 48px rgba(4, 13, 25, .14),
+    inset 0 1px 0 rgba(255,255,255,.20),
+    inset 0 -1px 0 rgba(3,12,22,.09) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(135%) !important;
+  backdrop-filter: blur(24px) saturate(135%) !important;
+  scroll-margin-top: 24px;
+}
+html[data-theme="light"] .sl-home-section {
+  border-color: rgba(255,255,255,.43) !important;
+  background: linear-gradient(135deg, rgba(255,255,255,.25), rgba(255,255,255,.10)), rgba(242,248,255,.19) !important;
+  box-shadow:
+    0 18px 48px rgba(42, 67, 91, .105),
+    inset 0 1px 0 rgba(255,255,255,.72),
+    inset 0 -1px 0 rgba(118,148,174,.07) !important;
+}
+.sl-home-section-heading {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  margin: 0 !important;
+}
+.sl-home-section-kicker {
+  color: #8bdcf7;
+  font-size: .66rem;
+  font-weight: 850;
+  letter-spacing: .17em;
+  line-height: 1.35;
+}
+html[data-theme="light"] .sl-home-section-kicker { color: #597da0; }
+.sl-home-section-heading h2 {
+  margin: 0 !important;
+  color: #f2f7fc !important;
+  font-size: clamp(1.35rem, 2vw, 1.8rem) !important;
+  font-weight: 820 !important;
+  letter-spacing: -.035em !important;
+  line-height: 1.2 !important;
+  text-shadow: 0 1px 12px rgba(0,0,0,.12);
+}
+html[data-theme="light"] .sl-home-section-heading h2 {
+  color: #304a64 !important;
+  text-shadow: none !important;
+}
+.sl-home-section-heading p {
+  margin: 0 !important;
+  color: rgba(224,235,245,.78) !important;
+  font-size: .89rem !important;
+  line-height: 1.55 !important;
+  max-width: 70ch;
+}
+html[data-theme="light"] .sl-home-section-heading p { color: #5a7087 !important; }
+
+/* Home remains the overview, now grouped inside the same panel system. */
+.sl-home-home-section {
+  padding-bottom: clamp(18px, 2vw, 25px) !important;
+}
+.sl-home-home-section > h1.home-hero-title-spacer { display: none !important; }
+.sl-home-home-section .homepage-overview-panel {
+  margin: 0 !important;
+  padding: clamp(14px, 1.7vw, 22px) !important;
+  border: 1px solid rgba(213,229,244,.17) !important;
+  border-radius: 19px !important;
+  background: rgba(8,20,34,.12) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(125%) !important;
+  backdrop-filter: blur(16px) saturate(125%) !important;
+}
+html[data-theme="light"] .sl-home-home-section .homepage-overview-panel {
+  border-color: rgba(255,255,255,.32) !important;
+  background: rgba(255,255,255,.13) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.48) !important;
+}
+
+/* Subject and resource cards sit inside each panel as a second glass layer. */
+.sl-home-card-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+  margin: 0 !important;
+  min-width: 0;
+}
+.sl-home-section .subject-card,
+.sl-home-section .study-tools-card,
+.sl-home-section .telegram-card {
+  min-width: 0 !important;
+  border: 1px solid rgba(205,226,246,.21) !important;
+  border-radius: 18px !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.105), rgba(255,255,255,.025)), rgba(7,18,32,.30) !important;
+  box-shadow: 0 10px 26px rgba(0,0,0,.11), inset 0 1px 0 rgba(255,255,255,.12) !important;
+  -webkit-backdrop-filter: blur(19px) saturate(135%) !important;
+  backdrop-filter: blur(19px) saturate(135%) !important;
+  transition: transform .2s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease !important;
+}
+html[data-theme="light"] .sl-home-section .subject-card,
+html[data-theme="light"] .sl-home-section .study-tools-card,
+html[data-theme="light"] .sl-home-section .telegram-card {
+  border-color: rgba(255,255,255,.49) !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.42), rgba(255,255,255,.18)), rgba(228,239,249,.16) !important;
+  box-shadow: 0 10px 28px rgba(42,68,94,.085), inset 0 1px 0 rgba(255,255,255,.75) !important;
+}
+.sl-home-section .subject-card:hover,
+.sl-home-section .study-tools-card:hover,
+.sl-home-section .telegram-card:hover {
+  transform: translateY(-3px) !important;
+  border-color: rgba(118,220,255,.55) !important;
+  box-shadow: 0 16px 32px rgba(0,0,0,.15), 0 0 18px rgba(97,194,255,.10), inset 0 1px 0 rgba(255,255,255,.16) !important;
+}
+html[data-theme="light"] .sl-home-section .subject-card:hover,
+html[data-theme="light"] .sl-home-section .study-tools-card:hover,
+html[data-theme="light"] .sl-home-section .telegram-card:hover {
+  border-color: rgba(105,165,214,.58) !important;
+  box-shadow: 0 16px 30px rgba(48,78,108,.12), inset 0 1px 0 rgba(255,255,255,.88) !important;
+}
+.sl-home-section .subject-card h2,
+.sl-home-section .study-tools-card h2,
+.sl-home-section .telegram-card h2 {
+  color: #f0f6fc !important;
+  line-height: 1.32 !important;
+  overflow-wrap: anywhere;
+}
+.sl-home-section .subject-card p,
+.sl-home-section .study-tools-card p,
+.sl-home-section .telegram-card p {
+  color: rgba(220,232,243,.80) !important;
+  line-height: 1.55 !important;
+}
+html[data-theme="light"] .sl-home-section .subject-card h2,
+html[data-theme="light"] .sl-home-section .study-tools-card h2,
+html[data-theme="light"] .sl-home-section .telegram-card h2 { color: #314c66 !important; }
+html[data-theme="light"] .sl-home-section .subject-card p,
+html[data-theme="light"] .sl-home-section .study-tools-card p,
+html[data-theme="light"] .sl-home-section .telegram-card p { color: #536e89 !important; }
+.sl-home-section .card-cta,
+.sl-home-section .study-tools-card-cta { color: #9fe4ff !important; }
+html[data-theme="light"] .sl-home-section .card-cta,
+html[data-theme="light"] .sl-home-section .study-tools-card-cta { color: #477ca5 !important; }
+.sl-home-section .card-icon { filter: saturate(.86); }
+
+/* Large Study Room call-to-action with a rotating Windows-Bloom-inspired neon edge. */
+.sl-home-room-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(250px, .95fr);
+  align-items: center;
+  gap: clamp(18px, 3vw, 34px);
+  min-width: 0;
+  padding: clamp(17px, 2.3vw, 30px);
+  border: 1px solid rgba(172,214,244,.19);
+  border-radius: 22px;
+  background: linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.025)), rgba(5,16,29,.22);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 12px 30px rgba(0,0,0,.10);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
+}
+html[data-theme="light"] .sl-home-room-panel {
+  border-color: rgba(255,255,255,.46);
+  background: linear-gradient(135deg, rgba(255,255,255,.34), rgba(255,255,255,.12)), rgba(232,243,252,.17);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.74), 0 12px 28px rgba(45,73,99,.075);
+}
+.sl-home-room-copy { min-width: 0; }
+.sl-home-room-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #9deaff;
+  font-size: .67rem;
+  font-weight: 850;
+  letter-spacing: .14em;
+}
+html[data-theme="light"] .sl-home-room-live { color: #397d9f; }
+.sl-home-room-live span,
+.sl-home-rank-kicker i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #65e4d8;
+  box-shadow: 0 0 12px rgba(101,228,216,.72);
+}
+.sl-home-room-copy h3 {
+  margin: 12px 0 8px !important;
+  color: #f2f8fd !important;
+  font-size: clamp(1.35rem, 2.6vw, 2.1rem) !important;
+  font-weight: 820 !important;
+  letter-spacing: -.035em;
+  line-height: 1.17 !important;
+  max-width: 19ch;
+}
+html[data-theme="light"] .sl-home-room-copy h3 { color: #304a64 !important; }
+.sl-home-room-copy p {
+  margin: 0 0 21px !important;
+  max-width: 57ch;
+  color: rgba(220,234,246,.80) !important;
+  font-size: .9rem !important;
+  line-height: 1.65 !important;
+}
+html[data-theme="light"] .sl-home-room-copy p { color: #586f86 !important; }
+.sl-home-room-entry {
+  --sl-room-ring-angle: 0deg;
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: min(100%, 460px);
+  min-height: 86px;
+  padding: 15px 18px;
+  border: 1px solid rgba(120,215,255,.32);
+  border-radius: 19px;
+  color: #f5fbff !important;
+  text-decoration: none !important;
+  background: linear-gradient(135deg, rgba(32,77,112,.54), rgba(28,41,77,.40)), rgba(7,18,34,.34);
+  box-shadow: 0 0 24px rgba(45,192,255,.13), inset 0 1px 0 rgba(255,255,255,.18);
+  -webkit-backdrop-filter: blur(14px) saturate(145%);
+  backdrop-filter: blur(14px) saturate(145%);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.sl-home-room-entry::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -2px;
+  padding: 2px;
+  border-radius: inherit;
+  background: conic-gradient(from var(--sl-room-ring-angle), #4ee9ff, #71b8ff, #a79bff, #eb9cda, #80e2e5, #4ee9ff);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: slHomeBloomSpin 5s linear infinite;
+  pointer-events: none;
+}
+.sl-home-room-entry::after {
+  content: "";
+  position: absolute;
+  z-index: -2;
+  inset: -5px;
+  border-radius: inherit;
+  background: conic-gradient(from var(--sl-room-ring-angle), rgba(78,233,255,.22), rgba(113,184,255,.18), rgba(167,155,255,.18), rgba(235,156,218,.17), rgba(128,226,229,.20));
+  filter: blur(13px);
+  animation: slHomeBloomSpin 5s linear infinite;
+  pointer-events: none;
+}
+.sl-home-room-entry:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 30px rgba(74,204,255,.24), 0 0 35px rgba(171,151,255,.10), inset 0 1px 0 rgba(255,255,255,.24);
+}
+.sl-home-room-entry-icon {
+  flex: 0 0 43px;
+  width: 43px;
+  height: 43px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  color: #c9f5ff;
+  background: linear-gradient(135deg, rgba(65,207,255,.30), rgba(166,145,255,.22));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.24), 0 0 18px rgba(77,202,255,.14);
+}
+.sl-home-room-entry-icon svg { width: 21px; height: 21px; fill: currentColor; }
+.sl-home-room-entry-copy { flex: 1 1 auto; min-width: 0; display: grid; gap: 3px; }
+.sl-home-room-entry-copy small { color: #9beaff; font-size: .62rem; font-weight: 850; letter-spacing: .13em; }
+.sl-home-room-entry-copy strong { color: inherit; font-size: 1.04rem; line-height: 1.25; }
+.sl-home-room-entry-copy em { color: rgba(229,242,252,.73); font-size: .76rem; font-style: normal; }
+.sl-home-room-entry-arrow { flex: 0 0 auto; color: #a8eaff; font-size: 1.35rem; }
+.sl-home-room-ranks {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 10px;
+  min-width: 0;
+}
+.sl-home-rank-card {
+  min-width: 0;
+  min-height: 128px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 9px;
+  padding: 16px;
+  border: 1px solid rgba(187,218,243,.19);
+  border-radius: 17px;
+  background: rgba(6,17,31,.24);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.10);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+html[data-theme="light"] .sl-home-rank-card {
+  border-color: rgba(255,255,255,.50);
+  background: rgba(255,255,255,.24);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.72);
+}
+.sl-home-rank-kicker { display: inline-flex; align-items: center; gap: 7px; color: #a9dff2; font-size: .63rem; font-weight: 850; letter-spacing: .10em; }
+html[data-theme="light"] .sl-home-rank-kicker { color: #4c7897; }
+.sl-home-rank-kicker i { width: 6px; height: 6px; }
+.sl-home-rank-card strong { color: #f3f8fd; font-size: 1.05rem; line-height: 1.3; overflow-wrap: anywhere; }
+html[data-theme="light"] .sl-home-rank-card strong { color: #304a64; }
+.sl-home-rank-card small { color: rgba(219,233,245,.72); font-size: .73rem; line-height: 1.45; }
+html[data-theme="light"] .sl-home-rank-card small { color: #62788d; }
+.sl-home-rank-footnote { grid-column: 1 / -1; margin: 0 !important; color: rgba(213,229,242,.58); font-size: .67rem; line-height: 1.5; }
+html[data-theme="light"] .sl-home-rank-footnote { color: #6b8196; }
+@keyframes slHomeBloomSpin { to { --sl-room-ring-angle: 360deg; } }
+@property --sl-room-ring-angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+
+/* Social: three editorial feature tiles and a single action into the existing drawer. */
+.sl-home-social-grid {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 13px;
+}
+.sl-home-feature-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  min-height: 174px;
+  padding: 18px;
+  border: 1px solid rgba(203,225,245,.19);
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(255,255,255,.10), rgba(255,255,255,.025)), rgba(8,19,34,.25);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.11);
+  -webkit-backdrop-filter: blur(17px) saturate(130%);
+  backdrop-filter: blur(17px) saturate(130%);
+}
+html[data-theme="light"] .sl-home-feature-card {
+  border-color: rgba(255,255,255,.50);
+  background: linear-gradient(145deg, rgba(255,255,255,.36), rgba(255,255,255,.14)), rgba(230,240,250,.16);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.78);
+}
+.sl-home-feature-icon {
+  width: 39px;
+  height: 39px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  color: #a6e8ff;
+  background: linear-gradient(135deg, rgba(85,205,255,.22), rgba(169,153,255,.18));
+  font-size: 1.22rem;
+}
+html[data-theme="light"] .sl-home-feature-icon { color: #4d83a8; background: rgba(121,183,226,.17); }
+.sl-home-feature-card h3 { margin: 0 0 5px !important; color: #f0f6fc !important; font-size: 1rem !important; }
+html[data-theme="light"] .sl-home-feature-card h3 { color: #304a64 !important; }
+.sl-home-feature-card p { margin: 0 !important; color: rgba(220,233,244,.76) !important; font-size: .82rem !important; line-height: 1.55 !important; }
+html[data-theme="light"] .sl-home-feature-card p { color: #5b7187 !important; }
+.sl-home-feature-tag { margin-top: auto; color: #9bd8ec; font-size: .61rem; font-weight: 850; letter-spacing: .12em; }
+html[data-theme="light"] .sl-home-feature-tag { color: #6687a1; }
+.sl-home-social-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding-top: 3px;
+  color: rgba(224,236,247,.76);
+  font-size: .83rem;
+}
+html[data-theme="light"] .sl-home-social-action { color: #5d7389; }
+.sl-home-social-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex: 0 0 auto;
+  min-height: 43px;
+  padding: 0 17px;
+  border: 1px solid rgba(138,211,246,.34);
+  border-radius: 13px;
+  color: #e9f8ff;
+  background: linear-gradient(135deg, rgba(67,163,218,.28), rgba(136,130,220,.20)), rgba(10,29,49,.26);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 7px 18px rgba(0,0,0,.08);
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+html[data-theme="light"] .sl-home-social-button { color: #365d7c; border-color: rgba(255,255,255,.70); background: rgba(255,255,255,.34); box-shadow: inset 0 1px 0 #fff, 0 7px 18px rgba(48,80,110,.07); }
+.sl-home-social-button:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(0,0,0,.13), 0 0 18px rgba(110,201,255,.10); }
+.sl-home-single-card > * { width: 100%; }
+
+/* Responsive layouts keep the translucent cards readable instead of squeezing them. */
+@media (max-width: 1120px) {
+  .sl-home-card-grid { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+  .sl-home-room-panel { grid-template-columns: minmax(0,1fr); }
+  .sl-home-room-entry { width: 100%; }
+}
+@media (max-width: 700px) {
+  .sl-home-section { gap: 14px; padding: 16px !important; border-radius: 20px !important; }
+  .sl-home-card-grid { grid-template-columns: minmax(0,1fr) !important; gap: 11px !important; }
+  .sl-home-social-grid { grid-template-columns: minmax(0,1fr); gap: 10px; }
+  .sl-home-feature-card { min-height: 0; padding: 15px; }
+  .sl-home-social-action { align-items: stretch; flex-direction: column; }
+  .sl-home-social-button { width: 100%; }
+  .sl-home-room-ranks { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .sl-home-room-panel { padding: 15px; }
+  .sl-home-rank-card { min-height: 116px; padding: 12px; }
+  html[data-theme="light"] body,
+  html[data-theme="dark"] body { background-attachment: scroll !important; }
+}
+@media (max-width: 380px) {
+  .sl-home-room-ranks { grid-template-columns: minmax(0,1fr); }
+  .sl-home-rank-footnote { grid-column: auto; }
+  .sl-home-room-entry { gap: 10px; padding: 13px; }
+  .sl-home-room-entry-copy strong { font-size: .94rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sl-home-room-entry::before,
+  .sl-home-room-entry::after { animation: none !important; }
+  .sl-home-section .subject-card,
+  .sl-home-section .study-tools-card,
+  .sl-home-section .telegram-card,
+  .sl-home-social-button { transition: none !important; }
+}
+
+
+/* =========================================================
+   HOME FRAME REFINEMENT — MATCH THE HEADER AND SECTION WIDTHS
+   Keep the content frame fixed while the rail expands/collapses.
+   ========================================================= */
+@media (min-width: 1180px) {
+  :root {
+    --sl-home-frame-width: min(1460px, calc(100vw - 310px));
+    --sl-home-frame-shift: max(117px, calc(25vw - 273px));
+  }
+
+  html body header.site-header,
+  html body:has(.sl-home-sidebar.is-collapsed) header.site-header {
+    left: calc(50% + var(--sl-home-frame-shift)) !important;
+    right: auto !important;
+    width: var(--sl-home-frame-width) !important;
+    min-width: 0 !important;
+    max-width: var(--sl-home-frame-width) !important;
+    transform: translateX(-50%) !important;
+    transition: background .35s ease, border-color .35s ease, box-shadow .35s ease !important;
+  }
+
+  .sl-home-layout .sl-home-content,
+  .sl-home-layout.is-sidebar-collapsed .sl-home-content {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+    transition: none !important;
+  }
+
+  .sl-home-layout .sl-home-content > main.container {
+    position: relative !important;
+    left: calc(50% + var(--sl-home-frame-shift)) !important;
+    width: var(--sl-home-frame-width) !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    margin: 96px 0 80px !important;
+    padding: 0 !important;
+    transform: translateX(-50%) !important;
+    box-sizing: border-box !important;
+  }
+
+  .sl-home-section {
+    width: 100% !important;
+    max-width: none !important;
+    scroll-margin-top: 100px !important;
+  }
+
+  .sl-home-home-section {
+    text-align: left !important;
+    padding: clamp(18px, 2.2vw, 28px) !important;
+  }
+
+  .sl-home-home-section .homepage-overview-panel {
+    width: 100% !important;
+    max-width: none !important;
+  }
+}
+
+/* The Home greeting is the section's only heading: Hello, time, name, then welcome. */
+.sl-home-home-section .homepage-greeting {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: baseline !important;
+  justify-content: flex-start !important;
+  flex-wrap: wrap !important;
+  gap: 3px 9px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 0 24px !important;
+  padding: 0 2px !important;
+  text-align: left !important;
+}
+.sl-home-home-section .homepage-greeting-hello,
+.sl-home-home-section .homepage-greeting-time,
+.sl-home-home-section .homepage-greeting-name {
+  display: inline !important;
+  flex: 0 0 auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  font-size: clamp(20px, 2.2vw, 28px) !important;
+  line-height: 1.2 !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}
+.sl-home-home-section .homepage-greeting-hello {
+  color: #a9c2d8 !important;
+  font-weight: 650 !important;
+}
+html[data-theme="light"] .sl-home-home-section .homepage-greeting-hello {
+  color: #718ba4 !important;
+}
+.sl-home-home-section .homepage-greeting-welcome {
+  display: block !important;
+  flex: 0 0 100% !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 4px 0 0 !important;
+  font-size: clamp(15px, 1.35vw, 18px) !important;
+  line-height: 1.4 !important;
+  text-align: left !important;
+}
+
+/* A genuinely translucent rail and a softer glass active-section capsule. */
+@media (min-width: 1180px) {
+  .sl-home-sidebar {
+    transition:
+      width .24s cubic-bezier(.2,.75,.25,1),
+      padding .24s cubic-bezier(.2,.75,.25,1),
+      border-radius .24s cubic-bezier(.2,.75,.25,1) !important;
+    background:
+      radial-gradient(ellipse at 9% 0%, rgba(123,205,255,.12), transparent 54%),
+      linear-gradient(145deg, rgba(43,67,94,.43), rgba(8,18,32,.32) 58%, rgba(28,39,65,.34)) !important;
+    border-color: rgba(190,225,255,.30) !important;
+    -webkit-backdrop-filter: blur(38px) saturate(190%) !important;
+    backdrop-filter: blur(38px) saturate(190%) !important;
+    box-shadow:
+      0 20px 58px rgba(0,0,0,.20),
+      0 5px 18px rgba(0,0,0,.10),
+      0 0 30px rgba(86,175,255,.09),
+      inset 0 1.5px 0 rgba(255,255,255,.22),
+      inset 0 0 24px rgba(170,220,255,.035) !important;
+  }
+
+  html[data-theme="light"] .sl-home-sidebar {
+    background:
+      radial-gradient(ellipse at 9% 0%, rgba(120,205,255,.16), transparent 54%),
+      linear-gradient(145deg, rgba(255,255,255,.57), rgba(226,239,251,.36) 58%, rgba(235,232,250,.34)) !important;
+    border-color: rgba(255,255,255,.78) !important;
+    -webkit-backdrop-filter: blur(38px) saturate(175%) !important;
+    backdrop-filter: blur(38px) saturate(175%) !important;
+    box-shadow:
+      0 20px 52px rgba(45,83,122,.12),
+      0 5px 18px rgba(45,83,122,.06),
+      inset 0 1.5px 0 rgba(255,255,255,.88),
+      inset 0 0 24px rgba(255,255,255,.18) !important;
+  }
+
+  .sl-home-sidebar .sl-home-nav-indicator {
+    overflow: hidden !important;
+    border: 1px solid rgba(140,214,255,.26) !important;
+    border-radius: 14px !important;
+    background:
+      linear-gradient(135deg, rgba(121,207,255,.14), rgba(145,157,255,.085)),
+      rgba(255,255,255,.045) !important;
+    box-shadow:
+      0 5px 16px rgba(40,145,215,.08),
+      inset 0 1px 0 rgba(255,255,255,.19) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(165%) !important;
+    backdrop-filter: blur(24px) saturate(165%) !important;
+    transition:
+      transform .32s cubic-bezier(.2,.75,.25,1),
+      height .22s ease,
+      opacity .14s ease !important;
+  }
+  .sl-home-sidebar .sl-home-nav-indicator::before {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 12% auto !important;
+    height: 42% !important;
+    border-radius: inherit !important;
+    background: linear-gradient(180deg, rgba(255,255,255,.20), transparent) !important;
+    pointer-events: none !important;
+    filter: blur(.5px) !important;
+  }
+  .sl-home-sidebar .sl-home-nav-indicator::after { content: none !important; }
+
+  html[data-theme="light"] .sl-home-sidebar .sl-home-nav-indicator {
+    border-color: rgba(100,165,216,.28) !important;
+    background:
+      linear-gradient(135deg, rgba(111,190,244,.15), rgba(158,163,255,.085)),
+      rgba(255,255,255,.09) !important;
+    box-shadow: 0 5px 16px rgba(55,125,185,.08), inset 0 1px 0 rgba(255,255,255,.72) !important;
+  }
+
+  .sl-home-sidebar .sl-home-nav-label {
+    transition: opacity .14s ease, max-width .22s ease !important;
+  }
+}
+
+/* Let smaller screens use the full page width without the desktop frame offset. */
+@media (max-width: 1179px) {
+  .sl-home-layout .sl-home-content,
+  .sl-home-layout.is-sidebar-collapsed .sl-home-content {
+    padding-inline: 0 !important;
+    transition: none !important;
+  }
+  .sl-home-layout .sl-home-content > main.container {
+    position: static !important;
+    left: auto !important;
+    transform: none !important;
+    width: calc(100% - 32px) !important;
+    max-width: 1120px !important;
+    margin: 82px auto 80px !important;
+    padding: 0 !important;
+  }
+  .sl-home-section { scroll-margin-top: 88px !important; }
+}
+@media (max-width: 700px) {
+  .sl-home-home-section { text-align: left !important; }
+  .sl-home-home-section .homepage-greeting { gap: 3px 6px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sl-home-sidebar,
+  .sl-home-sidebar .sl-home-nav-indicator,
+  .sl-home-sidebar .sl-home-nav-label {
+    transition: none !important;
+  }
+}
+
+
+/* Preserve the document's accessible title without adding visible Home copy. */
+.sl-home-home-section > h1.home-hero-title-spacer {
+  display: block !important;
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0,0,0,0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+  line-height: 0 !important;
+}
+
+
+/* =========================================================
+   STUDYLAB WINDOWS BLOOM AMBIENCE
+   Soft background palette + slow scientific side doodles.
+   The existing formula layer stays underneath the glass.
+   ========================================================= */
+html[data-theme="dark"] body {
+  background-color: #0a1020 !important;
+  background-image:
+    radial-gradient(ellipse 48% 57% at 8% 15%, rgba(78,130,255,.32), transparent 76%),
+    radial-gradient(ellipse 49% 54% at 91% 13%, rgba(145,101,226,.27), transparent 75%),
+    radial-gradient(ellipse 59% 49% at 57% 98%, rgba(48,162,211,.20), transparent 76%),
+    url("../images/studylab-edu-doodles-dark.svg"),
+    linear-gradient(145deg, #0a1020 0%, #10172a 53%, #101326 100%) !important;
+  background-position: center center, center center, center center, center top, center center !important;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat, no-repeat !important;
+  background-size: 100% 100%, 100% 100%, 100% 100%, 600px 600px, 100% 100% !important;
+  background-attachment: fixed, fixed, fixed, fixed, fixed !important;
+}
+html[data-theme="light"] body {
+  background-color: #edf5ff !important;
+  background-image:
+    radial-gradient(ellipse 49% 56% at 9% 14%, rgba(120,183,255,.32), transparent 75%),
+    radial-gradient(ellipse 46% 52% at 91% 13%, rgba(190,160,255,.27), transparent 75%),
+    radial-gradient(ellipse 58% 49% at 56% 96%, rgba(248,190,222,.23), transparent 76%),
+    url("../images/studylab-edu-doodles-light.svg"),
+    linear-gradient(145deg, #edf5ff 0%, #f5f7ff 53%, #fdf1fa 100%) !important;
+  background-position: center center, center center, center center, center top, center center !important;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat, no-repeat !important;
+  background-size: 100% 100%, 100% 100%, 100% 100%, 600px 600px, 100% 100% !important;
+  background-attachment: fixed, fixed, fixed, fixed, fixed !important;
+}
+
+/* Large, restrained bloom loops stay at the sides and behind every panel. */
+.science-background {
+  isolation: isolate;
+  opacity: 1 !important;
+}
+.science-background::before,
+.science-background::after {
+  content: "";
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  border: 1px solid rgba(148,190,255,.19);
+  box-shadow:
+    inset 0 0 38px rgba(111,149,255,.075),
+    0 0 36px rgba(102,159,255,.075);
+  opacity: .54;
+  will-change: transform;
+}
+.science-background::before {
+  width: clamp(260px, 36vw, 620px);
+  height: clamp(340px, 57vh, 690px);
+  left: -17vw;
+  top: 12vh;
+  border-radius: 48% 52% 61% 39% / 42% 36% 64% 58%;
+  background:
+    radial-gradient(ellipse at 60% 45%, rgba(89,143,255,.11), transparent 64%),
+    linear-gradient(135deg, rgba(151,184,255,.045), transparent 60%);
+  transform: rotate(-22deg);
+  animation: slBloomDriftLeft 48s ease-in-out infinite alternate;
+}
+.science-background::after {
+  width: clamp(300px, 42vw, 700px);
+  height: clamp(340px, 60vh, 740px);
+  right: -20vw;
+  bottom: -18vh;
+  border-color: rgba(169,147,255,.17);
+  border-radius: 58% 42% 37% 63% / 52% 60% 40% 48%;
+  background:
+    radial-gradient(ellipse at 38% 38%, rgba(140,112,231,.12), transparent 65%),
+    linear-gradient(150deg, rgba(96,175,238,.035), transparent 66%);
+  box-shadow:
+    inset 0 0 44px rgba(141,119,235,.08),
+    0 0 42px rgba(127,117,230,.06);
+  transform: rotate(17deg);
+  animation: slBloomDriftRight 56s ease-in-out infinite alternate;
+}
+html[data-theme="light"] .science-background::before {
+  border-color: rgba(76,145,214,.19);
+  background:
+    radial-gradient(ellipse at 60% 45%, rgba(93,164,239,.13), transparent 64%),
+    linear-gradient(135deg, rgba(158,197,255,.045), transparent 60%);
+  box-shadow: inset 0 0 38px rgba(108,165,226,.075), 0 0 36px rgba(108,165,226,.06);
+}
+html[data-theme="light"] .science-background::after {
+  border-color: rgba(161,133,217,.17);
+  background:
+    radial-gradient(ellipse at 38% 38%, rgba(177,149,235,.12), transparent 65%),
+    linear-gradient(150deg, rgba(133,196,234,.035), transparent 66%);
+  box-shadow: inset 0 0 44px rgba(163,143,222,.07), 0 0 42px rgba(154,137,213,.05);
+}
+@keyframes slBloomDriftLeft {
+  from { transform: translate3d(0,0,0) rotate(-22deg) scale(.98); }
+  to { transform: translate3d(3.2vw,-2.8vh,0) rotate(-14deg) scale(1.04); }
+}
+@keyframes slBloomDriftRight {
+  from { transform: translate3d(0,0,0) rotate(17deg) scale(1); }
+  to { transform: translate3d(-2.8vw,-3.2vh,0) rotate(9deg) scale(1.035); }
+}
+.science-symbol {
+  color: rgba(160,199,255,.16) !important;
+  text-shadow: 0 0 18px rgba(117,166,255,.075) !important;
+}
+html[data-theme="light"] .science-symbol {
+  color: rgba(67,119,177,.14) !important;
+  text-shadow: 0 0 16px rgba(91,155,218,.07) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .science-background::before,
+  .science-background::after,
+  .science-symbol { animation: none !important; }
+}
+
+/* =========================================================
+   NEUTRAL LIQUID GLASS — let the Bloom atmosphere show through.
+   Outer pane: light base layer. Inner cards: a touch denser.
+   No added blue/purple tint and no extra blur.
+   ========================================================= */
+.sl-home-section {
+  border-color: rgba(224,235,247,.16) !important;
+  background: rgba(8,14,24,.115) !important;
+  box-shadow:
+    0 14px 38px rgba(0,0,0,.09),
+    inset 0 1px 0 rgba(255,255,255,.11) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(112%) !important;
+  backdrop-filter: blur(12px) saturate(112%) !important;
+}
+html[data-theme="light"] .sl-home-section {
+  border-color: rgba(255,255,255,.42) !important;
+  background: rgba(255,255,255,.17) !important;
+  box-shadow:
+    0 14px 38px rgba(46,68,95,.075),
+    inset 0 1px 0 rgba(255,255,255,.64) !important;
+}
+.sl-home-home-section .homepage-overview-panel {
+  border-color: rgba(226,238,249,.13) !important;
+  background: rgba(255,255,255,.035) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.085) !important;
+  -webkit-backdrop-filter: blur(13px) saturate(112%) !important;
+  backdrop-filter: blur(13px) saturate(112%) !important;
+}
+html[data-theme="light"] .sl-home-home-section .homepage-overview-panel {
+  border-color: rgba(255,255,255,.44) !important;
+  background: rgba(255,255,255,.16) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.7) !important;
+}
+.sl-home-section .subject-card,
+.sl-home-section .study-tools-card,
+.sl-home-section .telegram-card {
+  border-color: rgba(224,236,247,.15) !important;
+  background: rgba(255,255,255,.045) !important;
+  box-shadow:
+    0 8px 22px rgba(0,0,0,.075),
+    inset 0 1px 0 rgba(255,255,255,.09) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(112%) !important;
+  backdrop-filter: blur(14px) saturate(112%) !important;
+}
+html[data-theme="light"] .sl-home-section .subject-card,
+html[data-theme="light"] .sl-home-section .study-tools-card,
+html[data-theme="light"] .sl-home-section .telegram-card {
+  border-color: rgba(255,255,255,.50) !important;
+  background: rgba(255,255,255,.22) !important;
+  box-shadow:
+    0 8px 22px rgba(48,72,98,.055),
+    inset 0 1px 0 rgba(255,255,255,.73) !important;
+}
+.sl-home-section .subject-card:hover,
+.sl-home-section .study-tools-card:hover,
+.sl-home-section .telegram-card:hover {
+  background: rgba(255,255,255,.075) !important;
+  border-color: rgba(226,239,250,.25) !important;
+  box-shadow: 0 11px 26px rgba(0,0,0,.09), inset 0 1px 0 rgba(255,255,255,.12) !important;
+}
+html[data-theme="light"] .sl-home-section .subject-card:hover,
+html[data-theme="light"] .sl-home-section .study-tools-card:hover,
+html[data-theme="light"] .sl-home-section .telegram-card:hover {
+  background: rgba(255,255,255,.31) !important;
+  border-color: rgba(255,255,255,.68) !important;
+  box-shadow: 0 11px 26px rgba(48,72,98,.075), inset 0 1px 0 #fff !important;
+}
+.sl-home-room-panel,
+.sl-home-feature-card,
+.sl-home-rank-card {
+  border-color: rgba(224,236,247,.14) !important;
+  background: rgba(255,255,255,.04) !important;
+  box-shadow: 0 8px 22px rgba(0,0,0,.055), inset 0 1px 0 rgba(255,255,255,.10) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(112%) !important;
+  backdrop-filter: blur(14px) saturate(112%) !important;
+}
+html[data-theme="light"] .sl-home-room-panel,
+html[data-theme="light"] .sl-home-feature-card,
+html[data-theme="light"] .sl-home-rank-card {
+  border-color: rgba(255,255,255,.48) !important;
+  background: rgba(255,255,255,.20) !important;
+  box-shadow: 0 8px 22px rgba(48,72,98,.055), inset 0 1px 0 rgba(255,255,255,.72) !important;
+}
+.sl-home-social-button {
+  border-color: rgba(224,236,247,.20) !important;
+  color: inherit !important;
+  background: rgba(255,255,255,.065) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 6px 16px rgba(0,0,0,.06) !important;
+}
+html[data-theme="light"] .sl-home-social-button {
+  border-color: rgba(255,255,255,.58) !important;
+  background: rgba(255,255,255,.27) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.85), 0 6px 16px rgba(48,72,98,.05) !important;
+}
+.sl-home-room-entry {
+  background: rgba(255,255,255,.045) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(112%) !important;
+  backdrop-filter: blur(14px) saturate(112%) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.13), 0 8px 22px rgba(0,0,0,.06) !important;
+}
+html[data-theme="light"] .sl-home-room-entry {
+  background: rgba(255,255,255,.22) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.82), 0 8px 22px rgba(48,72,98,.05) !important;
+}
+
+/* =========================================================
+   SIMPLE GLASS-ON-GLASS NAV INDICATOR.
+   Flatten the old glossy droplet and remove the spring overshoot.
+   ========================================================= */
+@media (min-width: 1180px) {
+  .sl-home-sidebar .sl-home-nav-indicator {
+    overflow: hidden !important;
+    border: 1px solid rgba(225,238,250,.15) !important;
+    border-radius: 13px !important;
+    background: rgba(255,255,255,.055) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.10) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(112%) !important;
+    backdrop-filter: blur(12px) saturate(112%) !important;
+    transition:
+      transform .26s cubic-bezier(.2,.75,.25,1),
+      height .20s ease,
+      opacity .12s ease !important;
+  }
+  .sl-home-sidebar .sl-home-nav-indicator::before,
+  .sl-home-sidebar .sl-home-nav-indicator::after {
+    content: none !important;
+  }
+  html[data-theme="light"] .sl-home-sidebar .sl-home-nav-indicator {
+    border-color: rgba(255,255,255,.42) !important;
+    background: rgba(255,255,255,.22) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.7) !important;
+  }
+}
+
+/* The rail stays available at the footer. Only its quick-action dock fades. */
+@media (min-width: 1180px) {
+  .sl-home-sidebar {
+    opacity: 1 !important;
+    transition:
+      width .24s cubic-bezier(.2,.75,.25,1),
+      padding .24s cubic-bezier(.2,.75,.25,1),
+      border-radius .24s ease !important;
+  }
+  .sl-home-sidebar.is-footer-hidden {
+    pointer-events: auto !important;
+  }
+  .sl-home-sidebar .sl-home-quick-actions {
+    opacity: var(--sl-home-footer-opacity, 1);
+    transition: opacity .18s ease !important;
+  }
+  .sl-home-sidebar.is-footer-hidden .sl-home-quick-actions {
+    pointer-events: none !important;
+  }
+}
+
+/* =========================================================
+   ONE TRANSLUCENT MATERIAL FOR HEADER + FLOATING CONTROLS.
+   Social remains in the fixed top bar, never in the footer fade.
+   ========================================================= */
+html body header.site-header .header-actions > button,
+html body header.site-header .sl-feed-toggle {
+  color: inherit !important;
+  border: 1px solid rgba(225,238,250,.20) !important;
+  border-radius: 13px !important;
+  background: rgba(255,255,255,.055) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.11), 0 5px 14px rgba(0,0,0,.045) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(115%) !important;
+  backdrop-filter: blur(14px) saturate(115%) !important;
+  text-shadow: none !important;
+  transition: background .18s ease, border-color .18s ease, box-shadow .18s ease !important;
+}
+html body header.site-header .header-actions > button:hover,
+html body header.site-header .header-actions > button[aria-expanded="true"],
+html body header.site-header .sl-feed-toggle:hover,
+html body header.site-header .sl-feed-toggle[aria-expanded="true"] {
+  background: rgba(255,255,255,.10) !important;
+  border-color: rgba(225,238,250,.31) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 7px 17px rgba(0,0,0,.06) !important;
+}
+html[data-theme="light"] body header.site-header .header-actions > button,
+html[data-theme="light"] body header.site-header .sl-feed-toggle {
+  color: #30465c !important;
+  border-color: rgba(255,255,255,.55) !important;
+  background: rgba(255,255,255,.23) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.82), 0 5px 14px rgba(48,72,98,.045) !important;
+}
+html[data-theme="light"] body header.site-header .header-actions > button:hover,
+html[data-theme="light"] body header.site-header .header-actions > button[aria-expanded="true"],
+html[data-theme="light"] body header.site-header .sl-feed-toggle:hover,
+html[data-theme="light"] body header.site-header .sl-feed-toggle[aria-expanded="true"] {
+  background: rgba(255,255,255,.34) !important;
+  border-color: rgba(255,255,255,.76) !important;
+}
+html body header.site-header .sl-feed-toggle {
+  position: relative !important;
+  z-index: 3 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Keep the fixed Social entry calm and glass-like, not attention-pulsing. */
+html body header.site-header .sl-feed-toggle,
+.sl-feed-floating-shortcut {
+  animation: none !important;
+  text-shadow: none !important;
+}
+
+
+/* The bottom-right action trio and the separate Social shortcut use the same neutral pane. */
+.study-quick-button,
+.study-feedback-button,
+.sl-feed-floating-shortcut,
+.study-chat-button,
+#studylabPetLauncher,
+.studylab-ai-tools-row .studylab-ai-launcher {
+  border: 1px solid rgba(225,238,250,.18) !important;
+  color: inherit !important;
+  background: rgba(255,255,255,.055) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 7px 18px rgba(0,0,0,.06) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(115%) !important;
+  backdrop-filter: blur(14px) saturate(115%) !important;
+  transition: background .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease !important;
+}
+.study-quick-button:hover,
+.study-feedback-button:hover,
+.sl-feed-floating-shortcut:hover,
+.study-chat-button:hover,
+#studylabPetLauncher:hover,
+#studylabPetLauncher[aria-expanded="true"],
+.study-chat-button.is-open,
+.studylab-ai-tools-row .studylab-ai-launcher:hover,
+.studylab-ai-tools-row .studylab-ai-launcher.is-open {
+  border-color: rgba(225,238,250,.30) !important;
+  background: rgba(255,255,255,.10) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 8px 20px rgba(0,0,0,.075) !important;
+}
+html[data-theme="light"] .study-quick-button,
+html[data-theme="light"] .study-feedback-button,
+html[data-theme="light"] .sl-feed-floating-shortcut,
+html[data-theme="light"] .study-chat-button,
+html[data-theme="light"] #studylabPetLauncher,
+html[data-theme="light"] .studylab-ai-tools-row .studylab-ai-launcher {
+  color: #30465c !important;
+  border-color: rgba(255,255,255,.52) !important;
+  background: rgba(255,255,255,.22) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.84), 0 7px 18px rgba(48,72,98,.045) !important;
+}
+html[data-theme="light"] .study-quick-button:hover,
+html[data-theme="light"] .study-feedback-button:hover,
+html[data-theme="light"] .sl-feed-floating-shortcut:hover,
+html[data-theme="light"] .study-chat-button:hover,
+html[data-theme="light"] #studylabPetLauncher:hover,
+html[data-theme="light"] #studylabPetLauncher[aria-expanded="true"],
+html[data-theme="light"] .study-chat-button.is-open,
+html[data-theme="light"] .studylab-ai-tools-row .studylab-ai-launcher:hover,
+html[data-theme="light"] .studylab-ai-tools-row .studylab-ai-launcher.is-open {
+  background: rgba(255,255,255,.34) !important;
+}
+
+/* Match the open Pet, AI and Chat surfaces to the new glass material. */
+.sl-pet-panel,
+.sl-pet-thought-cloud,
+.studylab-ai-panel,
+.study-chat-panel {
+  color: var(--text-primary) !important;
+  border: 1px solid rgba(225,238,250,.18) !important;
+  border-radius: 22px !important;
+  background: rgba(10,16,27,.60) !important;
+  box-shadow:
+    0 24px 64px rgba(0,0,0,.24),
+    inset 0 1px 0 rgba(255,255,255,.12) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(120%) !important;
+  backdrop-filter: blur(18px) saturate(120%) !important;
+}
+html[data-theme="light"] .sl-pet-panel,
+html[data-theme="light"] .sl-pet-thought-cloud,
+html[data-theme="light"] .studylab-ai-panel,
+html[data-theme="light"] .study-chat-panel {
+  color: #30465c !important;
+  border-color: rgba(255,255,255,.54) !important;
+  background: rgba(244,249,255,.69) !important;
+  box-shadow:
+    0 24px 64px rgba(48,72,98,.14),
+    inset 0 1px 0 rgba(255,255,255,.82) !important;
+}
+.sl-pet-panel-head,
+.studylab-ai-head,
+.study-chat-head {
+  background: rgba(255,255,255,.035) !important;
+  border-bottom-color: rgba(225,238,250,.12) !important;
+}
+html[data-theme="light"] .sl-pet-panel-head,
+html[data-theme="light"] .studylab-ai-head,
+html[data-theme="light"] .study-chat-head {
+  background: rgba(255,255,255,.16) !important;
+  border-bottom-color: rgba(80,110,140,.10) !important;
+}
+.sl-pet-setting,
+.study-chat-compose,
+.studylab-ai-compose {
+  border-color: rgba(225,238,250,.11) !important;
+  background: rgba(255,255,255,.025) !important;
+}
+html[data-theme="light"] .sl-pet-setting,
+html[data-theme="light"] .study-chat-compose,
+html[data-theme="light"] .studylab-ai-compose {
+  border-color: rgba(80,110,140,.10) !important;
+  background: rgba(255,255,255,.12) !important;
+}
+.sl-pet-panel-close,
+.sl-pet-setting-buttons button,
+.study-chat-close,
+.study-chat-notice,
+.study-chat-message,
+.study-chat-input,
+.study-chat-send,
+.studylab-ai-close,
+.studylab-ai-notice,
+.studylab-ai-message,
+.studylab-ai-input,
+.studylab-ai-send {
+  color: inherit !important;
+  border-color: rgba(225,238,250,.13) !important;
+  background: rgba(255,255,255,.045) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08) !important;
+}
+.study-chat-message.own,
+.studylab-ai-message.user {
+  background: rgba(255,255,255,.075) !important;
+  border-color: rgba(225,238,250,.16) !important;
+}
+html[data-theme="light"] .sl-pet-panel-close,
+html[data-theme="light"] .sl-pet-setting-buttons button,
+html[data-theme="light"] .study-chat-close,
+html[data-theme="light"] .study-chat-notice,
+html[data-theme="light"] .study-chat-message,
+html[data-theme="light"] .study-chat-input,
+html[data-theme="light"] .study-chat-send,
+html[data-theme="light"] .studylab-ai-close,
+html[data-theme="light"] .studylab-ai-notice,
+html[data-theme="light"] .studylab-ai-message,
+html[data-theme="light"] .studylab-ai-input,
+html[data-theme="light"] .studylab-ai-send {
+  color: #30465c !important;
+  border-color: rgba(80,110,140,.11) !important;
+  background: rgba(255,255,255,.22) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.72) !important;
+}
+html[data-theme="light"] .study-chat-message.own,
+html[data-theme="light"] .studylab-ai-message.user {
+  background: rgba(255,255,255,.34) !important;
+  border-color: rgba(80,110,140,.13) !important;
+}
+
+/* Keep quick-control labels and status text readable on the transparent panes. */
+html[data-theme="dark"] .sl-home-sidebar .sl-home-quick-actions,
+html[data-theme="dark"] .sl-home-sidebar .sl-home-quick-actions button { color: #e5edf6 !important; }
+html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions,
+html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions button { color: #344f69 !important; }
+
+/* Respect reduced-motion preferences across the ambient layer and all floating interfaces. */
+@media (prefers-reduced-motion: reduce) {
+  .sl-home-section,
+  .sl-home-section .subject-card,
+  .sl-home-section .study-tools-card,
+  .sl-home-section .telegram-card,
+  .sl-home-sidebar .sl-home-nav-indicator,
+  .study-quick-button,
+  .study-feedback-button,
+  .sl-feed-floating-shortcut,
+  .study-chat-button,
+  #studylabPetLauncher,
+  .studylab-ai-tools-row .studylab-ai-launcher,
+  .study-chat-panel,
+  .studylab-ai-panel,
+  .sl-pet-panel,
+  .sl-pet-thought-cloud {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+
+/* =========================================================
+   EXACT-SPECIFICITY OVERRIDES FOR THE DOCKED CONTROLS
+   The rail and its launchers are neutral translucent glass too.
+   ========================================================= */
+@media (min-width: 1180px) {
+  .sl-home-sidebar {
+    border-color: rgba(225,238,250,.18) !important;
+    background: rgba(8,14,24,.16) !important;
+    box-shadow:
+      0 18px 42px rgba(0,0,0,.13),
+      inset 0 1px 0 rgba(255,255,255,.13) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(112%) !important;
+    backdrop-filter: blur(16px) saturate(112%) !important;
+  }
+  html[data-theme="light"] .sl-home-sidebar {
+    border-color: rgba(255,255,255,.48) !important;
+    background: rgba(255,255,255,.22) !important;
+    box-shadow:
+      0 18px 42px rgba(48,72,98,.07),
+      inset 0 1px 0 rgba(255,255,255,.78) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(112%) !important;
+    backdrop-filter: blur(16px) saturate(112%) !important;
+  }
+
+  .sl-home-sidebar .sl-home-quick-actions #studylabPetLauncher,
+  .sl-home-sidebar .sl-home-quick-actions .studylab-ai-launcher,
+  .sl-home-sidebar .sl-home-quick-actions .study-chat-button {
+    color: inherit !important;
+    border: 1px solid rgba(225,238,250,.18) !important;
+    background: rgba(255,255,255,.055) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 6px 15px rgba(0,0,0,.045) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(112%) !important;
+    backdrop-filter: blur(14px) saturate(112%) !important;
+  }
+  .sl-home-sidebar .sl-home-quick-actions #studylabPetLauncher:hover,
+  .sl-home-sidebar .sl-home-quick-actions #studylabPetLauncher[aria-expanded="true"],
+  .sl-home-sidebar .sl-home-quick-actions .studylab-ai-launcher:hover,
+  .sl-home-sidebar .sl-home-quick-actions .studylab-ai-launcher.is-open,
+  .sl-home-sidebar .sl-home-quick-actions .study-chat-button:hover,
+  .sl-home-sidebar .sl-home-quick-actions .study-chat-button.is-open {
+    border-color: rgba(225,238,250,.30) !important;
+    background: rgba(255,255,255,.10) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 7px 17px rgba(0,0,0,.06) !important;
+  }
+
+  html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions #studylabPetLauncher,
+  html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions .studylab-ai-launcher,
+  html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions .study-chat-button {
+    color: #344f69 !important;
+    border-color: rgba(255,255,255,.52) !important;
+    background: rgba(255,255,255,.23) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.84), 0 6px 15px rgba(48,72,98,.04) !important;
+  }
+  html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions #studylabPetLauncher:hover,
+  html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions #studylabPetLauncher[aria-expanded="true"],
+  html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions .studylab-ai-launcher:hover,
+  html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions .studylab-ai-launcher.is-open,
+  html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions .study-chat-button:hover,
+  html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions .study-chat-button.is-open {
+    background: rgba(255,255,255,.34) !important;
+    border-color: rgba(255,255,255,.72) !important;
+  }
+}
+
+
+/* Override the legacy ID-scoped Social neon pulse with the same top-bar glass. */
+#studyLabHomeLayout .sl-feed-toggle {
+  color: inherit !important;
+  border: 1px solid rgba(225,238,250,.20) !important;
+  background: rgba(255,255,255,.055) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.11), 0 5px 14px rgba(0,0,0,.045) !important;
+  animation: none !important;
+  text-shadow: none !important;
+}
+#studyLabHomeLayout .sl-feed-toggle:hover,
+#studyLabHomeLayout .sl-feed-toggle[aria-expanded="true"] {
+  color: inherit !important;
+  border-color: rgba(225,238,250,.31) !important;
+  background: rgba(255,255,255,.10) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 7px 17px rgba(0,0,0,.06) !important;
+}
+html[data-theme="light"] #studyLabHomeLayout .sl-feed-toggle {
+  color: #30465c !important;
+  border-color: rgba(255,255,255,.55) !important;
+  background: rgba(255,255,255,.23) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.82), 0 5px 14px rgba(48,72,98,.045) !important;
+}
+html[data-theme="light"] #studyLabHomeLayout .sl-feed-toggle:hover,
+html[data-theme="light"] #studyLabHomeLayout .sl-feed-toggle[aria-expanded="true"] {
+  background: rgba(255,255,255,.34) !important;
+  border-color: rgba(255,255,255,.76) !important;
+}
+
+
+/* =========================================================
+   REPEATING EDUCATIONAL TELEGRAM-STYLE WALLPAPER
+   Replaces the old photo wallpapers with theme-specific SVG doodles.
+   ========================================================= */
+
+/* The doodle tile is a true repeating image layer, not a full-screen photo. */
+html[data-theme="dark"] body {
+  background-image:
+    radial-gradient(ellipse 48% 57% at 8% 15%, rgba(78,130,255,.32), transparent 76%),
+    radial-gradient(ellipse 49% 54% at 91% 13%, rgba(145,101,226,.27), transparent 75%),
+    radial-gradient(ellipse 59% 49% at 57% 98%, rgba(48,162,211,.20), transparent 76%),
+    url("../images/studylab-edu-doodles-dark.svg"),
+    linear-gradient(145deg, #0a1020 0%, #10172a 53%, #101326 100%) !important;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat, no-repeat !important;
+  background-position: center center, center center, center center, center top, center center !important;
+  background-size: 100% 100%, 100% 100%, 100% 100%, 600px 600px, 100% 100% !important;
+  background-attachment: fixed, fixed, fixed, fixed, fixed !important;
+}
+html[data-theme="light"] body {
+  background-image:
+    radial-gradient(ellipse 49% 56% at 9% 14%, rgba(120,183,255,.32), transparent 75%),
+    radial-gradient(ellipse 46% 52% at 91% 13%, rgba(190,160,255,.27), transparent 75%),
+    radial-gradient(ellipse 58% 49% at 56% 96%, rgba(248,190,222,.23), transparent 76%),
+    url("../images/studylab-edu-doodles-light.svg"),
+    linear-gradient(145deg, #edf5ff 0%, #f5f7ff 53%, #fdf1fa 100%) !important;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat, no-repeat !important;
+  background-position: center center, center center, center center, center top, center center !important;
+  background-size: 100% 100%, 100% 100%, 100% 100%, 600px 600px, 100% 100% !important;
+  background-attachment: fixed, fixed, fixed, fixed, fixed !important;
+}
+
+/* Telegram-style line art: quiet enough to sit behind content, visible between panes. */
+.science-background {
+  background: transparent !important;
+}
+.science-symbol {
+  opacity: .72 !important;
+}
+html[data-theme="dark"] .science-symbol {
+  color: rgba(190,211,245,.22) !important;
+  text-shadow: 0 0 14px rgba(131,171,235,.08) !important;
+}
+html[data-theme="light"] .science-symbol {
+  color: rgba(70,104,148,.19) !important;
+  text-shadow: 0 0 14px rgba(91,141,191,.06) !important;
+}
+
+/* Footer-aware bottom-right floating shortcut row. */
+body:not(.study-room-page) .study-quick-button,
+body:not(.study-room-page) .study-feedback-button,
+body:not(.study-room-page) .sl-feed-floating-shortcut {
+  opacity: var(--sl-home-floating-footer-opacity, 1) !important;
+  transition:
+    opacity .18s ease,
+    background .18s ease,
+    border-color .18s ease,
+    box-shadow .18s ease,
+    transform .18s ease !important;
+}
+body.is-footer-near-floating-controls .study-quick-button,
+body.is-footer-near-floating-controls .study-feedback-button,
+body.is-footer-near-floating-controls .sl-feed-floating-shortcut {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* The three right-side actions share one restrained glass recipe in both themes. */
+body:not(.study-room-page) .study-quick-button,
+body:not(.study-room-page) .study-feedback-button,
+body:not(.study-room-page) .sl-feed-floating-shortcut {
+  color: rgba(235,244,252,.96) !important;
+  border: 1px solid rgba(225,238,250,.20) !important;
+  background: rgba(255,255,255,.065) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.13), 0 7px 18px rgba(0,0,0,.06) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(115%) !important;
+  backdrop-filter: blur(14px) saturate(115%) !important;
+  animation: none !important;
+  text-shadow: none !important;
+}
+body:not(.study-room-page) .study-quick-button:hover,
+body:not(.study-room-page) .study-feedback-button:hover,
+body:not(.study-room-page) .sl-feed-floating-shortcut:hover {
+  background: rgba(255,255,255,.11) !important;
+  border-color: rgba(225,238,250,.34) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 8px 20px rgba(0,0,0,.075) !important;
+}
+html[data-theme="light"] body:not(.study-room-page) .study-quick-button,
+html[data-theme="light"] body:not(.study-room-page) .study-feedback-button,
+html[data-theme="light"] body:not(.study-room-page) .sl-feed-floating-shortcut {
+  color: #344f69 !important;
+  border-color: rgba(255,255,255,.58) !important;
+  background: rgba(255,255,255,.26) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.84), 0 7px 18px rgba(48,72,98,.055) !important;
+}
+html[data-theme="light"] body:not(.study-room-page) .study-quick-button:hover,
+html[data-theme="light"] body:not(.study-room-page) .study-feedback-button:hover,
+html[data-theme="light"] body:not(.study-room-page) .sl-feed-floating-shortcut:hover {
+  background: rgba(255,255,255,.37) !important;
+  border-color: rgba(255,255,255,.78) !important;
+}
+body:not(.study-room-page) .sl-feed-floating-shortcut svg {
+  stroke: currentColor !important;
+  filter: none !important;
+}
+
+/* Chat uses the same cool neutral icon tone as Pet and the ChatGPT mark. */
+.sl-home-sidebar .sl-home-quick-actions #studylabPetLauncher .sl-pet-launcher-icon,
+.sl-home-sidebar .sl-home-quick-actions .studylab-ai-launcher-icon,
+.sl-home-sidebar .sl-home-quick-actions .study-chat-button-icon {
+  color: #b9e8ff !important;
+  filter: none !important;
+}
+.sl-home-sidebar .sl-home-quick-actions .studylab-ai-launcher-icon svg,
+.sl-home-sidebar .sl-home-quick-actions .study-chat-button-icon svg,
+.sl-home-sidebar .sl-home-quick-actions #studylabPetLauncher .sl-pet-launcher-icon svg {
+  color: inherit !important;
+  filter: none !important;
+}
+html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions #studylabPetLauncher .sl-pet-launcher-icon,
+html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions .studylab-ai-launcher-icon,
+html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions .study-chat-button-icon {
+  color: #557da4 !important;
+}
+
+/* Pet preference buttons have a strong selected state in both themes. */
+html[data-theme="dark"] .sl-pet-panel .sl-pet-setting-buttons button.is-active,
+html[data-theme="dark"] .sl-pet-panel .sl-pet-setting-buttons button[aria-pressed="true"] {
+  color: #d8f3ff !important;
+  border: 1px solid rgba(112,205,255,.76) !important;
+  background: rgba(77,178,241,.24) !important;
+  box-shadow:
+    0 0 0 1px rgba(91,190,255,.14),
+    inset 0 1px 0 rgba(255,255,255,.20),
+    0 4px 14px rgba(41,155,220,.12) !important;
+  font-weight: 850 !important;
+}
+html[data-theme="dark"] .sl-pet-panel .sl-pet-setting-buttons button[data-pet-eye="pink"].is-active,
+html[data-theme="dark"] .sl-pet-panel .sl-pet-setting-buttons button[data-pet-eye="pink"][aria-pressed="true"] {
+  color: #ffe3f2 !important;
+  border-color: rgba(255,139,202,.78) !important;
+  background: rgba(237,105,177,.22) !important;
+  box-shadow:
+    0 0 0 1px rgba(255,139,202,.15),
+    inset 0 1px 0 rgba(255,255,255,.20),
+    0 4px 14px rgba(207,80,151,.13) !important;
+}
+html[data-theme="light"] .sl-pet-panel .sl-pet-setting-buttons button.is-active,
+html[data-theme="light"] .sl-pet-panel .sl-pet-setting-buttons button[aria-pressed="true"] {
+  color: #155c8c !important;
+  border: 1px solid rgba(68,151,211,.72) !important;
+  background: rgba(109,190,244,.24) !important;
+  box-shadow:
+    0 0 0 1px rgba(74,157,218,.12),
+    inset 0 1px 0 rgba(255,255,255,.90),
+    0 4px 12px rgba(68,140,196,.10) !important;
+  font-weight: 850 !important;
+}
+html[data-theme="light"] .sl-pet-panel .sl-pet-setting-buttons button[data-pet-eye="pink"].is-active,
+html[data-theme="light"] .sl-pet-panel .sl-pet-setting-buttons button[data-pet-eye="pink"][aria-pressed="true"] {
+  color: #a72e74 !important;
+  border-color: rgba(219,105,168,.70) !important;
+  background: rgba(255,157,207,.25) !important;
+  box-shadow:
+    0 0 0 1px rgba(216,111,171,.12),
+    inset 0 1px 0 rgba(255,255,255,.92),
+    0 4px 12px rgba(201,94,157,.10) !important;
+}
+.sl-pet-setting-buttons button[aria-pressed="true"] {
+  position: relative !important;
+  transform: none !important;
+}
+.sl-pet-setting-buttons button[aria-pressed="true"]::after {
+  content: "✓" !important;
+  display: inline-block !important;
+  margin-left: 6px !important;
+  font-size: .72em !important;
+  font-weight: 900 !important;
+}
+.sl-pet-setting-buttons button[data-pet-eye][aria-pressed="true"]::after {
+  content: "✓" !important;
+}
+
+
+/* =========================================================
+   HOME REFERENCE WALLPAPERS — Windows ribbon palette
+   Uses the existing Home image asset paths so both themes keep
+   working while upgraded 2048x1152 wallpapers are uploaded.
+   ========================================================= */
+html[data-theme="dark"] body {
+  background-color: #081127 !important;
+  background-image:
+    linear-gradient(180deg, rgba(5, 12, 32, .18), rgba(5, 12, 31, .28)),
+    url("../images/studylab-home-dark.webp"),
+    linear-gradient(145deg, #081127, #075ac4 62%, #191756) !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+  background-attachment: fixed !important;
+}
+html[data-theme="light"] body {
+  background-color: #dceeff !important;
+  background-image:
+    linear-gradient(180deg, rgba(246,251,255,.12), rgba(228,242,255,.18)),
+    url("../images/studylab-home-light.webp"),
+    linear-gradient(145deg, #e7f1fc, #88cefa 62%, #e7c8ff) !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+  background-attachment: fixed !important;
+}
+
+/* Keep translucent glass distinct from the bright ribbons behind it. */
+html[data-theme="dark"] .sl-home-section {
+  background: rgba(7,16,39,.40) !important;
+  border-color: rgba(183,223,255,.25) !important;
+}
+html[data-theme="dark"] .sl-home-section .subject-card,
+html[data-theme="dark"] .sl-home-section .study-tools-card,
+html[data-theme="dark"] .sl-home-section .telegram-card,
+html[data-theme="dark"] .sl-home-room-panel,
+html[data-theme="dark"] .sl-home-feature-card,
+html[data-theme="dark"] .sl-home-rank-card {
+  background: rgba(8,19,46,.35) !important;
+}
+html[data-theme="light"] .sl-home-section {
+  color: #183653 !important;
+  background: rgba(250,253,255,.61) !important;
+  border-color: rgba(255,255,255,.75) !important;
+  box-shadow: 0 15px 40px rgba(27,69,124,.11), inset 0 1px 0 rgba(255,255,255,.85) !important;
+}
+html[data-theme="light"] .sl-home-home-section .homepage-overview-panel {
+  background: rgba(255,255,255,.32) !important;
+}
+html[data-theme="light"] .sl-home-section .subject-card,
+html[data-theme="light"] .sl-home-section .study-tools-card,
+html[data-theme="light"] .sl-home-section .telegram-card,
+html[data-theme="light"] .sl-home-room-panel,
+html[data-theme="light"] .sl-home-feature-card,
+html[data-theme="light"] .sl-home-rank-card {
+  background: rgba(250,253,255,.49) !important;
+  border-color: rgba(255,255,255,.78) !important;
+}
+html[data-theme="light"] .sl-home-section-heading h2,
+html[data-theme="light"] .sl-home-room-copy h3,
+html[data-theme="light"] .sl-home-feature-card h3,
+html[data-theme="light"] .sl-home-section .subject-card h2,
+html[data-theme="light"] .sl-home-section .study-tools-card h2,
+html[data-theme="light"] .sl-home-section .telegram-card h2,
+html[data-theme="light"] .sl-home-rank-card strong {
+  color: #163655 !important;
+}
+html[data-theme="light"] .sl-home-section-heading p,
+html[data-theme="light"] .sl-home-room-copy p,
+html[data-theme="light"] .sl-home-feature-card p,
+html[data-theme="light"] .sl-home-section .subject-card p,
+html[data-theme="light"] .sl-home-section .study-tools-card p,
+html[data-theme="light"] .sl-home-section .telegram-card p {
+  color: #395873 !important;
+}
+
+/* Same cyan vector tone for the sidebar's Pet, AI and Chat icons. */
+.sl-home-sidebar .sl-home-quick-actions #studylabPetLauncher .sl-pet-launcher-icon,
+.sl-home-sidebar .sl-home-quick-actions .studylab-ai-launcher-icon,
+.sl-home-sidebar .sl-home-quick-actions .study-chat-button-icon {
+  color: #9ce2ff !important;
+  filter: none !important;
+}
+.sl-home-sidebar .sl-home-quick-actions .study-chat-button-icon svg {
+  color: inherit !important;
+  stroke: currentColor !important;
+  filter: none !important;
+}
+html[data-theme="light"] .sl-home-sidebar {
+  background: rgba(247,252,255,.65) !important;
+  border-color: rgba(255,255,255,.77) !important;
+}
+html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions #studylabPetLauncher .sl-pet-launcher-icon,
+html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions .studylab-ai-launcher-icon,
+html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions .study-chat-button-icon {
+  color: #185f99 !important;
+}
+
+/* Float the entire bottom-right action trio above the footer, not beneath it.
+   The existing Home sidebar script updates --sl-home-floating-footer-lift. */
+body:not(.study-room-page) .study-quick-button,
+body:not(.study-room-page) .study-feedback-button,
+body:not(.study-room-page) .sl-feed-floating-shortcut {
+  bottom: calc(20px + var(--sl-home-floating-footer-lift, 0px)) !important;
+}
+@media (max-width: 720px) {
+  html[data-theme="dark"] body,
+  html[data-theme="light"] body { background-attachment: scroll !important; }
+  body:not(.study-room-page) .study-quick-button,
+  body:not(.study-room-page) .study-feedback-button,
+  body:not(.study-room-page) .sl-feed-floating-shortcut {
+    bottom: calc(12px + var(--sl-home-floating-footer-lift, 0px)) !important;
+  }
+}

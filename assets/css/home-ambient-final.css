@@ -1,0 +1,73 @@
+/* StudyLab Home: lightweight original ribbon ambience + educational line-art.
+   Loaded last so the background is owned by one place rather than competing legacy rules.
+   The existing panels and their functions are not reconstructed. */
+
+html[data-theme="dark"] body {
+  background-color: #081633 !important;
+  background-image:
+    linear-gradient(180deg, rgba(6,13,31,.18), rgba(7,16,33,.23)),
+    url("../images/studylab-edu-doodles-dark.svg"),
+    url("../images/studylab-ambient-dark.svg") !important;
+  background-position: center, center top, center center !important;
+  background-size: cover, 660px 660px, cover !important;
+  background-repeat: no-repeat, repeat, no-repeat !important;
+  background-attachment: fixed, fixed, fixed !important;
+}
+html[data-theme="light"] body {
+  background-color: #d6e6f3 !important;
+  background-image:
+    linear-gradient(180deg, rgba(243,250,255,.12), rgba(230,241,254,.14)),
+    url("../images/studylab-edu-doodles-light.svg"),
+    url("../images/studylab-ambient-light.svg") !important;
+  background-position: center, center top, center center !important;
+  background-size: cover, 660px 660px, cover !important;
+  background-repeat: no-repeat, repeat, no-repeat !important;
+  background-attachment: fixed, fixed, fixed !important;
+}
+
+/* The already-present animated ambient symbols should complement the doodles,
+   not make a second high-contrast pattern over the glass cards. */
+.science-background::before,
+.science-background::after { opacity: .25 !important; }
+.science-symbol { opacity: .30 !important; }
+
+/* Prevent Quick and Suggest from slipping behind the fixed Home header.
+   Height uses the *measured* header bottom (including wrapped mobile headers).
+   The panel itself scrolls whenever space is constrained. */
+:root { --sl-home-header-clearance: 98px; }
+body:not(.study-room-page) .study-quick-panel,
+body:not(.study-room-page) .study-feedback-panel {
+  --sl-home-popup-bottom: calc(78px + var(--sl-home-floating-footer-lift, 0px));
+  box-sizing: border-box;
+  position: fixed !important;
+  top: auto !important;
+  bottom: var(--sl-home-popup-bottom) !important;
+  z-index: 1006 !important;
+  min-height: 0 !important;
+  max-height: min(680px, calc(100vh - var(--sl-home-header-clearance) - var(--sl-home-popup-bottom) - 10px)) !important;
+  max-height: min(680px, max(0px, calc(100dvh - var(--sl-home-header-clearance) - var(--sl-home-popup-bottom) - 10px))) !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+}
+body:not(.study-room-page) .study-quick-panel[hidden],
+body:not(.study-room-page) .study-feedback-panel[hidden] { display: none !important; }
+
+@media (max-width: 720px) {
+  html[data-theme="dark"] body,
+  html[data-theme="light"] body {
+    background-position: center, center top, center center !important;
+    background-size: cover, 510px 510px, cover !important;
+    background-attachment: scroll, scroll, scroll !important;
+  }
+  body:not(.study-room-page) .study-quick-panel,
+  body:not(.study-room-page) .study-feedback-panel {
+    --sl-home-popup-bottom: calc(68px + var(--sl-home-floating-footer-lift, 0px));
+    right: 12px !important;
+    max-width: calc(100vw - 24px) !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .science-background::before,
+  .science-background::after,
+  .science-symbol { animation: none !important; }
+}

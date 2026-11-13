@@ -1043,13 +1043,18 @@
   }
 
   function updateControls() {
-    enableButton.classList.toggle("is-active", state.enabled);
-    disableButton.classList.toggle("is-active", !state.enabled);
+    const syncSelected = (button, selected) => {
+      button.classList.toggle("is-active", selected);
+      button.setAttribute("aria-pressed", String(selected));
+    };
+
+    syncSelected(enableButton, state.enabled);
+    syncSelected(disableButton, !state.enabled);
     eyeButtons.forEach((button) => {
-      button.classList.toggle("is-active", button.dataset.petEye === state.eye);
+      syncSelected(button, button.dataset.petEye === state.eye);
     });
-    bubbleEnableButton.classList.toggle("is-active", state.bubbleEnabled);
-    bubbleDisableButton.classList.toggle("is-active", !state.bubbleEnabled);
+    syncSelected(bubbleEnableButton, state.bubbleEnabled);
+    syncSelected(bubbleDisableButton, !state.bubbleEnabled);
   }
 
   function startDrag(event) {

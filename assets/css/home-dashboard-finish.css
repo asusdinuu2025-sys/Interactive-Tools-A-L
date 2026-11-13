@@ -1,0 +1,243 @@
+/* StudyLab Home overview: spacious welcome, unified vector icons and one useful next step.
+   Purely visual; existing four-card data sources, navigation and overlays remain unchanged. */
+
+/* The top bar remains fixed; reclaim unnecessary empty space beneath it. */
+@media (min-width: 1180px) {
+  .sl-home-layout .sl-home-content > main.container {
+    margin-top: 82px !important;
+  }
+}
+@media (min-width: 721px) and (max-width: 1179px) {
+  .sl-home-layout .sl-home-content > main.container {
+    margin-top: 76px !important;
+  }
+}
+.sl-home-home-section {
+  padding-top: 10px !important;
+}
+.sl-home-home-section .homepage-overview-panel {
+  padding: clamp(19px, 2vw, 28px) !important;
+}
+.sl-home-home-section .homepage-greeting {
+  margin-bottom: 7px !important;
+}
+.sl-home-home-section .sl-home-overview-subtitle {
+  position: relative;
+  z-index: 1;
+  display: block;
+  margin: 0 0 clamp(18px, 2vw, 26px) !important;
+  color: #aec6df !important;
+  font-family: "Nirmala UI", "Segoe UI", sans-serif;
+  font-size: clamp(.78rem, .85vw, .91rem);
+  font-weight: 450;
+  line-height: 1.5;
+}
+html[data-theme="light"] .sl-home-home-section .sl-home-overview-subtitle {
+  color: #436481 !important;
+}
+
+/* Slightly taller dashboard cards, not four new oversized feature blocks. */
+@media (min-width: 721px) {
+  .homepage-overview-panel .live-card,
+  .homepage-overview-panel .student-milestone,
+  .homepage-overview-panel .study-room-launcher {
+    min-height: 176px !important;
+  }
+}
+.homepage-overview-panel .homepage-utility-row {
+  margin-bottom: 0 !important;
+}
+.homepage-overview-panel .study-room-launcher {
+  gap: 11px !important;
+}
+
+/* A coherent, sharp, neutral vector icon style replaces saturated emoji-like artwork. */
+.homepage-overview-panel .student-milestone-icon,
+.homepage-overview-panel .study-room-launcher-icon {
+  display: grid !important;
+  place-items: center !important;
+  width: 44px !important;
+  height: 44px !important;
+  flex: 0 0 44px !important;
+  border: 1px solid rgba(164,218,251,.23) !important;
+  border-radius: 15px !important;
+  background: rgba(88,177,231,.12) !important;
+  color: #9cdeff !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.14) !important;
+  filter: none !important;
+}
+.homepage-overview-panel .student-milestone-icon svg,
+.homepage-overview-panel .study-room-launcher-icon svg {
+  display: block !important;
+  width: 26px !important;
+  height: 26px !important;
+  overflow: visible !important;
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2.6 !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+  filter: none !important;
+}
+html[data-theme="light"] .homepage-overview-panel .student-milestone-icon,
+html[data-theme="light"] .homepage-overview-panel .study-room-launcher-icon {
+  color: #236ca4 !important;
+  background: rgba(79,165,226,.13) !important;
+  border-color: rgba(69,146,197,.19) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.82) !important;
+}
+
+/* Live occupancy is one compact, dependable line, never a paragraph. */
+.homepage-overview-panel .study-room-launcher-subtitle,
+.sl-home-room-entry .sl-home-room-entry-copy [data-home-room-occupancy] {
+  display: block !important;
+  font-variant-numeric: tabular-nums;
+  max-width: 100%;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  text-wrap: pretty;
+}
+.sl-home-room-entry-icon svg {
+  fill: none !important;
+  stroke: currentColor !important;
+  width: 23px !important;
+  height: 23px !important;
+}
+.sl-home-room-entry-arrow {
+  display: grid !important;
+  place-items: center !important;
+  flex: 0 0 29px !important;
+  width: 29px !important;
+  height: 34px !important;
+}
+.sl-home-room-entry-arrow svg {
+  display: block;
+  width: 26px;
+  height: 26px;
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 1.8;
+}
+html[data-theme="light"] .sl-home-room-entry-arrow svg {
+  color: #2472a5 !important;
+}
+
+@media (max-width: 720px) {
+  .sl-home-layout .sl-home-content > main.container { margin-top: 76px !important; }
+  .sl-home-home-section { padding-top: 10px !important; }
+  .sl-home-home-section .homepage-overview-panel { padding: 17px !important; }
+  .sl-home-home-section .homepage-greeting { margin-bottom: 6px !important; }
+  .sl-home-home-section .sl-home-overview-subtitle {
+    margin-bottom: 15px !important;
+    font-size: .77rem;
+  }
+}
+
+/* =========================================================
+   HOME FINAL HEADER / RESOURCE ALIGNMENT
+   The old extra 90/76/72px inline main padding has been removed;
+   keep a single header offset and preserve the Home section's 10px inset.
+   ========================================================= */
+.sl-home-home-section {
+  padding-top: 10px !important;
+}
+
+/* A door icon in the dashboard Study Room tile, matching its main entry. */
+.homepage-overview-panel .study-room-launcher-arrow {
+  display: grid !important;
+  flex: 0 0 30px !important;
+  width: 30px !important;
+  height: 34px !important;
+  place-items: center !important;
+  color: #9bdfff !important;
+}
+.homepage-overview-panel .study-room-launcher-arrow svg {
+  display: block !important;
+  width: 26px !important;
+  height: 26px !important;
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 1.8 !important;
+  filter: none !important;
+}
+html[data-theme="light"] .homepage-overview-panel .study-room-launcher-arrow {
+  color: #2472a5 !important;
+}
+
+/* The Social opener uses its own discussion glyph, not another outbound arrow. */
+.sl-home-social .sl-home-social-button-arrow {
+  display: grid !important;
+  place-items: center !important;
+  flex: 0 0 34px !important;
+  width: 34px !important;
+  height: 34px !important;
+  line-height: 1 !important;
+}
+.sl-home-social .sl-home-social-button-arrow svg {
+  display: block !important;
+  width: 28px !important;
+  height: 28px !important;
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 1.8 !important;
+}
+html[data-theme="light"] .sl-home-social .sl-home-social-button-arrow {
+  color: #1d71aa !important;
+}
+
+/* Both Other A/L Resources entries now occupy the full panel width.
+   The original MCQ site and Study Tools destinations stay untouched. */
+.sl-home-other .sl-home-resource-grid {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  align-items: stretch !important;
+  gap: 13px !important;
+}
+.sl-home-other .sl-home-resource-grid > .mcq-practice-card,
+.sl-home-other .sl-home-resource-grid > .study-tools-card {
+  box-sizing: border-box !important;
+  grid-column: 1 / -1 !important;
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 146px !important;
+  height: auto !important;
+  gap: 18px !important;
+  padding: 20px 23px !important;
+  border-radius: 19px !important;
+}
+.sl-home-other .sl-home-resource-grid > .mcq-practice-card .telegram-card-content,
+.sl-home-other .sl-home-resource-grid > .study-tools-card .study-tools-card-content {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+.sl-home-other .sl-home-resource-grid > .mcq-practice-card .card-cta,
+.sl-home-other .sl-home-resource-grid > .study-tools-card .study-tools-card-cta {
+  flex: 0 0 auto !important;
+  margin-left: auto !important;
+  white-space: nowrap !important;
+}
+.sl-home-other .sl-home-resource-grid > .mcq-practice-card .mcq-icon,
+.sl-home-other .sl-home-resource-grid > .study-tools-card .study-tools-card-icon {
+  flex: 0 0 52px !important;
+  width: 52px !important;
+  height: 52px !important;
+  margin: 0 !important;
+}
+@media (max-width: 720px) {
+  .sl-home-other .sl-home-resource-grid > .mcq-practice-card,
+  .sl-home-other .sl-home-resource-grid > .study-tools-card {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    gap: 12px !important;
+    padding: 17px !important;
+  }
+  .sl-home-other .sl-home-resource-grid > .mcq-practice-card .card-cta,
+  .sl-home-other .sl-home-resource-grid > .study-tools-card .study-tools-card-cta {
+    margin-left: 0 !important;
+    margin-top: 5px !important;
+    white-space: normal !important;
+  }
+}

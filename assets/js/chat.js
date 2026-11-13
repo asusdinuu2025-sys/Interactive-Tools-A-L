@@ -151,12 +151,26 @@
   }
 
   function setUnread(count) {
-    unreadCount = Math.max(0, count);
+    const numericCount = Number(count);
+    unreadCount = Number.isFinite(numericCount)
+      ? Math.max(0, Math.floor(numericCount))
+      : 0;
+
     if (!unread) return;
-    unread.hidden = unreadCount === 0;
-    if (!unread.hidden) {
-      unread.textContent = unreadCount > 9 ? "9+" : String(unreadCount);
+
+    if (unreadCount === 0) {
+      unread.textContent = "";
+      unread.hidden = true;
+      unread.removeAttribute("aria-label");
+      return;
     }
+
+    unread.textContent = unreadCount > 9 ? "9+" : String(unreadCount);
+    unread.setAttribute(
+      "aria-label",
+      unreadCount === 1 ? "1 unread message" : unreadCount + " unread messages"
+    );
+    unread.hidden = false;
   }
 
   function scrollToBottom(force = false) {
