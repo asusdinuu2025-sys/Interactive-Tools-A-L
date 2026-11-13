@@ -399,3 +399,62 @@ body > main.container {
   }
 }
 
+/* Header brand typography and luminous identity */
+.site-header .brand {
+  flex: 0 1 auto;
+  min-width: 0;
+  gap: 12px;
+}
+.site-header .brand-title-text {
+  display: inline-block;
+  max-width: 100%;
+  white-space: nowrap;
+  font-family: "Nirmala UI", "Noto Sans Sinhala", "Segoe UI", sans-serif;
+  font-size: clamp(.82rem, 1.18vw, 1.06rem);
+  font-weight: 650;
+  letter-spacing: .012em;
+  line-height: 1.2;
+  color: rgba(239, 249, 255, .98);
+  text-shadow:
+    0 0 7px rgba(111, 203, 255, .82),
+    0 0 17px rgba(75, 166, 255, .58),
+    0 0 30px rgba(80, 126, 255, .34);
+  filter: drop-shadow(0 1px 5px rgba(82, 183, 255, .24));
+}
+html[data-theme="light"] .site-header .brand-title-text {
+  color: rgba(25, 61, 103, .98);
+  text-shadow:
+    0 0 7px rgba(78, 167, 255, .48),
+    0 0 17px rgba(105, 145, 255, .28);
+}
+
+/* Increase the glass clarity while keeping the contents beneath visible. */
+html body header.site-header {
+  background:
+    linear-gradient(135deg, rgba(43, 68, 101, .54), rgba(14, 28, 49, .46) 55%, rgba(35, 44, 78, .49)) !important;
+}
+html[data-theme="light"] body header.site-header {
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.69), rgba(236,246,255,.57) 55%, rgba(242,240,255,.60)) !important;
+}
+
+/* Keep the former hero-title footprint, but leave it visually empty. */
+.hero .home-hero-title-spacer {
+  display: block !important;
+  visibility: hidden !important;
+  min-height: 1.15em;
+  margin-block: .67em;
+  line-height: 1.15;
+}
+@media (max-width: 640px) {
+  .site-header .brand {
+    gap: 7px;
+  }
+  .site-header .brand-title-text {
+    white-space: normal;
+    max-width: 210px;
+    font-size: 11px;
+    line-height: 1.15;
+  }
+}
+
