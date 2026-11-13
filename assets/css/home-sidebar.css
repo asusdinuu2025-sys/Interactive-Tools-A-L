@@ -811,3 +811,110 @@ html[data-theme="light"] .study-header-search-panel .study-find-meta { color: rg
   .study-header-search-panel { top: 78px; }
   .study-header-search-panel .study-find-meta { display: none; }
 }
+
+
+/* Full-height StudyLab glass rail with integrated quick actions. */
+@media (min-width: 1180px) {
+  .sl-home-sidebar {
+    top: 0 !important; bottom: 0 !important; left: 0 !important;
+    width: 244px !important; max-height: none !important;
+    height: 100vh !important; height: 100dvh !important;
+    padding: 18px 14px calc(18px + env(safe-area-inset-bottom)) !important;
+    border-radius: 0 25px 25px 0 !important;
+    transform: none !important; gap: 13px !important; border-left: 0 !important;
+    background:
+      radial-gradient(ellipse at 0 0, rgba(104,190,255,.15), transparent 48%),
+      linear-gradient(145deg, rgba(36,64,94,.43), rgba(9,20,37,.34) 58%, rgba(25,35,64,.38)) !important;
+    -webkit-backdrop-filter: blur(42px) saturate(190%) !important;
+    backdrop-filter: blur(42px) saturate(190%) !important;
+    box-shadow: 14px 0 48px rgba(0,0,0,.18), inset -1px 0 0 rgba(190,225,255,.16), inset 0 1px 0 rgba(255,255,255,.25) !important;
+  }
+  .sl-home-sidebar.is-collapsed { width: 78px !important; border-radius: 0 22px 22px 0 !important; }
+  .sl-home-sidebar-nav { flex: 1 1 auto; }
+  .sl-home-layout .sl-home-content,
+  .sl-home-layout.is-sidebar-collapsed .sl-home-content {
+    padding-left: 260px !important;
+  }
+  html body header.site-header {
+    left: calc(50% + 118px) !important;
+    width: calc(100vw - 284px) !important;
+    min-width: 0 !important; max-width: 1500px !important;
+    transform: translateX(-50%) !important;
+  }
+  .sl-home-quick-actions {
+    position: relative; z-index: 2; display: grid; grid-template-columns: 1fr;
+    gap: 9px; padding-top: 13px; border-top: 1px solid rgba(205,230,255,.18);
+  }
+  .sl-home-quick-actions > button {
+    position: relative !important; inset: auto !important;
+    display: flex !important; align-items: center !important; justify-content: flex-start !important;
+    gap: 12px !important; width: 100% !important; min-width: 0 !important;
+    max-width: none !important; height: 46px !important; min-height: 46px !important;
+    padding: 0 13px !important; border: 1px solid rgba(190,225,255,.22) !important;
+    border-radius: 15px !important; color: rgba(235,247,255,.96) !important;
+    background: linear-gradient(135deg, rgba(255,255,255,.12), rgba(120,175,230,.045)), rgba(18,34,54,.20) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 6px 18px rgba(0,0,0,.09) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(175%) !important;
+    backdrop-filter: blur(18px) saturate(175%) !important;
+    font: inherit !important; font-size: .82rem !important; font-weight: 720 !important;
+    letter-spacing: .01em !important; cursor: pointer;
+    transition: transform .2s ease, background .2s ease, border-color .2s ease !important;
+  }
+  .sl-home-quick-actions > button:hover,
+  .sl-home-quick-actions > button[aria-expanded="true"],
+  .sl-home-quick-actions > button.is-open {
+    transform: translateY(-1px) !important; border-color: rgba(133,213,255,.48) !important;
+    background: linear-gradient(135deg, rgba(88,175,245,.22), rgba(140,145,255,.12)), rgba(18,34,54,.28) !important;
+  }
+  .sl-home-quick-actions > button > span { display: inline-flex !important; align-items: center; justify-content: center; flex: 0 0 auto; width: auto; height: auto; color: inherit; }
+  .sl-home-quick-actions #studylabPetLauncher .sl-pet-launcher-icon,
+  .sl-home-quick-actions .studylab-ai-launcher-icon,
+  .sl-home-quick-actions .study-chat-button-icon {
+    width: 22px !important; height: 22px !important; font-size: 1rem !important; color: #a8e4ff !important;
+  }
+  .sl-home-quick-actions #studylabPetLauncher .sl-pet-launcher-icon + span,
+  .sl-home-quick-actions .studylab-ai-launcher-copy {
+    display: inline-flex !important; width: auto !important; max-width: none !important;
+    opacity: 1 !important; color: inherit !important; font-size: .82rem !important;
+  }
+  .sl-home-quick-actions .studylab-ai-launcher-copy { display: block !important; }
+  .sl-home-quick-actions .studylab-ai-launcher-title { font-size: .82rem !important; }
+  .sl-home-quick-actions .studylab-ai-launcher-subtitle { display: none !important; }
+  .sl-home-quick-actions .study-chat-button > span:last-of-type { display: inline !important; }
+  .sl-home-quick-actions .study-chat-unread { margin-left: auto; }
+  .sl-home-sidebar.is-collapsed .sl-home-quick-actions > button { justify-content: center !important; padding-inline: 0 !important; }
+  .sl-home-sidebar.is-collapsed .sl-home-quick-actions > button > span:not(:first-child) { display: none !important; }
+  .sl-home-sidebar.is-collapsed .sl-home-quick-actions { gap: 7px; }
+  .studylab-ai-tools-row .studylab-ai-panel,
+  .study-chat-panel { left: 258px !important; right: auto !important; bottom: 22px !important; }
+  html[data-theme="light"] .sl-home-sidebar {
+    border-color: rgba(255,255,255,.68) !important;
+    background: radial-gradient(ellipse at 0 0, rgba(115,190,245,.17), transparent 48%), linear-gradient(145deg, rgba(255,255,255,.52), rgba(226,241,252,.38) 58%, rgba(237,233,255,.36)) !important;
+    box-shadow: 14px 0 48px rgba(40,75,110,.10), inset -1px 0 0 rgba(255,255,255,.72), inset 0 1px 0 rgba(255,255,255,.92) !important;
+  }
+  html[data-theme="light"] .sl-home-quick-actions > button {
+    color: #214764 !important; border-color: rgba(255,255,255,.78) !important;
+    background: linear-gradient(135deg, rgba(255,255,255,.48), rgba(140,190,230,.10)), rgba(255,255,255,.20) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.96), 0 6px 18px rgba(45,83,122,.07) !important;
+  }
+  html[data-theme="light"] .sl-home-quick-actions > button:hover,
+  html[data-theme="light"] .sl-home-quick-actions > button[aria-expanded="true"] {
+    background: linear-gradient(135deg, rgba(105,185,240,.22), rgba(150,155,255,.12)), rgba(255,255,255,.40) !important;
+  }
+  html[data-theme="light"] .sl-home-quick-actions .studylab-ai-launcher-icon { color: #6e73ce !important; }
+}
+@media (max-width: 1179px) { .sl-home-quick-actions { display: none !important; } }
+
+/* Stronger, genuinely see-through glass on the fixed header. */
+html body header.site-header {
+  background: linear-gradient(135deg, rgba(52,82,119,.27), rgba(13,28,49,.19) 55%, rgba(43,52,88,.22)) !important;
+  -webkit-backdrop-filter: blur(42px) saturate(205%) !important;
+  backdrop-filter: blur(42px) saturate(205%) !important;
+  border-color: rgba(190,225,255,.34) !important;
+  box-shadow: 0 22px 58px rgba(0,0,0,.20), 0 0 38px rgba(78,170,255,.12), inset 0 1.5px 0 rgba(255,255,255,.34), inset 0 -1px 0 rgba(115,178,235,.13) !important;
+}
+html[data-theme="light"] body header.site-header {
+  background: linear-gradient(135deg, rgba(255,255,255,.39), rgba(225,241,255,.28) 55%, rgba(239,235,255,.30)) !important;
+  border-color: rgba(255,255,255,.88) !important;
+  box-shadow: 0 20px 54px rgba(45,83,122,.13), inset 0 1.5px 0 rgba(255,255,255,.99) !important;
+}
