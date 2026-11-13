@@ -675,3 +675,495 @@ html[data-theme="light"] .sl-home-home-section .homepage-greeting-hello {
   border: 0 !important;
   line-height: 0 !important;
 }
+
+
+/* =========================================================
+   STUDYLAB WINDOWS BLOOM AMBIENCE
+   Soft background palette + slow scientific side doodles.
+   The existing formula layer stays underneath the glass.
+   ========================================================= */
+html[data-theme="dark"] body {
+  background-color: #0a1020 !important;
+  background-image:
+    radial-gradient(ellipse 47% 56% at 10% 18%, rgba(74,126,255,.25), transparent 76%),
+    radial-gradient(ellipse 48% 54% at 90% 16%, rgba(135,91,220,.22), transparent 74%),
+    radial-gradient(ellipse 58% 48% at 60% 95%, rgba(47,157,207,.16), transparent 76%),
+    radial-gradient(ellipse 30% 40% at 48% 42%, rgba(104,100,190,.10), transparent 75%),
+    linear-gradient(145deg, rgba(7,12,24,.40), rgba(10,15,29,.48)),
+    url("../images/studylab-home-dark.webp") !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+  background-attachment: fixed !important;
+}
+html[data-theme="light"] body {
+  background-color: #eef5ff !important;
+  background-image:
+    radial-gradient(ellipse 49% 56% at 10% 16%, rgba(116,178,255,.27), transparent 75%),
+    radial-gradient(ellipse 45% 51% at 89% 14%, rgba(190,156,255,.23), transparent 75%),
+    radial-gradient(ellipse 57% 48% at 56% 94%, rgba(247,185,219,.18), transparent 76%),
+    radial-gradient(ellipse 34% 39% at 48% 47%, rgba(129,206,239,.15), transparent 75%),
+    linear-gradient(145deg, rgba(248,252,255,.24), rgba(235,243,255,.32)),
+    url("../images/studylab-home-light.webp") !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+  background-attachment: fixed !important;
+}
+
+/* Large, restrained bloom loops stay at the sides and behind every panel. */
+.science-background {
+  isolation: isolate;
+  opacity: 1 !important;
+}
+.science-background::before,
+.science-background::after {
+  content: "";
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  border: 1px solid rgba(148,190,255,.19);
+  box-shadow:
+    inset 0 0 38px rgba(111,149,255,.075),
+    0 0 36px rgba(102,159,255,.075);
+  opacity: .54;
+  will-change: transform;
+}
+.science-background::before {
+  width: clamp(260px, 36vw, 620px);
+  height: clamp(340px, 57vh, 690px);
+  left: -17vw;
+  top: 12vh;
+  border-radius: 48% 52% 61% 39% / 42% 36% 64% 58%;
+  background:
+    radial-gradient(ellipse at 60% 45%, rgba(89,143,255,.11), transparent 64%),
+    linear-gradient(135deg, rgba(151,184,255,.045), transparent 60%);
+  transform: rotate(-22deg);
+  animation: slBloomDriftLeft 48s ease-in-out infinite alternate;
+}
+.science-background::after {
+  width: clamp(300px, 42vw, 700px);
+  height: clamp(340px, 60vh, 740px);
+  right: -20vw;
+  bottom: -18vh;
+  border-color: rgba(169,147,255,.17);
+  border-radius: 58% 42% 37% 63% / 52% 60% 40% 48%;
+  background:
+    radial-gradient(ellipse at 38% 38%, rgba(140,112,231,.12), transparent 65%),
+    linear-gradient(150deg, rgba(96,175,238,.035), transparent 66%);
+  box-shadow:
+    inset 0 0 44px rgba(141,119,235,.08),
+    0 0 42px rgba(127,117,230,.06);
+  transform: rotate(17deg);
+  animation: slBloomDriftRight 56s ease-in-out infinite alternate;
+}
+html[data-theme="light"] .science-background::before {
+  border-color: rgba(76,145,214,.19);
+  background:
+    radial-gradient(ellipse at 60% 45%, rgba(93,164,239,.13), transparent 64%),
+    linear-gradient(135deg, rgba(158,197,255,.045), transparent 60%);
+  box-shadow: inset 0 0 38px rgba(108,165,226,.075), 0 0 36px rgba(108,165,226,.06);
+}
+html[data-theme="light"] .science-background::after {
+  border-color: rgba(161,133,217,.17);
+  background:
+    radial-gradient(ellipse at 38% 38%, rgba(177,149,235,.12), transparent 65%),
+    linear-gradient(150deg, rgba(133,196,234,.035), transparent 66%);
+  box-shadow: inset 0 0 44px rgba(163,143,222,.07), 0 0 42px rgba(154,137,213,.05);
+}
+@keyframes slBloomDriftLeft {
+  from { transform: translate3d(0,0,0) rotate(-22deg) scale(.98); }
+  to { transform: translate3d(3.2vw,-2.8vh,0) rotate(-14deg) scale(1.04); }
+}
+@keyframes slBloomDriftRight {
+  from { transform: translate3d(0,0,0) rotate(17deg) scale(1); }
+  to { transform: translate3d(-2.8vw,-3.2vh,0) rotate(9deg) scale(1.035); }
+}
+.science-symbol {
+  color: rgba(160,199,255,.16) !important;
+  text-shadow: 0 0 18px rgba(117,166,255,.075) !important;
+}
+html[data-theme="light"] .science-symbol {
+  color: rgba(67,119,177,.14) !important;
+  text-shadow: 0 0 16px rgba(91,155,218,.07) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .science-background::before,
+  .science-background::after,
+  .science-symbol { animation: none !important; }
+}
+
+/* =========================================================
+   NEUTRAL LIQUID GLASS — let the Bloom atmosphere show through.
+   Outer pane: light base layer. Inner cards: a touch denser.
+   No added blue/purple tint and no extra blur.
+   ========================================================= */
+.sl-home-section {
+  border-color: rgba(224,235,247,.16) !important;
+  background: rgba(8,14,24,.115) !important;
+  box-shadow:
+    0 14px 38px rgba(0,0,0,.09),
+    inset 0 1px 0 rgba(255,255,255,.11) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(112%) !important;
+  backdrop-filter: blur(12px) saturate(112%) !important;
+}
+html[data-theme="light"] .sl-home-section {
+  border-color: rgba(255,255,255,.42) !important;
+  background: rgba(255,255,255,.17) !important;
+  box-shadow:
+    0 14px 38px rgba(46,68,95,.075),
+    inset 0 1px 0 rgba(255,255,255,.64) !important;
+}
+.sl-home-home-section .homepage-overview-panel {
+  border-color: rgba(226,238,249,.13) !important;
+  background: rgba(255,255,255,.035) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.085) !important;
+  -webkit-backdrop-filter: blur(13px) saturate(112%) !important;
+  backdrop-filter: blur(13px) saturate(112%) !important;
+}
+html[data-theme="light"] .sl-home-home-section .homepage-overview-panel {
+  border-color: rgba(255,255,255,.44) !important;
+  background: rgba(255,255,255,.16) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.7) !important;
+}
+.sl-home-section .subject-card,
+.sl-home-section .study-tools-card,
+.sl-home-section .telegram-card {
+  border-color: rgba(224,236,247,.15) !important;
+  background: rgba(255,255,255,.045) !important;
+  box-shadow:
+    0 8px 22px rgba(0,0,0,.075),
+    inset 0 1px 0 rgba(255,255,255,.09) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(112%) !important;
+  backdrop-filter: blur(14px) saturate(112%) !important;
+}
+html[data-theme="light"] .sl-home-section .subject-card,
+html[data-theme="light"] .sl-home-section .study-tools-card,
+html[data-theme="light"] .sl-home-section .telegram-card {
+  border-color: rgba(255,255,255,.50) !important;
+  background: rgba(255,255,255,.22) !important;
+  box-shadow:
+    0 8px 22px rgba(48,72,98,.055),
+    inset 0 1px 0 rgba(255,255,255,.73) !important;
+}
+.sl-home-section .subject-card:hover,
+.sl-home-section .study-tools-card:hover,
+.sl-home-section .telegram-card:hover {
+  background: rgba(255,255,255,.075) !important;
+  border-color: rgba(226,239,250,.25) !important;
+  box-shadow: 0 11px 26px rgba(0,0,0,.09), inset 0 1px 0 rgba(255,255,255,.12) !important;
+}
+html[data-theme="light"] .sl-home-section .subject-card:hover,
+html[data-theme="light"] .sl-home-section .study-tools-card:hover,
+html[data-theme="light"] .sl-home-section .telegram-card:hover {
+  background: rgba(255,255,255,.31) !important;
+  border-color: rgba(255,255,255,.68) !important;
+  box-shadow: 0 11px 26px rgba(48,72,98,.075), inset 0 1px 0 #fff !important;
+}
+.sl-home-room-panel,
+.sl-home-feature-card,
+.sl-home-rank-card {
+  border-color: rgba(224,236,247,.14) !important;
+  background: rgba(255,255,255,.04) !important;
+  box-shadow: 0 8px 22px rgba(0,0,0,.055), inset 0 1px 0 rgba(255,255,255,.10) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(112%) !important;
+  backdrop-filter: blur(14px) saturate(112%) !important;
+}
+html[data-theme="light"] .sl-home-room-panel,
+html[data-theme="light"] .sl-home-feature-card,
+html[data-theme="light"] .sl-home-rank-card {
+  border-color: rgba(255,255,255,.48) !important;
+  background: rgba(255,255,255,.20) !important;
+  box-shadow: 0 8px 22px rgba(48,72,98,.055), inset 0 1px 0 rgba(255,255,255,.72) !important;
+}
+.sl-home-social-button {
+  border-color: rgba(224,236,247,.20) !important;
+  color: inherit !important;
+  background: rgba(255,255,255,.065) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 6px 16px rgba(0,0,0,.06) !important;
+}
+html[data-theme="light"] .sl-home-social-button {
+  border-color: rgba(255,255,255,.58) !important;
+  background: rgba(255,255,255,.27) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.85), 0 6px 16px rgba(48,72,98,.05) !important;
+}
+.sl-home-room-entry {
+  background: rgba(255,255,255,.045) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(112%) !important;
+  backdrop-filter: blur(14px) saturate(112%) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.13), 0 8px 22px rgba(0,0,0,.06) !important;
+}
+html[data-theme="light"] .sl-home-room-entry {
+  background: rgba(255,255,255,.22) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.82), 0 8px 22px rgba(48,72,98,.05) !important;
+}
+
+/* =========================================================
+   SIMPLE GLASS-ON-GLASS NAV INDICATOR.
+   Flatten the old glossy droplet and remove the spring overshoot.
+   ========================================================= */
+@media (min-width: 1180px) {
+  .sl-home-sidebar .sl-home-nav-indicator {
+    overflow: hidden !important;
+    border: 1px solid rgba(225,238,250,.15) !important;
+    border-radius: 13px !important;
+    background: rgba(255,255,255,.055) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.10) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(112%) !important;
+    backdrop-filter: blur(12px) saturate(112%) !important;
+    transition:
+      transform .26s cubic-bezier(.2,.75,.25,1),
+      height .20s ease,
+      opacity .12s ease !important;
+  }
+  .sl-home-sidebar .sl-home-nav-indicator::before,
+  .sl-home-sidebar .sl-home-nav-indicator::after {
+    content: none !important;
+  }
+  html[data-theme="light"] .sl-home-sidebar .sl-home-nav-indicator {
+    border-color: rgba(255,255,255,.42) !important;
+    background: rgba(255,255,255,.22) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.7) !important;
+  }
+}
+
+/* The rail stays available at the footer. Only its quick-action dock fades. */
+@media (min-width: 1180px) {
+  .sl-home-sidebar {
+    opacity: 1 !important;
+    transition:
+      width .24s cubic-bezier(.2,.75,.25,1),
+      padding .24s cubic-bezier(.2,.75,.25,1),
+      border-radius .24s ease !important;
+  }
+  .sl-home-sidebar.is-footer-hidden {
+    pointer-events: auto !important;
+  }
+  .sl-home-sidebar .sl-home-quick-actions {
+    opacity: var(--sl-home-footer-opacity, 1);
+    transform: translateY(calc((1 - var(--sl-home-footer-opacity, 1)) * 5px));
+    transition: opacity .18s ease, transform .18s ease !important;
+  }
+  .sl-home-sidebar.is-footer-hidden .sl-home-quick-actions {
+    pointer-events: none !important;
+  }
+}
+
+/* =========================================================
+   ONE TRANSLUCENT MATERIAL FOR HEADER + FLOATING CONTROLS.
+   Social remains in the fixed top bar, never in the footer fade.
+   ========================================================= */
+html body header.site-header .header-actions > button,
+html body header.site-header .sl-feed-toggle {
+  color: inherit !important;
+  border: 1px solid rgba(225,238,250,.20) !important;
+  border-radius: 13px !important;
+  background: rgba(255,255,255,.055) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.11), 0 5px 14px rgba(0,0,0,.045) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(115%) !important;
+  backdrop-filter: blur(14px) saturate(115%) !important;
+  text-shadow: none !important;
+  transition: background .18s ease, border-color .18s ease, box-shadow .18s ease !important;
+}
+html body header.site-header .header-actions > button:hover,
+html body header.site-header .header-actions > button[aria-expanded="true"],
+html body header.site-header .sl-feed-toggle:hover,
+html body header.site-header .sl-feed-toggle[aria-expanded="true"] {
+  background: rgba(255,255,255,.10) !important;
+  border-color: rgba(225,238,250,.31) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 7px 17px rgba(0,0,0,.06) !important;
+}
+html[data-theme="light"] body header.site-header .header-actions > button,
+html[data-theme="light"] body header.site-header .sl-feed-toggle {
+  color: #30465c !important;
+  border-color: rgba(255,255,255,.55) !important;
+  background: rgba(255,255,255,.23) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.82), 0 5px 14px rgba(48,72,98,.045) !important;
+}
+html[data-theme="light"] body header.site-header .header-actions > button:hover,
+html[data-theme="light"] body header.site-header .header-actions > button[aria-expanded="true"],
+html[data-theme="light"] body header.site-header .sl-feed-toggle:hover,
+html[data-theme="light"] body header.site-header .sl-feed-toggle[aria-expanded="true"] {
+  background: rgba(255,255,255,.34) !important;
+  border-color: rgba(255,255,255,.76) !important;
+}
+html body header.site-header .sl-feed-toggle {
+  position: relative !important;
+  z-index: 3 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* The bottom-right action trio and the separate Social shortcut use the same neutral pane. */
+.study-quick-button,
+.study-feedback-button,
+.sl-feed-floating-shortcut,
+.study-chat-button,
+#studylabPetLauncher,
+.studylab-ai-tools-row .studylab-ai-launcher {
+  border: 1px solid rgba(225,238,250,.18) !important;
+  color: inherit !important;
+  background: rgba(255,255,255,.055) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 7px 18px rgba(0,0,0,.06) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(115%) !important;
+  backdrop-filter: blur(14px) saturate(115%) !important;
+  transition: background .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease !important;
+}
+.study-quick-button:hover,
+.study-feedback-button:hover,
+.sl-feed-floating-shortcut:hover,
+.study-chat-button:hover,
+#studylabPetLauncher:hover,
+#studylabPetLauncher[aria-expanded="true"],
+.study-chat-button.is-open,
+.studylab-ai-tools-row .studylab-ai-launcher:hover,
+.studylab-ai-tools-row .studylab-ai-launcher.is-open {
+  border-color: rgba(225,238,250,.30) !important;
+  background: rgba(255,255,255,.10) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 8px 20px rgba(0,0,0,.075) !important;
+}
+html[data-theme="light"] .study-quick-button,
+html[data-theme="light"] .study-feedback-button,
+html[data-theme="light"] .sl-feed-floating-shortcut,
+html[data-theme="light"] .study-chat-button,
+html[data-theme="light"] #studylabPetLauncher,
+html[data-theme="light"] .studylab-ai-tools-row .studylab-ai-launcher {
+  color: #30465c !important;
+  border-color: rgba(255,255,255,.52) !important;
+  background: rgba(255,255,255,.22) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.84), 0 7px 18px rgba(48,72,98,.045) !important;
+}
+html[data-theme="light"] .study-quick-button:hover,
+html[data-theme="light"] .study-feedback-button:hover,
+html[data-theme="light"] .sl-feed-floating-shortcut:hover,
+html[data-theme="light"] .study-chat-button:hover,
+html[data-theme="light"] #studylabPetLauncher:hover,
+html[data-theme="light"] #studylabPetLauncher[aria-expanded="true"],
+html[data-theme="light"] .study-chat-button.is-open,
+html[data-theme="light"] .studylab-ai-tools-row .studylab-ai-launcher:hover,
+html[data-theme="light"] .studylab-ai-tools-row .studylab-ai-launcher.is-open {
+  background: rgba(255,255,255,.34) !important;
+}
+
+/* Match the open Pet, AI and Chat surfaces to the new glass material. */
+.sl-pet-panel,
+.sl-pet-thought-cloud,
+.studylab-ai-panel,
+.study-chat-panel {
+  color: var(--text-primary) !important;
+  border: 1px solid rgba(225,238,250,.18) !important;
+  border-radius: 22px !important;
+  background: rgba(10,16,27,.60) !important;
+  box-shadow:
+    0 24px 64px rgba(0,0,0,.24),
+    inset 0 1px 0 rgba(255,255,255,.12) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(120%) !important;
+  backdrop-filter: blur(18px) saturate(120%) !important;
+}
+html[data-theme="light"] .sl-pet-panel,
+html[data-theme="light"] .sl-pet-thought-cloud,
+html[data-theme="light"] .studylab-ai-panel,
+html[data-theme="light"] .study-chat-panel {
+  color: #30465c !important;
+  border-color: rgba(255,255,255,.54) !important;
+  background: rgba(244,249,255,.69) !important;
+  box-shadow:
+    0 24px 64px rgba(48,72,98,.14),
+    inset 0 1px 0 rgba(255,255,255,.82) !important;
+}
+.sl-pet-panel-head,
+.studylab-ai-head,
+.study-chat-head {
+  background: rgba(255,255,255,.035) !important;
+  border-bottom-color: rgba(225,238,250,.12) !important;
+}
+html[data-theme="light"] .sl-pet-panel-head,
+html[data-theme="light"] .studylab-ai-head,
+html[data-theme="light"] .study-chat-head {
+  background: rgba(255,255,255,.16) !important;
+  border-bottom-color: rgba(80,110,140,.10) !important;
+}
+.sl-pet-setting,
+.study-chat-compose,
+.studylab-ai-compose {
+  border-color: rgba(225,238,250,.11) !important;
+  background: rgba(255,255,255,.025) !important;
+}
+html[data-theme="light"] .sl-pet-setting,
+html[data-theme="light"] .study-chat-compose,
+html[data-theme="light"] .studylab-ai-compose {
+  border-color: rgba(80,110,140,.10) !important;
+  background: rgba(255,255,255,.12) !important;
+}
+.sl-pet-panel-close,
+.sl-pet-setting-buttons button,
+.study-chat-close,
+.study-chat-notice,
+.study-chat-message,
+.study-chat-input,
+.study-chat-send,
+.studylab-ai-close,
+.studylab-ai-notice,
+.studylab-ai-message,
+.studylab-ai-input,
+.studylab-ai-send {
+  color: inherit !important;
+  border-color: rgba(225,238,250,.13) !important;
+  background: rgba(255,255,255,.045) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08) !important;
+}
+.study-chat-message.own,
+.studylab-ai-message.user {
+  background: rgba(255,255,255,.075) !important;
+  border-color: rgba(225,238,250,.16) !important;
+}
+html[data-theme="light"] .sl-pet-panel-close,
+html[data-theme="light"] .sl-pet-setting-buttons button,
+html[data-theme="light"] .study-chat-close,
+html[data-theme="light"] .study-chat-notice,
+html[data-theme="light"] .study-chat-message,
+html[data-theme="light"] .study-chat-input,
+html[data-theme="light"] .study-chat-send,
+html[data-theme="light"] .studylab-ai-close,
+html[data-theme="light"] .studylab-ai-notice,
+html[data-theme="light"] .studylab-ai-message,
+html[data-theme="light"] .studylab-ai-input,
+html[data-theme="light"] .studylab-ai-send {
+  color: #30465c !important;
+  border-color: rgba(80,110,140,.11) !important;
+  background: rgba(255,255,255,.22) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.72) !important;
+}
+html[data-theme="light"] .study-chat-message.own,
+html[data-theme="light"] .studylab-ai-message.user {
+  background: rgba(255,255,255,.34) !important;
+  border-color: rgba(80,110,140,.13) !important;
+}
+
+/* Keep quick-control labels and status text readable on the transparent panes. */
+html[data-theme="dark"] .sl-home-sidebar .sl-home-quick-actions,
+html[data-theme="dark"] .sl-home-sidebar .sl-home-quick-actions button { color: #e5edf6 !important; }
+html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions,
+html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions button { color: #344f69 !important; }
+
+/* Respect reduced-motion preferences across the ambient layer and all floating interfaces. */
+@media (prefers-reduced-motion: reduce) {
+  .sl-home-section,
+  .sl-home-section .subject-card,
+  .sl-home-section .study-tools-card,
+  .sl-home-section .telegram-card,
+  .sl-home-sidebar .sl-home-nav-indicator,
+  .study-quick-button,
+  .study-feedback-button,
+  .sl-feed-floating-shortcut,
+  .study-chat-button,
+  #studylabPetLauncher,
+  .studylab-ai-tools-row .studylab-ai-launcher,
+  .study-chat-panel,
+  .studylab-ai-panel,
+  .sl-pet-panel,
+  .sl-pet-thought-cloud {
+    transition: none !important;
+    animation: none !important;
+  }
+}

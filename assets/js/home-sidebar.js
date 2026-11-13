@@ -88,10 +88,13 @@
 
   let activeId = "home";
   let scrollFrame = 0;
+  let pendingNavigation = null;
 
   function setActive(id) {
     const item = navItems.find(element => element.dataset.navId === id);
     if (!item) return;
+    if (activeId === id && item.classList.contains("is-active")) return;
+
     activeId = id;
     navItems.forEach(element => {
       const active = element === item;
@@ -99,9 +102,11 @@
       if (active) element.setAttribute("aria-current", "location");
       else element.removeAttribute("aria-current");
     });
+
     indicator.style.opacity = "1";
     indicator.style.height = item.offsetHeight + "px";
     indicator.style.transform = "translate3d(0," + item.offsetTop + "px,0)";
+
     if (item.offsetTop < nav.scrollTop || item.offsetTop + item.offsetHeight > nav.scrollTop + nav.clientHeight) {
       const targetTop = Math.max(0, item.offsetTop - nav.offsetTop - (nav.clientHeight - item.offsetHeight) / 2);
       nav.scrollTo({ top: targetTop, behavior: "smooth" });
@@ -133,10 +138,22 @@
   function syncFromScroll() {
     scrollFrame = 0;
     updateSidebarFooterFade();
+
     if (document.body.classList.contains("sl-community-open")) {
       setActive("social");
       return;
     }
+
+    if (pendingNavigation) {
+      const targetTop = pendingNavigation.element.getBoundingClientRect().top;
+      if (Math.abs(targetTop - 100) <= 22) {
+        pendingNavigation = null;
+      } else {
+        setActive(pendingNavigation.navId);
+        return;
+      }
+    }
+
     const markerLine = Math.min(window.innerHeight * 0.36, 300);
     let current = null;
     scrollTargets.forEach(target => {
@@ -155,10 +172,12 @@
       const id = item.dataset.navId;
       const targetId = id === "home" ? "home-overview" : id;
       const target = document.getElementById(targetId);
-      setActive(id);
 
       if (!target) return;
       event.preventDefault();
+
+      pendingNavigation = { navId: id, element: target };
+      setActive(id);
 
       const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       target.scrollIntoView({
@@ -170,6 +189,25 @@
         window.history.replaceState(null, "", "#" + targetId);
       }
     });
+  });
+
+  window.addEventListener("scrollend", () => {
+    if (!pendingNavigation) return;
+    pendingNavigation = null;
+    scheduleScrollSync();
+  }, { passive: true });
+
+  const interruptPendingNavigation = () => {
+    if (!pendingNavigation) return;
+    pendingNavigation = null;
+    scheduleScrollSync();
+  };
+  window.addEventListener("wheel", interruptPendingNavigation, { passive: true });
+  window.addEventListener("touchstart", interruptPendingNavigation, { passive: true });
+  window.addEventListener("keydown", event => {
+    if (["PageDown", "PageUp", "Home", "End", "ArrowDown", "ArrowUp", " "].includes(event.key)) {
+      interruptPendingNavigation();
+    }
   });
 
   collapseButton.addEventListener("click", () => {
