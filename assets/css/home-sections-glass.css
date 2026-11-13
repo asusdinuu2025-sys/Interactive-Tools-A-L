@@ -685,30 +685,28 @@ html[data-theme="light"] .sl-home-home-section .homepage-greeting-hello {
 html[data-theme="dark"] body {
   background-color: #0a1020 !important;
   background-image:
-    radial-gradient(ellipse 47% 56% at 10% 18%, rgba(74,126,255,.25), transparent 76%),
-    radial-gradient(ellipse 48% 54% at 90% 16%, rgba(135,91,220,.22), transparent 74%),
-    radial-gradient(ellipse 58% 48% at 60% 95%, rgba(47,157,207,.16), transparent 76%),
-    radial-gradient(ellipse 30% 40% at 48% 42%, rgba(104,100,190,.10), transparent 75%),
-    linear-gradient(145deg, rgba(7,12,24,.40), rgba(10,15,29,.48)),
-    url("../images/studylab-home-dark.webp") !important;
-  background-position: center center !important;
-  background-repeat: no-repeat !important;
-  background-size: cover !important;
-  background-attachment: fixed !important;
+    radial-gradient(ellipse 48% 57% at 8% 15%, rgba(78,130,255,.32), transparent 76%),
+    radial-gradient(ellipse 49% 54% at 91% 13%, rgba(145,101,226,.27), transparent 75%),
+    radial-gradient(ellipse 59% 49% at 57% 98%, rgba(48,162,211,.20), transparent 76%),
+    url("../images/studylab-edu-doodles-dark.svg"),
+    linear-gradient(145deg, #0a1020 0%, #10172a 53%, #101326 100%) !important;
+  background-position: center center, center center, center center, center top, center center !important;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat, no-repeat !important;
+  background-size: 100% 100%, 100% 100%, 100% 100%, 600px 600px, 100% 100% !important;
+  background-attachment: fixed, fixed, fixed, fixed, fixed !important;
 }
 html[data-theme="light"] body {
-  background-color: #eef5ff !important;
+  background-color: #edf5ff !important;
   background-image:
-    radial-gradient(ellipse 49% 56% at 10% 16%, rgba(116,178,255,.27), transparent 75%),
-    radial-gradient(ellipse 45% 51% at 89% 14%, rgba(190,156,255,.23), transparent 75%),
-    radial-gradient(ellipse 57% 48% at 56% 94%, rgba(247,185,219,.18), transparent 76%),
-    radial-gradient(ellipse 34% 39% at 48% 47%, rgba(129,206,239,.15), transparent 75%),
-    linear-gradient(145deg, rgba(248,252,255,.24), rgba(235,243,255,.32)),
-    url("../images/studylab-home-light.webp") !important;
-  background-position: center center !important;
-  background-repeat: no-repeat !important;
-  background-size: cover !important;
-  background-attachment: fixed !important;
+    radial-gradient(ellipse 49% 56% at 9% 14%, rgba(120,183,255,.32), transparent 75%),
+    radial-gradient(ellipse 46% 52% at 91% 13%, rgba(190,160,255,.27), transparent 75%),
+    radial-gradient(ellipse 58% 49% at 56% 96%, rgba(248,190,222,.23), transparent 76%),
+    url("../images/studylab-edu-doodles-light.svg"),
+    linear-gradient(145deg, #edf5ff 0%, #f5f7ff 53%, #fdf1fa 100%) !important;
+  background-position: center center, center center, center center, center top, center center !important;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat, no-repeat !important;
+  background-size: 100% 100%, 100% 100%, 100% 100%, 600px 600px, 100% 100% !important;
+  background-attachment: fixed, fixed, fixed, fixed, fixed !important;
 }
 
 /* Large, restrained bloom loops stay at the sides and behind every panel. */
@@ -1267,4 +1265,187 @@ html[data-theme="light"] #studyLabHomeLayout .sl-feed-toggle:hover,
 html[data-theme="light"] #studyLabHomeLayout .sl-feed-toggle[aria-expanded="true"] {
   background: rgba(255,255,255,.34) !important;
   border-color: rgba(255,255,255,.76) !important;
+}
+
+
+/* =========================================================
+   REPEATING EDUCATIONAL TELEGRAM-STYLE WALLPAPER
+   Replaces the old photo wallpapers with theme-specific SVG doodles.
+   ========================================================= */
+
+/* The doodle tile is a true repeating image layer, not a full-screen photo. */
+html[data-theme="dark"] body {
+  background-image:
+    radial-gradient(ellipse 48% 57% at 8% 15%, rgba(78,130,255,.32), transparent 76%),
+    radial-gradient(ellipse 49% 54% at 91% 13%, rgba(145,101,226,.27), transparent 75%),
+    radial-gradient(ellipse 59% 49% at 57% 98%, rgba(48,162,211,.20), transparent 76%),
+    url("../images/studylab-edu-doodles-dark.svg"),
+    linear-gradient(145deg, #0a1020 0%, #10172a 53%, #101326 100%) !important;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat, no-repeat !important;
+  background-position: center center, center center, center center, center top, center center !important;
+  background-size: 100% 100%, 100% 100%, 100% 100%, 600px 600px, 100% 100% !important;
+  background-attachment: fixed, fixed, fixed, fixed, fixed !important;
+}
+html[data-theme="light"] body {
+  background-image:
+    radial-gradient(ellipse 49% 56% at 9% 14%, rgba(120,183,255,.32), transparent 75%),
+    radial-gradient(ellipse 46% 52% at 91% 13%, rgba(190,160,255,.27), transparent 75%),
+    radial-gradient(ellipse 58% 49% at 56% 96%, rgba(248,190,222,.23), transparent 76%),
+    url("../images/studylab-edu-doodles-light.svg"),
+    linear-gradient(145deg, #edf5ff 0%, #f5f7ff 53%, #fdf1fa 100%) !important;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat, no-repeat !important;
+  background-position: center center, center center, center center, center top, center center !important;
+  background-size: 100% 100%, 100% 100%, 100% 100%, 600px 600px, 100% 100% !important;
+  background-attachment: fixed, fixed, fixed, fixed, fixed !important;
+}
+
+/* Telegram-style line art: quiet enough to sit behind content, visible between panes. */
+.science-background {
+  background: transparent !important;
+}
+.science-symbol {
+  opacity: .72 !important;
+}
+html[data-theme="dark"] .science-symbol {
+  color: rgba(190,211,245,.22) !important;
+  text-shadow: 0 0 14px rgba(131,171,235,.08) !important;
+}
+html[data-theme="light"] .science-symbol {
+  color: rgba(70,104,148,.19) !important;
+  text-shadow: 0 0 14px rgba(91,141,191,.06) !important;
+}
+
+/* Footer-aware bottom-right floating shortcut row. */
+body:not(.study-room-page) .study-quick-button,
+body:not(.study-room-page) .study-feedback-button,
+body:not(.study-room-page) .sl-feed-floating-shortcut {
+  opacity: var(--sl-home-floating-footer-opacity, 1) !important;
+  transition:
+    opacity .18s ease,
+    background .18s ease,
+    border-color .18s ease,
+    box-shadow .18s ease,
+    transform .18s ease !important;
+}
+body.is-footer-near-floating-controls .study-quick-button,
+body.is-footer-near-floating-controls .study-feedback-button,
+body.is-footer-near-floating-controls .sl-feed-floating-shortcut {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* The three right-side actions share one restrained glass recipe in both themes. */
+body:not(.study-room-page) .study-quick-button,
+body:not(.study-room-page) .study-feedback-button,
+body:not(.study-room-page) .sl-feed-floating-shortcut {
+  color: rgba(235,244,252,.96) !important;
+  border: 1px solid rgba(225,238,250,.20) !important;
+  background: rgba(255,255,255,.065) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.13), 0 7px 18px rgba(0,0,0,.06) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(115%) !important;
+  backdrop-filter: blur(14px) saturate(115%) !important;
+  animation: none !important;
+  text-shadow: none !important;
+}
+body:not(.study-room-page) .study-quick-button:hover,
+body:not(.study-room-page) .study-feedback-button:hover,
+body:not(.study-room-page) .sl-feed-floating-shortcut:hover {
+  background: rgba(255,255,255,.11) !important;
+  border-color: rgba(225,238,250,.34) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 8px 20px rgba(0,0,0,.075) !important;
+}
+html[data-theme="light"] body:not(.study-room-page) .study-quick-button,
+html[data-theme="light"] body:not(.study-room-page) .study-feedback-button,
+html[data-theme="light"] body:not(.study-room-page) .sl-feed-floating-shortcut {
+  color: #344f69 !important;
+  border-color: rgba(255,255,255,.58) !important;
+  background: rgba(255,255,255,.26) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.84), 0 7px 18px rgba(48,72,98,.055) !important;
+}
+html[data-theme="light"] body:not(.study-room-page) .study-quick-button:hover,
+html[data-theme="light"] body:not(.study-room-page) .study-feedback-button:hover,
+html[data-theme="light"] body:not(.study-room-page) .sl-feed-floating-shortcut:hover {
+  background: rgba(255,255,255,.37) !important;
+  border-color: rgba(255,255,255,.78) !important;
+}
+body:not(.study-room-page) .sl-feed-floating-shortcut svg {
+  stroke: currentColor !important;
+  filter: none !important;
+}
+
+/* Chat uses the same cool neutral icon tone as Pet and the ChatGPT mark. */
+.sl-home-sidebar .sl-home-quick-actions #studylabPetLauncher .sl-pet-launcher-icon,
+.sl-home-sidebar .sl-home-quick-actions .studylab-ai-launcher-icon,
+.sl-home-sidebar .sl-home-quick-actions .study-chat-button-icon {
+  color: #b9e8ff !important;
+  filter: none !important;
+}
+.sl-home-sidebar .sl-home-quick-actions .studylab-ai-launcher-icon svg,
+.sl-home-sidebar .sl-home-quick-actions .study-chat-button-icon svg,
+.sl-home-sidebar .sl-home-quick-actions #studylabPetLauncher .sl-pet-launcher-icon svg {
+  color: inherit !important;
+  filter: none !important;
+}
+html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions #studylabPetLauncher .sl-pet-launcher-icon,
+html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions .studylab-ai-launcher-icon,
+html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions .study-chat-button-icon {
+  color: #557da4 !important;
+}
+
+/* Pet preference buttons have a strong selected state in both themes. */
+html[data-theme="dark"] .sl-pet-panel .sl-pet-setting-buttons button.is-active,
+html[data-theme="dark"] .sl-pet-panel .sl-pet-setting-buttons button[aria-pressed="true"] {
+  color: #d8f3ff !important;
+  border: 1px solid rgba(112,205,255,.76) !important;
+  background: rgba(77,178,241,.24) !important;
+  box-shadow:
+    0 0 0 1px rgba(91,190,255,.14),
+    inset 0 1px 0 rgba(255,255,255,.20),
+    0 4px 14px rgba(41,155,220,.12) !important;
+  font-weight: 850 !important;
+}
+html[data-theme="dark"] .sl-pet-panel .sl-pet-setting-buttons button[data-pet-eye="pink"].is-active,
+html[data-theme="dark"] .sl-pet-panel .sl-pet-setting-buttons button[data-pet-eye="pink"][aria-pressed="true"] {
+  color: #ffe3f2 !important;
+  border-color: rgba(255,139,202,.78) !important;
+  background: rgba(237,105,177,.22) !important;
+  box-shadow:
+    0 0 0 1px rgba(255,139,202,.15),
+    inset 0 1px 0 rgba(255,255,255,.20),
+    0 4px 14px rgba(207,80,151,.13) !important;
+}
+html[data-theme="light"] .sl-pet-panel .sl-pet-setting-buttons button.is-active,
+html[data-theme="light"] .sl-pet-panel .sl-pet-setting-buttons button[aria-pressed="true"] {
+  color: #155c8c !important;
+  border: 1px solid rgba(68,151,211,.72) !important;
+  background: rgba(109,190,244,.24) !important;
+  box-shadow:
+    0 0 0 1px rgba(74,157,218,.12),
+    inset 0 1px 0 rgba(255,255,255,.90),
+    0 4px 12px rgba(68,140,196,.10) !important;
+  font-weight: 850 !important;
+}
+html[data-theme="light"] .sl-pet-panel .sl-pet-setting-buttons button[data-pet-eye="pink"].is-active,
+html[data-theme="light"] .sl-pet-panel .sl-pet-setting-buttons button[data-pet-eye="pink"][aria-pressed="true"] {
+  color: #a72e74 !important;
+  border-color: rgba(219,105,168,.70) !important;
+  background: rgba(255,157,207,.25) !important;
+  box-shadow:
+    0 0 0 1px rgba(216,111,171,.12),
+    inset 0 1px 0 rgba(255,255,255,.92),
+    0 4px 12px rgba(201,94,157,.10) !important;
+}
+.sl-pet-setting-buttons button[aria-pressed="true"] {
+  position: relative !important;
+  transform: none !important;
+}
+.sl-pet-setting-buttons button[aria-pressed="true"]::after {
+  content: "✓" !important;
+  display: inline-block !important;
+  margin-left: 6px !important;
+  font-size: .72em !important;
+  font-weight: 900 !important;
+}
+.sl-pet-setting-buttons button[data-pet-eye][aria-pressed="true"]::after {
+  content: "✓" !important;
 }
