@@ -415,27 +415,23 @@ body > main.container {
   letter-spacing: .012em;
   line-height: 1.2;
   color: rgba(239, 249, 255, .98);
-  text-shadow:
-    0 0 7px rgba(111, 203, 255, .82),
-    0 0 17px rgba(75, 166, 255, .58),
-    0 0 30px rgba(80, 126, 255, .34);
-  filter: drop-shadow(0 1px 5px rgba(82, 183, 255, .24));
+  text-shadow: none;
+  filter: none;
 }
 html[data-theme="light"] .site-header .brand-title-text {
   color: rgba(25, 61, 103, .98);
-  text-shadow:
-    0 0 7px rgba(78, 167, 255, .48),
-    0 0 17px rgba(105, 145, 255, .28);
+  text-shadow: none;
+  filter: none;
 }
 
 /* Increase the glass clarity while keeping the contents beneath visible. */
 html body header.site-header {
   background:
-    linear-gradient(135deg, rgba(43, 68, 101, .54), rgba(14, 28, 49, .46) 55%, rgba(35, 44, 78, .49)) !important;
+    linear-gradient(135deg, rgba(43, 68, 101, .36), rgba(14, 28, 49, .28) 55%, rgba(35, 44, 78, .32)) !important;
 }
 html[data-theme="light"] body header.site-header {
   background:
-    linear-gradient(135deg, rgba(255,255,255,.69), rgba(236,246,255,.57) 55%, rgba(242,240,255,.60)) !important;
+    linear-gradient(135deg, rgba(255,255,255,.52), rgba(236,246,255,.40) 55%, rgba(242,240,255,.44)) !important;
 }
 
 /* Keep the former hero-title footprint, but leave it visually empty. */
@@ -468,3 +464,57 @@ html[data-theme="light"] body header.site-header {
   }
 }
 
+
+
+/* Active navigation marker: a glossy, translucent water-drop surface. */
+.sl-home-nav-indicator {
+  overflow: hidden;
+  border: 1px solid rgba(151, 224, 255, .48);
+  border-radius: 17px 21px 16px 20px / 17px 14px 20px 16px;
+  background:
+    radial-gradient(ellipse at 18% 8%, rgba(255,255,255,.42), transparent 43%),
+    radial-gradient(ellipse at 82% 100%, rgba(64,176,255,.22), transparent 58%),
+    linear-gradient(145deg, rgba(137,222,255,.23), rgba(100,143,255,.14) 58%, rgba(255,255,255,.09));
+  box-shadow:
+    0 8px 24px rgba(35,145,225,.20),
+    0 0 17px rgba(91,197,255,.15),
+    inset 0 1.5px 0 rgba(255,255,255,.46),
+    inset 0 -1px 0 rgba(111,202,255,.20),
+    inset 0 0 12px rgba(255,255,255,.10);
+}
+.sl-home-nav-indicator::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 12px;
+  right: 12px;
+  height: 42%;
+  border-radius: 999px;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255,255,255,.34), rgba(255,255,255,0));
+  filter: blur(.3px);
+}
+.sl-home-nav-indicator::after {
+  content: "";
+  position: absolute;
+  top: 7px;
+  left: 15px;
+  width: 8px;
+  height: 4px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: rgba(255,255,255,.78);
+  filter: blur(1px);
+}
+html[data-theme="light"] .sl-home-nav-indicator {
+  border-color: rgba(90,177,225,.38);
+  background:
+    radial-gradient(ellipse at 18% 8%, rgba(255,255,255,.96), transparent 43%),
+    radial-gradient(ellipse at 82% 100%, rgba(87,180,245,.17), transparent 58%),
+    linear-gradient(145deg, rgba(132,210,250,.25), rgba(151,164,255,.13) 58%, rgba(255,255,255,.48));
+  box-shadow:
+    0 8px 22px rgba(55,135,195,.15),
+    inset 0 1.5px 0 rgba(255,255,255,.98),
+    inset 0 -1px 0 rgba(90,165,220,.17),
+    inset 0 0 12px rgba(255,255,255,.36);
+}
