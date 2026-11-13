@@ -73,6 +73,7 @@
   const collapseButton = sidebar.querySelector(".sl-home-sidebar-collapse");
   const navItems = [...sidebar.querySelectorAll(".sl-home-nav-item")];
   const scrollTargets = [
+    ["home", "home-overview"],
     ["practical-simulations", "practical-simulations"],
     ["live-study-room", "live-study-room"],
     ["social", "social"],
@@ -152,8 +153,23 @@
   navItems.forEach(item => {
     item.addEventListener("click", event => {
       const id = item.dataset.navId;
+      const targetId = id === "home" ? "home-overview" : id;
+      const target = document.getElementById(targetId);
       setActive(id);
-});
+
+      if (!target) return;
+      event.preventDefault();
+
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      target.scrollIntoView({
+        behavior: reducedMotion ? "auto" : "smooth",
+        block: "start"
+      });
+
+      if (window.history?.replaceState) {
+        window.history.replaceState(null, "", "#" + targetId);
+      }
+    });
   });
 
   collapseButton.addEventListener("click", () => {

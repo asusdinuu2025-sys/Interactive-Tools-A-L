@@ -446,3 +446,215 @@ html[data-theme="light"] .sl-home-social-button { color: #365d7c; border-color: 
   .sl-home-section .telegram-card,
   .sl-home-social-button { transition: none !important; }
 }
+
+
+/* =========================================================
+   HOME FRAME REFINEMENT — MATCH THE HEADER AND SECTION WIDTHS
+   Keep the content frame fixed while the rail expands/collapses.
+   ========================================================= */
+@media (min-width: 1180px) {
+  :root {
+    --sl-home-frame-width: min(1460px, calc(100vw - 310px));
+    --sl-home-frame-shift: max(117px, calc(25vw - 273px));
+  }
+
+  html body header.site-header,
+  html body:has(.sl-home-sidebar.is-collapsed) header.site-header {
+    left: calc(50% + var(--sl-home-frame-shift)) !important;
+    right: auto !important;
+    width: var(--sl-home-frame-width) !important;
+    min-width: 0 !important;
+    max-width: var(--sl-home-frame-width) !important;
+    transform: translateX(-50%) !important;
+    transition: background .35s ease, border-color .35s ease, box-shadow .35s ease !important;
+  }
+
+  .sl-home-layout .sl-home-content,
+  .sl-home-layout.is-sidebar-collapsed .sl-home-content {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+    transition: none !important;
+  }
+
+  .sl-home-layout .sl-home-content > main.container {
+    position: relative !important;
+    left: calc(50% + var(--sl-home-frame-shift)) !important;
+    width: var(--sl-home-frame-width) !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    margin: 0 0 80px !important;
+    padding: 0 !important;
+    transform: translateX(-50%) !important;
+    box-sizing: border-box !important;
+  }
+
+  .sl-home-section {
+    width: 100% !important;
+    max-width: none !important;
+    scroll-margin-top: 100px !important;
+  }
+
+  .sl-home-home-section {
+    text-align: left !important;
+    padding: clamp(18px, 2.2vw, 28px) !important;
+  }
+
+  .sl-home-home-section .homepage-overview-panel {
+    width: 100% !important;
+    max-width: none !important;
+  }
+}
+
+/* The Home greeting is the section's only heading: Hello, time, name, then welcome. */
+.sl-home-home-section .homepage-greeting {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: baseline !important;
+  justify-content: flex-start !important;
+  flex-wrap: wrap !important;
+  gap: 3px 9px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 0 24px !important;
+  padding: 0 2px !important;
+  text-align: left !important;
+}
+.sl-home-home-section .homepage-greeting-hello,
+.sl-home-home-section .homepage-greeting-time,
+.sl-home-home-section .homepage-greeting-name {
+  display: inline !important;
+  flex: 0 0 auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  font-size: clamp(20px, 2.2vw, 28px) !important;
+  line-height: 1.2 !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}
+.sl-home-home-section .homepage-greeting-hello {
+  color: #a9c2d8 !important;
+  font-weight: 650 !important;
+}
+html[data-theme="light"] .sl-home-home-section .homepage-greeting-hello {
+  color: #718ba4 !important;
+}
+.sl-home-home-section .homepage-greeting-welcome {
+  display: block !important;
+  flex: 0 0 100% !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 4px 0 0 !important;
+  font-size: clamp(15px, 1.35vw, 18px) !important;
+  line-height: 1.4 !important;
+  text-align: left !important;
+}
+
+/* A genuinely translucent rail and a softer glass active-section capsule. */
+@media (min-width: 1180px) {
+  .sl-home-sidebar {
+    transition:
+      width .24s cubic-bezier(.2,.75,.25,1),
+      padding .24s cubic-bezier(.2,.75,.25,1),
+      border-radius .24s cubic-bezier(.2,.75,.25,1) !important;
+    background:
+      radial-gradient(ellipse at 9% 0%, rgba(123,205,255,.12), transparent 54%),
+      linear-gradient(145deg, rgba(43,67,94,.43), rgba(8,18,32,.32) 58%, rgba(28,39,65,.34)) !important;
+    border-color: rgba(190,225,255,.30) !important;
+    -webkit-backdrop-filter: blur(38px) saturate(190%) !important;
+    backdrop-filter: blur(38px) saturate(190%) !important;
+    box-shadow:
+      0 20px 58px rgba(0,0,0,.20),
+      0 5px 18px rgba(0,0,0,.10),
+      0 0 30px rgba(86,175,255,.09),
+      inset 0 1.5px 0 rgba(255,255,255,.22),
+      inset 0 0 24px rgba(170,220,255,.035) !important;
+  }
+
+  html[data-theme="light"] .sl-home-sidebar {
+    background:
+      radial-gradient(ellipse at 9% 0%, rgba(120,205,255,.16), transparent 54%),
+      linear-gradient(145deg, rgba(255,255,255,.57), rgba(226,239,251,.36) 58%, rgba(235,232,250,.34)) !important;
+    border-color: rgba(255,255,255,.78) !important;
+    -webkit-backdrop-filter: blur(38px) saturate(175%) !important;
+    backdrop-filter: blur(38px) saturate(175%) !important;
+    box-shadow:
+      0 20px 52px rgba(45,83,122,.12),
+      0 5px 18px rgba(45,83,122,.06),
+      inset 0 1.5px 0 rgba(255,255,255,.88),
+      inset 0 0 24px rgba(255,255,255,.18) !important;
+  }
+
+  .sl-home-sidebar .sl-home-nav-indicator {
+    overflow: hidden !important;
+    border: 1px solid rgba(140,214,255,.26) !important;
+    border-radius: 14px !important;
+    background:
+      linear-gradient(135deg, rgba(121,207,255,.14), rgba(145,157,255,.085)),
+      rgba(255,255,255,.045) !important;
+    box-shadow:
+      0 5px 16px rgba(40,145,215,.08),
+      inset 0 1px 0 rgba(255,255,255,.19) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(165%) !important;
+    backdrop-filter: blur(24px) saturate(165%) !important;
+    transition:
+      transform .32s cubic-bezier(.2,.75,.25,1),
+      height .22s ease,
+      opacity .14s ease !important;
+  }
+  .sl-home-sidebar .sl-home-nav-indicator::before {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 12% auto !important;
+    height: 42% !important;
+    border-radius: inherit !important;
+    background: linear-gradient(180deg, rgba(255,255,255,.20), transparent) !important;
+    pointer-events: none !important;
+    filter: blur(.5px) !important;
+  }
+  .sl-home-sidebar .sl-home-nav-indicator::after { content: none !important; }
+
+  html[data-theme="light"] .sl-home-sidebar .sl-home-nav-indicator {
+    border-color: rgba(100,165,216,.28) !important;
+    background:
+      linear-gradient(135deg, rgba(111,190,244,.15), rgba(158,163,255,.085)),
+      rgba(255,255,255,.09) !important;
+    box-shadow: 0 5px 16px rgba(55,125,185,.08), inset 0 1px 0 rgba(255,255,255,.72) !important;
+  }
+
+  .sl-home-sidebar .sl-home-nav-label {
+    transition: opacity .14s ease, max-width .22s ease !important;
+  }
+}
+
+/* Let smaller screens use the full page width without the desktop frame offset. */
+@media (max-width: 1179px) {
+  .sl-home-layout .sl-home-content,
+  .sl-home-layout.is-sidebar-collapsed .sl-home-content {
+    padding-inline: 0 !important;
+    transition: none !important;
+  }
+  .sl-home-layout .sl-home-content > main.container {
+    position: static !important;
+    left: auto !important;
+    transform: none !important;
+    width: calc(100% - 32px) !important;
+    max-width: 1120px !important;
+    margin: 0 auto 80px !important;
+    padding: 0 !important;
+  }
+  .sl-home-section { scroll-margin-top: 88px !important; }
+}
+@media (max-width: 700px) {
+  .sl-home-home-section { text-align: left !important; }
+  .sl-home-home-section .homepage-greeting { gap: 3px 6px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sl-home-sidebar,
+  .sl-home-sidebar .sl-home-nav-indicator,
+  .sl-home-sidebar .sl-home-nav-label {
+    transition: none !important;
+  }
+}
