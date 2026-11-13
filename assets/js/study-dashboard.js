@@ -578,7 +578,7 @@
 
       searchInput.addEventListener("input", applySearch);
       panel.append(searchInput, searchClear, searchMeta);
-      actions.insertBefore(button, actions.firstChild);
+      actions.appendChild(button);
       document.body.appendChild(panel);
 
       function setSearchOpen(open) {
