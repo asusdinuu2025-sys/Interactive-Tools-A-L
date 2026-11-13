@@ -32,8 +32,8 @@
         </div>
         <div class="sl-feed-head-brand"><span class="sl-feed-mark" aria-hidden="true">✦</span><strong>StudyLab Social Network</strong></div>
         <div class="sl-feed-head-actions">
-          <button class="sl-feed-refresh" type="button" aria-label="Refresh posts" title="Refresh posts">↻</button>
-          <button class="sl-feed-close" type="button" data-feed-close aria-label="Close Social panel">×</button>
+          <button class="sl-feed-refresh" type="button" aria-label="Refresh posts" title="Refresh posts"><svg class="sl-feed-refresh-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 11a8 8 0 1 0-2.34 5.66"/><path d="M20 4v7h-7"/></svg></button>
+          <button class="sl-feed-close" type="button" data-feed-close aria-label="Close Social panel" title="Close Social"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
         </div>
       </div>
       <form class="sl-feed-compose" aria-label="Create a feed post">
