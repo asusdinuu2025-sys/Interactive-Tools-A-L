@@ -58,6 +58,15 @@
   const feedHead = feedInner.querySelector(".sl-feed-head");
   const headBrand = feedHead.querySelector(".sl-feed-head-brand");
   const headActions = feedHead.querySelector(".sl-feed-head-actions");
+  const notificationToggle = document.createElement("button");
+  notificationToggle.className = "sl-feed-notifications-toggle";
+  notificationToggle.type = "button";
+  notificationToggle.setAttribute("aria-label", "Notifications");
+  notificationToggle.setAttribute("aria-expanded", "false");
+  notificationToggle.title = "Notifications";
+  notificationToggle.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><span class="sl-feed-notification-badge" hidden></span>';
+  headActions.insertBefore(notificationToggle, headActions.firstChild);
+
   const composer = feedInner.querySelector(".sl-feed-compose");
   const feedStage = document.createElement("div");
   feedStage.className = "sl-feed-stage";
