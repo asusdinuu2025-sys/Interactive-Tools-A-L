@@ -637,12 +637,16 @@
     }
     return urls;
   }
+  const SOCIAL_POST_SELECT_FIELDS = "id,author_id,author_display_name,author_username,author_gender,body,status,created_at,studylab_social_post_images(id,bucket_path,mime_type,size_bytes)";
   async function getPostRows(client, ownId) {
+    // Filter before applying the limit so pending posts cannot displace
+    // older approved community posts from the 40-post feed.
     const { data, error } = await client.from("studylab_social_posts")
-      .select("id,author_id,author_display_name,author_username,author_gender,body,status,created_at,studylab_social_post_images(id,bucket_path,mime_type,size_bytes)")
+      .select(SOCIAL_POST_SELECT_FIELDS)
+      .eq("status", "approved")
       .order("created_at", { ascending: false }).limit(40);
     if (error) throw error;
-    return (data || []).filter(post => post.status === "approved");
+    return data || [];
   }
   function renderPost(client, post, currentUserId, likesByPost, commentCountsByPost, signedImageUrls) {
     const card = make("article", "sl-feed-post");
@@ -1053,6 +1057,7 @@
   let socialNotificationUserId = null;
   let socialNotificationPopover = null;
   let socialNotificationRows = [];
+  let socialNotificationUnreadCount = 0;
 
   function ensureSocialNotificationUI() {
     const toggle = panel.querySelector(".sl-feed-notifications-toggle");
@@ -1077,8 +1082,9 @@
         socialNotificationPopover.hidden = !opening;
         toggle.setAttribute("aria-expanded", String(opening));
         if (opening) {
+          // Opening the panel is not an acknowledgement. Only tapping a
+          // notification or the explicit "Mark all read" action marks it read.
           await loadSocialNotifications(accountClient().client, socialNotificationUserId);
-          await markSocialNotificationsRead();
         }
       });
       document.addEventListener("click", event => {
@@ -1097,6 +1103,9 @@
     const badge = toggle?.querySelector(".sl-feed-notification-badge");
     if (!toggle || !badge) return;
     const value = Math.max(0, Number(count) || 0);
+    socialNotificationUnreadCount = value;
+    const markAll = socialNotificationPopover?.querySelector(".sl-feed-notification-mark-all");
+    if (markAll) markAll.disabled = value === 0;
     badge.textContent = value > 99 ? "99+" : String(value);
     badge.hidden = value === 0;
     toggle.setAttribute("aria-label", value ? "Notifications, " + value + " unread" : "Notifications");
@@ -1152,7 +1161,8 @@
   }
 
   async function markSocialNotificationsRead() {
-    if (!socialNotificationUserId || !socialNotificationRows.some(row => !row.is_read)) return;
+    // An unread notification can be older than the 30 items shown in the panel.
+    if (!socialNotificationUserId || socialNotificationUnreadCount === 0) return;
     try {
       const { error } = await accountClient().client.from("studylab_social_notifications")
         .update({ is_read: true })
@@ -1166,26 +1176,74 @@
     }
   }
 
+  async function getPostForNotification(client, postId, userId) {
+    // Only fetch an approved post visible to the current user under existing RLS.
+    // This works when the referenced post is older than the first 40 feed posts.
+    if (!postId || !userId) return null;
+    const { data: post, error } = await client.from("studylab_social_posts")
+      .select(SOCIAL_POST_SELECT_FIELDS)
+      .eq("id", postId)
+      .eq("status", "approved")
+      .maybeSingle();
+    if (error) throw error;
+    if (!post) return null;
+
+    const [likesResult, commentsResult, imageUrls] = await Promise.all([
+      client.from("studylab_social_likes").select("post_id,user_id").eq("post_id", post.id),
+      client.from("studylab_social_comments").select("post_id")
+        .eq("post_id", post.id).eq("status", "approved"),
+      getSignedImageUrls(client, [post])
+    ]);
+    if (likesResult.error) throw likesResult.error;
+    if (commentsResult.error) console.warn("Social comment count is unavailable:", commentsResult.error);
+    const likesByPost = new Map([[post.id, likesResult.data || []]]);
+    const commentsByPost = new Map([[post.id, (commentsResult.data || []).length]]);
+    return renderPost(client, post, userId, likesByPost, commentsByPost, imageUrls);
+  }
+
   async function openSocialNotification(row) {
     try {
       const client = accountClient().client;
-      const { error: readError } = await client.from("studylab_social_notifications")
-        .update({ is_read: true }).eq("id", row.id).eq("recipient_id", socialNotificationUserId);
-      if (readError) throw readError;
-      await loadSocialNotifications(client, socialNotificationUserId);
+      const currentUserId = socialNotificationUserId;
+      if (!currentUserId) return;
+
+      if (!row.is_read) {
+        const { error: readError } = await client.from("studylab_social_notifications")
+          .update({ is_read: true }).eq("id", row.id).eq("recipient_id", currentUserId);
+        if (readError) throw readError;
+      }
+      await loadSocialNotifications(client, currentUserId);
       if (socialNotificationPopover) socialNotificationPopover.hidden = true;
-      const card = [...stream.querySelectorAll(".sl-feed-post[data-post-id]")]
+      panel.querySelector(".sl-feed-notifications-toggle")?.setAttribute("aria-expanded", "false");
+
+      // Avoid fighting an in-progress feed load: that render would otherwise
+      // remove a just-inserted older post during its 40-post reconciliation.
+      if (feedLoadCount > 0) {
+        await new Promise(resolve => {
+          panel.addEventListener("studylab:social-feed-idle", resolve, { once: true });
+        });
+      }
+      let card = [...stream.querySelectorAll(".sl-feed-post[data-post-id]")]
         .find(item => item.dataset.postId === row.post_id);
       if (!card) {
-        setStatus("That post is no longer available in the current feed.");
+        card = await getPostForNotification(client, row.post_id, currentUserId);
+        if (card) {
+          stream.querySelector(".sl-feed-empty")?.remove();
+          stream.prepend(card);
+        }
+      }
+      if (!card) {
+        setStatus("This post has been deleted or is no longer available.");
         return;
       }
-      card.scrollIntoView({ behavior: "smooth", block: "center" });
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      card.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "center" });
       if (row.notification_type === "comment" && !card.querySelector(".sl-feed-comments")) {
         card.querySelector("[data-comment-count]")?.click();
       }
     } catch (error) {
       console.warn("Could not open StudyLab notification:", error);
+      setStatus("Could not open this notification. Please try again.", true);
     }
   }
 
@@ -1332,6 +1390,7 @@
         stream.removeAttribute("aria-busy");
         refreshButton?.classList.remove("is-refreshing");
         refreshButton?.removeAttribute("aria-busy");
+        panel.dispatchEvent(new Event("studylab:social-feed-idle"));
       }
     }
   }
