@@ -21,7 +21,7 @@
     </div>
     <nav class="sl-home-sidebar-nav" aria-label="Home sections">
       <span class="sl-home-nav-indicator" aria-hidden="true"></span>
-      <a class="sl-home-nav-item is-active" href="#home-top" data-nav-id="home" aria-current="location" title="Home">
+      <a class="sl-home-nav-item is-active" href="#home-overview" data-nav-id="home" aria-current="location" title="Home">
         <span class="sl-home-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7"/><path d="M5 9v12h14V9M9 21v-7h6v7"/></svg></span><span class="sl-home-nav-label">Home</span>
       </a>
       <a class="sl-home-nav-item" href="#practical-simulations" data-nav-id="practical-simulations" title="Practical Simulations">
