@@ -37,7 +37,7 @@ html[data-theme="light"] body {
 :root { --sl-home-header-clearance: 98px; }
 body:not(.study-room-page) .study-quick-panel,
 body:not(.study-room-page) .study-feedback-panel {
-  --sl-home-popup-bottom: 78px;
+  --sl-home-popup-bottom: calc(78px + var(--sl-home-floating-footer-lift, 0px));
   box-sizing: border-box;
   position: fixed !important;
   top: auto !important;
@@ -61,7 +61,7 @@ body:not(.study-room-page) .study-feedback-panel[hidden] { display: none !import
   }
   body:not(.study-room-page) .study-quick-panel,
   body:not(.study-room-page) .study-feedback-panel {
-    --sl-home-popup-bottom: 68px;
+    --sl-home-popup-bottom: calc(68px + var(--sl-home-floating-footer-lift, 0px));
     right: 12px !important;
     max-width: calc(100vw - 24px) !important;
   }
