@@ -1890,6 +1890,7 @@
         <h2 class="homepage-greeting-name" id="homeGreetingName">Student</h2>
         <p class="homepage-greeting-welcome">Welcome to Study Lab</p>
       </div>
+      <p class="sl-home-overview-subtitle">Your space to explore, practise and make progress.</p>
 
 
       <!-- =====================================================
@@ -1937,13 +1938,10 @@
       <div class="study-room-tools-row" >
       <div class="student-milestone">
         <div class="student-milestone-icon student-milestone-plant" aria-hidden="true">
-          <svg viewBox="0 0 48 48" role="img" focusable="false">
-            <path d="M24 40V23" fill="none" stroke="#f5ed35" stroke-width="3.2" stroke-linecap="round"/>
-            <path d="M24 31c-5-1-8-4-9-9 5 0 9 3 9 9Z" fill="#f5ed35" opacity=".95"/>
-            <path d="M24 25c1-7 6-12 13-12-1 7-6 12-13 12Z" fill="#39ff78" stroke="#39ff78" stroke-width="1.2" stroke-linejoin="round"/>
-            <path d="M24 30c-1-7-6-12-13-12 1 7 6 12 13 12Z" fill="#25f76a" stroke="#25f76a" stroke-width="1.2" stroke-linejoin="round"/>
-            <path d="M24 19c-1-5 1-9 5-12 3 5 2 9-5 12Z" fill="#78ff5b" stroke="#78ff5b" stroke-width="1.2" stroke-linejoin="round"/>
-            <path d="M17 41h14" fill="none" stroke="#f5ed35" stroke-width="2.5" stroke-linecap="round"/>
+          <svg viewBox="0 0 48 48" focusable="false" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 38V28M18 38V21M27 38V27M36 38V15"/>
+            <path d="m8 19 11-8 9 5 11-9"/>
+            <path d="m32 7 7 0 0 7"/>
           </svg>
         </div>
 
@@ -1974,23 +1972,29 @@
 
         <a class="study-room-launcher" id="live-study-room-section" href="study-room.html?completeProfile=1&amp;returnTo=%2Fstudy-room.html" aria-label="Open StudyLab Live Study Room">
           <span class="study-room-launcher-icon study-room-launcher-vector" aria-hidden="true">
-            <svg viewBox="0 0 48 48" focusable="false">
-              <circle cx="15" cy="11" r="4.5" fill="none" stroke="#39ffb0" stroke-width="2.5"/>
-              <circle cx="33" cy="11" r="4.5" fill="none" stroke="#61e8ff" stroke-width="2.5"/>
-              <path d="M6 23c.8-4.5 4-7 9-7s8.2 2.5 9 7M24 23c.8-4.5 4-7 9-7s8.2 2.5 9 7" fill="none" stroke="#39ffb0" stroke-width="2.5" stroke-linecap="round"/>
-              <path d="M5 27c6-2 12-2 19 2 7-4 13-4 19-2v11c-7-2-13-2-19 2-7-4-13-4-19-2z" fill="none" stroke="#f5ed35" stroke-width="2.5" stroke-linejoin="round"/>
-              <path d="M24 29v11M10 31c3-.5 6 0 9 1M29 32c3-1 6-1.5 9-1" fill="none" stroke="#61e8ff" stroke-width="1.8" stroke-linecap="round"/>
+            <svg viewBox="0 0 48 48" focusable="false" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="19" cy="17" r="6"/>
+              <path d="M7 38v-3c0-6.5 5.4-11 12-11s12 4.5 12 11v3"/>
+              <path d="M34 25a6 6 0 0 0-3-11M35 27c4 .8 6 3.8 6 8v3"/>
             </svg>
           </span>
           <span class="study-room-launcher-copy">
             <span class="study-room-launcher-title">LIVE STUDY ROOM</span>
-            <span class="study-room-launcher-subtitle">Join students and study together</span>
+            <span class="study-room-launcher-subtitle" data-home-room-occupancy>Checking live room…</span>
           </span>
           <span class="study-room-launcher-arrow" aria-hidden="true">↗</span>
         </a>
       </div>
 
       </div>
+
+      <a class="sl-home-next-action" href="#practical-simulations" aria-label="Explore StudyLab practical simulations">
+        <span class="sl-home-next-action-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-5.5 9.2A2.5 2.5 0 0 0 6.7 22h10.6a2.5 2.5 0 0 0 2.2-3.8L14 9V3"/><path d="M7.5 16.5h9"/></svg>
+        </span>
+        <span class="sl-home-next-action-copy"><strong>Explore practical simulations</strong><small>Start with something interactive.</small></span>
+        <span class="sl-home-next-action-arrow" aria-hidden="true">↗</span>
+      </a>
       </section>
 
       <style>
@@ -2744,9 +2748,9 @@
           <h3>Your focus. Your progress. One shared room.</h3>
           <p>Study alongside other A/L students, keep track of your focused time and climb the daily and weekly rankings.</p>
           <a class="sl-home-room-entry" href="study-room.html?completeProfile=1&amp;returnTo=%2Fstudy-room.html">
-            <span class="sl-home-room-entry-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7-11-7Z"/></svg></span>
-            <span class="sl-home-room-entry-copy"><small>ENTER LIVE STUDY ROOM</small><strong>Join the Study Room</strong><em>Open your shared focus space</em></span>
-            <span class="sl-home-room-entry-arrow" aria-hidden="true">↗</span>
+            <span class="sl-home-room-entry-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v5l3 2M9 2h6M12 2v3"/></svg></span>
+            <span class="sl-home-room-entry-copy"><small>ENTER LIVE STUDY ROOM</small><strong>Join the Study Room</strong><em data-home-room-occupancy>Checking live room…</em></span>
+            <span class="sl-home-room-entry-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 21H4V3h14v4M7 21V3h11v18H7z" opacity=".8"/><path d="M11 3 19 5v16l-8-2V3z" fill="currentColor" fill-opacity=".12"/><circle cx="16.3" cy="12" r=".9" fill="currentColor" stroke="none"/></svg></span>
           </a>
         </div>
         <div class="sl-home-room-ranks" data-home-room-ranks aria-live="polite">
