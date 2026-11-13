@@ -1047,6 +1047,170 @@
       list.append(row);
     }
   }
+
+  // Simple Instagram-style Social notifications: likes and comments on your posts.
+  let socialNotificationChannel = null;
+  let socialNotificationUserId = null;
+  let socialNotificationPopover = null;
+  let socialNotificationRows = [];
+
+  function ensureSocialNotificationUI() {
+    const toggle = panel.querySelector(".sl-feed-notifications-toggle");
+    const headActions = panel.querySelector(".sl-feed-head-actions");
+    if (!toggle || !headActions) return null;
+    if (!socialNotificationPopover) {
+      socialNotificationPopover = make("section", "sl-feed-notification-popover");
+      socialNotificationPopover.hidden = true;
+      socialNotificationPopover.setAttribute("aria-label", "Notifications");
+      const heading = make("div", "sl-feed-notification-popover-head");
+      heading.append(make("strong", "", "Notifications"));
+      const markAll = make("button", "sl-feed-notification-mark-all", "Mark all read");
+      markAll.type = "button";
+      markAll.addEventListener("click", () => markSocialNotificationsRead());
+      heading.append(markAll);
+      const list = make("div", "sl-feed-notification-list");
+      list.setAttribute("aria-live", "polite");
+      socialNotificationPopover.append(heading, list);
+      headActions.append(socialNotificationPopover);
+      toggle.addEventListener("click", async () => {
+        const opening = socialNotificationPopover.hidden;
+        socialNotificationPopover.hidden = !opening;
+        toggle.setAttribute("aria-expanded", String(opening));
+        if (opening) {
+          await loadSocialNotifications(accountClient().client, socialNotificationUserId);
+          await markSocialNotificationsRead();
+        }
+      });
+      document.addEventListener("click", event => {
+        if (socialNotificationPopover && !socialNotificationPopover.hidden &&
+            !socialNotificationPopover.contains(event.target) && !toggle.contains(event.target)) {
+          socialNotificationPopover.hidden = true;
+          toggle.setAttribute("aria-expanded", "false");
+        }
+      });
+    }
+    return { toggle, list: socialNotificationPopover.querySelector(".sl-feed-notification-list") };
+  }
+
+  function updateSocialNotificationBadge(count) {
+    const toggle = panel.querySelector(".sl-feed-notifications-toggle");
+    const badge = toggle?.querySelector(".sl-feed-notification-badge");
+    if (!toggle || !badge) return;
+    const value = Math.max(0, Number(count) || 0);
+    badge.textContent = value > 99 ? "99+" : String(value);
+    badge.hidden = value === 0;
+    toggle.setAttribute("aria-label", value ? "Notifications, " + value + " unread" : "Notifications");
+  }
+
+  function renderSocialNotifications() {
+    const ui = ensureSocialNotificationUI();
+    if (!ui) return;
+    ui.list.replaceChildren();
+    if (!socialNotificationRows.length) {
+      ui.list.append(make("p", "sl-feed-notification-empty", "You're all caught up."));
+      return;
+    }
+    for (const row of socialNotificationRows) {
+      const item = make("button", "sl-feed-notification-item" + (row.is_read ? "" : " is-unread"));
+      item.type = "button";
+      item.dataset.notificationId = row.id;
+      item.dataset.postId = row.post_id;
+      item.dataset.notificationType = row.notification_type;
+      const avatar = make("span", "sl-feed-notification-avatar",
+        Array.from(String(row.actor_display_name || "S").trim())[0]?.toLocaleUpperCase() || "S");
+      const copy = make("span", "sl-feed-notification-copy");
+      const actor = make("strong", "", row.actor_display_name || "A student");
+      const message = row.notification_type === "like" ? " liked your post." : " commented on your post.";
+      const text = make("span", "", message);
+      copy.append(actor, text, make("small", "", relativeTime(row.created_at)));
+      const mark = make("span", "sl-feed-notification-kind", row.notification_type === "like" ? "♥" : "▤");
+      item.append(avatar, copy, mark);
+      item.addEventListener("click", () => openSocialNotification(row));
+      ui.list.append(item);
+    }
+  }
+
+  async function loadSocialNotifications(client, userId) {
+    if (!client || !userId) return;
+    try {
+      const [rowsResult, countResult] = await Promise.all([
+        client.from("studylab_social_notifications")
+          .select("id,actor_display_name,post_id,notification_type,is_read,created_at")
+          .eq("recipient_id", userId).order("created_at", { ascending: false }).limit(30),
+        client.from("studylab_social_notifications")
+          .select("id", { count: "exact", head: true })
+          .eq("recipient_id", userId).eq("is_read", false)
+      ]);
+      if (rowsResult.error) throw rowsResult.error;
+      if (countResult.error) throw countResult.error;
+      socialNotificationRows = rowsResult.data || [];
+      updateSocialNotificationBadge(countResult.count || 0);
+      renderSocialNotifications();
+    } catch (error) {
+      console.warn("StudyLab Social notifications are unavailable:", error);
+    }
+  }
+
+  async function markSocialNotificationsRead() {
+    if (!socialNotificationUserId || !socialNotificationRows.some(row => !row.is_read)) return;
+    try {
+      const { error } = await accountClient().client.from("studylab_social_notifications")
+        .update({ is_read: true })
+        .eq("recipient_id", socialNotificationUserId).eq("is_read", false);
+      if (error) throw error;
+      socialNotificationRows = socialNotificationRows.map(row => ({ ...row, is_read: true }));
+      updateSocialNotificationBadge(0);
+      renderSocialNotifications();
+    } catch (error) {
+      console.warn("Could not mark StudyLab notifications as read:", error);
+    }
+  }
+
+  async function openSocialNotification(row) {
+    try {
+      const client = accountClient().client;
+      const { error: readError } = await client.from("studylab_social_notifications")
+        .update({ is_read: true }).eq("id", row.id).eq("recipient_id", socialNotificationUserId);
+      if (readError) throw readError;
+      await loadSocialNotifications(client, socialNotificationUserId);
+      if (socialNotificationPopover) socialNotificationPopover.hidden = true;
+      const card = [...stream.querySelectorAll(".sl-feed-post[data-post-id]")]
+        .find(item => item.dataset.postId === row.post_id);
+      if (!card) {
+        setStatus("That post is no longer available in the current feed.");
+        return;
+      }
+      card.scrollIntoView({ behavior: "smooth", block: "center" });
+      if (row.notification_type === "comment" && !card.querySelector(".sl-feed-comments")) {
+        card.querySelector("[data-comment-count]")?.click();
+      }
+    } catch (error) {
+      console.warn("Could not open StudyLab notification:", error);
+    }
+  }
+
+  function setupSocialNotifications(client, userId) {
+    ensureSocialNotificationUI();
+    if (socialNotificationUserId === userId && socialNotificationChannel) {
+      loadSocialNotifications(client, userId);
+      return;
+    }
+    if (socialNotificationChannel) {
+      client.removeChannel(socialNotificationChannel);
+      socialNotificationChannel = null;
+    }
+    socialNotificationUserId = userId;
+    loadSocialNotifications(client, userId);
+    socialNotificationChannel = client.channel("studylab-social-notifications-" + userId)
+      .on("postgres_changes", {
+        event: "INSERT",
+        schema: "public",
+        table: "studylab_social_notifications",
+        filter: "recipient_id=eq." + userId
+      }, () => loadSocialNotifications(client, userId))
+      .subscribe();
+  }
+
   let feedLoadCount = 0;
   let lastFeedLoadedAt = 0;
   async function loadFeed() {
@@ -1071,6 +1235,7 @@
         user = refreshedSession?.user || account.getUser();
       }
       if (!user?.id) throw new Error("Student account not ready.");
+      setupSocialNotifications(account.client, user.id);
       isAdmin = user.app_metadata?.role === "admin";
       const heading = panel.querySelector(".sl-feed-heading");
       let adminBadge = panel.querySelector(".sl-feed-admin-mode");

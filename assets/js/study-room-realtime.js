@@ -188,6 +188,9 @@
   }
 
   function updateSessionUI(row) {
+    if (row?.subject && [...subject.options].some(option => option.value === row.subject || option.textContent.trim() === row.subject)) {
+      subject.value = row.subject;
+    }
     const isRunning = Boolean(row?.is_studying);
     const isAway = Boolean(row?.session_active && row?.session_presence_state === "away");
     const hasSession = Boolean(row?.session_active);
@@ -459,6 +462,7 @@
       targetSeconds: Number(member?.session_target_seconds) || 0,
       lastHeartbeatAt: member?.last_heartbeat_at || null,
       sessionStartedAt: member?.session_started_at || null,
+      targetReachedAt: member?.session_target_reached_at || null,
       updatedAt: member?.updated_at || null,
       sessionExpiredAt: member?.session_expired_at || null
     };
