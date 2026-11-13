@@ -991,24 +991,179 @@ html[data-theme="light"] body header.site-header {
   }
 }
 
-/* Universal Home-card liquid glass finish, including tablet and mobile layouts. */
-.sl-home-layout :is(article, .card, [class*="-card"], [class*="_card"]) {
-  -webkit-backdrop-filter: blur(30px) saturate(185%) !important;
-  backdrop-filter: blur(30px) saturate(185%) !important;
-  background-color: rgba(255,255,255,.055) !important;
-  border-color: rgba(190,220,245,.24) !important;
-  box-shadow:
-    0 14px 34px rgba(0,0,0,.13),
-    inset 0 1.5px 0 rgba(255,255,255,.24),
-    inset 0 -1px 0 rgba(130,195,245,.09),
-    inset 0 0 22px rgba(170,220,255,.035) !important;
+
+/* Final Home layout corrections: compact sidebar, clean cards and aligned tools. */
+@media (min-width: 1180px) {
+  .sl-home-sidebar {
+    top: 92px !important;
+    bottom: 14px !important;
+    left: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    box-sizing: border-box !important;
+    padding: 11px 12px !important;
+    gap: 8px !important;
+    overflow: hidden !important;
+    border-radius: 0 22px 22px 0 !important;
+  }
+
+  .sl-home-sidebar.is-collapsed {
+    width: 78px !important;
+  }
+
+  .sl-home-sidebar-nav {
+    flex: 0 0 auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    overflow-y: visible !important;
+    gap: 2px !important;
+    padding: 0 !important;
+  }
+
+  .sl-home-nav-item {
+    height: 34px !important;
+    min-height: 34px !important;
+    padding-inline: 9px !important;
+    gap: 9px !important;
+    font-size: .77rem !important;
+    border-radius: 11px !important;
+  }
+
+  .sl-home-nav-item[data-nav-id="practical-simulations"],
+  .sl-home-nav-item[data-nav-id="past-papers"],
+  .sl-home-nav-item[data-nav-id="productivity"] {
+    margin-top: 5px !important;
+  }
+
+  .sl-home-sidebar-hint {
+    padding: 5px 3px 0 !important;
+    font-size: .58rem !important;
+    line-height: 1.25 !important;
+  }
+
+  .sl-home-quick-actions {
+    flex: 0 0 auto !important;
+    gap: 7px !important;
+    padding-top: 9px !important;
+  }
+
+  .sl-home-quick-actions > button {
+    height: 38px !important;
+    min-height: 38px !important;
+    padding: 0 10px !important;
+    gap: 9px !important;
+    border-radius: 12px !important;
+  }
+
+  .sl-home-quick-actions .study-chat-button {
+    position: relative !important;
+    right: auto !important;
+    bottom: auto !important;
+    inset: auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    justify-content: flex-start !important;
+    overflow: visible !important;
+  }
+
+  .sl-home-quick-actions .study-chat-button-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 22px !important;
+    width: 22px !important;
+    height: 22px !important;
+    color: #a8e4ff !important;
+  }
+
+  .sl-home-quick-actions .study-chat-button-icon svg {
+    display: block !important;
+    width: 20px !important;
+    height: 20px !important;
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 1.7 !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+  }
+
+  .sl-home-quick-actions .study-chat-button > span:nth-child(2) {
+    display: inline !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  .sl-home-quick-actions .study-chat-unread {
+    position: absolute !important;
+    top: -5px !important;
+    right: -5px !important;
+    display: inline-flex !important;
+    flex: 0 0 auto !important;
+    width: auto !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    margin: 0 !important;
+    padding: 0 5px !important;
+    border-radius: 999px !important;
+    z-index: 3 !important;
+  }
+
+  .sl-home-quick-actions .study-chat-unread[hidden] {
+    display: none !important;
+  }
+
+  .sl-home-sidebar.is-collapsed .sl-home-quick-actions > button {
+    justify-content: center !important;
+    padding-inline: 0 !important;
+  }
+
+  .sl-home-sidebar.is-collapsed .sl-home-quick-actions > button > span:not(:first-child) {
+    display: none !important;
+  }
+
+  .sl-home-sidebar.is-collapsed .sl-home-quick-actions .study-chat-unread {
+    display: none !important;
+  }
+
+  .sl-home-sidebar.is-collapsed .sl-home-quick-actions .study-chat-button-icon {
+    flex-basis: 22px !important;
+  }
+
+  .sl-home-layout .sl-home-content,
+  .sl-home-layout.is-sidebar-collapsed .sl-home-content {
+    padding-left: 236px !important;
+  }
+
+  .sl-home-sidebar.is-collapsed ~ .sl-home-content,
+  .sl-home-layout.is-sidebar-collapsed .sl-home-content {
+    padding-left: 96px !important;
+  }
+
+  .studylab-ai-tools-row .studylab-ai-panel,
+  .study-chat-panel,
+  .sl-pet-panel {
+    left: 236px !important;
+    right: auto !important;
+    bottom: 22px !important;
+  }
+
+  .sl-home-sidebar.is-collapsed ~ .sl-home-content .study-chat-panel,
+  .sl-home-layout.is-sidebar-collapsed .study-chat-panel {
+    left: 94px !important;
+  }
 }
-html[data-theme="light"] .sl-home-layout :is(article, .card, [class*="-card"], [class*="_card"]) {
-  background-color: rgba(255,255,255,.34) !important;
-  border-color: rgba(255,255,255,.82) !important;
-  box-shadow:
-    0 13px 30px rgba(45,83,122,.085),
-    inset 0 1.5px 0 rgba(255,255,255,.98),
-    inset 0 -1px 0 rgba(105,155,200,.10),
-    inset 0 0 22px rgba(255,255,255,.28) !important;
+
+/* Do not apply card surfaces to nested icon/label elements. */
+.sl-home-layout .subject-card,
+.sl-home-layout .study-tools-card,
+.sl-home-layout .telegram-card,
+.sl-home-layout .mcq-practice-card,
+.sl-home-layout .chemistry-resources-card,
+.sl-home-layout .homepage-overview-panel,
+.sl-home-layout .homepage-overview-panel > .live-card,
+.sl-home-layout .homepage-overview-panel > .student-milestone,
+.sl-home-layout .homepage-overview-panel > .study-room-launcher {
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  backdrop-filter: blur(30px) saturate(180%);
 }
