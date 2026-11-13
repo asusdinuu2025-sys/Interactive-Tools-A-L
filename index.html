@@ -286,6 +286,49 @@
       isolation: isolate;
     }
 
+    /* Personalized Home greeting */
+    .homepage-greeting {
+      position: relative;
+      z-index: 2;
+      width: min(100%, 1120px);
+      margin: 24px auto 30px;
+      padding: 0 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      text-align: left;
+      gap: 3px;
+      isolation: isolate;
+    }
+    .homepage-greeting-time {
+      margin: 0 0 2px;
+      color: #8fcfff;
+      font: 650 clamp(14px, 1.35vw, 17px)/1.35 "Nirmala UI", "Segoe UI", sans-serif;
+      letter-spacing: .015em;
+    }
+    .homepage-greeting-name {
+      margin: 0;
+      color: var(--text-primary, #f4f8ff);
+      font: 750 clamp(30px, 4vw, 46px)/1.12 "Nirmala UI", "Segoe UI", sans-serif;
+      letter-spacing: -.045em;
+      text-shadow: 0 8px 28px rgba(0, 0, 0, .16);
+    }
+    .homepage-greeting-welcome {
+      margin: 4px 0 0;
+      color: var(--text-secondary, rgba(220, 232, 246, .78));
+      font: 450 clamp(14px, 1.3vw, 16px)/1.5 "Nirmala UI", "Segoe UI", sans-serif;
+      opacity: .9;
+    }
+    html[data-theme="light"] .homepage-greeting-time { color: #287db5; }
+    html[data-theme="light"] .homepage-greeting-name {
+      color: #182b42;
+      text-shadow: 0 7px 24px rgba(50, 95, 135, .10);
+    }
+    html[data-theme="light"] .homepage-greeting-welcome { color: #60758b; }
+    @media (max-width: 760px) {
+      .homepage-greeting { margin: 18px auto 24px; padding-inline: 4px; }
+    }
+
     /* =========================================================
        HERO — SMOOTH TYPOGRAPHY
        ========================================================= */
@@ -1835,7 +1878,11 @@
 
       <h1 class="home-hero-title-spacer" aria-label="Study-Lab for G.C.E A/L Sri Lanka"><span class="sr-only">Study-Lab for G.C.E A/L Sri Lanka</span></h1>
 
-      <p class="subtitle homepage-greeting" id="homeGreeting" aria-live="polite">Good morning</p>
+      <div class="homepage-greeting" id="homeGreeting" aria-live="polite">
+        <p class="homepage-greeting-time" id="homeGreetingTime">Good morning</p>
+        <h2 class="homepage-greeting-name" id="homeGreetingName">Student</h2>
+        <p class="homepage-greeting-welcome">Welcome to StudyLab</p>
+      </div>
 
 
       <!-- =====================================================
