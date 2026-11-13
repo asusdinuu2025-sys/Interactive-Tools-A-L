@@ -61,6 +61,7 @@
     return { element, marker };
   });
   const desktopDock = window.matchMedia("(min-width: 1180px)");
+  const footer = document.querySelector(".site-footer");
   function syncQuickActionDock() {
     dockPlaceholders.forEach(({ element, marker }) => {
       if (desktopDock.matches) quickActions.appendChild(element);
@@ -107,8 +108,31 @@
     }
   }
 
+  function updateSidebarFooterFade() {
+    if (!footer || !desktopDock.matches) {
+      sidebar.style.removeProperty("--sl-home-footer-opacity");
+      sidebar.classList.remove("is-footer-hidden");
+      return;
+    }
+
+    const sidebarRect = sidebar.getBoundingClientRect();
+    const footerRect = footer.getBoundingClientRect();
+    const fadeLead = Math.min(160, Math.max(100, sidebarRect.height * 0.24));
+    const fadeStart = sidebarRect.bottom + fadeLead;
+    const fadeEnd = sidebarRect.top + 10;
+
+    let opacity = 1;
+    if (footerRect.bottom > sidebarRect.top && footerRect.top < fadeStart) {
+      opacity = Math.max(0, Math.min(1, (footerRect.top - fadeEnd) / (fadeStart - fadeEnd)));
+    }
+
+    sidebar.style.setProperty("--sl-home-footer-opacity", opacity.toFixed(3));
+    sidebar.classList.toggle("is-footer-hidden", opacity <= 0.025);
+  }
+
   function syncFromScroll() {
     scrollFrame = 0;
+    updateSidebarFooterFade();
     if (document.body.classList.contains("sl-community-open")) {
       setActive("social");
       return;
