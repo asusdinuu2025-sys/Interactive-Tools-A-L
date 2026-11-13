@@ -667,3 +667,267 @@ body.studylab-campus .student-counter { border-radius:18px; }
 }
 
 .sl-campus-hero-copy { position:relative; z-index:2; min-width:0; }
+
+
+/* Campus polish: neutral liquid glass, readable greeting and a compact four-card status row. */
+body.studylab-campus,
+body.studylab-campus button,
+body.studylab-campus input,
+body.studylab-campus select,
+body.studylab-campus textarea {
+  font-family:"Nirmala UI","Nirmala UI Semilight","Segoe UI",sans-serif !important;
+}
+:root {
+  --campus-sidebar:252px;
+  --campus-bg:#141617;
+  --campus-panel:rgba(255,255,255,.075);
+  --campus-panel-solid:#202426;
+  --campus-panel-raised:rgba(255,255,255,.12);
+  --campus-line:rgba(255,255,255,.14);
+  --campus-text:#f2f5f4;
+  --campus-muted:#aeb8b5;
+  --campus-cyan:#8ed8c8;
+  --campus-blue:#a6b8e8;
+  --campus-violet:#c0a9dd;
+  --campus-green:#9bd7b8;
+  --campus-shadow:0 22px 60px rgba(0,0,0,.22);
+}
+html[data-theme="light"] {
+  --campus-bg:#f2f4f3;
+  --campus-panel:rgba(255,255,255,.66);
+  --campus-panel-solid:rgba(255,255,255,.78);
+  --campus-panel-raised:rgba(255,255,255,.88);
+  --campus-line:rgba(68,83,77,.13);
+  --campus-text:#26312e;
+  --campus-muted:#6d7b76;
+  --campus-cyan:#398f7d;
+  --campus-blue:#647da9;
+  --campus-violet:#8871a8;
+  --campus-green:#4f9675;
+  --campus-shadow:0 20px 54px rgba(36,54,46,.10);
+}
+body.studylab-campus {
+  background:
+    radial-gradient(ellipse at 78% 0%,rgba(125,188,169,.10),transparent 34rem),
+    radial-gradient(ellipse at 8% 52%,rgba(165,143,190,.07),transparent 30rem),
+    var(--campus-bg);
+}
+html[data-theme="light"] body.studylab-campus {
+  background:
+    radial-gradient(ellipse at 78% 0%,rgba(129,190,174,.16),transparent 34rem),
+    radial-gradient(ellipse at 5% 55%,rgba(173,157,197,.10),transparent 30rem),
+    var(--campus-bg);
+}
+
+/* Floating sidebar with a real glass edge instead of a flat blue rail. */
+.sl-campus-sidebar {
+  inset:12px auto 12px 12px;
+  width:calc(var(--campus-sidebar) - 24px);
+  padding:23px 15px 16px;
+  border:1px solid var(--campus-line);
+  border-radius:25px;
+  background:color-mix(in srgb,var(--campus-panel-solid) 68%,transparent);
+  box-shadow:0 18px 48px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.18);
+  backdrop-filter:blur(34px) saturate(155%);
+  -webkit-backdrop-filter:blur(34px) saturate(155%);
+}
+.sl-campus-side-label { letter-spacing:.12em; }
+.sl-campus-nav { gap:8px; }
+.sl-campus-nav a {
+  min-height:47px;
+  border:1px solid rgba(255,255,255,.055);
+  border-radius:15px;
+  background:rgba(255,255,255,.035);
+  transition:background .2s ease,border-color .2s ease,transform .2s ease;
+}
+.sl-campus-nav a:hover,
+.sl-campus-nav a[aria-current="page"] {
+  border-color:rgba(142,216,200,.28);
+  color:var(--campus-text);
+  background:linear-gradient(115deg,rgba(142,216,200,.16),rgba(192,169,221,.10));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 8px 20px rgba(0,0,0,.07);
+}
+.sl-campus-nav a:hover { transform:translateX(2px); }
+.sl-campus-sidebar-bottom {
+  border:1px solid var(--campus-line);
+  border-radius:18px;
+  background:rgba(255,255,255,.055);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.10);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+}
+
+/* Neutral adaptive hero; keep the personalised line open and readable. */
+body.studylab-campus .hero {
+  border-color:var(--campus-line);
+  background:
+    radial-gradient(ellipse at 82% 18%,rgba(142,216,200,.14),transparent 25rem),
+    radial-gradient(ellipse at 18% 100%,rgba(192,169,221,.09),transparent 24rem),
+    linear-gradient(125deg,rgba(45,51,49,.92),rgba(34,39,38,.88));
+  box-shadow:var(--campus-shadow),inset 0 1px 0 rgba(255,255,255,.12);
+}
+html[data-theme="light"] body.studylab-campus .hero {
+  border-color:rgba(83,105,95,.15);
+  background:
+    radial-gradient(ellipse at 82% 18%,rgba(142,216,200,.20),transparent 25rem),
+    radial-gradient(ellipse at 18% 100%,rgba(192,169,221,.13),transparent 24rem),
+    linear-gradient(125deg,rgba(255,255,255,.94),rgba(244,247,245,.88));
+}
+body.studylab-campus .home-hero-eyebrow {
+  color:var(--campus-cyan);
+  letter-spacing:.11em;
+}
+html[data-theme="light"] body.studylab-campus .home-hero-eyebrow { color:#398f7d; }
+body.studylab-campus .hero h1,
+html[data-theme="light"] body.studylab-campus .hero h1 {
+  max-width:100%;
+  font-family:"Nirmala UI","Nirmala UI Semilight","Segoe UI",sans-serif !important;
+  font-size:clamp(2rem,3.4vw,3.55rem);
+  font-weight:650;
+  letter-spacing:-.012em;
+  word-spacing:.025em;
+  line-height:1.22;
+  overflow-wrap:normal;
+}
+body.studylab-campus .hero .subtitle { max-width:680px; }
+.sl-campus-hero-actions a,
+.sl-campus-hero-actions a.secondary {
+  border:1px solid rgba(255,255,255,.23);
+  border-radius:16px;
+  color:var(--campus-text);
+  background:rgba(255,255,255,.105);
+  box-shadow:0 10px 26px rgba(0,0,0,.08),inset 0 1px 0 rgba(255,255,255,.18);
+  backdrop-filter:blur(20px) saturate(145%);
+  -webkit-backdrop-filter:blur(20px) saturate(145%);
+}
+.sl-campus-hero-actions a:hover { background:rgba(255,255,255,.17); }
+html[data-theme="light"] .sl-campus-hero-actions a,
+html[data-theme="light"] .sl-campus-hero-actions a.secondary {
+  border-color:rgba(74,99,87,.16);
+  color:#2e4b40;
+  background:rgba(255,255,255,.55);
+  box-shadow:0 9px 22px rgba(48,75,62,.08),inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+/* Four existing homepage features, one aligned desktop row. */
+body.studylab-campus .homepage-utility-row {
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  align-items:stretch;
+  gap:12px;
+  margin-top:24px;
+}
+body.studylab-campus .homepage-utility-row .live-card,
+body.studylab-campus .homepage-utility-row .student-milestone,
+body.studylab-campus .homepage-utility-row > .study-room-launcher {
+  min-height:142px;
+  height:100%;
+  padding:15px;
+  border:1px solid var(--campus-line);
+  border-radius:19px;
+  color:var(--campus-text);
+  background:var(--campus-panel);
+  box-shadow:0 12px 30px rgba(0,0,0,.07),inset 0 1px 0 rgba(255,255,255,.14);
+  backdrop-filter:blur(22px) saturate(145%);
+  -webkit-backdrop-filter:blur(22px) saturate(145%);
+}
+body.studylab-campus .homepage-utility-row > .study-room-launcher {
+  display:flex;
+  min-width:0;
+  flex-direction:row;
+  align-items:center;
+  justify-content:flex-start;
+  gap:12px;
+  text-decoration:none;
+  transition:transform .2s ease,border-color .2s ease,background .2s ease;
+}
+body.studylab-campus .homepage-utility-row > .study-room-launcher:hover {
+  transform:translateY(-3px);
+  border-color:rgba(142,216,200,.35);
+  background:var(--campus-panel-raised);
+}
+body.studylab-campus .homepage-utility-row > .study-room-launcher .study-room-launcher-icon {
+  flex:0 0 42px;
+  width:42px;
+  height:42px;
+}
+body.studylab-campus .homepage-utility-row > .study-room-launcher .study-room-launcher-copy {
+  display:grid;
+  min-width:0;
+  gap:7px;
+}
+body.studylab-campus .homepage-utility-row > .study-room-launcher .study-room-launcher-title {
+  color:var(--campus-text);
+  font-size:.82rem;
+  line-height:1.35;
+}
+body.studylab-campus .homepage-utility-row > .study-room-launcher .study-room-launcher-subtitle {
+  color:var(--campus-muted);
+  font-size:.72rem;
+  line-height:1.45;
+}
+body.studylab-campus .homepage-utility-row .live-card-title {
+  color:var(--campus-text);
+  font-size:.76rem;
+  line-height:1.35;
+}
+body.studylab-campus .homepage-utility-row .live-number { color:var(--campus-cyan); }
+body.studylab-campus .homepage-utility-row .student-milestone-kicker {
+  color:var(--campus-muted);
+  font-size:.61rem;
+  letter-spacing:.07em;
+}
+body.studylab-campus .homepage-utility-row .student-milestone-number {
+  color:var(--campus-cyan);
+  font-size:1.5rem;
+}
+body.studylab-campus .homepage-utility-row .student-milestone-label,
+body.studylab-campus .homepage-utility-row .student-milestone-goal,
+body.studylab-campus .homepage-utility-row .live-subtext,
+body.studylab-campus .homepage-utility-row .live-status { color:var(--campus-muted); }
+
+/* Consistent glass controls, without changing any destinations or click behaviour. */
+body.studylab-campus .header-actions > button,
+body.studylab-campus .header-actions .profile-button,
+.sl-campus-toplinks a {
+  border:1px solid var(--campus-line) !important;
+  border-radius:15px !important;
+  background:var(--campus-panel) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.13);
+  backdrop-filter:blur(20px) saturate(145%);
+  -webkit-backdrop-filter:blur(20px) saturate(145%);
+}
+.sl-campus-toplinks a { padding:10px 13px; }
+html[data-theme="light"] .sl-campus-sidebar {
+  background:rgba(255,255,255,.58);
+  box-shadow:0 18px 48px rgba(39,62,51,.09),inset 0 1px 0 rgba(255,255,255,.9);
+}
+html[data-theme="light"] .sl-campus-nav a { background:rgba(255,255,255,.34); }
+html[data-theme="light"] .sl-campus-nav a:hover,
+html[data-theme="light"] .sl-campus-nav a[aria-current="page"] {
+  background:linear-gradient(115deg,rgba(142,216,200,.24),rgba(192,169,221,.15));
+  border-color:rgba(57,143,125,.20);
+}
+html[data-theme="light"] body.studylab-campus .homepage-utility-row .live-card,
+html[data-theme="light"] body.studylab-campus .homepage-utility-row .student-milestone,
+html[data-theme="light"] body.studylab-campus .homepage-utility-row > .study-room-launcher {
+  border-color:rgba(68,91,80,.14);
+  background:rgba(255,255,255,.62);
+  box-shadow:0 12px 30px rgba(41,66,54,.06),inset 0 1px 0 rgba(255,255,255,.9);
+}
+@media (max-width:1180px) and (min-width:761px) {
+  body.studylab-campus .homepage-utility-row { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (max-width:760px) {
+  body.studylab-campus .homepage-utility-row { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  body.studylab-campus .homepage-utility-row .live-card,
+  body.studylab-campus .homepage-utility-row .student-milestone,
+  body.studylab-campus .homepage-utility-row > .study-room-launcher { min-height:132px; padding:13px; }
+  body.studylab-campus .hero h1 { font-size:clamp(1.9rem,7.2vw,2.7rem); letter-spacing:-.008em; line-height:1.25; }
+  .sl-campus-sidebar { display:none; }
+}
+@media (max-width:430px) {
+  body.studylab-campus .homepage-utility-row { grid-template-columns:minmax(0,1fr); }
+}
+@media (prefers-reduced-motion:reduce) {
+  .sl-campus-sidebar *,body.studylab-campus .homepage-utility-row > .study-room-launcher { transition:none !important; }
+}
