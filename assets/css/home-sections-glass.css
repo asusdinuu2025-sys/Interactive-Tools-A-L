@@ -941,8 +941,7 @@ html[data-theme="light"] .sl-home-room-entry {
   }
   .sl-home-sidebar .sl-home-quick-actions {
     opacity: var(--sl-home-footer-opacity, 1);
-    transform: translateY(calc((1 - var(--sl-home-footer-opacity, 1)) * 5px));
-    transition: opacity .18s ease, transform .18s ease !important;
+    transition: opacity .18s ease !important;
   }
   .sl-home-sidebar.is-footer-hidden .sl-home-quick-actions {
     pointer-events: none !important;
@@ -993,6 +992,14 @@ html body header.site-header .sl-feed-toggle {
   opacity: 1 !important;
   visibility: visible !important;
 }
+
+/* Keep the fixed Social entry calm and glass-like, not attention-pulsing. */
+html body header.site-header .sl-feed-toggle,
+.sl-feed-floating-shortcut {
+  animation: none !important;
+  text-shadow: none !important;
+}
+
 
 /* The bottom-right action trio and the separate Social shortcut use the same neutral pane. */
 .study-quick-button,
