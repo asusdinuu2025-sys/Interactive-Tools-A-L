@@ -993,7 +993,7 @@ html[data-theme="light"] body header.site-header {
 
 
 
-/* Refined floating Home rail: align with the header's top edge and size to content. */
+/* Refined floating Home rail: cleaner spacing, stronger proportions and independent overlays. */
 @media (min-width: 1180px) {
   .sl-home-sidebar {
     top: 14px !important;
@@ -1001,11 +1001,13 @@ html[data-theme="light"] body header.site-header {
     left: max(14px, calc((100vw - 1560px) / 2 + 14px)) !important;
     width: 220px !important;
     height: auto !important;
-    max-height: none !important;
+    max-height: calc(100dvh - 28px) !important;
     box-sizing: border-box !important;
-    padding: 12px !important;
-    gap: 8px !important;
-    overflow: hidden !important;
+    padding: 14px !important;
+    gap: 10px !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    scrollbar-width: none !important;
     border: 1px solid rgba(190,225,255,.28) !important;
     border-radius: 24px !important;
     transform: none !important;
@@ -1021,6 +1023,7 @@ html[data-theme="light"] body header.site-header {
       inset 0 1.5px 0 rgba(255,255,255,.28),
       inset 0 0 24px rgba(170,220,255,.035) !important;
   }
+  .sl-home-sidebar::-webkit-scrollbar { display: none !important; }
 
   .sl-home-sidebar.is-collapsed {
     width: 78px !important;
@@ -1028,42 +1031,47 @@ html[data-theme="light"] body header.site-header {
     border-radius: 22px !important;
   }
 
+  .sl-home-sidebar-head {
+    min-height: 42px !important;
+    padding: 3px 2px 10px 5px !important;
+  }
+
   .sl-home-sidebar-nav {
     flex: 0 0 auto !important;
     min-height: 0 !important;
     overflow: visible !important;
     overflow-y: visible !important;
-    gap: 2px !important;
-    padding: 0 !important;
+    gap: 4px !important;
+    padding: 4px 0 2px !important;
   }
 
   .sl-home-nav-item {
-    height: 34px !important;
-    min-height: 34px !important;
-    padding-inline: 9px !important;
-    gap: 9px !important;
-    border-radius: 11px !important;
-    font-size: .77rem !important;
+    height: 37px !important;
+    min-height: 37px !important;
+    padding-inline: 10px !important;
+    gap: 10px !important;
+    border-radius: 12px !important;
+    font-size: .79rem !important;
   }
 
   .sl-home-nav-item[data-nav-id="practical-simulations"],
   .sl-home-nav-item[data-nav-id="past-papers"],
   .sl-home-nav-item[data-nav-id="productivity"] {
-    margin-top: 5px !important;
+    margin-top: 6px !important;
   }
 
   .sl-home-sidebar-hint {
-    padding: 6px 3px 0 !important;
+    padding: 8px 4px 1px !important;
     margin: 0 !important;
-    font-size: .58rem !important;
-    line-height: 1.25 !important;
+    font-size: .59rem !important;
+    line-height: 1.3 !important;
   }
 
   .sl-home-quick-actions {
     flex: 0 0 auto !important;
-    gap: 7px !important;
+    gap: 8px !important;
     margin: 0 !important;
-    padding: 9px 0 0 !important;
+    padding: 12px 0 1px !important;
   }
 
   .sl-home-quick-actions > button,
@@ -1078,12 +1086,12 @@ html[data-theme="light"] body header.site-header {
     width: 100% !important;
     min-width: 0 !important;
     max-width: none !important;
-    height: 40px !important;
-    min-height: 40px !important;
+    height: 42px !important;
+    min-height: 42px !important;
     margin: 0 !important;
-    padding: 0 11px !important;
+    padding: 0 12px !important;
     border: 1px solid rgba(190,225,255,.23) !important;
-    border-radius: 13px !important;
+    border-radius: 14px !important;
     color: rgba(235,247,255,.96) !important;
     background: linear-gradient(135deg, rgba(255,255,255,.12), rgba(120,175,230,.045)), rgba(18,34,54,.20) !important;
     box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 6px 18px rgba(0,0,0,.09) !important;
@@ -1150,18 +1158,65 @@ html[data-theme="light"] body header.site-header {
   .sl-home-quick-actions .studylab-ai-launcher-title { font-size: .82rem !important; }
   .sl-home-quick-actions .studylab-ai-launcher-subtitle { display: none !important; }
 
-  .sl-home-quick-actions .study-chat-button > span:nth-child(2) {
+  /* The global floating-controls stylesheet otherwise pins Chat to the viewport edge. */
+  body:not(.study-room-page) .sl-home-sidebar .sl-home-quick-actions .study-chat-button {
+    position: relative !important;
+    inset: auto !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    z-index: 2 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    padding: 0 12px !important;
+    gap: 10px !important;
+    border-radius: 14px !important;
+  }
+
+  body:not(.study-room-page) .sl-home-sidebar .sl-home-quick-actions .study-chat-button:hover,
+  body:not(.study-room-page) .sl-home-sidebar .sl-home-quick-actions .study-chat-button.is-open {
+    transform: translateY(-1px) !important;
+    border-color: rgba(133,213,255,.48) !important;
+    background: linear-gradient(135deg, rgba(88,175,245,.22), rgba(140,145,255,.12)), rgba(18,34,54,.28) !important;
+  }
+
+  body:not(.study-room-page) .sl-home-sidebar .sl-home-quick-actions .study-chat-button > span:not(.study-chat-button-icon):not(.study-chat-unread) {
     display: inline !important;
     flex: 1 1 auto !important;
     min-width: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: inherit !important;
+    font: inherit !important;
     white-space: nowrap !important;
   }
 
-  .sl-home-quick-actions .study-chat-unread {
+  body:not(.study-room-page) .sl-home-sidebar .sl-home-quick-actions .study-chat-button .study-chat-button-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 22px !important;
+    width: 22px !important;
+    height: 22px !important;
+    color: #a8e4ff !important;
+  }
+
+  body:not(.study-room-page) .sl-home-sidebar .sl-home-quick-actions .study-chat-unread {
     position: absolute !important;
     top: -5px !important;
     right: -5px !important;
     display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     flex: 0 0 auto !important;
     width: auto !important;
     height: 18px !important;
@@ -1178,31 +1233,41 @@ html[data-theme="light"] body header.site-header {
     justify-content: center !important;
     padding-inline: 0 !important;
   }
-
   .sl-home-sidebar.is-collapsed .sl-home-quick-actions > button > span:not(:first-child) {
     display: none !important;
   }
-
-  .sl-home-sidebar.is-collapsed .sl-home-quick-actions .study-chat-unread {
-    display: none !important;
-  }
-
-  .sl-home-sidebar.is-collapsed .sl-home-quick-actions { gap: 7px !important; }
+  .sl-home-sidebar.is-collapsed .sl-home-quick-actions .study-chat-unread { display: none !important; }
+  .sl-home-sidebar.is-collapsed .sl-home-quick-actions { gap: 8px !important; }
 
   .sl-home-layout .sl-home-content,
   .sl-home-layout.is-sidebar-collapsed .sl-home-content {
     padding-left: 236px !important;
   }
-
   .sl-home-layout.is-sidebar-collapsed .sl-home-content {
     padding-left: 96px !important;
   }
 
-  /* Chat is a separate floating window, never attached to the sidebar rail. */
+  /* Shorter top bar, centred in the usable area beside the navigation rail. */
+  html body header.site-header {
+    left: calc(50% + 106px) !important;
+    right: auto !important;
+    width: min(720px, calc(100vw - 280px)) !important;
+    min-width: min(680px, calc(100vw - 280px)) !important;
+    max-width: calc(100vw - 280px) !important;
+    padding-inline: 26px !important;
+    gap: 28px !important;
+    transform: translateX(-50%) !important;
+  }
+  html body:has(.sl-home-sidebar.is-collapsed) header.site-header {
+    left: calc(50% + 35px) !important;
+  }
+
+  /* Chat's conversation window remains independent of the sidebar launcher. */
   .study-chat-panel {
     position: fixed !important;
     left: auto !important;
     right: 22px !important;
+    top: auto !important;
     bottom: 22px !important;
     width: min(410px, calc(100vw - 32px)) !important;
     max-height: calc(100dvh - 44px) !important;
@@ -1223,7 +1288,8 @@ html[data-theme="light"] body header.site-header {
       inset 0 0 24px rgba(255,255,255,.24) !important;
   }
 
-  html[data-theme="light"] .sl-home-quick-actions > button {
+  html[data-theme="light"] .sl-home-quick-actions > button,
+  html[data-theme="light"] body:not(.study-room-page) .sl-home-sidebar .sl-home-quick-actions .study-chat-button {
     color: #214764 !important;
     border-color: rgba(255,255,255,.82) !important;
     background: linear-gradient(135deg, rgba(255,255,255,.52), rgba(140,190,230,.10)), rgba(255,255,255,.24) !important;
@@ -1231,6 +1297,7 @@ html[data-theme="light"] body header.site-header {
   }
 
   html[data-theme="light"] .sl-home-quick-actions > button:hover,
+  html[data-theme="light"] body:not(.study-room-page) .sl-home-sidebar .sl-home-quick-actions .study-chat-button:hover,
   html[data-theme="light"] .sl-home-quick-actions > button[aria-expanded="true"] {
     background: linear-gradient(135deg, rgba(105,185,240,.22), rgba(150,155,255,.12)), rgba(255,255,255,.40) !important;
   }
