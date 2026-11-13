@@ -21,7 +21,10 @@
     </div>
     <nav class="sl-home-sidebar-nav" aria-label="Home sections">
       <span class="sl-home-nav-indicator" aria-hidden="true"></span>
-      <a class="sl-home-nav-item is-active" href="#practical-simulations" data-nav-id="practical-simulations" aria-current="location" title="Practical Simulations">
+      <a class="sl-home-nav-item is-active" href="#home-top" data-nav-id="home" aria-current="location" title="Home">
+        <span class="sl-home-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7"/><path d="M5 9v12h14V9M9 21v-7h6v7"/></svg></span><span class="sl-home-nav-label">Home</span>
+      </a>
+      <a class="sl-home-nav-item" href="#practical-simulations" data-nav-id="practical-simulations" title="Practical Simulations">
         <span class="sl-home-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4A2 2 0 0 0 19 18l-5-9V3"/><path d="M8 15h8M10 12h4"/></svg></span><span class="sl-home-nav-label">Practical Simulations</span>
       </a>
       <a class="sl-home-nav-item" href="study-room.html?completeProfile=1&amp;returnTo=%2Fstudy-room.html" data-nav-id="live-study-room" title="Live Study Room">
@@ -93,11 +96,11 @@
       return;
     }
     const markerLine = Math.min(window.innerHeight * 0.36, 300);
-    let current = scrollTargets[0];
+    let current = null;
     scrollTargets.forEach(target => {
       if (target.element.getBoundingClientRect().top <= markerLine) current = target;
     });
-    if (current) setActive(current.navId);
+    setActive(current ? current.navId : "home");
   }
 
   function scheduleScrollSync() {
