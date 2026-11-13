@@ -1093,3 +1093,64 @@ html[data-theme="light"] .study-room-launcher:hover {
   border-color: rgba(105, 172, 235, .42) !important;
   box-shadow: 0 18px 40px rgba(55, 116, 181, .12), inset 0 1px 0 #fff !important;
 }
+
+
+/* =========================================================
+   HOME LAYOUT — CENTER THE FULL PAGE SCROLL AREA
+   Use the full viewport as the layout canvas, then center
+   the complete Home content in the space beside the sidebar.
+   ========================================================= */
+.sl-home-layout {
+  width: 100% !important;
+  max-width: none !important;
+  margin-inline: 0 !important;
+}
+.sl-home-content {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+}
+@media (min-width: 1180px) {
+  .sl-home-layout .sl-home-content,
+  .sl-home-layout.is-sidebar-collapsed .sl-home-content {
+    padding-left: 244px !important;
+    padding-right: 24px !important;
+  }
+  .sl-home-content > main.container {
+    display: block !important;
+    width: 100% !important;
+    max-width: 1080px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  .sl-home-content > main.container .homepage-greeting {
+    width: 100% !important;
+    max-width: 1080px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
+@media (max-width: 1179px) {
+  .sl-home-layout .sl-home-content,
+  .sl-home-layout.is-sidebar-collapsed .sl-home-content {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  .sl-home-content > main.container {
+    width: calc(100% - 32px) !important;
+    max-width: 1120px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  .sl-home-content > main.container .homepage-greeting {
+    width: 100% !important;
+    max-width: 1120px !important;
+  }
+}
+
+/* The floating Home header must never sit above the Social takeover. */
+body.sl-community-open header.site-header,
+body.sl-community-open .study-header-search-panel,
+body.sl-community-open .sl-feed-floating-shortcut {
+  display: none !important;
+}
