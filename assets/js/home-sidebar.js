@@ -49,9 +49,26 @@
         <span class="sl-home-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8.5"/><path d="M12 8v5l3 2M9 2h6M19 5l1.5-1.5"/></svg></span><span class="sl-home-nav-label">Productivity</span>
       </a>
     </nav>
-    <div class="sl-home-sidebar-hint">Navigate your A/L workspace</div>`;
+    <div class="sl-home-sidebar-hint">Navigate your A/L workspace</div>
+    <div class="sl-home-quick-actions" aria-label="StudyLab quick tools"></div>`;
 
   layout.insertBefore(sidebar, content);
+  const quickActions = sidebar.querySelector(".sl-home-quick-actions");
+  const dockItems = [document.getElementById("studylabPetLauncher"), document.querySelector(".studylab-ai-tools-row [data-ai-launcher]"), document.querySelector("[data-study-chat] [data-chat-button]")].filter(Boolean);
+  const dockPlaceholders = dockItems.map(element => {
+    const marker = document.createComment("StudyLab quick action position");
+    element.parentNode.insertBefore(marker, element);
+    return { element, marker };
+  });
+  const desktopDock = window.matchMedia("(min-width: 1180px)");
+  function syncQuickActionDock() {
+    dockPlaceholders.forEach(({ element, marker }) => {
+      if (desktopDock.matches) quickActions.appendChild(element);
+      else if (marker.parentNode) marker.parentNode.insertBefore(element, marker);
+    });
+  }
+  syncQuickActionDock();
+  desktopDock.addEventListener?.("change", syncQuickActionDock);
   const nav = sidebar.querySelector(".sl-home-sidebar-nav");
   const indicator = sidebar.querySelector(".sl-home-nav-indicator");
   const collapseButton = sidebar.querySelector(".sl-home-sidebar-collapse");
