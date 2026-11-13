@@ -14,7 +14,7 @@
   sidebar.setAttribute("aria-label", "StudyLab home navigation");
   sidebar.innerHTML = `
     <div class="sl-home-sidebar-head">
-      <span class="sl-home-sidebar-brand">StudyLab navigation</span>
+      <span class="sl-home-sidebar-brand-mark" aria-label="StudyLab"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m2 9 10-5 10 5-10 5L2 9Z"/><path d="M6 11v5c3.5 3 8.5 3 12 0v-5M22 9v6"/></svg></span>
       <button class="sl-home-sidebar-collapse" type="button" aria-label="Collapse navigation" aria-expanded="true" title="Collapse navigation">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>
       </button>
@@ -65,7 +65,7 @@
     element: document.getElementById(targetId)
   })).filter(item => item.element);
 
-  let activeId = "practical-simulations";
+  let activeId = "home";
   let scrollFrame = 0;
 
   function setActive(id) {
