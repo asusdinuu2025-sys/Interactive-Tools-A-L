@@ -1689,6 +1689,7 @@
   <link rel="stylesheet" href="assets/css/floating-controls.css?v=1.0.4" />
   <link rel="stylesheet" href="assets/css/home-light-glass.css?v=20261113-centered-social-header-v3">
   <link rel="stylesheet" href="assets/css/home-overview-polish.css?v=2">
+  <link rel="stylesheet" href="assets/css/home-sections-glass.css?v=1">
 </head>
 
 
@@ -1877,7 +1878,12 @@
          STUDY LAB LK — HERO
          ======================================================= -->
 
-    <section class="hero">
+    <section class="hero sl-home-section sl-home-home-section" id="home-top" aria-labelledby="slHomeTitle">
+      <header class="sl-home-section-heading">
+        <span class="sl-home-section-kicker">YOUR STUDY SPACE</span>
+        <h2 id="slHomeTitle">Home</h2>
+        <p>Your A/L workspace, gathered in one place.</p>
+      </header>
 
       <h1 class="home-hero-title-spacer" aria-label="Study-Lab for G.C.E A/L Sri Lanka"><span class="sr-only">Study-Lab for G.C.E A/L Sri Lanka</span></h1>
 
@@ -2609,44 +2615,18 @@
 
         @media (max-width: 600px) {
           .student-milestone {
-            margin-left: 8px;
-            margin-right: 8px;
-            padding: 16px 18px;
-          }
-
-          .student-milestone-number {
-            font-size: 24px;
-          }
-
-          .student-milestone-label {
-            font-size: 12px;
-          }
-        }
-
-      </style>
-
-
-
-
-    </section>
-
-
-    <!-- =======================================================
-         STUDY LAB LK — SUBJECT CARDS START
+     <!-- =======================================================
+         STUDYLAB HOME — SECTION PANELS
          ======================================================= -->
 
-    <section
-      class="card-grid"
-      id="practical-simulations"
-      aria-label="Practical Simulations"
-    >
-
-
-      <!-- =====================================================
-           MATHEMATICS CARD
-           ===================================================== -->
-
-      <a
+    <section class="sl-home-section sl-home-simulations" id="practical-simulations" aria-labelledby="practical-simulations-title">
+      
+  <header class="sl-home-section-heading">
+    <span class="sl-home-section-kicker">LEARN BY EXPLORING</span>
+    <h2 id="practical-simulations-title">Practical Simulations</h2>
+    <p>Interactive visual experiments and subject-based practical learning.</p>
+  </header>
+      <div class="card-grid sl-home-card-grid"><a
         class="subject-card"
         href="maths.html"
         aria-label="Open Mathematics simulations"
@@ -2667,13 +2647,7 @@
         </span>
 
       </a>
-
-
-      <!-- =====================================================
-           BIOLOGY CARD
-           ===================================================== -->
-
-      <a
+<a
         class="subject-card"
         href="biology.html"
         aria-label="Open Biology simulations"
@@ -2693,13 +2667,7 @@
         </span>
 
       </a>
-
-
-      <!-- =====================================================
-           CHEMISTRY CARD
-           ===================================================== -->
-
-      <a
+<a
         class="subject-card"
         href="chemistry.html"
         aria-label="Open Chemistry simulations"
@@ -2720,13 +2688,7 @@
         </span>
 
       </a>
-
-
-      <!-- =====================================================
-           PHYSICS CARD
-           ===================================================== -->
-
-      <a
+<a
         class="subject-card"
         href="physics.html"
         aria-label="Open Physics simulations"
@@ -2746,12 +2708,85 @@
           Explore Practical Simulations →
         </span>
 
-      </a>
+      </a></div>
+    </section>
 
-      <a
+    <section class="sl-home-section sl-home-live-room" id="live-study-room" aria-labelledby="live-study-room-title">
+      
+  <header class="sl-home-section-heading">
+    <span class="sl-home-section-kicker">STUDY TOGETHER</span>
+    <h2 id="live-study-room-title">Live Study Room</h2>
+    <p>Enter the shared room, focus on your work and follow the live study rankings.</p>
+  </header>
+      
+      <div class="sl-home-room-panel">
+        <div class="sl-home-room-copy">
+          <span class="sl-home-room-live"><span></span> LIVE COMMUNITY SPACE</span>
+          <h3>Your focus. Your progress. One shared room.</h3>
+          <p>Study alongside other A/L students, keep track of your focused time and climb the daily and weekly rankings.</p>
+          <a class="sl-home-room-entry" href="study-room.html?completeProfile=1&amp;returnTo=%2Fstudy-room.html">
+            <span class="sl-home-room-entry-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7-11-7Z"/></svg></span>
+            <span class="sl-home-room-entry-copy"><small>ENTER LIVE STUDY ROOM</small><strong>Join the Study Room</strong><em>Open your shared focus space</em></span>
+            <span class="sl-home-room-entry-arrow" aria-hidden="true">↗</span>
+          </a>
+        </div>
+        <div class="sl-home-room-ranks" data-home-room-ranks aria-live="polite">
+          <article class="sl-home-rank-card sl-home-rank-today">
+            <span class="sl-home-rank-kicker"><i></i> TODAY · #1</span>
+            <strong data-home-rank-today-name>Loading live ranking…</strong>
+            <small data-home-rank-today-time>Connecting to Study Room</small>
+          </article>
+          <article class="sl-home-rank-card sl-home-rank-week">
+            <span class="sl-home-rank-kicker"><i></i> THIS WEEK · #1</span>
+            <strong data-home-rank-week-name>Loading live ranking…</strong>
+            <small data-home-rank-week-time>Connecting to Study Room</small>
+          </article>
+          <p class="sl-home-rank-footnote">Rankings are read from the live Study Room leaderboard.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="sl-home-section sl-home-social" id="social" aria-labelledby="social-title">
+      
+  <header class="sl-home-section-heading">
+    <span class="sl-home-section-kicker">STUDENTS, SHARING KNOWLEDGE</span>
+    <h2 id="social-title">StudyLab Social</h2>
+    <p>A community space for questions, study updates and useful discoveries.</p>
+  </header>
+      
+      <div class="sl-home-social-grid">
+        <article class="sl-home-feature-card">
+          <span class="sl-home-feature-icon" aria-hidden="true">✦</span>
+          <div><h3>Share your progress</h3><p>Post a study update, a useful resource or a milestone from your A/L journey.</p></div>
+          <span class="sl-home-feature-tag">YOUR JOURNEY</span>
+        </article>
+        <article class="sl-home-feature-card">
+          <span class="sl-home-feature-icon" aria-hidden="true">⌕</span>
+          <div><h3>Ask and discuss</h3><p>Bring questions to the community and continue the conversation through comments.</p></div>
+          <span class="sl-home-feature-tag">DISCUSS</span>
+        </article>
+        <article class="sl-home-feature-card">
+          <span class="sl-home-feature-icon" aria-hidden="true">↗</span>
+          <div><h3>Discover useful ideas</h3><p>See what other students are learning, sharing and recommending.</p></div>
+          <span class="sl-home-feature-tag">COMMUNITY</span>
+        </article>
+      </div>
+      <div class="sl-home-social-action">
+        <span>One space for the StudyLab student community.</span>
+        <button type="button" class="sl-home-social-button" data-open-home-social>Open StudyLab Social <span aria-hidden="true">→</span></button>
+      </div>
+    </section>
+
+    <section class="sl-home-section sl-home-pastpapers" id="past-papers" aria-labelledby="past-papers-title">
+      
+  <header class="sl-home-section-heading">
+    <span class="sl-home-section-kicker">PRACTICE WITH PURPOSE</span>
+    <h2 id="past-papers-title">Past Papers</h2>
+    <p>Find subject papers, revision material and examination resources.</p>
+  </header>
+      <div class="card-grid sl-home-card-grid"><a
         class="subject-card"
         href="git.html"
-        id="other-al-resources"
         aria-label="Open General Information Technology resources"
       >
 
@@ -2767,8 +2802,7 @@
         </span>
 
       </a>
-
-      <a
+<a
         class="subject-card"
         href="generalenglish.html"
         aria-label="Open General English past papers"
@@ -2788,8 +2822,7 @@
         </span>
 
       </a>
-
-      <a
+<a
         class="subject-card"
         href="generalknowledge.html"        aria-label="Open General Knowledge past papers"
       >
@@ -2809,11 +2842,9 @@
         </span>
 
       </a>
-
-      <a
+<a
         class="subject-card"
         href="exam-hub.html"
-        id="past-papers"
         aria-label="Open A/L Exam Hub"
       >
 
@@ -2831,46 +2862,18 @@
           Open Exam Hub →
         </span>
 
-      </a>
+      </a></div>
+    </section>
 
-      <a
-        class="study-tools-card lesson-resource-card"
-        id="free-lesson-packs"
-        href="lesson-packs.html"
-        aria-label="Open Free Lessons and Lesson Packs"
-      >
-        <span class="study-tools-card-icon vector-card-icon icon-books" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="M6 9h10v31H6zM19 6h10v34H19zM32 11h10v29H32z"/><path d="M9 15h4M22 13h4M35 18h4M6 40h36"/></svg></span>
-        <div class="study-tools-card-content">
-          <span class="study-tools-card-badge">FREE LESSONS</span>
-          <h2>Free Lessons &amp; Lesson Packs</h2>
-          <p>නොමිලේ පාඩම්, FULL THEORY, questions practice සහ 2027 A/L revision lesson packs එකම තැනකින්.</p>
-        </div>
-        <span class="study-tools-card-cta">Explore Lessons &amp; Packs →</span>
-      </a>
-
-      <a
-        class="study-tools-card"
-        id="productivity"
-        href="study-tools.html"
-        aria-label="Open A/L Study Tools"
-      >
-
-        <span class="study-tools-card-icon vector-card-icon icon-toolbox" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><rect x="5" y="17" width="38" height="25" rx="4"/><path d="M17 17v-5a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v5M5 27h38M20 26v5h8v-5"/></svg></span>
-
-        <div class="study-tools-card-content">
-          <span class="study-tools-card-badge">STUDY UTILITIES</span>
-          <h2>A/L Study Tools</h2>
-          <p>
-            Marks calculator, study-time planner, Pomodoro timer, flashcards,
-            mistake notebook, practice planner, mock exam timer and unit converter.
-          </p>
-        </div>
-
-        <span class="study-tools-card-cta">Open Study Tools →</span>
-      </a>
-    <a
+    <section class="sl-home-section sl-home-telegram" id="telegram-links" aria-labelledby="telegram-links-title">
+      
+  <header class="sl-home-section-heading">
+    <span class="sl-home-section-kicker">STAY CONNECTED</span>
+    <h2 id="telegram-links-title">A/L Telegram Channels</h2>
+    <p>Find subject-based A/L Telegram channels and learning communities.</p>
+  </header>
+      <div class="sl-home-single-card"><a
       class="telegram-card"
-      id="telegram-links"
       href="Telegram_Channels.html"
       aria-label="Open A/L Telegram Channels"
     >
@@ -2893,9 +2896,17 @@
       </div>
 
       <span class="card-cta">Open Channels →</span>
-    </a>
+    </a></div>
+    </section>
 
-    <a
+    <section class="sl-home-section sl-home-other" id="other-al-resources" aria-labelledby="other-al-resources-title">
+      
+  <header class="sl-home-section-heading">
+    <span class="sl-home-section-kicker">MORE WAYS TO PREPARE</span>
+    <h2 id="other-al-resources-title">Other A/L Resources</h2>
+    <p>Online MCQ practice and useful tools for your everyday study routine.</p>
+  </header>
+      <div class="card-grid sl-home-card-grid sl-home-resource-grid"><a
       class="telegram-card mcq-practice-card"
       href="https://almcq.vercel.app"
       target="_blank"
@@ -2906,6 +2917,59 @@
 
       <div class="telegram-card-content">
         <span class="telegram-badge">ONLINE PRACTICE</span>
+        <h2>Online pastpaper MCQ practice</h2>
+        <p lang="si">
+          පසුගිය විභාග ප්‍රශ්න ආශ්‍රිත MCQ සමඟ ඔබේ දැනුම පරීක්ෂා කරමින්
+          වේගයෙන් පුහුණු වන්න.
+        </p>
+      </div>
+
+      <span class="card-cta">Practice MCQs →</span>
+    </a>
+<a
+        class="study-tools-card"
+        href="study-tools.html"
+        aria-label="Open A/L Study Tools"
+      >
+
+        <span class="study-tools-card-icon vector-card-icon icon-toolbox" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><rect x="5" y="17" width="38" height="25" rx="4"/><path d="M17 17v-5a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v5M5 27h38M20 26v5h8v-5"/></svg></span>
+
+        <div class="study-tools-card-content">
+          <span class="study-tools-card-badge">STUDY UTILITIES</span>
+          <h2>A/L Study Tools</h2>
+          <p>
+            Marks calculator, study-time planner, Pomodoro timer, flashcards,
+            mistake notebook, practice planner, mock exam timer and unit converter.
+          </p>
+        </div>
+
+        <span class="study-tools-card-cta">Open Study Tools →</span>
+      </a></div>
+    </section>
+
+    <section class="sl-home-section sl-home-lessons" id="free-lesson-packs" aria-labelledby="free-lesson-packs-title">
+      
+  <header class="sl-home-section-heading">
+    <span class="sl-home-section-kicker">LEARN MORE, AT NO COST</span>
+    <h2 id="free-lesson-packs-title">Free Lesson Packs</h2>
+    <p>Access free lessons, theory and revision packs in one place.</p>
+  </header>
+      <div class="sl-home-single-card"><a
+        class="study-tools-card lesson-resource-card"
+        href="lesson-packs.html"
+        aria-label="Open Free Lessons and Lesson Packs"
+      >
+        <span class="study-tools-card-icon vector-card-icon icon-books" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="M6 9h10v31H6zM19 6h10v34H19zM32 11h10v29H32z"/><path d="M9 15h4M22 13h4M35 18h4M6 40h36"/></svg></span>
+        <div class="study-tools-card-content">
+          <span class="study-tools-card-badge">FREE LESSONS</span>
+          <h2>Free Lessons &amp; Lesson Packs</h2>
+          <p>නොමිලේ පාඩම්, FULL THEORY, questions practice සහ 2027 A/L revision lesson packs එකම තැනකින්.</p>
+        </div>
+        <span class="study-tools-card-cta">Explore Lessons &amp; Packs →</span>
+      </a></div>
+    </section>
+
+    lass="telegram-badge">ONLINE PRACTICE</span>
         <h2>Online pastpaper MCQ practice</h2>
         <p lang="si">
           පසුගිය විභාග ප්‍රශ්න ආශ්‍රිත MCQ සමඟ ඔබේ දැනුම පරීක්ෂා කරමින්
@@ -3217,7 +3281,8 @@
 <script src="assets/js/home-card-glow.js?v=1.2.0" defer></script>
   <script src="assets/js/pwa.js?v=1.0.1"></script>
   <script src="assets/js/feed-drawer.js?v=19" defer></script>
-  <script src="assets/js/home-sidebar.js?v=4" defer></script>
+  <script src="assets/js/home-sidebar.js?v=5" defer></script>
+  <script src="assets/js/home-panels.js?v=1" defer></script>
   <script src="assets/js/studylab-social.js?v=22" defer></script>
 
 </body>

@@ -1,0 +1,448 @@
+/* StudyLab Home: image-backed section panels with restrained liquid glass. */
+html[data-theme="light"] body {
+  background-color: #b9cbd9 !important;
+  background-image:
+    linear-gradient(180deg, rgba(227, 238, 247, .12), rgba(226, 236, 245, .19)),
+    url("../images/studylab-home-light.webp") !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+  background-attachment: fixed !important;
+}
+html[data-theme="dark"] body {
+  background-color: #111a27 !important;
+  background-image:
+    linear-gradient(180deg, rgba(8, 15, 25, .38), rgba(8, 15, 25, .48)),
+    url("../images/studylab-home-dark.webp") !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+  background-attachment: fixed !important;
+}
+
+/* The animated formula layer is intentionally left untouched. */
+.sl-home-layout .sl-home-content > main.container {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  align-items: start !important;
+  gap: clamp(16px, 2vw, 22px) !important;
+  width: 100% !important;
+}
+.sl-home-section {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+  margin: 0 !important;
+  padding: clamp(18px, 2.2vw, 28px) !important;
+  border: 1px solid rgba(210, 230, 247, .23) !important;
+  border-radius: 25px !important;
+  background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.055)), rgba(16, 30, 47, .22) !important;
+  box-shadow:
+    0 18px 48px rgba(4, 13, 25, .14),
+    inset 0 1px 0 rgba(255,255,255,.20),
+    inset 0 -1px 0 rgba(3,12,22,.09) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(135%) !important;
+  backdrop-filter: blur(24px) saturate(135%) !important;
+  scroll-margin-top: 24px;
+}
+html[data-theme="light"] .sl-home-section {
+  border-color: rgba(255,255,255,.43) !important;
+  background: linear-gradient(135deg, rgba(255,255,255,.25), rgba(255,255,255,.10)), rgba(242,248,255,.19) !important;
+  box-shadow:
+    0 18px 48px rgba(42, 67, 91, .105),
+    inset 0 1px 0 rgba(255,255,255,.72),
+    inset 0 -1px 0 rgba(118,148,174,.07) !important;
+}
+.sl-home-section-heading {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  margin: 0 !important;
+}
+.sl-home-section-kicker {
+  color: #8bdcf7;
+  font-size: .66rem;
+  font-weight: 850;
+  letter-spacing: .17em;
+  line-height: 1.35;
+}
+html[data-theme="light"] .sl-home-section-kicker { color: #597da0; }
+.sl-home-section-heading h2 {
+  margin: 0 !important;
+  color: #f2f7fc !important;
+  font-size: clamp(1.35rem, 2vw, 1.8rem) !important;
+  font-weight: 820 !important;
+  letter-spacing: -.035em !important;
+  line-height: 1.2 !important;
+  text-shadow: 0 1px 12px rgba(0,0,0,.12);
+}
+html[data-theme="light"] .sl-home-section-heading h2 {
+  color: #304a64 !important;
+  text-shadow: none !important;
+}
+.sl-home-section-heading p {
+  margin: 0 !important;
+  color: rgba(224,235,245,.78) !important;
+  font-size: .89rem !important;
+  line-height: 1.55 !important;
+  max-width: 70ch;
+}
+html[data-theme="light"] .sl-home-section-heading p { color: #5a7087 !important; }
+
+/* Home remains the overview, now grouped inside the same panel system. */
+.sl-home-home-section {
+  padding-bottom: clamp(18px, 2vw, 25px) !important;
+}
+.sl-home-home-section > .hero h1.home-hero-title-spacer { display: none !important; }
+.sl-home-home-section .homepage-overview-panel {
+  margin: 0 !important;
+  padding: clamp(14px, 1.7vw, 22px) !important;
+  border: 1px solid rgba(213,229,244,.17) !important;
+  border-radius: 19px !important;
+  background: rgba(8,20,34,.12) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(125%) !important;
+  backdrop-filter: blur(16px) saturate(125%) !important;
+}
+html[data-theme="light"] .sl-home-home-section .homepage-overview-panel {
+  border-color: rgba(255,255,255,.32) !important;
+  background: rgba(255,255,255,.13) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.48) !important;
+}
+
+/* Subject and resource cards sit inside each panel as a second glass layer. */
+.sl-home-card-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+  margin: 0 !important;
+  min-width: 0;
+}
+.sl-home-section .subject-card,
+.sl-home-section .study-tools-card,
+.sl-home-section .telegram-card {
+  min-width: 0 !important;
+  border: 1px solid rgba(205,226,246,.21) !important;
+  border-radius: 18px !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.105), rgba(255,255,255,.025)), rgba(7,18,32,.30) !important;
+  box-shadow: 0 10px 26px rgba(0,0,0,.11), inset 0 1px 0 rgba(255,255,255,.12) !important;
+  -webkit-backdrop-filter: blur(19px) saturate(135%) !important;
+  backdrop-filter: blur(19px) saturate(135%) !important;
+  transition: transform .2s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease !important;
+}
+html[data-theme="light"] .sl-home-section .subject-card,
+html[data-theme="light"] .sl-home-section .study-tools-card,
+html[data-theme="light"] .sl-home-section .telegram-card {
+  border-color: rgba(255,255,255,.49) !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.42), rgba(255,255,255,.18)), rgba(228,239,249,.16) !important;
+  box-shadow: 0 10px 28px rgba(42,68,94,.085), inset 0 1px 0 rgba(255,255,255,.75) !important;
+}
+.sl-home-section .subject-card:hover,
+.sl-home-section .study-tools-card:hover,
+.sl-home-section .telegram-card:hover {
+  transform: translateY(-3px) !important;
+  border-color: rgba(118,220,255,.55) !important;
+  box-shadow: 0 16px 32px rgba(0,0,0,.15), 0 0 18px rgba(97,194,255,.10), inset 0 1px 0 rgba(255,255,255,.16) !important;
+}
+html[data-theme="light"] .sl-home-section .subject-card:hover,
+html[data-theme="light"] .sl-home-section .study-tools-card:hover,
+html[data-theme="light"] .sl-home-section .telegram-card:hover {
+  border-color: rgba(105,165,214,.58) !important;
+  box-shadow: 0 16px 30px rgba(48,78,108,.12), inset 0 1px 0 rgba(255,255,255,.88) !important;
+}
+.sl-home-section .subject-card h2,
+.sl-home-section .study-tools-card h2,
+.sl-home-section .telegram-card h2 {
+  color: #f0f6fc !important;
+  line-height: 1.32 !important;
+  overflow-wrap: anywhere;
+}
+.sl-home-section .subject-card p,
+.sl-home-section .study-tools-card p,
+.sl-home-section .telegram-card p {
+  color: rgba(220,232,243,.80) !important;
+  line-height: 1.55 !important;
+}
+html[data-theme="light"] .sl-home-section .subject-card h2,
+html[data-theme="light"] .sl-home-section .study-tools-card h2,
+html[data-theme="light"] .sl-home-section .telegram-card h2 { color: #314c66 !important; }
+html[data-theme="light"] .sl-home-section .subject-card p,
+html[data-theme="light"] .sl-home-section .study-tools-card p,
+html[data-theme="light"] .sl-home-section .telegram-card p { color: #536e89 !important; }
+.sl-home-section .card-cta,
+.sl-home-section .study-tools-card-cta { color: #9fe4ff !important; }
+html[data-theme="light"] .sl-home-section .card-cta,
+html[data-theme="light"] .sl-home-section .study-tools-card-cta { color: #477ca5 !important; }
+.sl-home-section .card-icon { filter: saturate(.86); }
+
+/* Large Study Room call-to-action with a rotating Windows-Bloom-inspired neon edge. */
+.sl-home-room-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(250px, .95fr);
+  align-items: center;
+  gap: clamp(18px, 3vw, 34px);
+  min-width: 0;
+  padding: clamp(17px, 2.3vw, 30px);
+  border: 1px solid rgba(172,214,244,.19);
+  border-radius: 22px;
+  background: linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.025)), rgba(5,16,29,.22);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 12px 30px rgba(0,0,0,.10);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
+}
+html[data-theme="light"] .sl-home-room-panel {
+  border-color: rgba(255,255,255,.46);
+  background: linear-gradient(135deg, rgba(255,255,255,.34), rgba(255,255,255,.12)), rgba(232,243,252,.17);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.74), 0 12px 28px rgba(45,73,99,.075);
+}
+.sl-home-room-copy { min-width: 0; }
+.sl-home-room-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #9deaff;
+  font-size: .67rem;
+  font-weight: 850;
+  letter-spacing: .14em;
+}
+html[data-theme="light"] .sl-home-room-live { color: #397d9f; }
+.sl-home-room-live span,
+.sl-home-rank-kicker i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #65e4d8;
+  box-shadow: 0 0 12px rgba(101,228,216,.72);
+}
+.sl-home-room-copy h3 {
+  margin: 12px 0 8px !important;
+  color: #f2f8fd !important;
+  font-size: clamp(1.35rem, 2.6vw, 2.1rem) !important;
+  font-weight: 820 !important;
+  letter-spacing: -.035em;
+  line-height: 1.17 !important;
+  max-width: 19ch;
+}
+html[data-theme="light"] .sl-home-room-copy h3 { color: #304a64 !important; }
+.sl-home-room-copy p {
+  margin: 0 0 21px !important;
+  max-width: 57ch;
+  color: rgba(220,234,246,.80) !important;
+  font-size: .9rem !important;
+  line-height: 1.65 !important;
+}
+html[data-theme="light"] .sl-home-room-copy p { color: #586f86 !important; }
+.sl-home-room-entry {
+  --sl-room-ring-angle: 0deg;
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: min(100%, 460px);
+  min-height: 86px;
+  padding: 15px 18px;
+  border: 1px solid rgba(120,215,255,.32);
+  border-radius: 19px;
+  color: #f5fbff !important;
+  text-decoration: none !important;
+  background: linear-gradient(135deg, rgba(32,77,112,.54), rgba(28,41,77,.40)), rgba(7,18,34,.34);
+  box-shadow: 0 0 24px rgba(45,192,255,.13), inset 0 1px 0 rgba(255,255,255,.18);
+  -webkit-backdrop-filter: blur(14px) saturate(145%);
+  backdrop-filter: blur(14px) saturate(145%);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.sl-home-room-entry::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -2px;
+  padding: 2px;
+  border-radius: inherit;
+  background: conic-gradient(from var(--sl-room-ring-angle), #4ee9ff, #71b8ff, #a79bff, #eb9cda, #80e2e5, #4ee9ff);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: slHomeBloomSpin 5s linear infinite;
+  pointer-events: none;
+}
+.sl-home-room-entry::after {
+  content: "";
+  position: absolute;
+  z-index: -2;
+  inset: -5px;
+  border-radius: inherit;
+  background: conic-gradient(from var(--sl-room-ring-angle), rgba(78,233,255,.22), rgba(113,184,255,.18), rgba(167,155,255,.18), rgba(235,156,218,.17), rgba(128,226,229,.20));
+  filter: blur(13px);
+  animation: slHomeBloomSpin 5s linear infinite;
+  pointer-events: none;
+}
+.sl-home-room-entry:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 30px rgba(74,204,255,.24), 0 0 35px rgba(171,151,255,.10), inset 0 1px 0 rgba(255,255,255,.24);
+}
+.sl-home-room-entry-icon {
+  flex: 0 0 43px;
+  width: 43px;
+  height: 43px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  color: #c9f5ff;
+  background: linear-gradient(135deg, rgba(65,207,255,.30), rgba(166,145,255,.22));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.24), 0 0 18px rgba(77,202,255,.14);
+}
+.sl-home-room-entry-icon svg { width: 21px; height: 21px; fill: currentColor; }
+.sl-home-room-entry-copy { flex: 1 1 auto; min-width: 0; display: grid; gap: 3px; }
+.sl-home-room-entry-copy small { color: #9beaff; font-size: .62rem; font-weight: 850; letter-spacing: .13em; }
+.sl-home-room-entry-copy strong { color: inherit; font-size: 1.04rem; line-height: 1.25; }
+.sl-home-room-entry-copy em { color: rgba(229,242,252,.73); font-size: .76rem; font-style: normal; }
+.sl-home-room-entry-arrow { flex: 0 0 auto; color: #a8eaff; font-size: 1.35rem; }
+.sl-home-room-ranks {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 10px;
+  min-width: 0;
+}
+.sl-home-rank-card {
+  min-width: 0;
+  min-height: 128px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 9px;
+  padding: 16px;
+  border: 1px solid rgba(187,218,243,.19);
+  border-radius: 17px;
+  background: rgba(6,17,31,.24);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.10);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+html[data-theme="light"] .sl-home-rank-card {
+  border-color: rgba(255,255,255,.50);
+  background: rgba(255,255,255,.24);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.72);
+}
+.sl-home-rank-kicker { display: inline-flex; align-items: center; gap: 7px; color: #a9dff2; font-size: .63rem; font-weight: 850; letter-spacing: .10em; }
+html[data-theme="light"] .sl-home-rank-kicker { color: #4c7897; }
+.sl-home-rank-kicker i { width: 6px; height: 6px; }
+.sl-home-rank-card strong { color: #f3f8fd; font-size: 1.05rem; line-height: 1.3; overflow-wrap: anywhere; }
+html[data-theme="light"] .sl-home-rank-card strong { color: #304a64; }
+.sl-home-rank-card small { color: rgba(219,233,245,.72); font-size: .73rem; line-height: 1.45; }
+html[data-theme="light"] .sl-home-rank-card small { color: #62788d; }
+.sl-home-rank-footnote { grid-column: 1 / -1; margin: 0 !important; color: rgba(213,229,242,.58); font-size: .67rem; line-height: 1.5; }
+html[data-theme="light"] .sl-home-rank-footnote { color: #6b8196; }
+@keyframes slHomeBloomSpin { to { --sl-room-ring-angle: 360deg; } }
+@property --sl-room-ring-angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+
+/* Social: three editorial feature tiles and a single action into the existing drawer. */
+.sl-home-social-grid {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 13px;
+}
+.sl-home-feature-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  min-height: 174px;
+  padding: 18px;
+  border: 1px solid rgba(203,225,245,.19);
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(255,255,255,.10), rgba(255,255,255,.025)), rgba(8,19,34,.25);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.11);
+  -webkit-backdrop-filter: blur(17px) saturate(130%);
+  backdrop-filter: blur(17px) saturate(130%);
+}
+html[data-theme="light"] .sl-home-feature-card {
+  border-color: rgba(255,255,255,.50);
+  background: linear-gradient(145deg, rgba(255,255,255,.36), rgba(255,255,255,.14)), rgba(230,240,250,.16);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.78);
+}
+.sl-home-feature-icon {
+  width: 39px;
+  height: 39px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  color: #a6e8ff;
+  background: linear-gradient(135deg, rgba(85,205,255,.22), rgba(169,153,255,.18));
+  font-size: 1.22rem;
+}
+html[data-theme="light"] .sl-home-feature-icon { color: #4d83a8; background: rgba(121,183,226,.17); }
+.sl-home-feature-card h3 { margin: 0 0 5px !important; color: #f0f6fc !important; font-size: 1rem !important; }
+html[data-theme="light"] .sl-home-feature-card h3 { color: #304a64 !important; }
+.sl-home-feature-card p { margin: 0 !important; color: rgba(220,233,244,.76) !important; font-size: .82rem !important; line-height: 1.55 !important; }
+html[data-theme="light"] .sl-home-feature-card p { color: #5b7187 !important; }
+.sl-home-feature-tag { margin-top: auto; color: #9bd8ec; font-size: .61rem; font-weight: 850; letter-spacing: .12em; }
+html[data-theme="light"] .sl-home-feature-tag { color: #6687a1; }
+.sl-home-social-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding-top: 3px;
+  color: rgba(224,236,247,.76);
+  font-size: .83rem;
+}
+html[data-theme="light"] .sl-home-social-action { color: #5d7389; }
+.sl-home-social-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex: 0 0 auto;
+  min-height: 43px;
+  padding: 0 17px;
+  border: 1px solid rgba(138,211,246,.34);
+  border-radius: 13px;
+  color: #e9f8ff;
+  background: linear-gradient(135deg, rgba(67,163,218,.28), rgba(136,130,220,.20)), rgba(10,29,49,.26);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 7px 18px rgba(0,0,0,.08);
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+html[data-theme="light"] .sl-home-social-button { color: #365d7c; border-color: rgba(255,255,255,.70); background: rgba(255,255,255,.34); box-shadow: inset 0 1px 0 #fff, 0 7px 18px rgba(48,80,110,.07); }
+.sl-home-social-button:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(0,0,0,.13), 0 0 18px rgba(110,201,255,.10); }
+.sl-home-single-card > * { width: 100%; }
+
+/* Responsive layouts keep the translucent cards readable instead of squeezing them. */
+@media (max-width: 1120px) {
+  .sl-home-card-grid { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+  .sl-home-room-panel { grid-template-columns: minmax(0,1fr); }
+  .sl-home-room-entry { width: 100%; }
+}
+@media (max-width: 700px) {
+  .sl-home-section { gap: 14px; padding: 16px !important; border-radius: 20px !important; }
+  .sl-home-card-grid { grid-template-columns: minmax(0,1fr) !important; gap: 11px !important; }
+  .sl-home-social-grid { grid-template-columns: minmax(0,1fr); gap: 10px; }
+  .sl-home-feature-card { min-height: 0; padding: 15px; }
+  .sl-home-social-action { align-items: stretch; flex-direction: column; }
+  .sl-home-social-button { width: 100%; }
+  .sl-home-room-ranks { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .sl-home-room-panel { padding: 15px; }
+  .sl-home-rank-card { min-height: 116px; padding: 12px; }
+  html[data-theme="light"] body,
+  html[data-theme="dark"] body { background-attachment: scroll !important; }
+}
+@media (max-width: 380px) {
+  .sl-home-room-ranks { grid-template-columns: minmax(0,1fr); }
+  .sl-home-rank-footnote { grid-column: auto; }
+  .sl-home-room-entry { gap: 10px; padding: 13px; }
+  .sl-home-room-entry-copy strong { font-size: .94rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sl-home-room-entry::before,
+  .sl-home-room-entry::after { animation: none !important; }
+  .sl-home-section .subject-card,
+  .sl-home-section .study-tools-card,
+  .sl-home-section .telegram-card,
+  .sl-home-social-button { transition: none !important; }
+}

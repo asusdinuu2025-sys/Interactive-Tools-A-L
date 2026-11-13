@@ -27,16 +27,16 @@
       <a class="sl-home-nav-item" href="#practical-simulations" data-nav-id="practical-simulations" title="Practical Simulations">
         <span class="sl-home-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4A2 2 0 0 0 19 18l-5-9V3"/><path d="M8 15h8M10 12h4"/></svg></span><span class="sl-home-nav-label">Practical Simulations</span>
       </a>
-      <a class="sl-home-nav-item" href="study-room.html?completeProfile=1&amp;returnTo=%2Fstudy-room.html" data-nav-id="live-study-room" title="Live Study Room">
+      <a class="sl-home-nav-item" href="#live-study-room" data-nav-id="live-study-room" title="Live Study Room">
         <span class="sl-home-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="8" cy="7" r="3"/><circle cx="17" cy="7" r="3"/><path d="M2.5 19v-1.5A4.5 4.5 0 0 1 7 13h2a4.5 4.5 0 0 1 4.5 4.5V19M13 13.5a4.5 4.5 0 0 1 8.5 2V19"/></svg></span><span class="sl-home-nav-label">Live Study Room</span>
       </a>
-      <button class="sl-home-nav-item" type="button" data-nav-id="social" title="Social" aria-label="Open StudyLab Social">
+      <a class="sl-home-nav-item" href="#social" data-nav-id="social" title="Social">
         <span class="sl-home-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5.5h16v11H9l-5 3v-14Z"/><path d="M8 9h8M8 13h5"/></svg></span><span class="sl-home-nav-label">Social</span>
-      </button>
+      </a>
       <a class="sl-home-nav-item" href="#past-papers" data-nav-id="past-papers" title="Past Papers">
         <span class="sl-home-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h4M9 12h7M9 16h7"/></svg></span><span class="sl-home-nav-label">Past Papers</span>
       </a>
-      <a class="sl-home-nav-item" href="Telegram_Channels.html" data-nav-id="telegram-links" title="A/L Telegram Channel Links">
+      <a class="sl-home-nav-item" href="#telegram-links" data-nav-id="telegram-links" title="A/L Telegram Channel Links">
         <span class="sl-home-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m21 3-7.2 18-3.7-7.1L3 10.2 21 3Z"/><path d="m10.1 13.9 4.6-4.6"/></svg></span><span class="sl-home-nav-label">A/L Telegram Channel Links</span>
       </a>
       <a class="sl-home-nav-item" href="#other-al-resources" data-nav-id="other-al-resources" title="Other A/L Resources">
@@ -45,9 +45,7 @@
       <a class="sl-home-nav-item" href="#free-lesson-packs" data-nav-id="free-lesson-packs" title="Free Lesson Packs">
         <span class="sl-home-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5.5A3.5 3.5 0 0 1 7.5 2H20v17H7.5A3.5 3.5 0 0 0 4 22z"/><path d="M4 5.5v16.5M8 6h8M8 10h8"/></svg></span><span class="sl-home-nav-label">Free Lesson Packs</span>
       </a>
-      <a class="sl-home-nav-item" href="#productivity" data-nav-id="productivity" title="Productivity">
-        <span class="sl-home-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8.5"/><path d="M12 8v5l3 2M9 2h6M19 5l1.5-1.5"/></svg></span><span class="sl-home-nav-label">Productivity</span>
-      </a>
+      
     </nav>
     <div class="sl-home-sidebar-hint">Navigate your A/L workspace</div>
     <div class="sl-home-quick-actions" aria-label="StudyLab quick tools"></div>`;
@@ -76,11 +74,12 @@
   const navItems = [...sidebar.querySelectorAll(".sl-home-nav-item")];
   const scrollTargets = [
     ["practical-simulations", "practical-simulations"],
-    ["other-al-resources", "other-al-resources"],
+    ["live-study-room", "live-study-room"],
+    ["social", "social"],
     ["past-papers", "past-papers"],
-    ["free-lesson-packs", "free-lesson-packs"],
-    ["productivity", "productivity"],
-    ["telegram-links", "telegram-links"]
+    ["telegram-links", "telegram-links"],
+    ["other-al-resources", "other-al-resources"],
+    ["free-lesson-packs", "free-lesson-packs"]
   ].map(([navId, targetId]) => ({
     navId,
     element: document.getElementById(targetId)
@@ -154,11 +153,7 @@
     item.addEventListener("click", event => {
       const id = item.dataset.navId;
       setActive(id);
-      if (id === "social") {
-        event.preventDefault();
-        document.querySelector(".sl-feed-toggle")?.click();
-      }
-    });
+});
   });
 
   collapseButton.addEventListener("click", () => {
