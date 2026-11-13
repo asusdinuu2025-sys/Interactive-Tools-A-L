@@ -160,61 +160,58 @@ body.study-room-page[data-room-theme] .profile-dialog{
 body.study-room-page[data-room-theme] .room-pointer-glow{opacity:0!important}
 body.study-room-page[data-room-theme] .room-page .room-panel:hover{box-shadow:0 24px 64px rgba(0,0,0,.15),inset 0 1px 0 color-mix(in srgb,var(--room-text) 13%,transparent)!important}
 body.study-room-page[data-room-theme] .room-notice{color:var(--room-secondary)!important}
-.sl-goal-celebration[hidden]{display:none!important}
-.sl-goal-celebration{
-  position:fixed;inset:0;z-index:2600;display:grid;place-items:center;padding:20px;
-  background:rgba(3,8,18,.48);-webkit-backdrop-filter:blur(13px);backdrop-filter:blur(13px);
-  opacity:0;transition:opacity .32s ease;
+
+/* Theme-aware ambient celebration layer. Kept behind Study Room content and never blocks input. */
+body.study-room-page #slStudyRoomAmbient {
+  position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;
+  contain:layout paint;opacity:1;
 }
-.sl-goal-celebration.is-visible{opacity:1}
-.sl-goal-celebration-card{
-  position:relative;isolation:isolate;overflow:hidden;width:min(440px,100%);padding:34px 28px 28px;
-  text-align:center;border-radius:30px;
-  border:1px solid color-mix(in srgb,var(--room-text) 22%,transparent);
-  background:linear-gradient(145deg,color-mix(in srgb,var(--room-card) 84%,transparent),color-mix(in srgb,var(--room-page-bg) 78%,transparent));
-  color:var(--room-text);box-shadow:0 32px 100px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.22);
-  -webkit-backdrop-filter:blur(34px) saturate(175%);backdrop-filter:blur(34px) saturate(175%);
-  transform:translateY(16px) scale(.97);transition:transform .42s cubic-bezier(.2,.8,.2,1);
+body.study-room-page .room-page {position:relative;z-index:1}
+.sl-room-ambient-particle {
+  position:absolute;left:var(--x);top:var(--y);display:block;
+  color:color-mix(in srgb,var(--room-accent) 58%,var(--room-text));
+  opacity:0;font-size:var(--size);line-height:1;
+  text-shadow:0 0 12px color-mix(in srgb,var(--room-accent) 45%,transparent);
+  user-select:none;will-change:transform,opacity;
+  animation:slRoomAmbientDrift var(--duration) ease-in-out var(--delay) infinite;
 }
-.sl-goal-celebration.is-visible .sl-goal-celebration-card{transform:translateY(0) scale(1)}
-.sl-goal-celebration-card:before{
-  content:"";position:absolute;z-index:-1;inset:-30%;pointer-events:none;
-  background:radial-gradient(circle at 50% 28%,color-mix(in srgb,var(--room-accent) 24%,transparent),transparent 48%);
+#slStudyRoomAmbient[data-theme="charcoal"] .sl-room-ambient-particle,
+#slStudyRoomAmbient[data-theme="dark"] .sl-room-ambient-particle {
+  color:color-mix(in srgb,#e9edf5 72%,var(--room-text));
+  text-shadow:0 0 12px rgba(225,232,244,.24);
 }
-.sl-goal-celebration-mark{
-  width:78px;height:78px;margin:0 auto 18px;display:grid;place-items:center;border-radius:25px;
-  color:var(--room-accent);font-size:38px;
-  background:color-mix(in srgb,var(--room-accent) 13%,transparent);
-  border:1px solid color-mix(in srgb,var(--room-accent) 35%,transparent);
-  box-shadow:0 0 0 9px color-mix(in srgb,var(--room-accent) 5%,transparent),0 0 42px color-mix(in srgb,var(--room-accent) 20%,transparent);
-  animation:slGoalMarkPop .75s cubic-bezier(.2,.8,.2,1) both;
+#slStudyRoomAmbient[data-theme="mint"] .sl-room-ambient-particle {
+  color:#a8fff0;text-shadow:0 0 13px rgba(130,255,231,.35);
 }
-.sl-goal-celebration-card h2{margin:0 0 9px;color:var(--room-text);font-size:clamp(1.45rem,5vw,1.85rem);letter-spacing:-.04em}
-.sl-goal-celebration-card p{margin:0;color:var(--room-muted);font-size:.92rem;line-height:1.65}
-.sl-goal-celebration-time{display:inline-block;margin:18px 0 22px;padding:9px 15px;border-radius:99px;background:color-mix(in srgb,var(--room-accent) 12%,transparent);border:1px solid color-mix(in srgb,var(--room-accent) 25%,transparent);color:var(--room-text);font-size:1rem;font-weight:850;font-variant-numeric:tabular-nums}
-.sl-goal-celebration-close{
-  display:block;width:100%;min-height:46px;border:1px solid color-mix(in srgb,var(--room-accent) 28%,transparent);
-  border-radius:15px;background:linear-gradient(135deg,var(--room-accent-strong),var(--room-accent));
-  color:#fff;font:inherit;font-weight:800;cursor:pointer;box-shadow:0 10px 24px color-mix(in srgb,var(--room-accent) 19%,transparent);
+#slStudyRoomAmbient[data-theme="midnight-blue"] .sl-room-ambient-particle {
+  color:#c5d9ff;text-shadow:0 0 15px rgba(117,165,255,.52);
 }
-.sl-goal-celebration-close:focus-visible{outline:3px solid var(--room-accent);outline-offset:4px}
-.sl-goal-sparkles{position:absolute;inset:0;overflow:hidden;pointer-events:none}
-.sl-goal-sparkles i{position:absolute;top:52%;left:50%;width:6px;height:10px;border-radius:3px;background:var(--spark-color,var(--room-accent));opacity:0;animation:slGoalSpark 1.5s ease-out both;animation-delay:var(--spark-delay,0ms)}
-.sl-goal-sparkles i:nth-child(1){--spark-x:-130px;--spark-y:-125px;--spark-color:var(--room-accent);--spark-delay:0ms}
-.sl-goal-sparkles i:nth-child(2){--spark-x:125px;--spark-y:-115px;--spark-color:var(--room-accent-strong);--spark-delay:70ms}
-.sl-goal-sparkles i:nth-child(3){--spark-x:-155px;--spark-y:5px;--spark-color:#f3c86a;--spark-delay:110ms}
-.sl-goal-sparkles i:nth-child(4){--spark-x:155px;--spark-y:12px;--spark-color:var(--room-accent);--spark-delay:150ms}
-.sl-goal-sparkles i:nth-child(5){--spark-x:-105px;--spark-y:125px;--spark-color:#b79aff;--spark-delay:190ms}
-.sl-goal-sparkles i:nth-child(6){--spark-x:110px;--spark-y:130px;--spark-color:var(--room-accent-strong);--spark-delay:230ms}
-.sl-goal-sparkles i:nth-child(7){--spark-x:-55px;--spark-y:-155px;--spark-color:#f3c86a;--spark-delay:260ms}
-.sl-goal-sparkles i:nth-child(8){--spark-x:65px;--spark-y:-160px;--spark-color:var(--room-accent);--spark-delay:300ms}
-.sl-goal-sparkles i:nth-child(9){--spark-x:-175px;--spark-y:-65px;--spark-color:#b79aff;--spark-delay:340ms}
-.sl-goal-sparkles i:nth-child(10){--spark-x:175px;--spark-y:-60px;--spark-color:#f3c86a;--spark-delay:380ms}
-@keyframes slGoalMarkPop{0%{transform:scale(.55) rotate(-12deg);opacity:0}65%{transform:scale(1.08) rotate(4deg)}100%{transform:scale(1);opacity:1}}
-@keyframes slGoalSpark{0%{opacity:0;transform:translate(-50%,-50%) scale(.3) rotate(0)}18%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--spark-x)),calc(-50% + var(--spark-y))) scale(1) rotate(150deg)}}
-@media(max-width:520px){.sl-goal-celebration-card{padding:28px 21px 22px;border-radius:25px}.sl-goal-sparkles i{width:5px;height:8px}}
-@media(prefers-reduced-motion:reduce){
-  .sl-goal-celebration,.sl-goal-celebration-card{transition:none!important}
-  .sl-goal-celebration-mark,.sl-goal-sparkles i{animation:none!important}
-  .sl-goal-celebration.is-visible .sl-goal-celebration-card{transform:none}
+#slStudyRoomAmbient[data-theme="pinky"] .sl-room-ambient-particle {
+  color:#ffb9d7;text-shadow:0 0 12px rgba(255,151,198,.42);
+}
+#slStudyRoomAmbient[data-theme="forest-green"] .sl-room-ambient-particle {
+  color:#b6e7a5;text-shadow:0 0 12px rgba(137,210,113,.34);
+}
+#slStudyRoomAmbient[data-theme="lavender"] .sl-room-ambient-particle {
+  color:#d7c3ff;text-shadow:0 0 13px rgba(177,142,255,.42);
+}
+#slStudyRoomAmbient[data-theme="warm-sand"] .sl-room-ambient-particle {
+  color:#f4d49b;text-shadow:0 0 12px rgba(242,193,111,.35);
+}
+#slStudyRoomAmbient[data-theme="ocean"] .sl-room-ambient-particle {
+  color:#a8e8ff;text-shadow:0 0 13px rgba(89,197,255,.40);
+}
+@keyframes slRoomAmbientDrift {
+  0% {opacity:0;transform:translate3d(0,12px,0) rotate(0deg) scale(.82)}
+  14% {opacity:.34}
+  52% {opacity:.24;transform:translate3d(var(--drift-x),var(--drift-y),0) rotate(var(--rotation)) scale(1)}
+  88% {opacity:.28}
+  100% {opacity:0;transform:translate3d(calc(var(--drift-x) * -0.45),calc(var(--drift-y) * -0.7),0) rotate(calc(var(--rotation) * -0.55)) scale(.9)}
+}
+.sl-pet-character.is-goal-celebrating {
+  filter:drop-shadow(0 0 13px color-mix(in srgb,var(--room-accent) 65%,transparent));
+}
+@media(prefers-reduced-motion:reduce) {
+  .sl-room-ambient-particle {animation:none!important;opacity:.12}
+  .sl-pet-character.is-goal-celebrating {filter:none}
 }
