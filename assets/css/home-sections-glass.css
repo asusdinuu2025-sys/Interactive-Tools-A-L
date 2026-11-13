@@ -1174,3 +1174,68 @@ html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions button { color:
     animation: none !important;
   }
 }
+
+
+/* =========================================================
+   EXACT-SPECIFICITY OVERRIDES FOR THE DOCKED CONTROLS
+   The rail and its launchers are neutral translucent glass too.
+   ========================================================= */
+@media (min-width: 1180px) {
+  .sl-home-sidebar {
+    border-color: rgba(225,238,250,.18) !important;
+    background: rgba(8,14,24,.16) !important;
+    box-shadow:
+      0 18px 42px rgba(0,0,0,.13),
+      inset 0 1px 0 rgba(255,255,255,.13) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(112%) !important;
+    backdrop-filter: blur(16px) saturate(112%) !important;
+  }
+  html[data-theme="light"] .sl-home-sidebar {
+    border-color: rgba(255,255,255,.48) !important;
+    background: rgba(255,255,255,.22) !important;
+    box-shadow:
+      0 18px 42px rgba(48,72,98,.07),
+      inset 0 1px 0 rgba(255,255,255,.78) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(112%) !important;
+    backdrop-filter: blur(16px) saturate(112%) !important;
+  }
+
+  .sl-home-sidebar .sl-home-quick-actions #studylabPetLauncher,
+  .sl-home-sidebar .sl-home-quick-actions .studylab-ai-launcher,
+  .sl-home-sidebar .sl-home-quick-actions .study-chat-button {
+    color: inherit !important;
+    border: 1px solid rgba(225,238,250,.18) !important;
+    background: rgba(255,255,255,.055) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 6px 15px rgba(0,0,0,.045) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(112%) !important;
+    backdrop-filter: blur(14px) saturate(112%) !important;
+  }
+  .sl-home-sidebar .sl-home-quick-actions #studylabPetLauncher:hover,
+  .sl-home-sidebar .sl-home-quick-actions #studylabPetLauncher[aria-expanded="true"],
+  .sl-home-sidebar .sl-home-quick-actions .studylab-ai-launcher:hover,
+  .sl-home-sidebar .sl-home-quick-actions .studylab-ai-launcher.is-open,
+  .sl-home-sidebar .sl-home-quick-actions .study-chat-button:hover,
+  .sl-home-sidebar .sl-home-quick-actions .study-chat-button.is-open {
+    border-color: rgba(225,238,250,.30) !important;
+    background: rgba(255,255,255,.10) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 7px 17px rgba(0,0,0,.06) !important;
+  }
+
+  html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions #studylabPetLauncher,
+  html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions .studylab-ai-launcher,
+  html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions .study-chat-button {
+    color: #344f69 !important;
+    border-color: rgba(255,255,255,.52) !important;
+    background: rgba(255,255,255,.23) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.84), 0 6px 15px rgba(48,72,98,.04) !important;
+  }
+  html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions #studylabPetLauncher:hover,
+  html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions #studylabPetLauncher[aria-expanded="true"],
+  html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions .studylab-ai-launcher:hover,
+  html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions .studylab-ai-launcher.is-open,
+  html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions .study-chat-button:hover,
+  html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions .study-chat-button.is-open {
+    background: rgba(255,255,255,.34) !important;
+    border-color: rgba(255,255,255,.72) !important;
+  }
+}
