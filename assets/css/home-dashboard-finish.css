@@ -132,3 +132,112 @@ html[data-theme="light"] .sl-home-room-entry-arrow svg {
     font-size: .77rem;
   }
 }
+
+/* =========================================================
+   HOME FINAL HEADER / RESOURCE ALIGNMENT
+   The old extra 90/76/72px inline main padding has been removed;
+   keep a single header offset and preserve the Home section's 10px inset.
+   ========================================================= */
+.sl-home-home-section {
+  padding-top: 10px !important;
+}
+
+/* A door icon in the dashboard Study Room tile, matching its main entry. */
+.homepage-overview-panel .study-room-launcher-arrow {
+  display: grid !important;
+  flex: 0 0 30px !important;
+  width: 30px !important;
+  height: 34px !important;
+  place-items: center !important;
+  color: #9bdfff !important;
+}
+.homepage-overview-panel .study-room-launcher-arrow svg {
+  display: block !important;
+  width: 26px !important;
+  height: 26px !important;
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 1.8 !important;
+  filter: none !important;
+}
+html[data-theme="light"] .homepage-overview-panel .study-room-launcher-arrow {
+  color: #2472a5 !important;
+}
+
+/* The Social opener uses its own discussion glyph, not another outbound arrow. */
+.sl-home-social .sl-home-social-button-arrow {
+  display: grid !important;
+  place-items: center !important;
+  flex: 0 0 34px !important;
+  width: 34px !important;
+  height: 34px !important;
+  line-height: 1 !important;
+}
+.sl-home-social .sl-home-social-button-arrow svg {
+  display: block !important;
+  width: 28px !important;
+  height: 28px !important;
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 1.8 !important;
+}
+html[data-theme="light"] .sl-home-social .sl-home-social-button-arrow {
+  color: #1d71aa !important;
+}
+
+/* Both Other A/L Resources entries now occupy the full panel width.
+   The original MCQ site and Study Tools destinations stay untouched. */
+.sl-home-other .sl-home-resource-grid {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  align-items: stretch !important;
+  gap: 13px !important;
+}
+.sl-home-other .sl-home-resource-grid > .mcq-practice-card,
+.sl-home-other .sl-home-resource-grid > .study-tools-card {
+  box-sizing: border-box !important;
+  grid-column: 1 / -1 !important;
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 146px !important;
+  height: auto !important;
+  gap: 18px !important;
+  padding: 20px 23px !important;
+  border-radius: 19px !important;
+}
+.sl-home-other .sl-home-resource-grid > .mcq-practice-card .telegram-card-content,
+.sl-home-other .sl-home-resource-grid > .study-tools-card .study-tools-card-content {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+.sl-home-other .sl-home-resource-grid > .mcq-practice-card .card-cta,
+.sl-home-other .sl-home-resource-grid > .study-tools-card .study-tools-card-cta {
+  flex: 0 0 auto !important;
+  margin-left: auto !important;
+  white-space: nowrap !important;
+}
+.sl-home-other .sl-home-resource-grid > .mcq-practice-card .mcq-icon,
+.sl-home-other .sl-home-resource-grid > .study-tools-card .study-tools-card-icon {
+  flex: 0 0 52px !important;
+  width: 52px !important;
+  height: 52px !important;
+  margin: 0 !important;
+}
+@media (max-width: 720px) {
+  .sl-home-other .sl-home-resource-grid > .mcq-practice-card,
+  .sl-home-other .sl-home-resource-grid > .study-tools-card {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    gap: 12px !important;
+    padding: 17px !important;
+  }
+  .sl-home-other .sl-home-resource-grid > .mcq-practice-card .card-cta,
+  .sl-home-other .sl-home-resource-grid > .study-tools-card .study-tools-card-cta {
+    margin-left: 0 !important;
+    margin-top: 5px !important;
+    white-space: normal !important;
+  }
+}
