@@ -1,6 +1,25 @@
 /* StudyLab Home panels: read-only live Study Room ranks + Social drawer launcher. */
 (() => {
   "use strict";
+  const greetingTime = document.getElementById("homeGreetingTime");
+  const updateGreetingTime = () => {
+    if (!greetingTime) return;
+    const hour = Number(new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Colombo",
+      hour: "2-digit",
+      hourCycle: "h23"
+    }).format(new Date()));
+    greetingTime.textContent = hour >= 5 && hour < 12
+      ? "Good morning"
+      : hour >= 12 && hour < 17
+        ? "Good afternoon"
+        : hour >= 17 && hour < 22
+          ? "Good evening"
+          : "Good night";
+  };
+  updateGreetingTime();
+  window.setInterval(updateGreetingTime, 60000);
+
   const rankRoot = document.querySelector("[data-home-room-ranks]");
   const socialButton = document.querySelector("[data-open-home-social]");
 

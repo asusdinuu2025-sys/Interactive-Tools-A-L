@@ -484,7 +484,7 @@ html[data-theme="light"] .sl-home-social-button { color: #365d7c; border-color: 
     width: var(--sl-home-frame-width) !important;
     min-width: 0 !important;
     max-width: none !important;
-    margin: 0 0 80px !important;
+    margin: 96px 0 80px !important;
     padding: 0 !important;
     transform: translateX(-50%) !important;
     box-sizing: border-box !important;
@@ -642,7 +642,7 @@ html[data-theme="light"] .sl-home-home-section .homepage-greeting-hello {
     transform: none !important;
     width: calc(100% - 32px) !important;
     max-width: 1120px !important;
-    margin: 0 auto 80px !important;
+    margin: 82px auto 80px !important;
     padding: 0 !important;
   }
   .sl-home-section { scroll-margin-top: 88px !important; }
@@ -657,4 +657,21 @@ html[data-theme="light"] .sl-home-home-section .homepage-greeting-hello {
   .sl-home-sidebar .sl-home-nav-label {
     transition: none !important;
   }
+}
+
+
+/* Preserve the document's accessible title without adding visible Home copy. */
+.sl-home-home-section > h1.home-hero-title-spacer {
+  display: block !important;
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0,0,0,0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+  line-height: 0 !important;
 }
