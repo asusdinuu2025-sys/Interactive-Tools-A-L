@@ -112,6 +112,11 @@
     }).catch(()=>updateGreeting(null));
   }
 
+  // Keep the original Study Room card and its exact destination, but surface it with the live dashboard metrics.
+  const utilityRow = document.querySelector(".homepage-utility-row");
+  const studyRoomCard = document.querySelector(".home-hub-grid--productivity > .study-room-launcher");
+  if (utilityRow && studyRoomCard) utilityRow.append(studyRoomCard);
+
   const allNavLinks = [...sidebar.querySelectorAll("a"),...mobileNav.querySelectorAll("a")];
   const sections = ["overview","subjects","learning","productivity","community","assistance"]
     .map(id=>document.getElementById(id)).filter(Boolean);
