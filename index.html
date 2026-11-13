@@ -34,6 +34,7 @@
   <link rel="stylesheet" href="assets/css/main.css?v=20261103-filter-chevron-v1" />
   <link rel="stylesheet" href="assets/css/pwa.css?v=1.0.1">
   <link rel="stylesheet" href="assets/css/feed-drawer.css?v=29">
+  <link rel="stylesheet" href="assets/css/home-sidebar.css?v=1">
 
 
   <!-- =========================================================
@@ -1921,7 +1922,7 @@
         </div>
       </div>
 
-        <a class="study-room-launcher" href="study-room.html?completeProfile=1&amp;returnTo=%2Fstudy-room.html" aria-label="Open StudyLab Live Study Room">
+        <a class="study-room-launcher" id="live-study-room-section" href="study-room.html?completeProfile=1&amp;returnTo=%2Fstudy-room.html" aria-label="Open StudyLab Live Study Room">
           <span class="study-room-launcher-icon study-room-launcher-vector" aria-hidden="true">
             <svg viewBox="0 0 48 48" focusable="false">
               <circle cx="15" cy="11" r="4.5" fill="none" stroke="#39ffb0" stroke-width="2.5"/>
@@ -2238,7 +2239,8 @@
 
     <section
       class="card-grid"
-      aria-label="Subjects"
+      id="practical-simulations"
+      aria-label="Practical Simulations"
     >
 
 
@@ -2351,6 +2353,7 @@
       <a
         class="subject-card"
         href="git.html"
+        id="other-al-resources"
         aria-label="Open General Information Technology resources"
       >
 
@@ -2412,6 +2415,7 @@
       <a
         class="subject-card"
         href="exam-hub.html"
+        id="past-papers"
         aria-label="Open A/L Exam Hub"
       >
 
@@ -2433,6 +2437,7 @@
 
       <a
         class="study-tools-card lesson-resource-card"
+        id="free-lesson-packs"
         href="lesson-packs.html"
         aria-label="Open Free Lessons and Lesson Packs"
       >
@@ -2447,6 +2452,7 @@
 
       <a
         class="study-tools-card"
+        id="productivity"
         href="study-tools.html"
         aria-label="Open A/L Study Tools"
       >
@@ -2466,6 +2472,7 @@
       </a>
     <a
       class="telegram-card"
+      id="telegram-links"
       href="Telegram_Channels.html"
       aria-label="Open A/L Telegram Channels"
     >
@@ -2811,6 +2818,7 @@
 <script src="assets/js/home-card-glow.js?v=1.2.0" defer></script>
   <script src="assets/js/pwa.js?v=1.0.1"></script>
   <script src="assets/js/feed-drawer.js?v=19" defer></script>
+  <script src="assets/js/home-sidebar.js?v=1" defer></script>
   <script src="assets/js/studylab-social.js?v=22" defer></script>
 
 </body>
