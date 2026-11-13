@@ -472,7 +472,7 @@
 
     const subjectGrid = document.querySelector(SELECTORS.subjectGrid);
     if (subjectGrid) {
-      return [...subjectGrid.querySelectorAll(".subject-card, .study-tools-card, .telegram-card")];
+      return [...subjectGrid.querySelectorAll(".subject-card, .study-tools-card, .telegram-card, .study-room-launcher, .home-hub-action-card")];
     }
 
     return [];
@@ -495,7 +495,7 @@
     });
 
     document.querySelectorAll("[data-home-hub-section]").forEach(section => {
-      const sectionCards = [...section.querySelectorAll(".subject-card, .study-tools-card, .telegram-card")];
+      const sectionCards = [...section.querySelectorAll(".subject-card, .study-tools-card, .telegram-card, .study-room-launcher, .home-hub-action-card")];
       const hasVisibleCard = sectionCards.some(card => !card.classList.contains("study-search-hidden"));
       section.hidden = Boolean(query) && sectionCards.length > 0 && !hasVisibleCard;
     });
@@ -503,7 +503,7 @@
     if (searchMeta) {
       const label = document.querySelector(SELECTORS.toolGrid)
         ? "tools"
-        : "resources";
+        : "items";
       searchMeta.textContent = query
         ? matches + " " + label + " found"
         : cards.length + " " + label;
@@ -555,7 +555,7 @@
     searchInput.spellcheck = false;
     searchInput.placeholder = toolGrid
       ? "Search tools, lessons, topics..."
-      : "Search A/L subjects, lessons and resources...";
+      : "Search subjects, lessons, tools and StudyLab...";
     searchInput.setAttribute("aria-label", searchInput.placeholder);
 
     searchClear = document.createElement("button");
