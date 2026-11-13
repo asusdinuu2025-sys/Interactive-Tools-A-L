@@ -119,7 +119,14 @@
     });
   });
 
+  sidebar.addEventListener("animationend", event => {
+    if (event.animationName === "slSidebarSoftSnap") sidebar.classList.remove("is-transitioning");
+  });
+
   collapseButton.addEventListener("click", () => {
+    sidebar.classList.remove("is-transitioning");
+    void sidebar.offsetWidth;
+    sidebar.classList.add("is-transitioning");
     const collapsed = sidebar.classList.toggle("is-collapsed");
     layout.classList.toggle("is-sidebar-collapsed", collapsed);
     collapseButton.setAttribute("aria-expanded", String(!collapsed));
