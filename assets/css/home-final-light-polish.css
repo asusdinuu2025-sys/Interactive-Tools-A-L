@@ -251,3 +251,187 @@ html[data-theme="light"] .sl-home-social-button-description {
   .sl-home-social-button::before,
   .sl-home-social-button::after { animation: none !important; }
 }
+
+
+/* =============================================================
+   HOME QUICK + SUGGEST GLASS PANELS
+   Share the Home/Pet/AI neutral translucent material.
+   The feedback and quick-access scripts and data bindings stay intact.
+   ============================================================= */
+body:not(.study-room-page) .study-quick-panel,
+body:not(.study-room-page) .study-feedback-panel {
+  --sl-popup-text: #eaf5ff;
+  --sl-popup-muted: #b5cce2;
+  --sl-popup-border: rgba(211,233,250,.20);
+  --sl-popup-control-bg: rgba(255,255,255,.055);
+  --sl-popup-control-hover: rgba(255,255,255,.10);
+  --sl-popup-control-border: rgba(212,233,251,.14);
+  box-sizing: border-box;
+  color: var(--sl-popup-text) !important;
+  border: 1px solid rgba(211,233,250,.23) !important;
+  border-radius: 22px !important;
+  background:
+    linear-gradient(130deg,rgba(255,255,255,.075),transparent 38%),
+    rgba(10,18,33,.58) !important;
+  box-shadow:
+    0 22px 62px rgba(0,8,25,.23),
+    inset 0 1px 0 rgba(255,255,255,.17) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(120%) !important;
+  backdrop-filter: blur(18px) saturate(120%) !important;
+  scrollbar-color: rgba(165,208,235,.28) transparent;
+}
+html[data-theme="light"] body:not(.study-room-page) .study-quick-panel,
+html[data-theme="light"] body:not(.study-room-page) .study-feedback-panel {
+  --sl-popup-text: #173b59;
+  --sl-popup-muted: #42637e;
+  --sl-popup-border: rgba(85,140,190,.18);
+  --sl-popup-control-bg: rgba(255,255,255,.29);
+  --sl-popup-control-hover: rgba(255,255,255,.47);
+  --sl-popup-control-border: rgba(74,129,178,.20);
+  color: var(--sl-popup-text) !important;
+  border-color: rgba(255,255,255,.76) !important;
+  background:
+    linear-gradient(130deg,rgba(255,255,255,.26),transparent 38%),
+    rgba(245,251,255,.68) !important;
+  box-shadow:
+    0 20px 56px rgba(29,73,124,.14),
+    inset 0 1px 0 rgba(255,255,255,.86) !important;
+  scrollbar-color: rgba(50,110,161,.25) transparent;
+}
+
+/* Identical restrained top-edge highlight, not a colored neon stripe. */
+body:not(.study-room-page) .study-quick-panel::before,
+body:not(.study-room-page) .study-feedback-panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 12%;
+  right: 12%;
+  height: 1px;
+  background: linear-gradient(90deg,transparent,rgba(230,246,255,.33),transparent);
+  pointer-events: none;
+}
+html[data-theme="light"] body:not(.study-room-page) .study-quick-panel::before,
+html[data-theme="light"] body:not(.study-room-page) .study-feedback-panel::before {
+  background: linear-gradient(90deg,transparent,rgba(255,255,255,.95),transparent);
+}
+
+/* Panel headings, help text, labels and counts remain legible in both modes. */
+body:not(.study-room-page) .study-quick-head strong,
+body:not(.study-room-page) .study-feedback-title,
+body:not(.study-room-page) .study-quick-progress-top strong,
+body:not(.study-room-page) .study-quick-item-text strong {
+  color: var(--sl-popup-text) !important;
+}
+body:not(.study-room-page) .study-quick-head small,
+body:not(.study-room-page) .study-feedback-subtitle,
+body:not(.study-room-page) .study-quick-section-title,
+body:not(.study-room-page) .study-quick-section-title span,
+body:not(.study-room-page) .study-quick-item-text small,
+body:not(.study-room-page) .study-quick-empty,
+body:not(.study-room-page) .study-quick-progress-top,
+body:not(.study-room-page) .study-feedback-label,
+body:not(.study-room-page) .study-feedback-meta,
+body:not(.study-room-page) .study-feedback-status {
+  color: var(--sl-popup-muted) !important;
+}
+body:not(.study-room-page) .study-feedback-head {
+  border-bottom-color: var(--sl-popup-control-border) !important;
+}
+
+/* Layered glass controls inside each panel, without the older gray/opaque boxes. */
+body:not(.study-room-page) .study-quick-search-row,
+body:not(.study-room-page) .study-quick-progress,
+body:not(.study-room-page) .study-quick-item,
+body:not(.study-room-page) .study-feedback-option,
+body:not(.study-room-page) .study-feedback-textarea,
+body:not(.study-room-page) .study-quick-close,
+body:not(.study-room-page) .study-feedback-close {
+  color: var(--sl-popup-text) !important;
+  border: 1px solid var(--sl-popup-control-border) !important;
+  background: var(--sl-popup-control-bg) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.09) !important;
+}
+body:not(.study-room-page) .study-quick-search,
+body:not(.study-room-page) .study-feedback-textarea {
+  color: var(--sl-popup-text) !important;
+  caret-color: #65beee;
+}
+body:not(.study-room-page) .study-quick-search {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+body:not(.study-room-page) .study-quick-search::placeholder,
+body:not(.study-room-page) .study-feedback-textarea::placeholder {
+  color: var(--sl-popup-muted) !important;
+  opacity: .85;
+}
+body:not(.study-room-page) .study-quick-item:hover,
+body:not(.study-room-page) .study-feedback-option:hover,
+body:not(.study-room-page) .study-quick-close:hover,
+body:not(.study-room-page) .study-feedback-close:hover {
+  background: var(--sl-popup-control-hover) !important;
+  border-color: rgba(113,193,239,.36) !important;
+  color: var(--sl-popup-text) !important;
+}
+
+/* Visible selected feedback type, even against a bright background. */
+body:not(.study-room-page) .study-feedback-option.active {
+  background: rgba(80,172,225,.17) !important;
+  border-color: rgba(106,198,247,.54) !important;
+  color: var(--sl-popup-text) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.16) !important;
+}
+html[data-theme="light"] body:not(.study-room-page) .study-feedback-option.active {
+  background: rgba(73,164,220,.18) !important;
+  border-color: rgba(46,130,192,.55) !important;
+  color: #174c78 !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.76) !important;
+}
+body:not(.study-room-page) .study-feedback-textarea:focus,
+body:not(.study-room-page) .study-quick-search-row:focus-within {
+  border-color: rgba(103,186,239,.62) !important;
+  box-shadow: 0 0 0 3px rgba(77,170,226,.12) !important;
+  outline: none !important;
+}
+body:not(.study-room-page) .study-feedback-submit {
+  color: #eaf5ff !important;
+  border: 1px solid rgba(135,204,246,.27) !important;
+  background: rgba(67,147,204,.26) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.18),0 7px 18px rgba(0,15,31,.08) !important;
+}
+body:not(.study-room-page) .study-feedback-submit:not(:disabled):hover {
+  border-color: rgba(138,215,252,.56) !important;
+  background: rgba(67,147,204,.36) !important;
+}
+html[data-theme="light"] body:not(.study-room-page) .study-feedback-submit {
+  color: #164d78 !important;
+  border-color: rgba(75,145,204,.35) !important;
+  background: rgba(115,189,239,.25) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.82),0 7px 18px rgba(42,90,138,.06) !important;
+}
+body:not(.study-room-page) .study-feedback-submit:disabled {
+  opacity: .50 !important;
+  cursor: not-allowed;
+}
+body:not(.study-room-page) .study-feedback-status.success { color: #67ddb2 !important; }
+body:not(.study-room-page) .study-feedback-status.error { color: #ff949e !important; }
+html[data-theme="light"] body:not(.study-room-page) .study-feedback-status.success { color: #137655 !important; }
+html[data-theme="light"] body:not(.study-room-page) .study-feedback-status.error { color: #b43c4f !important; }
+body:not(.study-room-page) .study-quick-item-icon { color: #8cd6fa !important; }
+html[data-theme="light"] body:not(.study-room-page) .study-quick-item-icon { color: #1b70a7 !important; }
+html[data-theme="light"] body:not(.study-room-page) .study-quick-progress-track {
+  background: rgba(39,95,138,.13) !important;
+}
+body:not(.study-room-page) .study-quick-panel[hidden],
+body:not(.study-room-page) .study-feedback-panel[hidden] {
+  display: none !important;
+}
+@media (max-width: 720px) {
+  body:not(.study-room-page) .study-quick-panel,
+  body:not(.study-room-page) .study-feedback-panel {
+    border-radius: 20px !important;
+    max-height: calc(100dvh - 92px);
+  }
+}
