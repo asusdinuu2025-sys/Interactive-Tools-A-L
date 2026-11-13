@@ -1,6 +1,6 @@
 /* StudyLab Home floating liquid-glass navigation. Isolated to the homepage. */
 .sl-home-sidebar {
-  --sl-sidebar-width: 232px;
+  --sl-sidebar-width: 208px;
   position: fixed;
   z-index: 990;
   top: 50%;
@@ -238,7 +238,7 @@ html[data-theme="light"] .sl-home-nav-indicator {
 html[data-theme="light"] .sl-home-sidebar-hint { color: rgba(40,80,115,.48); }
 .sl-home-layout .sl-home-content { transition: padding-left .42s cubic-bezier(.22,1,.36,1); }
 @media (min-width: 1180px) {
-  .sl-home-layout .sl-home-content { box-sizing: border-box; padding-left: 250px; }
+  .sl-home-layout .sl-home-content { box-sizing: border-box; padding-left: 226px; }
   .sl-home-layout.is-sidebar-collapsed .sl-home-content { padding-left: 96px; }
 }
 @media (max-width: 1179px) {
@@ -697,7 +697,7 @@ html[data-theme="light"] .sl-home-nav-item[data-nav-id="productivity"]::before {
   .sl-home-layout .sl-home-content,
   .sl-home-layout.is-sidebar-collapsed .sl-home-content {
     box-sizing: border-box;
-    padding-left: 250px !important;
+    padding-left: 226px !important;
     transition: none !important;
   }
 }
