@@ -26,6 +26,32 @@
     return;
   }
 
+  // Supabase can briefly reject a freshly issued access token when the
+  // PostgREST verifier's clock is slightly behind the Auth server. Retry only
+  // that specific 401 once the timestamp has had time to become valid.
+  async function fetchWithJwtClockSkewRetry(input, init) {
+    const request = new Request(input, init);
+    const retryDelays = [500, 1500, 3000];
+    const isRestRequest = new URL(request.url).pathname.startsWith("/rest/v1/");
+
+    for (let attempt = 0; ; attempt += 1) {
+      const response = await fetch(request.clone());
+      if (!isRestRequest || response.status !== 401 || attempt >= retryDelays.length) {
+        return response;
+      }
+
+      const payload = await response.clone().json().catch(() => null);
+      const detail = [
+        payload?.code || "",
+        payload?.message || "",
+        payload?.details || ""
+      ].join(" ");
+      if (!/PGRST303|JWT.{0,80}(?:issued|future)/i.test(detail)) return response;
+
+      await new Promise(resolve => window.setTimeout(resolve, retryDelays[attempt]));
+    }
+  }
+
   const client = window.supabase.createClient(
     CONFIG.url,
     CONFIG.publishableKey,
@@ -34,6 +60,9 @@
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true
+      },
+      global: {
+        fetch: fetchWithJwtClockSkewRetry
       }
     }
   );
