@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Abstract StudyLab day blue violet flowing ribbons">
+  <defs>
+    <linearGradient id="base" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#D7E6F2"/>
+      <stop offset=".52" stop-color="#D3EBFA"/>
+      <stop offset="1" stop-color="#B7DFF7"/>
+    </linearGradient>
+    <radialGradient id="hazeC" cx=".7" cy=".08" r=".8">
+      <stop offset="0" stop-color="#57BCEB" stop-opacity=".30"/>
+      <stop offset="1" stop-color="#57BCEB" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="hazeM" cx=".05" cy=".92" r=".9">
+      <stop offset="0" stop-color="#B795E8" stop-opacity=".25"/>
+      <stop offset="1" stop-color="#B795E8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="purple" x1="0" y1=".95" x2="1" y2="0">
+      <stop offset="0" stop-color="#9B47D3"/>
+      <stop offset=".54" stop-color="#CD71E8"/>
+      <stop offset="1" stop-color="#7A44D6"/>
+    </linearGradient>
+    <linearGradient id="blue" x1=".14" y1=".96" x2=".86" y2=".06">
+      <stop offset="0" stop-color="#1871D3"/>
+      <stop offset=".43" stop-color="#1893E6"/>
+      <stop offset=".82" stop-color="#4FB8F2"/>
+      <stop offset="1" stop-color="#B7E9FF"/>
+    </linearGradient>
+    <linearGradient id="blueAlt" x1=".08" y1=".32" x2="1" y2=".80">
+      <stop offset="0" stop-color="#B7E9FF"/>
+      <stop offset=".48" stop-color="#1893E6"/>
+      <stop offset="1" stop-color="#1871D3"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="0" y1="0" x2="1" y2=".8">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity=".05"/>
+      <stop offset=".50" stop-color="#FFFFFF" stop-opacity=".75"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity=".05"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#base)"/>
+  <rect width="1920" height="1080" fill="url(#hazeC)"/>
+  <rect width="1920" height="1080" fill="url(#hazeM)"/>
+  <!-- Fluid ribbons stay at the margins, leaving generous space for study content. -->
+  <path d="M-210 310 C85 405 140 760 450 835 C710 897 910 645 1100 640 C1306 636 1540 865 1940 926 L1940 1250 L-220 1250Z" fill="url(#purple)" opacity=".58"/>
+  <path d="M-190 -90 C5 98 112 274 276 511 C491 825 775 899 958 667 C1106 479 1190 291 1416 308 C1665 326 1813 575 2070 716 L2070 994 C1721 796 1500 583 1325 572 C1118 556 1094 914 847 1027 C556 1160 211 895 -120 565Z" fill="url(#blue)" opacity=".68"/>
+  <path d="M-210 44 C102 228 164 503 351 699 C569 927 822 964 973 743 C1120 529 1191 424 1350 421 C1610 418 1734 655 2055 807" fill="none" stroke="url(#edge)" stroke-width="10" opacity=".72"/>
+  <path d="M-170 112 C90 312 194 579 386 755 C567 923 798 1016 998 789" fill="none" stroke="#B7E9FF" stroke-width="2" stroke-opacity=".42"/>
+  <!-- An outer blue ribbon gives depth without blurring the interface. -->
+  <path d="M1180 -110 C1473 21 1618 244 1806 384 C1939 483 2034 518 2111 531 L2111 802 C1853 761 1636 544 1476 426 C1365 345 1288 282 1140 293 C1021 302 981 404 934 463 C957 234 1020 21 1180 -110Z" fill="url(#blueAlt)" opacity=".57"/>
+  <path d="M1164 4 C1418 97 1563 316 1756 451 C1875 535 1963 594 2068 624" fill="none" stroke="url(#edge)" stroke-width="6" opacity=".6"/>
+  <path d="M-120 1040 C332 952 585 1158 870 1080 C1132 1007 1393 916 1665 1014 C1855 1085 2044 1102 2090 1120" fill="none" stroke="#FFFFFF" stroke-opacity=".22" stroke-width="28"/>
+</svg>
