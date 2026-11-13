@@ -1,0 +1,253 @@
+/* StudyLab Home finishing pass: light wallpaper, readable glass and full-width Social CTA.
+   Scope: Home-only appearance. Behaviour, destinations and profile colours remain unchanged. */
+
+/* Exact uploaded light wallpaper is served from the existing Home image asset path.
+   Preserve it sharply; the glass panels, not the wallpaper, take the blur. */
+html[data-theme="light"] body {
+  background-color: #d6e4f1 !important;
+  background-image:
+    linear-gradient(180deg, rgba(245,250,255,.09), rgba(227,239,253,.12)),
+    url("../images/studylab-home-light.webp"),
+    linear-gradient(145deg, #d6e4f1 0%, #7dc3ee 60%, #ba73e6 100%) !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+  background-attachment: fixed !important;
+}
+
+/* Blue, lavender and clean white. Strong navy reading colours, no washed-out grey text. */
+html[data-theme="light"] .sl-home-section {
+  color: #173c5c !important;
+  background: rgba(247,251,255,.61) !important;
+  border-color: rgba(255,255,255,.80) !important;
+  box-shadow: 0 14px 38px rgba(25,69,115,.10), inset 0 1px 0 rgba(255,255,255,.87) !important;
+}
+html[data-theme="light"] .sl-home-home-section .homepage-overview-panel {
+  background: rgba(255,255,255,.35) !important;
+  border-color: rgba(255,255,255,.68) !important;
+}
+html[data-theme="light"] .sl-home-section .subject-card,
+html[data-theme="light"] .sl-home-section .study-tools-card,
+html[data-theme="light"] .sl-home-section .telegram-card,
+html[data-theme="light"] .sl-home-room-panel,
+html[data-theme="light"] .sl-home-feature-card,
+html[data-theme="light"] .sl-home-rank-card {
+  background: rgba(249,253,255,.48) !important;
+  border-color: rgba(255,255,255,.76) !important;
+  box-shadow: 0 8px 24px rgba(42,94,140,.065), inset 0 1px 0 rgba(255,255,255,.83) !important;
+}
+html[data-theme="light"] .sl-home-section-heading h2,
+html[data-theme="light"] .sl-home-room-copy h3,
+html[data-theme="light"] .sl-home-feature-card h3,
+html[data-theme="light"] .sl-home-rank-card strong,
+html[data-theme="light"] .sl-home-section .subject-card h2,
+html[data-theme="light"] .sl-home-section .study-tools-card h2,
+html[data-theme="light"] .sl-home-section .telegram-card h2 {
+  color: #153754 !important;
+  text-shadow: none !important;
+}
+html[data-theme="light"] .sl-home-section-heading p,
+html[data-theme="light"] .sl-home-room-copy p,
+html[data-theme="light"] .sl-home-feature-card p,
+html[data-theme="light"] .sl-home-section .subject-card p,
+html[data-theme="light"] .sl-home-section .study-tools-card p,
+html[data-theme="light"] .sl-home-section .telegram-card p,
+html[data-theme="light"] .sl-home-rank-card small,
+html[data-theme="light"] .sl-home-social-action,
+html[data-theme="light"] .sl-home-room-entry-copy em {
+  color: #375b78 !important;
+}
+html[data-theme="light"] .sl-home-section-kicker,
+html[data-theme="light"] .sl-home-room-live,
+html[data-theme="light"] .sl-home-rank-kicker,
+html[data-theme="light"] .sl-home-feature-tag {
+  color: #246b9b !important;
+}
+html[data-theme="light"] .sl-home-section .card-cta,
+html[data-theme="light"] .sl-home-section .study-tools-card-cta {
+  color: #175d96 !important;
+}
+
+/* The whole Study Room link, including the actual strong/small/em/arrow children,
+   must contrast with its glass surface; styling only nested buttons did not work. */
+html[data-theme="light"] .sl-home-room-entry {
+  color: #173d62 !important;
+  background: rgba(251,254,255,.53) !important;
+  border-color: rgba(105,166,215,.40) !important;
+  box-shadow: 0 9px 24px rgba(28,85,148,.09), inset 0 1px 0 rgba(255,255,255,.92) !important;
+}
+html[data-theme="light"] .sl-home-room-entry .sl-home-room-entry-copy strong {
+  color: #143858 !important;
+}
+html[data-theme="light"] .sl-home-room-entry .sl-home-room-entry-copy small {
+  color: #14669b !important;
+}
+html[data-theme="light"] .sl-home-room-entry .sl-home-room-entry-copy em {
+  color: #42617c !important;
+}
+html[data-theme="light"] .sl-home-room-entry .sl-home-room-entry-icon {
+  color: #1f74b0 !important;
+  background: rgba(81,178,234,.15) !important;
+}
+html[data-theme="light"] .sl-home-room-entry .sl-home-room-entry-arrow {
+  color: #1f74b0 !important;
+}
+html[data-theme="light"] .sl-home-room-entry:hover {
+  background: rgba(255,255,255,.72) !important;
+  border-color: rgba(63,154,222,.64) !important;
+}
+html[data-theme="light"] .sl-home-room-entry:focus-visible,
+.sl-home-social-button:focus-visible {
+  outline: 3px solid #328fd6 !important;
+  outline-offset: 4px;
+}
+
+/* Earlier sidebar rules paint AI purple while Chat stays a different blue.
+   Match all THREE icons to one readable accent in light mode.
+   Preserve SVG geometry: Chat is a stroked outline, AI is a filled logo. */
+html[data-theme="light"] .sl-home-sidebar {
+  color: #193b59 !important;
+  background: rgba(247,251,255,.66) !important;
+  border-color: rgba(255,255,255,.77) !important;
+}
+html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions #studylabPetLauncher .sl-pet-launcher-icon,
+html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions .studylab-ai-launcher-icon,
+html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions .study-chat-button .study-chat-button-icon,
+html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions .studylab-ai-launcher-icon svg,
+html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions .study-chat-button .study-chat-button-icon svg,
+html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions #studylabPetLauncher .sl-pet-launcher-icon svg {
+  color: #1b70ad !important;
+  filter: none !important;
+}
+html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions .study-chat-button .study-chat-button-icon svg {
+  fill: none !important;
+  stroke: currentColor !important;
+}
+html[data-theme="light"] .sl-home-sidebar .sl-home-quick-actions .studylab-ai-launcher-icon svg {
+  fill: currentColor !important;
+}
+
+/* Social action is one full-width translucent card, not a small button alongside text. */
+.sl-home-social-action {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0;
+  padding-top: 6px !important;
+}
+.sl-home-social-button {
+  --sl-social-ring-angle: 0deg;
+  position: relative !important;
+  isolation: isolate;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  width: 100% !important;
+  min-height: 86px !important;
+  padding: 15px 20px !important;
+  border: 1px solid rgba(120,215,255,.30) !important;
+  border-radius: 19px !important;
+  color: #eef8ff !important;
+  background: rgba(11,26,51,.35) !important;
+  box-shadow: 0 8px 24px rgba(17,44,79,.11), inset 0 1px 0 rgba(255,255,255,.14) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(115%) !important;
+  backdrop-filter: blur(14px) saturate(115%) !important;
+  text-align: left;
+  overflow: visible !important;
+  cursor: pointer;
+  transition: transform .2s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease !important;
+}
+.sl-home-social-button::before,
+.sl-home-social-button::after {
+  content: "";
+  position: absolute;
+  border-radius: inherit;
+  pointer-events: none;
+  background: conic-gradient(from var(--sl-social-ring-angle),
+    #4ee9ff, #71b8ff, #a79bff, #eb9cda, #80e2e5, #4ee9ff);
+  animation: slHomeSocialRingSpin 5s linear infinite;
+}
+.sl-home-social-button::before {
+  z-index: 0;
+  inset: -2px;
+  padding: 2px;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.sl-home-social-button::after {
+  z-index: -1;
+  inset: -5px;
+  opacity: .22;
+  filter: blur(13px);
+}
+.sl-home-social-button-content {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.sl-home-social-button-kicker {
+  color: #a0e9ff;
+  font-size: .62rem;
+  font-weight: 850;
+  letter-spacing: .13em;
+}
+.sl-home-social-button-content strong {
+  color: inherit;
+  font-size: 1.04rem;
+  line-height: 1.25;
+}
+.sl-home-social-button-description {
+  color: rgba(229,243,254,.80);
+  font-size: .76rem;
+  line-height: 1.4;
+}
+.sl-home-social-button-arrow {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  font-size: 1.35rem;
+  color: #a8eaff;
+}
+.sl-home-social-button:hover {
+  transform: translateY(-2px) !important;
+  background: rgba(26,63,100,.48) !important;
+  border-color: rgba(121,221,255,.48) !important;
+  box-shadow: 0 12px 30px rgba(20,66,110,.16), inset 0 1px 0 rgba(255,255,255,.20) !important;
+}
+html[data-theme="light"] .sl-home-social-button {
+  color: #153b5b !important;
+  background: rgba(251,254,255,.55) !important;
+  border-color: rgba(104,168,219,.38) !important;
+  box-shadow: 0 9px 24px rgba(34,80,132,.09), inset 0 1px 0 rgba(255,255,255,.90) !important;
+}
+html[data-theme="light"] .sl-home-social-button:hover {
+  background: rgba(255,255,255,.72) !important;
+  border-color: rgba(71,159,223,.64) !important;
+}
+html[data-theme="light"] .sl-home-social-button-kicker,
+html[data-theme="light"] .sl-home-social-button-arrow {
+  color: #1d71aa !important;
+}
+html[data-theme="light"] .sl-home-social-button-content strong {
+  color: #163858 !important;
+}
+html[data-theme="light"] .sl-home-social-button-description {
+  color: #42627d !important;
+}
+@property --sl-social-ring-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes slHomeSocialRingSpin { to { --sl-social-ring-angle: 360deg; } }
+@media (max-width: 700px) {
+  html[data-theme="light"] body { background-attachment: scroll !important; }
+  .sl-home-social-button { min-height: 80px !important; padding: 14px 16px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sl-home-social-button::before,
+  .sl-home-social-button::after { animation: none !important; }
+}
