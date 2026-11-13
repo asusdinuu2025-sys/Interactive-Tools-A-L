@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600">
-  <g fill="none" stroke="#c4d7ff" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" opacity="0.42">
+  <g fill="none" stroke="#c4d7ff" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" opacity="0.27">
     <!-- Atom and orbit -->
     <g transform="translate(76 82) rotate(-13)">
       <ellipse rx="34" ry="13"/><ellipse rx="34" ry="13" transform="rotate(60)"/><ellipse rx="34" ry="13" transform="rotate(120)"/>
@@ -67,7 +67,7 @@
     <path d="M24 175 l9 0 m-4.5 -4.5 v9 M554 170 l9 0 m-4.5 -4.5 v9"/>
     <path d="M350 34 l8 0 m-4 -4 v8 M175 520 l8 0 m-4 -4 v8"/>
   </g>
-  <g fill="#c4d7ff" font-family="Segoe UI, Arial, sans-serif" font-weight="600" opacity="0.3864">
+  <g fill="#c4d7ff" font-family="Segoe UI, Arial, sans-serif" font-weight="600" opacity="0.24">
     <text x="380" y="188" font-size="25" transform="rotate(-9 380 188)">π</text>
     <text x="32" y="525" font-size="24" transform="rotate(-12 32 525)">∫ f(x) dx</text>
     <text x="360" y="565" font-size="18" transform="rotate(6 360 565)">E = mc²</text>
