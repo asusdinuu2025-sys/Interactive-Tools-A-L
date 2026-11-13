@@ -314,6 +314,15 @@
       profileButton.title = "Open your StudyLab account options";
       profileButton.setAttribute("aria-label", "Open StudyLab account options");
     }
+    const greeting = document.getElementById("homeGreeting");
+    if (greeting) {
+      const greetingName = isGuest
+        ? "Guest"
+        : (p?.display_name && !placeholderName(p.display_name)
+          ? p.display_name
+          : (window.StudyLabAccount?.getGoogleName?.() || "Student"));
+      greeting.textContent = "Good morning, " + greetingName;
+    }
     if (accountMenu && !accountMenu.hidden) renderAccountMenu();
   }
   function showStatus(message, isError = false) {
