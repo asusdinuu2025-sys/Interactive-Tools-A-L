@@ -3,20 +3,19 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.0";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const BUCKET = "studylab-social";
-const HIGH_WATER_BYTES = 768 * 1024 * 1024; // 75% of the 1 GiB Free storage allowance
-const LOW_WATER_BYTES = 665 * 1024 * 1024;  // target about 65%
 const OLD_CONTENT_DAYS = 30;
 
-type ImageRow = { post_id: string; bucket_path: string };
 type PostRow = { id: string; status: string; created_at: string };
 
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return json({ error: "POST required" }, 405);
   if (!SUPABASE_URL || !SERVICE_ROLE_KEY) return json({ error: "Server configuration missing" }, 500);
 
-  // The gateway also verifies the JWT. Exact service-role matching prevents
-  // ordinary authenticated students from invoking this maintenance endpoint.
-  if (req.headers.get("authorization") !== `Bearer ${SERVICE_ROLE_KEY}`) {
+  // Supabase's gateway verifies the JWT signature before this function runs
+  // (verify_jwt is enabled). Check its verified role instead of comparing the
+  // raw token to an environment secret, which can drift after key rotation.
+  const claims = readJwtClaims(req);
+  if (claims?.role !== "service_role") {
     return json({ error: "Forbidden" }, 403);
   }
 
@@ -45,43 +44,16 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    const { data: imageRows, error: imageError } = await supabase
-      .from("studylab_social_post_images")
-      .select("post_id,bucket_path");
-    if (imageError) throw imageError;
-    const images = (imageRows || []) as ImageRow[];
-    let usedBytes = await getStorageUsage(supabase);
-    let storageTrimmedPosts = 0;
-
-    if (usedBytes > HIGH_WATER_BYTES) {
-      const { data: oldest, error: oldestError } = await supabase
-        .from("studylab_social_posts")
-        .select("id,status,created_at")
-        .eq("status", "approved")
-        .order("created_at", { ascending: true })
-        .limit(1000);
-      if (oldestError) throw oldestError;
-
-      for (const post of (oldest || []) as PostRow[]) {
-        if (usedBytes <= LOW_WATER_BYTES) break;
-        if (!images.some(image => image.post_id === post.id)) continue;
-        const result = await deletePost(supabase, post.id);
-        if (result.ok) {
-          storageTrimmedPosts++;
-          deletedObjects += result.objects;
-          usedBytes = await getStorageUsage(supabase);
-        }
-      }
-    }
-
-
+    // Measure usage for monitoring, but never auto-delete published student posts.
+    const usedBytes = await getStorageUsage(supabase);
 
     return json({
       success: true,
       deletedOldPosts: deletedPosts,
-      storageTrimmedPosts,
+      storageTrimmedPosts: 0,
       deletedStorageObjects: deletedObjects,
-      trackedImageBytesAfterCleanup: usedBytes
+      trackedImageBytesAfterCleanup: usedBytes,
+      approvedPostsPreserved: true
     });
   } catch (error) {
     console.error("StudyLab Social maintenance failed:", error);
@@ -117,6 +89,21 @@ async function deletePost(supabase: ReturnType<typeof createClient>, postId: str
     .eq("id", postId);
   if (deleteError) return { ok: false, objects: removed };
   return { ok: true, objects: removed };
+}
+
+function readJwtClaims(req: Request): Record<string, unknown> | null {
+  const authorization = req.headers.get("authorization") || "";
+  const token = authorization.replace(/^Bearer\s+/i, "");
+  const payload = token.split(".")[1];
+  if (!payload) return null;
+
+  try {
+    const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, "=");
+    return JSON.parse(atob(padded));
+  } catch {
+    return null;
+  }
 }
 
 function chunks<T>(items: T[], size: number): T[][] {
