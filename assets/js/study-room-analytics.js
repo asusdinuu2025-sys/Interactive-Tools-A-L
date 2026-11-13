@@ -12,7 +12,13 @@ const fmt=s=>{s=Math.max(0,Math.floor(s||0));const h=Math.floor(s/3600),m=Math.f
 const color=n=>{const i=Math.max(0,[...subject.options].findIndex(o=>o.text===n));return "hsl("+((i*137.508)%360).toFixed(1)+" 72% 62%)";};
 const blank=()=>({days:{},tasks:[]});
 function read(){try{const d=JSON.parse(localStorage.getItem(key)||"null");return d&&typeof d==="object"?{days:d.days||{},tasks:Array.isArray(d.tasks)?d.tasks:[]}:blank();}catch(_){return blank();}}
-let data=read(),active=null,period="today";
+let data=read(),period="today",activeSession=null,livePendingSeconds=0,livePendingDay=today(),livePendingSubject="";
+try{activeSession=JSON.parse(localStorage.getItem(key+":active")||"null");}catch(_){activeSession=null;}
+const cursorKey=key+":server-cursor";
+function readCursor(){try{return JSON.parse(localStorage.getItem(cursorKey)||"null");}catch(_){return null;}}
+let serverCursor=readCursor();
+function persistCursor(){try{if(serverCursor)localStorage.setItem(cursorKey,JSON.stringify(serverCursor));else localStorage.removeItem(cursorKey);}catch(_){}}
+
 function save(){try{const cutoff=dateAgo(365);Object.keys(data.days).forEach(k=>{if(k<cutoff)delete data.days[k];});localStorage.setItem(key,JSON.stringify(data));}catch(e){console.warn("StudyLab tracker storage:",e);notice("Browser storage is unavailable or full.");}}
 const panel=document.createElement("section");panel.className="room-panel sl-analytics";panel.id="slLocalStudyAnalytics";
 panel.innerHTML=[
@@ -44,27 +50,85 @@ const style=document.createElement("style");style.textContent=css+[
 ].join("");document.head.append(style);
 let noticeTimer;
 function notice(message){const el=$("slNotice");if(!el)return;el.textContent=message;el.hidden=!message;clearTimeout(noticeTimer);if(message)noticeTimer=setTimeout(()=>el.hidden=true,6000);}
-function add(name,seconds,day=today(),session=null){if(!name||seconds<1)return;const amount=Math.floor(seconds);if(amount<1)return;data.days[day]||={};data.days[day][name]=(Number(data.days[day][name])||0)+amount;if(session){session.credits||={};session.credits[day]||={};session.credits[day][name]=(Number(session.credits[day][name])||0)+amount;}}
-function nextDayStart(day){const[y,m,d]=day.split("-").map(Number);return Date.UTC(y,m-1,d+1)-19800000;}
-function addInterval(name,startMs,endMs,session=null){let cursor=startMs;while(cursor<endMs){const day=dayKey(new Date(cursor));const stop=Math.min(endMs,nextDayStart(day));add(name,(stop-cursor)/1000,day,session);cursor=stop;}}
-function flush(until=Date.now()){if(!active||active.paused)return;const endAt=Math.max(active.at,until),whole=Math.floor((endAt-active.at)/1000);if(whole<1)return;const creditedEnd=active.at+whole*1000;active.credits||={};addInterval(active.subject,active.at,creditedEnd,active);active.at=creditedEnd;active.day=today();try{localStorage.setItem(key+":active",JSON.stringify(active));}catch(_){}save();render();if(typeof renderStreaks==="function")renderStreaks();}
-function begin(name,at=Date.now()){if(active)return;active={subject:name,at:Number(at)||Date.now(),day:today(),paused:false,credits:{}};try{localStorage.setItem(key+":active",JSON.stringify(active));}catch(_){}}
-function end(at=Date.now()){if(!active)return;if(!active.paused)flush(at);active=null;try{localStorage.removeItem(key+":active");}catch(_){}render();}
-function discardExpiredSession(){if(!active){try{active=JSON.parse(localStorage.getItem(key+":active")||"null");}catch(_){active=null;}}if(active?.credits){Object.entries(active.credits).forEach(([day,subjects])=>{Object.entries(subjects||{}).forEach(([name,seconds])=>{if(!data.days[day])return;const remaining=Math.max(0,(Number(data.days[day][name])||0)-(Number(seconds)||0));if(remaining>0)data.days[day][name]=remaining;else delete data.days[day][name];});if(data.days[day]&&!Object.keys(data.days[day]).length)delete data.days[day];});}active=null;try{localStorage.removeItem(key+":active");}catch(_){}save();render();if(typeof renderStreaks==="function")renderStreaks();}
-function syncRoomSession(state){if(!state?.ready)return;if(state.sessionExpiredAt){discardExpiredSession();return;}const stamp=state.updatedAt?new Date(state.updatedAt).getTime():Date.now();if(!active){try{const saved=JSON.parse(localStorage.getItem(key+":active")||"null");if(saved?.at&&saved?.subject)active=saved;}catch(_){}}if(state.isStudying){if(!active)begin(state.subject||subject.value);active.credits||={};if(active.paused){active.paused=false;active.at=Date.now();active.day=today();}if(active.subject!==(state.subject||subject.value)){flush(Date.now());active.subject=state.subject||subject.value;active.at=Date.now();active.day=today();}try{localStorage.setItem(key+":active",JSON.stringify(active));}catch(_){}render();return;}if(state.sessionActive){if(active&&!active.paused){flush(stamp);active.paused=true;active.at=Date.now();try{localStorage.setItem(key+":active",JSON.stringify(active));}catch(_){}render();}return;}if(active)end(stamp);else{try{localStorage.removeItem(key+":active");}catch(_){}}}
+function add(name,seconds,day=today(),session=null){
+ if(!name||seconds<1)return;
+ const amount=Math.floor(seconds);if(amount<1)return;
+ data.days[day]||={};
+ data.days[day][name]=(Number(data.days[day][name])||0)+amount;
+ if(session){session.credits||={};session.credits[day]||={};session.credits[day][name]=(Number(session.credits[day][name])||0)+amount;}
+}
+function subtractSessionCredits(session){
+ if(!session?.credits)return;
+ Object.entries(session.credits).forEach(([day,subjects])=>{
+  Object.entries(subjects||{}).forEach(([name,seconds])=>{
+   if(!data.days[day])return;
+   const remaining=Math.max(0,(Number(data.days[day][name])||0)-(Number(seconds)||0));
+   if(remaining)data.days[day][name]=remaining;else delete data.days[day][name];
+  });
+  if(data.days[day]&&!Object.keys(data.days[day]).length)delete data.days[day];
+ });
+}
+function saveSession(){try{if(activeSession)localStorage.setItem(key+":active",JSON.stringify(activeSession));else localStorage.removeItem(key+":active");}catch(_){}}
+function syncRoomSession(state){
+ if(!state?.ready)return;
+ const day=state.todayDate||today();
+ const seconds=Math.max(0,Math.floor(Number(state.todaySeconds)||0));
+ const currentSubject=state.subject||subject.value||"Other";
+ const stateUpdatedAt=state.updatedAt?new Date(state.updatedAt).getTime():0;
+ if(serverCursor&&stateUpdatedAt&&Number(serverCursor.updatedAt||0)>stateUpdatedAt)return;
+ livePendingSeconds=Math.max(0,Math.floor(Number(state.pendingTodaySeconds)||0));
+ livePendingDay=day;livePendingSubject=currentSubject;
+ if(state.sessionExpiredAt){
+  if(!activeSession){try{activeSession=JSON.parse(localStorage.getItem(key+":active")||"null");}catch(_){activeSession=null;}}
+  subtractSessionCredits(activeSession);
+  activeSession=null;saveSession();serverCursor={day,seconds,subject:currentSubject,updatedAt:state.updatedAt||null};persistCursor();save();render(false);
+  if(typeof renderStreaks==="function")renderStreaks();
+  return;
+ }
+ if(!serverCursor){
+  // Establish a baseline without importing old server totals into local history.
+  // Existing browser history is retained; future increments follow server credits.
+  serverCursor={day,seconds,subject:currentSubject,updatedAt:state.updatedAt||null};
+  persistCursor();
+ }else if(serverCursor.day!==day){
+  // Colombo midnight resets the server's daily counter. Never carry yesterday's
+  // cursor into the new day or manufacture a negative/duplicate interval.
+  serverCursor={day,seconds,subject:currentSubject,updatedAt:state.updatedAt||null};
+  persistCursor();
+ }else{
+  const delta=seconds- Math.max(0,Math.floor(Number(serverCursor.seconds)||0));
+  if(delta>0){
+   if(!activeSession&&state.sessionActive){
+    try{activeSession=JSON.parse(localStorage.getItem(key+":active")||"null");}catch(_){activeSession=null;}
+   }
+   if(state.sessionActive&&!activeSession)activeSession={subject:serverCursor.subject||currentSubject,credits:{}};
+   add(serverCursor.subject||currentSubject,delta,day,state.sessionActive?activeSession:null);
+   save();
+   if(typeof renderStreaks==="function")renderStreaks();
+  }
+  serverCursor={day,seconds,subject:currentSubject,updatedAt:state.updatedAt||null};
+  persistCursor();
+ }
+ if(state.sessionActive){
+  if(!activeSession)activeSession={subject:currentSubject,credits:{}};
+  activeSession.subject=currentSubject;
+  saveSession();
+ }else if(activeSession){
+  activeSession=null;saveSession();
+ }
+ render(false);
+}
 window.addEventListener("studylab:study-room-timer",event=>syncRoomSession(event.detail));
 if(window.StudyRoomTimer?.getState)syncRoomSession(window.StudyRoomTimer.getState());
-subject.addEventListener("change",()=>{if(active&&!active.paused){flush();active.subject=subject.value;active.at=Date.now();active.day=today();try{localStorage.setItem(key+":active",JSON.stringify(active));}catch(_){}}});
-setInterval(()=>{const state=window.StudyRoomTimer?.getState?.();if(state)syncRoomSession(state);if(active&&!active.paused)flush();},10000);
-document.addEventListener("visibilitychange",()=>{if(active&&!active.paused)flush();});
-window.addEventListener("pagehide",()=>{if(active&&!active.paused)flush();});
-function days(){if(period==="today")return[today()];if(period==="7")return Array.from({length:7},(_,i)=>dateAgo(6-i));if(period==="30")return Array.from({length:30},(_,i)=>dateAgo(29-i));const keys=Object.keys(data.days);if(active)keys.push(today());return [...new Set(keys)].sort();}
-function totalsFor(list){const out={};list.forEach(day=>Object.entries(data.days[day]||{}).forEach(([n,s])=>out[n]=(out[n]||0)+(Number(s)||0)));if(active&&!active.paused){let cursor=active.at;const now=Date.now();while(cursor<now){const day=dayKey(new Date(cursor));const stop=Math.min(now,nextDayStart(day));if(list.includes(day))out[active.subject]=(out[active.subject]||0)+(stop-cursor)/1000;cursor=stop;}}return Object.entries(out).filter(([,s])=>s>0).sort((a,b)=>b[1]-a[1]);}
-function render(){if(!panel.isConnected)return;const list=days(),totals=totalsFor(list),sum=totals.reduce((a,r)=>a+r[1],0);$("slTotal").textContent=fmt(sum);$("slSubjects").textContent=totals.length;$("slTop").textContent=totals[0]?.[0]||"—";$("slPiePeriod").textContent=period==="today"?"Today":period==="7"?"7 days":period==="30"?"30 days":"All time";
+// Subject changes are committed by the server. The subject cursor changes only
+// after the server has credited the preceding interval and returned fresh state.
+function days(){if(period==="today")return[today()];if(period==="7")return Array.from({length:7},(_,i)=>dateAgo(6-i));if(period==="30")return Array.from({length:30},(_,i)=>dateAgo(29-i));const keys=Object.keys(data.days);if(livePendingSeconds>0)keys.push(livePendingDay);return [...new Set(keys)].sort();}
+function totalsFor(list){const out={};list.forEach(day=>Object.entries(data.days[day]||{}).forEach(([n,s])=>out[n]=(out[n]||0)+(Number(s)||0)));if(livePendingSeconds>0&&list.includes(livePendingDay))out[livePendingSubject]=(out[livePendingSubject]||0)+livePendingSeconds;return Object.entries(out).filter(([,s])=>s>0).sort((a,b)=>b[1]-a[1]);}
+function render(includeTasks=true){if(!panel.isConnected)return;const list=days(),totals=totalsFor(list),sum=totals.reduce((a,r)=>a+r[1],0);$("slTotal").textContent=fmt(sum);$("slSubjects").textContent=totals.length;$("slTop").textContent=totals[0]?.[0]||"—";$("slPiePeriod").textContent=period==="today"?"Today":period==="7"?"7 days":period==="30"?"30 days":"All time";
 const pie=$("slPie");let cursor=0;const stops=totals.map(([n,s])=>{const start=cursor/Math.max(1,sum)*100;cursor+=s;return color(n)+" "+start+"% "+(cursor/Math.max(1,sum)*100)+"%";});pie.style.background=stops.length?"conic-gradient("+stops.join(",")+")":"conic-gradient(rgba(120,135,160,.18) 0 100%)";pie.querySelector("span").textContent=fmt(sum);
 const legend=$("slLegend");legend.replaceChildren();if(!totals.length){legend.innerHTML='<p class="sl-empty">Start studying to build your chart.</p>';}else totals.forEach(([n,s])=>{const row=document.createElement("div");row.className="sl-legend-row";const dot=document.createElement("i");dot.style.background=color(n);const name=document.createElement("span");name.textContent=n;const value=document.createElement("b");value.textContent=fmt(s);row.append(dot,name,value);legend.append(row);});
 const rows=$("slRows");rows.replaceChildren();if(!totals.length)rows.innerHTML='<p class="sl-empty">No study time recorded yet.</p>';else totals.forEach(([n,s])=>{const row=document.createElement("div");row.className="sl-row";const name=document.createElement("span");name.className="sl-row-name";name.textContent=n;const track=document.createElement("span");track.className="sl-track";const fill=document.createElement("i");fill.style.width=(s/totals[0][1]*100)+"%";fill.style.background=color(n);track.append(fill);const time=document.createElement("time");time.textContent=fmt(s);row.append(name,track,time);rows.append(row);});
-const bars=$("slBars");bars.replaceChildren();const last=list;const scrollBars=period==="30"||period==="all";bars.classList.toggle("sl-bars-scroll",scrollBars);$("slBarsPeriod").textContent=period==="today"?"Today":period==="7"?"Last 7 days":period==="30"?"Last 30 days":"All recorded days";bars.style.gridTemplateColumns=scrollBars?"none":`repeat(${Math.max(1,last.length)}, minmax(28px, 1fr))`;const barValues=last.map(d=>[d,totalsFor([d])]);const max=Math.max(1,...barValues.map(([,values])=>values.reduce((a,r)=>a+r[1],0)));barValues.forEach(([d,values])=>{const total=values.reduce((a,r)=>a+r[1],0);const col=document.createElement("div");col.className="sl-day";const val=document.createElement("b");val.textContent=total?fmt(total):"";const stack=document.createElement("div");stack.className="sl-stack";values.forEach(([n,s])=>{const seg=document.createElement("i");seg.className="sl-seg";seg.style.height=(Number(s)/max*135)+"px";seg.style.background=color(n);seg.title=n+": "+fmt(s);stack.append(seg);});const label=document.createElement("small");label.textContent=period==="today"?"Today":new Date(d+"T12:00:00+05:30").toLocaleDateString("en-US",{timeZone:"Asia/Colombo",weekday:"short"});col.append(val,stack,label);bars.append(col);});renderTasks();}
+const bars=$("slBars");bars.replaceChildren();const last=list;const scrollBars=period==="30"||period==="all";bars.classList.toggle("sl-bars-scroll",scrollBars);$("slBarsPeriod").textContent=period==="today"?"Today":period==="7"?"Last 7 days":period==="30"?"Last 30 days":"All recorded days";bars.style.gridTemplateColumns=scrollBars?"none":`repeat(${Math.max(1,last.length)}, minmax(28px, 1fr))`;const barValues=last.map(d=>[d,totalsFor([d])]);const max=Math.max(1,...barValues.map(([,values])=>values.reduce((a,r)=>a+r[1],0)));barValues.forEach(([d,values])=>{const total=values.reduce((a,r)=>a+r[1],0);const col=document.createElement("div");col.className="sl-day";const val=document.createElement("b");val.textContent=total?fmt(total):"";const stack=document.createElement("div");stack.className="sl-stack";values.forEach(([n,s])=>{const seg=document.createElement("i");seg.className="sl-seg";seg.style.height=(Number(s)/max*135)+"px";seg.style.background=color(n);seg.title=n+": "+fmt(s);stack.append(seg);});const label=document.createElement("small");label.textContent=period==="today"?"Today":new Date(d+"T12:00:00+05:30").toLocaleDateString("en-US",{timeZone:"Asia/Colombo",weekday:"short"});col.append(val,stack,label);bars.append(col);});if(includeTasks)renderTasks();}
 function renderTasks(){const list=$("slTasks");list.replaceChildren();$("slTaskCount").textContent=data.tasks.filter(t=>!t.done).length+" remaining";
 const completed=data.tasks.filter(t=>t.done&&t.doneAt&&days().includes(t.doneAt)).length;const pending=data.tasks.filter(t=>!t.done).length;const totalForRate=completed+pending;$("slTasksDone").textContent=completed;$("slTasksPending").textContent=pending;$("slTasksRate").textContent=totalForRate?Math.round(completed/totalForRate*100)+"%":"0%";
 const taskBars=$("slTaskBars");taskBars.replaceChildren();const taskDays=Array.from({length:7},(_,i)=>dateAgo(6-i));const counts=taskDays.map(day=>data.tasks.filter(t=>t.done&&t.doneAt===day).length);const maxTasks=Math.max(1,...counts);taskDays.forEach((day,i)=>{const col=document.createElement("div");col.className="sl-day";const val=document.createElement("b");val.textContent=counts[i]||"";const stack=document.createElement("div");stack.className="sl-stack";if(counts[i]){const seg=document.createElement("i");seg.className="sl-seg";seg.style.height=(counts[i]/maxTasks*105)+"px";stack.append(seg);}const label=document.createElement("small");label.textContent=new Date(day+"T12:00:00+05:30").toLocaleDateString("en-US",{timeZone:"Asia/Colombo",weekday:"short"});col.append(val,stack,label);taskBars.append(col);});if(!data.tasks.length){list.innerHTML='<p class="sl-empty">Add your first study task.</p>';return;}data.tasks.forEach(t=>{const row=document.createElement("label");row.className="sl-task"+(t.done?" done":"");const box=document.createElement("input");box.type="checkbox";box.checked=!!t.done;box.addEventListener("change",()=>{t.done=box.checked;t.doneAt=t.done?today():null;save();renderTasks();});const title=document.createElement("span");title.textContent=t.title;const del=document.createElement("button");del.type="button";del.textContent="×";del.setAttribute("aria-label","Delete task");del.addEventListener("click",e=>{e.preventDefault();data.tasks=data.tasks.filter(x=>x.id!==t.id);save();renderTasks();});row.append(box,title,del);list.append(row);});}
