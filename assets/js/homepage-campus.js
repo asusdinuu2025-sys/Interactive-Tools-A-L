@@ -71,13 +71,19 @@
     const actions = document.createElement("div");
     actions.className = "sl-campus-hero-actions";
     actions.innerHTML = '<a href="#subjects">Explore subjects <span aria-hidden="true">↗</span></a><a class="secondary" href="study-room.html?completeProfile=1&amp;returnTo=%2Fstudy-room.html">Enter Study Room <span aria-hidden="true">↗</span></a>';
-    subtitle?.insertAdjacentElement("afterend",actions);
+
+    const copy = document.createElement("div");
+    copy.className = "sl-campus-hero-copy";
+    hero.insertBefore(copy,hero.firstChild);
+    [eyebrow,heading,subtitle,actions].filter(Boolean).forEach(node=>copy.append(node));
 
     const art = document.createElement("div");
     art.className = "sl-campus-hero-art";
     art.setAttribute("aria-hidden","true");
     art.innerHTML = '<div class="sl-campus-orbit"></div><div class="sl-campus-hero-core"><svg viewBox="0 0 72 72"><path d="M9 24 36 11l27 13-27 13L9 24Z"/><path d="M18 29v16c10 9 26 9 36 0V29M63 24v19"/><path d="M27 42v9m18-9v9"/></svg></div><div class="sl-campus-float-chip one">✦ Learn</div><div class="sl-campus-float-chip two">⚗ Explore</div><div class="sl-campus-float-chip three">◷ Focus</div>';
-    actions?.insertAdjacentElement("afterend",art);
+    const utility = hero.querySelector(".homepage-utility-row");
+    hero.append(art);
+    if (utility) hero.append(utility);
   }
 
   const greeting = document.getElementById("campusGreeting");
