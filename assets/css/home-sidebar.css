@@ -311,3 +311,91 @@ body.sl-community-open .sl-home-sidebar {
   width: 15px;
   height: 15px;
 }
+
+/* Floating top glass bar: fixed to the viewport and independent of sidebar width. */
+html body header.site-header {
+  position: fixed !important;
+  z-index: 1005 !important;
+  top: 14px !important;
+  left: 50% !important;
+  right: auto !important;
+  width: calc(100% - 32px) !important;
+  max-width: 1680px !important;
+  min-height: 68px !important;
+  height: 68px !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 8px clamp(18px, 2.2vw, 34px) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 18px !important;
+  overflow: hidden;
+  border: 1px solid rgba(178, 220, 255, .23) !important;
+  border-radius: 22px !important;
+  background:
+    linear-gradient(135deg, rgba(42, 66, 96, .76), rgba(15, 28, 48, .70) 55%, rgba(34, 43, 75, .72)) !important;
+  -webkit-backdrop-filter: blur(34px) saturate(180%) !important;
+  backdrop-filter: blur(34px) saturate(180%) !important;
+  box-shadow:
+    0 22px 58px rgba(0, 0, 0, .28),
+    0 7px 18px rgba(4, 13, 28, .18),
+    0 0 34px rgba(78, 170, 255, .10),
+    inset 0 1.5px 0 rgba(255, 255, 255, .27),
+    inset 0 -1px 0 rgba(115, 178, 235, .10),
+    inset 0 0 0 1px rgba(255, 255, 255, .035) !important;
+  transform: translateX(-50%) !important;
+  transition:
+    background .35s ease,
+    border-color .35s ease,
+    box-shadow .35s ease !important;
+}
+html body header.site-header::before {
+  content: "";
+  position: absolute;
+  inset: 0 8% auto;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.58), transparent);
+}
+html body header.site-header::after {
+  content: "";
+  position: absolute;
+  inset: auto 12% 0;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(117,196,255,.28), transparent);
+}
+html body header.site-header > * {
+  position: relative;
+  z-index: 1;
+}
+html[data-theme="light"] body header.site-header {
+  border-color: rgba(255,255,255,.94) !important;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.86), rgba(236,246,255,.77) 55%, rgba(242,240,255,.78)) !important;
+  box-shadow:
+    0 20px 54px rgba(45, 83, 122, .17),
+    0 6px 16px rgba(45, 83, 122, .08),
+    0 0 30px rgba(85, 160, 220, .09),
+    inset 0 1.5px 0 rgba(255,255,255,.99),
+    inset 0 -1px 0 rgba(105,155,200,.10) !important;
+}
+body > main.container {
+  margin-top: 96px !important;
+}
+@media (max-width: 640px) {
+  html body header.site-header {
+    top: 9px !important;
+    width: calc(100% - 18px) !important;
+    min-height: 60px !important;
+    height: 60px !important;
+    padding: 7px 12px !important;
+    gap: 8px !important;
+    border-radius: 18px !important;
+  }
+  body > main.container {
+    margin-top: 82px !important;
+  }
+}
+
