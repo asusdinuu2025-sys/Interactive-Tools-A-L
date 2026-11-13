@@ -2318,3 +2318,63 @@ html[data-theme="light"] .sl-feed-post-report-reason:hover {
 @media (prefers-reduced-motion:reduce) {
   .sl-feed-post-menu-toggle { transition:none !important; }
 }
+
+
+/* StudyLab Social notifications */
+.sl-feed-head-actions { position: relative; }
+.sl-feed-notifications-toggle {
+  position: relative; display: inline-flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; flex: 0 0 40px; border-radius: 13px;
+  border: 1px solid var(--sl-feed-border,rgba(140,160,190,.2));
+  background: var(--sl-feed-surface,rgba(255,255,255,.07));
+  color: inherit; cursor: pointer; transition: background .2s ease,transform .2s ease;
+}
+.sl-feed-notifications-toggle:hover { transform: translateY(-1px); background: rgba(125,190,255,.14); }
+.sl-feed-notifications-toggle svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.sl-feed-notification-badge {
+  position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; padding: 0 5px;
+  display: inline-flex; align-items: center; justify-content: center; border-radius: 99px;
+  background: #e84d67; color: #fff; border: 2px solid var(--sl-feed-panel-bg,#111827);
+  font-size: 10px; line-height: 1; font-weight: 800;
+}
+.sl-feed-notification-badge[hidden] { display: none; }
+.sl-feed-notification-popover {
+  position: absolute; z-index: 120; top: calc(100% + 12px); right: 0;
+  width: min(390px,calc(100vw - 28px)); max-height: min(520px,72vh); overflow: auto;
+  border: 1px solid rgba(145,170,205,.24); border-radius: 20px;
+  background: color-mix(in srgb,var(--sl-feed-panel-bg,#111827) 94%,transparent);
+  color: var(--text-primary,#eef2ff); box-shadow: 0 22px 70px rgba(0,0,0,.28);
+  -webkit-backdrop-filter: blur(26px) saturate(155%); backdrop-filter: blur(26px) saturate(155%);
+}
+.sl-feed-notification-popover[hidden] { display: none; }
+.sl-feed-notification-popover-head {
+  position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 16px 17px; border-bottom: 1px solid rgba(145,170,205,.16);
+  background: color-mix(in srgb,var(--sl-feed-panel-bg,#111827) 96%,transparent);
+}
+.sl-feed-notification-popover-head strong { font-size: 15px; }
+.sl-feed-notification-mark-all { border: 0; background: transparent; color: var(--sl-feed-accent,#78caff); font: inherit; font-size: 12px; cursor: pointer; }
+.sl-feed-notification-list { display: grid; gap: 2px; padding: 7px; }
+.sl-feed-notification-item {
+  display: grid; grid-template-columns: 38px minmax(0,1fr) 24px; align-items: center; gap: 11px;
+  width: 100%; padding: 11px 10px; border: 0; border-radius: 13px; text-align: left;
+  color: inherit; background: transparent; cursor: pointer; font: inherit;
+}
+.sl-feed-notification-item:hover { background: rgba(130,180,235,.10); }
+.sl-feed-notification-item.is-unread { background: rgba(105,175,255,.105); }
+.sl-feed-notification-avatar {
+  width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%;
+  color: #fff; font-size: 14px; font-weight: 750;
+  background: linear-gradient(145deg,#498ed7,#8d72d5);
+}
+.sl-feed-notification-copy { min-width: 0; font-size: 13px; line-height: 1.45; overflow-wrap: anywhere; }
+.sl-feed-notification-copy strong { font-weight: 750; }
+.sl-feed-notification-copy small { display: block; margin-top: 3px; color: var(--text-secondary,#9caac0); font-size: 11px; }
+.sl-feed-notification-kind { color: #ed6580; font-size: 17px; text-align: center; }
+.sl-feed-notification-empty { margin: 0; padding: 30px 12px; color: var(--text-secondary,#9caac0); text-align: center; font-size: 13px; }
+@media (max-width: 600px) {
+  .sl-feed-notification-popover { position: fixed; top: max(68px,env(safe-area-inset-top)); right: 12px; left: 12px; width: auto; max-height: min(68vh,560px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sl-feed-notifications-toggle { transition: none; }
+}
