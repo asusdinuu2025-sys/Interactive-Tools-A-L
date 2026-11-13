@@ -21,6 +21,7 @@
   window.setInterval(updateGreetingTime, 60000);
 
   const rankRoot = document.querySelector("[data-home-room-ranks]");
+  const occupancyNodes = [...document.querySelectorAll("[data-home-room-occupancy]")];
   const socialButton = document.querySelector("[data-open-home-social]");
 
   socialButton?.addEventListener("click", () => {
@@ -65,7 +66,29 @@
     }
     return elapsed;
   }
+  function setOccupancy(message) {
+    occupancyNodes.forEach(node => { node.textContent = message; });
+  }
+  function renderOccupancy(rows) {
+    // Count only students who are actively studying with a recent heartbeat.
+    // Students marked away or paused do not count as "studying now".
+    const now = Date.now();
+    const present = new Set();
+    for (const row of rows || []) {
+      if (!row?.user_id || !row.is_studying || row.session_presence_state === "away") continue;
+      const beat = Date.parse(row.last_heartbeat_at || "");
+      if (!Number.isFinite(beat) || now - beat > 90000 || now - beat < -90000) continue;
+      present.add(row.user_id);
+    }
+    const count = present.size;
+    setOccupancy(count === 0
+      ? "Be the first to study"
+      : count === 1
+        ? "1 student studying now"
+        : count + " students studying now");
+  }
   function showUnavailable(message) {
+    setOccupancy("Live count unavailable");
     [todayName, weekName].forEach(el => { if (el) el.textContent = message; });
     [todayTime, weekTime].forEach(el => { if (el) el.textContent = "Live ranking unavailable right now"; });
     rankRoot.dataset.rankState = "unavailable";
@@ -84,6 +107,7 @@
     return ranked[0] || null;
   }
   function render(rows) {
+    renderOccupancy(rows);
     const today = renderRank(rows, "today");
     const week = renderRank(rows, "week");
     if (todayName) todayName.textContent = today?.row?.display_name || fallbackName;
