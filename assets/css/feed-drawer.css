@@ -2456,3 +2456,72 @@ html[data-theme="light"] .sl-feed-post-report-reason:hover {
     animation: none !important;
   }
 }
+
+/* Social notifications: match translucent light and dark Home appearance.
+   Keep the popover legible on iOS/Android and avoid white text on white glass. */
+.sl-feed-notification-mark-all:disabled {
+  opacity: .50;
+  cursor: default;
+}
+.sl-feed-notification-item:focus-visible,
+.sl-feed-notification-mark-all:focus-visible {
+  outline: 2px solid #56b8ec;
+  outline-offset: -2px;
+}
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-popover {
+  color: #1b3855 !important;
+  background: rgba(246,251,255,.97) !important;
+  border: 1px solid rgba(121,161,202,.33) !important;
+  box-shadow: 0 20px 58px rgba(36,68,113,.17), inset 0 1px 0 rgba(255,255,255,.92) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(115%) !important;
+  backdrop-filter: blur(16px) saturate(115%) !important;
+}
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-popover-head {
+  color: #183a5b !important;
+  background: rgba(236,246,255,.98) !important;
+  border-bottom-color: rgba(110,156,204,.22) !important;
+}
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-popover-head strong {
+  color: #173957 !important;
+}
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-mark-all {
+  color: #086eaf !important;
+}
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-mark-all:hover:not(:disabled) {
+  color: #044e84 !important;
+  text-decoration: underline;
+}
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-list {
+  background: transparent !important;
+}
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-item {
+  color: #254661 !important;
+  background: transparent !important;
+}
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-item strong {
+  color: #193a56 !important;
+}
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-item small {
+  color: #607891 !important;
+}
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-item:hover,
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-item:focus-visible {
+  background: rgba(71,142,204,.10) !important;
+}
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-item.is-unread {
+  background: rgba(71,142,204,.14) !important;
+  box-shadow: inset 3px 0 0 #4b9bd4;
+}
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-item.is-unread:hover {
+  background: rgba(71,142,204,.20) !important;
+}
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-kind {
+  color: #ca4a72 !important;
+}
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-empty {
+  color: #57718b !important;
+}
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-badge {
+  border-color: #f5faff !important;
+  color: #fff !important;
+}
