@@ -1321,3 +1321,97 @@ html[data-theme="light"] body header.site-header {
   -webkit-backdrop-filter: blur(30px) saturate(180%);
   backdrop-filter: blur(30px) saturate(180%);
 }
+
+
+/* Final Home interaction polish: no empty unread dot, true icon-only collapse, responsive header spacing. */
+@media (min-width: 1180px) {
+  .sl-home-sidebar {
+    transition:
+      width .17s cubic-bezier(.2,.75,.25,1),
+      padding .17s cubic-bezier(.2,.75,.25,1),
+      border-radius .17s ease !important;
+  }
+  .sl-home-sidebar .sl-home-sidebar-brand {
+    transition: opacity .12s ease, width .16s ease !important;
+  }
+  .sl-home-sidebar .sl-home-nav-label {
+    transition: opacity .12s ease, max-width .16s ease !important;
+  }
+  .sl-home-sidebar .sl-home-nav-item {
+    transition: color .14s ease, transform .14s ease, padding .16s ease !important;
+  }
+  .sl-home-sidebar .sl-home-sidebar-collapse {
+    transition: transform .16s ease, background .16s ease, border-color .16s ease !important;
+  }
+
+  /* In the collapsed rail, keep only the Pet, AI and Chat icons visible. */
+  .sl-home-sidebar.is-collapsed .sl-home-quick-actions #studylabPetLauncher > span:not(.sl-pet-launcher-icon),
+  .sl-home-sidebar.is-collapsed .sl-home-quick-actions .studylab-ai-launcher-copy,
+  body:not(.study-room-page) .sl-home-sidebar.is-collapsed .sl-home-quick-actions .study-chat-button > span:not(.study-chat-button-icon):not(.study-chat-unread) {
+    display: none !important;
+    width: 0 !important;
+    max-width: 0 !important;
+    min-width: 0 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .sl-home-sidebar.is-collapsed .sl-home-quick-actions > button,
+  body:not(.study-room-page) .sl-home-sidebar.is-collapsed .sl-home-quick-actions .study-chat-button {
+    justify-content: center !important;
+    gap: 0 !important;
+    padding-inline: 0 !important;
+  }
+
+  /* Preserve a numbered badge for genuine unread messages, never an empty red dot. */
+  .study-chat-unread:empty,
+  .study-chat-unread[hidden],
+  .sl-home-sidebar .sl-home-quick-actions .study-chat-unread:empty,
+  .sl-home-sidebar .sl-home-quick-actions .study-chat-unread[hidden] {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  .sl-home-sidebar.is-collapsed .sl-home-quick-actions .study-chat-unread:not(:empty):not([hidden]) {
+    display: inline-flex !important;
+    visibility: visible !important;
+  }
+
+  /* Keep the header's original breathing room while shortening it only slightly. */
+  html body header.site-header {
+    left: calc(50% + 106px) !important;
+    right: auto !important;
+    width: min(1460px, calc(100vw - 310px)) !important;
+    min-width: min(720px, calc(100vw - 310px)) !important;
+    max-width: calc(100vw - 310px) !important;
+    padding-inline: 30px !important;
+    gap: 32px !important;
+    transform: translateX(-50%) !important;
+    transition: left .18s ease, width .18s ease, background .35s ease, border-color .35s ease, box-shadow .35s ease !important;
+  }
+  html body:has(.sl-home-sidebar.is-collapsed) header.site-header {
+    left: calc(50% + 35px) !important;
+    width: min(1600px, calc(100vw - 168px)) !important;
+    min-width: min(720px, calc(100vw - 168px)) !important;
+    max-width: calc(100vw - 168px) !important;
+  }
+  html body header.site-header .brand {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    gap: 12px !important;
+  }
+  html body header.site-header .header-actions {
+    flex: 0 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    flex-wrap: nowrap !important;
+  }
+}
+
+.study-chat-unread:empty,
+.study-chat-unread[hidden] {
+  display: none !important;
+  visibility: hidden !important;
+}
