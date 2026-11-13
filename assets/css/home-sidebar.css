@@ -990,3 +990,25 @@ html[data-theme="light"] body header.site-header {
     box-shadow: 0 12px 28px rgba(45,83,122,.07), inset 0 1px 0 rgba(255,255,255,.96) !important;
   }
 }
+
+/* Universal Home-card liquid glass finish, including tablet and mobile layouts. */
+.sl-home-layout :is(article, .card, [class*="-card"], [class*="_card"]) {
+  -webkit-backdrop-filter: blur(30px) saturate(185%) !important;
+  backdrop-filter: blur(30px) saturate(185%) !important;
+  background-color: rgba(255,255,255,.055) !important;
+  border-color: rgba(190,220,245,.24) !important;
+  box-shadow:
+    0 14px 34px rgba(0,0,0,.13),
+    inset 0 1.5px 0 rgba(255,255,255,.24),
+    inset 0 -1px 0 rgba(130,195,245,.09),
+    inset 0 0 22px rgba(170,220,255,.035) !important;
+}
+html[data-theme="light"] .sl-home-layout :is(article, .card, [class*="-card"], [class*="_card"]) {
+  background-color: rgba(255,255,255,.34) !important;
+  border-color: rgba(255,255,255,.82) !important;
+  box-shadow:
+    0 13px 30px rgba(45,83,122,.085),
+    inset 0 1.5px 0 rgba(255,255,255,.98),
+    inset 0 -1px 0 rgba(105,155,200,.10),
+    inset 0 0 22px rgba(255,255,255,.28) !important;
+}
