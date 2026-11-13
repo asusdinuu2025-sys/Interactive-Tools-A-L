@@ -159,6 +159,11 @@
       previousFocus = document.activeElement;
       window.setTimeout(() => panel.querySelector("[data-feed-close]")?.focus(), 80);
     } else {
+      // Reset the notification overlay when closing Social, so it never
+      // reopens with an old popover or stale expanded accessibility state.
+      const notifications = panel.querySelector(".sl-feed-notification-popover");
+      if (notifications) notifications.hidden = true;
+      panel.querySelector(".sl-feed-notifications-toggle")?.setAttribute("aria-expanded", "false");
       if (previousFocus && typeof previousFocus.focus === "function") previousFocus.focus();
       toggle.focus({ preventScroll: true });
     }
