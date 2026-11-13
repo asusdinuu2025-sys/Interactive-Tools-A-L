@@ -992,23 +992,40 @@ html[data-theme="light"] body header.site-header {
 }
 
 
-/* Final Home layout corrections: compact sidebar, clean cards and aligned tools. */
+
+/* Refined floating Home rail: align with the header's top edge and size to content. */
 @media (min-width: 1180px) {
   .sl-home-sidebar {
-    top: 92px !important;
-    bottom: 14px !important;
-    left: 0 !important;
+    top: 14px !important;
+    bottom: auto !important;
+    left: max(14px, calc((100vw - 1560px) / 2 + 14px)) !important;
+    width: 220px !important;
     height: auto !important;
     max-height: none !important;
     box-sizing: border-box !important;
-    padding: 11px 12px !important;
+    padding: 12px !important;
     gap: 8px !important;
     overflow: hidden !important;
-    border-radius: 0 22px 22px 0 !important;
+    border: 1px solid rgba(190,225,255,.28) !important;
+    border-radius: 24px !important;
+    transform: none !important;
+    background:
+      radial-gradient(ellipse at 8% 0%, rgba(120,205,255,.14), transparent 52%),
+      linear-gradient(145deg, rgba(38,65,96,.52), rgba(9,20,37,.43) 58%, rgba(31,39,70,.44)) !important;
+    -webkit-backdrop-filter: blur(38px) saturate(185%) !important;
+    backdrop-filter: blur(38px) saturate(185%) !important;
+    box-shadow:
+      0 20px 58px rgba(0,0,0,.24),
+      0 5px 18px rgba(0,0,0,.12),
+      0 0 32px rgba(86,175,255,.10),
+      inset 0 1.5px 0 rgba(255,255,255,.28),
+      inset 0 0 24px rgba(170,220,255,.035) !important;
   }
 
   .sl-home-sidebar.is-collapsed {
     width: 78px !important;
+    padding-inline: 10px !important;
+    border-radius: 22px !important;
   }
 
   .sl-home-sidebar-nav {
@@ -1025,8 +1042,8 @@ html[data-theme="light"] body header.site-header {
     min-height: 34px !important;
     padding-inline: 9px !important;
     gap: 9px !important;
-    font-size: .77rem !important;
     border-radius: 11px !important;
+    font-size: .77rem !important;
   }
 
   .sl-home-nav-item[data-nav-id="practical-simulations"],
@@ -1036,7 +1053,8 @@ html[data-theme="light"] body header.site-header {
   }
 
   .sl-home-sidebar-hint {
-    padding: 5px 3px 0 !important;
+    padding: 6px 3px 0 !important;
+    margin: 0 !important;
     font-size: .58rem !important;
     line-height: 1.25 !important;
   }
@@ -1044,35 +1062,66 @@ html[data-theme="light"] body header.site-header {
   .sl-home-quick-actions {
     flex: 0 0 auto !important;
     gap: 7px !important;
-    padding-top: 9px !important;
+    margin: 0 !important;
+    padding: 9px 0 0 !important;
   }
 
-  .sl-home-quick-actions > button {
-    height: 38px !important;
-    min-height: 38px !important;
-    padding: 0 10px !important;
-    gap: 9px !important;
-    border-radius: 12px !important;
-  }
-
+  .sl-home-quick-actions > button,
   .sl-home-quick-actions .study-chat-button {
+    box-sizing: border-box !important;
     position: relative !important;
-    right: auto !important;
-    bottom: auto !important;
     inset: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
     width: 100% !important;
     min-width: 0 !important;
-    justify-content: flex-start !important;
-    overflow: visible !important;
+    max-width: none !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    margin: 0 !important;
+    padding: 0 11px !important;
+    border: 1px solid rgba(190,225,255,.23) !important;
+    border-radius: 13px !important;
+    color: rgba(235,247,255,.96) !important;
+    background: linear-gradient(135deg, rgba(255,255,255,.12), rgba(120,175,230,.045)), rgba(18,34,54,.20) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 6px 18px rgba(0,0,0,.09) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(175%) !important;
+    backdrop-filter: blur(18px) saturate(175%) !important;
+    font: inherit !important;
+    font-size: .82rem !important;
+    font-weight: 720 !important;
+    letter-spacing: .01em !important;
+    text-align: left !important;
+    cursor: pointer !important;
   }
 
-  .sl-home-quick-actions .study-chat-button-icon {
+  .sl-home-quick-actions > button:hover,
+  .sl-home-quick-actions > button[aria-expanded="true"],
+  .sl-home-quick-actions > button.is-open {
+    transform: translateY(-1px) !important;
+    border-color: rgba(133,213,255,.48) !important;
+    background: linear-gradient(135deg, rgba(88,175,245,.22), rgba(140,145,255,.12)), rgba(18,34,54,.28) !important;
+  }
+
+  .sl-home-quick-actions > button > span {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
+    flex: 0 0 auto !important;
+    width: auto !important;
+    height: auto !important;
+    color: inherit !important;
+  }
+
+  .sl-home-quick-actions #studylabPetLauncher .sl-pet-launcher-icon,
+  .sl-home-quick-actions .studylab-ai-launcher-icon,
+  .sl-home-quick-actions .study-chat-button-icon {
     flex: 0 0 22px !important;
     width: 22px !important;
     height: 22px !important;
+    font-size: 1rem !important;
     color: #a8e4ff !important;
   }
 
@@ -1086,6 +1135,20 @@ html[data-theme="light"] body header.site-header {
     stroke-linecap: round !important;
     stroke-linejoin: round !important;
   }
+
+  .sl-home-quick-actions #studylabPetLauncher .sl-pet-launcher-icon + span,
+  .sl-home-quick-actions .studylab-ai-launcher-copy {
+    display: inline-flex !important;
+    width: auto !important;
+    max-width: none !important;
+    opacity: 1 !important;
+    color: inherit !important;
+    font-size: .82rem !important;
+  }
+
+  .sl-home-quick-actions .studylab-ai-launcher-copy { display: block !important; }
+  .sl-home-quick-actions .studylab-ai-launcher-title { font-size: .82rem !important; }
+  .sl-home-quick-actions .studylab-ai-launcher-subtitle { display: none !important; }
 
   .sl-home-quick-actions .study-chat-button > span:nth-child(2) {
     display: inline !important;
@@ -1109,9 +1172,7 @@ html[data-theme="light"] body header.site-header {
     z-index: 3 !important;
   }
 
-  .sl-home-quick-actions .study-chat-unread[hidden] {
-    display: none !important;
-  }
+  .sl-home-quick-actions .study-chat-unread[hidden] { display: none !important; }
 
   .sl-home-sidebar.is-collapsed .sl-home-quick-actions > button {
     justify-content: center !important;
@@ -1126,35 +1187,61 @@ html[data-theme="light"] body header.site-header {
     display: none !important;
   }
 
-  .sl-home-sidebar.is-collapsed .sl-home-quick-actions .study-chat-button-icon {
-    flex-basis: 22px !important;
-  }
+  .sl-home-sidebar.is-collapsed .sl-home-quick-actions { gap: 7px !important; }
 
   .sl-home-layout .sl-home-content,
   .sl-home-layout.is-sidebar-collapsed .sl-home-content {
     padding-left: 236px !important;
   }
 
-  .sl-home-sidebar.is-collapsed ~ .sl-home-content,
   .sl-home-layout.is-sidebar-collapsed .sl-home-content {
     padding-left: 96px !important;
   }
 
-  .studylab-ai-tools-row .studylab-ai-panel,
-  .study-chat-panel,
-  .sl-pet-panel {
-    left: 236px !important;
-    right: auto !important;
+  /* Chat is a separate floating window, never attached to the sidebar rail. */
+  .study-chat-panel {
+    position: fixed !important;
+    left: auto !important;
+    right: 22px !important;
     bottom: 22px !important;
+    width: min(410px, calc(100vw - 32px)) !important;
+    max-height: calc(100dvh - 44px) !important;
+    z-index: 1200 !important;
+    border-radius: 24px !important;
+    box-shadow: 0 28px 85px rgba(0,0,0,.34), 0 0 35px rgba(86,175,255,.10), inset 0 1px 0 rgba(255,255,255,.12) !important;
   }
 
-  .sl-home-sidebar.is-collapsed ~ .sl-home-content .study-chat-panel,
-  .sl-home-layout.is-sidebar-collapsed .study-chat-panel {
-    left: 94px !important;
+  html[data-theme="light"] .sl-home-sidebar {
+    border-color: rgba(255,255,255,.90) !important;
+    background:
+      radial-gradient(ellipse at 8% 0%, rgba(120,205,255,.17), transparent 52%),
+      linear-gradient(145deg, rgba(255,255,255,.72), rgba(226,241,252,.58) 58%, rgba(238,234,255,.55)) !important;
+    box-shadow:
+      0 20px 58px rgba(45,83,122,.14),
+      0 5px 18px rgba(45,83,122,.07),
+      inset 0 1.5px 0 rgba(255,255,255,.98),
+      inset 0 0 24px rgba(255,255,255,.24) !important;
+  }
+
+  html[data-theme="light"] .sl-home-quick-actions > button {
+    color: #214764 !important;
+    border-color: rgba(255,255,255,.82) !important;
+    background: linear-gradient(135deg, rgba(255,255,255,.52), rgba(140,190,230,.10)), rgba(255,255,255,.24) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.98), 0 6px 18px rgba(45,83,122,.07) !important;
+  }
+
+  html[data-theme="light"] .sl-home-quick-actions > button:hover,
+  html[data-theme="light"] .sl-home-quick-actions > button[aria-expanded="true"] {
+    background: linear-gradient(135deg, rgba(105,185,240,.22), rgba(150,155,255,.12)), rgba(255,255,255,.40) !important;
+  }
+
+  html[data-theme="light"] .sl-home-quick-actions .studylab-ai-launcher-icon,
+  html[data-theme="light"] .sl-home-quick-actions .study-chat-button-icon {
+    color: #6e73ce !important;
   }
 }
 
-/* Do not apply card surfaces to nested icon/label elements. */
+/* Card glass stays on actual card surfaces, not every nested element. */
 .sl-home-layout .subject-card,
 .sl-home-layout .study-tools-card,
 .sl-home-layout .telegram-card,
