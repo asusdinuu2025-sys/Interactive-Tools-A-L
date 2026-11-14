@@ -48,7 +48,13 @@
   }
   function updateButtons(id) {
     for (const button of [...buttons]) {
-      if(!button.isConnected){buttons.delete(button);continue;}
+      // Buttons are registered BEFORE the caller appends them to a card.
+      // Do not unregister a fresh, detached button before its async lookup
+      // completes. Prune only buttons that were previously mounted.
+      if(button.isConnected) button.dataset.followWasMounted="true";
+      if(!button.isConnected && button.dataset.followWasMounted==="true"){
+        buttons.delete(button);continue;
+      }
       if(button.dataset.followTarget !== id)continue;
       const following=followingCache.get(id)===true;
       const working=busyIds.has(id);
