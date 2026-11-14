@@ -46,7 +46,7 @@ html[data-theme="light"] .sl-follow-btn.is-following{
   border-color:rgba(90,139,181,.2);
 }
 /* Keep the original post layout and three-dot menu. */
-.sl-feed-post-top .sl-follow-btn {align-self:flex-start}
+.sl-feed-post-top .sl-follow-btn {align-self:flex-start;margin-left:auto}
 .sl-feed-profile-trigger,.sl-follow-profile-trigger {cursor:pointer}
 .sl-feed-member.sl-follow-profile-trigger:focus-visible{
   outline:2px solid #73d4ff;
