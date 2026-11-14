@@ -121,7 +121,8 @@
   // The Live Study Room keeps its own controller; this event bridges its selected mode.
   document.addEventListener("studylab:room-mode-change", function (event) {
     const mode = event.detail && event.detail.mode;
-    if (validModes.includes(mode)) applyTheme(mode, true);
+    // Study Room's theme choice is page-local; do not overwrite Home preferences.
+    if (validModes.includes(mode)) applyTheme(mode, false);
   });
 
   // Keep theme changes made in another StudyLab tab in sync.
