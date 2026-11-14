@@ -15,6 +15,8 @@ const syntaxFiles = [
   "assets/js/study-room-subject-picker.js",
   "assets/js/studylab-global-search.js",
   "assets/js/studylab-name-mark.js",
+  "assets/js/studylab-profile-view.js",
+  "netlify/functions/delete-account.js",
   "assets/js/interior-neon-doodles.js",
   "assets/js/study-room-enhancements.js",
   "assets/js/ai-response-renderer.js",
@@ -137,6 +139,13 @@ const nameMarkTests = spawnSync(process.execPath, ["scripts/name-mark-check.mjs"
 if (nameMarkTests.status !== 0) {
   fail("Selected-account name mark checks failed:\n" +
     (nameMarkTests.stderr || nameMarkTests.stdout || "node test failed"));
+}
+
+// A mock-only account deletion safety suite. Never touches real students.
+const profileTests = spawnSync(process.execPath, ["scripts/profile-view-check.cjs"], { encoding: "utf8" });
+if (profileTests.status !== 0) {
+  fail("View Profile and account deletion checks failed:\n" +
+    (profileTests.stderr || profileTests.stdout || "node test failed"));
 }
 
 // Parse inline JavaScript in the standalone Study Tools page without executing it.

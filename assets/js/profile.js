@@ -140,6 +140,10 @@
       </button>
       <p class="account-menu-status" role="status" hidden></p>` : `
       <div class="account-menu-heading">YOUR STUDYLAB ACCOUNT</div>
+      <button type="button" role="menuitem" data-account-action="view">
+        <span class="account-menu-icon" aria-hidden="true">◎</span>
+        <span class="account-menu-copy"><strong>View Profile</strong><small>See your StudyLab account card</small></span>
+      </button>
       <button type="button" role="menuitem" data-account-action="profile">
         <span class="account-menu-icon" aria-hidden="true">♙</span>
         <span class="account-menu-copy"><strong>Edit student profile</strong><small>Update your StudyLab profile details</small></span>
@@ -162,6 +166,13 @@
   accountMenu.addEventListener("click", async event => {
     const action = event.target.closest("[data-account-action]")?.dataset.accountAction;
     if (!action) return;
+    if (action === "view") {
+      closeAccountMenu();
+      const viewer = window.StudyLabProfileView;
+      if (viewer) viewer.open({openEdit: () => openModal()});
+      else openModal(); // Safe fallback if the viewer asset failed to load.
+      return;
+    }
     if (action === "profile") { closeAccountMenu(); openModal(); return; }
     if (action === "signup" || action === "login") {
       closeAccountMenu();
