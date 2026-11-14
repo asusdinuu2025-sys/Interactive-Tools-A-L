@@ -1,4 +1,4 @@
-/* Local Study Room analytics: private per-browser subject history and task list. */
+/* Study Room analytics: cloud-confirmed study credits with private browser-local tasks. */
 (async () => {
 "use strict";
 // Resolve the account before choosing the local, per-student task key.
@@ -17,7 +17,8 @@ function read(){try{const d=JSON.parse(localStorage.getItem(key)||"null");return
 let data=read(),period="today",activeSession=null,livePendingSeconds=0,livePendingDay=today(),livePendingSubject="";
 try{activeSession=JSON.parse(localStorage.getItem(key+":active")||"null");}catch(_){activeSession=null;}
 const cursorKey=key+":server-cursor";
- let cloudDays=null,cloudSessions=[],cloudEnabled=false,cloudBusy=false;
+ let cloudDays=null,cloudSessions=[],cloudEnabled=false;
+ let cloudRefreshQueue=Promise.resolve();
  const daySource=()=>cloudDays?{...Object.fromEntries(Object.entries(data.days).filter(([day])=>day<"2026-11-14")),...cloudDays}:data.days;
 function readCursor(){try{return JSON.parse(localStorage.getItem(cursorKey)||"null");}catch(_){return null;}}
 let serverCursor=readCursor();
@@ -176,8 +177,7 @@ function getStreakSummary(){
  return {current,best,activeDays:Array.from({length:7},(_,i)=>dateAgo(i)).filter(day=>set.has(day)).length};
 }
 window.StudyRoomHistory={getStreakSummary,refresh:refreshCloudHistory};
-async function refreshCloudHistory(){
- if(cloudBusy)return;cloudBusy=true;
+async function pullCloudHistory(){
  try{
   const account=window.StudyLabAccount;
   if(!account?.ready)return;
@@ -195,7 +195,12 @@ async function refreshCloudHistory(){
   const marker=panel.querySelector(".sl-local");if(marker)marker.textContent="● CLOUD TIME";
   render(false);renderStreaks();renderSessionHistory();
  }catch(error){console.warn("Study Room cloud history sync:",error?.message||error);const note=$("slHistoryStorageNote");if(note)note.textContent="Cloud study history could not be refreshed; local study history and tasks are preserved. Check the network and database migration.";renderSessionHistory();}
- finally{cloudBusy=false;}
+}
+// Always enqueue an explicit Pause/End refresh after a request already in flight.
+// A dropped request here is what made saved totals appear late even after Pause.
+function refreshCloudHistory(){
+ cloudRefreshQueue=cloudRefreshQueue.then(pullCloudHistory,pullCloudHistory);
+ return cloudRefreshQueue;
 }
 function exportStudyHistory(){
  const rows=[["Date (Sri Lanka)","Subject","Seconds","Source"]];
