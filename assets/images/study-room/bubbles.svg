@@ -1,11 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none" stroke="#fff" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round">
   <!-- Outline-only soap and water bubbles; clear centers, luminous edges. -->
   <circle cx="137" cy="133" r="83"/>
-  <path d="M94 72C104 60 119 54 135 54" stroke-width="9"/>
-  <path d="M174 193C161 204 149 209 136 210" stroke-width="5"/>
-  <path d="M79 105C75 115 74 121 74 130" stroke-width="5"/>
-  <circle cx="49" cy="62" r="27" stroke-width="6"/>
-  <path d="M39 45C44 42 48 41 53 42" stroke-width="4"/>
-  <circle cx="216" cy="217" r="21" stroke-width="5"/>
-  <path d="M210 204C213 202 216 201 220 202" stroke-width="3.5"/>
+  <path d="M94 72C104 60 119 54 135 54" stroke-width="5.4"/>
+  <path d="M174 193C161 204 149 209 136 210" stroke-width="3"/>
+  <path d="M79 105C75 115 74 121 74 130" stroke-width="3"/>
+  <circle cx="49" cy="62" r="27" stroke-width="3.6"/>
+  <path d="M39 45C44 42 48 41 53 42" stroke-width="2.4"/>
+  <circle cx="216" cy="217" r="21" stroke-width="3"/>
+  <path d="M210 204C213 202 216 201 220 202" stroke-width="2.2"/>
 </svg>

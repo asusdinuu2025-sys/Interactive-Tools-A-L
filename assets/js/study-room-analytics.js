@@ -1,6 +1,8 @@
-/* Local Study Room analytics: private per-browser subject history and task list. */
-(() => {
+/* Study Room analytics: cloud-confirmed study credits with private browser-local tasks. */
+(async () => {
 "use strict";
+// Resolve the account before choosing the local, per-student task key.
+try { await window.StudyLabAccount?.ready; } catch (_) {}
 const $=id=>document.getElementById(id), status=$("yourStatus"), subject=$("studySubject"), layout=document.querySelector(".room-layout");
 if(!status||!subject||!layout||$("slLocalStudyAnalytics"))return;
 let uid="";try{uid=window.StudyLabAccount?.getUser?.()?.id||"";}catch(_){}
@@ -15,6 +17,9 @@ function read(){try{const d=JSON.parse(localStorage.getItem(key)||"null");return
 let data=read(),period="today",activeSession=null,livePendingSeconds=0,livePendingDay=today(),livePendingSubject="";
 try{activeSession=JSON.parse(localStorage.getItem(key+":active")||"null");}catch(_){activeSession=null;}
 const cursorKey=key+":server-cursor";
+ let cloudDays=null,cloudSessions=[],cloudEnabled=false;
+ let cloudRefreshQueue=Promise.resolve();
+ const daySource=()=>cloudDays?{...Object.fromEntries(Object.entries(data.days).filter(([day])=>day<"2026-11-14")),...cloudDays}:data.days;
 function readCursor(){try{return JSON.parse(localStorage.getItem(cursorKey)||"null");}catch(_){return null;}}
 let serverCursor=readCursor();
 function persistCursor(){try{if(serverCursor)localStorage.setItem(cursorKey,JSON.stringify(serverCursor));else localStorage.removeItem(cursorKey);}catch(_){}}
@@ -30,7 +35,9 @@ panel.innerHTML=[
 '<article class="sl-card sl-wide"><div class="sl-head"><h3>Time by subject</h3><small>Hours & minutes</small></div><div id="slRows" class="sl-rows"><p class="sl-empty">No study time recorded yet.</p></div></article>',
 '<article class="sl-card sl-wide"><div class="sl-head"><div><h3>My study tasks</h3><p class="sl-sub">A simple personal to-do list</p></div><small id="slTaskCount">0 remaining</small></div><form id="slTaskForm" class="sl-form"><input id="slTaskInput" maxlength="90" placeholder="Add a task, e.g. Revise vectors" aria-label="New study task" required><button>Add task</button></form><div id="slTasks" class="sl-tasks"><p class="sl-empty">Add your first study task.</p></div></article>',
 '<article class="sl-card sl-wide"><div class="sl-head"><h3>Completed tasks</h3><small>Same selected period</small></div><div class="sl-summary sl-task-summary"><article><span>Completed</span><strong id="slTasksDone">0</strong></article><article><span>Remaining</span><strong id="slTasksPending">0</strong></article><article><span>Completion rate</span><strong id="slTasksRate">0%</strong></article></div><div class="sl-task-history-head"><strong>Daily completions</strong><small>Last 7 days</small></div><div class="sl-bars sl-task-bars" id="slTaskBars"><p class="sl-empty">Completed tasks will appear here.</p></div></article>',
-'<p class="sl-foot">Time is recorded while your Study Room status is “Studying”. History and tasks stay in this browser, are not shared with other students, and do not sync across devices.</p><p id="slNotice" class="sl-notice" role="status" hidden></p>'
+'<article class="sl-card sl-wide"><div class="sl-head"><h3>Recent study sessions</h3><button class="sl-history-export" id="slHistoryExport" type="button">Export CSV</button></div><div id="slSessionHistory" class="sl-rows"><p class="sl-empty">Loading study history...</p></div></article>',
+ '<details class="sl-timer-help"><summary>How StudyLab records time</summary><p>Study time is saved to Supabase while you study. Active clocks refresh locally, and server credits are recorded on heartbeats. After leaving the Study Room, a 60-second grace period applies while the page remains open. If the browser closes without reporting its state, server maintenance detects missed heartbeats. Away time can continue up to your target, but unconfirmed time can be removed after midnight. Personal subject history syncs across devices after cloud recording is enabled; tasks and pre-existing browser history remain on this device.</p></details>',
+ '<p class="sl-foot" id="slHistoryStorageNote">Study time history and tasks are saved on this device. Cloud synchronization is not connected yet.</p><p id="slNotice" class="sl-notice" role="status" hidden></p>'
 ].join("");
 const content=document.querySelector(".sl-room-content");
 const attendance=document.getElementById("peopleGrid")?.closest(".room-panel");
@@ -41,7 +48,7 @@ const css=[
 '.sl-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-bottom:12px}.sl-summary article,.sl-card{min-width:0;padding:14px;border:1px solid var(--card-border);border-radius:15px;background:var(--card-bg)}.sl-summary span{display:block;color:var(--text-muted);font-size:.7rem}.sl-summary strong{display:block;margin-top:7px;font-size:clamp(1rem,2.5vw,1.4rem);overflow-wrap:anywhere}',
 '.sl-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.sl-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:13px}.sl-head h3{margin:0;font-size:.9rem}.sl-head small{color:var(--text-muted);font-size:.68rem}.sl-pie-wrap{display:flex;align-items:center;justify-content:center;gap:14px;min-height:180px}.sl-pie{width:140px;height:140px;flex:0 0 140px;display:grid;place-items:center;border-radius:50%;position:relative;background:conic-gradient(rgba(120,135,160,.18) 0 100%)}.sl-pie:before{content:"";position:absolute;inset:22px;border-radius:50%;background:var(--card-bg);border:1px solid var(--card-border)}.sl-pie span{position:relative;font-weight:850;font-size:.9rem}.sl-legend{display:grid;gap:7px;min-width:0;max-height:175px;overflow:auto}.sl-legend-row{display:flex;align-items:center;gap:6px;font-size:.68rem;min-width:0}.sl-legend-row i{width:8px;height:8px;flex:0 0 8px;border-radius:3px}.sl-legend-row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sl-legend-row b{margin-left:auto;white-space:nowrap}',
 '.sl-bars{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px;align-items:end;min-height:180px}.sl-bars.sl-bars-scroll{display:grid;grid-auto-flow:column;grid-auto-columns:42px;grid-template-columns:none!important;gap:7px;overflow-x:auto;overflow-y:hidden;max-width:100%;width:100%;box-sizing:border-box;padding-bottom:6px;overscroll-behavior-x:contain}.sl-bars.sl-bars-scroll .sl-day{min-width:42px}.sl-day{height:170px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px;min-width:0}.sl-stack{width:min(100%,29px);height:135px;display:flex;flex-direction:column-reverse;overflow:hidden;border-radius:6px;background:rgba(120,135,160,.1)}.sl-seg{width:100%;min-height:0}.sl-day small{font-size:.62rem;color:var(--text-muted)}.sl-day b{font-size:.58rem;color:var(--text-muted);white-space:nowrap}.sl-empty{margin:auto;text-align:center;color:var(--text-muted);font-size:.76rem;line-height:1.6}.sl-wide{margin-top:12px}.sl-rows{display:grid;gap:10px}.sl-row{display:grid;grid-template-columns:minmax(100px,1fr) minmax(50px,2fr) auto;gap:9px;align-items:center;font-size:.73rem}.sl-row-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sl-track{height:8px;border-radius:99px;overflow:hidden;background:rgba(120,135,160,.14)}.sl-track i{display:block;height:100%;border-radius:inherit}.sl-row time{color:var(--text-muted);white-space:nowrap}',
-'.sl-form{display:flex;gap:8px;margin-bottom:11px}.sl-form input{flex:1;min-width:0;min-height:42px;padding:9px 11px;border:1px solid var(--card-border);border-radius:10px;background:var(--bg-mid);color:var(--text-primary);font:inherit;font-size:.8rem}.sl-form button{border:0;border-radius:10px;padding:0 14px;background:linear-gradient(135deg,#26b98d,#168b78);color:white;font:inherit;font-size:.78rem;font-weight:800;cursor:pointer}.sl-tasks{display:grid;gap:7px}.sl-task{display:flex;align-items:center;gap:8px;padding:9px 10px;border:1px solid var(--card-border);border-radius:10px;font-size:.78rem}.sl-task input{accent-color:#26b98d}.sl-task span{flex:1;min-width:0;overflow-wrap:anywhere}.sl-task.done span{text-decoration:line-through;color:var(--text-muted)}.sl-task button{border:0;background:transparent;color:var(--text-muted);font-size:1.1rem;cursor:pointer}.sl-foot,.sl-notice{margin:12px 0 0;color:var(--text-muted);font-size:.68rem;line-height:1.6}.sl-notice{color:#d49a42}.sl-task-summary{margin:0 0 15px}.sl-task-summary article{padding:11px}.sl-task-history-head{display:flex;justify-content:space-between;gap:8px;margin-bottom:8px;font-size:.75rem}.sl-task-history-head small{color:var(--text-muted)}.sl-task-bars{min-height:150px}.sl-task-bars .sl-day{height:140px}.sl-task-bars .sl-stack{height:105px;background:rgba(120,135,160,.08)}.sl-task-bars .sl-seg{background:linear-gradient(180deg,#39d6ad,#208fbd)}',
+'.sl-history-export,.sl-task-study{border:1px solid var(--card-border);border-radius:9px;padding:7px 10px;background:var(--card-bg);color:var(--text-primary);font:inherit;font-size:.73rem;cursor:pointer}.sl-timer-help{margin:12px 0 0;padding:12px;border:1px solid var(--card-border);border-radius:12px;color:var(--text-muted);font-size:.75rem}.sl-timer-help summary{cursor:pointer;color:var(--text-primary);font-weight:750}.sl-timer-help p{line-height:1.6}.sl-form{display:flex;gap:8px;margin-bottom:11px}.sl-form input{flex:1;min-width:0;min-height:42px;padding:9px 11px;border:1px solid var(--card-border);border-radius:10px;background:var(--bg-mid);color:var(--text-primary);font:inherit;font-size:.8rem}.sl-form button{border:0;border-radius:10px;padding:0 14px;background:linear-gradient(135deg,#26b98d,#168b78);color:white;font:inherit;font-size:.78rem;font-weight:800;cursor:pointer}.sl-tasks{display:grid;gap:7px}.sl-task{display:flex;align-items:center;gap:8px;padding:9px 10px;border:1px solid var(--card-border);border-radius:10px;font-size:.78rem}.sl-task input{accent-color:#26b98d}.sl-task span{flex:1;min-width:0;overflow-wrap:anywhere}.sl-task.done span{text-decoration:line-through;color:var(--text-muted)}.sl-task button{border:0;background:transparent;color:var(--text-muted);font-size:1.1rem;cursor:pointer}.sl-foot,.sl-notice{margin:12px 0 0;color:var(--text-muted);font-size:.68rem;line-height:1.6}.sl-notice{color:#d49a42}.sl-task-summary{margin:0 0 15px}.sl-task-summary article{padding:11px}.sl-task-history-head{display:flex;justify-content:space-between;gap:8px;margin-bottom:8px;font-size:.75rem}.sl-task-history-head small{color:var(--text-muted)}.sl-task-bars{min-height:150px}.sl-task-bars .sl-day{height:140px}.sl-task-bars .sl-stack{height:105px;background:rgba(120,135,160,.08)}.sl-task-bars .sl-seg{background:linear-gradient(180deg,#39d6ad,#208fbd)}',
 '@media(max-width:650px){.sl-grid{grid-template-columns:1fr}.sl-pie{width:125px;height:125px;flex-basis:125px}.sl-pie:before{inset:20px}}@media(max-width:420px){.sl-tabs{width:100%;justify-content:space-between}.sl-tabs button{padding:8px 8px;font-size:.68rem}.sl-summary article{padding:10px}.sl-summary span{font-size:.63rem}.sl-row{grid-template-columns:minmax(82px,1fr) minmax(35px,1fr) auto;gap:6px}}'
 ].join("");
 const style=document.createElement("style");style.textContent=css+[
@@ -97,7 +104,7 @@ function syncRoomSession(state){
   persistCursor();
  }else{
   const delta=seconds- Math.max(0,Math.floor(Number(serverCursor.seconds)||0));
-  if(delta>0){
+  if(delta>0&&!cloudEnabled){
    if(!activeSession&&state.sessionActive){
     try{activeSession=JSON.parse(localStorage.getItem(key+":active")||"null");}catch(_){activeSession=null;}
    }
@@ -109,11 +116,11 @@ function syncRoomSession(state){
   serverCursor={day,seconds,subject:currentSubject,updatedAt:state.updatedAt||null};
   persistCursor();
  }
- if(state.sessionActive){
+ if(!cloudEnabled&&state.sessionActive){
   if(!activeSession)activeSession={subject:currentSubject,credits:{}};
   activeSession.subject=currentSubject;
   saveSession();
- }else if(activeSession){
+ }else if(!cloudEnabled&&activeSession){
   activeSession=null;saveSession();
  }
  render(false);
@@ -122,8 +129,8 @@ window.addEventListener("studylab:study-room-timer",event=>syncRoomSession(event
 if(window.StudyRoomTimer?.getState)syncRoomSession(window.StudyRoomTimer.getState());
 // Subject changes are committed by the server. The subject cursor changes only
 // after the server has credited the preceding interval and returned fresh state.
-function days(){if(period==="today")return[today()];if(period==="7")return Array.from({length:7},(_,i)=>dateAgo(6-i));if(period==="30")return Array.from({length:30},(_,i)=>dateAgo(29-i));const keys=Object.keys(data.days);if(livePendingSeconds>0)keys.push(livePendingDay);return [...new Set(keys)].sort();}
-function totalsFor(list){const out={};list.forEach(day=>Object.entries(data.days[day]||{}).forEach(([n,s])=>out[n]=(out[n]||0)+(Number(s)||0)));if(livePendingSeconds>0&&list.includes(livePendingDay))out[livePendingSubject]=(out[livePendingSubject]||0)+livePendingSeconds;return Object.entries(out).filter(([,s])=>s>0).sort((a,b)=>b[1]-a[1]);}
+function days(){if(period==="today")return[today()];if(period==="7")return Array.from({length:7},(_,i)=>dateAgo(6-i));if(period==="30")return Array.from({length:30},(_,i)=>dateAgo(29-i));const keys=Object.keys(daySource());if(livePendingSeconds>0)keys.push(livePendingDay);return [...new Set(keys)].sort();}
+function totalsFor(list){const out={};list.forEach(day=>Object.entries(daySource()[day]||{}).forEach(([n,s])=>out[n]=(out[n]||0)+(Number(s)||0)));if(livePendingSeconds>0&&list.includes(livePendingDay))out[livePendingSubject]=(out[livePendingSubject]||0)+livePendingSeconds;return Object.entries(out).filter(([,s])=>s>0).sort((a,b)=>b[1]-a[1]);}
 function render(includeTasks=true){if(!panel.isConnected)return;const list=days(),totals=totalsFor(list),sum=totals.reduce((a,r)=>a+r[1],0);$("slTotal").textContent=fmt(sum);$("slSubjects").textContent=totals.length;$("slTop").textContent=totals[0]?.[0]||"—";$("slPiePeriod").textContent=period==="today"?"Today":period==="7"?"7 days":period==="30"?"30 days":"All time";
 const pie=$("slPie");let cursor=0;const stops=totals.map(([n,s])=>{const start=cursor/Math.max(1,sum)*100;cursor+=s;return color(n)+" "+start+"% "+(cursor/Math.max(1,sum)*100)+"%";});pie.style.background=stops.length?"conic-gradient("+stops.join(",")+")":"conic-gradient(rgba(120,135,160,.18) 0 100%)";pie.querySelector("span").textContent=fmt(sum);
 const legend=$("slLegend");legend.replaceChildren();if(!totals.length){legend.innerHTML='<p class="sl-empty">Start studying to build your chart.</p>';}else totals.forEach(([n,s])=>{const row=document.createElement("div");row.className="sl-legend-row";const dot=document.createElement("i");dot.style.background=color(n);const name=document.createElement("span");name.textContent=n;const value=document.createElement("b");value.textContent=fmt(s);row.append(dot,name,value);legend.append(row);});
@@ -131,7 +138,7 @@ const rows=$("slRows");rows.replaceChildren();if(!totals.length)rows.innerHTML='
 const bars=$("slBars");bars.replaceChildren();const last=list;const scrollBars=period==="30"||period==="all";bars.classList.toggle("sl-bars-scroll",scrollBars);$("slBarsPeriod").textContent=period==="today"?"Today":period==="7"?"Last 7 days":period==="30"?"Last 30 days":"All recorded days";bars.style.gridTemplateColumns=scrollBars?"none":`repeat(${Math.max(1,last.length)}, minmax(28px, 1fr))`;const barValues=last.map(d=>[d,totalsFor([d])]);const max=Math.max(1,...barValues.map(([,values])=>values.reduce((a,r)=>a+r[1],0)));barValues.forEach(([d,values])=>{const total=values.reduce((a,r)=>a+r[1],0);const col=document.createElement("div");col.className="sl-day";const val=document.createElement("b");val.textContent=total?fmt(total):"";const stack=document.createElement("div");stack.className="sl-stack";values.forEach(([n,s])=>{const seg=document.createElement("i");seg.className="sl-seg";seg.style.height=(Number(s)/max*135)+"px";seg.style.background=color(n);seg.title=n+": "+fmt(s);stack.append(seg);});const label=document.createElement("small");label.textContent=period==="today"?"Today":new Date(d+"T12:00:00+05:30").toLocaleDateString("en-US",{timeZone:"Asia/Colombo",weekday:"short"});col.append(val,stack,label);bars.append(col);});if(includeTasks)renderTasks();}
 function renderTasks(){const list=$("slTasks");list.replaceChildren();$("slTaskCount").textContent=data.tasks.filter(t=>!t.done).length+" remaining";
 const completed=data.tasks.filter(t=>t.done&&t.doneAt&&days().includes(t.doneAt)).length;const pending=data.tasks.filter(t=>!t.done).length;const totalForRate=completed+pending;$("slTasksDone").textContent=completed;$("slTasksPending").textContent=pending;$("slTasksRate").textContent=totalForRate?Math.round(completed/totalForRate*100)+"%":"0%";
-const taskBars=$("slTaskBars");taskBars.replaceChildren();const taskDays=Array.from({length:7},(_,i)=>dateAgo(6-i));const counts=taskDays.map(day=>data.tasks.filter(t=>t.done&&t.doneAt===day).length);const maxTasks=Math.max(1,...counts);taskDays.forEach((day,i)=>{const col=document.createElement("div");col.className="sl-day";const val=document.createElement("b");val.textContent=counts[i]||"";const stack=document.createElement("div");stack.className="sl-stack";if(counts[i]){const seg=document.createElement("i");seg.className="sl-seg";seg.style.height=(counts[i]/maxTasks*105)+"px";stack.append(seg);}const label=document.createElement("small");label.textContent=new Date(day+"T12:00:00+05:30").toLocaleDateString("en-US",{timeZone:"Asia/Colombo",weekday:"short"});col.append(val,stack,label);taskBars.append(col);});if(!data.tasks.length){list.innerHTML='<p class="sl-empty">Add your first study task.</p>';return;}data.tasks.forEach(t=>{const row=document.createElement("label");row.className="sl-task"+(t.done?" done":"");const box=document.createElement("input");box.type="checkbox";box.checked=!!t.done;box.addEventListener("change",()=>{t.done=box.checked;t.doneAt=t.done?today():null;save();renderTasks();});const title=document.createElement("span");title.textContent=t.title;const del=document.createElement("button");del.type="button";del.textContent="×";del.setAttribute("aria-label","Delete task");del.addEventListener("click",e=>{e.preventDefault();data.tasks=data.tasks.filter(x=>x.id!==t.id);save();renderTasks();});row.append(box,title,del);list.append(row);});}
+const taskBars=$("slTaskBars");taskBars.replaceChildren();const taskDays=Array.from({length:7},(_,i)=>dateAgo(6-i));const counts=taskDays.map(day=>data.tasks.filter(t=>t.done&&t.doneAt===day).length);const maxTasks=Math.max(1,...counts);taskDays.forEach((day,i)=>{const col=document.createElement("div");col.className="sl-day";const val=document.createElement("b");val.textContent=counts[i]||"";const stack=document.createElement("div");stack.className="sl-stack";if(counts[i]){const seg=document.createElement("i");seg.className="sl-seg";seg.style.height=(counts[i]/maxTasks*105)+"px";stack.append(seg);}const label=document.createElement("small");label.textContent=new Date(day+"T12:00:00+05:30").toLocaleDateString("en-US",{timeZone:"Asia/Colombo",weekday:"short"});col.append(val,stack,label);taskBars.append(col);});if(!data.tasks.length){list.innerHTML='<p class="sl-empty">Add your first study task.</p>';return;}data.tasks.forEach(t=>{const row=document.createElement("label");row.className="sl-task"+(t.done?" done":"");const box=document.createElement("input");box.type="checkbox";box.checked=!!t.done;box.addEventListener("change",()=>{t.done=box.checked;t.doneAt=t.done?today():null;save();renderTasks();});const title=document.createElement("span");title.textContent=t.title;const del=document.createElement("button");del.type="button";del.textContent="×";del.setAttribute("aria-label","Delete task");del.addEventListener("click",e=>{e.preventDefault();data.tasks=data.tasks.filter(x=>x.id!==t.id);save();renderTasks();});const study=document.createElement("button");study.type="button";study.className="sl-task-study";study.textContent="Study";study.setAttribute("aria-label","Use task to prepare study session");study.addEventListener("click",()=>{const match=[...subject.options].find(o=>o.value&&t.title.toLowerCase().includes((o.textContent||"").trim().toLowerCase()));if(match){subject.value=match.value;subject.dispatchEvent(new Event("change",{bubbles:true}));}document.getElementById("timerSection")?.scrollIntoView({behavior:"smooth",block:"start"});});row.append(box,title,study,del);list.append(row);});}
 $("slTaskForm").addEventListener("submit",e=>{e.preventDefault();const input=$("slTaskInput"),title=input.value.trim();if(!title)return;data.tasks.unshift({id:Date.now().toString(36)+Math.random().toString(36).slice(2),title,done:false,doneAt:null});data.tasks=data.tasks.slice(0,100);input.value="";save();renderTasks();});
 panel.querySelectorAll("[data-period]").forEach(b=>b.addEventListener("click",()=>{period=b.dataset.period;panel.querySelectorAll("[data-period]").forEach(x=>{const on=x===b;x.classList.toggle("active",on);x.setAttribute("aria-pressed",String(on));});render();}));
 render();
@@ -139,7 +146,7 @@ const streakPanel=document.createElement("section");streakPanel.className="room-
 streakPanel.innerHTML='<div class="sl-head"><div><h2>My study streaks</h2><p class="sl-sub">Based on your personal recorded study days</p></div><span class="sl-local">● LOCAL</span></div><div class="sl-streak-grid"><article><span>Current streak</span><strong id="slCurrentStreak">0 days</strong></article><article><span>Best streak</span><strong id="slBestStreak">0 days</strong></article><article><span>Active days · 7 days</span><strong id="slActiveDays">0 / 7</strong></article></div><p class="sl-foot">A day counts when at least one minute of study time is recorded in this browser.</p>';
 const leaderboard=document.getElementById("leaderboardSection");if(leaderboard)leaderboard.insertAdjacentElement("afterend",streakPanel);else panel.insertAdjacentElement("afterend",streakPanel);
 style.textContent += '.sl-streak-panel{margin-top:12px}.sl-streak-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.sl-streak-grid article{padding:13px;border:1px solid var(--card-border);border-radius:13px;background:var(--card-bg)}.sl-streak-grid span{display:block;color:var(--text-muted);font-size:.7rem}.sl-streak-grid strong{display:block;margin-top:7px;font-size:1.15rem}@media(max-width:420px){.sl-streak-grid article{padding:10px}.sl-streak-grid strong{font-size:.95rem}}';
-function renderStreaks(){const activeDays=Object.keys(data.days).filter(day=>Object.values(data.days[day]||{}).reduce((a,b)=>a+(Number(b)||0),0)>=60).sort();const set=new Set(activeDays);let current=0,offset=0;while(set.has(dateAgo(offset))){current++;offset++;}let best=0,run=0,previous=null;activeDays.forEach(day=>{const stamp=new Date(day+"T12:00:00+05:30").getTime();if(previous!==null&&stamp-previous===86400000)run++;else run=1;best=Math.max(best,run);previous=stamp;});$("slCurrentStreak").textContent=current+" days";$("slBestStreak").textContent=best+" days";$("slActiveDays").textContent=Array.from({length:7},(_,i)=>dateAgo(i)).filter(d=>set.has(d)).length+" / 7";}
+function renderStreaks(){const activeDays=Object.keys(daySource()).filter(day=>Object.values(daySource()[day]||{}).reduce((a,b)=>a+(Number(b)||0),0)>=60).sort();const set=new Set(activeDays);let current=0,offset=0;while(set.has(dateAgo(offset))){current++;offset++;}let best=0,run=0,previous=null;activeDays.forEach(day=>{const stamp=new Date(day+"T12:00:00+05:30").getTime();if(previous!==null&&stamp-previous===86400000)run++;else run=1;best=Math.max(best,run);previous=stamp;});$("slCurrentStreak").textContent=current+" days";$("slBestStreak").textContent=best+" days";$("slActiveDays").textContent=Array.from({length:7},(_,i)=>dateAgo(i)).filter(d=>set.has(d)).length+" / 7";window.dispatchEvent(new Event("studylab:study-history-updated"));}
 
 /* Fixed left navigation only. Preserve the baseline content sizing and panel flow. */
 const fixedNavStyle=document.createElement("style");
@@ -147,4 +154,68 @@ fixedNavStyle.textContent='.room-layout.sl-room-shell{display:block}.sl-room-nav
 document.head.append(fixedNavStyle);
 
 const navLinks=[...document.querySelectorAll("[data-room-nav]")];navLinks.forEach(link=>link.addEventListener("click",()=>{navLinks.forEach(x=>x.classList.toggle("active",x===link));}));const navObserver=new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting){const id=entry.target.id;navLinks.forEach(link=>link.classList.toggle("active",link.getAttribute("href")==="#"+id));}});},{rootMargin:"-25% 0px -65% 0px"});["timerSection","slLocalStudyAnalytics","leaderboardSection","slStreakPanel"].forEach(id=>{const target=document.getElementById(id);if(target)navObserver.observe(target);});renderStreaks();
+
+// Cloud daily credit is authoritative for all days with server records.
+// Older browser-only days remain visible locally, without being uploaded or
+// counted in shared ranks, until they can be independently verified.
+function renderSessionHistory(){
+ const target=$("slSessionHistory");if(!target)return;target.replaceChildren();
+ if(!cloudSessions.length){const p=document.createElement("p");p.className="sl-empty";p.textContent=cloudEnabled?"No confirmed cloud study sessions yet.":"Cloud history unavailable; your existing local tracking is preserved.";target.append(p);return;}
+ for(const row of cloudSessions.slice(0,25)){
+  const line=document.createElement("div");line.className="sl-row";
+  const name=document.createElement("span");name.className="sl-row-name";name.textContent=row.subject||"Other";
+  const date=document.createElement("span");date.textContent=new Date(row.ended_at).toLocaleDateString("en-GB",{timeZone:"Asia/Colombo",month:"short",day:"numeric",year:"numeric"});
+  const duration=document.createElement("time");duration.textContent=fmt(Number(row.seconds)||0);
+  line.append(name,date,duration);target.append(line);
+ }
+}
+function getStreakSummary(){
+ const activeDays=Object.keys(daySource()).filter(day=>Object.values(daySource()[day]||{}).reduce((sum,seconds)=>sum+(Number(seconds)||0),0)>=60).sort();
+ const set=new Set(activeDays);let current=0,best=0,run=0,previous=null;
+ while(set.has(dateAgo(current)))current++;
+ activeDays.forEach(day=>{const stamp=Date.parse(day+"T12:00:00+05:30");run=previous!==null&&stamp-previous===86400000?run+1:1;best=Math.max(best,run);previous=stamp;});
+ return {current,best,activeDays:Array.from({length:7},(_,i)=>dateAgo(i)).filter(day=>set.has(day)).length};
+}
+window.StudyRoomHistory={getStreakSummary,refresh:refreshCloudHistory};
+async function pullCloudHistory(){
+ try{
+  const account=window.StudyLabAccount;
+  if(!account?.ready)return;
+  await account.ready;
+  const uid=account.getUser?.()?.id;
+  if(!uid||!account.client)return;
+  const [daily,sessions]=await Promise.all([
+   account.client.from("study_room_personal_daily").select("local_day,subject,seconds").eq("user_id",uid).gte("local_day",dateAgo(365)),
+   account.client.from("study_room_personal_sessions").select("session_id,subject,started_at,ended_at,seconds").eq("user_id",uid).order("ended_at",{ascending:false}).limit(40)
+  ]);
+  if(daily.error)throw daily.error;if(sessions.error)throw sessions.error;
+  const days={};for(const row of daily.data||[]){days[row.local_day]||={};days[row.local_day][row.subject]=(Number(days[row.local_day][row.subject])||0)+(Number(row.seconds)||0);}
+  cloudDays=days;cloudSessions=sessions.data||[];cloudEnabled=true;
+  const note=$("slHistoryStorageNote");if(note)note.textContent="Confirmed study time and subject history sync to your StudyLab account. Existing older browser-only history and tasks stay on this device.";
+  const marker=panel.querySelector(".sl-local");if(marker)marker.textContent="● CLOUD TIME";
+  render(false);renderStreaks();renderSessionHistory();
+ }catch(error){console.warn("Study Room cloud history sync:",error?.message||error);const note=$("slHistoryStorageNote");if(note)note.textContent="Cloud study history could not be refreshed; local study history and tasks are preserved. Check the network and database migration.";renderSessionHistory();}
+}
+// Always enqueue an explicit Pause/End refresh after a request already in flight.
+// A dropped request here is what made saved totals appear late even after Pause.
+function refreshCloudHistory(){
+ cloudRefreshQueue=cloudRefreshQueue.then(pullCloudHistory,pullCloudHistory);
+ return cloudRefreshQueue;
+}
+function exportStudyHistory(){
+ const rows=[["Date (Sri Lanka)","Subject","Seconds","Source"]];
+ const local=data.days||{};
+ const cloud=cloudDays||{};
+ for(const [day,subjects] of Object.entries(daySource()).sort(([a],[b])=>a.localeCompare(b))){
+  for(const [name,seconds] of Object.entries(subjects||{})){rows.push([day,name,Math.max(0,Math.floor(Number(seconds)||0)),Object.hasOwn(cloud,day)?"Cloud":"Legacy local"]);}
+ }
+ const csv="\uFEFF"+rows.map(row=>row.map(value=>'"'+String(value).replaceAll('"','""')+'"').join(",")).join("\r\n");
+ const url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+ const anchor=document.createElement("a");anchor.href=url;anchor.download="studylab-study-history.csv";anchor.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+$("slHistoryExport")?.addEventListener("click",exportStudyHistory);
+window.addEventListener("online",refreshCloudHistory);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)refreshCloudHistory();});
+setInterval(refreshCloudHistory,60000);
+refreshCloudHistory();
 })();

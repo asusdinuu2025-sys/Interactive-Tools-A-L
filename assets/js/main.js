@@ -70,6 +70,25 @@
     updateToggle();
   }
 
+  // Optional lightweight mode for slow devices. Default styling is untouched.
+  // A visitor can enable it with ?performance=lite or disable with
+  // ?performance=normal. The choice persists in this browser.
+  const PERF_KEY = "studylab-performance-mode";
+  const requestedPerf = new URLSearchParams(window.location.search).get("performance");
+  try {
+    if (requestedPerf === "lite" || requestedPerf === "normal") localStorage.setItem(PERF_KEY, requestedPerf);
+  } catch (_) {}
+  let lite = false;
+  try { lite = localStorage.getItem(PERF_KEY) === "lite"; } catch (_) {}
+  // Never alter the approved appearance without an explicit opt-in.
+  if (lite) {
+    root.dataset.slPerformance = "lite";
+    const lightStyle = document.createElement("style");
+    lightStyle.id = "sl-lite-performance-rules";
+    lightStyle.textContent = 'html[data-sl-performance="lite"] *,html[data-sl-performance="lite"] *::before,html[data-sl-performance="lite"] *::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}html[data-sl-performance="lite"] .sl-home-sidebar,html[data-sl-performance="lite"] .sl-home-section,html[data-sl-performance="lite"] .room-panel,html[data-sl-performance="lite"] .slr-theme-illustrations{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}';
+    document.head.appendChild(lightStyle);
+  }
+
   // Apply before DOMContentLoaded where possible, avoiding a light-mode flash.
   applyTheme(themeMode, false);
 
@@ -102,7 +121,8 @@
   // The Live Study Room keeps its own controller; this event bridges its selected mode.
   document.addEventListener("studylab:room-mode-change", function (event) {
     const mode = event.detail && event.detail.mode;
-    if (validModes.includes(mode)) applyTheme(mode, true);
+    // Study Room's theme choice is page-local; do not overwrite Home preferences.
+    if (validModes.includes(mode)) applyTheme(mode, false);
   });
 
   // Keep theme changes made in another StudyLab tab in sync.

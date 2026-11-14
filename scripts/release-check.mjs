@@ -5,13 +5,17 @@ import { spawnSync } from "node:child_process";
 
 const root = process.cwd();
 const errors = [];
-const requiredPages = ["index.html", "study-room.html", "study-room-mini.html", "study-tools.html"];
+const requiredPages = ["index.html", "study-room.html", "study-room-mini.html", "study-tools.html", "exam-hub.html"];
 const syntaxFiles = [
   "assets/js/studylab-social.js",
   "assets/js/study-room-analytics.js",
   "assets/js/study-room-mini-standalone.js",
   "assets/js/study-room-presence.js",
   "assets/js/study-room-realtime.js",
+  "assets/js/study-room-enhancements.js",
+  "assets/js/study-dashboard.js",
+  "assets/js/past-paper-finder.js",
+  "assets/js/main.js",
   "netlify/functions/gemini.js"
 ];
 
@@ -69,12 +73,18 @@ for (const page of requiredPages) {
     }
   }
 
+  const loadedStyles = new Set();
   for (const match of html.matchAll(/<(script|link)\b([^>]*)>/gi)) {
     const tag = match[1].toLowerCase();
     const attrs = match[2];
     const reference = tag === "script" ? attribute(attrs, "src") : attribute(attrs, "href");
     if (tag === "link" && !/\brel=["'][^"']*stylesheet|manifest|icon/i.test(attrs)) continue;
     if (!reference) continue;
+    if (tag === "link" && /\brel=["'][^"']*stylesheet/i.test(attrs)) {
+      const normalized = reference.split(/[?#]/, 1)[0];
+      if (loadedStyles.has(normalized)) fail(page + " loads stylesheet twice: " + normalized);
+      loadedStyles.add(normalized);
+    }
     const target = localFile(page, reference);
     if (target && !existsSync(target)) {
       fail(page + " references a missing local " + (tag === "script" ? "script" : "asset") + ": " + reference);

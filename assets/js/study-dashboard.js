@@ -172,50 +172,9 @@
         });
       });
 
-    // One-time migration: read existing cloud records, never write dashboard data to Supabase.
-    let account = getCloudAccount();
-    let migrationSucceeded = false;
-    if ((() => { try { return localStorage.getItem(LOCAL_KEYS.migrated) !== "1"; } catch (_) { return true; } })() && account?.ready) {
-      try {
-        await account.ready;
-        const client = account.client;
-        const user = account.getUser?.();
-        if (client && user?.id) {
-          const [favResult, progressResult] = await Promise.all([
-            client.from("studylab_favorites")
-              .select("tool_url,title,description,subject,created_at")
-              .eq("user_id", user.id),
-            client.from("studylab_progress")
-              .select("tool_url,title,subject,first_opened_at,last_opened_at,open_count")
-              .eq("user_id", user.id)
-          ]);
-          if (!favResult.error) {
-            (favResult.data || []).forEach(row => {
-              if (!favorites.has(row.tool_url)) favorites.set(row.tool_url, row);
-            });
-          }
-          if (!progressResult.error) {
-            (progressResult.data || []).forEach(row => {
-              const existing = progress.get(row.tool_url);
-              progress.set(row.tool_url, {
-                ...row,
-                description: existing?.description || "",
-                first_opened_at: existing?.first_opened_at || row.first_opened_at,
-                last_opened_at: new Date(Math.max(
-                  new Date(existing?.last_opened_at || 0).getTime(),
-                  new Date(row.last_opened_at || 0).getTime()
-                )).toISOString(),
-                open_count: Math.max(Number(existing?.open_count) || 0, Number(row.open_count) || 1)
-              });
-            });
-          }
-          migrationSucceeded = !favResult.error && !progressResult.error;
-        }
-      } catch (error) {
-        // Tables may already have been removed; local dashboard remains usable.
-        console.info("StudyLab local dashboard migration skipped:", error?.message || error);
-      }
-    }
+    // Legacy Supabase favorites/progress tables were removed. The browser's
+    // localStorage is the definitive store; do not retry deleted endpoints.
+    const migrationSucceeded = true;
 
     cloud.favorites = favorites;
     cloud.progress = progress;
@@ -380,6 +339,18 @@
 
     card.dataset.studyEnhanced = "true";
     card.dataset.studySubject = knownSubject || subject || "study-lab";
+    // Source-link availability is not a claim of educational accuracy.
+    try {
+      const link = new URL(getCardUrl(card), document.baseURI);
+      if (link.origin === location.origin && link.pathname.startsWith("/tools/") && link.pathname.toLowerCase().endsWith(".html")) {
+        card.dataset.resourceLinkStatus = "checked-2026-11-14";
+        if (!card.hasAttribute("title")) card.title = "StudyLab page link checked 14 Nov 2026; educational content review pending.";
+      } else if (link.protocol === "http:" || link.protocol === "https:") {
+        card.dataset.resourceLinkStatus = "external-unverified";
+        if (!card.hasAttribute("title")) card.title = "External resource; check availability and content at the original source.";
+      }
+    } catch (_) {}
+
 
     const favorite = document.createElement("span");
     favorite.className = "study-favorite-toggle";
@@ -752,7 +723,7 @@
       <div class="study-quick-head">
         <div>
           <strong>Quick Access</strong>
-          <small>Synced to your StudyLab account</small>
+          <small>Saved on this device</small>
         </div>
         <button type="button" class="study-quick-close" aria-label="Close Quick Access">×</button>
       </div>
