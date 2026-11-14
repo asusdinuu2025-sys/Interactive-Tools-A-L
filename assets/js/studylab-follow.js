@@ -29,7 +29,7 @@
     toastHideTimer=setTimeout(()=>{toast.hidden=true;},4250);
   }
   function hasBasicProfile(p){
-    return Boolean(p?.display_name && !/^Student\\d{4}$/.test(String(p.display_name)) &&
+    return Boolean(p?.display_name && !/^Student\d{4}$/.test(String(p.display_name)) &&
       p?.username && p?.exam_year && p?.study_stream);
   }
 
