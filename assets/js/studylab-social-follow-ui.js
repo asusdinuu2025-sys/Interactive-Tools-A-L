@@ -24,7 +24,7 @@
     node.type="button";
     node.setAttribute("aria-label",label);
     node.title=label;
-    node.setAttribute("aria-expanded","false");
+    if(cls.includes("sl-follow-head-toggle"))node.setAttribute("aria-expanded","false");
     if(svg)node.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">'+svg+'</svg>';
     return node;
   }
