@@ -1080,6 +1080,14 @@
   let socialNotificationPopover = null;
   let socialNotificationRows = [];
   let socialNotificationUnreadCount = 0;
+  function lkNotificationDayStart() {
+    const parts=new Intl.DateTimeFormat("en-GB",{
+      timeZone:"Asia/Colombo",year:"numeric",month:"2-digit",day:"2-digit"
+    }).formatToParts(new Date());
+    const read=type=>parts.find(p=>p.type===type)?.value||"";
+    return read("year")+"-"+read("month")+"-"+read("day")+"T00:00:00+05:30";
+  }
+  let socialNoticeDay=lkNotificationDayStart();
 
   function ensureSocialNotificationUI() {
     const toggle = panel.querySelector(".sl-feed-notifications-toggle");
@@ -1167,10 +1175,12 @@
       const [rowsResult, countResult] = await Promise.all([
         client.from("studylab_social_notifications")
           .select("id,actor_display_name,post_id,notification_type,is_read,created_at")
-          .eq("recipient_id", userId).order("created_at", { ascending: false }).limit(30),
+          .eq("recipient_id", userId).gte("created_at",lkNotificationDayStart())
+           .order("created_at", { ascending: false }).limit(30),
         client.from("studylab_social_notifications")
           .select("id", { count: "exact", head: true })
           .eq("recipient_id", userId).eq("is_read", false)
+           .gte("created_at",lkNotificationDayStart())
       ]);
       if (rowsResult.error) throw rowsResult.error;
       if (countResult.error) throw countResult.error;
@@ -1290,6 +1300,25 @@
       }, () => loadSocialNotifications(client, userId))
       .subscribe();
   }
+
+  // At 00:00 Sri Lanka time, clear cached notification UI as well as the
+  // scheduled database deletion. Do not touch posts, likes or comments.
+  function refreshNoticeDayIfChanged() {
+    const day=lkNotificationDayStart();
+    if(day===socialNoticeDay)return;
+    socialNoticeDay=day;
+    socialNotificationRows=[];
+    updateSocialNotificationBadge(0);
+    if(socialNotificationPopover)renderSocialNotifications();
+    const account=window.StudyLabAccount;
+    if(socialNotificationUserId&&account?.client){
+      loadSocialNotifications(account.client,socialNotificationUserId);
+    }
+  }
+  window.setInterval(refreshNoticeDayIfChanged,30000);
+  document.addEventListener("visibilitychange",()=>{
+    if(!document.hidden)refreshNoticeDayIfChanged();
+  });
 
   let feedLoadCount = 0;
   let lastFeedLoadedAt = 0;
