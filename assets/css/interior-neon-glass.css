@@ -1,0 +1,259 @@
+/* StudyLab Neon Educational Glass | Interior hub layer
+   Scoped exclusively to opted-in page bodies. Existing structure, actions,
+   controls, routes, profiles, and timer logic stay as they are.
+   Major panels = barely tinted glass; inner interactive cards = stronger glass.
+   All original drawings are rendered by interior-neon-doodles.js. */
+
+/* Global settings for selected interior pages, not Home or mini timer. */
+body[data-sl-neon-page] {
+  --sl-neon-a:#5bdfff;
+  --sl-neon-b:#b18bff;
+  --sl-neon-outer:rgba(227,242,255,.055);
+  --sl-neon-inner:rgba(13,31,55,.37);
+  --sl-neon-edge:rgba(224,242,255,.145);
+  --sl-neon-inner-edge:rgba(222,239,255,.18);
+  --sl-neon-highlight:rgba(255,255,255,.10);
+  --sl-neon-shadow:0 14px 36px rgba(4,12,30,.10);
+  --sl-neon-opacity:.59;
+  isolation:isolate;
+}
+html[data-theme="light"] body[data-sl-neon-page] {
+  --sl-neon-outer:rgba(255,255,255,.17);
+  --sl-neon-inner:rgba(255,255,255,.38);
+  --sl-neon-edge:rgba(68,119,161,.16);
+  --sl-neon-inner-edge:rgba(89,148,192,.20);
+  --sl-neon-highlight:rgba(255,255,255,.56);
+  --sl-neon-shadow:0 11px 29px rgba(47,91,135,.07);
+  --sl-neon-opacity:.52;
+}
+
+/* Subject-specific neon pigments. Light mode uses deeper saturated strokes,
+   rather than pale neon lines disappearing against a white background. */
+body[data-sl-neon-page="maths"]       { --sl-neon-a:#4edfff; --sl-neon-b:#b68aff; }
+body[data-sl-neon-page="physics"]     { --sl-neon-a:#78adff; --sl-neon-b:#50e3fb; }
+body[data-sl-neon-page="chemistry"]   { --sl-neon-a:#4df4c9; --sl-neon-b:#8af2ad; }
+body[data-sl-neon-page="biology"]     { --sl-neon-a:#71ec9c; --sl-neon-b:#ee9ccf; }
+body[data-sl-neon-page="exam"]        { --sl-neon-a:#ffd078; --sl-neon-b:#7faeff; }
+body[data-sl-neon-page="utilities"]   { --sl-neon-a:#bc9dff; --sl-neon-b:#58e5ff; }
+body[data-sl-neon-page="lessons"]     { --sl-neon-a:#63e3ea; --sl-neon-b:#ffbf9d; }
+body[data-sl-neon-page="revise"]      { --sl-neon-a:#ffca6f; --sl-neon-b:#6fb6ff; }
+body[data-sl-neon-page="audio"]       { --sl-neon-a:#d494ff; --sl-neon-b:#ff9ac8; }
+body[data-sl-neon-page="english"]     { --sl-neon-a:#c19cff; --sl-neon-b:#7faefa; }
+body[data-sl-neon-page="gct"]         { --sl-neon-a:#ffbd70; --sl-neon-b:#68d9d9; }
+body[data-sl-neon-page="git"]         { --sl-neon-a:#57dfff; --sl-neon-b:#73e6ac; }
+body[data-sl-neon-page="telegram"]    { --sl-neon-a:#78deff; --sl-neon-b:#a6b5ff; }
+body[data-sl-neon-page="study-room"]  { --sl-neon-a:var(--room-accent,#62dfff); --sl-neon-b:var(--room-accent-strong,#a28aff); }
+
+html[data-theme="light"] body[data-sl-neon-page="maths"]     { --sl-neon-a:#057eac; --sl-neon-b:#7940b7; }
+html[data-theme="light"] body[data-sl-neon-page="physics"]   { --sl-neon-a:#245fca; --sl-neon-b:#007aa4; }
+html[data-theme="light"] body[data-sl-neon-page="chemistry"] { --sl-neon-a:#008c6f; --sl-neon-b:#238b4d; }
+html[data-theme="light"] body[data-sl-neon-page="biology"]   { --sl-neon-a:#168a4b; --sl-neon-b:#ab3878; }
+html[data-theme="light"] body[data-sl-neon-page="exam"]      { --sl-neon-a:#a86a0a; --sl-neon-b:#285fb4; }
+html[data-theme="light"] body[data-sl-neon-page="utilities"] { --sl-neon-a:#7752b9; --sl-neon-b:#027f9c; }
+html[data-theme="light"] body[data-sl-neon-page="lessons"]   { --sl-neon-a:#04879a; --sl-neon-b:#af6540; }
+html[data-theme="light"] body[data-sl-neon-page="revise"]    { --sl-neon-a:#9c670f; --sl-neon-b:#235fc6; }
+html[data-theme="light"] body[data-sl-neon-page="audio"]     { --sl-neon-a:#914cb4; --sl-neon-b:#b34279; }
+html[data-theme="light"] body[data-sl-neon-page="english"]   { --sl-neon-a:#7750b6; --sl-neon-b:#305fac; }
+html[data-theme="light"] body[data-sl-neon-page="gct"]       { --sl-neon-a:#a06107; --sl-neon-b:#087b80; }
+html[data-theme="light"] body[data-sl-neon-page="git"]       { --sl-neon-a:#087ba3; --sl-neon-b:#0a8863; }
+html[data-theme="light"] body[data-sl-neon-page="telegram"]  { --sl-neon-a:#0d79b8; --sl-neon-b:#536fc3; }
+
+/* Only on the new interior hubs: the previous repeated generic science tile
+   is replaced by the page-specific outlines, never an additional competing tile. */
+body.sl-subject-hub[data-sl-neon-page]:not(.sl-telegram-hub) {
+  background-image:
+    linear-gradient(155deg,rgba(5,13,28,.30),rgba(9,24,49,.13)),
+    radial-gradient(ellipse at 15% 28%,var(--sl-subject-tint,rgba(80,160,220,.14)),transparent 47%),
+    url("../images/studylab-ambient-dark.svg") !important;
+  background-repeat:no-repeat,no-repeat,no-repeat !important;
+  background-position:center,center,center !important;
+  background-size:cover,cover,cover !important;
+  background-attachment:fixed,fixed,fixed !important;
+}
+html[data-theme="light"] body.sl-subject-hub[data-sl-neon-page]:not(.sl-telegram-hub) {
+  background-image:
+    linear-gradient(160deg,rgba(246,252,255,.09),rgba(242,247,255,.08)),
+    radial-gradient(ellipse at 15% 28%,var(--sl-subject-tint,rgba(80,160,220,.10)),transparent 48%),
+    url("../images/studylab-ambient-light.svg") !important;
+}
+body.sl-subject-hub[data-sl-neon-page] .subject-science-background {
+  opacity:.08 !important;
+}
+
+/* Wallpaper drawings: static icons, touch/keyboard inert and behind content. */
+body[data-sl-neon-page] .sl-neon-layer {
+  position:fixed;
+  inset:0;
+  z-index:0;
+  overflow:hidden;
+  pointer-events:none;
+  user-select:none;
+  contain:layout paint style;
+}
+body[data-sl-neon-page] .sl-neon-glyph {
+  position:absolute;
+  display:block;
+  width:clamp(48px,5.2vw,92px);
+  height:auto;
+  aspect-ratio:1;
+  color:var(--sl-neon-a);
+  opacity:var(--sl-neon-opacity);
+  transform:translate3d(0,0,0) rotate(var(--sl-neon-rot,0deg));
+  filter:drop-shadow(0 0 5px color-mix(in srgb,var(--sl-neon-a) 40%,transparent));
+  animation:sl-interior-glyph-float 36s ease-in-out infinite;
+  will-change:auto;
+}
+body[data-sl-neon-page] .sl-neon-glyph:nth-child(even) {
+  color:var(--sl-neon-b);
+  filter:drop-shadow(0 0 5px color-mix(in srgb,var(--sl-neon-b) 40%,transparent));
+}
+body[data-sl-neon-page] .sl-neon-glyph svg {display:block;width:100%;height:100%;overflow:visible}
+.sl-neon-glyph:nth-child(1){left:3%;top:12%;--sl-neon-rot:-14deg;animation-delay:-12s}
+.sl-neon-glyph:nth-child(2){right:3%;top:17%;--sl-neon-rot:17deg;animation-delay:-24s}
+.sl-neon-glyph:nth-child(3){left:8%;top:36%;--sl-neon-rot:9deg;animation-delay:-8s}
+.sl-neon-glyph:nth-child(4){right:7%;top:41%;--sl-neon-rot:-12deg;animation-delay:-17s}
+.sl-neon-glyph:nth-child(5){left:2%;top:64%;--sl-neon-rot:16deg;animation-delay:-27s}
+.sl-neon-glyph:nth-child(6){right:4%;top:70%;--sl-neon-rot:-7deg;animation-delay:-19s}
+.sl-neon-glyph:nth-child(7){left:15%;top:86%;--sl-neon-rot:-14deg;animation-delay:-3s}
+.sl-neon-glyph:nth-child(8){right:17%;top:85%;--sl-neon-rot:12deg;animation-delay:-31s}
+@keyframes sl-interior-glyph-float {
+  0%,100%{transform:translate3d(0,0,0) rotate(var(--sl-neon-rot,0deg))}
+  50%{transform:translate3d(0,-9px,0) rotate(var(--sl-neon-rot,0deg))}
+}
+body[data-sl-neon-page] main,
+body[data-sl-neon-page] .site-header,
+body[data-sl-neon-page] footer.site-footer,
+body[data-sl-neon-page] footer.telegram-footer {
+  position:relative;
+  z-index:1;
+}
+/* Keep existing fixed subject topbars and z-order rules fully intact. */
+body.sl-subject-hub[data-sl-neon-page] .site-header.sl-subject-topbar {position:fixed !important}
+
+/* Nearly-clear major glass. No size, spacing, or layout changes. */
+body.sl-subject-hub[data-sl-neon-page] .sl-subject-intro-panel,
+body.sl-resource-hub[data-sl-neon-page] .examhub-section,
+body.sl-resource-hub[data-sl-neon-page] .tool-panel,
+body.sl-telegram-hub[data-sl-neon-page] .telegram-subject,
+body.sl-telegram-hub[data-sl-neon-page] .telegram-all,
+body.sl-telegram-hub[data-sl-neon-page] .telegram-featured-channel {
+  background:var(--sl-neon-outer) !important;
+  border:1px solid var(--sl-neon-edge) !important;
+  box-shadow:var(--sl-neon-shadow),inset 0 1px 0 var(--sl-neon-highlight) !important;
+  backdrop-filter:blur(19px) saturate(120%) !important;
+  -webkit-backdrop-filter:blur(19px) saturate(120%) !important;
+}
+
+/* A modest additional tint under interactive resources keeps them readable. */
+body.sl-subject-hub[data-sl-neon-page] .tool-grid > .tool-card,
+body.sl-resource-hub[data-sl-neon-page] .examhub-card,
+body.sl-resource-hub[data-sl-neon-page] .utility-card,
+body.sl-lessons-hub[data-sl-neon-page] .sl-lesson-publisher-card,
+body.sl-lessons-hub[data-sl-neon-page] .resource-link,
+body.sl-telegram-hub[data-sl-neon-page] .telegram-channel,
+body.sl-telegram-hub[data-sl-neon-page] .telegram-all-channel {
+  background:var(--sl-neon-inner) !important;
+  border:1px solid var(--sl-neon-inner-edge) !important;
+  box-shadow:0 8px 25px rgba(9,24,48,.065),inset 0 1px 0 var(--sl-neon-highlight) !important;
+  backdrop-filter:blur(13px) saturate(116%) !important;
+  -webkit-backdrop-filter:blur(13px) saturate(116%) !important;
+}
+body.sl-subject-hub[data-sl-neon-page] .tool-grid > .tool-card:hover,
+body.sl-resource-hub[data-sl-neon-page] .examhub-card:hover,
+body.sl-resource-hub[data-sl-neon-page] .utility-card:not(.is-active):hover,
+body.sl-lessons-hub[data-sl-neon-page] .sl-lesson-publisher-card:hover,
+body.sl-lessons-hub[data-sl-neon-page] .resource-link:hover,
+body.sl-telegram-hub[data-sl-neon-page] .telegram-channel:hover,
+body.sl-telegram-hub[data-sl-neon-page] .telegram-all-channel:hover {
+  background:color-mix(in srgb,var(--sl-neon-inner) 88%,var(--sl-neon-a) 12%) !important;
+  border-color:color-mix(in srgb,var(--sl-neon-a) 36%,var(--sl-neon-inner-edge)) !important;
+}
+body.sl-resource-hub[data-sl-neon-page] .utility-card.is-active {
+  background:color-mix(in srgb,var(--sl-neon-inner) 82%,var(--sl-neon-a) 18%) !important;
+  border-color:var(--sl-neon-a) !important;
+}
+/* Keep small call-to-action buttons, inputs, and their contrast unchanged. */
+
+/* Independent, older paper and audio pages use the same system only on
+   their actual containers. Do not restyle global page-header components. */
+body[data-sl-neon-page="english"] main.container > .page-header,
+body[data-sl-neon-page="gct"] main.container > .page-header,
+body[data-sl-neon-page="git"] main.container > .page-header,
+body[data-sl-neon-page="audio"] main.container > .page-header,
+body[data-sl-neon-page="english"] main.container > section[aria-label],
+body[data-sl-neon-page="gct"] main.container > section[aria-label],
+body[data-sl-neon-page="git"] main.container > section[aria-label],
+body[data-sl-neon-page="audio"] .audio-empty-state {
+  background:var(--sl-neon-outer) !important;
+  border:1px solid var(--sl-neon-edge) !important;
+  border-radius:20px;
+  box-shadow:var(--sl-neon-shadow),inset 0 1px 0 var(--sl-neon-highlight) !important;
+  backdrop-filter:blur(17px) saturate(118%) !important;
+  -webkit-backdrop-filter:blur(17px) saturate(118%) !important;
+}
+body:is([data-sl-neon-page="english"],[data-sl-neon-page="gct"],[data-sl-neon-page="git"])
+main.container > section[aria-label] {
+  padding:clamp(10px,2vw,18px);
+}
+body:is([data-sl-neon-page="english"],[data-sl-neon-page="gct"],[data-sl-neon-page="git"])
+.paper-item {
+  background:var(--sl-neon-inner) !important;
+  border-color:var(--sl-neon-inner-edge) !important;
+  box-shadow:inset 0 1px 0 var(--sl-neon-highlight);
+}
+/* Audio Books is currently an empty state: no fake player cards are added. */
+
+/* Telegram already has 20 original icons. Colorize those, do NOT add a
+   duplicate doodle layer or remove required icon attribution. */
+body.sl-telegram-hub[data-sl-neon-page="telegram"] .sl-tg-doodle-layer img {
+  opacity:.48;
+  filter:brightness(0) saturate(100%) invert(86%) sepia(19%) saturate(1800%)
+    hue-rotate(158deg) drop-shadow(0 0 5px rgba(72,214,255,.68));
+}
+html[data-theme="light"] body.sl-telegram-hub[data-sl-neon-page="telegram"] .sl-tg-doodle-layer img {
+  opacity:.45;
+  filter:brightness(0) saturate(100%) invert(30%) sepia(80%) saturate(1250%)
+    hue-rotate(162deg) drop-shadow(0 0 3px rgba(4,113,184,.34));
+}
+
+/* Live Study Room uses its own eight palettes. The current theme provides
+   the neon colors and supplies the glass tint. Never change timer controls. */
+body.study-room-page[data-sl-neon-page="study-room"][data-room-theme] {
+  --sl-neon-opacity:.32;
+}
+body.study-room-page[data-sl-neon-page="study-room"][data-room-theme] .room-hero,
+body.study-room-page[data-sl-neon-page="study-room"][data-room-theme] .room-panel {
+  background:color-mix(in srgb,var(--room-card) 26%,transparent) !important;
+  border:1px solid color-mix(in srgb,var(--room-text) 14%,transparent) !important;
+  box-shadow:0 14px 38px rgba(0,0,0,.08),
+    inset 0 1px 0 color-mix(in srgb,var(--room-text) 11%,transparent) !important;
+  backdrop-filter:blur(19px) saturate(118%) !important;
+  -webkit-backdrop-filter:blur(19px) saturate(118%) !important;
+}
+body.study-room-page[data-room-doodles="off"] .sl-neon-layer {display:none !important}
+body.study-room-page[data-sl-neon-page="study-room"] .sl-neon-glyph {
+  animation:none;
+  filter:drop-shadow(0 0 4px color-mix(in srgb,var(--room-accent) 25%,transparent));
+}
+
+/* Small/mobile devices see only 4 modest outlines. None can block a click.
+   Reduced motion / lite mode preserve the same static decorative identity. */
+@media(max-width:760px) {
+  body[data-sl-neon-page] .sl-neon-glyph {width:clamp(36px,10vw,62px);animation:none;opacity:min(var(--sl-neon-opacity),.44)}
+  body[data-sl-neon-page] .sl-neon-glyph:nth-child(n+5) {display:none}
+  .sl-neon-glyph:nth-child(1){left:2%;top:19%}
+  .sl-neon-glyph:nth-child(2){right:2%;top:37%}
+  .sl-neon-glyph:nth-child(3){left:3%;top:66%}
+  .sl-neon-glyph:nth-child(4){right:3%;top:84%}
+  body.sl-telegram-hub[data-sl-neon-page="telegram"] .sl-tg-doodle-layer img:nth-child(n+11){opacity:.20}
+  body[data-sl-neon-page] .sl-neon-layer {contain:paint}
+}
+@media(prefers-reduced-motion:reduce) {
+  body[data-sl-neon-page] .sl-neon-glyph{animation:none !important}
+}
+html[data-sl-performance="lite"] body[data-sl-neon-page] .sl-neon-glyph {animation:none !important;filter:none !important}
+/* Non-supporting browsers retain a visible translucent tint, never blank text. */
+@supports not (backdrop-filter:blur(1px)) {
+  body[data-sl-neon-page] { --sl-neon-outer:rgba(18,35,56,.55);--sl-neon-inner:rgba(18,35,56,.78) }
+  html[data-theme="light"] body[data-sl-neon-page] { --sl-neon-outer:rgba(255,255,255,.70);--sl-neon-inner:rgba(255,255,255,.85) }
+}

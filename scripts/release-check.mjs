@@ -13,6 +13,7 @@ const syntaxFiles = [
   "assets/js/study-room-presence.js",
   "assets/js/study-room-realtime.js",
   "assets/js/study-room-subject-picker.js",
+  "assets/js/interior-neon-doodles.js",
   "assets/js/study-room-enhancements.js",
   "assets/js/ai-response-renderer.js",
   "assets/js/ai-tutor.js",
@@ -113,6 +114,13 @@ const aiTests = spawnSync(process.execPath, ["scripts/ai-quota-smoke-tests.cjs"]
 if (aiTests.status !== 0) {
   fail("StudyLab AI quota smoke tests failed:\n" +
     (aiTests.stderr || aiTests.stdout || "node test failed"));
+}
+
+// Exercise every interior page's icon set, theme isolation and Doodles off.
+const neonTests = spawnSync(process.execPath, ["scripts/interior-neon-check.mjs"], {encoding:"utf8"});
+if (neonTests.status !== 0) {
+  fail("Interior neon/glass checks failed:\n" +
+    (neonTests.stderr || neonTests.stdout || "node test failed"));
 }
 
 // Parse inline JavaScript in the standalone Study Tools page without executing it.
