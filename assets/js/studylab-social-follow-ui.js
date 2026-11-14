@@ -74,7 +74,15 @@
   let loadingAlerts=false;
   let unreadCount=0;
   let displayedAlerts=[];
-  const alertAge=()=>new Date(Date.now()-14*24*60*60*1000).toISOString();
+  // Daily notification window starts at midnight in Sri Lanka (UTC+05:30).
+  // Older alerts disappear on screen even before the scheduled DB cleanup runs.
+  const alertAge=()=>{
+    const parts=new Intl.DateTimeFormat("en-GB",{
+      timeZone:"Asia/Colombo",year:"numeric",month:"2-digit",day:"2-digit"
+    }).formatToParts(new Date());
+    const read=type=>parts.find(p=>p.type===type)?.value||"";
+    return read("year")+"-"+read("month")+"-"+read("day")+"T00:00:00+05:30";
+  };
   function closePanels(except){
     for(const [toggle,box] of [[searchToggle,searchPanel],[alertsToggle,alertsPanel]]){
       if(box===except)continue;
