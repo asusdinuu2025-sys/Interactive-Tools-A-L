@@ -14,6 +14,7 @@ const syntaxFiles = [
   "assets/js/study-room-realtime.js",
   "assets/js/study-room-subject-picker.js",
   "assets/js/studylab-global-search.js",
+  "assets/js/studylab-name-mark.js",
   "assets/js/interior-neon-doodles.js",
   "assets/js/study-room-enhancements.js",
   "assets/js/ai-response-renderer.js",
@@ -129,6 +130,13 @@ const searchTests = spawnSync(process.execPath, ["scripts/global-search-check.mj
 if (searchTests.status !== 0) {
   fail("StudyLab global search checks failed:\n" +
     (searchTests.stderr || searchTests.stdout || "node test failed"));
+}
+
+// Cosmetic account badge: only the selected Auth IDs can receive the mark.
+const nameMarkTests = spawnSync(process.execPath, ["scripts/name-mark-check.mjs"], {encoding:"utf8"});
+if (nameMarkTests.status !== 0) {
+  fail("Selected-account name mark checks failed:\n" +
+    (nameMarkTests.stderr || nameMarkTests.stdout || "node test failed"));
 }
 
 // Parse inline JavaScript in the standalone Study Tools page without executing it.
