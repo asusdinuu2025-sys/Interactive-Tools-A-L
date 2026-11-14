@@ -726,11 +726,15 @@
       postMenu.append(menuToggle, menuPanel);
     }
     top.append(identity, date);
+    // Keep Follow/Following immediately beside the existing three-dot menu,
+    // rather than allowing the post's date to separate the two controls.
+    const postControls = make("div","sl-feed-post-controls");
     if (post.author_id !== currentUserId) {
       const followButton = window.StudyLabFollow?.makeButton(post.author_id, {compact:true});
-      if (followButton) top.append(followButton);
+      if (followButton) postControls.append(followButton);
     }
-    if (postMenu) top.append(postMenu);
+    if (postMenu) postControls.append(postMenu);
+    if (postControls.childElementCount) top.append(postControls);
     card.append(top);
     identity.addEventListener("click", () => {
       window.StudyLabProfileView?.open({userId:post.author_id});
