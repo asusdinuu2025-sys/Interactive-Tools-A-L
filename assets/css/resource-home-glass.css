@@ -479,3 +479,23 @@ html[data-theme="light"] body.sl-lessons-hub .resource-arrow { color: #1b858c; }
   body.sl-resource-hub .utility-card,
   body.sl-lessons-hub .resource-link { transition: none !important; }
 }
+
+/* Keep supporting copy aligned with the hero instead of a stranded
+   centred paragraph left over from the older Exam Hub layout. */
+body.sl-exam-hub .examhub-intro {
+  max-width: 750px;
+  margin: 12px 0 0 clamp(82px,8vw,100px);
+  color: #b6cfe0;
+  opacity: 1;
+  font: .82rem/1.65 "Nirmala UI","Segoe UI",sans-serif;
+  text-align: left;
+}
+body.sl-lessons-hub .lesson-hero.page-header {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+html[data-theme="light"] body.sl-exam-hub .examhub-intro { color: #506e86; }
+html[data-theme="light"] body.sl-lessons-hub .message-time { color: #638093; }
+@media (max-width: 720px) {
+  body.sl-exam-hub .examhub-intro { margin: 13px 0 0; font-size: .77rem; }
+}
