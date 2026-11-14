@@ -9,7 +9,6 @@
   const yourRank = $('yourRank');
   const status = $('yourStatus');
   const subject = $('studySubject');
-  const subjectSearch = $('studySubjectSearch');
   const targetHours = $('targetHours');
   const targetMinutes = $('targetMinutes');
   const targetHint = $('targetTimeHint');
@@ -142,37 +141,6 @@
     return total >= 60 && total <= 39540 ? total : null;
   }
 
-  // Search only filters the existing server-approved subject choices. The
-  // actual selection always remains the native select, including on mobile.
-  const subjectCatalog = [...subject.options].filter(option => option.value)
-    .map(option => ({value: option.value, label: option.textContent.trim()}));
-  function filterSubjectOptions(preserveSelection = true) {
-    if (!subjectSearch) return;
-    const query = subjectSearch.value.trim().toLocaleLowerCase();
-    const previous = preserveSelection ? subject.value : '';
-    const matches = subjectCatalog.filter(entry => entry.label.toLocaleLowerCase().includes(query));
-    if (previous && !matches.some(entry => entry.value === previous)) {
-      const current = subjectCatalog.find(entry => entry.value === previous);
-      if (current) matches.unshift(current);
-    }
-    const placeholder = new Option('Select subject to study', '', true, true);
-    placeholder.disabled = true;
-    const options = [placeholder];
-    for (const entry of matches) options.push(new Option(entry.label, entry.value));
-    if (!matches.length) {
-      const empty = new Option('No matching subjects', '');
-      empty.disabled = true;
-      options.push(empty);
-    }
-    subject.replaceChildren(...options);
-    subject.value = previous || '';
-    if (!subject.value) subject.selectedIndex = 0;
-  }
-  if (subjectSearch) subjectSearch.addEventListener('input', () => {
-    // Searching for a new session requires choosing an actual list option.
-    // Never erase the selected subject of a running or paused session.
-    filterSubjectOptions(Boolean(member?.session_active));
-  });
   function refreshPersonalHistory() {
     try {
       const task = window.StudyRoomHistory?.refresh?.();
@@ -232,11 +200,8 @@
   function updateSessionUI(row) {
     // Inactive database rows retain the last subject. Do not pre-select it
     // for a new study session just because it was used yesterday.
-    if (row?.session_active && row?.subject && subjectCatalog.some(option => option.value === row.subject)) {
-      if (subjectSearch?.value) {
-        subjectSearch.value = '';
-        filterSubjectOptions();
-      }
+    if (row?.session_active && row?.subject &&
+        [...subject.options].some(option => option.value === row.subject)) {
       subject.value = row.subject;
     }
     const isRunning = Boolean(row?.is_studying);
@@ -267,8 +232,6 @@
       targetMinutes.value = String(targetMinutesTotal % 60);
       clearTargetError();
     } else if (!hasSession && hadActiveSession) {
-      if (subjectSearch) subjectSearch.value = '';
-      filterSubjectOptions(false);
       subject.value = '';
       targetHours.value = "";
       targetMinutes.value = "";
@@ -290,6 +253,7 @@
           ? "Target reached · paused · resume before midnight to confirm away time"
           : hasSession ? "Paused · press Continue to resume" : "Not studying · select a subject and target to begin";
     liveLabel.textContent = "Live shared room";
+    window.StudyRoomSubjectPicker?.sync?.();
     emitTimerState();
   }
 
@@ -545,7 +509,9 @@
       subject.style.setProperty("box-shadow", "0 0 0 3px rgba(239,68,68,.18)", "important");
       subject.style.setProperty("color", "#ef4444", "important");
       say("Please select subject first", true);
-      subject.focus();
+      window.StudyRoomSubjectPicker?.sync?.();
+      if (window.StudyRoomSubjectPicker) window.StudyRoomSubjectPicker.focus();
+      else subject.focus();
       return;
     }
 
@@ -699,10 +665,6 @@
       });
       leave.addEventListener('click', endStudy);
       subject.addEventListener('change', async () => {
-        if (subjectSearch?.value) {
-          subjectSearch.value = '';
-          filterSubjectOptions();
-        }
         subject.removeAttribute('aria-invalid');
         subject.classList.remove('room-subject-required');
         subject.style.removeProperty('border-color');
