@@ -1,0 +1,31 @@
+/* Cosmetic StudyLab blue name mark: no sizing changes to existing cards. */
+.sl-name-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: -0.17em;
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+  margin-inline-start: 5px;
+  color: #178fff;
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+  filter: drop-shadow(0 0 3px rgba(32, 155, 255, .48));
+}
+.sl-name-mark svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+html[data-theme="light"] .sl-name-mark { color: #0d75df; filter: drop-shadow(0 0 2px rgba(18, 120, 212, .20)); }
+.homepage-greeting-name > .sl-name-mark { width: 16px; height: 16px; }
+.sl-feed-member-copy .sl-name-mark,
+.sl-feed-profile-copy .sl-name-mark,
+.room-person-card-name .sl-name-mark,
+.room-rank-info .sl-name-mark { width: 14px; height: 14px; }
+@media (max-width: 480px) {
+  .sl-name-mark { width: 13px; height: 13px; margin-inline-start: 3px; }
+}

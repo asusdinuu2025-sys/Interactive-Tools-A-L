@@ -669,6 +669,7 @@
         : '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.1"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>';
     const identityCopy = make("span","sl-feed-profile-copy");
     const name = make("strong", "sl-feed-post-name", post.author_display_name || "Student");
+    window.StudyLabNameMark?.decorate(name, post.author_id);
     const username = make("span", "sl-feed-post-username", "@" + (post.author_username || "student"));
     identityCopy.append(name, username);
     identity.append(avatar,identityCopy);
@@ -727,7 +728,9 @@
       if (existing) { existing.remove(); return; }
       panel.querySelectorAll(".sl-feed-profile-popover").forEach(item => item.remove());
       const popover = make("div","sl-feed-profile-popover");
-      popover.append(make("strong","",post.author_display_name || "Student"));
+      const popoverName = make("strong","",post.author_display_name || "Student");
+      window.StudyLabNameMark?.decorate(popoverName, post.author_id);
+      popover.append(popoverName);
       popover.append(make("span","", "@" + (post.author_username || "student")));
       popover.append(make("small","","StudyLab student"));
       card.append(popover);
@@ -943,7 +946,9 @@
         const commentName = String(comment.author_display_name || "Student").trim();
         commentAvatar.textContent = Array.from(commentName)[0]?.toLocaleUpperCase() || "S";
         commentAvatar.setAttribute("aria-label", (comment.author_display_name || "Student") + " profile");
-        header.append(commentAvatar,make("strong", "", comment.author_display_name || "Student"));
+        const commentNameNode = make("strong", "", comment.author_display_name || "Student");
+        window.StudyLabNameMark?.decorate(commentNameNode, comment.author_id);
+        header.append(commentAvatar, commentNameNode);
         item.append(header, make("p", "", comment.body));
         if (comment.author_id === currentUserId || isAdmin) {
           const commentMenu = document.createElement("details");
@@ -1045,7 +1050,9 @@
       const avatar = make("span", "sl-feed-member-avatar", faces[hashNumber(member.author_id) % faces.length]);
       avatar.style.setProperty("--sl-member-hue", String(hashNumber(member.author_id + "profile") % 360));
       const copy = make("span", "sl-feed-member-copy");
-      copy.append(make("strong", "", member.author_display_name || "Student"));
+      const memberName = make("strong", "", member.author_display_name || "Student");
+      window.StudyLabNameMark?.decorate(memberName, member.author_id);
+      copy.append(memberName);
       copy.append(make("small", "", "@" + (member.author_username || "student")));
       row.append(avatar, copy);
       list.append(row);

@@ -110,9 +110,15 @@
     renderOccupancy(rows);
     const today = renderRank(rows, "today");
     const week = renderRank(rows, "week");
-    if (todayName) todayName.textContent = today?.row?.display_name || fallbackName;
+    if (todayName) {
+      todayName.textContent = today?.row?.display_name || fallbackName;
+      window.StudyLabNameMark?.decorate(todayName, today?.row?.user_id);
+    }
     if (todayTime) todayTime.textContent = today ? duration(today.score) + " focused today" : "The daily leaderboard updates as students study";
-    if (weekName) weekName.textContent = week?.row?.display_name || fallbackName;
+    if (weekName) {
+      weekName.textContent = week?.row?.display_name || fallbackName;
+      window.StudyLabNameMark?.decorate(weekName, week?.row?.user_id);
+    }
     if (weekTime) weekTime.textContent = week ? duration(week.score) + " focused this week" : "The weekly leaderboard updates as students study";
     rankRoot.dataset.rankState = "live";
     rankRoot.dataset.updatedAt = new Date().toISOString();
