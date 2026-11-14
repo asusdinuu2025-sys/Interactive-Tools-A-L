@@ -1,5 +1,5 @@
 /* StudyLab Live Study Room: illustrated glass palettes.
-   Seven STATIC SVG masks at most, reusing one set of seven DOM nodes.
+   Ten STATIC SVG masks at most, reusing one set of ten DOM nodes.
    Content, timers, attendance, ranking and theme controls are untouched. */
 body.study-room-page {
   --slr-art-mask: none;
@@ -38,7 +38,7 @@ body.study-room-page[data-room-theme="ocean"] {
   --slr-art-mask: url("../images/study-room/shark.svg");
   --slr-art-ink: #65e5f8;
   --slr-art-glow: rgba(39,215,250,.68);
-  --slr-art-opacity: .38;
+  --slr-art-opacity: .53;
 }
 /* Light appearance: colorful outlines, darker than the pale background. */
 body.study-room-page[data-room-mode="light"][data-room-theme="pinky"] {
@@ -54,7 +54,7 @@ body.study-room-page[data-room-mode="light"][data-room-theme="warm-sand"] {
   --slr-art-ink: #a67828; --slr-art-glow: rgba(163,117,49,.27); --slr-art-opacity:.24;
 }
 body.study-room-page[data-room-mode="light"][data-room-theme="ocean"] {
-  --slr-art-ink: #0787aa; --slr-art-glow: rgba(7,161,195,.33); --slr-art-opacity:.26;
+  --slr-art-ink: #0787aa; --slr-art-glow: rgba(7,161,195,.33); --slr-art-opacity:.34;
 }
 body.study-room-page .slr-theme-illustrations {display:none}
 body.study-room-page:is(
@@ -77,13 +77,14 @@ body.study-room-page .slr-theme-illustration {
   opacity:var(--slr-art-opacity);
   -webkit-mask-image:var(--slr-art-mask);
   mask-image:var(--slr-art-mask);
+  mask-mode:alpha;
   -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
   -webkit-mask-position:center;mask-position:center;
   -webkit-mask-size:contain;mask-size:contain;
   transform:rotate(var(--art-rotate));
   filter:drop-shadow(0 0 3px var(--slr-art-glow));
 }
-/* Seven thoughtfully offset positions: large side anchors, small accents.
+/* Ten thoughtfully offset positions: large side anchors, small accents.
    Illustrations sit UNDER the panels and never receive pointer events. */
 body.study-room-page .slr-theme-illustration--hero       {--art-size:clamp(148px,17vw,250px);--art-x:79%;--art-y:13%;--art-rotate:-14deg}
 body.study-room-page .slr-theme-illustration--left-top   {--art-size:clamp(60px,7vw,110px);--art-x:4%;--art-y:21%;--art-rotate:24deg}
@@ -193,7 +194,7 @@ body.study-room-page .slr-theme-illustrations {touch-action:none}
 }
 
 /* Soft vector scenery, with one large silhouette beneath central cards.
-   Continue using exactly seven decorative elements (four on narrow phones). */
+   Continue using ten static decorative elements, with smaller versions on phones. */
 body.study-room-page .slr-theme-illustration--hero {
   --art-size:clamp(250px,33vw,440px);--art-x:34%;--art-y:33%;--art-rotate:-12deg;
 }
@@ -499,5 +500,113 @@ body.study-room-page .room-dashboard-controls .room-doodles-toggle:focus-visible
     background:var(--room-panel-bg)!important;
     -webkit-backdrop-filter:none!important;
     backdrop-filter:none!important;
+  }
+}
+
+
+/* Upper-right illustrated hero, three new small center details = ten. */
+body.study-room-page .slr-theme-illustration--hero {
+  --art-size:clamp(250px,31vw,425px);--art-x:70%;--art-y:8%;--art-rotate:-14deg;
+}
+body.study-room-page .slr-theme-illustration--center-upper {
+  --art-size:clamp(40px,5.2vw,69px);--art-x:34%;--art-y:32%;--art-rotate:26deg;
+}
+body.study-room-page .slr-theme-illustration--center-middle {
+  --art-size:clamp(51px,6.2vw,84px);--art-x:54%;--art-y:51%;--art-rotate:-24deg;
+}
+body.study-room-page .slr-theme-illustration--center-lower {
+  --art-size:clamp(35px,4.3vw,61px);--art-x:42%;--art-y:74%;--art-rotate:18deg;
+}
+body.study-room-page .slr-theme-illustration:is(
+  .slr-theme-illustration--center-upper,
+  .slr-theme-illustration--center-middle,
+  .slr-theme-illustration--center-lower
+) {opacity:calc(var(--slr-art-opacity) * .78)}
+/* Force Ocean to use the corrected white-alpha shark silhouette. */
+body.study-room-page[data-room-theme="ocean"] .slr-theme-illustration {
+  -webkit-mask-image:url("../images/study-room/shark.svg");
+  mask-image:url("../images/study-room/shark.svg");
+}
+/* Optically thicker LIVE profile cards, while keeping the contents clear.
+   The double specular edge and inset highlights define glass thickness. */
+body.study-room-page[data-room-theme] .room-page .room-people-grid .room-person-card {
+  border:2px solid color-mix(in srgb,var(--room-text) 23%,transparent)!important;
+  border-top-color:color-mix(in srgb,var(--room-text) 37%,transparent)!important;
+  border-left-color:color-mix(in srgb,var(--room-text) 29%,transparent)!important;
+  border-radius:25px!important;
+  background:linear-gradient(147deg,
+    color-mix(in srgb,var(--room-page-bg) 17%,transparent),
+    color-mix(in srgb,var(--room-card) 10%,transparent))!important;
+  box-shadow:
+    inset 0 2px 0 color-mix(in srgb,var(--room-text) 17%,transparent),
+    inset 2px 0 0 color-mix(in srgb,var(--room-text) 7%,transparent),
+    inset 0 -2px 0 color-mix(in srgb,var(--room-text) 10%,transparent),
+    0 12px 32px rgba(0,0,0,.14)!important;
+  -webkit-backdrop-filter:blur(5px) saturate(107%)!important;
+  backdrop-filter:blur(5px) saturate(107%)!important;
+}
+body.study-room-page[data-room-theme] .room-page .room-people-grid .room-person-card:hover {
+  transform:none!important;
+  border-color:color-mix(in srgb,var(--room-accent) 41%,transparent)!important;
+  background:linear-gradient(147deg,
+    color-mix(in srgb,var(--room-page-bg) 18%,transparent),
+    color-mix(in srgb,var(--room-card) 11%,transparent))!important;
+}
+body.study-room-page[data-room-mode="light"][data-room-theme] .room-page .room-people-grid .room-person-card {
+  background:linear-gradient(147deg,
+    color-mix(in srgb,var(--room-page-bg) 12%,transparent),
+    color-mix(in srgb,var(--room-card) 7%,transparent))!important;
+  box-shadow:
+    inset 0 2px 0 color-mix(in srgb,var(--room-text) 10%,transparent),
+    inset 2px 0 0 color-mix(in srgb,var(--room-text) 6%,transparent),
+    inset 0 -2px 0 color-mix(in srgb,var(--room-text) 8%,transparent),
+    0 10px 27px rgba(39,79,118,.12)!important;
+}
+@media(max-width:900px) {
+  body.study-room-page .slr-theme-illustration--hero {
+    --art-size:clamp(200px,36vw,290px);--art-x:66%;--art-y:10%;
+  }
+  body.study-room-page .slr-theme-illustration--center-upper {
+    --art-size:53px;--art-x:35%;--art-y:31%;
+  }
+  body.study-room-page .slr-theme-illustration--center-middle {
+    --art-size:62px;--art-x:52%;--art-y:53%;
+  }
+  body.study-room-page .slr-theme-illustration--center-lower {
+    --art-size:48px;--art-x:42%;--art-y:75%;
+  }
+}
+@media(max-width:680px) {
+  /* Ten small static motifs, no drop shadows to reduce mobile GPU costs. */
+  body.study-room-page .slr-theme-illustration--hero {
+    --art-size:clamp(138px,47vw,210px);--art-x:63%;--art-y:11%;
+  }
+  body.study-room-page .slr-theme-illustration:is(
+    .slr-theme-illustration--top-small,
+    .slr-theme-illustration--mid-small,
+    .slr-theme-illustration--bottom-small
+  ) {display:block}
+  body.study-room-page .slr-theme-illustration--top-small {
+    --art-size:28px;--art-x:39%;--art-y:9%;
+  }
+  body.study-room-page .slr-theme-illustration--mid-small {
+    --art-size:31px;--art-x:29%;--art-y:64%;
+  }
+  body.study-room-page .slr-theme-illustration--bottom-small {
+    --art-size:35px;--art-x:64%;--art-y:81%;
+  }
+  body.study-room-page .slr-theme-illustration--center-upper {
+    --art-size:27px;--art-x:29%;--art-y:35%;
+  }
+  body.study-room-page .slr-theme-illustration--center-middle {
+    --art-size:36px;--art-x:54%;--art-y:49%;
+  }
+  body.study-room-page .slr-theme-illustration--center-lower {
+    --art-size:28px;--art-x:39%;--art-y:72%;
+  }
+  body.study-room-page .slr-theme-illustration {filter:none!important}
+  body.study-room-page[data-room-theme] .room-page .room-people-grid .room-person-card {
+    -webkit-backdrop-filter:blur(3px)!important;
+    backdrop-filter:blur(3px)!important;
   }
 }

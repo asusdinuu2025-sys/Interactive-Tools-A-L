@@ -1,6 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none" stroke="#000" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round">
-<path d="M18 149C49 127 78 118 107 117L128 68L153 114C177 115 202 124 222 139L243 113L232 159L244 193L216 169C184 176 157 179 129 170L102 196L107 165C77 166 46 164 18 149Z"/>
-<path d="M113 140C152 151 186 152 218 141M132 147L132 158M143 148L143 161M154 149L154 161" stroke-width="5"/>
-<circle cx="65" cy="141" r="3.6" fill="#000" stroke="none"/>
-<path d="M42 157C60 168 80 168 96 165" stroke-width="4"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- Solid white-alpha shark silhouette for cross-browser CSS masking. -->
+  <path fill="#fff" stroke="#fff" stroke-width="3.5" stroke-linejoin="round"
+    d="M15 148 C41 129 75 115 103 113 L128 57 155 111
+       C177 117 195 128 215 138 L243 107 231 151
+       246 190 213 167 C187 178 156 179 130 170
+       L103 197 108 165 C78 170 44 164 15 148 Z"/>
+  <path fill="#fff" d="M95 140 C111 126 130 120 149 124 C160 141 165 156 151 171 L119 166Z"/>
 </svg>
