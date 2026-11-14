@@ -494,3 +494,33 @@ html[data-theme="light"] body.sl-subject-hub .site-footer {
   body.sl-subject-hub .sl-subject-back,
   body.sl-subject-hub .site-header .theme-toggle { transition: none !important; }
 }
+
+/* Light-mode visual consistency: tinted glass icons use dark navy glyphs,
+   while the white panels and soft accent gradients remain translucent. */
+html[data-theme="light"] body.sl-subject-hub .sl-subject-topbar-mark {
+  color: #1d5278 !important;
+  background: linear-gradient(135deg,rgba(165,215,245,.78),rgba(190,207,247,.74)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.86),0 4px 13px rgba(65,112,153,.10) !important;
+}
+html[data-theme="light"] body.sl-subject-hub .sl-subject-topbar-mark svg {
+  stroke: currentColor !important;
+}
+html[data-theme="light"] body.sl-subject-hub .sl-subject-hero-icon {
+  color: #234f70 !important;
+  background: linear-gradient(140deg,rgba(151,206,239,.74),rgba(195,211,245,.71)) !important;
+  border-color: rgba(93,153,194,.29) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.76),0 9px 24px rgba(65,109,147,.10) !important;
+}
+html[data-theme="light"] body.sl-subject-hub .sl-subject-hero-icon svg {
+  stroke: currentColor !important;
+  fill: none !important;
+}
+html[data-theme="light"] body.sl-subject-hub .tool-grid .tool-card .card-icon {
+  color: #235271 !important;
+  background: linear-gradient(145deg,rgba(149,209,239,.75),rgba(187,201,242,.69)) !important;
+  border-color: rgba(109,165,205,.33) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.62),0 5px 14px rgba(55,104,147,.09) !important;
+}
+html[data-theme="light"] body.sl-subject-hub .tool-grid .tool-card .card-icon svg {
+  stroke: currentColor !important;
+}
