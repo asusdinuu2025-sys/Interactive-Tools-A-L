@@ -1,0 +1,124 @@
+/* StudyLab Home: quiet translucent navigation pills with contextual icons.
+   Loaded after the earlier Home styles. No link destinations or card behavior changed. */
+.sl-home-layout .sl-home-section .card-cta.sl-home-cta-pill,
+.sl-home-layout .sl-home-section .study-tools-card-cta.sl-home-cta-pill,
+.sl-home-section .card-cta.sl-home-cta-pill,
+.sl-home-section .study-tools-card-cta.sl-home-cta-pill {
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 1 auto !important;
+  align-self: flex-start !important;
+  gap: 9px !important;
+  max-width: 100% !important;
+  min-height: 38px !important;
+  margin-top: auto !important;
+  padding: 8px 13px 8px 15px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(179,220,246,.28) !important;
+  color: #d0eeff !important;
+  background: linear-gradient(140deg,rgba(236,250,255,.11),rgba(218,242,255,.035)),rgba(39,91,129,.12) !important;
+  box-shadow: 0 4px 15px rgba(7,25,58,.06),inset 0 1px 0 rgba(255,255,255,.16) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(112%);
+  backdrop-filter: blur(8px) saturate(112%);
+  font: 710 clamp(.75rem,1vw,.82rem)/1.30 "Nirmala UI","Segoe UI",sans-serif !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  text-decoration: none !important;
+  text-shadow: none !important;
+  transform: none !important;
+  white-space: normal !important;
+  text-align: left;
+  transition: border-color .18s ease,background .18s ease,box-shadow .18s ease !important;
+}
+.sl-home-layout .sl-home-section .sl-home-cta-pill .sl-home-cta-label,
+.sl-home-section .sl-home-cta-pill .sl-home-cta-label { display: inline-block;min-width: 0;overflow-wrap: anywhere; }
+.sl-home-layout .sl-home-section .sl-home-cta-pill .sl-home-cta-glyph,
+.sl-home-section .sl-home-cta-pill .sl-home-cta-glyph {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+  border-radius: 7px;
+  color: inherit;
+  background: rgba(185,226,253,.12);
+}
+.sl-home-layout .sl-home-section .sl-home-cta-pill svg,
+.sl-home-section .sl-home-cta-pill svg {
+  display: block !important;
+  width: 15px !important;
+  height: 15px !important;
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 1.9 !important;
+  filter: none !important;
+}
+.sl-home-layout .sl-home-section a:hover .sl-home-cta-pill,
+.sl-home-section a:hover .sl-home-cta-pill {
+  border-color: rgba(163,219,251,.45) !important;
+  background: rgba(155,211,243,.17) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.19) !important;
+}
+.sl-home-layout .sl-home-section a:focus-visible,
+.sl-home-section a:focus-visible {
+  outline: 2px solid rgba(110,213,255,.9);
+  outline-offset: 3px;
+}
+
+/* Home light mode must read as navy ink over transparent glass, not pale ink
+   layered on top of white-on-white cards. Only light-mode text/icon colors
+   are strengthened; the Windows-flower pastel background stays intact. */
+html[data-theme="light"] .sl-home-section .card-cta.sl-home-cta-pill,
+html[data-theme="light"] .sl-home-section .study-tools-card-cta.sl-home-cta-pill,
+html[data-theme="light"] .sl-home-layout .sl-home-section .card-cta.sl-home-cta-pill,
+html[data-theme="light"] .sl-home-layout .sl-home-section .study-tools-card-cta.sl-home-cta-pill {
+  color: #264b69 !important;
+  border-color: rgba(93,148,191,.27) !important;
+  background: linear-gradient(145deg,rgba(255,255,255,.60),rgba(221,239,253,.30)),rgba(193,225,247,.13) !important;
+  box-shadow: 0 4px 12px rgba(40,90,137,.055),inset 0 1px 0 rgba(255,255,255,.88) !important;
+}
+html[data-theme="light"] .sl-home-section .sl-home-cta-pill .sl-home-cta-glyph { color: #1e608a !important;background: rgba(116,177,219,.14) !important; }
+html[data-theme="light"] .sl-home-section a:hover .sl-home-cta-pill {
+  color: #174666 !important;
+  background: rgba(226,243,255,.85) !important;
+  border-color: rgba(78,146,195,.40) !important;
+}
+html[data-theme="light"] .sl-home-section .subject-card h2,
+html[data-theme="light"] .sl-home-section .study-tools-card h2,
+html[data-theme="light"] .sl-home-section .telegram-card h2 { color: #1d3d59 !important; }
+html[data-theme="light"] .sl-home-section .subject-card p,
+html[data-theme="light"] .sl-home-section .study-tools-card p,
+html[data-theme="light"] .sl-home-section .telegram-card p { color: #527089 !important; }
+html[data-theme="light"] .sl-home-section .subject-card .vector-card-icon,
+html[data-theme="light"] .sl-home-section .study-tools-card .vector-card-icon {
+  color: #245677 !important;
+  background: linear-gradient(135deg,rgba(163,204,239,.44),rgba(195,201,242,.30)) !important;
+  border-color: rgba(93,153,197,.23) !important;
+  box-shadow: 0 4px 14px rgba(52,101,141,.075),inset 0 1px 0 rgba(255,255,255,.55) !important;
+}
+html[data-theme="light"] .sl-home-section .vector-card-icon svg {
+  color: #225376 !important;
+  fill: none !important;
+  stroke: currentColor !important;
+}
+html[data-theme="light"] .sl-home-section .telegram-icon {
+  color: #1e6692 !important;
+  background: linear-gradient(145deg,rgba(174,220,250,.52),rgba(216,237,251,.29)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.78) !important;
+}
+html[data-theme="light"] .sl-home-section .telegram-icon svg { color: #226a9a !important; }
+html[data-theme="light"] .sl-home-section .sl-home-section-kicker,
+html[data-theme="light"] .sl-home-section .sl-home-section-heading p,
+html[data-theme="light"] .sl-home-section .study-tools-card-badge,
+html[data-theme="light"] .sl-home-section .telegram-badge { color: #466b86 !important; }
+
+@media (max-width: 720px) {
+  .sl-home-section .sl-home-cta-pill { min-height: 37px !important;gap: 7px !important;padding: 8px 12px !important; }
+  .sl-home-section .sl-home-cta-pill .sl-home-cta-glyph { flex-basis: 19px;width: 19px;height: 19px; }
+  .sl-home-section .sl-home-cta-pill svg { width: 14px !important;height: 14px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sl-home-section .sl-home-cta-pill { transition: none !important; }
+}
