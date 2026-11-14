@@ -13,6 +13,7 @@ const syntaxFiles = [
   "assets/js/study-room-presence.js",
   "assets/js/study-room-realtime.js",
   "assets/js/study-room-subject-picker.js",
+  "assets/js/studylab-global-search.js",
   "assets/js/interior-neon-doodles.js",
   "assets/js/study-room-enhancements.js",
   "assets/js/ai-response-renderer.js",
@@ -121,6 +122,13 @@ const neonTests = spawnSync(process.execPath, ["scripts/interior-neon-check.mjs"
 if (neonTests.status !== 0) {
   fail("Interior neon/glass checks failed:\n" +
     (neonTests.stderr || neonTests.stdout || "node test failed"));
+}
+
+// Verify the generated global resource index, public links and Home layout isolation.
+const searchTests = spawnSync(process.execPath, ["scripts/global-search-check.mjs"], {encoding:"utf8"});
+if (searchTests.status !== 0) {
+  fail("StudyLab global search checks failed:\n" +
+    (searchTests.stderr || searchTests.stdout || "node test failed"));
 }
 
 // Parse inline JavaScript in the standalone Study Tools page without executing it.

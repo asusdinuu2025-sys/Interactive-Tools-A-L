@@ -435,6 +435,7 @@
   let searchMeta = null;
   let searchClear = null;
   let openHeaderSearch = null;
+  let globalSearch = null;
 
   function currentSearchCards() {
     const toolGrid = document.querySelector(SELECTORS.toolGrid);
@@ -452,6 +453,11 @@
 
   function applySearch() {
     const query = (searchInput?.value || "").trim().toLowerCase();
+    if (globalSearch) {
+      globalSearch.search();
+      if (searchClear) searchClear.hidden = !query;
+      return; // Global search must not hide or rearrange Home cards.
+    }
     const cards = currentSearchCards();
     let matches = 0;
 
@@ -549,20 +555,41 @@
 
       searchInput.addEventListener("input", applySearch);
       panel.append(searchInput, searchClear, searchMeta);
+      // The existing icon opens full-site results on Home, while compact
+      // subject/resource page filters keep their original functionality.
+      globalSearch = window.StudyLabGlobalSearch?.mount({
+        input: searchInput, panel, meta: searchMeta
+      }) || null;
       actions.appendChild(button);
       document.body.appendChild(panel);
 
+      let closeTimer = null;
       function setSearchOpen(open) {
-        panel.hidden = !open;
+        if (closeTimer) clearTimeout(closeTimer);
         button.setAttribute("aria-expanded", String(open));
         button.classList.toggle("is-open", open);
-        if (open) requestAnimationFrame(() => searchInput.focus());
+        if (open) {
+          panel.hidden = false;
+          searchInput.setAttribute("aria-expanded", "true");
+          globalSearch?.open();
+          requestAnimationFrame(() => {
+            panel.classList.add("is-visible");
+            searchInput.focus();
+          });
+        } else {
+          panel.classList.remove("is-visible");
+          searchInput.setAttribute("aria-expanded", "false");
+          globalSearch?.close();
+          closeTimer = setTimeout(() => {
+            if (!button.classList.contains("is-open")) panel.hidden = true;
+          }, 220);
+        }
       }
 
       openHeaderSearch = () => setSearchOpen(true);
       button.addEventListener("click", event => {
         event.stopPropagation();
-        setSearchOpen(panel.hidden);
+        setSearchOpen(!button.classList.contains("is-open"));
       });
       panel.addEventListener("click", event => event.stopPropagation());
       document.addEventListener("click", event => {
@@ -984,6 +1011,8 @@
   }
 
   async function boot() {
+    // Make header search responsive immediately, not after account/cloud setup.
+    createSearchBar();
     try {
       await loadCloudDashboard();
     } catch (error) {
@@ -1000,7 +1029,6 @@
       });
     }
 
-    createSearchBar();
     ensureProgress();
     enhanceVisibleCards();
 
