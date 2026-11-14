@@ -328,6 +328,13 @@ body.study-room-page.profile-modal-open > :not(#profileModal):not(#studyRoomProf
             <p class="profile-hint">3–24 characters: lowercase letters, numbers, and underscores. Each username can belong to only one student.</p>
             <p class="profile-hint profile-username-status" id="profileUsernameStatus" role="status" aria-live="polite" hidden></p>
           </div>
+          <div class="profile-field profile-field-full sl-profile-bio-field">
+            <label for="profileBio">Bio <span class="profile-optional">Optional · up to 15 words</span></label>
+            <textarea class="profile-input sl-profile-bio-input" id="profileBio" name="bio"
+                      rows="2" maxlength="240" aria-describedby="profileBioCount"
+                      placeholder="A little about your studies (avoid sharing personal contact details)"></textarea>
+            <p class="profile-hint sl-profile-bio-count" id="profileBioCount" aria-live="polite">0 / 15 words</p>
+          </div>
           <div class="profile-field">
             <label for="profileSchool">School <span class="profile-optional">Optional</span></label>
             <input class="profile-input" id="profileSchool" name="school" type="text" maxlength="120"
