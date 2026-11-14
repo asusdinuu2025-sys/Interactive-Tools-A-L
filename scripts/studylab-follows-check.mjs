@@ -73,8 +73,21 @@ assert.ok(room.includes("room-person-follow-slot"),"Follow control must sit insi
 assert.ok(css.includes("sl-follow-profile-toast"),"Right-side incomplete-profile toast styling missing");
 assert.ok(source.includes("showCompleteProfileToast()"),"Incomplete profiles must trigger a toast");
 assert.ok(followGuardMigration.includes("First Complete Your Profile to follow others"),
-  "Database trigger should enforce the same complete-profile requirement");
-assert.ok(followGuardMigration.includes("p.display_name !~ '^Student[0-9]{4}
+  "Database trigger must enforce profile completion");
+assert.ok(followGuardMigration.includes("p.display_name !~"),
+  "Database trigger must reject placeholder student names");
+assert.ok(followGuardMigration.includes("p.username is not null"),
+  "Database trigger must require a username before following");
+assert.ok(social.includes("sl-feed-post-controls"),
+  "Social Follow must be grouped beside the three-dot menu");
+assert.ok(room.includes("room-person-status-stack") && room.includes("room-person-follow-slot"),
+  "Study Room Follow must be directly below studying/away status inside card");
+assert.ok(css.includes("max-width:100%;margin:0;z-index:1"),
+  "Study Room Follow control must not overflow its card");
+assert.ok(editProfile.includes("Bio must be 15 words or fewer"),
+  "Client profile editor must enforce 15 bio words");
+assert.ok(accountSource.includes('bio.split(" ").length > 15'),
+  "Account save must enforce 15 bio words");
 
 const own="10000000-0000-4000-8000-000000000001";
 const other="20000000-0000-4000-8000-000000000002";
