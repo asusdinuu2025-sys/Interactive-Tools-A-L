@@ -327,7 +327,7 @@
     const account=window.StudyLabAccount;
     if(!account?.getUser)return false;
     const user=account.getUser();
-    if(!user || user.is_anonymous)return false;
+    if(!user || (user.is_anonymous && (!options.userId || options.userId===user.id)))return false;
     const id=options.userId||user.id;
     const own=id===user.id;
     const serial=++viewSequence;
