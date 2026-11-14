@@ -8,6 +8,30 @@
   const busyIds = new Set();
   const buttons = new Set();
   const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  let toastTimer = null;
+  let toastHideTimer = null;
+  function showCompleteProfileToast() {
+    let toast=document.getElementById("slFollowProfileToast");
+    if(!toast){
+      toast=document.createElement("div");
+      toast.id="slFollowProfileToast";
+      toast.className="sl-follow-profile-toast";
+      toast.setAttribute("role","status");
+      toast.setAttribute("aria-live","polite");
+      document.body.appendChild(toast);
+    }
+    toast.textContent="First Complete Your Profile to follow others";
+    toast.hidden=false;
+    toast.classList.remove("is-hiding");
+    if(toastTimer)clearTimeout(toastTimer);
+    if(toastHideTimer)clearTimeout(toastHideTimer);
+    toastTimer=setTimeout(()=>toast.classList.add("is-hiding"),3800);
+    toastHideTimer=setTimeout(()=>{toast.hidden=true;},4250);
+  }
+  function hasBasicProfile(p){
+    return Boolean(p?.display_name && !/^Student\\d{4}$/.test(String(p.display_name)) &&
+      p?.username && p?.exam_year && p?.study_stream);
+  }
 
   function account() {
     const value = window.StudyLabAccount;
@@ -66,6 +90,14 @@
     try {
       const db=await client();
       if(shouldFollow){
+        // Check BEFORE inserting: an incomplete student can still view profiles,
+        // but must complete their own basic profile before following anyone.
+        const own=account().getUser();
+        const myProfile=await account().getProfile(true);
+        if(own?.is_anonymous || !hasBasicProfile(myProfile)){
+          showCompleteProfileToast();
+          return followingCache.get(id)===true;
+        }
         const {error}=await db.from("studylab_follows").insert({follower_id:uid,following_id:id});
         if(error&&error.code!=="23505")throw error;
       }else{
