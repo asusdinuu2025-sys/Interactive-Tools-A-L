@@ -1,9 +1,8 @@
-/* Goal completion: one short event, plus a persistent 15-minute theme-aware ambient layer. */
+/* Permanent theme-aware doodle ambience; each reached goal only celebrates with the pet. */
 (() => {
   'use strict';
   const EFFECT_KEY = 'studylab:study-room-ambient-effect-v1';
   const LAST_GOAL_KEY = 'studylab:study-room-last-goal-v1';
-  const EFFECT_DURATION = 15 * 60 * 1000;
   const PET_CELEBRATION_DURATION = 4000;
   const THEME_PARTICLES = {
     charcoal: ['◇', '◆', '✧', '⋄'],
@@ -17,8 +16,6 @@
     ocean: ['○', '◦', '◌', '°']
   };
   let layer = null;
-  let expiryTimer = null;
-  let activeEffect = null;
 
   const read = key => {
     try { return JSON.parse(localStorage.getItem(key) || 'null'); }
@@ -50,13 +47,20 @@
   }
 
   function renderParticles() {
-    if (!activeEffect || activeEffect.until <= Date.now()) return;
-    const host = ensureLayer();
+    if (document.body?.dataset.roomDoodles === 'off') {
+      if (layer?.isConnected) layer.remove();
+      layer = null;
+      return;
+    }
     const theme = currentTheme();
+    if (layer?.isConnected && layer.dataset.theme === theme) return;
+    const host = ensureLayer();
     const symbols = THEME_PARTICLES[theme] || THEME_PARTICLES['midnight-blue'];
     host.dataset.theme = theme;
     host.replaceChildren();
-    for (let i = 0; i < 22; i++) {
+    // Keep permanent ambience lighter than the former 22-particle goal burst.
+    const count = window.matchMedia?.('(max-width: 680px)')?.matches ? 10 : 16;
+    for (let i = 0; i < count; i++) {
       const particle = document.createElement('span');
       particle.className = 'sl-room-ambient-particle';
       particle.textContent = symbols[i % symbols.length];
@@ -70,26 +74,6 @@
       particle.style.setProperty('--rotation', random(-100, 100).toFixed(1) + 'deg');
       host.append(particle);
     }
-  }
-
-  function stopAmbient() {
-    activeEffect = null;
-    if (expiryTimer) clearTimeout(expiryTimer);
-    expiryTimer = null;
-    layer?.remove();
-    layer = null;
-    remove(EFFECT_KEY);
-  }
-
-  function startAmbient(record) {
-    if (!record || !Number.isFinite(Number(record.until)) || Number(record.until) <= Date.now()) {
-      stopAmbient();
-      return;
-    }
-    activeEffect = { until: Number(record.until), sessionKey: record.sessionKey || '' };
-    renderParticles();
-    if (expiryTimer) clearTimeout(expiryTimer);
-    expiryTimer = setTimeout(stopAmbient, Math.max(0, activeEffect.until - Date.now()));
   }
 
   function sameCompletedSession(previous, state) {
@@ -113,8 +97,6 @@
         previous.targetReachedAt = state.targetReachedAt;
         write(LAST_GOAL_KEY, previous);
       }
-      const savedEffect = read(EFFECT_KEY);
-      if (savedEffect?.until > Date.now()) startAmbient(savedEffect);
       return;
     }
 
@@ -129,10 +111,6 @@
       targetSeconds: Number(state.targetSeconds) || 0,
       triggeredAt
     });
-    const effect = { sessionKey, startedAt: triggeredAt, until: triggeredAt + EFFECT_DURATION };
-    write(EFFECT_KEY, effect);
-    startAmbient(effect);
-
     window.dispatchEvent(new CustomEvent('studylab:study-room-goal-celebration', {
       detail: {
         duration: PET_CELEBRATION_DURATION,
@@ -150,14 +128,13 @@
     if (Number(state.elapsedSeconds) >= target || state.targetReachedAt) handleGoal(state);
   });
 
+  // Doodles controls both static illustrations AND this drifting ambient.
+  // Goal completion does not add particles, restart them, or change the layer.
   window.addEventListener('studylab:room-theme-change', renderParticles);
-  const themeObserver = new MutationObserver(() => {
-    if (activeEffect && activeEffect.until > Date.now()) renderParticles();
-  });
-  themeObserver.observe(document.body, { attributes: true, attributeFilter: ['data-room-theme'] });
+  const themeObserver = new MutationObserver(renderParticles);
+  themeObserver.observe(document.body, { attributes: true, attributeFilter: ['data-room-theme','data-room-doodles'] });
   themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-room-theme'] });
-
-  const savedEffect = read(EFFECT_KEY);
-  if (savedEffect?.until > Date.now()) startAmbient(savedEffect);
-  else if (savedEffect) remove(EFFECT_KEY);
+  // The old expiring effect setting is obsolete; appearance is no longer timed.
+  remove(EFFECT_KEY);
+  renderParticles();
 })();

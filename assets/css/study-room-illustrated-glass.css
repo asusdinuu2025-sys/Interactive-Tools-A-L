@@ -1,0 +1,711 @@
+/* StudyLab Live Study Room: illustrated glass palettes.
+   Ten STATIC SVG masks at most, reusing one set of ten DOM nodes.
+   Content, timers, attendance, ranking and theme controls are untouched. */
+body.study-room-page {
+  --slr-art-mask: none;
+  --slr-art-ink: transparent;
+  --slr-art-glow: transparent;
+  --slr-art-opacity: 0;
+  --slr-glass-main: 70%;
+  --slr-glass-card: 62%;
+}
+/* Five adaptive theme palettes: light and dark are independent from Home. */
+body.study-room-page[data-room-theme="pinky"] {
+  --slr-art-mask: url("../images/study-room/flower.svg");
+  --slr-art-ink: #ff74c4;
+  --slr-art-glow: rgba(255,73,174,.65);
+  --slr-art-opacity: .38;
+}
+body.study-room-page[data-room-theme="forest-green"] {
+  --slr-art-mask: url("../images/study-room/leaf.svg");
+  --slr-art-ink: #74f3a8;
+  --slr-art-glow: rgba(64,231,134,.62);
+  --slr-art-opacity: .35;
+}
+body.study-room-page[data-room-theme="lavender"] {
+  --slr-art-mask: url("../images/study-room/lavender.svg");
+  --slr-art-ink: #c797ff;
+  --slr-art-glow: rgba(168,99,245,.68);
+  --slr-art-opacity: .40;
+}
+body.study-room-page[data-room-theme="warm-sand"] {
+  --slr-art-mask: url("../images/study-room/turtle.svg");
+  --slr-art-ink: #f8ce82;
+  --slr-art-glow: rgba(242,182,82,.58);
+  --slr-art-opacity: .35;
+}
+body.study-room-page[data-room-theme="ocean"] {
+  --slr-art-mask: url("../images/study-room/bubbles.svg");
+  --slr-art-ink: #65e5f8;
+  --slr-art-glow: rgba(39,215,250,.68);
+  --slr-art-opacity: .53;
+}
+/* Light appearance: colorful outlines, darker than the pale background. */
+body.study-room-page[data-room-mode="light"][data-room-theme="pinky"] {
+  --slr-art-ink: #d13b85; --slr-art-glow: rgba(212,62,132,.35); --slr-art-opacity:.24;
+}
+body.study-room-page[data-room-mode="light"][data-room-theme="forest-green"] {
+  --slr-art-ink: #27985e; --slr-art-glow: rgba(35,158,96,.32); --slr-art-opacity:.24;
+}
+body.study-room-page[data-room-mode="light"][data-room-theme="lavender"] {
+  --slr-art-ink: #8c50bf; --slr-art-glow: rgba(143,80,197,.34); --slr-art-opacity:.25;
+}
+body.study-room-page[data-room-mode="light"][data-room-theme="warm-sand"] {
+  --slr-art-ink: #a67828; --slr-art-glow: rgba(163,117,49,.27); --slr-art-opacity:.24;
+}
+body.study-room-page[data-room-mode="light"][data-room-theme="ocean"] {
+  --slr-art-ink: #0787aa; --slr-art-glow: rgba(7,161,195,.33); --slr-art-opacity:.34;
+}
+body.study-room-page .slr-theme-illustrations {display:none}
+body.study-room-page:is(
+  [data-room-theme="pinky"],[data-room-theme="forest-green"],
+  [data-room-theme="lavender"],[data-room-theme="warm-sand"],
+  [data-room-theme="ocean"]
+) .slr-theme-illustrations {
+  position:fixed;inset:0;z-index:0;display:block;overflow:hidden;
+  pointer-events:none;user-select:none;contain:layout paint;
+}
+body.study-room-page .slr-theme-illustration {
+  position:absolute;
+  display:block;
+  width:var(--art-size);
+  height:var(--art-size);
+  left:var(--art-x);
+  top:var(--art-y);
+  color:var(--slr-art-ink);
+  background:currentColor;
+  opacity:var(--slr-art-opacity);
+  -webkit-mask-image:var(--slr-art-mask);
+  mask-image:var(--slr-art-mask);
+  mask-mode:alpha;
+  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+  -webkit-mask-position:center;mask-position:center;
+  -webkit-mask-size:contain;mask-size:contain;
+  transform:rotate(var(--art-rotate));
+  filter:drop-shadow(0 0 3px var(--slr-art-glow));
+}
+/* Ten thoughtfully offset positions: large side anchors, small accents.
+   Illustrations sit UNDER the panels and never receive pointer events. */
+body.study-room-page .slr-theme-illustration--hero       {--art-size:clamp(148px,17vw,250px);--art-x:79%;--art-y:13%;--art-rotate:-14deg}
+body.study-room-page .slr-theme-illustration--left-top   {--art-size:clamp(60px,7vw,110px);--art-x:4%;--art-y:21%;--art-rotate:24deg}
+body.study-room-page .slr-theme-illustration--right-edge {--art-size:clamp(177px,24vw,325px);--art-x:86%;--art-y:57%;--art-rotate:22deg}
+body.study-room-page .slr-theme-illustration--left-edge  {--art-size:clamp(130px,18vw,248px);--art-x:-6%;--art-y:71%;--art-rotate:-25deg}
+body.study-room-page .slr-theme-illustration--top-small  {--art-size:clamp(41px,4vw,64px);--art-x:42%;--art-y:7%;--art-rotate:10deg}
+body.study-room-page .slr-theme-illustration--bottom-small {--art-size:clamp(71px,9vw,116px);--art-x:67%;--art-y:83%;--art-rotate:-18deg}
+body.study-room-page .slr-theme-illustration--mid-small  {--art-size:clamp(51px,6vw,86px);--art-x:27%;--art-y:61%;--art-rotate:30deg}
+/* Existing science formulas belong to the three neutral themes. Showing
+   both on the five new palettes would overcrowd the background. */
+body.study-room-page:is(
+  [data-room-theme="pinky"],[data-room-theme="forest-green"],
+  [data-room-theme="lavender"],[data-room-theme="warm-sand"],
+  [data-room-theme="ocean"]
+) .room-science-bg {display:none!important}
+/* Single visual system for the five illustrated palettes. Retain all
+   theme-specific text/accent tokens, focus states, and interactive behavior. */
+body.study-room-page:is(
+  [data-room-theme="pinky"],[data-room-theme="forest-green"],
+  [data-room-theme="lavender"],[data-room-theme="warm-sand"],
+  [data-room-theme="ocean"]
+) .room-hero,
+body.study-room-page:is(
+  [data-room-theme="pinky"],[data-room-theme="forest-green"],
+  [data-room-theme="lavender"],[data-room-theme="warm-sand"],
+  [data-room-theme="ocean"]
+) .room-panel {
+  background:linear-gradient(145deg,
+    color-mix(in srgb,var(--room-card) var(--slr-glass-main),transparent),
+    color-mix(in srgb,var(--room-page-bg) 40%,transparent))!important;
+  color:var(--room-text)!important;
+  border:1px solid color-mix(in srgb,var(--room-text) 15%,transparent)!important;
+  border-top-color:color-mix(in srgb,var(--room-text) 23%,transparent)!important;
+  box-shadow:0 18px 46px rgba(0,0,0,.115),inset 0 1px 0 color-mix(in srgb,var(--room-text) 14%,transparent)!important;
+  -webkit-backdrop-filter:blur(22px) saturate(130%)!important;
+  backdrop-filter:blur(22px) saturate(130%)!important;
+}
+body.study-room-page:is(
+  [data-room-theme="pinky"],[data-room-theme="forest-green"],
+  [data-room-theme="lavender"],[data-room-theme="warm-sand"],
+  [data-room-theme="ocean"]
+) :is(.room-stat,.room-person-card,.room-person,.room-rank,
+      .room-session,.room-goal,.room-notice,.slr-toolbar,.slr-focus-card,
+      .slr-badge,.slr-achievements) {
+  background:color-mix(in srgb,var(--room-card) var(--slr-glass-card),transparent)!important;
+  border-color:color-mix(in srgb,var(--room-text) 13%,transparent)!important;
+  color:var(--room-text)!important;
+  -webkit-backdrop-filter:blur(12px) saturate(118%);
+  backdrop-filter:blur(12px) saturate(118%);
+}
+body.study-room-page[data-room-mode="light"]:is(
+  [data-room-theme="pinky"],[data-room-theme="forest-green"],
+  [data-room-theme="lavender"],[data-room-theme="warm-sand"],
+  [data-room-theme="ocean"]
+) {
+  --slr-glass-main:57%;
+  --slr-glass-card:55%;
+}
+/* The separate local palette is the source of truth; Home's html mode should
+   never wash out text or icons within Study Room. */
+body.study-room-page[data-room-mode="light"]:is(
+  [data-room-theme="pinky"],[data-room-theme="forest-green"],
+  [data-room-theme="lavender"],[data-room-theme="warm-sand"],
+  [data-room-theme="ocean"]
+) :is(.room-hero h1,.room-panel h2,.room-stat strong,.room-person-card-name,
+      .room-rank-info strong,.room-session strong) {
+  color:var(--room-text)!important;
+}
+body.study-room-page .slr-theme-illustrations {touch-action:none}
+@media (max-width:900px) {
+  body.study-room-page .slr-theme-illustration--right-edge {--art-x:81%;--art-y:55%;--art-size:180px}
+  body.study-room-page .slr-theme-illustration--left-edge {--art-x:-9%;--art-y:74%;--art-size:154px}
+  body.study-room-page .slr-theme-illustration--hero {--art-x:78%;--art-y:14%;--art-size:165px}
+  body.study-room-page:has(.slr-theme-illustrations) .slr-theme-illustration {filter:drop-shadow(0 0 6px var(--slr-art-glow))}
+}
+@media (max-width:680px) {
+  body.study-room-page .slr-theme-illustration--top-small,
+  body.study-room-page .slr-theme-illustration--mid-small,
+  body.study-room-page .slr-theme-illustration--bottom-small {display:none}
+  body.study-room-page .slr-theme-illustration--left-top {--art-x:5%;--art-y:23%;--art-size:72px}
+  body.study-room-page .slr-theme-illustration--hero {--art-x:72%;--art-y:9%;--art-size:138px}
+  body.study-room-page .slr-theme-illustration--right-edge {--art-x:77%;--art-y:61%;--art-size:138px}
+  body.study-room-page .slr-theme-illustration--left-edge {--art-x:-10%;--art-y:76%;--art-size:115px}
+  body.study-room-page:is(
+    [data-room-theme="pinky"],[data-room-theme="forest-green"],
+    [data-room-theme="lavender"],[data-room-theme="warm-sand"],
+    [data-room-theme="ocean"]
+  ) :is(.room-hero,.room-panel) {
+    -webkit-backdrop-filter:blur(11px) saturate(115%)!important;
+    backdrop-filter:blur(11px) saturate(115%)!important;
+  }
+  body.study-room-page:is(
+    [data-room-theme="pinky"],[data-room-theme="forest-green"],
+    [data-room-theme="lavender"],[data-room-theme="warm-sand"],
+    [data-room-theme="ocean"]
+  ) :is(.room-stat,.room-person-card,.room-person,.room-rank,.room-session,
+        .room-goal,.room-notice,.slr-toolbar,.slr-focus-card,.slr-badge,.slr-achievements) {
+    -webkit-backdrop-filter:blur(5px)!important;
+    backdrop-filter:blur(5px)!important;
+  }
+}
+@media(prefers-reduced-transparency:reduce) {
+  body.study-room-page .slr-theme-illustration {opacity:.22}
+}
+@media(prefers-reduced-motion:reduce) {
+  body.study-room-page .slr-theme-illustration {transform:none}
+}
+
+/* Soft vector scenery, with one large silhouette beneath central cards.
+   Continue using ten static decorative elements, with smaller versions on phones. */
+body.study-room-page .slr-theme-illustration--hero {
+  --art-size:clamp(250px,33vw,440px);--art-x:34%;--art-y:33%;--art-rotate:-12deg;
+}
+body.study-room-page .slr-theme-illustration--right-edge {
+  --art-size:clamp(140px,19vw,265px);--art-x:82%;--art-y:53%;
+}
+body.study-room-page .slr-theme-illustration--mid-small {
+  --art-size:clamp(45px,5.4vw,74px);--art-x:21%;--art-y:58%;
+}
+body.study-room-page .slr-theme-illustration {
+  filter:drop-shadow(0 0 3px var(--slr-art-glow))!important;
+}
+body.study-room-page:is(
+  [data-room-theme="pinky"],[data-room-theme="forest-green"],
+  [data-room-theme="lavender"],[data-room-theme="warm-sand"],
+  [data-room-theme="ocean"]
+) :is(.room-hero,.room-panel) {
+  border-radius:29px!important;
+  background:linear-gradient(142deg,
+    color-mix(in srgb,var(--room-card) 51%,transparent),
+    color-mix(in srgb,var(--room-page-bg) 19%,transparent))!important;
+  -webkit-backdrop-filter:blur(19px) saturate(118%)!important;
+  backdrop-filter:blur(19px) saturate(118%)!important;
+}
+body.study-room-page:is(
+  [data-room-theme="pinky"],[data-room-theme="forest-green"],
+  [data-room-theme="lavender"],[data-room-theme="warm-sand"],
+  [data-room-theme="ocean"]
+) :is(.room-stat,.room-person-card,.room-person,.room-rank,.room-session,.room-goal,
+  .room-notice,.slr-toolbar,.slr-focus-card,.slr-badge,.slr-achievements,.slr-achievement-summary) {
+  border-radius:22px!important;
+  background:color-mix(in srgb,var(--room-card) 42%,transparent)!important;
+  border:1px solid color-mix(in srgb,var(--room-text) 12%,transparent)!important;
+  box-shadow:inset 0 1px 0 color-mix(in srgb,var(--room-text) 12%,transparent),
+    0 8px 22px rgba(0,0,0,.045)!important;
+  -webkit-backdrop-filter:blur(9px) saturate(113%)!important;
+  backdrop-filter:blur(9px) saturate(113%)!important;
+}
+body.study-room-page[data-room-mode="light"]:is(
+  [data-room-theme="pinky"],[data-room-theme="forest-green"],
+  [data-room-theme="lavender"],[data-room-theme="warm-sand"],[data-room-theme="ocean"]
+) :is(.room-hero,.room-panel) {
+  background:linear-gradient(145deg,
+    color-mix(in srgb,var(--room-card) 52%,transparent),
+    color-mix(in srgb,var(--room-page-bg) 14%,transparent))!important;
+}
+body.study-room-page[data-room-mode="light"]:is(
+  [data-room-theme="pinky"],[data-room-theme="forest-green"],
+  [data-room-theme="lavender"],[data-room-theme="warm-sand"],[data-room-theme="ocean"]
+) :is(.room-stat,.room-person-card,.room-person,.room-rank,.room-session,.room-goal,
+  .room-notice,.slr-toolbar,.slr-focus-card,.slr-badge) {
+  background:color-mix(in srgb,var(--room-card) 49%,transparent)!important;
+}
+/* Compact daily ranks; persistent avatars receive a crown without
+   removing their original male/female neon outline. */
+body.study-room-page[data-room-theme] .room-people-grid .room-person-card {
+  border-radius:24px!important;
+  border-color:color-mix(in srgb,var(--room-text) 14%,transparent)!important;
+}
+body.study-room-page[data-room-theme] .room-people-grid .room-person-card-name-row {
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;
+  min-width:0;gap:7px;margin:3px 0 1px;
+}
+body.study-room-page[data-room-theme] .room-people-grid .room-person-card-name-row .room-person-card-name {
+  flex:1 1 95px;min-width:0;overflow-wrap:anywhere;
+}
+body.study-room-page[data-room-theme] .room-people-grid .room-person-card-rank {
+  display:inline-flex;align-items:center;justify-content:center;
+  box-sizing:border-box;flex:0 0 auto;min-width:35px;min-height:27px;padding:4px 9px;
+  border:1px solid color-mix(in srgb,var(--room-accent) 34%,transparent);
+  border-radius:999px;
+  color:var(--room-text)!important;
+  background:color-mix(in srgb,var(--room-card) 55%,transparent);
+  font:800 .76rem/1.1 "Nirmala UI","Segoe UI",sans-serif;
+  font-variant-numeric:tabular-nums;
+}
+body.study-room-page .room-people-grid .room-person-card-rank.is-daily-leader {
+  color:#88600f!important;border-color:rgba(215,169,57,.44);
+  background:rgba(255,212,113,.22);
+}
+body.study-room-page[data-room-mode="dark"] .room-people-grid .room-person-card-rank.is-daily-leader {
+  color:#ffe19b!important;border-color:rgba(255,205,95,.46);
+  background:rgba(245,180,62,.15);
+}
+body.study-room-page .room-people-grid .room-avatar.slr-crown-avatar {
+  position:relative;overflow:visible!important;outline:2px solid rgba(246,202,98,.55);
+  outline-offset:2px;
+}
+body.study-room-page .room-people-grid .room-avatar.slr-crown-avatar::before {
+  content:attr(data-slr-crown);
+  position:absolute;z-index:5;right:-9px;top:-12px;
+  width:21px;height:21px;display:grid;place-items:center;
+  border:1px solid rgba(146,98,25,.34);border-radius:50%;
+  color:#50310c;background:#f8d079;box-shadow:0 3px 12px rgba(131,87,21,.21);
+  font:900 12px/1 "Segoe UI Symbol","Segoe UI",sans-serif;pointer-events:none;
+}
+/* Home is a real navigation link, not a fifth scroll-only section. */
+body.study-room-page .sl-room-nav .sl-nav-home {
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
+  gap:4px;min-width:0;min-height:56px;
+  border:1px solid color-mix(in srgb,var(--room-accent) 24%,transparent);
+  border-radius:15px;
+  color:var(--room-text)!important;
+  background:color-mix(in srgb,var(--room-card) 48%,transparent);
+  text-decoration:none;
+  -webkit-backdrop-filter:blur(9px);backdrop-filter:blur(9px);
+}
+body.study-room-page .sl-room-nav .sl-nav-home:hover {
+  background:color-mix(in srgb,var(--room-accent) 13%,var(--room-card));
+  border-color:color-mix(in srgb,var(--room-accent) 48%,transparent);
+}
+body.study-room-page .sl-room-nav .sl-nav-home:focus-visible {
+  outline:2px solid var(--room-accent);outline-offset:2px;
+}
+body.study-room-page .sl-room-nav .sl-nav-home-icon {
+  display:grid;place-items:center;color:var(--room-accent);
+}
+body.study-room-page .sl-room-nav .sl-nav-home-icon svg {
+  display:block;width:21px;height:21px;
+}
+body.study-room-page .sl-room-nav .sl-nav-home small {
+  font:750 .69rem/1.1 "Nirmala UI","Segoe UI",sans-serif;
+  color:var(--room-text)!important;
+}
+@media(max-width:900px) {
+  body.study-room-page .slr-theme-illustration--hero {
+    --art-size:clamp(205px,39vw,290px);--art-x:29%;--art-y:38%;
+  }
+}
+@media(max-width:680px) {
+  body.study-room-page .slr-theme-illustration--hero {
+    --art-size:clamp(165px,55vw,245px);--art-x:16%;--art-y:41%;
+  }
+  body.study-room-page:is(
+  [data-room-theme="pinky"],[data-room-theme="forest-green"],
+  [data-room-theme="lavender"],[data-room-theme="warm-sand"],
+  [data-room-theme="ocean"]
+) :is(.room-hero,.room-panel) {
+    -webkit-backdrop-filter:blur(9px) saturate(112%)!important;
+    backdrop-filter:blur(9px) saturate(112%)!important;
+  }
+  body.study-room-page:is(
+  [data-room-theme="pinky"],[data-room-theme="forest-green"],
+  [data-room-theme="lavender"],[data-room-theme="warm-sand"],
+  [data-room-theme="ocean"]
+) :is(.room-stat,.room-person-card,.room-person,.room-rank,.room-session,.room-goal,
+    .room-notice,.slr-toolbar,.slr-focus-card,.slr-badge,.slr-achievements) {
+    -webkit-backdrop-filter:blur(4px)!important;
+    backdrop-filter:blur(4px)!important;
+  }
+  body.study-room-page .sl-room-nav .sl-nav-home {
+    min-height:44px;padding:5px 8px;border-radius:12px;
+  }
+  body.study-room-page .sl-room-nav .sl-nav-home-icon svg {width:18px;height:18px}
+}
+@media(prefers-reduced-transparency:reduce) {
+  body.study-room-page:is(
+  [data-room-theme="pinky"],[data-room-theme="forest-green"],
+  [data-room-theme="lavender"],[data-room-theme="warm-sand"],
+  [data-room-theme="ocean"]
+) :is(.room-hero,.room-panel) {
+    background:var(--room-page-bg)!important;
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+  }
+}
+
+
+/* ================================================================
+   CLEAR GLASS: low-opacity, low-blur, crisp edges across ALL
+   eight Study Room palettes. Keep theme-specific ink readable.
+   These rules come last, after the old liquid-glass stylesheet.
+   ================================================================ */
+body.study-room-page[data-room-theme] .room-page :is(.room-hero,.room-panel) {
+  background: color-mix(in srgb,var(--room-page-bg) 9%,transparent) !important;
+  border: 1px solid color-mix(in srgb,var(--room-text) 24%,transparent) !important;
+  border-top-color: color-mix(in srgb,var(--room-text) 30%,transparent) !important;
+  border-radius: 28px !important;
+  color: var(--room-text) !important;
+  box-shadow: 0 11px 33px rgba(0,0,0,.16),inset 0 1px 0 color-mix(in srgb,var(--room-text) 10%,transparent) !important;
+  -webkit-backdrop-filter: blur(5px) saturate(106%) !important;
+  backdrop-filter: blur(5px) saturate(106%) !important;
+}
+body.study-room-page[data-room-theme] .room-page .room-hero::before {
+  background: linear-gradient(120deg,color-mix(in srgb,var(--room-text) 3%,transparent),transparent 42%) !important;
+}
+body.study-room-page[data-room-theme] .room-page :is(.room-stat,.room-person-card,.room-person,
+  .room-rank,.room-session,.room-goal,.room-notice,.slr-toolbar,.slr-focus-card,
+  .slr-badge,.slr-achievement-summary) {
+  background: color-mix(in srgb,var(--room-page-bg) 7%,transparent) !important;
+  border: 1px solid color-mix(in srgb,var(--room-text) 18%,transparent) !important;
+  border-top-color: color-mix(in srgb,var(--room-text) 23%,transparent) !important;
+  border-radius: 21px !important;
+  color: var(--room-text) !important;
+  box-shadow: 0 6px 18px rgba(0,0,0,.075),inset 0 1px 0 color-mix(in srgb,var(--room-text) 7%,transparent) !important;
+  -webkit-backdrop-filter: blur(3px) saturate(105%) !important;
+  backdrop-filter: blur(3px) saturate(105%) !important;
+}
+/* The top session time display should not form a cloudy opaque block. */
+body.study-room-page[data-room-theme] .room-page .room-session {
+  background: color-mix(in srgb,var(--room-page-bg) 9%,transparent) !important;
+}
+/* Clear hover states, without a sudden opaque fill or 3D jump. */
+body.study-room-page[data-room-theme] .room-page :is(.room-person-card,.room-rank,.room-stat):hover {
+  background: color-mix(in srgb,var(--room-accent) 6%,transparent) !important;
+  border-color: color-mix(in srgb,var(--room-accent) 35%,transparent) !important;
+  transform: none !important;
+}
+/* Light palettes keep dark text and strokes without a white fog layer. */
+body.study-room-page[data-room-mode="light"][data-room-theme] .room-page :is(.room-hero,.room-panel) {
+  background: color-mix(in srgb,var(--room-page-bg) 8%,transparent) !important;
+  box-shadow: 0 10px 31px rgba(37,67,97,.13),inset 0 1px 0 color-mix(in srgb,var(--room-text) 8%,transparent) !important;
+}
+body.study-room-page[data-room-mode="light"][data-room-theme] .room-page :is(.room-stat,.room-person-card,
+  .room-person,.room-rank,.room-session,.room-goal,.room-notice,.slr-toolbar,.slr-focus-card,
+  .slr-badge,.slr-achievement-summary) {
+  background: color-mix(in srgb,var(--room-page-bg) 6%,transparent) !important;
+  box-shadow: 0 5px 16px rgba(38,79,115,.075),inset 0 1px 0 color-mix(in srgb,var(--room-text) 5%,transparent) !important;
+}
+/* Hide ALL decorative drawings, including neutral theme formula doodles.
+   No illustration element is removed, and the theme setting is preserved. */
+body.study-room-page[data-room-doodles="off"] .slr-theme-illustrations,
+body.study-room-page[data-room-doodles="off"] .room-science-bg {
+  display: none !important;
+}
+body.study-room-page[data-room-doodles="off"] .room-hero::after {
+  display: none !important;
+}
+/* Independent glass toggle alongside Mode and Room theme. */
+body.study-room-page[data-room-theme] .room-dashboard-controls .room-doodles-toggle {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  min-height: 42px;
+  padding: 8px 11px;
+  border: 1px solid color-mix(in srgb,var(--room-text) 23%,transparent);
+  border-radius: 14px;
+  color: var(--room-text);
+  background: color-mix(in srgb,var(--room-page-bg) 11%,transparent);
+  box-shadow: 0 5px 16px rgba(0,0,0,.10),inset 0 1px 0 color-mix(in srgb,var(--room-text) 8%,transparent);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+  font: 750 .82rem/1.2 "Nirmala UI","Segoe UI",sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: border-color .18s ease,background .18s ease;
+}
+body.study-room-page[data-room-theme] .room-dashboard-controls .room-doodles-toggle:hover {
+  background: color-mix(in srgb,var(--room-accent) 10%,transparent);
+  border-color: color-mix(in srgb,var(--room-accent) 48%,transparent);
+}
+body.study-room-page .room-doodles-toggle .room-doodles-icon {
+  display: block;flex: 0 0 20px;
+  width: 20px;height: 20px;
+  stroke: var(--room-accent);
+}
+body.study-room-page .room-doodles-toggle .room-doodles-state {
+  display: inline-grid;place-items:center;
+  min-width: 34px;min-height: 25px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb,var(--room-text) 18%,transparent);
+  color: var(--room-muted);
+  background: color-mix(in srgb,var(--room-page-bg) 9%,transparent);
+  font: 780 .72rem/1.2 "Nirmala UI","Segoe UI",sans-serif;
+}
+body.study-room-page .room-doodles-toggle.is-selected .room-doodles-state {
+  color: var(--room-text);
+  border-color: color-mix(in srgb,var(--room-accent) 37%,transparent);
+  background: color-mix(in srgb,var(--room-accent) 14%,transparent);
+}
+body.study-room-page .room-dashboard-controls .room-doodles-toggle:focus-visible {
+  outline: 2px solid var(--room-accent);
+  outline-offset: 3px;
+}
+@media(max-width:760px) {
+  body.study-room-page[data-room-theme] .room-page :is(.room-hero,.room-panel) {
+    -webkit-backdrop-filter: blur(3px) !important;
+    backdrop-filter: blur(3px) !important;
+  }
+  body.study-room-page[data-room-theme] .room-page :is(.room-stat,.room-person-card,.room-person,
+    .room-rank,.room-session,.room-goal,.room-notice,.slr-toolbar,.slr-focus-card,.slr-badge) {
+    -webkit-backdrop-filter: blur(2px) !important;
+    backdrop-filter: blur(2px) !important;
+  }
+}
+@media(max-width:440px) {
+  body.study-room-page[data-room-theme] .room-dashboard-controls .room-doodles-toggle {
+    width:100%;justify-content:space-between;min-height:42px;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  body.study-room-page[data-room-theme] .room-dashboard-controls .room-doodles-toggle {transition:none!important;}
+}
+@media(prefers-reduced-transparency:reduce) {
+  body.study-room-page[data-room-theme] .room-page :is(.room-hero,.room-panel,
+    .room-stat,.room-person-card,.room-person,.room-rank,.room-session,.room-goal,
+    .room-notice,.slr-toolbar,.slr-focus-card,.slr-badge,.slr-achievement-summary) {
+    background:var(--room-panel-bg)!important;
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+  }
+}
+
+
+/* Upper-right illustrated hero, three new small center details = ten. */
+body.study-room-page .slr-theme-illustration--hero {
+  --art-size:clamp(250px,31vw,425px);--art-x:70%;--art-y:8%;--art-rotate:-14deg;
+}
+body.study-room-page .slr-theme-illustration--center-upper {
+  --art-size:clamp(40px,5.2vw,69px);--art-x:34%;--art-y:32%;--art-rotate:26deg;
+}
+body.study-room-page .slr-theme-illustration--center-middle {
+  --art-size:clamp(51px,6.2vw,84px);--art-x:54%;--art-y:51%;--art-rotate:-24deg;
+}
+body.study-room-page .slr-theme-illustration--center-lower {
+  --art-size:clamp(35px,4.3vw,61px);--art-x:42%;--art-y:74%;--art-rotate:18deg;
+}
+body.study-room-page .slr-theme-illustration:is(
+  .slr-theme-illustration--center-upper,
+  .slr-theme-illustration--center-middle,
+  .slr-theme-illustration--center-lower
+) {opacity:calc(var(--slr-art-opacity) * .78)}
+/* Force Ocean to use the corrected white-alpha shark silhouette. */
+body.study-room-page[data-room-theme="ocean"] .slr-theme-illustration {
+  -webkit-mask-image:url("../images/study-room/bubbles.svg");
+  mask-image:url("../images/study-room/bubbles.svg");
+}
+/* Optically thicker LIVE profile cards, while keeping the contents clear.
+   The double specular edge and inset highlights define glass thickness. */
+body.study-room-page[data-room-theme] .room-page .room-people-grid .room-person-card {
+  border:2px solid color-mix(in srgb,var(--room-text) 23%,transparent)!important;
+  border-top-color:color-mix(in srgb,var(--room-text) 37%,transparent)!important;
+  border-left-color:color-mix(in srgb,var(--room-text) 29%,transparent)!important;
+  border-radius:25px!important;
+  background:linear-gradient(147deg,
+    color-mix(in srgb,var(--room-page-bg) 17%,transparent),
+    color-mix(in srgb,var(--room-card) 10%,transparent))!important;
+  box-shadow:
+    inset 0 2px 0 color-mix(in srgb,var(--room-text) 17%,transparent),
+    inset 2px 0 0 color-mix(in srgb,var(--room-text) 7%,transparent),
+    inset 0 -2px 0 color-mix(in srgb,var(--room-text) 10%,transparent),
+    0 12px 32px rgba(0,0,0,.14)!important;
+  -webkit-backdrop-filter:blur(5px) saturate(107%)!important;
+  backdrop-filter:blur(5px) saturate(107%)!important;
+}
+body.study-room-page[data-room-theme] .room-page .room-people-grid .room-person-card:hover {
+  transform:none!important;
+  border-color:color-mix(in srgb,var(--room-accent) 41%,transparent)!important;
+  background:linear-gradient(147deg,
+    color-mix(in srgb,var(--room-page-bg) 18%,transparent),
+    color-mix(in srgb,var(--room-card) 11%,transparent))!important;
+}
+body.study-room-page[data-room-mode="light"][data-room-theme] .room-page .room-people-grid .room-person-card {
+  background:linear-gradient(147deg,
+    color-mix(in srgb,var(--room-page-bg) 12%,transparent),
+    color-mix(in srgb,var(--room-card) 7%,transparent))!important;
+  box-shadow:
+    inset 0 2px 0 color-mix(in srgb,var(--room-text) 10%,transparent),
+    inset 2px 0 0 color-mix(in srgb,var(--room-text) 6%,transparent),
+    inset 0 -2px 0 color-mix(in srgb,var(--room-text) 8%,transparent),
+    0 10px 27px rgba(39,79,118,.12)!important;
+}
+@media(max-width:900px) {
+  body.study-room-page .slr-theme-illustration--hero {
+    --art-size:clamp(200px,36vw,290px);--art-x:66%;--art-y:10%;
+  }
+  body.study-room-page .slr-theme-illustration--center-upper {
+    --art-size:53px;--art-x:35%;--art-y:31%;
+  }
+  body.study-room-page .slr-theme-illustration--center-middle {
+    --art-size:62px;--art-x:52%;--art-y:53%;
+  }
+  body.study-room-page .slr-theme-illustration--center-lower {
+    --art-size:48px;--art-x:42%;--art-y:75%;
+  }
+}
+@media(max-width:680px) {
+  /* Ten small static motifs, no drop shadows to reduce mobile GPU costs. */
+  body.study-room-page .slr-theme-illustration--hero {
+    --art-size:clamp(138px,47vw,210px);--art-x:63%;--art-y:11%;
+  }
+  body.study-room-page .slr-theme-illustration:is(
+    .slr-theme-illustration--top-small,
+    .slr-theme-illustration--mid-small,
+    .slr-theme-illustration--bottom-small
+  ) {display:block}
+  body.study-room-page .slr-theme-illustration--top-small {
+    --art-size:28px;--art-x:39%;--art-y:9%;
+  }
+  body.study-room-page .slr-theme-illustration--mid-small {
+    --art-size:31px;--art-x:29%;--art-y:64%;
+  }
+  body.study-room-page .slr-theme-illustration--bottom-small {
+    --art-size:35px;--art-x:64%;--art-y:81%;
+  }
+  body.study-room-page .slr-theme-illustration--center-upper {
+    --art-size:27px;--art-x:29%;--art-y:35%;
+  }
+  body.study-room-page .slr-theme-illustration--center-middle {
+    --art-size:36px;--art-x:54%;--art-y:49%;
+  }
+  body.study-room-page .slr-theme-illustration--center-lower {
+    --art-size:28px;--art-x:39%;--art-y:72%;
+  }
+  body.study-room-page .slr-theme-illustration {filter:none!important}
+  body.study-room-page[data-room-theme] .room-page .room-people-grid .room-person-card {
+    -webkit-backdrop-filter:blur(3px)!important;
+    backdrop-filter:blur(3px)!important;
+  }
+}
+
+
+/* Ocean soap bubbles: line art only with subtle iridescent tint. */
+body.study-room-page[data-room-theme="ocean"] .slr-theme-illustration {
+  background:linear-gradient(145deg,
+    color-mix(in srgb,var(--slr-art-ink) 63%,white),
+    var(--slr-art-ink) 44%,
+    color-mix(in srgb,var(--slr-art-ink) 76%,#b9b2f3))!important;
+}
+/* Translucent session numbers: clear liquid glass typography, not white paint. */
+body.study-room-page[data-room-theme] #timerSection #sessionTimer {
+  display:block;
+  width:100%;
+  margin:7px auto 3px;
+  color:color-mix(in srgb,var(--room-text) 80%,var(--room-accent))!important;
+  font-family:"Segoe UI Variable Display","Nirmala UI","Segoe UI",system-ui,sans-serif!important;
+  font-size:clamp(2.55rem,5.6vw,3.3rem)!important;
+  font-weight:780!important;
+  line-height:1.12!important;
+  letter-spacing:-.046em!important;
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum" 1;
+  filter:drop-shadow(0 2px 5px color-mix(in srgb,var(--room-accent) 15%,transparent));
+}
+@supports (-webkit-background-clip:text) or (background-clip:text) {
+  body.study-room-page[data-room-theme] #timerSection #sessionTimer {
+    background:linear-gradient(180deg,
+      color-mix(in srgb,var(--room-text) 88%,var(--room-accent) 12%) 0%,
+      color-mix(in srgb,var(--room-text) 66%,var(--room-accent) 34%) 60%,
+      color-mix(in srgb,var(--room-accent) 72%,var(--room-text) 28%) 100%)!important;
+    -webkit-background-clip:text!important;
+    background-clip:text!important;
+    -webkit-text-fill-color:transparent!important;
+  }
+}
+/* Study Room session buttons: thick clear glass, softly tinted by role. */
+body.study-room-page[data-room-theme] #timerSection .room-session-actions .room-action {
+  border:1.5px solid color-mix(in srgb,var(--room-text) 24%,transparent)!important;
+  border-top-color:color-mix(in srgb,var(--room-text) 37%,transparent)!important;
+  border-radius:16px!important;
+  min-height:47px;
+  background:linear-gradient(149deg,
+    color-mix(in srgb,var(--room-accent) 13%,transparent),
+    color-mix(in srgb,var(--room-page-bg) 11%,transparent))!important;
+  color:var(--room-text)!important;
+  box-shadow:inset 0 2px 0 color-mix(in srgb,var(--room-text) 12%,transparent),
+    inset 0 -1px 0 color-mix(in srgb,var(--room-text) 6%,transparent),
+    0 9px 22px rgba(0,0,0,.10)!important;
+  -webkit-backdrop-filter:blur(5px) saturate(108%)!important;
+  backdrop-filter:blur(5px) saturate(108%)!important;
+  transform:none!important;
+  filter:none!important;
+  font-weight:780;
+  transition:border-color .18s ease,background .18s ease,box-shadow .18s ease!important;
+}
+body.study-room-page[data-room-theme] #timerSection .room-session-actions .room-action:first-child {
+  border-color:color-mix(in srgb,var(--room-accent) 45%,transparent)!important;
+  background:linear-gradient(150deg,
+    color-mix(in srgb,var(--room-accent) 19%,transparent),
+    color-mix(in srgb,var(--room-accent-strong) 9%,transparent))!important;
+}
+body.study-room-page[data-room-theme] #timerSection .room-session-actions .room-action.pause {
+  background:color-mix(in srgb,var(--room-accent) 8%,transparent)!important;
+}
+body.study-room-page[data-room-theme] #timerSection .room-session-actions .room-action.leave {
+  background:color-mix(in srgb,#e65d70 8%,transparent)!important;
+  border-color:rgba(214,100,112,.30)!important;
+  color:var(--room-text)!important;
+}
+body.study-room-page[data-room-theme] #timerSection .room-session-actions .room-action:not(:disabled):hover {
+  background:color-mix(in srgb,var(--room-accent) 17%,transparent)!important;
+  border-color:color-mix(in srgb,var(--room-accent) 53%,transparent)!important;
+  box-shadow:inset 0 2px 0 color-mix(in srgb,var(--room-text) 15%,transparent),
+    0 9px 24px rgba(0,0,0,.12)!important;
+}
+body.study-room-page[data-room-theme] #timerSection .room-session-actions .room-action:focus-visible {
+  outline:2px solid var(--room-accent)!important;
+  outline-offset:3px!important;
+}
+body.study-room-page[data-room-theme] #timerSection .room-session-actions .room-action:disabled {
+  opacity:.44!important;
+  cursor:not-allowed!important;
+}
+@media(max-width:720px) {
+  body.study-room-page[data-room-theme] #timerSection .room-session-actions .room-action {
+    -webkit-backdrop-filter:blur(3px)!important;
+    backdrop-filter:blur(3px)!important;
+  }
+}
+@media(prefers-reduced-transparency:reduce) {
+  body.study-room-page[data-room-theme] #timerSection .room-session-actions .room-action {
+    background:var(--room-chip)!important;
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+  }
+}
+/* Ambient is a normal part of the themed doodle layer: Off hides it too. */
+body.study-room-page[data-room-doodles="off"] #slStudyRoomAmbient {
+  display:none!important;
+}

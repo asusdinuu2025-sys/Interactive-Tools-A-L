@@ -1,0 +1,173 @@
+/* Theme-aware StudyLab Mini Timer: in-page, independent and Picture-in-Picture.
+   Appearance only: all timer authority, heartbeats and RPCs are unchanged. */
+:root{--mini-base:#0b1220;--mini-ink:#edf5ff;--mini-muted:#b0c6e0;--mini-accent:#4dd8f0;}
+:root[data-room-theme="midnight-blue"]{--mini-base:#0b1220;--mini-ink:#edf5ff;--mini-muted:#b0c6e0;--mini-accent:#4dd8f0;}
+:root[data-room-theme="charcoal"]{--mini-base:#0b0b0d;--mini-ink:#f3f3f5;--mini-muted:#bfc0c5;--mini-accent:#c9cdd7;}
+:root[data-room-theme="mint"]{--mini-base:#f2f5fa;--mini-ink:#202938;--mini-muted:#566273;--mini-accent:#426ac4;}
+:root[data-room-theme="pinky"][data-room-mode="light"]{--mini-base:#fff0f6;--mini-ink:#492238;--mini-muted:#80516a;--mini-accent:#c83e80;}
+:root[data-room-theme="pinky"][data-room-mode="dark"]{--mini-base:#24121c;--mini-ink:#fff0f7;--mini-muted:#d7a9bf;--mini-accent:#ff8fc5;}
+:root[data-room-theme="forest-green"][data-room-mode="light"]{--mini-base:#eef8f0;--mini-ink:#193525;--mini-muted:#4d6b58;--mini-accent:#287a49;}
+:root[data-room-theme="forest-green"][data-room-mode="dark"]{--mini-base:#101f18;--mini-ink:#edf8ef;--mini-muted:#abcbb3;--mini-accent:#80d99c;}
+:root[data-room-theme="lavender"][data-room-mode="light"]{--mini-base:#f6f0ff;--mini-ink:#352346;--mini-muted:#705c85;--mini-accent:#8254b5;}
+:root[data-room-theme="lavender"][data-room-mode="dark"]{--mini-base:#1c1629;--mini-ink:#f7f0ff;--mini-muted:#d0c0e5;--mini-accent:#d1b4ff;}
+:root[data-room-theme="warm-sand"][data-room-mode="light"]{--mini-base:#fbf5e9;--mini-ink:#46351f;--mini-muted:#80694b;--mini-accent:#98651d;}
+:root[data-room-theme="warm-sand"][data-room-mode="dark"]{--mini-base:#211a10;--mini-ink:#fff5df;--mini-muted:#d0b98e;--mini-accent:#e9bf6b;}
+:root[data-room-theme="ocean"][data-room-mode="light"]{--mini-base:#edfaff;--mini-ink:#173b47;--mini-muted:#4d727e;--mini-accent:#087e9c;}
+:root[data-room-theme="ocean"][data-room-mode="dark"]{--mini-base:#0c1c24;--mini-ink:#eafaff;--mini-muted:#9fcbd6;--mini-accent:#65d6e8;}
+
+body.study-room-page {
+  --mini-base:var(--room-page-bg,#0b1220);
+  --mini-ink:var(--room-text,#edf5ff);
+  --mini-muted:var(--room-muted,#b0c6e0);
+  --mini-accent:var(--room-accent,#4dd8f0);
+}
+/* Standalone and PiP windows do not inherit the Study Room document CSS. */
+body.sl-mini-window {
+  margin:0;min-height:100vh;box-sizing:border-box;
+  display:grid;place-items:center;padding:12px;
+  color:var(--mini-ink)!important;
+  color-scheme:normal;
+  font-family:"Nirmala UI","Segoe UI",system-ui,sans-serif;
+  background:
+    radial-gradient(ellipse at 15% 10%,color-mix(in srgb,var(--mini-accent) 24%,transparent),transparent 59%),
+    radial-gradient(ellipse at 87% 87%,color-mix(in srgb,var(--mini-accent) 14%,transparent),transparent 68%),
+    linear-gradient(145deg,var(--mini-base),color-mix(in srgb,var(--mini-base) 84%,var(--mini-accent) 16%))!important;
+}
+html[data-room-mode="light"] body.sl-mini-window{color-scheme:light}
+html[data-room-mode="dark"] body.sl-mini-window{color-scheme:dark}
+html[data-room-theme="charcoal"] body.sl-mini-window{color-scheme:dark}
+html[data-room-theme="mint"] body.sl-mini-window{color-scheme:light}
+/* Thick beveled glass outer surface, but still transparent. */
+body.sl-mini-window :is(.mini,.pip),
+body.study-room-page[data-room-theme] .sl-mini-timer-panel {
+  color:var(--mini-ink)!important;
+  border:2px solid color-mix(in srgb,var(--mini-ink) 22%,transparent)!important;
+  border-top-color:color-mix(in srgb,var(--mini-ink) 38%,transparent)!important;
+  border-radius:26px!important;
+  background:linear-gradient(147deg,
+    color-mix(in srgb,var(--mini-accent) 12%,transparent),
+    color-mix(in srgb,var(--mini-base) 57%,transparent) 71%,
+    color-mix(in srgb,var(--mini-accent) 5%,transparent))!important;
+  box-shadow:inset 0 2px 0 color-mix(in srgb,var(--mini-ink) 14%,transparent),
+    inset 0 -2px 0 color-mix(in srgb,var(--mini-ink) 7%,transparent),
+    0 17px 42px rgba(0,0,0,.19)!important;
+  -webkit-backdrop-filter:blur(9px) saturate(110%)!important;
+  backdrop-filter:blur(9px) saturate(110%)!important;
+}
+body.sl-mini-window :is(.mini,.pip) {
+  box-sizing:border-box;width:100%;max-width:420px;padding:16px;
+}
+body.study-room-page[data-room-theme] .sl-mini-timer-panel {
+  box-sizing:border-box;width:min(306px,calc(100vw - 28px));padding:14px!important;
+}
+body.sl-mini-window :is(header,.head),
+body.study-room-page[data-room-theme] .sl-mini-timer-head {
+  color:var(--mini-ink)!important;
+  font:780 .80rem/1.3 "Nirmala UI","Segoe UI",system-ui,sans-serif;
+  letter-spacing:-.012em;
+}
+body.sl-mini-window :is(header button,.head-actions button,.close),
+body.study-room-page[data-room-theme] :is(.sl-mini-close,.sl-mini-detach) {
+  color:var(--mini-ink)!important;
+  border:1px solid color-mix(in srgb,var(--mini-ink) 19%,transparent)!important;
+  border-radius:11px!important;
+  background:color-mix(in srgb,var(--mini-accent) 9%,transparent)!important;
+}
+/* Glass clock slab follows the theme, not a solid white or grey rectangle. */
+body.sl-mini-window .sl-mini-clock-glass,
+body.study-room-page[data-room-theme] .sl-mini-clock-glass {
+  box-sizing:border-box;
+  margin:13px 0 9px;padding:1px;
+  border:1px solid color-mix(in srgb,var(--mini-ink) 26%,transparent);
+  border-top-color:color-mix(in srgb,var(--mini-ink) 38%,transparent);
+  border-radius:21px;
+  background:linear-gradient(150deg,
+    color-mix(in srgb,var(--mini-ink) 6%,transparent),
+    color-mix(in srgb,var(--mini-accent) 11%,transparent));
+  box-shadow:inset 0 2px 0 color-mix(in srgb,var(--mini-ink) 13%,transparent),
+    inset 0 -1px 0 color-mix(in srgb,var(--mini-ink) 8%,transparent),
+    0 8px 25px rgba(0,0,0,.075);
+}
+/* Large lock-screen-style numerals: translucent gradient, softened depth. */
+body.sl-mini-window .sl-mini-clock-glass :is(#clock,.clock),
+body.study-room-page[data-room-theme] .sl-mini-clock-glass .sl-mini-timer-clock {
+  display:block;box-sizing:border-box;
+  width:100%;min-width:0;
+  margin:0!important;padding:12px 4px 14px!important;
+  border:0!important;border-radius:20px!important;
+  box-shadow:none!important;
+  color:var(--mini-ink)!important;
+  font-family:"Segoe UI Variable Display","Nirmala UI","Segoe UI",system-ui,sans-serif!important;
+  font-size:clamp(2.35rem,9.5vw,3.15rem)!important;
+  font-weight:830!important;
+  line-height:1.10!important;
+  letter-spacing:-.048em!important;
+  text-align:center;
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum" 1;
+}
+@supports (-webkit-background-clip:text) or (background-clip:text) {
+  body.sl-mini-window .sl-mini-clock-glass :is(#clock,.clock),
+  body.study-room-page[data-room-theme] .sl-mini-clock-glass .sl-mini-timer-clock {
+    background:linear-gradient(180deg,
+      color-mix(in srgb,var(--mini-ink) 92%,var(--mini-accent) 8%) 5%,
+      color-mix(in srgb,var(--mini-ink) 65%,var(--mini-accent) 35%) 60%,
+      color-mix(in srgb,var(--mini-accent) 72%,var(--mini-ink) 28%) 100%)!important;
+    -webkit-background-clip:text!important;background-clip:text!important;
+    -webkit-text-fill-color:transparent!important;
+    filter:drop-shadow(0 2px 5px color-mix(in srgb,var(--mini-accent) 18%,transparent));
+  }
+}
+body.sl-mini-window :is(#status,.status,.hint),
+body.study-room-page[data-room-theme] :is(.sl-mini-timer-status,.sl-mini-timer-hint){
+  color:var(--mini-muted)!important;
+}
+body.sl-mini-window .actions button,
+body.study-room-page[data-room-theme] .sl-mini-timer-actions button {
+  color:var(--mini-ink)!important;
+  border:1px solid color-mix(in srgb,var(--mini-ink) 20%,transparent)!important;
+  border-radius:12px!important;
+  background:color-mix(in srgb,var(--mini-accent) 10%,transparent)!important;
+  min-height:38px;
+}
+body.sl-mini-window .actions button:first-child,
+body.study-room-page[data-room-theme] .sl-mini-timer-actions button:first-child {
+  background:linear-gradient(145deg,
+    color-mix(in srgb,var(--mini-accent) 71%,var(--mini-base) 29%),
+    color-mix(in srgb,var(--mini-accent) 55%,var(--mini-base) 45%))!important;
+  color:var(--mini-ink)!important;
+  border-color:color-mix(in srgb,var(--mini-accent) 42%,transparent)!important;
+}
+body.sl-mini-window .actions button:disabled,
+body.study-room-page[data-room-theme] .sl-mini-timer-actions button:disabled {
+  opacity:.43;
+}
+body.study-room-page[data-room-theme] .sl-mini-timer-launcher{
+  background:linear-gradient(145deg,
+    color-mix(in srgb,var(--mini-accent) 11%,transparent),
+    color-mix(in srgb,var(--mini-base) 66%,transparent))!important;
+  color:var(--mini-ink)!important;
+  border-color:color-mix(in srgb,var(--mini-ink) 23%,transparent)!important;
+  -webkit-backdrop-filter:blur(7px)!important;backdrop-filter:blur(7px)!important;
+}
+@media(max-width:520px){
+  body.sl-mini-window{padding:9px}
+  body.sl-mini-window :is(.mini,.pip){padding:12px;border-radius:22px!important}
+  body.sl-mini-window .sl-mini-clock-glass :is(#clock,.clock){font-size:clamp(2.05rem,9vw,2.8rem)!important}
+  body.study-room-page[data-room-theme] .sl-mini-clock-glass .sl-mini-timer-clock{font-size:2.5rem!important}
+  body.study-room-page[data-room-theme] .sl-mini-timer-panel{
+    -webkit-backdrop-filter:blur(5px)!important;backdrop-filter:blur(5px)!important;
+  }
+}
+@media(prefers-reduced-transparency:reduce){
+  body.sl-mini-window :is(.mini,.pip),
+  body.study-room-page[data-room-theme] .sl-mini-timer-panel {
+    background:var(--mini-base)!important;
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  body.sl-mini-window *,body.study-room-page[data-room-theme] .sl-mini-timer-panel * {
+    transition:none!important;
+  }
+}

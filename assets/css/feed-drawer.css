@@ -2378,3 +2378,150 @@ html[data-theme="light"] .sl-feed-post-report-reason:hover {
 @media (prefers-reduced-motion: reduce) {
   .sl-feed-notifications-toggle { transition: none; }
 }
+
+/* Social header controls: notification, refresh and close share exactly
+   the same hit area on desktop, tablets and phones. The buttons never spin. */
+.sl-feed-panel[data-size="full"] .sl-feed-head-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+.sl-feed-panel[data-size="full"] .sl-feed-head-actions > .sl-feed-notifications-toggle,
+.sl-feed-panel[data-size="full"] .sl-feed-head-actions > .sl-feed-refresh,
+.sl-feed-panel[data-size="full"] .sl-feed-head-actions > .sl-feed-close {
+  position: relative !important;
+  box-sizing: border-box !important;
+  display: grid !important;
+  place-items: center !important;
+  flex: 0 0 36px !important;
+  width: 36px !important;
+  min-width: 36px !important;
+  max-width: 36px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 1px solid rgba(140,190,220,.22) !important;
+  border-radius: 11px !important;
+  background: rgba(125,170,205,.10) !important;
+  color: inherit !important;
+  font: inherit !important;
+  line-height: 1 !important;
+  cursor: pointer;
+  transform: none !important;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.sl-feed-panel[data-size="full"] .sl-feed-head-actions > .sl-feed-notifications-toggle:hover,
+.sl-feed-panel[data-size="full"] .sl-feed-head-actions > .sl-feed-refresh:hover,
+.sl-feed-panel[data-size="full"] .sl-feed-head-actions > .sl-feed-close:hover {
+  background: rgba(100,185,235,.18) !important;
+  border-color: rgba(120,196,238,.35) !important;
+  transform: none !important;
+}
+.sl-feed-panel[data-size="full"] .sl-feed-head-actions > .sl-feed-notifications-toggle:focus-visible,
+.sl-feed-panel[data-size="full"] .sl-feed-head-actions > .sl-feed-refresh:focus-visible,
+.sl-feed-panel[data-size="full"] .sl-feed-head-actions > .sl-feed-close:focus-visible {
+  outline: 2px solid #7bd7ff;
+  outline-offset: 2px;
+}
+.sl-feed-panel[data-size="full"] .sl-feed-head-actions > .sl-feed-notifications-toggle svg,
+.sl-feed-panel[data-size="full"] .sl-feed-head-actions > .sl-feed-refresh svg,
+.sl-feed-panel[data-size="full"] .sl-feed-head-actions > .sl-feed-close svg {
+  display: block !important;
+  flex: 0 0 auto;
+  width: 20px !important;
+  height: 20px !important;
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 1.9 !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+  pointer-events: none;
+  transform-origin: center;
+}
+.sl-feed-panel[data-size="full"] .sl-feed-head-actions > .sl-feed-refresh.is-refreshing {
+  animation: none !important;
+  transform: none !important;
+}
+.sl-feed-panel[data-size="full"] .sl-feed-head-actions > .sl-feed-refresh.is-refreshing .sl-feed-refresh-icon {
+  animation: sl-feed-refresh-icon-spin .75s linear infinite;
+}
+@keyframes sl-feed-refresh-icon-spin {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sl-feed-panel[data-size="full"] .sl-feed-head-actions > .sl-feed-refresh.is-refreshing .sl-feed-refresh-icon {
+    animation: none !important;
+  }
+}
+
+/* Social notifications: match translucent light and dark Home appearance.
+   Keep the popover legible on iOS/Android and avoid white text on white glass. */
+.sl-feed-notification-mark-all:disabled {
+  opacity: .50;
+  cursor: default;
+}
+.sl-feed-notification-item:focus-visible,
+.sl-feed-notification-mark-all:focus-visible {
+  outline: 2px solid #56b8ec;
+  outline-offset: -2px;
+}
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-popover {
+  color: #1b3855 !important;
+  background: rgba(246,251,255,.97) !important;
+  border: 1px solid rgba(121,161,202,.33) !important;
+  box-shadow: 0 20px 58px rgba(36,68,113,.17), inset 0 1px 0 rgba(255,255,255,.92) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(115%) !important;
+  backdrop-filter: blur(16px) saturate(115%) !important;
+}
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-popover-head {
+  color: #183a5b !important;
+  background: rgba(236,246,255,.98) !important;
+  border-bottom-color: rgba(110,156,204,.22) !important;
+}
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-popover-head strong {
+  color: #173957 !important;
+}
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-mark-all {
+  color: #086eaf !important;
+}
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-mark-all:hover:not(:disabled) {
+  color: #044e84 !important;
+  text-decoration: underline;
+}
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-list {
+  background: transparent !important;
+}
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-item {
+  color: #254661 !important;
+  background: transparent !important;
+}
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-item strong {
+  color: #193a56 !important;
+}
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-item small {
+  color: #607891 !important;
+}
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-item:hover,
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-item:focus-visible {
+  background: rgba(71,142,204,.10) !important;
+}
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-item.is-unread {
+  background: rgba(71,142,204,.14) !important;
+  box-shadow: inset 3px 0 0 #4b9bd4;
+}
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-item.is-unread:hover {
+  background: rgba(71,142,204,.20) !important;
+}
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-kind {
+  color: #ca4a72 !important;
+}
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-empty {
+  color: #57718b !important;
+}
+html[data-theme="light"] .sl-feed-panel .sl-feed-notification-badge {
+  border-color: #f5faff !important;
+  color: #fff !important;
+}

@@ -277,12 +277,12 @@
       }
     }
 
-    <link rel="stylesheet" href="assets/css/feedback.css">
-
-<link rel="stylesheet" href="assets/css/floating-controls.css">
+  </style>
+  <link rel="stylesheet" href="assets/css/feedback.css">
+  <link rel="stylesheet" href="assets/css/floating-controls.css">
+  <link rel="stylesheet" href="assets/css/subject-home-glass.css?v=1">
 </head>
-    </style>
-<body class="maths-page" data-filter-subject="maths">
+<body class="maths-page sl-subject-hub" data-filter-subject="maths">
   <div class="subject-science-background" aria-hidden="true">
     <span class="subject-science-symbol" style="left:5%; top:16%; font-size:25px; animation-delay:-8s;">∫ f(x) dx</span>
     <span class="subject-science-symbol" style="left:24%; top:8%; font-size:22px; animation-delay:16s;">π</span>
@@ -299,27 +299,32 @@
   </div>
 
 
-  <header class="site-header">
-    <div class="brand">
-      <span class="brand-mark">🎓</span>
-      <span>E-tools</span>
+  <header class="site-header sl-subject-topbar">
+    <a class="sl-subject-back back-button" href="index.html#practical-simulations" aria-label="Back to Practical Simulations">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m14 5-7 7 7 7M7 12h13"/></svg>
+      <span class="sl-subject-back-label">Back to Subjects</span>
+    </a>
+    <div class="sl-subject-topbar-brand" aria-label="StudyLab">
+      <span class="sl-subject-topbar-mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M12 5c-3-2-6-2-9-1v14c3-1 6-1 9 1 3-2 6-2 9-1V4c-3-1-6-1-9 1ZM12 5v14"/></svg></span>
+      <span class="sl-subject-topbar-name">StudyLab</span>
     </div>
     <button type="button" class="theme-toggle" data-theme-toggle aria-label="Cycle dark, light, and system themes">
-      🌙 Dark Mode
+      <span class="theme-toggle-icon" aria-hidden="true"></span><span class="theme-toggle-label">Dark Mode</span>
     </button>
   </header>
 
-  <main class="container">
-    <section class="page-header">
-      <h1>📐 Mathematics</h1>
-      <p>Interactive tools to help you visualize and practice Combined/Higher Mathematics topics for the G.C.E A/L syllabus.</p>
-    </section>
-
-    <div class="back-row">
-      <a class="back-button" href="index.html">← Back to Subjects</a>
+  <main class="container sl-subject-main">
+    <div class="sl-subject-intro-panel">
+      <section class="page-header">
+        <span class="sl-subject-hero-icon" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><rect x="10" y="5" width="28" height="38" rx="5"/><path d="M16 13h16v8H16zM17 28h3M28 28h3M17 35h3M28 35h3"/></svg></span>
+        <div class="sl-subject-hero-copy">
+          <span class="sl-subject-kicker">G.C.E. A/L · COMBINED MATHEMATICS SIMULATIONS</span>
+          <h1>Mathematics</h1>
+          <p>Interactive tools to help you visualize and practice Combined/Higher Mathematics topics for the G.C.E A/L syllabus.</p>
+        </div>
+      </section>
+      <div class="lesson-filter" id="lessonFilter" aria-label="Filter tools"></div>
     </div>
-
-    <div class="lesson-filter" id="lessonFilter" aria-label="Filter tools"></div>
 
     <section class="tool-grid" aria-label="Mathematics tools">
 <a class="tool-card" href="tools/Maths/Trigonometry.html">

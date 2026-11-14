@@ -359,93 +359,97 @@
     }
   </style>
 <link rel="stylesheet" href="assets/css/floating-controls.css">
+<link rel="stylesheet" href="assets/css/subject-home-glass.css?v=1">
+<link rel="stylesheet" href="assets/css/resource-home-glass.css?v=1">
 </head>
-<body>
+<body class="sl-subject-hub sl-resource-hub sl-utilities-hub">
 
-  <header class="site-header">
-    <div class="brand">
-      <span class="brand-mark">🎓</span>
-      <span>E-tools</span>
+  <header class="site-header sl-subject-topbar">
+    <a class="sl-subject-back back-button" href="index.html#other-al-resources" aria-label="Back to A/L Resources">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m14 5-7 7 7 7M7 12h13"/></svg>
+      <span class="sl-subject-back-label">Back to StudyLab</span>
+    </a>
+    <div class="sl-subject-topbar-brand" aria-label="StudyLab">
+      <span class="sl-subject-topbar-mark" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5c-3-2-6-2-9-1v14c3-1 6-1 9 1 3-2 6-2 9-1V4c-3-1-6-1-9 1ZM12 5v14"/></svg></span>
+      <span class="sl-subject-topbar-name">StudyLab</span>
     </div>
     <button type="button" class="theme-toggle" data-theme-toggle aria-label="Cycle dark, light, and system themes">
-      🌙 Dark Mode
+      <span class="theme-toggle-icon" aria-hidden="true"></span><span class="theme-toggle-label">Dark Mode</span>
     </button>
   </header>
 
-  <main class="container">
-    <section class="study-tools-hero">
-      <span class="study-tools-badge">A/L General Study Tools</span>
-      <h1>🧰 Study Tools</h1>
-      <p>
-        Practical tools for planning, calculating, practicing and managing your A/L study workflow.
-        The A/L 2027 countdown already lives on the StudyLab homepage, so it is deliberately not duplicated here.
-      </p>
-    </section>
-
-    <div class="back-row">
-      <a class="back-button" href="index.html">← Back to Subjects</a>
+  <main class="container sl-subject-main">
+    <div class="sl-subject-intro-panel">
+      <section class="page-header study-tools-hero">
+        <span class="sl-subject-hero-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M8 8V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3M3 13h18M10 12v3h4v-3"/></svg></span>
+        <div class="sl-subject-hero-copy">
+          <span class="sl-subject-kicker">A/L GENERAL STUDY UTILITIES</span>
+          <h1>Study Tools</h1>
+          <p>Practical tools for planning, calculating, practicing and managing your A/L study workflow. The 2027 A/L countdown remains on the StudyLab homepage.</p>
+        </div>
+      </section>
     </div>
 
     <section class="study-tools-grid" aria-label="Study tools">
 
       <button class="utility-card" type="button" data-open-tool="marks">
-        <span class="card-icon">🧮</span>
+        <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M8 6h8M8 11h2M14 11h2M8 16h2M14 16h2"/></svg></span>
         <h2>Marks Calculator</h2>
         <p>Calculate raw totals, percentages, averages and weighted marks.</p>
         <span class="card-cta">Open Calculator →</span>
       </button>
 
       <button class="utility-card" type="button" data-open-tool="study-time">
-        <span class="card-icon">⏱️</span>
+        <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 3"/></svg></span>
         <h2>Study Time Calculator</h2>
         <p>Distribute your available study time across subjects using custom weights.</p>
         <span class="card-cta">Plan Time →</span>
       </button>
 
       <button class="utility-card" type="button" data-open-tool="pomodoro">
-        <span class="card-icon">🍅</span>
+        <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6M12 2v3"/></svg></span>
         <h2>Pomodoro / Study Timer</h2>
         <p>Run focused study sessions with automatic study and break cycles.</p>
         <span class="card-cta">Start Timer →</span>
       </button>
 
       <button class="utility-card" type="button" data-open-tool="random">
-        <span class="card-icon">🎲</span>
+        <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="8" cy="8" r="1"/><circle cx="16" cy="8" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="8" cy="16" r="1"/><circle cx="16" cy="16" r="1"/></svg></span>
         <h2>Random Question Generator</h2>
         <p>Generate a quick A/L-style revision prompt from a selected subject.</p>
         <span class="card-cta">Generate Question →</span>
       </button>
 
       <button class="utility-card" type="button" data-open-tool="flashcards">
-        <span class="card-icon">🗃️</span>
+        <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><rect x="3" y="6" width="16" height="13" rx="2"/><path d="M7 3h14v13M7 11h8M7 15h5"/></svg></span>
         <h2>Flashcards</h2>
         <p>Create your own question-and-answer cards and keep them on this device.</p>
         <span class="card-cta">Open Flashcards →</span>
       </button>
 
       <button class="utility-card" type="button" data-open-tool="mistakes">
-        <span class="card-icon">📓</span>
+        <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M5 3h14v18H5zM9 7h6M9 11h6M9 15h3M14 16l2 2 4-5"/></svg></span>
         <h2>Mistake Notebook</h2>
         <p>Save questions you got wrong, record the correction and retry them later.</p>
         <span class="card-cta">Open Notebook →</span>
       </button>
 
       <button class="utility-card" type="button" data-open-tool="daily">
-        <span class="card-icon">📅</span>
+        <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18M8 14h3M14 14h3M8 18h3"/></svg></span>
         <h2>Daily Practice Generator</h2>
         <p>Build a balanced daily practice plan from your subjects and available time.</p>
         <span class="card-cta">Build Plan →</span>
       </button>
 
       <button class="utility-card" type="button" data-open-tool="mock">
-        <span class="card-icon">🎯</span>
+        <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg></span>
         <h2>Mock Exam Timer</h2>
         <p>Run a distraction-free countdown for a full paper or custom mock exam.</p>
         <span class="card-cta">Start Mock →</span>
       </button>
 
       <button class="utility-card" type="button" data-open-tool="units">
-        <span class="card-icon">📏</span>
+        <span class="card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M3 7h18v10H3zM7 7v4M11 7v2M15 7v4M19 7v2"/></svg></span>
         <h2>Unit Converter</h2>
         <p>Convert common length, mass, time, energy, pressure, temperature and electrical units.</p>
         <span class="card-cta">Open Converter →</span>

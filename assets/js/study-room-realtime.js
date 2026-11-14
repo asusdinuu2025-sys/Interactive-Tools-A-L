@@ -194,8 +194,10 @@
     const isRunning = Boolean(row?.is_studying);
     const isAway = Boolean(row?.session_active && row?.session_presence_state === "away");
     const hasSession = Boolean(row?.session_active);
-    join.disabled = isRunning || isAway || Boolean(sessionAction);
-    pause.disabled = !isRunning || Boolean(sessionAction);
+    // Start begins a NEW session. Once paused, Pause becomes Continue.
+    // Away sessions stay locked until presence is reconciled by the server.
+    join.disabled = hasSession || isRunning || isAway || Boolean(sessionAction);
+    pause.disabled = !hasSession || isAway || Boolean(sessionAction);
     leave.disabled = !hasSession || Boolean(sessionAction);
     targetHours.disabled = hasSession;
     targetMinutes.disabled = hasSession;
@@ -222,8 +224,10 @@
       targetHours.querySelector('option[data-legacy-target="true"]')?.remove();
     }
     hadActiveSession = hasSession;
-    join.textContent = "Start";
-    pause.textContent = "Pause";
+    join.textContent = sessionAction === 'start' ? "Starting…" : "Start";
+    pause.textContent = sessionAction === 'continue' ? "Continuing…" :
+      sessionAction === 'pause' ? "Pausing…" :
+      hasSession && !isRunning && !isAway ? "Continue" : "Pause";
     leave.textContent = "End";
     status.textContent = isAway ? "Away" : isRunning ? "Studying" : hasSession ? "Paused" : "Not studying";
     panel.classList.toggle("is-studying", isRunning);
@@ -233,83 +237,168 @@
         ? "Studying " + (row?.subject || subject.value) + " · session in progress"
         : row?.session_target_reached_at && hasSession
           ? "Target reached · paused · resume before midnight to confirm away time"
-          : hasSession ? "Paused · press Start to resume" : "Not studying · select a subject and target to begin";
+          : hasSession ? "Paused · press Continue to resume" : "Not studying · select a subject and target to begin";
     liveLabel.textContent = "Live shared room";
     emitTimerState();
+  }
+
+  // Shared daily/weekly score calculation. Stable ties avoid a crown that
+  // randomly jumps between accounts with the same number of seconds.
+  function rankedRoomRows(period) {
+    const daily = period === 'daily';
+    const expected = daily ? dayKey(new Date()) : weekStart(new Date());
+    const dateField = daily ? 'today_date' : 'week_start';
+    const secondsField = daily ? 'today_seconds' : 'week_seconds';
+    const boundary = startOfDay(expected);
+    return rows.map(r => ({
+      ...r,
+      score: (r[dateField] === expected ? Math.max(0, Number(r[secondsField]) || 0) : 0) +
+        pendingSeconds(r, boundary)
+    })).sort((a, b) => b.score - a.score ||
+      String(a.display_name || '').localeCompare(String(b.display_name || ''), 'en', {sensitivity:'base'}) ||
+      String(a.user_id || '').localeCompare(String(b.user_id || '')));
+  }
+  function setLiveText(node, value) {
+    const label = String(value ?? '');
+    if (node && node.textContent !== label) node.textContent = label;
   }
   function renderPeople() {
     const active = rows.filter(r => heartbeatIsFresh(r) ||
       (r?.session_active && r?.session_presence_state === 'away'));
-    activeCount.textContent = String(active.length);
+    setLiveText(activeCount, active.length);
     const own = rows.find(r => r.user_id === userId) || member;
-    const currentWeek = weekStart(new Date());
-    const weeklyRanked = rows.map(r => ({
-      ...r, rankScore: (r.week_start === currentWeek ? Number(r.week_seconds) || 0 : 0) + pendingSeconds(r, startOfDay(currentWeek))
-    })).sort((a,b) => b.rankScore - a.rankScore);
-    const ownRankIndex = weeklyRanked.findIndex(r => r.user_id === userId);
-    yourRank.textContent = ownRankIndex >= 0 ? '#' + (ownRankIndex + 1) : '—';
-    yourRank.title = ownRankIndex >= 0
+    const rankedWeek = rankedRoomRows('weekly');
+    const ownRank = rankedWeek.findIndex(r => r.user_id === userId);
+    setLiveText(yourRank, ownRank < 0 ? '—' : '#' + (ownRank + 1));
+    yourRank.title = ownRank >= 0
       ? 'Ranked by total study time this week among Study Room members'
       : 'Your rank appears after your Study Room record is available';
+    const currentWeek = weekStart(new Date());
     const thisWeek = own && own.week_start === currentWeek ? Number(own.week_seconds) || 0 : 0;
-    weeklyHours.textContent = profileDuration(thisWeek + pendingSeconds(own, startOfDay(currentWeek)));
-    people.replaceChildren();
-    if (!active.length) {
-      people.innerHTML = '<p class="room-empty">No one is studying right now. Be the first to start.</p>';
-    } else {
-      active.sort((a,b) => a.display_name.localeCompare(b.display_name)).forEach(r => {
-        const card = document.createElement('article');
+    setLiveText(weeklyHours, profileDuration(thisWeek + pendingSeconds(own, startOfDay(currentWeek))));
+
+    const today = dayKey(new Date()), boundary = startOfDay(today);
+    const rankedToday = rankedRoomRows('daily');
+    const dailyPositions = new Map(rankedToday.map((r, i) => [String(r.user_id), i + 1]));
+    const crownId = rankedToday[0]?.score > 0 ? String(rankedToday[0].user_id) : null;
+    if (active.length === 0) {
+      let empty = people.querySelector('.room-empty');
+      if (!empty || people.children.length !== 1) {
+        empty = document.createElement('p');
+        empty.className = 'room-empty';
+        people.replaceChildren(empty);
+      }
+      setLiveText(empty, 'No one is studying right now. Be the first to start.');
+      return;
+    }
+    people.querySelector('.room-empty')?.remove();
+    const existing = new Map([...people.querySelectorAll('.room-person-card[data-user-id]')]
+      .map(card => [card.dataset.userId, card]));
+    const visible = new Set();
+    active.sort((a,b) =>
+      String(a.display_name || '').localeCompare(String(b.display_name || ''), 'en', {sensitivity:'base'}) ||
+      String(a.user_id || '').localeCompare(String(b.user_id || '')));
+    active.forEach((r, index) => {
+      const id = String(r.user_id);
+      visible.add(id);
+      let card = existing.get(id);
+      if (!card) {
+        card = document.createElement('article');
         card.className = 'room-person-card';
-        const today = r.today_date === dayKey(new Date()) ? Number(r.today_seconds) || 0 : 0;
-        const liveToday = pendingSeconds(r, startOfDay(dayKey(new Date())));
-        card.innerHTML = '<div class="room-person-card-top"><div class="room-avatar"></div><span class="room-person-status">Studying now</span></div>' +
-          '<div class="room-person-card-name"></div><div class="room-person-card-subject"></div>' +
-          '<div class="room-person-card-divider"></div><div class="room-person-card-time-label">Today\'s study time</div><div class="room-person-card-time"></div>';
-        const avatar = card.querySelector('.room-avatar');
-        setGenderIcon(avatar, r.gender);
+        card.dataset.userId = id;
+        card.innerHTML = "<div class='room-person-card-top'><div class='room-avatar'></div><span class='room-person-status'>Studying now</span></div>" +
+          "<div class='room-person-card-name-row'><div class='room-person-card-name'></div><span class='room-person-card-rank' title='Daily rank among all Study Room members'></span></div>" +
+          "<div class='room-person-card-subject'></div><div class='room-person-card-divider'></div>" +
+          "<div class='room-person-card-time-label'>Today's study time</div><div class='room-person-card-time'></div>";
         const neonPalette = [['#45ddff','#087da0'],['#b79aff','#7040c7'],['#55edb0','#08794e'],['#ffd166','#9a5b00'],['#ff83c8','#b21b70'],['#ff8b6b','#b83b22']];
-        const identity = String(r.user_id || r.display_name || 'student');
-        let colourHash = 0;
-        for (let index = 0; index < identity.length; index++) colourHash = (colourHash * 31 + identity.charCodeAt(index)) | 0;
-        const neon = neonPalette[Math.abs(colourHash) % neonPalette.length];
+        let hash = 0;
+        for (let i=0; i<id.length; i++) hash = (hash*31 + id.charCodeAt(i)) | 0;
+        const neon = neonPalette[Math.abs(hash) % neonPalette.length];
+        const avatar = card.querySelector('.room-avatar');
         avatar.classList.add('slr-neon-avatar');
         avatar.style.setProperty('--slr-neon-dark', neon[0]);
         avatar.style.setProperty('--slr-neon-light', neon[1]);
-        avatar.title = r.session_presence_state === 'away' ? 'Away · timer continues to target' : 'Studying now';
-        card.querySelector('.room-person-status').textContent = r.session_presence_state === 'away' ? 'Away' : 'Studying now';
-        card.querySelector('.room-person-card-name').textContent = r.display_name;
-        card.querySelector('.room-person-card-subject').textContent = r.subject;
-        card.querySelector('.room-person-card-time').textContent = profileDuration(today + liveToday);
-        people.appendChild(card);
-      });
+      }
+      const avatar = card.querySelector('.room-avatar');
+      const gender = r.gender === 'female' ? 'female' : 'male';
+      if (avatar.dataset.gender !== gender) {
+        avatar.classList.remove('room-avatar-female','room-avatar-male');
+        setGenderIcon(avatar, gender);
+        avatar.dataset.gender = gender;
+      }
+      const hasCrown = id === crownId;
+      avatar.classList.toggle('slr-crown-avatar', hasCrown);
+      if (hasCrown) {
+        const title = gender === 'female' ? 'Study Queen' : 'Study King';
+        const crown = gender === 'female' ? '♕' : '♛';
+        if (avatar.getAttribute('data-slr-crown') !== crown) avatar.setAttribute('data-slr-crown', crown);
+        avatar.setAttribute('aria-label', gender + ' profile icon, ' + title + ', daily rank #1');
+        avatar.title = title + ' · daily rank #1';
+      } else {
+        if (avatar.hasAttribute('data-slr-crown')) avatar.removeAttribute('data-slr-crown');
+        avatar.setAttribute('aria-label', gender + ' profile icon');
+        avatar.title = r.session_presence_state === 'away'
+          ? 'Away · timer continues to target' : 'Studying now';
+      }
+      const number = dailyPositions.get(id);
+      const badge = card.querySelector('.room-person-card-rank');
+      setLiveText(badge, number ? '#' + number : '—');
+      badge.classList.toggle('is-daily-leader', hasCrown);
+      badge.setAttribute('aria-label', number ? 'Daily rank number ' + number : 'No daily rank');
+      setLiveText(card.querySelector('.room-person-status'),
+        r.session_presence_state === 'away' ? 'Away' : 'Studying now');
+      setLiveText(card.querySelector('.room-person-card-name'), r.display_name || 'Student');
+      setLiveText(card.querySelector('.room-person-card-subject'), r.subject || '—');
+      const saved = r.today_date === today ? Number(r.today_seconds) || 0 : 0;
+      setLiveText(card.querySelector('.room-person-card-time'), profileDuration(saved + pendingSeconds(r, boundary)));
+      if (people.children[index] !== card) people.insertBefore(card, people.children[index] || null);
+    });
+    for (const card of [...people.querySelectorAll('.room-person-card')]) {
+      if (!visible.has(card.dataset.userId)) card.remove();
     }
   }
   function renderBoard() {
-    const field = selectedBoard === 'daily' ? 'today_seconds' : 'week_seconds';
-    const bucket = selectedBoard === 'daily' ? 'today_date' : 'week_start';
-    const expected = selectedBoard === 'daily' ? dayKey(new Date()) : weekStart(new Date());
-    const boundary = startOfDay(expected);
-    const ranked = rows.map(r => ({
-      ...r,
-      score: (r[bucket] === expected ? Number(r[field]) || 0 : 0) +
-        ((r.is_studying || r.session_presence_state === 'away') ? pendingSeconds(r, boundary) : 0)
-    })).sort((a,b) => b.score - a.score);
-    board.replaceChildren();
+    const ranked = rankedRoomRows(selectedBoard);
     if (!ranked.length) {
-      board.innerHTML = '<p class="room-empty">The leaderboard will appear as students study.</p>';
+      let empty = board.querySelector('.room-empty');
+      if (!empty || board.children.length !== 1) {
+        empty = document.createElement('p');
+        empty.className = 'room-empty';
+        board.replaceChildren(empty);
+      }
+      setLiveText(empty, 'The leaderboard will appear as students study.');
     } else {
+      board.querySelector('.room-empty')?.remove();
+      const existing = new Map([...board.querySelectorAll('.room-rank[data-user-id]')]
+        .map(item => [item.dataset.userId, item]));
+      const visible = new Set();
       ranked.forEach((r,i) => {
-        const item = document.createElement('div');
-        item.className = 'room-rank';
-        item.innerHTML = '<span class="room-rank-number"></span><div class="room-avatar"></div>' +
-          '<div class="room-rank-info"><strong></strong><span></span></div><span class="room-time"></span>';
-        item.querySelector('.room-rank-number').textContent = String(i+1);
-        setGenderIcon(item.querySelector('.room-avatar'), r.gender);
-        item.querySelector('.room-rank-info strong').textContent = r.display_name;
-        item.querySelector('.room-rank-info span').textContent = r.subject;
-        item.querySelector('.room-time').textContent = compact(r.score);
-        board.appendChild(item);
+        const id = String(r.user_id);
+        visible.add(id);
+        let item = existing.get(id);
+        if (!item) {
+          item = document.createElement('div');
+          item.className = 'room-rank';
+          item.dataset.userId = id;
+          item.innerHTML = "<span class='room-rank-number'></span><div class='room-avatar'></div>" +
+            "<div class='room-rank-info'><strong></strong><span></span></div><span class='room-time'></span>";
+        }
+        const avatar = item.querySelector('.room-avatar');
+        const gender = r.gender === 'female' ? 'female' : 'male';
+        if (avatar.dataset.gender !== gender) {
+          avatar.classList.remove('room-avatar-female','room-avatar-male');
+          setGenderIcon(avatar, gender);
+          avatar.dataset.gender = gender;
+        }
+        setLiveText(item.querySelector('.room-rank-number'), i+1);
+        setLiveText(item.querySelector('.room-rank-info strong'), r.display_name || 'Student');
+        setLiveText(item.querySelector('.room-rank-info span'), r.subject || '—');
+        setLiveText(item.querySelector('.room-time'), compact(r.score));
+        if (board.children[i] !== item) board.insertBefore(item, board.children[i] || null);
       });
+      for (const item of [...board.querySelectorAll('.room-rank')]) {
+        if (!visible.has(item.dataset.userId)) item.remove();
+      }
     }
     dailyTab.classList.toggle('active', selectedBoard === 'daily');
     weeklyTab.classList.toggle('active', selectedBoard === 'weekly');
@@ -400,6 +489,8 @@
     subject.style.removeProperty("color");
     clearTargetError();
 
+    sessionAction = hasExistingSession ? 'continue' : 'start';
+    updateSessionUI(member);
     try {
       await callRpc("study_room_set_subject", { p_subject: subject.value });
       // The server preserves an existing session's original target on resume.
@@ -410,6 +501,9 @@
       say("Your study session has started. If you leave the Study Room, it continues until your target and then pauses.");
     } catch (e) {
       say("Could not start the study session: " + e.message, true);
+    } finally {
+      sessionAction = null;
+      updateSessionUI(member);
     }
   }
   async function pauseStudy() {
@@ -423,7 +517,7 @@
       if (heartbeatPromise) await heartbeatPromise;
       await callRpc('study_room_pause');
       await loadRows();
-      say('Your study session is paused. Press Start to resume it.');
+      say('Your study session is paused. Press Continue to resume it.');
     } catch (e) {
       say('Could not pause the study session: ' + e.message, true);
       try { await loadRows(); } catch (_) {}
@@ -515,7 +609,11 @@
           loadRows().catch(e => console.error('Could not refresh live Study Room data', e));
         }).subscribe();
       join.addEventListener('click', startStudy);
-      pause.addEventListener('click', pauseStudy);
+      pause.addEventListener('click', () => {
+        if (sessionAction || !member?.session_active) return;
+        if (member.is_studying) pauseStudy();
+        else if (member.session_presence_state !== 'away') startStudy();
+      });
       leave.addEventListener('click', endStudy);
       subject.addEventListener('change', async () => {
         subject.removeAttribute('aria-invalid');
@@ -542,7 +640,16 @@
           loadRows().catch(error => console.error('Could not refresh Study Room rankings', error));
         }
       }, 60000);
-      uiInterval = setInterval(updatePersonal, 1000);
+      // Refresh visible ranks from already-cached session scores; no new DB calls.
+      let lastRankUiRefresh = 0;
+      uiInterval = setInterval(() => {
+        updatePersonal();
+        if (!document.hidden && Date.now() - lastRankUiRefresh >= 10000) {
+          lastRankUiRefresh = Date.now();
+          renderPeople();
+          renderBoard();
+        }
+      }, 1000);
       window.addEventListener('online', () => {
         presenceController?.refresh();
         heartbeat();

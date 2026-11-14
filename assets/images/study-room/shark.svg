@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- Solid white-alpha shark silhouette for cross-browser CSS masking. -->
+  <path fill="#fff" stroke="#fff" stroke-width="3.5" stroke-linejoin="round"
+    d="M15 148 C41 129 75 115 103 113 L128 57 155 111
+       C177 117 195 128 215 138 L243 107 231 151
+       246 190 213 167 C187 178 156 179 130 170
+       L103 197 108 165 C78 170 44 164 15 148 Z"/>
+  <path fill="#fff" d="M95 140 C111 126 130 120 149 124 C160 141 165 156 151 171 L119 166Z"/>
+</svg>
