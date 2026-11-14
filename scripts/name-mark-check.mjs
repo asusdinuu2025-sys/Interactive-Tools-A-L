@@ -31,7 +31,8 @@ assert.ok(marks,"name mark not exported");
 const selected=[
   "b6c80613-8217-48ac-851b-a39a3d9bef2b",
   "7c97a8d7-f047-4c88-883d-4bed9b1a5f99",
-  "1f01a0f7-2030-4e14-b561-1e17648d4b3f"
+  "1f01a0f7-2030-4e14-b561-1e17648d4b3f",
+  "24e78cd0-4565-407a-96f7-9cfde083f6d2"
 ];
 for(const id of selected){
   assert.equal(marks.isMarked(id),true,"selected ID missing");
@@ -68,4 +69,4 @@ for(const [path,min] of modules){
   assert.ok((text.match(/StudyLabNameMark\?\.decorate/g)||[]).length>=min,"badge not wired into "+path);
 }
 assert.ok(css.includes("pointer-events: none"),"badge should not change clicks");
-console.log("Selected-account name mark checks passed: only 3 confirmed Auth IDs, 4 user-facing surfaces, no email exposure.");
+console.log("Selected-account name mark checks passed: only 4 confirmed Auth IDs, 4 user-facing surfaces, no email exposure.");
