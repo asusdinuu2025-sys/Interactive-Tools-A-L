@@ -193,6 +193,10 @@ body.sl-subject-hub main.sl-subject-main {
 }
 body.sl-subject-hub .sl-subject-intro-panel {
   position: relative;
+  /* The menu is absolute inside this backdrop-filter stacking context.
+     Keep its entire glass panel above the separate tool-card grid (z-index:1),
+     otherwise each open lesson list renders behind the resource cards. */
+  z-index: 2;
   overflow: visible;
   padding: clamp(20px,3vw,31px);
   border: 1px solid rgba(220,236,251,.22);
