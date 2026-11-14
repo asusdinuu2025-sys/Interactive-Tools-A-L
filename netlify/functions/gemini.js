@@ -122,7 +122,7 @@ function normalizeHistory(history) {
 // no Netlify Blob setup, and no secret service-role credential in the client.
 async function reserveQuota(event) {
   const authorization = event?.headers?.authorization || event?.headers?.Authorization || "";
-  const token = authorization.match(/^Bearer\\s+(.+)$/i)?.[1];
+  const token = authorization.match(/^Bearer\s+(.+)$/i)?.[1];
   if (!token) return { ok: false, reason: "storage" };
   try {
     const response = await fetch(SUPABASE_URL + "/rest/v1/rpc/studylab_ai_atomic_reserve", {
