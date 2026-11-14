@@ -60,7 +60,7 @@ for(const file of ["index.html","study-room.html"]){
 }
 const modules=[
  ["assets/js/profile.js",2],
- ["assets/js/studylab-social.js",4],
+ ["assets/js/studylab-social.js",3],
  ["assets/js/study-room-realtime.js",2],
  ["assets/js/home-panels.js",2]
 ];
@@ -69,4 +69,7 @@ for(const [path,min] of modules){
   assert.ok((text.match(/StudyLabNameMark\?\.decorate/g)||[]).length>=min,"badge not wired into "+path);
 }
 assert.ok(css.includes("pointer-events: none"),"badge should not change clicks");
+const viewer=readFileSync("assets/js/studylab-profile-view.js","utf8");
+assert.ok(viewer.includes("StudyLabNameMark?.decorate(nameNode,id)"),
+  "the public student profile viewer must keep the selected account blue badges");
 console.log("Selected-account name mark checks passed: only 4 confirmed Auth IDs, 4 user-facing surfaces, no email exposure.");

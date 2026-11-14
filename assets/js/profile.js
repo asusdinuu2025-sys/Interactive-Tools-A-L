@@ -10,6 +10,8 @@
   const profileInput = document.getElementById("profileName");
   const profileNameStatus = document.getElementById("profileNameStatus");
   const profileUsername = document.getElementById("profileUsername");
+  const profileBio = document.getElementById("profileBio");
+  const profileBioCount = document.getElementById("profileBioCount");
   const profileUsernameStatus = document.getElementById("profileUsernameStatus");
   const profileSchool = document.getElementById("profileSchool");
   const profilePhone = document.getElementById("profilePhone");
@@ -20,7 +22,7 @@
   const profileStatus = document.getElementById("profileStatus");
   const profileNameLabel = document.getElementById("profileNameLabel");
   const profileSubtitle = document.getElementById("profileSubtitle");
-  const profileFields = [profileInput, profileUsername, profileSchool, profilePhone, profileExamYear, profileStream];
+  const profileFields = [profileInput, profileUsername, profileBio, profileSchool, profilePhone, profileExamYear, profileStream].filter(Boolean);
   let closeTimer = null;
   let nameCheckTimer = null;
   let nameCheckSequence = 0;
@@ -396,6 +398,8 @@
       profileUsernameStatus.textContent = "";
       profileUsernameStatus.dataset.state = "";
     }
+    if (profileBio) profileBio.value = p?.bio || "";
+    updateBioCount();
     profileSchool.value = p?.school || "";
     profilePhone.value = p?.phone || "";
     profileExamYear.value = p?.exam_year || "";
@@ -406,6 +410,17 @@
       button.classList.toggle("is-selected", active);
       button.setAttribute("aria-pressed", String(active));
     });
+  }
+  function bioWords(text) {
+    const value=String(text||"").trim();
+    return value ? value.split(/\s+/).length : 0;
+  }
+  function updateBioCount(){
+    if(!profileBio || !profileBioCount)return;
+    const count=bioWords(profileBio.value);
+    profileBioCount.textContent=count+" / 15 words";
+    profileBioCount.classList.toggle("is-over-limit",count>15);
+    profileBio.setAttribute("aria-invalid",String(count>15));
   }
   function normalizeDisplayName(value) {
     return String(value || "").trim().replace(/\s+/g, " ");
@@ -723,6 +738,7 @@
   profileInput?.addEventListener("change", checkNameAvailability);
   profileUsername?.addEventListener("input", scheduleUsernameAvailabilityCheck);
   profileUsername?.addEventListener("change", checkUsernameAvailability);
+  profileBio?.addEventListener("input",updateBioCount);
   profileClose?.addEventListener("click", closeModal);
   profileModal.addEventListener("click", event => {
     if (event.target === profileModal) closeModal();
@@ -767,6 +783,12 @@
         return;
       }
     }
+    const bio = String(profileBio?.value||"").trim().replace(/\s+/g," ");
+    if(bioWords(bio)>15 || bio.length>240){
+      showStatus("Bio must be 15 words or fewer.",true);
+      profileBio?.focus();
+      return;
+    }
     const school = profileSchool.value.trim().replace(/\s+/g, " ");
     const phone = profilePhone.value.trim();
     if (mandatoryProfile && school.length < 2) {
@@ -804,6 +826,7 @@
       await account.ready;
       const p = await account.saveProfile(name, {
         username,
+        bio,
         school,
         phone,
         exam_year: profileExamYear.value,

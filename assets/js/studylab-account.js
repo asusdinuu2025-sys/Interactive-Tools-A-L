@@ -84,7 +84,7 @@
 
     const { data, error } = await client
       .from("studylab_profiles")
-      .select("id,display_name,username,school,phone,exam_year,study_stream,gender,profile_completed_at,created_at,updated_at")
+      .select("id,display_name,username,bio,school,phone,exam_year,study_stream,gender,profile_completed_at,created_at,updated_at")
       .eq("id", user.id)
       .maybeSingle();
 
@@ -129,7 +129,7 @@
         },
         { onConflict: "id" }
       )
-      .select("id,display_name,username,school,phone,exam_year,study_stream,gender,profile_completed_at,created_at,updated_at")
+      .select("id,display_name,username,bio,school,phone,exam_year,study_stream,gender,profile_completed_at,created_at,updated_at")
       .single();
 
     if (error) throw error;
@@ -162,6 +162,10 @@
     const examYear = String(details.exam_year || "").trim();
     const studyStream = String(details.study_stream || "").trim();
     const gender = String(details.gender || "").trim();
+    const bio = String(details.bio || "").trim().replace(/\s+/g," ");
+    if (bio.length > 240 || (bio && bio.split(" ").length > 15)) {
+      throw new Error("Your bio must be 15 words or fewer (240 characters maximum).");
+    }
 
     if (school && school.length < 2) throw new Error("Please enter a valid school name.");
     if (requireFullProfile && !school) throw new Error("Please enter your school name.");
@@ -204,10 +208,11 @@
         exam_year: examYear,
         study_stream: studyStream,
         gender: gender || null,
+        bio: bio || null,
         profile_completed_at: fullDetailsComplete ? (profile?.profile_completed_at || now) : null,
         updated_at: now
       }, { onConflict: "id" })
-      .select("id,display_name,username,school,phone,exam_year,study_stream,gender,profile_completed_at,created_at,updated_at")
+      .select("id,display_name,username,bio,school,phone,exam_year,study_stream,gender,profile_completed_at,created_at,updated_at")
       .single();
 
     if (error) {
@@ -270,7 +275,7 @@
             if (legacyName.length >= 2 && legacyName.length <= 60) {
               const { data: migrated, error: saveError } = await client.from("studylab_profiles")
                 .upsert({ id: user.id, display_name: legacyName, updated_at: new Date().toISOString() }, { onConflict: "id" })
-                .select("id,display_name,username,school,phone,exam_year,study_stream,gender,profile_completed_at,created_at,updated_at").single();
+                .select("id,display_name,username,bio,school,phone,exam_year,study_stream,gender,profile_completed_at,created_at,updated_at").single();
               if (saveError) throw saveError;
               profile = migrated;
               localStorage.removeItem("studyLabProfile");

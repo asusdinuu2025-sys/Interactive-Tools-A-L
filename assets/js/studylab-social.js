@@ -406,6 +406,11 @@
     status.append(document.createTextNode(message));
   }
 
+  window.addEventListener("studylab:follow-error", event => {
+    if (panel.inert) return;
+    setStatus(event.detail?.message || "Could not update following. Please retry.", true);
+  });
+
   async function requireBasicProfile() {
     const account = accountClient();
     await account.ready;
@@ -721,19 +726,18 @@
       postMenu.append(menuToggle, menuPanel);
     }
     top.append(identity, date);
-    if (postMenu) top.append(postMenu);
+    // Keep Follow/Following immediately beside the existing three-dot menu,
+    // rather than allowing the post's date to separate the two controls.
+    const postControls = make("div","sl-feed-post-controls");
+    if (post.author_id !== currentUserId) {
+      const followButton = window.StudyLabFollow?.makeButton(post.author_id, {compact:true});
+      if (followButton) postControls.append(followButton);
+    }
+    if (postMenu) postControls.append(postMenu);
+    if (postControls.childElementCount) top.append(postControls);
     card.append(top);
-    identity.addEventListener("click",() => {
-      const existing = card.querySelector(".sl-feed-profile-popover");
-      if (existing) { existing.remove(); return; }
-      panel.querySelectorAll(".sl-feed-profile-popover").forEach(item => item.remove());
-      const popover = make("div","sl-feed-profile-popover");
-      const popoverName = make("strong","",post.author_display_name || "Student");
-      window.StudyLabNameMark?.decorate(popoverName, post.author_id);
-      popover.append(popoverName);
-      popover.append(make("span","", "@" + (post.author_username || "student")));
-      popover.append(make("small","","StudyLab student"));
-      card.append(popover);
+    identity.addEventListener("click", () => {
+      window.StudyLabProfileView?.open({userId:post.author_id});
     });
 
     if (post.body) {
@@ -1055,6 +1059,17 @@
       copy.append(memberName);
       copy.append(make("small", "", "@" + (member.author_username || "student")));
       row.append(avatar, copy);
+      row.classList.add("sl-follow-profile-trigger");
+      row.setAttribute("role","button");
+      row.tabIndex=0;
+      row.setAttribute("aria-label","View profile of "+(member.author_display_name||"Student"));
+      row.addEventListener("click",()=>window.StudyLabProfileView?.open({userId:member.author_id}));
+      row.addEventListener("keydown",event=>{
+        if(event.key==="Enter"||event.key===" "){
+          event.preventDefault();
+          window.StudyLabProfileView?.open({userId:member.author_id});
+        }
+      });
       list.append(row);
     }
   }
@@ -1065,6 +1080,14 @@
   let socialNotificationPopover = null;
   let socialNotificationRows = [];
   let socialNotificationUnreadCount = 0;
+  function lkNotificationDayStart() {
+    const parts=new Intl.DateTimeFormat("en-GB",{
+      timeZone:"Asia/Colombo",year:"numeric",month:"2-digit",day:"2-digit"
+    }).formatToParts(new Date());
+    const read=type=>parts.find(p=>p.type===type)?.value||"";
+    return read("year")+"-"+read("month")+"-"+read("day")+"T00:00:00+05:30";
+  }
+  let socialNoticeDay=lkNotificationDayStart();
 
   function ensureSocialNotificationUI() {
     const toggle = panel.querySelector(".sl-feed-notifications-toggle");
@@ -1152,10 +1175,12 @@
       const [rowsResult, countResult] = await Promise.all([
         client.from("studylab_social_notifications")
           .select("id,actor_display_name,post_id,notification_type,is_read,created_at")
-          .eq("recipient_id", userId).order("created_at", { ascending: false }).limit(30),
+          .eq("recipient_id", userId).gte("created_at",lkNotificationDayStart())
+           .order("created_at", { ascending: false }).limit(30),
         client.from("studylab_social_notifications")
           .select("id", { count: "exact", head: true })
           .eq("recipient_id", userId).eq("is_read", false)
+           .gte("created_at",lkNotificationDayStart())
       ]);
       if (rowsResult.error) throw rowsResult.error;
       if (countResult.error) throw countResult.error;
@@ -1276,6 +1301,25 @@
       .subscribe();
   }
 
+  // At 00:00 Sri Lanka time, clear cached notification UI as well as the
+  // scheduled database deletion. Do not touch posts, likes or comments.
+  function refreshNoticeDayIfChanged() {
+    const day=lkNotificationDayStart();
+    if(day===socialNoticeDay)return;
+    socialNoticeDay=day;
+    socialNotificationRows=[];
+    updateSocialNotificationBadge(0);
+    if(socialNotificationPopover)renderSocialNotifications();
+    const account=window.StudyLabAccount;
+    if(socialNotificationUserId&&account?.client){
+      loadSocialNotifications(account.client,socialNotificationUserId);
+    }
+  }
+  window.setInterval(refreshNoticeDayIfChanged,30000);
+  document.addEventListener("visibilitychange",()=>{
+    if(!document.hidden)refreshNoticeDayIfChanged();
+  });
+
   let feedLoadCount = 0;
   let lastFeedLoadedAt = 0;
   async function loadFeed() {
@@ -1312,6 +1356,12 @@
         adminBadge?.remove();
       }
       const posts = await getPostRows(account.client, user.id);
+      // One batch query keeps the follow pills consistent without querying
+      // Supabase separately for every Social post.
+      if(window.StudyLabFollow){
+        await window.StudyLabFollow.prefetch(posts.map(p=>p.author_id))
+          .catch(err=>console.warn("Following status unavailable:",err));
+      }
       renderCommunityProfiles(posts);
       const approvedIds = posts.filter(post => post.status === "approved").map(post => post.id);
       const likesByPost = new Map();

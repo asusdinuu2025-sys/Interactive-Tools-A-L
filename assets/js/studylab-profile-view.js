@@ -68,6 +68,12 @@
   let deleting = false;
   let editHandler = null;
   let accountUser = null;
+  let bioNode = null;
+  let viewedUserId = null;
+  let viewSequence = 0;
+  let followAction = null;
+  let countButtons = [];
+  let listPanel = null;
 
   function tabbables(root) {
     return [...root.querySelectorAll("button:not([disabled]),input:not([disabled]),a[href]")].filter(n => !n.hidden && n.getAttribute("aria-hidden") !== "true");
@@ -90,6 +96,8 @@
     view.hidden = true;
     document.body.classList.remove("sl-profile-view-open");
     accountUser = null;
+    viewedUserId = null;
+    listPanel.hidden = true;
     const focus = lastFocus;
     lastFocus = null;
     if (returnFocus && focus?.isConnected && typeof focus.focus === "function")focus.focus();
@@ -133,24 +141,25 @@
     titleWrap.append(nameNode,usernameNode);
     identity.append(avatarNode,titleWrap);
 
-    const note = element("p","sl-pv-description",
-      "Your StudyLab student profile.");
-    note.id="slPvDescription";
+    bioNode = element("p","sl-pv-description","No bio added yet.");
+    bioNode.id="slPvDescription";
 
     const counts = element("div","sl-pv-counts");
     for (const label of ["Followers","Following"]){
       const item = button("sl-pv-count");
-      item.disabled = true;
-      item.setAttribute("title",label+" · Coming soon");
-      item.setAttribute("aria-label",label+" · Coming soon");
-      item.append(element("strong","sl-pv-count-number","—"),element("span","sl-pv-count-label",label),
-        element("small","sl-pv-count-soon","Coming soon"));
+      item.dataset.listType = label.toLowerCase();
+      item.setAttribute("aria-label","View "+label);
+      item.append(element("strong","sl-pv-count-number","—"),element("span","sl-pv-count-label",label));
+      item.addEventListener("click",()=>openList(item.dataset.listType));
+      countButtons.push(item);
       counts.append(item);
     }
     const actions=element("div","sl-pv-actions");
     edit = createButton("sl-pv-edit","edit","Edit Profile");
     deleteStart = createButton("sl-pv-delete","trash","Delete Account");
     actions.append(edit,deleteStart);
+    followAction=element("div","sl-pv-follow-action");
+    followAction.hidden=true;
 
     const joined=element("div","sl-pv-joined");
     joined.append(icon("calendar"));
@@ -160,7 +169,9 @@
     viewStatus.setAttribute("role","status");
     viewStatus.hidden=true;
 
-    dialog.append(header,identity,note,counts,actions,joined,viewStatus);
+    listPanel=element("section","sl-pv-student-list");
+    listPanel.hidden=true;
+    dialog.append(header,identity,bioNode,counts,actions,followAction,joined,viewStatus,listPanel);
     view.append(dialog);
     document.body.append(view);
 
@@ -263,37 +274,109 @@
       year:"numeric",month:"long",day:"numeric",timeZone:"Asia/Colombo"
     }).format(date);
   }
+  async function openList(type){
+    const follow=window.StudyLabFollow;
+    if(!viewedUserId||!follow||!listPanel)return;
+    listPanel.hidden=false;
+    listPanel.replaceChildren();
+    const heading=element("div","sl-pv-list-heading");
+    const title=element("strong","",type==="followers"?"Followers":"Following");
+    const dismissList=button("sl-pv-list-close","Close");
+    dismissList.addEventListener("click",()=>{listPanel.hidden=true;countButtons[0].focus();});
+    heading.append(title,dismissList);
+    const container=element("div","sl-pv-list-rows");
+    container.append(element("p","sl-pv-list-empty","Loading students…"));
+    listPanel.append(heading,container);
+    const id=viewedUserId;
+    try{
+      const profiles=await follow.list(type,id);
+      if(viewedUserId!==id||listPanel.hidden)return;
+      container.replaceChildren();
+      if(!profiles.length){
+        container.append(element("p","sl-pv-list-empty","No students here yet."));
+        return;
+      }
+      for(const profile of profiles){
+        const row=button("sl-pv-list-user");
+        const identity=element("span","sl-pv-list-identity");
+        const name=element("strong","",profile.display_name||"Student");
+        window.StudyLabNameMark?.decorate(name,profile.user_id);
+        identity.append(name,element("small","","@"+profile.username));
+        row.append(identity,icon("arrow"));
+        row.addEventListener("click",()=>open({userId:profile.user_id}));
+        container.append(row);
+      }
+    }catch(error){
+      container.replaceChildren(element("p","sl-pv-list-empty","Could not load this list."));
+    }
+  }
+  async function updateCounts(id,serial){
+    const follow=window.StudyLabFollow;
+    if(!follow)return;
+    try{
+      const counts=await follow.stats(id);
+      if(serial!==viewSequence||view.hidden||viewedUserId!==id)return;
+      countButtons[0].querySelector(".sl-pv-count-number").textContent=String(counts.followers);
+      countButtons[1].querySelector(".sl-pv-count-number").textContent=String(counts.following);
+    }catch(error){
+      console.warn("StudyLab profile follower counts:",error);
+    }
+  }
   async function open(options={}){
     make();
     const account=window.StudyLabAccount;
     if(!account?.getUser)return false;
     const user=account.getUser();
-    if(!user || user.is_anonymous) return false;
+    if(!user || (user.is_anonymous && (!options.userId || options.userId===user.id)))return false;
+    const id=options.userId||user.id;
+    const own=id===user.id;
+    const serial=++viewSequence;
     lastFocus=document.activeElement;
-    editHandler=typeof options.openEdit==="function"?options.openEdit:null;
+    editHandler=typeof options.openEdit==="function"
+      ?options.openEdit
+      :()=>document.querySelector('.profile-account-menu [data-account-action="profile"]')?.click();
     accountUser=user;
-    nameNode.textContent=escText(user.user_metadata?.full_name)||"Student";
+    viewedUserId=id;
+    nameNode.textContent=own?(escText(user.user_metadata?.full_name)||"Student"):"Student";
     usernameNode.textContent="Loading profile…";
-    joinedNode.textContent=joinedDate(user.created_at);
+    joinedNode.textContent=own?joinedDate(user.created_at):"Account created · —";
     paintAvatar("male");
+    window.StudyLabNameMark?.decorate(nameNode,null);
     viewStatus.hidden=true;
+    listPanel.hidden=true;
+    countButtons.forEach(node=>{node.querySelector(".sl-pv-count-number").textContent="—";});
+    dialog.querySelector(".sl-pv-eyebrow").textContent=own?"STUDYLAB · MY PROFILE":"STUDYLAB · STUDENT PROFILE";
+    bioNode.textContent="Loading bio…";
+    dialog.querySelector(".sl-pv-actions").hidden=!own;
+    followAction.hidden=own;
+    followAction.replaceChildren();
+    if(!own){
+      const followButton=window.StudyLabFollow?.makeButton(id);
+      if(followButton)followAction.append(followButton);
+      else followAction.append(element("p","sl-pv-status","Follow is temporarily unavailable."));
+    }
     view.hidden=false;
     document.body.classList.add("sl-profile-view-open");
     requestAnimationFrame(()=>dismiss.focus());
-    const openedFor=user.id;
+    updateCounts(id,serial);
     try{
-      const profile=await account.getProfile(true);
-      if(view.hidden || accountUser?.id!==openedFor)return true;
-      nameNode.textContent=escText(profile?.display_name)||"Student";
-      usernameNode.textContent=profile?.username?"@"+escText(profile.username):"Username not set";
-      joinedNode.textContent=joinedDate(user.created_at||profile?.created_at);
-      paintAvatar(profile?.gender==="female"?"female":"male");
-      window.StudyLabNameMark?.decorate(nameNode,user.id);
+      const profile=own
+        ?await account.getProfile(true)
+        :await window.StudyLabFollow?.getProfile(id);
+      if(serial!==viewSequence||view.hidden||viewedUserId!==id)return true;
+      if(!profile)throw new Error("This student's profile is unavailable.");
+      nameNode.textContent=escText(profile.display_name)||"Student";
+      bioNode.textContent=escText(profile.bio)||"No bio added yet.";
+      usernameNode.textContent=profile.username?"@"+escText(profile.username):"Username not set";
+      joinedNode.textContent=joinedDate((own?user.created_at:null)||profile.joined_at||profile.created_at);
+      paintAvatar(profile.gender==="female"?"female":"male");
+      window.StudyLabNameMark?.decorate(nameNode,id);
     }catch(error){
-      if(!view.hidden && accountUser?.id===openedFor){
+      if(serial===viewSequence&&!view.hidden&&viewedUserId===id){
         usernameNode.textContent="Profile temporarily unavailable";
-        window.StudyLabNameMark?.decorate(nameNode,user.id);
-        viewStatus.textContent="We couldn't refresh your profile details. Try again later.";
+        bioNode.textContent="Bio unavailable.";
+        window.StudyLabNameMark?.decorate(nameNode,id);
+        viewStatus.textContent=error?.message||"Could not refresh this student profile.";
         viewStatus.hidden=false;
       }
     }
@@ -301,7 +384,8 @@
   }
 
   async function deleteAccount(){
-    if(deleting || !confirmed || confirmInput.value!=="DELETE" || !accountUser || accountUser.is_anonymous)return;
+    if(deleting || !confirmed || confirmInput.value!=="DELETE" || !accountUser ||
+       viewedUserId!==accountUser.id || accountUser.is_anonymous)return;
     const account=window.StudyLabAccount;
     if(!account?.client)return;
     deleting=true;
@@ -343,6 +427,18 @@
       confirmSubmit.disabled=confirmInput.value!=="DELETE";
     }
   }
+  window.addEventListener("studylab:follow-error",event=>{
+    if(view && !view.hidden){
+      viewStatus.textContent=event.detail?.message||"Could not update following.";
+      viewStatus.hidden=false;
+    }
+  });
+  window.addEventListener("studylab:follow-changed",event=>{
+    if(view?.hidden||!viewedUserId)return;
+    if(event.detail?.targetId===viewedUserId || viewedUserId===window.StudyLabFollow?.currentId()){
+      updateCounts(viewedUserId,viewSequence);
+    }
+  });
   Object.defineProperty(window,"StudyLabProfileView",{
     value:Object.freeze({open}),writable:false,configurable:false
   });

@@ -21,9 +21,11 @@ assert.ok(profile.includes("viewer.open({openEdit: () => openModal()})"),
   "Edit Profile must reuse existing editor");
 assert.ok(viewer.includes("StudyLabNameMark?.decorate"),"existing four-account marks must carry over");
 assert.ok(viewer.includes('"Followers","Following"'),"follower placeholders missing");
-assert.ok(viewer.includes('item.disabled = true'),"follower placeholders must not be interactive");
-assert.ok(viewer.includes("joinedDate(user.created_at"),"joined date must be real user data");
+assert.ok(viewer.includes('item.addEventListener("click",()=>openList(item.dataset.listType))'),"follower lists should now open on click");
+assert.ok(viewer.includes("profile.joined_at") && viewer.includes("user.created_at"),"joined date must use real user data");
 assert.ok(viewer.includes('confirmInput.value==="DELETE"'),"account deletion needs typed confirmation");
+assert.ok(viewer.includes("viewedUserId!==accountUser.id"),
+  "visitor profile cards must never allow deleting the currently authenticated account");
 assert.ok(viewer.includes('data.session.user?.id!==accountUser.id'),
   "delete request must use active user session only");
 assert.ok(viewer.includes("account.getProfile(true)"),"profile should load from existing account");
