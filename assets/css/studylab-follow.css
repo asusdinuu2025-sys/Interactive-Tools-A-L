@@ -1,0 +1,279 @@
+/* StudyLab Followers & Following, shared between Social and Study Room.
+   Intentionally visual-only additions around existing cards and controls. */
+.sl-follow-btn {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  box-sizing:border-box;
+  flex:0 0 auto;
+  gap:5px;
+  min-width:77px;
+  min-height:34px;
+  padding:6px 12px;
+  border:1px solid rgba(96,198,249,.36);
+  border-radius:11px;
+  background:rgba(73,162,238,.16);
+  color:#b5ecff;
+  font:730 12px/1.2 "Nirmala UI","Segoe UI",sans-serif;
+  white-space:nowrap;
+  cursor:pointer;
+  -webkit-backdrop-filter:blur(16px) saturate(130%);
+  backdrop-filter:blur(16px) saturate(130%);
+  transition:background .17s ease,border-color .17s ease;
+}
+.sl-follow-btn:hover:not(:disabled){background:rgba(70,181,244,.29);border-color:rgba(110,218,255,.56)}
+.sl-follow-btn.is-following{
+  background:rgba(190,222,238,.09);
+  color:#cfdeec;
+  border-color:rgba(187,213,230,.22);
+}
+.sl-follow-btn:disabled{opacity:.63;cursor:default}
+.sl-follow-btn.is-compact{
+  min-width:64px;
+  min-height:27px;
+  padding:5px 8px;
+  font-size:10px;
+  border-radius:9px;
+}
+html[data-theme="light"] .sl-follow-btn {
+  background:rgba(52,148,226,.12);
+  color:#1466a2;
+  border-color:rgba(45,139,206,.33);
+}
+html[data-theme="light"] .sl-follow-btn.is-following{
+  background:rgba(85,127,169,.08);
+  color:#4b6b83;
+  border-color:rgba(90,139,181,.2);
+}
+/* Keep the original post layout and three-dot menu. */
+.sl-feed-post-top .sl-follow-btn {align-self:flex-start}
+.sl-feed-profile-trigger,.sl-follow-profile-trigger {cursor:pointer}
+.sl-feed-member.sl-follow-profile-trigger:focus-visible{
+  outline:2px solid #73d4ff;
+  outline-offset:3px;
+}
+.room-person-card-top .sl-follow-btn{
+  margin-left:auto;
+  min-width:65px;
+  z-index:1;
+}
+.room-person-card-top {gap:7px}
+.room-person-card-top .room-person-status {flex:0 1 auto}
+@media(max-width:440px){
+  .sl-feed-post-top .sl-follow-btn.is-compact{
+    min-width:55px;
+    font-size:9.5px;
+    padding:4px 6px;
+  }
+  .room-person-card-top .sl-follow-btn{
+    min-width:58px;
+    font-size:9px;
+    padding:4px 6px;
+  }
+}
+/* Social search and follow alerts are separate from likes/comments bell. */
+.sl-feed-panel .sl-feed-head-actions > .sl-follow-head-toggle{
+  position:relative!important;
+  display:grid!important;
+  place-items:center!important;
+  box-sizing:border-box!important;
+  flex:0 0 36px!important;
+  width:36px!important;height:36px!important;
+  min-width:36px!important;min-height:36px!important;
+  max-width:36px!important;max-height:36px!important;
+  padding:0!important;margin:0!important;
+  border:1px solid rgba(140,190,220,.22)!important;
+  border-radius:11px!important;
+  background:rgba(125,170,205,.10)!important;
+  color:inherit!important;
+  cursor:pointer;
+}
+.sl-feed-panel .sl-feed-head-actions > .sl-follow-head-toggle:hover{
+  border-color:rgba(116,202,246,.38)!important;
+  background:rgba(102,181,241,.19)!important;
+}
+.sl-feed-panel .sl-follow-head-toggle svg {
+  width:20px;height:20px;
+  display:block;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.9;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.sl-follow-unread{
+  position:absolute;
+  top:-5px;right:-6px;
+  display:grid;place-items:center;
+  min-width:18px;height:18px;
+  border:2px solid #112034;
+  border-radius:99px;
+  padding:0 3px;
+  box-sizing:border-box;
+  background:#ef668c;color:#fff;
+  font:800 10px/1 "Nirmala UI","Segoe UI",sans-serif;
+}
+.sl-follow-unread[hidden]{display:none!important}
+.sl-feed-panel .sl-follow-popover {
+  position:absolute;
+  z-index:150;
+  top:calc(100% + 12px);
+  right:0;
+  width:min(390px,calc(100vw - 24px));
+  max-height:min(520px,72vh);
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  color:#edf7ff;
+  background:rgba(17,31,51,.97);
+  border:1px solid rgba(156,197,232,.24);
+  border-radius:19px;
+  box-shadow:0 20px 70px rgba(0,0,0,.34),inset 0 1px rgba(255,255,255,.13);
+  -webkit-backdrop-filter:blur(24px) saturate(130%);
+  backdrop-filter:blur(24px) saturate(130%);
+  font-family:"Nirmala UI","Segoe UI",sans-serif;
+}
+.sl-feed-panel .sl-follow-popover[hidden] {display:none!important}
+.sl-follow-popover-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:15px 15px 11px;
+  border-bottom:1px solid rgba(143,184,222,.16);
+}
+.sl-follow-popover-head strong {font-size:14px;font-weight:800}
+.sl-follow-search-input {
+  display:block;
+  width:calc(100% - 25px);
+  min-height:40px;
+  margin:12px auto 6px;
+  box-sizing:border-box;
+  padding:9px 12px;
+  border-radius:11px;
+  border:1px solid rgba(152,193,227,.26);
+  outline:none;
+  background:rgba(223,241,255,.075);
+  color:inherit;
+  font:580 13px "Nirmala UI","Segoe UI",sans-serif;
+}
+.sl-follow-search-input:focus {border-color:rgba(119,207,255,.66);box-shadow:0 0 0 3px rgba(119,207,255,.11)}
+.sl-follow-search-input::placeholder{color:#9db4ca}
+.sl-follow-result-list{display:grid;gap:3px;padding:8px;max-height:360px;overflow:auto}
+.sl-follow-search-result{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  width:100%;
+  min-height:55px;
+  padding:8px 9px;
+  border:0;
+  border-radius:11px;
+  background:transparent;
+  color:inherit;
+  cursor:pointer;
+  font-family:inherit;
+  text-align:left;
+}
+.sl-follow-search-result:hover,.sl-follow-search-result:focus-visible{
+  background:rgba(125,193,247,.10);
+  outline:0;
+}
+.sl-follow-search-result.is-unread{background:rgba(92,164,244,.12)}
+.sl-follow-search-avatar{
+  display:grid;place-items:center;
+  width:37px;height:37px;flex:0 0 37px;
+  border:1px solid rgba(135,207,244,.24);
+  border-radius:50%;
+  background:linear-gradient(145deg,rgba(68,160,240,.46),rgba(119,109,218,.32));
+  color:#e8f9ff;font-weight:780;font-size:14px;
+}
+.sl-follow-search-copy {display:flex;flex-direction:column;min-width:0;gap:3px;font-size:12.5px}
+.sl-follow-search-copy strong {font-weight:760;overflow-wrap:anywhere}
+.sl-follow-search-copy small{font-size:11px;color:#acc6da;overflow-wrap:anywhere}
+.sl-follow-search-arrow{margin-left:auto;color:#8ec8ed;font-size:20px}
+.sl-follow-empty {margin:0;padding:23px 10px;font-size:12px;color:#b9d1e2;text-align:center;line-height:1.5}
+.sl-follow-alert-caption {line-height:1.4}
+.sl-follow-mark-read {
+  border:0;background:transparent;
+  color:#7dcfff;
+  padding:6px;
+  font:690 11px "Nirmala UI","Segoe UI",sans-serif;
+  cursor:pointer;
+}
+.sl-follow-mark-read:disabled{opacity:.48;cursor:default}
+html[data-theme="light"] .sl-feed-panel .sl-follow-popover {
+  color:#24465f;
+  background:rgba(246,251,255,.98);
+  border-color:rgba(107,163,213,.26);
+  box-shadow:0 20px 64px rgba(53,93,138,.19);
+}
+html[data-theme="light"] .sl-follow-search-input{color:#25435f;background:rgba(255,255,255,.7);border-color:rgba(85,140,188,.30)}
+html[data-theme="light"] .sl-follow-search-input::placeholder{color:#758ea6}
+html[data-theme="light"] .sl-follow-search-copy small,
+html[data-theme="light"] .sl-follow-empty {color:#5c7990}
+html[data-theme="light"] .sl-follow-search-result:hover {background:rgba(78,152,217,.10)}
+html[data-theme="light"] .sl-follow-search-result.is-unread{background:rgba(90,158,231,.10)}
+html[data-theme="light"] .sl-follow-search-avatar{color:#fff}
+html[data-theme="light"] .sl-follow-unread{border-color:#f4faff}
+/* Reuse original View Profile modal for both account types. */
+.sl-pv-actions[hidden],
+.sl-pv-follow-action[hidden],
+.sl-pv-student-list[hidden]{display:none!important}
+.sl-pv-count:not(:disabled){cursor:pointer;transition:background .16s ease}
+.sl-pv-count:not(:disabled):hover{background:rgba(121,197,245,.14)}
+.sl-pv-follow-action{display:flex;justify-content:stretch;margin-top:15px}
+.sl-pv-follow-action .sl-follow-btn{width:100%;min-height:44px;font-size:13px}
+.sl-pv-student-list {
+  margin-top:17px;
+  border:1px solid rgba(139,191,231,.19);
+  border-radius:16px;
+  background:rgba(159,218,249,.055);
+  max-height:240px;
+  overflow:auto;
+}
+.sl-pv-list-heading{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 14px;
+  border-bottom:1px solid rgba(133,177,210,.16);
+  font-size:13px;
+}
+.sl-pv-list-close{
+  border:0;background:transparent;color:inherit;
+  cursor:pointer;font:650 12px "Nirmala UI","Segoe UI",sans-serif
+}
+.sl-pv-list-rows {display:grid;gap:2px;padding:6px}
+.sl-pv-list-user {
+  display:flex;align-items:center;justify-content:space-between;
+  gap:8px;
+  width:100%;
+  padding:10px;
+  border:0;border-radius:9px;
+  background:transparent;color:inherit;
+  font-family:inherit;
+  text-align:left;cursor:pointer;
+}
+.sl-pv-list-user:hover {background:rgba(120,186,240,.13)}
+.sl-pv-list-user svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
+.sl-pv-list-identity {display:flex;flex-direction:column;gap:2px;min-width:0}
+.sl-pv-list-identity strong{font-size:12px;overflow-wrap:anywhere}
+.sl-pv-list-identity small{font-size:11px;color:#a8c7df;overflow-wrap:anywhere}
+.sl-pv-list-empty{padding:15px;text-align:center;font-size:12px;color:#aec9de}
+html[data-theme="light"] .sl-pv-list-identity small,
+html[data-theme="light"] .sl-pv-list-empty{color:#627d94}
+@media(max-width:600px){
+  .sl-feed-panel .sl-feed-head-actions > .sl-follow-head-toggle{
+    flex-basis:28px!important;
+    width:28px!important;max-width:28px!important;min-width:28px!important;
+    height:28px!important;max-height:28px!important;min-height:28px!important;
+    border-radius:9px!important;
+  }
+  .sl-feed-panel .sl-follow-head-toggle svg{width:17px;height:17px}
+  .sl-feed-panel .sl-follow-popover {
+    position:fixed;top:max(68px,env(safe-area-inset-top));
+    left:10px;right:10px;
+    width:auto;max-height:min(66dvh,550px);
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .sl-follow-btn,.sl-pv-count:not(:disabled){transition:none!important}
+}
