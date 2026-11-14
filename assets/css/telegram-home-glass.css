@@ -326,3 +326,14 @@ html[data-theme="light"] body.sl-telegram-hub .telegram-footer { color:#5a758d; 
   body.sl-telegram-hub .telegram-all-channel,
   body.sl-telegram-hub .telegram-open { transition: none !important; }
 }
+
+/* The source Telegram logo also switches to dark ink over pale glass. */
+html[data-theme="light"] body.sl-telegram-hub .sl-subject-hero-icon img {
+  filter: none !important;
+  opacity: .94;
+}
+html[data-theme="light"] body.sl-telegram-hub .sl-lesson-publisher-mark,
+html[data-theme="light"] body.sl-telegram-hub .telegram-channel-icon svg {
+  color: #245878 !important;
+  stroke: currentColor !important;
+}
