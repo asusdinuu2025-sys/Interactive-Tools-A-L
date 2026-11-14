@@ -68,6 +68,7 @@
   let deleting = false;
   let editHandler = null;
   let accountUser = null;
+  let bioNode = null;
   let viewedUserId = null;
   let viewSequence = 0;
   let followAction = null;
@@ -140,9 +141,8 @@
     titleWrap.append(nameNode,usernameNode);
     identity.append(avatarNode,titleWrap);
 
-    const note = element("p","sl-pv-description",
-      "Your StudyLab student profile.");
-    note.id="slPvDescription";
+    bioNode = element("p","sl-pv-description","No bio added yet.");
+    bioNode.id="slPvDescription";
 
     const counts = element("div","sl-pv-counts");
     for (const label of ["Followers","Following"]){
@@ -171,7 +171,7 @@
 
     listPanel=element("section","sl-pv-student-list");
     listPanel.hidden=true;
-    dialog.append(header,identity,note,counts,actions,followAction,joined,viewStatus,listPanel);
+    dialog.append(header,identity,bioNode,counts,actions,followAction,joined,viewStatus,listPanel);
     view.append(dialog);
     document.body.append(view);
 
@@ -346,8 +346,7 @@
     listPanel.hidden=true;
     countButtons.forEach(node=>{node.querySelector(".sl-pv-count-number").textContent="—";});
     dialog.querySelector(".sl-pv-eyebrow").textContent=own?"STUDYLAB · MY PROFILE":"STUDYLAB · STUDENT PROFILE";
-    dialog.querySelector(".sl-pv-description").textContent=own
-      ?"Your StudyLab student profile.":"StudyLab student";
+    bioNode.textContent="Loading bio…";
     dialog.querySelector(".sl-pv-actions").hidden=!own;
     followAction.hidden=own;
     followAction.replaceChildren();
@@ -367,6 +366,7 @@
       if(serial!==viewSequence||view.hidden||viewedUserId!==id)return true;
       if(!profile)throw new Error("This student's profile is unavailable.");
       nameNode.textContent=escText(profile.display_name)||"Student";
+      bioNode.textContent=escText(profile.bio)||"No bio added yet.";
       usernameNode.textContent=profile.username?"@"+escText(profile.username):"Username not set";
       joinedNode.textContent=joinedDate((own?user.created_at:null)||profile.joined_at||profile.created_at);
       paintAvatar(profile.gender==="female"?"female":"male");
@@ -374,6 +374,7 @@
     }catch(error){
       if(serial===viewSequence&&!view.hidden&&viewedUserId===id){
         usernameNode.textContent="Profile temporarily unavailable";
+        bioNode.textContent="Bio unavailable.";
         window.StudyLabNameMark?.decorate(nameNode,id);
         viewStatus.textContent=error?.message||"Could not refresh this student profile.";
         viewStatus.hidden=false;
