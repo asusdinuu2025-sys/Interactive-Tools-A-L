@@ -216,7 +216,13 @@
     const timeLabel = document.getElementById("homeGreetingTime");
     const nameLabel = document.getElementById("homeGreetingName");
     if (timeLabel) timeLabel.textContent = greetingTime;
-    if (nameLabel) nameLabel.textContent = homeGreetingName;
+    if (nameLabel) {
+      nameLabel.textContent = homeGreetingName;
+      const currentUser = window.StudyLabAccount?.getUser?.();
+      window.StudyLabNameMark?.decorate(
+        nameLabel, !isGuest && homeGreetingName !== "Student" ? currentUser?.id : null
+      );
+    }
   }
 
   window.setInterval(() => updateHomeGreeting(), 60 * 1000);
@@ -344,6 +350,10 @@
       profileButton.title = "Open your StudyLab account options";
       profileButton.setAttribute("aria-label", "Open StudyLab account options");
     }
+    window.StudyLabNameMark?.decorate(
+      profileButton.querySelector(".profile-button-label"),
+      !isGuest && isBasicComplete(p) ? window.StudyLabAccount?.getUser?.()?.id : null
+    );
     updateHomeGreeting(p);
     if (accountMenu && !accountMenu.hidden) renderAccountMenu();
   }

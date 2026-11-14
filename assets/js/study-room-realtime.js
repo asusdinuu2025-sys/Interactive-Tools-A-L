@@ -362,7 +362,9 @@
       badge.setAttribute('aria-label', number ? 'Daily rank number ' + number : 'No daily rank');
       setLiveText(card.querySelector('.room-person-status'),
         r.session_presence_state === 'away' ? 'Away' : 'Studying now');
-      setLiveText(card.querySelector('.room-person-card-name'), r.display_name || 'Student');
+      const liveName = card.querySelector('.room-person-card-name');
+      setLiveText(liveName, r.display_name || 'Student');
+      window.StudyLabNameMark?.decorate(liveName, id);
       setLiveText(card.querySelector('.room-person-card-subject'), r.subject || '—');
       const saved = r.today_date === today ? Number(r.today_seconds) || 0 : 0;
       setLiveText(card.querySelector('.room-person-card-time'), profileDuration(saved + pendingSeconds(r, boundary)));
@@ -406,7 +408,9 @@
           avatar.dataset.gender = gender;
         }
         setLiveText(item.querySelector('.room-rank-number'), i+1);
-        setLiveText(item.querySelector('.room-rank-info strong'), r.display_name || 'Student');
+        const rankName = item.querySelector('.room-rank-info strong');
+        setLiveText(rankName, r.display_name || 'Student');
+        window.StudyLabNameMark?.decorate(rankName, id);
         setLiveText(item.querySelector('.room-rank-info span'), r.subject || '—');
         setLiveText(item.querySelector('.room-time'), compact(r.score));
         if (board.children[i] !== item) board.insertBefore(item, board.children[i] || null);
