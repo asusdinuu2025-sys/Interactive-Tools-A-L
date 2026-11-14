@@ -38,6 +38,20 @@ CREATE TABLE IF NOT EXISTS public.study_room_credit_segments (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
+-- Preserve today's existing server total before the journal begins. The
+-- historic subject mix is unavailable to the server, so name it explicitly.
+INSERT INTO public.study_room_credit_segments
+  (user_id, session_id, local_day, subject, credited_from, credited_until, seconds, pending)
+SELECT m.user_id, coalesce(m.session_id, m.user_id), m.today_date,
+  'Before cloud sync (subject unavailable)',
+  greatest((m.today_date::timestamp at time zone 'Asia/Colombo'), now() - make_interval(secs => greatest(0, m.today_seconds))),
+  now(),
+  greatest(0, m.today_seconds - CASE WHEN m.session_away_pending_date = m.today_date THEN coalesce(m.session_away_pending_seconds, 0) ELSE 0 END),
+  false
+FROM public.study_room_members AS m
+WHERE m.today_date = timezone('Asia/Colombo', now())::date
+  AND greatest(0, m.today_seconds - CASE WHEN m.session_away_pending_date = m.today_date THEN coalesce(m.session_away_pending_seconds, 0) ELSE 0 END) > 0;
+
 CREATE INDEX IF NOT EXISTS study_room_credit_user_day_idx
   ON public.study_room_credit_segments (user_id, local_day DESC);
 CREATE INDEX IF NOT EXISTS study_room_credit_user_session_idx
