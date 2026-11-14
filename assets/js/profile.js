@@ -76,6 +76,7 @@
     }
     .profile-account-menu button:hover,.profile-account-menu button:focus-visible { background:rgba(125,190,255,.14);outline:2px solid rgba(125,190,255,.28);outline-offset:-2px; }
     .profile-account-menu .account-menu-icon { display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;border:1px solid rgba(125,190,255,.22);border-radius:12px;background:rgba(90,160,230,.12);color:#a9dfff;font-size:19px; }
+    .profile-account-menu .account-menu-icon svg { display:block;width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round; }
     .profile-account-menu .account-menu-copy { display:grid;gap:4px;min-width:0; }
     .profile-account-menu .account-menu-copy strong { font-size:15px;font-weight:700;line-height:1.25; }
     .profile-account-menu .account-menu-copy small { color:#b3c3d8;font-size:12.5px;line-height:1.4; }
@@ -126,7 +127,7 @@
     accountMenu.innerHTML = isGuest ? `
       <div class="account-menu-heading">GUEST SESSION</div>
       <button type="button" role="menuitem" data-account-action="profile">
-        <span class="account-menu-icon" aria-hidden="true">♙</span>
+        <span class="account-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="m4 20 4.2-.8L19 8.4a2.2 2.2 0 0 0-3.1-3.1L5.1 16.1 4 20Z"/><path d="m13.9 7.3 3.1 3.1"/></svg></span>
         <span class="account-menu-copy"><strong>Edit profile</strong><small>Update your student details</small></span>
       </button>
       <div class="account-menu-divider"></div>
@@ -141,11 +142,11 @@
       <p class="account-menu-status" role="status" hidden></p>` : `
       <div class="account-menu-heading">YOUR STUDYLAB ACCOUNT</div>
       <button type="button" role="menuitem" data-account-action="view">
-        <span class="account-menu-icon" aria-hidden="true">◎</span>
+        <span class="account-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="9" r="3.2"/><path d="M5.2 19.4c.4-3.6 2.9-5.5 6.8-5.5s6.4 1.9 6.8 5.5"/></svg></span>
         <span class="account-menu-copy"><strong>View Profile</strong><small>See your StudyLab account card</small></span>
       </button>
       <button type="button" role="menuitem" data-account-action="profile">
-        <span class="account-menu-icon" aria-hidden="true">♙</span>
+        <span class="account-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="m4 20 4.2-.8L19 8.4a2.2 2.2 0 0 0-3.1-3.1L5.1 16.1 4 20Z"/><path d="m13.9 7.3 3.1 3.1"/></svg></span>
         <span class="account-menu-copy"><strong>Edit student profile</strong><small>Update your StudyLab profile details</small></span>
       </button>
       <div class="account-menu-divider"></div>
