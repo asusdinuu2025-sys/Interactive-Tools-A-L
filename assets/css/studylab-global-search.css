@@ -1,0 +1,209 @@
+/* StudyLab Home: global search flyout + compact Study Room action.
+   Strictly scoped: no changes to dashboard grid, dimensions or other cards. */
+#studyHeaderSearchPanel.sl-global-search-panel {
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:9px 10px;
+  width:min(560px,calc(100vw - 24px));
+  max-height:min(74vh,650px);
+  overflow:hidden;
+  padding:13px 14px 12px;
+  border-radius:20px;
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transform:translate(-50%,-10px) scale(.985);
+  transition:opacity .2s ease,transform .2s cubic-bezier(.2,.8,.2,1),visibility .2s ease;
+}
+#studyHeaderSearchPanel.sl-global-search-panel.is-visible {
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+  transform:translate(-50%,0) scale(1);
+}
+#studyHeaderSearchPanel.sl-global-search-panel[hidden] {display:none !important}
+#studyHeaderSearchPanel.sl-global-search-panel .study-find-input {
+  flex:1 1 180px;
+  min-height:34px;
+  min-width:0;
+}
+#studyHeaderSearchPanel.sl-global-search-panel .study-find-meta {
+  flex:0 0 auto;
+  font-variant-numeric:tabular-nums;
+  max-width:105px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+#studyHeaderSearchPanel.sl-global-search-panel .sl-global-search-results {
+  flex:0 0 100%;
+  width:100%;
+  box-sizing:border-box;
+  min-width:0;
+  max-height:min(57vh,480px);
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  padding-top:7px;
+  border-top:1px solid rgba(180,214,242,.17);
+  scrollbar-width:thin;
+  scrollbar-color:rgba(121,193,245,.40) transparent;
+}
+.sl-global-search-results-label {
+  margin:4px 8px 7px;
+  font-size:.68rem;
+  font-weight:800;
+  letter-spacing:.10em;
+  color:rgba(180,223,252,.72);
+}
+.sl-global-search-result {
+  display:flex;
+  align-items:center;
+  gap:11px;
+  min-height:53px;
+  margin:2px 0;
+  padding:9px 10px;
+  border:1px solid transparent;
+  border-radius:12px;
+  color:inherit !important;
+  text-decoration:none !important;
+  background:transparent;
+  box-sizing:border-box;
+  transition:background .16s ease,border-color .16s ease;
+}
+.sl-global-search-result:is(:hover,:focus-visible,.is-active) {
+  outline:none;
+  border-color:rgba(116,209,253,.24);
+  background:rgba(90,163,224,.14);
+}
+.sl-global-search-result-icon {
+  display:grid;
+  place-items:center;
+  width:34px;
+  height:34px;
+  flex:0 0 34px;
+  border:1px solid rgba(117,206,250,.24);
+  border-radius:11px;
+  color:#8deaff;
+  background:rgba(87,185,232,.11);
+  font-size:18px;
+}
+.sl-global-search-result-copy {
+  display:flex;
+  flex:1;
+  min-width:0;
+  flex-direction:column;
+  gap:3px;
+}
+.sl-global-search-result-copy strong {
+  display:block;
+  color:inherit;
+  font-size:.83rem;
+  font-weight:760;
+  line-height:1.35;
+  overflow-wrap:anywhere;
+}
+.sl-global-search-result-copy small {
+  display:block;
+  color:rgba(193,220,245,.72);
+  font-size:.71rem;
+  line-height:1.25;
+  overflow-wrap:anywhere;
+}
+.sl-global-search-result-arrow {
+  flex:0 0 auto;
+  font-size:17px;
+  color:#92dafa;
+}
+.sl-global-search-message,.sl-global-search-more {
+  padding:13px 8px;
+  margin:0;
+  font-size:.79rem;
+  line-height:1.5;
+  color:rgba(202,225,247,.80);
+}
+.sl-global-search-more {
+  padding:8px;
+  font-size:.69rem;
+}
+html[data-theme="light"] #studyHeaderSearchPanel.sl-global-search-panel .sl-global-search-results {
+  border-top-color:rgba(62,117,169,.14);
+}
+html[data-theme="light"] .sl-global-search-results-label {
+  color:#50748f;
+}
+html[data-theme="light"] .sl-global-search-result:is(:hover,:focus-visible,.is-active) {
+  border-color:rgba(38,118,180,.23);
+  background:rgba(93,175,227,.13);
+}
+html[data-theme="light"] .sl-global-search-result-icon {
+  color:#2277a8;
+  border-color:rgba(58,129,188,.18);
+  background:rgba(79,162,218,.12);
+}
+html[data-theme="light"] .sl-global-search-result-copy small,
+html[data-theme="light"] .sl-global-search-message,
+html[data-theme="light"] .sl-global-search-more {color:#607a90}
+html[data-theme="light"] .sl-global-search-result-arrow {color:#2477aa}
+
+/* A slim glowing CTA within the *existing single anchor* for the Room.
+   Inline and non-interactive itself: clicking anywhere keeps the same link. */
+.homepage-overview-panel .study-room-launcher-copy {
+  display:flex !important;
+  flex-direction:column;
+  align-items:flex-start;
+}
+.homepage-overview-panel .study-room-launcher-cta {
+  display:inline-flex !important;
+  align-items:center;
+  justify-content:center;
+  align-self:flex-start;
+  flex:0 0 auto;
+  max-width:100%;
+  box-sizing:border-box;
+  min-height:24px;
+  margin-top:9px;
+  padding:5px 10px;
+  border:1px solid rgba(109,234,251,.58);
+  border-radius:999px;
+  color:#c8faff;
+  font:800 9px/1.1 "Nirmala UI","Segoe UI",sans-serif;
+  letter-spacing:.04em;
+  white-space:nowrap;
+  background:linear-gradient(115deg,rgba(29,169,219,.29),rgba(82,133,231,.22));
+  box-shadow:0 0 10px rgba(49,224,248,.20),inset 0 1px 0 rgba(225,255,255,.20);
+  text-shadow:0 0 9px rgba(88,226,252,.45);
+  transition:background .18s ease,box-shadow .18s ease;
+}
+.homepage-overview-panel .study-room-launcher:hover .study-room-launcher-cta,
+.homepage-overview-panel .study-room-launcher:focus-visible .study-room-launcher-cta {
+  background:linear-gradient(115deg,rgba(34,194,233,.43),rgba(86,141,245,.29));
+  box-shadow:0 0 14px rgba(62,220,253,.34),inset 0 1px 0 rgba(245,255,255,.25);
+}
+html[data-theme="light"] .homepage-overview-panel .study-room-launcher-cta {
+  color:#07577f;
+  border-color:rgba(19,128,188,.43);
+  background:linear-gradient(115deg,rgba(79,197,235,.26),rgba(102,161,245,.17));
+  box-shadow:0 0 11px rgba(58,159,222,.18),inset 0 1px 0 rgba(255,255,255,.81);
+  text-shadow:none;
+}
+@media(max-width:640px) {
+  #studyHeaderSearchPanel.sl-global-search-panel {
+    top:78px;
+    max-height:calc(100dvh - 92px);
+    padding:10px;
+  }
+  #studyHeaderSearchPanel.sl-global-search-panel .sl-global-search-results {
+    max-height:calc(100dvh - 175px);
+  }
+  #studyHeaderSearchPanel.sl-global-search-panel .study-find-meta {
+    display:none;
+  }
+  .homepage-overview-panel .study-room-launcher-cta {
+    font-size:9px;
+    padding:5px 9px;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  #studyHeaderSearchPanel.sl-global-search-panel,
+  .homepage-overview-panel .study-room-launcher-cta {transition:none !important}
+}
