@@ -1,6 +1,8 @@
 /* Local Study Room analytics: private per-browser subject history and task list. */
-(() => {
+(async () => {
 "use strict";
+// Resolve the account before choosing the local, per-student task key.
+try { await window.StudyLabAccount?.ready; } catch (_) {}
 const $=id=>document.getElementById(id), status=$("yourStatus"), subject=$("studySubject"), layout=document.querySelector(".room-layout");
 if(!status||!subject||!layout||$("slLocalStudyAnalytics"))return;
 let uid="";try{uid=window.StudyLabAccount?.getUser?.()?.id||"";}catch(_){}
@@ -16,7 +18,7 @@ let data=read(),period="today",activeSession=null,livePendingSeconds=0,livePendi
 try{activeSession=JSON.parse(localStorage.getItem(key+":active")||"null");}catch(_){activeSession=null;}
 const cursorKey=key+":server-cursor";
  let cloudDays=null,cloudSessions=[],cloudEnabled=false,cloudBusy=false;
- const daySource=()=>cloudDays?{...data.days,...cloudDays}:data.days;
+ const daySource=()=>cloudDays?{...Object.fromEntries(Object.entries(data.days).filter(([day])=>day<"2026-11-14")),...cloudDays}:data.days;
 function readCursor(){try{return JSON.parse(localStorage.getItem(cursorKey)||"null");}catch(_){return null;}}
 let serverCursor=readCursor();
 function persistCursor(){try{if(serverCursor)localStorage.setItem(cursorKey,JSON.stringify(serverCursor));else localStorage.removeItem(cursorKey);}catch(_){}}
