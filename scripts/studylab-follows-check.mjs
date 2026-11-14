@@ -10,6 +10,9 @@ const viewer=readFileSync("assets/js/studylab-profile-view.js","utf8");
 const room=readFileSync("assets/js/study-room-realtime.js","utf8");
 const sql=readFileSync("supabase/migrations/20261114220202_simple_student_follows_and_alerts_20261114.sql","utf8");
 const css=readFileSync("assets/css/studylab-follow.css","utf8");
+const bioMigration=readFileSync("supabase/migrations/20261114223114_student_bio_and_midnight_notifications_20261114.sql","utf8");
+const editProfile=readFileSync("assets/js/profile.js","utf8");
+const accountSource=readFileSync("assets/js/studylab-account.js","utf8");
 const home=readFileSync("index.html","utf8");
 const study=readFileSync("study-room.html","utf8");
 const drawer=readFileSync("assets/js/feed-drawer.js","utf8");
@@ -55,6 +58,19 @@ assert.ok(sql.includes("recipient_id = (select auth.uid())"),"Follow alert reads
 assert.ok(sql.includes("p.display_name, p.username, p.gender, u.created_at"),"Public identity should include only safe columns");
 assert.ok(!/select\s+p\.\*/i.test(sql),"Must never expose private profile fields via directory");
 assert.ok(!/grant\s+select\s+on\s+public\.studylab_profiles/i.test(sql),"Existing profile privacy must be untouched");
+assert.ok(bioMigration.includes("add column if not exists bio text"),"Optional public bio column missing");
+assert.ok(bioMigration.includes("<= 15"),"Database must enforce the 15-word limit");
+assert.ok(bioMigration.includes("'30 18 * * *'"),"Sri Lanka midnight is 18:30 UTC");
+assert.ok(bioMigration.includes("studylab_follow_alerts") && bioMigration.includes("studylab_social_notifications"),
+  "Midnight notification cleanup must cover both follow and Social alerts");
+assert.ok(!/delete\s+from\s+public\.studylab_social_(posts|comments|likes)/i.test(bioMigration),
+  "Midnight cleanup must not delete actual posts, comments, or likes");
+assert.ok(bioMigration.includes("p.bio"),"Safe public directory must return the optional bio");
+assert.ok(editProfile.includes('profileBio') && accountSource.includes("bio: bio || null"),"Profile editor must save bios");
+assert.ok(viewer.includes('bioNode.textContent=escText(profile.bio)'),"Profile viewer must display bio");
+assert.ok(room.includes("room-person-follow-slot"),"Follow control must sit inside study room card");
+assert.ok(css.includes("sl-follow-profile-toast"),"Right-side incomplete-profile toast styling missing");
+assert.ok(source.includes("showCompleteProfileToast()"),"Incomplete profiles must trigger a toast");
 
 const own="10000000-0000-4000-8000-000000000001";
 const other="20000000-0000-4000-8000-000000000002";
@@ -101,18 +117,38 @@ const fakeClient={
    return Promise.resolve({data:[{user_id:other,display_name:"Test Student",username:"test_student",gender:"male",joined_at:"2026-01-01T00:00:00Z"}],error:null});
  }
 };
+let ownProfile={display_name:"Test Member",username:"testmember",exam_year:"2027",study_stream:"Physical Science"};
+const fakeElements=new Map();
+const fakeDocument={
+  getElementById:id=>fakeElements.get(id)||null,
+  createElement:tag=>{
+    const classes=new Set();
+    return {
+      tagName:tag,hidden:true,isConnected:false,dataset:{},textContent:"",
+      className:"",
+      classList:{add:v=>classes.add(v),remove:v=>classes.delete(v),toggle:(v,state)=>state?classes.add(v):classes.delete(v)},
+      setAttribute(){},
+      addEventListener(){},
+    };
+  },
+  body:{appendChild(node){fakeElements.set(node.id,node);node.isConnected=true;}}
+};
 const window={
  StudyLabAccount:{
   client:fakeClient,
   ready:Promise.resolve(),
   getUser:()=>({id:own}),
+  getProfile:async()=>ownProfile,
  },
  dispatchEvent:evt=>events.push(evt.detail)
 };
 class FakeCustomEvent {
  constructor(type,options){this.type=type;this.detail=options.detail;}
 }
-vm.runInNewContext(source,{window,CustomEvent:FakeCustomEvent,console,Promise,Map,Set},{
+vm.runInNewContext(source,{
+ window,document:fakeDocument,CustomEvent:FakeCustomEvent,console,Promise,Map,Set,
+ setTimeout:()=>1,clearTimeout:()=>{},
+},{
  timeout:1500
 });
 const follow=window.StudyLabFollow;
@@ -127,6 +163,24 @@ assert.equal(await follow.toggle(other),false);
 assert.equal(pairs.size,0);
 assert.equal(await follow.isFollowing(other),false);
 await assert.rejects(()=>follow.setFollowing(own,true),/Choose another student/);
+// Incomplete profiles should keep their visitor card open and show a
+// nonblocking slide-in toast, without creating a follow relationship.
+ownProfile={display_name:"Student1234",username:"missing",exam_year:"",study_stream:""};
+assert.equal(await follow.setFollowing(other,true),false);
+assert.equal(pairs.size,0,"Incomplete accounts must not follow others");
+const toast=fakeElements.get("slFollowProfileToast");
+assert.ok(toast && !toast.hidden,"Follow toast should be visible");
+assert.equal(toast.textContent,"First Complete Your Profile to follow others");
+ownProfile={display_name:"Test Member",username:"testmember",exam_year:"2027",study_stream:"Physical Science"};
+// A new detached button must not be removed before it's appended; once the
+// request returns, a previously followed account displays Following.
+const third="30000000-0000-4000-8000-000000000003";
+pairs.add(third);
+const button=follow.makeButton(third);
+assert.ok(button,"Follow button wasn't constructed");
+button.isConnected=true;
+assert.equal(await follow.isFollowing(third),true);
+assert.equal(button.textContent,"Following","Already-followed button must show Following");
 const found=await follow.search("@test");
 assert.equal(found[0].username,"test_student");
 assert.equal(lastRpc.p_query,"test");
