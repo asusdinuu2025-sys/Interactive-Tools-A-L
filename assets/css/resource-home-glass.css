@@ -1,0 +1,481 @@
+/* StudyLab resource hubs.
+   Shared visual continuation of subject-home-glass.css.
+   Scopes itself to the 3 resource landing pages; all underlying tools and links stay intact. */
+
+/* Three recognizable accent palettes inside the same Home glass family. */
+body.sl-resource-hub.sl-exam-hub {
+  --sl-subject-a: #5d9af0;
+  --sl-subject-b: #9d80e5;
+  --sl-subject-ink: #c7d8ff;
+  --sl-subject-tint: rgba(95,147,231,.17);
+  --sl-subject-line: rgba(140,189,245,.29);
+}
+body.sl-resource-hub.sl-utilities-hub {
+  --sl-subject-a: #47b6e6;
+  --sl-subject-b: #817fec;
+  --sl-subject-ink: #b5e8ff;
+  --sl-subject-tint: rgba(80,167,234,.16);
+  --sl-subject-line: rgba(125,192,245,.28);
+}
+body.sl-resource-hub.sl-lessons-hub {
+  --sl-subject-a: #38bfab;
+  --sl-subject-b: #6da9e5;
+  --sl-subject-ink: #c0fae7;
+  --sl-subject-tint: rgba(49,194,172,.16);
+  --sl-subject-line: rgba(86,207,180,.28);
+}
+body.sl-resource-hub main.sl-subject-main { max-width: 1185px; }
+body.sl-resource-hub .sl-subject-intro-panel {
+  margin: 0 0 20px;
+  background: linear-gradient(145deg,rgba(239,249,255,.12),rgba(222,242,255,.035)),rgba(12,27,48,.42);
+}
+body.sl-resource-hub .page-header h1 { font-size: clamp(1.7rem,3.1vw,2.45rem); }
+body.sl-resource-hub .page-header p { max-width: 760px; }
+
+/* Segmented glass sections: gentle panel on panel, not a stack of opaque boxes. */
+body.sl-resource-hub .examhub-section {
+  position: relative;
+  z-index: 1;
+  margin: 16px 0 0 !important;
+  padding: clamp(16px,2.1vw,25px);
+  border: 1px solid rgba(211,237,255,.19);
+  border-radius: 23px;
+  background: linear-gradient(140deg,rgba(244,251,255,.09),rgba(234,246,255,.025)),rgba(10,26,48,.34);
+  box-shadow: 0 14px 36px rgba(6,22,42,.09),inset 0 1px 0 rgba(255,255,255,.13);
+  -webkit-backdrop-filter: blur(14px) saturate(112%);
+  backdrop-filter: blur(14px) saturate(112%);
+}
+body.sl-resource-hub .examhub-section > h2 {
+  display: flex; align-items: center; gap: 11px;
+  color: #ecf5ff;
+  font: 780 clamp(1rem,1.4vw,1.18rem)/1.25 "Nirmala UI","Segoe UI",sans-serif;
+  margin: 0 0 17px;
+  letter-spacing: -.015em;
+}
+body.sl-resource-hub .sl-resource-heading-icon {
+  display: grid;place-items: center;
+  flex: 0 0 35px;
+  width: 35px;height: 35px;
+  border-radius: 11px;
+  border: 1px solid rgba(188,217,248,.22);
+  color: var(--sl-subject-ink);
+  background: rgba(116,179,240,.11);
+}
+body.sl-resource-hub .sl-resource-heading-icon svg {
+  display: block;width: 20px;height: 20px;
+  fill: none;stroke: currentColor;stroke-width: 1.9;stroke-linecap: round;stroke-linejoin: round;
+}
+body.sl-resource-hub .examhub-grid {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 13px;
+}
+body.sl-resource-hub .examhub-card,
+body.sl-resource-hub .utility-card {
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  border-radius: 19px !important;
+  border: 1px solid rgba(211,234,255,.19) !important;
+  background: linear-gradient(155deg,rgba(250,254,255,.09),rgba(229,242,255,.025)),rgba(13,30,51,.43) !important;
+  box-shadow: 0 10px 25px rgba(6,19,36,.11),inset 0 1px 0 rgba(255,255,255,.13) !important;
+  -webkit-backdrop-filter: blur(13px) saturate(114%);
+  backdrop-filter: blur(13px) saturate(114%);
+  transition: border-color .18s ease,background .18s ease,box-shadow .18s ease;
+  transform: none !important;
+}
+body.sl-resource-hub .examhub-card {
+  padding: 19px;
+  min-height: 195px;
+}
+body.sl-resource-hub .examhub-card::before,
+body.sl-resource-hub .utility-card::before {
+  content: "";
+  position: absolute;
+  top: 0;left: 19px;right: 19px;height: 1px;
+  background: linear-gradient(90deg,transparent,rgba(255,255,255,.27),transparent);
+  pointer-events: none;
+}
+body.sl-resource-hub .examhub-card:hover,
+body.sl-resource-hub .utility-card:hover {
+  border-color: var(--sl-subject-line) !important;
+  background: linear-gradient(150deg,rgba(248,255,255,.15),rgba(228,246,255,.045)),rgba(22,43,68,.47) !important;
+  box-shadow: 0 12px 28px rgba(5,18,41,.13),inset 0 1px 0 rgba(255,255,255,.18) !important;
+}
+body.sl-resource-hub .examhub-card:focus-visible,
+body.sl-resource-hub .utility-card:focus-visible,
+body.sl-resource-hub .resource-link:focus-visible {
+  outline: 2px solid var(--sl-subject-a);
+  outline-offset: 3px;
+}
+body.sl-resource-hub .examhub-card .card-icon,
+body.sl-resource-hub .utility-card .card-icon {
+  display: grid;place-items: center;
+  flex: 0 0 51px;
+  width: 51px;height: 51px;
+  padding: 0;
+  border: 1px solid rgba(255,255,255,.30);
+  border-radius: 15px;
+  color: #fff;
+  background: linear-gradient(142deg,var(--sl-card-a,var(--sl-subject-a)),var(--sl-card-b,var(--sl-subject-b))) !important;
+  box-shadow: 0 8px 18px rgba(18,39,75,.15),inset 0 1px 0 rgba(255,255,255,.31) !important;
+  font-size: 1.45rem;
+}
+body.sl-resource-hub .examhub-card .card-icon svg,
+body.sl-resource-hub .utility-card .card-icon svg {
+  display: block;width: 28px;height: 28px;
+  fill: none;stroke: currentColor;stroke-width: 1.85;
+  stroke-linecap: round;stroke-linejoin: round;
+}
+body.sl-resource-hub .examhub-card h3,
+body.sl-resource-hub .utility-card h2 {
+  color: #f0f7ff;
+  font: 760 clamp(.94rem,1vw,1.05rem)/1.40 "Nirmala UI","Segoe UI",sans-serif;
+  letter-spacing: -.014em;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+body.sl-resource-hub .examhub-card p,
+body.sl-resource-hub .utility-card p {
+  color: #bad0e3;
+  font: 430 .81rem/1.60 "Nirmala UI","Segoe UI",sans-serif;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+body.sl-resource-hub .examhub-link,
+body.sl-resource-hub .utility-card .card-cta {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 6px;
+  margin: auto 0 0;
+  min-height: 34px;
+  padding: 7px 11px;
+  border: 1px solid var(--sl-subject-line);
+  border-radius: 10px;
+  color: #c7eaff !important;
+  background: rgba(130,190,243,.085);
+  font: 690 .77rem/1.2 "Nirmala UI","Segoe UI",sans-serif;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.09);
+}
+body.sl-resource-hub .examhub-note,
+body.sl-resource-hub .tool-note {
+  margin: 18px auto 0;
+  padding: 15px 18px;
+  max-width: none;
+  border: 1px solid rgba(205,227,249,.16);
+  border-radius: 16px;
+  color: #b4c9dc;
+  background: rgba(24,43,67,.30);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+  font: .78rem/1.6 "Nirmala UI","Segoe UI",sans-serif;
+  text-align: left;
+}
+
+/* Subject-specific accent chips on Exam Hub past-paper resources. */
+body.sl-resource-hub .examhub-card[data-resource-accent="maths"] { --sl-card-a:#6198f1; --sl-card-b:#9380ef; }
+body.sl-resource-hub .examhub-card[data-resource-accent="physics"] { --sl-card-a:#34b8d6; --sl-card-b:#6c95f0; }
+body.sl-resource-hub .examhub-card[data-resource-accent="chemistry"] { --sl-card-a:#efaa69; --sl-card-b:#dc829a; }
+body.sl-resource-hub .examhub-card[data-resource-accent="biology"] { --sl-card-a:#3cbea0; --sl-card-b:#68c9b9; }
+body.sl-resource-hub .examhub-card[data-resource-accent="english"] { --sl-card-a:#8984e2; --sl-card-b:#b081cf; }
+body.sl-resource-hub .examhub-card[data-resource-accent="exam"] { --sl-card-a:#51a5d8; --sl-card-b:#6e91e0; }
+
+/* Tools are actual buttons, retaining their original data-open-tool handlers. */
+body.sl-resource-hub .study-tools-grid {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  align-items: stretch;
+  gap: 15px;
+  margin: 18px 0 0;
+}
+body.sl-resource-hub .utility-card {
+  width: 100%;
+  min-height: 194px;
+  padding: 19px !important;
+  cursor: pointer;
+  text-align: left;
+  color: #f1f8ff;
+}
+body.sl-resource-hub .utility-card.is-active {
+  border-color: var(--sl-subject-a) !important;
+  background: linear-gradient(145deg,rgba(90,160,220,.19),rgba(17,39,66,.36)),rgba(23,45,74,.45) !important;
+  box-shadow: 0 11px 28px rgba(12,37,71,.15),inset 0 0 0 1px rgba(110,209,244,.15) !important;
+}
+body.sl-resource-hub .utility-card[data-open-tool="pomodoro"],
+body.sl-resource-hub .utility-card[data-open-tool="mock"] {
+  --sl-card-a:#5ba8e5;--sl-card-b:#7e82e8;
+}
+body.sl-resource-hub .utility-card[data-open-tool="flashcards"],
+body.sl-resource-hub .utility-card[data-open-tool="mistakes"] {
+  --sl-card-a:#669ee6;--sl-card-b:#a07edb;
+}
+body.sl-resource-hub .utility-card[data-open-tool="daily"],
+body.sl-resource-hub .utility-card[data-open-tool="study-time"] {
+  --sl-card-a:#3daac0;--sl-card-b:#67b2e8;
+}
+body.sl-resource-hub .tool-panel {
+  position: relative;
+  z-index: 1;
+  margin-top: 18px;
+  padding: clamp(16px,2.4vw,25px);
+  border: 1px solid rgba(212,238,251,.24);
+  border-radius: 22px;
+  background: linear-gradient(150deg,rgba(240,251,255,.095),rgba(231,245,255,.025)),rgba(11,28,50,.48);
+  box-shadow: 0 15px 38px rgba(6,20,42,.13),inset 0 1px 0 rgba(255,255,255,.13);
+  -webkit-backdrop-filter: blur(16px) saturate(116%);
+  backdrop-filter: blur(16px) saturate(116%);
+  scroll-margin-top: 104px;
+}
+body.sl-resource-hub .tool-panel h2 {
+  color: #edf7ff;
+  font-family: "Nirmala UI","Segoe UI",sans-serif;
+}
+body.sl-resource-hub .tool-panel p,
+body.sl-resource-hub .tool-panel .tool-field label {
+  color: #b8d0e2;
+}
+body.sl-resource-hub .tool-panel .tool-field input,
+body.sl-resource-hub .tool-panel .tool-field select,
+body.sl-resource-hub .tool-panel .tool-field textarea {
+  color: #edf6ff;
+  border: 1px solid rgba(163,208,240,.23);
+  border-radius: 12px;
+  background: rgba(237,248,255,.075);
+}
+body.sl-resource-hub .tool-panel .tool-field input:focus-visible,
+body.sl-resource-hub .tool-panel .tool-field select:focus-visible,
+body.sl-resource-hub .tool-panel .tool-field textarea:focus-visible {
+  outline: 2px solid var(--sl-subject-a);
+  outline-offset: 1px;
+}
+body.sl-resource-hub .tool-panel .tool-result,
+body.sl-resource-hub .tool-panel .question-box,
+body.sl-resource-hub .tool-panel .flashcard-view,
+body.sl-resource-hub .tool-panel .stack-item,
+body.sl-resource-hub .tool-panel .practice-plan,
+body.sl-resource-hub .tool-panel .timer-display {
+  border-color: rgba(161,207,244,.18);
+  color: #ecf6ff;
+}
+body.sl-resource-hub .tool-panel .tool-btn {
+  box-shadow: 0 7px 19px rgba(24,86,146,.14);
+  border-radius: 11px;
+}
+body.sl-resource-hub .tool-panel .tool-btn:focus-visible {
+  outline: 2px solid #86dcff;outline-offset: 3px;
+}
+
+/* Lesson resources keep the original publisher/links and gain clean layered glass. */
+body.sl-lessons-hub main.lesson-page.sl-subject-main {
+  width: 100%;
+  max-width: 995px;
+}
+body.sl-lessons-hub .telegram-message-wrap {
+  display: flex;
+  justify-content: center;
+}
+body.sl-lessons-hub .telegram-message {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(209,237,255,.22);
+  border-radius: 24px;
+  background: linear-gradient(152deg,rgba(255,255,255,.10),rgba(255,255,255,.025)),rgba(16,34,55,.48);
+  box-shadow: 0 16px 41px rgba(6,22,43,.13),inset 0 1px 0 rgba(255,255,255,.13);
+  -webkit-backdrop-filter: blur(15px) saturate(116%);
+  backdrop-filter: blur(15px) saturate(116%);
+}
+body.sl-lessons-hub .telegram-message-top {
+  border-bottom: 1px solid rgba(219,239,254,.16);
+  background: rgba(219,241,251,.07);
+}
+body.sl-lessons-hub .telegram-avatar {
+  border-radius: 13px;
+  background: linear-gradient(142deg,#2bb5a7,#5e9fdb);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.33);
+}
+body.sl-lessons-hub .telegram-name { color: #eff8ff; }
+body.sl-lessons-hub .telegram-subtitle { color: #b8cde2; }
+body.sl-lessons-hub .telegram-bubble { padding: clamp(15px,2.3vw,26px); }
+body.sl-lessons-hub .pack-cover {
+  min-height: 195px;
+  border: 1px solid rgba(168,235,228,.32);
+  border-radius: 19px;
+  background: radial-gradient(ellipse at 20% 12%,rgba(63,205,188,.33),transparent 48%),
+    radial-gradient(ellipse at 88% 75%,rgba(112,147,237,.28),transparent 45%),
+    linear-gradient(130deg,rgba(14,37,56,.78),rgba(27,59,79,.66));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.18);
+}
+body.sl-lessons-hub .message-copy { color: #d3e2ee; font-family: "Nirmala UI","Segoe UI",sans-serif; }
+body.sl-lessons-hub .resource-list { display: grid; grid-template-columns: 1fr; gap: 11px; }
+body.sl-lessons-hub .resource-link {
+  display: flex; align-items: center;
+  min-height: 73px;
+  padding: 14px 16px;
+  border: 1px solid rgba(213,241,250,.20);
+  border-radius: 16px;
+  background: linear-gradient(140deg,rgba(246,255,255,.10),rgba(228,244,252,.025)),rgba(16,40,59,.32);
+  color: #eaf5ff;
+  transform: none;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.11);
+  transition: border-color .18s ease,background .18s ease,box-shadow .18s ease;
+}
+body.sl-lessons-hub .resource-link:hover {
+  background: rgba(149,216,234,.14);
+  border-color: rgba(126,219,213,.42);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.15);
+  transform: none;
+}
+body.sl-lessons-hub .resource-icon {
+  flex: 0 0 41px;width: 41px;height: 41px;
+  border: 1px solid rgba(255,255,255,.28);
+  border-radius: 12px;
+  color: #fff;
+  background: linear-gradient(145deg,#37bea9,#619cda);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.27);
+}
+body.sl-lessons-hub .resource-icon svg {
+  display: block;width: 19px;height: 19px;
+  fill: none;stroke: currentColor;stroke-width: 2.0;
+  stroke-linecap: round;stroke-linejoin: round;
+}
+body.sl-lessons-hub .resource-copy strong {
+  color: #f0f9ff;
+  font: 720 .89rem/1.5 "Nirmala UI","Segoe UI",sans-serif;
+}
+body.sl-lessons-hub .resource-copy small { color: #b0cfe0; font-size: .74rem; }
+body.sl-lessons-hub .resource-arrow { color: #91e6dc; font-size: 1.08rem; }
+body.sl-lessons-hub .message-emphasis {
+  border-left: 3px solid #64cbbb;
+  border-radius: 0 13px 13px 0;
+  background: rgba(70,178,168,.10);
+  color: #d7f6f2;
+}
+body.sl-lessons-hub .channel-credit { border-top-color: rgba(204,236,247,.19); }
+body.sl-lessons-hub .channel-credit strong { color: #eff8ff; }
+body.sl-lessons-hub .channel-credit small { color: #b7ccdf; }
+body.sl-lessons-hub .channel-button {
+  border: 1px solid rgba(154,229,222,.34);
+  border-radius: 12px;
+  background: rgba(80,192,184,.16);
+  color: #c6fff4;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
+}
+
+/* Light theme: bright transparent surfaces, real text contrast. */
+html[data-theme="light"] body.sl-resource-hub .sl-subject-intro-panel {
+  background: linear-gradient(145deg,rgba(255,255,255,.68),rgba(232,245,255,.32)),rgba(221,238,251,.28);
+}
+html[data-theme="light"] body.sl-resource-hub .examhub-section,
+html[data-theme="light"] body.sl-resource-hub .tool-panel {
+  border-color: rgba(255,255,255,.76);
+  background: linear-gradient(145deg,rgba(255,255,255,.60),rgba(231,245,255,.30)),rgba(221,237,250,.26);
+  box-shadow: 0 13px 31px rgba(39,83,123,.08),inset 0 1px 0 rgba(255,255,255,.91);
+}
+html[data-theme="light"] body.sl-resource-hub .examhub-section > h2,
+html[data-theme="light"] body.sl-resource-hub .tool-panel h2 { color: #234966; }
+html[data-theme="light"] body.sl-resource-hub .sl-resource-heading-icon {
+  color: #286e9c;background: rgba(94,175,221,.12);border-color: rgba(111,181,224,.21);
+}
+html[data-theme="light"] body.sl-resource-hub .examhub-card,
+html[data-theme="light"] body.sl-resource-hub .utility-card,
+html[data-theme="light"] body.sl-lessons-hub .resource-link {
+  color: #234765;
+  border-color: rgba(255,255,255,.80) !important;
+  background: linear-gradient(145deg,rgba(255,255,255,.64),rgba(238,247,255,.30)),rgba(220,238,252,.26) !important;
+  box-shadow: 0 9px 22px rgba(33,75,118,.07),inset 0 1px 0 rgba(255,255,255,.91) !important;
+}
+html[data-theme="light"] body.sl-resource-hub .examhub-card:hover,
+html[data-theme="light"] body.sl-resource-hub .utility-card:hover,
+html[data-theme="light"] body.sl-lessons-hub .resource-link:hover {
+  border-color: rgba(105,172,216,.41) !important;
+  background: rgba(255,255,255,.75) !important;
+}
+html[data-theme="light"] body.sl-resource-hub .utility-card.is-active {
+  background: rgba(172,217,244,.24) !important;
+  border-color: rgba(80,158,213,.51) !important;
+}
+html[data-theme="light"] body.sl-resource-hub .examhub-card h3,
+html[data-theme="light"] body.sl-resource-hub .utility-card h2,
+html[data-theme="light"] body.sl-lessons-hub .resource-copy strong { color: #214667; }
+html[data-theme="light"] body.sl-resource-hub .examhub-card p,
+html[data-theme="light"] body.sl-resource-hub .utility-card p,
+html[data-theme="light"] body.sl-lessons-hub .resource-copy small { color: #557089; }
+html[data-theme="light"] body.sl-resource-hub .examhub-link,
+html[data-theme="light"] body.sl-resource-hub .utility-card .card-cta {
+  color: #216d9d !important;background: rgba(108,178,220,.11);border-color: rgba(121,181,225,.26);
+}
+html[data-theme="light"] body.sl-resource-hub .examhub-note,
+html[data-theme="light"] body.sl-resource-hub .tool-note {
+  color: #4d6b86;border-color: rgba(255,255,255,.66);background: rgba(255,255,255,.40);
+}
+html[data-theme="light"] body.sl-resource-hub .tool-panel p,
+html[data-theme="light"] body.sl-resource-hub .tool-panel .tool-field label { color: #4e6c86; }
+html[data-theme="light"] body.sl-resource-hub .tool-panel .tool-field input,
+html[data-theme="light"] body.sl-resource-hub .tool-panel .tool-field select,
+html[data-theme="light"] body.sl-resource-hub .tool-panel .tool-field textarea {
+  color: #234663;border-color: rgba(92,147,195,.24);background: rgba(255,255,255,.63);
+}
+html[data-theme="light"] body.sl-resource-hub .tool-panel .tool-result,
+html[data-theme="light"] body.sl-resource-hub .tool-panel .question-box,
+html[data-theme="light"] body.sl-resource-hub .tool-panel .flashcard-view,
+html[data-theme="light"] body.sl-resource-hub .tool-panel .stack-item,
+html[data-theme="light"] body.sl-resource-hub .tool-panel .practice-plan,
+html[data-theme="light"] body.sl-resource-hub .tool-panel .timer-display { color: #254765; }
+html[data-theme="light"] body.sl-lessons-hub .telegram-message {
+  border-color: rgba(255,255,255,.81);
+  background: linear-gradient(145deg,rgba(255,255,255,.70),rgba(230,244,254,.36)),rgba(220,237,251,.27);
+  box-shadow: 0 14px 34px rgba(43,84,130,.09),inset 0 1px 0 rgba(255,255,255,.92);
+}
+html[data-theme="light"] body.sl-lessons-hub .telegram-message-top {
+  background: rgba(224,245,249,.47);border-bottom-color: rgba(123,187,201,.23);
+}
+html[data-theme="light"] body.sl-lessons-hub .telegram-name,
+html[data-theme="light"] body.sl-lessons-hub .channel-credit strong { color: #285069; }
+html[data-theme="light"] body.sl-lessons-hub .telegram-subtitle,
+html[data-theme="light"] body.sl-lessons-hub .channel-credit small { color: #5b7c8f; }
+html[data-theme="light"] body.sl-lessons-hub .message-copy { color: #355973; }
+html[data-theme="light"] body.sl-lessons-hub .message-emphasis {
+  background: rgba(69,190,172,.12);color: #285f66;
+}
+html[data-theme="light"] body.sl-lessons-hub .channel-button {
+  color: #1b6a72;border-color: rgba(87,179,179,.29);background: rgba(79,191,181,.12);
+}
+html[data-theme="light"] body.sl-lessons-hub .resource-arrow { color: #1b858c; }
+
+/* Responsive: no horizontal overflow, keep comfortable card tap targets. */
+@media (max-width: 1020px) {
+  body.sl-resource-hub .examhub-grid,
+  body.sl-resource-hub .study-tools-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 720px) {
+  body.sl-resource-hub .examhub-section { padding: 15px; border-radius: 18px; -webkit-backdrop-filter: blur(9px); backdrop-filter: blur(9px); }
+  body.sl-resource-hub .examhub-grid,
+  body.sl-resource-hub .study-tools-grid { grid-template-columns: 1fr; gap: 11px; }
+  body.sl-resource-hub .examhub-card,
+  body.sl-resource-hub .utility-card { min-height: 0;padding: 16px !important;-webkit-backdrop-filter: blur(8px);backdrop-filter: blur(8px); }
+  body.sl-resource-hub .examhub-card .card-icon,
+  body.sl-resource-hub .utility-card .card-icon { flex-basis: 46px;width: 46px;height: 46px; }
+  body.sl-resource-hub .tool-panel { padding: 16px;scroll-margin-top: 77px;-webkit-backdrop-filter: blur(8px);backdrop-filter: blur(8px); }
+  body.sl-lessons-hub .telegram-message { -webkit-backdrop-filter: blur(8px);backdrop-filter: blur(8px); }
+  body.sl-lessons-hub .telegram-message-top { padding: 14px; }
+  body.sl-lessons-hub .telegram-bubble { padding: 14px; }
+  body.sl-lessons-hub .pack-cover { min-height: 165px; }
+  body.sl-lessons-hub .resource-link { padding: 12px;min-height: 66px;gap: 11px; }
+  body.sl-lessons-hub .resource-icon { width: 38px;height: 38px;flex-basis: 38px; }
+  body.sl-lessons-hub .resource-copy strong { font-size: .82rem; }
+}
+@media (max-width: 380px) {
+  body.sl-resource-hub .sl-subject-intro-panel { padding: 14px; }
+  body.sl-resource-hub .sl-subject-hero-copy h1 { font-size: 1.28rem; }
+  body.sl-resource-hub .examhub-section { padding: 12px; }
+  body.sl-lessons-hub .resource-arrow { margin-left: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.sl-resource-hub .examhub-card,
+  body.sl-resource-hub .utility-card,
+  body.sl-lessons-hub .resource-link { transition: none !important; }
+}
