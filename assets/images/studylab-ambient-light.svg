@@ -1,50 +1,53 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Abstract StudyLab day blue violet flowing ribbons">
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice" role="img" aria-label="StudyLab Frosted Pearl atmospheric background">
   <defs>
-    <linearGradient id="base" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#D7E6F2"/>
-      <stop offset=".52" stop-color="#D3EBFA"/>
-      <stop offset="1" stop-color="#B7DFF7"/>
+    <linearGradient id="ground" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F7FAFE"/>
+      <stop offset=".52" stop-color="#EEF4FC"/>
+      <stop offset="1" stop-color="#F5F5FD"/>
     </linearGradient>
-    <radialGradient id="hazeC" cx=".7" cy=".08" r=".8">
-      <stop offset="0" stop-color="#57BCEB" stop-opacity=".30"/>
-      <stop offset="1" stop-color="#57BCEB" stop-opacity="0"/>
-    </radialGradient>
-    <radialGradient id="hazeM" cx=".05" cy=".92" r=".9">
-      <stop offset="0" stop-color="#B795E8" stop-opacity=".25"/>
-      <stop offset="1" stop-color="#B795E8" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="purple" x1="0" y1=".95" x2="1" y2="0">
-      <stop offset="0" stop-color="#9B47D3"/>
-      <stop offset=".54" stop-color="#CD71E8"/>
-      <stop offset="1" stop-color="#7A44D6"/>
+    <radialGradient id="blueGlow"><stop stop-color="#8AD5F4" stop-opacity=".33"/><stop offset=".55" stop-color="#94BFF5" stop-opacity=".13"/><stop offset="1" stop-color="#8AD5F4" stop-opacity="0"/></radialGradient>
+    <radialGradient id="violetGlow"><stop stop-color="#CBB6EB" stop-opacity=".29"/><stop offset=".6" stop-color="#E0CEED" stop-opacity=".10"/><stop offset="1" stop-color="#CBB6EB" stop-opacity="0"/></radialGradient>
+    <radialGradient id="quiet"><stop stop-color="#F7FAFE" stop-opacity=".73"/><stop offset=".55" stop-color="#F7FAFE" stop-opacity=".35"/><stop offset="1" stop-color="#F7FAFE" stop-opacity="0"/></radialGradient>
+    <linearGradient id="auroraC" x1=".05" y1=".9" x2=".95" y2=".08">
+      <stop stop-color="#8AD5F4" stop-opacity=".06"/>
+      <stop offset=".38" stop-color="#94BFF5" stop-opacity=".60"/>
+      <stop offset=".69" stop-color="#8AD5F4" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#8AD5F4" stop-opacity=".03"/>
     </linearGradient>
-    <linearGradient id="blue" x1=".14" y1=".96" x2=".86" y2=".06">
-      <stop offset="0" stop-color="#1871D3"/>
-      <stop offset=".43" stop-color="#1893E6"/>
-      <stop offset=".82" stop-color="#4FB8F2"/>
-      <stop offset="1" stop-color="#B7E9FF"/>
+    <linearGradient id="auroraV" x1=".15" y1=".05" x2=".9" y2="1">
+      <stop stop-color="#CBB6EB" stop-opacity=".03"/>
+      <stop offset=".48" stop-color="#CBB6EB" stop-opacity=".50"/>
+      <stop offset=".77" stop-color="#E0CEED" stop-opacity=".42"/>
+      <stop offset="1" stop-color="#E0CEED" stop-opacity=".02"/>
     </linearGradient>
-    <linearGradient id="blueAlt" x1=".08" y1=".32" x2="1" y2=".80">
-      <stop offset="0" stop-color="#B7E9FF"/>
-      <stop offset=".48" stop-color="#1893E6"/>
-      <stop offset="1" stop-color="#1871D3"/>
+    <linearGradient id="edgeC" x1="0" y1="0" x2="1" y2="0">
+      <stop stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset=".48" stop-color="#FFFFFF" stop-opacity=".32"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
     </linearGradient>
-    <linearGradient id="edge" x1="0" y1="0" x2="1" y2=".8">
-      <stop offset="0" stop-color="#FFFFFF" stop-opacity=".05"/>
-      <stop offset=".50" stop-color="#FFFFFF" stop-opacity=".75"/>
-      <stop offset="1" stop-color="#FFFFFF" stop-opacity=".05"/>
-    </linearGradient>
+    <filter id="blurSoft" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="38"/>
+    </filter>
   </defs>
-  <rect width="1920" height="1080" fill="url(#base)"/>
-  <rect width="1920" height="1080" fill="url(#hazeC)"/>
-  <rect width="1920" height="1080" fill="url(#hazeM)"/>
-  <!-- Fluid ribbons stay at the margins, leaving generous space for study content. -->
-  <path d="M-210 310 C85 405 140 760 450 835 C710 897 910 645 1100 640 C1306 636 1540 865 1940 926 L1940 1250 L-220 1250Z" fill="url(#purple)" opacity=".58"/>
-  <path d="M-190 -90 C5 98 112 274 276 511 C491 825 775 899 958 667 C1106 479 1190 291 1416 308 C1665 326 1813 575 2070 716 L2070 994 C1721 796 1500 583 1325 572 C1118 556 1094 914 847 1027 C556 1160 211 895 -120 565Z" fill="url(#blue)" opacity=".68"/>
-  <path d="M-210 44 C102 228 164 503 351 699 C569 927 822 964 973 743 C1120 529 1191 424 1350 421 C1610 418 1734 655 2055 807" fill="none" stroke="url(#edge)" stroke-width="10" opacity=".72"/>
-  <path d="M-170 112 C90 312 194 579 386 755 C567 923 798 1016 998 789" fill="none" stroke="#B7E9FF" stroke-width="2" stroke-opacity=".42"/>
-  <!-- An outer blue ribbon gives depth without blurring the interface. -->
-  <path d="M1180 -110 C1473 21 1618 244 1806 384 C1939 483 2034 518 2111 531 L2111 802 C1853 761 1636 544 1476 426 C1365 345 1288 282 1140 293 C1021 302 981 404 934 463 C957 234 1020 21 1180 -110Z" fill="url(#blueAlt)" opacity=".57"/>
-  <path d="M1164 4 C1418 97 1563 316 1756 451 C1875 535 1963 594 2068 624" fill="none" stroke="url(#edge)" stroke-width="6" opacity=".6"/>
-  <path d="M-120 1040 C332 952 585 1158 870 1080 C1132 1007 1393 916 1665 1014 C1855 1085 2044 1102 2090 1120" fill="none" stroke="#FFFFFF" stroke-opacity=".22" stroke-width="28"/>
+  <rect width="1920" height="1080" fill="url(#ground)"/>
+  <!-- Soft illumination lives near the outside; the middle stays calm under cards. -->
+  <ellipse cx="1690" cy="115" rx="600" ry="465" fill="url(#blueGlow)"/>
+  <ellipse cx="35" cy="905" rx="705" ry="550" fill="url(#violetGlow)"/>
+  <ellipse cx="160" cy="105" rx="450" ry="420" fill="url(#blueGlow)" opacity=".4"/>
+  <ellipse cx="1790" cy="965" rx="380" ry="360" fill="url(#violetGlow)" opacity=".48"/>
+  <g filter="url(#blurSoft)">
+    <path d="M1365 -230 C1360 70 1455 185 1645 326 C1788 432 1930 482 2160 519 L2150 -220Z" fill="url(#auroraC)" opacity=".48"/>
+    <path d="M1720 -225 C1525 31 1523 211 1706 385 C1840 507 1966 543 2150 618 L2140 -225Z" fill="url(#auroraV)" opacity=".38"/>
+    <path d="M-260 440 C15 492 151 641 323 767 C499 896 665 922 788 1205 L-260 1215Z" fill="url(#auroraC)" opacity=".48"/>
+    <path d="M-270 655 C75 723 186 869 372 1017 C480 1104 599 1158 749 1240 L-270 1240Z" fill="url(#auroraV)" opacity=".26"/>
+  </g>
+  <!-- Thin luminous glass edges, not high-contrast stripes. -->
+  <g fill="none" stroke-linecap="round">
+    <path d="M1390 -110 C1399 100 1500 246 1656 352 C1834 474 1960 502 2120 538" stroke="url(#edgeC)" stroke-width="9" opacity=".33"/>
+    <path d="M1441 -98 C1478 82 1531 204 1681 329 C1798 428 1926 474 2070 505" stroke="#FFFFFF" stroke-opacity=".21" stroke-width="1.65"/>
+    <path d="M-170 605 C120 646 197 820 393 903 C533 965 676 1014 762 1168" stroke="url(#edgeC)" stroke-width="8" opacity=".33"/>
+    <path d="M-145 645 C111 689 213 836 391 923 C537 997 623 1042 712 1200" stroke="#FFFFFF" stroke-opacity=".23" stroke-width="1.4"/>
+  </g>
+  <!-- Feather the centre so long text areas remain visually quiet. -->
+  <ellipse cx="935" cy="480" rx="715" ry="575" fill="url(#quiet)" opacity=".67"/>
 </svg>

@@ -1,78 +1,46 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600">
-  <g fill="none" stroke="#587da7" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" opacity="0.23">
-    <!-- Atom and orbit -->
-    <g transform="translate(76 82) rotate(-13)">
-      <ellipse rx="34" ry="13"/><ellipse rx="34" ry="13" transform="rotate(60)"/><ellipse rx="34" ry="13" transform="rotate(120)"/>
-      <circle r="4" fill="#587da7" stroke="none"/>
-    </g>
-    <!-- Open book -->
-    <g transform="translate(244 62) rotate(5)">
-      <path d="M-34 -16 Q-13 -22 0 -10 Q13 -22 34 -16 V26 Q12 18 0 31 Q-12 18 -34 26 Z"/>
-      <path d="M0 -10 V31 M-25 -7 Q-12 -9 -6 -3 M-25 3 Q-13 1 -6 7 M7 -3 Q16 -10 26 -7 M7 7 Q17 1 26 3"/>
-    </g>
-    <!-- Flask -->
-    <g transform="translate(460 84) rotate(9)">
-      <path d="M-10 -28 H10 M-6 -28 V-7 L-27 28 Q-31 35 -21 35 H21 Q31 35 27 28 L6 -7 V-28"/>
-      <path d="M-20 15 Q0 9 20 15 M-14 22 H14"/>
-      <circle cx="-6" cy="19" r="2"/><circle cx="8" cy="25" r="2"/>
-    </g>
-    <!-- DNA helix -->
-    <g transform="translate(90 260) rotate(-8)">
-      <path d="M-19 -39 C28 -19 -28 19 19 39 M19 -39 C-28 -19 28 19 -19 39"/>
-      <path d="M-12 -29 H12 M-5 -16 H5 M-1 0 H1 M-5 16 H5 M-12 29 H12"/>
-    </g>
-    <!-- Molecule -->
-    <g transform="translate(294 245)">
-      <path d="M-24 -8 L0 -22 L24 -8 L24 20 L0 34 L-24 20 Z M-24 -8 L0 6 L24 -8 M0 -22 V6 M0 6 V34"/>
-      <circle cx="-24" cy="-8" r="6" fill="#587da7"/><circle cx="0" cy="-22" r="6" fill="#587da7"/>
-      <circle cx="24" cy="-8" r="6" fill="#587da7"/><circle cx="24" cy="20" r="6" fill="#587da7"/>
-      <circle cx="0" cy="34" r="6" fill="#587da7"/><circle cx="-24" cy="20" r="6" fill="#587da7"/>
-      <circle cx="0" cy="6" r="5" fill="#587da7"/>
-    </g>
-    <!-- Pencil and ruler -->
-    <g transform="translate(488 265) rotate(-28)">
-      <path d="M-9 -36 L9 -36 L9 24 L0 39 L-9 24 Z M-9 -24 H9 M-9 -18 H9"/>
-      <path d="M-3 32 L0 39 L3 32"/>
-    </g>
-    <!-- Geometry triangle -->
-    <g transform="translate(105 445) rotate(7)">
-      <path d="M-38 28 L0 -37 L39 28 Z M0 -37 V28 M-12 7 H12"/>
-      <path d="M-29 19 Q-26 8 -16 9"/>
-      <circle cx="0" cy="-37" r="3" fill="#587da7"/>
-    </g>
-    <!-- Microscope -->
-    <g transform="translate(292 440) rotate(-7)">
-      <path d="M-7 -35 L13 -35 L24 -20 L7 -6 L-7 -20 Z"/>
-      <path d="M12 -7 Q27 4 18 20 Q9 33 -9 28 M-21 29 H30 M-4 -25 L9 -12 M-13 3 L-28 18"/>
-      <path d="M-28 18 L-17 29 M-28 18 L-35 18"/>
-      <circle cx="18" cy="20" r="4"/>
-    </g>
-    <!-- Globe and orbit -->
-    <g transform="translate(484 470) rotate(13)">
-      <circle r="29"/><ellipse rx="29" ry="12"/><path d="M0 -29 Q-17 0 0 29 M0 -29 Q17 0 0 29"/>
-      <path d="M-22 -18 Q0 -10 22 -18 M-28 3 H28 M-22 18 Q0 10 22 18"/>
-    </g>
-    <!-- Calculator -->
-    <g transform="translate(80 90)">
-      <rect x="-20" y="-22" width="40" height="48" rx="6" transform="translate(120 110) rotate(9)"/>
-      <rect x="105" y="91" width="28" height="8" rx="2" transform="rotate(9 105 91)"/>
-      <path d="M108 110 h4 M120 110 h4 M108 122 h4 M120 122 h4 M108 134 h4 M120 134 h4" transform="rotate(9 120 120)"/>
-    </g>
-    <!-- Small decorative orbit/dashed paths -->
-    <path d="M14 345 C50 320 65 320 96 338" stroke-dasharray="3 8"/>
-    <path d="M365 120 C400 104 418 105 438 122" stroke-dasharray="3 8"/>
-    <path d="M360 360 C391 337 414 339 437 359" stroke-dasharray="3 8"/>
-    <circle cx="193" cy="345" r="3"/><circle cx="205" cy="356" r="2"/><circle cx="180" cy="356" r="2"/>
-    <circle cx="382" cy="520" r="3"/><circle cx="398" cy="532" r="2"/>
-    <path d="M24 175 l9 0 m-4.5 -4.5 v9 M554 170 l9 0 m-4.5 -4.5 v9"/>
-    <path d="M350 34 l8 0 m-4 -4 v8 M175 520 l8 0 m-4 -4 v8"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Quiet science line art at the edges">
+<g fill="none" stroke="#537EA6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity=".16">
+  <!-- Atomic orbits: upper left -->
+  <g transform="translate(137 161) rotate(-12)">
+    <ellipse rx="47" ry="16"/><ellipse rx="47" ry="16" transform="rotate(60)"/><ellipse rx="47" ry="16" transform="rotate(120)"/>
+    <circle r="3.5" fill="#537EA6" stroke="none"/>
   </g>
-  <g fill="#587da7" font-family="Segoe UI, Arial, sans-serif" font-weight="600" opacity="0.21">
-    <text x="380" y="188" font-size="25" transform="rotate(-9 380 188)">π</text>
-    <text x="32" y="525" font-size="24" transform="rotate(-12 32 525)">∫ f(x) dx</text>
-    <text x="360" y="565" font-size="18" transform="rotate(6 360 565)">E = mc²</text>
-    <text x="145" y="188" font-size="20" transform="rotate(8 145 188)">H₂O</text>
-    <text x="520" y="360" font-size="20" transform="rotate(90 520 360)">F = ma</text>
-    <text x="208" y="95" font-size="17" transform="rotate(-7 208 95)">a² + b²</text>
+  <!-- Parabolic and sinusoidal curves against left edge -->
+  <path d="M-32 366 Q60 283 147 367 T320 367" stroke-width="1.75"/>
+  <path d="M-18 400 H265 M89 306 V488" opacity=".44" stroke-dasharray="4 10"/>
+  <path d="M-18 536 C78 465 194 485 253 548" opacity=".65"/>
+  <!-- Molecule bottom left -->
+  <g transform="translate(145 881) rotate(-11)">
+    <path d="M-46 -5 L0 -32 L46 -5 L46 47 L0 75 L-46 47Z"/>
+    <path d="M-46 -5 L0 23 L46 -5 M0 -32 V23 M0 23 V75"/>
+    <circle cx="-46" cy="-5" r="5"/><circle cx="0" cy="-32" r="5"/><circle cx="46" cy="-5" r="5"/>
   </g>
+  <!-- Right-side geometries -->
+  <g transform="translate(1780 143) rotate(8)">
+    <path d="M-48 38 L0 -45 L50 38Z M0 -45 V38 M-13 15 H15"/>
+    <path d="M-37 24 Q-30 10 -17 9" stroke-dasharray="3 6"/>
+  </g>
+  <!-- Chemistry glassware -->
+  <g transform="translate(1790 482) rotate(9)">
+    <path d="M-15 -49 H15 M-9 -49 V-11 L-40 41 Q-44 51 -31 51 H31 Q44 51 40 41 L9 -11 V-49"/>
+    <path d="M-32 24 Q0 14 32 24 M-20 32 H20"/>
+    <circle cx="-6" cy="27" r="3"/><circle cx="14" cy="35" r="2"/>
+  </g>
+  <!-- Open textbook lower right -->
+  <g transform="translate(1710 897) rotate(-7)">
+    <path d="M-66 -26 Q-26 -39 0 -17 Q26 -39 66 -26 V42 Q26 28 0 50 Q-26 28 -66 42Z"/>
+    <path d="M0 -17 V50 M-50 -12 Q-29 -20 -12 -9 M11 -9 Q31 -20 51 -12 M-50 3 Q-29 -6 -12 5 M11 5 Q31 -6 51 3"/>
+  </g>
+  <!-- Small, very faint edge constellations -->
+  <path d="M45 667 L112 618 L181 655" stroke-dasharray="3 11"/>
+  <circle cx="45" cy="667" r="3"/><circle cx="112" cy="618" r="3"/><circle cx="181" cy="655" r="3"/>
+  <path d="M1790 670 C1845 638 1874 644 1925 695" stroke-dasharray="4 12"/>
+  <path d="M1750 291 l12 0 m-6 -6 v12 M120 1033 l12 0 m-6 -6 v12"/>
+</g>
+<g font-family="Georgia, 'Times New Roman', serif" font-style="italic" fill="#537EA6" opacity=".14">
+  <text x="251" y="94" font-size="30" transform="rotate(-10 251 94)">π</text>
+  <text x="64" y="747" font-size="24" transform="rotate(7 64 747)">λ</text>
+  <text x="1735" y="338" font-size="22" transform="rotate(-7 1735 338)">E = mc²</text>
+  <text x="1755" y="1010" font-size="24" transform="rotate(4 1755 1010)">∑</text>
+</g>
 </svg>

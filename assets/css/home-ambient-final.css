@@ -2,34 +2,49 @@
    Loaded last so the background is owned by one place rather than competing legacy rules.
    The existing panels and their functions are not reconstructed. */
 
+/* Homepage wallpaper only: Midnight Aurora / Frosted Pearl.
+   Layer order: calm wash, edge-only educational outlines, flowing atmosphere.
+   Cards, navigation, header and glass blur remain controlled by their own CSS. */
 html[data-theme="dark"] body {
-  background-color: #081633 !important;
+  background-color:#0B1429 !important;
   background-image:
-    linear-gradient(180deg, rgba(6,13,31,.18), rgba(7,16,33,.23)),
+    linear-gradient(180deg,rgba(7,14,30,.06),rgba(8,17,36,.12)),
     url("../images/studylab-edu-doodles-dark.svg"),
     url("../images/studylab-ambient-dark.svg") !important;
-  background-position: center, center top, center center !important;
-  background-size: cover, 660px 660px, cover !important;
-  background-repeat: no-repeat, repeat, no-repeat !important;
-  background-attachment: fixed, fixed, fixed !important;
+  background-position:center,center center,50% 50% !important;
+  background-size:cover,cover,105% 105% !important;
+  background-repeat:no-repeat,no-repeat,no-repeat !important;
+  background-attachment:fixed,fixed,fixed !important;
 }
 html[data-theme="light"] body {
-  background-color: #d6e6f3 !important;
+  background-color:#F5F8FE !important;
   background-image:
-    linear-gradient(180deg, rgba(243,250,255,.12), rgba(230,241,254,.14)),
+    linear-gradient(180deg,rgba(255,255,255,.05),rgba(243,248,255,.09)),
     url("../images/studylab-edu-doodles-light.svg"),
     url("../images/studylab-ambient-light.svg") !important;
-  background-position: center, center top, center center !important;
-  background-size: cover, 660px 660px, cover !important;
-  background-repeat: no-repeat, repeat, no-repeat !important;
-  background-attachment: fixed, fixed, fixed !important;
+  background-position:center,center center,50% 50% !important;
+  background-size:cover,cover,105% 105% !important;
+  background-repeat:no-repeat,no-repeat,no-repeat !important;
+  background-attachment:fixed,fixed,fixed !important;
+}
+/* Gentle, desktop-only ambient drift. SVG art remains sharp and fixed behind
+   the glass; mobile, slow-performance mode and reduced-motion stay static. */
+@keyframes sl-home-aurora-drift {
+  0%,100% { background-position:center,center center,49% 50%; }
+  50% { background-position:center,center center,51% 50%; }
+}
+@media (min-width:901px) and (prefers-reduced-motion:no-preference) {
+  html:not([data-sl-performance="lite"])[data-theme="dark"] body,
+  html:not([data-sl-performance="lite"])[data-theme="light"] body {
+    animation:sl-home-aurora-drift 84s ease-in-out infinite;
+  }
 }
 
 /* The already-present animated ambient symbols should complement the doodles,
    not make a second high-contrast pattern over the glass cards. */
 .science-background::before,
-.science-background::after { opacity: .25 !important; }
-.science-symbol { opacity: .30 !important; }
+.science-background::after { opacity: .18 !important; }
+.science-symbol { opacity: .22 !important; }
 
 /* Prevent Quick and Suggest from slipping behind the fixed Home header.
    Height uses the *measured* header bottom (including wrapped mobile headers).
@@ -55,9 +70,10 @@ body:not(.study-room-page) .study-feedback-panel[hidden] { display: none !import
 @media (max-width: 720px) {
   html[data-theme="dark"] body,
   html[data-theme="light"] body {
-    background-position: center, center top, center center !important;
-    background-size: cover, 510px 510px, cover !important;
-    background-attachment: scroll, scroll, scroll !important;
+    background-position:center,center center,center center !important;
+    background-size:cover,cover,cover !important;
+    background-attachment:scroll,scroll,scroll !important;
+    animation:none !important;
   }
   body:not(.study-room-page) .study-quick-panel,
   body:not(.study-room-page) .study-feedback-panel {
