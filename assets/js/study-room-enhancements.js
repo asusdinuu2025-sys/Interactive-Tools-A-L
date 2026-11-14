@@ -43,6 +43,28 @@ function init(){
     try{localStorage.setItem(themeKey,theme);}catch(_){}
     if(announce&&previous!==theme)document.dispatchEvent(new CustomEvent('studylab:room-theme-change',{detail:{theme,previous}}));
    };
+
+   // Decorative backdrop preference is local to Study Room and is ON unless
+   // the user has explicitly disabled it. It never changes room sessions.
+   const doodlesKey='studylab-room-doodles-v1';
+   const doodlesButton=document.getElementById('roomDoodlesToggle');
+   const applyDoodles=(enabled,save=false)=>{
+    const on=Boolean(enabled);
+    root.dataset.roomDoodles=on?'on':'off';
+    if(doodlesButton){
+     doodlesButton.setAttribute('aria-pressed',String(on));
+     doodlesButton.setAttribute('aria-label',on?'Doodles on. Hide background doodles':'Doodles off. Show background doodles');
+     doodlesButton.classList.toggle('is-selected',on);
+     const state=doodlesButton.querySelector('.room-doodles-state');
+     if(state && state.textContent!==(on?'On':'Off'))state.textContent=on?'On':'Off';
+    }
+    if(save){try{localStorage.setItem(doodlesKey,on?'on':'off')}catch(_){}}
+   };
+   applyDoodles(root.dataset.roomDoodles!=='off');
+   doodlesButton?.addEventListener('click',()=>applyDoodles(root.dataset.roomDoodles!=='on',true));
+   window.addEventListener('storage',event=>{
+    if(event.key===doodlesKey)applyDoodles(event.newValue!=='off',false);
+   });
    modeButtons.forEach(button=>button.addEventListener('click',()=>applyMode(button.dataset.roomModeChoice)));
    window.addEventListener('storage',event=>{if(event.key===modeKey&&['light','dark','system'].includes(event.newValue))applyMode(event.newValue,false);});
    if(systemQuery&&typeof systemQuery.addEventListener==='function')systemQuery.addEventListener('change',()=>{if(root.dataset.roomModeChoice==='system')applyMode('system',false);});
