@@ -46,19 +46,30 @@ html[data-theme="light"] .sl-follow-btn.is-following{
   border-color:rgba(90,139,181,.2);
 }
 /* Keep the original post layout and three-dot menu. */
-.sl-feed-post-top .sl-follow-btn {align-self:flex-start;margin-left:auto}
+.sl-feed-post-top .sl-follow-btn {align-self:center;margin-left:0}
+.sl-feed-post-controls{
+  display:flex;align-items:center;justify-content:flex-end;gap:6px;
+  flex:0 0 auto;margin-left:auto;min-width:0;
+}
+.sl-feed-post-controls .sl-feed-post-menu{margin-left:0}
 .sl-feed-profile-trigger,.sl-follow-profile-trigger {cursor:pointer}
 .sl-feed-member.sl-follow-profile-trigger:focus-visible{
   outline:2px solid #73d4ff;
   outline-offset:3px;
 }
-.room-person-card-top .sl-follow-btn{
-  margin-left:auto;
-  min-width:65px;
-  z-index:1;
+.room-person-card-top .room-person-status-stack{
+  display:flex;flex:1 1 auto;min-width:0;max-width:100%;
+  flex-direction:column;align-items:flex-end;justify-content:center;gap:5px;
 }
-.room-person-card-top {gap:7px}
-.room-person-card-top .room-person-status {flex:0 1 auto}
+.room-person-card-top .room-person-follow-slot{
+  display:flex;max-width:100%;align-items:center;justify-content:flex-end;
+}
+.room-person-card-top .room-person-follow-slot:empty{display:none}
+.room-person-card-top .sl-follow-btn{
+  min-width:65px;max-width:100%;margin:0;z-index:1;
+}
+.room-person-card-top{gap:7px;align-items:flex-start}
+.room-person-card-top .room-person-status{flex:0 1 auto;max-width:100%;text-align:right}
 @media(max-width:440px){
   .sl-feed-post-top .sl-follow-btn.is-compact{
     min-width:55px;
@@ -276,4 +287,78 @@ html[data-theme="light"] .sl-pv-list-empty{color:#627d94}
 }
 @media(prefers-reduced-motion:reduce){
   .sl-follow-btn,.sl-pv-count:not(:disabled){transition:none!important}
+}
+
+
+/* New optional public bio in both existing editor forms. */
+.sl-profile-bio-field{min-width:0}
+.sl-profile-bio-input{
+  box-sizing:border-box;
+  width:100%;
+  min-height:70px;
+  max-height:150px;
+  resize:vertical;
+  padding:10px 12px;
+  font:500 13px/1.55 "Nirmala UI","Segoe UI",sans-serif;
+}
+.sl-profile-bio-count{margin-top:4px;font-size:11px;text-align:right;opacity:.86}
+.sl-profile-bio-count.is-over-limit{color:#ff8088!important;opacity:1}
+.sl-pv-description{
+  min-height:45px;
+  max-width:100%;
+  padding:11px 13px;
+  box-sizing:border-box;
+  margin:13px 0 18px;
+  border:1px solid rgba(163,203,236,.15);
+  border-radius:15px;
+  background:rgba(143,193,231,.055);
+  line-height:1.55;
+  overflow-wrap:anywhere;
+  white-space:pre-wrap;
+}
+html[data-theme="light"] .sl-pv-description{
+  border-color:rgba(112,164,204,.17);
+  background:rgba(255,255,255,.32);
+}
+/* Profile-completion notice stays visible ABOVE any open student card;
+   it never closes, blurs, or steals focus from the card. */
+.sl-follow-profile-toast{
+  position:fixed;
+  top:clamp(70px,10vh,105px);
+  right:max(14px,env(safe-area-inset-right));
+  z-index:2147483500;
+  box-sizing:border-box;
+  width:max-content;
+  max-width:min(370px,calc(100vw - 28px));
+  padding:14px 16px;
+  border:1px solid rgba(124,203,255,.37);
+  border-radius:15px;
+  background:rgba(20,43,67,.97);
+  color:#eefbff;
+  box-shadow:0 13px 42px rgba(0,12,34,.35);
+  font:730 13px/1.48 "Nirmala UI","Segoe UI",sans-serif;
+  pointer-events:none;
+  animation:sl-follow-toast-entrance .35s cubic-bezier(.2,.8,.2,1) both;
+  -webkit-backdrop-filter:blur(18px);
+  backdrop-filter:blur(18px);
+}
+.sl-follow-profile-toast[hidden]{display:none!important}
+.sl-follow-profile-toast.is-hiding{
+  opacity:0;
+  transform:translateX(35px);
+  transition:opacity .4s ease,transform .4s ease;
+}
+html[data-theme="light"] .sl-follow-profile-toast{
+  background:rgba(246,251,255,.98);
+  color:#1d4b71;
+  border-color:rgba(76,150,213,.35);
+  box-shadow:0 14px 36px rgba(38,75,113,.20);
+}
+@keyframes sl-follow-toast-entrance{
+  from{opacity:0;transform:translateX(55px)}
+  to{opacity:1;transform:translateX(0)}
+}
+@media(prefers-reduced-motion:reduce){
+  .sl-follow-profile-toast{animation:none!important}
+  .sl-follow-profile-toast.is-hiding{transition:none!important}
 }
