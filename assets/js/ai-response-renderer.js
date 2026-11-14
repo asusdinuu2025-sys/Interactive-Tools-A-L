@@ -31,12 +31,12 @@
       const link = document.createElement("link");
       link.id = "studylab-ai-katex-css";
       link.rel = "stylesheet";
-      link.href = "https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css";
+      link.href = "https://cdn.jsdelivr.net/npm/katex@0.19.1/dist/katex.min.css";
       document.head.append(link);
     }
     katexPromise = new Promise((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = "https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js";
+      script.src = "https://cdn.jsdelivr.net/npm/katex@0.19.1/dist/katex.min.js";
       script.async = true;
       script.onload = () => window.katex?.render
         ? resolve(window.katex) : reject(new Error("KaTeX unavailable"));
@@ -107,7 +107,7 @@
           "blockquote","ul","ol","li","hr","h2","h3","h4","h5","h6",
           "sub","sup","span","div","table","thead","tbody","tr","th","td"
         ],
-        ALLOWED_ATTR: ["href","title","class"],
+        ALLOWED_ATTR: ["href","title"],
         ALLOW_DATA_ATTR:false, ALLOW_ARIA_ATTR:false
       });
       const template = document.createElement("template");
