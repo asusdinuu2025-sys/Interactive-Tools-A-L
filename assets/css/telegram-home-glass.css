@@ -233,13 +233,13 @@ html[data-theme="light"] body.sl-telegram-hub { color: #1d3e5d; }
 html[data-theme="light"] body.sl-telegram-hub .telegram-subject,
 html[data-theme="light"] body.sl-telegram-hub .telegram-all,
 html[data-theme="light"] body.sl-telegram-hub .telegram-featured-channel {
-  background: linear-gradient(145deg,rgba(255,255,255,.69),rgba(238,248,255,.41)),rgba(224,238,250,.23);
+  background: linear-gradient(145deg,rgba(255,255,255,.53),rgba(238,248,255,.29)),rgba(224,238,250,.18);
   border-color: rgba(255,255,255,.88);
   box-shadow: 0 13px 35px rgba(44,82,120,.09),inset 0 1px 0 #fff;
 }
 html[data-theme="light"] body.sl-telegram-hub .telegram-channel,
 html[data-theme="light"] body.sl-telegram-hub .telegram-all-channel {
-  background: linear-gradient(147deg,rgba(255,255,255,.66),rgba(231,245,255,.34)),rgba(214,232,248,.16);
+  background: linear-gradient(147deg,rgba(255,255,255,.54),rgba(231,245,255,.26)),rgba(214,232,248,.12);
   border-color: rgba(110,162,203,.24);
   color: #1d4363;
   box-shadow: 0 6px 19px rgba(42,84,122,.065),inset 0 1px 0 rgba(255,255,255,.91);
