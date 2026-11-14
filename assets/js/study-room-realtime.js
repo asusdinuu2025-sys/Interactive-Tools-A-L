@@ -334,6 +334,12 @@
         avatar.style.setProperty('--slr-neon-dark', neon[0]);
         avatar.style.setProperty('--slr-neon-light', neon[1]);
       }
+      // Small translucent follow button is independent of timer/ranking UI.
+      // Never add one to your own card or create duplicates on live refresh.
+      if (id !== userId && !card.querySelector('.sl-follow-btn')) {
+        const followButton = window.StudyLabFollow?.makeButton(id,{compact:true});
+        if (followButton) card.querySelector('.room-person-card-top')?.append(followButton);
+      }
       const avatar = card.querySelector('.room-avatar');
       const gender = r.gender === 'female' ? 'female' : 'male';
       if (avatar.dataset.gender !== gender) {

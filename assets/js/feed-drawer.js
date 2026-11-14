@@ -151,6 +151,7 @@
     }
     layout.classList.toggle("is-feed-open", open);
     document.body.classList.toggle("sl-community-open", open);
+    window.dispatchEvent(new CustomEvent("studylab:social-visibility",{detail:{open}}));
     backdrop.hidden = !open;
     toggle.setAttribute("aria-expanded", String(open));
     panel.setAttribute("aria-hidden", String(!open));
@@ -172,6 +173,9 @@
   panel.querySelector("[data-feed-close]").addEventListener("click", () => setOpen(false));
   backdrop.addEventListener("click", () => setOpen(false));
   document.addEventListener("keydown", event => {
+    // Let the top-level View Profile / account-deletion modal own keyboard
+    // focus and Escape while it is above the Social drawer.
+    if (document.querySelector("#slProfileViewer:not([hidden]),#slProfileDeleteConfirmation:not([hidden])")) return;
     const isOpen = toggle.getAttribute("aria-expanded") === "true";
     if (event.key === "Escape" && isOpen) {
       event.preventDefault();

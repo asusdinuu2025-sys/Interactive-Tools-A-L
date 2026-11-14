@@ -721,19 +721,14 @@
       postMenu.append(menuToggle, menuPanel);
     }
     top.append(identity, date);
+    if (post.author_id !== currentUserId) {
+      const followButton = window.StudyLabFollow?.makeButton(post.author_id, {compact:true});
+      if (followButton) top.append(followButton);
+    }
     if (postMenu) top.append(postMenu);
     card.append(top);
-    identity.addEventListener("click",() => {
-      const existing = card.querySelector(".sl-feed-profile-popover");
-      if (existing) { existing.remove(); return; }
-      panel.querySelectorAll(".sl-feed-profile-popover").forEach(item => item.remove());
-      const popover = make("div","sl-feed-profile-popover");
-      const popoverName = make("strong","",post.author_display_name || "Student");
-      window.StudyLabNameMark?.decorate(popoverName, post.author_id);
-      popover.append(popoverName);
-      popover.append(make("span","", "@" + (post.author_username || "student")));
-      popover.append(make("small","","StudyLab student"));
-      card.append(popover);
+    identity.addEventListener("click", () => {
+      window.StudyLabProfileView?.open({userId:post.author_id});
     });
 
     if (post.body) {
@@ -1055,6 +1050,17 @@
       copy.append(memberName);
       copy.append(make("small", "", "@" + (member.author_username || "student")));
       row.append(avatar, copy);
+      row.classList.add("sl-follow-profile-trigger");
+      row.setAttribute("role","button");
+      row.tabIndex=0;
+      row.setAttribute("aria-label","View profile of "+(member.author_display_name||"Student"));
+      row.addEventListener("click",()=>window.StudyLabProfileView?.open({userId:member.author_id}));
+      row.addEventListener("keydown",event=>{
+        if(event.key==="Enter"||event.key===" "){
+          event.preventDefault();
+          window.StudyLabProfileView?.open({userId:member.author_id});
+        }
+      });
       list.append(row);
     }
   }
@@ -1312,6 +1318,12 @@
         adminBadge?.remove();
       }
       const posts = await getPostRows(account.client, user.id);
+      // One batch query keeps the follow pills consistent without querying
+      // Supabase separately for every Social post.
+      if(window.StudyLabFollow){
+        await window.StudyLabFollow.prefetch(posts.map(p=>p.author_id))
+          .catch(err=>console.warn("Following status unavailable:",err));
+      }
       renderCommunityProfiles(posts);
       const approvedIds = posts.filter(post => post.status === "approved").map(post => post.id);
       const likesByPost = new Map();
