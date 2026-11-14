@@ -707,3 +707,25 @@ html[data-theme="light"] .studylab-ai-compose {
 @media (prefers-reduced-motion: reduce) {
   .studylab-ai-tools-row .studylab-ai-launcher { transition: none !important; }
 }
+
+/* Only AI-generated replies. Preserve the existing glass chat layout. */
+.studylab-ai-message-text.is-rich{white-space:normal;overflow-wrap:anywhere}
+.studylab-ai-message-text.is-rich p{margin:.35em 0 .65em}
+.studylab-ai-message-text.is-rich p:first-child{margin-top:0}
+.studylab-ai-message-text.is-rich p:last-child{margin-bottom:0}
+.studylab-ai-message-text.is-rich strong,.studylab-ai-message-text.is-rich b{font-weight:800}
+.studylab-ai-message-text.is-rich em,.studylab-ai-message-text.is-rich i{font-style:italic}
+.studylab-ai-message-text.is-rich u{text-decoration:underline}
+.studylab-ai-message-text.is-rich h2,.studylab-ai-message-text.is-rich h3,.studylab-ai-message-text.is-rich h4{font-size:1em;font-weight:800;margin:.8em 0 .35em}
+.studylab-ai-message-text.is-rich ul,.studylab-ai-message-text.is-rich ol{padding-left:1.4em;margin:.45em 0 .75em}
+.studylab-ai-message-text.is-rich li{margin:.18em 0}
+.studylab-ai-message-text.is-rich a{color:var(--accent-cyan,#79dcff);text-decoration:underline;text-underline-offset:2px;overflow-wrap:anywhere}
+.studylab-ai-message-text.is-rich a:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+.studylab-ai-message-text.is-rich code{padding:.1em .3em;border-radius:5px;background:rgba(125,155,182,.13);font:inherit;font-family:ui-monospace,Consolas,monospace}
+.studylab-ai-message-text.is-rich pre{max-width:100%;overflow-x:auto;padding:10px;border-radius:9px;background:rgba(10,25,40,.3)}
+.studylab-ai-message-text.is-rich pre code{background:transparent;padding:0;white-space:pre}
+.studylab-ai-message-text.is-rich blockquote{margin:.7em 0;padding:.2em .8em;border-left:3px solid var(--accent-cyan,#79dcff)}
+.studylab-ai-message-text.is-rich .studylab-ai-math.is-display{display:block;max-width:100%;margin:.6em 0;overflow-x:auto;overflow-y:hidden}
+.studylab-ai-message-text.is-rich .katex-display{overflow-x:auto;overflow-y:hidden;max-width:100%;padding:2px 0;margin:.5em 0}
+.studylab-ai-message-text.is-rich table{display:block;max-width:100%;overflow-x:auto;border-collapse:collapse}
+.studylab-ai-message-text.is-rich th,.studylab-ai-message-text.is-rich td{border:1px solid var(--card-border,rgba(140,160,180,.25));padding:5px 8px}
