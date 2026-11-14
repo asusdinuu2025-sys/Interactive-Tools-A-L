@@ -38,8 +38,9 @@
   const unread=el("span","sl-follow-unread");
   unread.hidden=true;
   alertsToggle.append(unread);
-  actions.insertBefore(searchToggle,bell);
+  // Place Search directly beside the existing likes/comments bell.
   actions.insertBefore(alertsToggle,bell);
+  actions.insertBefore(searchToggle,bell);
 
   const searchPanel=el("section","sl-follow-popover sl-follow-search-panel");
   const searchHead=el("div","sl-follow-popover-head");
