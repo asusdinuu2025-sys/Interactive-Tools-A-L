@@ -80,7 +80,7 @@
   } catch (_) {}
   let lite = false;
   try { lite = localStorage.getItem(PERF_KEY) === "lite"; } catch (_) {}
-  if (!lite && requestedPerf !== "normal") lite = Boolean(navigator.connection?.saveData);
+  // Never alter the approved appearance without an explicit opt-in.
   if (lite) {
     root.dataset.slPerformance = "lite";
     const lightStyle = document.createElement("style");
