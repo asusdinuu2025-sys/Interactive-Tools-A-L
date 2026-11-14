@@ -8,7 +8,8 @@
   const allowedIds = new Set([
     "b6c80613-8217-48ac-851b-a39a3d9bef2b",
     "7c97a8d7-f047-4c88-883d-4bed9b1a5f99",
-    "1f01a0f7-2030-4e14-b561-1e17648d4b3f"
+    "1f01a0f7-2030-4e14-b561-1e17648d4b3f",
+    "24e78cd0-4565-407a-96f7-9cfde083f6d2"
   ]);
   const NS = "http://www.w3.org/2000/svg";
 
