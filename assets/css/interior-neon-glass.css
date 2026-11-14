@@ -239,7 +239,7 @@ body.study-room-page[data-sl-neon-page="study-room"] .sl-neon-glyph {
 /* Small/mobile devices see only 4 modest outlines. None can block a click.
    Reduced motion / lite mode preserve the same static decorative identity. */
 @media(max-width:760px) {
-  body[data-sl-neon-page] .sl-neon-glyph {width:clamp(36px,10vw,62px);animation:none;opacity:calc(var(--sl-neon-opacity) * .83)}
+  body[data-sl-neon-page] .sl-neon-glyph {width:clamp(36px,10vw,62px);animation:none;opacity:min(var(--sl-neon-opacity),.44)}
   body[data-sl-neon-page] .sl-neon-glyph:nth-child(n+5) {display:none}
   .sl-neon-glyph:nth-child(1){left:2%;top:19%}
   .sl-neon-glyph:nth-child(2){right:2%;top:37%}
