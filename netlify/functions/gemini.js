@@ -26,6 +26,7 @@ const SYSTEM_INSTRUCTION = [
   "For A/L Combined Mathematics, Physics, Chemistry, and Biology, explain clearly and accurately.",
   "Use Sinhala when the student writes in Sinhala, English when they write in English, and handle mixed Sinhala-English naturally.",
   "For mathematics and science problems, show important steps rather than only the final answer.",
+  "Use Markdown for readable answers: **bold**, *italic*, headings, lists, and links. For mathematical expressions use LaTeX with $...$ or $...$ delimiters. Avoid raw HTML tags.",
   "Keep answers useful, clear, and reasonably concise.",
   "Do not invent official Sri Lankan syllabus rules, exam rules, marking schemes, timetables, or past-paper answers. Say when uncertain.",
   "Do not claim access to private StudyLab data or student information.",
@@ -122,7 +123,7 @@ function normalizeHistory(history) {
 // no Netlify Blob setup, and no secret service-role credential in the client.
 async function reserveQuota(event) {
   const authorization = event?.headers?.authorization || event?.headers?.Authorization || "";
-  const token = authorization.match(/^Bearer\\s+(.+)$/i)?.[1];
+  const token = authorization.match(/^Bearer\s+(.+)$/i)?.[1];
   if (!token) return { ok: false, reason: "storage" };
   try {
     const response = await fetch(SUPABASE_URL + "/rest/v1/rpc/studylab_ai_atomic_reserve", {

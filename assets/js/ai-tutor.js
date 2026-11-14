@@ -61,7 +61,13 @@
 
       const message = document.createElement("div");
       message.className = "studylab-ai-message-text";
-      message.textContent = text;
+      // Only model messages use a sanitized rich-text renderer.
+      // Student-authored content always remains literal text.
+      if (role === "model" && window.StudyLabAIRenderer) {
+        window.StudyLabAIRenderer.render(message, text);
+      } else {
+        message.textContent = text;
+      }
 
       article.append(label, message);
       list.appendChild(article);

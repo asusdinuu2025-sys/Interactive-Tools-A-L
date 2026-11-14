@@ -12,7 +12,10 @@ const syntaxFiles = [
   "assets/js/study-room-mini-standalone.js",
   "assets/js/study-room-presence.js",
   "assets/js/study-room-realtime.js",
+  "assets/js/study-room-subject-picker.js",
   "assets/js/study-room-enhancements.js",
+  "assets/js/ai-response-renderer.js",
+  "assets/js/ai-tutor.js",
   "assets/js/study-dashboard.js",
   "assets/js/past-paper-finder.js",
   "assets/js/main.js",
@@ -103,6 +106,13 @@ for (const file of syntaxFiles) {
 const timerTests = spawnSync(process.execPath, ["scripts/study-room-target-tests.mjs"], { encoding: "utf8" });
 if (timerTests.status !== 0) {
   fail("Study Room target/presence logic tests failed:\n" + (timerTests.stderr || timerTests.stdout || "node test failed"));
+}
+
+// Mock authenticated AI requests to catch token parser and quota regressions.
+const aiTests = spawnSync(process.execPath, ["scripts/ai-quota-smoke-tests.cjs"], {encoding:"utf8"});
+if (aiTests.status !== 0) {
+  fail("StudyLab AI quota smoke tests failed:\n" +
+    (aiTests.stderr || aiTests.stdout || "node test failed"));
 }
 
 // Parse inline JavaScript in the standalone Study Tools page without executing it.
