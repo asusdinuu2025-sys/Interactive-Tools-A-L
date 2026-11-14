@@ -11,8 +11,10 @@ alter table public.studylab_profiles
   ));
 
 -- Keep the only authorized student directory limited to public-safe data.
--- Replacing the function retains its existing authenticated-only EXECUTE grant.
-create or replace function public.studylab_public_student_lookup(
+-- The public result shape grows one bio column; PostgreSQL requires recreating
+-- (not replacing) a function when its RETURNS TABLE columns change.
+drop function if exists public.studylab_public_student_lookup(text,uuid[],int);
+create function public.studylab_public_student_lookup(
   p_query text default null, p_user_ids uuid[] default null, p_limit int default 20
 )
 returns table (
