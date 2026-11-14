@@ -1,5 +1,5 @@
 [build]
-  command = "node scripts/generate-sitemap.mjs"
+  command = "node scripts/generate-sitemap.mjs && node scripts/generate-search-index.mjs"
   publish = "."
   ignore = "bash ./scripts/netlify-ignore.sh"
 
