@@ -8,6 +8,11 @@ const errors = [];
 const requiredPages = ["index.html", "study-room.html", "study-room-mini.html", "study-tools.html", "exam-hub.html"];
 const syntaxFiles = [
   "assets/js/studylab-social.js",
+  "assets/js/studylab-follow.js",
+  "assets/js/studylab-social-follow-ui.js",
+  "assets/js/studylab-profile-view.js",
+  "assets/js/profile.js",
+  "assets/js/feed-drawer.js",
   "assets/js/study-room-analytics.js",
   "assets/js/study-room-mini-standalone.js",
   "assets/js/study-room-presence.js",
@@ -15,7 +20,6 @@ const syntaxFiles = [
   "assets/js/study-room-subject-picker.js",
   "assets/js/studylab-global-search.js",
   "assets/js/studylab-name-mark.js",
-  "assets/js/studylab-profile-view.js",
   "netlify/functions/delete-account.js",
   "assets/js/interior-neon-doodles.js",
   "assets/js/study-room-enhancements.js",
@@ -153,6 +157,13 @@ const profileDropdownTests = spawnSync(process.execPath, ["scripts/profile-menu-
 if (profileDropdownTests.status !== 0) {
   fail("Profile menu and lesson dropdown regression failed:\n" +
     (profileDropdownTests.stderr || profileDropdownTests.stdout || "node test failed"));
+}
+
+// Shared Social / Study Room follow relationships and privacy regressions.
+const followTests = spawnSync(process.execPath, ["scripts/studylab-follows-check.mjs"], {encoding:"utf8"});
+if (followTests.status !== 0) {
+  fail("StudyLab follows checks failed:\n" +
+    (followTests.stderr || followTests.stdout || "node test failed"));
 }
 
 // Parse inline JavaScript in the standalone Study Tools page without executing it.
