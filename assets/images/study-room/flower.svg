@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none" stroke="#000" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+<!-- Original six-petal blossom with a subtle centre and line-art sparkle. -->
+<g>
+<path d="M128 106 C110 90 108 54 128 30 C148 54 146 90 128 106Z"/>
+<path d="M128 106 C110 90 108 54 128 30 C148 54 146 90 128 106Z" transform="rotate(60 128 128)"/>
+<path d="M128 106 C110 90 108 54 128 30 C148 54 146 90 128 106Z" transform="rotate(120 128 128)"/>
+<path d="M128 106 C110 90 108 54 128 30 C148 54 146 90 128 106Z" transform="rotate(180 128 128)"/>
+<path d="M128 106 C110 90 108 54 128 30 C148 54 146 90 128 106Z" transform="rotate(240 128 128)"/>
+<path d="M128 106 C110 90 108 54 128 30 C148 54 146 90 128 106Z" transform="rotate(300 128 128)"/>
+</g><circle cx="128" cy="128" r="25"/><circle cx="128" cy="128" r="10" stroke-width="5"/>
+<path d="M29 26v18M20 35h18M224 207v15M216 215h16" stroke-width="4"/>
+</svg>
