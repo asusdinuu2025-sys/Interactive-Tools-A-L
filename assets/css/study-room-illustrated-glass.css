@@ -35,7 +35,7 @@ body.study-room-page[data-room-theme="warm-sand"] {
   --slr-art-opacity: .35;
 }
 body.study-room-page[data-room-theme="ocean"] {
-  --slr-art-mask: url("../images/study-room/shark.svg");
+  --slr-art-mask: url("../images/study-room/dolphin.svg");
   --slr-art-ink: #65e5f8;
   --slr-art-glow: rgba(39,215,250,.68);
   --slr-art-opacity: .53;
@@ -524,8 +524,8 @@ body.study-room-page .slr-theme-illustration:is(
 ) {opacity:calc(var(--slr-art-opacity) * .78)}
 /* Force Ocean to use the corrected white-alpha shark silhouette. */
 body.study-room-page[data-room-theme="ocean"] .slr-theme-illustration {
-  -webkit-mask-image:url("../images/study-room/shark.svg");
-  mask-image:url("../images/study-room/shark.svg");
+  -webkit-mask-image:url("../images/study-room/dolphin.svg");
+  mask-image:url("../images/study-room/dolphin.svg");
 }
 /* Optically thicker LIVE profile cards, while keeping the contents clear.
    The double specular edge and inset highlights define glass thickness. */
