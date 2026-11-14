@@ -19,7 +19,7 @@ assert.equal(edits.length,2,"Both Guest and signed-in Edit Profile menu entries 
 for(const match of edits) {
   assert.match(match[0],/account-menu-icon"[^>]*><svg viewBox="0 0 24 24"/,
     "Edit Profile must use a vector pencil icon");
-  assert.match(match[0],/M4 20 4\.2-.8L19 8\.4/,
+  assert.match(match[0],/m4 20 4\.2-\.8L19 8\.4/,
     "Pencil icon path must be present");
 }
 assert.doesNotMatch(profile,/<span class="account-menu-icon" aria-hidden="true">[◎♙]<\/span>/,
