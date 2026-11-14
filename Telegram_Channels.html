@@ -619,40 +619,59 @@
     }
   </style>
 <link rel="stylesheet" href="assets/css/floating-controls.css">
+<link rel="stylesheet" href="assets/css/subject-home-glass.css?v=1">
+<link rel="stylesheet" href="assets/css/telegram-home-glass.css?v=1">
 </head>
 
-<body class="telegram-page">
-  <header class="site-header">
-    <div class="brand">
-      <span class="brand-mark">🎓</span>
-      <span>StudyLab</span>
+<body class="telegram-page sl-subject-hub sl-telegram-hub">
+  <div class="sl-tg-doodle-layer" aria-hidden="true">
+    <img src="assets/images/telegram-doodles/brand-telegram.svg" alt="" decoding="async">
+    <img src="assets/images/telegram-doodles/messages.svg" alt="" decoding="async">
+    <img src="assets/images/telegram-doodles/duck.svg" alt="" decoding="async">
+    <img src="assets/images/telegram-doodles/send.svg" alt="" decoding="async">
+    <img src="assets/images/telegram-doodles/sticker.svg" alt="" decoding="async">
+    <img src="assets/images/telegram-doodles/paperclip.svg" alt="" decoding="async">
+    <img src="assets/images/telegram-doodles/heart.svg" alt="" decoding="async">
+    <img src="assets/images/telegram-doodles/gift.svg" alt="" decoding="async">
+    <img src="assets/images/telegram-doodles/speakerphone.svg" alt="" decoding="async">
+    <img src="assets/images/telegram-doodles/message-circle.svg" alt="" decoding="async">
+    <img src="assets/images/telegram-doodles/star.svg" alt="" decoding="async">
+    <img src="assets/images/telegram-doodles/brand-telegram.svg" alt="" decoding="async">
+    <img src="assets/images/telegram-doodles/duck.svg" alt="" decoding="async">
+    <img src="assets/images/telegram-doodles/messages.svg" alt="" decoding="async">
+    <img src="assets/images/telegram-doodles/send.svg" alt="" decoding="async">
+    <img src="assets/images/telegram-doodles/sticker.svg" alt="" decoding="async">
+    <img src="assets/images/telegram-doodles/gift.svg" alt="" decoding="async">
+    <img src="assets/images/telegram-doodles/paperclip.svg" alt="" decoding="async">
+    <img src="assets/images/telegram-doodles/heart.svg" alt="" decoding="async">
+    <img src="assets/images/telegram-doodles/message-circle.svg" alt="" decoding="async">
+  </div>
+  <header class="site-header sl-subject-topbar">
+    <a class="sl-subject-back back-button" href="index.html#telegram-links" aria-label="Back to Telegram Channels">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m14 5-7 7 7 7M7 12h13"/></svg>
+      <span class="sl-subject-back-label">Back to StudyLab</span>
+    </a>
+    <div class="sl-subject-topbar-brand" aria-label="StudyLab">
+      <span class="sl-subject-topbar-mark" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5c-3-2-6-2-9-1v14c3-1 6-1 9 1 3-2 6-2 9-1V4c-3-1-6-1-9 1ZM12 5v14"/></svg></span>
+      <span class="sl-subject-topbar-name">StudyLab</span>
     </div>
     <button type="button" class="theme-toggle" data-theme-toggle aria-label="Cycle dark, light, and system themes">
-      🌙 Dark Mode
+      <span class="theme-toggle-icon" aria-hidden="true"></span><span class="theme-toggle-label">Dark Mode</span>
     </button>
   </header>
-
-  <main class="container">
-    <section class="telegram-hero">
-      <h1><span class="telegram-heading-icon" aria-hidden="true">
-          <svg viewBox="0 0 240 240" role="img">
-            <circle cx="120" cy="120" r="120" fill="#229ED9"></circle>
-            <path d="M183.6 68.4 158.1 188c-1.9 8.5-6.9 10.6-14 6.6l-38.6-28.5-18.6 17.9c-2.1 2.1-3.8 3.8-7.8 3.8l2.8-39.4 71.7-64.8c3.1-2.8-.7-4.4-4.8-1.6l-88.7 55.8-38.2-12c-8.3-2.6-8.5-8.3 1.7-12.3L171.6 51c7.1-2.6 13.3 1.6 12 17.4Z" fill="#fff"></path>
-          </svg>
-        </span> Telegram Channels</h1>
-      <p>
-        G.C.E. A/L Sri Lanka Telegram channels, organized by subject so notes,
-        resources, announcements and study communities stay easy to find.
-      </p>
-    </section>
-
-    <div class="telegram-back-row">
-      <a class="telegram-back" href="index.html">← Back to Subjects</a>
+  <main class="container sl-subject-main">
+    <div class="sl-subject-intro-panel">
+      <section class="page-header telegram-hero">
+        <span class="sl-subject-hero-icon" aria-hidden="true"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt=""></span>
+        <div class="sl-subject-hero-copy">
+          <span class="sl-subject-kicker">STUDY COMMUNITIES · TELEGRAM CHANNELS</span>
+          <h1>Telegram Channels</h1>
+          <p>G.C.E. A/L Sri Lanka Telegram channels, organized by subject so notes, resources, announcements and study communities stay easy to find.</p>
+        </div>
+      </section>
     </div>
 
-    
-
-    <div class="telegram-sponsored-bar" aria-label="Sponsored channel">
+    <div class="telegram-sponsored-bar aria-label="Sponsored channel">
       <span class="telegram-sponsored-label">SPONSORED</span>
       <span>Featured learning channel</span>
     </div>
@@ -674,7 +693,7 @@
         <span class="telegram-featured-count">👥 ග්‍රාහකයින්ගේ වත්මන් ගණන Telegram තුළ බලන්න</span>
       </div>
       <div class="telegram-featured-action">
-        <a class="telegram-open" href="https://t.me/AL_LESSONS" target="_blank" rel="noopener noreferrer">Join Now ↗</a>
+        <a class="telegram-open" href="https://t.me/AL_LESSONS" target="_blank" rel="noopener noreferrer"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt="" aria-hidden="true"> Join Channel</a>
         <small>Current subscriber count<br>shown on Telegram</small>
       </div>
     </section>
@@ -697,12 +716,12 @@
           rel="noopener noreferrer"
           aria-label="Open 2027 Revision | Tharaka B. Jayathilake — @TB_27RV"
         >
-          <span class="telegram-channel-icon" aria-hidden="true">➤</span>
+          <span class="telegram-channel-icon" aria-hidden="true"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt=""></span>
           <span>
             <strong>2027 Revision | Tharaka B. Jayathilake — @TB_27RV</strong>
             <span>2027 Combined Maths revision, class updates and learning resources.</span>
           </span>
-          <span class="telegram-open">Open Telegram →</span>
+          <span class="telegram-open"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt="" aria-hidden="true"> Open Channel</span>
         </a>
 
         <a
@@ -712,12 +731,12 @@
           rel="noopener noreferrer"
           aria-label="Open 2027 Combined Maths Notes | Ajantha Dissanayake — @CMNotes27"
         >
-          <span class="telegram-channel-icon" aria-hidden="true">➤</span>
+          <span class="telegram-channel-icon" aria-hidden="true"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt=""></span>
           <span>
             <strong>2027 Combined Maths Notes | Ajantha Dissanayake — @CMNotes27</strong>
             <span class="telegram-channel-description">2027 A/L Combined Maths notes and study resources in Sinhala.</span>
           </span>
-          <span class="telegram-open">Open Telegram →</span>
+          <span class="telegram-open"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt="" aria-hidden="true"> Open Channel</span>
         </a>
 
         <a
@@ -727,12 +746,12 @@
           rel="noopener noreferrer"
           aria-label="Open Morning Sum 2027 A/L — @MorningSum27"
         >
-          <span class="telegram-channel-icon" aria-hidden="true">➤</span>
+          <span class="telegram-channel-icon" aria-hidden="true"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt=""></span>
           <span>
             <strong>Morning Sum 2027 A/L — @MorningSum27</strong>
             <span class="telegram-channel-description">Morning Sum question sets, answers and regular Combined Maths practice material.</span>
           </span>
-          <span class="telegram-open">Open Telegram →</span>
+          <span class="telegram-open"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt="" aria-hidden="true"> Open Channel</span>
         </a>
 
         <a
@@ -742,12 +761,12 @@
           rel="noopener noreferrer"
           aria-label="Open 𝗦𝗟 𝗖𝗢𝗠𝗕𝗜𝗡𝗘𝗗 𝗠𝗔𝗧𝗛𝗦 — @sl_combind_maths"
         >
-          <span class="telegram-channel-icon" aria-hidden="true">➤</span>
+          <span class="telegram-channel-icon" aria-hidden="true"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt=""></span>
           <span>
             <strong>𝗦𝗟 𝗖𝗢𝗠𝗕𝗜𝗡𝗘𝗗 𝗠𝗔𝗧𝗛𝗦 — @sl_combind_maths</strong>
             <span class="telegram-channel-description">Combined Maths theory, questions, revision resources, papers and topic-based material.</span>
           </span>
-          <span class="telegram-open">Open Telegram →</span>
+          <span class="telegram-open"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt="" aria-hidden="true"> Open Channel</span>
         </a>
 
         <a
@@ -757,12 +776,12 @@
           rel="noopener noreferrer"
           aria-label="Open 2027 Combined Maths | Ajantha Dissanayake — @dcv35"
         >
-          <span class="telegram-channel-icon" aria-hidden="true">➤</span>
+          <span class="telegram-channel-icon" aria-hidden="true"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt=""></span>
           <span>
             <strong>2027 Combined Maths | Ajantha Dissanayake — @dcv35</strong>
             <span class="telegram-channel-description">2027 Combined Maths class updates, lesson material, homework and revision resources.</span>
           </span>
-          <span class="telegram-open">Open Telegram →</span>
+          <span class="telegram-open"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt="" aria-hidden="true"> Open Channel</span>
         </a>
       </section>
 
@@ -782,12 +801,12 @@
           rel="noopener noreferrer"
           aria-label="Open BioNerds2027DM"
         >
-          <span class="telegram-channel-icon" aria-hidden="true">➤</span>
+          <span class="telegram-channel-icon" aria-hidden="true"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt=""></span>
           <span>
             <strong>BioNerds2027DM — @BioNerds2027DM</strong>
             <span class="telegram-channel-description">2027 A/L Biology notes, resources and subject-focused learning material.</span>
           </span>
-          <span class="telegram-open">Open Telegram →</span>
+          <span class="telegram-open"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt="" aria-hidden="true"> Open Channel</span>
         </a>
 
         <a
@@ -797,12 +816,12 @@
           rel="noopener noreferrer"
           aria-label="Open 2027 A/L Biology | Tissa Jananayake | Osipka-Galle — @tissajananayake2027al"
         >
-          <span class="telegram-channel-icon" aria-hidden="true">➤</span>
+          <span class="telegram-channel-icon" aria-hidden="true"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt=""></span>
           <span>
             <strong>2027 A/L Biology | Tissa Jananayake | Osipka-Galle — @tissajananayake2027al</strong>
             <span class="telegram-channel-description">Current 2027 A/L Biology theory and class-related learning resources.</span>
           </span>
-          <span class="telegram-open">Open Telegram →</span>
+          <span class="telegram-open"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt="" aria-hidden="true"> Open Channel</span>
         </a>
 
         <a
@@ -812,12 +831,12 @@
           rel="noopener noreferrer"
           aria-label="Open 2027 Biology | Lahiru Siriwardana — @biolahiru27T"
         >
-          <span class="telegram-channel-icon" aria-hidden="true">➤</span>
+          <span class="telegram-channel-icon" aria-hidden="true"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt=""></span>
           <span>
             <strong>2027 Biology | Lahiru Siriwardana — @biolahiru27T</strong>
             <span class="telegram-channel-description">2027 Biology theory, revision and paper-class related learning material.</span>
           </span>
-          <span class="telegram-open">Open Telegram →</span>
+          <span class="telegram-open"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt="" aria-hidden="true"> Open Channel</span>
         </a>
 
         <a
@@ -827,12 +846,12 @@
           rel="noopener noreferrer"
           aria-label="Open 2027 Biology Theory | SK Wellala — @Bio2027skw"
         >
-          <span class="telegram-channel-icon" aria-hidden="true">➤</span>
+          <span class="telegram-channel-icon" aria-hidden="true"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt=""></span>
           <span>
             <strong>2027 Biology Theory | SK Wellala — @Bio2027skw</strong>
             <span class="telegram-channel-description">2027 A/L Biology theory information, classes and learning updates.</span>
           </span>
-          <span class="telegram-open">Open Telegram →</span>
+          <span class="telegram-open"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt="" aria-hidden="true"> Open Channel</span>
         </a>
 
         <a
@@ -842,12 +861,12 @@
           rel="noopener noreferrer"
           aria-label="Open 𝗦𝗟 𝗕𝗜𝗢𝗟𝗢𝗚𝗬 🦠 — @sl_biology"
         >
-          <span class="telegram-channel-icon" aria-hidden="true">➤</span>
+          <span class="telegram-channel-icon" aria-hidden="true"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt=""></span>
           <span>
             <strong>𝗦𝗟 𝗕𝗜𝗢𝗟𝗢𝗚𝗬 🦠 — @sl_biology</strong>
             <span class="telegram-channel-description">Sri Lankan A/L Biology notes, papers, revision and educational resources.</span>
           </span>
-          <span class="telegram-open">Open Telegram →</span>
+          <span class="telegram-open"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt="" aria-hidden="true"> Open Channel</span>
         </a>
       </section>
 
@@ -867,12 +886,12 @@
           rel="noopener noreferrer"
           aria-label="Open chemnotes2027"
         >
-          <span class="telegram-channel-icon" aria-hidden="true">➤</span>
+          <span class="telegram-channel-icon" aria-hidden="true"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt=""></span>
           <span>
             <strong>Chemistry Notes 2027 — @chemnotes2027</strong>
             <span class="telegram-channel-description">2027 A/L Chemistry notes, revision resources and subject-focused learning material.</span>
           </span>
-          <span class="telegram-open">Open Telegram →</span>
+          <span class="telegram-open"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt="" aria-hidden="true"> Open Channel</span>
         </a>
 
         <a
@@ -882,12 +901,12 @@
           rel="noopener noreferrer"
           aria-label="Open 2027 Chemistry Theory-Ujith Sir — @Ujithsir2027Theory"
         >
-          <span class="telegram-channel-icon" aria-hidden="true">➤</span>
+          <span class="telegram-channel-icon" aria-hidden="true"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt=""></span>
           <span>
             <strong>2027 Chemistry Theory-Ujith Sir — @Ujithsir2027Theory</strong>
             <span>2027 Chemistry theory class updates, lessons and related learning resources.</span>
           </span>
-          <span class="telegram-open">Open Telegram →</span>
+          <span class="telegram-open"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt="" aria-hidden="true"> Open Channel</span>
         </a>
 
         <a
@@ -897,12 +916,12 @@
           rel="noopener noreferrer"
           aria-label="Open 2027 Theory | Amila Dasanayake — @ECHEM_27T"
         >
-          <span class="telegram-channel-icon" aria-hidden="true">➤</span>
+          <span class="telegram-channel-icon" aria-hidden="true"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt=""></span>
           <span>
             <strong>2027 Theory | Amila Dasanayake — @ECHEM_27T</strong>
             <span class="telegram-channel-description">Current 2027 Chemistry theory updates, Daily Dose, Weekly Review and lesson resources.</span>
           </span>
-          <span class="telegram-open">Open Telegram →</span>
+          <span class="telegram-open"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt="" aria-hidden="true"> Open Channel</span>
         </a>
 
         <a
@@ -912,12 +931,12 @@
           rel="noopener noreferrer"
           aria-label="Open 𝗦𝗟 𝗖𝗛𝗘𝗠𝗜𝗦𝗧𝗥𝗬 ⚗ — @sl_chemistry"
         >
-          <span class="telegram-channel-icon" aria-hidden="true">➤</span>
+          <span class="telegram-channel-icon" aria-hidden="true"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt=""></span>
           <span>
             <strong>𝗦𝗟 𝗖𝗛𝗘𝗠𝗜𝗦𝗧𝗥𝗬 ⚗ — @sl_chemistry</strong>
             <span class="telegram-channel-description">Sri Lankan A/L Chemistry notes, papers and revision resources.</span>
           </span>
-          <span class="telegram-open">Open Telegram →</span>
+          <span class="telegram-open"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt="" aria-hidden="true"> Open Channel</span>
         </a>
 
         <a
@@ -927,12 +946,12 @@
           rel="noopener noreferrer"
           aria-label="Open 2027 A/L | CHEMISTRY | KSIRI WITHANAGE — @ksiri27"
         >
-          <span class="telegram-channel-icon" aria-hidden="true">➤</span>
+          <span class="telegram-channel-icon" aria-hidden="true"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt=""></span>
           <span>
             <strong>2027 A/L | CHEMISTRY | KSIRI WITHANAGE — @ksiri27</strong>
             <span class="telegram-channel-description">2027 Chemistry theory, questions, recordings and lesson updates.</span>
           </span>
-          <span class="telegram-open">Open Telegram →</span>
+          <span class="telegram-open"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt="" aria-hidden="true"> Open Channel</span>
         </a>
 
         <a
@@ -942,12 +961,12 @@
           rel="noopener noreferrer"
           aria-label="Open Chemistry HUB🐞🧬🧪 — @finalpaperz"
         >
-          <span class="telegram-channel-icon" aria-hidden="true">➤</span>
+          <span class="telegram-channel-icon" aria-hidden="true"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt=""></span>
           <span>
             <strong>Chemistry HUB🐞🧬🧪 — @finalpaperz</strong>
             <span class="telegram-channel-description">Chemistry explanations, MCQ points, structured-essay preparation and paper-related resources.</span>
           </span>
-          <span class="telegram-open">Open Telegram →</span>
+          <span class="telegram-open"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt="" aria-hidden="true"> Open Channel</span>
         </a>
       </section>
 
@@ -967,12 +986,12 @@
           rel="noopener noreferrer"
           aria-label="Open 2027 Physics Theory | Dr Darshana Ukuwela — @DU27T"
         >
-          <span class="telegram-channel-icon" aria-hidden="true">➤</span>
+          <span class="telegram-channel-icon" aria-hidden="true"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt=""></span>
           <span>
             <strong>2027 Physics Theory | Dr Darshana Ukuwela — @DU27T</strong>
             <span>2027 A/L Physics theory, papers and class-related learning resources.</span>
           </span>
-          <span class="telegram-open">Open Telegram →</span>
+          <span class="telegram-open"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt="" aria-hidden="true"> Open Channel</span>
         </a>
 
         <a
@@ -982,12 +1001,12 @@
           rel="noopener noreferrer"
           aria-label="Open 2027 THEORY - PHYSICS | ANURADHA PERERA — @AP2027T"
         >
-          <span class="telegram-channel-icon" aria-hidden="true">➤</span>
+          <span class="telegram-channel-icon" aria-hidden="true"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt=""></span>
           <span>
             <strong>2027 THEORY - PHYSICS | ANURADHA PERERA — @AP2027T</strong>
             <span>2027 A/L Physics theory updates and class-related learning resources.</span>
           </span>
-          <span class="telegram-open">Open Telegram →</span>
+          <span class="telegram-open"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt="" aria-hidden="true"> Open Channel</span>
         </a>
 
         <a
@@ -997,12 +1016,12 @@
           rel="noopener noreferrer"
           aria-label="Open Phy6Core — @The_Core_Of_Physics"
         >
-          <span class="telegram-channel-icon" aria-hidden="true">➤</span>
+          <span class="telegram-channel-icon" aria-hidden="true"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt=""></span>
           <span>
             <strong>Phy6Core — @The_Core_Of_Physics</strong>
             <span class="telegram-channel-description">Physics-focused educational resources and Sinhala A/L learning content.</span>
           </span>
-          <span class="telegram-open">Open Telegram →</span>
+          <span class="telegram-open"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt="" aria-hidden="true"> Open Channel</span>
         </a>
 
         <a
@@ -1012,12 +1031,12 @@
           rel="noopener noreferrer"
           aria-label="Open 𝗦𝗟 𝗣𝗛𝗬𝗦𝗜𝗖𝗦 🛠 — @sl_physics"
         >
-          <span class="telegram-channel-icon" aria-hidden="true">➤</span>
+          <span class="telegram-channel-icon" aria-hidden="true"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt=""></span>
           <span>
             <strong>𝗦𝗟 𝗣𝗛𝗬𝗦𝗜𝗖𝗦 🛠 — @sl_physics</strong>
             <span class="telegram-channel-description">Sri Lankan A/L Physics notes, equations, papers and revision resources.</span>
           </span>
-          <span class="telegram-open">Open Telegram →</span>
+          <span class="telegram-open"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt="" aria-hidden="true"> Open Channel</span>
         </a>
 
         <a
@@ -1027,12 +1046,12 @@
           rel="noopener noreferrer"
           aria-label="Open Physics Channel SL — @PhysicsChannelSL"
         >
-          <span class="telegram-channel-icon" aria-hidden="true">➤</span>
+          <span class="telegram-channel-icon" aria-hidden="true"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt=""></span>
           <span>
             <strong>Physics Channel SL — @PhysicsChannelSL</strong>
             <span class="telegram-channel-description">G.C.E. A/L Physics resources with past-paper and model-paper related content.</span>
           </span>
-          <span class="telegram-open">Open Telegram →</span>
+          <span class="telegram-open"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt="" aria-hidden="true"> Open Channel</span>
         </a>
 
         <a
@@ -1042,12 +1061,12 @@
           rel="noopener noreferrer"
           aria-label="Open Mithukshan Physics Official — @MithukshanPhysicsOfficial"
         >
-          <span class="telegram-channel-icon" aria-hidden="true">➤</span>
+          <span class="telegram-channel-icon" aria-hidden="true"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt=""></span>
           <span>
             <strong>Mithukshan Physics Official — @MithukshanPhysicsOfficial</strong>
             <span class="telegram-channel-description">Physics PDFs, papers, practical material and current 2027-batch learning updates.</span>
           </span>
-          <span class="telegram-open">Open Telegram →</span>
+          <span class="telegram-open"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt="" aria-hidden="true"> Open Channel</span>
         </a>
       </section>
     </section>
@@ -1070,12 +1089,12 @@
           rel="noopener noreferrer"
           aria-label="Open Sci-LiNK Backup — @Sci_Linkz"
         >
-          <span class="telegram-channel-icon" aria-hidden="true">➤</span>
+          <span class="telegram-channel-icon" aria-hidden="true"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt=""></span>
           <span>
             <strong>Sci-LiNK Backup — @Sci_Linkz</strong>
             <span>Backup/general Science Link resource channel connected with Sri Lankan A/L educational content.</span>
           </span>
-          <span class="telegram-open">Open Telegram →</span>
+          <span class="telegram-open"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt="" aria-hidden="true"> Open Channel</span>
         </a>
 
         <a
@@ -1085,12 +1104,12 @@
           rel="noopener noreferrer"
           aria-label="Open 𝐒𝐋 𝐄𝐃𝐔𝐂𝐀𝐓𝐈𝐎𝐍 𝐀/𝐋 — @SL_EDUCATION_A_L"
         >
-          <span class="telegram-channel-icon" aria-hidden="true">➤</span>
+          <span class="telegram-channel-icon" aria-hidden="true"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt=""></span>
           <span>
             <strong>𝐒𝐋 𝐄𝐃𝐔𝐂𝐀𝐓𝐈𝐎𝐍 𝐀/𝐋 — @SL_EDUCATION_A_L</strong>
             <span>Mixed A/L resource hub covering Biology, Combined Maths, Chemistry, Physics and other study material.</span>
           </span>
-          <span class="telegram-open">Open Telegram →</span>
+          <span class="telegram-open"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt="" aria-hidden="true"> Open Channel</span>
         </a>
 
         <a
@@ -1100,12 +1119,12 @@
           rel="noopener noreferrer"
           aria-label="Open 𝗔𝗟 අපි 🇱🇰 — @AL_api"
         >
-          <span class="telegram-channel-icon" aria-hidden="true">➤</span>
+          <span class="telegram-channel-icon" aria-hidden="true"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt=""></span>
           <span>
             <strong>𝗔𝗟 අපි 🇱🇰 — @AL_api</strong>
             <span>Broad Sri Lankan A/L resource channel with papers, marking schemes and subject materials.</span>
           </span>
-          <span class="telegram-open">Open Telegram →</span>
+          <span class="telegram-open"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt="" aria-hidden="true"> Open Channel</span>
         </a>
 
         <a
@@ -1115,12 +1134,12 @@
           rel="noopener noreferrer"
           aria-label="Open xscience0resources"
         >
-          <span class="telegram-channel-icon" aria-hidden="true">➤</span>
+          <span class="telegram-channel-icon" aria-hidden="true"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt=""></span>
           <span>
             <strong>xscience0resources</strong>
             <span>Mixed 2027/2028 resources including class recordings, notes, papers and multi-subject material.</span>
           </span>
-          <span class="telegram-open">Open Telegram →</span>
+          <span class="telegram-open"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt="" aria-hidden="true"> Open Channel</span>
         </a>
 
         <a
@@ -1130,12 +1149,12 @@
           rel="noopener noreferrer"
           aria-label="Open E-Tools Telegram Channel — @htmlstudytools"
         >
-          <span class="telegram-channel-icon" aria-hidden="true">➤</span>
+          <span class="telegram-channel-icon" aria-hidden="true"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt=""></span>
           <span>
             <strong>E-Tools Telegram Channel — @htmlstudytools</strong>
             <span>StudyLab / E-Tools updates, interactive tools and general educational resources.</span>
           </span>
-          <span class="telegram-open">Open Telegram →</span>
+          <span class="telegram-open"><img src="assets/images/telegram-doodles/brand-telegram.svg" alt="" aria-hidden="true"> Open Channel</span>
         </a>
 
       </div>
