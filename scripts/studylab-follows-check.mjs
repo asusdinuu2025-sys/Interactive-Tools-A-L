@@ -50,7 +50,9 @@ assert.ok(drawer.includes('if (document.querySelector("#slProfileViewer:not([hid
 assert.ok(followUi.includes("studylab_follow_alerts") && followUi.includes("studylab_public_student_lookup")===false,
   "Search should use the shared public identity service, alerts own table");
 assert.ok(followUi.includes("follow.search(query)") && followUi.includes("follow.lookup(ids)"));
-assert.ok(followUi.includes("14*24*60*60*1000"),"Follow alerts should expire visibly after 14 days");
+assert.ok(followUi.includes('timeZone:"Asia/Colombo"') && followUi.includes("T00:00:00+05:30"),"Follow alerts must display only the current Sri Lanka day");
+assert.ok(social.includes(".gte(\"created_at\",lkNotificationDayStart())"),"Social likes and comment notices must be filtered from local midnight");
+assert.ok(social.includes("refreshNoticeDayIfChanged"),"Open Social notification panel must refresh at local midnight");
 assert.ok(sql.includes("alter table public.studylab_follows enable row level security"));
 assert.ok(sql.includes("alter table public.studylab_follow_alerts enable row level security"));
 assert.ok(sql.includes("grant update (is_read)"),"Follow alerts update must be restricted to is_read");
