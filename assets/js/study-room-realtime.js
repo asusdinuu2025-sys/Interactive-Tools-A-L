@@ -277,6 +277,9 @@
     const label = String(value ?? '');
     if (node && node.textContent !== label) node.textContent = label;
   }
+  window.addEventListener("studylab:follow-error", event => {
+    say(event.detail?.message || "Could not update following. Please retry.", true);
+  });
   function renderPeople() {
     const active = rows.filter(r => heartbeatIsFresh(r) ||
       (r?.session_active && r?.session_presence_state === 'away'));

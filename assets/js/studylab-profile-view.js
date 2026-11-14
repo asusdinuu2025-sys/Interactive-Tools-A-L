@@ -426,6 +426,12 @@
       confirmSubmit.disabled=confirmInput.value!=="DELETE";
     }
   }
+  window.addEventListener("studylab:follow-error",event=>{
+    if(view && !view.hidden){
+      viewStatus.textContent=event.detail?.message||"Could not update following.";
+      viewStatus.hidden=false;
+    }
+  });
   window.addEventListener("studylab:follow-changed",event=>{
     if(view?.hidden||!viewedUserId)return;
     if(event.detail?.targetId===viewedUserId || viewedUserId===window.StudyLabFollow?.currentId()){

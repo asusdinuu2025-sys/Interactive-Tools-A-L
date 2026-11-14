@@ -406,6 +406,11 @@
     status.append(document.createTextNode(message));
   }
 
+  window.addEventListener("studylab:follow-error", event => {
+    if (panel.inert) return;
+    setStatus(event.detail?.message || "Could not update following. Please retry.", true);
+  });
+
   async function requireBasicProfile() {
     const account = accountClient();
     await account.ready;
