@@ -11,31 +11,31 @@ body.study-room-page {
 }
 /* Five adaptive theme palettes: light and dark are independent from Home. */
 body.study-room-page[data-room-theme="pinky"] {
-  --slr-art-mask: url("../images/study-room/flower.svg");
+  --slr-art-mask: url("../images/study-room/flower.svg?v=thin-20261114");
   --slr-art-ink: #ff74c4;
   --slr-art-glow: rgba(255,73,174,.65);
   --slr-art-opacity: .38;
 }
 body.study-room-page[data-room-theme="forest-green"] {
-  --slr-art-mask: url("../images/study-room/leaf.svg");
+  --slr-art-mask: url("../images/study-room/leaf.svg?v=thin-20261114");
   --slr-art-ink: #74f3a8;
   --slr-art-glow: rgba(64,231,134,.62);
   --slr-art-opacity: .35;
 }
 body.study-room-page[data-room-theme="lavender"] {
-  --slr-art-mask: url("../images/study-room/lavender.svg");
+  --slr-art-mask: url("../images/study-room/lavender.svg?v=thin-20261114");
   --slr-art-ink: #c797ff;
   --slr-art-glow: rgba(168,99,245,.68);
   --slr-art-opacity: .40;
 }
 body.study-room-page[data-room-theme="warm-sand"] {
-  --slr-art-mask: url("../images/study-room/turtle.svg");
+  --slr-art-mask: url("../images/study-room/turtle.svg?v=thin-20261114");
   --slr-art-ink: #f8ce82;
   --slr-art-glow: rgba(242,182,82,.58);
   --slr-art-opacity: .35;
 }
 body.study-room-page[data-room-theme="ocean"] {
-  --slr-art-mask: url("../images/study-room/bubbles.svg");
+  --slr-art-mask: url("../images/study-room/bubbles.svg?v=thin-20261114");
   --slr-art-ink: #65e5f8;
   --slr-art-glow: rgba(39,215,250,.68);
   --slr-art-opacity: .53;
@@ -524,8 +524,8 @@ body.study-room-page .slr-theme-illustration:is(
 ) {opacity:calc(var(--slr-art-opacity) * .78)}
 /* Force Ocean to use the corrected white-alpha shark silhouette. */
 body.study-room-page[data-room-theme="ocean"] .slr-theme-illustration {
-  -webkit-mask-image:url("../images/study-room/bubbles.svg");
-  mask-image:url("../images/study-room/bubbles.svg");
+  -webkit-mask-image:url("../images/study-room/bubbles.svg?v=thin-20261114");
+  mask-image:url("../images/study-room/bubbles.svg?v=thin-20261114");
 }
 /* Optically thicker LIVE profile cards, while keeping the contents clear.
    The double specular edge and inset highlights define glass thickness. */
