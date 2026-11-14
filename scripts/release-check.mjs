@@ -148,6 +148,13 @@ if (profileTests.status !== 0) {
     (profileTests.stderr || profileTests.stdout || "node test failed"));
 }
 
+// Profile menu icon and shared four-subject dropdown stacking regression.
+const profileDropdownTests = spawnSync(process.execPath, ["scripts/profile-menu-subject-dropdown-check.mjs"], {encoding:"utf8"});
+if (profileDropdownTests.status !== 0) {
+  fail("Profile menu and lesson dropdown regression failed:\n" +
+    (profileDropdownTests.stderr || profileDropdownTests.stdout || "node test failed"));
+}
+
 // Parse inline JavaScript in the standalone Study Tools page without executing it.
 const toolsHtml = read("study-tools.html");
 if (toolsHtml) {
