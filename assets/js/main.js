@@ -70,6 +70,25 @@
     updateToggle();
   }
 
+  // Optional lightweight mode for slow devices. Default styling is untouched.
+  // A visitor can enable it with ?performance=lite or disable with
+  // ?performance=normal. The choice persists in this browser.
+  const PERF_KEY = "studylab-performance-mode";
+  const requestedPerf = new URLSearchParams(window.location.search).get("performance");
+  try {
+    if (requestedPerf === "lite" || requestedPerf === "normal") localStorage.setItem(PERF_KEY, requestedPerf);
+  } catch (_) {}
+  let lite = false;
+  try { lite = localStorage.getItem(PERF_KEY) === "lite"; } catch (_) {}
+  if (!lite && requestedPerf !== "normal") lite = Boolean(navigator.connection?.saveData);
+  if (lite) {
+    root.dataset.slPerformance = "lite";
+    const lightStyle = document.createElement("style");
+    lightStyle.id = "sl-lite-performance-rules";
+    lightStyle.textContent = 'html[data-sl-performance="lite"] *,html[data-sl-performance="lite"] *::before,html[data-sl-performance="lite"] *::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}html[data-sl-performance="lite"] .sl-home-sidebar,html[data-sl-performance="lite"] .sl-home-section,html[data-sl-performance="lite"] .room-panel,html[data-sl-performance="lite"] .slr-theme-illustrations{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}';
+    document.head.appendChild(lightStyle);
+  }
+
   // Apply before DOMContentLoaded where possible, avoiding a light-mode flash.
   applyTheme(themeMode, false);
 
