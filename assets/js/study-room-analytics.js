@@ -103,7 +103,7 @@ function syncRoomSession(state){
   persistCursor();
  }else{
   const delta=seconds- Math.max(0,Math.floor(Number(serverCursor.seconds)||0));
-  if(delta>0){
+  if(delta>0&&!cloudEnabled){
    if(!activeSession&&state.sessionActive){
     try{activeSession=JSON.parse(localStorage.getItem(key+":active")||"null");}catch(_){activeSession=null;}
    }
@@ -115,11 +115,11 @@ function syncRoomSession(state){
   serverCursor={day,seconds,subject:currentSubject,updatedAt:state.updatedAt||null};
   persistCursor();
  }
- if(state.sessionActive){
+ if(!cloudEnabled&&state.sessionActive){
   if(!activeSession)activeSession={subject:currentSubject,credits:{}};
   activeSession.subject=currentSubject;
   saveSession();
- }else if(activeSession){
+ }else if(!cloudEnabled&&activeSession){
   activeSession=null;saveSession();
  }
  render(false);
