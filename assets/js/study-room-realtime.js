@@ -9,6 +9,7 @@
   const yourRank = $('yourRank');
   const status = $('yourStatus');
   const subject = $('studySubject');
+  const subjectSearch = $('studySubjectSearch');
   const targetHours = $('targetHours');
   const targetMinutes = $('targetMinutes');
   const targetHint = $('targetTimeHint');
@@ -141,6 +142,46 @@
     return total >= 60 && total <= 39540 ? total : null;
   }
 
+  // Search only filters the existing server-approved subject choices. The
+  // actual selection always remains the native select, including on mobile.
+  const subjectCatalog = [...subject.options].filter(option => option.value)
+    .map(option => ({value: option.value, label: option.textContent.trim()}));
+  function filterSubjectOptions(preserveSelection = true) {
+    if (!subjectSearch) return;
+    const query = subjectSearch.value.trim().toLocaleLowerCase();
+    const previous = preserveSelection ? subject.value : '';
+    const matches = subjectCatalog.filter(entry => entry.label.toLocaleLowerCase().includes(query));
+    if (previous && !matches.some(entry => entry.value === previous)) {
+      const current = subjectCatalog.find(entry => entry.value === previous);
+      if (current) matches.unshift(current);
+    }
+    const placeholder = new Option('Select subject to study', '', true, true);
+    placeholder.disabled = true;
+    const options = [placeholder];
+    for (const entry of matches) options.push(new Option(entry.label, entry.value));
+    if (!matches.length) {
+      const empty = new Option('No matching subjects', '');
+      empty.disabled = true;
+      options.push(empty);
+    }
+    subject.replaceChildren(...options);
+    subject.value = previous || '';
+    if (!subject.value) subject.selectedIndex = 0;
+  }
+  if (subjectSearch) subjectSearch.addEventListener('input', () => {
+    // Searching for a new session requires choosing an actual list option.
+    // Never erase the selected subject of a running or paused session.
+    filterSubjectOptions(Boolean(member?.session_active));
+  });
+  function refreshPersonalHistory() {
+    try {
+      const task = window.StudyRoomHistory?.refresh?.();
+      if (task?.catch) task.catch(error => console.warn('Study Room history refresh failed', error));
+    } catch (error) {
+      console.warn('Could not request saved Study Room history', error);
+    }
+  }
+
   function clearTargetError() {
     [targetHours, targetMinutes].forEach(input => {
       if (!input) return;
@@ -189,7 +230,13 @@
   }
 
   function updateSessionUI(row) {
-    if (row?.subject && [...subject.options].some(option => option.value === row.subject || option.textContent.trim() === row.subject)) {
+    // Inactive database rows retain the last subject. Do not pre-select it
+    // for a new study session just because it was used yesterday.
+    if (row?.session_active && row?.subject && subjectCatalog.some(option => option.value === row.subject)) {
+      if (subjectSearch?.value) {
+        subjectSearch.value = '';
+        filterSubjectOptions();
+      }
       subject.value = row.subject;
     }
     const isRunning = Boolean(row?.is_studying);
@@ -220,6 +267,9 @@
       targetMinutes.value = String(targetMinutesTotal % 60);
       clearTargetError();
     } else if (!hasSession && hadActiveSession) {
+      if (subjectSearch) subjectSearch.value = '';
+      filterSubjectOptions(false);
+      subject.value = '';
       targetHours.value = "";
       targetMinutes.value = "";
       targetHours.querySelector('option[data-legacy-target="true"]')?.remove();
@@ -543,6 +593,7 @@
       if (heartbeatPromise) await heartbeatPromise;
       await callRpc('study_room_pause');
       await loadRows();
+      refreshPersonalHistory(); // server credits are committed by the pause RPC
       say('Your study session is paused. Press Continue to resume it.');
     } catch (e) {
       say('Could not pause the study session: ' + e.message, true);
@@ -557,6 +608,7 @@
     try {
       await callRpc('study_room_end');
       await loadRows();
+      refreshPersonalHistory(); // immediate personal-history refresh, not the 60s fallback
       targetHours.value = '';
       targetMinutes.value = '';
       updatePersonal();
@@ -578,7 +630,7 @@
       todayDate: today,
       weekSeconds: member?.week_start === weekStart(new Date()) ? Math.max(0, Number(member?.week_seconds) || 0) : 0,
       pendingWeekSeconds: pendingSeconds(member, startOfDay(weekStart(new Date()))),
-      subject: member?.subject || subject.value || '',
+      subject: member?.session_active ? (member.subject || subject.value || '') : (subject.value || ''),
       status: member?.session_presence_state === 'away' ? 'Away' : member?.is_studying ? 'Studying' : member?.session_active ? 'Paused' : 'Not studying',
       sessionPresenceState: member?.session_presence_state || 'paused',
       targetSeconds: Number(member?.session_target_seconds) || 0,
@@ -647,13 +699,21 @@
       });
       leave.addEventListener('click', endStudy);
       subject.addEventListener('change', async () => {
+        if (subjectSearch?.value) {
+          subjectSearch.value = '';
+          filterSubjectOptions();
+        }
         subject.removeAttribute('aria-invalid');
         subject.classList.remove('room-subject-required');
         subject.style.removeProperty('border-color');
         subject.style.removeProperty('box-shadow');
         subject.style.removeProperty('color');
-        try { await callRpc('study_room_set_subject', {p_subject: subject.value}); await loadRows(); }
-        catch(e) { say('Could not update subject: ' + e.message, true); }
+        if (!subject.value || !member?.session_active) return;
+        try {
+          await callRpc('study_room_set_subject', {p_subject: subject.value});
+          await refreshOwnRow();
+          refreshPersonalHistory(); // the previous subject's credited interval was settled
+        } catch(e) { say('Could not update subject: ' + e.message, true); }
       });
       dailyTab.addEventListener('click', () => { selectedBoard = 'daily'; renderBoard(); });
       weeklyTab.addEventListener('click', () => { selectedBoard = 'weekly'; renderBoard(); });
