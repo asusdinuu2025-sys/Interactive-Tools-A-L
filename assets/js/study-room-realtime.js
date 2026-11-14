@@ -27,6 +27,7 @@
   const weeklyTab = $('weeklyBoardTab');
   let client, userId = null, member = null, rows = [], heartbeatInterval = null, uiInterval = null, rankRefreshInterval = null;
   let heartbeatRetryTimer = null, heartbeatPromise = null, presenceController = null, hadActiveSession = false, sessionAction = null;
+  let lastFullSyncAt = 0, fullSyncTimer = null;
 
   let accessToken = null;
 
@@ -59,7 +60,7 @@
       onPresenceChange: async (present, changedAt) => {
         if (!client || !userId) return;
         await callRpc("study_room_presence_at", { p_is_present: present, p_transition_at: new Date(changedAt || Date.now()).toISOString() });
-        await loadRows();
+        await refreshOwnRow();
       },
       onPulse: heartbeat,
       onUnloadAway: sendUnloadPresenceAway
@@ -405,12 +406,37 @@
     dailyTab.setAttribute('aria-pressed', String(selectedBoard === 'daily'));
     weeklyTab.setAttribute('aria-pressed', String(selectedBoard === 'weekly'));
   }
+  // Heartbeats fetch only the student's record. The shared leaderboard is
+  // refreshed on a coalesced realtime signal and a 60-second fallback.
+  async function refreshOwnRow() {
+    if (!client || !userId) return;
+    const {data, error} = await client.from('study_room_live').select(
+      'user_id,display_name,gender,subject,is_studying,session_active,session_started_at,session_elapsed_seconds,session_date,last_heartbeat_at,today_seconds,today_date,week_seconds,week_start,updated_at,session_expired_at,session_presence_state,session_target_seconds,session_target_reached_at,session_away_since_at,session_away_pending_seconds'
+    ).eq('user_id', userId).maybeSingle();
+    if (error) throw error;
+    rows = rows.filter(row => row.user_id !== userId);
+    if (data) rows.push(data);
+    member = data || null;
+    updateSessionUI(member);
+    renderPeople();
+    renderBoard();
+    updatePersonal();
+  }
+  function scheduleGlobalRefresh() {
+    if (fullSyncTimer || !client) return;
+    const delay = Math.max(1200, 20000 - (Date.now() - lastFullSyncAt));
+    fullSyncTimer = setTimeout(() => {
+      fullSyncTimer = null;
+      loadRows().catch(error => console.error('Study Room shared refresh failed', error));
+    }, delay);
+  }
   async function loadRows() {
     const {data,error} = await client.from('study_room_live').select(
       'user_id,display_name,gender,subject,is_studying,session_active,session_started_at,session_elapsed_seconds,session_date,last_heartbeat_at,today_seconds,today_date,week_seconds,week_start,updated_at,session_expired_at,session_presence_state,session_target_seconds,session_target_reached_at,session_away_since_at,session_away_pending_seconds'
     );
     if (error) throw error;
     rows = data || [];
+    lastFullSyncAt = Date.now();
     member = rows.find(r => r.user_id === userId) || null;
     updateSessionUI(member);
     renderPeople();
@@ -430,7 +456,7 @@
   async function heartbeat(isRetry = false) {
     if (!client || !userId || !member?.is_studying) return;
     if (heartbeatWasRecentlySuccessful()) {
-      try { await loadRows(); }
+      try { await refreshOwnRow(); }
       catch (e) { console.error('Could not refresh shared Study Room timer state', e); }
       return;
     }
@@ -443,7 +469,7 @@
           clearTimeout(heartbeatRetryTimer);
           heartbeatRetryTimer = null;
         }
-        await loadRows();
+        await refreshOwnRow();
       } catch (e) {
         console.error('Study Room heartbeat failed', e);
         // One short retry for a transient network failure; the next normal
@@ -550,6 +576,8 @@
       todaySeconds: member && member.today_date === today ? Math.max(0, Number(member.today_seconds) || 0) : 0,
       pendingTodaySeconds: pendingSeconds(member, startOfDay(today)),
       todayDate: today,
+      weekSeconds: member?.week_start === weekStart(new Date()) ? Math.max(0, Number(member?.week_seconds) || 0) : 0,
+      pendingWeekSeconds: pendingSeconds(member, startOfDay(weekStart(new Date()))),
       subject: member?.subject || subject.value || '',
       status: member?.session_presence_state === 'away' ? 'Away' : member?.is_studying ? 'Studying' : member?.session_active ? 'Paused' : 'Not studying',
       sessionPresenceState: member?.session_presence_state || 'paused',
@@ -606,7 +634,10 @@
       startRoomPresenceLifecycle();
       client.channel('study-room-live')
         .on('postgres_changes', {event:'*',schema:'public',table:'study_room_members'}, () => {
-          loadRows().catch(e => console.error('Could not refresh live Study Room data', e));
+          scheduleGlobalRefresh();
+        })
+        .on('postgres_changes', {event:'UPDATE',schema:'public',table:'study_room_members',filter:'user_id=eq.' + userId}, () => {
+          refreshOwnRow().catch(e => console.error('Could not refresh own Study Room state', e));
         }).subscribe();
       join.addEventListener('click', startStudy);
       pause.addEventListener('click', () => {
