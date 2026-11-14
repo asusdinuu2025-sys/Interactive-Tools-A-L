@@ -194,8 +194,10 @@
     const isRunning = Boolean(row?.is_studying);
     const isAway = Boolean(row?.session_active && row?.session_presence_state === "away");
     const hasSession = Boolean(row?.session_active);
-    join.disabled = isRunning || isAway || Boolean(sessionAction);
-    pause.disabled = !isRunning || Boolean(sessionAction);
+    // Start begins a NEW session. Once paused, Pause becomes Continue.
+    // Away sessions stay locked until presence is reconciled by the server.
+    join.disabled = hasSession || isRunning || isAway || Boolean(sessionAction);
+    pause.disabled = !hasSession || isAway || Boolean(sessionAction);
     leave.disabled = !hasSession || Boolean(sessionAction);
     targetHours.disabled = hasSession;
     targetMinutes.disabled = hasSession;
@@ -222,8 +224,10 @@
       targetHours.querySelector('option[data-legacy-target="true"]')?.remove();
     }
     hadActiveSession = hasSession;
-    join.textContent = "Start";
-    pause.textContent = "Pause";
+    join.textContent = sessionAction === 'start' ? "Starting…" : "Start";
+    pause.textContent = sessionAction === 'continue' ? "Continuing…" :
+      sessionAction === 'pause' ? "Pausing…" :
+      hasSession && !isRunning && !isAway ? "Continue" : "Pause";
     leave.textContent = "End";
     status.textContent = isAway ? "Away" : isRunning ? "Studying" : hasSession ? "Paused" : "Not studying";
     panel.classList.toggle("is-studying", isRunning);
@@ -233,7 +237,7 @@
         ? "Studying " + (row?.subject || subject.value) + " · session in progress"
         : row?.session_target_reached_at && hasSession
           ? "Target reached · paused · resume before midnight to confirm away time"
-          : hasSession ? "Paused · press Start to resume" : "Not studying · select a subject and target to begin";
+          : hasSession ? "Paused · press Continue to resume" : "Not studying · select a subject and target to begin";
     liveLabel.textContent = "Live shared room";
     emitTimerState();
   }
@@ -485,6 +489,8 @@
     subject.style.removeProperty("color");
     clearTargetError();
 
+    sessionAction = hasExistingSession ? 'continue' : 'start';
+    updateSessionUI(member);
     try {
       await callRpc("study_room_set_subject", { p_subject: subject.value });
       // The server preserves an existing session's original target on resume.
@@ -495,6 +501,9 @@
       say("Your study session has started. If you leave the Study Room, it continues until your target and then pauses.");
     } catch (e) {
       say("Could not start the study session: " + e.message, true);
+    } finally {
+      sessionAction = null;
+      updateSessionUI(member);
     }
   }
   async function pauseStudy() {
@@ -508,7 +517,7 @@
       if (heartbeatPromise) await heartbeatPromise;
       await callRpc('study_room_pause');
       await loadRows();
-      say('Your study session is paused. Press Start to resume it.');
+      say('Your study session is paused. Press Continue to resume it.');
     } catch (e) {
       say('Could not pause the study session: ' + e.message, true);
       try { await loadRows(); } catch (_) {}
@@ -600,7 +609,11 @@
           loadRows().catch(e => console.error('Could not refresh live Study Room data', e));
         }).subscribe();
       join.addEventListener('click', startStudy);
-      pause.addEventListener('click', pauseStudy);
+      pause.addEventListener('click', () => {
+        if (sessionAction || !member?.session_active) return;
+        if (member.is_studying) pauseStudy();
+        else if (member.session_presence_state !== 'away') startStudy();
+      });
       leave.addEventListener('click', endStudy);
       subject.addEventListener('change', async () => {
         subject.removeAttribute('aria-invalid');

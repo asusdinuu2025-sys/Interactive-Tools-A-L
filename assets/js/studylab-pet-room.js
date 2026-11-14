@@ -1034,56 +1034,25 @@
   }
 
   let goalCelebrationUntil = 0;
-  let nextGoalMoveAt = 0;
-
-  function launchGoalCelebrationMove() {
-    const half = safeX();
-    const bounds = safeY();
-    const minX = half + 24;
-    const maxX = Math.max(minX + 25, window.innerWidth - half - 24);
-    const minY = bounds.min + 12;
-    const maxY = Math.max(minY + 25, bounds.max - 12);
-    let targetX = state.x;
-    let targetY = state.y;
-    let farthest = 0;
-    for (let i = 0; i < 12; i++) {
-      const x = random(minX, maxX);
-      const y = random(minY, maxY);
-      const distance = Math.hypot(x - state.x, y - state.y);
-      if (distance > farthest) { farthest = distance; targetX = x; targetY = y; }
-    }
-    state.targetX = targetX;
-    state.targetY = targetY;
-    state.moveMode = 'burst';
-    state.moving = true;
-    state.pauseUntil = 0;
-    const dx = targetX - state.x;
-    const dy = targetY - state.y;
-    const distance = Math.max(1, Math.hypot(dx, dy));
-    const speed = Math.max(260, profile().speed * 2.35);
-    state.velocityX = dx / distance * speed;
-    state.velocityY = dy / distance * speed;
-    character.dataset.moving = 'true';
-    character.dataset.direction = visualDirection(dx, dy);
-    setExpression(pick(['excited', 'delighted', 'happy']), 720, true);
-    nextGoalMoveAt = now() + random(620, 820);
-  }
+  let goalCelebrationStarted = 0;
+  let goalBounceOriginX = 0;
+  let goalBounceOriginY = 0;
 
   function beginGoalCelebration() {
-    if (!state.enabled || state.dragging || reducedMotion) {
-      if (state.enabled && state.sleeping) wake();
-      if (state.enabled && reducedMotion) setExpression('delighted', 1000, true);
-      return;
-    }
+    // User-disabled pets stay disabled, but a sleeping enabled pet wakes up.
+    if (!state.enabled || state.dragging) return;
     if (state.sleeping) wake();
-    else {
-      state.lastActivity = now();
-      state.nextSleepAt = now() + 12000;
-      setExpression('excited', 900, true);
-    }
-    goalCelebrationUntil = now() + 4000;
+    state.lastActivity = now();
+    state.nextSleepAt = now() + 12000;
+    setExpression('delighted', 1300, true);
+    if (reducedMotion) return;
+    stopNormalMove();
+    goalCelebrationStarted = now();
+    goalCelebrationUntil = goalCelebrationStarted + 3400;
+    goalBounceOriginX = state.x;
+    goalBounceOriginY = state.y;
+    state.nextMoveAt = goalCelebrationUntil + 3000;
     character.classList.add('is-goal-celebrating');
-    launchGoalCelebrationMove();
   }
 
   window.addEventListener('studylab:study-room-goal-celebration', beginGoalCelebration);
@@ -1954,11 +1923,15 @@
         character.classList.remove('is-goal-celebrating');
         if (state.enabled && !state.dragging) {
           stopNormalMove();
+          setPosition(goalBounceOriginX, goalBounceOriginY);
           setExpression('delighted', 950, true);
           state.nextMoveAt = timeNow + random(3500, 6000);
         }
-      } else if (timeNow >= nextGoalMoveAt) {
-        launchGoalCelebrationMove();
+      } else {
+        // Short in-place happy bounce; no racing across or behind panels.
+        const fraction = Math.min(1, (timeNow - goalCelebrationStarted) / 3400);
+        const height = Math.abs(Math.sin(fraction * Math.PI * 5)) * 17 * (1 - fraction * .4);
+        setPosition(goalBounceOriginX, goalBounceOriginY - height);
       }
     }
 
