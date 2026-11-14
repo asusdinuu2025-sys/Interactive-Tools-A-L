@@ -324,7 +324,7 @@
         card = document.createElement('article');
         card.className = 'room-person-card';
         card.dataset.userId = id;
-        card.innerHTML = "<div class='room-person-card-top'><div class='room-avatar'></div><span class='room-person-status'>Studying now</span></div>" +
+        card.innerHTML = "<div class='room-person-card-top'><div class='room-avatar'></div><div class='room-person-status-stack'><span class='room-person-status'>Studying now</span><div class='room-person-follow-slot'></div></div></div>" +
           "<div class='room-person-card-name-row'><div class='room-person-card-name'></div><span class='room-person-card-rank' title='Daily rank among all Study Room members'></span></div>" +
           "<div class='room-person-card-subject'></div><div class='room-person-card-divider'></div>" +
           "<div class='room-person-card-time-label'>Today's study time</div><div class='room-person-card-time'></div>";
@@ -341,7 +341,7 @@
       // Never add one to your own card or create duplicates on live refresh.
       if (id !== userId && !card.querySelector('.sl-follow-btn')) {
         const followButton = window.StudyLabFollow?.makeButton(id,{compact:true});
-        if (followButton) card.querySelector('.room-person-card-top')?.append(followButton);
+        if (followButton) card.querySelector('.room-person-follow-slot')?.append(followButton);
       }
       const avatar = card.querySelector('.room-avatar');
       const gender = r.gender === 'female' ? 'female' : 'male';
