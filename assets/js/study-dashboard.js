@@ -339,6 +339,18 @@
 
     card.dataset.studyEnhanced = "true";
     card.dataset.studySubject = knownSubject || subject || "study-lab";
+    // Source-link availability is not a claim of educational accuracy.
+    try {
+      const link = new URL(getCardUrl(card), document.baseURI);
+      if (link.origin === location.origin && link.pathname.startsWith("/tools/") && link.pathname.toLowerCase().endsWith(".html")) {
+        card.dataset.resourceLinkStatus = "checked-2026-11-14";
+        if (!card.hasAttribute("title")) card.title = "StudyLab page link checked 14 Nov 2026; educational content review pending.";
+      } else if (link.protocol === "http:" || link.protocol === "https:") {
+        card.dataset.resourceLinkStatus = "external-unverified";
+        if (!card.hasAttribute("title")) card.title = "External resource; check availability and content at the original source.";
+      }
+    } catch (_) {}
+
 
     const favorite = document.createElement("span");
     favorite.className = "study-favorite-toggle";
