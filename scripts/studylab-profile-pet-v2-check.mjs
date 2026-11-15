@@ -35,7 +35,10 @@ assert.match(bioMigration,/drop constraint if exists studylab_profiles_bio_word_
 assert.match(bioMigration,/char_length\(coalesce\(new\.bio,''\)\) > 35/);
 assert.match(viewer,/listBackdrop=element\("div","sl-pv-list-backdrop"\)/);
 assert.match(viewer,/listBackdrop\.append\(listPanel\)/);
-assert.match(viewer,/dialog\.append\(header,identity,avatarEditor,bioSummary,bioEditor,counts,actions,followAction,joined,viewStatus\)/);
+assert.match(viewer,/dialog\.append\(header,identity,avatarEditor,bioSummary,counts,actions,followAction,joined,viewStatus\)/);
+assert.match(viewer,/bioSummary\.append\(bioEditor\)/);
+assert.match(viewer,/bioNode\.hidden=opening/);
+assert.match(viewer,/Math\.min\(146,Math\.max\(45,bioInput\.scrollHeight\)\)/);
 assert.match(viewer,/function closeList\(\)/);
 assert.match(viewer,/avatarRemove = button\("sl-pv-avatar-remove","Use default avatar"\)/);
 assert.match(viewer,/bioEditToggle=button\("sl-pv-bio-edit-toggle"/);
