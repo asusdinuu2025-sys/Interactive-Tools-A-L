@@ -79,8 +79,8 @@ assert.ok(!accountSource.includes("bio: bio || null"),
   "Normal full-profile saves must not overwrite an existing Bio");
 assert.ok(viewer.includes('bioNode.textContent=escText(profile.bio)'),
   "Visitor profile card must show read-only public Bio");
-assert.ok(viewer.includes("bioEditor.hidden=!own") &&
-  viewer.includes("bioNode.hidden=own"),
+assert.ok(viewer.includes("bioEditor.hidden=true") &&
+  viewer.includes("bioEditToggle.hidden=!own"),
   "Only a profile owner may use the Bio editor");
 assert.ok(room.includes("room-person-follow-slot"),"Follow control must sit inside study room card");
 assert.ok(css.includes("sl-follow-profile-toast"),"Right-side incomplete-profile toast styling missing");
