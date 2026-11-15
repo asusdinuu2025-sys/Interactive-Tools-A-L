@@ -8,14 +8,15 @@ const css=read("assets/css/studylab-announcements.css");
 const before=read("supabase/migrations/20261115230000_studylab_announcements.sql");
 const migration=read("supabase/migrations/20261115233500_announcements_v2_admin_banners.sql");
 const publicRead=read("supabase/migrations/20261115233600_announcements_public_read_policy.sql");
+const customization=read("supabase/migrations/20261116010000_banner_customization.sql");
 assert.doesNotThrow(()=>new vm.Script(ui,{filename:"studylab-announcements.js"}));
 assert.doesNotThrow(()=>new vm.Script(profile,{filename:"profile.js"}));
 for(const required of [
   'id="slDiscoveryCarousel"','data-discovery-main','data-discovery-prev',
   'data-discovery-next','data-discovery-dots','sl-home-intro-row',
   'homepage-utility-row',
-  'assets/css/studylab-announcements.css?v=20261116-home-fade-pet-v3',
-  'assets/js/studylab-announcements.js?v=20261116-home-fade-pet-v3'
+  'assets/css/studylab-announcements.css?v=20261116-custom-banners-v4',
+  'assets/js/studylab-announcements.js?v=20261116-custom-banners-v4'
 ])assert.ok(html.includes(required),"Missing Home integration: "+required);
 assert.match(profile,/updates\.dataset\.accountAction="announcements"/);
 assert.match(profile,/manage\.dataset\.accountAction="manage-announcements"/);
@@ -30,9 +31,8 @@ assert.match(ui,/changeSlide\(current\+1\)/);
 assert.match(ui,/function changeSlide\(index\)/);
 assert.match(ui,/card\.classList\.add\("is-transitioning"\)/);
 assert.match(ui,/card\.classList\.remove\("is-transitioning"\)/);
-assert.match(ui,/},190\)/);
-assert.match(ui,/if\(reduced\.matches\)/);
-assert.match(ui,/},4000\)/);
+assert.match(ui,/if\(reduced\.matches\|\|effect==="none"\)/);
+assert.match(ui,/rotation=setTimeout\(tick,durationOf\(items\[current\]\)\)/);
 assert.match(ui,/new IntersectionObserver/);
 assert.match(ui,/reduced\.matches/);
 assert.match(ui,/function navigate\(raw\)/);
@@ -53,7 +53,6 @@ assert.match(ui,/form\.addEventListener\("submit",async event=>\{/);
 assert.match(ui,/client\.storage\.from\(BUCKET\)\.upload\(newImagePath,processed/);
 assert.match(ui,/client\.storage\.from\(BUCKET\)\.remove\(\[oldImage\]\)/);
 assert.match(ui,/client\.storage\.from\(BUCKET\)\.remove\(\[item\.image_path\]\)/);
-assert.match(ui,/context\.drawImage\(img,cropX,cropY,cropW,cropH,0,0,W,H\)/);
 assert.match(ui,/W=1200,H=480/);
 assert.match(ui,/const BUCKET="studylab-announcements"/);
 assert.match(ui,/MAX_SOURCE=8\*1024\*1024,MAX_FINAL=2\*1024\*1024/);
@@ -90,4 +89,42 @@ assert.match(css,/\.sl-discovery-card\.is-transitioning \.sl-discovery-slide-mai
 assert.match(css,/transition-duration:\.18s/);
 assert.match(css,/html body #studylabPetStage\{\s*z-index:2147483400!important/);
 assert.match(css,/html body #studylabPetPanel\{\s*z-index:2147483402!important/);
-console.log("StudyLab seven published banners, admin editor, images, no read-tracking and mobile layout: OK.");
+
+// Admin customization contract: no changes to independent StudyLab features.
+assert.match(ui,/function durationOf\(item\)/);
+assert.match(ui,/Math\.min\(10,Math\.max\(1,Number\(item\?\.display_seconds\)\|\|4\)\)\*1000/);
+assert.match(ui,/rotation=setTimeout\(tick,durationOf\(items\[current\]\)\)/);
+assert.match(ui,/changeSlide\(current\+1\)/);
+assert.match(ui,/function safeDestination\(raw\)/);
+assert.match(ui,/window\.open\(url\.href,"_blank","noopener,noreferrer"\)/);
+assert.match(ui,/url\.username\|\|url\.password/);
+assert.match(ui,/item\.art_key==="none"\?"":/);
+assert.match(ui,/sl-discovery-image-only/);
+assert.match(ui,/function prepareCrop\(file\)/);
+assert.match(ui,/cropBox\.addEventListener\("pointerdown"/);
+assert.match(ui,/cropBox\.addEventListener\("pointermove"/);
+assert.match(ui,/cropBox\.addEventListener\("keydown"/);
+assert.match(ui,/cropZoom\.addEventListener\("input"/);
+assert.match(ui,/ctx\.drawImage\(crop\.image,crop\.x,crop\.y,crop\.w,crop\.h,0,0,W,H\)/);
+assert.match(ui,/function stopTransition\(\)/);
+assert.match(ui,/function transitionOf\(item\)/);
+assert.match(ui,/card\.dataset\.exitStyle=effect/);
+assert.match(ui,/function scheduleRotation\(\)/);
+assert.match(ui,/find\("display_mode"\)/);
+assert.match(ui,/name="transition_style"/);
+assert.match(ui,/name="display_seconds"/);
+assert.match(ui,/name="custom_path" type="text"/);
+assert.match(css,/\.sl-ann-crop-stage/);
+assert.match(css,/\.sl-ann-crop-box/);
+assert.match(css,/\.sl-ann-crop-result/);
+assert.match(css,/\.sl-discovery-card\.sl-discovery-image-only/);
+assert.match(css,/\[data-exit-style="dissolve"\]/);
+assert.match(css,/\[data-exit-style="slide"\]/);
+assert.match(customization,/drop constraint if exists studylab_announcements_target_path_check/);
+assert.match(customization,/add column if not exists display_seconds smallint/);
+assert.match(customization,/add column if not exists transition_style text/);
+assert.match(customization,/add column if not exists display_mode text/);
+assert.match(customization,/announcement_image_mode_requires_image/);
+assert.match(customization,/announcement_art_key_safe/);
+
+console.log("StudyLab customizable banners, crop editor, effects, external links and previous features: OK.");
