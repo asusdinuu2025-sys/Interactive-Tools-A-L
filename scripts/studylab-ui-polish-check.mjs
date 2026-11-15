@@ -98,5 +98,5 @@ for(const html of [roomHtml,homeHtml]){
   assert.match(html,/studylab-avatar\.js\?v=20261115-uuid-fixed-v5/,
     "Working photo renderer must stay on its tested version");
 }
-assert.match(roomHtml,/study-room-illustrated-glass\.css\?v=20261115-upper-right-art-v6/);
+assert.match(roomHtml,/study-room-illustrated-glass\.css\?v=20261115-room-watermark-v7/);
 console.log("Inline Bio, Chat layout/controls, badge spacing and illustrated corners passed.");
