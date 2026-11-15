@@ -532,7 +532,8 @@
         !length ||
         length > CONFIG.maxLength ||
         !client ||
-        Date.now() - lastSentAt < CONFIG.rateLimitMs;
+        busyMessageAction ||
+        (!editTarget && Date.now() - lastSentAt < CONFIG.rateLimitMs);
     }
   }
 
@@ -551,7 +552,7 @@
 
     const { data, error } = await client
       .from(CONFIG.table)
-      .select("id,message,created_at,session_id,user_id,nickname")
+      .select("id,message,created_at,session_id,user_id,nickname,reply_to,edited_at")
       .order("created_at", { ascending: false })
       .order("id", { ascending: false })
       .limit(CONFIG.maxMessages);
@@ -564,6 +565,10 @@
     }
 
     renderInitial((data || []).reverse());
+    // Separate, read-only student identity lookup: never expose private
+    // student profile fields or require individual profile queries per bubble.
+    loadProfiles();
+    loadReactions();
   }
 
   function subscribe() {
@@ -571,76 +576,77 @@
 
     channel = client
       .channel("studylab-chat-room")
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: CONFIG.table
-        },
-        payload => {
-          const row = payload.new;
-          const wasNearBottom =
-            list &&
-            list.scrollHeight - list.scrollTop - list.clientHeight < 140;
-
+      .on("postgres_changes",
+        {event:"*",schema:"public",table:CONFIG.table},
+        payload=>{
+          if(payload.eventType==="DELETE"){
+            deleteMessageLocally(payload.old?.id);
+            return;
+          }
+          const row=payload.new;
+          if(!row?.id)return;
+          const wasKnown=messagesById.has(row.id);
+          const wasNearBottom=list &&
+            list.scrollHeight-list.scrollTop-list.clientHeight<140;
           renderMessage(row);
-
-          if (!isOpen && row.user_id !== userId) {
-            setUnread(unreadCount + 1);
+          if(payload.eventType==="INSERT"){
+            if(!isOpen && row.user_id!==userId)setUnread(unreadCount+1);
+            if(wasNearBottom || row.session_id===sessionKey)scrollToBottom(true);
+            loadProfiles();
+            loadReactions();
+          } else if(wasKnown){
+            // Keep edits across every open tab without reordering messages.
+            loadProfiles();
           }
-
-          if (wasNearBottom || row.session_id === sessionKey) {
-            scrollToBottom(true);
-          }
-        }
-      )
-      .subscribe(status => {
-        if (status === "SUBSCRIBED") {
-          setStatus(true, "Live • newest 100 messages");
-        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
-          setStatus(false, "Live connection unavailable");
-        }
+        })
+      .on("postgres_changes",
+        {event:"*",schema:"public",table:"studylab_chat_reactions"},
+        ()=>{
+          clearTimeout(reactionSyncTimer);
+          reactionSyncTimer=setTimeout(()=>loadReactions(),140);
+        })
+      .subscribe(status=>{
+        if(status==="SUBSCRIBED")setStatus(true,"Live • newest 100 messages");
+        else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT")
+          setStatus(false,"Live connection unavailable");
       });
   }
 
   async function sendMessage() {
-    if (!client || !input) return;
-
-    const now = Date.now();
-    if (now - lastSentAt < CONFIG.rateLimitMs) {
-      return;
-    }
-
-    const message = input.value.trim();
-    if (!message || message.length > CONFIG.maxLength) {
+    if(!client || !input || busyMessageAction)return;
+    const message=input.value.trim();
+    if(!message || message.length>CONFIG.maxLength){updateComposer();return;}
+    const now=Date.now();
+    if(!editTarget && now-lastSentAt<CONFIG.rateLimitMs)return;
+    busyMessageAction=true;
+    if(!editTarget)lastSentAt=now;
+    updateComposer();chatFeedback("");
+    try {
+      const editingId=editTarget;
+      let error;
+      if(editingId){
+        if(messagesById.get(editingId)?.user_id!==userId)
+          throw new Error("Only the author can edit this message.");
+        ({error}=await client.from(CONFIG.table)
+          .update({message}).eq("id",editingId).eq("user_id",userId));
+      }else{
+        const values={message,session_id:sessionKey,user_id:userId,nickname};
+        if(replyTarget && messagesById.has(replyTarget))values.reply_to=replyTarget;
+        ({error}=await client.from(CONFIG.table).insert(values));
+      }
+      if(error)throw error;
+      input.value="";clearComposerContext();updateComposer();
+    }catch(error){
+      console.warn("StudyLab Chat message action:",error);
+      chatFeedback(error?.message?.includes("foreign key")
+        ?"That original message is no longer available. Cancel reply and send again."
+        :editTarget?"Could not edit message.":"Message could not be sent.",true);
+      if(!editTarget)lastSentAt=0;
+    }finally{
+      busyMessageAction=false;
       updateComposer();
-      return;
+      window.setTimeout(updateComposer,CONFIG.rateLimitMs+20);
     }
-
-    lastSentAt = now;
-    updateComposer();
-
-    const { error } = await client
-      .from(CONFIG.table)
-      .insert({
-        message,
-        session_id: sessionKey,
-        user_id: userId,
-        nickname
-      });
-
-    if (error) {
-      console.warn("StudyLab Chat send:", error);
-      setStatus(false, "Message could not be sent");
-      lastSentAt = 0;
-      updateComposer();
-      return;
-    }
-
-    input.value = "";
-    updateComposer();
-    window.setTimeout(updateComposer, CONFIG.rateLimitMs + 20);
   }
 
   function closeQuickAccess() {
@@ -683,7 +689,20 @@
       sendMessage();
     });
 
-    input?.addEventListener("input", updateComposer);
+    input?.addEventListener("input",()=>{
+      chatFeedback("");
+      updateComposer();
+    });
+    cancelContext?.addEventListener("click",()=>clearComposerContext(true));
+    // The menu belongs to its message, and closes on outside click.
+    panel?.addEventListener("click",event=>{
+      if(event.target.closest(".study-chat-message-more,.study-chat-message-menu"))return;
+      for(const menu of panel.querySelectorAll(".study-chat-message-menu:not([hidden])")){
+        menu.hidden=true;
+        menu.parentElement?.querySelector(".study-chat-message-more")
+          ?.setAttribute("aria-expanded","false");
+      }
+    });
 
     input?.addEventListener("keydown", event => {
       if (event.key === "Enter" && !event.shiftKey) {
@@ -706,7 +725,13 @@
 
     document.addEventListener("keydown", event => {
       if (event.key === "Escape" && isOpen) {
-        setOpen(false);
+        const visibleMenu=panel?.querySelector(".study-chat-message-menu:not([hidden])");
+        if(visibleMenu){
+          visibleMenu.hidden=true;
+          visibleMenu.parentElement?.querySelector(".study-chat-message-more")
+            ?.setAttribute("aria-expanded","false");
+        }else if(replyTarget||editTarget)clearComposerContext();
+        else setOpen(false);
       }
     });
 
