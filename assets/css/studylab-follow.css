@@ -837,3 +837,45 @@ html[data-theme="light"] body:not(.study-room-page) .sl-pv-backdrop .sl-pv-avata
 body.study-room-page[data-room-mode="light"] .sl-pv-backdrop .sl-pv-avatar-toggle:hover{
   background:rgba(191,229,255,.98)!important;
 }
+
+
+/* Inline Bio editing: one identity-card section, never a second panel. */
+.sl-pv-dialog .sl-pv-bio-summary{
+  display:flex;flex-direction:column;
+  gap:7px;min-width:0;
+}
+.sl-pv-dialog .sl-pv-bio-summary .sl-pv-description[hidden],
+.sl-pv-dialog .sl-pv-bio-summary .sl-pv-bio-editor[hidden]{
+  display:none!important;
+}
+.sl-pv-dialog .sl-pv-bio-summary .sl-pv-bio-editor{
+  width:100%;min-width:0;display:flex;flex-direction:column;
+  padding:0!important;margin:0!important;gap:7px;
+  background:none!important;border:0!important;box-shadow:none!important;
+}
+.sl-pv-dialog .sl-pv-bio-summary .sl-pv-bio-label{
+  position:absolute;width:1px;height:1px;overflow:hidden;
+  clip-path:inset(50%);white-space:nowrap;
+}
+.sl-pv-dialog .sl-pv-bio-summary .sl-pv-bio-input{
+  display:block;width:100%;box-sizing:border-box;
+  min-height:45px;max-height:146px;
+  margin:0;padding:10px 12px;
+  resize:none;overflow-y:hidden;
+  border-radius:11px;line-height:1.45;
+  transition:border-color .16s ease,box-shadow .16s ease;
+}
+.sl-pv-dialog .sl-pv-bio-summary .sl-pv-bio-controls{
+  width:100%;display:flex;align-items:center;
+  justify-content:space-between;gap:9px;margin-top:0!important;
+}
+.sl-pv-dialog .sl-pv-bio-summary .sl-pv-bio-status{
+  margin:0;text-align:left;
+}
+.sl-pv-dialog .sl-pv-bio-summary .sl-pv-bio-edit-toggle[aria-expanded="true"]{
+  border-color:rgba(123,190,238,.20);
+  background:rgba(106,182,233,.13);
+}
+@media(prefers-reduced-motion:reduce){
+ .sl-pv-dialog .sl-pv-bio-summary .sl-pv-bio-input{transition:none}
+}
