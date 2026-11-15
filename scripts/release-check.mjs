@@ -131,6 +131,12 @@ if (profilePetTests.status !== 0) {
     (profilePetTests.stderr || profilePetTests.stdout || "Checks failed"));
 }
 
+const avatarRenderTests = spawnSync(process.execPath, ["scripts/studylab-avatar-render-regression.mjs"], {encoding:"utf8"});
+if (avatarRenderTests.status !== 0) {
+  fail("StudyLab avatar render regression failed:\n" +
+    (avatarRenderTests.stderr || avatarRenderTests.stdout || "Avatar render test failed"));
+}
+
 const avatarTests = spawnSync(process.execPath, ["scripts/studylab-avatar-check.mjs"], {encoding:"utf8"});
 if (avatarTests.status !== 0) {
   fail("StudyLab avatar lifecycle tests failed:\n" +
