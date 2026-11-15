@@ -20,7 +20,11 @@ assert.match(chat,/data-chat-reply-preview|data-chat-context/);
 assert.match(chat,/study-chat-message-more/);
 assert.match(chat,/row\.user_id===userId/);
 assert.match(chat,/\.update\(\{message\}\)\.eq\("id",editingId\)\.eq\("user_id",userId\)/);
-assert.match(chat,/\.delete\(\)[\s\S]*?\.eq\("id",id\)\.eq\("user_id",userId\)/);
+assert.match(chat,/\.delete\(\)\.eq\("id",id\)/);
+assert.match(chat,/if\(!isChatModerator\)request=request\.eq\("user_id",userId\)/);
+assert.match(chat,/await request\.select\("id"\)/);
+assert.match(chat,/if\(own \|\| isChatModerator\)/);
+assert.match(chat,/client\.rpc\("studylab_chat_can_moderate"\)/);
 assert.match(chat,/values\.reply_to=replyTarget/);
 assert.match(chat,/window\.StudyLabProfileView\?\.open\(\{userId:id\}\)/);
 assert.match(chat,/window\.StudyLabAvatar\?\.decorate\(avatar,row\.user_id\)/);
@@ -60,8 +64,8 @@ assert.match(hardening,/revoke truncate, trigger, references on public\.studylab
 assert.match(hardening,/grant update \(reaction\) on public\.studylab_chat_reactions/);
 
 for(const page of [home,room]){
-  assert.match(page,/chat\.css\?v=20261115-sender-colors-v3/);
-  assert.match(page,/chat\.js\?v=20261115-sender-colors-v3/);
+  assert.match(page,/chat\.css\?v=20261115-curved-chat-admin-v4/);
+  assert.match(page,/chat\.js\?v=20261115-curved-chat-admin-v4/);
   assert.ok(page.indexOf("studylab-profile-view.js")<page.indexOf("chat.js"),
     "Chat must load after shared profile viewer");
 }
