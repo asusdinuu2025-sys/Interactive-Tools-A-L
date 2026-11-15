@@ -1026,3 +1026,56 @@ body.study-room-page[data-room-mode="light"][data-room-theme] .room-page :is(
     background:var(--room-panel-bg,var(--room-card))!important;
   }
 }
+
+
+/* Decorative StudyLab watermark in the free upper-right background area.
+   It is outside the foreground panels, reuses the current room's accent,
+   requires no network font, and cannot intercept Study Room interactions. */
+body.study-room-page .slr-room-name-watermark{
+  position:fixed;
+  z-index:0;
+  top:clamp(104px,12.4vh,140px);
+  right:clamp(35px,5.4vw,94px);
+  width:min(510px,38vw);
+  max-width:calc(100vw - 60px);
+  display:flex;flex-direction:column;align-items:flex-end;
+  gap:3px;margin:0;
+  color:color-mix(in srgb,var(--room-accent) 72%,var(--room-text) 28%);
+  opacity:.22;
+  text-align:right;
+  pointer-events:none;user-select:none;
+  -webkit-user-select:none;
+  font-family:"Bahnschrift SemiCondensed","Bahnschrift","Aptos Display",
+    "Segoe UI Variable Display","Nirmala UI",sans-serif;
+  filter:drop-shadow(0 0 12px color-mix(in srgb,var(--room-accent) 24%,transparent));
+}
+body.study-room-page .slr-room-name-watermark .slr-room-name-brand{
+  display:block;
+  font-size:clamp(.75rem,1.05vw,1.04rem);
+  font-weight:760;
+  letter-spacing:.35em;
+  line-height:1.15;
+  text-transform:uppercase;
+}
+body.study-room-page .slr-room-name-watermark .slr-room-name-title{
+  display:block;
+  font-size:clamp(1.65rem,2.6vw,2.75rem);
+  font-weight:780;
+  letter-spacing:-.045em;
+  line-height:1.05;
+  white-space:nowrap;
+}
+body.study-room-page[data-room-mode="light"] .slr-room-name-watermark{
+  opacity:.16;
+}
+body.study-room-page[data-room-doodles="off"] .slr-room-name-watermark{
+  display:none;
+}
+/* The watermark is purely ornamental. At smaller widths, clear the space
+   for the mode/theme controls instead of covering them. */
+@media(max-width:1160px){
+  body.study-room-page .slr-room-name-watermark{display:none}
+}
+@media(prefers-reduced-transparency:reduce){
+  body.study-room-page .slr-room-name-watermark{filter:none}
+}

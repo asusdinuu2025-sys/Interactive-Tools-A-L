@@ -1,7 +1,7 @@
 /* Theme-aware StudyLab Mini Timer: in-page, independent and Picture-in-Picture.
    Appearance only: all timer authority, heartbeats and RPCs are unchanged. */
 :root{--mini-base:#0b1220;--mini-ink:#edf5ff;--mini-muted:#b0c6e0;--mini-accent:#4dd8f0;}
-:root[data-room-theme="midnight-blue"]{--mini-base:#0b1220;--mini-ink:#edf5ff;--mini-muted:#b0c6e0;--mini-accent:#4dd8f0;}
+:root[data-room-theme="midnight-blue"]{--mini-base:#0b1030;--mini-ink:#edf0ff;--mini-muted:#adb9e4;--mini-accent:#838cff;}
 :root[data-room-theme="charcoal"]{--mini-base:#0b0b0d;--mini-ink:#f3f3f5;--mini-muted:#bfc0c5;--mini-accent:#c9cdd7;}
 :root[data-room-theme="mint"]{--mini-base:#f2f5fa;--mini-ink:#202938;--mini-muted:#566273;--mini-accent:#426ac4;}
 :root[data-room-theme="pinky"][data-room-mode="light"]{--mini-base:#fff0f6;--mini-ink:#492238;--mini-muted:#80516a;--mini-accent:#c83e80;}
@@ -20,6 +20,15 @@ body.study-room-page {
   --mini-ink:var(--room-text,#edf5ff);
   --mini-muted:var(--room-muted,#b0c6e0);
   --mini-accent:var(--room-accent,#4dd8f0);
+}
+/* Midnight Blue alone gets a deep indigo timer. Ocean keeps its aqua glass.
+   Both the in-page fallback and the independent PiP/standalone windows use
+   these same theme tokens; there are no timer/heartbeat logic changes. */
+body.study-room-page[data-room-theme="midnight-blue"]{
+  --mini-base:#0b1030;
+  --mini-ink:#edf0ff;
+  --mini-muted:#adb9e4;
+  --mini-accent:#838cff;
 }
 /* Standalone and PiP windows do not inherit the Study Room document CSS. */
 body.sl-mini-window {

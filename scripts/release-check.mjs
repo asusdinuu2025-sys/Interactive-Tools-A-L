@@ -216,6 +216,13 @@ if(profileRoomMiniTests.status!==0){
     (profileRoomMiniTests.stderr||profileRoomMiniTests.stdout||"node test failed"));
 }
 
+// Midnight Blue mini timer color and non-interactive themed Study Room watermark.
+const miniWatermarkTests=spawnSync(process.execPath,["scripts/studylab-mini-watermark-check.mjs"],{encoding:"utf8"});
+if(miniWatermarkTests.status!==0){
+  fail("StudyLab mini timer and watermark checks failed:\n"+
+    (miniWatermarkTests.stderr||miniWatermarkTests.stdout||"Mini timer/watermark test failed"));
+}
+
 // Seven requested StudyLab lifecycle and compact layout regressions.
 const lifecycleTests=spawnSync(process.execPath,["scripts/studylab-lifecycle-check.mjs"],{encoding:"utf8"});
 if(lifecycleTests.status!==0){
