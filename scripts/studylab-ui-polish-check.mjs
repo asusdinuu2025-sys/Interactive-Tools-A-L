@@ -93,8 +93,8 @@ assert.doesNotMatch(addedCornerStyles,/opacity:calc\(var\(--slr-art-opacity\) \*
 for(const html of [roomHtml,homeHtml]){
   assert.match(html,/studylab-profile-view\.js\?v=20261115-inline-bio-v5/);
   assert.match(html,/studylab-follow\.css\?v=20261115-inline-bio-v5/);
-  assert.match(html,/chat\.css\?v=20261115-visible-reacted-v6/);
-  assert.match(html,/chat\.js\?v=20261115-visible-reacted-v6/);
+  assert.match(html,/chat\.css\?v=20261115-mobile-chat-header-v7/);
+  assert.match(html,/chat\.js\?v=20261115-mobile-chat-header-v7/);
   assert.match(html,/studylab-avatar\.js\?v=20261115-uuid-fixed-v5/,
     "Working photo renderer must stay on its tested version");
 }

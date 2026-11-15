@@ -62,6 +62,17 @@ assert.match(chatCss,/\.sl-home-sidebar\.is-collapsed/);
 assert.match(chatCss,/left:108px!important/);
 assert.match(chatCss,/@media \(max-width:800px\)/);
 assert.match(chat,/setExpanded\(!isExpanded\)/);
+// Mobile Home Chat must begin below the measured floating Home header
+// in both compact and expanded modes, even on narrow wrapped headers.
+assert.match(chat,/mobileHomeHeader\.getBoundingClientRect\(\)\.bottom/);
+assert.match(chat,/Math\.max\(82,Math\.ceil\(headerBottom\+12\)\)/);
+assert.match(chat,/new ResizeObserver\(syncMobileChatHeaderOffset\)\.observe\(mobileHomeHeader\)/);
+assert.match(chat,/if \(open\) \{\s*syncMobileChatHeaderOffset\(\)/);
+assert.match(chatCss,/@media \(max-width:760px\)\{/);
+assert.match(chatCss,/top:var\(--sl-chat-mobile-top,82px\)!important/);
+assert.match(chatCss,/height:auto!important;\s*max-height:none!important;\s*min-height:0!important/);
+assert.match(chatCss,/body:not\(\.study-room-page\) \.study-chat-panel:not\(\.is-expanded\)\{\s*bottom:calc\(68px \+ env\(safe-area-inset-bottom, 0px\)\)!important/);
+assert.match(chatCss,/body:not\(\.study-room-page\) \.study-chat-panel\.is-expanded\{\s*bottom:calc\(8px \+ env\(safe-area-inset-bottom, 0px\)\)!important/);
 
 // Moderator rights are DB-enforced, never based on an editable email string.
 assert.match(chat,/let isChatModerator = false/);
@@ -94,8 +105,8 @@ assert.match(socialMigration,/create table if not exists public\.studylab_social
 assert.doesNotMatch(moderators,/delete from public\.studylab_social_posts/i);
 
 for(const html of [home,room]){
-  assert.match(html,/chat\.js\?v=20261115-visible-reacted-v6/);
-  assert.match(html,/chat\.css\?v=20261115-visible-reacted-v6/);
+  assert.match(html,/chat\.js\?v=20261115-mobile-chat-header-v7/);
+  assert.match(html,/chat\.css\?v=20261115-mobile-chat-header-v7/);
   assert.match(html,/studylab-avatar\.js\?v=20261115-uuid-fixed-v5/);
 }
 assert.match(home,/studylab-social\.js\?v=20261115-social-likes-only-v3/);

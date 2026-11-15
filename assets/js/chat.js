@@ -100,6 +100,21 @@
 
   const button = root.querySelector("[data-chat-button]");
   const panel = root.querySelector("[data-chat-panel]");
+  // The fixed Home top bar can wrap on narrow phones. Measure its actual
+  // bottom edge so the Chat title never sits behind the header.
+  const mobileHomeHeader = isHomePage ? document.querySelector("header.site-header") : null;
+  function syncMobileChatHeaderOffset(){
+    if(!mobileHomeHeader || window.innerWidth>760)return;
+    const headerBottom = mobileHomeHeader.getBoundingClientRect().bottom;
+    panel.style.setProperty("--sl-chat-mobile-top", Math.max(82,Math.ceil(headerBottom+12))+"px");
+  }
+  if(mobileHomeHeader){
+    syncMobileChatHeaderOffset();
+    window.addEventListener("resize",syncMobileChatHeaderOffset,{passive:true});
+    if(typeof ResizeObserver!=="undefined"){
+      new ResizeObserver(syncMobileChatHeaderOffset).observe(mobileHomeHeader);
+    }
+  }
   const closeButton = root.querySelector("[data-chat-close]");
   const expandButton = root.querySelector("[data-chat-expand]");
   const list = root.querySelector("[data-chat-list]");
@@ -863,6 +878,7 @@
     button.classList.toggle("is-open", open);
 
     if (open) {
+      syncMobileChatHeaderOffset();
       window.dispatchEvent(new Event("studylab-chat-open"));
       closeQuickAccess();
       setUnread(0);

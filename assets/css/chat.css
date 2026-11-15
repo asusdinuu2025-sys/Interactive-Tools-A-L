@@ -1309,3 +1309,26 @@ body.study-room-page[data-room-mode="light"] .study-chat-message .study-chat-mes
 body.study-room-page[data-room-mode="light"] .study-chat-message .study-chat-react-toggle:hover{
   color:#1476ae!important;
 }
+
+
+
+/* Phone-only Home Chat clearance. The Home bar is fixed above this panel
+   and can wrap to more than 60px; JS measures its real bottom edge.
+   Do not change Study Room Chat or the desktop left-sidebar positioning. */
+@media (max-width:760px){
+  body:not(.study-room-page) .study-chat-panel:not(.is-expanded),
+  body:not(.study-room-page) .study-chat-panel.is-expanded{
+    top:var(--sl-chat-mobile-top,82px)!important;
+    height:auto!important;
+    max-height:none!important;
+    min-height:0!important;
+  }
+  /* Compact Chat keeps its space above the floating launcher. */
+  body:not(.study-room-page) .study-chat-panel:not(.is-expanded){
+    bottom:calc(68px + env(safe-area-inset-bottom, 0px))!important;
+  }
+  /* Expanded Chat gains height but still clears the Home top bar. */
+  body:not(.study-room-page) .study-chat-panel.is-expanded{
+    bottom:calc(8px + env(safe-area-inset-bottom, 0px))!important;
+  }
+}
