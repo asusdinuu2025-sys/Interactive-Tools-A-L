@@ -161,7 +161,8 @@ const navLinks=[...document.querySelectorAll("[data-room-nav]")];navLinks.forEac
 function renderSessionHistory(){
  const target=$("slSessionHistory");if(!target)return;target.replaceChildren();
  if(!cloudSessions.length){const p=document.createElement("p");p.className="sl-empty";p.textContent=cloudEnabled?"No confirmed cloud study sessions yet.":"Cloud history unavailable; your existing local tracking is preserved.";target.append(p);return;}
- for(const row of cloudSessions.slice(0,25)){
+ // Show only the latest five cloud sessions here. Export CSV retains full history.
+ for(const row of cloudSessions.slice(0,5)){
   const line=document.createElement("div");line.className="sl-row";
   const name=document.createElement("span");name.className="sl-row-name";name.textContent=row.subject||"Other";
   const date=document.createElement("span");date.textContent=new Date(row.ended_at).toLocaleDateString("en-GB",{timeZone:"Asia/Colombo",month:"short",day:"numeric",year:"numeric"});

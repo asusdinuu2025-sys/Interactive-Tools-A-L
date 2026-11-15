@@ -70,15 +70,14 @@
     occupancyNodes.forEach(node => { node.textContent = message; });
   }
   function renderOccupancy(rows) {
-    // Count only students who are actively studying with a recent heartbeat.
-    // Students marked away or paused do not count as "studying now".
-    const now = Date.now();
+    // Exactly match the count shown by Live Study Room's renderPeople():
+    // studying students with heartbeats, plus active sessions marked Away.
     const present = new Set();
     for (const row of rows || []) {
-      if (!row?.user_id || !row.is_studying || row.session_presence_state === "away") continue;
-      const beat = Date.parse(row.last_heartbeat_at || "");
-      if (!Number.isFinite(beat) || now - beat > 90000 || now - beat < -90000) continue;
-      present.add(row.user_id);
+      if (!row?.user_id) continue;
+      const shownInRoom = Boolean(row.is_studying && row.last_heartbeat_at) ||
+        Boolean(row.session_active && row.session_presence_state === "away");
+      if (shownInRoom) present.add(row.user_id);
     }
     const count = present.size;
     setOccupancy(count === 0
