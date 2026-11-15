@@ -686,3 +686,16 @@ body.study-room-page[data-room-theme] .sl-pv-list-dialog .sl-pv-list-rows{
  .sl-pv-list-backdrop .sl-pv-list-dialog{height:min(430px,calc(100dvh - 32px))}
 }
 @media(prefers-reduced-motion:reduce){.sl-pv-list-dialog{animation:none!important}}
+
+
+.sl-pv-list-dialog .sl-pv-list-user{justify-content:flex-start}
+.sl-pv-list-dialog .sl-pv-list-user > svg:last-child{margin-left:auto;flex:0 0 16px}
+.sl-pv-list-dialog .sl-pv-list-avatar {
+  position:relative;display:grid;place-items:center;isolation:isolate;overflow:hidden;
+  width:38px;height:38px;flex:0 0 38px;border:2px solid #4bbcff;border-radius:50%;
+  color:#4bbcff;background:rgba(91,184,247,.09);
+  box-shadow:0 0 7px rgba(73,186,255,.37);
+}
+.sl-pv-list-dialog .sl-pv-list-avatar-female{border-color:#ff67b7;color:#ff67b7;box-shadow:0 0 7px rgba(255,103,183,.36)}
+.sl-pv-list-avatar > svg{width:24px;height:24px;stroke:currentColor;stroke-width:1.75;fill:none}
+.sl-pv-list-avatar > .sl-avatar-photo{top:2px;left:2px;width:calc(100% - 4px);height:calc(100% - 4px)}
