@@ -2000,5 +2000,112 @@
     setExpression(pick(profile().idleExpressions), 850, true);
   }
 
+
+  /* Adaptive pet brain v2. Non-destructive extension to the existing
+     local memory, expressions, reactions, eye movement and goal celebration.
+     StudyLab Auth supplies the name; no user data is sent to an external AI. */
+  const PET_VISIT_PREFIX="studylab-pet-visit-v2:";
+  let lastSectionReactionAt=0;
+  let lastSectionId="";
+  async function welcomeKnownStudent() {
+    try {
+      const account=window.StudyLabAccount;
+      if (!account?.ready) return;
+      await account.ready;
+      const user=account.getUser?.();
+      if(!user?.id || user.is_anonymous)return;
+      const profile=await account.getProfile().catch(()=>null);
+      const displayName=String(profile?.display_name||account.getGoogleName?.()||"Student")
+        .trim().replace(/\s+/g," ");
+      const name=/^Student\d{4}$/.test(displayName) ? "Student"
+        : (displayName.split(" ")[0]||"Student").slice(0,22);
+      const key=PET_VISIT_PREFIX+user.id;
+      const time=now();
+      let previous=null;
+      try{
+        previous=JSON.parse(localStorage.getItem(key)||"null");
+      }catch(_){}
+      const earlier=Number(previous?.lastSeen)||0;
+      const since=earlier ? time-earlier : Infinity;
+      const visits=Math.min(99999,Math.max(0,Number(previous?.visits)||0)+1);
+      try{
+        localStorage.setItem(key,JSON.stringify({
+          name,visits,lastSeen:time,lastSection:lastSectionId||previous?.lastSection||null
+        }));
+      }catch(_){}
+      // A quick Home <-> Study Room navigation should not greet repeatedly.
+      if(since < 3*60*1000 || !state.enabled || !state.bubbleEnabled)return;
+      let greeting="";
+      const localHour=Number(new Intl.DateTimeFormat("en-US",{
+        timeZone:"Asia/Colombo",hour:"2-digit",hourCycle:"h23"
+      }).format(new Date()));
+      const timeOfDay=localHour<12?"morning":localHour<17?"afternoon":"evening";
+      if(!earlier){
+        greeting="Hey "+name+"! Welcome to StudyLab. ✨";
+      }else if(since >= 24*60*60*1000){
+        greeting="Welcome back, "+name+"! Ready for another study day? 🌟";
+      }else if(since >= 40*60*1000){
+        greeting="Good "+timeOfDay+", "+name+"! Let's find our rhythm. ✨";
+      }else {
+        greeting="Back again, "+name+"? Let's explore. 🔍";
+      }
+      setTimeout(()=>{
+        if(!state.enabled || !state.bubbleEnabled || document.hidden) return;
+        if(state.sleeping)wake();
+        setExpression("happy",1500,true);
+        showThought(greeting,3250);
+        if(!reducedMotion)triggerReactionAnimation(850);
+      },1300);
+    }catch(error){
+      console.info("Personal pet greeting unavailable:",error?.message||error);
+    }
+  }
+  const sectionThoughts=[
+    [/timer|focus|session|study.room/i, ["⏱ Focus time. Your progress starts here.","🎯 Small sessions build momentum.","⏳ Ready when you are."]],
+    [/leaderboard|ranking|rank|crown/i, ["🏆 The board is moving. Keep your own pace.","📊 Rankings are live. Consistency is the interesting part.","✨ Every session counts."]],
+    [/analytics|history|progress|streak/i, ["📈 Your study history tells a story.","🧠 Patterns help us plan the next session.","📅 One focused day at a time."]],
+    [/social|community|following|followers/i, ["💬 Community time. Share something useful.","🤝 Study partners make a difference.","✨ Time to see what everyone is learning."]],
+    [/simulat|practical|experiment|lab/i, ["🧪 Experiment mode. Change one variable.","⚗️ Discover what the model actually shows.","🔬 Try a prediction before clicking."]],
+    [/paper|exam|question/i, ["📚 Practice first, confidence follows.","📝 One question at a time.","🎯 A clear answer beats a rushed one."]],
+    [/telegram|resource|channel|lesson/i, ["📚 Find a resource you can actually use.","🔎 Choose quality over quantity.","💡 A useful lesson can save an hour."]],
+    [/home|overview|dashboard/i, ["🏠 Back at your StudyLab dashboard.","✨ Another chance to make progress.","🌤 Let's see what today brings."]]
+  ];
+  function contextSectionReaction(event){
+    if(!state.enabled || !state.bubbleEnabled || document.hidden)return;
+    const target=event.target?.closest?.(
+      "[data-room-nav],.sl-nav-link,.home-sidebar a,.home-sidebar button,[data-home-nav],[data-sidebar-nav]"
+    );
+    if(!target || character.contains(target))return;
+    const href=target.getAttribute("href")||"";
+    const section=(href+" "+(target.getAttribute("aria-label")||"")+" "+(target.textContent||""))
+      .toLowerCase().slice(0,110);
+    if(!section)return;
+    const timestamp=now();
+    if(timestamp-lastSectionReactionAt<4100 || section===lastSectionId && timestamp-lastSectionReactionAt<15000)return;
+    const matched=sectionThoughts.find(([pattern])=>pattern.test(section));
+    if(!matched)return;
+    lastSectionReactionAt=timestamp;lastSectionId=section;
+    state.brain.lastTopic=section.slice(0,45);
+    setExpression(pick(["curious","focused","happy","alert"]),1050,true);
+    showThought(avoidRepeatedThought(matched[1]),1800);
+    if(!reducedMotion)triggerReactionAnimation(650);
+  }
+  document.addEventListener("click",contextSectionReaction,{passive:true});
+  window.addEventListener("studylab-profile-updated",event=>{
+    // When a student edits their name, use that name on the next greeting.
+    if(!event.detail?.display_name)return;
+    const id=window.StudyLabAccount?.getUser?.()?.id;
+    if(!id)return;
+    const key=PET_VISIT_PREFIX+id;
+    try{
+      const saved=JSON.parse(localStorage.getItem(key)||"null");
+      if(saved){
+        saved.name=String(event.detail.display_name).trim().split(/\s+/)[0].slice(0,22);
+        localStorage.setItem(key,JSON.stringify(saved));
+      }
+    }catch(_){}
+  });
+  welcomeKnownStudent();
+
   requestAnimationFrame(lifeLoop);
 })();
