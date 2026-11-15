@@ -677,6 +677,18 @@
       // Record a genuine Study Room visit. This is separate from broad
       // updated_at timestamps used by housekeeping and ranking refreshes.
       await callRpc('study_room_record_visit');
+      // Returning to a visible room counts as visiting again, even when a
+      // tab has been parked in the background for a long time. Recreate an
+      // expired progress row if the 30-day cleanup already ran.
+      document.addEventListener('visibilitychange', async () => {
+        if(document.hidden || !client || !userId)return;
+        try {
+          await callRpc('study_room_ensure_profile');
+          await callRpc('study_room_record_visit');
+        } catch(error) {
+          console.warn('Could not update Study Room last visit', error);
+        }
+      });
       await loadRows();
       startRoomPresenceLifecycle();
       client.channel('study-room-live')
