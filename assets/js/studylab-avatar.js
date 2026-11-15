@@ -43,12 +43,15 @@
     img.className = "sl-avatar-photo";
     img.alt = "";
     img.decoding = "async";
-    img.loading = "lazy";
+    // A lazy image with hidden=true may NEVER be fetched, because the browser
+    // waits for it to be visible while our onload waits for the fetch.
+    // Keep the original SVG visible until the eager photo has loaded.
+    img.loading = "eager";
     img.referrerPolicy = "no-referrer";
-    img.hidden = true;
+    img.style.opacity = "0";
     img.onload = () => {
       if (node.dataset.slAvatarUrl !== url) return;
-      img.hidden = false;
+      img.style.opacity = "1";
       node.classList.add("sl-avatar-has-image");
     };
     img.onerror = () => {
