@@ -119,6 +119,12 @@ for (const file of syntaxFiles) {
 }
 
 
+const uiPolishTests = spawnSync(process.execPath, ["scripts/studylab-ui-polish-check.mjs"], {encoding:"utf8"});
+if (uiPolishTests.status !== 0) {
+  fail("StudyLab UI polish regression checks failed:\n" +
+    (uiPolishTests.stderr || uiPolishTests.stdout || "UI layout check failed"));
+}
+
 const chatTests = spawnSync(process.execPath, ["scripts/studylab-chat-interactions-check.mjs"], {encoding:"utf8"});
 if (chatTests.status !== 0) {
   fail("StudyLab Chat actions tests failed:\n" +
