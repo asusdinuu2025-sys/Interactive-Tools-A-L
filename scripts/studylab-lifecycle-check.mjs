@@ -21,11 +21,12 @@ assert.match(home,/const shownInRoom = Boolean\(row\.is_studying && row\.last_he
 assert.ok(!home.includes("now - beat > 90000"),"Old Home-only 90-second cutoff must be removed");
 assert.ok(home.includes("occupancyNodes.forEach"),"Both Home room cards must use one count");
 
-// 2. Five visible rows, full CSV export unchanged.
+// 2. Keep the five visible history rows without the removed CSV export.
 assert.ok(analytics.includes("cloudSessions.slice(0,5)"),"History preview must show at most 5 rows");
-assert.ok(analytics.includes('anchor.download="studylab-study-history.csv"'));
-assert.ok(analytics.includes('for(const [day,subjects] of Object.entries(daySource())'),
-  "CSV export must still include full history");
+assert.ok(analytics.includes("renderSessionHistory()"),"Recent session history must still render");
+assert.ok(!analytics.includes("slHistoryExport"),"Removed CSV button must not return");
+assert.ok(!analytics.includes("exportStudyHistory"),"Removed CSV export handler must not return");
+assert.ok(!analytics.includes('anchor.download="studylab-study-history.csv"'));
 assert.ok(!analytics.includes("cloudSessions.slice(0,25)"));
 
 // 3. Long names and five-phone-item nav cannot resize or wrap cards.
@@ -101,4 +102,4 @@ assert.ok(progress.includes("'40 18 * * *'"),"Daily cleanup at 00:10 Sri Lanka t
 assert.ok(room.includes("await callRpc('study_room_record_visit')"),
   "Entering the Live Study Room must update visit timestamp");
 
-console.log("StudyLab occupancy, CSV preview, mobile/nav, full post/account deletion and 30-day progress checks passed.");
+console.log("StudyLab occupancy, five-row history, mobile/nav, full post/account deletion and 30-day progress checks passed.");
