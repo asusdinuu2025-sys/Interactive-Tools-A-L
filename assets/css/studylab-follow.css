@@ -799,3 +799,41 @@ body.study-room-page[data-room-theme] .sl-pv-bio-summary{
   .sl-pv-avatar-wrap{width:72px;height:72px;flex-basis:72px}
   .sl-pv-dialog .sl-pv-actions .sl-pv-delete{min-height:31px}
 }
+
+
+/* Fix low-contrast camera control in the light glass View Profile card.
+   Keep it outside the photo, with a clear camera glyph and soft accent ring. */
+.sl-pv-backdrop .sl-pv-avatar-toggle{
+  right:-8px;bottom:-5px;
+  width:30px;height:30px;
+  color:#ebf8ff;
+  background:linear-gradient(145deg,rgba(44,111,171,.96),rgba(23,70,122,.94));
+  border:1.5px solid rgba(160,221,255,.80);
+  border-radius:50%;
+  box-shadow:0 3px 12px rgba(12,42,79,.20),0 0 0 2px rgba(137,211,255,.19);
+  -webkit-backdrop-filter:blur(12px);
+  backdrop-filter:blur(12px);
+}
+.sl-pv-backdrop .sl-pv-avatar-toggle svg{
+  display:block;
+  width:16px;height:16px;
+  stroke:currentColor;stroke-width:2.2;
+  fill:none;
+  filter:none;
+}
+.sl-pv-backdrop .sl-pv-avatar-toggle:hover,
+.sl-pv-backdrop .sl-pv-avatar-toggle[aria-expanded="true"]{
+  background:linear-gradient(145deg,rgba(40,139,205,.98),rgba(32,107,173,.98));
+  border-color:rgba(188,237,255,.96);
+}
+html[data-theme="light"] body:not(.study-room-page) .sl-pv-backdrop .sl-pv-avatar-toggle,
+body.study-room-page[data-room-mode="light"] .sl-pv-backdrop .sl-pv-avatar-toggle{
+  color:#14629b!important;
+  background:linear-gradient(145deg,rgba(255,255,255,.98),rgba(218,240,255,.96))!important;
+  border-color:rgba(77,169,228,.70)!important;
+  box-shadow:0 3px 12px rgba(36,98,148,.14),0 0 0 2px rgba(114,189,238,.22);
+}
+html[data-theme="light"] body:not(.study-room-page) .sl-pv-backdrop .sl-pv-avatar-toggle:hover,
+body.study-room-page[data-room-mode="light"] .sl-pv-backdrop .sl-pv-avatar-toggle:hover{
+  background:rgba(191,229,255,.98)!important;
+}
