@@ -328,6 +328,18 @@
           "<div class='room-person-card-name-row'><div class='room-person-card-name'></div><span class='room-person-card-rank' title='Daily rank among all Study Room members'></span></div>" +
           "<div class='room-person-card-subject'></div><div class='room-person-card-divider'></div>" +
           "<div class='room-person-card-time-label'>Today's study time</div><div class='room-person-card-time'></div>";
+        const nameTrigger=card.querySelector(".room-person-card-name");
+        nameTrigger.classList.add("slr-profile-name-trigger");
+        nameTrigger.setAttribute("role","button");
+        nameTrigger.tabIndex=0;
+        const showRoomProfile=()=>window.StudyLabProfileView?.open({userId:id});
+        nameTrigger.addEventListener("click",showRoomProfile);
+        nameTrigger.addEventListener("keydown",event=>{
+          if(event.key==="Enter"||event.key===" "){
+            event.preventDefault();
+            showRoomProfile();
+          }
+        });
         const neonPalette = [['#45ddff','#087da0'],['#b79aff','#7040c7'],['#55edb0','#08794e'],['#ffd166','#9a5b00'],['#ff83c8','#b21b70'],['#ff8b6b','#b83b22']];
         let hash = 0;
         for (let i=0; i<id.length; i++) hash = (hash*31 + id.charCodeAt(i)) | 0;
@@ -373,6 +385,7 @@
         r.session_presence_state === 'away' ? 'Away' : 'Studying now');
       const liveName = card.querySelector('.room-person-card-name');
       setLiveText(liveName, r.display_name || 'Student');
+      liveName.setAttribute('aria-label','View profile of '+(r.display_name||'Student'));
       window.StudyLabNameMark?.decorate(liveName, id);
       setLiveText(card.querySelector('.room-person-card-subject'), r.subject || '—');
       const saved = r.today_date === today ? Number(r.today_seconds) || 0 : 0;
