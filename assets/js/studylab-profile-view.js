@@ -36,7 +36,8 @@
       trash:"M4 7H20 M9 7V4H15V7 M7 7L8 20H16L17 7 M10 11V17 M14 11V17",
       user:"M12 12A4 4 0 1 0 12 4A4 4 0 0 0 12 12ZM4 21V19Q4 14 12 14T20 19V21",
       lock:"M6 11V8A6 6 0 0 1 18 8V11 M5 11H19V21H5Z",
-      arrow:"M8 5 15 12 8 19"
+      arrow:"M8 5 15 12 8 19",
+      camera:"M3 7H7L9 4H15L17 7H21V20H3Z M12 17A4 4 0 1 0 12 9A4 4 0 0 0 12 17"
     };
     path.setAttribute("d", variants[name] || variants.user);
     svg.append(path);
@@ -57,6 +58,9 @@
   let nameNode = null;
   let avatarNode = null;
   let avatarEditor = null;
+  let avatarToggle = null;
+  let bioSummary = null;
+  let bioEditToggle = null;
   let avatarPick = null;
   let avatarRemove = null;
   let avatarFile = null;
@@ -155,18 +159,32 @@
     nameNode.id = "slPvHeading";
     usernameNode = element("p","sl-pv-username","@student");
     titleWrap.append(nameNode,usernameNode);
-    identity.append(avatarNode,titleWrap);
+    const avatarWrap=element("div","sl-pv-avatar-wrap");
+    avatarToggle=button("sl-pv-avatar-toggle","","Edit profile picture");
+    avatarToggle.append(icon("camera"));
+    avatarToggle.hidden=true;
+    avatarToggle.setAttribute("aria-expanded","false");
+    avatarToggle.setAttribute("aria-controls","slPvAvatarEditor");
+    avatarWrap.append(avatarNode,avatarToggle);
+    identity.append(avatarWrap,titleWrap);
 
     // Profile picture editing lives ONLY in this View Profile card.
     // The normal Edit Profile forms never receive upload controls.
     avatarEditor = element("section","sl-pv-avatar-editor");
+    avatarEditor.id="slPvAvatarEditor";
     avatarEditor.hidden = true;
+    avatarToggle.addEventListener("click",()=>{
+      if(avatarBusy || !accountUser || viewedUserId!==accountUser.id)return;
+      avatarEditor.hidden=!avatarEditor.hidden;
+      avatarToggle.setAttribute("aria-expanded",String(!avatarEditor.hidden));
+      if(!avatarEditor.hidden)avatarPick.focus();
+    });
     const avatarActions = element("div","sl-pv-avatar-actions");
     // Native input inside a label: mobile/Edge browsers can open the picker
     // without relying on a scripted click against a display:none input.
     avatarPick = element("label","sl-pv-avatar-upload","Upload photo");
     avatarPick.tabIndex = 0;
-    avatarRemove = button("sl-pv-avatar-remove","Remove photo");
+    avatarRemove = button("sl-pv-avatar-remove","Use default avatar");
     avatarRemove.disabled = true;
     avatarFile = element("input","sl-pv-avatar-input");
     avatarFile.type = "file";
@@ -242,10 +260,27 @@
 
     bioNode = element("p","sl-pv-description","No bio added yet.");
     bioNode.id="slPvDescription";
+    bioSummary=element("section","sl-pv-bio-summary");
+    const bioSummaryHeading=element("div","sl-pv-bio-summary-heading");
+    bioSummaryHeading.append(element("strong","","Bio"));
+    bioEditToggle=button("sl-pv-bio-edit-toggle","","Edit Bio");
+    bioEditToggle.append(icon("edit"),element("span","","Edit"));
+    bioEditToggle.hidden=true;
+    bioEditToggle.setAttribute("aria-controls","slPvBioEditor");
+    bioEditToggle.setAttribute("aria-expanded","false");
+    bioSummaryHeading.append(bioEditToggle);
+    bioSummary.append(bioSummaryHeading,bioNode);
+    bioEditToggle.addEventListener("click",()=>{
+      if(bioSaving || !accountUser || viewedUserId!==accountUser.id)return;
+      bioEditor.hidden=!bioEditor.hidden;
+      bioEditToggle.setAttribute("aria-expanded",String(!bioEditor.hidden));
+      if(!bioEditor.hidden)bioInput.focus();
+    });
 
     // The owner edits the bio here, not in the general profile form.
     // Other students only ever see the safe, read-only public text.
     bioEditor = element("div","sl-pv-bio-editor");
+    bioEditor.id="slPvBioEditor";
     bioEditor.hidden = true;
     const bioLabel = element("label","sl-pv-bio-label","My Bio");
     bioLabel.htmlFor = "slPvBioInput";
@@ -257,7 +292,7 @@
     bioInput.placeholder = "A little about your studies…";
     bioInput.setAttribute("aria-describedby","slPvBioCount");
     const bioControls = element("div","sl-pv-bio-controls");
-    bioCount = element("span","sl-pv-bio-count","0 / 18 characters");
+    bioCount = element("span","sl-pv-bio-count","0 / 35 characters");
     bioCount.id="slPvBioCount";
     bioSave = createButton("sl-pv-bio-save","edit","Save Bio");
     bioSave.disabled = true;
@@ -269,10 +304,10 @@
 
     const updateBioWords=()=>{
       const count=Array.from(bioInput.value.trim()).length;
-      bioCount.textContent=count+" / 18 characters";
-      bioCount.classList.toggle("is-over-limit",count>18);
-      bioInput.setAttribute("aria-invalid",String(count>18));
-      bioSave.disabled=count>18 || bioSaving || !accountUser ||
+      bioCount.textContent=count+" / 35 characters";
+      bioCount.classList.toggle("is-over-limit",count>35);
+      bioInput.setAttribute("aria-invalid",String(count>35));
+      bioSave.disabled=count>35 || bioSaving || !accountUser ||
         viewedUserId!==accountUser.id;
       if(!bioStatus.hidden)bioStatus.hidden=true;
     };
@@ -291,7 +326,10 @@
         if(view.hidden || viewedUserId!==id)return;
         const saved=escText(profile?.bio);
         bioInput.value=saved;
-        bioCount.textContent=Array.from(saved).length+" / 18 characters";
+        bioNode.textContent=saved||"No bio added yet.";
+        bioCount.textContent=Array.from(saved).length+" / 35 characters";
+        bioEditor.hidden=true;
+        bioEditToggle.setAttribute("aria-expanded","false");
         bioStatus.textContent="Bio saved.";
         bioStatus.dataset.state="success";
         bioStatus.hidden=false;
@@ -345,7 +383,7 @@
     listPanel.setAttribute("aria-label","Student connections");
     listPanel.hidden=true;
     listBackdrop.append(listPanel);
-    dialog.append(header,identity,avatarEditor,bioNode,bioEditor,counts,actions,followAction,joined,viewStatus);
+    dialog.append(header,identity,avatarEditor,bioSummary,bioEditor,counts,actions,followAction,joined,viewStatus);
     view.append(dialog);
     document.body.append(view,listBackdrop);
     listBackdrop.addEventListener("pointerdown",event=>{
@@ -561,9 +599,15 @@
     listBackdrop.hidden=true;
     countButtons.forEach(node=>{node.querySelector(".sl-pv-count-number").textContent="—";});
     dialog.querySelector(".sl-pv-eyebrow").textContent=own?"STUDYLAB · MY PROFILE":"STUDYLAB · STUDENT PROFILE";
-    bioNode.hidden=own;
-    bioEditor.hidden=!own;
-    avatarEditor.hidden=!own;
+    bioNode.hidden=false;
+    bioNode.textContent="Loading bio…";
+    bioSummary.hidden=false;
+    bioEditToggle.hidden=!own;
+    bioEditToggle.setAttribute("aria-expanded","false");
+    bioEditor.hidden=true;
+    avatarToggle.hidden=!own;
+    avatarToggle.setAttribute("aria-expanded","false");
+    avatarEditor.hidden=true;
     avatarHasPhoto=false;
     avatarBusy=false;
     avatarPick.firstChild.textContent="Upload photo";
@@ -576,11 +620,11 @@
     bioInput.value="";
     bioInput.disabled=false;
     bioSave.disabled=true;
-    bioCount.textContent="0 / 18 characters";
+    bioCount.textContent="0 / 35 characters";
     bioCount.classList.remove("is-over-limit");
     bioStatus.hidden=true;
-    bioNode.textContent=own?"":"Loading bio…";
-    dialog.setAttribute("aria-describedby",own?"slPvBioLabel":"slPvDescription");
+    bioNode.textContent="Loading bio…";
+    dialog.setAttribute("aria-describedby","slPvDescription");
     dialog.querySelector(".sl-pv-actions").hidden=!own;
     followAction.hidden=own;
     followAction.replaceChildren();
@@ -602,11 +646,12 @@
       nameNode.textContent=escText(profile.display_name)||"Student";
       if(own){
         const saved=escText(profile.bio);
+        bioNode.textContent=saved||"No bio added yet.";
         bioInput.value=saved;
         const chars=Array.from(saved).length;
-        bioCount.textContent=chars+" / 18 characters";
-        bioCount.classList.toggle("is-over-limit",chars>18);
-        bioSave.disabled=chars>18;
+        bioCount.textContent=chars+" / 35 characters";
+        bioCount.classList.toggle("is-over-limit",chars>35);
+        bioSave.disabled=chars>35;
       }else{
         bioNode.textContent=escText(profile.bio)||"No bio added yet.";
       }
