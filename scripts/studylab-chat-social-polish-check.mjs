@@ -107,7 +107,7 @@ assert.doesNotMatch(moderators,/delete from public\.studylab_social_posts/i);
 for(const html of [home,room]){
   assert.match(html,/chat\.js\?v=20261115-mobile-chat-header-v7/);
   assert.match(html,/chat\.css\?v=20261115-mobile-chat-header-v7/);
-  assert.match(html,/studylab-avatar\.js\?v=20261115-uuid-fixed-v5/);
+  assert.match(html,/studylab-avatar\.js\?v=20261116-manual-crop-v1/);
 }
 assert.match(home,/studylab-social\.js\?v=20261115-social-likes-only-v3/);
 assert.match(home,/feed-drawer\.css\?v=20261115-social-likes-only-v3/);
