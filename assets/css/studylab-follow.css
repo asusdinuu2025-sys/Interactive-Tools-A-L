@@ -530,3 +530,159 @@ body.study-room-page[data-room-theme] .slr-profile-name-trigger:focus-visible{
 @media(prefers-reduced-motion:reduce){
   body.study-room-page[data-room-theme] .slr-profile-name-trigger{transition:none!important}
 }
+
+
+/* View Profile refinements: compact glass layout and themed, non-white scrollbars. */
+.sl-pv-backdrop .sl-pv-dialog {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(137,199,242,.42) transparent;
+  scrollbar-gutter: auto;
+  overflow-x:hidden;
+}
+.sl-pv-backdrop .sl-pv-dialog::-webkit-scrollbar,
+.sl-pv-list-dialog .sl-pv-list-rows::-webkit-scrollbar,
+.sl-pv-bio-input::-webkit-scrollbar {width:6px;height:6px}
+.sl-pv-backdrop .sl-pv-dialog::-webkit-scrollbar-track,
+.sl-pv-list-dialog .sl-pv-list-rows::-webkit-scrollbar-track,
+.sl-pv-bio-input::-webkit-scrollbar-track {background:transparent}
+.sl-pv-backdrop .sl-pv-dialog::-webkit-scrollbar-thumb,
+.sl-pv-list-dialog .sl-pv-list-rows::-webkit-scrollbar-thumb,
+.sl-pv-bio-input::-webkit-scrollbar-thumb {
+  background:rgba(137,199,242,.39);border-radius:99px;
+}
+.sl-pv-backdrop .sl-pv-dialog::-webkit-scrollbar-thumb:hover,
+.sl-pv-list-dialog .sl-pv-list-rows::-webkit-scrollbar-thumb:hover {
+  background:rgba(113,199,255,.69);
+}
+.sl-pv-dialog:not(.sl-pv-confirm-dialog){padding:clamp(17px,2.4vw,24px)}
+.sl-pv-dialog .sl-pv-identity{gap:6px;margin-top:4px}
+.sl-pv-dialog .sl-pv-avatar{width:76px;height:76px}
+.sl-pv-dialog .sl-pv-avatar svg{width:47px;height:47px}
+.sl-pv-avatar-editor{margin:0 0 7px!important;gap:5px!important}
+.sl-pv-avatar-editor .sl-pv-avatar-actions{gap:7px}
+.sl-pv-avatar-editor .sl-pv-avatar-actions button,
+.sl-pv-avatar-editor .sl-pv-avatar-actions label{
+  box-sizing:border-box;position:relative;
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:31px;padding:6px 12px;
+  border:1px solid rgba(149,213,255,.31);border-radius:10px;
+  background:rgba(112,189,241,.14);
+  color:inherit;font:700 11px/1.25 "Nirmala UI","Segoe UI",sans-serif;
+  cursor:pointer;transition:background .2s,border-color .2s;
+}
+.sl-pv-avatar-editor .sl-pv-avatar-actions label:hover{
+  background:rgba(113,194,255,.22);border-color:rgba(140,214,255,.55)
+}
+.sl-pv-avatar-editor .sl-pv-avatar-actions label:focus-within,
+.sl-pv-avatar-editor .sl-pv-avatar-actions label:focus-visible{outline:2px solid #87cfff;outline-offset:2px}
+.sl-pv-avatar-editor .sl-pv-avatar-actions label.is-disabled{opacity:.48;pointer-events:none}
+.sl-pv-avatar-editor .sl-pv-avatar-input{
+  display:block!important;position:absolute!important;inset:0!important;
+  width:100%!important;height:100%!important;opacity:0!important;
+  cursor:pointer!important;font-size:0!important;
+}
+.sl-pv-avatar-editor .sl-pv-avatar-note{font-size:10px;max-width:340px}
+.sl-pv-dialog .sl-pv-username{font-size:.77rem;margin:0}
+.sl-pv-dialog .sl-pv-name{
+  font-family:"Bahnschrift SemiBold","Bahnschrift","Arial Black","Nirmala UI",sans-serif;
+  font-weight:800;letter-spacing:.01em;
+}
+.sl-pv-dialog .sl-pv-counts{gap:9px}
+.sl-pv-dialog .sl-pv-count{
+  min-height:61px;padding:9px 8px;border-radius:15px;
+  font-family:"Bahnschrift SemiBold","Bahnschrift","Arial Black","Nirmala UI",sans-serif;
+  cursor:pointer;
+}
+.sl-pv-dialog .sl-pv-count-number{
+  font-size:20px;font-weight:850;line-height:1.05;font-variant-numeric:tabular-nums;
+}
+.sl-pv-dialog .sl-pv-count-label{
+  margin-top:3px;font-size:11px;font-weight:800;letter-spacing:.035em;
+}
+.sl-pv-dialog .sl-pv-actions{margin-top:10px;gap:9px}
+.sl-pv-dialog .sl-pv-actions button{min-height:39px;font-family:"Bahnschrift SemiBold","Bahnschrift","Nirmala UI",sans-serif}
+.sl-pv-dialog .sl-pv-joined{margin-top:13px}
+.sl-pv-dialog .sl-pv-bio-editor{padding:12px 13px;margin:9px 0 12px}
+.sl-pv-dialog .sl-pv-bio-input{min-height:55px;max-height:130px;scrollbar-color:rgba(137,199,242,.45) transparent;scrollbar-width:thin}
+.sl-pv-dialog .sl-pv-bio-controls{margin-top:7px}
+.sl-pv-dialog .sl-pv-bio-label{margin-bottom:5px}
+.sl-pv-dialog .sl-pv-description{margin:8px 0 12px}
+.sl-pv-list-backdrop {
+  position:fixed;inset:0;z-index:2147483090;
+  display:grid;place-items:center;padding:14px;
+  background:rgba(6,16,33,.49);
+  -webkit-backdrop-filter:blur(11px) saturate(135%);
+  backdrop-filter:blur(11px) saturate(135%);
+}
+.sl-pv-list-backdrop[hidden]{display:none!important}
+.sl-pv-list-backdrop .sl-pv-list-dialog {
+  box-sizing:border-box;
+  width:min(360px,100%);
+  height:min(470px,calc(100dvh - 48px));
+  max-height:calc(100dvh - 48px);
+  min-height:200px;
+  display:flex;flex-direction:column;overflow:hidden;
+  margin:0!important;padding:0;
+  border:1px solid rgba(168,218,255,.3);
+  border-radius:26px;
+  background:linear-gradient(150deg,rgba(69,111,157,.32),rgba(21,37,66,.55)),rgba(20,36,61,.74);
+  -webkit-backdrop-filter:blur(28px) saturate(155%);
+  backdrop-filter:blur(28px) saturate(155%);
+  color:#eaf7ff;
+  box-shadow:0 24px 70px rgba(0,10,31,.38),inset 0 1px 0 rgba(255,255,255,.13);
+  animation:sl-pv-dialog-in .23s ease-out both;
+  font-family:"Nirmala UI","Segoe UI",sans-serif;
+}
+.sl-pv-list-dialog .sl-pv-list-heading {
+  flex:0 0 auto;padding:17px 18px;
+  font-family:"Bahnschrift SemiBold","Bahnschrift","Nirmala UI",sans-serif;
+  font-size:17px;letter-spacing:.02em;
+  border-bottom:1px solid rgba(161,202,237,.21);
+}
+.sl-pv-list-dialog .sl-pv-list-close{
+  display:grid;place-items:center;width:30px;height:30px;
+  border:1px solid rgba(180,217,246,.22);border-radius:10px;
+  background:rgba(169,211,242,.08);font:700 20px/1 "Nirmala UI",sans-serif;
+}
+.sl-pv-list-dialog .sl-pv-list-rows{
+  flex:1;min-height:0;
+  display:flex;flex-direction:column;gap:9px;
+  padding:13px;overflow-y:auto;overscroll-behavior:contain;
+  scrollbar-width:thin;scrollbar-color:rgba(156,212,250,.39) transparent;
+}
+.sl-pv-list-dialog .sl-pv-list-user{
+  min-height:59px;flex:0 0 auto;
+  border:1px solid rgba(162,209,251,.15);border-radius:14px;
+  background:rgba(195,229,255,.065);
+  padding:10px 13px;
+}
+.sl-pv-list-dialog .sl-pv-list-user:hover{background:rgba(140,204,255,.15)}
+.sl-pv-list-dialog .sl-pv-list-identity strong{
+  font-family:"Bahnschrift SemiBold","Bahnschrift","Nirmala UI",sans-serif;font-size:13px
+}
+.sl-pv-list-dialog .sl-pv-list-identity small{font-size:11px}
+html[data-theme="light"] body:not(.study-room-page) .sl-pv-list-dialog {
+  color:#224563;
+  background:linear-gradient(145deg,rgba(255,255,255,.86),rgba(219,237,251,.70));
+  border-color:rgba(255,255,255,.87);
+}
+body.study-room-page[data-room-theme] .sl-pv-list-dialog {
+  color:var(--room-text)!important;
+  border-color:color-mix(in srgb,var(--room-accent) 37%,transparent);
+  background:color-mix(in srgb,var(--room-card) 87%,var(--room-page-bg));
+}
+body.study-room-page[data-room-theme] .sl-pv-list-dialog .sl-pv-list-rows{
+  scrollbar-color:color-mix(in srgb,var(--room-accent) 52%,transparent) transparent
+}
+.homepage-greeting-name {display:inline-flex!important;align-items:center;justify-content:center;gap:5px;vertical-align:middle}
+.homepage-greeting-name > .sl-name-mark {
+  display:inline-flex!important;align-self:center!important;
+  position:relative!important;top:-1px!important;transform:none!important;
+  margin:0 0 0 3px!important;vertical-align:middle!important
+}
+@media(max-width:480px){
+ .sl-pv-dialog:not(.sl-pv-confirm-dialog){padding:17px 13px}
+ .sl-pv-dialog .sl-pv-count{min-height:58px;padding:8px 5px}
+ .sl-pv-list-backdrop .sl-pv-list-dialog{height:min(430px,calc(100dvh - 32px))}
+}
+@media(prefers-reduced-motion:reduce){.sl-pv-list-dialog{animation:none!important}}
