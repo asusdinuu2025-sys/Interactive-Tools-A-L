@@ -1178,3 +1178,78 @@ body.study-room-page[data-room-mode="light"] .study-chat-message.own{
 @media (max-width:450px){
   .study-chat-list{padding-inline:17px!important}
 }
+
+
+/* November Chat final: shaped bubble corners, NO detached triangle/tail.
+   The shape is the bubble's own continuous rounded border. */
+.study-chat-message::after,
+.study-chat-message.own::after{
+  content:none!important;display:none!important;clip-path:none!important;
+}
+.study-chat-message:not(.own){
+  border-radius:17px 17px 17px 4px!important;
+}
+.study-chat-message.own{
+  border-radius:17px 17px 4px 17px!important;
+}
+/* Reactions live behind an explicit control, never four permanent buttons.
+   Click/tap works on desktop, touch and keyboard, without relying on hover. */
+.study-chat-reactions{
+  display:none!important;
+  margin-top:7px!important;
+  margin-bottom:3px;
+}
+.study-chat-message.is-reactions-open .study-chat-reactions{
+  display:flex!important;
+}
+.study-chat-message-foot-actions{
+  display:inline-flex;align-items:center;gap:11px;min-width:0;
+}
+.study-chat-react-toggle{
+  border:0;border-radius:7px;
+  padding:3px 4px;
+  background:transparent;color:var(--text-muted);
+  font:650 10px/1.3 "Nirmala UI","Segoe UI",sans-serif;
+  cursor:pointer;
+}
+.study-chat-react-toggle:hover,
+.study-chat-react-toggle[aria-expanded="true"]{
+  color:var(--accent-cyan,#67c9ef);
+  background:color-mix(in srgb,var(--room-accent,#69b9eb) 12%,transparent);
+}
+.study-chat-react-toggle:focus-visible{
+  outline:2px solid #67bfff;outline-offset:2px;
+}
+/* Day markers belong to the message stream, not to individual bubbles. */
+.study-chat-date-separator{
+  display:table;align-self:center;max-width:90%;
+  padding:6px 13px;margin:7px auto 5px;
+  border-radius:999px;
+  border:1px solid rgba(153,199,235,.20);
+  background:rgba(41,64,91,.77);
+  -webkit-backdrop-filter:blur(10px);
+  backdrop-filter:blur(10px);
+  box-shadow:0 3px 10px rgba(0,0,0,.10);
+  color:#dcecff;font:750 11px/1.25 "Nirmala UI","Segoe UI",sans-serif;
+  text-align:center;white-space:nowrap;
+  pointer-events:none;
+}
+html[data-theme="light"] .study-chat-date-separator,
+body.study-room-page[data-room-mode="light"] .study-chat-date-separator{
+  background:rgba(238,246,255,.88);color:#355b7e;
+  border-color:rgba(106,154,189,.28);
+}
+@media (max-width:450px){
+  .study-chat-message-foot-actions{gap:7px}
+  .study-chat-date-separator{font-size:10px;padding:5px 10px}
+}
+@media(prefers-reduced-transparency:reduce){
+  .study-chat-date-separator{
+    backdrop-filter:none;-webkit-backdrop-filter:none;
+    background:#263c55;
+  }
+  html[data-theme="light"] .study-chat-date-separator,
+  body.study-room-page[data-room-mode="light"] .study-chat-date-separator{
+    background:#ebf3fc;
+  }
+}
