@@ -308,10 +308,10 @@
     }
   }
   function refreshReactionUI() {
-    for(const [id] of messagesById){
-      const target=[...list.querySelectorAll(".study-chat-message")].find(el=>el.dataset.messageId===id);
-      const row=target?.querySelector(".study-chat-reactions");
-      if(row)messageReactions(id,row);
+    for(const article of list.querySelectorAll(".study-chat-message")){
+      const id=article.dataset.messageId;
+      const reactions=article.querySelector(".study-chat-reactions");
+      if(id && reactions)messageReactions(id,reactions);
     }
   }
 
@@ -420,6 +420,7 @@
     reply.type="button";reply.className="study-chat-message-reply";
     reply.textContent="↩ Reply";
     reply.addEventListener("click",()=>{
+      if(editTarget)input.value="";
       editTarget=null;replyTarget=row.id;
       showComposerContext();input.focus();chatFeedback("");
     });
@@ -758,7 +759,7 @@
           visibleMenu.hidden=true;
           visibleMenu.parentElement?.querySelector(".study-chat-message-more")
             ?.setAttribute("aria-expanded","false");
-        }else if(replyTarget||editTarget)clearComposerContext();
+        }else if(replyTarget||editTarget)clearComposerContext(true);
         else setOpen(false);
       }
     });
