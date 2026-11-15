@@ -16,6 +16,7 @@ const syntaxFiles = [
   "assets/js/studylab-pet-room.js",
   "assets/js/studylab-pet.js",
   "assets/js/profile.js",
+  "assets/js/studylab-announcements.js",
   "assets/js/feed-drawer.js",
   "assets/js/study-room-analytics.js",
   "assets/js/study-room-mini-standalone.js",
@@ -119,6 +120,11 @@ for (const file of syntaxFiles) {
 }
 
 
+const discoveryTests = spawnSync(process.execPath, ["scripts/studylab-announcements-check.mjs"], {encoding:"utf8"});
+if(discoveryTests.status!==0){
+  fail("StudyLab announcement carousel regressions:\n"+
+    (discoveryTests.stderr||discoveryTests.stdout||"Announcement test failed"));
+}
 const uiPolishTests = spawnSync(process.execPath, ["scripts/studylab-ui-polish-check.mjs"], {encoding:"utf8"});
 if (uiPolishTests.status !== 0) {
   fail("StudyLab UI polish regression checks failed:\n" +

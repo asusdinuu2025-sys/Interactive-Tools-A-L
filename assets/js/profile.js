@@ -165,6 +165,23 @@
         <span class="account-menu-copy"><strong>Sign out</strong><small>Sign out of this StudyLab account</small></span>
       </button>
       <p class="account-menu-status" role="status" hidden></p>`;
+    const status=accountMenu.querySelector(".account-menu-status");
+    if(status){
+      const updates=document.createElement("button");
+      updates.type="button";updates.setAttribute("role","menuitem");
+      updates.dataset.accountAction="announcements";
+      updates.innerHTML='<span class="account-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span>'+
+        '<span class="account-menu-copy"><strong>Announcements</strong><small>Updates, new features and tips</small></span>';
+      accountMenu.insertBefore(updates,status);
+      if(window.StudyLabAnnouncements?.canManage?.()){
+        const manage=document.createElement("button");
+        manage.type="button";manage.setAttribute("role","menuitem");
+        manage.dataset.accountAction="manage-announcements";
+        manage.innerHTML='<span class="account-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 11h3l13-6v14l-13-6H3z"/><path d="m7 14 2 6h3l-2-6"/></svg></span>'+
+          '<span class="account-menu-copy"><strong>Manage announcements</strong><small>Admin publishing and scheduling</small></span>';
+        accountMenu.insertBefore(manage,status);
+      }
+    }
   }
   function toggleAccountMenu() {
     if (!accountMenu.hidden) { closeAccountMenu(); return; }
@@ -177,6 +194,16 @@
   accountMenu.addEventListener("click", async event => {
     const action = event.target.closest("[data-account-action]")?.dataset.accountAction;
     if (!action) return;
+    if (action === "announcements") {
+      closeAccountMenu();
+      window.StudyLabAnnouncements?.openHistory?.();
+      return;
+    }
+    if (action === "manage-announcements") {
+      closeAccountMenu();
+      window.StudyLabAnnouncements?.openManager?.();
+      return;
+    }
     if (action === "view") {
       closeAccountMenu();
       const viewer = window.StudyLabProfileView;
@@ -239,7 +266,12 @@
     const nameLabel = document.getElementById("homeGreetingName");
     if (timeLabel) timeLabel.textContent = greetingTime;
     if (nameLabel) {
-      nameLabel.textContent = homeGreetingName;
+      // Ellipsis applies only to text, never to the blue account badge.
+      const nameText=document.createElement("span");
+      nameText.className="sl-greeting-name-text";
+      nameText.textContent=homeGreetingName;
+      nameText.title=homeGreetingName;
+      nameLabel.replaceChildren(nameText);
       const currentUser = window.StudyLabAccount?.getUser?.();
       window.StudyLabNameMark?.decorate(
         nameLabel, !isGuest && homeGreetingName !== "Student" ? currentUser?.id : null

@@ -1,0 +1,280 @@
+/* StudyLab Home: compact announcement/discovery carousel. No layout rewrite.
+   Added to the existing greeting row; four statistic cards remain underneath. */
+.sl-home-home-section .homepage-overview-panel .sl-home-intro-row{
+  position:relative;z-index:2;display:grid;
+  grid-template-columns:minmax(0,.38fr) minmax(0,.62fr);
+  align-items:center;gap:clamp(15px,2vw,28px);min-width:0;
+  min-height:190px;margin-bottom:clamp(15px,1.6vw,22px);
+}
+.sl-home-home-section .sl-home-intro-copy{min-width:0;max-width:100%;padding:5px 0;}
+.sl-home-home-section .homepage-overview-panel .sl-home-intro-copy .homepage-greeting{
+  display:flex!important;align-items:baseline!important;
+  align-content:flex-start!important;justify-content:flex-start!important;
+  flex-direction:row!important;flex-wrap:wrap!important;gap:4px 7px!important;
+  width:100%!important;min-width:0!important;max-width:100%!important;
+  margin:0 0 10px!important;white-space:normal!important;
+}
+.sl-home-home-section .sl-home-intro-copy .homepage-greeting-time{
+  font-weight:650!important;
+  font-size:clamp(18px,1.85vw,25px)!important;
+}
+.sl-home-home-section .sl-home-intro-copy .homepage-greeting-name{
+  display:inline-flex!important;align-items:center!important;
+  flex:0 1 auto;min-width:0!important;max-width:100%!important;
+  overflow:hidden!important;white-space:nowrap!important;
+  font-size:clamp(20px,2vw,29px)!important;
+}
+.sl-home-home-section .sl-home-intro-copy .homepage-greeting-name .sl-greeting-name-text{
+  min-width:0;max-width:100%;display:inline-block;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  vertical-align:middle;
+}
+.sl-home-home-section .sl-home-intro-copy .homepage-greeting-name .sl-name-mark{
+  flex:0 0 16px;margin-left:5px!important;align-self:center;
+}
+.sl-home-home-section .sl-home-intro-copy .homepage-greeting-hello{display:inline!important;font-size:clamp(18px,1.8vw,25px)!important}
+.sl-home-home-section .sl-home-intro-copy .homepage-greeting-welcome{
+  display:block!important;flex:1 0 100%;width:100%;font-size:clamp(13px,1.1vw,15px)!important;
+  font-weight:500!important;white-space:normal!important;
+  margin-top:3px!important;
+}
+.sl-home-home-section .homepage-overview-panel .sl-home-intro-copy .sl-home-overview-subtitle{
+  position:relative;z-index:1;margin:0!important;
+  line-height:1.45;font-size:clamp(11px,.85vw,13px);
+  max-width:35ch;
+}
+/* The entire text/art region is a large accessible feature-opening button.
+   Arrows and dots are siblings, never nested within that button. */
+.sl-discovery-card{
+  position:relative;isolation:isolate;min-width:0;
+  height:190px;min-height:190px;overflow:hidden;
+  border-radius:24px;border:1px solid rgba(148,202,255,.38);
+  background:
+    radial-gradient(ellipse at 87% 16%,rgba(135,82,240,.26),transparent 58%),
+    radial-gradient(ellipse at 7% 95%,rgba(30,182,220,.20),transparent 55%),
+    linear-gradient(135deg,rgba(13,33,76,.85),rgba(26,23,78,.88));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.21),
+    inset 0 -1px 0 rgba(107,200,255,.12),0 12px 27px rgba(4,14,43,.14);
+  -webkit-backdrop-filter:blur(18px) saturate(145%);
+  backdrop-filter:blur(18px) saturate(145%);
+  font-family:"Nirmala UI","Segoe UI",sans-serif;
+  color:#eff7ff;
+}
+.sl-discovery-card::before{
+  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(124deg,rgba(255,255,255,.12),transparent 22%,transparent 78%,rgba(125,150,245,.12));
+}
+.sl-discovery-card::after{
+  content:"";position:absolute;inset:auto -25% -85px 19%;height:126px;
+  transform:rotate(-11deg);border:1px solid rgba(119,198,255,.16);
+  border-radius:50%;pointer-events:none;
+}
+.sl-discovery-card[data-discovery-kind="feature"]{border-color:rgba(168,124,255,.49)}
+.sl-discovery-card[data-discovery-kind="discover"]{border-color:rgba(95,202,239,.42)}
+.sl-discovery-slide-main{
+  display:flex;align-items:center;position:absolute;inset:0;
+  width:100%;height:100%;z-index:1;
+  border:0;background:transparent;color:inherit;
+  text-align:left;cursor:pointer;padding:19px 43px 32px 35px;
+  font:inherit;
+}
+.sl-discovery-slide-main:focus-visible{outline:3px solid #70e7ff;outline-offset:-5px;border-radius:22px}
+.sl-discovery-copy{display:flex;flex-direction:column;align-items:flex-start;
+  justify-content:center;gap:5px;flex:1;min-width:0;max-width:70%;
+  position:relative;z-index:1}
+.sl-discovery-tag{
+  display:inline-flex;align-items:center;padding:4px 11px;
+  border:1px solid rgba(136,208,255,.35);border-radius:999px;
+  background:linear-gradient(120deg,rgba(88,97,220,.46),rgba(34,192,226,.22));
+  box-shadow:inset 0 1px rgba(255,255,255,.14);
+  color:#baf6ff;font-size:10px;font-weight:850;letter-spacing:.055em;
+}
+.sl-discovery-title{
+  margin:3px 0 0;max-width:100%;
+  font:800 clamp(17px,1.55vw,24px)/1.16 "Bahnschrift","Nirmala UI","Segoe UI",sans-serif;
+  letter-spacing:-.03em;overflow-wrap:anywhere;
+  text-shadow:0 2px 17px rgba(5,11,54,.18);
+}
+.sl-discovery-body{
+  display:-webkit-box;max-width:100%;margin:0;
+  font:500 clamp(11px,.82vw,13px)/1.38 "Nirmala UI","Segoe UI",sans-serif;
+  color:#d4e2fa;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2;
+}
+.sl-discovery-cta{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  margin-top:8px;padding:8px 15px;
+  border:1px solid rgba(82,236,255,.73);border-radius:999px;
+  background:linear-gradient(110deg,rgba(14,175,223,.51),rgba(56,96,221,.37));
+  box-shadow:inset 0 1px rgba(218,255,255,.22),0 0 17px rgba(37,214,245,.15);
+  color:#f5ffff;font-size:11px;font-weight:800;white-space:nowrap;
+}
+.sl-discovery-cta svg{width:13px;height:13px;flex:0 0 13px}
+.sl-discovery-slide-main:hover .sl-discovery-cta{background:rgba(34,171,226,.62)}
+.sl-discovery-art{display:grid;place-items:center;
+  flex:0 0 33%;height:100%;margin-left:9px;
+  color:#79d7ff;filter:drop-shadow(0 0 15px rgba(56,162,235,.28));}
+.sl-discovery-art svg{display:block;width:100%;max-width:205px;max-height:152px}
+.sl-discovery-arrow{
+  position:absolute;top:50%;z-index:3;transform:translateY(-50%);
+  display:grid;place-items:center;width:31px;height:31px;
+  border:1px solid rgba(170,207,255,.30);border-radius:50%;
+  background:rgba(106,133,224,.18);color:#e3f6ff;cursor:pointer;
+}
+.sl-discovery-arrow svg{width:15px;height:15px;stroke:currentColor;stroke-width:2.2;fill:none}
+.sl-discovery-arrow[data-discovery-prev]{left:7px}
+.sl-discovery-arrow[data-discovery-next]{right:7px}
+.sl-discovery-arrow:hover,.sl-discovery-arrow:focus-visible{
+  background:rgba(78,181,235,.38);outline:2px solid rgba(151,233,255,.32);
+}
+.sl-discovery-dots{display:flex;position:absolute;bottom:9px;left:50%;z-index:4;
+  transform:translateX(-50%);gap:7px;align-items:center;justify-content:center}
+.sl-discovery-dot{width:8px;height:8px;padding:0;border:0;border-radius:50%;
+  background:rgba(185,208,248,.44);cursor:pointer;box-shadow:0 0 0 3px transparent;}
+.sl-discovery-dot[aria-current="true"]{background:#4ee8ff;box-shadow:0 0 9px rgba(73,220,252,.42)}
+.sl-discovery-dot:focus-visible{outline:2px solid #fff;outline-offset:3px}
+html[data-theme="light"] .sl-discovery-card{
+  border-color:rgba(82,151,214,.45);
+  background:radial-gradient(ellipse at 87% 19%,rgba(193,172,250,.26),transparent 57%),
+    linear-gradient(128deg,rgba(238,248,255,.95),rgba(222,235,255,.92) 65%,rgba(233,226,255,.92));
+  box-shadow:inset 0 1px #fff,0 13px 25px rgba(63,112,158,.12);
+  color:#183e68;
+}
+html[data-theme="light"] .sl-discovery-tag{color:#296b9b;border-color:rgba(80,148,209,.34);
+  background:rgba(103,190,239,.17);}
+html[data-theme="light"] .sl-discovery-body{color:#476581}
+html[data-theme="light"] .sl-discovery-cta{color:#14557e;background:rgba(131,215,245,.50);
+  border-color:rgba(34,160,205,.57);}
+html[data-theme="light"] .sl-discovery-art{color:#3177c7}
+html[data-theme="light"] .sl-discovery-arrow{color:#21557e;background:rgba(153,193,231,.26)}
+html[data-theme="light"] .sl-discovery-dot{background:rgba(82,139,191,.32)}
+html[data-theme="light"] .sl-discovery-dot[aria-current="true"]{background:#148dcb}
+/* On phones the greeting stays first, carousel underneath, with no overlap.
+   Longer names never push the carousel out of its grid track. */
+@media(max-width:1120px){
+  .sl-home-home-section .homepage-overview-panel .sl-home-intro-row{
+    grid-template-columns:minmax(0,1fr);gap:12px;min-height:0;
+  }
+  .sl-home-home-section .sl-home-intro-copy{padding:0}
+  .sl-home-home-section .sl-home-intro-copy .homepage-greeting-name{
+    max-width:100%!important;
+  }
+  .sl-discovery-card{height:177px;min-height:177px}
+  .sl-discovery-slide-main{padding:15px 43px 29px}
+  .sl-discovery-copy{max-width:72%}
+}
+@media(max-width:540px){
+  .sl-home-home-section .homepage-overview-panel .sl-home-intro-row{
+    gap:10px;margin-bottom:13px;
+  }
+  .sl-home-home-section .homepage-overview-panel .sl-home-intro-copy .homepage-greeting{
+    gap:4px 7px!important;margin-bottom:6px!important;
+  }
+  .sl-home-home-section .sl-home-intro-copy .homepage-greeting-name .sl-greeting-name-text{
+    max-width:min(67vw,300px);
+  }
+  .sl-discovery-card{height:162px;min-height:162px;border-radius:19px}
+  .sl-discovery-slide-main{padding:13px 35px 29px 32px}
+  .sl-discovery-copy{max-width:80%;gap:4px}
+  .sl-discovery-title{font-size:16px}
+  .sl-discovery-body{font-size:11px;-webkit-line-clamp:2}
+  .sl-discovery-tag{font-size:9px;padding:3px 8px}
+  .sl-discovery-cta{padding:6px 10px;margin-top:4px;font-size:10px}
+  .sl-discovery-art{position:absolute;right:23px;top:15px;width:26%;opacity:.38}
+  .sl-discovery-arrow{width:25px;height:25px}
+  .sl-discovery-arrow[data-discovery-prev]{left:4px}
+  .sl-discovery-arrow[data-discovery-next]{right:4px}
+  .sl-discovery-dots{bottom:7px}
+}
+@media(prefers-reduced-motion:reduce){
+ .sl-discovery-card *, .sl-discovery-card{animation:none!important;transition:none!important}
+}
+/* Modal history and admin authoring use the existing glass visual language. */
+.sl-ann-dialog{
+  box-sizing:border-box;width:min(570px,calc(100vw - 24px));max-width:calc(100vw - 24px);
+  max-height:min(86dvh,760px);margin:auto; padding:0;
+  overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;
+  scrollbar-color:rgba(152,205,245,.44) transparent;
+  border:1px solid rgba(150,207,245,.39);border-radius:25px;
+  background:linear-gradient(145deg,rgba(23,40,73,.96),rgba(21,29,63,.97));
+  box-shadow:0 28px 100px rgba(0,0,0,.58),inset 0 1px rgba(255,255,255,.16);
+  -webkit-backdrop-filter:blur(26px);backdrop-filter:blur(26px);
+  color:#e9f5ff;font-family:"Nirmala UI","Segoe UI",sans-serif;
+}
+.sl-ann-dialog:not([open]){display:none!important}
+.sl-ann-dialog::backdrop{background:rgba(2,9,29,.65);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px)}
+.sl-ann-dialog-head{position:sticky;top:0;z-index:3;display:flex;align-items:center;
+  justify-content:space-between;gap:9px;padding:20px 22px 12px;
+  background:rgba(24,40,72,.94);border-bottom:1px solid rgba(150,205,255,.16)}
+.sl-ann-dialog-head h2{font-size:18px;line-height:1.25;margin:0;font-weight:800}
+.sl-ann-close{width:32px;height:32px;flex:0 0 32px;display:grid;place-items:center;
+  background:rgba(120,172,220,.12);border:1px solid rgba(150,200,245,.2);
+  border-radius:10px;color:inherit;cursor:pointer;font-size:22px}
+.sl-ann-dialog-body{padding:18px 22px 22px;display:flex;flex-direction:column;gap:11px}
+.sl-ann-dialog-intro{font-size:13px;color:#bcd2e7;margin:0 0 8px;line-height:1.5}
+.sl-ann-history-card{border:1px solid rgba(150,205,245,.19);border-radius:17px;
+  padding:15px;background:rgba(121,177,234,.065);}
+.sl-ann-history-tag{display:inline-block;color:#7fe0ff;
+  font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+.sl-ann-history-card h3{font-size:15px;line-height:1.3;margin:7px 0;font-weight:750}
+.sl-ann-history-card p{margin:0;font-size:12px;line-height:1.48;color:#c6d7ef;white-space:pre-wrap}
+.sl-ann-history-footer{display:flex;align-items:center;justify-content:space-between;
+  gap:10px;margin-top:12px;flex-wrap:wrap}
+.sl-ann-history-footer time{color:#9cbbd5;font-size:11px}
+.sl-ann-card-action,.sl-ann-primary,.sl-ann-secondary{
+  border:1px solid rgba(116,196,239,.45);border-radius:11px;
+  padding:9px 13px;font:750 12px/1.3 "Nirmala UI","Segoe UI",sans-serif;
+  cursor:pointer;white-space:nowrap}
+.sl-ann-card-action,.sl-ann-primary{
+  background:linear-gradient(120deg,rgba(35,176,222,.38),rgba(81,116,215,.35));color:#e6faff}
+.sl-ann-secondary{background:rgba(127,171,210,.1);color:inherit}
+.sl-ann-card-action:hover,.sl-ann-primary:hover,.sl-ann-secondary:hover{
+  border-color:#7fe1ff;background:rgba(70,158,222,.3)}
+.sl-ann-empty{color:#b8d0e7;text-align:center;font-size:13px;padding:16px}
+.sl-ann-dialog-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:9px}
+.sl-ann-editor{display:flex;flex-direction:column;gap:12px}
+.sl-ann-editor label{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:750}
+.sl-ann-editor input,.sl-ann-editor textarea,.sl-ann-editor select{
+  box-sizing:border-box;width:100%;min-height:38px;
+  padding:9px 11px;border:1px solid rgba(146,199,236,.31);
+  border-radius:11px;background:rgba(9,22,47,.58);color:inherit;
+  font:500 13px/1.45 "Nirmala UI","Segoe UI",sans-serif}
+.sl-ann-editor option{background:#182f50;color:#eff8ff}
+.sl-ann-editor textarea{min-height:80px;resize:vertical}
+.sl-ann-form-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sl-ann-toggle{flex-direction:row!important;align-items:center!important;gap:9px!important}
+.sl-ann-toggle input{width:16px;min-height:16px;accent-color:#53cde9}
+.sl-ann-form-status{min-height:16px;margin:0;font-size:12px;color:#99e5cf}
+.sl-ann-form-status[data-error="true"]{color:#ffb3bf}
+.sl-ann-admin-list{border-top:1px solid rgba(151,190,227,.23);padding-top:8px}
+.sl-ann-admin-list h3{font-size:14px}
+.sl-ann-admin-row{display:flex;align-items:center;gap:8px;padding:8px 0;
+  border-bottom:1px solid rgba(151,190,227,.12)}
+.sl-ann-admin-row span{font-size:12px;flex:1;min-width:0;overflow-wrap:anywhere}
+.sl-ann-admin-row button{font:700 11px "Nirmala UI",sans-serif;color:inherit;
+  border:1px solid rgba(150,199,237,.23);background:rgba(110,155,201,.13);
+  padding:7px 9px;border-radius:9px;cursor:pointer}
+.sl-ann-dialog button:focus-visible,.sl-ann-dialog input:focus-visible,
+.sl-ann-dialog select:focus-visible,.sl-ann-dialog textarea:focus-visible{
+  outline:2px solid #7adfff;outline-offset:2px}
+html[data-theme="light"] .sl-ann-dialog{
+  background:linear-gradient(145deg,rgba(246,252,255,.98),rgba(231,240,255,.97));
+  border-color:rgba(91,153,201,.35);color:#1c4165;
+  box-shadow:0 25px 70px rgba(51,91,136,.25)}
+html[data-theme="light"] .sl-ann-dialog-head{background:#e8f3ff}
+html[data-theme="light"] .sl-ann-dialog-intro,
+html[data-theme="light"] .sl-ann-history-card p,
+html[data-theme="light"] .sl-ann-history-footer time{color:#52718b}
+html[data-theme="light"] .sl-ann-history-tag{color:#166eae}
+html[data-theme="light"] .sl-ann-history-card{background:rgba(255,255,255,.63)}
+html[data-theme="light"] .sl-ann-editor input,
+html[data-theme="light"] .sl-ann-editor textarea,
+html[data-theme="light"] .sl-ann-editor select{
+  background:#f8fbff;color:#1c4165;border-color:#a7c8e1}
+html[data-theme="light"] .sl-ann-card-action,
+html[data-theme="light"] .sl-ann-primary{color:#185d83}
+@media(max-width:540px){
+ .sl-ann-dialog{max-height:87dvh;border-radius:20px}
+ .sl-ann-dialog-head{padding:14px 15px 11px}
+ .sl-ann-dialog-body{padding:13px 15px 17px}
+ .sl-ann-form-pair{grid-template-columns:1fr}
+}
