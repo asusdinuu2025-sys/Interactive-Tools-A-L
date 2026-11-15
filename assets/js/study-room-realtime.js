@@ -362,6 +362,7 @@
         setGenderIcon(avatar, gender);
         avatar.dataset.gender = gender;
       }
+      window.StudyLabAvatar?.decorate(avatar,id);
       const hasCrown = id === crownId;
       avatar.classList.toggle('slr-crown-avatar', hasCrown);
       if (hasCrown) {
@@ -430,6 +431,7 @@
           setGenderIcon(avatar, gender);
           avatar.dataset.gender = gender;
         }
+        window.StudyLabAvatar?.decorate(avatar,id);
         setLiveText(item.querySelector('.room-rank-number'), i+1);
         const rankName = item.querySelector('.room-rank-info strong');
         setLiveText(rankName, r.display_name || 'Student');
