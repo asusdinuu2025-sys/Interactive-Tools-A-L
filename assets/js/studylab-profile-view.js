@@ -343,7 +343,7 @@
         bioSaving=false;
         bioInput.disabled=false;
         if(viewedUserId===id){
-          bioSave.disabled=Array.from(bioInput.value.trim()).length>18;
+          bioSave.disabled=Array.from(bioInput.value.trim()).length>35;
         }
       }
     });
