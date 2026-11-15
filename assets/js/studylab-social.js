@@ -672,6 +672,7 @@
       : gender === "male"
         ? '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3.2"/><path d="M4.5 20v-2.5a7.5 7.5 0 0 1 15 0V20z"/></svg>'
         : '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.1"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>';
+    window.StudyLabAvatar?.decorate(avatar,post.author_id);
     const identityCopy = make("span","sl-feed-profile-copy");
     const name = make("strong", "sl-feed-post-name", post.author_display_name || "Student");
     window.StudyLabNameMark?.decorate(name, post.author_id);
@@ -937,13 +938,18 @@
         .eq("post_id", post.id).eq("status", "approved").order("created_at", { ascending: true }).limit(50);
       if (error) throw error;
       area.replaceChildren();
+      await window.StudyLabAvatar?.prefetch((data||[]).map(comment=>comment.author_id))
+        .catch(error=>console.warn("Comment pictures unavailable:",error));
       (data || []).forEach(comment => {
         const item = make("div", "sl-feed-comment is-entering");
         const header = make("div", "sl-feed-comment-head");
         const commentGender = comment.author_gender === "female" ? "female" : comment.author_gender === "male" ? "male" : "neutral";
         const commentAvatar = make("span","sl-feed-avatar sl-feed-comment-avatar sl-feed-avatar-" + commentGender);
         const commentName = String(comment.author_display_name || "Student").trim();
-        commentAvatar.textContent = Array.from(commentName)[0]?.toLocaleUpperCase() || "S";
+        commentAvatar.innerHTML = commentGender === "female"
+          ? '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3.2"/><path d="M7 20l1-4.2a4.1 4.1 0 0 1 8 0l1 4.2z"/></svg>'
+          : '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3.2"/><path d="M4.5 20v-2.5a7.5 7.5 0 0 1 15 0V20z"/></svg>';
+        window.StudyLabAvatar?.decorate(commentAvatar,comment.author_id);
         commentAvatar.setAttribute("aria-label", (comment.author_display_name || "Student") + " profile");
         const commentNameNode = make("strong", "", comment.author_display_name || "Student");
         window.StudyLabNameMark?.decorate(commentNameNode, comment.author_id);
@@ -1032,8 +1038,7 @@
   function renderCommunityProfiles(posts) {
     const list = panel.querySelector(".sl-feed-member-list");
     if (!list) return;
-    const faces = [":)", ";D", ":D", "☺", "✦", "★", "☀", "♡", "⚡", "🌈", "✨", "☻"];
-    const unique = new Map();
+     const unique = new Map();
     for (const post of posts) {
       if (post.status !== "approved" || !post.author_id || unique.has(post.author_id)) continue;
       unique.set(post.author_id, post);
@@ -1046,8 +1051,13 @@
     }
     for (const member of members) {
       const row = make("div", "sl-feed-member");
-      const avatar = make("span", "sl-feed-member-avatar", faces[hashNumber(member.author_id) % faces.length]);
-      avatar.style.setProperty("--sl-member-hue", String(hashNumber(member.author_id + "profile") % 360));
+      const memberGender = member.author_gender === "female" ? "female" : "male";
+      const avatar = make("span","sl-feed-member-avatar sl-feed-avatar-" + memberGender);
+      avatar.style.setProperty("--sl-member-hue", memberGender === "female" ? "326" : "195");
+      avatar.innerHTML = memberGender === "female"
+        ? '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3.2"/><path d="M7 20l1-4.2a4.1 4.1 0 0 1 8 0l1 4.2z"/></svg>'
+        : '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3.2"/><path d="M4.5 20v-2.5a7.5 7.5 0 0 1 15 0V20z"/></svg>';
+      window.StudyLabAvatar?.decorate(avatar,member.author_id);
       const copy = make("span", "sl-feed-member-copy");
       const memberName = make("strong", "", member.author_display_name || "Student");
       window.StudyLabNameMark?.decorate(memberName, member.author_id);
@@ -1357,6 +1367,8 @@
         await window.StudyLabFollow.prefetch(posts.map(p=>p.author_id))
           .catch(err=>console.warn("Following status unavailable:",err));
       }
+      await window.StudyLabAvatar?.prefetch(posts.map(post=>post.author_id))
+        .catch(error=>console.warn("Social profile pictures unavailable:",error));
       renderCommunityProfiles(posts);
       const approvedIds = posts.filter(post => post.status === "approved").map(post => post.id);
       const likesByPost = new Map();
