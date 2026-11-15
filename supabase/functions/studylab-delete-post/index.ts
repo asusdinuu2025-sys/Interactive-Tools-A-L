@@ -6,7 +6,6 @@ import {createClient} from "https://esm.sh/@supabase/supabase-js@2.57.0";
 
 const url=Deno.env.get("SUPABASE_URL")||"";
 const serviceKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")||"";
-const publicKey=Deno.env.get("SUPABASE_ANON_KEY")||"";
 const storageBucket="studylab-social";
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 function cors(req:Request) {
@@ -28,7 +27,7 @@ function reply(req:Request,body:object,status=200) {
 Deno.serve(async req=>{
   if(req.method==="OPTIONS")return new Response(null,{status:204,headers:cors(req)});
   if(req.method!=="POST")return reply(req,{deleted:false,message:"POST required."},405);
-  if(!url||!serviceKey||!publicKey)
+  if(!url||!serviceKey)
     return reply(req,{deleted:false,message:"Server configuration unavailable."},503);
   const token=String(req.headers.get("authorization")||"").match(/^Bearer\s+(\S+)$/i)?.[1];
   if(!token || token===serviceKey)return reply(req,{deleted:false,message:"Sign in required."},401);
