@@ -1090,3 +1090,90 @@ body.study-room-page[data-room-mode="light"] .study-chat-list{
 @media(prefers-reduced-motion:reduce){
   .study-chat-message{animation:none!important}
 }
+
+
+/* Chat location and bubble curvature. Keep panel beside the Home sidebar
+   (including its collapsed form) rather than attached to the right edge.
+   All overrides intentionally follow the earlier Home !important rules. */
+@media (min-width:801px){
+  body:not(.study-room-page) .study-chat-panel:not(.is-expanded){
+    left:252px!important;right:auto!important;
+    width:min(535px,calc(100vw - 274px))!important;
+  }
+  body:not(.study-room-page) .study-chat-panel.is-expanded{
+    left:252px!important;right:auto!important;
+    width:min(825px,calc(100vw - 274px))!important;
+  }
+  body:not(.study-room-page):has(.sl-home-sidebar.is-collapsed)
+  .study-chat-panel:not(.is-expanded){
+    left:108px!important;
+    width:min(535px,calc(100vw - 130px))!important;
+  }
+  body:not(.study-room-page):has(.sl-home-sidebar.is-collapsed)
+  .study-chat-panel.is-expanded{
+    left:108px!important;
+    width:min(825px,calc(100vw - 130px))!important;
+  }
+}
+@media (max-width:800px){
+  body:not(.study-room-page) .study-chat-panel:not(.is-expanded),
+  body:not(.study-room-page) .study-chat-panel.is-expanded{
+    left:8px!important;right:8px!important;
+    width:calc(100vw - 16px)!important;
+  }
+}
+/* Telegram-like smooth flowing tips, not independent triangular wedges.
+   The tail uses an actual Bezier curve and shares the parent color surface. */
+.study-chat-message:not(.own){
+  --sl-chat-tail: #253650;
+  border-radius:17px 17px 17px 5px;
+  background:
+    linear-gradient(155deg,rgba(130,164,211,.16) 0%,rgba(85,114,164,.04) 80%),
+    rgba(34,50,74,.88);
+  border-color:rgba(166,196,231,.23);
+}
+.study-chat-message.own{
+  --sl-chat-tail:#164d5f;
+  border-radius:17px 17px 5px 17px;
+  background:
+    linear-gradient(150deg,rgba(32,161,190,.27),rgba(31,126,164,.10) 80%),
+    rgba(15,60,77,.82);
+  border-color:rgba(68,202,225,.39);
+}
+.study-chat-message::after{
+  content:"";
+  position:absolute;
+  left:-9px;right:auto;
+  bottom:-1px;
+  width:17px;height:19px;
+  border:0;border-radius:0;
+  clip-path:path("M 17 0 C 17 8 11 15 0 17 C 6 18 12 18 17 18 Z");
+  background:var(--sl-chat-tail);
+  pointer-events:none;
+}
+.study-chat-message.own::after{
+  left:auto;right:-9px;
+  transform:scaleX(-1);
+  background:var(--sl-chat-tail);
+}
+html[data-theme="light"] .study-chat-message:not(.own),
+body.study-room-page[data-room-mode="light"] .study-chat-message:not(.own){
+  --sl-chat-tail:#e5eef8;
+  background:
+    linear-gradient(150deg,rgba(185,215,243,.45),rgba(237,246,255,.25)),
+    rgba(243,248,255,.93);
+  border-color:rgba(98,151,195,.28);
+}
+html[data-theme="light"] .study-chat-message.own,
+body.study-room-page[data-room-mode="light"] .study-chat-message.own{
+  --sl-chat-tail:#c6e9ef;
+  background:
+    linear-gradient(150deg,rgba(115,219,233,.42),rgba(199,231,246,.22)),
+    rgba(201,237,247,.94);
+  border-color:rgba(45,153,186,.40);
+}
+/* Extra breathing room so curved tips never clip on the scroll container. */
+.study-chat-list{padding-inline:22px!important}
+@media (max-width:450px){
+  .study-chat-list{padding-inline:17px!important}
+}
