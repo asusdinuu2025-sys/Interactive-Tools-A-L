@@ -372,7 +372,9 @@
     clearEmptyState();
 
     const article=existing||document.createElement("article");
+    const reactionsWereOpen=existing?.classList.contains("is-reactions-open")||false;
     article.className="study-chat-message";
+    article.classList.toggle("is-reactions-open",reactionsWereOpen);
     article.dataset.messageId=row.id;
     const own=Boolean(row.user_id && row.user_id===userId);
     if(own)article.classList.add("own");
@@ -492,6 +494,8 @@
     messageReactions(row.id,reactions);
     const footer=document.createElement("div");
     footer.className="study-chat-message-foot";
+    const footerActions=document.createElement("div");
+    footerActions.className="study-chat-message-foot-actions";
     const reply=document.createElement("button");
     reply.type="button";reply.className="study-chat-message-reply";
     reply.textContent="↩ Reply";
@@ -500,10 +504,21 @@
       editTarget=null;replyTarget=row.id;
       showComposerContext();input.focus();chatFeedback("");
     });
+    const react=document.createElement("button");
+    react.type="button";react.className="study-chat-react-toggle";
+    react.textContent="☺ React";
+    react.setAttribute("aria-label","Show reactions to this message");
+    react.setAttribute("aria-expanded",String(reactionsWereOpen));
+    react.addEventListener("click",()=>{
+      const visible=article.classList.toggle("is-reactions-open");
+      react.setAttribute("aria-expanded",String(visible));
+      react.setAttribute("aria-label",visible?"Hide reactions":"Show reactions to this message");
+    });
+    footerActions.append(reply,react);
     const timestamp=document.createElement("span");
     timestamp.className="study-chat-message-time";
     timestamp.textContent=formatTime(row.created_at)+(row.edited_at?" · edited":"");
-    footer.append(reply,timestamp);
+    footer.append(footerActions,timestamp);
     article.replaceChildren(header,body,reactions,footer);
 
     if(!existing)list.appendChild(article);
@@ -515,6 +530,8 @@
         oldest.remove();
       }
     }
+    // Dates are derived from actual message timestamps, not stored separately.
+    if(!existing)refreshDateSeparators();
   }
 
   async function loadProfiles() {
@@ -605,8 +622,48 @@
     }
     if(editTarget===id||replyTarget===id)clearComposerContext();
     if(messagesById.size===0)renderInitial([]);
-    else for(const row of [...messagesById.values()]){
-      if(row.reply_to===id)renderMessage({...row,reply_to:null});
+    else{
+      for(const row of [...messagesById.values()]){
+        if(row.reply_to===id)renderMessage({...row,reply_to:null});
+      }
+      refreshDateSeparators();
+    }
+  }
+
+  function dateKey(date){
+    return [date.getFullYear(),String(date.getMonth()+1).padStart(2,"0"),
+      String(date.getDate()).padStart(2,"0")].join("-");
+  }
+  function dateLabel(date){
+    const today=new Date();today.setHours(0,0,0,0);
+    const midnight=new Date(date);midnight.setHours(0,0,0,0);
+    if(midnight.getTime()===today.getTime())return "Today";
+    const yesterday=new Date(today);yesterday.setDate(today.getDate()-1);
+    if(midnight.getTime()===yesterday.getTime())return "Yesterday";
+    return date.toLocaleDateString(undefined,{
+      day:"numeric",month:"long",
+      ...(date.getFullYear()!==today.getFullYear()?{year:"numeric"}:{})
+    });
+  }
+  function refreshDateSeparators(){
+    if(!list)return;
+    list.querySelectorAll(".study-chat-date-separator").forEach(item=>item.remove());
+    let previousKey="";
+    for(const node of list.querySelectorAll(".study-chat-message")){
+      const row=messagesById.get(node.dataset.messageId);
+      if(!row?.created_at)continue;
+      const date=new Date(row.created_at);
+      if(!Number.isFinite(date.getTime()))continue;
+      const key=dateKey(date);
+      if(key===previousKey)continue;
+      const label=dateLabel(date);
+      const separator=document.createElement("div");
+      separator.className="study-chat-date-separator";
+      separator.textContent=label;
+      separator.setAttribute("role","separator");
+      separator.setAttribute("aria-label","Messages from "+label);
+      list.insertBefore(separator,node);
+      previousKey=key;
     }
   }
 
@@ -624,6 +681,7 @@
     }
 
     rows.slice(-CONFIG.maxMessages).forEach(renderMessage);
+    refreshDateSeparators();
     scrollToBottom(true);
   }
 
