@@ -87,6 +87,8 @@
   let followAction = null;
   let countButtons = [];
   let listPanel = null;
+  let listBackdrop = null;
+  let listDismiss = null;
 
   function tabbables(root) {
     return [...root.querySelectorAll("button:not([disabled]),input:not([disabled]),textarea:not([disabled]),a[href]")].filter(n => !n.hidden && n.getAttribute("aria-hidden") !== "true");
@@ -111,6 +113,7 @@
     accountUser = null;
     viewedUserId = null;
     listPanel.hidden = true;
+    if (listBackdrop) listBackdrop.hidden = true;
     const focus = lastFocus;
     lastFocus = null;
     if (returnFocus && focus?.isConnected && typeof focus.focus === "function")focus.focus();
@@ -159,15 +162,18 @@
     avatarEditor = element("section","sl-pv-avatar-editor");
     avatarEditor.hidden = true;
     const avatarActions = element("div","sl-pv-avatar-actions");
-    avatarPick = button("sl-pv-avatar-upload","Upload photo");
+    // Native input inside a label: mobile/Edge browsers can open the picker
+    // without relying on a scripted click against a display:none input.
+    avatarPick = element("label","sl-pv-avatar-upload","Upload photo");
+    avatarPick.tabIndex = 0;
     avatarRemove = button("sl-pv-avatar-remove","Remove photo");
     avatarRemove.disabled = true;
     avatarFile = element("input","sl-pv-avatar-input");
     avatarFile.type = "file";
     avatarFile.accept = "image/jpeg,image/png,image/webp";
-    avatarFile.hidden = true;
     avatarFile.setAttribute("aria-label","Choose JPG, PNG or WebP profile picture");
-    avatarActions.append(avatarPick,avatarRemove,avatarFile);
+    avatarPick.append(avatarFile);
+    avatarActions.append(avatarPick,avatarRemove);
     const photoNote = element("p","sl-pv-avatar-note",
       "JPG, PNG or WebP · up to 1 MB · cropped to a 320 px square. Photos are visible to other students.");
     avatarStatus = element("p","sl-pv-avatar-message","");
@@ -175,11 +181,19 @@
     avatarStatus.setAttribute("role","status");
     avatarEditor.append(avatarActions,photoNote,avatarStatus);
     const syncAvatarButtons = () => {
-      avatarPick.disabled = avatarBusy;
+      avatarPick.classList.toggle("is-disabled",avatarBusy);
+      avatarPick.setAttribute("aria-disabled",String(avatarBusy));
+      avatarFile.disabled = avatarBusy;
       avatarRemove.disabled = avatarBusy || !avatarHasPhoto;
-      avatarPick.textContent = avatarHasPhoto ? "Change photo" : "Upload photo";
+      avatarPick.firstChild.textContent = avatarHasPhoto ? "Change photo" : "Upload photo";
     };
-    avatarPick.addEventListener("click",()=>{if(!avatarBusy)avatarFile.click();});
+    avatarPick.addEventListener("keydown",event=>{
+      if (avatarBusy) return;
+      if (event.key==="Enter" || event.key===" ") {
+        event.preventDefault();
+        avatarFile.click();
+      }
+    });
     avatarFile.addEventListener("change",async()=>{
       const file = avatarFile.files?.[0];
       avatarFile.value = "";
@@ -239,11 +253,11 @@
     bioInput = element("textarea","sl-pv-bio-input");
     bioInput.id = "slPvBioInput";
     bioInput.rows = 2;
-    bioInput.maxLength = 240;
+    bioInput.maxLength = 240; // Existing longer bios stay readable until edited.
     bioInput.placeholder = "A little about your studies…";
     bioInput.setAttribute("aria-describedby","slPvBioCount");
     const bioControls = element("div","sl-pv-bio-controls");
-    bioCount = element("span","sl-pv-bio-count","0 / 15 words");
+    bioCount = element("span","sl-pv-bio-count","0 / 18 characters");
     bioCount.id="slPvBioCount";
     bioSave = createButton("sl-pv-bio-save","edit","Save Bio");
     bioSave.disabled = true;
@@ -254,11 +268,11 @@
     bioEditor.append(bioLabel,bioInput,bioControls,bioStatus);
 
     const updateBioWords=()=>{
-      const words=bioInput.value.trim()?bioInput.value.trim().split(/\s+/).length:0;
-      bioCount.textContent=words+" / 15 words";
-      bioCount.classList.toggle("is-over-limit",words>15);
-      bioInput.setAttribute("aria-invalid",String(words>15));
-      bioSave.disabled=words>15 || bioSaving || !accountUser ||
+      const count=Array.from(bioInput.value.trim()).length;
+      bioCount.textContent=count+" / 18 characters";
+      bioCount.classList.toggle("is-over-limit",count>18);
+      bioInput.setAttribute("aria-invalid",String(count>18));
+      bioSave.disabled=count>18 || bioSaving || !accountUser ||
         viewedUserId!==accountUser.id;
       if(!bioStatus.hidden)bioStatus.hidden=true;
     };
@@ -277,7 +291,7 @@
         if(view.hidden || viewedUserId!==id)return;
         const saved=escText(profile?.bio);
         bioInput.value=saved;
-        bioCount.textContent=(saved?saved.split(/\s+/).length:0)+" / 15 words";
+        bioCount.textContent=Array.from(saved).length+" / 18 characters";
         bioStatus.textContent="Bio saved.";
         bioStatus.dataset.state="success";
         bioStatus.hidden=false;
@@ -291,8 +305,7 @@
         bioSaving=false;
         bioInput.disabled=false;
         if(viewedUserId===id){
-          const words=bioInput.value.trim()?bioInput.value.trim().split(/\s+/).length:0;
-          bioSave.disabled=words>15;
+          bioSave.disabled=Array.from(bioInput.value.trim()).length>18;
         }
       }
     });
@@ -322,11 +335,22 @@
     viewStatus.setAttribute("role","status");
     viewStatus.hidden=true;
 
-    listPanel=element("section","sl-pv-student-list");
+    // Followers and Following open as a separate glass popup, never expanding
+    // the profile card itself.
+    listBackdrop=element("div","sl-pv-list-backdrop");
+    listBackdrop.hidden=true;
+    listPanel=element("section","sl-pv-student-list sl-pv-list-dialog");
+    listPanel.setAttribute("role","dialog");
+    listPanel.setAttribute("aria-modal","true");
+    listPanel.setAttribute("aria-label","Student connections");
     listPanel.hidden=true;
-    dialog.append(header,identity,avatarEditor,bioNode,bioEditor,counts,actions,followAction,joined,viewStatus,listPanel);
+    listBackdrop.append(listPanel);
+    dialog.append(header,identity,avatarEditor,bioNode,bioEditor,counts,actions,followAction,joined,viewStatus);
     view.append(dialog);
-    document.body.append(view);
+    document.body.append(view,listBackdrop);
+    listBackdrop.addEventListener("pointerdown",event=>{
+      if(event.target===listBackdrop)closeList();
+    });
 
     // A distinct confirmation surface never deletes immediately on open.
     confirmView=element("div","sl-pv-backdrop sl-pv-confirm-backdrop");
@@ -397,6 +421,11 @@
         else trap(event,confirmView);
         return;
       }
+      if(listBackdrop && !listBackdrop.hidden){
+        if(event.key==="Escape"){event.preventDefault();closeList();}
+        else trap(event,listPanel);
+        return;
+      }
       if(view && !view.hidden){
         if(event.key==="Escape"){event.preventDefault();closeView();}
         else trap(event,view);
@@ -429,19 +458,30 @@
       year:"numeric",month:"long",day:"numeric",timeZone:"Asia/Colombo"
     }).format(date);
   }
+  function closeList(){
+    if (!listPanel || listBackdrop?.hidden) return;
+    listBackdrop.hidden=true;
+    listPanel.hidden=true;
+    listPanel.replaceChildren();
+    countButtons.find(b=>b.dataset.listType===listBackdrop.dataset.type)?.focus();
+  }
   async function openList(type){
     const follow=window.StudyLabFollow;
     if(!viewedUserId||!follow||!listPanel)return;
+    listBackdrop.dataset.type=type;
+    listBackdrop.hidden=false;
     listPanel.hidden=false;
     listPanel.replaceChildren();
     const heading=element("div","sl-pv-list-heading");
     const title=element("strong","",type==="followers"?"Followers":"Following");
-    const dismissList=button("sl-pv-list-close","Close");
-    dismissList.addEventListener("click",()=>{listPanel.hidden=true;countButtons[0].focus();});
+    const dismissList=button("sl-pv-list-close","×","Close connections");
+    listDismiss=dismissList;
+    dismissList.addEventListener("click",closeList);
     heading.append(title,dismissList);
     const container=element("div","sl-pv-list-rows");
     container.append(element("p","sl-pv-list-empty","Loading students…"));
     listPanel.append(heading,container);
+    dismissList.focus();
     const id=viewedUserId;
     try{
       const profiles=await follow.list(type,id);
@@ -458,7 +498,10 @@
         window.StudyLabNameMark?.decorate(name,profile.user_id);
         identity.append(name,element("small","","@"+profile.username));
         row.append(identity,icon("arrow"));
-        row.addEventListener("click",()=>open({userId:profile.user_id}));
+        row.addEventListener("click",()=>{
+          closeList();
+          open({userId:profile.user_id});
+        });
         container.append(row);
       }
     }catch(error){
@@ -500,6 +543,7 @@
     window.StudyLabNameMark?.decorate(nameNode,null);
     viewStatus.hidden=true;
     listPanel.hidden=true;
+    listBackdrop.hidden=true;
     countButtons.forEach(node=>{node.querySelector(".sl-pv-count-number").textContent="—";});
     dialog.querySelector(".sl-pv-eyebrow").textContent=own?"STUDYLAB · MY PROFILE":"STUDYLAB · STUDENT PROFILE";
     bioNode.hidden=own;
@@ -507,15 +551,17 @@
     avatarEditor.hidden=!own;
     avatarHasPhoto=false;
     avatarBusy=false;
-    avatarPick.textContent="Upload photo";
-    avatarPick.disabled=false;
+    avatarPick.firstChild.textContent="Upload photo";
+    avatarPick.classList.remove("is-disabled");
+    avatarPick.setAttribute("aria-disabled","false");
+    avatarFile.disabled=false;
     avatarRemove.disabled=true;
     avatarFile.value="";
     avatarStatus.hidden=true;
     bioInput.value="";
     bioInput.disabled=false;
     bioSave.disabled=true;
-    bioCount.textContent="0 / 15 words";
+    bioCount.textContent="0 / 18 characters";
     bioCount.classList.remove("is-over-limit");
     bioStatus.hidden=true;
     bioNode.textContent=own?"":"Loading bio…";
@@ -542,9 +588,10 @@
       if(own){
         const saved=escText(profile.bio);
         bioInput.value=saved;
-        const words=saved?saved.split(/\s+/).length:0;
-        bioCount.textContent=words+" / 15 words";
-        bioSave.disabled=words>15;
+        const chars=Array.from(saved).length;
+        bioCount.textContent=chars+" / 18 characters";
+        bioCount.classList.toggle("is-over-limit",chars>18);
+        bioSave.disabled=chars>18;
       }else{
         bioNode.textContent=escText(profile.bio)||"No bio added yet.";
       }
@@ -557,7 +604,7 @@
         if (serial===viewSequence && !view.hidden && viewedUserId===id && own) {
           avatarHasPhoto=Boolean(hasPhoto);
           avatarRemove.disabled=!avatarHasPhoto;
-          avatarPick.textContent=avatarHasPhoto?"Change photo":"Upload photo";
+          avatarPick.firstChild.textContent=avatarHasPhoto?"Change photo":"Upload photo";
         }
       }catch(error){console.warn("Profile picture lookup unavailable:",error);}
       window.StudyLabNameMark?.decorate(nameNode,id);
