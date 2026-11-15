@@ -1,0 +1,78 @@
+/* One shared avatar photo layer. Keep each existing gender neon ring and SVG
+   exactly as before; a loaded WebP only replaces the icon inside the circle. */
+.sl-pv-avatar,
+.room-avatar,
+.sl-feed-avatar,
+.sl-feed-member-avatar {
+  position:relative;
+  isolation:isolate;
+}
+.sl-avatar-photo {
+  position:absolute;
+  z-index:1;
+  box-sizing:border-box;
+  top:3px;left:3px;
+  width:calc(100% - 6px);
+  height:calc(100% - 6px);
+  max-width:none;
+  border-radius:50%;
+  object-fit:cover;
+  object-position:center;
+  display:block;
+  background:rgba(13,24,40,.24);
+  pointer-events:none;
+}
+.sl-avatar-photo[hidden]{display:none!important}
+.sl-avatar-has-image > svg {visibility:hidden!important}
+.sl-avatar-has-image.sl-feed-member-avatar {font-size:0!important}
+.sl-pv-avatar .sl-avatar-photo {top:4px;left:4px;width:calc(100% - 8px);height:calc(100% - 8px)}
+/* The crown stays above the image, and the colored circle outline never moves. */
+body.study-room-page .room-avatar.slr-crown-avatar::before {z-index:5}
+
+.sl-pv-avatar-editor {
+  display:grid;
+  gap:8px;
+  justify-items:center;
+  width:100%;
+  margin:2px 0 12px;
+}
+.sl-pv-avatar-actions {
+  display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;
+}
+.sl-pv-avatar-actions button {
+  min-height:34px;
+  padding:7px 12px;
+  font:750 11.5px/1.25 "Nirmala UI","Segoe UI",sans-serif;
+  color:inherit;
+  border:1px solid rgba(148,215,255,.33);
+  border-radius:11px;
+  background:rgba(135,198,246,.12);
+  -webkit-backdrop-filter:blur(12px);
+  backdrop-filter:blur(12px);
+  cursor:pointer;
+}
+.sl-pv-avatar-actions button:hover:not(:disabled) {
+  border-color:rgba(148,215,255,.65);background:rgba(115,191,247,.19);
+}
+.sl-pv-avatar-actions button:disabled {opacity:.45;cursor:not-allowed}
+.sl-pv-avatar-actions .sl-pv-avatar-remove {
+  border-color:rgba(255,125,148,.29);background:rgba(234,113,133,.075);
+}
+.sl-pv-avatar-note {
+  max-width:315px;margin:0;
+  text-align:center;
+  font-size:10.5px;line-height:1.5;
+  color:inherit;opacity:.72;
+}
+.sl-pv-avatar-message {
+  margin:0;text-align:center;font-size:11px;line-height:1.45;
+}
+.sl-pv-avatar-message[data-state="error"] {color:#ffb5ba}
+.sl-pv-avatar-message[data-state="success"] {color:#83e8c5}
+.sl-pv-avatar-input {display:none!important}
+body.study-room-page[data-room-theme] .sl-pv-avatar-actions button {
+  color:var(--room-text);border-color:color-mix(in srgb,var(--room-accent) 34%,transparent);
+  background:color-mix(in srgb,var(--room-card) 65%,transparent);
+}
+html[data-theme="light"] body:not(.study-room-page) .sl-pv-avatar-message[data-state="error"] {color:#ab3348}
+html[data-theme="light"] body:not(.study-room-page) .sl-pv-avatar-message[data-state="success"] {color:#146e59}
