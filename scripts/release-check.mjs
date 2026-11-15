@@ -176,6 +176,13 @@ if(profileRoomMiniTests.status!==0){
     (profileRoomMiniTests.stderr||profileRoomMiniTests.stdout||"node test failed"));
 }
 
+// Seven requested StudyLab lifecycle and compact layout regressions.
+const lifecycleTests=spawnSync(process.execPath,["scripts/studylab-lifecycle-check.mjs"],{encoding:"utf8"});
+if(lifecycleTests.status!==0){
+  fail("StudyLab lifecycle and layout checks failed:\n"+
+    (lifecycleTests.stderr||lifecycleTests.stdout||"node test failed"));
+}
+
 // Parse inline JavaScript in the standalone Study Tools page without executing it.
 const toolsHtml = read("study-tools.html");
 if (toolsHtml) {
