@@ -897,3 +897,131 @@ body.study-room-page:is(
   --art-size:86px;--art-x:76%;--art-y:62%
  }
 }
+
+
+/* Study Room panel-only high-translucency liquid glass (Spicetify-like).
+   No changes to body background, wallpaper, palette or study calculations.
+   Contrasting text remains inherited from each of the eight room themes. */
+body.study-room-page[data-room-theme] .room-page :is(.room-hero,.room-panel){
+  background:
+    linear-gradient(138deg,
+      color-mix(in srgb,var(--room-text) 7%,transparent) 0%,
+      color-mix(in srgb,var(--room-card) 18%,transparent) 44%,
+      color-mix(in srgb,var(--room-page-bg) 10%,transparent) 100%)!important;
+  border:1px solid color-mix(in srgb,var(--room-text) 29%,transparent)!important;
+  border-top-color:color-mix(in srgb,var(--room-text) 48%,transparent)!important;
+  border-left-color:color-mix(in srgb,var(--room-text) 34%,transparent)!important;
+  border-radius:27px!important;
+  box-shadow:
+    inset 0 1.5px 0 color-mix(in srgb,var(--room-text) 24%,transparent),
+    inset 1px 0 0 color-mix(in srgb,var(--room-text) 13%,transparent),
+    inset 0 -1px 0 color-mix(in srgb,var(--room-text) 8%,transparent),
+    0 18px 48px rgba(0,0,0,.18)!important;
+  -webkit-backdrop-filter:blur(29px) saturate(180%) brightness(1.07)!important;
+  backdrop-filter:blur(29px) saturate(180%) brightness(1.07)!important;
+  color:var(--room-text)!important;
+}
+/* Layered cards float above the main glass. Keep contrast and spacing. */
+body.study-room-page[data-room-theme] .room-page :is(
+  .room-stat,.room-person-card,.room-person,.room-rank,.room-session,
+  .room-goal,.room-notice,.slr-toolbar,.slr-focus-card,.slr-badge,
+  .slr-achievements,.slr-achievement-summary
+){
+  background:linear-gradient(150deg,
+    color-mix(in srgb,var(--room-card) 27%,transparent),
+    color-mix(in srgb,var(--room-page-bg) 10%,transparent))!important;
+  border:1px solid color-mix(in srgb,var(--room-text) 23%,transparent)!important;
+  border-top-color:color-mix(in srgb,var(--room-text) 38%,transparent)!important;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb,var(--room-text) 16%,transparent),
+    inset 1px 0 0 color-mix(in srgb,var(--room-text) 7%,transparent),
+    0 8px 25px rgba(0,0,0,.10)!important;
+  -webkit-backdrop-filter:blur(19px) saturate(160%)!important;
+  backdrop-filter:blur(19px) saturate(160%)!important;
+  color:var(--room-text)!important;
+}
+body.study-room-page[data-room-theme] .room-page .room-people-grid .room-person-card{
+  background:linear-gradient(150deg,
+    color-mix(in srgb,var(--room-card) 26%,transparent),
+    color-mix(in srgb,var(--room-page-bg) 8%,transparent))!important;
+  border:1.5px solid color-mix(in srgb,var(--room-text) 30%,transparent)!important;
+  border-top-color:color-mix(in srgb,var(--room-text) 43%,transparent)!important;
+  -webkit-backdrop-filter:blur(17px) saturate(165%)!important;
+  backdrop-filter:blur(17px) saturate(165%)!important;
+}
+body.study-room-page[data-room-theme] .room-dashboard-controls :is(
+  .room-mode-control,.room-appearance-trigger,.room-doodles-toggle
+),
+body.study-room-page[data-room-theme] .sl-room-nav{
+  background:linear-gradient(135deg,
+    color-mix(in srgb,var(--room-card) 31%,transparent),
+    color-mix(in srgb,var(--room-page-bg) 17%,transparent))!important;
+  border:1px solid color-mix(in srgb,var(--room-text) 27%,transparent)!important;
+  border-top-color:color-mix(in srgb,var(--room-text) 39%,transparent)!important;
+  box-shadow:inset 0 1px 0 color-mix(in srgb,var(--room-text) 17%,transparent),
+    0 8px 22px rgba(0,0,0,.11)!important;
+  -webkit-backdrop-filter:blur(21px) saturate(168%)!important;
+  backdrop-filter:blur(21px) saturate(168%)!important;
+}
+/* On light modes, a little extra frost maintains legible charts and controls. */
+body.study-room-page[data-room-mode="light"][data-room-theme] .room-page :is(.room-hero,.room-panel){
+  background:linear-gradient(138deg,
+    rgba(255,255,255,.24),
+    color-mix(in srgb,var(--room-card) 23%,transparent) 53%,
+    rgba(255,255,255,.12))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.58),
+    inset 1px 0 0 rgba(255,255,255,.28),
+    0 15px 43px rgba(40,75,110,.14)!important;
+}
+body.study-room-page[data-room-mode="light"][data-room-theme] .room-page :is(
+  .room-stat,.room-person-card,.room-person,.room-rank,.room-session,
+  .room-goal,.room-notice,.slr-toolbar,.slr-focus-card,.slr-badge,
+  .slr-achievements,.slr-achievement-summary
+){
+  background:linear-gradient(145deg,rgba(255,255,255,.34),
+    color-mix(in srgb,var(--room-card) 20%,transparent))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.67),
+    0 8px 24px rgba(40,75,110,.09)!important;
+}
+/* No GPU-heavy blur stacking on narrow screens. Visual style survives. */
+@media(max-width:760px){
+  body.study-room-page[data-room-theme] .room-page :is(.room-hero,.room-panel){
+    -webkit-backdrop-filter:blur(15px) saturate(145%)!important;
+    backdrop-filter:blur(15px) saturate(145%)!important;
+  }
+  body.study-room-page[data-room-theme] .room-page :is(
+    .room-stat,.room-person-card,.room-person,.room-rank,.room-session,
+    .room-goal,.room-notice,.slr-toolbar,.slr-focus-card,.slr-badge,
+    .slr-achievements,.slr-achievement-summary
+  ){
+    -webkit-backdrop-filter:blur(8px) saturate(130%)!important;
+    backdrop-filter:blur(8px) saturate(130%)!important;
+  }
+  body.study-room-page[data-room-theme] .room-dashboard-controls :is(
+    .room-mode-control,.room-appearance-trigger,.room-doodles-toggle
+  ),
+  body.study-room-page[data-room-theme] .sl-room-nav{
+    -webkit-backdrop-filter:blur(10px) saturate(135%)!important;
+    backdrop-filter:blur(10px) saturate(135%)!important;
+  }
+}
+/* Accessibility/user power settings take precedence over appearance. */
+@media(prefers-reduced-transparency:reduce){
+  body.study-room-page[data-room-theme] .room-page :is(
+    .room-hero,.room-panel,.room-stat,.room-person-card,.room-person,.room-rank,
+    .room-session,.room-goal,.room-notice,.slr-toolbar,.slr-focus-card,.slr-badge,
+    .slr-achievements,.slr-achievement-summary
+  ),body.study-room-page[data-room-theme] .room-dashboard-controls :is(
+    .room-mode-control,.room-appearance-trigger,.room-doodles-toggle
+  ),body.study-room-page[data-room-theme] .sl-room-nav{
+    background:var(--room-panel-bg,var(--room-card))!important;
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+  }
+}
+@supports not ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
+  body.study-room-page[data-room-theme] .room-page :is(
+    .room-hero,.room-panel,.room-stat,.room-person-card,.room-person,.room-rank
+  ){
+    background:var(--room-panel-bg,var(--room-card))!important;
+  }
+}
