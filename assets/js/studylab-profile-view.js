@@ -262,7 +262,7 @@
     const title=element("h2","","Delete your StudyLab account?");
     title.id="slPvDeleteTitle";
     const details=element("p","sl-pv-confirm-info",
-      "This permanently removes your StudyLab account and its linked data, including profile, Study Room activity and Social content. This cannot be undone.");
+      "This permanently deletes your sign-in, posts, likes, comments, follows and Study Room history. Only one anonymized profile record remains, without your name, username, phone, school or bio. This cannot be undone.");
     const inputLabel=element("label","sl-pv-confirm-label","Type DELETE to confirm");
     inputLabel.htmlFor="slPvDeleteInput";
     confirmInput=element("input","sl-pv-confirm-input");
