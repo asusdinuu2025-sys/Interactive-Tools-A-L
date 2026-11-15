@@ -752,3 +752,16 @@ body.study-room-page[data-room-theme] .room-people-grid .room-person-card-name-r
     min-height:46px!important;
   }
 }
+
+
+/* Smooth Study Room sidebar navigation with clearance for sticky mobile nav. */
+body.study-room-page #timerSection,
+body.study-room-page #slLocalStudyAnalytics,
+body.study-room-page #leaderboardSection,
+body.study-room-page #slStreakPanel {scroll-margin-top:clamp(18px,8vh,100px)}
+@media(max-width:760px){
+  body.study-room-page #timerSection,
+  body.study-room-page #slLocalStudyAnalytics,
+  body.study-room-page #leaderboardSection,
+  body.study-room-page #slStreakPanel{scroll-margin-top:95px}
+}
