@@ -153,7 +153,19 @@ const fixedNavStyle=document.createElement("style");
 fixedNavStyle.textContent='.room-layout.sl-room-shell{display:block}.sl-room-nav{position:fixed;left:12px;top:50%;transform:translateY(-50%);z-index:1000;width:64px}@media(max-width:760px){.room-layout.sl-room-shell{display:grid;grid-template-columns:1fr;gap:12px}.sl-room-nav{position:sticky;left:auto;top:8px;transform:none;width:auto}}';
 document.head.append(fixedNavStyle);
 
-const navLinks=[...document.querySelectorAll("[data-room-nav]")];navLinks.forEach(link=>link.addEventListener("click",()=>{navLinks.forEach(x=>x.classList.toggle("active",x===link));}));const navObserver=new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting){const id=entry.target.id;navLinks.forEach(link=>link.classList.toggle("active",link.getAttribute("href")==="#"+id));}});},{rootMargin:"-25% 0px -65% 0px"});["timerSection","slLocalStudyAnalytics","leaderboardSection","slStreakPanel"].forEach(id=>{const target=document.getElementById(id);if(target)navObserver.observe(target);});renderStreaks();
+const navLinks=[...document.querySelectorAll("[data-room-nav]")];navLinks.forEach(link=>link.addEventListener("click",event=>{
+  const href=link.getAttribute("href")||"";
+  if(href.startsWith("#")&&href.length>1){
+    const target=document.getElementById(href.slice(1));
+    if(target){
+      event.preventDefault();
+      const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      target.scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"});
+      if(history.replaceState)history.replaceState(null,"",href);
+    }
+  }
+  navLinks.forEach(x=>x.classList.toggle("active",x===link));
+}));const navObserver=new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting){const id=entry.target.id;navLinks.forEach(link=>link.classList.toggle("active",link.getAttribute("href")==="#"+id));}});},{rootMargin:"-25% 0px -65% 0px"});["timerSection","slLocalStudyAnalytics","leaderboardSection","slStreakPanel"].forEach(id=>{const target=document.getElementById(id);if(target)navObserver.observe(target);});renderStreaks();
 
 // Cloud daily credit is authoritative for all days with server records.
 // Older browser-only days remain visible locally, without being uploaded or

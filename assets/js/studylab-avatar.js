@@ -43,12 +43,15 @@
     img.className = "sl-avatar-photo";
     img.alt = "";
     img.decoding = "async";
-    img.loading = "lazy";
+    // A lazy image with hidden=true may NEVER be fetched, because the browser
+    // waits for it to be visible while our onload waits for the fetch.
+    // Keep the original SVG visible until the eager photo has loaded.
+    img.loading = "eager";
     img.referrerPolicy = "no-referrer";
-    img.hidden = true;
+    img.style.opacity = "0";
     img.onload = () => {
       if (node.dataset.slAvatarUrl !== url) return;
-      img.hidden = false;
+      img.style.opacity = "1";
       node.classList.add("sl-avatar-has-image");
     };
     img.onerror = () => {
@@ -116,7 +119,21 @@
     const image = new Image();
     try {
       image.src = objectUrl;
-      await image.decode();
+      // Some browsers cannot decode through Image.decode() reliably.
+      if (typeof image.decode === "function") {
+        try { await image.decode(); }
+        catch (_) {
+          await new Promise((resolve,reject)=>{
+            if (image.complete && image.naturalWidth) return resolve();
+            image.onload=resolve;
+            image.onerror=()=>reject(new Error("Could not read this image."));
+          });
+        }
+      } else {
+        await new Promise((resolve,reject)=>{
+          image.onload=resolve;image.onerror=()=>reject(new Error("Could not read this image."));
+        });
+      }
       const width = image.naturalWidth, height = image.naturalHeight;
       if (!width || !height || width > 8192 || height > 8192 ||
           width * height > 20000000) throw new Error("Image dimensions are too large.");
@@ -143,9 +160,23 @@
     await value.ready;
     const uid = ownId();
     const blob = await readFile(file);
-    const {error:uploadError} = await value.client.storage.from(BUCKET)
-      .upload(pathFor(uid),blob,{upsert:true,contentType:"image/webp",cacheControl:"3600"});
-    if (uploadError) throw uploadError;
+    // Explicit create/update is more reliable than a single upsert across
+    // Storage policy versions. Do not remove the old photo until replacement succeeds.
+    const bucket = value.client.storage.from(BUCKET);
+    const path = pathFor(uid);
+    let {error:uploadError} = await bucket.upload(path,blob,{
+      upsert:false,contentType:"image/webp",cacheControl:"3600"
+    });
+    if (uploadError && (uploadError.statusCode === "409" ||
+        uploadError.status === 409 || /already exists|duplicate/i.test(uploadError.message||""))) {
+      const result = await bucket.update(path,blob,{contentType:"image/webp",cacheControl:"3600",upsert:true});
+      uploadError = result.error;
+    }
+    if (uploadError) {
+      const code = String(uploadError.statusCode || uploadError.status || "");
+      const detail = uploadError.message || "Storage rejected the upload.";
+      throw new Error("Photo upload failed" + (code ? " (" + code + ")" : "") + ": " + detail);
+    }
     const updatedAt = new Date().toISOString();
     const {data,error} = await value.client.from("studylab_profile_avatars")
       .upsert({user_id:uid,updated_at:updatedAt},{onConflict:"user_id"})
