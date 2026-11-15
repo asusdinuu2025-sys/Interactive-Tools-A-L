@@ -290,19 +290,6 @@ html[data-theme="light"] .sl-pv-list-empty{color:#627d94}
 }
 
 
-/* New optional public bio in both existing editor forms. */
-.sl-profile-bio-field{min-width:0}
-.sl-profile-bio-input{
-  box-sizing:border-box;
-  width:100%;
-  min-height:70px;
-  max-height:150px;
-  resize:vertical;
-  padding:10px 12px;
-  font:500 13px/1.55 "Nirmala UI","Segoe UI",sans-serif;
-}
-.sl-profile-bio-count{margin-top:4px;font-size:11px;text-align:right;opacity:.86}
-.sl-profile-bio-count.is-over-limit{color:#ff8088!important;opacity:1}
 .sl-pv-description{
   min-height:45px;
   max-width:100%;
@@ -361,4 +348,185 @@ html[data-theme="light"] .sl-follow-profile-toast{
 @media(prefers-reduced-motion:reduce){
   .sl-follow-profile-toast{animation:none!important}
   .sl-follow-profile-toast.is-hiding{transition:none!important}
+}
+
+
+/* Bio is now editable ONLY within the account owner's View Profile window. */
+.sl-pv-description[hidden],.sl-pv-bio-editor[hidden]{display:none!important}
+.sl-pv-bio-editor{
+  display:grid;gap:8px;
+  padding:12px 13px;
+  margin:13px 0 18px;
+  border:1px solid rgba(163,203,236,.22);
+  border-radius:16px;
+  background:rgba(143,193,231,.065);
+}
+.sl-pv-bio-label{font:750 12.5px/1.4 "Nirmala UI","Segoe UI",sans-serif}
+.sl-pv-bio-input{
+  box-sizing:border-box;display:block;
+  width:100%;min-height:66px;max-height:140px;resize:vertical;
+  padding:9px 11px;border-radius:11px;
+  border:1px solid rgba(149,197,233,.29);
+  background:rgba(12,31,53,.21);
+  color:inherit;
+  font:500 12.5px/1.5 "Nirmala UI","Segoe UI",sans-serif;
+  outline:none;
+}
+.sl-pv-bio-input:focus-visible{
+  border-color:rgba(117,213,255,.82);
+  box-shadow:0 0 0 3px rgba(83,179,237,.14);
+}
+.sl-pv-bio-input[aria-invalid="true"]{border-color:#ff8295}
+.sl-pv-bio-controls{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.sl-pv-bio-count{color:#a7c6dd;font-size:11px}
+.sl-pv-bio-count.is-over-limit{color:#ff9baf!important}
+.sl-pv-bio-save{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  min-height:35px;padding:7px 13px;
+  border:1px solid rgba(117,203,255,.36);border-radius:11px;
+  background:rgba(80,170,235,.20);
+  color:#c9edff;
+  font:750 12px/1.2 "Nirmala UI","Segoe UI",sans-serif;
+  cursor:pointer;
+  -webkit-backdrop-filter:blur(15px);
+  backdrop-filter:blur(15px);
+}
+.sl-pv-bio-save:hover:not(:disabled){background:rgba(89,183,251,.33)}
+.sl-pv-bio-save:disabled{opacity:.46;cursor:default}
+.sl-pv-bio-save svg{width:15px;height:15px}
+.sl-pv-bio-status{font-size:11.5px;line-height:1.4;margin:0}
+.sl-pv-bio-status[data-state="success"]{color:#77dcad}
+.sl-pv-bio-status[data-state="error"]{color:#ffabb4}
+html[data-theme="light"] body:not(.study-room-page) .sl-pv-bio-editor{
+  background:rgba(255,255,255,.38);border-color:rgba(99,157,207,.24)
+}
+html[data-theme="light"] body:not(.study-room-page) .sl-pv-bio-input{
+  background:rgba(255,255,255,.58);
+  border-color:rgba(107,153,194,.32);color:#24435f
+}
+html[data-theme="light"] body:not(.study-room-page) .sl-pv-bio-count{color:#607a91}
+html[data-theme="light"] body:not(.study-room-page) .sl-pv-bio-save{
+  color:#165c89;background:rgba(75,153,220,.15);border-color:rgba(62,142,202,.35)
+}
+
+/* Clear selected gender: a bold outlined state, small checkmark, and
+   accessible status, including the mandatory pre-Study-Room profile gate. */
+#profileModal .profile-gender-choice{
+  position:relative!important;
+  overflow:visible!important;
+  isolation:isolate;
+}
+#profileModal .profile-gender-male{--sl-gender-choice-color:#279dff}
+#profileModal .profile-gender-female{--sl-gender-choice-color:#ee479e}
+#profileModal .profile-gender-choice.is-selected[aria-pressed="true"]{
+  border:2px solid var(--sl-gender-choice-color)!important;
+  background:color-mix(in srgb,var(--sl-gender-choice-color) 25%,transparent)!important;
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--sl-gender-choice-color) 38%,transparent),
+    0 0 21px color-mix(in srgb,var(--sl-gender-choice-color) 31%,transparent)!important;
+}
+#profileModal .profile-gender-choice.is-selected[aria-pressed="true"]::after{
+  content:"✓";position:absolute;top:-9px;right:-9px;
+  display:grid;place-items:center;
+  width:19px;height:19px;box-sizing:border-box;
+  border:2px solid var(--room-page-bg,#152038);
+  border-radius:50%;background:var(--sl-gender-choice-color);
+  color:white;font:900 12px/1 "Nirmala UI","Segoe UI",sans-serif;
+  box-shadow:0 2px 8px rgba(0,0,0,.2);
+  pointer-events:none;
+}
+#profileModal .sl-profile-gender-feedback{
+  margin:8px 0 0;
+  font:650 11px/1.4 "Nirmala UI","Segoe UI",sans-serif;
+  color:var(--text-secondary,#8daac1);
+}
+#profileModal .sl-profile-gender-feedback.has-selection{
+  color:var(--room-accent,#61bfff);
+}
+html[data-theme="light"] body:not(.study-room-page) #profileModal .sl-profile-gender-feedback.has-selection{color:#2474b4}
+body.study-room-page[data-room-theme] #profileModal .sl-profile-gender-feedback.has-selection{color:var(--room-accent)!important}
+
+/* Study Room profile window inherits live room colors even when its mode is
+   different from the Home HTML theme. This covers all eight room palettes. */
+body.study-room-page[data-room-theme] .sl-pv-dialog{
+  color:var(--room-text)!important;
+  border-color:color-mix(in srgb,var(--room-accent) 31%,transparent)!important;
+  background:
+    radial-gradient(ellipse at 18% 0%,color-mix(in srgb,var(--room-accent) 16%,transparent),transparent 60%),
+    linear-gradient(145deg,color-mix(in srgb,var(--room-page-bg) 82%,transparent),
+      color-mix(in srgb,var(--room-page-bg) 72%,var(--room-accent) 10%))!important;
+  box-shadow:0 26px 76px rgba(0,0,0,.22),
+    inset 0 1px 0 color-mix(in srgb,var(--room-text) 17%,transparent)!important;
+}
+body.study-room-page[data-room-mode="light"] .sl-pv-backdrop{
+  background:rgba(20,48,72,.20)!important;
+}
+body.study-room-page[data-room-mode="dark"] .sl-pv-backdrop{
+  background:rgba(4,10,18,.51)!important;
+}
+body.study-room-page[data-room-mode="light"] .sl-pv-dialog{color-scheme:light}
+body.study-room-page[data-room-mode="dark"] .sl-pv-dialog{color-scheme:dark}
+body.study-room-page[data-room-theme] :is(
+  .sl-pv-eyebrow,.sl-pv-username,.sl-pv-joined,.sl-pv-bio-count,
+  .sl-pv-list-identity small,.sl-pv-list-empty
+){color:var(--room-muted)!important}
+body.study-room-page[data-room-theme] :is(
+  .sl-pv-count,.sl-pv-bio-editor,.sl-pv-description,.sl-pv-student-list,.sl-pv-close
+){
+  background:color-mix(in srgb,var(--room-card) 58%,transparent)!important;
+  border-color:color-mix(in srgb,var(--room-text) 19%,transparent)!important;
+  color:var(--room-text)!important;
+}
+body.study-room-page[data-room-theme] .sl-pv-bio-input{
+  background:color-mix(in srgb,var(--room-input) 64%,transparent)!important;
+  color:var(--room-text)!important;
+  border-color:color-mix(in srgb,var(--room-text) 22%,transparent)!important;
+}
+body.study-room-page[data-room-theme] :is(.sl-pv-edit,.sl-pv-bio-save,.sl-pv-follow-action .sl-follow-btn){
+  background:color-mix(in srgb,var(--room-accent) 16%,var(--room-card))!important;
+  color:var(--room-text)!important;
+  border-color:color-mix(in srgb,var(--room-accent) 45%,transparent)!important;
+}
+body.study-room-page[data-room-theme] .sl-pv-follow-action .sl-follow-btn.is-following{
+  color:var(--room-text)!important;
+  background:color-mix(in srgb,var(--room-text) 9%,var(--room-card))!important;
+  border-color:color-mix(in srgb,var(--room-text) 26%,transparent)!important;
+}
+body.study-room-page[data-room-theme] .sl-pv-bio-status[data-state="success"]{color:var(--room-accent)!important}
+body.study-room-page[data-room-theme] .sl-pv-bio-label{color:var(--room-text)!important}
+body.study-room-page[data-room-theme] .sl-pv-list-user{color:var(--room-text)!important}
+body.study-room-page[data-room-theme] .sl-pv-list-user:hover{background:var(--room-chip)!important}
+body.study-room-page[data-room-theme] .sl-pv-count:hover{background:var(--room-chip)!important}
+
+/* Study Room follow actions match active palette and effective light/dark mode. */
+body.study-room-page[data-room-theme] .room-person-follow-slot .sl-follow-btn{
+  background:color-mix(in srgb,var(--room-accent) 17%,var(--room-card))!important;
+  color:var(--room-accent)!important;
+  border-color:color-mix(in srgb,var(--room-accent) 42%,transparent)!important;
+  box-shadow:inset 0 1px 0 color-mix(in srgb,var(--room-text) 12%,transparent);
+}
+body.study-room-page[data-room-theme] .room-person-follow-slot .sl-follow-btn.is-following{
+  background:color-mix(in srgb,var(--room-text) 10%,var(--room-card))!important;
+  color:var(--room-text)!important;
+  border-color:color-mix(in srgb,var(--room-text) 24%,transparent)!important;
+}
+body.study-room-page[data-room-theme] .room-person-follow-slot .sl-follow-btn:not(:disabled):hover{
+  background:color-mix(in srgb,var(--room-accent) 27%,var(--room-card))!important;
+}
+body.study-room-page[data-room-theme] .slr-profile-name-trigger{
+  cursor:pointer;
+  border-radius:5px;
+  text-decoration-color:transparent;
+  transition:text-decoration-color .16s ease;
+}
+body.study-room-page[data-room-theme] .slr-profile-name-trigger:hover{
+  text-decoration:underline;
+  text-decoration-color:var(--room-accent);
+  text-underline-offset:3px;
+}
+body.study-room-page[data-room-theme] .slr-profile-name-trigger:focus-visible{
+  outline:2px solid var(--room-accent)!important;
+  outline-offset:3px;
+}
+@media(prefers-reduced-motion:reduce){
+  body.study-room-page[data-room-theme] .slr-profile-name-trigger{transition:none!important}
 }
