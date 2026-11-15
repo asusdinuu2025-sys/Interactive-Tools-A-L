@@ -1253,3 +1253,59 @@ body.study-room-page[data-room-mode="light"] .study-chat-date-separator{
     background:#ebf3fc;
   }
 }
+
+
+/* Nonzero reactions stay displayed, while the four-choice picker remains
+   behind the small React action. No unused reaction buttons are shown. */
+.study-chat-reactions-used{
+  display:flex;align-items:center;flex-wrap:wrap;
+  gap:5px;margin-top:7px;margin-bottom:2px;
+}
+.study-chat-reactions-used:empty{display:none}
+.study-chat-reactions-used .study-chat-reaction{
+  min-height:24px;
+  border-color:rgba(119,182,223,.28);
+  background:rgba(113,173,222,.13);
+}
+.study-chat-reactions-used .study-chat-reaction.is-chosen{
+  border-color:rgba(92,202,248,.64);
+  background:rgba(75,178,230,.23);
+}
+html[data-theme="light"] .study-chat-reactions-used .study-chat-reaction,
+body.study-room-page[data-room-mode="light"] .study-chat-reactions-used .study-chat-reaction{
+  border-color:rgba(81,147,190,.32);
+  background:rgba(99,167,215,.14);
+}
+/* Nirmala UI for chat text and replies; emoji buttons retain emoji fallback. */
+.study-chat-message-text,
+.study-chat-message-content,
+.study-chat-reply-quote{
+  font-family:"Nirmala UI","Segoe UI",sans-serif!important;
+}
+/* Tiny actions stay compact but are legible in both light/dark modes. */
+.study-chat-message .study-chat-message-reply,
+.study-chat-message .study-chat-react-toggle{
+  font-family:"Nirmala UI","Segoe UI",sans-serif!important;
+  font-size:10.5px;
+  font-weight:750;
+  letter-spacing:.005em;
+  color:#acc7e3!important;
+  opacity:1;
+}
+.study-chat-message .study-chat-message-reply:hover,
+.study-chat-message .study-chat-react-toggle:hover,
+.study-chat-message .study-chat-react-toggle[aria-expanded="true"]{
+  color:#6bd5ff!important;
+}
+html[data-theme="light"] .study-chat-message .study-chat-message-reply,
+html[data-theme="light"] .study-chat-message .study-chat-react-toggle,
+body.study-room-page[data-room-mode="light"] .study-chat-message .study-chat-message-reply,
+body.study-room-page[data-room-mode="light"] .study-chat-message .study-chat-react-toggle{
+  color:#43698c!important;
+}
+html[data-theme="light"] .study-chat-message .study-chat-message-reply:hover,
+html[data-theme="light"] .study-chat-message .study-chat-react-toggle:hover,
+body.study-room-page[data-room-mode="light"] .study-chat-message .study-chat-message-reply:hover,
+body.study-room-page[data-room-mode="light"] .study-chat-message .study-chat-react-toggle:hover{
+  color:#1476ae!important;
+}

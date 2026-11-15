@@ -336,11 +336,12 @@
     window.StudyLabProfileView?.open({userId:id});
   }
 
-  function messageReactions(id, container) {
+  function messageReactions(id, container, usedOnly = false) {
     const rows=reactionsByMessage.get(id)||[];
     container.replaceChildren();
     for(const symbol of REACTIONS){
       const used=rows.filter(item=>item.reaction===symbol);
+      if(usedOnly && !used.length)continue;
       const chosen=used.some(item=>item.user_id===userId);
       const reaction=document.createElement("button");
       reaction.type="button";reaction.className="study-chat-reaction";
@@ -359,7 +360,9 @@
   function refreshReactionUI() {
     for(const article of list.querySelectorAll(".study-chat-message")){
       const id=article.dataset.messageId;
+      const usedReactions=article.querySelector(".study-chat-reactions-used");
       const reactions=article.querySelector(".study-chat-reactions");
+      if(id && usedReactions)messageReactions(id,usedReactions,true);
       if(id && reactions)messageReactions(id,reactions);
     }
   }
@@ -489,6 +492,12 @@
     text.append(linkifyMessage(row.message));
     body.append(text);
 
+    // Telegram-style: used reactions and counts stay on the bubble;
+    // unused choices stay hidden inside the existing React picker.
+    const usedReactions=document.createElement("div");
+    usedReactions.className="study-chat-reactions-used";
+    usedReactions.setAttribute("aria-label","Message reaction counts");
+    messageReactions(row.id,usedReactions,true);
     const reactions=document.createElement("div");
     reactions.className="study-chat-reactions";
     messageReactions(row.id,reactions);
@@ -519,7 +528,7 @@
     timestamp.className="study-chat-message-time";
     timestamp.textContent=formatTime(row.created_at)+(row.edited_at?" · edited":"");
     footer.append(footerActions,timestamp);
-    article.replaceChildren(header,body,reactions,footer);
+    article.replaceChildren(header,body,usedReactions,reactions,footer);
 
     if(!existing)list.appendChild(article);
     while(list.querySelectorAll(".study-chat-message").length>CONFIG.maxMessages){

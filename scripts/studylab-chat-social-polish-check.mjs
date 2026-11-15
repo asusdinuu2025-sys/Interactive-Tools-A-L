@@ -38,6 +38,14 @@ assert.match(chat,/separator\.setAttribute\("role","separator"\)/);
 assert.match(chat,/if\(!existing\)refreshDateSeparators\(\)/);
 assert.match(chat,/react\.setAttribute\("aria-expanded"/);
 assert.match(chatCss,/\.study-chat-message\.is-reactions-open \.study-chat-reactions/);
+assert.match(chat,/function messageReactions\(id, container, usedOnly = false\)/);
+assert.match(chat,/if\(usedOnly && !used.length\)continue/);
+assert.match(chat,/messageReactions\(id,usedReactions,true\)/);
+assert.match(chat,/messageReactions\(row.id,usedReactions,true\)/);
+assert.match(chat,/article.replaceChildren\(header,body,usedReactions,reactions,footer\)/);
+assert.match(chatCss,/\.study-chat-reactions-used:empty\{display:none\}/);
+assert.match(chatCss,/font-family:"Nirmala UI","Segoe UI",sans-serif!important/);
+assert.match(chatCss,/font-size:10.5px/);
 assert.match(chatCss,/\.study-chat-date-separator/);
 assert.match(chatCss,/\.study-chat-message:not\(\.own\)\{/);
 assert.match(chatCss,/\.study-chat-message\.own\{/);
@@ -86,8 +94,8 @@ assert.match(socialMigration,/create table if not exists public\.studylab_social
 assert.doesNotMatch(moderators,/delete from public\.studylab_social_posts/i);
 
 for(const html of [home,room]){
-  assert.match(html,/chat\.js\?v=20261115-telegram-corners-dates-v5/);
-  assert.match(html,/chat\.css\?v=20261115-telegram-corners-dates-v5/);
+  assert.match(html,/chat\.js\?v=20261115-visible-reacted-v6/);
+  assert.match(html,/chat\.css\?v=20261115-visible-reacted-v6/);
   assert.match(html,/studylab-avatar\.js\?v=20261115-uuid-fixed-v5/);
 }
 assert.match(home,/studylab-social\.js\?v=20261115-social-likes-only-v3/);
