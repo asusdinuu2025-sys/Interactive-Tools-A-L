@@ -484,10 +484,18 @@
     if(!client||!userId||!REACTIONS.includes(symbol)||!messagesById.has(id))return;
     const active=(reactionsByMessage.get(id)||[]).find(r=>r.user_id===userId);
     const query=client.from("studylab_chat_reactions");
-    const {error}=active?.reaction===symbol
-      ?await query.delete().eq("message_id",id).eq("user_id",userId)
-      :await query.upsert({message_id:id,user_id:userId,reaction:symbol},
-        {onConflict:"message_id,user_id"});
+    // Insert a new reaction, update ONLY its emoji when switching, or delete
+    // it when tapped twice. Column-level grants forbid changing owner/target.
+    let result;
+    if(active?.reaction===symbol){
+      result=await query.delete().eq("message_id",id).eq("user_id",userId);
+    }else if(active){
+      result=await query.update({reaction:symbol})
+        .eq("message_id",id).eq("user_id",userId);
+    }else{
+      result=await query.insert({message_id:id,user_id:userId,reaction:symbol});
+    }
+    const {error}=result;
     if(error){chatFeedback("Reaction failed. Please try again.",true);return;}
     chatFeedback("");await loadReactions([id]);
   }
