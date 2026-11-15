@@ -35,7 +35,8 @@ assert.match(migration,/for insert to authenticated/);
 assert.match(migration,/for update to authenticated/);
 assert.match(migration,/for delete to authenticated/);
 
-assert.match(viewer,/avatarEditor\.hidden=!own/);
+assert.match(viewer,/avatarEditor\.hidden=true/);
+assert.match(viewer,/avatarToggle\.hidden=!own/);
 assert.match(viewer,/window\.StudyLabAvatar\.save\(file\)/);
 assert.match(viewer,/window\.StudyLabAvatar\.remove\(\)/);
 assert.match(viewer,/window\.StudyLabAvatar\?\.decorate\(avatarNode,id\)/);

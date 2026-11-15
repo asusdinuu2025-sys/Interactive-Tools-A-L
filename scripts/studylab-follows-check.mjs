@@ -21,7 +21,7 @@ const drawer=readFileSync("assets/js/feed-drawer.js","utf8");
 for(const path of ["index.html","study-room.html"]){
  const html=readFileSync(path,"utf8");
  assert.ok(html.includes("studylab-follow.js?v=20261114-follow-v1"),"Follow script missing from "+path);
- assert.ok(html.includes("studylab-follow.css?v=20261115-profile-refine-v2"),"Follow CSS missing from "+path);
+ assert.ok(html.includes("studylab-follow.css?v=20261115-profile-identity-v3"),"Follow CSS missing from "+path);
  assert.ok(html.indexOf("studylab-follow.js")<html.indexOf("studylab-profile-view.js"),
    "Follow module must load before public profile viewer");
 }
@@ -79,8 +79,8 @@ assert.ok(!accountSource.includes("bio: bio || null"),
   "Normal full-profile saves must not overwrite an existing Bio");
 assert.ok(viewer.includes('bioNode.textContent=escText(profile.bio)'),
   "Visitor profile card must show read-only public Bio");
-assert.ok(viewer.includes("bioEditor.hidden=!own") &&
-  viewer.includes("bioNode.hidden=own"),
+assert.ok(viewer.includes("bioEditor.hidden=true") &&
+  viewer.includes("bioEditToggle.hidden=!own"),
   "Only a profile owner may use the Bio editor");
 assert.ok(room.includes("room-person-follow-slot"),"Follow control must sit inside study room card");
 assert.ok(css.includes("sl-follow-profile-toast"),"Right-side incomplete-profile toast styling missing");
@@ -97,10 +97,10 @@ assert.ok(room.includes("room-person-status-stack") && room.includes("room-perso
   "Study Room Follow must be directly below studying/away status inside card");
 assert.ok(css.includes("max-width:100%;margin:0;z-index:1"),
   "Study Room Follow control must not overflow its card");
-assert.ok(viewer.includes("bioCount.textContent") && viewer.includes('count>18'),
-  "View Profile must show and enforce the 18-character Bio counter");
-assert.ok(accountSource.includes('Array.from(cleanBio).length > 18'),
-  "Dedicated Bio saver must enforce the 18-character limit");
+assert.ok(viewer.includes("bioCount.textContent") && viewer.includes('count>35'),
+  "View Profile must show and enforce the 35-character Bio counter");
+assert.ok(accountSource.includes('Array.from(cleanBio).length > 35'),
+  "Dedicated Bio saver must enforce the 35-character limit");
 
 const own="10000000-0000-4000-8000-000000000001";
 const other="20000000-0000-4000-8000-000000000002";

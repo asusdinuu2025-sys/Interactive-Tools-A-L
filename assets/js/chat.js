@@ -1,6 +1,6 @@
 /* =========================================================
    STUDY LAB — SHARED STUDY CHAT
-   Anonymous, text-only, Realtime Supabase chat.
+   Realtime Supabase chat with profiles, replies, reactions and author controls.
    ========================================================= */
 
 (function () {
@@ -55,14 +55,14 @@
           <button type="button" class="study-chat-close" data-chat-close aria-label="Close chat">×</button>
         </div>
 
-        <div class="study-chat-notice">
-          🎓 Study chat • keeps the newest 100 messages. When a new message makes 101, the oldest is removed.
-          <strong>Please keep conversations educational and respectful.</strong>
-        </div>
-
         <div class="study-chat-list" data-chat-list aria-live="polite"></div>
 
         <form class="study-chat-compose" data-chat-form>
+          <div class="study-chat-context" data-chat-context hidden>
+            <span data-chat-context-text></span>
+            <button type="button" data-chat-context-cancel aria-label="Cancel reply or edit">×</button>
+          </div>
+          <div class="study-chat-feedback" data-chat-feedback role="status" hidden></div>
           <div class="study-chat-input-wrap">
             <textarea
               class="study-chat-input"
@@ -101,6 +101,10 @@
   const statusText = root.querySelector("[data-chat-status]");
   const unread = root.querySelector("[data-chat-unread]");
   const inputWrap = root.querySelector(".study-chat-input-wrap");
+  const contextBar = root.querySelector("[data-chat-context]");
+  const contextText = root.querySelector("[data-chat-context-text]");
+  const cancelContext = root.querySelector("[data-chat-context-cancel]");
+  const feedback = root.querySelector("[data-chat-feedback]");
 
   const sessionKey =
     sessionStorage.getItem("studylab_chat_session") ||
@@ -118,6 +122,16 @@
   let unreadCount = 0;
   let lastSentAt = 0;
   let messagesById = new Map();
+  let profilesById = new Map();
+  let reactionsByMessage = new Map();
+  let replyTarget = null;
+  let editTarget = null;
+  let busyMessageAction = false;
+  let reactionSyncTimer = 0;
+  const reactionRefreshIds = new Set();
+  const REACTIONS = ["👍","😂","🔥","❤️"];
+  const safeUuid = value => typeof value === "string" &&
+    /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(value);
 
   async function loadChatIdentity() {
     const account = window.StudyLabAccount;
@@ -143,6 +157,10 @@
   window.addEventListener("studylab-profile-updated", event => {
     const name = event.detail?.display_name;
     if (name) nickname = name;
+    if(userId){
+      profilesById.delete(userId);
+      loadProfiles();
+    }
   });
 
   function setStatus(online, textValue) {
@@ -190,42 +208,316 @@
     empty?.remove();
   }
 
+  function chatFeedback(text, isError = false) {
+    if (!feedback) return;
+    feedback.hidden = !text;
+    feedback.textContent = text || "";
+    feedback.classList.toggle("is-error", Boolean(isError));
+  }
+
+  function showComposerContext() {
+    if (!contextBar) return;
+    const active=editTarget||replyTarget;
+    contextBar.hidden=!active;
+    if(contextText){
+      const row=messagesById.get(active);
+      contextText.textContent=editTarget
+        ? "Editing your message"
+        : "Replying to " + (row?.nickname || "a student") + ": " +
+          String(row?.message || "").slice(0,90);
+    }
+    input.placeholder=editTarget?"Edit your message…":replyTarget?"Write a reply…":"";
+    updateComposer();
+  }
+  function clearComposerContext(clearInput = false) {
+    editTarget=null;replyTarget=null;
+    if(clearInput)input.value="";
+    showComposerContext();
+  }
+
+  // Render link and phone anchors as DOM nodes only. Never insert message
+  // content as HTML; malicious markup must remain inert text.
+  function linkifyMessage(textValue) {
+    const fragment=document.createDocumentFragment();
+    const raw=String(textValue||"");
+    const pattern=/(?:https?:\/\/|www\.)[^\s<>"']+|(?:\+?\d[\d().\s-]{7,}\d)/gi;
+    let pos=0;
+    for(const match of raw.matchAll(pattern)){
+      const index=match.index;
+      if(index < pos)continue;
+      if(index>pos)fragment.append(document.createTextNode(raw.slice(pos,index)));
+      const matched=match[0];
+      let candidate=matched;
+      let suffix="";
+      if(/^(?:https?:\/\/|www\.)/i.test(candidate)){
+        candidate=candidate.replace(/[.,;!?]+$/g,m=>{suffix=m+suffix;return "";});
+        if(candidate.endsWith(")") &&
+          (candidate.match(/\(/g)||[]).length < (candidate.match(/\)/g)||[]).length){
+          candidate=candidate.slice(0,-1);suffix=")"+suffix;
+        }
+        try {
+          const parsed=new URL(candidate.startsWith("www.")?"https://"+candidate:candidate);
+          if(["http:","https:"].includes(parsed.protocol)){
+            const link=document.createElement("a");
+            link.textContent=candidate;link.href=parsed.href;
+            link.target="_blank";link.rel="noopener noreferrer nofollow ugc";
+            fragment.append(link);
+          }else fragment.append(document.createTextNode(candidate));
+        }catch(_){fragment.append(document.createTextNode(candidate));}
+      }else{
+        const digits=candidate.replace(/\D/g,"");
+        const atStart=index===0 || !/[\w@]/.test(raw[index-1]);
+        if(atStart && digits.length>=9 && digits.length<=15 &&
+          /^(\+|0)/.test(candidate.trim())){
+          const link=document.createElement("a");
+          link.textContent=candidate;
+          link.href="tel:"+(candidate.trim().startsWith("+")?"+":"")+digits;
+          fragment.append(link);
+        }else fragment.append(document.createTextNode(candidate));
+      }
+      if(suffix)fragment.append(document.createTextNode(suffix));
+      pos=index+matched.length;
+    }
+    if(pos<raw.length)fragment.append(document.createTextNode(raw.slice(pos)));
+    return fragment;
+  }
+
+  function activateProfile(id) {
+    if (!safeUuid(id))return;
+    window.StudyLabProfileView?.open({userId:id});
+  }
+
+  function messageReactions(id, container) {
+    const rows=reactionsByMessage.get(id)||[];
+    container.replaceChildren();
+    for(const symbol of REACTIONS){
+      const used=rows.filter(item=>item.reaction===symbol);
+      const chosen=used.some(item=>item.user_id===userId);
+      const reaction=document.createElement("button");
+      reaction.type="button";reaction.className="study-chat-reaction";
+      reaction.classList.toggle("is-chosen",chosen);
+      reaction.setAttribute("aria-pressed",String(chosen));
+      reaction.setAttribute("aria-label",symbol+" reaction, "+used.length+" students");
+      reaction.append(document.createTextNode(symbol));
+      if(used.length){
+        const counter=document.createElement("span");
+        counter.textContent=String(used.length);reaction.append(counter);
+      }
+      reaction.addEventListener("click",()=>toggleReaction(id,symbol));
+      container.append(reaction);
+    }
+  }
+  function refreshReactionUI() {
+    for(const article of list.querySelectorAll(".study-chat-message")){
+      const id=article.dataset.messageId;
+      const reactions=article.querySelector(".study-chat-reactions");
+      if(id && reactions)messageReactions(id,reactions);
+    }
+  }
+
   function renderMessage(row) {
     if (!list || !row?.id) return;
-
-    if (messagesById.has(row.id)) return;
-    messagesById.set(row.id, row);
+    const existing=[...list.querySelectorAll(".study-chat-message")]
+      .find(node=>node.dataset.messageId===row.id);
+    messagesById.set(row.id,row);
     clearEmptyState();
 
-    const article = document.createElement("article");
-    article.className = "study-chat-message";
-    article.dataset.messageId = row.id;
+    const article=existing||document.createElement("article");
+    article.className="study-chat-message";
+    article.dataset.messageId=row.id;
+    const own=Boolean(row.user_id && row.user_id===userId);
+    if(own)article.classList.add("own");
 
-    if ((row.user_id && row.user_id === userId) || (!row.user_id && row.session_id === sessionKey)) {
-      article.classList.add("own");
+    const header=document.createElement("div");
+    header.className="study-chat-message-head";
+    const identity=document.createElement(safeUuid(row.user_id)?"button":"div");
+    identity.className="study-chat-message-author";
+    if(identity.tagName==="BUTTON"){
+      identity.type="button";
+      identity.title="View student profile";
+      identity.addEventListener("click",()=>activateProfile(row.user_id));
+    }
+    const avatar=document.createElement("span");
+    avatar.className="study-chat-message-avatar";
+    const profile=profilesById.get(row.user_id);
+    const isFemale=profile?.gender==="female";
+    avatar.classList.toggle("female",isFemale);
+    avatar.innerHTML=isFemale
+      ? '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3.2"/><path d="M7 20l1-4.2a4.1 4.1 0 0 1 8 0l1 4.2z"/></svg>'
+      : '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3.2"/><path d="M4.5 20v-2.5a7.5 7.5 0 0 1 15 0V20z"/></svg>';
+    if(safeUuid(row.user_id))window.StudyLabAvatar?.decorate(avatar,row.user_id);
+    const name=document.createElement("span");
+    name.className="study-chat-message-name";
+    name.textContent=profile?.display_name||row.nickname||"Student";
+    if(safeUuid(row.user_id))window.StudyLabNameMark?.decorate(name,row.user_id);
+    identity.append(avatar,name);header.append(identity);
+
+    if(own){
+      const menuWrap=document.createElement("div");
+      menuWrap.className="study-chat-message-menu-wrap";
+      const dots=document.createElement("button");
+      dots.type="button";dots.className="study-chat-message-more";
+      dots.textContent="⋯";dots.title="Message options";
+      dots.setAttribute("aria-label","Message options");
+      dots.setAttribute("aria-expanded","false");
+      const menu=document.createElement("div");
+      menu.className="study-chat-message-menu";menu.hidden=true;
+      for(const [label,handler] of [
+        ["Edit",()=>{
+          replyTarget=null;editTarget=row.id;
+          input.value=row.message||"";
+          showComposerContext();input.focus();
+          chatFeedback("");
+        }],
+        ["Delete",()=>deleteMessage(row.id)]
+      ]){
+        const option=document.createElement("button");
+        option.type="button";option.textContent=label;
+        option.addEventListener("click",event=>{
+          event.stopPropagation();menu.hidden=true;dots.setAttribute("aria-expanded","false");
+          handler();
+        });
+        menu.append(option);
+      }
+      dots.addEventListener("click",event=>{
+        event.stopPropagation();
+        for(const open of document.querySelectorAll(".study-chat-message-menu:not([hidden])"))open.hidden=true;
+        const isOpening=menu.hidden;
+        menu.hidden=!isOpening;dots.setAttribute("aria-expanded",String(isOpening));
+      });
+      menuWrap.append(dots,menu);header.append(menuWrap);
     }
 
-    const name = document.createElement("div");
-    name.className = "study-chat-message-name";
-    name.textContent = row.nickname || "Student";
+    const body=document.createElement("div");
+    body.className="study-chat-message-text";
+    if(row.reply_to){
+      const quote=document.createElement("button");
+      quote.type="button";quote.className="study-chat-reply-quote";
+      const source=messagesById.get(row.reply_to);
+      quote.textContent=source
+        ? "↳ "+source.nickname+": "+String(source.message||"").slice(0,76)
+        : "↳ Previous message unavailable";
+      quote.addEventListener("click",()=>{
+        const target=[...list.querySelectorAll(".study-chat-message")]
+          .find(el=>el.dataset.messageId===row.reply_to);
+        target?.scrollIntoView({behavior:"smooth",block:"nearest"});
+        target?.classList.add("is-highlighted");
+        if(target)setTimeout(()=>target.classList.remove("is-highlighted"),1350);
+      });
+      body.append(quote);
+    }
+    const text=document.createElement("span");
+    text.className="study-chat-message-content";
+    text.append(linkifyMessage(row.message));
+    body.append(text);
 
-    const message = document.createElement("div");
-    message.className = "study-chat-message-text";
-    message.textContent = row.message || "";
+    const reactions=document.createElement("div");
+    reactions.className="study-chat-reactions";
+    messageReactions(row.id,reactions);
+    const footer=document.createElement("div");
+    footer.className="study-chat-message-foot";
+    const reply=document.createElement("button");
+    reply.type="button";reply.className="study-chat-message-reply";
+    reply.textContent="↩ Reply";
+    reply.addEventListener("click",()=>{
+      if(editTarget)input.value="";
+      editTarget=null;replyTarget=row.id;
+      showComposerContext();input.focus();chatFeedback("");
+    });
+    const timestamp=document.createElement("span");
+    timestamp.className="study-chat-message-time";
+    timestamp.textContent=formatTime(row.created_at)+(row.edited_at?" · edited":"");
+    footer.append(reply,timestamp);
+    article.replaceChildren(header,body,reactions,footer);
 
-    const time = document.createElement("div");
-    time.className = "study-chat-message-time";
-    time.textContent = formatTime(row.created_at);
-
-    article.append(name, message, time);
-    list.appendChild(article);
-
-    while (list.querySelectorAll(".study-chat-message").length > CONFIG.maxMessages) {
-      const oldest = list.querySelector(".study-chat-message");
-      if (oldest) {
+    if(!existing)list.appendChild(article);
+    while(list.querySelectorAll(".study-chat-message").length>CONFIG.maxMessages){
+      const oldest=list.querySelector(".study-chat-message");
+      if(oldest){
         messagesById.delete(oldest.dataset.messageId);
+        reactionsByMessage.delete(oldest.dataset.messageId);
         oldest.remove();
       }
+    }
+  }
+
+  async function loadProfiles() {
+    const ids=[...new Set([...messagesById.values()]
+      .map(row=>row.user_id).filter(safeUuid))];
+    if(!ids.length)return;
+    const missing=ids.filter(id=>!profilesById.has(id));
+    try {
+      if(missing.length){
+        const batches=[];
+        for(let i=0;i<missing.length;i+=40)batches.push(missing.slice(i,i+40));
+        const results=await Promise.all(batches.map(ids=>window.StudyLabFollow?.lookup(ids)||[]));
+        const byId=new Map(results.flat().filter(p=>p?.user_id).map(p=>[p.user_id,p]));
+        for(const id of missing)profilesById.set(id,byId.get(id)||{user_id:id});
+        for(const row of [...messagesById.values()]){
+          if(missing.includes(row.user_id))renderMessage(row);
+        }
+      }
+      // StudyLabAvatar internally caches photos for 90 seconds, so this never
+      // re-fetches existing avatars on every new message.
+      await window.StudyLabAvatar?.prefetch(ids).catch(()=>{});
+    }catch(error){console.warn("Chat profile labels unavailable:",error);}
+  }
+
+  async function loadReactions(onlyIds) {
+    if(!client || !messagesById.size)return;
+    const ids=(onlyIds||[...messagesById.keys()])
+      .filter(id=>messagesById.has(id));
+    if(!ids.length)return;
+    const {data,error}=await client.from("studylab_chat_reactions")
+      .select("message_id,user_id,reaction").in("message_id",ids);
+    if(error){console.warn("Chat reactions unavailable:",error);return;}
+    const next=new Map();
+    for(const item of data||[]){
+      if(!next.has(item.message_id))next.set(item.message_id,[]);
+      next.get(item.message_id).push(item);
+    }
+    if(!onlyIds)reactionsByMessage=next;
+    else for(const id of ids)reactionsByMessage.set(id,next.get(id)||[]);
+    refreshReactionUI();
+  }
+
+  async function toggleReaction(id,symbol) {
+    if(!client||!userId||!REACTIONS.includes(symbol)||!messagesById.has(id))return;
+    const active=(reactionsByMessage.get(id)||[]).find(r=>r.user_id===userId);
+    const query=client.from("studylab_chat_reactions");
+    // Insert a new reaction, update ONLY its emoji when switching, or delete
+    // it when tapped twice. Column-level grants forbid changing owner/target.
+    let result;
+    if(active?.reaction===symbol){
+      result=await query.delete().eq("message_id",id).eq("user_id",userId);
+    }else if(active){
+      result=await query.update({reaction:symbol})
+        .eq("message_id",id).eq("user_id",userId);
+    }else{
+      result=await query.insert({message_id:id,user_id:userId,reaction:symbol});
+    }
+    const {error}=result;
+    if(error){chatFeedback("Reaction failed. Please try again.",true);return;}
+    chatFeedback("");await loadReactions([id]);
+  }
+
+  async function deleteMessage(id) {
+    if(!client||!userId||messagesById.get(id)?.user_id!==userId)return;
+    if(!window.confirm("Delete your message? This cannot be undone."))return;
+    const {error}=await client.from(CONFIG.table).delete()
+      .eq("id",id).eq("user_id",userId);
+    if(error){chatFeedback("Could not delete message.",true);return;}
+    deleteMessageLocally(id);
+  }
+  function deleteMessageLocally(id) {
+    messagesById.delete(id);reactionsByMessage.delete(id);
+    for(const element of list.querySelectorAll(".study-chat-message")){
+      if(element.dataset.messageId===id)element.remove();
+    }
+    if(editTarget===id||replyTarget===id)clearComposerContext();
+    if(messagesById.size===0)renderInitial([]);
+    else for(const row of [...messagesById.values()]){
+      if(row.reply_to===id)renderMessage({...row,reply_to:null});
     }
   }
 
@@ -264,7 +556,8 @@
         !length ||
         length > CONFIG.maxLength ||
         !client ||
-        Date.now() - lastSentAt < CONFIG.rateLimitMs;
+        busyMessageAction ||
+        (!editTarget && Date.now() - lastSentAt < CONFIG.rateLimitMs);
     }
   }
 
@@ -283,7 +576,7 @@
 
     const { data, error } = await client
       .from(CONFIG.table)
-      .select("id,message,created_at,session_id,user_id,nickname")
+      .select("id,message,created_at,session_id,user_id,nickname,reply_to,edited_at")
       .order("created_at", { ascending: false })
       .order("id", { ascending: false })
       .limit(CONFIG.maxMessages);
@@ -296,6 +589,10 @@
     }
 
     renderInitial((data || []).reverse());
+    // Separate, read-only student identity lookup: never expose private
+    // student profile fields or require individual profile queries per bubble.
+    loadProfiles();
+    loadReactions();
   }
 
   function subscribe() {
@@ -303,76 +600,82 @@
 
     channel = client
       .channel("studylab-chat-room")
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: CONFIG.table
-        },
-        payload => {
-          const row = payload.new;
-          const wasNearBottom =
-            list &&
-            list.scrollHeight - list.scrollTop - list.clientHeight < 140;
-
+      .on("postgres_changes",
+        {event:"*",schema:"public",table:CONFIG.table},
+        payload=>{
+          if(payload.eventType==="DELETE"){
+            deleteMessageLocally(payload.old?.id);
+            return;
+          }
+          const row=payload.new;
+          if(!row?.id)return;
+          const wasKnown=messagesById.has(row.id);
+          const wasNearBottom=list &&
+            list.scrollHeight-list.scrollTop-list.clientHeight<140;
           renderMessage(row);
-
-          if (!isOpen && row.user_id !== userId) {
-            setUnread(unreadCount + 1);
+          if(payload.eventType==="INSERT"){
+            if(!isOpen && row.user_id!==userId)setUnread(unreadCount+1);
+            if(wasNearBottom || row.session_id===sessionKey)scrollToBottom(true);
+            loadProfiles();
+          } else if(wasKnown){
+            // Keep edits across every open tab without reordering messages.
+            loadProfiles();
           }
-
-          if (wasNearBottom || row.session_id === sessionKey) {
-            scrollToBottom(true);
-          }
-        }
-      )
-      .subscribe(status => {
-        if (status === "SUBSCRIBED") {
-          setStatus(true, "Live • newest 100 messages");
-        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
-          setStatus(false, "Live connection unavailable");
-        }
+        })
+      .on("postgres_changes",
+        {event:"*",schema:"public",table:"studylab_chat_reactions"},
+        payload=>{
+          const id=payload.new?.message_id || payload.old?.message_id;
+          if(id)reactionRefreshIds.add(id);
+          clearTimeout(reactionSyncTimer);
+          reactionSyncTimer=setTimeout(()=>{
+            const changed=[...reactionRefreshIds];
+            reactionRefreshIds.clear();
+            loadReactions(changed.length?changed:undefined);
+          },140);
+        })
+      .subscribe(status=>{
+        if(status==="SUBSCRIBED")setStatus(true,"Live • newest 100 messages");
+        else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT")
+          setStatus(false,"Live connection unavailable");
       });
   }
 
   async function sendMessage() {
-    if (!client || !input) return;
-
-    const now = Date.now();
-    if (now - lastSentAt < CONFIG.rateLimitMs) {
-      return;
-    }
-
-    const message = input.value.trim();
-    if (!message || message.length > CONFIG.maxLength) {
+    if(!client || !input || busyMessageAction)return;
+    const message=input.value.trim();
+    if(!message || message.length>CONFIG.maxLength){updateComposer();return;}
+    const now=Date.now();
+    if(!editTarget && now-lastSentAt<CONFIG.rateLimitMs)return;
+    busyMessageAction=true;
+    if(!editTarget)lastSentAt=now;
+    updateComposer();chatFeedback("");
+    try {
+      const editingId=editTarget;
+      let error;
+      if(editingId){
+        if(messagesById.get(editingId)?.user_id!==userId)
+          throw new Error("Only the author can edit this message.");
+        ({error}=await client.from(CONFIG.table)
+          .update({message}).eq("id",editingId).eq("user_id",userId));
+      }else{
+        const values={message,session_id:sessionKey,user_id:userId,nickname};
+        if(replyTarget && messagesById.has(replyTarget))values.reply_to=replyTarget;
+        ({error}=await client.from(CONFIG.table).insert(values));
+      }
+      if(error)throw error;
+      input.value="";clearComposerContext();updateComposer();
+    }catch(error){
+      console.warn("StudyLab Chat message action:",error);
+      chatFeedback(error?.message?.includes("foreign key")
+        ?"That original message is no longer available. Cancel reply and send again."
+        :editTarget?"Could not edit message.":"Message could not be sent.",true);
+      if(!editTarget)lastSentAt=0;
+    }finally{
+      busyMessageAction=false;
       updateComposer();
-      return;
+      window.setTimeout(updateComposer,CONFIG.rateLimitMs+20);
     }
-
-    lastSentAt = now;
-    updateComposer();
-
-    const { error } = await client
-      .from(CONFIG.table)
-      .insert({
-        message,
-        session_id: sessionKey,
-        user_id: userId,
-        nickname
-      });
-
-    if (error) {
-      console.warn("StudyLab Chat send:", error);
-      setStatus(false, "Message could not be sent");
-      lastSentAt = 0;
-      updateComposer();
-      return;
-    }
-
-    input.value = "";
-    updateComposer();
-    window.setTimeout(updateComposer, CONFIG.rateLimitMs + 20);
   }
 
   function closeQuickAccess() {
@@ -415,7 +718,20 @@
       sendMessage();
     });
 
-    input?.addEventListener("input", updateComposer);
+    input?.addEventListener("input",()=>{
+      chatFeedback("");
+      updateComposer();
+    });
+    cancelContext?.addEventListener("click",()=>clearComposerContext(true));
+    // The menu belongs to its message, and closes on outside click.
+    panel?.addEventListener("click",event=>{
+      if(event.target.closest(".study-chat-message-more,.study-chat-message-menu"))return;
+      for(const menu of panel.querySelectorAll(".study-chat-message-menu:not([hidden])")){
+        menu.hidden=true;
+        menu.parentElement?.querySelector(".study-chat-message-more")
+          ?.setAttribute("aria-expanded","false");
+      }
+    });
 
     input?.addEventListener("keydown", event => {
       if (event.key === "Enter" && !event.shiftKey) {
@@ -438,7 +754,13 @@
 
     document.addEventListener("keydown", event => {
       if (event.key === "Escape" && isOpen) {
-        setOpen(false);
+        const visibleMenu=panel?.querySelector(".study-chat-message-menu:not([hidden])");
+        if(visibleMenu){
+          visibleMenu.hidden=true;
+          visibleMenu.parentElement?.querySelector(".study-chat-message-more")
+            ?.setAttribute("aria-expanded","false");
+        }else if(replyTarget||editTarget)clearComposerContext(true);
+        else setOpen(false);
       }
     });
 
