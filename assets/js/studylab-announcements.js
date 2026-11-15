@@ -33,7 +33,7 @@
     science:'<svg viewBox="0 0 230 150" fill="none" aria-hidden="true"><path d="M84 20v48l-31 52c-5 10 1 15 11 15h101c10 0 17-7 12-16l-33-51V20M76 20h78" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="M69 101c29 10 65-13 94 0l13 22c4 7-1 12-13 12H65c-10 0-13-5-9-12l13-22Z" fill="#6974ff" fill-opacity=".33"/><circle cx="113" cy="108" r="8" stroke="#90f6ff" stroke-width="3"/><circle cx="140" cy="119" r="5" fill="#9c85ff"/><circle cx="99" cy="85" r="4" fill="#90f6ff"/><path d="m176 26 7-7m-7 7 7 7m-7-7h-9m9 0h10" stroke="#7be3ff" stroke-width="3" stroke-linecap="round"/></svg>',
     announcement:'<svg viewBox="0 0 230 150" fill="none" aria-hidden="true"><path d="m66 60 95-33v89L66 84H44V60h22ZM65 85l12 39h26L91 95" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><path d="M178 55c18 7 18 31 0 38m10-51c26 13 25 52 0 64" stroke="#ad87ff" stroke-width="4" stroke-linecap="round"/><path d="m45 43 6-14m79 2 5-11" stroke="#71edff" stroke-width="3" stroke-linecap="round"/></svg>'
   };
-  let current=0,items=slides.slice(),announcements=[],receipts=new Map(),admin=false,interval=null;
+  let current=0,items=slides.slice(),announcements=[],historyItems=[],receipts=new Map(),admin=false,interval=null;
   let interactionUntil=0,hovered=false,visible=true;
   let historyDialog=null,managerDialog=null,editingId=null;
   const safeText=x=>String(x||"").trim();
@@ -132,8 +132,9 @@
       .order("created_at",{ascending:false}).limit(50);
     if(error){console.warn("StudyLab announcements:",error.message);return;}
     const now=Date.now();
-    announcements=(data||[]).filter(a=>a.published&&new Date(a.starts_at).getTime()<=now
-      &&(!a.ends_at||new Date(a.ends_at).getTime()>now));
+    // History retains published past updates; the carousel only promotes active ones.
+    historyItems=(data||[]).filter(a=>a.published&&new Date(a.starts_at).getTime()<=now);
+    announcements=historyItems.filter(a=>!a.ends_at||new Date(a.ends_at).getTime()>now);
     const announcement=announcements[0];
     items=slides.slice();
     if(announcement&&safeDestination(announcement.target_path)){
@@ -223,9 +224,9 @@
     intro.textContent="Discover StudyLab updates and revisit features at any time.";
     content.append(intro);
     await loadAnnouncements();await loadReceipts();
-    if(announcements.length){
-      for(const item of announcements)content.append(historyCard(item,false));
-      for(const item of announcements)markSeen(item.id,"viewed_at");
+    if(historyItems.length){
+      for(const item of historyItems)content.append(historyCard(item,false));
+      for(const item of historyItems)markSeen(item.id,"viewed_at");
     }else emptyMessage(content,"No official announcements have been published yet. Keep exploring StudyLab!");
     const footer=document.createElement("div");footer.className="sl-ann-dialog-actions";
     const tour=document.createElement("button");tour.type="button";tour.className="sl-ann-secondary";
@@ -353,7 +354,7 @@
   // Menu and user navigation use this small API; RLS remains the authority.
   window.StudyLabAnnouncements=Object.freeze({
     openHistory,openManager,canManage,
-    unreadCount:()=>announcements.filter(a=>!status(a.id).viewed_at).length
+    unreadCount:()=>historyItems.filter(a=>!status(a.id).viewed_at).length
   });
   loadAnnouncements();
   Promise.resolve(account?.ready).then(async()=>{

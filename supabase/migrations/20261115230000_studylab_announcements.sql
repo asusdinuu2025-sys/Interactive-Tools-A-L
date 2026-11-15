@@ -28,7 +28,7 @@ drop policy if exists "Announcement read published or site admin" on public.stud
 create policy "Announcement read published or site admin"
   on public.studylab_announcements for select to anon,authenticated
   using (
-    (published and starts_at <= now() and (ends_at is null or ends_at > now()))
+    (published and starts_at <= now())
     or (select public.studylab_social_is_admin())
   );
 drop policy if exists "Site admin may create announcements" on public.studylab_announcements;
