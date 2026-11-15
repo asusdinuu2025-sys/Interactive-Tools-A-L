@@ -17,6 +17,16 @@
   const profileStream = document.getElementById("profileStream");
   const genderButtons = [...document.querySelectorAll("[data-profile-gender]")];
   let selectedGender = "";
+  const profileGenderFeedback = document.createElement("p");
+  profileGenderFeedback.className = "sl-profile-gender-feedback";
+  profileGenderFeedback.setAttribute("role","status");
+  profileGenderFeedback.setAttribute("aria-live","polite");
+  document.querySelector(".profile-gender-field")?.append(profileGenderFeedback);
+  function showSelectedGender(){
+    const label=selectedGender==="male"?"Male":selectedGender==="female"?"Female":"None";
+    profileGenderFeedback.textContent=selectedGender?"✓ Selected: "+label:"No profile icon selected";
+    profileGenderFeedback.classList.toggle("has-selection",Boolean(selectedGender));
+  }
   const profileStatus = document.getElementById("profileStatus");
   const profileNameLabel = document.getElementById("profileNameLabel");
   const profileSubtitle = document.getElementById("profileSubtitle");
@@ -406,6 +416,7 @@
       button.classList.toggle("is-selected", active);
       button.setAttribute("aria-pressed", String(active));
     });
+    showSelectedGender();
   }
   function normalizeDisplayName(value) {
     return String(value || "").trim().replace(/\s+/g, " ");
@@ -710,6 +721,7 @@
       item.classList.toggle("is-selected", active);
       item.setAttribute("aria-pressed", String(active));
     });
+    showSelectedGender();
     updateStudyRoomValidation();
   }));
 
