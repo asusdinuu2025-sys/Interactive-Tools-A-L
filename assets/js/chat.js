@@ -130,6 +130,7 @@
   let channel = null;
   let isOpen = false;
   let isExpanded = false;
+  let isChatModerator = false;
   let unreadCount = 0;
   let lastSentAt = 0;
   let messagesById = new Map();
@@ -409,7 +410,9 @@
     if(safeUuid(row.user_id))window.StudyLabNameMark?.decorate(name,row.user_id);
     identity.append(avatar,name);header.append(identity);
 
-    if(own){
+    // Edit is always author-only. Verified Chat moderators may also remove
+    // other students' messages; PostgreSQL RLS enforces this server-side.
+    if(own || isChatModerator){
       const menuWrap=document.createElement("div");
       menuWrap.className="study-chat-message-menu-wrap";
       const dots=document.createElement("button");
@@ -420,15 +423,15 @@
       dots.setAttribute("aria-expanded","false");
       const menu=document.createElement("div");
       menu.className="study-chat-message-menu";menu.hidden=true;
-      for(const [label,handler] of [
-        ["Edit",()=>{
-          replyTarget=null;editTarget=row.id;
-          input.value=row.message||"";
-          showComposerContext();input.focus();
-          chatFeedback("");
-        }],
-        ["Delete",()=>deleteMessage(row.id)]
-      ]){
+      const actions=[];
+      if(own) actions.push(["Edit",()=>{
+        replyTarget=null;editTarget=row.id;
+        input.value=row.message||"";
+        showComposerContext();input.focus();
+        chatFeedback("");
+      }]);
+      actions.push(["Delete",()=>deleteMessage(row.id)]);
+      for(const [label,handler] of actions){
         const option=document.createElement("button");
         option.type="button";
         option.className=label==="Delete"?"study-chat-option-delete":"study-chat-option-edit";
@@ -575,11 +578,24 @@
   }
 
   async function deleteMessage(id) {
-    if(!client||!userId||messagesById.get(id)?.user_id!==userId)return;
-    if(!window.confirm("Delete your message? This cannot be undone."))return;
-    const {error}=await client.from(CONFIG.table).delete()
-      .eq("id",id).eq("user_id",userId);
-    if(error){chatFeedback("Could not delete message.",true);return;}
+    const message=messagesById.get(id);
+    if(!client || !userId || !message || (!isChatModerator && message.user_id!==userId))return;
+    const moderating=message.user_id!==userId;
+    const confirmation=moderating
+      ? "As a Chat moderator, permanently delete this student's message? This action will be privately logged."
+      : "Delete your message? This cannot be undone.";
+    if(!window.confirm(confirmation))return;
+    // Moderators select by message ID; ordinary users are also constrained
+    // by their own user ID. Server-side RLS is the final authority.
+    let request=client.from(CONFIG.table).delete().eq("id",id);
+    if(!isChatModerator)request=request.eq("user_id",userId);
+    const {data,error}=await request.select("id");
+    if(error || !data?.length){
+      chatFeedback(moderating?"Moderator deletion was not authorized or the message is gone."
+        :"Could not delete message.",true);
+      return;
+    }
+    chatFeedback("");
     deleteMessageLocally(id);
   }
   function deleteMessageLocally(id) {
@@ -883,6 +899,13 @@
         CONFIG.supabasePublishableKey
       );
 
+      // Read-only permission lookup. Auth account IDs are checked in a
+      // private DB table; browser email strings never grant moderator rights.
+      const moderatorResult=await client.rpc("studylab_chat_can_moderate");
+      if(moderatorResult.error){
+        console.warn("Chat moderator permission lookup unavailable:",moderatorResult.error);
+      }
+      isChatModerator=moderatorResult.data===true;
       await loadMessages();
       subscribe();
 
