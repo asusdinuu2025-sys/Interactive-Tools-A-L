@@ -125,6 +125,12 @@ if (uiPolishTests.status !== 0) {
     (uiPolishTests.stderr || uiPolishTests.stdout || "UI layout check failed"));
 }
 
+const chatSocialPolishTests = spawnSync(process.execPath, ["scripts/studylab-chat-social-polish-check.mjs"], {encoding:"utf8"});
+if (chatSocialPolishTests.status !== 0) {
+  fail("StudyLab Chat and Social polish checks failed:\n" +
+    (chatSocialPolishTests.stderr || chatSocialPolishTests.stdout || "Chat/Social polish tests failed"));
+}
+
 const chatTests = spawnSync(process.execPath, ["scripts/studylab-chat-interactions-check.mjs"], {encoding:"utf8"});
 if (chatTests.status !== 0) {
   fail("StudyLab Chat actions tests failed:\n" +
