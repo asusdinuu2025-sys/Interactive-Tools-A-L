@@ -902,3 +902,26 @@ html[data-theme="light"] .study-chat-message-menu button.study-chat-option-delet
 @media(prefers-reduced-motion:reduce){
   .study-chat-expand,.study-chat-close{transition:none!important}
 }
+
+/* Home sidebar CSS has important positioning on the compact Chat window.
+   An explicitly expanded window must override it at higher specificity. */
+body:not(.study-room-page) .study-chat-panel.is-expanded{
+  position:fixed!important;
+  left:clamp(16px,17vw,250px)!important;
+  right:auto!important;
+  top:auto!important;
+  bottom:18px!important;
+  width:min(700px,calc(100vw - 285px))!important;
+  height:min(790px,calc(100dvh - 36px))!important;
+  max-height:calc(100dvh - 36px)!important;
+  min-height:0!important;
+}
+@media(max-width:800px){
+  body:not(.study-room-page) .study-chat-panel.is-expanded{
+    left:8px!important;right:8px!important;
+    width:calc(100vw - 16px)!important;
+    height:calc(100dvh - 16px)!important;
+    max-height:calc(100dvh - 16px)!important;
+    bottom:8px!important;
+  }
+}
