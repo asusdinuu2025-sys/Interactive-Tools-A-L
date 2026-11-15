@@ -53,6 +53,23 @@ async function removeSocialFiles(userId) {
   }
   throw new Error("storage_batch_limit");
 }
+async function removeUserProgress(userId){
+  // These two personal-credit views are backed by tables without an Auth FK.
+  // Auth deletion already cascades study_room_members/credit_segments.
+  for(const table of ["study_room_personal_sessions","study_room_personal_daily"]){
+    const result=await request("/rest/v1/"+table+"?user_id=eq."+
+      encodeURIComponent(userId),"DELETE",PRIVATE_KEY);
+    if(!result.ok)throw new Error(table+"_cleanup_failed");
+  }
+}
+async function checkProfileCanBePreserved(userId){
+  // Do not hard-delete a user until the archive migration is present. On old
+  // schemas the profile row would disappear via auth.users cascade instead.
+  const result=await request("/rest/v1/studylab_profiles?select=id,deleted_at&id=eq."+
+    encodeURIComponent(userId)+"&limit=1","GET",PRIVATE_KEY);
+  return result.ok && Array.isArray(result.content) && result.content.length===1 &&
+    Object.prototype.hasOwnProperty.call(result.content[0],"deleted_at");
+}
 async function removeChatMessages(userId){
   // Chat messages allow NULL on user_id when account is removed; remove their
   // identifiable messages instead of leaving anonymized records behind.
@@ -88,14 +105,25 @@ exports.handler=async function(event) {
   }
   if(user?.is_anonymous)return reply(403,"Guest sessions cannot use registered-account deletion.");
   try{
+    if(!(await checkProfileCanBePreserved(user.id))){
+      return reply(409,"Profile preservation is not configured. No account data was deleted.");
+    }
     await removeSocialFiles(user.id);
     await removeChatMessages(user.id);
-    // Deleting auth.users cascades StudyLab profiles, Social posts/comments,
-    // study history and quota data (current Supabase schema audited).
+    await removeUserProgress(user.id);
+    // Auth deletion cascades all other account-linked records, while the
+    // archived profile's Auth FK is intentionally removed. Its private fields
+    // are anonymized by the BEFORE DELETE trigger on auth.users.
     const result=await request("/auth/v1/admin/users/"+encodeURIComponent(user.id),
       "DELETE",PRIVATE_KEY);
     if(!result.ok)throw new Error("auth_delete_failed_"+result.status);
-    return reply(200,"StudyLab account deleted.",true);
+    const retained=await request("/rest/v1/studylab_profiles?select=id,deleted_at&id=eq."+
+      encodeURIComponent(user.id)+"&limit=1","GET",PRIVATE_KEY);
+    if(!retained.ok || !retained.content?.[0]?.deleted_at){
+      console.error("Account deleted but archived profile verification failed",user.id);
+      return reply(500,"Account removal completed, but profile archival could not be verified. Contact StudyLab support.");
+    }
+    return reply(200,"StudyLab account deleted; anonymized profile record retained.",true);
   }catch(error){
     console.error("StudyLab account deletion failed:",error?.message||"unknown");
     return reply(500,

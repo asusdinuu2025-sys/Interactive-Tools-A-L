@@ -674,6 +674,9 @@
         return;
       }
       await callRpc('study_room_ensure_profile');
+      // Record a genuine Study Room visit. This is separate from broad
+      // updated_at timestamps used by housekeeping and ranking refreshes.
+      await callRpc('study_room_record_visit');
       await loadRows();
       startRoomPresenceLifecycle();
       client.channel('study-room-live')
