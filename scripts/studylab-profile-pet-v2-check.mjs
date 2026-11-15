@@ -20,6 +20,7 @@ assert.match(avatar,/bucket\.update\(path,blob,/);
 assert.match(avatar,/Photo upload failed/);
 assert.match(avatar,/verifyPublicImage\(photoUrl\)/);
 assert.match(avatar,/waitForVisibleProfile\(uid,photoUrl\)/);
+assert.match(avatar,/img\.complete && img\.naturalWidth>0/);
 assert.match(avatar,/img\.loading = "eager"/);
 assert.match(avatar,/img\.style\.opacity = "0"/);
 assert.doesNotMatch(avatar,/img\.loading = "lazy"/);
