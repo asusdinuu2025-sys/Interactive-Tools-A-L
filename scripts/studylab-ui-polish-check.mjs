@@ -60,7 +60,7 @@ assert.match(chatCss,/\.study-chat-context\{\s*grid-column:1\/-1/);
 
 // The four circled empty regions reuse the user's existing themed SVG masks.
 const addedClasses=[
-  "corner-upper-left","corner-lower-left","corner-lower-right"
+  "corner-upper-left","corner-upper-right","corner-lower-left","corner-lower-right"
 ];
 for(const part of addedClasses){
   const cssSelector=".slr-theme-illustration--"+part;
@@ -76,7 +76,9 @@ assert.match(roomCss,/--slr-art-mask: url\("\.\.\/images\/study-room\/leaf\.svg/
 assert.match(roomCss,/--slr-art-mask: url\("\.\.\/images\/study-room\/turtle\.svg/);
 assert.match(roomHtml,/data-room-doodles="on"/);
 assert.match(roomCss,/\.slr-theme-illustrations/);
-for(const removed of ["hero","left-top","corner-upper-right"]){
+assert.match(roomCss,/--art-x:82%;--art-y:19%/);
+assert.match(roomCss,/\[data-room-doodles="off"\] \.slr-theme-illustrations/);
+for(const removed of ["hero","left-top"]){
   assert.ok(!roomHtml.includes('<span class="slr-theme-illustration slr-theme-illustration--'+removed+'">'),
     "Marked SVG must be removed: "+removed);
 }
@@ -96,5 +98,5 @@ for(const html of [roomHtml,homeHtml]){
   assert.match(html,/studylab-avatar\.js\?v=20261115-uuid-fixed-v5/,
     "Working photo renderer must stay on its tested version");
 }
-assert.match(roomHtml,/study-room-illustrated-glass\.css\?v=20261115-study-glass-v5/);
+assert.match(roomHtml,/study-room-illustrated-glass\.css\?v=20261115-upper-right-art-v6/);
 console.log("Inline Bio, Chat layout/controls, badge spacing and illustrated corners passed.");

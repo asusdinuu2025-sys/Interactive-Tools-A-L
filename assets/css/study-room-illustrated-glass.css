@@ -847,8 +847,9 @@ body.study-room-page:is(
  [data-room-theme="lavender"],[data-room-theme="warm-sand"],
  [data-room-theme="ocean"]
 ) .slr-theme-illustration--corner-upper-right{
- --art-size:clamp(118px,12.5vw,190px);
- --art-x:76%;--art-y:11%;--art-rotate:-24deg;
+ /* Position the existing theme-specific SVG in the marked upper-right gap. */
+ --art-size:clamp(115px,12vw,175px);
+ --art-x:82%;--art-y:19%;--art-rotate:-24deg;
  opacity:var(--slr-art-opacity);
 }
 body.study-room-page:is(
@@ -874,7 +875,7 @@ body.study-room-page:is(
   --art-size:68px;--art-x:7%;--art-y:16%
  }
  body.study-room-page .slr-theme-illustration--corner-upper-right{
-  --art-size:110px;--art-x:76%;--art-y:13%
+  --art-size:110px;--art-x:78%;--art-y:17%
  }
  body.study-room-page .slr-theme-illustration--corner-lower-left{
   --art-size:82px;--art-x:5%;--art-y:59%
@@ -888,7 +889,7 @@ body.study-room-page:is(
   --art-size:45px;--art-x:3%;--art-y:14%
  }
  body.study-room-page .slr-theme-illustration--corner-upper-right{
-  --art-size:70px;--art-x:78%;--art-y:16%
+  --art-size:70px;--art-x:77%;--art-y:18%
  }
  body.study-room-page .slr-theme-illustration--corner-lower-left{
   --art-size:56px;--art-x:1%;--art-y:59%
