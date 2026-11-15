@@ -49,13 +49,19 @@ function reply(status,body){
    const validUser="11111111-1111-4111-8111-111111111111";
    const anotherUser="22222222-2222-4222-8222-222222222222";
    let calls=[];
+   let authDeleted=false;
    global.fetch=async(url,options)=>{
      calls.push({url:String(url),method:options.method,headers:options.headers,body:options.body});
      if(url.endsWith("/auth/v1/user")) return reply(200,{id:validUser,is_anonymous:false});
+     if(url.includes("/rest/v1/studylab_profiles?select=id,deleted_at&id=eq."+validUser))
+       return reply(200,[{id:validUser,deleted_at:authDeleted?"2026-11-15T00:00:00Z":null}]);
      if(url.endsWith("/storage/v1/object/list/studylab-social"))
        return reply(200,[]);
      if(url.includes("studylab_chat_messages"))return reply(204,null);
-     if(url.endsWith("/auth/v1/admin/users/"+validUser))return reply(200,{});
+     if(url.endsWith("/auth/v1/admin/users/"+validUser)){
+       authDeleted=true;
+       return reply(200,{});
+     }
      return reply(404,{});
    };
    const request=(method,authorization,confirmation,extras={})=>({
@@ -69,6 +75,9 @@ function reply(status,body){
    const success=await handler(request("POST","valid-session","DELETE",{user_id:anotherUser}));
    assert.equal(success.statusCode,200);
    assert.equal(JSON.parse(success.body).deleted,true);
+   assert.ok(calls.some(x=>x.url.includes("studylab_profiles?select=id,deleted_at&id=eq."+validUser)),
+     "account deletion must verify profile retention migration before deleting");
+   assert.ok(authDeleted,"mock Auth account should be deleted");
    assert.ok(calls.some(x=>x.url.endsWith("/auth/v1/admin/users/"+validUser)),
      "delete should target the verified signed-in user");
    assert.ok(!calls.some(x=>x.url.endsWith("/auth/v1/admin/users/"+anotherUser)),
