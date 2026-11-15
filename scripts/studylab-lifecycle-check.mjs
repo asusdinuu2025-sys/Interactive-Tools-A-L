@@ -73,7 +73,7 @@ assert.ok(edge.indexOf("service.storage.from(storageBucket).remove(") <
 // 6. 30 days inactivity deletes ONLY study progress, never whole accounts.
 assert.ok(progress.includes("last_room_visit_at timestamptz"));
 assert.ok(progress.includes("returns void language plpgsql security definer"));
-assert.ok(progress.includes("v_user_id := (select auth.uid())"),
+assert.ok(/v_user_id\s+uuid\s*:=\s*\(select auth\.uid\(\)\)/.test(progress),
   "Only current signed-in student may mark a real visit");
 assert.ok(progress.includes("m.last_room_visit_at < now() - interval '30 days'"));
 assert.ok(progress.includes("m.last_heartbeat_at < now() - interval '30 days'"));
