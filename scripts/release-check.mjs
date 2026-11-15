@@ -11,6 +11,7 @@ const syntaxFiles = [
   "assets/js/studylab-follow.js",
   "assets/js/studylab-social-follow-ui.js",
   "assets/js/studylab-profile-view.js",
+  "assets/js/studylab-avatar.js",
   "assets/js/profile.js",
   "assets/js/feed-drawer.js",
   "assets/js/study-room-analytics.js",
@@ -114,6 +115,12 @@ for (const file of syntaxFiles) {
   else checkNode(absolutePath, file);
 }
 
+
+const avatarTests = spawnSync(process.execPath, ["scripts/studylab-avatar-check.mjs"], {encoding:"utf8"});
+if (avatarTests.status !== 0) {
+  fail("StudyLab avatar lifecycle tests failed:\n" +
+    (avatarTests.stderr || avatarTests.stdout || "Avatar test failed"));
+}
 
 const timerTests = spawnSync(process.execPath, ["scripts/study-room-target-tests.mjs"], { encoding: "utf8" });
 if (timerTests.status !== 0) {
