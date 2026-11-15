@@ -227,8 +227,8 @@
       throw new Error("Sign in to your StudyLab account to edit your bio.");
     }
     const cleanBio = String(value || "").trim().replace(/\s+/g, " ");
-    if (cleanBio.length > 240 || (cleanBio && cleanBio.split(" ").length > 15)) {
-      throw new Error("Bio must be 15 words or fewer (240 characters maximum).");
+    if (Array.from(cleanBio).length > 18) {
+      throw new Error("Bio must be 18 characters or fewer.");
     }
     const { data, error } = await client
       .from("studylab_profiles")
