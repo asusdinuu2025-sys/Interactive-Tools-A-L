@@ -386,6 +386,7 @@
       const liveName = card.querySelector('.room-person-card-name');
       setLiveText(liveName, r.display_name || 'Student');
       liveName.setAttribute('aria-label','View profile of '+(r.display_name||'Student'));
+      liveName.title=r.display_name||'Student';
       window.StudyLabNameMark?.decorate(liveName, id);
       setLiveText(card.querySelector('.room-person-card-subject'), r.subject || '—');
       const saved = r.today_date === today ? Number(r.today_seconds) || 0 : 0;
