@@ -1698,6 +1698,72 @@
   <link rel="stylesheet" href="assets/css/studylab-profile-view.css?v=20261114-glass-profile-v1">
   <link rel="stylesheet" href="assets/css/studylab-avatar.css?v=20261115-avatar-v1">
   <link rel="stylesheet" href="assets/css/studylab-follow.css?v=20261115-inline-bio-v5">
+
+  <!-- Final production: phone-only top bar restoration; no tablet/desktop rules. -->
+  <style id="studylab-final-phone-header">
+    @media (max-width: 600px) {
+      html body #home-top.site-header {
+        top: max(9px, env(safe-area-inset-top)) !important;
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        justify-content: center !important;
+        flex-wrap: nowrap !important;
+        box-sizing: border-box !important;
+        width: calc(100vw - 18px) !important;
+        min-width: 0 !important;
+        max-width: calc(100vw - 18px) !important;
+        height: auto !important;
+        min-height: 0 !important;
+        padding: 9px 10px !important;
+        gap: 7px !important;
+      }
+      html body #home-top.site-header .brand {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        flex: 0 0 auto !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        gap: 8px !important;
+      }
+      html body #home-top.site-header .brand-mark {
+        display: inline-flex !important;
+        flex: 0 0 30px !important;
+        width: 30px !important;
+        height: 30px !important;
+      }
+      html body #home-top.site-header .brand-title-text {
+        display: inline-block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        white-space: normal !important;
+        font-size: clamp(11px, 3vw, 13px) !important;
+        line-height: 1.25 !important;
+      }
+      html body #home-top.site-header .header-actions {
+        display: flex !important;
+        flex: 0 0 auto !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+      }
+      .sl-home-layout .sl-home-content > main.container {
+        margin-top: var(--sl-mobile-header-clearance, 175px) !important;
+      }
+    }
+  </style>
 </head>
 
 
@@ -3341,6 +3407,35 @@
   <script src="assets/js/home-panels.js?v=20261115-room-live-count-v1" defer></script>
   <script src="assets/js/studylab-social.js?v=20261115-social-likes-only-v3" defer></script>
   <script src="assets/js/studylab-announcements.js?v=20261116-custom-banners-v4" defer></script>
+
+  <script>
+    /* Phone-only: keep the greeting below the real, post-load header height. */
+    (() => {
+      const header = document.getElementById("home-top");
+      if (!header || !window.matchMedia) return;
+      const mobile = window.matchMedia("(max-width: 600px)");
+      const syncHeaderClearance = () => {
+        if (!mobile.matches) {
+          document.documentElement.style.removeProperty("--sl-mobile-header-clearance");
+          return;
+        }
+        const bottom = header.getBoundingClientRect().bottom;
+        if (bottom > 0) {
+          document.documentElement.style.setProperty(
+            "--sl-mobile-header-clearance",
+            Math.ceil(bottom + 14) + "px"
+          );
+        }
+      };
+      if (window.ResizeObserver) {
+        new ResizeObserver(syncHeaderClearance).observe(header);
+      }
+      window.addEventListener("resize", syncHeaderClearance, { passive: true });
+      window.addEventListener("load", syncHeaderClearance, { once: true });
+      mobile.addEventListener?.("change", syncHeaderClearance);
+      syncHeaderClearance();
+    })();
+  </script>
 
 </body>
 </html>
