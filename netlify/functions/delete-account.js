@@ -36,22 +36,43 @@ async function request(endpoint,method,key,body,token) {
   return {ok:response.ok,status:response.status,content};
 }
 async function removeSocialFiles(userId) {
-  // Storage folders are keyed by the authenticated account's UUID.
-  // The last page can shrink after removal, so always restart at offset 0.
-  const folder=userId+"/";
-  for(let batch=0;batch<100;batch++){
-    const result=await request("/storage/v1/object/list/studylab-social",
-      "POST",PRIVATE_KEY,{prefix:folder,limit:100,offset:0,sortBy:{column:"name",order:"asc"}});
-    if(!result.ok||!Array.isArray(result.content))throw new Error("storage_list_failed");
-    const files=result.content.filter(item=>item && item.id && typeof item.name==="string")
-      .map(item=>folder+item.name);
-    // Empty folder means no files left.
-    if(!files.length)return;
-    const removed=await request("/storage/v1/object/studylab-social",
-      "DELETE",PRIVATE_KEY,{prefixes:files});
-    if(!removed.ok)throw new Error("storage_delete_failed");
+  // StudyLab uploads use <user UUID>/<post UUID>/<file name>. The Storage
+  // list API returns virtual directories with a NULL id; a flat folder list
+  // therefore misses all nested post images. Traverse directories first and
+  // remove actual object paths in batches using server-side Storage API.
+  const objects = new Set();
+  const visited = new Set();
+  async function gather(directory,depth) {
+    if(depth>6 || visited.size>5000 || objects.size>20000){
+      throw new Error("storage_cleanup_safety_limit");
+    }
+    if(visited.has(directory))return;
+    visited.add(directory);
+    for(let offset=0;offset<5000;offset+=100){
+      const result=await request("/storage/v1/object/list/studylab-social",
+        "POST",PRIVATE_KEY,{
+          prefix:directory,limit:100,offset,sortBy:{column:"name",order:"asc"}
+        });
+      if(!result.ok || !Array.isArray(result.content)){
+        throw new Error("storage_list_failed");
+      }
+      const batch=result.content;
+      for(const item of batch){
+        if(!item || typeof item.name!=="string" || !item.name || item.name==="." || item.name==="..")continue;
+        const child=directory+"/"+item.name;
+        if(item.id || item.metadata)objects.add(child);
+        else await gather(child,depth+1);
+      }
+      if(batch.length<100)break;
+    }
   }
-  throw new Error("storage_batch_limit");
+  await gather(userId,0);
+  const paths=[...objects];
+  for(let offset=0;offset<paths.length;offset+=100){
+    const result=await request("/storage/v1/object/studylab-social",
+      "DELETE",PRIVATE_KEY,{prefixes:paths.slice(offset,offset+100)});
+    if(!result.ok)throw new Error("storage_delete_failed");
+  }
 }
 async function checkProfileCanBePreserved(userId){
   // Do not hard-delete a user until the archive migration is present. On old
