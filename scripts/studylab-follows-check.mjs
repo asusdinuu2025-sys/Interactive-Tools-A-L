@@ -21,7 +21,7 @@ const drawer=readFileSync("assets/js/feed-drawer.js","utf8");
 for(const path of ["index.html","study-room.html"]){
  const html=readFileSync(path,"utf8");
  assert.ok(html.includes("studylab-follow.js?v=20261114-follow-v1"),"Follow script missing from "+path);
- assert.ok(html.includes("studylab-follow.css?v=20261115-profile-theme-v1"),"Follow CSS missing from "+path);
+ assert.ok(html.includes("studylab-follow.css?v=20261115-profile-refine-v2"),"Follow CSS missing from "+path);
  assert.ok(html.indexOf("studylab-follow.js")<html.indexOf("studylab-profile-view.js"),
    "Follow module must load before public profile viewer");
 }
@@ -97,10 +97,10 @@ assert.ok(room.includes("room-person-status-stack") && room.includes("room-perso
   "Study Room Follow must be directly below studying/away status inside card");
 assert.ok(css.includes("max-width:100%;margin:0;z-index:1"),
   "Study Room Follow control must not overflow its card");
-assert.ok(viewer.includes("bioCount.textContent") && viewer.includes('words>15'),
-  "View Profile must show and enforce Bio's 15-word counter");
-assert.ok(accountSource.includes('cleanBio.split(" ").length > 15'),
-  "Dedicated Bio saver must enforce the 15-word limit");
+assert.ok(viewer.includes("bioCount.textContent") && viewer.includes('count>18'),
+  "View Profile must show and enforce the 18-character Bio counter");
+assert.ok(accountSource.includes('Array.from(cleanBio).length > 18'),
+  "Dedicated Bio saver must enforce the 18-character limit");
 
 const own="10000000-0000-4000-8000-000000000001";
 const other="20000000-0000-4000-8000-000000000002";
