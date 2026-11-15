@@ -71,6 +71,7 @@
   let avatarCropStage = null;
   let avatarCropSquare = null;
   let avatarCropZoom = null;
+  let avatarCropZoomValue = null;
   let avatarCropPreview = null;
   let avatarCropMessage = null;
   let avatarCropSave = null;
@@ -225,6 +226,7 @@
       avatarCropState={image,width,height,size,x:(width-size)/2,y:(height-size)/2};
       avatarCropDrag=null;
       avatarCropZoom.value="1";
+      avatarCropZoomValue.textContent="1.0×";
       avatarCropMessage.hidden=true;
       avatarCropMessage.textContent="";
       avatarCropSave.disabled=false;
@@ -282,14 +284,14 @@
     avatarCropZoom.min="1";avatarCropZoom.max="3";avatarCropZoom.step=".05";
     avatarCropZoom.value="1";
     avatarCropZoom.setAttribute("aria-label","Zoom into selected photo area");
-    const cropZoomValue=element("span","sl-pv-crop-zoom-value","1.0×");
+    avatarCropZoomValue=element("span","sl-pv-crop-zoom-value","1.0×");
     const previewWrap=element("div","sl-pv-crop-preview-wrap");
     avatarCropPreview=element("canvas","sl-pv-crop-preview");
     avatarCropPreview.width=avatarCropPreview.height=92;
     avatarCropPreview.setAttribute("role","img");
     avatarCropPreview.setAttribute("aria-label","Live circular preview of the selected profile picture");
     previewWrap.append(avatarCropPreview);
-    cropControls.append(cropZoomLabel,avatarCropZoom,cropZoomValue,previewWrap);
+    cropControls.append(cropZoomLabel,avatarCropZoom,avatarCropZoomValue,previewWrap);
     avatarCropMessage=element("p","sl-pv-crop-message","");
     avatarCropMessage.hidden=true;
     avatarCropMessage.setAttribute("role","alert");
@@ -341,7 +343,7 @@
       state.size=Math.min(state.width,state.height)/zoom;
       state.x=clampCrop(centerX-state.size/2,0,state.width-state.size);
       state.y=clampCrop(centerY-state.size/2,0,state.height-state.size);
-      cropZoomValue.textContent=zoom.toFixed(1)+"×";
+      avatarCropZoomValue.textContent=zoom.toFixed(1)+"×";
       redrawAvatarCrop();
     });
     avatarCropCancel.addEventListener("click",()=>closeAvatarCrop());
