@@ -97,10 +97,10 @@ assert.ok(room.includes("room-person-status-stack") && room.includes("room-perso
   "Study Room Follow must be directly below studying/away status inside card");
 assert.ok(css.includes("max-width:100%;margin:0;z-index:1"),
   "Study Room Follow control must not overflow its card");
-assert.ok(viewer.includes("bioCount.textContent") && viewer.includes('count>18'),
-  "View Profile must show and enforce the 18-character Bio counter");
-assert.ok(accountSource.includes('Array.from(cleanBio).length > 18'),
-  "Dedicated Bio saver must enforce the 18-character limit");
+assert.ok(viewer.includes("bioCount.textContent") && viewer.includes('count>35'),
+  "View Profile must show and enforce the 35-character Bio counter");
+assert.ok(accountSource.includes('Array.from(cleanBio).length > 35'),
+  "Dedicated Bio saver must enforce the 35-character limit");
 
 const own="10000000-0000-4000-8000-000000000001";
 const other="20000000-0000-4000-8000-000000000002";
