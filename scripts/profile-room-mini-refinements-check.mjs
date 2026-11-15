@@ -28,13 +28,13 @@ assert.ok(account.includes("async function saveBio(value)")&&account.includes("g
 assert.match(account,/\.update\(\{bio:\s*cleanBio\s*\|\|\s*null/);
 assert.ok(account.includes('.eq("id", user.id)'),
   "Dedicated Save Bio must update only the signed-in user's own row");
-assert.ok(account.includes('cleanBio.split(" ").length > 15'),"Bio must be limited to 15 words");
+assert.ok(account.includes("Array.from(cleanBio).length > 18"),"Bio edits must be limited to 18 characters");
 assert.ok(viewer.includes("bioEditor.hidden=!own")&&viewer.includes("bioNode.hidden=own"),
   "Owner can edit and visitors can only read");
-assert.ok(viewer.includes("bioInput.maxLength = 240"),"Bio should also respect DB character limit");
+assert.ok(viewer.includes("bioInput.maxLength = 240"),"Legacy longer bios must remain readable until edited");
 assert.ok(viewer.includes("bioSave.addEventListener")&&viewer.includes("account.saveBio(bioInput.value)"));
 assert.ok(viewer.includes('bioStatus.textContent="Bio saved."'),"Save confirmation missing");
-assert.ok(viewer.includes("bioInput.setAttribute")&&viewer.includes('bioCount.textContent=words+" / 15 words"'));
+assert.ok(viewer.includes("bioInput.setAttribute")&&viewer.includes('bioCount.textContent=count+" / 18 characters"'));
 
 // 2. Clearly visible and accessible gender selection works in both forms.
 assert.ok(profile.includes("showSelectedGender();"),"Selection feedback not wired");
