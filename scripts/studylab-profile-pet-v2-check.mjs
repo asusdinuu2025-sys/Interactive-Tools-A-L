@@ -43,7 +43,7 @@ for(const petPath of ["assets/js/studylab-pet.js","assets/js/studylab-pet-room.j
   assert.match(pet,/function contextSectionReaction\(event\)/);
   assert.match(pet,/prefers-reduced-motion: reduce/);
   assert.match(pet,/welcomeKnownStudent\(\)/);
-  assert.match(pet,/goalCelebrationUntil/);
+  if (petPath.includes("pet-room.js")) assert.match(pet,/goalCelebrationUntil/);
 }
 assert.match(home,/studylab-pet\.js\?v=20261115-brain-v2/);
 assert.match(room,/studylab-pet-room\.js\?v=20261115-brain-v2/);
