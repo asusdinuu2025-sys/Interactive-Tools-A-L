@@ -52,7 +52,16 @@
               <span data-chat-status>Connecting…</span>
             </div>
           </div>
-          <button type="button" class="study-chat-close" data-chat-close aria-label="Close chat">×</button>
+          <div class="study-chat-head-actions">
+            <button type="button" class="study-chat-expand" data-chat-expand
+              aria-label="Expand chat window" aria-pressed="false" title="Expand chat">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5"/>
+              </svg>
+            </button>
+            <button type="button" class="study-chat-close" data-chat-close aria-label="Close chat">×</button>
+          </div>
         </div>
 
         <div class="study-chat-list" data-chat-list aria-live="polite"></div>
@@ -92,6 +101,7 @@
   const button = root.querySelector("[data-chat-button]");
   const panel = root.querySelector("[data-chat-panel]");
   const closeButton = root.querySelector("[data-chat-close]");
+  const expandButton = root.querySelector("[data-chat-expand]");
   const list = root.querySelector("[data-chat-list]");
   const form = root.querySelector("[data-chat-form]");
   const input = root.querySelector("[data-chat-input]");
@@ -119,6 +129,7 @@
   let nickname = "Student";
   let channel = null;
   let isOpen = false;
+  let isExpanded = false;
   let unreadCount = 0;
   let lastSentAt = 0;
   let messagesById = new Map();
@@ -348,7 +359,10 @@
     if(safeUuid(row.user_id))window.StudyLabAvatar?.decorate(avatar,row.user_id);
     const name=document.createElement("span");
     name.className="study-chat-message-name";
-    name.textContent=profile?.display_name||row.nickname||"Student";
+    const nameText=document.createElement("span");
+    nameText.className="study-chat-message-name-text";
+    nameText.textContent=profile?.display_name||row.nickname||"Student";
+    name.append(nameText);
     if(safeUuid(row.user_id))window.StudyLabNameMark?.decorate(name,row.user_id);
     identity.append(avatar,name);header.append(identity);
 
@@ -357,7 +371,8 @@
       menuWrap.className="study-chat-message-menu-wrap";
       const dots=document.createElement("button");
       dots.type="button";dots.className="study-chat-message-more";
-      dots.textContent="⋯";dots.title="Message options";
+      dots.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>';
+      dots.title="Message options";
       dots.setAttribute("aria-label","Message options");
       dots.setAttribute("aria-expanded","false");
       const menu=document.createElement("div");
@@ -372,7 +387,22 @@
         ["Delete",()=>deleteMessage(row.id)]
       ]){
         const option=document.createElement("button");
-        option.type="button";option.textContent=label;
+        option.type="button";
+        option.className=label==="Delete"?"study-chat-option-delete":"study-chat-option-edit";
+        const iconSvg=document.createElementNS("http://www.w3.org/2000/svg","svg");
+        iconSvg.setAttribute("viewBox","0 0 24 24");
+        iconSvg.setAttribute("fill","none");
+        iconSvg.setAttribute("stroke","currentColor");
+        iconSvg.setAttribute("stroke-width","1.9");
+        iconSvg.setAttribute("stroke-linecap","round");
+        iconSvg.setAttribute("stroke-linejoin","round");
+        iconSvg.setAttribute("aria-hidden","true");
+        const iconPath=document.createElementNS("http://www.w3.org/2000/svg","path");
+        iconPath.setAttribute("d",label==="Delete"
+          ?"M4 7h16M10 4h4m-7 3 1 13h8l1-13M10 11v6m4-6v6"
+          :"M4 20h4l11-11a2.5 2.5 0 0 0-4-4L4 16v4Zm9-13 4 4");
+        iconSvg.append(iconPath);
+        option.append(iconSvg,document.createTextNode(label));
         option.addEventListener("click",event=>{
           event.stopPropagation();menu.hidden=true;dots.setAttribute("aria-expanded","false");
           handler();
@@ -688,6 +718,15 @@
     }
   }
 
+  function setExpanded(expanded){
+    isExpanded=Boolean(expanded);
+    panel.classList.toggle("is-expanded",isExpanded);
+    expandButton?.setAttribute("aria-pressed",String(isExpanded));
+    expandButton?.setAttribute("aria-label",isExpanded?"Restore chat window":"Expand chat window");
+    expandButton.title=isExpanded?"Restore chat size":"Expand chat";
+    if(isOpen)scrollToBottom();
+  }
+
   function setOpen(open) {
     isOpen = open;
     panel.hidden = !open;
@@ -710,6 +749,7 @@
     });
 
     closeButton?.addEventListener("click", () => setOpen(false));
+    expandButton?.addEventListener("click",()=>setExpanded(!isExpanded));
 
     panel?.addEventListener("click", event => event.stopPropagation());
 
