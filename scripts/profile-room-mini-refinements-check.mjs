@@ -28,13 +28,13 @@ assert.ok(account.includes("async function saveBio(value)")&&account.includes("g
 assert.match(account,/\.update\(\{bio:\s*cleanBio\s*\|\|\s*null/);
 assert.ok(account.includes('.eq("id", user.id)'),
   "Dedicated Save Bio must update only the signed-in user's own row");
-assert.ok(account.includes("Array.from(cleanBio).length > 18"),"Bio edits must be limited to 18 characters");
-assert.ok(viewer.includes("bioEditor.hidden=!own")&&viewer.includes("bioNode.hidden=own"),
+assert.ok(account.includes("Array.from(cleanBio).length > 35"),"Bio edits must be limited to 35 characters");
+assert.ok(viewer.includes("bioEditor.hidden=true")&&viewer.includes("bioEditToggle.hidden=!own"),
   "Owner can edit and visitors can only read");
 assert.ok(viewer.includes("bioInput.maxLength = 240"),"Legacy longer bios must remain readable until edited");
 assert.ok(viewer.includes("bioSave.addEventListener")&&viewer.includes("account.saveBio(bioInput.value)"));
 assert.ok(viewer.includes('bioStatus.textContent="Bio saved."'),"Save confirmation missing");
-assert.ok(viewer.includes("bioInput.setAttribute")&&viewer.includes('bioCount.textContent=count+" / 18 characters"'));
+assert.ok(viewer.includes("bioInput.setAttribute")&&viewer.includes('bioCount.textContent=count+" / 35 characters"'));
 
 // 2. Clearly visible and accessible gender selection works in both forms.
 assert.ok(profile.includes("showSelectedGender();"),"Selection feedback not wired");
