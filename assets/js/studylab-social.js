@@ -1298,14 +1298,18 @@
     if (error) throw error;
     if (!post) return null;
 
-    const [likesResult, commentsResult, imageUrls] = await Promise.all([
+    const [likesResult, commentsResult, reactionResult, imageUrls] = await Promise.all([
       client.from("studylab_social_likes").select("post_id,user_id").eq("post_id", post.id),
       client.from("studylab_social_comments").select("post_id")
         .eq("post_id", post.id).eq("status", "approved"),
+      client.from("studylab_social_post_reactions")
+        .select("post_id,user_id,reaction").eq("post_id",post.id),
       getSignedImageUrls(client, [post])
     ]);
     if (likesResult.error) throw likesResult.error;
     if (commentsResult.error) console.warn("Social comment count is unavailable:", commentsResult.error);
+    if (reactionResult.error) console.warn("Social post reactions unavailable:",reactionResult.error);
+    else postReactionsById.set(post.id,reactionResult.data||[]);
     const likesByPost = new Map([[post.id, likesResult.data || []]]);
     const commentsByPost = new Map([[post.id, (commentsResult.data || []).length]]);
     return renderPost(client, post, userId, likesByPost, commentsByPost, imageUrls);
@@ -1450,13 +1454,20 @@
       // for one network stage to finish before starting the next.
       const signedImageUrlsPromise = getSignedImageUrls(account.client, posts);
       if (approvedIds.length) {
-        const [likesResult, commentsResult] = await Promise.all([
+        const [likesResult, commentsResult, reactionResult] = await Promise.all([
           account.client.from("studylab_social_likes")
             .select("post_id,user_id").in("post_id", approvedIds),
           account.client.from("studylab_social_comments")
-            .select("post_id").in("post_id", approvedIds).eq("status", "approved")
+            .select("post_id").in("post_id", approvedIds).eq("status", "approved"),
+          account.client.from("studylab_social_post_reactions")
+            .select("post_id,user_id,reaction").in("post_id",approvedIds)
         ]);
         if (likesResult.error) throw likesResult.error;
+        if(reactionResult.error){
+          console.warn("Social post reactions unavailable:",reactionResult.error);
+        }else{
+          postReactionsById=groupPostReactions(reactionResult.data||[]);
+        }
         for (const row of likesResult.data || []) {
           if (!likesByPost.has(row.post_id)) likesByPost.set(row.post_id, []);
           likesByPost.get(row.post_id).push(row);
