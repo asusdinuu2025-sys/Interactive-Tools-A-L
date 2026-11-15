@@ -61,6 +61,9 @@
     };
     node.append(img);
     img.src = url;
+    // Edge may resolve a cached WebP synchronously; don't depend solely on
+    // a later load event to swap out the SVG fallback.
+    if(img.complete && img.naturalWidth>0)img.onload();
   }
   // Successful Storage writes are not proof that a browser can display
   // the public image. Decode the actual public URL before confirming success.
