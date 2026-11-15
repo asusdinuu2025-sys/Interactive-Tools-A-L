@@ -11,7 +11,7 @@ const css=readFileSync("assets/css/studylab-profile-view.css","utf8");
 const server=readFileSync("netlify/functions/delete-account.js","utf8");
 for(const file of ["index.html","study-room.html"]){
  const html=readFileSync(file,"utf8");
- assert.ok(html.includes("studylab-profile-view.js?v=20261114-glass-profile-v1"));
+ assert.ok(html.includes("studylab-profile-view.js?v=20261115-profile-lifecycle-v2"));
  assert.ok(html.includes("studylab-profile-view.css?v=20261114-glass-profile-v1"));
  assert.ok(html.indexOf("studylab-profile-view.js")<html.indexOf("assets/js/profile.js"),
    "profile viewer helper must be available before profile menu");
@@ -49,13 +49,29 @@ function reply(status,body){
    const validUser="11111111-1111-4111-8111-111111111111";
    const anotherUser="22222222-2222-4222-8222-222222222222";
    let calls=[];
+   let authDeleted=false;
    global.fetch=async(url,options)=>{
      calls.push({url:String(url),method:options.method,headers:options.headers,body:options.body});
      if(url.endsWith("/auth/v1/user")) return reply(200,{id:validUser,is_anonymous:false});
-     if(url.endsWith("/storage/v1/object/list/studylab-social"))
+     if(url.includes("/rest/v1/studylab_profiles?select=id,deleted_at&id=eq."+validUser))
+       return reply(200,[{id:validUser,deleted_at:authDeleted?"2026-11-15T00:00:00Z":null}]);
+     if(url.endsWith("/storage/v1/object/list/studylab-social")){
+       const request=JSON.parse(options.body||"{}");
+       if(request.prefix===validUser){
+         return reply(200,[{name:"test-post-folder",id:null,metadata:null}]);
+       }
+       if(request.prefix===validUser+"/test-post-folder"){
+         return reply(200,[{name:"photo.png",id:"test-photo-id",metadata:{mimetype:"image/png"}}]);
+       }
+       return reply(200,[]);
+     }
+     if(url.endsWith("/storage/v1/object/studylab-social")&&options.method==="DELETE")
        return reply(200,[]);
      if(url.includes("studylab_chat_messages"))return reply(204,null);
-     if(url.endsWith("/auth/v1/admin/users/"+validUser))return reply(200,{});
+     if(url.endsWith("/auth/v1/admin/users/"+validUser)){
+       authDeleted=true;
+       return reply(200,{});
+     }
      return reply(404,{});
    };
    const request=(method,authorization,confirmation,extras={})=>({
@@ -69,12 +85,30 @@ function reply(status,body){
    const success=await handler(request("POST","valid-session","DELETE",{user_id:anotherUser}));
    assert.equal(success.statusCode,200);
    assert.equal(JSON.parse(success.body).deleted,true);
+   assert.ok(calls.some(x=>x.url.includes("studylab_profiles?select=id,deleted_at&id=eq."+validUser)),
+     "account deletion must verify profile retention migration before deleting");
+   assert.ok(authDeleted,"mock Auth account should be deleted");
+   assert.ok(calls.some(x=>x.url.endsWith("/storage/v1/object/studylab-social")
+     && JSON.parse(x.body||"{}").prefixes?.includes(validUser+"/test-post-folder/photo.png")),
+     "account deletion must traverse nested post folders and remove actual image files");
    assert.ok(calls.some(x=>x.url.endsWith("/auth/v1/admin/users/"+validUser)),
      "delete should target the verified signed-in user");
    assert.ok(!calls.some(x=>x.url.endsWith("/auth/v1/admin/users/"+anotherUser)),
      "user-supplied IDs must NEVER authorize another account deletion");
    assert.ok(calls.some(x=>x.url.includes("studylab_chat_messages?user_id=eq."+validUser)),
      "user chat messages must be removed before auth deletion");
+   calls=[];
+   global.fetch=async(url,options)=>{
+     calls.push({url:String(url),method:options.method});
+     if(url.endsWith("/auth/v1/user"))return reply(200,{id:validUser,is_anonymous:false});
+     if(url.includes("/rest/v1/studylab_profiles?select=id,deleted_at"))return reply(200,[]);
+     throw new Error("Account deletion must stop before storage or Auth delete if no profile exists.");
+   };
+   const refused=await handler(request("POST","valid-session","DELETE"));
+   assert.equal(refused.statusCode,409);
+   assert.equal(JSON.parse(refused.body).deleted,false);
+   assert.ok(!calls.some(x=>x.url.includes("/auth/v1/admin/users/")),
+     "Missing profile/archive migration must block Auth deletion");
    calls=[];
    global.fetch=async(url,options)=>{
      calls.push({url:String(url),method:options.method});

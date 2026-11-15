@@ -69,6 +69,12 @@
   let editHandler = null;
   let accountUser = null;
   let bioNode = null;
+  let bioEditor = null;
+  let bioInput = null;
+  let bioCount = null;
+  let bioSave = null;
+  let bioStatus = null;
+  let bioSaving = false;
   let viewedUserId = null;
   let viewSequence = 0;
   let followAction = null;
@@ -144,6 +150,74 @@
     bioNode = element("p","sl-pv-description","No bio added yet.");
     bioNode.id="slPvDescription";
 
+    // The owner edits the bio here, not in the general profile form.
+    // Other students only ever see the safe, read-only public text.
+    bioEditor = element("div","sl-pv-bio-editor");
+    bioEditor.hidden = true;
+    const bioLabel = element("label","sl-pv-bio-label","My Bio");
+    bioLabel.htmlFor = "slPvBioInput";
+    bioLabel.id = "slPvBioLabel";
+    bioInput = element("textarea","sl-pv-bio-input");
+    bioInput.id = "slPvBioInput";
+    bioInput.rows = 2;
+    bioInput.maxLength = 240;
+    bioInput.placeholder = "A little about your studies…";
+    bioInput.setAttribute("aria-describedby","slPvBioCount");
+    const bioControls = element("div","sl-pv-bio-controls");
+    bioCount = element("span","sl-pv-bio-count","0 / 15 words");
+    bioCount.id="slPvBioCount";
+    bioSave = createButton("sl-pv-bio-save","edit","Save Bio");
+    bioSave.disabled = true;
+    bioControls.append(bioCount,bioSave);
+    bioStatus = element("p","sl-pv-bio-status","");
+    bioStatus.hidden = true;
+    bioStatus.setAttribute("role","status");
+    bioEditor.append(bioLabel,bioInput,bioControls,bioStatus);
+
+    const updateBioWords=()=>{
+      const words=bioInput.value.trim()?bioInput.value.trim().split(/\s+/).length:0;
+      bioCount.textContent=words+" / 15 words";
+      bioCount.classList.toggle("is-over-limit",words>15);
+      bioInput.setAttribute("aria-invalid",String(words>15));
+      bioSave.disabled=words>15 || bioSaving || !accountUser ||
+        viewedUserId!==accountUser.id;
+      if(!bioStatus.hidden)bioStatus.hidden=true;
+    };
+    bioInput.addEventListener("input",updateBioWords);
+    bioSave.addEventListener("click",async()=>{
+      if(bioSaving || !accountUser || viewedUserId!==accountUser.id)return;
+      const id=viewedUserId;
+      const account=window.StudyLabAccount;
+      if(!account?.saveBio)return;
+      bioSaving=true;
+      bioSave.disabled=true;
+      bioInput.disabled=true;
+      bioStatus.hidden=true;
+      try{
+        const profile=await account.saveBio(bioInput.value);
+        if(view.hidden || viewedUserId!==id)return;
+        const saved=escText(profile?.bio);
+        bioInput.value=saved;
+        bioCount.textContent=(saved?saved.split(/\s+/).length:0)+" / 15 words";
+        bioStatus.textContent="Bio saved.";
+        bioStatus.dataset.state="success";
+        bioStatus.hidden=false;
+        window.dispatchEvent(new CustomEvent("studylab-profile-updated",{detail:profile}));
+      }catch(error){
+        if(view.hidden||viewedUserId!==id)return;
+        bioStatus.textContent=error?.message || "Could not save bio. Please try again.";
+        bioStatus.dataset.state="error";
+        bioStatus.hidden=false;
+      }finally{
+        bioSaving=false;
+        bioInput.disabled=false;
+        if(viewedUserId===id){
+          const words=bioInput.value.trim()?bioInput.value.trim().split(/\s+/).length:0;
+          bioSave.disabled=words>15;
+        }
+      }
+    });
+
     const counts = element("div","sl-pv-counts");
     for (const label of ["Followers","Following"]){
       const item = button("sl-pv-count");
@@ -171,7 +245,7 @@
 
     listPanel=element("section","sl-pv-student-list");
     listPanel.hidden=true;
-    dialog.append(header,identity,bioNode,counts,actions,followAction,joined,viewStatus,listPanel);
+    dialog.append(header,identity,bioNode,bioEditor,counts,actions,followAction,joined,viewStatus,listPanel);
     view.append(dialog);
     document.body.append(view);
 
@@ -188,7 +262,7 @@
     const title=element("h2","","Delete your StudyLab account?");
     title.id="slPvDeleteTitle";
     const details=element("p","sl-pv-confirm-info",
-      "This permanently removes your StudyLab account and its linked data, including profile, Study Room activity and Social content. This cannot be undone.");
+      "This permanently deletes your sign-in, posts, likes, comments, follows and Study Room history. Only one anonymized profile record remains, without your name, username, phone, school or bio. This cannot be undone.");
     const inputLabel=element("label","sl-pv-confirm-label","Type DELETE to confirm");
     inputLabel.htmlFor="slPvDeleteInput";
     confirmInput=element("input","sl-pv-confirm-input");
@@ -346,7 +420,16 @@
     listPanel.hidden=true;
     countButtons.forEach(node=>{node.querySelector(".sl-pv-count-number").textContent="—";});
     dialog.querySelector(".sl-pv-eyebrow").textContent=own?"STUDYLAB · MY PROFILE":"STUDYLAB · STUDENT PROFILE";
-    bioNode.textContent="Loading bio…";
+    bioNode.hidden=own;
+    bioEditor.hidden=!own;
+    bioInput.value="";
+    bioInput.disabled=false;
+    bioSave.disabled=true;
+    bioCount.textContent="0 / 15 words";
+    bioCount.classList.remove("is-over-limit");
+    bioStatus.hidden=true;
+    bioNode.textContent=own?"":"Loading bio…";
+    dialog.setAttribute("aria-describedby",own?"slPvBioLabel":"slPvDescription");
     dialog.querySelector(".sl-pv-actions").hidden=!own;
     followAction.hidden=own;
     followAction.replaceChildren();
@@ -366,7 +449,15 @@
       if(serial!==viewSequence||view.hidden||viewedUserId!==id)return true;
       if(!profile)throw new Error("This student's profile is unavailable.");
       nameNode.textContent=escText(profile.display_name)||"Student";
-      bioNode.textContent=escText(profile.bio)||"No bio added yet.";
+      if(own){
+        const saved=escText(profile.bio);
+        bioInput.value=saved;
+        const words=saved?saved.split(/\s+/).length:0;
+        bioCount.textContent=words+" / 15 words";
+        bioSave.disabled=words>15;
+      }else{
+        bioNode.textContent=escText(profile.bio)||"No bio added yet.";
+      }
       usernameNode.textContent=profile.username?"@"+escText(profile.username):"Username not set";
       joinedNode.textContent=joinedDate((own?user.created_at:null)||profile.joined_at||profile.created_at);
       paintAvatar(profile.gender==="female"?"female":"male");
@@ -374,7 +465,10 @@
     }catch(error){
       if(serial===viewSequence&&!view.hidden&&viewedUserId===id){
         usernameNode.textContent="Profile temporarily unavailable";
-        bioNode.textContent="Bio unavailable.";
+        if(own){
+          bioInput.disabled=true;
+          bioSave.disabled=true;
+        }else bioNode.textContent="Bio unavailable.";
         window.StudyLabNameMark?.decorate(nameNode,id);
         viewStatus.textContent=error?.message||"Could not refresh this student profile.";
         viewStatus.hidden=false;
@@ -399,19 +493,19 @@
       if(error || !data?.session?.access_token || data.session.user?.id!==accountUser.id){
         throw new Error("Your session expired. Sign in again before deleting your account.");
       }
-      const response=await fetch("/.netlify/functions/delete-account",{
-        method:"POST",
-        headers:{
-          "Content-Type":"application/json",
-          "Authorization":"Bearer "+data.session.access_token
-        },
-        body:JSON.stringify({confirmation:"DELETE"}),
-        cache:"no-store"
-      });
-      let result={};
-      try{result=await response.json();}catch(_){}
-      if(!response.ok || result.deleted!==true){
-        throw new Error(result.message||"Account deletion is unavailable. Your account has not been deleted.");
+      // The dedicated Supabase Edge Function has the private service role
+      // available server-side, with no separate Netlify key configuration.
+      const {data:result,error:deleteError}=await account.client.functions.invoke(
+        "studylab-delete-account",{body:{confirmation:"DELETE"}}
+      );
+      if(deleteError){
+        let detail="";
+        try{detail=(await deleteError.context?.json?.())?.message||"";}catch(_){}
+        throw new Error(detail||deleteError.message||
+          "Account deletion is unavailable. Please try again.");
+      }
+      if(result?.deleted!==true){
+        throw new Error(result?.message||"Account deletion could not be verified.");
       }
       // Server has deleted only the authenticated account. Clear browser session
       // without depending on a now-deleted remote identity.

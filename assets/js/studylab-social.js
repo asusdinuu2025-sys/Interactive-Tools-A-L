@@ -884,22 +884,17 @@
         if (!window.confirm(confirmation)) return;
         removePost.disabled = true;
         try {
-          let deletion = client.from("studylab_social_posts").delete().eq("id", post.id);
-          if (!isAdmin) deletion = deletion.eq("author_id", currentUserId);
-          const { data: deleted, error } = await deletion.select("id").maybeSingle();
-          if (error) throw error;
-          if (!deleted) throw new Error("This post could not be deleted. Check your permissions and try again.");
-          const imagePaths = imageRows.map(row => row.bucket_path).filter(Boolean);
-          let cleanupWarning = false;
-          if (imagePaths.length) {
-            const { error: storageError } = await client.storage.from(BUCKET).remove(imagePaths);
-            if (storageError) {
-              console.warn("Deleted Social post but could not clean up every image:", storageError);
-              cleanupWarning = true;
-            }
-          }
-          setStatus(cleanupWarning ? "Post deleted. Some image storage may need cleanup." :
-            (deletingAnotherStudentPost ? "Student post deleted." : "Your post was deleted."));
+          // An authenticated Edge Function deletes uploaded files using
+          // server-side storage permissions, then removes the post. Its
+          // existing foreign keys cascade likes, comments and alerts.
+          const {data:result,error:deletionError} = await client.functions.invoke(
+            "studylab-delete-post",{body:{post_id:post.id}}
+          );
+          if(deletionError)throw deletionError;
+          if(!result?.deleted)throw new Error(result?.message||"Could not delete this post.");
+          setStatus(deletingAnotherStudentPost
+            ? "Student post, comments, likes and images deleted."
+            : "Your post, comments, likes and images were deleted.");
           await animateOut(card, "is-removing");
           if (!stream.querySelector(".sl-feed-post")) emptyState("No posts yet");
         } catch (error) {

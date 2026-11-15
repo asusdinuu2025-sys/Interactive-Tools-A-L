@@ -8,6 +8,9 @@
   <meta name="robots" content="noindex, follow">
   <style>
     *{box-sizing:border-box}
+    /* Don't paint the legacy fallback timer while the glass theme is loading. */
+    :root{background:var(--mini-base,#0b1220)}
+    html:not(.sl-mini-glass-ready) body.sl-mini-window{visibility:hidden}
     :root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
     body{margin:0;min-height:100vh;display:grid;place-items:center;padding:14px;background:radial-gradient(circle at 15% 0%,rgba(45,115,150,.2),transparent 48%),#0c1422;color:#edf5ff}
     .mini{width:100%;max-width:420px;padding:17px;border:1px solid rgba(126,220,255,.2);border-radius:19px;background:rgba(20,34,54,.96);box-shadow:0 18px 48px rgba(0,0,0,.3)}
@@ -27,7 +30,12 @@
   </style>
 <link rel="stylesheet" href="assets/css/studylab-auth-gateway.css?v=20261103-google-auth-v1">
 <script src="assets/js/study-room-mini-appearance.js?v=1"></script>
-<link rel="stylesheet" href="assets/css/study-room-mini-glass.css?v=1">
+<link rel="stylesheet" href="assets/css/study-room-mini-glass.css?v=20261115-no-theme-flash-v1">
+<script>
+  // This runs after the render-blocking current-theme stylesheet has loaded,
+  // but before the timer body is parsed and shown to the user.
+  document.documentElement.classList.add("sl-mini-glass-ready");
+</script>
 </head>
 <body class="sl-mini-window">
   <main class="mini" aria-label="Independent StudyLab timer">
@@ -42,7 +50,7 @@
     <p class="hint">This independent window can stay open after you close the main Study Room tab.</p>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="assets/js/studylab-account.js"></script>
+  <script src="assets/js/studylab-account.js?v=20261115-profile-lifecycle-v2"></script>
   <script src="assets/js/studylab-auth-gateway.js?v=20261103-google-auth-v1"></script>
   <script src="assets/js/study-room-config.js"></script>
   <script src="assets/js/study-room-presence.js?v=20261103-target-presence-v1"></script>

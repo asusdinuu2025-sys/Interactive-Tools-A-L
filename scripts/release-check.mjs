@@ -15,6 +15,9 @@ const syntaxFiles = [
   "assets/js/feed-drawer.js",
   "assets/js/study-room-analytics.js",
   "assets/js/study-room-mini-standalone.js",
+  "assets/js/study-room-mini-timer.js",
+  "assets/js/study-room-mini-appearance.js",
+  "assets/js/studylab-account.js",
   "assets/js/study-room-presence.js",
   "assets/js/study-room-realtime.js",
   "assets/js/study-room-subject-picker.js",
@@ -164,6 +167,20 @@ const followTests = spawnSync(process.execPath, ["scripts/studylab-follows-check
 if (followTests.status !== 0) {
   fail("StudyLab follows checks failed:\n" +
     (followTests.stderr || followTests.stdout || "node test failed"));
+}
+
+// Targeted View Profile / gender / room theme / mini-timer first-paint checks.
+const profileRoomMiniTests=spawnSync(process.execPath,["scripts/profile-room-mini-refinements-check.mjs"],{encoding:"utf8"});
+if(profileRoomMiniTests.status!==0){
+  fail("StudyLab profile and mini timer refinements failed:\n"+
+    (profileRoomMiniTests.stderr||profileRoomMiniTests.stdout||"node test failed"));
+}
+
+// Seven requested StudyLab lifecycle and compact layout regressions.
+const lifecycleTests=spawnSync(process.execPath,["scripts/studylab-lifecycle-check.mjs"],{encoding:"utf8"});
+if(lifecycleTests.status!==0){
+  fail("StudyLab lifecycle and layout checks failed:\n"+
+    (lifecycleTests.stderr||lifecycleTests.stdout||"node test failed"));
 }
 
 // Parse inline JavaScript in the standalone Study Tools page without executing it.

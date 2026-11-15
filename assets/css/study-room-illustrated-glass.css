@@ -709,3 +709,46 @@ body.study-room-page[data-room-theme] #timerSection .room-session-actions .room-
 body.study-room-page[data-room-doodles="off"] #slStudyRoomAmbient {
   display:none!important;
 }
+
+
+/* Keep live student cards' existing geometry with ellipsis for long names. */
+body.study-room-page[data-room-theme] .room-page .room-people-grid .room-person-card{
+  min-width:0;max-width:100%;box-sizing:border-box;
+}
+body.study-room-page[data-room-theme] .room-people-grid .room-person-card-name-row{
+  flex-wrap:nowrap!important;min-width:0;max-width:100%;width:100%;overflow:hidden;
+}
+body.study-room-page[data-room-theme] .room-people-grid .room-person-card-name-row .room-person-card-name{
+  display:block;flex:1 1 0!important;min-width:0!important;max-width:100%;
+  white-space:nowrap!important;overflow:hidden!important;
+  text-overflow:ellipsis!important;overflow-wrap:normal!important;
+}
+body.study-room-page[data-room-theme] .room-people-grid .room-person-card-name-row .room-person-card-rank{
+  flex:0 0 auto;
+}
+
+/* Five navigation buttons, including Home, one row on phones only. */
+@media(max-width:600px){
+  body.study-room-page .room-layout.sl-room-shell .sl-room-nav{
+    display:grid!important;
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    grid-auto-flow:column!important;
+    gap:clamp(3px,1vw,7px)!important;
+    width:100%!important;max-width:100%!important;min-width:0!important;
+    box-sizing:border-box!important;padding:5px!important;overflow:visible;
+  }
+  body.study-room-page .room-layout.sl-room-shell .sl-room-nav > .sl-nav-link{
+    display:flex!important;flex-direction:column!important;align-items:center!important;
+    justify-content:center!important;min-width:0!important;max-width:100%!important;
+    width:100%!important;box-sizing:border-box!important;
+    min-height:46px!important;padding:5px 1px!important;gap:3px!important;
+    font-size:clamp(12px,3.5vw,16px)!important;
+  }
+  body.study-room-page .room-layout.sl-room-shell .sl-room-nav > .sl-nav-link small{
+    font-size:clamp(9px,2.6vw,11px)!important;
+    white-space:nowrap!important;max-width:100%;
+  }
+  body.study-room-page .room-layout.sl-room-shell .sl-room-nav .sl-nav-home{
+    min-height:46px!important;
+  }
+}

@@ -21,7 +21,7 @@ const drawer=readFileSync("assets/js/feed-drawer.js","utf8");
 for(const path of ["index.html","study-room.html"]){
  const html=readFileSync(path,"utf8");
  assert.ok(html.includes("studylab-follow.js?v=20261114-follow-v1"),"Follow script missing from "+path);
- assert.ok(html.includes("studylab-follow.css?v=20261114-follow-v1"),"Follow CSS missing from "+path);
+ assert.ok(html.includes("studylab-follow.css?v=20261115-profile-theme-v1"),"Follow CSS missing from "+path);
  assert.ok(html.indexOf("studylab-follow.js")<html.indexOf("studylab-profile-view.js"),
    "Follow module must load before public profile viewer");
 }
@@ -69,8 +69,19 @@ assert.ok(bioMigration.includes("studylab_follow_alerts") && bioMigration.includ
 assert.ok(!/delete\s+from\s+public\.studylab_social_(posts|comments|likes)/i.test(bioMigration),
   "Midnight cleanup must not delete actual posts, comments, or likes");
 assert.ok(bioMigration.includes("p.bio"),"Safe public directory must return the optional bio");
-assert.ok(editProfile.includes('profileBio') && accountSource.includes("bio: bio || null"),"Profile editor must save bios");
-assert.ok(viewer.includes('bioNode.textContent=escText(profile.bio)'),"Profile viewer must display bio");
+assert.ok(!editProfile.includes("profileBio") && !home.includes('id="profileBio"') &&
+  !study.includes('id="profileBio"'),
+  "Bio must be absent from both general Edit Profile forms");
+assert.ok(accountSource.includes("async function saveBio(value)") &&
+  viewer.includes("account.saveBio(bioInput.value)"),
+  "Only View Profile must save the owner's Bio separately");
+assert.ok(!accountSource.includes("bio: bio || null"),
+  "Normal full-profile saves must not overwrite an existing Bio");
+assert.ok(viewer.includes('bioNode.textContent=escText(profile.bio)'),
+  "Visitor profile card must show read-only public Bio");
+assert.ok(viewer.includes("bioEditor.hidden=!own") &&
+  viewer.includes("bioNode.hidden=own"),
+  "Only a profile owner may use the Bio editor");
 assert.ok(room.includes("room-person-follow-slot"),"Follow control must sit inside study room card");
 assert.ok(css.includes("sl-follow-profile-toast"),"Right-side incomplete-profile toast styling missing");
 assert.ok(source.includes("showCompleteProfileToast()"),"Incomplete profiles must trigger a toast");
@@ -86,10 +97,10 @@ assert.ok(room.includes("room-person-status-stack") && room.includes("room-perso
   "Study Room Follow must be directly below studying/away status inside card");
 assert.ok(css.includes("max-width:100%;margin:0;z-index:1"),
   "Study Room Follow control must not overflow its card");
-assert.ok(editProfile.includes("Bio must be 15 words or fewer"),
-  "Client profile editor must enforce 15 bio words");
-assert.ok(accountSource.includes('bio.split(" ").length > 15'),
-  "Account save must enforce 15 bio words");
+assert.ok(viewer.includes("bioCount.textContent") && viewer.includes('words>15'),
+  "View Profile must show and enforce Bio's 15-word counter");
+assert.ok(accountSource.includes('cleanBio.split(" ").length > 15'),
+  "Dedicated Bio saver must enforce the 15-word limit");
 
 const own="10000000-0000-4000-8000-000000000001";
 const other="20000000-0000-4000-8000-000000000002";
