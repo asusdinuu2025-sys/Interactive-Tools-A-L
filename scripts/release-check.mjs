@@ -12,6 +12,8 @@ const syntaxFiles = [
   "assets/js/studylab-social-follow-ui.js",
   "assets/js/studylab-profile-view.js",
   "assets/js/studylab-avatar.js",
+  "assets/js/studylab-pet-room.js",
+  "assets/js/studylab-pet.js",
   "assets/js/profile.js",
   "assets/js/feed-drawer.js",
   "assets/js/study-room-analytics.js",
@@ -115,6 +117,12 @@ for (const file of syntaxFiles) {
   else checkNode(absolutePath, file);
 }
 
+
+const profilePetTests = spawnSync(process.execPath, ["scripts/studylab-profile-pet-v2-check.mjs"], {encoding:"utf8"});
+if (profilePetTests.status !== 0) {
+  fail("StudyLab profile and Pet v2 checks failed:\n" +
+    (profilePetTests.stderr || profilePetTests.stdout || "Checks failed"));
+}
 
 const avatarTests = spawnSync(process.execPath, ["scripts/studylab-avatar-check.mjs"], {encoding:"utf8"});
 if (avatarTests.status !== 0) {
