@@ -76,3 +76,15 @@ body.study-room-page[data-room-theme] .sl-pv-avatar-actions button {
 }
 html[data-theme="light"] body:not(.study-room-page) .sl-pv-avatar-message[data-state="error"] {color:#ab3348}
 html[data-theme="light"] body:not(.study-room-page) .sl-pv-avatar-message[data-state="success"] {color:#146e59}
+
+/* Keep Social community avatars gender-colored instead of random when pictured. */
+.sl-feed-panel[data-size="full"] .sl-feed-member-avatar.sl-feed-avatar-male {
+  border-color:#48caff;color:#48caff;
+  box-shadow:0 0 5px #48caff,0 0 12px rgba(55,185,255,.38);
+}
+.sl-feed-panel[data-size="full"] .sl-feed-member-avatar.sl-feed-avatar-female {
+  border-color:#ff75cf;color:#ff75cf;
+  box-shadow:0 0 5px #ff75cf,0 0 12px rgba(255,90,200,.38);
+}
+.sl-feed-member-avatar > svg {width:20px;height:20px;stroke:currentColor;stroke-width:1.65;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.sl-feed-comment-avatar > svg {width:17px;height:17px}
