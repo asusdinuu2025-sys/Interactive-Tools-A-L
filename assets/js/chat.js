@@ -141,6 +141,41 @@
   let reactionSyncTimer = 0;
   const reactionRefreshIds = new Set();
   const REACTIONS = ["👍","😂","🔥","❤️"];
+  // Each student keeps a recognizable color for the current browser session.
+  // Names are colored, not whole incoming bubbles; your own name stays cyan.
+  const senderColors = [
+    ["#e7b2ff","#753ca7"],["#ffc47c","#925319"],["#8ce8ba","#23784c"],
+    ["#ffacbf","#a7375b"],["#a6bbff","#445db4"],["#f8e08b","#86600b"],
+    ["#91dcea","#126b86"],["#ebabe4","#913f88"],["#b6e58e","#517e1d"],
+    ["#fcb4a2","#9e4a35"],["#b5b4ff","#6554a1"],["#a3e6d8","#206e67"]
+  ];
+  const senderColorIds = new Map();
+  const occupiedSenderColors = new Set();
+  function senderColor(uid){
+    if(!uid) return senderColors[0];
+    if(senderColorIds.has(uid)) return senderColors[senderColorIds.get(uid)];
+    let hash=2166136261;
+    const seed=uid+"|"+sessionKey;
+    for(let i=0;i<seed.length;i++){
+      hash^=seed.charCodeAt(i);
+      hash=Math.imul(hash,16777619);
+    }
+    let index=(hash>>>0)%senderColors.length;
+    for(let tries=0;tries<senderColors.length && occupiedSenderColors.has(index);tries++){
+      index=(index+1)%senderColors.length;
+    }
+    senderColorIds.set(uid,index);
+    occupiedSenderColors.add(index);
+    return senderColors[index];
+  }
+  function resizeMessageInput(){
+    if(!input)return;
+    input.style.height="auto";
+    const limit=99; // about 4 lines at the current font size
+    const needed=Math.max(43,input.scrollHeight);
+    input.style.height=Math.min(needed,limit)+"px";
+    input.style.overflowY=needed>limit?"auto":"hidden";
+  }
   const safeUuid = value => typeof value === "string" &&
     /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(value);
 
@@ -238,11 +273,13 @@
           String(row?.message || "").slice(0,90);
     }
     input.placeholder=editTarget?"Edit your message…":replyTarget?"Write a reply…":"";
+    resizeMessageInput();
     updateComposer();
   }
   function clearComposerContext(clearInput = false) {
     editTarget=null;replyTarget=null;
     if(clearInput)input.value="";
+    resizeMessageInput();
     showComposerContext();
   }
 
@@ -338,6 +375,11 @@
     article.dataset.messageId=row.id;
     const own=Boolean(row.user_id && row.user_id===userId);
     if(own)article.classList.add("own");
+    else{
+      const [dark,light]=senderColor(row.user_id||row.nickname||row.session_id);
+      article.style.setProperty("--sl-chat-sender-dark",dark);
+      article.style.setProperty("--sl-chat-sender-light",light);
+    }
 
     const header=document.createElement("div");
     header.className="study-chat-message-head";
@@ -362,6 +404,7 @@
     const nameText=document.createElement("span");
     nameText.className="study-chat-message-name-text";
     nameText.textContent=profile?.display_name||row.nickname||"Student";
+    nameText.title=nameText.textContent; // Full name remains available if truncated.
     name.append(nameText);
     if(safeUuid(row.user_id))window.StudyLabNameMark?.decorate(name,row.user_id);
     identity.append(avatar,name);header.append(identity);
@@ -694,7 +737,7 @@
         ({error}=await client.from(CONFIG.table).insert(values));
       }
       if(error)throw error;
-      input.value="";clearComposerContext();updateComposer();
+      input.value="";clearComposerContext();resizeMessageInput();updateComposer();
     }catch(error){
       console.warn("StudyLab Chat message action:",error);
       chatFeedback(error?.message?.includes("foreign key")
@@ -724,7 +767,10 @@
     expandButton?.setAttribute("aria-pressed",String(isExpanded));
     expandButton?.setAttribute("aria-label",isExpanded?"Restore chat window":"Expand chat window");
     expandButton.title=isExpanded?"Restore chat size":"Expand chat";
-    if(isOpen)scrollToBottom();
+    if(isOpen){
+      resizeMessageInput();
+      scrollToBottom();
+    }
   }
 
   function setOpen(open) {
@@ -738,6 +784,7 @@
       closeQuickAccess();
       setUnread(0);
       scrollToBottom(true);
+      resizeMessageInput();
       input?.focus();
     }
   }
@@ -760,6 +807,7 @@
 
     input?.addEventListener("input",()=>{
       chatFeedback("");
+      resizeMessageInput();
       updateComposer();
     });
     cancelContext?.addEventListener("click",()=>clearComposerContext(true));
