@@ -1,50 +1,78 @@
 import assert from "node:assert/strict";
+import vm from "node:vm";
 import {readFileSync} from "node:fs";
 const read=p=>readFileSync(p,"utf8");
-const html=read("index.html");
-const profile=read("assets/js/profile.js");
+const html=read("index.html"), profile=read("assets/js/profile.js");
 const ui=read("assets/js/studylab-announcements.js");
 const css=read("assets/css/studylab-announcements.css");
-const sql=read("supabase/migrations/20261115230000_studylab_announcements.sql");
-assert.match(html,/id="slDiscoveryCarousel"/);
-assert.match(html,/data-discovery-main/);
-assert.match(html,/data-discovery-prev/);
-assert.match(html,/data-discovery-next/);
-assert.match(html,/data-discovery-dots/);
-assert.match(html,/sl-home-intro-row/);
-assert.match(html,/homepage-utility-row/);
-assert.match(html,/assets\/css\/studylab-announcements\.css\?v=20261115-feature-discovery-v1/);
-assert.match(html,/assets\/js\/studylab-announcements\.js\?v=20261115-feature-discovery-v1/);
+const before=read("supabase/migrations/20261115230000_studylab_announcements.sql");
+const migration=read("supabase/migrations/20261115233500_announcements_v2_admin_banners.sql");
+const publicRead=read("supabase/migrations/20261115233600_announcements_public_read_policy.sql");
+assert.doesNotThrow(()=>new vm.Script(ui,{filename:"studylab-announcements.js"}));
+assert.doesNotThrow(()=>new vm.Script(profile,{filename:"profile.js"}));
+for(const required of [
+  'id="slDiscoveryCarousel"','data-discovery-main','data-discovery-prev',
+  'data-discovery-next','data-discovery-dots','sl-home-intro-row',
+  'homepage-utility-row',
+  'assets/css/studylab-announcements.css?v=20261115-published-banners-v2',
+  'assets/js/studylab-announcements.js?v=20261115-published-banners-v2'
+])assert.ok(html.includes(required),"Missing Home integration: "+required);
 assert.match(profile,/updates\.dataset\.accountAction="announcements"/);
 assert.match(profile,/manage\.dataset\.accountAction="manage-announcements"/);
 assert.match(profile,/nameText\.className="sl-greeting-name-text"/);
 assert.match(profile,/window\.StudyLabNameMark\?\.decorate/);
-assert.match(ui,/interval=window\.setInterval\(\(\)=>\{/);
+assert.match(ui,/items=historyItems\.filter\(x=>!x\.ends_at/);
+assert.match(ui,/\.order\("sort_order",\{ascending:true\}\)/);
+assert.match(ui,/current=\(current\+1\)%items\.length;render\(\)/);
 assert.match(ui,/},4000\)/);
+assert.match(ui,/new IntersectionObserver/);
 assert.match(ui,/reduced\.matches/);
-assert.match(ui,/if\(item\?\.action==="profile"\)return openProfile\(\)/);
-assert.match(ui,/if\(result\.origin!==window\.location\.origin\)return null/);
-assert.match(ui,/\.scrollIntoView\(\{behavior:reduced\.matches\?"auto":"smooth"/);
-assert.match(ui,/items\[1\]=\{kind:announcement\.kind/);
-assert.match(ui,/historyItems=\(data\|\|\[\]\)\.filter/);
-assert.match(ui,/announcements=historyItems\.filter/);
-assert.match(ui,/for\(const item of historyItems\)content\.append/);
+assert.match(ui,/function navigate\(raw\)/);
+for(const path of [
+  '/#profile','/#social','/#study-chat','/#about-studylab',
+  '/#practical-simulations'
+])assert.ok(migration.includes(path),"Missing seeded link: "+path);
+assert.match(ui,/function openProfile\(\)/);
+assert.match(ui,/function openChat\(\)/);
+assert.match(ui,/function openAbout\(\)/);
+assert.match(ui,/card\.querySelector\("\[data-discovery-prev\]"\)/);
+assert.match(ui,/card\.querySelector\("\[data-discovery-next\]"\)/);
 assert.match(ui,/historyDialog=dialogShell\("slAnnouncementHistory"/);
 assert.match(ui,/managerDialog=dialogShell\("slAnnouncementManager"/);
 assert.match(ui,/client\.rpc\("studylab_social_is_admin"\)/);
-assert.match(ui,/client\.from\("studylab_announcement_reads"\)/);
 assert.match(ui,/client\.from\("studylab_announcements"\)/);
-assert.match(ui,/new IntersectionObserver/);
+assert.match(ui,/form\.addEventListener\("submit",async event=>\{/);
+assert.match(ui,/client\.storage\.from\(BUCKET\)\.upload\(newImagePath,processed/);
+assert.match(ui,/client\.storage\.from\(BUCKET\)\.remove\(\[oldImage\]\)/);
+assert.match(ui,/client\.storage\.from\(BUCKET\)\.remove\(\[item\.image_path\]\)/);
+assert.match(ui,/context\.drawImage\(img,cropX,cropY,cropW,cropH,0,0,W,H\)/);
+assert.match(ui,/W=1200,H=480/);
+assert.match(ui,/const BUCKET="studylab-announcements"/);
+assert.match(ui,/MAX_SOURCE=8\*1024\*1024,MAX_FINAL=2\*1024\*1024/);
+for(const deleted of [
+  "studylab_announcement_reads","markSeen(","loadReceipts(",
+  "receipts=new Map(","localStorage.","viewed_at","dismissed_at","opened_at"
+])assert.ok(!ui.includes(deleted),"Obsolete read tracking in frontend: "+deleted);
+assert.match(migration,/drop table if exists public\.studylab_announcement_reads/);
+assert.match(migration,/update auth\.users/);
+assert.match(migration,/is_anonymous=true/);
+assert.match(migration,/and \(select auth\.uid\(\)\) in/);
+assert.match(migration,/create policy "StudyLab admin adds announcement images"/);
+assert.match(migration,/create policy "StudyLab admin deletes announcement images"/);
+assert.match(migration,/file_size_limit/);
+assert.match(publicRead,/for select to anon,authenticated using \(published and starts_at <= now\(\)\)/);
+assert.match(publicRead,/for select to authenticated using \(\(select public\.studylab_social_is_admin\(\)\)\)/);
+assert.match(before,/alter table public\.studylab_announcements enable row level security/);
+for(const title of [
+  "Profile pictures are here!","Follow and connect","Live Study Room",
+  "StudyLab Social","StudyLab Chat","Practical Simulations","About StudyLab"
+])assert.ok(migration.includes(title),"Missing published default banner: "+title);
 assert.match(css,/@media\(max-width:1120px\)/);
 assert.match(css,/@media\(max-width:540px\)/);
-assert.match(css,/text-overflow:ellipsis/);
-assert.match(css,/\.sl-discovery-card/);
-assert.match(css,/html\[data-theme="light"\] \.sl-discovery-card/);
 assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
-assert.match(sql,/alter table public\.studylab_announcements enable row level security/);
-assert.match(sql,/alter table public\.studylab_announcement_reads enable row level security/);
-assert.match(sql,/public\.studylab_social_is_admin\(\)/);
-assert.match(sql,/user_id=\(select auth\.uid\(\)\)/);
-assert.match(sql,/on delete cascade/);
-assert.doesNotMatch(sql,/drop table public\.studylab_social|delete from public\.studylab_social/i);
-console.log("StudyLab announcement UI, navigation, history, role security and layout checks passed.");
+assert.match(css,/html\[data-theme="light"\] \.sl-discovery-card/);
+assert.match(css,/text-overflow:ellipsis/);
+assert.match(css,/\.sl-discovery-custom-image/);
+assert.match(css,/\.sl-discovery-card\.has-uploaded-banner/);
+assert.match(css,/\.sl-ann-image-preview/);
+console.log("StudyLab seven published banners, admin editor, images, no read-tracking and mobile layout: OK.");

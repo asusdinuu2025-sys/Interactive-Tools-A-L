@@ -278,3 +278,74 @@ html[data-theme="light"] .sl-ann-primary{color:#185d83}
  .sl-ann-dialog-body{padding:13px 15px 17px}
  .sl-ann-form-pair{grid-template-columns:1fr}
 }
+
+
+/* Announcement posts v2: one true Supabase post per slide, optionally with a
+   browser-optimized 1200×480 background image. Existing Live/Home cards remain
+   unchanged and theme-aware. */
+.sl-discovery-card[hidden],
+.sl-discovery-custom-image[hidden],
+.sl-ann-image-preview[hidden],
+.sl-ann-remove-image[hidden],
+.sl-ann-custom-path[hidden]{
+  display:none!important;
+}
+.sl-home-home-section .homepage-overview-panel .sl-home-intro-row.sl-discovery-no-posts{
+  grid-template-columns:minmax(0,1fr)!important;
+  min-height:0!important;
+}
+.sl-discovery-custom-image{
+  position:absolute;inset:0;width:100%;height:100%;
+  display:block;object-fit:cover;object-position:center;
+  z-index:0;pointer-events:none;opacity:.82;
+}
+.sl-discovery-card.has-uploaded-banner .sl-discovery-slide-main{
+  background:linear-gradient(90deg,rgba(11,24,53,.97) 0%,
+    rgba(13,26,59,.90) 43%,rgba(12,25,56,.30) 100%);
+}
+.sl-discovery-card.has-uploaded-banner .sl-discovery-title{
+  color:#fff!important;text-shadow:0 2px 11px rgba(0,0,0,.45);
+}
+.sl-discovery-card.has-uploaded-banner .sl-discovery-body{color:#e5f2ff!important}
+.sl-discovery-card.has-uploaded-banner .sl-discovery-art{opacity:.09}
+.sl-discovery-card.has-uploaded-banner .sl-discovery-tag{
+  color:#b2f3ff!important;
+  background:rgba(28,70,118,.74)!important;
+  border-color:rgba(150,217,255,.48)!important;
+}
+.sl-discovery-card.has-uploaded-banner .sl-discovery-cta{
+  color:#fff!important;background:rgba(22,115,167,.8)!important;
+}
+.sl-ann-image-guidance{
+  font:500 11px/1.48 "Nirmala UI","Segoe UI",sans-serif;
+  margin:-6px 0 4px;color:#a9c7e7;
+}
+.sl-ann-image-preview{
+  width:100%;max-height:230px;aspect-ratio:5/2;
+  object-fit:cover;display:block;
+  border-radius:13px;border:1px solid rgba(133,203,255,.37);
+  box-shadow:0 7px 19px rgba(0,0,0,.15);
+}
+.sl-ann-history-image{
+  display:block;width:100%;max-height:130px;aspect-ratio:5/2;
+  object-fit:cover;border-radius:10px;margin-bottom:11px;
+}
+.sl-ann-admin-thumb{
+  display:block;width:65px;height:37px;flex:0 0 65px;
+  object-fit:cover;border-radius:8px;border:1px solid rgba(143,195,236,.3);
+}
+.sl-ann-admin-row{gap:7px}
+.sl-ann-admin-row span{overflow-wrap:anywhere}
+.sl-ann-admin-row button{flex:0 0 auto}
+html[data-theme="light"] .sl-ann-image-guidance{color:#50758c}
+html[data-theme="light"] .sl-ann-image-preview{
+  border-color:rgba(57,135,198,.32);
+}
+@media(max-width:540px){
+  .sl-discovery-card.has-uploaded-banner .sl-discovery-slide-main{
+    background:linear-gradient(90deg,rgba(11,24,53,.96),
+      rgba(13,26,59,.75) 65%,rgba(12,25,56,.37));
+  }
+  .sl-ann-admin-thumb{width:46px;height:30px;flex-basis:46px}
+  .sl-ann-admin-row button{padding:6px;font-size:10px}
+}
