@@ -270,11 +270,28 @@
     bioEditToggle.setAttribute("aria-expanded","false");
     bioSummaryHeading.append(bioEditToggle);
     bioSummary.append(bioSummaryHeading,bioNode);
+    const resizeBioInput=()=>{
+      if(bioEditor.hidden)return;
+      bioInput.style.height="auto";
+      bioInput.style.height=Math.min(146,Math.max(45,bioInput.scrollHeight))+"px";
+      bioInput.style.overflowY=bioInput.scrollHeight>146?"auto":"hidden";
+    };
     bioEditToggle.addEventListener("click",()=>{
       if(bioSaving || !accountUser || viewedUserId!==accountUser.id)return;
-      bioEditor.hidden=!bioEditor.hidden;
-      bioEditToggle.setAttribute("aria-expanded",String(!bioEditor.hidden));
-      if(!bioEditor.hidden)bioInput.focus();
+      const opening=bioEditor.hidden;
+      bioEditor.hidden=!opening;
+      bioNode.hidden=opening;
+      bioEditToggle.setAttribute("aria-expanded",String(opening));
+      bioEditToggle.querySelector("span").textContent=opening?"Cancel":"Edit";
+      if(opening){
+        bioInput.value=bioNode.textContent==="No bio added yet."?"":bioNode.textContent;
+        updateBioWords();
+        resizeBioInput();
+        bioInput.focus();
+      }else{
+        bioInput.value=bioNode.textContent==="No bio added yet."?"":bioNode.textContent;
+        bioStatus.hidden=true;
+      }
     });
 
     // The owner edits the bio here, not in the general profile form.
@@ -287,7 +304,7 @@
     bioLabel.id = "slPvBioLabel";
     bioInput = element("textarea","sl-pv-bio-input");
     bioInput.id = "slPvBioInput";
-    bioInput.rows = 2;
+    bioInput.rows = 1;
     bioInput.maxLength = 240; // Existing longer bios stay readable until edited.
     bioInput.placeholder = "A little about your studies…";
     bioInput.setAttribute("aria-describedby","slPvBioCount");
@@ -301,6 +318,8 @@
     bioStatus.hidden = true;
     bioStatus.setAttribute("role","status");
     bioEditor.append(bioLabel,bioInput,bioControls,bioStatus);
+    // Edit in the same Bio card: no duplicate editing section below it.
+    bioSummary.append(bioEditor);
 
     const updateBioWords=()=>{
       const count=Array.from(bioInput.value.trim()).length;
@@ -311,7 +330,10 @@
         viewedUserId!==accountUser.id;
       if(!bioStatus.hidden)bioStatus.hidden=true;
     };
-    bioInput.addEventListener("input",updateBioWords);
+    bioInput.addEventListener("input",()=>{
+      resizeBioInput();
+      updateBioWords();
+    });
     bioSave.addEventListener("click",async()=>{
       if(bioSaving || !accountUser || viewedUserId!==accountUser.id)return;
       const id=viewedUserId;
@@ -329,7 +351,9 @@
         bioNode.textContent=saved||"No bio added yet.";
         bioCount.textContent=Array.from(saved).length+" / 35 characters";
         bioEditor.hidden=true;
+        bioNode.hidden=false;
         bioEditToggle.setAttribute("aria-expanded","false");
+        bioEditToggle.querySelector("span").textContent="Edit";
         bioStatus.textContent="Bio saved.";
         bioStatus.dataset.state="success";
         bioStatus.hidden=false;
@@ -383,7 +407,7 @@
     listPanel.setAttribute("aria-label","Student connections");
     listPanel.hidden=true;
     listBackdrop.append(listPanel);
-    dialog.append(header,identity,avatarEditor,bioSummary,bioEditor,counts,actions,followAction,joined,viewStatus);
+    dialog.append(header,identity,avatarEditor,bioSummary,counts,actions,followAction,joined,viewStatus);
     view.append(dialog);
     document.body.append(view,listBackdrop);
     listBackdrop.addEventListener("pointerdown",event=>{
@@ -604,6 +628,7 @@
     bioSummary.hidden=false;
     bioEditToggle.hidden=!own;
     bioEditToggle.setAttribute("aria-expanded","false");
+    bioEditToggle.querySelector("span").textContent="Edit";
     bioEditor.hidden=true;
     avatarToggle.hidden=!own;
     avatarToggle.setAttribute("aria-expanded","false");
