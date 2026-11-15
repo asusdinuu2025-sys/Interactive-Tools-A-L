@@ -21,7 +21,7 @@ const drawer=readFileSync("assets/js/feed-drawer.js","utf8");
 for(const path of ["index.html","study-room.html"]){
  const html=readFileSync(path,"utf8");
  assert.ok(html.includes("studylab-follow.js?v=20261114-follow-v1"),"Follow script missing from "+path);
- assert.ok(html.includes("studylab-follow.css?v=20261114-follow-v1"),"Follow CSS missing from "+path);
+ assert.ok(html.includes("studylab-follow.css?v=20261115-profile-theme-v1"),"Follow CSS missing from "+path);
  assert.ok(html.indexOf("studylab-follow.js")<html.indexOf("studylab-profile-view.js"),
    "Follow module must load before public profile viewer");
 }
