@@ -11,7 +11,7 @@ const css=readFileSync("assets/css/studylab-profile-view.css","utf8");
 const server=readFileSync("netlify/functions/delete-account.js","utf8");
 for(const file of ["index.html","study-room.html"]){
  const html=readFileSync(file,"utf8");
- assert.ok(html.includes("studylab-profile-view.js?v=20261115-profile-lifecycle-v2"));
+ assert.ok(html.includes("studylab-profile-view.js?v=20261115-compact-list-v3"));
  assert.ok(html.includes("studylab-profile-view.css?v=20261114-glass-profile-v1"));
  assert.ok(html.indexOf("studylab-profile-view.js")<html.indexOf("assets/js/profile.js"),
    "profile viewer helper must be available before profile menu");
