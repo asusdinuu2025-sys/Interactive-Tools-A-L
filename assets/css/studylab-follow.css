@@ -699,3 +699,27 @@ body.study-room-page[data-room-theme] .sl-pv-list-dialog .sl-pv-list-rows{
 .sl-pv-list-dialog .sl-pv-list-avatar-female{border-color:#ff67b7;color:#ff67b7;box-shadow:0 0 7px rgba(255,103,183,.36)}
 .sl-pv-list-avatar > svg{width:24px;height:24px;stroke:currentColor;stroke-width:1.75;fill:none}
 .sl-pv-list-avatar > .sl-avatar-photo{top:2px;left:2px;width:calc(100% - 4px);height:calc(100% - 4px)}
+
+
+/* Override older high-specificity Home rules which force the H2 to inline. */
+.sl-home-home-section .homepage-overview-panel .homepage-greeting-name{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  flex-wrap:nowrap!important;
+  gap:4px!important;
+  vertical-align:baseline!important;
+}
+.sl-home-home-section .homepage-overview-panel .homepage-greeting-name > .sl-name-mark{
+  display:inline-flex!important;
+  align-self:center!important;
+  flex:0 0 16px!important;
+  width:16px!important;height:16px!important;
+  margin:0 0 0 2px!important;
+  top:0!important;transform:none!important;
+}
+body.study-room-page[data-room-theme] .sl-pv-avatar-editor .sl-pv-avatar-actions label{
+  color:var(--room-text)!important;
+  border-color:color-mix(in srgb,var(--room-accent) 35%,transparent)!important;
+  background:color-mix(in srgb,var(--room-card) 60%,transparent)!important;
+}
