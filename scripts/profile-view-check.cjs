@@ -67,6 +67,8 @@ function reply(status,body){
      }
      if(url.endsWith("/storage/v1/object/studylab-social")&&options.method==="DELETE")
        return reply(200,[]);
+     if(url.endsWith("/storage/v1/object/studylab-avatars")&&options.method==="DELETE")
+       return reply(200,[]);
      if(url.includes("studylab_chat_messages"))return reply(204,null);
      if(url.endsWith("/auth/v1/admin/users/"+validUser)){
        authDeleted=true;
@@ -91,6 +93,10 @@ function reply(status,body){
    assert.ok(calls.some(x=>x.url.endsWith("/storage/v1/object/studylab-social")
      && JSON.parse(x.body||"{}").prefixes?.includes(validUser+"/test-post-folder/photo.png")),
      "account deletion must traverse nested post folders and remove actual image files");
+   assert.ok(calls.some(x=>x.url.endsWith("/storage/v1/object/studylab-avatars")
+     && JSON.parse(x.body||"{}").prefixes?.includes(validUser+"/avatar.webp")),
+     "account deletion must also remove its separate avatar file");
+
    assert.ok(calls.some(x=>x.url.endsWith("/auth/v1/admin/users/"+validUser)),
      "delete should target the verified signed-in user");
    assert.ok(!calls.some(x=>x.url.endsWith("/auth/v1/admin/users/"+anotherUser)),

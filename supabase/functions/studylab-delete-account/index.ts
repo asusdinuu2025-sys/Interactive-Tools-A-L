@@ -83,6 +83,12 @@ Deno.serve(async(req)=>{
       if(error)throw error;
     }
 
+    // An avatar is a separate public image object, not Social post media.
+    // Clear it before deleting Auth, so the public URL ceases to work.
+    const {error:avatarError}=await service.storage.from("studylab-avatars")
+      .remove([uid+"/avatar.webp"]);
+    if(avatarError)throw avatarError;
+
     // Chat uses ON DELETE SET NULL, so delete authored messages explicitly.
     // All other account relations are ON DELETE CASCADE: posts/comments,
     // likes, followers, reports, notifications, room credits/membership,

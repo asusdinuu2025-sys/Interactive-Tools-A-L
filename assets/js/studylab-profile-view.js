@@ -56,6 +56,13 @@
   let usernameNode = null;
   let nameNode = null;
   let avatarNode = null;
+  let avatarEditor = null;
+  let avatarPick = null;
+  let avatarRemove = null;
+  let avatarFile = null;
+  let avatarStatus = null;
+  let avatarBusy = false;
+  let avatarHasPhoto = false;
   let joinedNode = null;
   let viewStatus = null;
   let confirmView = null;
@@ -82,7 +89,7 @@
   let listPanel = null;
 
   function tabbables(root) {
-    return [...root.querySelectorAll("button:not([disabled]),input:not([disabled]),a[href]")].filter(n => !n.hidden && n.getAttribute("aria-hidden") !== "true");
+    return [...root.querySelectorAll("button:not([disabled]),input:not([disabled]),textarea:not([disabled]),a[href]")].filter(n => !n.hidden && n.getAttribute("aria-hidden") !== "true");
   }
   function trap(event, root) {
     if (event.key !== "Tab") return;
@@ -146,6 +153,78 @@
     usernameNode = element("p","sl-pv-username","@student");
     titleWrap.append(nameNode,usernameNode);
     identity.append(avatarNode,titleWrap);
+
+    // Profile picture editing lives ONLY in this View Profile card.
+    // The normal Edit Profile forms never receive upload controls.
+    avatarEditor = element("section","sl-pv-avatar-editor");
+    avatarEditor.hidden = true;
+    const avatarActions = element("div","sl-pv-avatar-actions");
+    avatarPick = button("sl-pv-avatar-upload","Upload photo");
+    avatarRemove = button("sl-pv-avatar-remove","Remove photo");
+    avatarRemove.disabled = true;
+    avatarFile = element("input","sl-pv-avatar-input");
+    avatarFile.type = "file";
+    avatarFile.accept = "image/jpeg,image/png,image/webp";
+    avatarFile.hidden = true;
+    avatarFile.setAttribute("aria-label","Choose JPG, PNG or WebP profile picture");
+    avatarActions.append(avatarPick,avatarRemove,avatarFile);
+    const photoNote = element("p","sl-pv-avatar-note",
+      "JPG, PNG or WebP · up to 1 MB · cropped to a 320 px square. Photos are visible to other students.");
+    avatarStatus = element("p","sl-pv-avatar-message","");
+    avatarStatus.hidden = true;
+    avatarStatus.setAttribute("role","status");
+    avatarEditor.append(avatarActions,photoNote,avatarStatus);
+    const syncAvatarButtons = () => {
+      avatarPick.disabled = avatarBusy;
+      avatarRemove.disabled = avatarBusy || !avatarHasPhoto;
+      avatarPick.textContent = avatarHasPhoto ? "Change photo" : "Upload photo";
+    };
+    avatarPick.addEventListener("click",()=>{if(!avatarBusy)avatarFile.click();});
+    avatarFile.addEventListener("change",async()=>{
+      const file = avatarFile.files?.[0];
+      avatarFile.value = "";
+      if (!file || avatarBusy || viewedUserId!==accountUser?.id) return;
+      const id = viewedUserId;
+      avatarBusy = true;syncAvatarButtons();
+      avatarStatus.hidden = false;avatarStatus.textContent = "Processing and uploading photo…";
+      avatarStatus.dataset.state = "";
+      try {
+        await window.StudyLabAvatar.save(file);
+        if (view.hidden || viewedUserId!==id) return;
+        avatarHasPhoto = true;
+        avatarStatus.textContent = "Profile picture saved.";
+        avatarStatus.dataset.state = "success";
+      } catch (error) {
+        if (view.hidden || viewedUserId!==id) return;
+        avatarStatus.textContent = error?.message || "Could not upload photo.";
+        avatarStatus.dataset.state = "error";
+      } finally {
+        avatarBusy = false;
+        if (viewedUserId===id) syncAvatarButtons();
+      }
+    });
+    avatarRemove.addEventListener("click",async()=>{
+      if (avatarBusy || !avatarHasPhoto || viewedUserId!==accountUser?.id) return;
+      if (!window.confirm("Remove your profile picture and use the original profile icon?")) return;
+      const id = viewedUserId;
+      avatarBusy = true;syncAvatarButtons();
+      avatarStatus.hidden = false;avatarStatus.textContent = "Removing photo…";
+      avatarStatus.dataset.state = "";
+      try {
+        await window.StudyLabAvatar.remove();
+        if (view.hidden || viewedUserId!==id) return;
+        avatarHasPhoto = false;
+        avatarStatus.textContent = "Original profile icon restored.";
+        avatarStatus.dataset.state = "success";
+      } catch (error) {
+        if (view.hidden || viewedUserId!==id) return;
+        avatarStatus.textContent = error?.message || "Could not remove photo.";
+        avatarStatus.dataset.state = "error";
+      } finally {
+        avatarBusy = false;
+        if (viewedUserId===id) syncAvatarButtons();
+      }
+    });
 
     bioNode = element("p","sl-pv-description","No bio added yet.");
     bioNode.id="slPvDescription";
@@ -245,7 +324,7 @@
 
     listPanel=element("section","sl-pv-student-list");
     listPanel.hidden=true;
-    dialog.append(header,identity,bioNode,bioEditor,counts,actions,followAction,joined,viewStatus,listPanel);
+    dialog.append(header,identity,avatarEditor,bioNode,bioEditor,counts,actions,followAction,joined,viewStatus,listPanel);
     view.append(dialog);
     document.body.append(view);
 
@@ -327,6 +406,8 @@
 
   function paintAvatar(gender){
     avatarNode.replaceChildren();
+    delete avatarNode.dataset.slAvatarUrl;
+    avatarNode.classList.remove("sl-avatar-has-image");
     const svg=document.createElementNS(SVG_NS,"svg");
     svg.setAttribute("viewBox","0 0 24 24");
     svg.setAttribute("aria-hidden","true");
@@ -415,6 +496,7 @@
     usernameNode.textContent="Loading profile…";
     joinedNode.textContent=own?joinedDate(user.created_at):"Account created · —";
     paintAvatar("male");
+    window.StudyLabAvatar?.decorate(avatarNode,id);
     window.StudyLabNameMark?.decorate(nameNode,null);
     viewStatus.hidden=true;
     listPanel.hidden=true;
@@ -422,6 +504,14 @@
     dialog.querySelector(".sl-pv-eyebrow").textContent=own?"STUDYLAB · MY PROFILE":"STUDYLAB · STUDENT PROFILE";
     bioNode.hidden=own;
     bioEditor.hidden=!own;
+    avatarEditor.hidden=!own;
+    avatarHasPhoto=false;
+    avatarBusy=false;
+    avatarPick.textContent="Upload photo";
+    avatarPick.disabled=false;
+    avatarRemove.disabled=true;
+    avatarFile.value="";
+    avatarStatus.hidden=true;
     bioInput.value="";
     bioInput.disabled=false;
     bioSave.disabled=true;
@@ -461,6 +551,15 @@
       usernameNode.textContent=profile.username?"@"+escText(profile.username):"Username not set";
       joinedNode.textContent=joinedDate((own?user.created_at:null)||profile.joined_at||profile.created_at);
       paintAvatar(profile.gender==="female"?"female":"male");
+      window.StudyLabAvatar?.decorate(avatarNode,id);
+      try {
+        const hasPhoto = await window.StudyLabAvatar?.get(id,true);
+        if (serial===viewSequence && !view.hidden && viewedUserId===id && own) {
+          avatarHasPhoto=Boolean(hasPhoto);
+          avatarRemove.disabled=!avatarHasPhoto;
+          avatarPick.textContent=avatarHasPhoto?"Change photo":"Upload photo";
+        }
+      }catch(error){console.warn("Profile picture lookup unavailable:",error);}
       window.StudyLabNameMark?.decorate(nameNode,id);
     }catch(error){
       if(serial===viewSequence&&!view.hidden&&viewedUserId===id){

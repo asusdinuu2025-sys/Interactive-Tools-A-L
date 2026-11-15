@@ -121,6 +121,10 @@ exports.handler=async function(event) {
       return reply(409,"Profile preservation is not configured. No account data was deleted.");
     }
     await removeSocialFiles(user.id);
+    // Keep legacy account deletion as privacy-safe as the Supabase Edge path.
+    const avatarRemoval=await request("/storage/v1/object/studylab-avatars",
+      "DELETE",PRIVATE_KEY,{prefixes:[user.id+"/avatar.webp"]});
+    if(!avatarRemoval.ok)throw new Error("avatar_cleanup_failed");
     await removeChatMessages(user.id);
     // Auth deletion cascades study_room_credit_segments and members. The
     // personal_daily/personal_sessions views derive from those credits.
