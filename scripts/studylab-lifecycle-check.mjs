@@ -11,6 +11,7 @@ const accountDelete=read("netlify/functions/delete-account.js");
 const profileViewer=read("assets/js/studylab-profile-view.js");
 const posts=read("assets/js/studylab-social.js");
 const edge=read("supabase/functions/studylab-delete-post/index.ts");
+const accountEdge=read("supabase/functions/studylab-delete-account/index.ts");
 const archive=read("supabase/migrations/20261115095418_privacy_safe_profile_retention_on_delete_20261115.sql");
 const progress=read("supabase/migrations/20261115095425_study_room_inactive_progress_30_days_20261115.sql");
 
@@ -54,6 +55,20 @@ assert.ok(accountDelete.includes('"/auth/v1/admin/users/"'),
   "Deletion must be server-side and use verified Supabase Auth identity");
 assert.ok(!accountDelete.includes("DELETE FROM public.study_room_personal_"),
   "Personal daily/sessions are read-only views; no direct view deletes");
+assert.ok(profileViewer.includes('"studylab-delete-account",{body:{confirmation:"DELETE"}}'),
+  "Delete Account button must use the authenticated Supabase function");
+assert.ok(accountEdge.includes("service.auth.getUser(token)"),
+  "Account deletion must verify the actual Supabase Auth user, not an input ID");
+assert.ok(accountEdge.includes("service.auth.admin.deleteUser(uid)"),
+  "Only the server can remove the verified Auth identity");
+assert.ok(accountEdge.includes('select("id,deleted_at")'),
+  "Archive migration must be checked before deleting the Auth identity");
+assert.ok(accountEdge.includes("async function walk(prefix:string,depth:number)"),
+  "Account deletion must walk nested Social user/post folders");
+assert.ok(accountEdge.includes("service.storage.from(bucket).remove(files.slice(i,i+100))"),
+  "Nested Social media must be deleted from Storage");
+assert.ok(accountEdge.includes('.from("studylab_chat_messages")'),
+  "Messages that use SET NULL foreign keys require explicit deletion");
 assert.ok(profileViewer.includes("Only one anonymized profile record remains"),
   "Deletion confirmation must disclose the retained profile row");
 
