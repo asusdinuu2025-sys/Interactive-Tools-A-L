@@ -27,8 +27,18 @@ assert.match(chatCss,/--sl-chat-sender-light/);
 
 // Curved, integrated bubble tails replace polygon triangles.
 // Incoming bubbles have a subtle neutral gradient, outgoing have cyan.
-assert.match(chatCss,/clip-path:path\("M 17 0 C 17 8 11 15 0 17/);
-assert.doesNotMatch(chatCss,/clip-path:polygon/);
+assert.match(chatCss,/content:none!important;display:none!important;clip-path:none!important/);
+assert.match(chatCss,/border-radius:17px 17px 17px 4px!important/);
+assert.match(chatCss,/border-radius:17px 17px 4px 17px!important/);
+assert.match(chat,/function refreshDateSeparators\(\)/);
+assert.match(chat,/function dateLabel\(date\)/);
+assert.match(chat,/return "Today"/);
+assert.match(chat,/return "Yesterday"/);
+assert.match(chat,/separator\.setAttribute\("role","separator"\)/);
+assert.match(chat,/if\(!existing\)refreshDateSeparators\(\)/);
+assert.match(chat,/react\.setAttribute\("aria-expanded"/);
+assert.match(chatCss,/\.study-chat-message\.is-reactions-open \.study-chat-reactions/);
+assert.match(chatCss,/\.study-chat-date-separator/);
 assert.match(chatCss,/\.study-chat-message:not\(\.own\)\{/);
 assert.match(chatCss,/\.study-chat-message\.own\{/);
 assert.match(chatCss,/linear-gradient\(155deg,rgba\(130,164,211/);
@@ -76,8 +86,8 @@ assert.match(socialMigration,/create table if not exists public\.studylab_social
 assert.doesNotMatch(moderators,/delete from public\.studylab_social_posts/i);
 
 for(const html of [home,room]){
-  assert.match(html,/chat\.js\?v=20261115-curved-chat-admin-v4/);
-  assert.match(html,/chat\.css\?v=20261115-curved-chat-admin-v4/);
+  assert.match(html,/chat\.js\?v=20261115-telegram-corners-dates-v5/);
+  assert.match(html,/chat\.css\?v=20261115-telegram-corners-dates-v5/);
   assert.match(html,/studylab-avatar\.js\?v=20261115-uuid-fixed-v5/);
 }
 assert.match(home,/studylab-social\.js\?v=20261115-social-likes-only-v3/);
