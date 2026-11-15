@@ -491,13 +491,28 @@
         container.append(element("p","sl-pv-list-empty","No students here yet."));
         return;
       }
+      await window.StudyLabAvatar?.prefetch(profiles.map(p=>p.user_id)).catch(()=>{});
       for(const profile of profiles){
         const row=button("sl-pv-list-user");
+        const gender=profile.gender==="female"?"female":"male";
+        const avatar=element("span","sl-pv-list-avatar sl-pv-list-avatar-"+gender);
+        const fallback=document.createElementNS(SVG_NS,"svg");
+        fallback.setAttribute("viewBox","0 0 24 24");
+        fallback.setAttribute("aria-hidden","true");
+        const head=document.createElementNS(SVG_NS,"circle");
+        head.setAttribute("cx","12");head.setAttribute("cy","7");head.setAttribute("r","3.2");
+        const shoulders=document.createElementNS(SVG_NS,"path");
+        shoulders.setAttribute("d",gender==="female"
+          ?"M7 20 8 15.8A4.1 4.1 0 0 1 16 15.8L17 20Z"
+          :"M4.5 20V18A7.5 7.5 0 0 1 19.5 18V20Z");
+        fallback.append(head,shoulders);
+        avatar.append(fallback);
+        window.StudyLabAvatar?.decorate(avatar,profile.user_id);
         const identity=element("span","sl-pv-list-identity");
         const name=element("strong","",profile.display_name||"Student");
         window.StudyLabNameMark?.decorate(name,profile.user_id);
         identity.append(name,element("small","","@"+profile.username));
-        row.append(identity,icon("arrow"));
+        row.append(avatar,identity,icon("arrow"));
         row.addEventListener("click",()=>{
           closeList();
           open({userId:profile.user_id});
