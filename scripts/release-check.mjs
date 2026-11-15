@@ -12,6 +12,7 @@ const syntaxFiles = [
   "assets/js/studylab-social-follow-ui.js",
   "assets/js/studylab-profile-view.js",
   "assets/js/studylab-avatar.js",
+  "assets/js/chat.js",
   "assets/js/studylab-pet-room.js",
   "assets/js/studylab-pet.js",
   "assets/js/profile.js",
@@ -117,6 +118,12 @@ for (const file of syntaxFiles) {
   else checkNode(absolutePath, file);
 }
 
+
+const chatTests = spawnSync(process.execPath, ["scripts/studylab-chat-interactions-check.mjs"], {encoding:"utf8"});
+if (chatTests.status !== 0) {
+  fail("StudyLab Chat actions tests failed:\n" +
+    (chatTests.stderr || chatTests.stdout || "Chat interaction test failed"));
+}
 
 const profilePetTests = spawnSync(process.execPath, ["scripts/studylab-profile-pet-v2-check.mjs"], {encoding:"utf8"});
 if (profilePetTests.status !== 0) {
