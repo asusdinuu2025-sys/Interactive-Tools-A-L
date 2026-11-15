@@ -162,10 +162,6 @@
     const examYear = String(details.exam_year || "").trim();
     const studyStream = String(details.study_stream || "").trim();
     const gender = String(details.gender || "").trim();
-    const bio = String(details.bio || "").trim().replace(/\s+/g," ");
-    if (bio.length > 240 || (bio && bio.split(" ").length > 15)) {
-      throw new Error("Your bio must be 15 words or fewer (240 characters maximum).");
-    }
 
     if (school && school.length < 2) throw new Error("Please enter a valid school name.");
     if (requireFullProfile && !school) throw new Error("Please enter your school name.");
@@ -208,7 +204,6 @@
         exam_year: examYear,
         study_stream: studyStream,
         gender: gender || null,
-        bio: bio || null,
         profile_completed_at: fullDetailsComplete ? (profile?.profile_completed_at || now) : null,
         updated_at: now
       }, { onConflict: "id" })
@@ -223,6 +218,27 @@
     }
     profile = data;
     return profile;
+  }
+
+  // Bio is edited only from View Profile. Full profile edits never reset it.
+  async function saveBio(value) {
+    if (!user) await ready;
+    if (!user?.id || user.is_anonymous) {
+      throw new Error("Sign in to your StudyLab account to edit your bio.");
+    }
+    const cleanBio = String(value || "").trim().replace(/\s+/g, " ");
+    if (cleanBio.length > 240 || (cleanBio && cleanBio.split(" ").length > 15)) {
+      throw new Error("Bio must be 15 words or fewer (240 characters maximum).");
+    }
+    const { data, error } = await client
+      .from("studylab_profiles")
+      .update({bio: cleanBio || null, updated_at: new Date().toISOString()})
+      .eq("id", user.id)
+      .select("id,display_name,username,bio,school,phone,exam_year,study_stream,gender,profile_completed_at,created_at,updated_at")
+      .single();
+    if (error) throw error;
+    profile = data;
+    return data;
   }
 
   async function getProfile(force = false) {
@@ -384,7 +400,7 @@
       const metadata = user?.user_metadata || {};
       return String(metadata.full_name || metadata.name || metadata.given_name || "").trim();
     },
-    getUser: () => user, getProfile, saveProfile
+    getUser: () => user, getProfile, saveProfile, saveBio
   };
 
   // The Study Room page now owns its profile gate and displays the existing
