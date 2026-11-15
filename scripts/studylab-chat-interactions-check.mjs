@@ -60,8 +60,8 @@ assert.match(hardening,/revoke truncate, trigger, references on public\.studylab
 assert.match(hardening,/grant update \(reaction\) on public\.studylab_chat_reactions/);
 
 for(const page of [home,room]){
-  assert.match(page,/chat\.css\?v=20261115-layout-v2/);
-  assert.match(page,/chat\.js\?v=20261115-layout-v2/);
+  assert.match(page,/chat\.css\?v=20261115-sender-colors-v3/);
+  assert.match(page,/chat\.js\?v=20261115-sender-colors-v3/);
   assert.ok(page.indexOf("studylab-profile-view.js")<page.indexOf("chat.js"),
     "Chat must load after shared profile viewer");
 }
