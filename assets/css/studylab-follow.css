@@ -723,3 +723,79 @@ body.study-room-page[data-room-theme] .sl-pv-avatar-editor .sl-pv-avatar-actions
   border-color:color-mix(in srgb,var(--room-accent) 35%,transparent)!important;
   background:color-mix(in srgb,var(--room-card) 60%,transparent)!important;
 }
+
+
+/* Profile identity-card v3. Keep the existing blue/pink photo ring. */
+.sl-pv-avatar-wrap{position:relative;width:76px;height:76px;flex:0 0 76px;margin:auto}
+.sl-pv-avatar-wrap .sl-pv-avatar{width:100%;height:100%;box-sizing:border-box}
+.sl-pv-avatar-toggle{
+  position:absolute;right:-7px;bottom:-3px;z-index:3;
+  display:grid;place-items:center;width:29px;height:29px;
+  border:1px solid rgba(158,219,255,.64);border-radius:50%;
+  background:color-mix(in srgb,var(--room-card,#1c3b61) 83%,#318fdd);
+  box-shadow:0 3px 13px rgba(0,0,0,.18),0 0 7px rgba(83,201,255,.17);
+  color:inherit;cursor:pointer;
+}
+.sl-pv-avatar-toggle svg{width:15px;height:15px}
+.sl-pv-avatar-toggle[aria-expanded="true"]{border-color:var(--room-accent,#63bfff)}
+.sl-pv-avatar-editor[hidden],.sl-pv-avatar-toggle[hidden],
+.sl-pv-bio-edit-toggle[hidden],.sl-pv-bio-summary[hidden]{display:none!important}
+.sl-pv-avatar-actions .sl-pv-avatar-remove{background:rgba(133,169,201,.09);border-color:rgba(145,187,221,.26)}
+.sl-pv-bio-summary{
+  display:grid;gap:5px;
+  padding:11px 13px;margin:11px 0 12px;
+  border:1px solid rgba(163,203,236,.22);
+  border-radius:15px;
+  background:rgba(143,193,231,.065);
+}
+.sl-pv-bio-summary-heading{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sl-pv-bio-summary-heading strong{
+  font:750 12.5px/1.4 "Nirmala UI","Segoe UI",sans-serif;
+}
+.sl-pv-bio-edit-toggle{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 7px;border:1px solid transparent;border-radius:8px;
+  color:inherit;background:transparent;cursor:pointer;
+  font:700 11px "Nirmala UI","Segoe UI",sans-serif;
+}
+.sl-pv-bio-edit-toggle:hover{background:rgba(113,181,236,.13);border-color:rgba(122,187,234,.19)}
+.sl-pv-bio-edit-toggle svg{width:13px;height:13px}
+.sl-pv-bio-summary .sl-pv-description{
+  margin:0!important;
+  text-align:left;line-height:1.45;font-size:12px;
+  overflow-wrap:anywhere;
+}
+.sl-pv-dialog .sl-pv-bio-editor{
+  margin:0 0 12px!important;
+  padding:11px 13px!important;
+}
+.sl-pv-dialog .sl-pv-actions{display:grid;grid-template-columns:1fr!important;gap:7px!important}
+.sl-pv-dialog .sl-pv-actions .sl-pv-edit{min-height:39px;width:100%}
+.sl-pv-dialog .sl-pv-actions .sl-pv-delete{
+  min-height:32px;width:100%;
+  font-size:11px!important;border-radius:11px;
+  background:rgba(204,88,111,.055);
+}
+.sl-pv-dialog .sl-pv-joined{margin-top:9px!important}
+.sl-pv-dialog .sl-pv-identity{margin-top:1px;gap:4px}
+.sl-pv-dialog .sl-pv-name{
+  display:flex;align-items:center;justify-content:center;
+  gap:4px;flex-wrap:wrap;max-width:100%;text-align:center;
+  line-height:1.21;min-height:28px;
+}
+.sl-pv-dialog .sl-pv-name > .sl-name-mark{
+  display:inline-flex;align-self:center;vertical-align:middle;
+  margin-inline-start:1px;transform:none;top:0;
+  flex:0 0 18px;width:18px;height:18px;
+}
+html[data-theme="light"] .sl-pv-bio-summary{
+  background:rgba(255,255,255,.38);border-color:rgba(99,157,207,.24)
+}
+body.study-room-page[data-room-theme] .sl-pv-bio-summary{
+  border-color:color-mix(in srgb,var(--room-accent) 23%,transparent);
+  background:color-mix(in srgb,var(--room-card) 40%,transparent)
+}
+@media(max-width:420px){
+  .sl-pv-avatar-wrap{width:72px;height:72px;flex-basis:72px}
+  .sl-pv-dialog .sl-pv-actions .sl-pv-delete{min-height:31px}
+}
