@@ -34,8 +34,8 @@ begin
            or m.last_heartbeat_at < now() - interval '30 days')
     for update skip locked
   loop
-    delete from public.study_room_personal_sessions where user_id=v_user_id;
-    delete from public.study_room_personal_daily where user_id=v_user_id;
+    -- Personal daily/sessions are read-only views of credit_segments.
+    -- Deleting the underlying rows clears both automatically.
     delete from public.study_room_credit_segments where user_id=v_user_id;
     delete from public.study_room_members where user_id=v_user_id;
     v_deleted:=v_deleted+1;
