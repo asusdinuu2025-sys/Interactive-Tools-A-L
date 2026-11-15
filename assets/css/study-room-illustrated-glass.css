@@ -765,3 +765,66 @@ body.study-room-page #slStreakPanel {scroll-margin-top:clamp(18px,8vh,100px)}
   body.study-room-page #leaderboardSection,
   body.study-room-page #slStreakPanel{scroll-margin-top:95px}
 }
+
+/* Requested layout: same two corner placements for all five illustrated
+   themes. Only existing SVG masks move; the Study Room controls stay put. */
+body.study-room-page:is(
+ [data-room-theme="pinky"],[data-room-theme="forest-green"],
+ [data-room-theme="lavender"],[data-room-theme="warm-sand"],
+ [data-room-theme="ocean"]
+) .slr-theme-illustration--hero{
+ --art-size:clamp(125px,14vw,205px);--art-x:82%;--art-y:9%;--art-rotate:-14deg;
+}
+body.study-room-page:is(
+ [data-room-theme="pinky"],[data-room-theme="forest-green"],
+ [data-room-theme="lavender"],[data-room-theme="warm-sand"],
+ [data-room-theme="ocean"]
+) .slr-theme-illustration--right-edge{
+ --art-size:clamp(100px,11vw,165px);--art-x:25%;--art-y:11%;--art-rotate:16deg;
+}
+@media(max-width:900px){
+ body.study-room-page:is(
+  [data-room-theme="pinky"],[data-room-theme="forest-green"],
+  [data-room-theme="lavender"],[data-room-theme="warm-sand"],
+  [data-room-theme="ocean"]
+ ) .slr-theme-illustration--hero{--art-size:clamp(92px,19vw,165px);--art-x:79%;--art-y:12%}
+ body.study-room-page:is(
+  [data-room-theme="pinky"],[data-room-theme="forest-green"],
+  [data-room-theme="lavender"],[data-room-theme="warm-sand"],
+  [data-room-theme="ocean"]
+ ) .slr-theme-illustration--right-edge{--art-size:clamp(80px,15vw,125px);--art-x:26%;--art-y:13%}
+}
+@media(max-width:680px){
+ body.study-room-page:is(
+  [data-room-theme="pinky"],[data-room-theme="forest-green"],
+  [data-room-theme="lavender"],[data-room-theme="warm-sand"],
+  [data-room-theme="ocean"]
+ ) .slr-theme-illustration--hero{--art-size:110px;--art-x:75%;--art-y:12%}
+ body.study-room-page:is(
+  [data-room-theme="pinky"],[data-room-theme="forest-green"],
+  [data-room-theme="lavender"],[data-room-theme="warm-sand"],
+  [data-room-theme="ocean"]
+ ) .slr-theme-illustration--right-edge{--art-size:80px;--art-x:30%;--art-y:16%}
+}
+/* Only Midnight Blue needs an OPAQUE doughnut center. Study subjects keep
+   their original conic-gradient colors and all progress math is untouched. */
+body.study-room-page[data-room-theme="midnight-blue"] .sl-analytics .sl-pie::before{
+ background:#1b2648!important;
+}
+/* Vector chevron belongs to the theme button, not a font glyph. */
+body.study-room-page .room-appearance-chevron{
+ display:inline-flex;align-items:center;justify-content:center;
+ width:15px;height:15px;flex:0 0 15px;
+ transition:transform .2s ease;
+}
+body.study-room-page .room-appearance-chevron svg{display:block;width:15px;height:15px}
+body.study-room-page .room-appearance-trigger[aria-expanded="true"] .room-appearance-chevron{
+ transform:rotate(180deg)
+}
+body.study-room-page .room-back{display:inline-flex;align-items:center;gap:9px}
+body.study-room-page .room-back .sl-room-exit-icon{
+ display:block;width:18px;height:18px
+}
+@media(prefers-reduced-motion:reduce){
+ body.study-room-page .room-appearance-chevron{transition:none!important}
+}
