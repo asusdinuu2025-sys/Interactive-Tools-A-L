@@ -128,6 +128,7 @@
   let editTarget = null;
   let busyMessageAction = false;
   let reactionSyncTimer = 0;
+  const reactionRefreshIds = new Set();
   const REACTIONS = ["👍","😂","🔥","❤️"];
   const safeUuid = value => typeof value === "string" &&
     /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(value);
@@ -156,6 +157,10 @@
   window.addEventListener("studylab-profile-updated", event => {
     const name = event.detail?.display_name;
     if (name) nickname = name;
+    if(userId){
+      profilesById.delete(userId);
+      loadProfiles();
+    }
   });
 
   function setStatus(online, textValue) {
@@ -439,30 +444,40 @@
     const ids=[...new Set([...messagesById.values()]
       .map(row=>row.user_id).filter(safeUuid))];
     if(!ids.length)return;
+    const missing=ids.filter(id=>!profilesById.has(id));
     try {
-      const batches=[];
-      for(let i=0;i<ids.length;i+=40)batches.push(ids.slice(i,i+40));
-      const results=await Promise.all(batches.map(ids=>window.StudyLabFollow?.lookup(ids)||[]));
-      for(const profile of results.flat()){
-        if(profile?.user_id)profilesById.set(profile.user_id,profile);
+      if(missing.length){
+        const batches=[];
+        for(let i=0;i<missing.length;i+=40)batches.push(missing.slice(i,i+40));
+        const results=await Promise.all(batches.map(ids=>window.StudyLabFollow?.lookup(ids)||[]));
+        const byId=new Map(results.flat().filter(p=>p?.user_id).map(p=>[p.user_id,p]));
+        for(const id of missing)profilesById.set(id,byId.get(id)||{user_id:id});
+        for(const row of [...messagesById.values()]){
+          if(missing.includes(row.user_id))renderMessage(row);
+        }
       }
+      // StudyLabAvatar internally caches photos for 90 seconds, so this never
+      // re-fetches existing avatars on every new message.
       await window.StudyLabAvatar?.prefetch(ids).catch(()=>{});
-      for(const row of [...messagesById.values()])renderMessage(row);
     }catch(error){console.warn("Chat profile labels unavailable:",error);}
   }
 
-  async function loadReactions() {
+  async function loadReactions(onlyIds) {
     if(!client || !messagesById.size)return;
-    const ids=[...messagesById.keys()];
+    const ids=(onlyIds||[...messagesById.keys()])
+      .filter(id=>messagesById.has(id));
+    if(!ids.length)return;
     const {data,error}=await client.from("studylab_chat_reactions")
       .select("message_id,user_id,reaction").in("message_id",ids);
     if(error){console.warn("Chat reactions unavailable:",error);return;}
     const next=new Map();
-    for(const reaction of data||[]){
-      if(!next.has(reaction.message_id))next.set(reaction.message_id,[]);
-      next.get(reaction.message_id).push(reaction);
+    for(const item of data||[]){
+      if(!next.has(item.message_id))next.set(item.message_id,[]);
+      next.get(item.message_id).push(item);
     }
-    reactionsByMessage=next;refreshReactionUI();
+    if(!onlyIds)reactionsByMessage=next;
+    else for(const id of ids)reactionsByMessage.set(id,next.get(id)||[]);
+    refreshReactionUI();
   }
 
   async function toggleReaction(id,symbol) {
@@ -474,7 +489,7 @@
       :await query.upsert({message_id:id,user_id:userId,reaction:symbol},
         {onConflict:"message_id,user_id"});
     if(error){chatFeedback("Reaction failed. Please try again.",true);return;}
-    chatFeedback("");await loadReactions();
+    chatFeedback("");await loadReactions([id]);
   }
 
   async function deleteMessage(id) {
@@ -593,7 +608,6 @@
             if(!isOpen && row.user_id!==userId)setUnread(unreadCount+1);
             if(wasNearBottom || row.session_id===sessionKey)scrollToBottom(true);
             loadProfiles();
-            loadReactions();
           } else if(wasKnown){
             // Keep edits across every open tab without reordering messages.
             loadProfiles();
@@ -601,9 +615,15 @@
         })
       .on("postgres_changes",
         {event:"*",schema:"public",table:"studylab_chat_reactions"},
-        ()=>{
+        payload=>{
+          const id=payload.new?.message_id || payload.old?.message_id;
+          if(id)reactionRefreshIds.add(id);
           clearTimeout(reactionSyncTimer);
-          reactionSyncTimer=setTimeout(()=>loadReactions(),140);
+          reactionSyncTimer=setTimeout(()=>{
+            const changed=[...reactionRefreshIds];
+            reactionRefreshIds.clear();
+            loadReactions(changed.length?changed:undefined);
+          },140);
         })
       .subscribe(status=>{
         if(status==="SUBSCRIBED")setStatus(true,"Live • newest 100 messages");
