@@ -493,19 +493,19 @@
       if(error || !data?.session?.access_token || data.session.user?.id!==accountUser.id){
         throw new Error("Your session expired. Sign in again before deleting your account.");
       }
-      const response=await fetch("/.netlify/functions/delete-account",{
-        method:"POST",
-        headers:{
-          "Content-Type":"application/json",
-          "Authorization":"Bearer "+data.session.access_token
-        },
-        body:JSON.stringify({confirmation:"DELETE"}),
-        cache:"no-store"
-      });
-      let result={};
-      try{result=await response.json();}catch(_){}
-      if(!response.ok || result.deleted!==true){
-        throw new Error(result.message||"Account deletion is unavailable. Your account has not been deleted.");
+      // The dedicated Supabase Edge Function has the private service role
+      // available server-side, with no separate Netlify key configuration.
+      const {data:result,error:deleteError}=await account.client.functions.invoke(
+        "studylab-delete-account",{body:{confirmation:"DELETE"}}
+      );
+      if(deleteError){
+        let detail="";
+        try{detail=(await deleteError.context?.json?.())?.message||"";}catch(_){}
+        throw new Error(detail||deleteError.message||
+          "Account deletion is unavailable. Please try again.");
+      }
+      if(result?.deleted!==true){
+        throw new Error(result?.message||"Account deletion could not be verified.");
       }
       // Server has deleted only the authenticated account. Clear browser session
       // without depending on a now-deleted remote identity.
