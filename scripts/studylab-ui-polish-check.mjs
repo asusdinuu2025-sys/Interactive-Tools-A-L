@@ -91,12 +91,12 @@ assert.doesNotMatch(addedCornerStyles,/opacity:calc\(var\(--slr-art-opacity\) \*
   "New corner styles must not use unsupported opacity arithmetic");
 
 for(const html of [roomHtml,homeHtml]){
-  assert.match(html,/studylab-profile-view\.js\?v=20261115-inline-bio-v5/);
+  assert.match(html,/studylab-profile-view\.js\?v=20261116-manual-crop-v1/);
   assert.match(html,/studylab-follow\.css\?v=20261115-inline-bio-v5/);
   assert.match(html,/chat\.css\?v=20261115-mobile-chat-header-v7/);
   assert.match(html,/chat\.js\?v=20261115-mobile-chat-header-v7/);
-  assert.match(html,/studylab-avatar\.js\?v=20261115-uuid-fixed-v5/,
-    "Working photo renderer must stay on its tested version");
+  assert.match(html,/studylab-avatar\.js\?v=20261116-manual-crop-v1/,
+    "The manual crop renderer must have an updated production asset version");
 }
 assert.match(roomHtml,/study-room-illustrated-glass\.css\?v=20261115-room-watermark-v7/);
 console.log("Inline Bio, Chat layout/controls, badge spacing and illustrated corners passed.");

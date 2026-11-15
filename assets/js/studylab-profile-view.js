@@ -109,7 +109,7 @@
   let listDismiss = null;
 
   function tabbables(root) {
-    return [...root.querySelectorAll("button:not([disabled]),input:not([disabled]),textarea:not([disabled]),a[href]")].filter(n => !n.hidden && n.getAttribute("aria-hidden") !== "true");
+    return [...root.querySelectorAll("button:not([disabled]),input:not([disabled]),textarea:not([disabled]),a[href],[tabindex=\"0\"]")].filter(n => !n.hidden && n.getAttribute("aria-hidden") !== "true");
   }
   function trap(event, root) {
     if (event.key !== "Tab") return;
