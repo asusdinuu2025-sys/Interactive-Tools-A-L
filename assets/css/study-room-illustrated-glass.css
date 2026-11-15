@@ -828,3 +828,72 @@ body.study-room-page .room-back .sl-room-exit-icon{
 @media(prefers-reduced-motion:reduce){
  body.study-room-page .room-appearance-chevron{transition:none!important}
 }
+
+
+/* Extra four corner illustrations requested in November profile/chat polish.
+   Reuse the CURRENT theme's own SVG mask, theme color and Doodles control.
+   Never introduce image files or overlay interactive Study Room controls. */
+body.study-room-page:is(
+ [data-room-theme="pinky"],[data-room-theme="forest-green"],
+ [data-room-theme="lavender"],[data-room-theme="warm-sand"],
+ [data-room-theme="ocean"]
+) .slr-theme-illustration--corner-upper-left{
+ --art-size:clamp(65px,6vw,90px);
+ --art-x:11%;--art-y:16%;--art-rotate:13deg;
+ opacity:calc(var(--slr-art-opacity) * .70);
+}
+body.study-room-page:is(
+ [data-room-theme="pinky"],[data-room-theme="forest-green"],
+ [data-room-theme="lavender"],[data-room-theme="warm-sand"],
+ [data-room-theme="ocean"]
+) .slr-theme-illustration--corner-upper-right{
+ --art-size:clamp(118px,12.5vw,190px);
+ --art-x:76%;--art-y:11%;--art-rotate:-24deg;
+ opacity:calc(var(--slr-art-opacity) * .60);
+}
+body.study-room-page:is(
+ [data-room-theme="pinky"],[data-room-theme="forest-green"],
+ [data-room-theme="lavender"],[data-room-theme="warm-sand"],
+ [data-room-theme="ocean"]
+) .slr-theme-illustration--corner-lower-left{
+ --art-size:clamp(82px,8vw,124px);
+ --art-x:7%;--art-y:57%;--art-rotate:27deg;
+ opacity:calc(var(--slr-art-opacity) * .65);
+}
+body.study-room-page:is(
+ [data-room-theme="pinky"],[data-room-theme="forest-green"],
+ [data-room-theme="lavender"],[data-room-theme="warm-sand"],
+ [data-room-theme="ocean"]
+) .slr-theme-illustration--corner-lower-right{
+ --art-size:clamp(150px,16vw,240px);
+ --art-x:73%;--art-y:57%;--art-rotate:-18deg;
+ opacity:calc(var(--slr-art-opacity) * .55);
+}
+@media(max-width:900px){
+ body.study-room-page .slr-theme-illustration--corner-upper-left{
+  --art-size:68px;--art-x:7%;--art-y:16%
+ }
+ body.study-room-page .slr-theme-illustration--corner-upper-right{
+  --art-size:110px;--art-x:76%;--art-y:13%
+ }
+ body.study-room-page .slr-theme-illustration--corner-lower-left{
+  --art-size:82px;--art-x:5%;--art-y:59%
+ }
+ body.study-room-page .slr-theme-illustration--corner-lower-right{
+  --art-size:128px;--art-x:78%;--art-y:62%
+ }
+}
+@media(max-width:680px){
+ body.study-room-page .slr-theme-illustration--corner-upper-left{
+  --art-size:45px;--art-x:3%;--art-y:14%
+ }
+ body.study-room-page .slr-theme-illustration--corner-upper-right{
+  --art-size:70px;--art-x:78%;--art-y:16%
+ }
+ body.study-room-page .slr-theme-illustration--corner-lower-left{
+  --art-size:56px;--art-x:1%;--art-y:59%
+ }
+ body.study-room-page .slr-theme-illustration--corner-lower-right{
+  --art-size:86px;--art-x:76%;--art-y:62%
+ }
+}
