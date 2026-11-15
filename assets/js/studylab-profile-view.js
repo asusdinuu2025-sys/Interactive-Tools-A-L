@@ -67,6 +67,20 @@
   let avatarStatus = null;
   let avatarBusy = false;
   let avatarHasPhoto = false;
+  let avatarCropOverlay = null;
+  let avatarCropStage = null;
+  let avatarCropSquare = null;
+  let avatarCropZoom = null;
+  let avatarCropPreview = null;
+  let avatarCropMessage = null;
+  let avatarCropSave = null;
+  let avatarCropCancel = null;
+  let avatarCropImageElement = null;
+  let avatarCropFile = null;
+  let avatarCropObjectUrl = "";
+  let avatarCropState = null;
+  let avatarCropDrag = null;
+  let avatarCropGeneration = 0;
   let joinedNode = null;
   let viewStatus = null;
   let confirmView = null;
@@ -112,6 +126,7 @@
   }
   function closeView(returnFocus = true) {
     if (!view || view.hidden || deleting || (confirmView && !confirmView.hidden)) return;
+    if (avatarCropOverlay && !avatarCropOverlay.hidden) {closeAvatarCrop();return;}
     view.hidden = true;
     document.body.classList.remove("sl-profile-view-open");
     accountUser = null;
@@ -130,6 +145,249 @@
     confirmSubmit.disabled = true;
     confirmError.hidden = true;
     deleteStart?.focus();
+  }
+
+
+  // An opt-in manual square selection: no profile data or Storage write
+  // happens until the student presses Save Photo.
+  const clampCrop = (number,min,max) => Math.min(max,Math.max(min,number));
+  function cropGeometry() {
+    if (!avatarCropState || !avatarCropStage) return null;
+    const {width,height} = avatarCropState;
+    const scale = Math.min(avatarCropStage.clientWidth/width,avatarCropStage.clientHeight/height);
+    if (!Number.isFinite(scale) || scale<=0) return null;
+    const displayWidth=width*scale, displayHeight=height*scale;
+    return {scale,displayWidth,displayHeight,
+      offsetX:(avatarCropStage.clientWidth-displayWidth)/2,
+      offsetY:(avatarCropStage.clientHeight-displayHeight)/2};
+  }
+  function redrawAvatarCrop() {
+    const state=avatarCropState, geometry=cropGeometry();
+    if (!state || !geometry) return;
+    avatarCropSquare.style.left=(geometry.offsetX+state.x*geometry.scale)+"px";
+    avatarCropSquare.style.top=(geometry.offsetY+state.y*geometry.scale)+"px";
+    avatarCropSquare.style.width=(state.size*geometry.scale)+"px";
+    avatarCropSquare.style.height=(state.size*geometry.scale)+"px";
+    const preview=avatarCropPreview.getContext("2d",{alpha:false});
+    if(preview) {
+      preview.clearRect(0,0,avatarCropPreview.width,avatarCropPreview.height);
+      preview.drawImage(state.image,state.x,state.y,state.size,state.size,
+        0,0,avatarCropPreview.width,avatarCropPreview.height);
+    }
+  }
+  function closeAvatarCrop(force=false) {
+    if (!avatarCropOverlay || avatarCropOverlay.hidden || (avatarBusy && !force)) return;
+    avatarCropGeneration++;
+    avatarCropOverlay.hidden=true;
+    avatarCropDrag=null;
+    avatarCropState=null;
+    avatarCropFile=null;
+    if(avatarCropObjectUrl) URL.revokeObjectURL(avatarCropObjectUrl);
+    avatarCropObjectUrl="";
+    avatarCropImageElement.removeAttribute("src");
+    if(view && !view.hidden && avatarPick?.isConnected) avatarPick.focus();
+  }
+  async function openAvatarCrop(file) {
+    if (!file || avatarBusy || viewedUserId!==accountUser?.id) return;
+    if (!(file instanceof File) || !["image/jpeg","image/png","image/webp"].includes(file.type)) {
+      avatarStatus.hidden=false;
+      avatarStatus.dataset.state="error";
+      avatarStatus.textContent="Choose a JPG, PNG or WebP image.";
+      return;
+    }
+    if(file.size<1 || file.size>1024*1024) {
+      avatarStatus.hidden=false;
+      avatarStatus.dataset.state="error";
+      avatarStatus.textContent="The original profile picture must be 1 MB or smaller.";
+      return;
+    }
+    const generation=++avatarCropGeneration;
+    avatarStatus.hidden=false;
+    avatarStatus.dataset.state="";
+    avatarStatus.textContent="Opening photo editor…";
+    const objectUrl=URL.createObjectURL(file);
+    const image=new Image();
+    try {
+      await new Promise((resolve,reject)=>{
+        image.onload=()=>resolve();
+        image.onerror=()=>reject(new Error("Could not read this image."));
+        image.src=objectUrl;
+        if(image.complete && image.naturalWidth>0)resolve();
+      });
+      if(generation!==avatarCropGeneration) {URL.revokeObjectURL(objectUrl);return;}
+      const width=image.naturalWidth,height=image.naturalHeight;
+      if(!width || !height || width>8192 || height>8192 || width*height>20000000) {
+        throw new Error("Image dimensions are too large.");
+      }
+      const size=Math.min(width,height);
+      avatarCropFile=file;
+      avatarCropObjectUrl=objectUrl;
+      avatarCropState={image,width,height,size,x:(width-size)/2,y:(height-size)/2};
+      avatarCropDrag=null;
+      avatarCropZoom.value="1";
+      avatarCropMessage.hidden=true;
+      avatarCropMessage.textContent="";
+      avatarCropSave.disabled=false;
+      avatarCropCancel.disabled=false;
+      avatarCropZoom.disabled=false;
+      avatarCropImageElement.src=objectUrl;
+      avatarCropOverlay.hidden=false;
+      avatarStatus.hidden=true;
+      requestAnimationFrame(redrawAvatarCrop);
+      avatarCropCancel.focus();
+    } catch(error) {
+      URL.revokeObjectURL(objectUrl);
+      if(generation!==avatarCropGeneration)return;
+      avatarStatus.hidden=false;
+      avatarStatus.dataset.state="error";
+      avatarStatus.textContent=error?.message || "Could not open the photo editor.";
+    }
+  }
+  function makeAvatarCrop(syncAvatarButtons) {
+    avatarCropOverlay=element("div","sl-pv-crop-backdrop");
+    avatarCropOverlay.hidden=true;
+    const cropDialog=element("section","sl-pv-crop-dialog");
+    cropDialog.setAttribute("role","dialog");
+    cropDialog.setAttribute("aria-modal","true");
+    cropDialog.setAttribute("aria-labelledby","slPvCropTitle");
+    cropDialog.setAttribute("aria-describedby","slPvCropHint");
+    const cropHeader=element("div","sl-pv-crop-header");
+    const cropTitle=element("h2","","Adjust Profile Picture");
+    cropTitle.id="slPvCropTitle";
+    const cropClose=button("sl-pv-crop-close","","Close photo editor");
+    cropClose.append(icon("x"));
+    cropHeader.append(cropTitle,cropClose);
+    const cropHint=element("p","sl-pv-crop-hint",
+      "Drag the square to choose the area. Use Zoom to resize your selection.");
+    cropHint.id="slPvCropHint";
+    avatarCropStage=element("div","sl-pv-crop-stage");
+    avatarCropStage.setAttribute("aria-label","Profile picture with movable square selection");
+    avatarCropImageElement=element("img","sl-pv-crop-image");
+    avatarCropImageElement.alt="";
+    avatarCropImageElement.draggable=false;
+    avatarCropSquare=element("div","sl-pv-crop-square");
+    avatarCropSquare.tabIndex=0;
+    avatarCropSquare.setAttribute("role","group");
+    avatarCropSquare.setAttribute("aria-label","Square crop: drag, or use arrow keys to move");
+    const cropGrid=element("span","sl-pv-crop-grid");
+    cropGrid.setAttribute("aria-hidden","true");
+    avatarCropSquare.append(cropGrid);
+    avatarCropStage.append(avatarCropImageElement,avatarCropSquare);
+    const cropControls=element("div","sl-pv-crop-controls");
+    const cropZoomLabel=element("label","sl-pv-crop-zoom-label","Zoom");
+    cropZoomLabel.htmlFor="slPvCropZoom";
+    avatarCropZoom=element("input","sl-pv-crop-zoom");
+    avatarCropZoom.id="slPvCropZoom";
+    avatarCropZoom.type="range";
+    avatarCropZoom.min="1";avatarCropZoom.max="3";avatarCropZoom.step=".05";
+    avatarCropZoom.value="1";
+    avatarCropZoom.setAttribute("aria-label","Zoom into selected photo area");
+    const cropZoomValue=element("span","sl-pv-crop-zoom-value","1.0×");
+    const previewWrap=element("div","sl-pv-crop-preview-wrap");
+    avatarCropPreview=element("canvas","sl-pv-crop-preview");
+    avatarCropPreview.width=avatarCropPreview.height=92;
+    avatarCropPreview.setAttribute("role","img");
+    avatarCropPreview.setAttribute("aria-label","Live circular preview of the selected profile picture");
+    previewWrap.append(avatarCropPreview);
+    cropControls.append(cropZoomLabel,avatarCropZoom,cropZoomValue,previewWrap);
+    avatarCropMessage=element("p","sl-pv-crop-message","");
+    avatarCropMessage.hidden=true;
+    avatarCropMessage.setAttribute("role","alert");
+    const cropActions=element("div","sl-pv-crop-actions");
+    avatarCropCancel=button("sl-pv-crop-cancel","Cancel");
+    avatarCropSave=button("sl-pv-crop-save","Save Photo");
+    cropActions.append(avatarCropCancel,avatarCropSave);
+    cropDialog.append(cropHeader,cropHint,avatarCropStage,cropControls,avatarCropMessage,cropActions);
+    avatarCropOverlay.append(cropDialog);
+    document.body.append(avatarCropOverlay);
+    const finishDrag=event=>{
+      if(avatarCropDrag && event.pointerId===avatarCropDrag.pointerId)avatarCropDrag=null;
+    };
+    avatarCropSquare.addEventListener("pointerdown",event=>{
+      if(avatarBusy || !avatarCropState || event.button!==0)return;
+      event.preventDefault();
+      avatarCropDrag={pointerId:event.pointerId,
+        clientX:event.clientX,clientY:event.clientY,
+        x:avatarCropState.x,y:avatarCropState.y};
+      avatarCropSquare.setPointerCapture?.(event.pointerId);
+    });
+    avatarCropSquare.addEventListener("pointermove",event=>{
+      const drag=avatarCropDrag,state=avatarCropState,geometry=cropGeometry();
+      if(!drag || drag.pointerId!==event.pointerId || !state || !geometry)return;
+      state.x=clampCrop(drag.x+(event.clientX-drag.clientX)/geometry.scale,0,state.width-state.size);
+      state.y=clampCrop(drag.y+(event.clientY-drag.clientY)/geometry.scale,0,state.height-state.size);
+      redrawAvatarCrop();
+    });
+    avatarCropSquare.addEventListener("pointerup",finishDrag);
+    avatarCropSquare.addEventListener("pointercancel",finishDrag);
+    avatarCropSquare.addEventListener("keydown",event=>{
+      const state=avatarCropState;
+      if(!state || avatarBusy)return;
+      const step=state.size*(event.shiftKey ? .05 : .01);
+      if(event.key==="ArrowLeft")state.x=clampCrop(state.x-step,0,state.width-state.size);
+      else if(event.key==="ArrowRight")state.x=clampCrop(state.x+step,0,state.width-state.size);
+      else if(event.key==="ArrowUp")state.y=clampCrop(state.y-step,0,state.height-state.size);
+      else if(event.key==="ArrowDown")state.y=clampCrop(state.y+step,0,state.height-state.size);
+      else return;
+      event.preventDefault();
+      redrawAvatarCrop();
+    });
+    avatarCropZoom.addEventListener("input",()=>{
+      const state=avatarCropState;
+      if(!state || avatarBusy)return;
+      const zoom=Number(avatarCropZoom.value);
+      if(!Number.isFinite(zoom) || zoom<1)return;
+      const centerX=state.x+state.size/2,centerY=state.y+state.size/2;
+      state.size=Math.min(state.width,state.height)/zoom;
+      state.x=clampCrop(centerX-state.size/2,0,state.width-state.size);
+      state.y=clampCrop(centerY-state.size/2,0,state.height-state.size);
+      cropZoomValue.textContent=zoom.toFixed(1)+"×";
+      redrawAvatarCrop();
+    });
+    avatarCropCancel.addEventListener("click",()=>closeAvatarCrop());
+    cropClose.addEventListener("click",()=>closeAvatarCrop());
+    avatarCropOverlay.addEventListener("pointerdown",event=>{
+      if(event.target===avatarCropOverlay)closeAvatarCrop();
+    });
+    window.addEventListener("resize",()=>{
+      if(avatarCropOverlay && !avatarCropOverlay.hidden)redrawAvatarCrop();
+    },{passive:true});
+    avatarCropSave.addEventListener("click",async()=>{
+      if(avatarBusy || !avatarCropFile || !avatarCropState ||
+          !accountUser || accountUser.is_anonymous || viewedUserId!==accountUser.id)return;
+      const id=viewedUserId;
+      const file=avatarCropFile;
+      const crop={x:avatarCropState.x,y:avatarCropState.y,size:avatarCropState.size};
+      avatarBusy=true;syncAvatarButtons();
+      avatarCropSave.disabled=true;
+      avatarCropCancel.disabled=true;
+      cropClose.disabled=true;
+      avatarCropZoom.disabled=true;
+      avatarCropMessage.hidden=false;
+      avatarCropMessage.dataset.state="";
+      avatarCropMessage.textContent="Processing and uploading photo…";
+      try {
+        await window.StudyLabAvatar.save(file,crop);
+        if(view && !view.hidden && viewedUserId===id) {
+          avatarHasPhoto=true;
+          avatarStatus.hidden=false;
+          avatarStatus.dataset.state="success";
+          avatarStatus.textContent="Profile picture saved.";
+        }
+        closeAvatarCrop(true);
+      } catch(error) {
+        avatarCropMessage.hidden=false;
+        avatarCropMessage.dataset.state="error";
+        avatarCropMessage.textContent=error?.message||"Could not save photo. Try again.";
+      } finally {
+        avatarBusy=false;
+        avatarCropSave.disabled=false;
+        avatarCropCancel.disabled=false;
+        cropClose.disabled=false;
+        avatarCropZoom.disabled=false;
+        if(viewedUserId===id)syncAvatarButtons();
+      }
+    });
   }
 
   function make() {
@@ -193,7 +451,7 @@
     avatarPick.append(avatarFile);
     avatarActions.append(avatarPick,avatarRemove);
     const photoNote = element("p","sl-pv-avatar-note",
-      "JPG, PNG or WebP · up to 1 MB · cropped to a 320 px square. Photos are visible to other students.");
+      "JPG, PNG or WebP · up to 1 MB · choose your crop · saved as 320 px WebP. Photos are visible to other students.");
     avatarStatus = element("p","sl-pv-avatar-message","");
     avatarStatus.hidden = true;
     avatarStatus.setAttribute("role","status");
@@ -205,6 +463,7 @@
       avatarRemove.disabled = avatarBusy || !avatarHasPhoto;
       avatarPick.firstChild.textContent = avatarHasPhoto ? "Change photo" : "Upload photo";
     };
+    makeAvatarCrop(syncAvatarButtons);
     avatarPick.addEventListener("keydown",event=>{
       if (avatarBusy) return;
       if (event.key==="Enter" || event.key===" ") {
@@ -212,28 +471,12 @@
         avatarFile.click();
       }
     });
-    avatarFile.addEventListener("change",async()=>{
-      const file = avatarFile.files?.[0];
-      avatarFile.value = "";
-      if (!file || avatarBusy || viewedUserId!==accountUser?.id) return;
-      const id = viewedUserId;
-      avatarBusy = true;syncAvatarButtons();
-      avatarStatus.hidden = false;avatarStatus.textContent = "Processing and uploading photo…";
-      avatarStatus.dataset.state = "";
-      try {
-        await window.StudyLabAvatar.save(file);
-        if (view.hidden || viewedUserId!==id) return;
-        avatarHasPhoto = true;
-        avatarStatus.textContent = "Profile picture saved.";
-        avatarStatus.dataset.state = "success";
-      } catch (error) {
-        if (view.hidden || viewedUserId!==id) return;
-        avatarStatus.textContent = error?.message || "Could not upload photo.";
-        avatarStatus.dataset.state = "error";
-      } finally {
-        avatarBusy = false;
-        if (viewedUserId===id) syncAvatarButtons();
-      }
+    avatarFile.addEventListener("change",()=>{
+      const file=avatarFile.files?.[0];
+      avatarFile.value="";
+      if(!file || avatarBusy || viewedUserId!==accountUser?.id)return;
+      // Open the crop editor first. Only its Save Photo button uploads.
+      openAvatarCrop(file);
     });
     avatarRemove.addEventListener("click",async()=>{
       if (avatarBusy || !avatarHasPhoto || viewedUserId!==accountUser?.id) return;
@@ -478,6 +721,11 @@
     });
     confirmSubmit.addEventListener("click",deleteAccount);
     document.addEventListener("keydown",event=>{
+      if(avatarCropOverlay && !avatarCropOverlay.hidden){
+        if(event.key==="Escape"){event.preventDefault();closeAvatarCrop();}
+        else trap(event,avatarCropOverlay);
+        return;
+      }
       if(confirmView && !confirmView.hidden){
         if(event.key==="Escape") {event.preventDefault();closeConfirm();}
         else trap(event,confirmView);
@@ -604,6 +852,10 @@
     const user=account.getUser();
     if(!user || (user.is_anonymous && (!options.userId || options.userId===user.id)))return false;
     const id=options.userId||user.id;
+    if (avatarCropOverlay && !avatarCropOverlay.hidden) {
+      if(avatarBusy)return false;
+      closeAvatarCrop();
+    }
     const own=id===user.id;
     const serial=++viewSequence;
     lastFocus=document.activeElement;

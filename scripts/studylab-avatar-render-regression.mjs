@@ -80,6 +80,7 @@ const account={
   getUser:()=>({id:uid,is_anonymous:false}),
   client:{storage,from:()=>profileTable}
 };
+let lastCropArgs=null;
 const doc={
   hidden:false,
   addEventListener(){},
@@ -88,7 +89,7 @@ const doc={
   createElement:name=>{
     if(name!=="canvas")throw Error("Unexpected element: "+name);
     return {
-      getContext:()=>({drawImage(){}}),
+      getContext:()=>({drawImage(...args){lastCropArgs=args;}}),
       toBlob:cb=>cb({size:9000,type:"image/webp"})
     };
   }
@@ -118,6 +119,8 @@ assert.equal(node.childNodes[0].style.opacity,"1");
 assert.equal(node.dataset.slAvatarUser,uid);
 assert.equal(await win.StudyLabAvatar.save(new MockFile()),true);
 assert.equal(node.childNodes[0].tagName,"IMG");
+assert.equal(await win.StudyLabAvatar.save(new MockFile(),{x:40,y:50,size:120}),true);
+assert.deepEqual(lastCropArgs.slice(1,5),[40,50,120,120], "Saved photo must use manual square crop");
 assert.equal(node.querySelector(":scope > svg"),null,"SVG must not remain on a successful photo");
 await win.StudyLabAvatar.remove();
 assert.equal(node.childNodes[0].tagName,"svg","Original SVG must return when photo removed");
@@ -128,7 +131,7 @@ assert.match(css,/\.sl-pv-backdrop \.sl-pv-avatar-toggle svg/);
 assert.match(css,/color:#14629b!important/);
 for(const page of ["index.html","study-room.html"]){
   const html=readFileSync(page,"utf8");
-  assert.match(html,/studylab-avatar\.js\?v=20261115-uuid-fixed-v5/);
+  assert.match(html,/studylab-avatar\.js\?v=20261116-manual-crop-v1/);
   assert.match(html,/studylab-follow\.css\?v=20261115-inline-bio-v5/);
 }
 console.log("StudyLab atomic avatar display, SVG restoration, image verification and camera styles passed.");

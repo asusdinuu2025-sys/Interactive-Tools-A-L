@@ -185,7 +185,7 @@
     render(node,uid);
     if (!cache.has(uid) || Date.now()-cache.get(uid).checkedAt>=CACHE_MS) enqueue(uid);
   }
-  async function readFile(file) {
+  async function readFile(file,crop) {
     if (!(file instanceof File) ||
       !["image/jpeg","image/png","image/webp"].includes(file.type)) {
       throw new Error("Choose a JPG, PNG or WebP image.");
@@ -219,9 +219,21 @@
       canvas.width = canvas.height = PHOTO_SIZE;
       const ctx = canvas.getContext("2d",{alpha:false});
       if (!ctx) throw new Error("Your browser cannot process this image.");
-      // Square center crop, then re-encode: strips camera EXIF/GPS metadata.
+      // Use the confirmed, manually positioned square when provided.
+      // Keep centre crop as the legacy fallback for direct save() callers.
+      // Re-encoding continues to strip original EXIF/GPS metadata.
       const edge = Math.min(width,height);
-      ctx.drawImage(image,(width-edge)/2,(height-edge)/2,edge,edge,
+      let sourceX = (width-edge)/2, sourceY = (height-edge)/2, sourceSize = edge;
+      if (crop !== undefined && crop !== null) {
+        const {x,y,size} = crop;
+        if (![x,y,size].every(Number.isFinite) || size < 1 ||
+            size > edge || x < 0 || y < 0 ||
+            x + size > width + .01 || y + size > height + .01) {
+          throw new Error("Invalid photo selection. Adjust the square and try again.");
+        }
+        sourceX = x; sourceY = y; sourceSize = size;
+      }
+      ctx.drawImage(image,sourceX,sourceY,sourceSize,sourceSize,
         0,0,PHOTO_SIZE,PHOTO_SIZE);
       for (const quality of [0.82,0.70,0.58,0.45]) {
         const blob = await new Promise(resolve=>canvas.toBlob(resolve,"image/webp",quality));
@@ -233,11 +245,11 @@
       URL.revokeObjectURL(objectUrl);
     }
   }
-  async function save(file) {
+  async function save(file,crop) {
     const value = account();
     await value.ready;
     const uid = ownId();
-    const blob = await readFile(file);
+    const blob = await readFile(file,crop);
     // Explicit create/update is more reliable than a single upsert across
     // Storage policy versions. Do not remove the old photo until replacement succeeds.
     const bucket = value.client.storage.from(BUCKET);

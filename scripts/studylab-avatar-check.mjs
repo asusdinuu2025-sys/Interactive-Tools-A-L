@@ -37,7 +37,12 @@ assert.match(migration,/for delete to authenticated/);
 
 assert.match(viewer,/avatarEditor\.hidden=true/);
 assert.match(viewer,/avatarToggle\.hidden=!own/);
-assert.match(viewer,/window\.StudyLabAvatar\.save\(file\)/);
+assert.match(viewer,/window\.StudyLabAvatar\.save\(file,crop\)/);
+assert.match(viewer,/openAvatarCrop\(file\)/);
+assert.match(viewer,/avatarCropSquare\.addEventListener\("pointermove"/);
+assert.match(viewer,/avatarCropZoom\.addEventListener\("input"/);
+assert.match(avatar,/sourceX = x; sourceY = y; sourceSize = size;/);
+assert.match(css,/\.sl-pv-crop-square/);
 assert.match(viewer,/window\.StudyLabAvatar\.remove\(\)/);
 assert.match(viewer,/window\.StudyLabAvatar\?\.decorate\(avatarNode,id\)/);
 assert.match(viewer,/Photos are visible to other students/);
