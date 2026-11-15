@@ -76,7 +76,10 @@ assert.match(roomCss,/--slr-art-mask: url\("\.\.\/images\/study-room\/leaf\.svg/
 assert.match(roomCss,/--slr-art-mask: url\("\.\.\/images\/study-room\/turtle\.svg/);
 assert.match(roomHtml,/data-room-doodles="on"/);
 assert.match(roomCss,/\.slr-theme-illustrations/);
-assert.doesNotMatch(roomCss,/opacity:calc\(var\(--slr-art-opacity\) \* /);
+const addedCornerStyles=roomCss.split("/* Extra four corner illustrations")[1]||"";
+assert.ok(addedCornerStyles,"Expected the new corner art CSS section");
+assert.doesNotMatch(addedCornerStyles,/opacity:calc\(var\(--slr-art-opacity\) \* /,
+  "New corner styles must not use unsupported opacity arithmetic");
 
 for(const html of [roomHtml,homeHtml]){
   assert.match(html,/studylab-profile-view\.js\?v=20261115-inline-bio-v5/);
