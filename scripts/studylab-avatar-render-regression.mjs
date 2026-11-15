@@ -7,6 +7,12 @@ import vm from "node:vm";
 
 const uid="11111111-2222-4333-8444-555555555555";
 const actualSource=readFileSync("assets/js/studylab-avatar.js","utf8");
+const uuidRule=actualSource.match(/const UUID = (\/[^;]+\/i);/);
+assert.ok(uuidRule,"Avatar must explicitly validate Supabase user IDs");
+const standardUuid="11111111-2222-4333-8444-555555555555";
+assert.ok(new RegExp(uuidRule[1].slice(1,-2),"i").test(standardUuid),
+  "Avatar validator must accept standard five-section Supabase UUIDs");
+
 const tokens=new Set();
 const fallback=()=>({
   nodeType:1,tagName:"svg",className:"original-svg",
@@ -122,7 +128,7 @@ assert.match(css,/\.sl-pv-backdrop \.sl-pv-avatar-toggle svg/);
 assert.match(css,/color:#14629b!important/);
 for(const page of ["index.html","study-room.html"]){
   const html=readFileSync(page,"utf8");
-  assert.match(html,/studylab-avatar\.js\?v=20261115-atomic-avatar-v4/);
+  assert.match(html,/studylab-avatar\.js\?v=20261115-uuid-fixed-v5/);
   assert.match(html,/studylab-follow\.css\?v=20261115-camera-contrast-v4/);
 }
 console.log("StudyLab atomic avatar display, SVG restoration, image verification and camera styles passed.");
