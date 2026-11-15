@@ -9,6 +9,21 @@
   const PHOTO_SIZE = 320;
   const UUID = /^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i;
   const cache = new Map();
+  // Store each original icon separately so real photos can REPLACE the icon
+  // instead of sitting behind or in front of it. Never discard the fallback.
+  const originalIcons = new WeakMap();
+  function rememberIcon(node) {
+    const originals=[...node.childNodes].filter(child=>
+      !(child.nodeType===1 && child.classList?.contains("sl-avatar-photo")));
+    if(originals.length)originalIcons.set(node,originals.map(child=>child.cloneNode(true)));
+  }
+  function restoreIcon(node) {
+    const saved=originalIcons.get(node);
+    if(saved?.length)node.replaceChildren(...saved.map(child=>child.cloneNode(true)));
+    else node.querySelector(":scope > img.sl-avatar-photo")?.remove();
+    node.classList.remove("sl-avatar-has-image");
+  }
+
   const queue = new Set();
   const CACHE_MS = 90000;
   let queueTimer = null;
@@ -32,37 +47,43 @@
   }
   function render(node, uid) {
     if (!node || !valid(uid)) return;
-    const item = cache.get(uid);
-    const url = item?.updatedAt ? publicUrl(uid, item.updatedAt) : "";
-    if (node.dataset.slAvatarUrl === url) return;
-    node.dataset.slAvatarUrl = url;
-    node.classList.remove("sl-avatar-has-image");
-    node.querySelector(":scope > img.sl-avatar-photo")?.remove();
-    if (!url) return;
-    const img = document.createElement("img");
-    img.className = "sl-avatar-photo";
-    img.alt = "";
-    img.decoding = "async";
-    // A lazy image with hidden=true may NEVER be fetched, because the browser
-    // waits for it to be visible while our onload waits for the fetch.
-    // Keep the original SVG visible until the eager photo has loaded.
-    img.loading = "eager";
-    img.referrerPolicy = "no-referrer";
-    img.style.opacity = "0";
-    img.onload = () => {
-      if (node.dataset.slAvatarUrl !== url) return;
-      img.style.opacity = "1";
+    // Gender SVGs can be rebuilt on profile refresh; remember the most recent
+    // fallback before loading any image.
+    if (!node.classList.contains("sl-avatar-has-image")) rememberIcon(node);
+    const item=cache.get(uid);
+    const url=item?.updatedAt ? publicUrl(uid,item.updatedAt) : "";
+    const previous=node.dataset.slAvatarUrl;
+    if(previous===url) return;
+    node.dataset.slAvatarUrl=url;
+    if(!url){
+      restoreIcon(node);
+      return;
+    }
+    // Do NOT append an invisible image next to the original SVG. Once decoded,
+    // make the actual photo the sole avatar child. This avoids stacking,
+    // opacity and fallback-visibility conflicts across StudyLab themes.
+    const img=new Image();
+    img.className="sl-avatar-photo";
+    img.alt="";
+    img.decoding="async";
+    img.loading="eager";
+    img.referrerPolicy="no-referrer";
+    img.setAttribute("aria-hidden","true");
+    img.onload=()=>{
+      if(node.dataset.slAvatarUrl!==url)return;
+      if(!img.naturalWidth || !img.naturalHeight) return;
+      img.style.opacity="1";
+      img.style.visibility="visible";
+      img.style.display="block";
+      node.replaceChildren(img);
       node.classList.add("sl-avatar-has-image");
     };
-    img.onerror = () => {
-      if (node.dataset.slAvatarUrl !== url) return;
-      img.remove();
-      node.classList.remove("sl-avatar-has-image");
+    img.onerror=()=>{
+      if(node.dataset.slAvatarUrl!==url)return;
+      // Keep the original icon, not a blank circle, after a broken upload.
+      restoreIcon(node);
     };
-    node.append(img);
-    img.src = url;
-    // Edge may resolve a cached WebP synchronously; don't depend solely on
-    // a later load event to swap out the SVG fallback.
+    img.src=url;
     if(img.complete && img.naturalWidth>0)img.onload();
   }
   // Successful Storage writes are not proof that a browser can display
@@ -87,18 +108,32 @@
     });
   }
   function waitForVisibleProfile(uid, url) {
-    const node=document.querySelector("#slProfileViewer:not([hidden]) .sl-pv-avatar");
-    if(!node || node.dataset.slAvatarUser!==uid) return Promise.resolve(true);
+    const viewer=document.getElementById("slProfileViewer");
+    if(!viewer || viewer.hidden)return Promise.resolve(true);
+    const node=viewer.querySelector(".sl-pv-avatar");
+    if(!node || node.dataset.slAvatarUser!==uid){
+      return Promise.reject(new Error("The profile picture couldn't attach to your profile. Reopen View Profile."));
+    }
     return new Promise((resolve,reject)=>{
       const begun=Date.now();
       function check(){
-        if(!node.isConnected || node.closest("#slProfileViewer")?.hidden) return resolve(true);
+        if(!node.isConnected || viewer.hidden)return resolve(true);
+        const photo=node.querySelector(":scope > img.sl-avatar-photo");
         const shown=node.dataset.slAvatarUrl===url &&
           node.classList.contains("sl-avatar-has-image") &&
-          Boolean(node.querySelector("img.sl-avatar-photo"));
-        if(shown)return resolve(true);
-        if(Date.now()-begun>=4500)
-          return reject(new Error("The photo was saved, but the profile preview did not update. Reopen View Profile to retry."));
+          photo && photo.naturalWidth>0 && photo.naturalHeight>0 &&
+          !node.querySelector(":scope > svg");
+        if(shown){
+          const styles=getComputedStyle(photo);
+          const dimensions=photo.getBoundingClientRect();
+          if(styles.display!=="none" && styles.visibility!=="hidden" &&
+             Number(styles.opacity)>0 && dimensions.width>=12 &&
+             dimensions.height>=12){
+            return resolve(true);
+          }
+        }
+        if(Date.now()-begun>=5500)
+          return reject(new Error("Your photo uploaded but the preview did not display. Please reopen View Profile."));
         requestAnimationFrame(check);
       }
       check();
