@@ -24,17 +24,22 @@ on public.studylab_profile_avatars for select to authenticated using (true);
 drop policy if exists "StudyLab avatars: owner insert" on public.studylab_profile_avatars;
 create policy "StudyLab avatars: owner insert"
 on public.studylab_profile_avatars for insert to authenticated
-with check (user_id = (select auth.uid()));
+with check (user_id = (select auth.uid())
+  and (select auth.jwt()->>'is_anonymous') is distinct from 'true');
 
 drop policy if exists "StudyLab avatars: owner update" on public.studylab_profile_avatars;
 create policy "StudyLab avatars: owner update"
 on public.studylab_profile_avatars for update to authenticated
-using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
+using (user_id = (select auth.uid())
+  and (select auth.jwt()->>'is_anonymous') is distinct from 'true')
+with check (user_id = (select auth.uid())
+  and (select auth.jwt()->>'is_anonymous') is distinct from 'true');
 
 drop policy if exists "StudyLab avatars: owner delete" on public.studylab_profile_avatars;
 create policy "StudyLab avatars: owner delete"
 on public.studylab_profile_avatars for delete to authenticated
-using (user_id = (select auth.uid()));
+using (user_id = (select auth.uid())
+  and (select auth.jwt()->>'is_anonymous') is distinct from 'true');
 
 -- Do not allow uploads of arbitrary file names or other people's images.
 drop policy if exists "StudyLab avatars: owner upload" on storage.objects;
@@ -42,28 +47,33 @@ create policy "StudyLab avatars: owner upload" on storage.objects
 for insert to authenticated with check (
   bucket_id = 'studylab-avatars'
   and name = (select auth.uid())::text || '/avatar.webp'
+  and (select auth.jwt()->>'is_anonymous') is distinct from 'true'
 );
 
 drop policy if exists "StudyLab avatars: owner replace" on storage.objects;
 create policy "StudyLab avatars: owner replace" on storage.objects
 for update to authenticated
 using (bucket_id = 'studylab-avatars'
-  and name = (select auth.uid())::text || '/avatar.webp')
+  and name = (select auth.uid())::text || '/avatar.webp'
+  and (select auth.jwt()->>'is_anonymous') is distinct from 'true')
 with check (bucket_id = 'studylab-avatars'
-  and name = (select auth.uid())::text || '/avatar.webp');
+  and name = (select auth.uid())::text || '/avatar.webp'
+  and (select auth.jwt()->>'is_anonymous') is distinct from 'true');
 
 drop policy if exists "StudyLab avatars: owner remove" on storage.objects;
 create policy "StudyLab avatars: owner remove" on storage.objects
 for delete to authenticated
 using (bucket_id = 'studylab-avatars'
-  and name = (select auth.uid())::text || '/avatar.webp');
+  and name = (select auth.uid())::text || '/avatar.webp'
+  and (select auth.jwt()->>'is_anonymous') is distinct from 'true');
 
 -- Supabase Storage upsert also requires SELECT on the existing object.
 drop policy if exists "StudyLab avatars: owner read for upsert" on storage.objects;
 create policy "StudyLab avatars: owner read for upsert" on storage.objects
 for select to authenticated
 using (bucket_id = 'studylab-avatars'
-  and name = (select auth.uid())::text || '/avatar.webp');
+  and name = (select auth.uid())::text || '/avatar.webp'
+  and (select auth.jwt()->>'is_anonymous') is distinct from 'true');
 
 -- No Study Room inactivity cleanup or Social maintenance touches this table.
 -- On account deletion, metadata cascades via auth.users; the separate Storage
