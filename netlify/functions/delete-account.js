@@ -53,15 +53,6 @@ async function removeSocialFiles(userId) {
   }
   throw new Error("storage_batch_limit");
 }
-async function removeUserProgress(userId){
-  // These two personal-credit views are backed by tables without an Auth FK.
-  // Auth deletion already cascades study_room_members/credit_segments.
-  for(const table of ["study_room_personal_sessions","study_room_personal_daily"]){
-    const result=await request("/rest/v1/"+table+"?user_id=eq."+
-      encodeURIComponent(userId),"DELETE",PRIVATE_KEY);
-    if(!result.ok)throw new Error(table+"_cleanup_failed");
-  }
-}
 async function checkProfileCanBePreserved(userId){
   // Do not hard-delete a user until the archive migration is present. On old
   // schemas the profile row would disappear via auth.users cascade instead.
@@ -110,7 +101,8 @@ exports.handler=async function(event) {
     }
     await removeSocialFiles(user.id);
     await removeChatMessages(user.id);
-    await removeUserProgress(user.id);
+    // Auth deletion cascades study_room_credit_segments and members. The
+    // personal_daily/personal_sessions views derive from those credits.
     // Auth deletion cascades all other account-linked records, while the
     // archived profile's Auth FK is intentionally removed. Its private fields
     // are anonymized by the BEFORE DELETE trigger on auth.users.
