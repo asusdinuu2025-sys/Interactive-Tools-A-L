@@ -62,6 +62,46 @@
     node.append(img);
     img.src = url;
   }
+  // Successful Storage writes are not proof that a browser can display
+  // the public image. Decode the actual public URL before confirming success.
+  function verifyPublicImage(url, timeoutMs = 9000) {
+    return new Promise((resolve,reject)=>{
+      const photo = new Image();
+      let finished = false;
+      const timeout = setTimeout(()=>finish(false,"Image request timed out."),timeoutMs);
+      function finish(ok,reason) {
+        if(finished)return;
+        finished=true;clearTimeout(timeout);
+        photo.onload=null;photo.onerror=null;
+        if(ok)resolve(true);
+        else reject(new Error(reason || "The stored picture could not be displayed."));
+      }
+      photo.onload=()=>finish(photo.naturalWidth>0&&photo.naturalHeight>0,
+        "The uploaded picture could not be decoded.");
+      photo.onerror=()=>finish(false,"The stored image URL failed to load. Please try again.");
+      photo.src=url;
+      if(photo.complete&&photo.naturalWidth>0)finish(true);
+    });
+  }
+  function waitForVisibleProfile(uid, url) {
+    const node=document.querySelector("#slProfileViewer:not([hidden]) .sl-pv-avatar");
+    if(!node || node.dataset.slAvatarUser!==uid) return Promise.resolve(true);
+    return new Promise((resolve,reject)=>{
+      const begun=Date.now();
+      function check(){
+        if(!node.isConnected || node.closest("#slProfileViewer")?.hidden) return resolve(true);
+        const shown=node.dataset.slAvatarUrl===url &&
+          node.classList.contains("sl-avatar-has-image") &&
+          Boolean(node.querySelector("img.sl-avatar-photo"));
+        if(shown)return resolve(true);
+        if(Date.now()-begun>=4500)
+          return reject(new Error("The photo was saved, but the profile preview did not update. Reopen View Profile to retry."));
+        requestAnimationFrame(check);
+      }
+      check();
+    });
+  }
+
   function paintAll(uid) {
     document.querySelectorAll('[data-sl-avatar-user="' + uid + '"]').forEach(node => render(node,uid));
   }
@@ -182,7 +222,15 @@
       .upsert({user_id:uid,updated_at:updatedAt},{onConflict:"user_id"})
       .select("updated_at").single();
     if (error) throw error;
-    setCache(uid,data.updated_at,Date.now()+1);
+    const photoUrl=publicUrl(uid,data.updated_at);
+    // Verify before swapping SVG fallback: never announce success on an
+    // unrenderable photo, even when Supabase accepted the upload.
+    let verified=false;
+    try {await verifyPublicImage(photoUrl);verified=true;}
+    finally {
+      setCache(uid,data.updated_at,Date.now()+1);
+    }
+    if(verified)await waitForVisibleProfile(uid,photoUrl);
     window.dispatchEvent(new CustomEvent("studylab-avatar-updated",{detail:{userId:uid,hasPhoto:true}}));
     return true;
   }
