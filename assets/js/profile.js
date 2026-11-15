@@ -404,6 +404,13 @@
       profileButton.title = "Open your StudyLab account options";
       profileButton.setAttribute("aria-label", "Open StudyLab account options");
     }
+    // Keep the badge outside the truncatable text so a very long display
+    // name never covers the top bar's Social, Install or theme controls.
+    const profileNameText=document.createElement("span");
+    profileNameText.className="sl-header-profile-name-text";
+    profileNameText.textContent=label.textContent;
+    profileNameText.title=label.textContent;
+    label.replaceChildren(profileNameText);
     window.StudyLabNameMark?.decorate(
       profileButton.querySelector(".profile-button-label"),
       !isGuest && isBasicComplete(p) ? window.StudyLabAccount?.getUser?.()?.id : null

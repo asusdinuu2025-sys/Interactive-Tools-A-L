@@ -37,6 +37,7 @@
   };
   let items=[],historyItems=[],current=0,admin=false;
   let interactionUntil=0,hovered=false,visible=true,rotation=null;
+  let slideTimer=null;
   let historyDialog=null,managerDialog=null,aboutDialog=null;
   function safeDestination(raw){
     try{
@@ -153,15 +154,36 @@
       dot.setAttribute("aria-label","Show slide "+(i+1)+": "+items[i].title);
       dot.setAttribute("aria-current",String(i===current));
       dot.addEventListener("click",()=>{
-        current=i;interactionUntil=Date.now()+12000;render();
+        interactionUntil=Date.now()+12000;changeSlide(i);
       });
       els.dots.append(dot);
     }
   }
+  function changeSlide(index){
+    if(!items.length)return;
+    const next=(index+items.length)%items.length;
+    if(slideTimer){clearTimeout(slideTimer);slideTimer=null;}
+    if(next===current){
+      card.classList.remove("is-transitioning");
+      return;
+    }
+    // Keep the four-second cadence; fade the *content*, not the card's
+    // background, so neither navigation buttons nor layout ever jump.
+    if(reduced.matches){
+      card.classList.remove("is-transitioning");
+      current=next;render();return;
+    }
+    card.classList.add("is-transitioning");
+    slideTimer=setTimeout(()=>{
+      slideTimer=null;
+      current=next;render();
+      requestAnimationFrame(()=>card.classList.remove("is-transitioning"));
+    },190);
+  }
   function step(delta){
     if(!items.length)return;
-    current=(current+delta+items.length)%items.length;
-    interactionUntil=Date.now()+12000;render();
+    interactionUntil=Date.now()+12000;
+    changeSlide(current+delta);
   }
   card.querySelector("[data-discovery-prev]").addEventListener("click",()=>step(-1));
   card.querySelector("[data-discovery-next]").addEventListener("click",()=>step(1));
@@ -188,6 +210,8 @@
     historyItems=(data||[]).filter(x=>x.published&&new Date(x.starts_at).getTime()<=now
       &&safeDestination(x.target_path));
     items=historyItems.filter(x=>!x.ends_at||new Date(x.ends_at).getTime()>now);
+    if(slideTimer){clearTimeout(slideTimer);slideTimer=null;}
+    card.classList.remove("is-transitioning");
     current=Math.min(current,Math.max(0,items.length-1));
     render();
   }
@@ -195,7 +219,7 @@
     if(rotation)clearInterval(rotation);
     rotation=setInterval(()=>{
       if(items.length<2||reduced.matches||document.hidden||hovered||!visible||Date.now()<interactionUntil)return;
-      current=(current+1)%items.length;render();
+      changeSlide(current+1);
     },4000);
   }
   reduced.addEventListener?.("change",()=>{interactionUntil=Date.now()+2000;});

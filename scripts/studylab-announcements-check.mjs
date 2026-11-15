@@ -14,16 +14,24 @@ for(const required of [
   'id="slDiscoveryCarousel"','data-discovery-main','data-discovery-prev',
   'data-discovery-next','data-discovery-dots','sl-home-intro-row',
   'homepage-utility-row',
-  'assets/css/studylab-announcements.css?v=20261115-published-banners-v2',
-  'assets/js/studylab-announcements.js?v=20261115-published-banners-v2'
+  'assets/css/studylab-announcements.css?v=20261116-home-fade-pet-v3',
+  'assets/js/studylab-announcements.js?v=20261116-home-fade-pet-v3'
 ])assert.ok(html.includes(required),"Missing Home integration: "+required);
 assert.match(profile,/updates\.dataset\.accountAction="announcements"/);
 assert.match(profile,/manage\.dataset\.accountAction="manage-announcements"/);
 assert.match(profile,/nameText\.className="sl-greeting-name-text"/);
+assert.match(profile,/profileNameText\.className="sl-header-profile-name-text"/);
+assert.match(profile,/label\.replaceChildren\(profileNameText\)/);
+assert.match(html,/assets\/js\/profile\.js\?v=20261116-header-name-v3/);
 assert.match(profile,/window\.StudyLabNameMark\?\.decorate/);
 assert.match(ui,/items=historyItems\.filter\(x=>!x\.ends_at/);
 assert.match(ui,/\.order\("sort_order",\{ascending:true\}\)/);
-assert.match(ui,/current=\(current\+1\)%items\.length;render\(\)/);
+assert.match(ui,/changeSlide\(current\+1\)/);
+assert.match(ui,/function changeSlide\(index\)/);
+assert.match(ui,/card\.classList\.add\("is-transitioning"\)/);
+assert.match(ui,/card\.classList\.remove\("is-transitioning"\)/);
+assert.match(ui,/},190\)/);
+assert.match(ui,/if\(reduced\.matches\)/);
 assert.match(ui,/},4000\)/);
 assert.match(ui,/new IntersectionObserver/);
 assert.match(ui,/reduced\.matches/);
@@ -75,4 +83,11 @@ assert.match(css,/text-overflow:ellipsis/);
 assert.match(css,/\.sl-discovery-custom-image/);
 assert.match(css,/\.sl-discovery-card\.has-uploaded-banner/);
 assert.match(css,/\.sl-ann-image-preview/);
+assert.match(css,/\.sl-header-profile-name-text/);
+assert.match(css,/\.profile-button-label > \.sl-name-mark/);
+assert.match(css,/max-width:clamp\(140px,22vw,270px\)/);
+assert.match(css,/\.sl-discovery-card\.is-transitioning \.sl-discovery-slide-main/);
+assert.match(css,/transition-duration:\.18s/);
+assert.match(css,/html body #studylabPetStage\{\s*z-index:2147483400!important/);
+assert.match(css,/html body #studylabPetPanel\{\s*z-index:2147483402!important/);
 console.log("StudyLab seven published banners, admin editor, images, no read-tracking and mobile layout: OK.");

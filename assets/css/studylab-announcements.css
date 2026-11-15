@@ -349,3 +349,118 @@ html[data-theme="light"] .sl-ann-image-preview{
   .sl-ann-admin-thumb{width:46px;height:30px;flex-basis:46px}
   .sl-ann-admin-row button{padding:6px;font-size:10px}
 }
+
+
+
+/* Final polish: no new header layout or greeting changes. The top-bar
+   account name is the ONLY truncated content; badge and caret stay visible. */
+html body header.site-header .brand{
+  min-width:0!important;overflow:hidden!important;
+}
+@media(min-width:761px){
+  html body header.site-header .brand{
+    flex:1 1 0%!important;
+  }
+  html body header.site-header .brand .brand-title-text{
+    min-width:0!important;overflow:hidden!important;
+    text-overflow:ellipsis!important;white-space:nowrap!important;
+  }
+}
+html body header.site-header .profile-button{
+  display:inline-flex!important;align-items:center!important;
+  flex:0 1 auto!important;min-width:0!important;
+  max-width:clamp(140px,22vw,270px)!important;
+  overflow:hidden!important;white-space:nowrap!important;
+}
+html body header.site-header .profile-button .header-action-icon,
+html body header.site-header .profile-button .profile-menu-caret{
+  flex:0 0 auto!important;
+}
+html body header.site-header .profile-button .profile-button-label{
+  display:inline-flex!important;align-items:center!important;
+  flex:0 1 auto!important;min-width:0!important;
+  max-width:100%!important;overflow:hidden!important;
+  white-space:nowrap!important;
+}
+html body header.site-header .profile-button .sl-header-profile-name-text{
+  display:block;flex:0 1 auto;min-width:0;max-width:100%;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+html body header.site-header .profile-button .profile-button-label > .sl-name-mark{
+  flex:0 0 15px!important;width:15px;height:15px;
+  margin-inline-start:4px!important;align-self:center;
+}
+@media(max-width:1100px){
+  html body header.site-header .profile-button{
+    max-width:clamp(110px,17vw,186px)!important;
+  }
+}
+@media(max-width:640px){
+  html body header.site-header .profile-button{
+    max-width:min(145px,36vw)!important;
+  }
+}
+
+/* Gentle Telegram-like dissolve between carousel posts.
+   Navigation and outer glass do not flash or shift. */
+.sl-discovery-card .sl-discovery-slide-main,
+.sl-discovery-card .sl-discovery-custom-image{
+  transition:opacity .48s ease-out,
+    transform .48s cubic-bezier(.2,.75,.2,1),
+    filter .48s ease-out;
+}
+.sl-discovery-card.is-transitioning .sl-discovery-slide-main,
+.sl-discovery-card.is-transitioning .sl-discovery-custom-image{
+  opacity:0!important;
+  transform:translateY(-4px) scale(.995);
+  filter:blur(2.5px);
+  transition-duration:.18s;
+}
+.sl-discovery-card.is-transitioning .sl-discovery-slide-main{
+  pointer-events:none;
+}
+/* Slightly smaller, more translucent manual navigation controls. */
+.sl-discovery-card .sl-discovery-arrow{
+  width:26px;height:26px;
+  border-color:rgba(176,212,255,.20);
+  background:rgba(99,130,192,.11);
+  color:rgba(236,249,255,.88);
+  box-shadow:inset 0 1px rgba(255,255,255,.08);
+}
+.sl-discovery-card .sl-discovery-arrow svg{
+  width:12px;height:12px;stroke-width:2;
+}
+html[data-theme="light"] .sl-discovery-card .sl-discovery-arrow{
+  color:#426b94;background:rgba(126,177,220,.13);
+  border-color:rgba(73,141,206,.22);
+}
+.sl-discovery-card .sl-discovery-arrow:hover,
+.sl-discovery-card .sl-discovery-arrow:focus-visible{
+  background:rgba(86,168,217,.28);
+}
+@media(max-width:540px){
+  .sl-discovery-card .sl-discovery-arrow{
+    width:23px;height:23px;
+  }
+  .sl-discovery-card .sl-discovery-arrow svg{
+    width:11px;height:11px;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .sl-discovery-card .sl-discovery-slide-main,
+  .sl-discovery-card .sl-discovery-custom-image{
+    transition:none!important;filter:none!important;transform:none!important;
+  }
+}
+
+/* The pet character remains above both floating View Profile and
+   the classic Edit Profile blur overlays. No movement or animation changes. */
+html body #studylabPetStage{
+  z-index:2147483400!important;
+}
+html body #studylabPetLauncher{
+  z-index:2147483401!important;
+}
+html body #studylabPetPanel{
+  z-index:2147483402!important;
+}
