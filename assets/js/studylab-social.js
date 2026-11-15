@@ -7,6 +7,29 @@
   window.__studyLabSocialLoaded = true;
 
   const BUCKET = "studylab-social";
+  // Separate from existing Likes: one optional emoji reaction per student.
+  const SOCIAL_REACTIONS = ["👍","😂","🔥","❤️"];
+  let postReactionsById = new Map();
+  function groupPostReactions(rows) {
+    const grouped=new Map();
+    for(const item of rows||[]){
+      if(!grouped.has(item.post_id))grouped.set(item.post_id,[]);
+      grouped.get(item.post_id).push(item);
+    }
+    return grouped;
+  }
+  function updateReactionButtons(card, postId, currentUserId) {
+    const data=postReactionsById.get(postId)||[];
+    for(const button of card.querySelectorAll("[data-social-reaction]")){
+      const symbol=button.dataset.socialReaction;
+      const count=data.filter(item=>item.reaction===symbol).length;
+      const selected=data.some(item=>item.user_id===currentUserId&&item.reaction===symbol);
+      button.textContent=symbol+(count?" "+count:"");
+      button.setAttribute("aria-pressed",String(selected));
+      button.setAttribute("aria-label",symbol+" reaction, "+count+" students");
+      button.classList.toggle("is-selected",selected);
+    }
+  }
   const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
   const MAX_IMAGES = 4;
   const MAX_POST_WORDS = 1000;
@@ -873,6 +896,47 @@
       commentsButton.dataset.commentCount = String(commentCountsByPost.get(post.id) || 0);
       commentsButton.addEventListener("click", () => toggleComments(card, post, client, currentUserId));
       actions.append(like, commentsButton);
+      const reactions=make("div","sl-feed-reaction-actions");
+      reactions.setAttribute("role","group");
+      reactions.setAttribute("aria-label","Reactions to this post");
+      const buttons=[];
+      for(const symbol of SOCIAL_REACTIONS){
+        const reactionButton=make("button","sl-feed-reaction-button",symbol);
+        reactionButton.type="button";
+        reactionButton.dataset.socialReaction=symbol;
+        buttons.push(reactionButton);
+        reactions.append(reactionButton);
+        reactionButton.addEventListener("click",async()=>{
+          if(buttons.some(button=>button.disabled))return;
+          buttons.forEach(button=>button.disabled=true);
+          const rows=postReactionsById.get(post.id)||[];
+          const current=rows.find(item=>item.user_id===currentUserId);
+          let response;
+          try{
+            const table=client.from("studylab_social_post_reactions");
+            if(current?.reaction===symbol){
+              response=await table.delete().eq("post_id",post.id).eq("user_id",currentUserId);
+            }else if(current){
+              response=await table.update({reaction:symbol})
+                .eq("post_id",post.id).eq("user_id",currentUserId);
+            }else{
+              response=await table.insert({post_id:post.id,user_id:currentUserId,reaction:symbol});
+            }
+            if(response.error)throw response.error;
+            postReactionsById.set(post.id,[
+              ...rows.filter(item=>item.user_id!==currentUserId),
+              ...(current?.reaction===symbol?[]:[{post_id:post.id,user_id:currentUserId,reaction:symbol}])
+            ]);
+            updateReactionButtons(card,post.id,currentUserId);
+          }catch(error){
+            setStatus(error.message||"Could not update reaction.",true);
+          }finally{
+            buttons.forEach(button=>button.disabled=false);
+          }
+        });
+      }
+      actions.append(reactions);
+      updateReactionButtons(card,post.id,currentUserId);
     }
     if (post.author_id === currentUserId || isAdmin) {
       const deletingAnotherStudentPost = post.author_id !== currentUserId;
@@ -919,6 +983,7 @@
       likeState.button.setAttribute("aria-pressed", String(likeState.liked));
       likeState.button.classList.toggle("is-liked", likeState.liked);
     }
+    updateReactionButtons(card,post.id,card.dataset.currentUserId);
     const commentButton = card.querySelector("[data-comment-count]");
     if (commentButton) {
       const count = commentCountsByPost.get(post.id) || 0;
@@ -953,7 +1018,15 @@
         commentAvatar.setAttribute("aria-label", (comment.author_display_name || "Student") + " profile");
         const commentNameNode = make("strong", "", comment.author_display_name || "Student");
         window.StudyLabNameMark?.decorate(commentNameNode, comment.author_id);
-        header.append(commentAvatar, commentNameNode);
+        const commentIdentity=make("button","sl-feed-comment-identity");
+        commentIdentity.type="button";
+        commentIdentity.title="View "+commentName+" profile";
+        commentIdentity.setAttribute("aria-label","View profile of "+commentName);
+        commentIdentity.append(commentAvatar,commentNameNode);
+        commentIdentity.addEventListener("click",()=>{
+          window.StudyLabProfileView?.open({userId:comment.author_id});
+        });
+        header.append(commentIdentity);
         item.append(header, make("p", "", comment.body));
         if (comment.author_id === currentUserId || isAdmin) {
           const commentMenu = document.createElement("details");
