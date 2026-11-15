@@ -7,7 +7,7 @@
   const BUCKET = "studylab-avatars";
   const MAX_UPLOAD = 1024 * 1024;
   const PHOTO_SIZE = 320;
-  const UUID = /^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i;
+  const UUID = /^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i;
   const cache = new Map();
   // Store each original icon separately so real photos can REPLACE the icon
   // instead of sitting behind or in front of it. Never discard the fallback.
