@@ -206,6 +206,32 @@
         .limit(1000);
       if (r.error) return;
       records = (r.data || []).map((x) => x.payload);
+      // Connected PR #102 and production must preserve the existing
+      // Draft Preview workflow. Never show a private draft to a visitor.
+      if (new URLSearchParams(location.search).get("admin-preview") === "1") {
+        const account = window.StudyLabAccount;
+        await account?.startup;
+        const auth = await client.auth.getUser();
+        if (auth.data?.user && !auth.data.user.is_anonymous) {
+          const allowed = await client.rpc("studylab_social_is_admin");
+          if (!allowed.error && allowed.data === true) {
+            let draft = null;
+            try {
+              draft = JSON.parse(localStorage.getItem("studylab-admin-draft-preview") || "null");
+            } catch (_) { /* A damaged local draft must not hide public content. */ }
+            if (draft?.owner === auth.data.user.id && draft.item?.page === page) {
+              records = [
+                ...records.filter((x) => x.id !== draft.item.id),
+                draft.item,
+              ];
+              document.body.prepend(el(
+                "div", "sl-cms-preview-banner",
+                "Private admin draft preview · Not published"
+              ));
+            }
+          }
+        }
+      }
     }
     apply(records);
   }
