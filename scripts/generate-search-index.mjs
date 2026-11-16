@@ -3,7 +3,7 @@ import {readdir,readFile,mkdir,writeFile} from "node:fs/promises";
 import path from "node:path";
 
 const root=process.cwd();
-const excluded=new Set(["study-room-mini.html"]);
+const excluded=new Set(["study-room-mini.html","admin.html"]);
 const primary={
  "index.html":["StudyLab Home","Home","Home"],
  "maths.html":["Combined Mathematics","Combined Maths","Subject"],

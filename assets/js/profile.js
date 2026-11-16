@@ -180,6 +180,11 @@
         manage.innerHTML='<span class="account-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 11h3l13-6v14l-13-6H3z"/><path d="m7 14 2 6h3l-2-6"/></svg></span>'+
           '<span class="account-menu-copy"><strong>Manage announcements</strong><small>Admin publishing and scheduling</small></span>';
         accountMenu.insertBefore(manage,status);
+        const dashboard=document.createElement("button");
+        dashboard.type="button";dashboard.setAttribute("role","menuitem");
+        dashboard.dataset.accountAction="admin-dashboard";
+        dashboard.innerHTML='<span class="account-menu-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg></span><span class="account-menu-copy"><strong>Admin Dashboard</strong><small>Users, content and site management</small></span>';
+        accountMenu.insertBefore(dashboard,status);
       }
     }
   }
@@ -194,6 +199,7 @@
   accountMenu.addEventListener("click", async event => {
     const action = event.target.closest("[data-account-action]")?.dataset.accountAction;
     if (!action) return;
+    if (action === "admin-dashboard") { closeAccountMenu(); location.href="admin.html"; return; }
     if (action === "announcements") {
       closeAccountMenu();
       window.StudyLabAnnouncements?.openHistory?.();

@@ -1,0 +1,86 @@
+[data-cms-id][hidden] {
+  display: none !important;
+}
+.sl-cms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 18px;
+  margin: 22px 0;
+}
+.sl-cms-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+  border: 1px solid var(--border, rgba(140, 200, 255, 0.25));
+  border-radius: 22px;
+  background: rgba(130, 170, 230, 0.06);
+  color: inherit;
+  text-decoration: none;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  transition: transform 0.2s;
+}
+.sl-cms-card:hover {
+  transform: translateY(-3px);
+}
+.sl-cms-card h3,
+.sl-cms-card p {
+  margin: 0;
+}
+.sl-cms-card p {
+  opacity: 0.75;
+  line-height: 1.6;
+}
+.sl-cms-image {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: 14px;
+}
+.sl-cms-section {
+  padding: 28px;
+  margin: 24px 0;
+  border: 1px solid rgba(140, 200, 255, 0.2);
+  border-radius: 26px;
+  background: rgba(130, 170, 230, 0.04);
+}
+.sl-cms-section[data-layout="list"] .sl-cms-grid {
+  grid-template-columns: 1fr;
+}
+.sl-cms-preview-banner {
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+  padding: 10px 18px;
+  background: #243658;
+  color: #fff;
+  font:
+    14px "Nirmala UI",
+    sans-serif;
+  text-align: center;
+}
+/* Height-only Home refinement; carousel editor and image processing are unchanged. */
+.homepage-overview-panel .live-card,
+.homepage-overview-panel .student-milestone,
+.homepage-overview-panel .study-room-launcher {
+  min-height: 138px !important;
+  padding: 12px !important;
+}
+.homepage-overview-panel .sl-discovery-card {
+  height: 240px;
+  min-height: 240px;
+}
+@media (max-width: 720px) {
+  .homepage-overview-panel .live-card,
+  .homepage-overview-panel .student-milestone,
+  .homepage-overview-panel .study-room-launcher {
+    min-height: 126px !important;
+  }
+  .homepage-overview-panel .sl-discovery-card {
+    height: 220px;
+    min-height: 220px;
+  }
+}
+
+.sl-home-nav-item[hidden] { display: none !important; }

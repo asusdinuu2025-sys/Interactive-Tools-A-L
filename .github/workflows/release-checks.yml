@@ -26,3 +26,7 @@ jobs:
         run: node scripts/generate-search-index.mjs
       - name: Run release checks
         run: node scripts/release-check.mjs
+      - name: Install test dependencies
+        run: npm ci
+      - name: Verify admin permissions and preview behavior
+        run: npm run test:admin

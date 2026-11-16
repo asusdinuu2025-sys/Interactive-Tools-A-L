@@ -3,5 +3,12 @@
   "private": true,
   "dependencies": {
     "@netlify/blobs": "10.7.13"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.3.14",
+    "jsdom": "26.1.0"
+  },
+  "scripts": {
+    "test:admin": "node scripts/admin-dashboard-tests.cjs && node scripts/admin-dashboard-sql-tests.cjs"
   }
 }

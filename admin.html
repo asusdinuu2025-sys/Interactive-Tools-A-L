@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>Admin Dashboard · StudyLab</title>
+    <link rel="icon" href="assets/icon/studylab-pwa.svg" />
+    <link rel="stylesheet" href="assets/css/main.css" />
+    <link rel="stylesheet" href="assets/css/studylab-admin.css" />
+  </head>
+  <body class="sl-admin-page">
+    <div class="ad-shell">
+      <header class="ad-top">
+        <a href="index.html" class="ad-brand"
+          ><span class="ad-brand-mark">S</span
+          ><span>StudyLab<small>ADMIN WORKSPACE</small></span></a
+        >
+        <div class="ad-top-actions">
+          <button id="ad-theme" aria-label="Switch colour theme">◐</button
+          ><a class="ad-button" href="index.html">Back to StudyLab ↗</a>
+        </div>
+      </header>
+      <main>
+        <section class="ad-heading">
+          <div>
+            <p class="ad-eyebrow">BEHIND THE SCENES</p>
+            <h1>Admin Dashboard<span>.</span></h1>
+            <p>One place to look after your learning community.</p>
+          </div>
+          <span id="ad-identity" class="ad-chip">Checking access…</span>
+        </section>
+        <p id="ad-gate" class="ad-notice" role="status">
+          Verifying your StudyLab admin account…
+        </p>
+        <div id="ad-workspace" hidden>
+          <div id="ad-mode" class="ad-notice"></div>
+          <nav id="ad-tabs" class="ad-tabs" aria-label="Admin areas"></nav>
+          <div class="ad-panel-heading">
+            <div>
+              <p id="ad-kicker" class="ad-eyebrow">WORKSPACE</p>
+              <h2 id="ad-title">Overview</h2>
+            </div>
+            <span id="ad-save-state" class="ad-chip">All changes saved</span>
+          </div>
+          <p id="ad-status" role="status" aria-live="polite"></p>
+          <section id="ad-content" aria-labelledby="ad-title"></section>
+        </div>
+      </main>
+      <footer class="ad-footer">
+        StudyLab · Built for your community <span>Admin access only</span>
+      </footer>
+    </div>
+    <dialog id="ad-editor" class="ad-dialog">
+      <form id="ad-form">
+        <header>
+          <h2 id="ad-editor-title">Edit content</h2>
+          <button type="button" id="ad-close" aria-label="Close editor">
+            ×
+          </button>
+        </header>
+        <div id="ad-fields"></div>
+        <p id="ad-editor-status" role="status"></p>
+        <div class="ad-editor-actions">
+          <button type="button" id="ad-preview">Preview</button
+          ><button type="submit" value="draft">Save draft</button
+          ><button type="submit" value="publish" class="ad-primary">
+            Publish
+          </button>
+        </div>
+      </form>
+    </dialog>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.2/dist/umd/supabase.js"></script>
+    <script src="assets/js/studylab-admin-config.js"></script>
+    <script src="assets/js/studylab-admin-api.js"></script>
+    <script src="assets/js/studylab-admin.js"></script>
+  </body>
+</html>
