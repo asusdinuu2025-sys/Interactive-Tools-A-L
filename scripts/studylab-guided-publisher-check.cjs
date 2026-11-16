@@ -55,7 +55,7 @@ function make(html){
  const pack={...sample,resource_type:"lesson-pack",id:"custom-66666666-6666-4666-8666-666666666666",
   title:"Study Pack",subject:"physics",publisher:"StudyLab Teacher",series:"2027 Revision Pack"};
  render(pack,"https://example.org/lessons");
- assert.ok(doc.window.document.querySelector(".sl-lessons-publisher-card .sl-lesson-publisher-title"));
+ assert.ok(doc.window.document.querySelector(".sl-lesson-publisher-card .sl-lesson-publisher-title"));
  assert.equal(render({...sample,resource_type:"custom"},"https://example.org"),false);
  doc.window.close();
 
