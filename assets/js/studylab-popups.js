@@ -137,18 +137,18 @@
       .select("id,title,message,variant,placement,display_seconds,link,link_label,starts_at")
       .order("starts_at",{ascending:false}).limit(8);
     if (resp.error || !resp.data?.length) return;
-    let account = null;
-    try { account = (await client.auth.getUser()).data?.user || null; }
-    catch (_) { account = null; }
+    let authAccount = null;
+    try { authAccount = (await client.auth.getUser()).data?.user || null; }
+    catch (_) { authAccount = null; }
     for (const item of resp.data) {
       // If the account chooser opens again, don't consume a delivery receipt.
       if (!(await waitForHomeEntry())) return;
       const startAt = new Date(item.starts_at).getTime();
       if (!Number.isFinite(startAt) ||
           Date.now()<startAt || Date.now()>=startAt+86400000) continue;
-      const key = localPrefix + item.id + ":" + (account?.id || "browser");
+      const key = localPrefix + item.id + ":" + (authAccount?.id || "browser");
       if (localSeen(key)) continue;
-      if (account?.id) {
+      if (authAccount?.id) {
         // One-time delivery survives devices, sessions and page refreshes.
         const claim = await client.rpc("studylab_popup_claim",{p_id:item.id});
         if (claim.error || claim.data !== true) continue;
