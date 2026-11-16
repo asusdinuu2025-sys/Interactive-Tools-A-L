@@ -414,7 +414,7 @@ async function setup(admin = true, options = {}) {
   const sidebarJs = read("assets/js/home-sidebar.js");
   const cmsJs = read("assets/js/studylab-content.js");
   assert.match(homeHtml,/id="more-learning-resources"/);
-  assert.match(homeHtml,/home-sidebar[.]js[?]v=9/);
+  assert.match(homeHtml,/home-sidebar[.]js[?]v=10/);
   assert.match(sidebarJs,/data-nav-id="more"/);
   assert.match(sidebarJs,/href="#more-learning-resources"/);
   assert.match(sidebarJs,/\["more", "more-learning-resources"\]/);
