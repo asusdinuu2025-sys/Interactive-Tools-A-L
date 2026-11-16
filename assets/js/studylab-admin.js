@@ -906,7 +906,7 @@
           item.message.length>800 || !Number.isInteger(item.display_seconds) ||
           item.display_seconds<3 || item.display_seconds>30 ||
           !item.link_label || item.link_label.length>20 ||
-          /[\\u0000-\\u001f<>]/.test(item.link_label) ||
+          /[\u0000-\u001f<>]/.test(item.link_label) ||
           !Number.isFinite(new Date(item.starts_at).getTime()))
         throw Error("Enter valid text, a display time and schedule.");
       if (item.link) item.link = api.safeURL(item.link);
