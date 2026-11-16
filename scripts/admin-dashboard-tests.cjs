@@ -145,13 +145,21 @@ async function setup(admin = true, options = {}) {
   assert.equal(w.document.documentElement.dataset.theme, "dark");
   assert.equal(w.localStorage.getItem("studylab-room-mode-v1"), "dark");
   dom.window.close();
-  // Failure to load a widget must show an actionable error, never an empty panel.
+  // One failed API request must not suppress the overview stats or its actions.
   ({ dom, w } = await setup(true, { failOverview: true }));
   assert.equal(w.document.querySelector("#ad-workspace").hidden, false);
-  assert.ok(w.document.querySelector(".ad-error-panel"));
-  assert.match(w.document.querySelector("#ad-status").textContent, /Test overview request failed/);
-  assert.equal(w.document.querySelector("#ad-save-state").textContent, "Load failed");
+  assert.equal(w.document.querySelectorAll(".ad-stats .ad-card").length, 4);
+  assert.match(w.document.querySelector(".ad-data-warning").textContent,
+    /Test overview request failed/);
+  assert.equal(w.document.querySelector("#ad-save-state").textContent, "Some data unavailable");
+  assert.equal(w.document.querySelectorAll(".ad-overview-grid .ad-quick").length, 5);
+  assert.match(w.document.querySelector(".ad-build-label").textContent,
+    /PR #102 preview/);
   dom.window.close();
+  const adminMarkup = read("admin.html");
+  assert.match(adminMarkup, /studylab-admin\.js\?v=pr102-overview-20261116-v4/);
+  assert.match(adminMarkup, /Loading dashboard/);
+  assert.match(read("netlify.toml"), /for = "\/admin\.html"[\s\S]*?no-store/);
   ({ dom, w } = await setup(false));
   assert.equal(w.document.querySelector("#ad-workspace").hidden, true);
   assert.match(
@@ -171,6 +179,6 @@ async function setup(admin = true, options = {}) {
     d.window.close();
   }
   console.log(
-    "PASS: admin access, seeded content, safe publishing, preview repairs, visible load errors, system theme, badges and zero remote preview mutations.",
+    "PASS: admin access, seeded content, versioned assets, immediate Overview, partial API failure recovery, system theme, badges and zero remote preview mutations.",
   );
 })();
