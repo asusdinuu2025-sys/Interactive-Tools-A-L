@@ -266,9 +266,10 @@
     ]);
     if (version !== request) return;
     const [users, admins, content, activity] = results;
+    const sourceLabels = ["Student accounts", "Administrators", "Content", "Recent activity"];
     const failed = results
       .map((r, i) => r.status === "rejected"
-        ? metricLabels[Math.min(i, 3)] + ": " + (r.reason?.message || "Unavailable")
+        ? sourceLabels[i] + ": " + (r.reason?.message || "Unavailable")
         : null)
       .filter(Boolean);
     metricValues[0].textContent =
