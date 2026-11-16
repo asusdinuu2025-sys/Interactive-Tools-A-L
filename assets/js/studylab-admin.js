@@ -729,6 +729,186 @@
       $("#sladmin-editor-status").textContent = e.message;
     }
   };
+  function floatingPreview(item) {
+    const popup = el("aside", undefined, "slpopup-toast slpopup-" + item.variant);
+    popup.dataset.placement = item.placement;
+    popup.setAttribute("role", "status");
+    popup.append(el("strong", item.title), el("p", item.message));
+    const close = button("×", () => popup.remove(), "slpopup-close");
+    close.setAttribute("aria-label", "Close preview");
+    popup.prepend(close);
+    popup.append(el("small", "Admin preview · Not sent"));
+    document.body.append(popup);
+    setTimeout(() => popup.remove(), Number(item.display_seconds || 8) * 1000);
+  }
+  function popupEditor(record = null) {
+    const dialog = el("dialog", undefined, "sladmin-dialog sladmin-popup-dialog");
+    const form = el("form"), header = el("header"),
+      fields = el("div", undefined, "sladmin-fields"),
+      error = el("p", "", "sladmin-modal-error"),
+      actions = el("div", undefined, "sladmin-editor-actions");
+    const dismiss = () => { dialog.close(); dialog.remove(); };
+    const close = button("×", dismiss);
+    close.setAttribute("aria-label", "Close pop-up editor");
+    header.append(el("h2", record ? "Edit pop-up message" : "New pop-up message"), close);
+    const data = record || {};
+    fields.append(
+      field("title", "Title", data.title || ""),
+      field("message", "Message", data.message || "", "textarea"),
+      field("variant", "Style", data.variant || "info", "text", [
+        ["info","Info · Blue"],["success","Success · Mint"],
+        ["warning","Warning · Amber"],["important","Important · Purple"],
+        ["custom","Custom · Multicolour"],
+      ]),
+      field("placement", "Position", data.placement || "top-right", "text", [
+        ["top-right","Upper right"],["top-center","Upper middle"],
+        ["center","Center screen"],["bottom-right","Lower right"],
+      ]),
+      field("display_seconds", "Display time (3–30 seconds)",
+        data.display_seconds || 8,"number"),
+      field("link", "Optional HTTPS or site-relative link",data.link || ""),
+    );
+    fields.querySelector('[name="title"]').maxLength = 120;
+    fields.querySelector('[name="message"]').maxLength = 800;
+    const duration = fields.querySelector('[name="display_seconds"]');
+    duration.min = "3"; duration.max = "30";
+    const messageLabel = fields.querySelector('[name="message"]').closest("label");
+    messageLabel.classList.add("sladmin-wide");
+    if (!record) {
+      const schedule = field("starts_at", "Schedule time (optional)", "", "datetime-local");
+      schedule.classList.add("sladmin-wide");
+      fields.append(schedule);
+    } else {
+      fields.append(el("p", "This message keeps its original 24-hour expiry. People who saw it will not see it again.", "sladmin-muted"));
+    }
+    const readForm = () => {
+      const fd = new FormData(form);
+      const start = fd.get("starts_at");
+      const starts_at = record?.starts_at ||
+        (start ? new Date(String(start)).toISOString() : new Date().toISOString());
+      const item = {
+        id: record?.id || null,
+        title: String(fd.get("title") || "").trim(),
+        message: String(fd.get("message") || "").trim(),
+        variant: String(fd.get("variant") || "info"),
+        placement: String(fd.get("placement") || "top-right"),
+        display_seconds: Number(fd.get("display_seconds") || 8),
+        link: String(fd.get("link") || "").trim(),
+        starts_at,
+      };
+      if (!item.title || !item.message || item.title.length>120 ||
+          item.message.length>800 || !Number.isInteger(item.display_seconds) ||
+          item.display_seconds<3 || item.display_seconds>30 ||
+          !Number.isFinite(new Date(item.starts_at).getTime()))
+        throw Error("Enter valid text, a display time and schedule.");
+      if (item.link) api.safeURL(item.link);
+      return item;
+    };
+    actions.append(
+      button("Preview", () => {
+        try { floatingPreview(readForm()); error.textContent = ""; }
+        catch (e) { error.textContent = e.message; }
+      }),
+      button("Cancel", dismiss),
+    );
+    const send = el("button", record ? "Save changes" : "Send / Schedule", "sladmin-primary");
+    send.type = "submit"; actions.append(send);
+    form.append(header,fields,error,actions);
+    form.onsubmit = async (event) => {
+      event.preventDefault(); send.disabled = true;
+      try {
+        const item = readForm();
+        if (!record && !confirm(
+          "Send this pop-up to StudyLab visitors for 24 hours after its scheduled start?")) return;
+        await api.popupSet(record ? "update" : "create", item);
+        dismiss();
+        await render();
+        status(record ? "Message updated. Existing viewers will not see it twice."
+          : "Message scheduled/published for one-time delivery within 24 hours.");
+      } catch (e) { error.textContent = e.message || "Couldn't save the message."; }
+      finally { send.disabled = false; }
+    };
+    dialog.append(form); document.body.append(dialog); dialog.showModal();
+  }
+  async function popupList(host, version) {
+    const toolbar = el("div", undefined, "sladmin-toolbar"),
+      list = el("div", undefined, "sladmin-list");
+    toolbar.append(button("+ New pop-up", () => popupEditor(), "sladmin-primary"));
+    host.append(el("p",
+      "Each message is eligible for exactly 24 hours after its scheduled start. A signed-in student sees it once across devices; visitors without accounts are tracked on this device.",
+      "sladmin-preview-explanation"), toolbar, list);
+    const rows = await api.popups();
+    if (version !== request) return;
+    if (!rows.length) empty(list, "No pop-up messages. Create an announcement above.");
+    for (const p of rows) {
+      const now = Date.now(), begin = new Date(p.starts_at).getTime();
+      const end = begin + 86400000;
+      const state = now < begin ? "Scheduled" : now >= end ? "Expired" : "Active";
+      list.append(row(p.title,
+        state + " · " + p.variant + " · " + p.placement +
+          " · " + p.display_seconds + " sec · Expires " +
+          new Date(end).toLocaleString() +
+          " · Seen by " + (p.delivered || 0) + " accounts",
+        [
+          button("Preview", () => floatingPreview(p)),
+          button("Edit", () => popupEditor(p)),
+          button("Delete", async () => {
+            if (!confirm("Delete pop-up \"" + p.title +
+              "\" permanently, including its delivery receipts?")) return;
+            await api.popupSet("delete", { id: p.id });
+            await render();
+          }, "sladmin-danger"),
+        ],"✉"));
+    }
+  }
+  function moderationDialog(u, refresh) {
+    if (u.admin || u.guest || u.id === info.user.id) return;
+    const unban = Boolean(u.banned);
+    const dialog = el("dialog", undefined, "sladmin-dialog sladmin-moderation-dialog"),
+      form = el("form"),
+      header = el("header"),
+      fields = el("div", undefined, "sladmin-fields"),
+      error = el("p", "", "sladmin-modal-error"),
+      actions = el("div", undefined, "sladmin-editor-actions");
+    const dismiss = () => { dialog.close(); dialog.remove(); };
+    header.append(el("h2", (unban ? "Unban " : "Ban ") +
+      (u.display_name || "student")), button("×", dismiss));
+    form.append(header,el("p",
+      unban ? "This will restore sign-in access for this account."
+        : "This bans the account from signing in again with the same Google identity. Previously issued access tokens may persist briefly.",
+      "sladmin-muted"));
+    if (!unban) {
+      fields.append(field("hours", "Duration", "24", "text", [
+        ["24", "24 hours"],["168", "7 days"],["720", "30 days"],
+        ["876000", "Indefinite (until unbanned)"],
+      ]));
+      const reason = field("reason", "Moderation reason (3–500 characters)","", "textarea");
+      reason.classList.add("sladmin-wide");
+      reason.querySelector("textarea").maxLength=500;
+      fields.append(reason);
+    }
+    actions.append(button("Cancel", dismiss));
+    const submit = el("button",unban ? "Confirm unban" : "Confirm ban",
+      unban ? "sladmin-primary" : "sladmin-danger");
+    submit.type="submit"; actions.append(submit);
+    form.append(fields,error,actions);
+    form.onsubmit=async (e)=>{
+      e.preventDefault(); submit.disabled=true;
+      try {
+        const data=new FormData(form);
+        const hours=unban ? 0 : Number(data.get("hours"));
+        const reason=unban ? "" : String(data.get("reason")||"").trim();
+        if (!unban && reason.length<3) throw Error("Enter a moderation reason.");
+        if (!confirm(unban ? "Confirm restoring this student's sign-in access?"
+          : "Confirm REAL account ban? This affects the student's StudyLab login.")) return;
+        await api.banUser(u.id,hours,reason);
+        dismiss(); await refresh();
+        status(unban ? "Account unbanned." : "Account ban saved.");
+      } catch (err) { error.textContent=err.message || "Moderation failed."; }
+      finally { submit.disabled=false; }
+    };
+    dialog.append(form);document.body.append(dialog);dialog.showModal();
+  }
   async function mediaList(host, version) {
     const toolbar = el("div", undefined, "sladmin-toolbar"),
       input = el("input");
