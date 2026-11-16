@@ -484,6 +484,29 @@
         .publicUrl,
     };
   }
+  async function uploadSimulation(file) {
+    requireAccess();
+    if (!file || !/\.html?$/i.test(file.name) ||
+        !["text/html","application/octet-stream",""].includes(file.type))
+      throw Error("Choose a standalone .html simulation file.");
+    if (!file.size || file.size > 5 * 1024 * 1024)
+      throw Error("Simulation files must be under 5 MB.");
+    if (preview) throw Error("HTML publishing requires the connected admin preview.");
+    const path="html/"+crypto.randomUUID()+".html";
+    const result=await client.storage.from("studylab-simulations").upload(path,file,{
+      contentType:"text/html",upsert:false,cacheControl:"300"
+    });
+    if (result.error)throw result.error;
+    return {path,url:client.storage.from("studylab-simulations").getPublicUrl(path).data.publicUrl};
+  }
+  async function removeSimulation(path) {
+    requireAccess();
+    if (!/^html\/[0-9a-f-]{36}\.html$/.test(String(path||"")))
+      throw Error("Invalid simulation upload path.");
+    if (preview) return;
+    const result=await client.storage.from("studylab-simulations").remove([path]);
+    if(result.error)throw result.error;
+  }
   async function removeMedia(path) {
     requireAccess();
     if (preview) {
@@ -516,6 +539,8 @@
     media,
     upload,
     removeMedia,
+    uploadSimulation,
+    removeSimulation,
     reset,
     validate,
     safeURL,
