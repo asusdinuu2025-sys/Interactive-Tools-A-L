@@ -67,23 +67,32 @@ async function setup(admin = true, options = {}) {
 }
 (async () => {
   let { dom, w, calls } = await setup();
-  assert.equal(w.document.querySelector("#ad-workspace").hidden, false);
-  assert.equal(w.document.querySelectorAll(".ad-stats .ad-card").length, 4);
+  assert.equal(w.document.querySelector("#sladmin-workspace").hidden, false);
+  assert.equal(w.document.querySelectorAll(".sladmin-stats .sladmin-card").length, 4);
+  // Simulate a generic cosmetic ad-block rule. The Admin Dashboard should
+  // not have ad-looking IDs or classes, and must remain visible.
+  const cosmetic = w.document.createElement("style");
+  cosmetic.textContent = '[id^="ad-"], [class^="ad-"], [class*=" ad-"] { display: none !important; }';
+  w.document.head.appendChild(cosmetic);
+  assert.equal(w.document.querySelectorAll('[id^="ad-"], [class^="ad-"], [class*=" ad-"]').length, 0);
+  assert.notEqual(w.getComputedStyle(w.document.querySelector("#sladmin-content")).display, "none");
+  assert.notEqual(w.getComputedStyle(w.document.querySelector("#sladmin-tabs")).display, "none");
+  assert.equal(w.document.querySelectorAll(".sladmin-stats .sladmin-card").length, 4);
   const click = (text) =>
     [...w.document.querySelectorAll("button")]
       .find((b) => b.textContent === text)
       .click();
   click("Content");
   await wait();
-  assert.ok(w.document.querySelectorAll(".ad-row").length > 100);
+  assert.ok(w.document.querySelectorAll(".sladmin-row").length > 100);
   click("+ New card");
   await wait();
-  const f = w.document.querySelector("#ad-form");
+  const f = w.document.querySelector("#sladmin-form");
   f.elements.title.value = "Safe <script>title</script>";
   f.elements.url.value = "https://example.org/resource";
   f.dispatchEvent(new w.Event("input", { bubbles: true }));
   assert.match(
-    w.document.querySelector("#ad-save-state").textContent,
+    w.document.querySelector("#sladmin-save-state").textContent,
     /Unsaved/,
   );
   f.dispatchEvent(
@@ -99,10 +108,10 @@ async function setup(admin = true, options = {}) {
   let state = JSON.parse(w.localStorage.getItem("studylab-admin-preview-v1"));
   assert.equal(state.published.length, 1);
   assert.equal(state.published[0].title, "Safe <script>title</script>");
-  assert.equal(w.document.querySelectorAll(".ad-row script").length, 0);
+  assert.equal(w.document.querySelectorAll(".sladmin-row script").length, 0);
   click("Users");
   await wait();
-  assert.equal(w.document.querySelectorAll(".ad-row").length, 5);
+  assert.equal(w.document.querySelectorAll(".sladmin-row").length, 5);
   click("Give blue badge");
   await wait();
   assert.ok(
@@ -137,36 +146,38 @@ async function setup(admin = true, options = {}) {
     themeMode: "system",
     prefersDark: false,
   }));
-  assert.equal(w.document.querySelectorAll(".ad-stats .ad-card").length, 4);
+  assert.equal(w.document.querySelectorAll(".sladmin-stats .sladmin-card").length, 4);
   assert.equal(w.document.documentElement.dataset.theme, "light");
   assert.equal(w.document.documentElement.dataset.themeMode, "system");
   assert.equal(JSON.parse(w.localStorage.getItem("studylab-admin-preview-v1")).users.length, 5);
-  w.document.querySelector("#ad-theme").click();
+  w.document.querySelector("#sladmin-theme").click();
   assert.equal(w.document.documentElement.dataset.theme, "dark");
   assert.equal(w.localStorage.getItem("studylab-room-mode-v1"), "dark");
   dom.window.close();
   // One failed API request must not suppress the overview stats or its actions.
   ({ dom, w } = await setup(true, { failOverview: true }));
-  assert.equal(w.document.querySelector("#ad-workspace").hidden, false);
-  assert.equal(w.document.querySelectorAll(".ad-stats .ad-card").length, 4);
-  assert.match(w.document.querySelector(".ad-data-warning").textContent,
+  assert.equal(w.document.querySelector("#sladmin-workspace").hidden, false);
+  assert.equal(w.document.querySelectorAll(".sladmin-stats .sladmin-card").length, 4);
+  assert.match(w.document.querySelector(".sladmin-data-warning").textContent,
     /Test overview request failed/);
-  assert.equal(w.document.querySelector("#ad-save-state").textContent, "Some data unavailable");
-  assert.equal(w.document.querySelectorAll(".ad-overview-grid .ad-quick").length, 5);
-  assert.match(w.document.querySelector(".ad-build-label").textContent,
+  assert.equal(w.document.querySelector("#sladmin-save-state").textContent, "Some data unavailable");
+  assert.equal(w.document.querySelectorAll(".sladmin-overview-grid .sladmin-quick").length, 5);
+  assert.match(w.document.querySelector(".sladmin-build-label").textContent,
     /PR #102 preview/);
   dom.window.close();
   const adminMarkup = read("admin.html");
-  assert.match(adminMarkup, /studylab-admin\.js\?v=pr102-standalone-20261116-v5/);
+  assert.match(adminMarkup, /studylab-admin\.js\?v=pr102-admin-safe-20261116-v6/);
   assert.match(adminMarkup, /Loading dashboard/);
-  assert.match(adminMarkup, /PR #102 · v5 · HTML loaded/);
+  assert.ok(!/(?:id|class)="[^"]*\\bad-[^"]*"/.test(adminMarkup),
+    "Admin identifiers must not match generic ad-blocker cosmetic selectors");
+  assert.match(adminMarkup, /PR #102 · v6 · HTML loaded/);
   assert.ok(!adminMarkup.includes('href="assets/css/main.css"'),
     "Admin must use isolated CSS, not global home rules");
   assert.match(read("netlify.toml"), /for = "\/admin\.html"[\s\S]*?no-store/);
   ({ dom, w } = await setup(false));
-  assert.equal(w.document.querySelector("#ad-workspace").hidden, true);
+  assert.equal(w.document.querySelector("#sladmin-workspace").hidden, true);
   assert.match(
-    w.document.querySelector("#ad-gate").textContent,
+    w.document.querySelector("#sladmin-gate").textContent,
     /does not have admin/,
   );
   dom.window.close();
@@ -182,6 +193,6 @@ async function setup(admin = true, options = {}) {
     d.window.close();
   }
   console.log(
-    "PASS: admin access, seeded content, versioned assets, immediate Overview, partial API failure recovery, system theme, badges and zero remote preview mutations.",
+    "PASS: admin access, seeded content, versioned assets, ad-filter-safe IDs, immediate Overview, partial API failure recovery, system theme, badges and zero remote preview mutations.",
   );
 })();
