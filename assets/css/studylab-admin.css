@@ -16,27 +16,27 @@ body.sl-admin-page::before,
 body.sl-admin-page::after {
   content: none !important;
 }
-body.sl-admin-page > .ad-shell {
+body.sl-admin-page > .sladmin-shell {
   display: block !important;
   position: relative;
   z-index: 1;
   visibility: visible !important;
   opacity: 1 !important;
 }
-.ad-top, .ad-heading, .ad-panel-heading {
+.sladmin-top, .sladmin-heading, .sladmin-panel-heading {
   visibility: visible;
   opacity: 1;
 }
 .sl-admin-page {
-  --ad-text: #e9f0ff;
-  --ad-muted: #a4bbd4;
-  --ad-line: rgba(164, 203, 255, 0.22);
-  --ad-glass: rgba(136, 174, 244, 0.10);
-  --ad-field: rgba(12, 24, 46, 0.64);
-  --ad-glass-highlight: rgba(235, 248, 255, 0.07);
+  --sladmin-text: #e9f0ff;
+  --sladmin-muted: #a4bbd4;
+  --sladmin-line: rgba(164, 203, 255, 0.22);
+  --sladmin-glass: rgba(136, 174, 244, 0.10);
+  --sladmin-field: rgba(12, 24, 46, 0.64);
+  --sladmin-glass-highlight: rgba(235, 248, 255, 0.07);
   color-scheme: dark;
   margin: 0;
-  color: var(--ad-text);
+  color: var(--sladmin-text);
   font:
     15px/1.6 "Nirmala UI",
     "Segoe UI",
@@ -49,12 +49,12 @@ body.sl-admin-page > .ad-shell {
   min-height: 100vh;
 }
 html[data-theme="light"] .sl-admin-page {
-  --ad-text: #23344d;
-  --ad-muted: #536c86;
-  --ad-line: rgba(68, 111, 166, 0.24);
-  --ad-glass: rgba(255, 255, 255, 0.56);
-  --ad-field: rgba(255, 255, 255, 0.83);
-  --ad-glass-highlight: rgba(255, 255, 255, 0.85);
+  --sladmin-text: #23344d;
+  --sladmin-muted: #536c86;
+  --sladmin-line: rgba(68, 111, 166, 0.24);
+  --sladmin-glass: rgba(255, 255, 255, 0.56);
+  --sladmin-field: rgba(255, 255, 255, 0.83);
+  --sladmin-glass-highlight: rgba(255, 255, 255, 0.85);
   color-scheme: light;
   background:
     radial-gradient(ellipse at 5% 4%, rgba(154, 203, 255, .58), transparent 56%),
@@ -75,17 +75,17 @@ html[data-theme="light"] .sl-admin-page {
   font: inherit;
 }
 .sl-admin-page button,
-.ad-button {
+.sladmin-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   min-height: 42px;
   padding: 9px 16px;
-  border: 1px solid var(--ad-line);
+  border: 1px solid var(--sladmin-line);
   border-radius: 12px;
-  background: var(--ad-glass);
-  color: var(--ad-text);
+  background: var(--sladmin-glass);
+  color: var(--sladmin-text);
   cursor: pointer;
   text-decoration: none;
   transition:
@@ -93,7 +93,7 @@ html[data-theme="light"] .sl-admin-page {
     transform 0.18s;
 }
 .sl-admin-page button:hover,
-.ad-button:hover {
+.sladmin-button:hover {
   background: rgba(130, 170, 240, 0.15);
 }
 .sl-admin-page button:disabled {
@@ -107,20 +107,20 @@ html[data-theme="light"] .sl-admin-page {
 .sl-admin-page a {
   color: inherit;
 }
-.ad-shell {
+.sladmin-shell {
   max-width: 1300px;
   padding: 0 42px;
   margin: auto;
 }
-.ad-top {
+.sladmin-top {
   height: 102px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid var(--ad-line);
+  border-bottom: 1px solid var(--sladmin-line);
   gap: 18px;
 }
-.ad-brand {
+.sladmin-brand {
   display: flex;
   align-items: center;
   gap: 13px;
@@ -128,13 +128,13 @@ html[data-theme="light"] .sl-admin-page {
   font-weight: 750;
   font-size: 22px;
 }
-.ad-brand small {
+.sladmin-brand small {
   display: block;
   font-size: 9px;
   letter-spacing: 0.19em;
-  color: var(--ad-muted);
+  color: var(--sladmin-muted);
 }
-.ad-brand-mark {
+.sladmin-brand-mark {
   display: grid;
   place-items: center;
   width: 43px;
@@ -144,151 +144,151 @@ html[data-theme="light"] .sl-admin-page {
   background: linear-gradient(140deg, #b7d4ff33, #b69bff22);
   color: #92bfff;
 }
-.ad-top-actions {
+.sladmin-top-actions {
   display: flex;
   gap: 10px;
 }
-.ad-heading {
+.sladmin-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
   padding: 46px 0 26px;
 }
-.ad-eyebrow {
+.sladmin-eyebrow {
   font-size: 10px;
   letter-spacing: 0.19em;
   font-weight: 700;
-  color: var(--ad-muted);
+  color: var(--sladmin-muted);
   margin: 0 0 8px;
 }
-.ad-heading h1 {
+.sladmin-heading h1 {
   font-size: clamp(28px, 4vw, 43px);
   letter-spacing: -0.04em;
   line-height: 1.2;
   margin: 0 0 12px;
 }
-.ad-heading h1 span {
+.sladmin-heading h1 span {
   color: #94b9ff;
 }
-.ad-heading p:last-child {
-  color: var(--ad-muted);
+.sladmin-heading p:last-child {
+  color: var(--sladmin-muted);
   margin: 0;
 }
-.ad-chip {
+.sladmin-chip {
   display: inline-flex;
   align-items: center;
-  border: 1px solid var(--ad-line);
+  border: 1px solid var(--sladmin-line);
   border-radius: 30px;
   padding: 5px 13px;
   font-size: 12px;
-  color: var(--ad-muted);
+  color: var(--sladmin-muted);
   white-space: nowrap;
 }
-.ad-notice {
+.sladmin-notice {
   padding: 14px 20px;
   background: rgba(110, 149, 232, 0.08);
-  border: 1px solid var(--ad-line);
+  border: 1px solid var(--sladmin-line);
   border-radius: 14px;
   font-size: 13px;
-  color: var(--ad-muted);
+  color: var(--sladmin-muted);
 }
-.ad-notice strong {
-  color: var(--ad-text);
+.sladmin-notice strong {
+  color: var(--sladmin-text);
 }
-.ad-tabs {
+.sladmin-tabs {
   display: flex;
   gap: 5px;
   padding: 7px;
-  border: 1px solid var(--ad-line);
+  border: 1px solid var(--sladmin-line);
   border-radius: 17px;
-  background: var(--ad-glass);
+  background: var(--sladmin-glass);
   margin: 28px 0 32px;
   overflow-x: auto;
 }
-.ad-tabs button {
+.sladmin-tabs button {
   border-color: transparent;
   flex: 1;
   white-space: nowrap;
 }
-.ad-tabs button[aria-current="page"] {
+.sladmin-tabs button[aria-current="page"] {
   background: linear-gradient(135deg, #709bff28, #c89bff15);
   border-color: #99baff44;
-  color: var(--ad-text);
+  color: var(--sladmin-text);
 }
-.ad-panel-heading {
+.sladmin-panel-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
 }
-.ad-panel-heading h2 {
+.sladmin-panel-heading h2 {
   font-size: 26px;
   margin: 0;
   letter-spacing: -0.025em;
 }
-#ad-status {
+#sladmin-status {
   min-height: 24px;
-  color: var(--ad-muted);
+  color: var(--sladmin-muted);
   font-size: 13px;
 }
-#ad-status[data-error="true"],
-#ad-editor-status {
+#sladmin-status[data-error="true"],
+#sladmin-editor-status {
   color: #d68c84;
 }
-.ad-stats {
+.sladmin-stats {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
 }
-.ad-card {
-  border: 1px solid var(--ad-line);
+.sladmin-card {
+  border: 1px solid var(--sladmin-line);
   border-radius: 21px;
   padding: 24px;
-  background: linear-gradient(140deg, var(--ad-glass-highlight), transparent 85%), var(--ad-glass);
+  background: linear-gradient(140deg, var(--sladmin-glass-highlight), transparent 85%), var(--sladmin-glass);
   backdrop-filter: blur(12px) saturate(135%);
   -webkit-backdrop-filter: blur(12px) saturate(135%);
-  box-shadow: 0 14px 32px rgba(0, 15, 45, .09), inset 0 1px var(--ad-glass-highlight);
+  box-shadow: 0 14px 32px rgba(0, 15, 45, .09), inset 0 1px var(--sladmin-glass-highlight);
   min-width: 0;
 }
-.ad-card p {
-  color: var(--ad-muted);
+.sladmin-card p {
+  color: var(--sladmin-muted);
   margin: 7px 0;
   font-size: 13px;
 }
-.ad-stat {
+.sladmin-stat {
   font-size: 36px;
   font-weight: 650;
   letter-spacing: -0.04em;
 }
-.ad-stat-label {
+.sladmin-stat-label {
   font-size: 12px;
-  color: var(--ad-muted);
+  color: var(--sladmin-muted);
 }
-.ad-overview-grid {
+.sladmin-overview-grid {
   display: grid;
   grid-template-columns: 1.3fr 1fr;
   gap: 18px;
   margin-top: 22px;
 }
-.ad-card h3 {
+.sladmin-card h3 {
   font-size: 18px;
   margin: 0 0 16px;
 }
-.ad-quick {
+.sladmin-quick {
   display: flex !important;
   justify-content: space-between !important;
   width: 100%;
   margin: 10px 0;
   text-align: left;
 }
-.ad-toolbar {
+.sladmin-toolbar {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
   margin: 0 0 20px;
 }
-.ad-toolbar input {
+.sladmin-toolbar input {
   flex: 1;
   min-width: 180px;
 }
@@ -296,58 +296,58 @@ html[data-theme="light"] .sl-admin-page {
 .sl-admin-page select,
 .sl-admin-page textarea {
   width: 100%;
-  border: 1px solid var(--ad-line);
+  border: 1px solid var(--sladmin-line);
   border-radius: 11px;
-  background: var(--ad-field);
-  color: var(--ad-text);
+  background: var(--sladmin-field);
+  color: var(--sladmin-text);
   padding: 10px 12px;
   min-height: 44px;
 }
-.ad-toolbar select {
+.sladmin-toolbar select {
   width: auto;
   max-width: 100%;
 }
-.ad-list {
-  border: 1px solid var(--ad-line);
+.sladmin-list {
+  border: 1px solid var(--sladmin-line);
   border-radius: 20px;
   overflow: hidden;
 }
-.ad-row {
+.sladmin-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 18px;
   padding: 18px 22px;
-  background: var(--ad-glass);
-  border-bottom: 1px solid var(--ad-line);
+  background: var(--sladmin-glass);
+  border-bottom: 1px solid var(--sladmin-line);
 }
-.ad-row:last-child {
+.sladmin-row:last-child {
   border: 0;
 }
-.ad-row-copy {
+.sladmin-row-copy {
   min-width: 0;
   flex: 1;
 }
-.ad-row strong {
+.sladmin-row strong {
   display: block;
   overflow-wrap: anywhere;
 }
-.ad-row small {
+.sladmin-row small {
   display: block;
-  color: var(--ad-muted);
+  color: var(--sladmin-muted);
   overflow-wrap: anywhere;
 }
-.ad-row-actions {
+.sladmin-row-actions {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
 }
-.ad-row-actions button {
+.sladmin-row-actions button {
   font-size: 12px;
   min-height: 36px;
   padding: 7px 12px;
 }
-.ad-avatar {
+.sladmin-avatar {
   width: 42px;
   height: 42px;
   flex-shrink: 0;
@@ -358,264 +358,264 @@ html[data-theme="light"] .sl-admin-page {
   color: #91bfff;
   font-weight: 700;
 }
-.ad-pager {
+.sladmin-pager {
   display: flex;
   justify-content: flex-end;
   align-items: center;
   gap: 14px;
   margin-top: 18px;
 }
-.ad-empty {
+.sladmin-empty {
   text-align: center;
   padding: 55px 20px;
-  color: var(--ad-muted);
+  color: var(--sladmin-muted);
 }
-.ad-dialog {
+.sladmin-dialog {
   width: min(720px, calc(100% - 24px));
   max-height: 90dvh;
-  border: 1px solid var(--ad-line);
+  border: 1px solid var(--sladmin-line);
   border-radius: 24px;
   padding: 28px;
   background: #131f33;
-  color: var(--ad-text);
+  color: var(--sladmin-text);
   box-shadow: 0 30px 100px #0007;
 }
-.ad-dialog::backdrop {
+.sladmin-dialog::backdrop {
   background: #080f2180;
   backdrop-filter: blur(7px);
 }
-html[data-theme="light"] .ad-dialog {
+html[data-theme="light"] .sladmin-dialog {
   background: #edf3fa;
 }
-.ad-dialog header {
+.sladmin-dialog header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 22px;
 }
-.ad-dialog h2 {
+.sladmin-dialog h2 {
   margin: 0;
   font-size: 22px;
 }
-.ad-fields {
+.sladmin-fields {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
-.ad-fields label {
+.sladmin-fields label {
   display: block;
   font-size: 12px;
-  color: var(--ad-muted);
+  color: var(--sladmin-muted);
 }
-.ad-fields label > span {
+.sladmin-fields label > span {
   display: block;
   margin-bottom: 6px;
 }
-.ad-fields .ad-wide {
+.sladmin-fields .sladmin-wide {
   grid-column: 1/-1;
 }
-.ad-fields textarea {
+.sladmin-fields textarea {
   min-height: 100px;
   resize: vertical;
 }
-.ad-fields input[type="checkbox"] {
+.sladmin-fields input[type="checkbox"] {
   margin-right: 8px;
 }
-.ad-editor-actions {
+.sladmin-editor-actions {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
   flex-wrap: wrap;
   margin-top: 24px;
 }
-.sl-admin-page .ad-primary {
+.sl-admin-page .sladmin-primary {
   background: #91b8ff;
   color: #102346;
   border-color: transparent;
   font-weight: 700;
 }
-.ad-footer {
+.sladmin-footer {
   display: flex;
   justify-content: space-between;
   gap: 16px;
-  color: var(--ad-muted);
+  color: var(--sladmin-muted);
   font-size: 11px;
-  border-top: 1px solid var(--ad-line);
+  border-top: 1px solid var(--sladmin-line);
   margin-top: 55px;
   padding: 24px 0;
 }
-.ad-media-grid {
+.sladmin-media-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
   gap: 18px;
 }
-.ad-media-grid img {
+.sladmin-media-grid img {
   width: 100%;
   height: 130px;
   object-fit: contain;
   border-radius: 12px;
   background: #7892b010;
 }
-.ad-media-grid strong {
+.sladmin-media-grid strong {
   display: block;
   overflow-wrap: anywhere;
   font-size: 13px;
 }
-.ad-media-grid button {
+.sladmin-media-grid button {
   margin-top: 10px;
   font-size: 12px;
 }
-.ad-check {
+.sladmin-check {
   display: flex !important;
   align-items: center;
   margin-top: 24px;
 }
-.ad-user-detail {
+.sladmin-user-detail {
   display: grid;
   gap: 10px;
 }
-.ad-user-detail dt {
-  color: var(--ad-muted);
+.sladmin-user-detail dt {
+  color: var(--sladmin-muted);
   font-size: 12px;
 }
-.ad-user-detail dd {
+.sladmin-user-detail dd {
   margin: 0;
   overflow-wrap: anywhere;
 }
 /* New preview Overview is immediately useful even before its statistics load. */
-.ad-preview-explanation {
-  border: 1px solid var(--ad-line);
+.sladmin-preview-explanation {
+  border: 1px solid var(--sladmin-line);
   border-radius: 12px;
   background: rgba(91, 155, 240, .10);
   padding: 11px 13px;
   margin: 0 0 16px !important;
   line-height: 1.6;
 }
-.ad-build-label {
+.sladmin-build-label {
   display: block;
   margin-top: 9px;
   letter-spacing: .045em;
   font-size: 11px;
   opacity: .86;
 }
-.ad-data-warning {
+.sladmin-data-warning {
   border: 1px solid rgba(232, 161, 93, .44);
   border-radius: 16px;
   padding: 16px 20px;
   margin-bottom: 18px;
   background: rgba(232, 161, 93, .09);
-  color: var(--ad-text);
+  color: var(--sladmin-text);
 }
-.ad-data-warning p {
-  color: var(--ad-muted);
+.sladmin-data-warning p {
+  color: var(--sladmin-muted);
   overflow-wrap: anywhere;
 }
-.ad-data-warning button {
+.sladmin-data-warning button {
   margin-top: 7px;
 }
-.ad-stat {
+.sladmin-stat {
   overflow-wrap: anywhere;
   font-size: clamp(18px, 2.4vw, 36px);
 }
-.ad-loading, .ad-error-panel {
-  border: 1px solid var(--ad-line);
+.sladmin-loading, .sladmin-error-panel {
+  border: 1px solid var(--sladmin-line);
   border-radius: 20px;
-  background: var(--ad-glass);
-  color: var(--ad-muted);
+  background: var(--sladmin-glass);
+  color: var(--sladmin-muted);
   padding: 24px;
   margin-top: 8px;
 }
-.ad-error-panel h3 {
-  color: var(--ad-text);
+.sladmin-error-panel h3 {
+  color: var(--sladmin-text);
   margin: 0 0 10px;
 }
-.ad-error-panel p {
+.sladmin-error-panel p {
   overflow-wrap: anywhere;
 }
-.ad-error-panel button {
+.sladmin-error-panel button {
   margin-top: 8px;
 }
-.sl-admin-page, .ad-tabs, .ad-dialog {
+.sl-admin-page, .sladmin-tabs, .sladmin-dialog {
   scrollbar-color: rgba(133, 169, 215, .42) transparent;
   scrollbar-width: thin;
 }
 .sl-admin-page::-webkit-scrollbar,
-.ad-tabs::-webkit-scrollbar,
-.ad-dialog::-webkit-scrollbar {
+.sladmin-tabs::-webkit-scrollbar,
+.sladmin-dialog::-webkit-scrollbar {
   width: 7px;
   height: 7px;
 }
 .sl-admin-page::-webkit-scrollbar-thumb,
-.ad-tabs::-webkit-scrollbar-thumb,
-.ad-dialog::-webkit-scrollbar-thumb {
+.sladmin-tabs::-webkit-scrollbar-thumb,
+.sladmin-dialog::-webkit-scrollbar-thumb {
   border-radius: 999px;
   background: rgba(133, 169, 215, .42);
 }
 @media (max-width: 800px) {
-  .ad-shell {
+  .sladmin-shell {
     padding: 0 20px;
   }
-  .ad-stats {
+  .sladmin-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .ad-overview-grid {
+  .sladmin-overview-grid {
     grid-template-columns: 1fr;
   }
-  .ad-row {
+  .sladmin-row {
     flex-wrap: wrap;
   }
-  .ad-row-actions {
+  .sladmin-row-actions {
     width: 100%;
     padding-left: 60px;
   }
-  .ad-heading {
+  .sladmin-heading {
     align-items: flex-start;
     flex-direction: column;
   }
-  .ad-tabs button {
+  .sladmin-tabs button {
     flex: none;
   }
-  .ad-top {
+  .sladmin-top {
     height: 86px;
   }
-  .ad-brand {
+  .sladmin-brand {
     font-size: 18px;
   }
 }
 @media (max-width: 440px) {
-  .ad-shell {
+  .sladmin-shell {
     padding: 0 14px;
   }
-  .ad-top-actions .ad-button {
+  .sladmin-top-actions .sladmin-button {
     font-size: 11px;
     padding: 8px;
   }
-  .ad-fields {
+  .sladmin-fields {
     grid-template-columns: 1fr;
   }
-  .ad-fields .ad-wide {
+  .sladmin-fields .sladmin-wide {
     grid-column: auto;
   }
-  .ad-card {
+  .sladmin-card {
     padding: 18px;
   }
-  .ad-row {
+  .sladmin-row {
     padding: 16px;
   }
-  .ad-row-actions {
+  .sladmin-row-actions {
     padding-left: 0;
   }
-  .ad-panel-heading {
+  .sladmin-panel-heading {
     align-items: flex-start;
     flex-direction: column;
   }
-  .ad-footer {
+  .sladmin-footer {
     flex-direction: column;
   }
-  .ad-dialog {
+  .sladmin-dialog {
     padding: 20px;
   }
-  .ad-brand small {
+  .sladmin-brand small {
     font-size: 8px;
   }
 }
