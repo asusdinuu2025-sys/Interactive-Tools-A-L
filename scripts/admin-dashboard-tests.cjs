@@ -53,7 +53,7 @@ async function setup(admin = true, options = {}) {
     "studylab-admin-config",
     "studylab-admin-api",
     "studylab-admin",
-  ])
+  ]) {
     w.eval(read("assets/js/" + f + ".js"));
     if (f === "studylab-admin-api" && options.failOverview) {
       w.StudyLabAdminAPI = Object.freeze({
@@ -61,6 +61,7 @@ async function setup(admin = true, options = {}) {
         content: async () => { throw new Error("Test overview request failed"); },
       });
     }
+  }
   await wait();
   return { dom, w, calls };
 }
