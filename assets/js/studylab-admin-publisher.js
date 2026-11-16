@@ -89,7 +89,9 @@ function mount(host,api,rows,onRefresh){
      fields.append(labeled("Topic","text","topic",draft?.topic||"",120));
      fields.append(labeled("Lesson number (optional)","number","lesson_number",draft?.lesson_number||""));
      fields.append(labeled("Lesson name (optional)","text","lesson_name",draft?.lesson_name||"",120));
-     fields.append(choice("Mathematics category","maths_category",
+     // Pure / Applied classification belongs to Combined Mathematics only.
+     // Other subject pages use their numbered A/L lesson filter.
+     if(destination==="maths.html") fields.append(choice("Mathematics category","maths_category",
        [["pure","Pure Maths"],["applied","Applied Maths"],["resources","Resources"],["pastpapers","Past Papers"]],
        draft?.maths_category||"pure"));
      const file=labeled("Upload standalone .html simulation (5 MB max)","file","html");
@@ -145,7 +147,7 @@ function mount(host,api,rows,onRefresh){
        info.lesson_number=number?Number(number):null;
        info.lesson_name=String(d.get("lesson_name")||"").trim().slice(0,120);
        info.topic=String(d.get("topic")||"").trim().slice(0,120);
-       info.maths_category=String(d.get("maths_category")||"pure");
+       if(page==="maths.html") info.maths_category=String(d.get("maths_category")||"pure");
        info.html_path=draft?.html_path||"";
        info.url="simulation-viewer.html?id="+info.id;
        // Numbered title is used by the original lesson filter.
