@@ -10,7 +10,7 @@
         .replace(/ /g, "%20");
       if (!raw) return null;
       if (
-        config.mode !== "live" &&
+        config.mode === "preview" &&
         /^data:(image\/(png|jpeg|webp)|application\/pdf);base64,[a-z0-9+/=]+$/i.test(
           raw,
         )
@@ -153,7 +153,7 @@
   }
   async function start() {
     let records = [];
-    if (config.mode !== "live") {
+    if (config.mode === "preview") {
       // Preview data is local and read only after admin verification; visitors get unchanged content.
       const state = JSON.parse(
         localStorage.getItem("studylab-admin-preview-v1") || "null",
