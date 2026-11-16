@@ -66,15 +66,48 @@
       e.returnValue = "";
     }
   });
-  function theme() {
-    const t =
-      document.documentElement.dataset.theme === "light" ? "dark" : "light";
-    document.documentElement.dataset.theme = t;
-    localStorage.setItem("etools-theme", t);
+  // Match the Home theme choice, including System and OS colour changes.
+  const THEME_KEY = "studylab-room-mode-v1";
+  const themeMedia = typeof window.matchMedia === "function"
+    ? window.matchMedia("(prefers-color-scheme: dark)") : { matches: true };
+  const themeModes = ["dark", "light", "system"];
+  let themeMode = "dark";
+  try {
+    const saved = localStorage.getItem(THEME_KEY) ||
+      localStorage.getItem("etools-theme");
+    if (themeModes.includes(saved)) themeMode = saved;
+  } catch (_) {}
+  function applyTheme(mode, save) {
+    themeMode = themeModes.includes(mode) ? mode : "dark";
+    const resolved = themeMode === "system"
+      ? (themeMedia.matches ? "dark" : "light") : themeMode;
+    document.documentElement.dataset.theme = resolved;
+    document.documentElement.dataset.themeMode = themeMode;
+    const labels = { dark: "Dark", light: "Light", system: "System" };
+    $("#ad-theme").textContent = "◐ " + labels[themeMode];
+    $("#ad-theme").setAttribute("aria-label",
+      "Theme: " + labels[themeMode] + ". Switch colour theme");
+    if (save) {
+      try {
+        localStorage.setItem(THEME_KEY, themeMode);
+        localStorage.setItem("etools-theme", themeMode);
+      } catch (_) {}
+    }
   }
-  document.documentElement.dataset.theme =
-    localStorage.getItem("etools-theme") || "dark";
-  $("#ad-theme").onclick = theme;
+  applyTheme(themeMode, false);
+  $("#ad-theme").onclick = () => applyTheme(
+    { dark: "light", light: "system", system: "dark" }[themeMode], true);
+  if (typeof themeMedia.addEventListener === "function") {
+    themeMedia.addEventListener("change", () => {
+      if (themeMode === "system") applyTheme(themeMode, false);
+    });
+  }
+  window.addEventListener("storage", (event) => {
+    if (event.key === THEME_KEY || event.key === "etools-theme") {
+      const next = event.newValue;
+      if (themeModes.includes(next)) applyTheme(next, false);
+    }
+  });
   function row(title, subtitle, actions = [], initial = "↗") {
     const r = el("div", undefined, "ad-row"),
       copy = el("div", undefined, "ad-row-copy"),
@@ -101,8 +134,36 @@
     await render();
   }
   async function render() {
-    const version = ++request,
-      host = $("#ad-content");
+    const version = ++request, host = $("#ad-content");
+    host.replaceChildren(el("div", "Loading " + active.toLowerCase() + "…", "ad-loading"));
+    host.setAttribute("aria-busy", "true");
+    status("Loading " + active.toLowerCase() + "…");
+    try {
+      await renderPanel(host, version);
+      if (version === request) {
+        status("");
+        if (!dirty) $("#ad-save-state").textContent = "All changes saved";
+      }
+    } catch (e) {
+      if (version !== request) return;
+      const message = e?.message || "An unexpected error occurred.";
+      status("Could not load " + active + ": " + message, true);
+      $("#ad-save-state").textContent = "Load failed";
+      host.replaceChildren();
+      const panel = el("div", undefined, "ad-error-panel");
+      panel.setAttribute("role", "alert");
+      panel.append(
+        el("h3", "This area could not load"),
+        el("p", "Your admin access is still protected. No changes were made."),
+        el("p", message),
+        button("Try loading again", () => render(), "ad-primary"),
+      );
+      host.append(panel);
+    } finally {
+      if (version === request) host.removeAttribute("aria-busy");
+    }
+  }
+  async function renderPanel(host, version) {
     host.replaceChildren();
     if (active === "Overview") return overview(host, version);
     if (active === "Users" || active === "Admins")
@@ -618,7 +679,9 @@
       );
       await navigate("Overview");
     } catch (e) {
-      $("#ad-gate").textContent = e.message;
+      $("#ad-workspace").hidden = true;
+      $("#ad-gate").hidden = false;
+      $("#ad-gate").textContent = e?.message || "Admin access could not be verified.";
       $("#ad-identity").textContent = "Access restricted";
     }
   })();
