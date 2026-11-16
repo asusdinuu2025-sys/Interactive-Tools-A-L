@@ -82,6 +82,9 @@
       );
       const href = safeURL(d.url);
       if (!href) continue;
+      // Specialized admin resources use native subject/Telegram/lesson cards.
+      // Generic cards and custom sections continue through the old renderer.
+      if (window.StudyLabSpecialResources?.apply(d,href)) continue;
       if (!card) {
         card = el("a", "sl-cms-card");
         card.dataset.cmsId = d.id;
@@ -259,6 +262,9 @@
       }
     }
     apply(records);
+    window.dispatchEvent(new CustomEvent("studylab-content-applied",{
+      detail:{page,records:records.length}
+    }));
   }
   start().catch((e) =>
     console.warn("StudyLab content kept its existing version:", e.message),
