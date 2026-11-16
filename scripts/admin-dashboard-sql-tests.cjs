@@ -50,8 +50,8 @@ as $admin_gate$ select auth.uid() in (
   // New live action-label and history migrations are exercised on this
   // isolated embedded database before any production migration is applied.
   for (const migration of [
-    "supabase/migrations/20261116193500_admin_action_labels_and_links.sql",
-    "supabase/migrations/20261116193501_admin_reversible_activity.sql",
+    "supabase/migrations/20261116195503_admin_action_labels_and_links.sql",
+    "supabase/migrations/20261116195507_admin_reversible_activity.sql",
   ]) {
     await db.exec(fs.readFileSync(migration, "utf8"));
   }
