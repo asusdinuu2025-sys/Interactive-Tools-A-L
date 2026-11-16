@@ -19,7 +19,11 @@
     table: "studylab_chat_messages",
     maxMessages: 100,
     maxLength: 500,
-    rateLimitMs: 2500
+    rateLimitMs: 2500,
+    imageBucket:"studylab-chat-images",
+    maxImages:3,
+    maxImageBytes:1048576,
+    maxSourceBytes:12*1048576
   };
 
   const CHAT_MARKUP = `
@@ -65,6 +69,10 @@
         </div>
 
         <div class="study-chat-list" data-chat-list aria-live="polite"></div>
+        <div class="study-chat-typing" data-chat-typing hidden aria-live="polite">
+          <span class="study-chat-typing-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span data-chat-typing-label>Typing…</span>
+        </div>
 
         <form class="study-chat-compose" data-chat-form>
           <div class="study-chat-context" data-chat-context hidden>
@@ -72,6 +80,13 @@
             <button type="button" data-chat-context-cancel aria-label="Cancel reply or edit">×</button>
           </div>
           <div class="study-chat-feedback" data-chat-feedback role="status" hidden></div>
+          <div class="study-chat-attachment-preview" data-chat-attachment-preview hidden></div>
+          <input type="file" data-chat-image-input accept="image/jpeg,image/png,image/webp" multiple hidden aria-label="Attach up to three images" />
+          <button type="button" class="study-chat-attach" data-chat-attach aria-label="Attach images" title="Add up to three images">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.3"/><path d="m4 17 5-5 3 3 3-4 5 6"/>
+            </svg>
+          </button>
           <div class="study-chat-input-wrap">
             <textarea
               class="study-chat-input"
@@ -130,6 +145,14 @@
   const contextText = root.querySelector("[data-chat-context-text]");
   const cancelContext = root.querySelector("[data-chat-context-cancel]");
   const feedback = root.querySelector("[data-chat-feedback]");
+  const typingBar = root.querySelector("[data-chat-typing]");
+  const typingLabel = root.querySelector("[data-chat-typing-label]");
+  const imageInput = root.querySelector("[data-chat-image-input]");
+  const attachButton = root.querySelector("[data-chat-attach]");
+  const attachPreview = root.querySelector("[data-chat-attachment-preview]");
+  let pendingImages = [];
+  let typingIdleTimer=0,lastTypingSent=0,channelSubscribed=false;
+  const imageUrlCache = new Map();
 
   const sessionKey =
     sessionStorage.getItem("studylab_chat_session") ||
@@ -351,6 +374,13 @@
     window.StudyLabProfileView?.open({userId:id});
   }
 
+  function closeReactionPicker(id){
+    const node=[...list.querySelectorAll(".study-chat-message")].find(x=>x.dataset.messageId===id);
+    if(!node)return;
+    node.classList.remove("is-reactions-open");
+    const toggle=node.querySelector(".study-chat-react-toggle");
+    if(toggle){toggle.setAttribute("aria-expanded","false");toggle.setAttribute("aria-label","Show reactions to this message");}
+  }
   function messageReactions(id, container, usedOnly = false) {
     const rows=reactionsByMessage.get(id)||[];
     container.replaceChildren();
@@ -368,7 +398,10 @@
         const counter=document.createElement("span");
         counter.textContent=String(used.length);reaction.append(counter);
       }
-      reaction.addEventListener("click",()=>toggleReaction(id,symbol));
+      reaction.addEventListener("click",()=>{
+        closeReactionPicker(id);
+        toggleReaction(id,symbol);
+      });
       container.append(reaction);
     }
   }
@@ -382,7 +415,7 @@
     }
   }
 
-  function renderMessage(row) {
+  function renderMessage(row,animate=false) {
     if (!list || !row?.id) return;
     const existing=[...list.querySelectorAll(".study-chat-message")]
       .find(node=>node.dataset.messageId===row.id);
@@ -534,6 +567,8 @@
     react.setAttribute("aria-label","Show reactions to this message");
     react.setAttribute("aria-expanded",String(reactionsWereOpen));
     react.addEventListener("click",()=>{
+      for(const open of list.querySelectorAll(".study-chat-message.is-reactions-open"))
+        if(open.dataset.messageId!==row.id)closeReactionPicker(open.dataset.messageId);
       const visible=article.classList.toggle("is-reactions-open");
       react.setAttribute("aria-expanded",String(visible));
       react.setAttribute("aria-label",visible?"Hide reactions":"Show reactions to this message");
@@ -545,7 +580,11 @@
     footer.append(footerActions,timestamp);
     article.replaceChildren(header,body,usedReactions,reactions,footer);
 
-    if(!existing)list.appendChild(article);
+    if(!existing){
+      if(animate && !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches)
+        article.classList.add("is-entering");
+      list.appendChild(article);
+    }
     while(list.querySelectorAll(".study-chat-message").length>CONFIG.maxMessages){
       const oldest=list.querySelector(".study-chat-message");
       if(oldest){
@@ -642,7 +681,9 @@
   function deleteMessageLocally(id) {
     messagesById.delete(id);reactionsByMessage.delete(id);
     for(const element of list.querySelectorAll(".study-chat-message")){
-      if(element.dataset.messageId===id)element.remove();
+      if(element.dataset.messageId!==id)continue;
+      if(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches)element.remove();
+      else {element.classList.add("is-exiting");setTimeout(()=>element.remove(),220);}
     }
     if(editTarget===id||replyTarget===id)clearComposerContext();
     if(messagesById.size===0)renderInitial([]);
@@ -783,7 +824,7 @@
           const wasKnown=messagesById.has(row.id);
           const wasNearBottom=list &&
             list.scrollHeight-list.scrollTop-list.clientHeight<140;
-          renderMessage(row);
+          renderMessage(row,payload.eventType==="INSERT");
           if(payload.eventType==="INSERT"){
             if(!isOpen && row.user_id!==userId)setUnread(unreadCount+1);
             if(wasNearBottom || row.session_id===sessionKey)scrollToBottom(true);
