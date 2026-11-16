@@ -166,6 +166,15 @@
       for (const x of order) parent.insertBefore(x.n, marker);
       marker.remove();
     }
+    // CMS sections may be re-ordered at runtime. Keep More immediately
+    // below Free Lesson Packs, before any subsequently published sections,
+    // even if the lesson card or an extra section has been hidden.
+    if (page === "index.html") {
+      const lessons = document.getElementById("free-lesson-packs");
+      const more = document.getElementById("more-learning-resources");
+      if (lessons && more && lessons.parentElement === more.parentElement)
+        lessons.after(more);
+    }
   }
   async function start() {
     let records = [];
