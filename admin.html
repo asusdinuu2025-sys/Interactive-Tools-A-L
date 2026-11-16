@@ -4,10 +4,11 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="robots" content="noindex,nofollow" />
+    <meta name="studylab-admin-build" content="pr102-overview-20261116-v4" />
     <title>Admin Dashboard · StudyLab</title>
     <link rel="icon" href="assets/icon/studylab-pwa.svg" />
     <link rel="stylesheet" href="assets/css/main.css" />
-    <link rel="stylesheet" href="assets/css/studylab-admin.css" />
+    <link rel="stylesheet" href="assets/css/studylab-admin.css?v=pr102-overview-20261116-v4" />
   </head>
   <body class="sl-admin-page">
     <div class="ad-shell">
@@ -44,7 +45,9 @@
             <span id="ad-save-state" class="ad-chip">All changes saved</span>
           </div>
           <p id="ad-status" role="status" aria-live="polite"></p>
-          <section id="ad-content" aria-labelledby="ad-title"></section>
+          <section id="ad-content" aria-labelledby="ad-title">
+            <div class="ad-loading" role="status">Loading dashboard…</div>
+          </section>
         </div>
       </main>
       <footer class="ad-footer">
@@ -71,8 +74,8 @@
       </form>
     </dialog>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.2/dist/umd/supabase.js"></script>
-    <script src="assets/js/studylab-admin-config.js"></script>
-    <script src="assets/js/studylab-admin-api.js"></script>
-    <script src="assets/js/studylab-admin.js"></script>
+    <script src="assets/js/studylab-admin-config.js?v=pr102-overview-20261116-v4"></script>
+    <script src="assets/js/studylab-admin-api.js?v=pr102-overview-20261116-v4"></script>
+    <script src="assets/js/studylab-admin.js?v=pr102-overview-20261116-v4"></script>
   </body>
 </html>
