@@ -1048,9 +1048,12 @@
       return "Your chat session needs refreshing. Sign out and sign back in if it persists.";
     if (/permission|row-level|policy|42501/.test(reason) || code==="42501")
       return "Message blocked by chat permissions. Refresh your account and retry.";
-    if (/foreign key/.test(reason))return "The message you replied to is no longer available. Cancel reply and retry.";
-    if (/failed to fetch|network|timeout|websocket/.test(reason))
-      return "Network connection interrupted. Your text is still here. Retry sending.";
+    if (/foreign key/.test(reason) || code==="23503")
+      return "The message you replied to is no longer available. Cancel reply and retry.";
+    if (code==="23514" || /check constraint|too long|nickname/.test(reason))
+      return "This message does not meet the chat limits. Check the text and selected images.";
+    if (/failed to fetch|network|timeout|websocket|load failed|connection|offline/.test(reason))
+      return "Connection interrupted. Your text and attachments are still here. Retry sending.";
     if (/image|storage|bucket|mime|file size/.test(reason))
       return "Image upload failed. Check your selected images and try again.";
     // Preserve text on failure, and provide a traceable error code without
@@ -1058,6 +1061,29 @@
     return (editing?"Could not edit message":"Message could not be sent") +
       (code && /^[0-9A-Z]{3,12}$/.test(code)?" ("+code+").":"; please retry.");
   }
+  // A temporary Realtime disconnection must not block REST inserts.
+  // Retry an explicit expired-token error once, using the SAME message ID.
+  // Do not retry unknown failures: a successful write may have returned
+  // without an acknowledgement and an extra write would duplicate it.
+  function staleChatSession(error) {
+    const code=String(error?.code||"").toUpperCase();
+    const reason=String(error?.message||"").toLowerCase();
+    return code==="PGRST301" || code==="401" ||
+      /jwt expired|token expired|invalid jwt|invalid token|jwt issued at future|session expired/.test(reason);
+  }
+  async function writeChatMessage(work) {
+    let result=await work();
+    if (!result?.error || !staleChatSession(result.error) ||
+        typeof client?.auth?.refreshSession!=="function") return result;
+    const refreshed=await client.auth.refreshSession();
+    if (refreshed.error || !refreshed.data?.session?.user?.id)
+      return result;
+    if (refreshed.data.session.user.id!==userId)
+      return {error:new Error("Your signed-in account changed. Reload StudyLab chat.")};
+    result=await work();
+    return result;
+  }
+
   async function sendMessage() {
     if(!client || !input || busyMessageAction)return;
     const message=input.value.trim();
@@ -1075,8 +1101,8 @@
       if(editingId){
         if(messagesById.get(editingId)?.user_id!==userId)
           throw new Error("Only the author can edit this message.");
-        ({error}=await client.from(CONFIG.table)
-          .update({message}).eq("id",editingId).eq("user_id",userId));
+        ({error}=await writeChatMessage(() => client.from(CONFIG.table)
+          .update({message}).eq("id",editingId).eq("user_id",userId)));
       }else{
         const id=crypto.randomUUID();
         const uploaded=[];
@@ -1089,9 +1115,10 @@
             uploaded.push(path);
           }
           const values={id,message:message||"📷 Photo",session_id:sessionKey,
-            user_id:userId,nickname,image_paths:uploaded};
+            user_id:userId,nickname:String(nickname||"Student").trim().slice(0,40)||"Student",
+            image_paths:uploaded};
           if(replyTarget && messagesById.has(replyTarget))values.reply_to=replyTarget;
-          ({error}=await client.from(CONFIG.table).insert(values));
+          ({error}=await writeChatMessage(() => client.from(CONFIG.table).insert(values)));
           if(error)throw error;
           // A successful server insert must be visible to its author even if
           // the WebSocket channel is temporarily disconnected.
