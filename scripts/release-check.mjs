@@ -138,6 +138,11 @@ if (popupHomeGate.status !== 0) {
     (popupHomeGate.stderr || popupHomeGate.stdout || "Home popup gate test failed"));
 }
 
+const popupGateTest = spawnSync(process.execPath, ["scripts/studylab-popup-home-gate-check.cjs"], {encoding:"utf8"});
+if(popupGateTest.status!==0){
+  fail("StudyLab home-only popup delivery checks failed:\\n" +
+    (popupGateTest.stderr || popupGateTest.stdout || "Home popup test failed"));
+}
 const chatSocialPolishTests = spawnSync(process.execPath, ["scripts/studylab-chat-social-polish-check.mjs"], {encoding:"utf8"});
 if (chatSocialPolishTests.status !== 0) {
   fail("StudyLab Chat and Social polish checks failed:\n" +
