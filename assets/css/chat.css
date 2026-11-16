@@ -1570,3 +1570,132 @@ body.study-room-page[data-room-mode="light"] .study-chat-attach{
   .study-chat-reactions,.study-chat-attach,
   .study-chat-reaction{transition:none!important;}
 }
+
+/* PR #102 unified Telegram-style glass composer.
+   The image affordance and paper plane are integral parts of the text field. */
+.study-chat-compose {
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  gap:7px!important;
+  padding:9px 11px 12px!important;
+  align-items:stretch!important;
+}
+.study-chat-compose .study-chat-context,
+.study-chat-compose .study-chat-feedback,
+.study-chat-compose .study-chat-attachment-preview {
+  grid-column:1/-1!important;
+}
+.study-chat-editorline {
+  display:grid;
+  position:relative;
+  grid-column:1/-1;
+  grid-template-columns:42px minmax(0,1fr) 43px;
+  align-items:end;
+  gap:2px;
+  min-width:0;
+  padding:3px 5px 3px 4px;
+  border:1px solid rgba(150,207,249,.35);
+  border-radius:21px;
+  background:
+    linear-gradient(130deg,rgba(145,205,255,.105),rgba(115,126,220,.065) 55%,rgba(112,219,251,.055)),
+    rgba(22,40,64,.18);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 6px 20px rgba(2,18,37,.08);
+  -webkit-backdrop-filter:blur(8px) saturate(135%);
+  backdrop-filter:blur(8px) saturate(135%);
+  transition:border-color .2s ease,background .2s ease,box-shadow .2s ease;
+}
+.study-chat-editorline:focus-within {
+  border-color:rgba(104,211,255,.61);
+  box-shadow:0 0 0 3px rgba(101,198,250,.065),inset 0 1px rgba(255,255,255,.19);
+}
+.study-chat-editorline .study-chat-attach {
+  grid-column:1!important;
+  justify-self:center;
+  align-self:end;
+  width:37px!important;
+  height:39px!important;
+  min-width:0;
+  border:0!important;
+  border-radius:14px!important;
+  box-shadow:none!important;
+  background:transparent!important;
+  color:var(--room-accent,#9bdfff);
+}
+.study-chat-editorline .study-chat-attach svg {width:20px;height:20px;}
+.study-chat-editorline .study-chat-input-wrap {
+  grid-column:2!important;
+  align-self:stretch;
+  min-width:0;
+}
+.study-chat-editorline .study-chat-input {
+  display:block;
+  width:100%;
+  min-height:40px;
+  height:40px;
+  padding:10px 2px 7px;
+  border:0!important;
+  outline:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  font-size:.85rem;
+  color:var(--text-primary);
+  scrollbar-width:thin;
+  scrollbar-color:rgba(129,185,224,.39) transparent;
+}
+.study-chat-editorline .study-chat-input:focus {border:0!important;box-shadow:none!important;}
+.study-chat-editorline .study-chat-watermark {
+  left:2px;
+  top:11px;
+  font-size:.62rem;
+  max-width:100%;
+  pointer-events:none;
+}
+.study-chat-editorline .study-chat-send {
+  grid-column:3!important;
+  width:39px!important;
+  height:39px!important;
+  min-width:39px;
+  align-self:end;
+  justify-self:center;
+  display:grid;
+  place-items:center;
+  border:0;
+  border-radius:50%;
+  color:#ebfaff;
+  background:linear-gradient(140deg,rgba(30,170,237,.86),rgba(61,110,235,.78));
+  box-shadow:0 5px 15px rgba(13,108,192,.23),inset 0 1px rgba(255,255,255,.32);
+}
+.study-chat-editorline .study-chat-send svg {
+  width:20px;height:20px;
+  margin-left:1px;
+  transform:rotate(-8deg);
+  transition:transform .19s ease;
+}
+.study-chat-editorline .study-chat-send:hover:not(:disabled) svg {transform:translate(2px,-2px) rotate(-8deg);}
+.study-chat-editorline .study-chat-send:disabled {opacity:.48;}
+.study-chat-editorline .study-chat-compose-meta {
+  right:53px!important;
+  bottom:3px!important;
+  font-size:9px;
+  z-index:2;
+}
+html[data-theme="light"] .study-chat-editorline,
+body.study-room-page[data-room-mode="light"] .study-chat-editorline {
+  background:linear-gradient(135deg,rgba(255,255,255,.68),rgba(200,225,250,.25));
+  border-color:rgba(68,135,193,.33);
+  box-shadow:inset 0 1px rgba(255,255,255,.85),0 7px 24px rgba(49,95,152,.08);
+}
+html[data-theme="light"] .study-chat-editorline .study-chat-attach,
+body.study-room-page[data-room-mode="light"] .study-chat-editorline .study-chat-attach {
+  color:#216b9c;
+}
+@media(max-width:450px){
+  .study-chat-editorline{grid-template-columns:37px minmax(0,1fr) 39px;}
+  .study-chat-editorline .study-chat-send{width:36px!important;height:36px!important;min-width:36px;}
+  .study-chat-editorline .study-chat-attach{width:34px!important;height:36px!important;}
+  .study-chat-editorline .study-chat-watermark{font-size:.58rem;}
+}
+@media(prefers-reduced-motion:reduce){
+  .study-chat-editorline,.study-chat-editorline .study-chat-send svg{transition:none!important;}
+}
