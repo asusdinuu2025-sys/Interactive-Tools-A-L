@@ -4,13 +4,18 @@ const assert = require("assert/strict");
 const root = process.cwd(),
   read = (p) => fs.readFileSync(p, "utf8"),
   wait = () => new Promise((r) => setTimeout(r, 40));
-async function setup(admin = true) {
+async function setup(admin = true, options = {}) {
   const dom = new JSDOM(read("admin.html"), {
     url: "https://preview.example/admin.html",
     runScripts: "outside-only",
     pretendToBeVisual: true,
   });
   const w = dom.window;
+  if (options.previewData !== undefined) {
+    w.localStorage.setItem("studylab-admin-preview-v1", options.previewData);
+  }
+  if (options.themeMode) w.localStorage.setItem("studylab-room-mode-v1", options.themeMode);
+  w.matchMedia = () => ({ matches: options.prefersDark !== false, addEventListener() {} });
   w.confirm = () => true;
   w.HTMLDialogElement.prototype.showModal = function () {
     this.open = true;
@@ -50,6 +55,12 @@ async function setup(admin = true) {
     "studylab-admin",
   ])
     w.eval(read("assets/js/" + f + ".js"));
+    if (f === "studylab-admin-api" && options.failOverview) {
+      w.StudyLabAdminAPI = Object.freeze({
+        ...w.StudyLabAdminAPI,
+        content: async () => { throw new Error("Test overview request failed"); },
+      });
+    }
   await wait();
   return { dom, w, calls };
 }
@@ -116,6 +127,30 @@ async function setup(admin = true) {
     /not supported/,
   );
   dom.window.close();
+  // A corrupted or older per-device preview schema must not produce a blank dashboard.
+  ({ dom, w } = await setup(true, {
+    previewData: JSON.stringify({
+      owner: "24e78cd0-4565-407a-96f7-9cfde083f6d2",
+      content: null, users: null, activity: null, published: null, media: null,
+    }),
+    themeMode: "system",
+    prefersDark: false,
+  }));
+  assert.equal(w.document.querySelectorAll(".ad-stats .ad-card").length, 4);
+  assert.equal(w.document.documentElement.dataset.theme, "light");
+  assert.equal(w.document.documentElement.dataset.themeMode, "system");
+  assert.equal(JSON.parse(w.localStorage.getItem("studylab-admin-preview-v1")).users.length, 5);
+  w.document.querySelector("#ad-theme").click();
+  assert.equal(w.document.documentElement.dataset.theme, "dark");
+  assert.equal(w.localStorage.getItem("studylab-room-mode-v1"), "dark");
+  dom.window.close();
+  // Failure to load a widget must show an actionable error, never an empty panel.
+  ({ dom, w } = await setup(true, { failOverview: true }));
+  assert.equal(w.document.querySelector("#ad-workspace").hidden, false);
+  assert.ok(w.document.querySelector(".ad-error-panel"));
+  assert.match(w.document.querySelector("#ad-status").textContent, /Test overview request failed/);
+  assert.equal(w.document.querySelector("#ad-save-state").textContent, "Load failed");
+  dom.window.close();
   ({ dom, w } = await setup(false));
   assert.equal(w.document.querySelector("#ad-workspace").hidden, true);
   assert.match(
@@ -135,6 +170,6 @@ async function setup(admin = true) {
     d.window.close();
   }
   console.log(
-    "PASS: dashboard access gates, all seeded targets, content publishing, escaped titles, badges, invalid URLs and zero remote preview mutations.",
+    "PASS: admin access, seeded content, safe publishing, preview repairs, visible load errors, system theme, badges and zero remote preview mutations.",
   );
 })();
