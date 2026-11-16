@@ -17,13 +17,13 @@ Base: main at b0470775edb0b33009c040c8de3294f1b4cd1288.
 
 `generate-admin-config.mjs` forces branch and deploy previews into preview mode. It cannot enable live operations in a preview even if STUDYLAB_ADMIN_LIVE is set.
 
-The dashboard uses the existing authenticated session only to verify admin eligibility. New dashboard writes are stored in localStorage under a user-specific owner check, not sent to production. Users/Admins use clearly labelled sample accounts plus a representation of the signed-in admin. Real accounts are not listed or changed. Preview uploads are limited to 1 MB and device storage capacity; live limit is 5 MB. Reset preview changes clears this local state.
+The dashboard verifies admin eligibility using the existing server-side `studylab_social_is_admin()` RPC, which currently only authorizes the three specified administrators. It uses the additional `studylab_admin_readonly_stats_v1()` and `studylab_admin_readonly_users_v1()` RPCs to display **real, current Supabase profile, administrator and social-post counts**, and paginated real profiles. No emails or phone numbers are returned. This is deliberately read-only: changing a real user's admin rights or badge is disabled in preview, as are production mutations for content and media. CMS drafts and preview uploads continue to use localStorage on this device only. If the read-only RPCs are absent or unreachable, the page explicitly labels its fallback sample accounts; it never represents sample users as real users. Preview uploads are limited to 1 MB and device storage capacity; live limit is 5 MB. Reset preview changes clears this local state.
 
 Published preview content appears only to a verified admin on the same preview origin/device. Draft Preview opens the target page with an explicit admin preview banner. Existing website functionality outside the new dashboard (including Manage Announcements) retains its current backend behavior; this preview is NOT a sandbox for existing Social, Study Room or announcement actions.
 
 ## Backend implementation and production gate
 
-The migration is included for review, NOT applied to any hosted database. It introduces private admin membership, private drafts/activity, public published content and badges, and a restricted media bucket. The existing three admins and four badges are seeded only from matching existing Auth users. Membership changes serialize under a transaction lock, disallow self-removal, update legacy app metadata for existing server endpoints, and use fresh membership checks for RLS. Public RPCs have fixed empty search paths, explicit authenticated-only grants and authorization checks. Ordinary users cannot access the private schema or write public content/badges. Grants/revocations and content operations have transactional activity records.
+Two independent migrations are included. `20261116085000_admin_readonly_live_preview.sql` installs only admin-checked SELECT-only RPCs to connect the preview to genuine counts and profiles. It does not edit students, posts, roles, privileges on existing tables, announcements or existing admin authorization logic. Its execution requires a separately authorized deployment step. **The larger `20261116070202_admin_dashboard.sql` full editing migration remains unapplied and under review.** It introduces private admin membership, private drafts/activity, public published content and badges, and a restricted media bucket. The existing three admins and four badges are seeded only from matching existing Auth users. Membership changes serialize under a transaction lock, disallow self-removal, update legacy app metadata for existing server endpoints, and use fresh membership checks for RLS. Public RPCs have fixed empty search paths, explicit authenticated-only grants and authorization checks. Ordinary users cannot access the private schema or write public content/badges. Grants/revocations and content operations have transactional activity records.
 
 Before enabling live mode:
 
@@ -42,6 +42,10 @@ Never use this PR's migration against production merely to make the preview work
 - The SQL tests execute the real migration in embedded PostgreSQL (PGlite) with minimal Auth/Storage fixtures. They cover grants, access denial, draft privacy, publication, revision conflicts, unsafe URLs, grant/revoke, self-removal protection and public badge visibility.
 - DOM tests exercise the actual dashboard/controller/API with a mocked admin-auth check and assert no remote mutation calls in preview, escaped content, access denial, safe links and all seeded targets.
 - Existing announcement JS/CSS are byte-for-byte unchanged.
+
+## Visual design (PR #102 v7)
+
+The Admin Dashboard uses an original Spotify-like dark glass treatment: translucent blur panels, subtle gradients, rounded navigation and cards, high-contrast text, and a large low-opacity ADMIN DASHBOARD watermark. Light and System modes remain supported; no Spotify artwork or music player code is used. HTML/CSS/JavaScript keep the unique `sladmin-` prefix to avoid ad-blocker cosmetic rules.
 
 ## Current limits
 
