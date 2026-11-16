@@ -14,23 +14,29 @@ create table storage.objects(id uuid,bucket_id text,name text);alter table stora
 insert into auth.users(id,raw_app_meta_data) values('24e78cd0-4565-407a-96f7-9cfde083f6d2','{"role":"admin"}'),('7c97a8d7-f047-4c88-883d-4bed9b1a5f99','{"role":"admin"}'),('b6c80613-8217-48ac-851b-a39a3d9bef2b','{"role":"admin"}'),('11111111-1111-4111-8111-111111111111','{}');
 insert into studylab_profiles(id,display_name,username) select id,'Student','student' from auth.users;
 `);
-  await db.exec(
-    fs.readFileSync(
-      "supabase/migrations/20261116070202_admin_dashboard.sql",
-      "utf8",
-    ),
-  );
-  // Exercise the additional read-only live snapshot RPCs under Postgres
-  // roles and the same three-admin auth gate as the deployed website.
+  // Reproduce the actual live rollout order: existing three-admin gate,
+  // read-only snapshot RPCs, then the dynamic admin-management migration.
   await db.exec(`
 create table public.studylab_social_posts(id text primary key);
 create table public.studylab_social_reports(id text primary key);
 insert into public.studylab_social_posts values ('post-1');
 insert into public.studylab_social_reports values ('report-1');
+create function public.studylab_social_is_admin() returns boolean language sql stable
+as $ select auth.uid() in (
+ '24e78cd0-4565-407a-96f7-9cfde083f6d2'::uuid,
+ '7c97a8d7-f047-4c88-883d-4bed9b1a5f99'::uuid,
+ 'b6c80613-8217-48ac-851b-a39a3d9bef2b'::uuid
+) $;
 `);
   await db.exec(
     fs.readFileSync(
       "supabase/migrations/20261116142631_admin_readonly_live_preview.sql",
+      "utf8",
+    ),
+  );
+  await db.exec(
+    fs.readFileSync(
+      "supabase/migrations/20261116153000_admin_dashboard_live_management.sql",
       "utf8",
     ),
   );
@@ -102,6 +108,11 @@ insert into public.studylab_social_reports values ('report-1');
   ]);
   await as("", "anon");
   assert.equal(
+    (await db.query("select studylab_social_is_admin() as ok")).rows[0].ok,
+    false,
+    "Unauthenticated social queries must remain allowed but not admin"
+  );
+  assert.equal(
     (await db.query("select * from studylab_site_content")).rows.length,
     0,
   );
@@ -135,6 +146,14 @@ insert into public.studylab_social_reports values ('report-1');
     student,
     "admin",
   ]);
+  assert.equal(
+    Number((await db.query("select studylab_admin_readonly_stats_v1() as data")).rows[0].data.admins), 4,
+    "New admins must appear in live stats immediately"
+  );
+  assert.equal(
+    Number((await db.query("select studylab_admin_readonly_users_v1('',0,true) as data")).rows[0].data.total), 4,
+    "New admins must appear in read-only and editable lists"
+  );
   await as(student);
   assert.equal(
     (await db.query("select studylab_social_is_admin() as ok")).rows[0].ok,
@@ -145,6 +164,10 @@ insert into public.studylab_social_reports values ('report-1');
     student,
     "admin",
   ]);
+  assert.equal(
+    Number((await db.query("select studylab_admin_readonly_stats_v1() as data")).rows[0].data.admins), 3,
+    "Revocations must update the dynamic membership list"
+  );
   await as(student);
   assert.equal(
     (await db.query("select studylab_social_is_admin() as ok")).rows[0].ok,
