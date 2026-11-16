@@ -74,6 +74,29 @@
   const indicator = sidebar.querySelector(".sl-home-nav-indicator");
   const collapseButton = sidebar.querySelector(".sl-home-sidebar-collapse");
   const navItems = [...sidebar.querySelectorAll(".sl-home-nav-item")];
+  // The Sections dashboard can change built-in section orders at runtime.
+  // Mirror the saved live CMS order instead of freezing a different sidebar order.
+  function syncNavigationOrder() {
+    const ordered=navItems.slice().sort((a,b)=>{
+      function order(item) {
+        const id=item.dataset.navId;
+        if(id==="home")return -100000;
+        if(id==="more")return 100000;
+        const target=document.getElementById(id);
+        const fromCMS=Number(target?.dataset?.cmsOrder);
+        if(target?.dataset?.cmsOrder && Number.isFinite(fromCMS))return fromCMS;
+        return (navItems.indexOf(item)+1)*10;
+      }
+      return order(a)-order(b)||navItems.indexOf(a)-navItems.indexOf(b);
+    });
+    for(const item of ordered)nav.append(item);
+    const active=navItems.find(x=>x.classList.contains("is-active"));
+    if(active && indicator){
+      indicator.style.transform="translate3d(0,"+active.offsetTop+"px,0)";
+    }
+  }
+  window.addEventListener("studylab-content-applied",syncNavigationOrder);
+  syncNavigationOrder();
   const scrollTargets = [
     ["home", "home-overview"],
     ["practical-simulations", "practical-simulations"],
