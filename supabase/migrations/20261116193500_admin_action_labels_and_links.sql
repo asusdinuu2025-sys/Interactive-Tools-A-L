@@ -65,7 +65,7 @@ end;
 $$;
 
 
-create function public.studylab_admin_popup_set(
+create function public.studylab_admin_popup_set_v2(
   p_action text, p_id uuid default null, p_title text default '',
   p_message text default '', p_variant text default 'info',
   p_placement text default 'top-right', p_seconds integer default 8,
@@ -129,8 +129,8 @@ begin
 end;
 $$;
 
-revoke all on function public.studylab_admin_popup_set(
+revoke all on function public.studylab_admin_popup_set_v2(
  text,uuid,text,text,text,text,integer,text,timestamptz,text) from public,anon;
-grant execute on function public.studylab_admin_popup_set(
+grant execute on function public.studylab_admin_popup_set_v2(
  text,uuid,text,text,text,text,integer,text,timestamptz,text) to authenticated;
 commit;
