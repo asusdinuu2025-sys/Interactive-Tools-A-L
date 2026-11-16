@@ -220,18 +220,50 @@
     if (active === "Pop-up Messages") return popupList(host, version);
     const entries = await api.activity();
     if (version !== request) return;
+    const toolbar = el("div", undefined, "sladmin-toolbar sladmin-history-actions");
+    toolbar.append(el("span",
+      "Clear hides a log entry. Undo reverses eligible unchanged actions.",
+      "sladmin-history-info"));
+    toolbar.append(button("Clear all", async () => {
+      if (!confirm("Hide all activity from this dashboard? This will NOT undo any changes. The protected audit record stays in Supabase.")) return;
+      await api.history("clear_all");
+      await render();
+      status("History cleared from the dashboard. Live changes remain.");
+    }, "sladmin-history-clear sladmin-danger"));
     const list = el("div", undefined, "sladmin-list");
-    host.append(list);
-    if (!entries.length) empty(list, "Your team’s changes will appear here.");
-    for (const a of entries)
-      list.append(
-        row(
-          a.action,
-          a.target + " · " + new Date(a.created_at).toLocaleString(),
-          [],
-          "↻",
-        ),
-      );
+    host.append(toolbar, list);
+    if (!entries.length) empty(list, "No visible history. New actions will appear here.");
+    for (const a of entries) {
+      const actions = [
+        button("Clear", async () => {
+          if (!confirm("Hide this history entry? The original change will remain.")) return;
+          await api.history("clear", a.id);
+          await render();
+          status("History message cleared; nothing was reversed.");
+        }),
+        button("Undo", async () => {
+          if (!confirm("Undo this eligible admin change on the LIVE StudyLab database? It will be reversed only if its target has not changed since.")) return;
+          await api.history("undo", a.id);
+          await render();
+          status("Change undone. A new audit entry records the reversal.");
+        }, "sladmin-undo"),
+      ];
+      if (!a.id) {
+        actions[0].disabled = true;
+        actions[0].title = "Older local log entries cannot be cleared individually";
+      }
+      if (!a.can_undo || a.undone_at) {
+        actions[1].disabled = true;
+        actions[1].title = a.undone_at
+          ? "Already undone"
+          : "No safe undo snapshot for this action";
+      }
+      list.append(row(
+        a.action + (a.undone_at ? " · Undone" : ""),
+        a.target + " · " + new Date(a.created_at).toLocaleString(),
+        actions, "↻",
+      ));
+    }
   }
   async function overview(host, version) {
     // Paint the workspace FIRST. No failing or stalled request may make
