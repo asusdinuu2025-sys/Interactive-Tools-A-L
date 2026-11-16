@@ -38,6 +38,12 @@ async function setup(admin = true, options = {}) {
       },
       rpc: async (name) => {
         calls.push(name);
+        if (name === "studylab_admin_readonly_stats_v1")
+          return options.liveStats
+            ? { data: options.liveStats }
+            : { data: null, error: { message: "Live preview RPC not installed in mock" } };
+        if (name === "studylab_admin_readonly_users_v1")
+          return { data: options.liveUsers || { rows: [], total: 0 } };
         return { data: admin };
       },
       from: () => {
@@ -118,7 +124,7 @@ async function setup(admin = true, options = {}) {
     JSON.parse(w.localStorage.getItem("studylab-admin-preview-v1")).activity
       .length >= 2,
   );
-  assert.deepEqual(calls, ["studylab_social_is_admin"]);
+  assert.deepEqual(calls, ["studylab_social_is_admin","studylab_admin_readonly_stats_v1"]);
   const api = w.StudyLabAdminAPI;
   assert.throws(
     () => api.validate({ ...state.published[0], url: "javascript:alert(1)" }),
@@ -135,6 +141,31 @@ async function setup(admin = true, options = {}) {
         url: "https://user:pass@example.org",
       }),
     /not supported/,
+  );
+  dom.window.close();
+  // Live accounts and site metrics must be visible to admins but read-only.
+  ({ dom, w, calls } = await setup(true, {
+    liveStats: { profiles: 575, registered: 14, guests: 561, admins: 3, social_posts: 32, reports: 2 },
+    liveUsers: { rows: [
+      { id: "11111111-1111-4111-8111-111111111111", display_name: "Real Student",
+        username: "realstudent", admin: false, verified: false, guest: false,
+        created_at: "2026-11-01T00:00:00Z" },
+    ], total: 575 },
+  }));
+  assert.equal(w.StudyLabAdminAPI.readonlyLive, true);
+  assert.deepEqual([...w.document.querySelectorAll(".sladmin-stats .sladmin-stat")]
+    .map(x => x.textContent), ["575","3","14","32"]);
+  assert.match(w.document.querySelector("#sladmin-mode").textContent,
+    /real StudyLab profiles/i);
+  assert.ok(calls.includes("studylab_admin_readonly_users_v1"));
+  w.document.querySelectorAll("#sladmin-tabs button")[1].click();
+  await wait();
+  assert.match(w.document.querySelector(".sladmin-row").textContent, /Real Student/);
+  assert.equal([...w.document.querySelectorAll(".sladmin-row-actions button")]
+    .filter(b => /badge|admin/i.test(b.textContent)).every(b => b.disabled), true);
+  await assert.rejects(
+    w.StudyLabAdminAPI.setUser("11111111-1111-4111-8111-111111111111", "admin", true),
+    /read-only/,
   );
   dom.window.close();
   // A corrupted or older per-device preview schema must not produce a blank dashboard.
@@ -166,13 +197,16 @@ async function setup(admin = true, options = {}) {
     /PR #102 preview/);
   dom.window.close();
   const adminMarkup = read("admin.html");
-  assert.match(adminMarkup, /studylab-admin\.js\?v=pr102-admin-safe-20261116-v6/);
+  assert.match(adminMarkup, /studylab-admin\.js\?v=pr102-live-read-glass-20261116-v7/);
   assert.match(adminMarkup, /Loading dashboard/);
   assert.ok(!/(?:id|class)="[^"]*\\bad-[^"]*"/.test(adminMarkup),
     "Admin identifiers must not match generic ad-blocker cosmetic selectors");
-  assert.match(adminMarkup, /PR #102 · v6 · HTML loaded/);
+  assert.match(adminMarkup, /PR #102 · v7 · HTML loaded/);
   assert.ok(!adminMarkup.includes('href="assets/css/main.css"'),
     "Admin must use isolated CSS, not global home rules");
+  const adminCss = read("assets/css/studylab-admin.css");
+  assert.match(adminCss, /content: "ADMIN DASHBOARD"/);
+  assert.match(adminCss, /backdrop-filter: blur\(27px\)/);
   assert.match(read("netlify.toml"), /for = "\/admin\.html"[\s\S]*?no-store/);
   ({ dom, w } = await setup(false));
   assert.equal(w.document.querySelector("#sladmin-workspace").hidden, true);
@@ -193,6 +227,6 @@ async function setup(admin = true, options = {}) {
     d.window.close();
   }
   console.log(
-    "PASS: admin access, seeded content, versioned assets, ad-filter-safe IDs, immediate Overview, partial API failure recovery, system theme, badges and zero remote preview mutations.",
+    "PASS: admin access, seeded content, versioned assets, ad-filter-safe IDs, real read-only accounts, liquid glass, immediate Overview, partial API failure recovery, system theme, badges and zero remote preview mutations.",
   );
 })();
