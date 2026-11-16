@@ -73,12 +73,21 @@
     });
   }
   async function start() {
+    // Only deliver after the welcome/sign-in flow has entered the actual
+    // homepage. Never claim a one-time message from a signup or subpage.
+    const path = location.pathname.replace(/\/+$/, "").toLowerCase();
+    if (!(path === "" || path === "/" || path.endsWith("/index.html"))) return;
+    await window.StudyLabAccount?.ready;
     await window.StudyLabBanGuardReady;
     if (window.StudyLabBanned) return;
     const client = window.StudyLabAccount?.client ||
       window.supabase?.createClient?.(PROJECT,KEY);
     if (!client) return;
     // Supabase RLS allows only messages within their exact 24-hour window.
+    // Recheck the account before reading or claiming delivery. A pre-login
+    // visitor must not consume a once-only notification.
+    const auth = await client.auth.getUser();
+    if (!auth.data?.user?.id || auth.error) return;
     const resp = await client.from("studylab_popups")
       .select("id,title,message,variant,placement,display_seconds,link,link_label,starts_at")
       .order("starts_at",{ascending:false}).limit(8);
