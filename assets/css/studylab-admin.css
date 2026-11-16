@@ -12,10 +12,6 @@ body.sl-admin-page {
   opacity: 1;
   overflow-x: hidden;
 }
-body.sl-admin-page::before,
-body.sl-admin-page::after {
-  content: none !important;
-}
 body.sl-admin-page > .sladmin-shell {
   display: block !important;
   position: relative;
@@ -623,4 +619,210 @@ html[data-theme="light"] .sladmin-dialog {
   .sl-admin-page * {
     transition: none !important;
   }
+}
+
+/* PR #102: original translucent midnight-glass dashboard.
+   Glass panes use the same accessible foreground colours as StudyLab. */
+.sl-admin-page {
+  --ad-text: #f1f6ff;
+  --ad-muted: #b1c0d5;
+  --ad-line: rgba(206,226,255,.19);
+  --ad-glass: rgba(20,28,46,.38);
+  --ad-field: rgba(12,18,32,.51);
+  --ad-glass-highlight: rgba(245,250,255,.075);
+  --ad-spotlight: rgba(92,170,255,.20);
+  background:
+    radial-gradient(ellipse 65% 62% at 4% 0%, rgba(28,119,204,.34), transparent 76%),
+    radial-gradient(ellipse 55% 66% at 100% 3%, rgba(145,72,185,.26), transparent 76%),
+    radial-gradient(ellipse 64% 60% at 60% 100%, rgba(35,151,169,.22), transparent 75%),
+    #090d18;
+  background-attachment: fixed;
+}
+.sl-admin-page::before {
+  content: "ADMIN DASHBOARD";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 900 clamp(48px, 9.7vw, 170px)/1 "Nirmala UI","Segoe UI",sans-serif;
+  letter-spacing: -.075em;
+  white-space: nowrap;
+  color: rgba(238,247,255,.048);
+  text-shadow: 0 0 80px rgba(119,177,250,.075);
+  transform: rotate(-10deg);
+  pointer-events: none;
+  user-select: none;
+}
+.sl-admin-page::after {
+  content: "";
+  position: fixed;
+  inset: -15%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 32% 37% at 15% 77%, rgba(103,55,125,.24), transparent 84%),
+    radial-gradient(ellipse 28% 36% at 74% 40%, rgba(64,154,220,.18), transparent 86%);
+  filter: blur(28px);
+}
+.sl-admin-page .sladmin-top,
+.sl-admin-page .sladmin-tabs,
+.sl-admin-page .sladmin-notice,
+.sl-admin-page .sladmin-card,
+.sl-admin-page .sladmin-list,
+.sl-admin-page .sladmin-toolbar,
+.sl-admin-page .sladmin-data-warning,
+.sl-admin-page .sladmin-dialog {
+  background: linear-gradient(130deg, rgba(255,255,255,.075), rgba(255,255,255,.015) 52%, rgba(116,170,255,.035)),
+              var(--ad-glass);
+  border: 1px solid var(--ad-line);
+  box-shadow: 0 22px 65px rgba(0,0,0,.15),
+              inset 0 1px 0 rgba(255,255,255,.13),
+              inset 0 -1px 0 rgba(255,255,255,.025);
+  backdrop-filter: blur(27px) saturate(155%);
+  -webkit-backdrop-filter: blur(27px) saturate(155%);
+}
+.sl-admin-page .sladmin-top {
+  min-height: 84px;
+  height: auto;
+  margin-top: 22px;
+  padding: 12px 20px;
+  border-radius: 24px;
+}
+.sl-admin-page .sladmin-heading {
+  padding: 35px 10px 24px;
+}
+.sl-admin-page .sladmin-heading h1 {
+  font-weight: 820;
+  letter-spacing: -.045em;
+}
+.sl-admin-page .sladmin-tabs {
+  border-radius: 24px;
+  padding: 7px;
+  gap: 7px;
+  margin-top: 20px;
+  margin-bottom: 26px;
+}
+.sl-admin-page .sladmin-tabs button {
+  border: 1px solid transparent;
+  border-radius: 17px;
+  min-height: 47px;
+  font-weight: 650;
+}
+.sl-admin-page .sladmin-tabs button[aria-current="page"] {
+  background: linear-gradient(145deg, rgba(154,194,250,.25), rgba(128,111,218,.18));
+  border-color: rgba(178,207,250,.37);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 5px 20px rgba(0,0,0,.13);
+}
+.sl-admin-page .sladmin-card {
+  border-radius: 25px;
+  min-height: 124px;
+}
+.sl-admin-page .sladmin-overview-grid .sladmin-card {
+  min-height: 238px;
+}
+.sl-admin-page .sladmin-stat {
+  font-weight: 780;
+  letter-spacing: -.045em;
+  background: linear-gradient(112deg, #ecf9ff, #9dceff 63%, #d2b8ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.sl-admin-page .sladmin-list {
+  border-radius: 24px;
+  overflow: hidden;
+}
+.sl-admin-page .sladmin-row {
+  background: linear-gradient(120deg, rgba(255,255,255,.045), rgba(255,255,255,.012));
+  padding: 16px 20px;
+}
+.sl-admin-page .sladmin-row:hover {
+  background: rgba(127,177,238,.085);
+}
+.sl-admin-page button,
+.sl-admin-page .sladmin-button {
+  background: linear-gradient(150deg, rgba(255,255,255,.085), rgba(255,255,255,.025)), rgba(85,111,158,.095);
+  border: 1px solid rgba(203,224,255,.16);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.09);
+}
+.sl-admin-page button:hover,
+.sl-admin-page .sladmin-button:hover {
+  border-color: rgba(165,209,255,.40);
+  background: linear-gradient(135deg, rgba(125,177,252,.23), rgba(161,133,228,.14));
+}
+.sl-admin-page .sladmin-primary {
+  background: linear-gradient(110deg, #78b7ff, #9f9fff);
+  color: #102039;
+  border-color: rgba(204,229,255,.5);
+}
+.sl-admin-page .sladmin-toolbar {
+  border-radius: 20px;
+  padding: 12px;
+  margin-bottom: 14px;
+}
+.sl-admin-page .sladmin-toolbar input {
+  background: rgba(7,16,32,.31);
+}
+.sl-admin-page .sladmin-dialog {
+  background: linear-gradient(135deg, rgba(30,47,79,.98), rgba(26,22,47,.98));
+}
+.sl-admin-page .sladmin-footer {
+  padding-bottom: 42px;
+}
+html[data-theme="light"] .sl-admin-page {
+  --ad-text: #223754;
+  --ad-muted: #56708b;
+  --ad-line: rgba(73,121,182,.23);
+  --ad-glass: rgba(255,255,255,.37);
+  --ad-field: rgba(255,255,255,.65);
+  --ad-glass-highlight: rgba(255,255,255,.72);
+  background:
+    radial-gradient(ellipse 65% 61% at 5% 0%, rgba(131,196,249,.49), transparent 76%),
+    radial-gradient(ellipse 58% 60% at 98% 8%, rgba(216,183,250,.42), transparent 74%),
+    radial-gradient(ellipse 62% 57% at 58% 95%, rgba(142,222,237,.34), transparent 72%),
+    #edf4fb;
+  background-attachment: fixed;
+}
+html[data-theme="light"] .sl-admin-page::before {
+  color: rgba(35,78,124,.068);
+  text-shadow: none;
+}
+html[data-theme="light"] .sl-admin-page .sladmin-top,
+html[data-theme="light"] .sl-admin-page .sladmin-tabs,
+html[data-theme="light"] .sl-admin-page .sladmin-notice,
+html[data-theme="light"] .sl-admin-page .sladmin-card,
+html[data-theme="light"] .sl-admin-page .sladmin-list,
+html[data-theme="light"] .sl-admin-page .sladmin-toolbar,
+html[data-theme="light"] .sl-admin-page .sladmin-data-warning {
+  background: linear-gradient(135deg, rgba(255,255,255,.66), rgba(255,255,255,.12)), var(--ad-glass);
+  box-shadow: 0 19px 50px rgba(44,91,149,.09), inset 0 1px 0 rgba(255,255,255,.89);
+}
+html[data-theme="light"] .sl-admin-page .sladmin-stat {
+  background: linear-gradient(115deg, #1c538c, #356fc3 64%, #8964c5);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+html[data-theme="light"] .sl-admin-page .sladmin-row {
+  background: rgba(255,255,255,.19);
+}
+html[data-theme="light"] .sl-admin-page .sladmin-toolbar input {
+  background: rgba(255,255,255,.58);
+}
+html[data-theme="light"] .sl-admin-page .sladmin-dialog {
+  background: linear-gradient(145deg, #ecf6ff, #f5efff);
+}
+html[data-theme="light"] .sl-admin-page button,
+html[data-theme="light"] .sl-admin-page .sladmin-button {
+  background: rgba(255,255,255,.28);
+  border-color: rgba(60,115,167,.18);
+}
+@media (max-width:800px) {
+  .sl-admin-page .sladmin-top { margin-top:10px;padding:12px 14px; }
+  .sl-admin-page .sladmin-heading { padding:25px 4px 16px; }
+  .sl-admin-page .sladmin-card { min-height:100px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .sl-admin-page::after { filter:none; }
 }
