@@ -39,7 +39,10 @@
       const title = document.createElement("strong");
       title.textContent = item.title || "StudyLab update";
       const message = document.createElement("p");
-      message.textContent = item.message || "";
+      message.className = "slpopup-message";
+      if (window.StudyLabPopupFormat?.render)
+        window.StudyLabPopupFormat.render(message, item.message || "");
+      else message.textContent = item.message || "";
       box.append(close,title,message);
       const href = safeLink(item.link);
       if (href) {
@@ -54,17 +57,19 @@
         link.textContent = label && label.length <= 20 ? label : "View";
         box.append(link);
       }
-      let finished = false;
+      let finished = false, stopTimer = () => {};
       const finish = () => {
         if (finished) return;
         finished = true;
-        clearTimeout(timer);
+        stopTimer();
         box.remove();
         resolve();
       };
-      const timer = setTimeout(finish,seconds*1000);
       close.addEventListener("click",finish);
       document.body.append(box);
+      stopTimer = window.StudyLabPopupFormat?.armTimer
+        ? window.StudyLabPopupFormat.armTimer(box,seconds*1000,finish)
+        : (() => { const id = setTimeout(finish,seconds*1000); return () => clearTimeout(id); })();
     });
   }
   async function start() {
