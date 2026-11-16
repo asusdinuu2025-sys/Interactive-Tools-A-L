@@ -105,8 +105,8 @@ assert.match(socialMigration,/create table if not exists public\.studylab_social
 assert.doesNotMatch(moderators,/delete from public\.studylab_social_posts/i);
 
 for(const html of [home,room]){
-  assert.match(html,/chat\.js\?v=20261116-chat-liquid-v1/);
-  assert.match(html,/chat\.css\?v=20261116-chat-liquid-v1/);
+  assert.match(html,/chat\.js\?v=20261116-chat-liquid-v2/);
+  assert.match(html,/chat\.css\?v=20261116-chat-liquid-v2/);
   assert.match(html,/studylab-avatar\.js\?v=20261116-manual-crop-v1/);
 }
 assert.match(home,/studylab-social\.js\?v=20261115-social-likes-only-v3/);
@@ -143,7 +143,7 @@ assert.match(imageSql,/1048576/);
 assert.match(imageSql,/for insert to authenticated/);
 assert.match(imageSql,/for delete to authenticated/);
 for(const html of [home,room]){
-  assert.match(html,/studylab-follow\.css\?v=20261116-follow-colors-v1/);
+  assert.match(html,/studylab-follow\.css\?v=20261116-follow-colors-v2/);
   assert.match(html,/studylab-popups\.js\?v=20261116-v15/);
 }
 const notices=read("assets/js/studylab-popups.js");
