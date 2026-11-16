@@ -152,7 +152,7 @@ async function setup(admin = true, options = {}) {
         ...state.published[0],
         url: "https://user:pass@example.org",
       }),
-    /not supported/,
+    /not supported|Only normal HTTP or HTTPS/,
   );
   // New preview actions only mutate local state.
   const temp = { ...state.published[0], id: "custom-deletable-test",
