@@ -270,3 +270,14 @@ body[data-theme="light"] section.sl-cms-section .sl-cms-grid > a.sl-cms-card {
     flex-direction:column;align-items:flex-start;
   }
 }
+
+/* Custom action labels grow naturally, wrapping rather than clipping. */
+.sl-cms-card .sl-cms-open {
+  width:max-content;
+  max-width:100%;
+  min-height:36px;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  text-align:center;
+  line-height:1.3;
+}
