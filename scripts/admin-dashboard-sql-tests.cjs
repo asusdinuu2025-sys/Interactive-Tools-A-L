@@ -348,14 +348,19 @@ as $admin_gate$ select auth.uid() in (
   assert.equal((await db.query("select count(*)::integer as n from public.studylab_popups where id=$1",
     [newPopup.id])).rows[0].n,0);
   logs=(await db.query("select studylab_admin_activity() as log")).rows[0].log;
+  await db.exec("reset role");
   const retainedBefore=(await db.query(
     "select count(*)::integer as n from studylab_private.activity")).rows[0].n;
+  await as(admin);
   await db.query("select studylab_admin_history_set('clear',$1)",[logs[0].id]);
+  await db.exec("reset role");
   assert.equal((await db.query(
     "select count(*)::integer as n from studylab_private.activity")).rows[0].n,
     retainedBefore, "Clearing history must not erase protected audit records");
+  await as(admin);
   await db.query("select studylab_admin_history_set('clear_all')");
   assert.equal((await db.query("select studylab_admin_activity() as log")).rows[0].log.length,0);
+  await db.exec("reset role");
   assert.equal((await db.query(
     "select count(*)::integer as n from studylab_private.activity")).rows[0].n,
     retainedBefore, "Clear all never changes the underlying audit history");
