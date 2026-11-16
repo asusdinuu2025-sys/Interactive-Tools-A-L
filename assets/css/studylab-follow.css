@@ -879,3 +879,25 @@ body.study-room-page[data-room-mode="light"] .sl-pv-backdrop .sl-pv-avatar-toggl
 @media(prefers-reduced-motion:reduce){
  .sl-pv-dialog .sl-pv-bio-summary .sl-pv-bio-input{transition:none}
 }
+
+/* PR #102 Chat Polish: preserve the existing glass Follow button.
+   Following changes its TEXT ONLY; background, dimensions and borders
+   remain exactly as the active theme defines them. */
+.sl-follow-btn.is-following,
+.sl-pv-follow-action .sl-follow-btn.is-following{
+  color:#57d8f9!important;
+}
+html[data-theme="light"] .sl-follow-btn.is-following,
+html[data-theme="light"] .sl-pv-follow-action .sl-follow-btn.is-following{
+  color:#164f88!important;
+}
+body.study-room-page[data-room-theme] .sl-follow-btn.is-following,
+body.study-room-page[data-room-theme] .sl-pv-follow-action .sl-follow-btn.is-following,
+body.study-room-page[data-room-theme] .room-person-follow-slot .sl-follow-btn.is-following{
+  color:var(--room-accent,#6ad2ee)!important;
+}
+body.study-room-page[data-room-mode="light"][data-room-theme] .sl-follow-btn.is-following,
+body.study-room-page[data-room-mode="light"][data-room-theme] .sl-pv-follow-action .sl-follow-btn.is-following,
+body.study-room-page[data-room-mode="light"][data-room-theme] .room-person-follow-slot .sl-follow-btn.is-following{
+  color:color-mix(in srgb,var(--room-accent,#2680c4) 62%,#153e67)!important;
+}
