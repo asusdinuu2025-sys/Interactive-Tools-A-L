@@ -50,6 +50,12 @@ async function setup(admin = true, options = {}) {
           return { data: [] };
         return { data: admin };
       },
+      functions: {
+        invoke: async (name, opts) => {
+          calls.push(name);
+          return { data: { ok: true, banned: Number(opts?.body?.hours) !== 0 } };
+        },
+      },
       from: () => {
         throw Error("Unexpected remote write/read in preview");
       },
@@ -148,6 +154,23 @@ async function setup(admin = true, options = {}) {
       }),
     /not supported/,
   );
+  // New preview actions only mutate local state.
+  const temp = { ...state.published[0], id: "custom-deletable-test",
+    title: "Discard me", page: "maths.html" };
+  await api.save(temp,0,"publish");
+  await api.deleteContent({ id:temp.id, draft:temp,revision:1,builtin:false });
+  assert.equal(JSON.parse(w.localStorage.getItem("studylab-admin-preview-v1"))
+    .published.some(x=>x.id===temp.id),false);
+  await api.popupSet("create", {
+    title:"Hello StudyLab",message:"One-time notice",variant:"info",
+    placement:"top-right",display_seconds:8,link:"",
+    starts_at:new Date().toISOString(),
+  });
+  assert.equal((await api.popups()).length,1);
+  const sample = JSON.parse(w.localStorage.getItem("studylab-admin-preview-v1")).users[2];
+  await api.banUser(sample.id,24,"Test moderation");
+  assert.equal(JSON.parse(w.localStorage.getItem("studylab-admin-preview-v1"))
+    .users.find(x=>x.id===sample.id).banned,true);
   dom.window.close();
   // Live accounts and site metrics must be visible to admins but read-only.
   ({ dom, w, calls } = await setup(true, {
@@ -199,6 +222,11 @@ async function setup(admin = true, options = {}) {
     .every(b=>!b.disabled), true);
   await w.StudyLabAdminAPI.setUser("11111111-1111-4111-8111-111111111111","verified",true);
   assert.ok(calls.includes("studylab_admin_user_set"));
+  await w.StudyLabAdminAPI.banUser(
+    "11111111-1111-4111-8111-111111111111",24,"Test review");
+  assert.ok(calls.includes("studylab-admin-ban"));
+  assert.ok([...w.document.querySelectorAll("#sladmin-tabs button")]
+    .some(x=>x.textContent==="Pop-up Messages"));
   assert.equal(w.localStorage.getItem("studylab-admin-preview-v1"), null,
     "Connected mode must not create local sample-user data");
   dom.window.close();
