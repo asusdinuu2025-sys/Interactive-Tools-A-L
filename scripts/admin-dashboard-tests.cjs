@@ -269,7 +269,7 @@ async function setup(admin = true, options = {}) {
   const contentCss = read("assets/css/studylab-content.css");
   assert.match(contentCss, /PR #102 glass parity/);
   assert.match(contentCss, /max-height:146px/);
-  assert.match(contentCss, /section\\.sl-cms-section > \\.sl-cms-grid/);
+  assert.ok(contentCss.includes("section.sl-cms-section > .sl-cms-grid"));
   assert.match(contentCss, /\\.sl-cms-card \\.sl-cms-open/);
   for (const page of ["index.html","maths.html","physics.html",
       "chemistry.html","biology.html","Telegram_Channels.html",
