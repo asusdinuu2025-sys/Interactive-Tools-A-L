@@ -13,6 +13,7 @@ const syntaxFiles = [
   "assets/js/studylab-profile-view.js",
   "assets/js/studylab-avatar.js",
   "assets/js/chat.js",
+  "assets/js/studylab-popups.js",
   "assets/js/studylab-pet-room.js",
   "assets/js/studylab-pet.js",
   "assets/js/profile.js",
@@ -129,6 +130,12 @@ const uiPolishTests = spawnSync(process.execPath, ["scripts/studylab-ui-polish-c
 if (uiPolishTests.status !== 0) {
   fail("StudyLab UI polish regression checks failed:\n" +
     (uiPolishTests.stderr || uiPolishTests.stdout || "UI layout check failed"));
+}
+
+const popupHomeGate = spawnSync(process.execPath, ["scripts/studylab-popups-home-entry-check.cjs"], {encoding:"utf8"});
+if (popupHomeGate.status !== 0) {
+  fail("Home-only popup gate regression:\n" +
+    (popupHomeGate.stderr || popupHomeGate.stdout || "Home popup gate test failed"));
 }
 
 const chatSocialPolishTests = spawnSync(process.execPath, ["scripts/studylab-chat-social-polish-check.mjs"], {encoding:"utf8"});
