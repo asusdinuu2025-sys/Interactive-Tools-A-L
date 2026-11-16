@@ -1123,6 +1123,7 @@
       setUnread(0);
       scrollToBottom(true);
       resizeMessageInput();
+      refreshTyping();
       input?.focus();
     }
   }
