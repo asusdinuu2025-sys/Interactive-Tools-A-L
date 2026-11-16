@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>StudyLab · Practical Simulation</title>
+<style>
+:root{font-family:"Nirmala UI","Segoe UI",sans-serif;color-scheme:dark;--back:#0b1931;--panel:rgba(111,170,232,.1);--line:rgba(148,210,255,.28);--text:#e9f6ff;--muted:#a5bfd6}
+html[data-theme="light"]{color-scheme:light;--back:#e6f4ff;--panel:rgba(255,255,255,.53);--line:rgba(70,139,191,.3);--text:#193b5c;--muted:#526e87}
+*{box-sizing:border-box}body{margin:0;min-height:100dvh;color:var(--text);background:radial-gradient(circle at 80% 18%,rgba(90,137,232,.25),transparent 38%),radial-gradient(circle at 20% 75%,rgba(56,203,234,.15),transparent 43%),var(--back)}
+main{width:min(100% - 24px,1400px);margin:0 auto;padding:16px 0 24px}header{display:flex;align-items:center;gap:13px;flex-wrap:wrap;padding:12px 16px;margin-bottom:14px;border:1px solid var(--line);border-radius:20px;background:var(--panel);backdrop-filter:blur(12px)}
+header a{border:1px solid var(--line);border-radius:999px;padding:9px 14px;color:inherit;text-decoration:none;background:var(--panel)}h1{flex:1;margin:0;font-size:clamp(1rem,2vw,1.4rem)}small{display:block;color:var(--muted)}button{font:inherit;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:inherit;padding:8px 13px;cursor:pointer}
+#feedback{margin:22px 4px;color:var(--muted)}#frame{display:none;width:100%;height:calc(100dvh - 118px);min-height:450px;border:1px solid var(--line);border-radius:20px;background:#fff;box-shadow:0 15px 40px rgba(0,0,0,.12)}
+body.is-ready #frame{display:block}body.is-ready #feedback{display:none}
+@media(max-width:600px){header{padding:10px}#frame{height:calc(100dvh - 145px);min-height:340px}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<a id="back" href="index.html#practical-simulations" aria-label="Back to StudyLab">← StudyLab</a>
+<div style="flex:1"><h1 id="title">Practical Simulation</h1><small id="details">Loading the published tool…</small></div>
+<button id="theme" type="button">Theme</button>
+</header>
+<p role="status" id="feedback">Checking the published simulation…</p>
+<!-- Never give uploaded HTML same-origin access to the real StudyLab app. -->
+<iframe id="frame" sandbox="allow-scripts allow-forms" referrerpolicy="no-referrer"
+  title="Interactive StudyLab simulation" loading="eager"></iframe>
+</main>
+<script>
+(function(){
+"use strict";
+const host="https://zpvatyxdbshjuqgtexzw.supabase.co",key="sb_publishable_zd8S3PcyicJX6Cgyh0ez8A_sUSTCuiB";
+const $=id=>document.getElementById(id);
+const id=new URLSearchParams(location.search).get("id");
+const allowedPages=new Set(["maths.html","physics.html","chemistry.html","biology.html"]);
+function setTheme(){
+  const setting=localStorage.getItem("studylab-theme")||"system";
+  const light=setting==="light"||(setting==="system"&&matchMedia("(prefers-color-scheme:light)").matches);
+  document.documentElement.dataset.theme=light?"light":"dark";
+}
+setTheme();
+$("theme").addEventListener("click",()=>{
+ const current=document.documentElement.dataset.theme;
+ localStorage.setItem("studylab-theme",current==="light"?"dark":"light");
+ setTheme();
+});
+function fail(message){$("feedback").textContent=message;}
+async function load(){
+ if(!id||!/^custom-[0-9a-f-]{36}$/.test(id)){fail("Invalid simulation link.");return;}
+ const query=host+"/rest/v1/studylab_site_content?select=page,payload&id=eq."+encodeURIComponent(id);
+ const meta=await fetch(query,{headers:{apikey:key,Accept:"application/json"}});
+ if(!meta.ok)throw Error("Published simulation could not be checked.");
+ const rows=await meta.json(),row=rows?.[0],p=row?.payload;
+ if(!p || p.hidden || p.deleted || p.resource_type!=="simulation" || !allowedPages.has(p.page)){
+   fail("This simulation is not currently published.");return;
+ }
+ if(!/^html\/[0-9a-f-]{36}\.html$/.test(p.html_path||"")){
+   fail("The simulation file is unavailable.");return;
+ }
+ $("title").textContent=String(p.title||"Practical simulation").slice(0,160);
+ $("details").textContent=String(p.topic||p.lesson_name||"Interactive A/L learning tool").slice(0,160);
+ $("back").href=p.page;
+ const raw=await fetch(host+"/storage/v1/object/public/studylab-simulations/"+p.html_path,{cache:"no-store"});
+ if(!raw.ok)throw Error("The published HTML file could not be loaded.");
+ const text=await raw.text();
+ if(text.length>5*1024*1024)throw Error("The uploaded simulation is too large.");
+ // No allow-same-origin: the file runs in a unique opaque origin, with no
+ // access to StudyLab cookies, localStorage, Supabase tokens or parent DOM.
+ $("frame").srcdoc=text;
+ document.body.classList.add("is-ready");
+}
+load().catch(e=>fail(e?.message||"Unable to load the simulation."));
+})();
+</script>
+</body>
+</html>
