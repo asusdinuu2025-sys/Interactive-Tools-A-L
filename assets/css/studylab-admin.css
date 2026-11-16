@@ -1,3 +1,32 @@
+/* Admin page uses isolated CSS: ensure no document-level stacking or hidden shell. */
+html {
+  min-height: 100%;
+}
+html, body.sl-admin-page {
+  width: 100%;
+  min-height: 100%;
+}
+body.sl-admin-page {
+  display: block;
+  visibility: visible;
+  opacity: 1;
+  overflow-x: hidden;
+}
+body.sl-admin-page::before,
+body.sl-admin-page::after {
+  content: none !important;
+}
+body.sl-admin-page > .ad-shell {
+  display: block !important;
+  position: relative;
+  z-index: 1;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+.ad-top, .ad-heading, .ad-panel-heading {
+  visibility: visible;
+  opacity: 1;
+}
 .sl-admin-page {
   --ad-text: #e9f0ff;
   --ad-muted: #a4bbd4;
