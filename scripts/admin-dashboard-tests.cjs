@@ -226,13 +226,26 @@ async function setup(admin = true, options = {}) {
   assert.match(w.document.querySelector(".sladmin-data-warning").textContent,
     /Test overview request failed/);
   assert.equal(w.document.querySelector("#sladmin-save-state").textContent, "Some data unavailable");
-  assert.equal(w.document.querySelectorAll(".sladmin-overview-grid .sladmin-quick").length, 5);
+  assert.equal(w.document.querySelectorAll(".sladmin-overview-grid .sladmin-quick").length, 6);
   assert.match(w.document.querySelector(".sladmin-build-label").textContent,
     /Local preview · PR #102/);
   dom.window.close();
   const adminMarkup = read("admin.html");
   assert.match(adminMarkup, /studylab-admin\.js\?v=pr102-connected-admin-20261116-v8/);
   assert.match(adminMarkup, /Loading dashboard/);
+  assert.match(adminMarkup,/sladmin-brand-mark" aria-hidden="true">ツ/);
+  assert.match(adminMarkup,/sladmin-back-icon/);
+  assert.match(adminMarkup,/studylab-popups.css/);
+  const popupCss=read("assets/css/studylab-popups.css");
+  assert.match(popupCss,/slpopup-toast/);
+  assert.match(read("assets/js/studylab-popups.js"),/studylab_popup_claim/);
+  assert.match(read("assets/js/studylab-ban-guard.js"),/studylab_user_ban_status/);
+  for(const page of ["index.html","study-room.html","maths.html","physics.html",
+      "chemistry.html","biology.html","Telegram_Channels.html","lesson-packs.html"]){
+    const source=read(page);
+    assert.match(source,/studylab-popups.js/,page+" popups script");
+    assert.match(source,/studylab-ban-guard.js/,page+" ban check");
+  }
   assert.ok(!/(?:id|class)="[^"]*\\bad-[^"]*"/.test(adminMarkup),
     "Admin identifiers must not match generic ad-blocker cosmetic selectors");
   assert.ok(!adminMarkup.includes("sladmin-build-proof"),
