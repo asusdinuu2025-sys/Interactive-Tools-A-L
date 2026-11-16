@@ -9,7 +9,7 @@ function make(html){
    pretendToBeVisual:true
  });
  if(!dom.window.CSS)dom.window.CSS={};
- dom.window.CSS.escape=s=>String(s).replace(/[^a-zA-Z0-9_-]/g,"\\ dom.window.CSS.escape=s=>String(s).replace(/[^a-zA-Z0-9_-]/g,"\\$&");");
+ dom.window.CSS.escape = s => String(s);
  dom.window.HTMLDialogElement.prototype.showModal=function(){this.open=true;};
  dom.window.HTMLDialogElement.prototype.close=function(){
    this.open=false;this.dispatchEvent(new dom.window.Event("close"));
