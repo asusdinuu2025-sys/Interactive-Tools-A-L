@@ -94,4 +94,30 @@ assert.ok(fragment.children.some(node=>node.type==="text"&&node.text.includes("<
 const unsafe=linkify("javascript:alert(1) mailto:test@site.net");
 assert.equal(unsafe.children.filter(n=>n.tag==="a").length,0,
   "Non-http URLs should never become navigable links");
+
+/* JWT refresh is safe to retry exactly once with the same message ID.
+   Unknown failures are not replayed, avoiding duplicate messages. */
+const authHead=chat.indexOf("  function staleChatSession(error) {");
+const authTail=chat.indexOf("  async function sendMessage() {",authHead);
+assert.ok(authHead>0&&authTail>authHead,"Chat auth recovery helpers must exist");
+const helper=chat.slice(authHead,authTail);
+const buildWriter=Function("client","userId",helper+";return writeChatMessage;");
+let refreshes=0, attempts=0;
+const writer=buildWriter({auth:{refreshSession:async()=>{
+ refreshes++;return {data:{session:{user:{id:"user-one"}}}};
+}}},"user-one");
+const recovered=await writer(async()=>{
+ attempts++;
+ return attempts===1?{error:{code:"PGRST301",message:"JWT expired"}}:{error:null,data:{id:"fixed-id"}};
+});
+assert.equal(attempts,2);
+assert.equal(refreshes,1);
+assert.equal(recovered.data.id,"fixed-id");
+attempts=0;
+const refused=await writer(async()=>{attempts++;return{error:{code:"23514",message:"Constraint violation"}}});
+assert.equal(attempts,1,"Never replay unknown failures or malformed messages");
+assert.equal(refused.error.code,"23514");
+assert.match(chat,/nickname:String\(nickname\|\|"Student"\)\.trim\(\)\.slice\(0,40\)/,
+ "Enforce the actual 40-character nickname database constraint");
+
 console.log("StudyLab Chat reply, reaction, profile, permission and safe-link checks passed.");
