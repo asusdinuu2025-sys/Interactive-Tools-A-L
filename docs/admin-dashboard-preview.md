@@ -53,3 +53,15 @@ The dashboard is a separate admin-only workspace reached from StudyLab's account
 - Only the most recent 100 activity entries and 100 media objects are shown. Media deletion does not automatically rewrite links to deleted files.
 - Verification badges and new admin rights become visible to already-open browser tabs after a refresh or another authenticated update; older open pages can have stale UI.
 - Content/permission mutations and media upload/removal are not executed merely by loading the admin dashboard.
+
+## PR #102 follow-up: deletion, one-time pop-ups, moderation and card glass
+
+- **Content and Sections:** new and existing custom cards can be permanently deleted with two confirmations. Database drafts and published records are removed; original hard-coded cards use minimal tombstones so the old HTML item does not come back on refresh. Extra sections can be deleted along with their saved dependent cards. Built-in sections remain protected.
+- **Shared media safety:** deleting a content record does not automatically erase independently uploaded files in the shared Media library. An image may be referenced by other content; administrators can remove unused uploads separately via Media. This avoids breaking unrelated cards.
+- **Pop-up Messages:** a new admin tab creates, edits, previews and deletes scheduled one-time StudyLab notices (info/success/warning/important/custom, four placement choices, 3–30-second display). Every message expires 24 hours after its scheduled start. Authenticated delivery receipts are atomic and unique by popup/account; anonymous devices use local tracking.
+- **Moderation:** registered non-admin accounts can be banned/unbanned through the server-authorized `studylab-admin-ban` Supabase Edge Function; duration and reason are logged. Account data is preserved. Admins and guests cannot be banned through this control. A client-side status notice signs suspended users out; already-issued access tokens may exist until expiry, so sensitive server endpoints must keep checking account privileges.
+- **Branding:** header shows `ツ` and the StudyLab icon in the Back to StudyLab link.
+- **New content glass:** cards and extra sections now have a lighter transparent gradient and neon outline consistent with the existing site; thumbnails are capped at 146px high instead of filling an entire section, and Open resource uses a rounded glass button treatment. Seven content-bearing pages have versioned CSS links so browsers load the updated design.
+
+The additional database migrations `20261116155600_admin_content_delete_v2.sql`, `20261116155627_admin_popup_messages_v2.sql`, `20261116155631_admin_ban_ledger_v2.sql` and the moderation-index migration are installed in Supabase. The ban Edge Function is deployed. No moderation, deletion, or pop-up creation was initiated just by installing the code or running the checks.
+
