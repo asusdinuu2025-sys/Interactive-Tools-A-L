@@ -70,6 +70,13 @@ function make(html){
  d.window.document.querySelector(".sladmin-path-choice").click();
  assert.ok(d.window.document.querySelector(".sladmin-publish-dialog input[name=html]"));
  assert.ok(d.window.document.querySelector(".sladmin-publish-dialog input[name=lesson_number]"));
+ assert.ok(d.window.document.querySelector(".sladmin-publish-dialog select[name=maths_category]"),
+   "Maths simulation form includes Pure/Applied categories");
+ d.window.document.querySelector(".sladmin-publish-dialog").close();
+ d.window.document.querySelectorAll(".sladmin-path-choice")[1].click();
+ assert.ok(d.window.document.querySelector(".sladmin-publish-dialog input[name=lesson_number]"));
+ assert.equal(d.window.document.querySelector(".sladmin-publish-dialog select[name=maths_category]"),null,
+   "Physics uses lesson filtering, not Pure/Applied category choices");
  d.window.document.querySelector(".sladmin-publish-dialog").close();
  d.window.document.querySelector("[data-kind=simulation]").click();
  d.window.document.querySelector("[data-kind=custom]").click();
