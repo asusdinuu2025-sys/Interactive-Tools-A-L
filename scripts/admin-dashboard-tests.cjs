@@ -42,8 +42,12 @@ async function setup(admin = true, options = {}) {
           return options.liveStats
             ? { data: options.liveStats }
             : { data: null, error: { message: "Live preview RPC not installed in mock" } };
-        if (name === "studylab_admin_readonly_users_v1")
+        if (name === "studylab_admin_readonly_users_v1" ||
+            name === "studylab_admin_users")
           return { data: options.liveUsers || { rows: [], total: 0 } };
+        if (name === "studylab_admin_content_list" ||
+            name === "studylab_admin_activity")
+          return { data: [] };
         return { data: admin };
       },
       from: () => {
@@ -61,6 +65,8 @@ async function setup(admin = true, options = {}) {
     "studylab-admin",
   ]) {
     w.eval(read("assets/js/" + f + ".js"));
+    if (f === "studylab-admin-config" && options.connected)
+      w.StudyLabAdminConfig = Object.freeze({ mode: "connected" });
     if (f === "studylab-admin-api" && options.failOverview) {
       w.StudyLabAdminAPI = Object.freeze({
         ...w.StudyLabAdminAPI,
@@ -168,6 +174,34 @@ async function setup(admin = true, options = {}) {
     /read-only/,
   );
   dom.window.close();
+  // PR #102 connected mode must use REAL server-side admin RPCs, not local
+  // state, and must let registered users be managed by authenticated admins.
+  ({ dom, w, calls } = await setup(true, {
+    connected: true,
+    liveStats: { profiles: 575, registered: 14, guests: 561,
+                 admins: 3, social_posts: 32, reports: 2 },
+    liveUsers: { rows: [
+      { id: "11111111-1111-4111-8111-111111111111", display_name: "Registered",
+        username: "registered", admin: false, verified: false, guest: false,
+        created_at: "2026-11-01T00:00:00Z" }
+    ], total: 14 },
+  }));
+  assert.equal(w.StudyLabAdminAPI.connectedPreview, true);
+  assert.equal(w.StudyLabAdminAPI.preview, false);
+  assert.match(w.document.querySelector("#sladmin-mode").textContent,
+    /real StudyLab database/);
+  assert.ok(calls.includes("studylab_admin_users"));
+  assert.ok(calls.includes("studylab_admin_content_list"));
+  w.document.querySelectorAll("#sladmin-tabs button")[1].click();
+  await wait();
+  const registeredButtons = [...w.document.querySelectorAll(".sladmin-row-actions button")];
+  assert.equal(registeredButtons.filter(b=>/badge|admin/i.test(b.textContent))
+    .every(b=>!b.disabled), true);
+  await w.StudyLabAdminAPI.setUser("11111111-1111-4111-8111-111111111111","verified",true);
+  assert.ok(calls.includes("studylab_admin_user_set"));
+  assert.equal(w.localStorage.getItem("studylab-admin-preview-v1"), null,
+    "Connected mode must not create local sample-user data");
+  dom.window.close();
   // A corrupted or older per-device preview schema must not produce a blank dashboard.
   ({ dom, w } = await setup(true, {
     previewData: JSON.stringify({
@@ -194,14 +228,15 @@ async function setup(admin = true, options = {}) {
   assert.equal(w.document.querySelector("#sladmin-save-state").textContent, "Some data unavailable");
   assert.equal(w.document.querySelectorAll(".sladmin-overview-grid .sladmin-quick").length, 5);
   assert.match(w.document.querySelector(".sladmin-build-label").textContent,
-    /PR #102 preview/);
+    /Local preview · PR #102/);
   dom.window.close();
   const adminMarkup = read("admin.html");
-  assert.match(adminMarkup, /studylab-admin\.js\?v=pr102-live-read-glass-20261116-v7/);
+  assert.match(adminMarkup, /studylab-admin\.js\?v=pr102-connected-admin-20261116-v8/);
   assert.match(adminMarkup, /Loading dashboard/);
   assert.ok(!/(?:id|class)="[^"]*\\bad-[^"]*"/.test(adminMarkup),
     "Admin identifiers must not match generic ad-blocker cosmetic selectors");
-  assert.match(adminMarkup, /PR #102 · v7 · HTML loaded/);
+  assert.ok(!adminMarkup.includes("sladmin-build-proof"),
+    "Remove the temporary floating developer diagnostic overlay");
   assert.ok(!adminMarkup.includes('href="assets/css/main.css"'),
     "Admin must use isolated CSS, not global home rules");
   const adminCss = read("assets/css/studylab-admin.css");
