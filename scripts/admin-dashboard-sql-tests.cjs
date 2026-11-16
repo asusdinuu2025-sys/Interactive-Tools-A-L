@@ -36,7 +36,7 @@ as $admin_gate$ select auth.uid() in (
   );
   await db.exec(
     fs.readFileSync(
-      "supabase/migrations/20261116153000_admin_dashboard_live_management.sql",
+      "supabase/migrations/20261116145158_admin_dashboard_live_management.sql",
       "utf8",
     ),
   );
