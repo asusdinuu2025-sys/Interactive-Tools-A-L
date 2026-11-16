@@ -7,7 +7,7 @@
     "sb_publishable_zd8S3PcyicJX6Cgyh0ez8A_sUSTCuiB",
   );
   const KEY = "studylab-admin-preview-v1";
-  let state, user, seed;
+  let state, user, seed, livePreviewStats = null, livePreviewError = null;
   const clone = (x) => JSON.parse(JSON.stringify(x));
   async function rpc(name, args) {
     const r = await client.rpc(name, args);
@@ -143,7 +143,25 @@
         // Browsers that deny storage can still use the in-memory preview.
       }
     }
-    return { user, preview };
+    // Read-only server-side snapshot: the existing three-admin RPC gate is
+    // checked before this call. This never changes production user records.
+    if (preview) {
+      try {
+        const latest = await rpc("studylab_admin_readonly_stats_v1");
+        if (latest && typeof latest === "object" &&
+            Number.isFinite(Number(latest.profiles)) &&
+            Number.isFinite(Number(latest.admins)) &&
+            Number.isFinite(Number(latest.registered)) &&
+            Number.isFinite(Number(latest.social_posts))) {
+          livePreviewStats = latest;
+        } else {
+          livePreviewError = "The live preview data service is not available.";
+        }
+      } catch (error) {
+        livePreviewError = error.message || "Could not load live statistics.";
+      }
+    }
+    return { user, preview, liveData: Boolean(livePreviewStats) };
   }
   async function content() {
     requireAccess();
@@ -206,6 +224,18 @@
         p_page: page,
         p_admins: admins,
       });
+    if (livePreviewStats) {
+      const result = await rpc("studylab_admin_readonly_users_v1", {
+        p_query: query,
+        p_page: page,
+        p_admins: admins,
+      });
+      if (!result || !Array.isArray(result.rows) ||
+          !Number.isFinite(Number(result.total))) {
+        throw Error("The real account list returned an unexpected response.");
+      }
+      return result;
+    }
     const a = state.users.filter(
       (x) =>
         (!admins || x.admin) &&
@@ -225,6 +255,9 @@
         p_field: field,
         p_value: value,
       });
+    if (livePreviewStats) {
+      throw Error("Preview is read-only. No live account or badge changes are permitted.");
+    }
     const u = state.users.find((x) => x.id === id);
     if (!u) throw Error("User not found.");
     if (field === "admin" && !value) {
@@ -351,6 +384,9 @@
     validate,
     safeURL,
     preview,
+    get readonlyLive() { return preview && Boolean(livePreviewStats); },
+    get liveStats() { return livePreviewStats ? clone(livePreviewStats) : null; },
+    get liveStatsError() { return livePreviewError; },
     previewKey: KEY,
   });
 })();
