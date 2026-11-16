@@ -50,7 +50,8 @@
           link.target = "_blank";
           link.rel = "noopener noreferrer";
         }
-        link.textContent = "Open resource →";
+        const label = String(item.link_label || "View").trim();
+        link.textContent = label && label.length <= 20 ? label : "View";
         box.append(link);
       }
       let finished = false;
@@ -74,7 +75,7 @@
     if (!client) return;
     // Supabase RLS allows only messages within their exact 24-hour window.
     const resp = await client.from("studylab_popups")
-      .select("id,title,message,variant,placement,display_seconds,link,starts_at")
+      .select("id,title,message,variant,placement,display_seconds,link,link_label,starts_at")
       .order("starts_at",{ascending:false}).limit(8);
     if (resp.error || !resp.data?.length) return;
     let account = null;
