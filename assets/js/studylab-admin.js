@@ -720,8 +720,12 @@
   for (const tab of tabs)
     $("#ad-tabs").append(button(tab, () => navigate(tab)));
   (async () => {
+    const buildProof = $("#ad-build-proof");
+    if (buildProof) buildProof.textContent = "PR #102 · v5 · JS started";
     try {
       info = await api.init();
+      if (buildProof) buildProof.textContent =
+        "PR #102 · v5 · " + (api.preview ? "Preview ready" : "Dashboard ready");
       $("#ad-gate").hidden = true;
       $("#ad-workspace").hidden = false;
       $("#ad-identity").textContent = "Administrator";
@@ -735,12 +739,13 @@
       );
       $("#ad-mode").append(el(
         "small",
-        api.preview ? "PR #102 preview · dashboard build 2026-11-16.4"
-          : "Dashboard build 2026-11-16.4",
+        api.preview ? "PR #102 preview · dashboard build 2026-11-16.5"
+          : "Dashboard build 2026-11-16.5",
         "ad-build-label",
       ));
       await navigate("Overview");
     } catch (e) {
+      if (buildProof) buildProof.textContent = "PR #102 · v5 · Check access";
       $("#ad-workspace").hidden = true;
       $("#ad-gate").hidden = false;
       $("#ad-gate").textContent = e?.message || "Admin access could not be verified.";
