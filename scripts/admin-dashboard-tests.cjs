@@ -231,7 +231,7 @@ async function setup(admin = true, options = {}) {
     /Local preview · PR #102/);
   dom.window.close();
   const adminMarkup = read("admin.html");
-  assert.match(adminMarkup, /studylab-admin\.js\?v=pr102-connected-admin-20261116-v8/);
+  assert.match(adminMarkup, /studylab-admin\.js\?v=pr102-connected-admin-20261116-v9/);
   assert.match(adminMarkup, /Loading dashboard/);
   assert.match(adminMarkup,/sladmin-brand-mark" aria-hidden="true">ツ/);
   assert.match(adminMarkup,/sladmin-back-icon/);
