@@ -130,3 +130,13 @@ body[data-theme="light"] .slpopup-toast .slpopup-close {
   color:inherit;
   cursor:pointer;
 }
+
+/* Keep custom 20-character actions readable on compact phones. */
+.slpopup-toast a.slpopup-link,.slpopup-toast .slpopup-link-preview {
+  width:max-content;
+  max-width:100%;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  text-align:center;
+  line-height:1.3;
+}
