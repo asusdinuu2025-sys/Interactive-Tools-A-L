@@ -21,6 +21,7 @@
   }
   function audit(action, target) {
     state.activity.unshift({
+      id: "preview-" + crypto.randomUUID(),
       action,
       target,
       actor: user.id,
@@ -205,11 +206,9 @@
     if (!["draft", "publish", "hide", "restore"].includes(action))
       throw Error("Invalid action.");
     if (!preview)
-      return rpc("studylab_admin_content_save", {
-        p_id: item.id,
-        p_payload: item,
-        p_revision: revision,
-        p_action: action,
+      return rpc("studylab_admin_action_v2", {
+        p_kind: "content", p_action: action,
+        p_data: { item, revision },
       });
     const old = state.content.find((x) => x.id === item.id);
     if ((old?.revision || 0) !== revision)
@@ -243,9 +242,10 @@
     const { id, kind, page, title } = record.draft;
     if (kind === "section" && record.builtin)
       throw Error("Built-in sections cannot be deleted. Use Hide instead.");
-    if (!preview) return rpc("studylab_admin_content_delete", {
-      p_id: id, p_page: page, p_kind: kind,
-      p_revision: record.revision, p_builtin: Boolean(record.builtin),
+    if (!preview) return rpc("studylab_admin_action_v2", {
+      p_kind: "content", p_action: "delete",
+      p_data: { id, page, kind, revision: record.revision,
+        builtin: Boolean(record.builtin) },
     });
     const current = state.content.find((x) => x.id === id);
     if ((current?.revision || 0) !== record.revision)
@@ -299,14 +299,10 @@
       persist();
       return;
     }
-    return rpc("studylab_admin_popup_set", {
-      p_action: action, p_id: data.id || null,
-      p_title: data.title || "", p_message: data.message || "",
-      p_variant: data.variant || "info",
-      p_placement: data.placement || "top-right",
-      p_seconds: Number(data.display_seconds || 8),
-      p_link: safeURL(data.link || ""), p_starts_at: data.starts_at || null,
-      p_link_label: String(data.link_label || "View").trim(),
+    return rpc("studylab_admin_action_v2", {
+      p_kind: "popup", p_action: action,
+      p_data: { ...data, link: safeURL(data.link || ""),
+        link_label: String(data.link_label || "View").trim() },
     });
   }
   async function banUser(id, hours, reason = "") {
@@ -367,10 +363,9 @@
     if (!["admin", "verified"].includes(field))
       throw Error("Invalid user action.");
     if (!preview)
-      return rpc("studylab_admin_user_set", {
-        p_user: id,
-        p_field: field,
-        p_value: value,
+      return rpc("studylab_admin_action_v2", {
+        p_kind: "user", p_action: "set",
+        p_data: { id, field, value },
       });
     if (livePreviewStats) {
       throw Error("Preview is read-only. No live account or badge changes are permitted.");
@@ -389,7 +384,26 @@
   }
   async function activity() {
     requireAccess();
-    return preview ? state.activity : await rpc("studylab_admin_activity");
+    return preview ? clone(state.activity) : await rpc("studylab_admin_activity");
+  }
+  async function history(action, id = null) {
+    requireAccess();
+    if (!["clear","clear_all","undo"].includes(action))
+      throw Error("Invalid history action.");
+    if (preview) {
+      if (action === "undo")
+        throw Error("Undo is only available for server-verified changes.");
+      const before = state.activity.length;
+      state.activity = action === "clear_all" ? [] :
+        state.activity.filter((item) => item.id !== id);
+      if (action === "clear" && before === state.activity.length)
+        throw Error("History entry no longer exists.");
+      persist();
+      return { cleared: before - state.activity.length };
+    }
+    return rpc("studylab_admin_history_set", {
+      p_action: action, p_id: id,
+    });
   }
   async function media() {
     requireAccess();
@@ -498,6 +512,7 @@
     users,
     setUser,
     activity,
+    history,
     media,
     upload,
     removeMedia,
