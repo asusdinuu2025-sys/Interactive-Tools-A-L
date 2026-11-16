@@ -30,7 +30,7 @@ insert into public.studylab_social_reports values ('report-1');
 `);
   await db.exec(
     fs.readFileSync(
-      "supabase/migrations/20261116085000_admin_readonly_live_preview.sql",
+      "supabase/migrations/20261116142631_admin_readonly_live_preview.sql",
       "utf8",
     ),
   );
