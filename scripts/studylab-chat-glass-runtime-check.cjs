@@ -1,0 +1,115 @@
+/* Browser-free StudyLab Chat integration smoke test.
+   Mock Supabase; never queries the live database. */
+const assert=require("node:assert/strict");
+const {readFileSync}=require("node:fs");
+const {JSDOM}=require("jsdom");
+const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+(async()=>{
+ const me="11111111-1111-4111-8111-111111111111";
+ const other="22222222-2222-4222-8222-222222222222";
+ const original={
+   id:"33333333-3333-4333-8333-333333333333",
+   message:"Hello, have you studied?",
+   user_id:other,nickname:"Student B",session_id:"session-b",
+   created_at:"2026-11-16T10:00:00Z",image_paths:[],reply_to:null
+ };
+ const dom=new JSDOM("<!doctype html><html data-theme='dark'><body><header class='site-header'></header></body></html>",{
+   url:"https://studylablk.netlify.app/",runScripts:"outside-only",pretendToBeVisual:true
+ });
+ const w=dom.window;
+ w.matchMedia=()=>({matches:false,addListener(){},removeListener(){}});
+ w.HTMLElement.prototype.scrollIntoView=function(){};
+ const tracks=[],writes=[],uploads=[],deleted=[];
+ let syncCallback;
+ let remoteStates={};
+ const channel={
+   on(event,options,fn){if(event==="presence"&&options?.event==="sync")syncCallback=fn;return this;},
+   subscribe(fn){fn("SUBSCRIBED");return this;},
+   track(item){tracks.push(item);return Promise.resolve({});},
+   presenceState(){return remoteStates;}
+ };
+ const storage={
+   upload:async(path,blob)=>{uploads.push({path,blob});return{error:null};},
+   remove:async(paths)=>{deleted.push(...paths);return{error:null};},
+   createSignedUrl:async()=>({data:{signedUrl:"https://example.test/private.png"},error:null})
+ };
+ const client={
+   rpc:async()=>({data:false,error:null}),
+   channel:()=>channel,
+   storage:{from:()=>storage},
+   from(table){
+     if(table==="studylab_chat_messages")return{
+       select(){return {order(){return this;},limit:async()=>({data:[original],error:null})};},
+       insert:async(row)=>{writes.push(row);return{error:null};}
+     };
+     if(table==="studylab_chat_reactions")return{
+       select(){return {in:async()=>({data:[],error:null})};},
+       insert:async()=>({error:null}),delete(){return{eq(){return this;},then(res){res({error:null});}};}
+     };
+     throw Error("Unexpected table "+table);
+   }
+ };
+ w.StudyLabAccount={
+   ready:Promise.resolve(),
+   getUser:()=>({id:me}),
+   getProfile:async()=>({display_name:"Student A"}),
+   client
+ };
+ w.StudyLabFollow={lookup:async()=>[]};
+ w.supabase={createClient:()=>client};
+ w.URL.createObjectURL=()=> "blob:study-preview";
+ w.URL.revokeObjectURL=()=>{};
+ w.createImageBitmap=async()=>({width:640,height:480,close(){}});
+ w.HTMLCanvasElement.prototype.getContext=()=>({drawImage(){}});
+ w.HTMLCanvasElement.prototype.toBlob=function(callback){
+   callback(new w.Blob(["compressed"],{type:"image/webp"}));
+ };
+ w.eval(readFileSync("assets/js/chat.js","utf8"));
+ await wait(70);
+ const panel=w.document.querySelector(".study-chat-panel");
+ const toggle=w.document.querySelector(".study-chat-button");
+ assert.ok(panel&&toggle,"Chat panel initializes");
+ const bubble=w.document.querySelector(".study-chat-message");
+ assert.ok(bubble,"Existing messages remain visible");
+ const react=bubble.querySelector(".study-chat-react-toggle");
+ react.click();
+ assert.ok(bubble.classList.contains("is-reactions-open"));
+ bubble.querySelector(".study-chat-reactions .study-chat-reaction").click();
+ assert.equal(bubble.classList.contains("is-reactions-open"),false,
+   "Choosing a reaction must close the picker");
+ toggle.click();
+ const input=w.document.querySelector("[data-chat-input]");
+ input.value="I am typing";
+ input.dispatchEvent(new w.Event("input",{bubbles:true}));
+ await wait(35);
+ assert.ok(tracks.some(x=>x.typing===true),"Typing state must be sent through Presence");
+ remoteStates={remote:[{id:other,typing:true,nickname:"Student B",updatedAt:Date.now()}]};
+ syncCallback();
+ assert.equal(w.document.querySelector("[data-chat-typing]").hidden,false);
+ const fileInput=w.document.querySelector("[data-chat-image-input]");
+ Object.defineProperty(fileInput,"files",{
+   configurable:true,
+   value:[new w.File(["picture"],"work.png",{type:"image/png"})]
+ });
+ fileInput.dispatchEvent(new w.Event("change",{bubbles:true}));
+ await wait(65);
+ assert.equal(w.document.querySelectorAll(".study-chat-pending-tile").length,1);
+ input.value="";
+ input.dispatchEvent(new w.Event("input",{bubbles:true}));
+ assert.equal(w.document.querySelector("[data-chat-send]").disabled,false,
+   "Image-only messages should be sendable");
+ w.document.querySelector("[data-chat-form]").dispatchEvent(new w.Event("submit",{bubbles:true,cancelable:true}));
+ await wait(65);
+ assert.equal(writes.length,1,"One image-only message should be persisted");
+ assert.equal(writes[0].message,"📷 Photo");
+ assert.equal(writes[0].image_paths.length,1);
+ assert.ok(writes[0].image_paths[0].startsWith(me+"/"));
+ assert.equal(uploads.length,1);
+ assert.equal(uploads[0].blob.type,"image/webp");
+ assert.ok(uploads[0].blob.size<=1048576);
+ assert.equal(w.document.querySelectorAll(".study-chat-pending-tile").length,0);
+ toggle.click();
+ assert.ok(tracks.some(x=>x.typing===false));
+ dom.window.close();
+ console.log("PASS: Chat runtime reactions, Presence typing, image compression and image-only message upload.");
+})().catch(e=>{console.error(e);process.exitCode=1});
