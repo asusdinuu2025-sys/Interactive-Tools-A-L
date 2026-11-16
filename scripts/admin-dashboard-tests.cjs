@@ -385,11 +385,11 @@ async function setup(admin = true, options = {}) {
     /Local preview · PR #102/);
   dom.window.close();
   const adminMarkup = read("admin.html");
-  assert.match(adminMarkup, /studylab-admin\.js\?v=pr102-home-more-20261116-v13/);
+  assert.match(adminMarkup, /studylab-admin\.js\?v=pr102-guided-v1/);
   assert.match(adminMarkup, /Loading dashboard/);
-  assert.match(adminMarkup, /pr102-home-more-20261116-v13/);
+  assert.match(adminMarkup, /pr102-guided-v1/);
   assert.match(read("index.html"), /studylab-popups[.]js[?]v=20261116-v15/);
-  assert.match(read("index.html"), /studylab-content[.]js[?]v=pr102-home-more-20261116-v13/);
+  assert.match(read("index.html"), /studylab-content[.]js[?]v=pr102-guided-v1/);
   assert.match(adminMarkup,/sladmin-brand-mark" aria-hidden="true">ツ/);
   assert.match(adminMarkup,/sladmin-back-icon/);
   assert.match(adminMarkup,/studylab-popups.css/);
@@ -407,7 +407,7 @@ async function setup(admin = true, options = {}) {
       "chemistry.html","biology.html","Telegram_Channels.html",
       "lesson-packs.html"]) {
     assert.match(read(page),
-      /studylab-content[.]css[?]v=pr102-actions-20261116-v12/,
+      /studylab-content[.]css[?]v=pr102-guided-v1/,
       page + " must fetch the new CSS instead of stale browser copies");
   }
   const homeHtml = read("index.html");
