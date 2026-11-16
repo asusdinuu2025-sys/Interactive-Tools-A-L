@@ -68,6 +68,7 @@ async function setup(admin = true, options = {}) {
   for (const f of [
     "studylab-admin-config",
     "studylab-admin-api",
+    "studylab-popup-format",
     "studylab-admin",
   ]) {
     w.eval(read("assets/js/" + f + ".js"));
@@ -90,6 +91,31 @@ async function setup(admin = true, options = {}) {
   assert.equal(w.document.querySelectorAll(".sladmin-quick-icon").length,6);
   assert.equal(w.document.querySelector("#sladmin-mode").hidden,true,
     "The redundant connected-preview notice should not occupy screen space");
+  // Pop-up markdown is rendered as DOM nodes, never unsanitized HTML.
+  const rich = w.document.createElement("p");
+  w.StudyLabPopupFormat.render(rich,
+    "**Bold** and __underlined__, *italic*, ~~deleted~~, `code`. <script>bad()</script>");
+  assert.equal(rich.querySelector("strong")?.textContent,"Bold");
+  assert.equal(rich.querySelector("u")?.textContent,"underlined");
+  assert.equal(rich.querySelector("em")?.textContent,"italic");
+  assert.equal(rich.querySelector("s")?.textContent,"deleted");
+  assert.equal(rich.querySelector("code")?.textContent,"code");
+  assert.equal(rich.querySelectorAll("script,img").length,0);
+  assert.match(rich.textContent,/<script>bad\(\)<\/script>/);
+  // Hover pauses the actual dismiss timer, rather than only its progress bar.
+  const timed = w.document.createElement("aside");
+  w.document.body.append(timed);
+  let dismissed = false;
+  const stop = w.StudyLabPopupFormat.armTimer(timed,70,()=>{dismissed=true;});
+  timed.dispatchEvent(new w.Event("pointerenter"));
+  await new Promise(resolve => setTimeout(resolve,95));
+  assert.equal(dismissed,false,"Hover must prevent the pop-up from closing");
+  assert.ok(timed.classList.contains("slpopup-paused"));
+  timed.dispatchEvent(new w.Event("pointerleave"));
+  await new Promise(resolve => setTimeout(resolve,100));
+  assert.equal(dismissed,true,"Countdown should resume with remaining time");
+  stop();
+  timed.remove();
   // Simulate a generic cosmetic ad-block rule. The Admin Dashboard should
   // not have ad-looking IDs or classes, and must remain visible.
   const cosmetic = w.document.createElement("style");
@@ -136,12 +162,27 @@ async function setup(admin = true, options = {}) {
   click("+ New pop-up");
   const popupForm = w.document.querySelector(".sladmin-popup-dialog form");
   assert.ok(popupForm, "New popup editor is present");
+  popupForm.querySelector('[name="title"]').value="Hello";
+  popupForm.querySelector('[name="message"]').value="**Welcome** __student__";
+  popupForm.querySelector('button').disabled = false;
+  [...popupForm.querySelectorAll("button")].find(b=>b.textContent==="Preview").click();
+  assert.equal(w.document.querySelector(".slpopup-toast .slpopup-message strong")?.textContent,"Welcome");
+  assert.equal(w.document.querySelector(".slpopup-toast .slpopup-message u")?.textContent,"student");
+  w.document.querySelector(".slpopup-toast .slpopup-close").click();
   assert.equal(popupForm.querySelector('[name="link_label"]').value,"View");
   assert.equal(popupForm.querySelector('[name="link_label"]').maxLength,20);
   popupForm.querySelector('button[aria-label="Close pop-up editor"]').click();
+  click("Admins");
+  await wait();
+  assert.equal([...w.document.querySelectorAll(".sladmin-row-actions button")]
+    .filter(b=>/^(?:Ban|Unban) user$/i.test(b.textContent)).length,0,
+    "The Admins tab must not offer Ban buttons");
   click("Users");
   await wait();
   assert.equal(w.document.querySelectorAll(".sladmin-row").length, 5);
+  assert.ok([...w.document.querySelectorAll(".sladmin-row-actions button")]
+    .some(b=>/^Ban user$/i.test(b.textContent)),
+    "User moderation remains accessible in the Users tab");
   click("Give blue badge");
   await wait();
   assert.ok(
@@ -306,11 +347,11 @@ async function setup(admin = true, options = {}) {
     /Local preview · PR #102/);
   dom.window.close();
   const adminMarkup = read("admin.html");
-  assert.match(adminMarkup, /studylab-admin\.js\?v=pr102-actions-20261116-v11/);
+  assert.match(adminMarkup, /studylab-admin\.js\?v=pr102-home-more-20261116-v13/);
   assert.match(adminMarkup, /Loading dashboard/);
-  assert.match(adminMarkup, /pr102-actions-20261116-v11/);
-  assert.match(read("index.html"), /studylab-popups[.]js[?]v=20261116-v11/);
-  assert.match(read("index.html"), /studylab-content[.]js[?]v=pr102-actions-20261116-v11/);
+  assert.match(adminMarkup, /pr102-home-more-20261116-v13/);
+  assert.match(read("index.html"), /studylab-popups[.]js[?]v=20261116-v13/);
+  assert.match(read("index.html"), /studylab-content[.]js[?]v=pr102-home-more-20261116-v13/);
   assert.match(adminMarkup,/sladmin-brand-mark" aria-hidden="true">ツ/);
   assert.match(adminMarkup,/sladmin-back-icon/);
   assert.match(adminMarkup,/studylab-popups.css/);
@@ -331,14 +372,28 @@ async function setup(admin = true, options = {}) {
       /studylab-content[.]css[?]v=pr102-actions-20261116-v12/,
       page + " must fetch the new CSS instead of stale browser copies");
   }
+  const homeHtml = read("index.html");
+  const sidebarJs = read("assets/js/home-sidebar.js");
+  const cmsJs = read("assets/js/studylab-content.js");
+  assert.match(homeHtml,/id="more-learning-resources"/);
+  assert.match(homeHtml,/home-sidebar[.]js[?]v=9/);
+  assert.match(sidebarJs,/data-nav-id="more"/);
+  assert.match(sidebarJs,/href="#more-learning-resources"/);
+  assert.match(sidebarJs,/\["more", "more-learning-resources"\]/);
+  assert.match(cmsJs,/lessons\.after\(more\)/);
+  assert.match(read("assets/css/home-sidebar.css"),/\.sl-home-more-anchor/);
   const popupCss=read("assets/css/studylab-popups.css");
   assert.match(popupCss,/slpopup-toast/);
+  assert.match(popupCss,/scrollbar-width:thin/);
+  assert.match(popupCss,/slpopup-paused/);
+  assert.match(popupCss,/\.slpopup-message strong/);
   assert.match(read("assets/js/studylab-popups.js"),/studylab_popup_claim/);
   assert.match(read("assets/js/studylab-ban-guard.js"),/studylab_user_ban_status/);
   for(const page of ["index.html","study-room.html","maths.html","physics.html",
       "chemistry.html","biology.html","Telegram_Channels.html","lesson-packs.html"]){
     const source=read(page);
     assert.match(source,/studylab-popups.js/,page+" popups script");
+    assert.match(source,/studylab-popup-format.js/,page+" shared formatter");
     assert.match(source,/studylab-ban-guard.js/,page+" ban check");
   }
   assert.ok(!/(?:id|class)="[^"]*\\bad-[^"]*"/.test(adminMarkup),
