@@ -65,3 +65,16 @@ The dashboard is a separate admin-only workspace reached from StudyLab's account
 
 The additional database migrations `20261116155600_admin_content_delete_v2.sql`, `20261116155627_admin_popup_messages_v2.sql`, `20261116155631_admin_ban_ledger_v2.sql` and the moderation-index migration are installed in Supabase. The ban Edge Function is deployed. No moderation, deletion, or pop-up creation was initiated just by installing the code or running the checks.
 
+
+## PR #102 polish: editable links and activity controls
+
+- **Card destination:** a bare domain such as `studylablk.netlify.app` is normalized to HTTPS. Standard HTTP/HTTPS pages and internal StudyLab paths are accepted. Unsafe executable schemes (`javascript:`, `data:`, `file:`), embedded credentials and malformed links remain blocked; external images require HTTPS.
+- **Card action label:** presets `Open resource`, `Open`, `Open link`, `View`, `Try`, `Learn more`, or custom text up to **22 characters**. Output is rendered as plain text on an auto-sizing glass button.
+- **Pop-up link label:** defaults to **View**; accepts `Open`, `Try`, `Read more`, `Learn more`, or a custom label up to **20 characters**. No forced decorative arrow.
+- **Overview:** shortcuts use compact inlined SVGs. Only *today's* activity in **Asia/Colombo** appears in Recent activity, with automatic rollover at 00:00 Sri Lanka time. Historical activity is unaffected by the rollover.
+- **Activity:** `Clear` hides one entry from the dashboard, and `Clear all` hides all displayed entries. The private audit rows remain stored; neither operation reverses live changes. For new supported content, permission and pop-up actions, `Undo` is enabled only when an atomic before/after snapshot exists. The server compares the current state with that snapshot to reject stale reversals. Old events, bans and cascading section deletions have no automatic Undo. An already delivered pop-up cannot be recalled.
+- **UI:** clear high-contrast red Delete controls in light theme, no redundant connected-mode banner, no Overview arrow glyphs, with SVG icons.
+- **Database:** migrations `20261116195503_admin_action_labels_and_links.sql` and `20261116195507_admin_reversible_activity.sql` were applied to Supabase after passing isolated PostgreSQL tests. No real users, existing history entries, publications or pop-up rows were changed by installation. Admin undo and history actions are server-authorized; anonymous callers have no EXECUTE privilege.
+
+**Known limit:** A visible Undo is not a generic reversal of every action. History removal never destroys the underlying audit log. Shared media, externally sent notifications and account bans require their own management controls rather than automatic historical rollback. Admins should still confirm any action that changes live data.
+
