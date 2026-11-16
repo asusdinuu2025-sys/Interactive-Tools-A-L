@@ -14,13 +14,14 @@
   const waiting = new Set();
   let timer;
   function scheduleLookup(userId) {
-    if (window.StudyLabAdminConfig?.mode !== "live" || queried.has(userId)) return;
+    if (window.StudyLabAdminConfig?.mode === "preview" || queried.has(userId)) return;
     queried.add(userId); waiting.add(userId);
     clearTimeout(timer);
     timer = setTimeout(flush, 80);
   }
   async function flush() {
       const ids = [...waiting].slice(0, 100); ids.forEach(id => waiting.delete(id));
+      await window.StudyLabAccount?.startup;
       const client = window.StudyLabAccount?.client;
       if (!client) { ids.forEach(id => queried.delete(id)); return; }
       const result = await client.from("studylab_verifications").select("user_id").in("user_id", ids);
