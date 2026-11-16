@@ -67,6 +67,8 @@
     });
   }
   async function start() {
+    await window.StudyLabBanGuardReady;
+    if (window.StudyLabBanned) return;
     const client = window.StudyLabAccount?.client ||
       window.supabase?.createClient?.(PROJECT,KEY);
     if (!client) return;
