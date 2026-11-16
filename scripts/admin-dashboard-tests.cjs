@@ -157,8 +157,11 @@ async function setup(admin = true, options = {}) {
     /PR #102 preview/);
   dom.window.close();
   const adminMarkup = read("admin.html");
-  assert.match(adminMarkup, /studylab-admin\.js\?v=pr102-overview-20261116-v4/);
+  assert.match(adminMarkup, /studylab-admin\.js\?v=pr102-standalone-20261116-v5/);
   assert.match(adminMarkup, /Loading dashboard/);
+  assert.match(adminMarkup, /PR #102 · v5 · HTML loaded/);
+  assert.ok(!adminMarkup.includes('href="assets/css/main.css"'),
+    "Admin must use isolated CSS, not global home rules");
   assert.match(read("netlify.toml"), /for = "\/admin\.html"[\s\S]*?no-store/);
   ({ dom, w } = await setup(false));
   assert.equal(w.document.querySelector("#ad-workspace").hidden, true);
