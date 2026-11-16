@@ -195,7 +195,7 @@
     // Paint the workspace FIRST. No failing or stalled request may make
     // the entire Overview disappear, including its navigation.
     const stats = el("div", undefined, "sladmin-stats");
-    const real = api.readonlyLive ? api.liveStats : null;
+    const real = api.liveStats;
     const metricLabels = real ? [
       "Student profiles · live",
       "Administrators · live",
@@ -233,6 +233,11 @@
       ["Upload images and documents →", "Media"],
     ]) quick.append(button(title, () => navigate(tab), "sladmin-quick"));
     recent.append(el("h3", "Recent activity"), recentItems);
+    if (api.connectedPreview) {
+      quick.prepend(el("p",
+        "CONNECTED PREVIEW · Authorized admin actions here change the live StudyLab database. Review carefully before confirming.",
+        "sladmin-preview-explanation"));
+    }
     if (api.preview) {
       quick.prepend(el(
         "p",
@@ -324,9 +329,13 @@
     const list = el("div", undefined, "sladmin-list"),
       pager = el("div", undefined, "sladmin-pager");
     toolbar.append(search);
-    if (api.readonlyLive) {
+    if (api.connectedPreview) {
       host.append(el("p",
-        "Live StudyLab users. Read-only preview: only the three existing administrators can access this page. Real account and badge changes are disabled until the production rollout is approved.",
+        "Live users · Administrator-only controls. Changes to permissions or verification badges take effect on StudyLab immediately after confirmation. Guest accounts cannot receive admin privileges.",
+        "sladmin-preview-explanation"));
+    } else if (api.readonlyLive) {
+      host.append(el("p",
+        "Live StudyLab users. Read-only preview: real account and badge changes are disabled.",
         "sladmin-preview-explanation"));
     } else if (api.preview && api.liveStatsError) {
       host.append(el("p",
@@ -378,7 +387,12 @@
             }
           }),
         ];
-        if (u.id === info.user.id) actions[2].disabled = true;
+        if (u.id === info.user.id || u.guest) actions[2].disabled = true;
+        if (u.guest) {
+          actions[1].disabled = true;
+          actions[1].title = "Sign up as a registered user before receiving verification";
+          actions[2].title = "Guest profiles cannot become administrators";
+        }
         if (api.readonlyLive) {
           actions[1].disabled = true;
           actions[2].disabled = true;
@@ -656,6 +670,8 @@
     try {
       const d = payload(),
         action = b?.value || "draft";
+      if (api.connectedPreview && action === "publish" &&
+          !confirm("Publish this resource to the REAL StudyLab database? This is not a local preview.")) return;
       await api.save(d, editing.revision, action);
       setDirty(false);
       $("#sladmin-editor").close();
@@ -752,34 +768,33 @@
   for (const tab of tabs)
     $("#sladmin-tabs").append(button(tab, () => navigate(tab)));
   (async () => {
-    const buildProof = $("#sladmin-build-proof");
-    if (buildProof) buildProof.textContent = "PR #102 · v7 · JS started";
     try {
       info = await api.init();
-      if (buildProof) buildProof.textContent =
-        "PR #102 · v7 · " + (api.readonlyLive ? "Live data connected" : api.preview ? "Preview ready" : "Dashboard ready");
       $("#sladmin-gate").hidden = true;
       $("#sladmin-workspace").hidden = false;
       $("#sladmin-identity").textContent = "Administrator";
       $("#sladmin-mode").append(
-        el("strong", api.preview ? "Preview workspace. " : "Live workspace. "),
+        el("strong", api.connectedPreview ? "PR #102 · Live admin controls. "
+          : api.preview ? "Preview workspace. " : "Live workspace. "),
         document.createTextNode(
-          api.readonlyLive
-            ? "Connected securely to real StudyLab profiles and statistics. This preview is read-only for real accounts; content edits remain local and unpublished."
-            : api.preview
-              ? "Changes stay on this device. Real account data is not available; sample users are shown until it reconnects."
-              : "Published edits are visible to students. Drafts stay private.",
+          api.connectedPreview
+            ? "Connected to the real StudyLab database. Granting rights, changing badges and publishing resources affect live data. Existing site layout remains on its deployed version until release."
+            : api.readonlyLive
+              ? "Connected securely to real StudyLab profiles and statistics. This preview is read-only."
+              : api.preview
+                ? "Sample content and changes stay on this device. No live database updates."
+                : "Published edits are visible to students. Drafts stay private.",
         ),
       );
       $("#sladmin-mode").append(el(
         "small",
-        api.preview ? "PR #102 preview · dashboard build 2026-11-16.7"
-          : "Dashboard build 2026-11-16.7",
+        api.connectedPreview ? "Connected admin preview · PR #102"
+          : api.preview ? "Local preview · PR #102" : "StudyLab Admin · Live",
         "sladmin-build-label",
       ));
       await navigate("Overview");
     } catch (e) {
-      if (buildProof) buildProof.textContent = "PR #102 · v7 · Check access";
+
       $("#sladmin-workspace").hidden = true;
       $("#sladmin-gate").hidden = false;
       $("#sladmin-gate").textContent = e?.message || "Admin access could not be verified.";
