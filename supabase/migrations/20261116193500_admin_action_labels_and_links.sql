@@ -70,7 +70,6 @@ create function public.studylab_admin_popup_set(
   p_message text default '', p_variant text default 'info',
   p_placement text default 'top-right', p_seconds integer default 8,
   p_link text default '', p_starts_at timestamptz default null,
-  p_link_label text default 'View',
   p_link_label text default 'View'
 )
 returns jsonb language plpgsql security definer set search_path=''
