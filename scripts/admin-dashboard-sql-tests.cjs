@@ -41,9 +41,9 @@ as $admin_gate$ select auth.uid() in (
     ),
   );
   for (const migration of [
-    "supabase/migrations/20261116160000_admin_content_delete.sql",
-    "supabase/migrations/20261116160100_admin_popups.sql",
-    "supabase/migrations/20261116160200_admin_bans.sql",
+    "supabase/migrations/20261116155600_admin_content_delete_v2.sql",
+    "supabase/migrations/20261116155627_admin_popup_messages_v2.sql",
+    "supabase/migrations/20261116155631_admin_ban_ledger_v2.sql",
   ]) {
     await db.exec(fs.readFileSync(migration, "utf8"));
   }
