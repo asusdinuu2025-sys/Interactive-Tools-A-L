@@ -8,7 +8,12 @@ function make(html){
    url:"https://studylablk.netlify.app/index.html",runScripts:"outside-only",
    pretendToBeVisual:true
  });
- dom.window.CSS.escape=s=>String(s).replace(/[^a-zA-Z0-9_-]/g,"\\$&");
+ if(!dom.window.CSS)dom.window.CSS={};
+ dom.window.CSS.escape=s=>String(s).replace(/[^a-zA-Z0-9_-]/g,"\\ dom.window.CSS.escape=s=>String(s).replace(/[^a-zA-Z0-9_-]/g,"\\$&");");
+ dom.window.HTMLDialogElement.prototype.showModal=function(){this.open=true;};
+ dom.window.HTMLDialogElement.prototype.close=function(){
+   this.open=false;this.dispatchEvent(new dom.window.Event("close"));
+ };
  return dom;
 }
 (async()=>{
