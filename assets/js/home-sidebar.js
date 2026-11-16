@@ -45,7 +45,9 @@
       <a class="sl-home-nav-item" href="#free-lesson-packs" data-nav-id="free-lesson-packs" title="Free Lesson Packs">
         <span class="sl-home-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5.5A3.5 3.5 0 0 1 7.5 2H20v17H7.5A3.5 3.5 0 0 0 4 22z"/><path d="M4 5.5v16.5M8 6h8M8 10h8"/></svg></span><span class="sl-home-nav-label">Free Lesson Packs</span>
       </a>
-      
+      <a class="sl-home-nav-item" href="#more-learning-resources" data-nav-id="more" title="More sections">
+        <span class="sl-home-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 10h16M4 15h9"/><path d="m15 17 4 4 4-4"/></svg></span><span class="sl-home-nav-label">More</span>
+      </a>
     </nav>
     <div class="sl-home-sidebar-hint">Navigate your A/L workspace</div>
     <div class="sl-home-quick-actions" aria-label="StudyLab quick tools"></div>`;
@@ -80,7 +82,8 @@
     ["past-papers", "past-papers"],
     ["telegram-links", "telegram-links"],
     ["other-al-resources", "other-al-resources"],
-    ["free-lesson-packs", "free-lesson-packs"]
+    ["free-lesson-packs", "free-lesson-packs"],
+    ["more", "more-learning-resources"]
   ].map(([navId, targetId]) => ({
     navId,
     element: document.getElementById(targetId)
@@ -189,7 +192,8 @@
   navItems.forEach(item => {
     item.addEventListener("click", event => {
       const id = item.dataset.navId;
-      const targetId = id === "home" ? "home-overview" : id;
+      const targetId = id === "home" ? "home-overview"
+        : id === "more" ? "more-learning-resources" : id;
       const target = document.getElementById(targetId);
 
       if (!target) return;
