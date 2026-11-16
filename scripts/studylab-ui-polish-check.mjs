@@ -92,9 +92,9 @@ assert.doesNotMatch(addedCornerStyles,/opacity:calc\(var\(--slr-art-opacity\) \*
 
 for(const html of [roomHtml,homeHtml]){
   assert.match(html,/studylab-profile-view\.js\?v=20261116-manual-crop-v1/);
-  assert.match(html,/studylab-follow\.css\?v=20261115-inline-bio-v5/);
-  assert.match(html,/chat\.css\?v=20261115-mobile-chat-header-v7/);
-  assert.match(html,/chat\.js\?v=20261115-mobile-chat-header-v7/);
+  assert.match(html,/studylab-follow\.css\?v=20261116-follow-colors-v1/);
+  assert.match(html,/chat\.css\?v=20261116-chat-liquid-v1/);
+  assert.match(html,/chat\.js\?v=20261116-chat-liquid-v1/);
   assert.match(html,/studylab-avatar\.js\?v=20261116-manual-crop-v1/,
     "The manual crop renderer must have an updated production asset version");
 }
