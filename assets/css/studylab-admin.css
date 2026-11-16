@@ -453,6 +453,41 @@ html[data-theme="light"] .ad-dialog {
   margin: 0;
   overflow-wrap: anywhere;
 }
+/* New preview Overview is immediately useful even before its statistics load. */
+.ad-preview-explanation {
+  border: 1px solid var(--ad-line);
+  border-radius: 12px;
+  background: rgba(91, 155, 240, .10);
+  padding: 11px 13px;
+  margin: 0 0 16px !important;
+  line-height: 1.6;
+}
+.ad-build-label {
+  display: block;
+  margin-top: 9px;
+  letter-spacing: .045em;
+  font-size: 11px;
+  opacity: .86;
+}
+.ad-data-warning {
+  border: 1px solid rgba(232, 161, 93, .44);
+  border-radius: 16px;
+  padding: 16px 20px;
+  margin-bottom: 18px;
+  background: rgba(232, 161, 93, .09);
+  color: var(--ad-text);
+}
+.ad-data-warning p {
+  color: var(--ad-muted);
+  overflow-wrap: anywhere;
+}
+.ad-data-warning button {
+  margin-top: 7px;
+}
+.ad-stat {
+  overflow-wrap: anywhere;
+  font-size: clamp(18px, 2.4vw, 36px);
+}
 .ad-loading, .ad-error-panel {
   border: 1px solid var(--ad-line);
   border-radius: 20px;
