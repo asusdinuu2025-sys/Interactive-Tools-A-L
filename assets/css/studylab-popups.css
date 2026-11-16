@@ -104,3 +104,29 @@ body[data-theme="light"] .slpopup-toast .slpopup-close {
   .slpopup-toast {animation:none;}
   .slpopup-toast::after {animation:none;}
 }
+
+/* Status message for users whose StudyLab sign-in is suspended. */
+.slban-notice {
+  position:fixed;
+  z-index:2147482500;
+  inset:auto 16px 22px auto;
+  width:min(410px,calc(100vw - 32px));
+  padding:20px;
+  border:1px solid rgba(255,188,150,.45);
+  border-radius:20px;
+  background:linear-gradient(135deg,rgba(76,42,58,.94),rgba(18,28,48,.96));
+  box-shadow:0 20px 70px rgba(0,0,0,.30);
+  backdrop-filter:blur(18px);
+  color:#fff0e9;
+  font:14px/1.6 "Nirmala UI","Segoe UI",sans-serif;
+}
+.slban-notice strong{display:block;font-size:18px;margin-bottom:6px;}
+.slban-notice p{margin:0 0 12px;overflow-wrap:anywhere;}
+.slban-notice button{
+  border:1px solid rgba(255,207,179,.36);
+  background:rgba(255,255,255,.08);
+  border-radius:10px;
+  padding:7px 14px;
+  color:inherit;
+  cursor:pointer;
+}
