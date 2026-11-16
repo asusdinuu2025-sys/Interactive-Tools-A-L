@@ -136,7 +136,7 @@ assert.match(followCss,/PR #102 Chat Polish/);
 assert.match(followCss,/color:#57d8f9!important/);
 assert.match(followCss,/color:#164f88!important/);
 assert.match(followCss,/body\.study-room-page\[data-room-theme\]/);
-const imageSql=read("supabase/migrations/20261116204000_chat_image_attachments.sql");
+const imageSql=read("supabase/migrations/20261116214516_chat_image_attachments.sql");
 assert.match(imageSql,/studylab_private\.chat_image_paths_valid/);
 assert.match(imageSql,/studylab-chat-images/);
 assert.match(imageSql,/1048576/);
