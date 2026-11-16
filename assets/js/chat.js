@@ -539,6 +539,40 @@
     text.className="study-chat-message-content";
     text.append(linkifyMessage(row.message));
     body.append(text);
+    const paths=Array.isArray(row.image_paths)
+      ? row.image_paths.filter(x=>typeof x==="string" && x.startsWith(String(row.user_id)+"/"))
+        .slice(0,CONFIG.maxImages) : [];
+    if(paths.length){
+      if(row.message==="📷 Photo")text.hidden=true;
+      const gallery=document.createElement("div");
+      gallery.className="study-chat-image-gallery";
+      gallery.dataset.count=String(paths.length);
+      for(const path of paths){
+        const tile=document.createElement("a");
+        tile.className="study-chat-image-tile is-loading";
+        tile.target="_blank";tile.rel="noopener noreferrer";
+        tile.setAttribute("aria-label","Open chat attachment");
+        const image=document.createElement("img");
+        image.alt="Study chat image";image.loading="lazy";
+        tile.append(image);gallery.append(tile);
+        const cached=imageUrlCache.get(path);
+        if(cached?.expires>Date.now()){
+          tile.href=cached.url;image.src=cached.url;
+          tile.classList.remove("is-loading");
+        }else if(client){
+          client.storage.from(CONFIG.imageBucket).createSignedUrl(path,3600)
+            .then(({data,error})=>{
+              if(error || !data?.signedUrl || !tile.isConnected){
+                tile.classList.add("is-unavailable");return;
+              }
+              const url=data.signedUrl;
+              imageUrlCache.set(path,{url,expires:Date.now()+3500000});
+              tile.href=url;image.src=url;tile.classList.remove("is-loading");
+            }).catch(()=>tile.classList.add("is-unavailable"));
+        }
+      }
+      body.append(gallery);
+    }
 
     // Telegram-style: used reactions and counts stay on the bubble;
     // unused choices stay hidden inside the existing React picker.
@@ -788,7 +822,7 @@
 
     const { data, error } = await client
       .from(CONFIG.table)
-      .select("id,message,created_at,session_id,user_id,nickname,reply_to,edited_at")
+      .select("id,message,created_at,session_id,user_id,nickname,reply_to,edited_at,image_paths")
       .order("created_at", { ascending: false })
       .order("id", { ascending: false })
       .limit(CONFIG.maxMessages);
