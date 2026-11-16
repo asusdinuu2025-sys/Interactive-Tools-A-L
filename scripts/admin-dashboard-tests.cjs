@@ -321,11 +321,14 @@ async function setup(admin = true, options = {}) {
   assert.match(contentCss, /max-height:146px/);
   assert.ok(contentCss.includes("section.sl-cms-section > .sl-cms-grid"));
   assert.ok(contentCss.includes(".sl-cms-card .sl-cms-open"));
+  assert.match(contentCss,/max-width:100%/);
+  assert.match(contentCss,/overflow-wrap:anywhere/);
+  assert.match(read("assets/css/studylab-popups.css"),/slpopup-link-preview/);
   for (const page of ["index.html","maths.html","physics.html",
       "chemistry.html","biology.html","Telegram_Channels.html",
       "lesson-packs.html"]) {
     assert.match(read(page),
-      /studylab-content[.]css[?]v=pr102-glass-cards-20261116-v10/,
+      /studylab-content[.]css[?]v=pr102-actions-20261116-v12/,
       page + " must fetch the new CSS instead of stale browser copies");
   }
   const popupCss=read("assets/css/studylab-popups.css");
