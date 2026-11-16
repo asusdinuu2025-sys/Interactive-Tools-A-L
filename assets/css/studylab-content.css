@@ -144,3 +144,129 @@ body[data-theme="light"] .sl-cms-section {
 }
 
 .sl-home-nav-item[hidden] { display: none !important; }
+
+/* PR #102 glass parity: newly created sections and resource cards.
+   Match the translucent StudyLab panels instead of making solid, full-width
+   image banners. Scoped to new CMS content; existing cards are untouched. */
+section.sl-cms-section {
+  --sl-cms-edge: rgba(134,194,254,.26);
+  --sl-cms-sheen: rgba(234,247,255,.065);
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  min-width: 0;
+  padding: clamp(18px,2.2vw,27px);
+  background:
+    linear-gradient(132deg,var(--sl-cms-sheen),transparent 52%),
+    rgba(18,40,85,.045);
+  border: 1px solid var(--sl-cms-edge);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12),0 12px 34px rgba(8,26,58,.08);
+  -webkit-backdrop-filter: blur(5px) saturate(125%);
+  backdrop-filter: blur(5px) saturate(125%);
+}
+section.sl-cms-section > h2,
+section.sl-cms-section > p { position:relative;z-index:1; }
+section.sl-cms-section > p {max-width:72ch;}
+section.sl-cms-section > .sl-cms-grid {
+  display:grid;
+  width:100%;
+  min-width:0;
+  grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr));
+  gap:clamp(12px,1.8vw,18px);
+  align-items:stretch;
+  justify-items:stretch;
+  margin:20px 0 0;
+}
+section.sl-cms-section .sl-cms-grid > a.sl-cms-card,
+[data-cms-additions] > a.sl-cms-card {
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:flex-start;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  overflow:hidden;
+  padding:17px;
+  border-radius:21px;
+  color:inherit;
+  text-decoration:none;
+  background:linear-gradient(145deg,rgba(190,221,255,.10),rgba(88,142,214,.045) 48%,rgba(155,122,225,.055));
+  border:1px solid rgba(139,204,255,.31);
+  box-shadow:inset 0 1px rgba(244,251,255,.12),0 9px 25px rgba(5,25,59,.09);
+  -webkit-backdrop-filter:blur(7px) saturate(135%);
+  backdrop-filter:blur(7px) saturate(135%);
+}
+section.sl-cms-section .sl-cms-grid > a.sl-cms-card:hover,
+[data-cms-additions] > a.sl-cms-card:hover {
+  transform:translateY(-2px);
+  background:linear-gradient(140deg,rgba(173,216,255,.17),rgba(117,164,231,.08),rgba(178,143,240,.09));
+  border-color:rgba(139,212,255,.53);
+}
+.sl-cms-card img.sl-cms-image {
+  display:block;
+  width:100%;
+  height:clamp(108px,11vw,146px);
+  max-height:146px;
+  min-height:0;
+  max-width:100%;
+  flex:0 0 auto;
+  padding:7px;
+  object-fit:contain;
+  object-position:center;
+  background:rgba(94,152,208,.055);
+  border:1px solid rgba(166,211,255,.17);
+  border-radius:15px;
+}
+.sl-cms-card .sl-cms-open {
+  display:inline-flex;
+  margin-top:auto;
+  padding:9px 14px;
+  min-height:36px;
+  border-radius:999px;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(125deg,rgba(151,211,255,.18),rgba(167,151,239,.13));
+  border:1px solid rgba(167,219,255,.34);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.16);
+  color:inherit;
+  font:700 12px/1.2 "Nirmala UI","Segoe UI",sans-serif;
+}
+.sl-cms-card:hover .sl-cms-open {
+  background:linear-gradient(120deg,rgba(143,215,255,.25),rgba(188,159,242,.20));
+  border-color:rgba(158,222,255,.50);
+}
+section.sl-cms-section[data-layout="list"] > .sl-cms-grid {
+  grid-template-columns:minmax(0,1fr);
+}
+section.sl-cms-section[data-layout="list"] .sl-cms-card {
+  flex-direction:row;
+  align-items:center;
+  gap:15px;
+}
+section.sl-cms-section[data-layout="list"] img.sl-cms-image {
+  width:min(120px,35%);
+  max-height:92px;
+  height:92px;
+}
+html[data-theme="light"] section.sl-cms-section,
+body[data-theme="light"] section.sl-cms-section {
+  --sl-cms-edge:rgba(88,139,194,.24);
+  --sl-cms-sheen:rgba(255,255,255,.38);
+  background:linear-gradient(135deg,rgba(255,255,255,.30),rgba(235,246,255,.11));
+  box-shadow:inset 0 1px rgba(255,255,255,.60),0 12px 32px rgba(65,103,162,.07);
+}
+html[data-theme="light"] section.sl-cms-section .sl-cms-grid > a.sl-cms-card,
+body[data-theme="light"] section.sl-cms-section .sl-cms-grid > a.sl-cms-card {
+  background:linear-gradient(135deg,rgba(255,255,255,.48),rgba(241,245,255,.18));
+  border-color:rgba(87,145,211,.28);
+  box-shadow:inset 0 1px rgba(255,255,255,.7),0 8px 23px rgba(58,98,151,.07);
+}
+@media(max-width:720px){
+  section.sl-cms-section > .sl-cms-grid {
+    grid-template-columns:minmax(0,1fr);
+  }
+  section.sl-cms-section[data-layout="list"] .sl-cms-card {
+    flex-direction:column;align-items:flex-start;
+  }
+}
