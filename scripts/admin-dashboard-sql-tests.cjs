@@ -40,6 +40,13 @@ as $admin_gate$ select auth.uid() in (
       "utf8",
     ),
   );
+  for (const migration of [
+    "supabase/migrations/20261116160000_admin_content_delete.sql",
+    "supabase/migrations/20261116160100_admin_popups.sql",
+    "supabase/migrations/20261116160200_admin_bans.sql",
+  ]) {
+    await db.exec(fs.readFileSync(migration, "utf8"));
+  }
   const admin = "24e78cd0-4565-407a-96f7-9cfde083f6d2",
     student = "11111111-1111-4111-8111-111111111111";
   async function as(id, role = "authenticated") {
@@ -195,8 +202,84 @@ as $admin_gate$ select auth.uid() in (
     (await db.query("select * from studylab_site_content")).rows.length,
     1,
   );
+  // New admin capabilities: remote deletes never leave a custom card/section
+  // behind, while built-in cards use only a minimal public HTML tombstone.
+  await as(admin);
+  const section = {
+    id:"custom-test-section",kind:"section",page:"index.html",
+    title:"Extra test section",description:"",url:"",image:"",
+    section:"",layout:"cards",order:100,hidden:false
+  };
+  const child = {...item,id:"custom-test-child",page:"index.html",
+    section:section.id,title:"Child"};
+  await db.query("select studylab_admin_content_save($1,$2,0,'publish')",
+    [section.id,JSON.stringify(section)]);
+  await db.query("select studylab_admin_content_save($1,$2,0,'publish')",
+    [child.id,JSON.stringify(child)]);
+  const gone = (await db.query(
+    "select studylab_admin_content_delete($1,$2,$3,$4,$5) as result",
+    [section.id,"index.html","section",1,false]
+  )).rows[0].result;
+  assert.equal(gone.deleted_children,1);
+  assert.equal((await db.query(
+    "select count(*)::integer as n from public.studylab_site_content where id in ($1,$2)",
+    [section.id,child.id])).rows[0].n,0);
+  const customDeleted=(await db.query(
+    "select studylab_admin_content_delete($1,$2,$3,$4,$5) as result",
+    ["test-card","maths.html","card",2,false]
+  )).rows[0].result;
+  assert.equal(customDeleted.deleted,true);
+  await db.query("select studylab_admin_content_delete($1,$2,$3,$4,$5)",
+    ["built-in-sample","index.html","card",0,true]);
+  assert.equal((await db.query(
+    "select payload->>'deleted' as gone from public.studylab_site_content where id='built-in-sample'"
+  )).rows[0].gone,"true");
+  assert.ok((await db.query("select studylab_admin_content_list() as list"))
+    .rows[0].list.some(r=>r.id==="built-in-sample"&&r.deleted));
+  await assert.rejects(
+    db.query("select studylab_admin_content_delete($1,$2,$3,$4,$5)",
+      ["home","index.html","section",0,true]),
+    /Built-in sections cannot be deleted/
+  );
+  // Admin messages: public RLS expires at 24h and each auth identity gets
+  // at most one successful atomic receipt.
+  const popup=(await db.query(
+    "select studylab_admin_popup_set($1,null,$2,$3,$4,$5,$6,$7,now()) as item",
+    ["create","New lesson packs","Check the updated resources","important","top-right",8,""]
+  )).rows[0].item;
+  await as(student);
+  assert.equal((await db.query(
+    "select studylab_popup_claim($1) as shown",[popup.id])).rows[0].shown,true);
+  assert.equal((await db.query(
+    "select studylab_popup_claim($1) as shown",[popup.id])).rows[0].shown,false);
+  await assert.rejects(db.query("select studylab_admin_popup_list()"),
+    /Admin access required/);
+  await assert.rejects(db.query("select studylab_admin_ban_preflight($1)",[admin]),
+    /Admin access required/);
+  await as(admin);
+  assert.equal((await db.query("select studylab_admin_popup_list() as list"))
+    .rows[0].list.length,1);
+  await db.query("select studylab_admin_popup_set('delete',$1)",[popup.id]);
+  assert.equal((await db.query(
+    "select count(*)::int as n from studylab_private.popup_receipts")).rows[0].n,0);
+  // Ban policy is server-checked. This SQL never bans GoTrue directly; the
+  // authenticated Edge Function is responsible for Auth ban_duration.
+  await assert.rejects(db.query(
+    "select studylab_admin_ban_preflight($1)",[admin]),/cannot ban your own/);
+  await db.query("select studylab_admin_ban_commit($1,24,$2)",
+    [student,"Repeated StudyLab rule violations"]);
+  const listed=(await db.query("select studylab_admin_users() as list")).rows[0].list;
+  assert.equal(listed.rows.find(x=>x.id===student).banned,true);
+  await as(student);
+  assert.equal((await db.query(
+    "select studylab_user_ban_status() as value")).rows[0].value.banned,true);
+  await as(admin);
+  await db.query("select studylab_admin_ban_commit($1,0,'')",[student]);
+  await as(student);
+  assert.equal((await db.query(
+    "select studylab_user_ban_status() as value")).rows[0].value.banned,false);
   await db.close();
   console.log(
-    "PASS: SQL authorization, grants, private drafts, publication, stale writes, unsafe links, grant/revoke, self-removal and badge visibility.",
+    "PASS: SQL authorization, grants, private drafts, publication, guarded deletion, 24-hour once-only popups, ban ledger, stale writes, grant/revoke and verification.",
   );
 })();
