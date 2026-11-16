@@ -221,7 +221,7 @@ async function setup(admin = true, options = {}) {
   assert.equal(registeredButtons.filter(b=>/badge|admin/i.test(b.textContent))
     .every(b=>!b.disabled), true);
   await w.StudyLabAdminAPI.setUser("11111111-1111-4111-8111-111111111111","verified",true);
-  assert.ok(calls.includes("studylab_admin_user_set"));
+  assert.ok(calls.includes("studylab_admin_action_v2"));
   await w.StudyLabAdminAPI.banUser(
     "11111111-1111-4111-8111-111111111111",24,"Test review");
   assert.ok(calls.includes("studylab-admin-ban"));
