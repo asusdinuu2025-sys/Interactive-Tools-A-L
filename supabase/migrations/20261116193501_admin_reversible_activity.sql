@@ -95,7 +95,7 @@ begin
    if v_pid is not null then
      select to_jsonb(t) into v_before from public.studylab_popups t where id=v_pid;
    end if;
-   v_result:=public.studylab_admin_popup_set(
+   v_result:=public.studylab_admin_popup_set_v2(
      p_action=>p_action,p_id=>v_pid,
      p_title=>coalesce(p_data->>'title',''),
      p_message=>coalesce(p_data->>'message',''),
