@@ -87,6 +87,9 @@ async function setup(admin = true, options = {}) {
   let { dom, w, calls } = await setup();
   assert.equal(w.document.querySelector("#sladmin-workspace").hidden, false);
   assert.equal(w.document.querySelectorAll(".sladmin-stats .sladmin-card").length, 4);
+  assert.equal(w.document.querySelectorAll(".sladmin-quick-icon").length,6);
+  assert.equal(w.document.querySelector("#sladmin-mode").hidden,true,
+    "The redundant connected-preview notice should not occupy screen space");
   // Simulate a generic cosmetic ad-block rule. The Admin Dashboard should
   // not have ad-looking IDs or classes, and must remain visible.
   const cosmetic = w.document.createElement("style");
@@ -127,6 +130,15 @@ async function setup(admin = true, options = {}) {
   assert.equal(state.published.length, 1);
   assert.equal(state.published[0].title, "Safe <script>title</script>");
   assert.equal(w.document.querySelectorAll(".sladmin-row script").length, 0);
+  assert.equal(w.document.querySelector("#sladmin-mode").hidden,true);
+  click("Pop-up Messages");
+  await wait();
+  click("+ New pop-up");
+  const popupForm = w.document.querySelector(".sladmin-popup-dialog form");
+  assert.ok(popupForm, "New popup editor is present");
+  assert.equal(popupForm.querySelector('[name="link_label"]').value,"View");
+  assert.equal(popupForm.querySelector('[name="link_label"]').maxLength,20);
+  popupForm.querySelector('button[aria-label="Close pop-up editor"]').click();
   click("Users");
   await wait();
   assert.equal(w.document.querySelectorAll(".sladmin-row").length, 5);
@@ -138,6 +150,25 @@ async function setup(admin = true, options = {}) {
   );
   assert.deepEqual(calls, ["studylab_social_is_admin","studylab_admin_readonly_stats_v1"]);
   const api = w.StudyLabAdminAPI;
+  const normalized = api.validate({
+    ...state.published[0], url:"studylablk.netlify.app", button_label:"Try"
+  });
+  assert.equal(normalized.url,"https://studylablk.netlify.app");
+  assert.equal(normalized.button_label,"Try");
+  assert.throws(() => api.validate({
+    ...state.published[0],button_label:"A".repeat(23)
+  }),/Button label/);
+  click("Activity");
+  await wait();
+  assert.ok([...w.document.querySelectorAll("#sladmin-content button")]
+    .some(b=>b.textContent==="Clear all"));
+  assert.ok([...w.document.querySelectorAll("#sladmin-content button")]
+    .some(b=>b.textContent==="Undo" && b.disabled));
+  const clearResult = await api.history("clear_all");
+  assert.ok(clearResult.cleared>=2);
+  assert.equal((await api.activity()).length,0);
+  click("Content");
+  await wait();
   assert.throws(
     () => api.validate({ ...state.published[0], url: "javascript:alert(1)" }),
     /not supported|Only normal HTTP or HTTPS/,
@@ -294,7 +325,14 @@ async function setup(admin = true, options = {}) {
     "Remove the temporary floating developer diagnostic overlay");
   assert.ok(!adminMarkup.includes('href="assets/css/main.css"'),
     "Admin must use isolated CSS, not global home rules");
+  const cardCode = read("assets/js/studylab-content.js");
+  assert.ok(cardCode.includes('d.button_label || "Open resource"'));
+  assert.ok(!cardCode.includes('"Open resource →"'));
+  const popupCode = read("assets/js/studylab-popups.js");
+  assert.ok(popupCode.includes('item.link_label || "View"'));
+  assert.ok(!popupCode.includes('"Open resource →"'));
   const adminCss = read("assets/css/studylab-admin.css");
+  assert.ok(adminCss.includes("button.sladmin-danger:not(:disabled)"));
   assert.match(adminCss, /content: "ADMIN DASHBOARD"/);
   assert.match(adminCss, /backdrop-filter: blur\(27px\)/);
   assert.match(read("netlify.toml"), /for = "\/admin\.html"[\s\S]*?no-store/);
