@@ -128,6 +128,8 @@
         published: cleanArray("published", (x) => x && typeof x.id === "string"),
         activity: cleanArray("activity", (x) => x && typeof x.action === "string"),
         media: cleanArray("media", (x) => x && typeof x.path === "string"),
+        deleted: cleanArray("deleted", (x) => typeof x === "string"),
+        popups: cleanArray("popups", (x) => x && typeof x.id === "string"),
         users: cleanArray("users", (x) => x && typeof x.id === "string" &&
           typeof x.display_name === "string" && typeof x.username === "string"),
       };
@@ -176,7 +178,14 @@
         { id: x.id, draft: x, revision: 0, published: true, builtin: true },
       ]),
     );
-    for (const r of rows || []) map.set(r.id, { ...r, builtin: map.has(r.id) });
+    for (const id of preview ? (state.deleted || []) : []) map.delete(id);
+    for (const r of rows || []) {
+      if (r.deleted) {
+        map.delete(r.id);
+        continue;
+      }
+      map.set(r.id, { ...r, builtin: map.has(r.id) });
+    }
     return [...map.values()];
   }
   async function save(item, revision, action) {
@@ -217,6 +226,99 @@
     audit(action, item.title);
     persist();
     return row;
+  }
+  async function deleteContent(record) {
+    requireAccess();
+    const { id, kind, page, title } = record.draft;
+    if (kind === "section" && record.builtin)
+      throw Error("Built-in sections cannot be deleted. Use Hide instead.");
+    if (!preview) return rpc("studylab_admin_content_delete", {
+      p_id: id, p_page: page, p_kind: kind,
+      p_revision: record.revision, p_builtin: Boolean(record.builtin),
+    });
+    const current = state.content.find((x) => x.id === id);
+    if ((current?.revision || 0) !== record.revision)
+      throw Error("This item changed. Reload before deleting.");
+    const ids = new Set([id]);
+    if (kind === "section") {
+      for (const x of state.content) {
+        if (x.draft?.section === id) ids.add(x.id);
+      }
+      for (const x of state.published) {
+        if (x.section === id) ids.add(x.id);
+      }
+    }
+    state.content = state.content.filter((x) => !ids.has(x.id));
+    state.published = state.published.filter((x) => !ids.has(x.id));
+    state.deleted = (state.deleted || []).filter((x) => !ids.has(x));
+    if (record.builtin) state.deleted.push(id);
+    audit("Delete " + kind, title);
+    persist();
+    return { deleted: true, deleted_children: ids.size - 1 };
+  }
+  async function popups() {
+    requireAccess();
+    return preview ? clone(state.popups || []) : rpc("studylab_admin_popup_list");
+  }
+  async function popupSet(action, data = {}) {
+    requireAccess();
+    if (!["create","update","delete"].includes(action))
+      throw Error("Invalid popup action");
+    if (preview) {
+      const current = state.popups || [];
+      if (action === "delete") {
+        state.popups = current.filter(x => x.id !== data.id);
+      } else {
+        const starts = action === "create"
+          ? (data.starts_at || new Date().toISOString())
+          : current.find(x => x.id === data.id)?.starts_at;
+        if (!starts) throw Error("Pop-up not found");
+        const item = { ...data,
+          id: action === "create" ? crypto.randomUUID() : data.id,
+          starts_at: starts,
+          expires_at: new Date(new Date(starts).getTime()+86400000).toISOString(),
+          delivered: 0,
+        };
+        state.popups = action === "create"
+          ? [item,...current]
+          : current.map(x => x.id === item.id ? item : x);
+      }
+      audit("Pop-up " + action, data.title || data.id);
+      persist();
+      return;
+    }
+    return rpc("studylab_admin_popup_set", {
+      p_action: action, p_id: data.id || null,
+      p_title: data.title || "", p_message: data.message || "",
+      p_variant: data.variant || "info",
+      p_placement: data.placement || "top-right",
+      p_seconds: Number(data.display_seconds || 8),
+      p_link: data.link || "", p_starts_at: data.starts_at || null,
+    });
+  }
+  async function banUser(id, hours, reason = "") {
+    requireAccess();
+    if (preview) {
+      if (livePreviewStats) throw Error("Read-only preview does not allow moderation.");
+      const found = state.users.find(x => x.id === id);
+      if (!found || found.admin || found.guest || id === user.id)
+        throw Error("This account cannot be banned.");
+      found.banned = hours !== 0;
+      audit(hours ? "Ban account" : "Unban account", found.display_name);
+      persist();
+      return;
+    }
+    if (!client.functions?.invoke)
+      throw Error("The account moderation service is not loaded.");
+    const r = await client.functions.invoke("studylab-admin-ban", {
+      body: { user_id: id, hours, reason },
+    });
+    if (r.error) {
+      const details = await r.error.context?.json?.().catch(() => null);
+      throw Error(details?.error || r.error.message || "Could not moderate account.");
+    }
+    if (!r.data?.ok) throw Error(r.data?.error || "Account moderation failed");
+    return r.data;
   }
   async function users(query = "", page = 0, admins = false) {
     requireAccess();
@@ -376,6 +478,10 @@
     init,
     content,
     save,
+    deleteContent,
+    popups,
+    popupSet,
+    banUser,
     users,
     setUser,
     activity,
