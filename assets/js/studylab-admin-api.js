@@ -31,20 +31,25 @@
   function requireAccess() {
     if (!user) throw Error("Admin access required.");
   }
-  function safeURL(value) {
-    value = String(value || "")
-      .trim()
-      .replace(/ /g, "%20");
+  function safeURL(value, image = false) {
+    value = String(value || "").trim();
     if (!value) return "";
-    if (preview && state?.media.some((x) => x.url === value)) return value;
+    if (preview && state?.media?.some((x) => x.url === value)) return value;
     if (value.length > 2048) throw Error("Link is too long.");
-    if (/[\u0000-\u0020\u007f\\]/.test(value) || value.startsWith("//"))
-      throw Error("Use a valid HTTPS link or site-relative path.");
-    const u = new URL(value, location.href);
-    if (!["https:", "http:"].includes(u.protocol) || u.username || u.password)
-      throw Error("This link type is not supported.");
-    if (u.origin !== location.origin && u.protocol !== "https:")
-      throw Error("External links must use HTTPS.");
+    if (/[\\u0000-\\u0020\\u007f\\\\]/.test(value) || value.startsWith("//"))
+      throw Error("Use an ordinary website link or a site-relative path.");
+    // A bare domain must NOT be interpreted as a path on studylablk.netlify.app.
+    // Keep single filenames such as maths.html and paths like ./lessons local.
+    if (!/^[a-z][a-z0-9+.-]*:/i.test(value) &&
+        !/^(?:[./?#]|\\w+\\.html(?:[?#]|$))/i.test(value) &&
+        /^(?:[a-z0-9-]+\\.)+[a-z]{2,}(?::[0-9]{2,5})?(?:[/?#]|$)/i.test(value)) {
+      value = "https://" + value;
+    }
+    const url = new URL(value, location.href);
+    if (!["https:", "http:"].includes(url.protocol) || url.username || url.password)
+      throw Error("Only normal HTTP or HTTPS website links are supported.");
+    if (image && url.origin !== location.origin && url.protocol !== "https:")
+      throw Error("External image URLs must use HTTPS.");
     return value;
   }
   function validate(item) {
@@ -57,7 +62,13 @@
     if (item.kind === "card" && !item.url)
       throw Error("Add a destination link.");
     item.url = safeURL(item.url);
-    item.image = safeURL(item.image);
+    item.image = safeURL(item.image, true);
+    if (item.kind === "card") {
+      item.button_label = String(item.button_label || "Open resource").trim();
+      if (!item.button_label || item.button_label.length > 22 ||
+          /[\\u0000-\\u001f<>]/.test(item.button_label))
+        throw Error("Button label must be 1–22 plain-text characters.");
+    }
     if (
       ![
         "index.html",
@@ -274,6 +285,7 @@
           : current.find(x => x.id === data.id)?.starts_at;
         if (!starts) throw Error("Pop-up not found");
         const item = { ...data,
+          link_label: String(data.link_label || "View").trim(),
           id: action === "create" ? crypto.randomUUID() : data.id,
           starts_at: starts,
           expires_at: new Date(new Date(starts).getTime()+86400000).toISOString(),
@@ -293,7 +305,8 @@
       p_variant: data.variant || "info",
       p_placement: data.placement || "top-right",
       p_seconds: Number(data.display_seconds || 8),
-      p_link: data.link || "", p_starts_at: data.starts_at || null,
+      p_link: safeURL(data.link || ""), p_starts_at: data.starts_at || null,
+      p_link_label: String(data.link_label || "View").trim(),
     });
   }
   async function banUser(id, hours, reason = "") {
