@@ -78,3 +78,13 @@ The additional database migrations `20261116155600_admin_content_delete_v2.sql`,
 
 **Known limit:** A visible Undo is not a generic reversal of every action. History removal never destroys the underlying audit log. Shared media, externally sent notifications and account bans require their own management controls rather than automatic historical rollback. Admins should still confirm any action that changes live data.
 
+
+## PR #102: readable long pop-ups and More navigation
+
+- **Responsive message overflow:** pop-ups now grow to the available viewport height instead of stopping at 480 px. If a particularly long message still requires scrolling, its scrollbar is **thin, rounded and themed** for both dark/light interfaces. White browser scroll tracks are not used.
+- **Pause while reading:** the actual close countdown and its progress indicator pause when the mouse pointer is over a pop-up, when its controls have keyboard focus, or when the tab is hidden. Time remaining resumes afterwards. Closing manually always works.
+- **Safe formatting:** authors can write `**bold**`, `__underline__`, `*italic*`, `~~strikethrough~~`, or backtick inline code in the existing message field. Newlines are preserved. The preview and published message both use the same text-to-DOM renderer; unsafe HTML remains plain text.
+- **Users vs Admins:** Ban/Unban remains in Users only. Admins does not show Ban controls (administrators remain protected by existing server rules).
+- **More sidebar:** More appears after Free Lesson Packs with an SVG icon. Its target is always located immediately after the Free Lesson Packs home section and before subsequent admin-managed extra sections, even after content is reordered. It remains available with no extra card.
+- All work is frontend-only on the PR preview: **no changes to live Supabase records, existing broadcasts, account roles or production frontend**. The previous one-time delivery limit and 24-hour expiry remain unchanged.
+
