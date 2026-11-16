@@ -41,22 +41,22 @@
     }
   }
   function status(text, error = false) {
-    $("#ad-status").textContent = text;
-    $("#ad-status").dataset.error = String(error);
+    $("#sladmin-status").textContent = text;
+    $("#sladmin-status").dataset.error = String(error);
   }
   function setDirty(value) {
     dirty = value;
-    $("#ad-save-state").textContent = value
+    $("#sladmin-save-state").textContent = value
       ? "Unsaved changes"
       : "All changes saved";
   }
   function closeEditor() {
     if (dirty && !confirm("Discard your unsaved changes?")) return;
     setDirty(false);
-    $("#ad-editor").close();
+    $("#sladmin-editor").close();
   }
-  $("#ad-close").onclick = closeEditor;
-  $("#ad-editor").addEventListener("cancel", (e) => {
+  $("#sladmin-close").onclick = closeEditor;
+  $("#sladmin-editor").addEventListener("cancel", (e) => {
     e.preventDefault();
     closeEditor();
   });
@@ -84,8 +84,8 @@
     document.documentElement.dataset.theme = resolved;
     document.documentElement.dataset.themeMode = themeMode;
     const labels = { dark: "Dark", light: "Light", system: "System" };
-    $("#ad-theme").textContent = "◐ " + labels[themeMode];
-    $("#ad-theme").setAttribute("aria-label",
+    $("#sladmin-theme").textContent = "◐ " + labels[themeMode];
+    $("#sladmin-theme").setAttribute("aria-label",
       "Theme: " + labels[themeMode] + ". Switch colour theme");
     if (save) {
       try {
@@ -95,7 +95,7 @@
     }
   }
   applyTheme(themeMode, false);
-  $("#ad-theme").onclick = () => applyTheme(
+  $("#sladmin-theme").onclick = () => applyTheme(
     { dark: "light", light: "system", system: "dark" }[themeMode], true);
   if (typeof themeMedia.addEventListener === "function") {
     themeMedia.addEventListener("change", () => {
@@ -109,42 +109,42 @@
     }
   });
   function row(title, subtitle, actions = [], initial = "↗") {
-    const r = el("div", undefined, "ad-row"),
-      copy = el("div", undefined, "ad-row-copy"),
-      a = el("div", undefined, "ad-row-actions");
+    const r = el("div", undefined, "sladmin-row"),
+      copy = el("div", undefined, "sladmin-row-copy"),
+      a = el("div", undefined, "sladmin-row-actions");
     copy.append(el("strong", title), el("small", subtitle));
     a.append(...actions);
-    r.append(el("span", initial, "ad-avatar"), copy, a);
+    r.append(el("span", initial, "sladmin-avatar"), copy, a);
     return r;
   }
   function empty(host, message) {
-    host.append(el("div", message, "ad-empty"));
+    host.append(el("div", message, "sladmin-empty"));
   }
   async function navigate(tab) {
     active = tab;
     page = 0;
-    $("#ad-title").textContent = tab;
-    $("#ad-kicker").textContent =
+    $("#sladmin-title").textContent = tab;
+    $("#sladmin-kicker").textContent =
       tab === "Overview"
         ? "YOUR COMMUNITY AT A GLANCE"
         : "MANAGE " + tab.toUpperCase();
-    for (const b of $("#ad-tabs").children)
+    for (const b of $("#sladmin-tabs").children)
       b.setAttribute("aria-current", b.textContent === tab ? "page" : "false");
     status("");
     await render();
   }
   async function render() {
-    const version = ++request, host = $("#ad-content");
-    host.replaceChildren(el("div", "Loading " + active.toLowerCase() + "…", "ad-loading"));
+    const version = ++request, host = $("#sladmin-content");
+    host.replaceChildren(el("div", "Loading " + active.toLowerCase() + "…", "sladmin-loading"));
     host.setAttribute("aria-busy", "true");
     status("Loading " + active.toLowerCase() + "…");
     try {
       await renderPanel(host, version);
       if (version === request) {
-        const partial = host.querySelector(".ad-data-warning:not([hidden])");
+        const partial = host.querySelector(".sladmin-data-warning:not([hidden])");
         status(partial ? "Some data is unavailable; the rest of the dashboard still works." : "",
           Boolean(partial));
-        if (!dirty) $("#ad-save-state").textContent = partial
+        if (!dirty) $("#sladmin-save-state").textContent = partial
           ? "Some data unavailable"
           : (api.preview ? "Preview saved on this device" : "All changes saved");
       }
@@ -152,15 +152,15 @@
       if (version !== request) return;
       const message = e?.message || "An unexpected error occurred.";
       status("Could not load " + active + ": " + message, true);
-      $("#ad-save-state").textContent = "Load failed";
+      $("#sladmin-save-state").textContent = "Load failed";
       host.replaceChildren();
-      const panel = el("div", undefined, "ad-error-panel");
+      const panel = el("div", undefined, "sladmin-error-panel");
       panel.setAttribute("role", "alert");
       panel.append(
         el("h3", "This area could not load"),
         el("p", "Your admin access is still protected. No changes were made."),
         el("p", message),
-        button("Try loading again", () => render(), "ad-primary"),
+        button("Try loading again", () => render(), "sladmin-primary"),
       );
       host.append(panel);
     } finally {
@@ -177,7 +177,7 @@
     if (active === "Media") return mediaList(host, version);
     const entries = await api.activity();
     if (version !== request) return;
-    const list = el("div", undefined, "ad-list");
+    const list = el("div", undefined, "sladmin-list");
     host.append(list);
     if (!entries.length) empty(list, "Your team’s changes will appear here.");
     for (const a of entries)
@@ -193,7 +193,7 @@
   async function overview(host, version) {
     // Paint the workspace FIRST. No failing or stalled request may make
     // the entire Overview disappear, including its navigation.
-    const stats = el("div", undefined, "ad-stats");
+    const stats = el("div", undefined, "sladmin-stats");
     const metricLabels = [
       api.preview ? "Preview accounts (sample)" : "Student accounts",
       "Administrators",
@@ -202,17 +202,17 @@
     ];
     const metricValues = [];
     for (const label of metricLabels) {
-      const card = el("article", undefined, "ad-card");
-      const value = el("div", "Loading…", "ad-stat");
+      const card = el("article", undefined, "sladmin-card");
+      const value = el("div", "Loading…", "sladmin-stat");
       value.setAttribute("aria-live", "polite");
-      card.append(el("div", label, "ad-stat-label"), value);
+      card.append(el("div", label, "sladmin-stat-label"), value);
       metricValues.push(value);
       stats.append(card);
     }
 
-    const grid = el("div", undefined, "ad-overview-grid"),
-      quick = el("article", undefined, "ad-card"),
-      recent = el("article", undefined, "ad-card"),
+    const grid = el("div", undefined, "sladmin-overview-grid"),
+      quick = el("article", undefined, "sladmin-card"),
+      recent = el("article", undefined, "sladmin-card"),
       recentItems = el("div", "Loading recent activity…");
     quick.append(
       el("h3", "Manage your StudyLab community"),
@@ -224,13 +224,13 @@
       ["Review administrator access →", "Admins"],
       ["Arrange homepage sections →", "Sections"],
       ["Upload images and documents →", "Media"],
-    ]) quick.append(button(title, () => navigate(tab), "ad-quick"));
+    ]) quick.append(button(title, () => navigate(tab), "sladmin-quick"));
     recent.append(el("h3", "Recent activity"), recentItems);
     if (api.preview) {
       quick.prepend(el(
         "p",
         "PREVIEW ONLY: account lists are samples. No real admin, badge, or content updates are sent to Supabase.",
-        "ad-preview-explanation",
+        "sladmin-preview-explanation",
       ));
       recent.append(button("Reset preview changes", () => {
         if (confirm("Reset the changes saved in this preview on this device?"))
@@ -238,7 +238,7 @@
       }));
     }
     grid.append(quick, recent);
-    const warning = el("div", undefined, "ad-data-warning");
+    const warning = el("div", undefined, "sladmin-data-warning");
     warning.hidden = true;
     warning.setAttribute("role", "alert");
     host.append(warning, stats, grid);
@@ -296,17 +296,17 @@
       warning.append(
         el("strong", "Some dashboard data could not load."),
         el("p", failed.join(" | ")),
-        button("Retry overview", () => render(), "ad-primary"),
+        button("Retry overview", () => render(), "sladmin-primary"),
       );
     }
   }
   async function userList(host, version) {
-    const toolbar = el("div", undefined, "ad-toolbar"),
+    const toolbar = el("div", undefined, "sladmin-toolbar"),
       search = el("input");
     search.placeholder = "Search name or username";
     search.setAttribute("aria-label", "Search users");
-    const list = el("div", undefined, "ad-list"),
-      pager = el("div", undefined, "ad-pager");
+    const list = el("div", undefined, "sladmin-list"),
+      pager = el("div", undefined, "sladmin-pager");
     toolbar.append(search);
     host.append(toolbar, list, pager);
     let timer,
@@ -391,14 +391,14 @@
   }
   function viewUser(u) {
     const dialog = document.createElement("dialog");
-    dialog.className = "ad-dialog";
+    dialog.className = "sladmin-dialog";
     const head = el("header");
     head.append(
       el("h2", u.display_name || "Student"),
       button("Close", () => dialog.close()),
     );
     dialog.append(head);
-    const dl = el("dl", undefined, "ad-user-detail");
+    const dl = el("dl", undefined, "sladmin-user-detail");
     for (const [key, value] of [
       ["Username", "@" + (u.username || "—")],
       ["School", u.school || "Not provided"],
@@ -421,10 +421,10 @@
     rows = await api.content();
     if (version !== request) return;
     const sectionMode = active === "Sections",
-      toolbar = el("div", undefined, "ad-toolbar"),
+      toolbar = el("div", undefined, "sladmin-toolbar"),
       search = el("input"),
       filter = el("select"),
-      list = el("div", undefined, "ad-list");
+      list = el("div", undefined, "sladmin-list");
     search.placeholder = "Find a title…";
     search.setAttribute("aria-label", "Search content");
     filter.setAttribute("aria-label", "Filter page");
@@ -439,7 +439,7 @@
       button(
         sectionMode ? "+ New section" : "+ New card",
         () => edit(null, sectionMode ? "section" : "card"),
-        "ad-primary",
+        "sladmin-primary",
       ),
     );
     host.append(toolbar, list);
@@ -510,7 +510,7 @@
     input.value = value ?? "";
     if (type === "checkbox") input.checked = !!value;
     if (["title", "description", "url", "image"].includes(name))
-      wrap.className = "ad-wide";
+      wrap.className = "sladmin-wide";
     if (name === "title") {
       input.required = true;
       input.maxLength = 160;
@@ -542,8 +542,8 @@
       },
     };
     const d = editing.draft;
-    $("#ad-editor-title").textContent = (record ? "Edit " : "New ") + d.kind;
-    const fields = el("div", undefined, "ad-fields");
+    $("#sladmin-editor-title").textContent = (record ? "Edit " : "New ") + d.kind;
+    const fields = el("div", undefined, "sladmin-fields");
     fields.append(
       field("title", "Title", d.title),
       field("description", "Description", d.description, "textarea"),
@@ -592,15 +592,15 @@
     fields.append(
       field("hidden", "Hidden from students", d.hidden, "checkbox"),
     );
-    $("#ad-fields").replaceChildren(fields);
-    $("#ad-editor-status").textContent = "";
-    $(".ad-editor-actions").hidden = false;
+    $("#sladmin-fields").replaceChildren(fields);
+    $("#sladmin-editor-status").textContent = "";
+    $(".sladmin-editor-actions").hidden = false;
     setDirty(false);
-    $("#ad-editor").showModal();
+    $("#sladmin-editor").showModal();
   }
-  $("#ad-form").addEventListener("input", () => setDirty(true));
+  $("#sladmin-form").addEventListener("input", () => setDirty(true));
   function payload() {
-    const form = $("#ad-form"),
+    const form = $("#sladmin-form"),
       d = { ...editing.draft };
     for (const n of [
       "title",
@@ -616,17 +616,17 @@
     d.hidden = form.elements.hidden.checked;
     return api.validate(d);
   }
-  $("#ad-form").onsubmit = async (e) => {
+  $("#sladmin-form").onsubmit = async (e) => {
     e.preventDefault();
     const b = e.submitter;
-    const buttons = [...$(".ad-editor-actions").querySelectorAll("button")];
+    const buttons = [...$(".sladmin-editor-actions").querySelectorAll("button")];
     buttons.forEach((x) => (x.disabled = true));
     try {
       const d = payload(),
         action = b?.value || "draft";
       await api.save(d, editing.revision, action);
       setDirty(false);
-      $("#ad-editor").close();
+      $("#sladmin-editor").close();
       await render();
       status(
         api.preview
@@ -636,12 +636,12 @@
             : "Draft saved.",
       );
     } catch (err) {
-      $("#ad-editor-status").textContent = err.message;
+      $("#sladmin-editor-status").textContent = err.message;
     } finally {
       buttons.forEach((x) => (x.disabled = false));
     }
   };
-  $("#ad-preview").onclick = () => {
+  $("#sladmin-preview").onclick = () => {
     try {
       const d = payload();
       localStorage.setItem(
@@ -650,11 +650,11 @@
       );
       window.open(d.page + "?admin-preview=1", "_blank", "noopener");
     } catch (e) {
-      $("#ad-editor-status").textContent = e.message;
+      $("#sladmin-editor-status").textContent = e.message;
     }
   };
   async function mediaList(host, version) {
-    const toolbar = el("div", undefined, "ad-toolbar"),
+    const toolbar = el("div", undefined, "sladmin-toolbar"),
       input = el("input");
     input.type = "file";
     input.accept = "image/jpeg,image/png,image/webp,application/pdf";
@@ -679,7 +679,7 @@
     );
     const entries = await api.media();
     if (version !== request) return;
-    const grid = el("div", undefined, "ad-media-grid");
+    const grid = el("div", undefined, "sladmin-media-grid");
     host.append(grid);
     if (!entries.length)
       empty(
@@ -687,7 +687,7 @@
         "Your uploaded images and learning resources will appear here.",
       );
     for (const m of entries) {
-      const c = el("article", undefined, "ad-card");
+      const c = el("article", undefined, "sladmin-card");
       if (
         /\.(png|jpe?g|webp)$/i.test(m.name) ||
         m.url.startsWith("data:image/")
@@ -718,18 +718,18 @@
     }
   }
   for (const tab of tabs)
-    $("#ad-tabs").append(button(tab, () => navigate(tab)));
+    $("#sladmin-tabs").append(button(tab, () => navigate(tab)));
   (async () => {
-    const buildProof = $("#ad-build-proof");
-    if (buildProof) buildProof.textContent = "PR #102 · v5 · JS started";
+    const buildProof = $("#sladmin-build-proof");
+    if (buildProof) buildProof.textContent = "PR #102 · v6 · JS started";
     try {
       info = await api.init();
       if (buildProof) buildProof.textContent =
-        "PR #102 · v5 · " + (api.preview ? "Preview ready" : "Dashboard ready");
-      $("#ad-gate").hidden = true;
-      $("#ad-workspace").hidden = false;
-      $("#ad-identity").textContent = "Administrator";
-      $("#ad-mode").append(
+        "PR #102 · v6 · " + (api.preview ? "Preview ready" : "Dashboard ready");
+      $("#sladmin-gate").hidden = true;
+      $("#sladmin-workspace").hidden = false;
+      $("#sladmin-identity").textContent = "Administrator";
+      $("#sladmin-mode").append(
         el("strong", api.preview ? "Preview workspace. " : "Live workspace. "),
         document.createTextNode(
           api.preview
@@ -737,19 +737,19 @@
             : "Published edits are visible to students. Drafts stay private.",
         ),
       );
-      $("#ad-mode").append(el(
+      $("#sladmin-mode").append(el(
         "small",
-        api.preview ? "PR #102 preview · dashboard build 2026-11-16.5"
-          : "Dashboard build 2026-11-16.5",
-        "ad-build-label",
+        api.preview ? "PR #102 preview · dashboard build 2026-11-16.6"
+          : "Dashboard build 2026-11-16.6",
+        "sladmin-build-label",
       ));
       await navigate("Overview");
     } catch (e) {
-      if (buildProof) buildProof.textContent = "PR #102 · v5 · Check access";
-      $("#ad-workspace").hidden = true;
-      $("#ad-gate").hidden = false;
-      $("#ad-gate").textContent = e?.message || "Admin access could not be verified.";
-      $("#ad-identity").textContent = "Access restricted";
+      if (buildProof) buildProof.textContent = "PR #102 · v6 · Check access";
+      $("#sladmin-workspace").hidden = true;
+      $("#sladmin-gate").hidden = false;
+      $("#sladmin-gate").textContent = e?.message || "Admin access could not be verified.";
+      $("#sladmin-identity").textContent = "Access restricted";
     }
   })();
 })();
