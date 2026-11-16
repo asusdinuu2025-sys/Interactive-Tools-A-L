@@ -85,41 +85,62 @@
     if (!response.ok) throw Error("Could not load existing content.");
     seed = await response.json();
     if (preview) {
+      // An interrupted write or an older preview schema must not leave the
+      // Overview empty. Preserve valid drafts and repair missing collections.
+      let stored = null;
       try {
-        state = JSON.parse(localStorage.getItem(KEY));
-      } catch {}
-      if (!state || state.owner !== user.id) {
-        state = {
-          owner: user.id,
-          content: [],
-          published: [],
-          activity: [],
-          media: [],
-          users: [
-            {
-              id: user.id,
-              display_name: "Your admin account",
-              username: "you",
-              admin: true,
-              verified: true,
-              created_at: user.created_at,
-            },
-            ...[
-              "Amani Perera",
-              "Kavindu Silva",
-              "Nethmi Jayasinghe",
-              "Sahan Bandara",
-            ].map((n, i) => ({
-              id: "sample-user-" + i,
-              display_name: n,
-              username: n.split(" ")[0].toLowerCase(),
-              admin: i === 0,
-              verified: i === 1,
-              created_at: "2026-11-01T00:00:00Z",
-            })),
-          ],
-        };
+        stored = JSON.parse(localStorage.getItem(KEY));
+      } catch (_) {
+        // Invalid device data is repaired below. It is never trusted as access.
+      }
+      const sampleUsers = [
+        {
+          id: user.id,
+          display_name: "Your admin account",
+          username: "you",
+          admin: true,
+          verified: true,
+          created_at: user.created_at,
+        },
+        ...[
+          "Amani Perera",
+          "Kavindu Silva",
+          "Nethmi Jayasinghe",
+          "Sahan Bandara",
+        ].map((n, i) => ({
+          id: "sample-user-" + i,
+          display_name: n,
+          username: n.split(" ")[0].toLowerCase(),
+          admin: i === 0,
+          verified: i === 1,
+          created_at: "2026-11-01T00:00:00Z",
+        })),
+      ];
+      const sameOwner = stored && typeof stored === "object" &&
+        !Array.isArray(stored) && stored.owner === user.id;
+      const cleanArray = (key, valid) => sameOwner && Array.isArray(stored[key])
+        ? stored[key].filter(valid) : [];
+      state = {
+        owner: user.id,
+        content: cleanArray("content", (x) => x && typeof x.id === "string" && x.draft && typeof x.draft === "object"),
+        published: cleanArray("published", (x) => x && typeof x.id === "string"),
+        activity: cleanArray("activity", (x) => x && typeof x.action === "string"),
+        media: cleanArray("media", (x) => x && typeof x.path === "string"),
+        users: cleanArray("users", (x) => x && typeof x.id === "string" &&
+          typeof x.display_name === "string" && typeof x.username === "string"),
+      };
+      if (!state.users.some((x) => x.id === user.id)) {
+        state.users.unshift(sampleUsers[0]);
+      }
+      if (!sameOwner || state.users.length === 1) {
+        for (const u of sampleUsers.slice(1)) {
+          if (!state.users.some((x) => x.id === u.id)) state.users.push(u);
+        }
+      }
+      try {
         persist();
+      } catch (_) {
+        // Browsers that deny storage can still use the in-memory preview.
       }
     }
     return { user, preview };
