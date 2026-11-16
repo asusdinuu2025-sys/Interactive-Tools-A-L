@@ -105,10 +105,51 @@ assert.match(socialMigration,/create table if not exists public\.studylab_social
 assert.doesNotMatch(moderators,/delete from public\.studylab_social_posts/i);
 
 for(const html of [home,room]){
-  assert.match(html,/chat\.js\?v=20261115-mobile-chat-header-v7/);
-  assert.match(html,/chat\.css\?v=20261115-mobile-chat-header-v7/);
+  assert.match(html,/chat\.js\?v=20261116-chat-liquid-v1/);
+  assert.match(html,/chat\.css\?v=20261116-chat-liquid-v1/);
   assert.match(html,/studylab-avatar\.js\?v=20261116-manual-crop-v1/);
 }
 assert.match(home,/studylab-social\.js\?v=20261115-social-likes-only-v3/);
 assert.match(home,/feed-drawer\.css\?v=20261115-social-likes-only-v3/);
+
+/* PR #102 smoke checks for connected Chat, alongside legacy ownership checks. */
+assert.match(chat,/imageBucket:"studylab-chat-images"/);
+assert.match(chat,/maxImages:3/);
+assert.match(chat,/maxImageBytes:1048576/);
+assert.match(chat,/compressChatImage/);
+assert.match(chat,/createSignedUrl\(path,3600\)/);
+assert.match(chat,/image_paths:uploaded/);
+assert.match(chat,/classList\.add\("is-entering"\)/);
+assert.match(chat,/classList\.add\("is-exiting"\)/);
+assert.match(chat,/closeReactionPicker\(id\)/);
+assert.match(chat,/\.on\("presence",\{event:"sync"\},refreshTyping\)/);
+assert.match(chat,/channel\.track/);
+assert.match(chat,/data-chat-typing/);
+assert.match(chat,/data-chat-image-input/);
+assert.match(chatCss,/linear-gradient\(120deg,rgba\(32,160,223,\.35\),rgba\(90,91,220,\.28\)\)/);
+assert.match(chatCss,/study-chat-typing-dots/);
+assert.match(chatCss,/study-chat-image-gallery/);
+assert.match(chatCss,/sl-chat-outgoing/);
+assert.match(chatCss,/prefers-reduced-motion/);
+const followCss=read("assets/css/studylab-follow.css");
+assert.match(followCss,/PR #102 Chat Polish/);
+assert.match(followCss,/color:#57d8f9!important/);
+assert.match(followCss,/color:#164f88!important/);
+assert.match(followCss,/body\.study-room-page\[data-room-theme\]/);
+const imageSql=read("supabase/migrations/20261116204000_chat_image_attachments.sql");
+assert.match(imageSql,/studylab_private\.chat_image_paths_valid/);
+assert.match(imageSql,/studylab-chat-images/);
+assert.match(imageSql,/1048576/);
+assert.match(imageSql,/for insert to authenticated/);
+assert.match(imageSql,/for delete to authenticated/);
+for(const html of [home,room]){
+  assert.match(html,/studylab-follow\.css\?v=20261116-follow-colors-v1/);
+  assert.match(html,/studylab-popups\.js\?v=20261116-v14/);
+}
+const notices=read("assets/js/studylab-popups.js");
+assert.match(notices,/path\.endsWith\("\/index\.html"\)/);
+assert.match(notices,/window\.StudyLabAccount\?\.ready/);
+assert.match(notices,/client\.auth\.getUser\(\)/);
+console.log("Chat image upload, animated reactions, typing Presence and Follow theme checks passed.");
+
 console.log("Curved Chat, left anchoring, verified moderator controls and Likes-only Social checks passed.");
