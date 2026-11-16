@@ -16,7 +16,7 @@ $$;
 -- Existing public policies on social posts/announcements call this function even
 -- for anonymous reads. Preserve permission to CALL; anonymous returns false.
 revoke all on function public.studylab_social_is_admin() from public;
-grant execute on function public.studylab_social_is_admin() to anon,authenticated;
+grant execute on function public.studylab_social_is_admin() to anon,authenticated,service_role;
 
 create table public.studylab_verifications(user_id uuid primary key references auth.users(id) on delete cascade, created_at timestamptz not null default now());
 alter table public.studylab_verifications enable row level security;
