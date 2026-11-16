@@ -69,6 +69,7 @@
       position:fixed !important;z-index:2147483000 !important;top:0;left:0;
       width:min(340px,calc(100vw - 24px));max-width:calc(100vw - 24px);
       max-height:min(72vh,460px);overflow-y:auto;overscroll-behavior:contain;
+      scrollbar-width:none;-ms-overflow-style:none;
       padding:11px;border:1px solid rgba(150,190,230,.24);border-radius:20px;
       background:rgba(13,24,40,.97);color:#eaf3ff;
       box-shadow:0 24px 72px rgba(0,0,0,.46),0 4px 18px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.1);
@@ -77,6 +78,8 @@
       font-family:"Nirmala UI","Segoe UI",sans-serif !important;font-size:14px;
       isolation:isolate;
     }
+    /* Keep menu scrolling with a wheel/touch, without the bright OS scrollbar. */
+    .profile-account-menu::-webkit-scrollbar { display:none;width:0;height:0; }
     .profile-account-menu[hidden] { display:none; }
     .profile-account-menu, .profile-account-menu * { font-family:"Nirmala UI","Segoe UI",sans-serif !important; }
     .profile-account-menu .account-menu-heading { padding:10px 12px 9px;color:#a9bfd8;font-size:12px;font-weight:800;letter-spacing:.11em; }
