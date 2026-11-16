@@ -140,7 +140,7 @@ async function setup(admin = true, options = {}) {
   const api = w.StudyLabAdminAPI;
   assert.throws(
     () => api.validate({ ...state.published[0], url: "javascript:alert(1)" }),
-    /not supported/,
+    /not supported|Only normal HTTP or HTTPS/,
   );
   assert.throws(
     () => api.validate({ ...state.published[0], url: "//evil.example" }),
