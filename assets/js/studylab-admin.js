@@ -13,6 +13,7 @@
     "Activity",
   ];
   let active = "Overview",
+    overviewMidnightTimer = null,
     rows = [],
     editing = null,
     dirty = false,
@@ -30,6 +31,45 @@
     b.type = "button";
     b.addEventListener("click", () => run(fn, b));
     return b;
+  }
+  function quickIcon(name) {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("aria-hidden", "true");
+    svg.setAttribute("focusable", "false");
+    svg.classList.add("sladmin-quick-icon");
+    const shapes = {
+      Content: ["M4 19.5A2.5 2.5 0 0 1 6.5 17H20", "M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"],
+      Users: ["M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2","M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z","M22 21v-2a4 4 0 0 0-3-3.87","M16 3.13a4 4 0 0 1 0 7.75"],
+      Admins: ["M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z","m9 12 2 2 4-4"],
+      Sections: ["M3 3h7v7H3z","M14 3h7v7h-7z","M3 14h7v7H3z","M14 14h7v7h-7z"],
+      Media: ["M3 3h18v18H3z","m3 15 4-4 3 3 3-3 5 5","M8.5 8.5h.01"],
+      "Pop-up Messages": ["M21 11.5a8.38 8.38 0 0 1-.9 3.8A8.5 8.5 0 0 1 12.5 20a8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7A8.38 8.38 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3H13a8.5 8.5 0 0 1 8 8.5Z"]
+    };
+    for (const d of shapes[name] || shapes.Content) {
+      const p = document.createElementNS("http://www.w3.org/2000/svg","path");
+      p.setAttribute("d",d);
+      p.setAttribute("fill","none");
+      p.setAttribute("stroke","currentColor");
+      p.setAttribute("stroke-width","1.8");
+      p.setAttribute("stroke-linecap","round");
+      p.setAttribute("stroke-linejoin","round");
+      svg.append(p);
+    }
+    return svg;
+  }
+  function colomboDate(date) {
+    return new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Colombo", year: "numeric", month: "2-digit", day: "2-digit"
+    }).format(date);
+  }
+  function scheduleOverviewReset() {
+    clearTimeout(overviewMidnightTimer);
+    const localMillis = Date.now() + 330 * 60000;
+    const until = 86400000 - (localMillis % 86400000);
+    overviewMidnightTimer = setTimeout(() => {
+      if (active === "Overview") render();
+    }, until + 200);
   }
   async function run(fn, b) {
     if (b) b.disabled = true;
@@ -228,13 +268,17 @@
       el("p", "Choose an area below to manage its content and settings."),
     );
     for (const [title, tab] of [
-      ["Manage learning resources →", "Content"],
-      ["Review users & verification →", "Users"],
-      ["Review administrator access →", "Admins"],
-      ["Arrange homepage sections →", "Sections"],
-      ["Upload images and documents →", "Media"],
-      ["Send one-time pop-up messages →", "Pop-up Messages"],
-    ]) quick.append(button(title, () => navigate(tab), "sladmin-quick"));
+      ["Learning resources", "Content"],
+      ["Users & badges", "Users"],
+      ["Admin access", "Admins"],
+      ["Homepage sections", "Sections"],
+      ["Media library", "Media"],
+      ["Pop-up messages", "Pop-up Messages"],
+    ]) {
+      const action = button(title, () => navigate(tab), "sladmin-quick");
+      action.append(quickIcon(tab));
+      quick.append(action);
+    }
     recent.append(el("h3", "Recent activity"), recentItems);
     if (api.connectedPreview) {
       quick.prepend(el("p",
@@ -308,10 +352,14 @@
     }
     recentItems.replaceChildren();
     if (activity.status === "fulfilled") {
-      if (!activity.value.length)
-        recentItems.append(el("p", "No changes recorded in this preview yet."));
-      for (const a of activity.value.slice(0, 4))
+      const today = colomboDate(new Date());
+      const todays = activity.value.filter(a =>
+        a.created_at && colomboDate(new Date(a.created_at)) === today);
+      if (!todays.length)
+        recentItems.append(el("p", "No activity today."));
+      for (const a of todays.slice(0, 4))
         recentItems.append(el("p", a.action + " · " + a.target));
+      scheduleOverviewReset();
     } else {
       recentItems.append(el("p", "Activity data is unavailable right now."));
     }
@@ -567,6 +615,22 @@
     ["Telegram_Channels.html", "Telegram channels"],
     ["lesson-packs.html", "Free lesson packs"],
   ];
+  function textLabel(name, label, value, presets, limit) {
+    const wrap = field(name, label, value || presets[0]);
+    const input = wrap.querySelector("input");
+    input.maxLength = limit;
+    input.placeholder = presets[0];
+    const list = el("datalist");
+    list.id = "sladmin-label-" + name;
+    input.setAttribute("list", list.id);
+    for (const word of presets) {
+      const option = el("option");
+      option.value = word;
+      list.append(option);
+    }
+    wrap.append(list);
+    return wrap;
+  }
   function field(name, label, value, type = "text", options) {
     const wrap = el("label");
     wrap.append(el("span", label));
@@ -624,8 +688,11 @@
     );
     if (d.kind === "card")
       fields.append(
-        field("url", "Destination link", d.url),
+        field("url", "Destination link (website, domain or internal path)", d.url),
         field("image", "Image URL (optional)", d.image),
+        textLabel("button_label", "Card button · max 22 characters",
+          d.button_label || "Open resource",
+          ["Open resource","Open","Open link","View","Try","Learn more"],22),
       );
     const page = field(
       "page",
@@ -681,6 +748,7 @@
       "description",
       "url",
       "image",
+      "button_label",
       "page",
       "section",
       "layout",
@@ -737,6 +805,8 @@
     const close = button("×", () => popup.remove(), "slpopup-close");
     close.setAttribute("aria-label", "Close preview");
     popup.prepend(close);
+    if (item.link) popup.append(el("span",
+      item.link_label || "View", "slpopup-link slpopup-link-preview"));
     popup.append(el("small", "Admin preview · Not sent"));
     document.body.append(popup);
     setTimeout(() => popup.remove(), Number(item.display_seconds || 8) * 1000);
@@ -766,7 +836,10 @@
       ]),
       field("display_seconds", "Display time (3–30 seconds)",
         data.display_seconds || 8,"number"),
-      field("link", "Optional HTTPS or site-relative link",data.link || ""),
+      field("link", "Optional website link",data.link || ""),
+      textLabel("link_label", "Link button · max 20 characters",
+        data.link_label || "View",
+        ["View","Open","Try","Read more","Learn more"],20),
     );
     fields.querySelector('[name="title"]').maxLength = 120;
     fields.querySelector('[name="message"]').maxLength = 800;
@@ -794,14 +867,17 @@
         placement: String(fd.get("placement") || "top-right"),
         display_seconds: Number(fd.get("display_seconds") || 8),
         link: String(fd.get("link") || "").trim(),
+        link_label: String(fd.get("link_label") || "View").trim(),
         starts_at,
       };
       if (!item.title || !item.message || item.title.length>120 ||
           item.message.length>800 || !Number.isInteger(item.display_seconds) ||
           item.display_seconds<3 || item.display_seconds>30 ||
+          !item.link_label || item.link_label.length>20 ||
+          /[\\u0000-\\u001f<>]/.test(item.link_label) ||
           !Number.isFinite(new Date(item.starts_at).getTime()))
         throw Error("Enter valid text, a display time and schedule.");
-      if (item.link) api.safeURL(item.link);
+      if (item.link) item.link = api.safeURL(item.link);
       return item;
     };
     actions.append(
@@ -1000,6 +1076,9 @@
           : api.preview ? "Local preview · PR #102" : "StudyLab Admin · Live",
         "sladmin-build-label",
       ));
+      // The connected-status notice is redundant once access is verified.
+      // Keep its text for diagnostics, but not a permanent on-screen card.
+      $("#sladmin-mode").hidden = true;
       await navigate("Overview");
     } catch (e) {
 
