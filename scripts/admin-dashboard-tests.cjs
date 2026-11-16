@@ -335,6 +335,44 @@ async function setup(admin = true, options = {}) {
   assert.match(todayPanel,/Today's action/);
   assert.doesNotMatch(todayPanel,/Yesterday action/);
   dom.window.close();
+  // The admin CMS may move/reorder extra sections after page load.
+  // More must remain immediately below Free Lesson Packs in the actual DOM.
+  const cmsDom = new JSDOM(`<main>
+    <section id="free-lesson-packs" data-cms-id="free-lesson-packs" data-cms-order="70">
+      <h2>Free Lesson Packs</h2><p>Lessons</p></section>
+    <div id="more-learning-resources" class="sl-home-more-anchor"></div>
+    </main>`,{
+      url:"https://preview.example/index.html",runScripts:"outside-only",
+      pretendToBeVisual:true
+    });
+  const cmsWindow = cmsDom.window;
+  if (!cmsWindow.CSS) cmsWindow.CSS = {};
+  cmsWindow.CSS.escape = value=>String(value).replace(/[^a-z0-9_-]/gi,"\\  // One failed API request must not suppress the overview stats or its actions.");
+  cmsWindow.StudyLabAdminConfig = {mode:"preview"};
+  cmsWindow.StudyLabAccount = {
+    startup:Promise.resolve(),
+    client:{
+      auth:{getUser:async()=>({data:{user:{id:"24e78cd0-4565-407a-96f7-9cfde083f6d2"}}})},
+      rpc:async()=>({data:true})
+    }
+  };
+  cmsWindow.localStorage.setItem("studylab-admin-preview-v1",JSON.stringify({
+    owner:"24e78cd0-4565-407a-96f7-9cfde083f6d2",
+    published:[{
+      id:"custom-cms-test",kind:"section",page:"index.html",
+      title:"Test",description:"Admin section",order:100,
+      layout:"cards",hidden:false
+    }]
+  }));
+  cmsWindow.eval(read("assets/js/studylab-content.js"));
+  await wait();
+  const free = cmsWindow.document.getElementById("free-lesson-packs");
+  const more = cmsWindow.document.getElementById("more-learning-resources");
+  const custom = cmsWindow.document.getElementById("custom-cms-test");
+  assert.ok(custom,"Admin custom section should render");
+  assert.equal(free.nextElementSibling,more,"More anchor stays immediately after Lessons");
+  assert.equal(more.nextElementSibling,custom,"More scroll reveals the added section");
+  cmsDom.close();
   // One failed API request must not suppress the overview stats or its actions.
   ({ dom, w } = await setup(true, { failOverview: true }));
   assert.equal(w.document.querySelector("#sladmin-workspace").hidden, false);
