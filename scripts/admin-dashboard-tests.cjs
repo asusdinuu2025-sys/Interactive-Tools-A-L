@@ -144,7 +144,7 @@ async function setup(admin = true, options = {}) {
   );
   assert.throws(
     () => api.validate({ ...state.published[0], url: "//evil.example" }),
-    /valid HTTPS/,
+    /valid HTTPS|ordinary website link|site-relative path/,
   );
   assert.throws(
     () =>
