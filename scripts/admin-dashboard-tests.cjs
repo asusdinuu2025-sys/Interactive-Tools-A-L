@@ -278,6 +278,22 @@ async function setup(admin = true, options = {}) {
   assert.equal(w.document.documentElement.dataset.theme, "dark");
   assert.equal(w.localStorage.getItem("studylab-room-mode-v1"), "dark");
   dom.window.close();
+  // Recent activity is a daily Colombo-time panel, NOT the full audit log.
+  const nowStamp = new Date().toISOString();
+  const yesterdayStamp = new Date(Date.now()-86400000).toISOString();
+  ({dom,w} = await setup(true, {
+    previewData: JSON.stringify({
+      owner:"24e78cd0-4565-407a-96f7-9cfde083f6d2",
+      activity:[
+        {id:"old",action:"Yesterday action",target:"not today",created_at:yesterdayStamp},
+        {id:"new",action:"Today's action",target:"visible",created_at:nowStamp},
+      ],
+    }),
+  }));
+  const todayPanel = w.document.querySelector(".sladmin-overview-grid").textContent;
+  assert.match(todayPanel,/Today's action/);
+  assert.doesNotMatch(todayPanel,/Yesterday action/);
+  dom.window.close();
   // One failed API request must not suppress the overview stats or its actions.
   ({ dom, w } = await setup(true, { failOverview: true }));
   assert.equal(w.document.querySelector("#sladmin-workspace").hidden, false);
