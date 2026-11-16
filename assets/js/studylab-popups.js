@@ -102,7 +102,27 @@
     const path = location.pathname.replace(/\/+$/, "").toLowerCase();
     if (!(path === "" || path === "/" || path.endsWith("/index.html"))) return;
     if (!(await waitForHomeEntry())) return;
-    await window.StudyLabAccount?.ready;
+    // The homepage URL also hosts the welcome/sign-in overlay. Do not
+    // read/claim a one-time notice until that overlay has truly closed.
+    // Await the account startup decision first to avoid a startup race.
+    const account = window.StudyLabAccount;
+    if (!account) return;
+    const alreadyEntered = await account.startup;
+    const gateway = document.getElementById("studylab-auth-gateway");
+    if (!alreadyEntered || (gateway && !gateway.hidden)) {
+      await new Promise(resolve => {
+        const entered = () => {
+          window.removeEventListener("studylab-home-entered", entered);
+          resolve();
+        };
+        window.addEventListener("studylab-home-entered", entered);
+        // A session may have completed while the handler was installed.
+        if (gateway?.hidden && account.getUser?.()?.id) entered();
+      });
+    }
+    // A newly created guest may be active only after the explicit entry event.
+    if (!account.getUser?.()?.id) return;
+    await account.ready;
     await window.StudyLabBanGuardReady;
     if (window.StudyLabBanned || !homeIsVisible()) return;
     const client = window.StudyLabAccount?.client ||
