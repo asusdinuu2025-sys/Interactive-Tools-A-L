@@ -30,7 +30,10 @@ async function makePage(path, gate = true) {
       return {data:true,error:null};
     }
   };
-  w.StudyLabAccount={startup,ready:Promise.resolve(),client};
+  w.StudyLabAccount={
+    startup,ready:Promise.resolve(),client,
+    getUser:()=>({id:"22222222-2222-4222-8222-222222222222"})
+  };
   w.StudyLabBanGuardReady=Promise.resolve();
   w.StudyLabBanned=false;
   w.eval(readFileSync("assets/js/studylab-popups.js","utf8"));
