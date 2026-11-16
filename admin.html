@@ -4,17 +4,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="robots" content="noindex,nofollow" />
-    <meta name="studylab-admin-build" content="pr102-live-read-glass-20261116-v7" />
+    <meta name="studylab-admin-build" content="pr102-connected-admin-20261116-v8" />
     <title>Admin Dashboard · StudyLab</title>
     <link rel="icon" href="assets/icon/studylab-pwa.svg" />
     <!-- Intentionally isolated: the main site stylesheet has broad page-level rules.
          The admin workspace has its own complete stylesheet. -->
-    <link rel="stylesheet" href="assets/css/studylab-admin.css?v=pr102-live-read-glass-20261116-v7" />
+    <link rel="stylesheet" href="assets/css/studylab-admin.css?v=pr102-connected-admin-20261116-v8" />
   </head>
   <body class="sl-admin-page">
-    <!-- Static build proof is deliberately outside the authenticated workspace.
-         If it is absent, the browser is not displaying this preview HTML. -->
-    <div id="sladmin-build-proof" aria-label="Admin preview build" style="position:fixed!important;z-index:2147483647!important;right:14px;bottom:14px;display:block!important;visibility:visible!important;opacity:1!important;background:#173153!important;color:#d8efff!important;border:1px solid #75baff66!important;border-radius:999px!important;padding:6px 11px!important;font:600 11px 'Nirmala UI','Segoe UI',sans-serif!important;pointer-events:none!important;">PR #102 · v7 · HTML loaded</div>
     <div class="sladmin-shell">
       <header class="sladmin-top">
         <a href="index.html" class="sladmin-brand"
@@ -77,18 +74,9 @@
         </div>
       </form>
     </dialog>
-    <script>
-      // Visible diagnostic fallback when an external script fails to load.
-      window.addEventListener("error", function (event) {
-        var badge = document.getElementById("sladmin-build-proof");
-        if (badge && !window.StudyLabAdminAPI) {
-          badge.textContent = "PR #102 · v7 · Startup issue";
-        }
-      });
-    </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.2/dist/umd/supabase.js"></script>
-    <script src="assets/js/studylab-admin-config.js?v=pr102-live-read-glass-20261116-v7"></script>
-    <script src="assets/js/studylab-admin-api.js?v=pr102-live-read-glass-20261116-v7"></script>
-    <script src="assets/js/studylab-admin.js?v=pr102-live-read-glass-20261116-v7"></script>
+    <script src="assets/js/studylab-admin-config.js?v=pr102-connected-admin-20261116-v8"></script>
+    <script src="assets/js/studylab-admin-api.js?v=pr102-connected-admin-20261116-v8"></script>
+    <script src="assets/js/studylab-admin.js?v=pr102-connected-admin-20261116-v8"></script>
   </body>
 </html>
