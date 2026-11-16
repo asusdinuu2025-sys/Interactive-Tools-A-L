@@ -324,14 +324,16 @@ as $admin_gate$ select auth.uid() in (
     db.query("select studylab_admin_history_set('undo',$1)",[targetLog.id]),
     /cannot be undone safely/
   );
+  // The student was already verified earlier: removing and undoing the
+  // badge tests a real state change, not a no-op grant.
   await db.query("select studylab_admin_action_v2('user','set',$1::jsonb)",
-    [JSON.stringify({id:student,field:"verified",value:true})]);
+    [JSON.stringify({id:student,field:"verified",value:false})]);
   logs=(await db.query("select studylab_admin_activity() as log")).rows[0].log;
-  targetLog=logs.find(x=>x.target===student && x.action==="Grant verified" && x.can_undo);
+  targetLog=logs.find(x=>x.target===student && x.action==="Remove verified" && x.can_undo);
   assert.ok(targetLog, "Badge change must be reversible");
   await db.query("select studylab_admin_history_set('undo',$1)",[targetLog.id]);
   assert.equal((await db.query("select count(*)::integer as n from studylab_verifications where user_id=$1",
-    [student])).rows[0].n,0);
+    [student])).rows[0].n,1);
   const popupInput={title:"Testing labels",message:"Body",variant:"info",
     placement:"top-right",display_seconds:8,link:"https://example.com",
     link_label:"Try",starts_at:new Date().toISOString()};
