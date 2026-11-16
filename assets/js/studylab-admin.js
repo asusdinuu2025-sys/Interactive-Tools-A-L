@@ -9,6 +9,7 @@
     "Content",
     "Sections",
     "Media",
+    "Pop-up Messages",
     "Activity",
   ];
   let active = "Overview",
@@ -176,6 +177,7 @@
     if (active === "Content" || active === "Sections")
       return contentList(host, version);
     if (active === "Media") return mediaList(host, version);
+    if (active === "Pop-up Messages") return popupList(host, version);
     const entries = await api.activity();
     if (version !== request) return;
     const list = el("div", undefined, "sladmin-list");
@@ -231,6 +233,7 @@
       ["Review administrator access →", "Admins"],
       ["Arrange homepage sections →", "Sections"],
       ["Upload images and documents →", "Media"],
+      ["Send one-time pop-up messages →", "Pop-up Messages"],
     ]) quick.append(button(title, () => navigate(tab), "sladmin-quick"));
     recent.append(el("h3", "Recent activity"), recentItems);
     if (api.connectedPreview) {
@@ -393,6 +396,15 @@
           actions[1].title = "Sign up as a registered user before receiving verification";
           actions[2].title = "Guest profiles cannot become administrators";
         }
+        const banAction = button(u.banned ? "Unban user" : "Ban user",
+          () => moderationDialog(u, load), "sladmin-danger");
+        if (u.guest || u.admin || u.id === info.user.id || api.readonlyLive) {
+          banAction.disabled = true;
+          banAction.title = u.admin ? "Administrators must have their admin role removed separately"
+            : u.guest ? "Guest accounts cannot be banned by this tool"
+            : "This account cannot be banned";
+        }
+        actions.push(banAction);
         if (api.readonlyLive) {
           actions[1].disabled = true;
           actions[2].disabled = true;
@@ -406,7 +418,8 @@
               (u.username || "—") +
               (u.admin ? " · Admin" : "") +
               (u.verified ? " · Verified" : "") +
-              (u.guest ? " · Guest" : ""),
+              (u.guest ? " · Guest" : "") +
+              (u.banned ? " · BANNED" : ""),
             actions,
             (u.display_name || "S").slice(0, 1),
           ),
@@ -520,6 +533,21 @@
                   await render();
                 }
               }),
+              ...((sectionMode && r.builtin) ? [] : [
+                button("Delete", async () => {
+                  const warning = sectionMode
+                    ? "Delete the extra section \"" + d.title +
+                      "\" and all its added cards permanently?"
+                    : "Delete \"" + d.title +
+                      "\" from StudyLab? Its saved draft and published entry will be removed.";
+                  if (!confirm(warning)) return;
+                  if (!confirm("Confirm permanent deletion. This cannot be undone from the dashboard.")) return;
+                  const result = await api.deleteContent(r);
+                  await render();
+                  status("Deleted " + d.title +
+                    (result?.deleted_children ? " and " + result.deleted_children + " linked cards." : "."));
+                }, "sladmin-danger"),
+              ]),
             ],
             sectionMode ? "▤" : "↗",
           ),
