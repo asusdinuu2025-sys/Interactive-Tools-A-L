@@ -141,8 +141,12 @@
     try {
       await renderPanel(host, version);
       if (version === request) {
-        status("");
-        if (!dirty) $("#ad-save-state").textContent = "All changes saved";
+        const partial = host.querySelector(".ad-data-warning:not([hidden])");
+        status(partial ? "Some data is unavailable; the rest of the dashboard still works." : "",
+          Boolean(partial));
+        if (!dirty) $("#ad-save-state").textContent = partial
+          ? "Some data unavailable"
+          : (api.preview ? "Preview saved on this device" : "All changes saved");
       }
     } catch (e) {
       if (version !== request) return;
@@ -187,62 +191,113 @@
       );
   }
   async function overview(host, version) {
-    const [content, users, admins, activity] = await Promise.all([
-      api.content(),
-      api.users(),
-      api.users("", 0, true),
-      api.activity(),
-    ]);
-    if (version !== request) return;
+    // Paint the workspace FIRST. No failing or stalled request may make
+    // the entire Overview disappear, including its navigation.
     const stats = el("div", undefined, "ad-stats");
-    for (const [n, label] of [
-      [users.total, api.preview ? "Preview accounts" : "Student accounts"],
-      [admins.total, "Administrators"],
-      [content.filter((x) => x.draft.kind === "card").length, "Content cards"],
-      [
-        content.filter((x) => x.revision && !x.draft.hidden).length,
-        "Edited items",
-      ],
-    ]) {
-      const c = el("article", undefined, "ad-card");
-      c.append(
-        el("div", label, "ad-stat-label"),
-        el("div", String(n), "ad-stat"),
-      );
-      stats.append(c);
+    const metricLabels = [
+      api.preview ? "Preview accounts (sample)" : "Student accounts",
+      "Administrators",
+      "Content cards",
+      "Edited items",
+    ];
+    const metricValues = [];
+    for (const label of metricLabels) {
+      const card = el("article", undefined, "ad-card");
+      const value = el("div", "Loading…", "ad-stat");
+      value.setAttribute("aria-live", "polite");
+      card.append(el("div", label, "ad-stat-label"), value);
+      metricValues.push(value);
+      stats.append(card);
     }
-    host.append(stats);
+
     const grid = el("div", undefined, "ad-overview-grid"),
       quick = el("article", undefined, "ad-card"),
-      recent = el("article", undefined, "ad-card");
+      recent = el("article", undefined, "ad-card"),
+      recentItems = el("div", "Loading recent activity…");
     quick.append(
-      el("h3", "Make something useful happen"),
-      el("p", "Keep resources fresh and your community supported."),
+      el("h3", "Manage your StudyLab community"),
+      el("p", "Choose an area below to manage its content and settings."),
     );
     for (const [title, tab] of [
       ["Manage learning resources →", "Content"],
       ["Review users & verification →", "Users"],
+      ["Review administrator access →", "Admins"],
       ["Arrange homepage sections →", "Sections"],
-    ])
-      quick.append(button(title, () => navigate(tab), "ad-quick"));
-    recent.append(el("h3", "Recent activity"));
-    if (!activity.length)
-      recent.append(
-        el("p", "A clean slate. Your next change will show up here."),
-      );
-    for (const a of activity.slice(0, 4))
-      recent.append(el("p", a.action + " · " + a.target));
-    if (api.preview)
-      recent.append(
-        button("Reset preview changes", () => {
-          if (
-            confirm("Reset the changes saved in this preview on this device?")
-          )
-            api.reset();
-        }),
-      );
+      ["Upload images and documents →", "Media"],
+    ]) quick.append(button(title, () => navigate(tab), "ad-quick"));
+    recent.append(el("h3", "Recent activity"), recentItems);
+    if (api.preview) {
+      quick.prepend(el(
+        "p",
+        "PREVIEW ONLY: account lists are samples. No real admin, badge, or content updates are sent to Supabase.",
+        "ad-preview-explanation",
+      ));
+      recent.append(button("Reset preview changes", () => {
+        if (confirm("Reset the changes saved in this preview on this device?"))
+          api.reset();
+      }));
+    }
     grid.append(quick, recent);
-    host.append(grid);
+    const warning = el("div", undefined, "ad-data-warning");
+    warning.hidden = true;
+    warning.setAttribute("role", "alert");
+    host.append(warning, stats, grid);
+
+    // A stalled API call must not block the entire dashboard forever.
+    async function fetchWithTimeout(label, getValue) {
+      let timeout;
+      try {
+        return await Promise.race([
+          Promise.resolve().then(getValue),
+          new Promise((_, reject) => {
+            timeout = setTimeout(
+              () => reject(new Error(label + " request timed out.")), 12000);
+          }),
+        ]);
+      } finally {
+        clearTimeout(timeout);
+      }
+    }
+    const results = await Promise.allSettled([
+      fetchWithTimeout("Accounts", () => api.users()),
+      fetchWithTimeout("Admins", () => api.users("", 0, true)),
+      fetchWithTimeout("Content", () => api.content()),
+      fetchWithTimeout("Activity", () => api.activity()),
+    ]);
+    if (version !== request) return;
+    const [users, admins, content, activity] = results;
+    const failed = results
+      .map((r, i) => r.status === "rejected"
+        ? metricLabels[Math.min(i, 3)] + ": " + (r.reason?.message || "Unavailable")
+        : null)
+      .filter(Boolean);
+    metricValues[0].textContent =
+      users.status === "fulfilled" ? String(users.value.total) : "Unavailable";
+    metricValues[1].textContent =
+      admins.status === "fulfilled" ? String(admins.value.total) : "Unavailable";
+    metricValues[2].textContent = content.status === "fulfilled"
+      ? String(content.value.filter(x => x?.draft?.kind === "card").length)
+      : "Unavailable";
+    metricValues[3].textContent = content.status === "fulfilled"
+      ? String(content.value.filter(x => x?.revision && !x?.draft?.hidden).length)
+      : "Unavailable";
+    recentItems.replaceChildren();
+    if (activity.status === "fulfilled") {
+      if (!activity.value.length)
+        recentItems.append(el("p", "No changes recorded in this preview yet."));
+      for (const a of activity.value.slice(0, 4))
+        recentItems.append(el("p", a.action + " · " + a.target));
+    } else {
+      recentItems.append(el("p", "Activity data is unavailable right now."));
+    }
+    if (failed.length) {
+      warning.hidden = false;
+      warning.append(
+        el("strong", "Some dashboard data could not load."),
+        el("p", failed.join(" | ")),
+        button("Retry overview", () => render(), "ad-primary"),
+      );
+    }
   }
   async function userList(host, version) {
     const toolbar = el("div", undefined, "ad-toolbar"),
@@ -677,6 +732,12 @@
             : "Published edits are visible to students. Drafts stay private.",
         ),
       );
+      $("#ad-mode").append(el(
+        "small",
+        api.preview ? "PR #102 preview · dashboard build 2026-11-16.4"
+          : "Dashboard build 2026-11-16.4",
+        "ad-build-label",
+      ));
       await navigate("Overview");
     } catch (e) {
       $("#ad-workspace").hidden = true;
