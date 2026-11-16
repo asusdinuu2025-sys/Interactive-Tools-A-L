@@ -152,7 +152,7 @@
   const attachButton = root.querySelector("[data-chat-attach]");
   const attachPreview = root.querySelector("[data-chat-attachment-preview]");
   let pendingImages = [];
-  let typingIdleTimer=0,lastTypingSent=0,channelSubscribed=false;
+  let typingIdleTimer=0,lastTypingSent=0,channelSubscribed=false,typingActive=false;
   const imageUrlCache = new Map();
 
   const sessionKey =
@@ -868,14 +868,24 @@
     if(!channelSubscribed || !channel || !userId)return;
     const now=Date.now();
     if(typing && (!isOpen || document.hidden))return;
-    if(typing && now-lastTypingSent<1100){
-      typingIdleTimer=setTimeout(()=>publishTyping(false),2400);
+    // Presence updates are rate-limited by Supabase. Track on state change,
+    // then at most once every 6 seconds while continually typing.
+    if(typing){
+      if(!typingActive || now-lastTypingSent>=6000){
+        typingActive=true;
+        lastTypingSent=now;
+        channel.track({id:userId,nickname,typing:true,updatedAt:now})
+          .catch(error=>console.warn("Chat typing presence:",error?.message));
+      }
+      typingIdleTimer=setTimeout(()=>publishTyping(false),2800);
       return;
     }
-    lastTypingSent=typing?now:0;
-    channel.track({id:userId,nickname,typing:Boolean(typing),updatedAt:now})
-      .catch(()=>{});
-    if(typing)typingIdleTimer=setTimeout(()=>publishTyping(false),2800);
+    if(typingActive){
+      typingActive=false;
+      lastTypingSent=now;
+      channel.track({id:userId,nickname,typing:false,updatedAt:now})
+        .catch(()=>{});
+    }
   }
   function subscribe() {
     if (!client) return;
@@ -1083,6 +1093,12 @@
           if(replyTarget && messagesById.has(replyTarget))values.reply_to=replyTarget;
           ({error}=await client.from(CONFIG.table).insert(values));
           if(error)throw error;
+          // A successful server insert must be visible to its author even if
+          // the WebSocket channel is temporarily disconnected.
+          if(!messagesById.has(id)){
+            renderMessage({...values,created_at:new Date().toISOString()},true);
+            scrollToBottom(true);
+          }
         }catch(uploadError){
           if(uploaded.length){
             try{await client.storage.from(CONFIG.imageBucket).remove(uploaded);}
