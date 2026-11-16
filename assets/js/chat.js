@@ -887,6 +887,103 @@
       });
   }
 
+
+  function clearPendingImages() {
+    for (const item of pendingImages) URL.revokeObjectURL(item.previewUrl);
+    pendingImages = [];
+    if (imageInput) imageInput.value = "";
+    renderPendingImages();
+  }
+  function renderPendingImages() {
+    if (!attachPreview) return;
+    attachPreview.replaceChildren();
+    attachPreview.hidden = !pendingImages.length;
+    for (const item of pendingImages) {
+      const tile = document.createElement("span");
+      tile.className = "study-chat-pending-tile";
+      const img = document.createElement("img");
+      img.alt = "Image ready to attach"; img.src = item.previewUrl;
+      const remove = document.createElement("button");
+      remove.type = "button"; remove.textContent = "×";
+      remove.setAttribute("aria-label", "Remove attached image");
+      remove.addEventListener("click", () => {
+        pendingImages = pendingImages.filter(x => x !== item);
+        URL.revokeObjectURL(item.previewUrl);
+        renderPendingImages(); updateComposer();
+      });
+      tile.append(img, remove); attachPreview.append(tile);
+    }
+    const caption = document.createElement("small");
+    caption.className = "study-chat-pending-count";
+    caption.textContent = pendingImages.length + "/3 images · up to 1 MB each";
+    attachPreview.append(caption);
+  }
+  async function compressChatImage(file) {
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type) ||
+        file.size > CONFIG.maxSourceBytes)
+      throw Error("Choose a JPG, PNG, or WebP file under 12 MB.");
+    const url = URL.createObjectURL(file);
+    let bitmap, source, w = 0, h = 0;
+    try {
+      if (typeof createImageBitmap === "function") {
+        bitmap = await createImageBitmap(file);
+        source = bitmap; w = bitmap.width; h = bitmap.height;
+      } else {
+        source = await new Promise((resolve, reject) => {
+          const image = new Image();
+          image.onload = () => resolve(image);
+          image.onerror = reject; image.src = url;
+        });
+        w = source.naturalWidth; h = source.naturalHeight;
+      }
+      if (!w || !h || w * h > 60000000)
+        throw Error("Unsupported image dimensions.");
+      let scale = Math.min(1, 1280 / Math.max(w, h));
+      for (let n = 0; n < 8; n++) {
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(w * scale));
+        canvas.height = Math.max(1, Math.round(h * scale));
+        const ctx = canvas.getContext("2d");
+        if (!ctx) throw Error("Image compression is unavailable in this browser.");
+        ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
+        const quality = n < 3 ? [0.82, 0.70, 0.58][n] : 0.58;
+        const blob = await new Promise(resolve =>
+          canvas.toBlob(resolve, "image/webp", quality));
+        if (blob && blob.type === "image/webp" &&
+            blob.size > 0 && blob.size <= CONFIG.maxImageBytes)
+          return blob;
+        scale *= 0.8;
+      }
+      throw Error("Image could not be compressed under 1 MB.");
+    } finally {
+      bitmap?.close?.();
+      URL.revokeObjectURL(url);
+    }
+  }
+  async function handleImageSelection(event) {
+    const files = Array.from(event.target.files || []);
+    if (imageInput) imageInput.value = "";
+    if (!files.length) return;
+    if (editTarget) {
+      chatFeedback("Finish editing before attaching images.", true); return;
+    }
+    if (files.length + pendingImages.length > CONFIG.maxImages) {
+      chatFeedback("Up to three images per message.", true); return;
+    }
+    attachButton.disabled = true;
+    try {
+      for (const file of files) {
+        const blob = await compressChatImage(file);
+        pendingImages.push({ blob, previewUrl: URL.createObjectURL(blob) });
+      }
+      renderPendingImages(); chatFeedback("");
+    } catch (error) {
+      chatFeedback(error.message || "Image could not be prepared.", true);
+    } finally {
+      updateComposer();
+    }
+  }
+
   async function sendMessage() {
     if(!client || !input || busyMessageAction)return;
     const message=input.value.trim();
