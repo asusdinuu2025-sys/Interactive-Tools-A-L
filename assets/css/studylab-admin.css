@@ -882,3 +882,62 @@ html[data-theme="light"] .sladmin-popup-dialog .sladmin-fields input[type="datet
   .sladmin-back-icon {width:16px;height:16px;}
   .sl-admin-page .sladmin-tabs button {min-width:110px;font-size:12px;}
 }
+
+/* PR #102: compact icon actions, correctly contrasted danger controls. */
+.sl-admin-page #sladmin-mode[hidden] {display:none !important;}
+.sl-admin-page .sladmin-quick {
+  align-items:center !important;
+  gap:14px;
+  justify-content:space-between !important;
+  white-space:normal;
+  line-height:1.35;
+  min-height:44px;
+  padding:11px 15px;
+}
+.sl-admin-page .sladmin-quick-icon {
+  width:19px;
+  height:19px;
+  min-width:19px;
+  color:#9acaff;
+  opacity:.94;
+  margin-left:auto;
+  flex-shrink:0;
+}
+html[data-theme="light"] .sl-admin-page .sladmin-quick-icon {
+  color:#33699f;
+}
+html[data-theme="light"] body.sl-admin-page button.sladmin-danger:not(:disabled),
+html[data-theme="light"] .sl-admin-page button.sladmin-danger:not(:disabled) {
+  color:#ad243e;
+  background:linear-gradient(135deg,rgba(254,219,224,.93),rgba(251,195,211,.58));
+  border-color:rgba(187,55,85,.51);
+  font-weight:700;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.72);
+}
+html[data-theme="light"] .sl-admin-page button.sladmin-danger:hover:not(:disabled) {
+  background:linear-gradient(135deg,rgba(254,196,207,.94),rgba(245,161,187,.73));
+  color:#82132b;
+  border-color:rgba(150,30,60,.65);
+}
+.sl-admin-page .sladmin-history-actions {
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.sl-admin-page .sladmin-history-clear {
+  margin-left:auto;
+}
+.sl-admin-page button.sladmin-undo:not(:disabled) {
+  border-color:rgba(138,209,246,.41);
+  color:var(--sladmin-text);
+}
+.sl-admin-page button.sladmin-undo:disabled {
+  opacity:.48;
+  cursor:not-allowed;
+}
+.sl-admin-page .sladmin-history-info {
+  font-size:12px;
+  color:var(--sladmin-muted);
+  margin:10px 0 15px;
+}
