@@ -5,23 +5,23 @@
     page = location.pathname.split("/").pop() || "index.html";
   function safeURL(raw, image = false) {
     try {
-      raw = String(raw || "")
-        .trim()
-        .replace(/ /g, "%20");
+      raw = String(raw || "").trim();
       if (!raw) return null;
       if (
         config.mode === "preview" &&
-        /^data:(image\/(png|jpeg|webp)|application\/pdf);base64,[a-z0-9+/=]+$/i.test(
-          raw,
-        )
-      )
-        return raw;
+        /^data:(image\/(png|jpeg|webp)|application\/pdf);base64,[a-z0-9+/=]+$/i.test(raw)
+      ) return raw;
       if (/[\u0000-\u0020\u007f\\]/.test(raw) || raw.startsWith("//"))
         return null;
+      if (!/^[a-z][a-z0-9+.-]*:/i.test(raw) &&
+          !/^(?:[./?#]|\w+\.html(?:[?#]|$))/i.test(raw) &&
+          /^(?:[a-z0-9-]+\.)+[a-z]{2,}(?::[0-9]{2,5})?(?:[/?#]|$)/i.test(raw))
+        raw = "https://" + raw;
       const u = new URL(raw, location.href);
       if (!["http:", "https:"].includes(u.protocol) || u.username || u.password)
         return null;
-      if (u.origin !== location.origin && u.protocol !== "https:") return null;
+      if (image && u.origin !== location.origin && u.protocol !== "https:")
+        return null;
       return u.href;
     } catch {
       return null;
@@ -85,7 +85,7 @@
       if (!card) {
         card = el("a", "sl-cms-card");
         card.dataset.cmsId = d.id;
-        card.append(el("h3"), el("p"), el("span", "sl-cms-open", "Open resource →"));
+        card.append(el("h3"), el("p"), el("span", "sl-cms-open", "Open resource"));
         let host = d.section
           ? document
               .getElementById(d.section)
@@ -130,6 +130,11 @@
       if (title) title.textContent = d.title;
       if (desc) desc.textContent = d.description || "";
       card.dataset.cmsOrder = d.order;
+      const open = card.querySelector(".sl-cms-open");
+      if (open) {
+        const label = String(d.button_label || "Open resource").trim();
+        open.textContent = label.slice(0, 22) || "Open resource";
+      }
       let img = card.querySelector(".sl-cms-image");
       if (d.image && safeURL(d.image, true)) {
         if (!img) {
