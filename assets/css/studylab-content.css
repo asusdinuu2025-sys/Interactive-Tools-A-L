@@ -1,52 +1,112 @@
 [data-cms-id][hidden] {
   display: none !important;
 }
+/* Database-created resources share StudyLab's subtle glass design. */
 .sl-cms-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
-  gap: 18px;
-  margin: 22px 0;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 320px));
+  align-items: start;
+  justify-content: start;
+  gap: 16px;
+  margin: 20px 0 8px;
 }
 .sl-cms-card {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 12px;
-  padding: 24px;
-  border: 1px solid var(--border, rgba(140, 200, 255, 0.25));
+  width: 100%;
+  min-width: 0;
+  padding: 19px;
+  border: 1px solid rgba(152, 204, 252, .24);
   border-radius: 22px;
-  background: rgba(130, 170, 230, 0.06);
+  background: linear-gradient(145deg, rgba(181,220,255,.10), rgba(142,147,245,.038) 55%, rgba(175,120,235,.055));
+  box-shadow: inset 0 1px rgba(255,255,255,.085),0 7px 26px rgba(8,22,52,.09);
+  backdrop-filter: blur(7px) saturate(130%);
+  -webkit-backdrop-filter: blur(7px) saturate(130%);
   color: inherit;
   text-decoration: none;
-  min-width: 0;
   overflow-wrap: anywhere;
-  transition: transform 0.2s;
+  transition: transform .2s,background .2s,border-color .2s;
 }
 .sl-cms-card:hover {
   transform: translateY(-3px);
+  background: linear-gradient(135deg,rgba(154,207,255,.17),rgba(140,149,235,.07));
+  border-color: rgba(145,207,255,.42);
 }
-.sl-cms-card h3,
-.sl-cms-card p {
-  margin: 0;
+.sl-cms-card:focus-visible {
+  outline: 2px solid #87c8ff;
+  outline-offset: 3px;
 }
-.sl-cms-card p {
-  opacity: 0.75;
-  line-height: 1.6;
+.sl-cms-card h3,.sl-cms-card p { margin: 0; }
+.sl-cms-card h3 {
+  font: 750 clamp(16px,1.5vw,19px)/1.35 "Nirmala UI","Segoe UI",sans-serif;
+  letter-spacing: -.02em;
+}
+.sl-cms-card p { opacity:.82;line-height:1.55;font-size:13px; }
+.sl-cms-card .sl-cms-open {
+  display: inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding: 8px 13px;
+  border:1px solid rgba(142,204,255,.27);
+  border-radius:999px;
+  color:inherit;
+  background: linear-gradient(140deg,rgba(139,200,255,.15),rgba(160,144,240,.10));
+  box-shadow:inset 0 1px rgba(255,255,255,.10);
+  font-size:12px;
+  font-weight:730;
 }
 .sl-cms-image {
-  width: 100%;
-  max-height: 180px;
-  object-fit: cover;
-  border-radius: 14px;
+  display:block;
+  width:100%;
+  height:146px;
+  max-width:100%;
+  object-fit:contain;
+  border-radius:13px;
+  background:rgba(8,30,65,.09);
+  border:1px solid rgba(145,191,240,.12);
 }
 .sl-cms-section {
-  padding: 28px;
-  margin: 24px 0;
-  border: 1px solid rgba(140, 200, 255, 0.2);
-  border-radius: 26px;
-  background: rgba(130, 170, 230, 0.04);
+  padding: clamp(18px,2.5vw,30px);
+  margin:24px 0;
+  border:1px solid rgba(156,202,252,.19);
+  border-radius:27px;
+  background: linear-gradient(130deg,rgba(147,196,255,.063),rgba(179,143,237,.032));
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+  box-shadow: inset 0 1px rgba(255,255,255,.07);
 }
+.sl-cms-section > h2 {margin:0 0 8px;font-weight:750;}
+.sl-cms-section > p {margin:0 0 12px;opacity:.80;}
 .sl-cms-section[data-layout="list"] .sl-cms-grid {
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0,1fr);
+}
+.sl-cms-section[data-layout="list"] .sl-cms-card {
+  flex-direction:row;
+  flex-wrap:wrap;
+  align-items:center;
+  max-width:none;
+}
+.sl-cms-section[data-layout="list"] .sl-cms-image {
+  width:120px;
+  height:92px;
+}
+html[data-theme="light"] .sl-cms-card,
+body[data-theme="light"] .sl-cms-card {
+  background:linear-gradient(145deg,rgba(255,255,255,.52),rgba(235,242,255,.29));
+  border-color:rgba(92,145,205,.25);
+  box-shadow:inset 0 1px rgba(255,255,255,.55),0 7px 22px rgba(70,108,162,.07);
+}
+html[data-theme="light"] .sl-cms-section,
+body[data-theme="light"] .sl-cms-section {
+  background:rgba(255,255,255,.28);
+  border-color:rgba(91,140,197,.20);
+}
+@media (max-width:720px){
+  .sl-cms-grid {grid-template-columns:minmax(0,1fr);}
+  .sl-cms-card {padding:16px;}
+  .sl-cms-section[data-layout="list"] .sl-cms-card {flex-direction:column;align-items:flex-start;}
 }
 .sl-cms-preview-banner {
   position: sticky;
