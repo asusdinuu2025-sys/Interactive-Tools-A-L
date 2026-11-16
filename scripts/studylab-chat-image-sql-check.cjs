@@ -5,7 +5,7 @@ const {readFileSync}=require("node:fs");
 (async()=>{
  const db=new PGlite();
  await db.exec("\ncreate role anon;create role authenticated;create schema auth;create schema storage;create schema studylab_private;\ncreate function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;\ncreate function public.studylab_chat_can_moderate() returns boolean language sql stable as $$ select false $$;\ncreate function storage.foldername(name text) returns text[] language sql immutable as $$ select string_to_array(name,'/') $$;\ncreate table public.studylab_chat_messages (id uuid primary key,user_id uuid,message text not null);\ncreate table storage.buckets (id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);\ncreate table storage.objects (id uuid default gen_random_uuid(),name text,bucket_id text);\nalter table storage.objects enable row level security;\ngrant usage on schema auth,storage to authenticated;\ngrant execute on function auth.uid() to authenticated;\ngrant execute on function public.studylab_chat_can_moderate() to authenticated;\ngrant execute on function storage.foldername(text) to authenticated;\ngrant select,insert,delete on storage.objects to authenticated;");
- await db.exec(readFileSync("supabase/migrations/20261116204000_chat_image_attachments.sql","utf8"));
+ await db.exec(readFileSync("supabase/migrations/20261116214516_chat_image_attachments.sql","utf8"));
  const uid="11111111-1111-4111-8111-111111111111";
  const mid="22222222-2222-4222-8222-222222222222";
  const root=uid+"/"+mid+"/";
