@@ -1,57 +1,55 @@
-# Admin Dashboard preview
+# StudyLab Admin Dashboard · PR #102 release notes
 
-Base: main at b0470775edb0b33009c040c8de3294f1b4cd1288.
+## Scope
 
-## Included
+The dashboard is a separate admin-only workspace reached from StudyLab's account menu, immediately after Manage Announcements. Tabs: **Overview, Users, Admins, Content, Sections, Media, Activity**.
 
-- Admin Dashboard entry immediately below Manage Announcements. Separate responsive page using the existing theme preference, Nirmala UI and translucent panels.
-- Overview, Users, Admins, Content, Sections, Media and Activity tabs.
-- Existing admins authorize access through the existing database RPC. Direct navigation fails closed for ordinary accounts.
-- Paginated user search, profile summaries (no email/phone disclosure), grant/revoke admin and blue verification badge controls. Verification is independent of admin membership.
-- 149 existing content/section records seeded from the current markup, with editing of titles, descriptions, links, thumbnails, visibility and numeric ordering. New simulation cards link to existing implementations or external HTTPS simulations; this does not generate simulation code.
-- New homepage sections with card-grid/list layouts, draft preview, separate save/publish, hide/restore, unsaved-change protection and optimistic revision checks.
-- JPG/PNG/WebP/PDF media uploads; signature/type/size validation. No HTML/script uploads.
-- Home tiles: minimum 138px desktop / 126px mobile, allowed to grow with text; advertisement 240px desktop / 220px mobile. Existing announcement editor, cropping and transitions are unchanged.
+- Responsive Nirmala UI; Dark, Light and System appearance; translucent gradient glass panels; subtle ADMIN DASHBOARD watermark; no floating developer badge or white account-menu scrollbar.
+- Real live user search, paginated accounts, registered/guest indicators and counts; private email and phone fields are never returned.
+- Real administrator grants/revocations, blue badge verification, content-card/section editor, JPEG/PNG/WebP/PDF media library, and activity history.
+- Existing 149 static content targets remain in place. New cards link to existing simulations or external HTTPS resources; the editor **does not generate simulation programs**.
+- Home overview cards use the previously agreed compact heights, advertisement area is taller. Existing Manage Announcements scripts and styling are unmodified.
 
-## Preview boundaries
+## Deployment modes
 
-`generate-admin-config.mjs` forces branch and deploy previews into preview mode. It cannot enable live operations in a preview even if STUDYLAB_ADMIN_LIVE is set.
+`scripts/generate-admin-config.mjs` selects one of three modes:
 
-The dashboard verifies admin eligibility using the existing server-side `studylab_social_is_admin()` RPC, which currently only authorizes the three specified administrators. It uses the additional `studylab_admin_readonly_stats_v1()` and `studylab_admin_readonly_users_v1()` RPCs to display **real, current Supabase profile, administrator and social-post counts**, and paginated real profiles. No emails or phone numbers are returned. This is deliberately read-only: changing a real user's admin rights or badge is disabled in preview, as are production mutations for content and media. CMS drafts and preview uploads continue to use localStorage on this device only. If the read-only RPCs are absent or unreachable, the page explicitly labels its fallback sample accounts; it never represents sample users as real users. Preview uploads are limited to 1 MB and device storage capacity; live limit is 5 MB. Reset preview changes clears this local state.
+| Deployment | Mode | Backend effects |
+| --- | --- | --- |
+| PR #102 Netlify Deploy Preview (`CONTEXT=deploy-preview`, `REVIEW_ID=102`) | `connected` | Real admin reads **and writes** using server-authorized Supabase RPCs. Confirmation required for changes; **not a sandbox**. |
+| Production when `STUDYLAB_ADMIN_LIVE=true` | `live` | Real admin reads and writes after production release. |
+| Other previews, local/dev, or production without the opt-in | `preview` | Local preview state only; no new admin database mutations. |
 
-Published preview content appears only to a verified admin on the same preview origin/device. Draft Preview opens the target page with an explicit admin preview banner. Existing website functionality outside the new dashboard (including Manage Announcements) retains its current backend behavior; this preview is NOT a sandbox for existing Social, Study Room or announcement actions.
+**Important:** PR #102 preview is connected to the **real Supabase production database**. An admin confirming a role change, badge action, publication, file upload or deletion makes a real database change. Ordinary users and unauthorized accounts cannot access the workspace. Do not use connected preview as a throwaway test environment.
 
-## Backend implementation and production gate
+## Database rollout already performed (16 November 2026)
 
-Two independent migrations are included. `20261116142631_admin_readonly_live_preview.sql` installs only admin-checked SELECT-only RPCs to connect the preview to genuine counts and profiles. It does not edit students, posts, roles, privileges on existing tables, announcements or existing admin authorization logic. It was applied to the connected Supabase project as migration `20261116142631` on 16 November 2026, following passing embedded PostgreSQL tests and verification that the pre-existing three-admin gate is unchanged. No existing user or social records were modified. **The larger `20261116070202_admin_dashboard.sql` full editing migration remains unapplied and under review.** It introduces private admin membership, private drafts/activity, public published content and badges, and a restricted media bucket. The existing three admins and four badges are seeded only from matching existing Auth users. Membership changes serialize under a transaction lock, disallow self-removal, update legacy app metadata for existing server endpoints, and use fresh membership checks for RLS. Public RPCs have fixed empty search paths, explicit authenticated-only grants and authorization checks. Ordinary users cannot access the private schema or write public content/badges. Grants/revocations and content operations have transactional activity records.
+- `20261116142631_admin_readonly_live_preview.sql`: read-only admin-scoped account and site metrics.
+- `20261116145158_admin_dashboard_live_management.sql`: private admin membership, published badges, draft/content registry, activity log, media bucket and server-checked admin operations.
+- Both changes are present in Supabase migration history and the corresponding files are included in PR #102.
+- Existing three administrators were seeded from existing Auth roles. The four existing blue badges were preserved. **No additional administrators were granted automatically.**
+- `studylab_social_is_admin()` now checks the private membership registry, allowing future grants to work for existing Social/announcement authorization immediately. The gate remains callable by `anon` for existing public RLS policies, but always returns false without an authenticated allowed account.
+- The registry is not directly accessible through the browser. Admin-write RPCs are restricted to authenticated callers with server-side membership checks. Admin changes are serialized, self-removal is blocked, and the last remaining administrator is protected. Guest accounts are not eligible.
+- Changes to existing profiles, posts and other student records were **not** made during migration. A Supabase post-migration verification confirmed three admin members, four badges, 575 profiles, 32 social posts, an empty published-content registry, an empty draft registry and one admin media bucket.
+- A security-advisor warning may flag signed-in callable SECURITY DEFINER RPCs; these endpoints explicitly verify membership and expose no direct table grants. Review them alongside the authorization tests rather than blindly revoking their execute permissions.
 
-Before enabling live mode:
-
-1. Apply the migration to an isolated Supabase test database. Test with two admins, an ordinary registered user and a guest, including Storage upload/delete policies and revocation while signed in.
-2. Validate existing Social/announcement admin policies and legacy delete-post behavior with newly granted and revoked admins. The endpoint reads fresh Auth metadata; its deployment does not change in this PR.
-3. Confirm the three seed admins are present, and run Supabase security/performance advisors. This PR has not run hosted advisors because no hosted database was changed.
-4. Check layouts at 360/390/720/721/1180/1360/1440px, 200% zoom, both themes, long names and mobile keyboard. A browser layout pass remains necessary; automated DOM tests are not a substitute for rendering.
-5. Obtain production approval, apply the reviewed migration, and set STUDYLAB_ADMIN_LIVE=true only for the production Netlify context. Deploy/branch previews remain isolated regardless.
-
-Never use this PR's migration against production merely to make the preview work.
-
-## Verification
+## Testing and review
 
 - `node scripts/release-check.mjs`
 - `npm ci && npm run test:admin`
-- The SQL tests execute the real migration in embedded PostgreSQL (PGlite) with minimal Auth/Storage fixtures. They cover grants, access denial, draft privacy, publication, revision conflicts, unsafe URLs, grant/revoke, self-removal protection and public badge visibility.
-- DOM tests exercise the actual dashboard/controller/API with a mocked admin-auth check and assert no remote mutation calls in preview, escaped content, access denial, safe links and all seeded targets.
-- Existing announcement JS/CSS are byte-for-byte unchanged.
+- PGlite tests reproduce the actual migration order, unauthorized/authorized access, content validation and publication, grant/revoke, admin membership count updates, and public verification reads.
+- DOM tests cover search, preview safety, simulated ad-blocker cosmetic rules, connected admin RPC calls, theme changes and empty/error states.
+- Netlify preview builds and automated GitHub release checks are required before production release.
+- **Browser verification still required** on desktop/mobile at 360/390/720/1180/1360/1440 px, 200% zoom and all themes. Automated DOM tests do not provide screenshots or real Safari/Edge layout verification.
+- Test a small authorized administrator change in the connected preview only after understanding it changes live data. Verify the recipient's privileges and badge visibility independently. Do not test by making unnecessary changes to real students.
 
-## Visual design (PR #102 v7)
+## Protection and limitations
 
-The Admin Dashboard uses an original Spotify-like dark glass treatment: translucent blur panels, subtle gradients, rounded navigation and cards, high-contrast text, and a large low-opacity ADMIN DASHBOARD watermark. Light and System modes remain supported; no Spotify artwork or music player code is used. HTML/CSS/JavaScript keep the unique `sladmin-` prefix to avoid ad-blocker cosmetic rules.
-
-## Current limits
-
-- New cards are inserted into the chosen supported homepage section or an additional resources area on the selected page. Existing cards keep their original placement; order is within their current parent group. This preserves established categories and functionality.
-- Built-in sections keep their original layout. Only newly created sections choose grid/list.
-- Activity lists the latest 100 live user/content changes (200 preview entries). Live media changes use Storage logs; they are not currently in the dashboard activity list.
-- Media displays the latest 100 files. Removing a file requires confirmation; references are not automatically rewritten.
-- The static search index does not automatically include newly database-published cards. Existing indexed resources remain searchable.
-- Badges resolve for displayed names in live mode; an already-open page may need reload to reflect a later badge change.
+- All changes to the live site still require the normal PR merge and production deploy. PR #102 is not automatically merged.
+- Existing announcement editor is untouched; its permissions now follow the database admin membership registry.
+- A server-published content card is available through the new `studylab_site_content` reader in the connected preview; the production homepage needs the merged client code and `STUDYLAB_ADMIN_LIVE=true` to render new cards.
+- The static site search index does not immediately include newly database-published content.
+- New cards appear in the targeted supported section or an additional resources area. Built-in sections keep their existing layout.
+- Only the most recent 100 activity entries and 100 media objects are shown. Media deletion does not automatically rewrite links to deleted files.
+- Verification badges and new admin rights become visible to already-open browser tabs after a refresh or another authenticated update; older open pages can have stale UI.
+- Content/permission mutations and media upload/removal are not executed merely by loading the admin dashboard.
