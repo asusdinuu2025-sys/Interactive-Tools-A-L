@@ -20,6 +20,20 @@ insert into studylab_profiles(id,display_name,username) select id,'Student','stu
       "utf8",
     ),
   );
+  // Exercise the additional read-only live snapshot RPCs under Postgres
+  // roles and the same three-admin auth gate as the deployed website.
+  await db.exec(`
+create table public.studylab_social_posts(id text primary key);
+create table public.studylab_social_reports(id text primary key);
+insert into public.studylab_social_posts values ('post-1');
+insert into public.studylab_social_reports values ('report-1');
+`);
+  await db.exec(
+    fs.readFileSync(
+      "supabase/migrations/20261116085000_admin_readonly_live_preview.sql",
+      "utf8",
+    ),
+  );
   const admin = "24e78cd0-4565-407a-96f7-9cfde083f6d2",
     student = "11111111-1111-4111-8111-111111111111";
   async function as(id, role = "authenticated") {
@@ -28,6 +42,14 @@ insert into studylab_profiles(id,display_name,username) select id,'Student','stu
     await db.exec("set role " + role);
   }
   await as(student);
+  await assert.rejects(
+    db.query("select studylab_admin_readonly_stats_v1()"),
+    /Admin access required/,
+  );
+  await assert.rejects(
+    db.query("select studylab_admin_readonly_users_v1()"),
+    /Admin access required/,
+  );
   await assert.rejects(
     db.query("select studylab_admin_users()"),
     /Admin access required/,
@@ -43,6 +65,19 @@ insert into studylab_profiles(id,display_name,username) select id,'Student','stu
     /permission denied/,
   );
   await as(admin);
+  const realStats = (await db.query("select studylab_admin_readonly_stats_v1() as data")).rows[0].data;
+  assert.equal(Number(realStats.profiles), 4);
+  assert.equal(Number(realStats.admins), 3);
+  assert.equal(Number(realStats.social_posts), 1);
+  assert.equal(Number(realStats.reports), 1);
+  const profiles = (await db.query("select studylab_admin_readonly_users_v1() as data")).rows[0].data;
+  assert.equal(Number(profiles.total), 4);
+  assert.equal(profiles.rows.length, 4);
+  assert.equal(profiles.rows.filter(x => x.admin).length, 3);
+  assert.ok(!JSON.stringify(profiles).includes("phone"));
+  const adminAccounts = (await db.query("select studylab_admin_readonly_users_v1('',0,true) as data")).rows[0].data;
+  assert.equal(Number(adminAccounts.total), 3);
+  assert.equal(adminAccounts.rows.length, 3);
   assert.equal(
     (await db.query("select studylab_admin_users() as data")).rows[0].data
       .total,
