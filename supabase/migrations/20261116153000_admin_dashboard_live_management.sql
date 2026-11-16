@@ -113,4 +113,45 @@ insert into storage.buckets(id,name,public,file_size_limit,allowed_mime_types) v
 create policy "Admins list media" on storage.objects for select to authenticated using(bucket_id='studylab-admin-media' and (select public.studylab_social_is_admin()));
 create policy "Admins upload media" on storage.objects for insert to authenticated with check(bucket_id='studylab-admin-media' and (select public.studylab_social_is_admin()) and name ~ '^uploads/[0-9a-f-]{36}\.(jpg|png|webp|pdf)$');
 create policy "Admins remove media" on storage.objects for delete to authenticated using(bucket_id='studylab-admin-media' and (select public.studylab_social_is_admin()));
+
+-- Keep the previously installed read-only admin endpoints in sync with the
+-- dynamic membership registry. A newly granted administrator must be visible
+-- in all admin views immediately, not only the editor.
+create or replace function public.studylab_admin_readonly_users_v1(
+  p_query text default '', p_page integer default 0, p_admins boolean default false
+) returns jsonb
+language sql stable security definer set search_path = ''
+as $$
+  select public.studylab_admin_users(p_query, p_page, p_admins);
+$$;
+create or replace function public.studylab_admin_readonly_stats_v1()
+returns jsonb
+language plpgsql stable security definer set search_path = ''
+as $$
+begin
+  if not coalesce(public.studylab_social_is_admin(), false) then
+    raise exception 'Admin access required' using errcode = '42501';
+  end if;
+  return jsonb_build_object(
+    'profiles', (select count(*) from public.studylab_profiles),
+    'registered', (
+      select count(*) from public.studylab_profiles p
+        join auth.users u on u.id = p.id
+      where coalesce(u.is_anonymous, false) = false
+    ),
+    'guests', (
+      select count(*) from public.studylab_profiles p
+        join auth.users u on u.id = p.id
+      where coalesce(u.is_anonymous, false) = true
+    ),
+    'admins', (select count(*) from studylab_private.admins),
+    'social_posts', (select count(*) from public.studylab_social_posts),
+    'reports', (select count(*) from public.studylab_social_reports)
+  );
+end;
+$$;
+revoke all on function public.studylab_admin_readonly_users_v1(text,integer,boolean),
+              public.studylab_admin_readonly_stats_v1() from public,anon;
+grant execute on function public.studylab_admin_readonly_users_v1(text,integer,boolean),
+              public.studylab_admin_readonly_stats_v1() to authenticated;
 commit;
