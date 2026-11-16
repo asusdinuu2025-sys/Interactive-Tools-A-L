@@ -82,25 +82,26 @@
           <div class="study-chat-feedback" data-chat-feedback role="status" hidden></div>
           <div class="study-chat-attachment-preview" data-chat-attachment-preview hidden></div>
           <input type="file" data-chat-image-input accept="image/jpeg,image/png,image/webp" multiple hidden aria-label="Attach up to three images" />
-          <button type="button" class="study-chat-attach" data-chat-attach aria-label="Attach images" title="Add up to three images">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.3"/><path d="m4 17 5-5 3 3 3-4 5 6"/>
-            </svg>
-          </button>
-          <div class="study-chat-input-wrap">
-            <textarea
-              class="study-chat-input"
-              data-chat-input
-              rows="1"
-              maxlength="500"
-              autocomplete="off"
-              spellcheck="true"
-              aria-label="Type a study-related message"
-            ></textarea>
-            <span class="study-chat-watermark">Educational purposes only • Keep it study-related</span>
+          <div class="study-chat-editorline">
+            <button type="button" class="study-chat-attach" data-chat-attach aria-label="Attach images" title="Add up to three images">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.3"/><path d="m4 17 5-5 3 3 3-4 5 6"/>
+              </svg>
+            </button>
+            <div class="study-chat-input-wrap">
+              <textarea class="study-chat-input" data-chat-input rows="1" maxlength="500"
+                autocomplete="off" spellcheck="true" placeholder="Message…"
+                aria-label="Type a study-related message"></textarea>
+              <span class="study-chat-watermark">Educational purposes only • Keep it study-related</span>
+            </div>
+            <button type="submit" class="study-chat-send" data-chat-send disabled aria-label="Send message" title="Send">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M22 2 11 13"/><path d="m22 2-7 20-4-9-9-4 20-7Z"/>
+              </svg>
+            </button>
+            <span class="study-chat-compose-meta" data-chat-count>0/500</span>
           </div>
-          <button type="submit" class="study-chat-send" data-chat-send disabled aria-label="Send message">➤</button>
-          <span class="study-chat-compose-meta" data-chat-count>0/500</span>
         </form>
       </aside>
     </div>
@@ -923,7 +924,9 @@
           publishTyping(false);
         }else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT"||status==="CLOSED"){
           channelSubscribed=false;
-          setStatus(false,"Live connection unavailable");
+          // Realtime may temporarily disconnect while ordinary database
+          // sends are still available: avoid implying the entire chat is dead.
+          setStatus(false,"Live updates paused · sending may still work");
           if(typingBar)typingBar.hidden=true;
         }
       });
@@ -1026,6 +1029,25 @@
     }
   }
 
+  function messageFailure(error, editing) {
+    const reason=String(error?.message || "").toLowerCase();
+    const code=String(error?.code || "").toUpperCase();
+    if (/wait before sending|rate.limit|too many requests/.test(reason) || code==="429")
+      return "Please wait a moment before sending another message.";
+    if (/jwt|token|session|not authenticated|auth.uid|unauthorized/.test(reason) || code==="PGRST301")
+      return "Your chat session needs refreshing. Sign out and sign back in if it persists.";
+    if (/permission|row-level|policy|42501/.test(reason) || code==="42501")
+      return "Message blocked by chat permissions. Refresh your account and retry.";
+    if (/foreign key/.test(reason))return "The message you replied to is no longer available. Cancel reply and retry.";
+    if (/failed to fetch|network|timeout|websocket/.test(reason))
+      return "Network connection interrupted. Your text is still here. Retry sending.";
+    if (/image|storage|bucket|mime|file size/.test(reason))
+      return "Image upload failed. Check your selected images and try again.";
+    // Preserve text on failure, and provide a traceable error code without
+    // revealing raw SQL statements or other students' information.
+    return (editing?"Could not edit message":"Message could not be sent") +
+      (code && /^[0-9A-Z]{3,12}$/.test(code)?" ("+code+").":"; please retry.");
+  }
   async function sendMessage() {
     if(!client || !input || busyMessageAction)return;
     const message=input.value.trim();
@@ -1076,9 +1098,7 @@
       publishTyping(false);
     }catch(error){
       console.warn("StudyLab Chat message action:",error);
-      chatFeedback(error?.message?.includes("foreign key")
-        ?"That original message is no longer available. Cancel reply and send again."
-        :editTarget?"Could not edit message.":"Message could not be sent.",true);
+      chatFeedback(messageFailure(error,Boolean(editTarget)),true);
       if(!editTarget)lastSentAt=0;
     }finally{
       busyMessageAction=false;
