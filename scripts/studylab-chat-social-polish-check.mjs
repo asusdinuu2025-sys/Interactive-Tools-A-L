@@ -144,7 +144,7 @@ assert.match(imageSql,/for insert to authenticated/);
 assert.match(imageSql,/for delete to authenticated/);
 for(const html of [home,room]){
   assert.match(html,/studylab-follow\.css\?v=20261116-follow-colors-v1/);
-  assert.match(html,/studylab-popups\.js\?v=20261116-v14/);
+  assert.match(html,/studylab-popups\.js\?v=20261116-v15/);
 }
 const notices=read("assets/js/studylab-popups.js");
 assert.match(notices,/path\.endsWith\("\/index\.html"\)/);
