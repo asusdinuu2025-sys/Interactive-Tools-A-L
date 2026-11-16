@@ -847,11 +847,40 @@
     loadReactions();
   }
 
+
+  function refreshTyping() {
+    if(!typingBar || !channel || !isOpen || document.hidden){
+      if(typingBar)typingBar.hidden=true;
+      return;
+    }
+    const values=Object.values(channel.presenceState() || {}).flat();
+    const other=values.filter(item=>item && item.typing && item.id!==userId &&
+      Date.now()-Number(item.updatedAt||0)<7000);
+    typingBar.hidden=!other.length;
+    if(other.length && typingLabel)
+      typingLabel.textContent=other.length===1
+        ? String(other[0].nickname||"Someone")+" is typing…"
+        : "Students are typing…";
+  }
+  function publishTyping(typing) {
+    clearTimeout(typingIdleTimer);
+    if(!channelSubscribed || !channel || !userId)return;
+    const now=Date.now();
+    if(typing && (!isOpen || document.hidden))return;
+    if(typing && now-lastTypingSent<1100){
+      typingIdleTimer=setTimeout(()=>publishTyping(false),2400);
+      return;
+    }
+    lastTypingSent=typing?now:0;
+    channel.track({id:userId,nickname,typing:Boolean(typing),updatedAt:now})
+      .catch(()=>{});
+    if(typing)typingIdleTimer=setTimeout(()=>publishTyping(false),2800);
+  }
   function subscribe() {
     if (!client) return;
 
     channel = client
-      .channel("studylab-chat-room")
+      .channel("studylab-chat-room",{config:{presence:{key:sessionKey}}})
       .on("postgres_changes",
         {event:"*",schema:"public",table:CONFIG.table},
         payload=>{
@@ -886,10 +915,17 @@
             loadReactions(changed.length?changed:undefined);
           },140);
         })
+      .on("presence",{event:"sync"},refreshTyping)
       .subscribe(status=>{
-        if(status==="SUBSCRIBED")setStatus(true,"Live • newest 100 messages");
-        else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT")
+        if(status==="SUBSCRIBED"){
+          channelSubscribed=true;
+          setStatus(true,"Live • newest 100 messages");
+          publishTyping(false);
+        }else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT"||status==="CLOSED"){
+          channelSubscribed=false;
           setStatus(false,"Live connection unavailable");
+          if(typingBar)typingBar.hidden=true;
+        }
       });
   }
 
@@ -1037,6 +1073,7 @@
       input.value="";
       clearPendingImages();
       clearComposerContext();resizeMessageInput();updateComposer();
+      publishTyping(false);
     }catch(error){
       console.warn("StudyLab Chat message action:",error);
       chatFeedback(error?.message?.includes("foreign key")
