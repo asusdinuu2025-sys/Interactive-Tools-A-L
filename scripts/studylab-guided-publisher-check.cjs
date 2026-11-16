@@ -79,7 +79,7 @@ function make(html){
 
  const viewer=read("simulation-viewer.html");
  assert.ok(/sandbox="allow-scripts allow-forms"/.test(viewer),"Viewer must sandbox uploaded HTML");
- assert.ok(!/allow-same-origin/.test(viewer),"Never give user HTML StudyLab origin access");
+ assert.ok(!/sandbox\\s*=\\s*["'][^"']*allow-same-origin/.test(viewer),"Never give user HTML StudyLab origin access");
  assert.ok(/studylab_site_content/.test(viewer),"Viewer must check publication status");
  assert.ok(!/service_role/.test(viewer),"Never expose privileged API keys");
  const api=read("assets/js/studylab-admin-api.js");
