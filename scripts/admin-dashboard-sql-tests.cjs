@@ -22,11 +22,11 @@ create table public.studylab_social_reports(id text primary key);
 insert into public.studylab_social_posts values ('post-1');
 insert into public.studylab_social_reports values ('report-1');
 create function public.studylab_social_is_admin() returns boolean language sql stable
-as $ select auth.uid() in (
+as $admin_gate$ select auth.uid() in (
  '24e78cd0-4565-407a-96f7-9cfde083f6d2'::uuid,
  '7c97a8d7-f047-4c88-883d-4bed9b1a5f99'::uuid,
  'b6c80613-8217-48ac-851b-a39a3d9bef2b'::uuid
-) $;
+) $admin_gate$;
 `);
   await db.exec(
     fs.readFileSync(
