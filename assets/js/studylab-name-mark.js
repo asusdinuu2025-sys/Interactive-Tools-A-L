@@ -14,7 +14,7 @@
   const waiting = new Set();
   let timer;
   function scheduleLookup(userId) {
-    if (window.StudyLabAdminConfig?.mode === "preview" || queried.has(userId)) return;
+    if (!["live", "connected"].includes(window.StudyLabAdminConfig?.mode) || queried.has(userId)) return;
     queried.add(userId); waiting.add(userId);
     clearTimeout(timer);
     timer = setTimeout(flush, 80);
