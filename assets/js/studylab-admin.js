@@ -484,7 +484,8 @@
             : u.guest ? "Guest accounts cannot be banned by this tool"
             : "This account cannot be banned";
         }
-        actions.push(banAction);
+        // Ban controls belong in Users only. Admins cannot be banned here.
+        if (active !== "Admins") actions.push(banAction);
         if (api.readonlyLive) {
           actions[1].disabled = true;
           actions[2].disabled = true;
@@ -833,15 +834,32 @@
     const popup = el("aside", undefined, "slpopup-toast slpopup-" + item.variant);
     popup.dataset.placement = item.placement;
     popup.setAttribute("role", "status");
-    popup.append(el("strong", item.title), el("p", item.message));
-    const close = button("×", () => popup.remove(), "slpopup-close");
+    const title = el("strong", item.title);
+    const message = el("p", undefined, "slpopup-message");
+    if (window.StudyLabPopupFormat?.render)
+      window.StudyLabPopupFormat.render(message, item.message || "");
+    else message.textContent = item.message || "";
+    popup.append(title, message);
+    let dismissed = false;
+    let stopTimer = () => {};
+    const dismiss = () => {
+      if (dismissed) return;
+      dismissed = true;
+      stopTimer();
+      popup.remove();
+    };
+    const close = button("×", dismiss, "slpopup-close");
     close.setAttribute("aria-label", "Close preview");
     popup.prepend(close);
     if (item.link) popup.append(el("span",
       item.link_label || "View", "slpopup-link slpopup-link-preview"));
     popup.append(el("small", "Admin preview · Not sent"));
+    const seconds = Math.max(3, Math.min(30, Number(item.display_seconds) || 8));
+    popup.style.setProperty("--slpopup-seconds", seconds + "s");
     document.body.append(popup);
-    setTimeout(() => popup.remove(), Number(item.display_seconds || 8) * 1000);
+    stopTimer = window.StudyLabPopupFormat?.armTimer
+      ? window.StudyLabPopupFormat.armTimer(popup, seconds * 1000, dismiss)
+      : (() => { const id = setTimeout(dismiss, seconds * 1000); return () => clearTimeout(id); })();
   }
   function popupEditor(record = null) {
     const dialog = el("dialog", undefined, "sladmin-dialog sladmin-popup-dialog");
@@ -879,6 +897,9 @@
     duration.min = "3"; duration.max = "30";
     const messageLabel = fields.querySelector('[name="message"]').closest("label");
     messageLabel.classList.add("sladmin-wide");
+    fields.insertBefore(el("p",
+      "Formatting: **bold**, __underline__, *italic*, ~~strikethrough~~, and `code`. Line breaks are preserved.",
+      "sladmin-muted sladmin-wide sladmin-format-hint"), messageLabel.nextSibling);
     if (!record) {
       const schedule = field("starts_at", "Schedule time (optional)", "", "datetime-local");
       schedule.classList.add("sladmin-wide");
