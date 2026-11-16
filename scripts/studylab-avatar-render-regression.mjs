@@ -132,6 +132,6 @@ assert.match(css,/color:#14629b!important/);
 for(const page of ["index.html","study-room.html"]){
   const html=readFileSync(page,"utf8");
   assert.match(html,/studylab-avatar\.js\?v=20261116-manual-crop-v1/);
-  assert.match(html,/studylab-follow\.css\?v=20261115-inline-bio-v5/);
+  assert.match(html,/studylab-follow\.css\?v=20261116-follow-colors-v1/);
 }
 console.log("StudyLab atomic avatar display, SVG restoration, image verification and camera styles passed.");
