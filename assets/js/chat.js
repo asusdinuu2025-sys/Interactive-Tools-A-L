@@ -711,6 +711,11 @@
     }
     chatFeedback("");
     deleteMessageLocally(id);
+    if(Array.isArray(message.image_paths) && message.image_paths.length){
+      const {error:storageError}=await client.storage.from(CONFIG.imageBucket)
+        .remove(message.image_paths);
+      if(storageError)console.warn("Chat image cleanup:",storageError);
+    }
   }
   function deleteMessageLocally(id) {
     messagesById.delete(id);reactionsByMessage.delete(id);
@@ -797,9 +802,10 @@
     const length = input?.value.length || 0;
     if (charCount) charCount.textContent = length + "/" + CONFIG.maxLength;
     inputWrap?.classList.toggle("has-text", length > 0);
+    if(attachButton)attachButton.disabled = !client || busyMessageAction || Boolean(editTarget);
     if (sendButton) {
       sendButton.disabled =
-        !length ||
+        (!length && !pendingImages.length) ||
         length > CONFIG.maxLength ||
         !client ||
         busyMessageAction ||
@@ -987,7 +993,9 @@
   async function sendMessage() {
     if(!client || !input || busyMessageAction)return;
     const message=input.value.trim();
-    if(!message || message.length>CONFIG.maxLength){updateComposer();return;}
+    if((!message && !pendingImages.length) || message.length>CONFIG.maxLength){
+      updateComposer();return;
+    }
     const now=Date.now();
     if(!editTarget && now-lastSentAt<CONFIG.rateLimitMs)return;
     busyMessageAction=true;
@@ -1002,12 +1010,33 @@
         ({error}=await client.from(CONFIG.table)
           .update({message}).eq("id",editingId).eq("user_id",userId));
       }else{
-        const values={message,session_id:sessionKey,user_id:userId,nickname};
-        if(replyTarget && messagesById.has(replyTarget))values.reply_to=replyTarget;
-        ({error}=await client.from(CONFIG.table).insert(values));
+        const id=crypto.randomUUID();
+        const uploaded=[];
+        try {
+          for(let i=0;i<pendingImages.length;i++){
+            const path=userId+"/"+id+"/"+i+".webp";
+            const result=await client.storage.from(CONFIG.imageBucket)
+              .upload(path,pendingImages[i].blob,{contentType:"image/webp",upsert:false});
+            if(result.error)throw result.error;
+            uploaded.push(path);
+          }
+          const values={id,message:message||"📷 Photo",session_id:sessionKey,
+            user_id:userId,nickname,image_paths:uploaded};
+          if(replyTarget && messagesById.has(replyTarget))values.reply_to=replyTarget;
+          ({error}=await client.from(CONFIG.table).insert(values));
+          if(error)throw error;
+        }catch(uploadError){
+          if(uploaded.length){
+            try{await client.storage.from(CONFIG.imageBucket).remove(uploaded);}
+            catch(cleanupError){console.warn("Chat upload cleanup:",cleanupError);}
+          }
+          throw uploadError;
+        }
       }
       if(error)throw error;
-      input.value="";clearComposerContext();resizeMessageInput();updateComposer();
+      input.value="";
+      clearPendingImages();
+      clearComposerContext();resizeMessageInput();updateComposer();
     }catch(error){
       console.warn("StudyLab Chat message action:",error);
       chatFeedback(error?.message?.includes("foreign key")
@@ -1049,6 +1078,7 @@
     button.setAttribute("aria-expanded", String(open));
     button.classList.toggle("is-open", open);
 
+    if (!open) publishTyping(false);
     if (open) {
       syncMobileChatHeaderOffset();
       window.dispatchEvent(new Event("studylab-chat-open"));
@@ -1080,6 +1110,12 @@
       chatFeedback("");
       resizeMessageInput();
       updateComposer();
+      publishTyping(Boolean(input.value.trim()));
+    });
+    attachButton?.addEventListener("click",()=>imageInput?.click());
+    imageInput?.addEventListener("change",handleImageSelection);
+    document.addEventListener("visibilitychange",()=>{
+      if(document.hidden)publishTyping(false);
     });
     cancelContext?.addEventListener("click",()=>clearComposerContext(true));
     // The menu belongs to its message, and closes on outside click.
