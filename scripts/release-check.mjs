@@ -183,6 +183,13 @@ if (neonTests.status !== 0) {
     (neonTests.stderr || neonTests.stdout || "node test failed"));
 }
 
+// Verify guided Content publishing and Telegram-style Chat in JSDOM.
+const guidedCmsTest=spawnSync(process.execPath,["scripts/studylab-guided-publisher-check.cjs"],{encoding:"utf8"});
+if(guidedCmsTest.status!==0){
+  fail("Guided publishing and Chat composer regression failed:\n"+
+    (guidedCmsTest.stderr||guidedCmsTest.stdout||"Publisher test failed"));
+}
+
 // Verify the generated global resource index, public links and Home layout isolation.
 const searchTests = spawnSync(process.execPath, ["scripts/global-search-check.mjs"], {encoding:"utf8"});
 if (searchTests.status !== 0) {
