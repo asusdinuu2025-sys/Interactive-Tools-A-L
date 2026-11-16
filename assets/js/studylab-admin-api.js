@@ -1,7 +1,9 @@
-/* Admin operations: preview never calls a remote mutation endpoint. */
+/* Admin operations: only the authorized connected PR or live deployment can mutate Supabase. */
 (function () {
   "use strict";
-  const preview = window.StudyLabAdminConfig?.mode !== "live";
+  const mode = window.StudyLabAdminConfig?.mode || "preview";
+  const preview = mode === "preview";
+  const connectedPreview = mode === "connected";
   const client = window.supabase?.createClient(
     "https://zpvatyxdbshjuqgtexzw.supabase.co",
     "sb_publishable_zd8S3PcyicJX6Cgyh0ez8A_sUSTCuiB",
@@ -145,7 +147,7 @@
     }
     // Read-only server-side snapshot: the existing three-admin RPC gate is
     // checked before this call. This never changes production user records.
-    if (preview) {
+    {
       try {
         const latest = await rpc("studylab_admin_readonly_stats_v1");
         if (latest && typeof latest === "object" &&
@@ -384,6 +386,7 @@
     validate,
     safeURL,
     preview,
+    connectedPreview,
     get readonlyLive() { return preview && Boolean(livePreviewStats); },
     get liveStats() { return livePreviewStats ? clone(livePreviewStats) : null; },
     get liveStatsError() { return livePreviewError; },
