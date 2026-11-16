@@ -372,7 +372,7 @@ async function setup(admin = true, options = {}) {
   assert.ok(custom,"Admin custom section should render");
   assert.equal(free.nextElementSibling,more,"More anchor stays immediately after Lessons");
   assert.equal(more.nextElementSibling,custom,"More scroll reveals the added section");
-  cmsDom.close();
+  cmsDom.window.close();
   // One failed API request must not suppress the overview stats or its actions.
   ({ dom, w } = await setup(true, { failOverview: true }));
   assert.equal(w.document.querySelector("#sladmin-workspace").hidden, false);
