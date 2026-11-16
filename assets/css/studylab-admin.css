@@ -649,7 +649,7 @@ html[data-theme="light"] .sladmin-dialog {
   font: 900 clamp(48px, 9.7vw, 170px)/1 "Nirmala UI","Segoe UI",sans-serif;
   letter-spacing: -.075em;
   white-space: nowrap;
-  color: rgba(238,247,255,.048);
+  color: rgba(238,247,255,.018);
   text-shadow: 0 0 80px rgba(119,177,250,.075);
   transform: rotate(-10deg);
   pointer-events: none;
@@ -786,7 +786,7 @@ html[data-theme="light"] .sl-admin-page {
   background-attachment: fixed;
 }
 html[data-theme="light"] .sl-admin-page::before {
-  color: rgba(35,78,124,.068);
+  color: rgba(35,78,124,.029);
   text-shadow: none;
 }
 html[data-theme="light"] .sl-admin-page .sladmin-top,
