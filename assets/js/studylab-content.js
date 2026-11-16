@@ -35,7 +35,18 @@
   };
   function apply(records) {
     const items = records.filter((x) => x.page === page);
-    for (const d of items.filter((x) => x.kind === "section")) {
+    // A deleted built-in card remains in static HTML. The server sends only
+    // its tiny tombstone, which permanently hides that element on refresh.
+    for (const d of items.filter((x) => x.deleted === true)) {
+      const target = document.querySelector(
+        '[data-cms-id="' + CSS.escape(d.id) + '"]',
+      );
+      if (target) target.hidden = true;
+      document.querySelectorAll(
+        '[data-home-nav="' + CSS.escape(d.id) + '"]',
+      ).forEach((link) => { link.hidden = true; });
+    }
+    for (const d of items.filter((x) => !x.deleted && x.kind === "section")) {
       let section = document.querySelector(
         '[data-cms-id="' + CSS.escape(d.id) + '"]',
       );
@@ -65,7 +76,7 @@
         )
         .forEach((n) => (n.hidden = !!d.hidden));
     }
-    for (const d of items.filter((x) => x.kind === "card")) {
+    for (const d of items.filter((x) => !x.deleted && x.kind === "card")) {
       let card = document.querySelector(
         '[data-cms-id="' + CSS.escape(d.id) + '"]',
       );
@@ -74,7 +85,7 @@
       if (!card) {
         card = el("a", "sl-cms-card");
         card.dataset.cmsId = d.id;
-        card.append(el("h3"), el("p"), el("span", null, "Open resource ↗"));
+        card.append(el("h3"), el("p"), el("span", "sl-cms-open", "Open resource →"));
         let host = d.section
           ? document
               .getElementById(d.section)
