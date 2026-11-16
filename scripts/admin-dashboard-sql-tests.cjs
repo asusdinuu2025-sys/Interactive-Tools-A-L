@@ -260,8 +260,11 @@ as $admin_gate$ select auth.uid() in (
   assert.equal((await db.query("select studylab_admin_popup_list() as list"))
     .rows[0].list.length,1);
   await db.query("select studylab_admin_popup_set('delete',$1)",[popup.id]);
+  // Private tables are intentionally inaccessible to the authenticated role.
+  await db.exec("reset role");
   assert.equal((await db.query(
     "select count(*)::int as n from studylab_private.popup_receipts")).rows[0].n,0);
+  await as(admin);
   // Ban policy is server-checked. This SQL never bans GoTrue directly; the
   // authenticated Edge Function is responsible for Auth ban_duration.
   await assert.rejects(db.query(
