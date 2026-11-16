@@ -37,13 +37,13 @@
     if (!value) return "";
     if (preview && state?.media?.some((x) => x.url === value)) return value;
     if (value.length > 2048) throw Error("Link is too long.");
-    if (/[\\u0000-\\u0020\\u007f\\\\]/.test(value) || value.startsWith("//"))
+    if (/[\u0000-\u0020\u007f\\]/.test(value) || value.startsWith("//"))
       throw Error("Use an ordinary website link or a site-relative path.");
     // A bare domain must NOT be interpreted as a path on studylablk.netlify.app.
     // Keep single filenames such as maths.html and paths like ./lessons local.
     if (!/^[a-z][a-z0-9+.-]*:/i.test(value) &&
-        !/^(?:[./?#]|\\w+\\.html(?:[?#]|$))/i.test(value) &&
-        /^(?:[a-z0-9-]+\\.)+[a-z]{2,}(?::[0-9]{2,5})?(?:[/?#]|$)/i.test(value)) {
+        !/^(?:[./?#]|\w+\.html(?:[?#]|$))/i.test(value) &&
+        /^(?:[a-z0-9-]+\.)+[a-z]{2,}(?::[0-9]{2,5})?(?:[/?#]|$)/i.test(value)) {
       value = "https://" + value;
     }
     const url = new URL(value, location.href);
@@ -67,7 +67,7 @@
     if (item.kind === "card") {
       item.button_label = String(item.button_label || "Open resource").trim();
       if (!item.button_label || item.button_label.length > 22 ||
-          /[\\u0000-\\u001f<>]/.test(item.button_label))
+          /[\u0000-\u001f<>]/.test(item.button_label))
         throw Error("Button label must be 1–22 plain-text characters.");
     }
     if (
