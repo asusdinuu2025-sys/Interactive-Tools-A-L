@@ -264,6 +264,20 @@ async function setup(admin = true, options = {}) {
   assert.match(adminMarkup,/sladmin-brand-mark" aria-hidden="true">ツ/);
   assert.match(adminMarkup,/sladmin-back-icon/);
   assert.match(adminMarkup,/studylab-popups.css/);
+  // New sections must use the same translucent panels as StudyLab,
+  // with capped thumbnails and an actual glass-style Open control.
+  const contentCss = read("assets/css/studylab-content.css");
+  assert.match(contentCss, /PR #102 glass parity/);
+  assert.match(contentCss, /max-height:146px/);
+  assert.match(contentCss, /section\\.sl-cms-section > \\.sl-cms-grid/);
+  assert.match(contentCss, /\\.sl-cms-card \\.sl-cms-open/);
+  for (const page of ["index.html","maths.html","physics.html",
+      "chemistry.html","biology.html","Telegram_Channels.html",
+      "lesson-packs.html"]) {
+    assert.match(read(page),
+      /studylab-content\\.css\\?v=pr102-glass-cards-20261116-v10/,
+      page + " must fetch the new CSS instead of stale browser copies");
+  }
   const popupCss=read("assets/css/studylab-popups.css");
   assert.match(popupCss,/slpopup-toast/);
   assert.match(read("assets/js/studylab-popups.js"),/studylab_popup_claim/);
