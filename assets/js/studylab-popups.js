@@ -72,14 +72,39 @@
         : (() => { const id = setTimeout(finish,seconds*1000); return () => clearTimeout(id); })();
     });
   }
+  function homeIsVisible() {
+    const gateway = document.getElementById("studylab-auth-gateway");
+    // The welcome, signup and login views share /index.html with Home.
+    // A pathname-only check is therefore insufficient.
+    return !gateway || gateway.hidden === true;
+  }
+  async function waitForHomeEntry() {
+    // Auth gateway is initialized before this script. Waiting for startup
+    // prevents its initial hidden state being mistaken for an entered Home.
+    try { await window.StudyLabAccount?.startup; } catch (_) {}
+    if (!homeIsVisible()) {
+      const gateway = document.getElementById("studylab-auth-gateway");
+      await new Promise(resolve => {
+        const observer = new MutationObserver(() => {
+          if (gateway.hidden || !gateway.isConnected) {
+            observer.disconnect();
+            resolve();
+          }
+        });
+        observer.observe(gateway,{attributes:true,attributeFilter:["hidden"]});
+      });
+    }
+    return homeIsVisible();
+  }
   async function start() {
     // Only deliver after the welcome/sign-in flow has entered the actual
     // homepage. Never claim a one-time message from a signup or subpage.
     const path = location.pathname.replace(/\/+$/, "").toLowerCase();
     if (!(path === "" || path === "/" || path.endsWith("/index.html"))) return;
+    if (!(await waitForHomeEntry())) return;
     await window.StudyLabAccount?.ready;
     await window.StudyLabBanGuardReady;
-    if (window.StudyLabBanned) return;
+    if (window.StudyLabBanned || !homeIsVisible()) return;
     const client = window.StudyLabAccount?.client ||
       window.supabase?.createClient?.(PROJECT,KEY);
     if (!client) return;
@@ -96,6 +121,8 @@
     try { account = (await client.auth.getUser()).data?.user || null; }
     catch (_) { account = null; }
     for (const item of resp.data) {
+      // If the account chooser opens again, don't consume a delivery receipt.
+      if (!(await waitForHomeEntry())) return;
       const startAt = new Date(item.starts_at).getTime();
       if (!Number.isFinite(startAt) ||
           Date.now()<startAt || Date.now()>=startAt+86400000) continue;
@@ -106,6 +133,7 @@
         const claim = await client.rpc("studylab_popup_claim",{p_id:item.id});
         if (claim.error || claim.data !== true) continue;
       }
+      if (!homeIsVisible()) return;
       markLocal(key);
       await showOne(item);
     }
