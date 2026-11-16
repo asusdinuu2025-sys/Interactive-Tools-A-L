@@ -270,12 +270,12 @@ async function setup(admin = true, options = {}) {
   assert.match(contentCss, /PR #102 glass parity/);
   assert.match(contentCss, /max-height:146px/);
   assert.ok(contentCss.includes("section.sl-cms-section > .sl-cms-grid"));
-  assert.match(contentCss, /\\.sl-cms-card \\.sl-cms-open/);
+  assert.ok(contentCss.includes(".sl-cms-card .sl-cms-open"));
   for (const page of ["index.html","maths.html","physics.html",
       "chemistry.html","biology.html","Telegram_Channels.html",
       "lesson-packs.html"]) {
     assert.match(read(page),
-      /studylab-content\\.css\\?v=pr102-glass-cards-20261116-v10/,
+      /studylab-content[.]css[?]v=pr102-glass-cards-20261116-v10/,
       page + " must fetch the new CSS instead of stale browser copies");
   }
   const popupCss=read("assets/css/studylab-popups.css");
