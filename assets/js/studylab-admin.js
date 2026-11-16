@@ -583,6 +583,11 @@
       ),
     );
     host.append(toolbar, list);
+    // Guided publishing adds specialized card templates without replacing
+    // the existing generic editor, Sections tab, drafts or Delete controls.
+    const publisher = !sectionMode && window.StudyLabAdminPublisher
+      ? window.StudyLabAdminPublisher.mount(host, api, rows, async () => render())
+      : null;
     function draw() {
       list.replaceChildren();
       const items = rows
@@ -601,7 +606,15 @@
             d.title,
             `${d.page} · Order ${d.order} · ${r.has_draft ? "Unpublished draft" : d.hidden ? "Hidden" : r.published ? "Published / available" : "Draft"}`,
             [
-              button("Edit", () => edit(r)),
+              button("Edit", () => {
+                const d=r.draft;
+                if (publisher && ["simulation","telegram","lesson-pack","custom"].includes(d.resource_type)) {
+                  const target=d.resource_type==="simulation"?d.page
+                    :d.resource_type==="telegram"?d.telegram_category||"all"
+                    :d.resource_type==="lesson-pack"?"lesson-packs.html":d.section;
+                  publisher.open(d.resource_type,target,r);
+                } else edit(r);
+              }),
               button(d.hidden ? "Restore" : "Hide", async () => {
                 if (
                   confirm((d.hidden ? "Restore " : "Hide ") + d.title + "?")
