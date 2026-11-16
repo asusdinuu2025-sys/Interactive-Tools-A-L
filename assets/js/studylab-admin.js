@@ -146,7 +146,8 @@
           Boolean(partial));
         if (!dirty) $("#sladmin-save-state").textContent = partial
           ? "Some data unavailable"
-          : (api.preview ? "Preview saved on this device" : "All changes saved");
+          : (api.readonlyLive ? "Real data · read-only preview" :
+            api.preview ? "Preview saved on this device" : "All changes saved");
       }
     } catch (e) {
       if (version !== request) return;
@@ -194,7 +195,13 @@
     // Paint the workspace FIRST. No failing or stalled request may make
     // the entire Overview disappear, including its navigation.
     const stats = el("div", undefined, "sladmin-stats");
-    const metricLabels = [
+    const real = api.readonlyLive ? api.liveStats : null;
+    const metricLabels = real ? [
+      "Student profiles · live",
+      "Administrators · live",
+      "Registered accounts · live",
+      "Social posts · live",
+    ] : [
       api.preview ? "Preview accounts (sample)" : "Student accounts",
       "Administrators",
       "Content cards",
@@ -229,7 +236,9 @@
     if (api.preview) {
       quick.prepend(el(
         "p",
-        "PREVIEW ONLY: account lists are samples. No real admin, badge, or content updates are sent to Supabase.",
+        real
+          ? "REAL DATA CONNECTED. Account and community statistics are live. This PR preview cannot change real accounts, badges or published content."
+          : "PREVIEW ONLY: real account data is not connected. No real admin, badge or content changes are sent to Supabase.",
         "sladmin-preview-explanation",
       ));
       recent.append(button("Reset preview changes", () => {
@@ -272,16 +281,23 @@
         ? sourceLabels[i] + ": " + (r.reason?.message || "Unavailable")
         : null)
       .filter(Boolean);
-    metricValues[0].textContent =
-      users.status === "fulfilled" ? String(users.value.total) : "Unavailable";
-    metricValues[1].textContent =
-      admins.status === "fulfilled" ? String(admins.value.total) : "Unavailable";
-    metricValues[2].textContent = content.status === "fulfilled"
-      ? String(content.value.filter(x => x?.draft?.kind === "card").length)
-      : "Unavailable";
-    metricValues[3].textContent = content.status === "fulfilled"
-      ? String(content.value.filter(x => x?.revision && !x?.draft?.hidden).length)
-      : "Unavailable";
+    if (real) {
+      metricValues[0].textContent = String(real.profiles);
+      metricValues[1].textContent = String(real.admins);
+      metricValues[2].textContent = String(real.registered);
+      metricValues[3].textContent = String(real.social_posts);
+    } else {
+      metricValues[0].textContent =
+        users.status === "fulfilled" ? String(users.value.total) : "Unavailable";
+      metricValues[1].textContent =
+        admins.status === "fulfilled" ? String(admins.value.total) : "Unavailable";
+      metricValues[2].textContent = content.status === "fulfilled"
+        ? String(content.value.filter(x => x?.draft?.kind === "card").length)
+        : "Unavailable";
+      metricValues[3].textContent = content.status === "fulfilled"
+        ? String(content.value.filter(x => x?.revision && !x?.draft?.hidden).length)
+        : "Unavailable";
+    }
     recentItems.replaceChildren();
     if (activity.status === "fulfilled") {
       if (!activity.value.length)
@@ -308,6 +324,15 @@
     const list = el("div", undefined, "sladmin-list"),
       pager = el("div", undefined, "sladmin-pager");
     toolbar.append(search);
+    if (api.readonlyLive) {
+      host.append(el("p",
+        "Live StudyLab users. Read-only preview: only the three existing administrators can access this page. Real account and badge changes are disabled until the production rollout is approved.",
+        "sladmin-preview-explanation"));
+    } else if (api.preview && api.liveStatsError) {
+      host.append(el("p",
+        "Live data unavailable: " + api.liveStatsError + ". Showing preview accounts instead.",
+        "sladmin-preview-explanation"));
+    }
     host.append(toolbar, list, pager);
     let timer,
       sequence = 0;
@@ -354,13 +379,20 @@
           }),
         ];
         if (u.id === info.user.id) actions[2].disabled = true;
+        if (api.readonlyLive) {
+          actions[1].disabled = true;
+          actions[2].disabled = true;
+          actions[1].title = "Read-only preview: real badges cannot be changed";
+          actions[2].title = "Read-only preview: administrator access cannot be changed";
+        }
         list.append(
           row(
             u.display_name || "Student",
             "@" +
               (u.username || "—") +
               (u.admin ? " · Admin" : "") +
-              (u.verified ? " · Verified" : ""),
+              (u.verified ? " · Verified" : "") +
+              (u.guest ? " · Guest" : ""),
             actions,
             (u.display_name || "S").slice(0, 1),
           ),
@@ -403,7 +435,7 @@
       ["Username", "@" + (u.username || "—")],
       ["School", u.school || "Not provided"],
       ["Bio", u.bio || "Not provided"],
-      ["Account", u.admin ? "Admin" : "Student"],
+      ["Account", u.admin ? "Administrator" : u.guest ? "Guest profile" : "Registered student"],
       ["Verification", u.verified ? "Blue badge" : "Not verified"],
       [
         "Joined",
@@ -721,31 +753,33 @@
     $("#sladmin-tabs").append(button(tab, () => navigate(tab)));
   (async () => {
     const buildProof = $("#sladmin-build-proof");
-    if (buildProof) buildProof.textContent = "PR #102 · v6 · JS started";
+    if (buildProof) buildProof.textContent = "PR #102 · v7 · JS started";
     try {
       info = await api.init();
       if (buildProof) buildProof.textContent =
-        "PR #102 · v6 · " + (api.preview ? "Preview ready" : "Dashboard ready");
+        "PR #102 · v7 · " + (api.readonlyLive ? "Live data connected" : api.preview ? "Preview ready" : "Dashboard ready");
       $("#sladmin-gate").hidden = true;
       $("#sladmin-workspace").hidden = false;
       $("#sladmin-identity").textContent = "Administrator";
       $("#sladmin-mode").append(
         el("strong", api.preview ? "Preview workspace. " : "Live workspace. "),
         document.createTextNode(
-          api.preview
-            ? "Changes stay on this device. User actions use sample accounts; real accounts and production content are untouched."
-            : "Published edits are visible to students. Drafts stay private.",
+          api.readonlyLive
+            ? "Connected securely to real StudyLab profiles and statistics. This preview is read-only for real accounts; content edits remain local and unpublished."
+            : api.preview
+              ? "Changes stay on this device. Real account data is not available; sample users are shown until it reconnects."
+              : "Published edits are visible to students. Drafts stay private.",
         ),
       );
       $("#sladmin-mode").append(el(
         "small",
-        api.preview ? "PR #102 preview · dashboard build 2026-11-16.6"
-          : "Dashboard build 2026-11-16.6",
+        api.preview ? "PR #102 preview · dashboard build 2026-11-16.7"
+          : "Dashboard build 2026-11-16.7",
         "sladmin-build-label",
       ));
       await navigate("Overview");
     } catch (e) {
-      if (buildProof) buildProof.textContent = "PR #102 · v6 · Check access";
+      if (buildProof) buildProof.textContent = "PR #102 · v7 · Check access";
       $("#sladmin-workspace").hidden = true;
       $("#sladmin-gate").hidden = false;
       $("#sladmin-gate").textContent = e?.message || "Admin access could not be verified.";
