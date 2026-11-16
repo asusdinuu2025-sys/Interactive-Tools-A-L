@@ -47,6 +47,14 @@ as $admin_gate$ select auth.uid() in (
   ]) {
     await db.exec(fs.readFileSync(migration, "utf8"));
   }
+  // New live action-label and history migrations are exercised on this
+  // isolated embedded database before any production migration is applied.
+  for (const migration of [
+    "supabase/migrations/20261116193500_admin_action_labels_and_links.sql",
+    "supabase/migrations/20261116193501_admin_reversible_activity.sql",
+  ]) {
+    await db.exec(fs.readFileSync(migration, "utf8"));
+  }
   const admin = "24e78cd0-4565-407a-96f7-9cfde083f6d2",
     student = "11111111-1111-4111-8111-111111111111";
   async function as(id, role = "authenticated") {
@@ -281,8 +289,77 @@ as $admin_gate$ select auth.uid() in (
   await as(student);
   assert.equal((await db.query(
     "select studylab_user_ban_status() as value")).rows[0].value.banned,false);
+
+  // All new admin mutations are performed by one atomic wrapper so their
+  // before/after state can be independently verified before undo.
+  await as(student);
+  await assert.rejects(
+    db.query("select studylab_admin_action_v2('user','set',$1::jsonb)",
+      [JSON.stringify({id:student,field:"verified",value:true})]),
+    /Admin access required/
+  );
+  await assert.rejects(
+    db.query("select studylab_admin_history_set('clear_all')"),
+    /Admin access required/
+  );
+  await as(admin);
+  const sampleLink = {
+    id:"custom-link-test",kind:"card",page:"index.html",title:"Link card",
+    description:"",url:"http://example.org/test",image:"",
+    button_label:"Open link",section:"",layout:"cards",order:105,hidden:false
+  };
+  await db.query("select studylab_admin_action_v2('content','publish',$1::jsonb)",
+    [JSON.stringify({item:sampleLink,revision:0})]);
+  assert.equal((await db.query(
+    "select payload->>'button_label' as label from studylab_site_content where id=$1",
+    [sampleLink.id])).rows[0].label,"Open link");
+  let logs = (await db.query("select studylab_admin_activity() as log")).rows[0].log;
+  let targetLog = logs.find(x=>x.target==="Link card" && x.can_undo);
+  assert.ok(targetLog && targetLog.id, "New publish must carry a guarded undo snapshot");
+  await db.query("select studylab_admin_history_set('undo',$1)",[targetLog.id]);
+  assert.equal((await db.query(
+    "select count(*)::integer as n from studylab_site_content where id=$1",
+    [sampleLink.id])).rows[0].n,0);
+  await assert.rejects(
+    db.query("select studylab_admin_history_set('undo',$1)",[targetLog.id]),
+    /cannot be undone safely/
+  );
+  await db.query("select studylab_admin_action_v2('user','set',$1::jsonb)",
+    [JSON.stringify({id:student,field:"verified",value:true})]);
+  logs=(await db.query("select studylab_admin_activity() as log")).rows[0].log;
+  targetLog=logs.find(x=>x.target===student && x.action==="Grant verified" && x.can_undo);
+  assert.ok(targetLog, "Badge change must be reversible");
+  await db.query("select studylab_admin_history_set('undo',$1)",[targetLog.id]);
+  assert.equal((await db.query("select count(*)::integer as n from studylab_verifications where user_id=$1",
+    [student])).rows[0].n,0);
+  const popupInput={title:"Testing labels",message:"Body",variant:"info",
+    placement:"top-right",display_seconds:8,link:"https://example.com",
+    link_label:"Try",starts_at:new Date().toISOString()};
+  const newPopup = (await db.query(
+    "select studylab_admin_action_v2('popup','create',$1::jsonb) as val",
+    [JSON.stringify(popupInput)])).rows[0].val;
+  assert.equal(newPopup.link_label,"Try");
+  logs=(await db.query("select studylab_admin_activity() as log")).rows[0].log;
+  targetLog=logs.find(x=>x.action==="Publish pop-up" && x.target===newPopup.id && x.can_undo);
+  assert.ok(targetLog, "New pop-up should carry an undo snapshot");
+  await db.query("select studylab_admin_history_set('undo',$1)",[targetLog.id]);
+  assert.equal((await db.query("select count(*)::integer as n from public.studylab_popups where id=$1",
+    [newPopup.id])).rows[0].n,0);
+  logs=(await db.query("select studylab_admin_activity() as log")).rows[0].log;
+  const retainedBefore=(await db.query(
+    "select count(*)::integer as n from studylab_private.activity")).rows[0].n;
+  await db.query("select studylab_admin_history_set('clear',$1)",[logs[0].id]);
+  assert.equal((await db.query(
+    "select count(*)::integer as n from studylab_private.activity")).rows[0].n,
+    retainedBefore, "Clearing history must not erase protected audit records");
+  await db.query("select studylab_admin_history_set('clear_all')");
+  assert.equal((await db.query("select studylab_admin_activity() as log")).rows[0].log.length,0);
+  assert.equal((await db.query(
+    "select count(*)::integer as n from studylab_private.activity")).rows[0].n,
+    retainedBefore, "Clear all never changes the underlying audit history");
+
   await db.close();
   console.log(
-    "PASS: SQL authorization, grants, private drafts, publication, guarded deletion, 24-hour once-only popups, ban ledger, stale writes, grant/revoke and verification.",
+    "PASS: SQL authorization, grants, private drafts, publication, guarded deletion, 24-hour once-only popups, ban ledger, verified undo snapshots, soft history clearing, editable labels, stale writes, grant/revoke and verification.",
   );
 })();
