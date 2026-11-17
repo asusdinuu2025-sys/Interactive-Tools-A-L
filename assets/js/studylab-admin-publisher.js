@@ -270,6 +270,11 @@ function mount(host,api,rows,onRefresh){
        addStatus(form,action==="draft"?"Saving resource draft…":"Publishing resource…");
        await api.save(info,record?.revision||0,action);
        committed=true;
+       let publicationVerified=api.preview ? false : null;
+       if(action==="publish" && !api.preview && api.verifyPublishedContent){
+         try{publicationVerified=await api.verifyPublishedContent(info);}
+         catch(error){console.warn("Publication read-back check:",error);}
+       }
        // Never delete a successfully published file if the list refresh fails.
        if(uploadedSimulation && draft?.html_path &&
           draft.html_path!==uploadedSimulation.path)
@@ -285,6 +290,25 @@ function mount(host,api,rows,onRefresh){
        dialog.close();
        try{await onRefresh();}
        catch(e){console.warn("Resource saved; list refresh failed:",e);}
+       const currentPanel=document.querySelector(".sladmin-publish");
+       if(currentPanel){
+         currentPanel.querySelector(".sladmin-publish-result")?.remove();
+         const result=el("div",null,"sladmin-publish-result");
+         result.setAttribute("role","status");
+         const copy=el("span",action==="draft"?"Resource draft saved. Not publicly visible."
+           :api.preview?"Saved on this device only. Not published for other students."
+           :publicationVerified===true
+             ?"Published and verified in Supabase. Open the page on THIS preview."
+             :"Saved to Supabase. Public visibility could not be confirmed; check the linked preview page.");
+         result.append(copy);
+         if(action==="publish" && !api.preview){
+           const link=el("a","View the updated page on this preview");
+           link.href=new URL(info.page,location.href).href;
+           link.target="_blank";link.rel="noopener noreferrer";
+           result.append(link);
+         }
+         currentPanel.prepend(result);
+       }
      }catch(e){
        if(!committed){
          if(uploadedSimulation)
