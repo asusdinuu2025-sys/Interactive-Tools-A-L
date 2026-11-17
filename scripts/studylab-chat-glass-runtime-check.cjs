@@ -99,6 +99,24 @@ const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
  remoteStates={remote:[{id:other,typing:true,nickname:"Student B",updatedAt:Date.now()}]};
  syncCallback();
  assert.equal(w.document.querySelector("[data-chat-typing]").hidden,false);
+ const editorLine=w.document.querySelector(".study-chat-editorline");
+ const toggleAttach=editorLine?.querySelector(":scope > [data-chat-attachments-toggle]");
+ const choices=editorLine?.querySelector("[data-chat-attachment-menu]");
+ assert.ok(toggleAttach,"Exactly one paperclip is exposed directly in the composer");
+ assert.ok(choices,"Image and file actions belong inside the dropdown");
+ assert.equal(choices.hidden,true,"Attachment dropdown starts closed");
+ assert.equal(editorLine.querySelector(":scope > [data-chat-attach]"),null,
+   "Image action must not occupy its own composer button");
+ assert.equal(editorLine.querySelector(":scope > [data-chat-file-attach]"),null,
+   "File action must not occupy its own composer button");
+ toggleAttach.click();
+ await wait(25);
+ assert.equal(choices.hidden,false,"Paperclip opens attachment menu");
+ assert.equal(choices.querySelectorAll("button").length,2);
+ assert.equal(toggleAttach.getAttribute("aria-expanded"),"true");
+ toggleAttach.click();
+ await wait(205);
+ assert.equal(choices.hidden,true,"Attachment menu closes smoothly");
  const fileInput=w.document.querySelector("[data-chat-image-input]");
  Object.defineProperty(fileInput,"files",{
    configurable:true,
