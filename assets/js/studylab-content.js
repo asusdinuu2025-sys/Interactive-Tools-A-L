@@ -1,8 +1,7 @@
 /* Published overrides enhance existing markup; failures leave original content intact. */
 (function () {
   "use strict";
-  const config = window.StudyLabAdminConfig || { mode: "preview" },
-    page = location.pathname.split("/").pop() || "index.html";
+  const page = location.pathname.split("/").pop() || "index.html";
   function safeURL(raw, image = false) {
     try {
       raw = String(raw || "").trim();
@@ -185,24 +184,72 @@
       if (builtins?.length) builtins[builtins.length - 1].after(more);
     }
   }
-  async function start() {
+  async function readPublished() {
+    // Public published content does not require a signed-in account or the
+    // optional Supabase JavaScript SDK. This works on the resource subpages
+    // even if their CDN-loaded authentication library failed to initialize.
+    const endpoint = "https://zpvatyxdbshjuqgtexzw.supabase.co";
+    const publicKey = "sb_publishable_zd8S3PcyicJX6Cgyh0ez8A_sUSTCuiB";
+    let directError;
+    try {
+      const query = endpoint + "/rest/v1/studylab_site_content?select=payload&page=eq." +
+        encodeURIComponent(page) + "&limit=1000";
+      const response = await fetch(query, {
+        headers: { apikey: publicKey, Accept: "application/json" },
+        cache: "no-store"
+      });
+      if (!response.ok) throw Error("Published content HTTP " + response.status);
+      const entries = await response.json();
+      if (!Array.isArray(entries)) throw Error("Invalid content response");
+      return entries.map(entry => entry?.payload).filter(Boolean);
+    } catch (error) {
+      directError = error;
+    }
+    // For unusual browser/network environments, retain the existing SDK path
+    // as a fallback. Never require the user to be an administrator to read.
     const client = window.StudyLabAccount?.client ||
-      window.supabase?.createClient(
-        "https://zpvatyxdbshjuqgtexzw.supabase.co",
-        "sb_publishable_zd8S3PcyicJX6Cgyh0ez8A_sUSTCuiB",
-      );
-    if (!client) return;
-    // Publicly published records are read-only and readable by visitors.
-    // The admin "preview" mode controls WRITING, not visibility of content
-    // already published. This matters after PR #102 merges while production
-    // administrator editing remains explicitly disabled.
-    const published = await client.from("studylab_site_content")
+      window.supabase?.createClient?.(endpoint, publicKey);
+    if (!client) throw directError;
+    const result = await client.from("studylab_site_content")
       .select("payload").eq("page",page).limit(1000);
-    if (published.error) {
-      console.warn("StudyLab published content unavailable:",published.error.message);
+    if (result.error) throw result.error;
+    return (result.data || []).map(entry => entry.payload).filter(Boolean);
+  }
+
+  function showContentLoadError() {
+    if (document.querySelector("[data-cms-load-error]")) return;
+    const host = document.querySelector(".tool-grid,.sl-lessons-publisher-grid," +
+      ".telegram-all-grid,[data-cms-additions]");
+    if (!host) return;
+    const notice = el("div","sl-cms-load-error");
+    notice.dataset.cmsLoadError = "true";
+    const message = el("span",null,"Newest published resources couldn't be loaded.");
+    const retry = el("button",null,"Retry");
+    retry.type = "button";
+    retry.addEventListener("click",()=>{
+      notice.remove();
+      void start();
+    });
+    notice.append(message,retry);
+    host.before(notice);
+  }
+
+  async function start() {
+    let records;
+    try {
+      records = await readPublished();
+      document.querySelector("[data-cms-load-error]")?.remove();
+    } catch (error) {
+      console.warn("StudyLab published content could not load:",error);
+      showContentLoadError();
       return;
     }
-    let records = (published.data || []).map((x)=>x.payload);
+    const config = window.StudyLabAdminConfig || {mode:"preview"};
+    const client = window.StudyLabAccount?.client ||
+      window.supabase?.createClient?.(
+        "https://zpvatyxdbshjuqgtexzw.supabase.co",
+        "sb_publishable_zd8S3PcyicJX6Cgyh0ez8A_sUSTCuiB"
+      );
     const draftMode = new URLSearchParams(location.search).get("admin-preview")==="1";
     if (config.mode === "preview") {
       // Sandboxed admin edits are private local overlays. Visitors only see
@@ -211,7 +258,7 @@
       try {
         state=JSON.parse(localStorage.getItem("studylab-admin-preview-v1")||"null");
       }catch(_){ /* Ignore invalid local preview JSON. */ }
-      if (state || draftMode) {
+      if (client && (state || draftMode)) {
         const account=window.StudyLabAccount;
         await account?.startup;
         const auth=await client.auth.getUser();
@@ -240,7 +287,7 @@
           }
         }
       }
-    }else if(draftMode){
+    }else if(draftMode && client){
       // Connected PR #102 also supports a private draft overlay. Only a
       // verified admin on the same browser/account can see it.
       const account=window.StudyLabAccount;
