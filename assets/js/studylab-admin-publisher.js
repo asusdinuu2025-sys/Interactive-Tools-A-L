@@ -180,6 +180,7 @@ function mount(host,api,rows,onRefresh){
        info.topic=String(d.get("topic")||"").trim().slice(0,120);
        if(page==="maths.html") info.maths_category=String(d.get("maths_category")||"pure");
        info.html_path=draft?.html_path||"";
+       info.html_name=draft?.html_name||"";
        info.url="/simulation-viewer.html?id="+encodeURIComponent(info.id);
        // Numbered title is used by the original lesson filter.
        if(number)info.title=String(number).padStart(2,"0")+". "+title;
