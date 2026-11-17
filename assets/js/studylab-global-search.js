@@ -1,6 +1,5 @@
-/* StudyLab site-wide header search.
-   Reads only the public static search index generated at deploy time.
-   No student history or account data is searched or uploaded. */
+/* StudyLab site-wide search: deploy-time public index plus RLS-filtered
+   administrator-published resources, without scanning private student data. */
 (() => {
   "use strict";
   const indexUrl = "assets/data/studylab-search-index.json";
@@ -33,6 +32,7 @@
     panel.append(list);
 
     let resources=null;
+    let loadedAt=0;
     let status="not-started";
     let pending=null;
     let visible=[];
@@ -46,26 +46,71 @@
       node.textContent=text;
       list.append(node);
     }
+    async function publishedResources() {
+      // Public resources require no login or optional Supabase SDK.
+      const host="https://zpvatyxdbshjuqgtexzw.supabase.co";
+      const key="sb_publishable_zd8S3PcyicJX6Cgyh0ez8A_sUSTCuiB";
+      const response=await fetch(host+"/rest/v1/studylab_site_content?select=payload&limit=1000",{
+        headers:{apikey:key,Accept:"application/json"},cache:"no-store"
+      });
+      if(!response.ok)throw Error("Published search HTTP "+response.status);
+      const rows=await response.json();
+      if(!Array.isArray(rows))throw Error("Unexpected published search response");
+      return rows.map(row=>row.payload).filter(p=>
+        p && p.kind==="card" && !p.hidden && !p.deleted
+      ).map(p=>{
+        const raw=p.resource_type==="simulation"
+          ?"/simulation-viewer.html?id="+encodeURIComponent(p.id):String(p.url||"").trim();
+        let url="";
+        try {
+          const target=new URL(raw,location.origin+"/");
+          if(target.protocol==="https:" ||
+            (target.origin===location.origin && target.protocol==="http:"))
+            url=target.origin===location.origin
+              ?target.pathname+target.search+target.hash:target.href;
+        }catch(_){}
+        return {
+          url,title:String(p.resource_title||p.title||"").slice(0,135),
+          subject:({"maths.html":"Combined Maths","physics.html":"Physics",
+            "chemistry.html":"Chemistry","biology.html":"Biology",
+            "Telegram_Channels.html":"A/L Telegram","lesson-packs.html":"Lessons"
+          })[p.page]||"StudyLab",
+          category:p.resource_type==="simulation"?"Simulation":
+            p.resource_type==="telegram"?"Telegram Channel":
+            p.resource_type==="lesson-pack"?"Lesson Pack":"Resource",
+          description:String(p.description||"").slice(0,160),
+          keywords:[p.topic,p.lesson_name,p.lesson_number,p.publisher,
+            p.series,p.telegram_category,p.subject,p.emoji,p.title]
+            .filter(Boolean).join(" ").slice(0,350)
+        };
+      }).filter(item=>item.title&&allowed(item.url));
+    }
     async function load(){
       if(resources) return resources;
       if(pending) return pending;
       status="loading";
       pending=(async()=>{
-        try{
+        let staticResources=[],dynamicResources=[];
+        try {
           const response=await fetch(indexUrl,{cache:"no-store"});
           if(!response.ok)throw new Error("Index HTTP "+response.status);
           const data=await response.json();
           if(!Array.isArray(data?.resources))throw new Error("Invalid search index");
-          resources=data.resources.filter(item=>item&&allowed(item.url)&&item.title)
-            .slice(0,1500);
-          status="ready";
-          return resources;
-        }catch(error){
-          console.warn("StudyLab global search index:",error?.message||"SEARCH_INDEX_UNAVAILABLE");
-          status="error";
-          resources=[];
-          return resources;
-        }finally{pending=null;}
+          staticResources=data.resources.filter(item=>item&&allowed(item.url)&&item.title);
+        } catch(error) {
+          console.warn("StudyLab static search:",error?.message||"INDEX_UNAVAILABLE");
+        }
+        try { dynamicResources=await publishedResources(); }
+        catch(error) {
+          console.warn("StudyLab published search:",error?.message||"CMS_SEARCH_UNAVAILABLE");
+        }
+        const map=new Map(staticResources.map(item=>[item.url,item]));
+        for(const item of dynamicResources)map.set(item.url,item);
+        resources=[...map.values()].slice(0,2200);
+        loadedAt=Date.now();
+        status=resources.length?"ready":"error";
+        pending=null;
+        return resources;
       })();
       return pending;
     }
@@ -188,6 +233,9 @@
     }
     function open(){
       generation++;
+      if(resources && Date.now()-loadedAt>60000){
+        resources=null;status="not-started";
+      }
       if(resources){draw();return;}
       status="loading";
       draw();
