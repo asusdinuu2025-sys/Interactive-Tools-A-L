@@ -30,7 +30,8 @@ as $$
         or f.item->>'name' ~ '[[:cntrl:]]'
         or f.item->>'name' !~* '\.(pdf|docx|pptx|txt)$'
         or f.item->>'size' !~ '^[0-9]{1,7}$'
-        or (case when f.item->>'size' ~ '^[0-9]{1,7}
+        or (case when f.item->>'size' ~ '^[0-9]{1,7}$'
+              then (f.item->>'size')::integer else 0 end) not between 1 and 5242880
     )
     and (
       select count(distinct f.item->>'path')=count(*)
