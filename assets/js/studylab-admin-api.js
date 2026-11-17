@@ -281,25 +281,48 @@
     requireAccess();
     return preview ? clone(state.popups || []) : rpc("studylab_admin_popup_list");
   }
+  // Compute preview expiry using actual calendar months/years and PostgreSQL's
+  // end-of-month clamping rather than pretending every month lasts 30 days.
+  function popupExpiryAt(starts, period = "24h") {
+    const date = new Date(starts);
+    if (!Number.isFinite(date.getTime())) throw Error("Invalid pop-up schedule.");
+    const days = {"24h": 1, "7d": 7};
+    if (days[period]) return new Date(date.getTime() + days[period] * 86400000).toISOString();
+    const months = {"1m": 1, "3m": 3, "6m": 6, "9m": 9, "1y": 12}[period];
+    if (!months) throw Error("Choose a valid expiration period.");
+    const day = date.getUTCDate();
+    const targetFirst = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, 1,
+      date.getUTCHours(),date.getUTCMinutes(),date.getUTCSeconds(),date.getUTCMilliseconds()));
+    const lastDay = new Date(Date.UTC(targetFirst.getUTCFullYear(),
+      targetFirst.getUTCMonth() + 1, 0)).getUTCDate();
+    targetFirst.setUTCDate(Math.min(day,lastDay));
+    return targetFirst.toISOString();
+  }
   async function popupSet(action, data = {}) {
     requireAccess();
     if (!["create","update","delete"].includes(action))
       throw Error("Invalid popup action");
+    const expiry = String(data.expiry_period || "24h");
+    if (action !== "delete" &&
+        !["24h","7d","1m","3m","6m","9m","1y"].includes(expiry))
+      throw Error("Choose a valid expiration period.");
     if (preview) {
       const current = state.popups || [];
       if (action === "delete") {
         state.popups = current.filter(x => x.id !== data.id);
       } else {
+        const old = current.find(x => x.id === data.id);
         const starts = action === "create"
           ? (data.starts_at || new Date().toISOString())
-          : current.find(x => x.id === data.id)?.starts_at;
+          : old?.starts_at;
         if (!starts) throw Error("Pop-up not found");
         const item = { ...data,
           link_label: String(data.link_label || "View").trim(),
           id: action === "create" ? crypto.randomUUID() : data.id,
           starts_at: starts,
-          expires_at: new Date(new Date(starts).getTime()+86400000).toISOString(),
-          delivered: 0,
+          expiry_period: expiry,
+          expires_at: popupExpiryAt(starts,expiry),
+          delivered: old?.delivered || 0,
         };
         state.popups = action === "create"
           ? [item,...current]
@@ -309,10 +332,24 @@
       persist();
       return;
     }
+    const payload = { ...data, link: safeURL(data.link || ""),
+      link_label: String(data.link_label || "View").trim(), expiry_period: expiry };
+    // New atomic server RPC ensures the selected expiry is enforced by SQL RLS
+    // and the one-time claim, not merely by a browser clock.
+    const v3 = await client.rpc("studylab_admin_popup_action_v3", {
+      p_action: action, p_data: payload
+    });
+    if (!v3.error) return v3.data;
+    // Compatibility while the pending migration is not installed: the existing
+    // 24h workflow must keep working. Never silently publish a longer duration
+    // as 24h, or hide genuine permission/server errors behind a fallback.
+    const missingRpc = /function.*(not found|does not exist)|could not find the function|PGRST202|schema cache/i
+      .test(String(v3.error.message || "") + " " + String(v3.error.code || ""));
+    if (!missingRpc) throw Error(v3.error.message || "Unable to save pop-up.");
+    if (expiry !== "24h" && action !== "delete")
+      throw Error("Extended pop-up durations are available after the pending Supabase migration is approved.");
     return rpc("studylab_admin_action_v2", {
-      p_kind: "popup", p_action: action,
-      p_data: { ...data, link: safeURL(data.link || ""),
-        link_label: String(data.link_label || "View").trim() },
+      p_kind: "popup", p_action: action, p_data: payload,
     });
   }
   async function banUser(id, hours, reason = "") {

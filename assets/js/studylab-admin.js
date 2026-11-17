@@ -899,6 +899,12 @@
       ]),
       field("display_seconds", "Display time (3–30 seconds)",
         data.display_seconds || 8,"number"),
+      field("expiry_period", "Available to visitors for",
+        data.expiry_period || "24h", "text", [
+          ["24h","24 hours"],["7d","7 days"],["1m","1 month"],
+          ["3m","3 months"],["6m","6 months"],["9m","9 months"],
+          ["1y","1 year"],
+        ]),
       field("link", "Optional website link",data.link || ""),
       textLabel("link_label", "Link button · max 20 characters",
         data.link_label || "View",
@@ -918,7 +924,7 @@
       schedule.classList.add("sladmin-wide");
       fields.append(schedule);
     } else {
-      fields.append(el("p", "This message keeps its original 24-hour expiry. People who saw it will not see it again.", "sladmin-muted"));
+      fields.append(el("p", "You can update when this message expires. Students who already saw it will not see it again.", "sladmin-muted"));
     }
     const readForm = () => {
       const fd = new FormData(form);
@@ -932,6 +938,7 @@
         variant: String(fd.get("variant") || "info"),
         placement: String(fd.get("placement") || "top-right"),
         display_seconds: Number(fd.get("display_seconds") || 8),
+        expiry_period: String(fd.get("expiry_period") || "24h"),
         link: String(fd.get("link") || "").trim(),
         link_label: String(fd.get("link_label") || "View").trim(),
         starts_at,
@@ -939,6 +946,7 @@
       if (!item.title || !item.message || item.title.length>120 ||
           item.message.length>800 || !Number.isInteger(item.display_seconds) ||
           item.display_seconds<3 || item.display_seconds>30 ||
+          !["24h","7d","1m","3m","6m","9m","1y"].includes(item.expiry_period) ||
           !item.link_label || item.link_label.length>20 ||
           /[\u0000-\u001f<>]/.test(item.link_label) ||
           !Number.isFinite(new Date(item.starts_at).getTime()))
@@ -961,12 +969,14 @@
       try {
         const item = readForm();
         if (!record && !confirm(
-          "Send this pop-up to StudyLab visitors for 24 hours after its scheduled start?")) return;
+          "Send this pop-up to StudyLab visitors for " +
+          fields.querySelector('[name="expiry_period"]').selectedOptions[0].text +
+          " after its scheduled start?")) return;
         await api.popupSet(record ? "update" : "create", item);
         dismiss();
         await render();
         status(record ? "Message updated. Existing viewers will not see it twice."
-          : "Message scheduled/published for one-time delivery within 24 hours.");
+          : "Message scheduled/published for one-time delivery until its selected expiry.");
       } catch (e) { error.textContent = e.message || "Couldn't save the message."; }
       finally { send.disabled = false; }
     };
@@ -977,14 +987,15 @@
       list = el("div", undefined, "sladmin-list");
     toolbar.append(button("+ New pop-up", () => popupEditor(), "sladmin-primary"));
     host.append(el("p",
-      "Each message is eligible for exactly 24 hours after its scheduled start. A signed-in student sees it once across devices; visitors without accounts are tracked on this device.",
+      "Choose each message’s expiry: 24 hours, 7 days, 1, 3, 6, or 9 months, or 1 year. A signed-in student sees it once across devices; this controls availability, not the on-screen display time.",
       "sladmin-preview-explanation"), toolbar, list);
     const rows = await api.popups();
     if (version !== request) return;
     if (!rows.length) empty(list, "No pop-up messages. Create an announcement above.");
     for (const p of rows) {
       const now = Date.now(), begin = new Date(p.starts_at).getTime();
-      const end = begin + 86400000;
+      const end = Number.isFinite(new Date(p.expires_at).getTime()) && p.expires_at
+        ? new Date(p.expires_at).getTime() : begin + 86400000;
       const state = now < begin ? "Scheduled" : now >= end ? "Expired" : "Active";
       list.append(row(p.title,
         state + " · " + p.variant + " · " + p.placement +

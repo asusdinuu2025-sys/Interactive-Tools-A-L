@@ -113,7 +113,8 @@ async function flush(){for(let i=0;i<8;i++)await Promise.resolve();}
   // Only four independent quarter-rings, not a GIF/canvas or progress bar.
   {
     const css=read('assets/css/page-boot.css');
-    assert(css.includes('backdrop-filter: blur(7px)'));
+    assert(css.includes('backdrop-filter: blur(3px)'));
+    assert(css.includes('transform: translateZ(0)'), 'SL orbits/text must retain their own sharp compositing layer');
     assert(css.includes('#sl-boot-loader::before'), 'blur must stay in the loader background layer');
     assert(css.includes('.sl-boot-orbits, .sl-boot-name'), 'logo and text need their own foreground');
     assert(!/html\.sl-booting::before\s*\{[^}]*backdrop-filter/.test(css),
@@ -124,6 +125,15 @@ async function flush(){for(let i=0;i<8;i++)await Promise.resolve();}
     assert(css.includes('--rotation: 360deg'));
     assert(!css.includes('sl-booting body { visibility: hidden'),
       'the live page must stay behind the translucent loader');
+  }
+  // The brand intro is always white even when the user's page uses a
+  // light theme; cross-document transitions must not dim new loader frames.
+  {
+    const intro=read('assets/js/loader-splash.js');
+    assert(intro.includes("text: 'rgba(245,252,255,'"));
+    assert(!intro.includes("text: 'rgba(14,86,119,'"));
+    const transition=read('assets/css/page-transitions.css');
+    assert(transition.includes('::view-transition-new(root) { animation: none; opacity: 1; }'));
   }
   // Slow auth/CMS cannot indefinitely hide a usable page.
   {
