@@ -187,7 +187,11 @@
       if (attachmentsToggle.disabled) return;
       attachmentsMenu.hidden = false;
       // Next paint animates a lightweight two-choice panel.
-      requestAnimationFrame(()=>attachmentsMenu.classList.add("is-open"));
+      requestAnimationFrame(()=>{
+        if(!attachmentsMenu.hidden &&
+           attachmentsToggle.getAttribute("aria-expanded")==="true")
+          attachmentsMenu.classList.add("is-open");
+      });
     } else {
       attachmentsMenu.classList.remove("is-open");
       attachmentMenuClosing = window.setTimeout(()=>{
@@ -1512,7 +1516,10 @@
     button.setAttribute("aria-expanded", String(open));
     button.classList.toggle("is-open", open);
 
-    if (!open) publishTyping(false);
+    if (!open) {
+      setAttachmentMenu(false);
+      publishTyping(false);
+    }
     if (open) {
       syncMobileChatHeaderOffset();
       if(!channelSubscribed)scheduleChatReconnect(true);
@@ -1536,7 +1543,13 @@
     closeButton?.addEventListener("click", () => setOpen(false));
     expandButton?.addEventListener("click",()=>setExpanded(!isExpanded));
 
-    panel?.addEventListener("click", event => event.stopPropagation());
+    panel?.addEventListener("click", event => {
+      event.stopPropagation();
+      if(attachmentsMenu && !attachmentsMenu.hidden &&
+         !attachmentsMenu.contains(event.target) &&
+         !attachmentsToggle?.contains(event.target))
+        setAttachmentMenu(false);
+    });
 
     form?.addEventListener("submit", event => {
       event.preventDefault();
