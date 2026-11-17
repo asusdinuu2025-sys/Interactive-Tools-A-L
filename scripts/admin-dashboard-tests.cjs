@@ -395,7 +395,7 @@ async function setup(admin = true, options = {}) {
   assert.match(adminMarkup, /Loading dashboard/);
   assert.match(adminMarkup, /pr102-guided-v1/);
   assert.match(read("index.html"), /studylab-popups[.]js[?]v=20261116-v15/);
-  assert.match(read("index.html"), /studylab-content[.]js[?]v=pr102-public-visibility-v2/);
+  assert.match(read("index.html"), /studylab-content[.]js[?]v=pr102-public-rest-v4/);
   assert.match(adminMarkup,/sladmin-brand-mark" aria-hidden="true">ツ/);
   assert.match(adminMarkup,/sladmin-back-icon/);
   assert.match(adminMarkup,/studylab-popups.css/);
@@ -413,7 +413,7 @@ async function setup(admin = true, options = {}) {
       "chemistry.html","biology.html","Telegram_Channels.html",
       "lesson-packs.html"]) {
     assert.match(read(page),
-      /studylab-content[.]css[?]v=pr102-guided-v1/,
+      /studylab-content[.]css[?]v=pr102-public-rest-v3/,
       page + " must fetch the new CSS instead of stale browser copies");
   }
   const homeHtml = read("index.html");
