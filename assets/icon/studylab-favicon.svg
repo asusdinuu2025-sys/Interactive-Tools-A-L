@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="StudyLab favicon">
+<rect width="512" height="512" rx="98" fill="#091530"/>
+<!-- Simplified high-contrast miniature of the same SL graduation-cap symbol -->
+<path d="M250 225 144 278 144 316 221 354 221 374 144 336 144 375 256 431 256 315 184 283 250 250Z" fill="#25d4f4"/>
+<path d="M268 223 309 246 309 365 392 321 392 367 268 431Z" fill="#a46ff2"/>
+<path d="M75 181 256 85 437 181 256 274Z M126 181 256 112 386 181 256 245Z" fill="#5caaff" fill-rule="evenodd"/>
+<path d="M75 181 256 85 256 112 126 181 256 245 256 274Z" fill="#20d8f4" fill-rule="evenodd"/>
+<path d="M437 181 V251" stroke="#d081f3" stroke-width="11" stroke-linecap="round"/>
+<path d="M437 244 Q418 267 437 289 Q454 269 437 244Z" fill="#d081f3"/>
+</svg>
