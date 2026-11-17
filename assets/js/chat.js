@@ -718,6 +718,7 @@
       return;
     }
     chatFeedback("");
+    messageEventSeq+=1;
     deleteMessageLocally(id);
     if(Array.isArray(message.image_paths) && message.image_paths.length){
       const {error:storageError}=await client.storage.from(CONFIG.imageBucket)
@@ -1235,6 +1236,7 @@
           // A successful server insert must be visible to its author even if
           // the WebSocket channel is temporarily disconnected.
           if(!messagesById.has(id)){
+            messageEventSeq+=1;
             renderMessage({...values,created_at:new Date().toISOString()},true);
             scrollToBottom(true);
           }
@@ -1293,6 +1295,8 @@
     if (!open) publishTyping(false);
     if (open) {
       syncMobileChatHeaderOffset();
+      if(!channelSubscribed)scheduleChatReconnect(true);
+      if(client && Date.now()-lastChatSyncAt>30000)void syncChatSnapshot();
       window.dispatchEvent(new Event("studylab-chat-open"));
       closeQuickAccess();
       setUnread(0);
@@ -1329,7 +1333,22 @@
     imageInput?.addEventListener("change",handleImageSelection);
     document.addEventListener("visibilitychange",()=>{
       if(document.hidden)publishTyping(false);
+      else {
+        if(!channelSubscribed)scheduleChatReconnect(true);
+        void syncChatSnapshot();
+      }
     });
+    window.addEventListener("online",()=>{
+      if(!channelSubscribed)scheduleChatReconnect(true);
+      void syncChatSnapshot();
+    });
+    // Low-frequency fallback lets an open Chat recover when PostgreSQL
+    // changes are unavailable, without continuous background API requests.
+    window.setInterval(()=>{
+      if(!client || !isOpen || document.hidden || navigator.onLine===false)return;
+      const interval=channelSubscribed?60000:15000;
+      if(Date.now()-lastChatSyncAt>=interval)void syncChatSnapshot();
+    },15000);
     cancelContext?.addEventListener("click",()=>clearComposerContext(true));
     // The menu belongs to its message, and closes on outside click.
     panel?.addEventListener("click",event=>{
