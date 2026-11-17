@@ -176,5 +176,59 @@ const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
  assert.match(w.document.querySelector("[data-chat-status]").textContent,/Live • newest 100 messages/,
    "Late callbacks from a retired channel must not re-disable live status");
  dom.window.close();
- console.log("PASS: Chat runtime reactions, Presence typing, image compression and image-only message upload.");
+
+ // Before the additive migration is applied, text Chat must remain usable.
+ // Only the paperclip should be disabled: never break existing messages.
+ const oldDom=new JSDOM("<!doctype html><html><body></body></html>",{
+   url:"https://studylablk.netlify.app/index.html",
+   runScripts:"outside-only",pretendToBeVisual:true
+ });
+ const old=oldDom.window;
+ old.matchMedia=()=>({matches:false,addListener(){},removeListener(){}});
+ const legacyWrites=[];
+ const legacyChannel={
+   on(){return this;},subscribe(fn){fn("SUBSCRIBED");return this;},
+   track:async()=>({}),presenceState:()=>({})
+ };
+ const legacyClient={
+   rpc:async()=>({data:false,error:null}),
+   channel:()=>legacyChannel,
+   from(table){
+     if(table==="studylab_chat_messages")return{
+       select(columns){
+         return {
+           order(){return this;},
+           limit:async()=>columns==="file_attachments"
+             ?{data:null,error:{code:"42703",message:"column missing"}}
+             :{data:[],error:null}
+         };
+       },
+       insert:async(row)=>{legacyWrites.push(row);return{error:null};}
+     };
+     if(table==="studylab_chat_reactions")return{
+       select(){return{in:async()=>({data:[],error:null})};}
+     };
+     throw Error("Unexpected table "+table);
+   }
+ };
+ old.StudyLabAccount={
+   ready:Promise.resolve(),getUser:()=>({id:me}),
+   getProfile:async()=>({display_name:"Student A"}),client:legacyClient
+ };
+ old.supabase={createClient:()=>legacyClient};
+ old.eval(readFileSync("assets/js/chat.js","utf8"));
+ await wait(90);
+ assert.equal(old.document.querySelector("[data-chat-file-attach]").disabled,true,
+   "Paperclip stays disabled until the document migration exists");
+ const legacyInput=old.document.querySelector("[data-chat-input]");
+ legacyInput.value="Text still works";
+ legacyInput.dispatchEvent(new old.Event("input",{bubbles:true}));
+ old.document.querySelector("[data-chat-form]").dispatchEvent(
+   new old.Event("submit",{bubbles:true,cancelable:true}));
+ await wait(80);
+ assert.equal(legacyWrites.length,1,"Text send must succeed without file metadata column");
+ assert.equal(Object.hasOwn(legacyWrites[0],"file_attachments"),false);
+ oldDom.window.close();
+
+ console.log("PASS: Chat reactions, images, PDF uploads, recovery and safe pre-migration fallback.");
 })().catch(e=>{console.error(e);process.exitCode=1});
