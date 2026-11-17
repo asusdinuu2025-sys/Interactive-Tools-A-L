@@ -209,7 +209,7 @@ function mount(host,api,rows,onRefresh){
      if(!file && !draft?.html_path){
        addStatus(form,"Choose an HTML file to preview.",true);return;
      }
-     if(file && (!/\\.html?$/i.test(file.name)||file.size>5*1024*1024)){
+     if(file && (!/\.html?$/i.test(file.name)||file.size>5*1024*1024)){
        addStatus(form,"Choose an .html file under 5 MB.",true);return;
      }
      const code=file ? await file.text() : await api.readSimulation(draft.html_path);
