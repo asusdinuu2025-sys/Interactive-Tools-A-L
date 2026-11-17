@@ -600,6 +600,62 @@
       }
       body.append(gallery);
     }
+    // A private signed link is created only for paths owned by this message.
+    // File names are always text nodes, never executable markup.
+    const files=Array.isArray(row.file_attachments) ? row.file_attachments
+      .filter(item=>item && typeof item.path==="string" &&
+        typeof item.name==="string" &&
+        item.path.startsWith(String(row.user_id)+"/"+row.id+"/") &&
+        /\/[0-1]\.(pdf|docx|pptx|txt)$/.test(item.path)).slice(0,CONFIG.maxFiles):[];
+    if(files.length){
+      if(row.message==="📎 File")text.hidden=true;
+      const attachments=document.createElement("div");
+      attachments.className="study-chat-document-list";
+      for(const file of files){
+        const link=document.createElement("a");
+        link.className="study-chat-document is-loading";
+        link.target="_blank";link.rel="noopener noreferrer";
+        link.title="Preparing private document link";
+        const icon=document.createElement("span");
+        icon.className="study-chat-document-icon";
+        icon.setAttribute("aria-hidden","true");
+        icon.textContent="📄";
+        const copy=document.createElement("span");
+        copy.className="study-chat-document-copy";
+        const filename=document.createElement("strong");
+        filename.textContent=file.name.slice(0,120);
+        const detail=document.createElement("small");
+        const bytes=Number(file.size)||0;
+        detail.textContent=(bytes?Math.max(1,Math.round(bytes/1024))+" KB · ":"")+
+          String(file.path.split(".").pop()).toUpperCase()+" · private file";
+        copy.append(filename,detail);
+        link.append(icon,copy);
+        attachments.append(link);
+        const cached=fileUrlCache.get(file.path);
+        if(cached?.expires>Date.now()){
+          link.href=cached.url;link.download=file.name;
+          link.classList.remove("is-loading");
+          link.title="Open or download document";
+        }else if(client){
+          client.storage.from(CONFIG.fileBucket).createSignedUrl(file.path,3600)
+            .then(({data,error})=>{
+              if(!link.isConnected)return;
+              if(error || !data?.signedUrl){
+                link.classList.replace("is-loading","is-unavailable");
+                link.title="File is unavailable";return;
+              }
+              fileUrlCache.set(file.path,{url:data.signedUrl,expires:Date.now()+3500000});
+              link.href=data.signedUrl;link.download=file.name;
+              link.title="Open or download document";
+              link.classList.remove("is-loading");
+            }).catch(()=>{
+              link.classList.replace("is-loading","is-unavailable");
+              link.title="File is unavailable";
+            });
+        }
+      }
+      body.append(attachments);
+    }
 
     // Telegram-style: used reactions and counts stay on the bubble;
     // unused choices stay hidden inside the existing React picker.
