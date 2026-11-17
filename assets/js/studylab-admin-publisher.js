@@ -133,7 +133,7 @@ function mount(host,api,rows,onRefresh){
        id:draft?.id||"custom-"+crypto.randomUUID(),kind:"card",page,
        resource_type:kind,resource_title:title,title,description,order,
        emoji,hidden:false,section:kind==="custom"?destination:"",
-       url:kind==="simulation"?"simulation-viewer.html?id="+(draft?.id||"") :
+       url:kind==="simulation"?"/simulation-viewer.html?id="+encodeURIComponent(draft?.id||"") :
          String(d.get("link")||"").trim(),
        image:String(d.get("image")||"").trim(),button_label:kind==="simulation"?"Open Tool":
          kind==="telegram"?"Open Channel":kind==="lesson-pack"?"View Lessons":"Open resource"
@@ -149,7 +149,7 @@ function mount(host,api,rows,onRefresh){
        info.topic=String(d.get("topic")||"").trim().slice(0,120);
        if(page==="maths.html") info.maths_category=String(d.get("maths_category")||"pure");
        info.html_path=draft?.html_path||"";
-       info.url="simulation-viewer.html?id="+info.id;
+       info.url="/simulation-viewer.html?id="+encodeURIComponent(info.id);
        // Numbered title is used by the original lesson filter.
        if(number)info.title=String(number).padStart(2,"0")+". "+title;
      }else if(kind==="telegram"){
@@ -186,12 +186,13 @@ function mount(host,api,rows,onRefresh){
      let uploaded=null;
      try{
        const info=rawValues();
+       // Ask permission before uploading into shared live Storage.
+       if(action==="publish"&&!confirm("Publish this resource to the REAL StudyLab database?"))return;
        if(isSim){
          const file=form.elements.html.files?.[0];
          if(file){uploaded=await api.uploadSimulation(file);info.html_path=uploaded.path;}
          if(!info.html_path)throw Error("Upload an HTML file before publishing.");
        }
-       if(action==="publish"&&!confirm("Publish this resource to the REAL StudyLab database?"))return;
        addStatus(form,"Saving to StudyLab…");
        await api.save(info,record?.revision||0,action);
        dialog.close();await onRefresh();
