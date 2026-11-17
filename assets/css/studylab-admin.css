@@ -994,12 +994,42 @@ html[data-theme="light"] .sl-admin-page button.sladmin-danger:hover:not(:disable
   transition:background .2s,transform .2s;
 }
 .sladmin-path-choice:hover {transform:translateY(-1px);background:rgba(153,201,247,.20);}
-.sladmin-publish-dialog {max-width:min(94vw,740px);}
-.sladmin-publish-dialog form {max-height:min(88dvh,780px);overflow:auto;scrollbar-width:thin;scrollbar-color:rgba(133,183,234,.46) transparent;}
+/* One scroll area only: keep the heading and action buttons in place. */
+.sladmin-publish-dialog {
+  max-width:min(94vw,740px);max-height:min(90dvh,780px);
+  box-sizing:border-box;overflow:hidden;
+}
+.sladmin-publish-dialog form {
+  display:flex;flex-direction:column;min-height:0;
+  max-height:calc(min(90dvh,780px) - 58px);
+  overflow:hidden;
+}
+.sladmin-publish-dialog form > header {flex:0 0 auto;margin-bottom:14px;}
 .sladmin-publish-fields {
   display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:13px;padding:6px 0 15px;
+  gap:13px;padding:6px 14px 15px 0;min-height:0;
+  overflow-y:auto;overflow-x:hidden;
+  scrollbar-width:thin;scrollbar-color:rgba(133,183,234,.46) transparent;
+  align-content:start;overscroll-behavior:contain;
 }
+.sladmin-publish-fields::-webkit-scrollbar {width:5px;}
+.sladmin-publish-fields::-webkit-scrollbar-thumb {
+  border-radius:99px;background:rgba(120,178,232,.45);
+}
+.sladmin-publish-dialog .sladmin-editor-actions {
+  flex:0 0 auto;margin-top:11px;padding-top:12px;
+  border-top:1px solid var(--sladmin-line);
+}
+.sladmin-publish-dialog .sladmin-publish-status {flex:0 0 auto;margin:9px 0 0;}
+.sladmin-publish-file-status {
+  grid-column:1/-1;display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  margin:-4px 0 4px;padding:9px 11px;border-radius:12px;
+  border:1px solid rgba(120,190,242,.29);
+  color:var(--sladmin-text);background:rgba(124,179,229,.075);
+  font-size:.78rem;overflow-wrap:anywhere;
+}
+.sladmin-publish-file-status a {color:var(--sladmin-text);text-underline-offset:3px;}
+.sladmin-publish-file-status strong {color:var(--sladmin-text);}
 .sladmin-publish-field {display:flex;min-width:0;flex-direction:column;gap:7px;font-size:.77rem;color:var(--sladmin-muted);}
 .sladmin-publish-field:has(textarea),.sladmin-publish-field:has(input[type="file"]) {grid-column:1/-1;}
 .sladmin-publish-field input,.sladmin-publish-field select,.sladmin-publish-field textarea {
