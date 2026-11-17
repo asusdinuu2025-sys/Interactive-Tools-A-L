@@ -144,7 +144,12 @@ function mount(host,api,rows,onRefresh){
    for(const b of [preview,draftBtn,publish])b.type="button";
    const status=el("p","", "sladmin-publish-status");status.dataset.publisherStatus="";
    actionBar.append(preview,draftBtn,publish);
-   form.append(head,fields,status,actionBar);dialog.append(form);document.body.append(dialog);
+   const modeNotice=el("p",api.preview
+     ? "Local-only editor: nothing appears to other students. Open PR #102 deploy preview to publish."
+     : "Connected to StudyLab publishing. Published cards appear on their destination pages.",
+     "sladmin-publish-note sladmin-publish-mode-note");
+   form.append(head,modeNotice,fields,status,actionBar);dialog.append(form);document.body.append(dialog);
+   form.addEventListener("submit",event=>event.preventDefault());
    dialog.addEventListener("close",()=>dialog.remove());dialog.showModal();
    function rawValues(){
      const d=new FormData(form);
@@ -182,27 +187,39 @@ function mount(host,api,rows,onRefresh){
        info.telegram_category=destination;
        if(!/^https:\/\/(t\.me|telegram\.me)\//i.test(info.url))
          throw Error("Use a Telegram channel link starting https://t.me/");
+       if(new URL(info.url).pathname==="/")
+         throw Error("Enter a full Telegram channel link such as https://t.me/yourchannel.");
        info.publisher=String(d.get("publisher")||"").trim().slice(0,100);
      }else if(kind==="lesson-pack"){
        info.subject=String(d.get("subject")||"physics");
        info.publisher=String(d.get("publisher")||"").trim().slice(0,120);
        info.series=String(d.get("series")||"").trim().slice(0,120);
+       info.pack_file_path=draft?.pack_file_path||"";
+       info.pack_file_name=draft?.pack_file_name||"";
+       info.cover_file_path=draft?.cover_file_path||"";
+       info.cover_file_name=draft?.cover_file_name||"";
      }
-     if(!info.url)throw Error("Provide the destination link.");
+     if(!info.url && !(kind==="lesson-pack" && form.elements.pack_pdf?.files?.[0]))
+       throw Error("Provide a destination link or upload a lesson pack PDF.");
      return info;
    }
    async function previewHTML(){
      if(!isSim)return;
      const file=form.elements.html?.files?.[0];
-     if(!file){addStatus(form,"Choose an HTML file to preview.",true);return;}
-     if(!/\.html?$/i.test(file.name)||file.size>5*1024*1024){addStatus(form,"Choose a .html file under 5 MB.",true);return;}
+     if(!file && !draft?.html_path){
+       addStatus(form,"Choose an HTML file to preview.",true);return;
+     }
+     if(file && (!/\\.html?$/i.test(file.name)||file.size>5*1024*1024)){
+       addStatus(form,"Choose an .html file under 5 MB.",true);return;
+     }
+     const code=file ? await file.text() : await api.readSimulation(draft.html_path);
      const frame=el("iframe");frame.sandbox="allow-scripts allow-forms";
      frame.referrerPolicy="no-referrer";frame.style.cssText="width:100%;height:min(68vh,600px);border:1px solid rgba(130,197,255,.3);border-radius:14px;background:#fff";
      const modal=el("dialog",null,"sladmin-dialog sladmin-html-preview");
      const end=el("button","Close Preview");end.type="button";end.onclick=()=>modal.close();
      modal.append(end,frame);document.body.append(modal);
      modal.addEventListener("close",()=>modal.remove());
-     modal.showModal();frame.srcdoc=await file.text();
+     modal.showModal();frame.srcdoc=code;
    }
    preview.onclick=async()=>{try{if(isSim)await previewHTML();else{
       const item=rawValues();addStatus(form,"Ready to publish: "+item.title+" · "+item.page);
