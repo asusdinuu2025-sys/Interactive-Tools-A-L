@@ -255,7 +255,7 @@ function make(html){
  assert.ok(api.includes('studylab-simulations'));
  assert.ok(api.includes("uploadSimulation"));
  const search=read("assets/js/studylab-global-search.js");
- assert.ok(search.includes('from("studylab_site_content")'));
+ assert.ok(search.includes("/rest/v1/studylab_site_content"),"Published search must use the public REST reader without an SDK dependency");
  const lesson=read("assets/js/lesson-filter.js");
  assert.ok(lesson.includes("element.dataset.lesson"));
  assert.ok(lesson.includes("element.dataset.filterCategory"));
