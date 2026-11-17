@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="studylab-admin-build" content="pr102-actions-20261116-v11" />
+    <title>Admin Dashboard · StudyLab</title>
+    <link rel="icon" href="assets/icon/studylab-pwa.svg" />
+    <!-- Intentionally isolated: the main site stylesheet has broad page-level rules.
+         The admin workspace has its own complete stylesheet. -->
+    <link rel="stylesheet" href="assets/css/studylab-admin.css?v=pr102-publish-visibility-v3" />
+    <link rel="stylesheet" href="assets/css/studylab-popups.css?v=20261116-v13" />
+  </head>
+  <body class="sl-admin-page">
+    <div class="sladmin-shell">
+      <header class="sladmin-top">
+        <a href="index.html" class="sladmin-brand"
+          ><span class="sladmin-brand-mark" aria-hidden="true">ツ</span
+          ><span>StudyLab<small>ADMIN WORKSPACE</small></span></a
+        >
+        <div class="sladmin-top-actions">
+          <button id="sladmin-theme" aria-label="Switch colour theme">◐</button
+          ><a class="sladmin-button" href="index.html">Back to StudyLab <img class="sladmin-back-icon" src="assets/icon/studylab-pwa.svg" alt="" /></a>
+        </div>
+      </header>
+      <main>
+        <section class="sladmin-heading">
+          <div>
+            <p class="sladmin-eyebrow">BEHIND THE SCENES</p>
+            <h1>Admin Dashboard<span>.</span></h1>
+            <p>One place to look after your learning community.</p>
+          </div>
+          <span id="sladmin-identity" class="sladmin-chip">Checking access…</span>
+        </section>
+        <p id="sladmin-gate" class="sladmin-notice" role="status">
+          Verifying your StudyLab admin account…
+        </p>
+        <div id="sladmin-workspace" hidden>
+          <div id="sladmin-mode" class="sladmin-notice"></div>
+          <nav id="sladmin-tabs" class="sladmin-tabs" aria-label="Admin areas"></nav>
+          <div class="sladmin-panel-heading">
+            <div>
+              <p id="sladmin-kicker" class="sladmin-eyebrow">WORKSPACE</p>
+              <h2 id="sladmin-title">Overview</h2>
+            </div>
+            <span id="sladmin-save-state" class="sladmin-chip">All changes saved</span>
+          </div>
+          <p id="sladmin-status" role="status" aria-live="polite"></p>
+          <section id="sladmin-content" aria-labelledby="sladmin-title">
+            <div class="sladmin-loading" role="status">Loading dashboard…</div>
+          </section>
+        </div>
+      </main>
+      <footer class="sladmin-footer">
+        StudyLab · Built for your community <span>Admin access only</span>
+      </footer>
+    </div>
+    <dialog id="sladmin-editor" class="sladmin-dialog">
+      <form id="sladmin-form">
+        <header>
+          <h2 id="sladmin-editor-title">Edit content</h2>
+          <button type="button" id="sladmin-close" aria-label="Close editor">
+            ×
+          </button>
+        </header>
+        <div id="sladmin-fields"></div>
+        <p id="sladmin-editor-status" role="status"></p>
+        <div class="sladmin-editor-actions">
+          <button type="button" id="sladmin-preview">Preview</button
+          ><button type="submit" value="draft">Save draft</button
+          ><button type="submit" value="publish" class="sladmin-primary">
+            Publish
+          </button>
+        </div>
+      </form>
+    </dialog>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.2/dist/umd/supabase.js"></script>
+    <script src="assets/js/studylab-admin-config.js?v=pr102-actions-20261116-v11"></script>
+    <script src="assets/js/studylab-admin-api.js?v=pr102-publish-visibility-v3"></script>
+    <script src="assets/js/studylab-popup-format.js?v=20261116-v1"></script>
+    <script src="assets/js/studylab-admin-publisher.js?v=pr102-publish-visibility-v3"></script>
+    <script src="assets/js/studylab-admin.js?v=pr102-guided-v1"></script>
+  </body>
+</html>

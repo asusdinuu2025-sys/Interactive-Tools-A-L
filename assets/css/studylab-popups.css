@@ -1,0 +1,187 @@
+/* StudyLab one-time messages. Original adaptive liquid-glass pop-up style. */
+.slpopup-toast {
+  --slpopup-accent: #82c7ff;
+  --slpopup-soft: rgba(71,162,255,.17);
+  position:fixed;
+  z-index:2147482000;
+  top:90px;
+  right:24px;
+  width:min(410px,calc(100vw - 32px));
+  max-height:min(85dvh,calc(100dvh - 112px),740px);
+  overflow-x:hidden;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(151,202,247,.46) transparent;
+  padding:20px 22px 24px;
+  border:1px solid rgba(203,230,255,.28);
+  border-top:2px solid var(--slpopup-accent);
+  border-radius:22px;
+  background:linear-gradient(140deg,rgba(225,241,255,.12),rgba(120,154,230,.025) 55%),
+    radial-gradient(ellipse at top right,var(--slpopup-soft),transparent 65%),
+    rgba(13,24,46,.78);
+  color:#ecf6ff;
+  box-shadow:0 24px 80px rgba(0,0,0,.30),inset 0 1px rgba(255,255,255,.14);
+  backdrop-filter:blur(22px) saturate(165%);
+  -webkit-backdrop-filter:blur(22px) saturate(165%);
+  font:400 14px/1.55 "Nirmala UI","Segoe UI",sans-serif;
+  isolation:isolate;
+  animation:slpopup-appear .34s cubic-bezier(.16,.84,.22,1) both;
+  box-sizing:border-box;
+}
+.slpopup-toast * {box-sizing:border-box;}
+.slpopup-toast > strong {
+  display:block;
+  max-width:calc(100% - 38px);
+  color:inherit;
+  margin:0 0 7px;
+  font-size:17px;
+  font-weight:800;
+  letter-spacing:-.025em;
+}
+.slpopup-toast p {margin:0;white-space:pre-line;overflow-wrap:anywhere;}
+/* Formatting inside the message stays inline, unlike the main heading. */
+.slpopup-toast .slpopup-message strong {
+  display:inline;
+  margin:0;
+  max-width:none;
+  font-size:inherit;
+  font-weight:780;
+  letter-spacing:normal;
+}
+.slpopup-toast .slpopup-message u {
+  text-underline-offset:2px;
+  text-decoration-thickness:1.5px;
+}
+.slpopup-toast .slpopup-message em {font-style:italic;}
+.slpopup-toast .slpopup-message s {text-decoration:line-through;}
+.slpopup-toast .slpopup-message code {
+  font:inherit;
+  padding:1px 4px;
+  border:1px solid rgba(193,227,255,.19);
+  border-radius:5px;
+  background:rgba(172,213,255,.09);
+}
+.slpopup-toast::-webkit-scrollbar {width:5px;height:5px;}
+.slpopup-toast::-webkit-scrollbar-track {background:transparent;border-radius:20px;}
+.slpopup-toast::-webkit-scrollbar-thumb {
+  background:rgba(153,209,255,.42);
+  border-radius:999px;
+}
+.slpopup-toast::-webkit-scrollbar-thumb:hover {background:rgba(171,222,255,.64);}
+.slpopup-toast .slpopup-close {
+  position:absolute;
+  top:12px;right:12px;
+  width:32px;height:32px;
+  border-radius:11px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.14);
+  color:inherit;
+  font:600 22px/1 "Segoe UI",sans-serif;
+  cursor:pointer;
+}
+.slpopup-toast .slpopup-close:hover {background:rgba(255,255,255,.17);}
+.slpopup-toast a.slpopup-link {
+  display:inline-flex;
+  padding:8px 13px;
+  margin-top:13px;
+  align-items:center;
+  border-radius:999px;
+  border:1px solid rgba(189,221,255,.30);
+  color:inherit;
+  text-decoration:none;
+  font-weight:720;
+  background:rgba(129,190,251,.13);
+}
+.slpopup-toast a.slpopup-link:hover {background:rgba(129,190,251,.26);}
+.slpopup-toast:is(:hover,:focus-within)::after,
+.slpopup-toast.slpopup-paused::after {animation-play-state:paused;}
+.slpopup-toast::after {
+  content:"";
+  display:block;
+  position:absolute;
+  bottom:0;left:0;
+  height:3px;
+  width:100%;
+  transform-origin:left;
+  background:var(--slpopup-accent);
+  animation:slpopup-time var(--slpopup-seconds,8s) linear forwards;
+}
+.slpopup-toast.slpopup-success {--slpopup-accent:#81e6b5;--slpopup-soft:rgba(69,223,154,.15);}
+.slpopup-toast.slpopup-warning {--slpopup-accent:#ffd179;--slpopup-soft:rgba(255,180,69,.19);}
+.slpopup-toast.slpopup-important {--slpopup-accent:#d2a0ff;--slpopup-soft:rgba(173,101,241,.19);}
+.slpopup-toast.slpopup-custom {--slpopup-accent:#8deadd;--slpopup-soft:rgba(167,108,242,.25);}
+.slpopup-toast[data-placement="top-center"] {right:auto;left:50%;transform:translateX(-50%);animation-name:slpopup-center-appear;}
+.slpopup-toast[data-placement="center"] {top:50%;right:auto;left:50%;transform:translate(-50%,-50%);animation-name:slpopup-middle-appear;}
+.slpopup-toast[data-placement="bottom-right"] {top:auto;bottom:24px;}
+.slpopup-toast small {display:block;margin-top:11px;opacity:.64;font-size:11px;}
+html[data-theme="light"] .slpopup-toast,
+body[data-theme="light"] .slpopup-toast {
+  color:#19314c;
+  background:linear-gradient(135deg,rgba(255,255,255,.80),rgba(241,245,255,.63)),
+    radial-gradient(ellipse at top right,var(--slpopup-soft),transparent 70%);
+  border-color:rgba(77,128,184,.32);
+  box-shadow:0 22px 60px rgba(52,87,128,.15),inset 0 1px rgba(255,255,255,.92);
+}
+html[data-theme="light"] .slpopup-toast,
+body[data-theme="light"] .slpopup-toast {scrollbar-color:rgba(61,115,172,.47) transparent;}
+html[data-theme="light"] .slpopup-toast::-webkit-scrollbar-thumb,
+body[data-theme="light"] .slpopup-toast::-webkit-scrollbar-thumb {
+  background:rgba(61,115,172,.46);
+}
+html[data-theme="light"] .slpopup-toast .slpopup-close,
+body[data-theme="light"] .slpopup-toast .slpopup-close {
+  border-color:rgba(61,106,154,.22);background:rgba(80,126,188,.09);
+}
+@keyframes slpopup-time {from{transform:scaleX(1)}to{transform:scaleX(0)}}
+@keyframes slpopup-appear {from{opacity:0;translate:40px -8px}to{opacity:1;translate:0 0}}
+@keyframes slpopup-center-appear {from{opacity:0;translate:0 -16px}to{opacity:1;translate:0 0}}
+@keyframes slpopup-middle-appear {from{opacity:0;scale:.94}to{opacity:1;scale:1}}
+@media (max-width:600px){
+  .slpopup-toast {
+    top:80px;right:16px;padding:17px 18px 22px;
+    max-height:min(83dvh,calc(100dvh - 96px));
+  }
+  .slpopup-toast[data-placement="center"] {max-height:85dvh;}
+  .slpopup-toast[data-placement="bottom-right"] {top:auto;bottom:18px;}
+}
+@media (prefers-reduced-motion:reduce){
+  .slpopup-toast {animation:none;}
+  .slpopup-toast::after {animation:none;}
+}
+
+/* Status message for users whose StudyLab sign-in is suspended. */
+.slban-notice {
+  position:fixed;
+  z-index:2147482500;
+  inset:auto 16px 22px auto;
+  width:min(410px,calc(100vw - 32px));
+  padding:20px;
+  border:1px solid rgba(255,188,150,.45);
+  border-radius:20px;
+  background:linear-gradient(135deg,rgba(76,42,58,.94),rgba(18,28,48,.96));
+  box-shadow:0 20px 70px rgba(0,0,0,.30);
+  backdrop-filter:blur(18px);
+  color:#fff0e9;
+  font:14px/1.6 "Nirmala UI","Segoe UI",sans-serif;
+}
+.slban-notice strong{display:block;font-size:18px;margin-bottom:6px;}
+.slban-notice p{margin:0 0 12px;overflow-wrap:anywhere;}
+.slban-notice button{
+  border:1px solid rgba(255,207,179,.36);
+  background:rgba(255,255,255,.08);
+  border-radius:10px;
+  padding:7px 14px;
+  color:inherit;
+  cursor:pointer;
+}
+
+/* Keep custom 20-character actions readable on compact phones. */
+.slpopup-toast a.slpopup-link,.slpopup-toast .slpopup-link-preview {
+  width:max-content;
+  max-width:100%;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  text-align:center;
+  line-height:1.3;
+}

@@ -1,6 +1,5 @@
-/* A cosmetic blue name mark for a fixed set of existing StudyLab accounts.
-   No verification workflow, access role, profile field, or permissions.
-   Only Supabase Auth user IDs appear here; private email addresses are never embedded. */
+/* Cosmetic blue badges. Existing badges remain the fallback until live admin mode
+   enables the public verification registry. Badges never grant access rights. */
 (function () {
   "use strict";
   if (window.StudyLabNameMark) return;
@@ -11,6 +10,32 @@
     "1f01a0f7-2030-4e14-b561-1e17648d4b3f",
     "24e78cd0-4565-407a-96f7-9cfde083f6d2"
   ]);
+  const queried = new Set();
+  const waiting = new Set();
+  let timer;
+  function scheduleLookup(userId) {
+    if (!["live", "connected"].includes(window.StudyLabAdminConfig?.mode) || queried.has(userId)) return;
+    queried.add(userId); waiting.add(userId);
+    clearTimeout(timer);
+    timer = setTimeout(flush, 80);
+  }
+  async function flush() {
+      const ids = [...waiting].slice(0, 100); ids.forEach(id => waiting.delete(id));
+      await window.StudyLabAccount?.startup;
+      const client = window.StudyLabAccount?.client;
+      if (!client) { ids.forEach(id => queried.delete(id)); return; }
+      const result = await client.from("studylab_verifications").select("user_id").in("user_id", ids);
+      if (result.error) { ids.forEach(id => queried.delete(id)); return; }
+      const verified = new Set((result.data || []).map(row => row.user_id));
+      ids.forEach(id => { if (verified.has(id)) allowedIds.add(id); else allowedIds.delete(id); });
+      document.querySelectorAll("[data-sl-badge-user]").forEach(node => {
+        if (ids.includes(node.dataset.slBadgeUser)) decorate(node, node.dataset.slBadgeUser);
+      });
+      if (waiting.size) timer = setTimeout(flush, 80);
+  }
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("[data-sl-badge-user]").forEach(node => scheduleLookup(node.dataset.slBadgeUser));
+  });
   const NS = "http://www.w3.org/2000/svg";
 
   function isMarked(userId) {
@@ -19,6 +44,8 @@
 
   function decorate(nameNode, userId) {
     if (!nameNode || typeof nameNode.querySelector !== "function") return;
+    nameNode.dataset.slBadgeUser = String(userId || "");
+    if (userId) scheduleLookup(userId);
     const existing = nameNode.querySelector(":scope > .sl-name-mark");
     if (!isMarked(userId)) {
       existing?.remove();

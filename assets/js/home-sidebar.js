@@ -45,7 +45,9 @@
       <a class="sl-home-nav-item" href="#free-lesson-packs" data-nav-id="free-lesson-packs" title="Free Lesson Packs">
         <span class="sl-home-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5.5A3.5 3.5 0 0 1 7.5 2H20v17H7.5A3.5 3.5 0 0 0 4 22z"/><path d="M4 5.5v16.5M8 6h8M8 10h8"/></svg></span><span class="sl-home-nav-label">Free Lesson Packs</span>
       </a>
-      
+      <a class="sl-home-nav-item" href="#more-learning-resources" data-nav-id="more" title="More sections">
+        <span class="sl-home-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 10h16M4 15h9"/><path d="m15 17 4 4 4-4"/></svg></span><span class="sl-home-nav-label">More</span>
+      </a>
     </nav>
     <div class="sl-home-sidebar-hint">Navigate your A/L workspace</div>
     <div class="sl-home-quick-actions" aria-label="StudyLab quick tools"></div>`;
@@ -72,6 +74,37 @@
   const indicator = sidebar.querySelector(".sl-home-nav-indicator");
   const collapseButton = sidebar.querySelector(".sl-home-sidebar-collapse");
   const navItems = [...sidebar.querySelectorAll(".sl-home-nav-item")];
+  // The Sections dashboard can change built-in section orders at runtime.
+  // Mirror the saved live CMS order instead of freezing a different sidebar order.
+  function syncNavigationOrder() {
+    // Order navigation from the real DOM after published CMS rearrangements,
+    // not from the original hard-coded list or a stale numeric fallback.
+    const ordered=navItems.slice().sort((a,b)=>{
+      if(a.dataset.navId==="home")return -1;
+      if(b.dataset.navId==="home")return 1;
+      if(a.dataset.navId==="more")return 1;
+      if(b.dataset.navId==="more")return -1;
+      const left=document.getElementById(a.dataset.navId);
+      const right=document.getElementById(b.dataset.navId);
+      if(left && right){
+        const position=left.compareDocumentPosition(right);
+        if(position & 4)return -1; // following
+        if(position & 2)return 1;  // preceding
+      }
+      return navItems.indexOf(a)-navItems.indexOf(b);
+    });
+    for(const item of ordered)nav.append(item);
+    const active=navItems.find(x=>x.classList.contains("is-active"));
+    if(active && indicator){
+      indicator.style.height=active.offsetHeight+"px";
+      indicator.style.transform="translate3d(0,"+active.offsetTop+"px,0)";
+    }
+  }
+  window.addEventListener("studylab-content-applied",()=>{
+    syncNavigationOrder();
+    scheduleScrollSync();
+  });
+  syncNavigationOrder();
   const scrollTargets = [
     ["home", "home-overview"],
     ["practical-simulations", "practical-simulations"],
@@ -80,7 +113,8 @@
     ["past-papers", "past-papers"],
     ["telegram-links", "telegram-links"],
     ["other-al-resources", "other-al-resources"],
-    ["free-lesson-packs", "free-lesson-packs"]
+    ["free-lesson-packs", "free-lesson-packs"],
+    ["more", "more-learning-resources"]
   ].map(([navId, targetId]) => ({
     navId,
     element: document.getElementById(targetId)
@@ -165,7 +199,8 @@
 
     if (pendingNavigation) {
       const targetTop = pendingNavigation.element.getBoundingClientRect().top;
-      if (Math.abs(targetTop - 100) <= 22) {
+      if (Math.abs(targetTop - 112) <= 32 ||
+          window.scrollY+window.innerHeight>=document.documentElement.scrollHeight-3) {
         pendingNavigation = null;
       } else {
         setActive(pendingNavigation.navId);
@@ -173,12 +208,38 @@
       }
     }
 
-    const markerLine = Math.min(window.innerHeight * 0.36, 300);
-    let current = null;
-    scrollTargets.forEach(target => {
-      if (target.element.getBoundingClientRect().top <= markerLine) current = target;
+    const headerBottom = document.querySelector("header.site-header")
+      ?.getBoundingClientRect().bottom || 82;
+    // Activate a panel as soon as its heading enters the main viewing area,
+    // not only after it passes the floating header. The old 185px cap left
+    // Free Lesson Packs selected while Other A/L Resources filled the screen.
+    const markerLine = Math.min(window.innerHeight*0.42,
+      Math.max(headerBottom+100,window.innerHeight*0.36));
+    // Re-sort on every scroll: CMS may have moved Free Lesson Packs and
+    // Other A/L Resources since these targets were first collected.
+    const orderedTargets=scrollTargets.filter(target=>
+      target.element.isConnected && !target.element.hidden &&
+      (target.navId!=="more" || [...target.element.parentElement.children]
+        .slice([...target.element.parentElement.children].indexOf(target.element)+1)
+        .some(node=>node.matches("section.sl-cms-section") && !node.hidden))
+    ).sort((a,b)=>{
+      const position=a.element.compareDocumentPosition(b.element);
+      if(position & 4)return -1;
+      if(position & 2)return 1;
+      return 0;
     });
-    setActive(current ? current.navId : "home");
+    let current=null;
+    for(const target of orderedTargets){
+      if(target.element.getBoundingClientRect().top<=markerLine)current=target;
+    }
+    // A 1px More anchor near the footer cannot always scroll to the
+    // heading offset. Highlight it once the visitor reaches that boundary.
+    const more=document.getElementById("more-learning-resources");
+    const atPageEnd=window.scrollY+window.innerHeight>=
+      document.documentElement.scrollHeight-3;
+    if(atPageEnd && more?.getBoundingClientRect().top<=window.innerHeight-40)
+      current=orderedTargets.find(target=>target.navId==="more")||current;
+    setActive(current?.navId||"home");
   }
 
   function scheduleScrollSync() {
@@ -189,7 +250,8 @@
   navItems.forEach(item => {
     item.addEventListener("click", event => {
       const id = item.dataset.navId;
-      const targetId = id === "home" ? "home-overview" : id;
+      const targetId = id === "home" ? "home-overview"
+        : id === "more" ? "more-learning-resources" : id;
       const target = document.getElementById(targetId);
 
       if (!target) return;

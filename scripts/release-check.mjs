@@ -13,6 +13,7 @@ const syntaxFiles = [
   "assets/js/studylab-profile-view.js",
   "assets/js/studylab-avatar.js",
   "assets/js/chat.js",
+  "assets/js/studylab-popups.js",
   "assets/js/studylab-pet-room.js",
   "assets/js/studylab-pet.js",
   "assets/js/profile.js",
@@ -131,6 +132,8 @@ if (uiPolishTests.status !== 0) {
     (uiPolishTests.stderr || uiPolishTests.stdout || "UI layout check failed"));
 }
 
+// The popup DOM simulations use jsdom; run them via npm run test:admin
+// after npm ci. Release checks run without node_modules in GitHub Actions.
 const chatSocialPolishTests = spawnSync(process.execPath, ["scripts/studylab-chat-social-polish-check.mjs"], {encoding:"utf8"});
 if (chatSocialPolishTests.status !== 0) {
   fail("StudyLab Chat and Social polish checks failed:\n" +
@@ -179,6 +182,8 @@ if (neonTests.status !== 0) {
   fail("Interior neon/glass checks failed:\n" +
     (neonTests.stderr || neonTests.stdout || "node test failed"));
 }
+
+// Guided publishing requires jsdom and runs after npm ci in test:admin.
 
 // Verify the generated global resource index, public links and Home layout isolation.
 const searchTests = spawnSync(process.execPath, ["scripts/global-search-check.mjs"], {encoding:"utf8"});

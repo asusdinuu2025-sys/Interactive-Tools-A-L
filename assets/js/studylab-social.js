@@ -1358,7 +1358,8 @@
       }
       if (!user?.id) throw new Error("Student account not ready.");
       setupSocialNotifications(account.client, user.id);
-      isAdmin = user.app_metadata?.role === "admin";
+      const adminResult = await account.client.rpc("studylab_social_is_admin");
+      isAdmin = !adminResult.error && adminResult.data === true;
       const heading = panel.querySelector(".sl-feed-heading");
       let adminBadge = panel.querySelector(".sl-feed-admin-mode");
       if (isAdmin && !adminBadge) {

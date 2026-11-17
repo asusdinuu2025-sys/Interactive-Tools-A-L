@@ -10,7 +10,13 @@
   const liveRoot = document.querySelector("[data-live-layer]");
   const onlineNumber = liveRoot?.querySelector("[data-live-online]");
   const liveStatus = liveRoot?.querySelector("[data-live-status]");
-  const countdownTarget = liveRoot?.dataset.countdownTarget;
+  const countdownYear = liveRoot?.querySelector("[data-cd-year]");
+  const countdownTargets = {
+    "2027": "2027-08-01T00:00:00+05:30",
+    "2028": "2028-08-01T00:00:00+05:30"
+  };
+  let countdownTarget = liveRoot?.dataset.countdownTarget;
+  let yearPickedManually = false;
 
   const countdown = {
     days: liveRoot?.querySelector("[data-cd-days]"),
@@ -39,13 +45,48 @@
     if (countdown.minutes) countdown.minutes.textContent = String(minutes).padStart(2, "0");
     if (countdown.seconds) countdown.seconds.textContent = String(seconds).padStart(2, "0");
 
-    if (diff <= 0) {
-      const note = liveRoot?.querySelector("[data-countdown-note]");
-      if (note) note.textContent = "A/L 2027 countdown target reached.";
-    }
+    const note = liveRoot?.querySelector("[data-countdown-note]");
+    if (note) note.textContent = diff <= 0
+      ? "A/L " + (countdownYear?.value || "2027") + " countdown target reached."
+      : "";
   }
 
-  updateCountdown();
+  function setCountdownYear(year) {
+    const resolved = year === "2028" ? "2028" : "2027";
+    countdownTarget = countdownTargets[resolved];
+    if (liveRoot) liveRoot.dataset.countdownTarget = countdownTarget;
+    if (countdownYear) {
+      countdownYear.value = resolved;
+      countdownYear.title = "Planning target: 1 August " + resolved +
+        " (not a confirmed official examination date)";
+    }
+    updateCountdown();
+  }
+
+  countdownYear?.addEventListener("change", () => {
+    yearPickedManually = true;
+    setCountdownYear(countdownYear.value);
+  });
+  // Profile defaults are loaded from the existing account service.
+  // A student who selects 2028 at signup sees 2028 automatically, while
+  // missing/Other/2026/2029 values safely default to the 2027 timer.
+  async function syncYearFromProfile() {
+    const account = window.StudyLabAccount;
+    if (!account?.ready || !account?.getProfile) return;
+    try {
+      await account.ready;
+      const profile = await account.getProfile();
+      if (!yearPickedManually) setCountdownYear(String(profile?.exam_year || ""));
+    } catch (error) {
+      console.warn("StudyLab countdown profile year unavailable:", error);
+    }
+  }
+  window.addEventListener("studylab-profile-updated", event => {
+    yearPickedManually = false;
+    setCountdownYear(String(event.detail?.exam_year || ""));
+  });
+  setCountdownYear("2027");
+  void syncYearFromProfile();
   window.setInterval(updateCountdown, 1000);
 
   function showLiveMessage(message) {
