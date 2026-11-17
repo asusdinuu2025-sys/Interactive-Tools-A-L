@@ -1,4 +1,4 @@
-/* Inlined by scripts/sync-page-boot.mjs before styles: no extra blocking request. */
+/* Inlined before page styles. First-visit intro and loading must never replay on refresh, history or internal navigation. */
 (function () {
   'use strict';
   const root = document.documentElement;
@@ -8,18 +8,38 @@
   const choice = valid(mode) ? mode : 'dark';
   root.dataset.theme = choice === 'system' ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : choice;
   root.dataset.themeMode = choice;
-  // The existing chemistry intro is shown only once per browser session.
-  // On that first Home visit, leave the scene visible instead of showing two loaders.
-  let firstIntro = false;
+
+  const home = /(?:\/|\/index\.html)$/i.test(location.pathname);
+  const INTRO_KEY = 'studylab-first-welcome-intro-v2';
+  const ENTRY_KEY = 'studylab-first-entry-in-tab-v2';
+  const nav = (typeof performance.getEntriesByType === 'function' &&
+    performance.getEntriesByType('navigation')[0]) || null;
+  const navigation = nav?.type || 'navigate';
+  const isNewNavigation = navigation === 'navigate';
+  let showFlask = false;
+  let showRings = false;
+
+  // A first-time visitor gets the chemistry introduction before the auth welcome.
+  // Returning students get the fast four-arc loader on the initial Home entry in
+  // a fresh browser tab, but NEVER on reload, browser Back/Forward or subpages.
+  // Reserve the first-visit flag synchronously, so refresh mid-intro cannot replay it.
   try {
-    firstIntro = /(?:\/|\/index\.html)$/i.test(location.pathname) &&
-      sessionStorage.getItem('studylabSplashSeenV1') !== '1';
+    const firstInTab = sessionStorage.getItem(ENTRY_KEY) !== '1';
+    const introPlayed = localStorage.getItem(INTRO_KEY) === '1';
+    if (home && isNewNavigation && firstInTab) {
+      showFlask = !introPlayed;
+      showRings = introPlayed;
+    }
+    sessionStorage.setItem(ENTRY_KEY, '1');
+    if (showFlask) localStorage.setItem(INTRO_KEY, '1');
   } catch (_) {
-    // The first-visit intro already has its own storage fallback.
-    firstIntro = /(?:\/|\/index\.html)$/i.test(location.pathname);
+    // Without persistent storage, avoid any repeating or stuck animation.
+    showFlask = false;
+    showRings = false;
   }
-  root.classList.add('sl-booting');
-  if (firstIntro) root.classList.add('sl-boot-intro');
+
+  if (showFlask) root.classList.add('sl-first-intro');
+  if (showRings) root.classList.add('sl-booting');
   let finished = false;
   function reveal() {
     if (finished) return;
@@ -28,10 +48,9 @@
     root.classList.remove('sl-booting');
     root.classList.add('sl-page-ready');
   }
-  // A failed CDN/script must never leave the site trapped behind a loader.
+  // A failed CDN, auth or network request must not trap students behind a loader.
   const failsafe = setTimeout(reveal, 12000);
   document.addEventListener('DOMContentLoaded', function () {
-    // Allow other DOMContentLoaded handlers to finish constructing the current UI.
     setTimeout(function () {
       const tasks = [window.StudyLabAccount?.startup, window.StudyLabContentReady].filter(Boolean);
       let deadline;
@@ -44,5 +63,17 @@
       });
     }, 0);
   }, { once: true });
-  window.addEventListener('pageshow', event => { if (event.persisted) reveal(); });
+
+  // BFCache navigation can restore previous DOM/CSS classes. Never replay the intro.
+  function leavePage() {
+    root.classList.remove('sl-booting', 'sl-first-intro');
+    const intro = document.getElementById('studylabLoader');
+    if (intro) intro.remove();
+  }
+  window.addEventListener('pagehide', leavePage);
+  window.addEventListener('pageshow', event => {
+    if (!event.persisted) return;
+    leavePage();
+    reveal();
+  });
 })();
