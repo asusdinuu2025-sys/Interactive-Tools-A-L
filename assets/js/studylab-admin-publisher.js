@@ -225,24 +225,78 @@ function mount(host,api,rows,onRefresh){
       const item=rawValues();addStatus(form,"Ready to publish: "+item.title+" · "+item.page);
    }}catch(e){addStatus(form,e.message,true)}};
    async function submit(action){
+     if(!form.reportValidity()){
+       addStatus(form,"Complete the required fields before saving.",true);
+       return;
+     }
+     let info;
+     try{info=rawValues();}
+     catch(e){addStatus(form,e?.message||"Check resource details.",true);return;}
+     if(action==="publish"&&!window.confirm(api.preview
+       ? "Save this resource on this device only?"
+       : "Publish this resource to the StudyLab database?"))return;
+     const newSimulation=form.elements.html?.files?.[0];
+     const newPDF=form.elements.pack_pdf?.files?.[0];
+     const newCover=form.elements.pack_cover?.files?.[0];
      for(const b of [draftBtn,publish,preview])b.disabled=true;
-     let uploaded=null;
+     let uploadedSimulation=null,committed=false;
+     const uploadedMedia=[];
      try{
-       const info=rawValues();
-       // Ask permission before uploading into shared live Storage.
-       if(action==="publish"&&!confirm("Publish this resource to the REAL StudyLab database?"))return;
        if(isSim){
-         const file=form.elements.html.files?.[0];
-         if(file){uploaded=await api.uploadSimulation(file);info.html_path=uploaded.path;}
+         if(newSimulation){
+           uploadedSimulation=await api.uploadSimulation(newSimulation);
+           info.html_path=uploadedSimulation.path;
+           info.html_name=newSimulation.name.slice(0,120);
+         }
          if(!info.html_path)throw Error("Upload an HTML file before publishing.");
        }
-       addStatus(form,"Saving to StudyLab…");
+       if(kind==="lesson-pack"){
+         if(newPDF){
+           const saved=await api.upload(newPDF);
+           uploadedMedia.push(saved);
+           info.url=saved.url;
+           info.pack_file_path=saved.path;
+           info.pack_file_name=newPDF.name.slice(0,120);
+         }
+         if(newCover){
+           const saved=await api.upload(newCover);
+           uploadedMedia.push(saved);
+           info.image=saved.url;
+           info.cover_file_path=saved.path;
+           info.cover_file_name=newCover.name.slice(0,120);
+         }
+       }
+       addStatus(form,action==="draft"?"Saving resource draft…":"Publishing resource…");
        await api.save(info,record?.revision||0,action);
-       dialog.close();await onRefresh();
+       committed=true;
+       // Never delete a successfully published file if the list refresh fails.
+       if(uploadedSimulation && draft?.html_path &&
+          draft.html_path!==uploadedSimulation.path)
+         api.removeSimulation(draft.html_path)
+           .catch(e=>console.warn("Old simulation cleanup:",e));
+       if(kind==="lesson-pack" && uploadedMedia.length){
+         for(const [before,after] of [[draft?.pack_file_path,info.pack_file_path],
+           [draft?.cover_file_path,info.cover_file_path]])
+           if(before && before!==after)
+             api.removeMedia(before)
+               .catch(e=>console.warn("Old lesson file cleanup:",e));
+       }
+       dialog.close();
+       try{await onRefresh();}
+       catch(e){console.warn("Resource saved; list refresh failed:",e);}
      }catch(e){
-       if(uploaded)await api.removeSimulation(uploaded.path).catch(()=>{});
+       if(!committed){
+         if(uploadedSimulation)
+           await api.removeSimulation(uploadedSimulation.path)
+             .catch(err=>console.warn("Unpublished HTML cleanup:",err));
+         for(const item of uploadedMedia)
+           await api.removeMedia(item.path)
+             .catch(err=>console.warn("Unpublished lesson file cleanup:",err));
+       }
        addStatus(form,e?.message||"Could not save the resource.",true);
-     }finally{for(const b of [draftBtn,publish,preview])b.disabled=false;}
+     }finally{
+       for(const b of [draftBtn,publish,preview])b.disabled=false;
+     }
    }
    draftBtn.onclick=()=>submit("draft");publish.onclick=()=>submit("publish");
  }
