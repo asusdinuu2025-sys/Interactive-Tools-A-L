@@ -121,6 +121,31 @@ const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
  assert.equal(uploads[0].blob.type,"image/webp");
  assert.ok(uploads[0].blob.size<=1048576);
  assert.equal(w.document.querySelectorAll(".study-chat-pending-tile").length,0);
+ // Document uploads are independently validated and stored in a private bucket.
+ const originalNow=w.Date.now;
+ w.Date.now=()=>originalNow()+5000; // Beyond the rate-limit window.
+ const docButton=w.document.querySelector("[data-chat-file-attach]");
+ assert.ok(docButton,"Paperclip must appear beside image button");
+ assert.equal(docButton.disabled,false,"Document uploads enabled after schema probe");
+ const docsInput=w.document.querySelector("[data-chat-file-input]");
+ Object.defineProperty(docsInput,"files",{
+   configurable:true,
+   value:[new w.File(["%PDF-1.6 Study notes"],"Mechanics.pdf",{type:"application/pdf"})]
+ });
+ docsInput.dispatchEvent(new w.Event("change",{bubbles:true}));
+ await wait(70);
+ assert.equal(w.document.querySelectorAll(".study-chat-pending-document").length,1);
+ assert.equal(w.document.querySelector("[data-chat-send]").disabled,false);
+ w.document.querySelector("[data-chat-form]").dispatchEvent(new w.Event("submit",{bubbles:true,cancelable:true}));
+ await wait(85);
+ assert.equal(writes.length,2,"Document-only message should persist");
+ assert.equal(writes[1].message,"📎 File");
+ assert.equal(writes[1].file_attachments.length,1);
+ assert.ok(writes[1].file_attachments[0].path.endsWith("/0.pdf"));
+ assert.equal(writes[1].file_attachments[0].name,"Mechanics.pdf");
+ assert.equal(uploads.length,2);
+ assert.equal(w.document.querySelectorAll(".study-chat-pending-document").length,0);
+ assert.ok(w.document.querySelector(".study-chat-document-copy strong"));
  toggle.click();
  assert.ok(tracks.some(x=>x.typing===false));
  // Simulate a dropped WebSocket and two failure callbacks for the same channel.
