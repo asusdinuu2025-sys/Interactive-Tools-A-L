@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1220 350" role="img" aria-label="StudyLab logo, for G.C.E. A/L students in Sri Lanka">
+<defs>
+<linearGradient id="cap" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#18dcf5"/><stop offset=".48" stop-color="#308ef6"/><stop offset="1" stop-color="#cd75ef"/></linearGradient>
+<linearGradient id="left" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#1de5f4"/><stop offset="1" stop-color="#1697ef"/></linearGradient>
+<linearGradient id="right" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#4b68f8"/><stop offset="1" stop-color="#d879f0"/></linearGradient>
+<linearGradient id="lab" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#16d3f3"/><stop offset=".48" stop-color="#4f9ef5"/><stop offset="1" stop-color="#c078ec"/></linearGradient>
+</defs>
+<g transform="translate(20,-26) scale(.85)">
+<path d="M256 225 148 278 148 316 221 352 221 370 148 333 148 374 258 430 258 317 189 283 256 249Z" fill="url(#left)"/>
+<path d="M268 224 308 248 308 365 390 322 390 367 268 430Z" fill="url(#right)"/>
+<path d="M79 181 256 88 433 181 256 272Z M126 181 256 113 386 181 256 245Z" fill="url(#cap)" fill-rule="evenodd"/>
+<path d="M433 181 V252" fill="none" stroke="#c178ef" stroke-width="9" stroke-linecap="round"/>
+<path d="M433 243 C422 254 421 276 433 287 C447 278 444 260 433 243Z" fill="#cc79ef"/>
+</g>
+<path d="M415 69 V282" stroke="#5db4df" stroke-width="2" opacity=".63"/>
+<text x="458" y="211" font-family="Segoe UI, Arial, sans-serif" font-size="122" letter-spacing="-4" font-weight="800" fill="#f5f9ff">Study</text>
+<text x="798" y="211" font-family="Segoe UI, Arial, sans-serif" font-size="122" letter-spacing="-4" font-weight="800" fill="url(#lab)">Lab</text>
+<text x="462" y="259" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="500" letter-spacing="5" fill="#c3d0e9">FOR G.C.E. A/L STUDENTS IN SRI LANKA</text>
+</svg>
