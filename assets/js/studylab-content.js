@@ -186,86 +186,78 @@
     }
   }
   async function start() {
-    let records = [];
-    if (config.mode === "preview") {
-      // Preview data is local and read only after admin verification; visitors get unchanged content.
-      const state = JSON.parse(
-        localStorage.getItem("studylab-admin-preview-v1") || "null",
+    const client = window.StudyLabAccount?.client ||
+      window.supabase?.createClient(
+        "https://zpvatyxdbshjuqgtexzw.supabase.co",
+        "sb_publishable_zd8S3PcyicJX6Cgyh0ez8A_sUSTCuiB",
       );
-      const draftMode =
-        new URLSearchParams(location.search).get("admin-preview") === "1";
-      if (!state && !draftMode) return;
-      const account = window.StudyLabAccount;
-      await account?.startup;
-      const client =
-        account?.client ||
-        window.supabase?.createClient(
-          "https://zpvatyxdbshjuqgtexzw.supabase.co",
-          "sb_publishable_zd8S3PcyicJX6Cgyh0ez8A_sUSTCuiB",
-        );
-      if (!client) return;
-      const u = await client.auth.getUser();
-      if (!u.data?.user || u.data.user.is_anonymous) return;
-      const admin = await client.rpc("studylab_social_is_admin");
-      if (admin.error || admin.data !== true) return;
-      if (state?.owner === u.data.user.id) records = state.published || [];
-      if (draftMode) {
-        const draft = JSON.parse(
-          localStorage.getItem("studylab-admin-draft-preview") || "null",
-        );
-        if (draft?.owner === u.data.user.id && draft.item)
-          records = [
-            ...records.filter((x) => x.id !== draft.item.id),
-            draft.item,
-          ];
-        const banner = el(
-          "div",
-          "sl-cms-preview-banner",
-          "Admin draft preview · Only visible on this device",
-        );
-        document.body.prepend(banner);
-      }
-    } else {
-      const client =
-        window.StudyLabAccount?.client ||
-        window.supabase?.createClient(
-          "https://zpvatyxdbshjuqgtexzw.supabase.co",
-          "sb_publishable_zd8S3PcyicJX6Cgyh0ez8A_sUSTCuiB",
-        );
-      if (!client) return;
-      const r = await client
-        .from("studylab_site_content")
-        .select("payload")
-        .eq("page", page)
-        .limit(1000);
-      if (r.error) {
-        console.warn("StudyLab published content unavailable:",r.error.message);
-        return;
-      }
-      records = (r.data || []).map((x) => x.payload);
-      // Connected PR #102 and production must preserve the existing
-      // Draft Preview workflow. Never show a private draft to a visitor.
-      if (new URLSearchParams(location.search).get("admin-preview") === "1") {
-        const account = window.StudyLabAccount;
+    if (!client) return;
+    // Publicly published records are read-only and readable by visitors.
+    // The admin "preview" mode controls WRITING, not visibility of content
+    // already published. This matters after PR #102 merges while production
+    // administrator editing remains explicitly disabled.
+    const published = await client.from("studylab_site_content")
+      .select("payload").eq("page",page).limit(1000);
+    if (published.error) {
+      console.warn("StudyLab published content unavailable:",published.error.message);
+      return;
+    }
+    let records = (published.data || []).map((x)=>x.payload);
+    const draftMode = new URLSearchParams(location.search).get("admin-preview")==="1";
+    if (config.mode === "preview") {
+      // Sandboxed admin edits are private local overlays. Visitors only see
+      // the real public database, never another administrator's local drafts.
+      let state=null;
+      try {
+        state=JSON.parse(localStorage.getItem("studylab-admin-preview-v1")||"null");
+      }catch(_){ /* Ignore invalid local preview JSON. */ }
+      if (state || draftMode) {
+        const account=window.StudyLabAccount;
         await account?.startup;
-        const auth = await client.auth.getUser();
-        if (auth.data?.user && !auth.data.user.is_anonymous) {
-          const allowed = await client.rpc("studylab_social_is_admin");
-          if (!allowed.error && allowed.data === true) {
-            let draft = null;
-            try {
-              draft = JSON.parse(localStorage.getItem("studylab-admin-draft-preview") || "null");
-            } catch (_) { /* A damaged local draft must not hide public content. */ }
-            if (draft?.owner === auth.data.user.id && draft.item?.page === page) {
-              records = [
-                ...records.filter((x) => x.id !== draft.item.id),
-                draft.item,
-              ];
-              document.body.prepend(el(
-                "div", "sl-cms-preview-banner",
-                "Private admin draft preview · Not published"
-              ));
+        const auth=await client.auth.getUser();
+        if(auth.data?.user && !auth.data.user.is_anonymous){
+          const allowed=await client.rpc("studylab_social_is_admin");
+          if(!allowed.error && allowed.data===true){
+            if(state?.owner===auth.data.user.id){
+              for(const item of state.published||[]){
+                if(item.page!==page)continue;
+                records=records.filter(x=>x.id!==item.id);
+                records.push(item);
+              }
             }
+            if(draftMode){
+              let draft=null;
+              try{
+                draft=JSON.parse(localStorage.getItem("studylab-admin-draft-preview")||"null");
+              }catch(_){ /* Ignore damaged preview drafts. */ }
+              if(draft?.owner===auth.data.user.id && draft.item?.page===page){
+                records=records.filter(x=>x.id!==draft.item.id);
+                records.push(draft.item);
+                document.body.prepend(el("div","sl-cms-preview-banner",
+                  "Admin draft preview · Only visible on this device"));
+              }
+            }
+          }
+        }
+      }
+    }else if(draftMode){
+      // Connected PR #102 also supports a private draft overlay. Only a
+      // verified admin on the same browser/account can see it.
+      const account=window.StudyLabAccount;
+      await account?.startup;
+      const auth=await client.auth.getUser();
+      if(auth.data?.user && !auth.data.user.is_anonymous){
+        const allowed=await client.rpc("studylab_social_is_admin");
+        if(!allowed.error && allowed.data===true){
+          let draft=null;
+          try{
+            draft=JSON.parse(localStorage.getItem("studylab-admin-draft-preview")||"null");
+          }catch(_){ /* Ignore invalid private preview records. */ }
+          if(draft?.owner===auth.data.user.id && draft.item?.page===page){
+            records=records.filter(x=>x.id!==draft.item.id);
+            records.push(draft.item);
+            document.body.prepend(el("div","sl-cms-preview-banner",
+              "Private admin draft preview · Not published"));
           }
         }
       }
