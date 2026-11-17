@@ -99,9 +99,11 @@
       indicator.style.height=active.offsetHeight+"px";
       indicator.style.transform="translate3d(0,"+active.offsetTop+"px,0)";
     }
-    scheduleScrollSync();
   }
-  window.addEventListener("studylab-content-applied",syncNavigationOrder);
+  window.addEventListener("studylab-content-applied",()=>{
+    syncNavigationOrder();
+    scheduleScrollSync();
+  });
   syncNavigationOrder();
   const scrollTargets = [
     ["home", "home-overview"],
