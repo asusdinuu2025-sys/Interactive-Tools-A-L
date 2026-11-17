@@ -65,7 +65,7 @@ assert.match(hardening,/grant update \(reaction\) on public\.studylab_chat_react
 
 for(const page of [home,room]){
   assert.match(page,/chat\.css\?v=pr102-telegram-compose-v1/);
-  assert.match(page,/chat\.js\?v=pr102-telegram-compose-v1/);
+  assert.match(page,/chat\.js\?v=pr102-realtime-recovery-v1/);
   assert.ok(page.indexOf("studylab-profile-view.js")<page.indexOf("chat.js"),
     "Chat must load after shared profile viewer");
 }
