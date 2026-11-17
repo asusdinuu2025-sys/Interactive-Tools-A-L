@@ -406,7 +406,7 @@ async function setup(admin = true, options = {}) {
     /Local preview · PR #102/);
   dom.window.close();
   const adminMarkup = read("admin.html");
-  assert.match(adminMarkup, /studylab-admin\\.js\\?v=pr108-expiry-v1/);
+  assert.match(adminMarkup, /studylab-admin\.js\?v=pr108-expiry-v1/);
   assert.match(adminMarkup, /Loading dashboard/);
   assert.match(adminMarkup, /pr108-expiry-v1/);
   assert.match(read("index.html"), /studylab-popups[.]js[?]v=pr108-expiry-v1/);
