@@ -86,6 +86,8 @@ const clickPublish=async dialog=>{
   await clickPublish(d);
   assert.equal(uploadedHTML.length,1,"Editing without a replacement must not upload again");
   assert.equal(saved[1].item.html_path,old.html_path,"Stored HTML path stays attached");
+  assert.equal(saved[1].item.html_name,"pendulum.html",
+    "The original filename remains visible on subsequent edits");
 
   // New Telegram channel: published under the chosen category.
   d=open("telegram",true);
