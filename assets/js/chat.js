@@ -1135,35 +1135,112 @@
   }
 
   function clearPendingImages() {
-    for (const item of pendingImages) URL.revokeObjectURL(item.previewUrl);
-    pendingImages = [];
-    if (imageInput) imageInput.value = "";
+    for(const item of pendingImages)URL.revokeObjectURL(item.previewUrl);
+    pendingImages=[];
+    if(imageInput)imageInput.value="";
+    renderPendingImages();
+  }
+  function clearPendingFiles(){
+    pendingFiles=[];
+    if(fileInput)fileInput.value="";
     renderPendingImages();
   }
   function renderPendingImages() {
-    if (!attachPreview) return;
+    if(!attachPreview)return;
     attachPreview.replaceChildren();
-    attachPreview.hidden = !pendingImages.length;
-    for (const item of pendingImages) {
-      const tile = document.createElement("span");
-      tile.className = "study-chat-pending-tile";
-      const img = document.createElement("img");
-      img.alt = "Image ready to attach"; img.src = item.previewUrl;
-      const remove = document.createElement("button");
-      remove.type = "button"; remove.textContent = "×";
-      remove.setAttribute("aria-label", "Remove attached image");
-      remove.addEventListener("click", () => {
-        pendingImages = pendingImages.filter(x => x !== item);
+    attachPreview.hidden=!pendingImages.length && !pendingFiles.length;
+    for(const item of pendingImages){
+      const tile=document.createElement("span");
+      tile.className="study-chat-pending-tile";
+      const img=document.createElement("img");
+      img.alt="Image ready to attach";img.src=item.previewUrl;
+      const remove=document.createElement("button");
+      remove.type="button";remove.textContent="×";
+      remove.setAttribute("aria-label","Remove attached image");
+      remove.addEventListener("click",()=>{
+        pendingImages=pendingImages.filter(x=>x!==item);
         URL.revokeObjectURL(item.previewUrl);
-        renderPendingImages(); updateComposer();
+        renderPendingImages();updateComposer();
       });
-      tile.append(img, remove); attachPreview.append(tile);
+      tile.append(img,remove);attachPreview.append(tile);
     }
-    const caption = document.createElement("small");
-    caption.className = "study-chat-pending-count";
-    caption.textContent = pendingImages.length + "/3 images · up to 1 MB each";
-    attachPreview.append(caption);
+    for(const item of pendingFiles){
+      const tile=document.createElement("span");
+      tile.className="study-chat-pending-document";
+      const label=document.createElement("span");
+      label.textContent="📎 "+item.file.name;
+      label.title=item.file.name;
+      const remove=document.createElement("button");
+      remove.type="button";remove.textContent="×";
+      remove.setAttribute("aria-label","Remove "+item.file.name);
+      remove.addEventListener("click",()=>{
+        pendingFiles=pendingFiles.filter(x=>x!==item);
+        renderPendingImages();updateComposer();
+      });
+      tile.append(label,remove);attachPreview.append(tile);
+    }
+    if(pendingImages.length || pendingFiles.length){
+      const caption=document.createElement("small");
+      caption.className="study-chat-pending-count";
+      const parts=[];
+      if(pendingImages.length)parts.push(pendingImages.length+"/3 images · 1 MB each");
+      if(pendingFiles.length)parts.push(pendingFiles.length+"/2 documents · 5 MB each");
+      caption.textContent=parts.join(" · ");
+      attachPreview.append(caption);
+    }
   }
+
+  const fileTypes={
+    pdf:"application/pdf",
+    docx:"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    pptx:"application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    txt:"text/plain"
+  };
+  async function validateChatFile(file){
+    const extension=String(file?.name||"").split(".").pop().toLowerCase();
+    if(!Object.hasOwn(fileTypes,extension))
+      throw Error("Attach PDF, DOCX, PPTX or TXT study files only.");
+    if(file.size<1 || file.size>CONFIG.maxFileBytes)
+      throw Error("Each document must be between 1 byte and 5 MB.");
+    if(file.name.length>120 || /[\x00-\x1f\x7f]/.test(file.name))
+      throw Error("Document name must be under 120 characters.");
+    if(file.type && file.type!=="application/octet-stream" &&
+        file.type!==fileTypes[extension])
+      throw Error("File extension and document type do not match.");
+    // Basic magic-byte checks reject obvious extension spoofing, but are
+    // not malware scanning. Open shared documents with normal caution.
+    if(typeof file.slice==="function" && typeof file.arrayBuffer==="function"){
+      const bytes=new Uint8Array(await file.slice(0,8).arrayBuffer());
+      if(extension==="pdf" &&
+          String.fromCharCode(...bytes.slice(0,5))!=="%PDF-")
+        throw Error("The selected PDF does not have a PDF header.");
+      if(["docx","pptx"].includes(extension) &&
+          !(bytes[0]===0x50 && bytes[1]===0x4b))
+        throw Error("The selected Office file is not a valid document package.");
+    }
+    return {file,extension,mime:fileTypes[extension]};
+  }
+  async function handleFileSelection(event){
+    const files=[...(event.target.files||[])];
+    if(fileInput)fileInput.value="";
+    if(!files.length)return;
+    if(!fileSharingAvailable){
+      chatFeedback("Document sharing is not enabled on this deployment yet.",true);
+      return;
+    }
+    if(editTarget){chatFeedback("Finish editing before attaching files.",true);return;}
+    if(files.length+pendingFiles.length>CONFIG.maxFiles){
+      chatFeedback("Up to two documents per message (5 MB each).",true);return;
+    }
+    if(fileButton)fileButton.disabled=true;
+    try{
+      const checked=await Promise.all(files.map(validateChatFile));
+      pendingFiles.push(...checked);
+      renderPendingImages();chatFeedback("");
+    }catch(error){chatFeedback(error.message||"Unable to attach document.",true);}
+    finally{updateComposer();}
+  }
+
   async function compressChatImage(file) {
     if (!/^image\/(jpeg|png|webp)$/.test(file.type) ||
         file.size > CONFIG.maxSourceBytes)
