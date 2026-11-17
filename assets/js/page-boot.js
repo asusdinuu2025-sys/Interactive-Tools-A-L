@@ -8,7 +8,18 @@
   const choice = valid(mode) ? mode : 'dark';
   root.dataset.theme = choice === 'system' ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : choice;
   root.dataset.themeMode = choice;
+  // The existing chemistry intro is shown only once per browser session.
+  // On that first Home visit, leave the scene visible instead of showing two loaders.
+  let firstIntro = false;
+  try {
+    firstIntro = /(?:\/|\/index\.html)$/i.test(location.pathname) &&
+      sessionStorage.getItem('studylabSplashSeenV1') !== '1';
+  } catch (_) {
+    // The first-visit intro already has its own storage fallback.
+    firstIntro = /(?:\/|\/index\.html)$/i.test(location.pathname);
+  }
   root.classList.add('sl-booting');
+  if (firstIntro) root.classList.add('sl-boot-intro');
   let finished = false;
   function reveal() {
     if (finished) return;
