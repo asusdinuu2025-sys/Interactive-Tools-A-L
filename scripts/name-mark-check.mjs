@@ -9,7 +9,7 @@ assert.doesNotMatch(source,/@gmail\.com/i,"Do not publish private email addresse
 
 class MockElement {
   constructor(name){
-    this.name=name;this.children=[];this.attributes={};this.className="";this.title="";
+    this.name=name;this.children=[];this.attributes={};this.dataset={};this.className="";this.title="";
   }
   setAttribute(key,value){this.attributes[key]=value;}
   append(...children){this.children.push(...children);}
@@ -21,6 +21,7 @@ class MockElement {
   remove(){this.removed=true;}
 }
 const elements={
+  addEventListener(){},
   createElement(name){return new MockElement(name);},
   createElementNS(_ns,name){return new MockElement(name);}
 };

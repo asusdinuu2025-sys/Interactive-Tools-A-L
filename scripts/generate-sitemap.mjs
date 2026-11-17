@@ -4,6 +4,7 @@ import path from "node:path";
 const ROOT = process.cwd();
 const BASE_URL = "https://studylablk.netlify.app/";
 const EXCLUDED_HTML_PATHS = new Set([
+  "admin.html",
   "study-room.html",
   "study-room-mini.html"
 ]);

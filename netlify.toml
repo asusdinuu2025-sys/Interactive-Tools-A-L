@@ -1,5 +1,5 @@
 [build]
-  command = "node scripts/generate-sitemap.mjs && node scripts/generate-search-index.mjs"
+  command = "node scripts/generate-admin-config.mjs && node scripts/generate-sitemap.mjs && node scripts/generate-search-index.mjs"
   publish = "."
   ignore = "bash ./scripts/netlify-ignore.sh"
 
@@ -22,3 +22,20 @@
   for = "/manifest.json"
   [headers.values]
     Cache-Control = "no-cache, must-revalidate"
+
+# Admin preview code should never be served from a stale browser cache.
+# These headers do not change public-facing pages or announcements.
+[[headers]]
+  for = "/admin.html"
+  [headers.values]
+    Cache-Control = "no-store, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/assets/js/studylab-admin*.js"
+  [headers.values]
+    Cache-Control = "no-store, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/assets/css/studylab-admin.css"
+  [headers.values]
+    Cache-Control = "no-store, max-age=0, must-revalidate"

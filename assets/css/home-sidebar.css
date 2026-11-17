@@ -249,14 +249,17 @@ body.sl-community-open .sl-home-sidebar {
   visibility: hidden;
   pointer-events: none;
 }
+/* Align a sidebar click with the section heading below the floating bar. */
+#home-overview,
 #practical-simulations,
-#live-study-room-section,
+#live-study-room,
+#social,
 #other-al-resources,
 #past-papers,
 #telegram-links,
 #free-lesson-packs,
 #productivity {
-  scroll-margin-top: 28px;
+  scroll-margin-top: 112px;
 }
 @media (prefers-reduced-motion: reduce) {
   .sl-home-sidebar,
@@ -1414,4 +1417,26 @@ html[data-theme="light"] body header.site-header {
 .study-chat-unread[hidden] {
   display: none !important;
   visibility: hidden !important;
+}
+
+/* More lives under Free Lesson Packs and always points below its card.
+   The 1px target must exist even with no additional published resources. */
+.sl-home-more-anchor {
+  display:block;
+  height:1px;
+  min-height:1px;
+  width:100%;
+  margin:0;
+  padding:0;
+  scroll-margin-top:112px;
+  pointer-events:none;
+}
+.sl-home-sidebar .sl-home-nav-item[data-nav-id="more"] .sl-home-nav-icon {
+  opacity:.92;
+}
+@media (min-width:1180px) and (max-height:780px) {
+  /* Fit nine navigation entries plus the three quick actions without
+     introducing a white inner scrollbar on shorter desktop screens. */
+  .sl-home-sidebar .sl-home-nav-item {height:34px !important;min-height:34px !important;}
+  .sl-home-sidebar .sl-home-quick-actions {gap:5px !important;padding-top:7px !important;}
 }
