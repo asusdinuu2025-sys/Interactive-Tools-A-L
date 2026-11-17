@@ -55,6 +55,9 @@ as $admin_gate$ select auth.uid() in (
   ]) {
     await db.exec(fs.readFileSync(migration, "utf8"));
   }
+  // Apply the PR #108 expiry upgrade only to this throwaway PGlite database.
+  await db.exec(fs.readFileSync(
+    "supabase/migrations/20261117175500_admin_popup_selectable_expiry.sql","utf8"));
   const admin = "24e78cd0-4565-407a-96f7-9cfde083f6d2",
     student = "11111111-1111-4111-8111-111111111111";
   async function as(id, role = "authenticated") {
@@ -347,6 +350,49 @@ as $admin_gate$ select auth.uid() in (
   await db.query("select studylab_admin_history_set('undo',$1)",[targetLog.id]);
   assert.equal((await db.query("select count(*)::integer as n from public.studylab_popups where id=$1",
     [newPopup.id])).rows[0].n,0);
+  // Custom admin-selected expiry is enforced by BOTH read RLS and atomic
+  // claim, and the existing undo/audit/history machinery still works.
+  const activePeriods=["24h","7d","1m","3m","6m","9m","1y"];
+  for(const period of activePeriods){
+    const item={title:"Expiry "+period,message:"Hello",variant:"info",
+      placement:"top-right",display_seconds:8,link:"",link_label:"View",
+      starts_at:new Date().toISOString(),expiry_period:period};
+    const created=(await db.query(
+      "select studylab_admin_popup_action_v3('create',$1::jsonb) as val",
+      [JSON.stringify(item)])).rows[0].val;
+    assert.equal(created.expiry_period,period);
+    assert(Date.parse(created.expires_at)>Date.parse(created.starts_at));
+    if(period==="7d")assert.equal(
+      Date.parse(created.expires_at)-Date.parse(created.starts_at),7*86400000);
+    await as(student);
+    assert.equal((await db.query(
+      "select studylab_popup_claim($1) as allowed",[created.id])).rows[0].allowed,true);
+    assert.equal((await db.query(
+      "select studylab_popup_claim($1) as allowed",[created.id])).rows[0].allowed,false,
+      "each student sees every message once regardless of its expiry length");
+    await assert.rejects(db.query(
+      "select studylab_admin_popup_action_v3('delete',$1::jsonb)",
+      [JSON.stringify({id:created.id})]),/Admin access required/);
+    await as(admin);
+    if(period==="7d"){
+      const updated=(await db.query(
+        "select studylab_admin_popup_action_v3('update',$1::jsonb) as val",
+        [JSON.stringify({...item,id:created.id,expiry_period:"3m"})])).rows[0].val;
+      assert.equal(updated.expiry_period,"3m");
+      await as(student);
+      assert.equal((await db.query(
+        "select studylab_popup_claim($1) as allowed",[created.id])).rows[0].allowed,false,
+        "changing expiry never re-delivers claimed notices");
+      await as(admin);
+    }
+    const log=(await db.query("select studylab_admin_activity() as log")).rows[0].log
+      .find(x=>x.action==="Publish pop-up" && x.target===created.id && x.can_undo);
+    assert.ok(log,"v3 creates an undo-able audited popup");
+    // Deleting after test avoids accumulating fixtures; admin RPC preserves
+    // the same cascade that removes its per-user receipts.
+    await db.query("select studylab_admin_popup_action_v3('delete',$1::jsonb)",
+      [JSON.stringify({id:created.id})]);
+  }
   logs=(await db.query("select studylab_admin_activity() as log")).rows[0].log;
   await db.exec("reset role");
   const retainedBefore=(await db.query(
@@ -367,6 +413,6 @@ as $admin_gate$ select auth.uid() in (
 
   await db.close();
   console.log(
-    "PASS: SQL authorization, grants, private drafts, publication, guarded deletion, 24-hour once-only popups, ban ledger, verified undo snapshots, soft history clearing, editable labels, stale writes, grant/revoke and verification.",
+    "PASS: SQL authorization, grants, private drafts, publication, guarded deletion, selectable popup expiry with one-time claims, ban ledger, verified undo snapshots, soft history clearing, editable labels, stale writes, grant/revoke and verification.",
   );
 })();
