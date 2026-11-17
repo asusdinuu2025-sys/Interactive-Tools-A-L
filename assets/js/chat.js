@@ -21,9 +21,12 @@
     maxLength: 500,
     rateLimitMs: 2500,
     imageBucket:"studylab-chat-images",
+    fileBucket:"studylab-chat-files",
     maxImages:3,
     maxImageBytes:1048576,
-    maxSourceBytes:12*1048576
+    maxSourceBytes:12*1048576,
+    maxFiles:2,
+    maxFileBytes:5*1048576
   };
 
   const CHAT_MARKUP = `
@@ -82,10 +85,18 @@
           <div class="study-chat-feedback" data-chat-feedback role="status" hidden></div>
           <div class="study-chat-attachment-preview" data-chat-attachment-preview hidden></div>
           <input type="file" data-chat-image-input accept="image/jpeg,image/png,image/webp" multiple hidden aria-label="Attach up to three images" />
+          <input type="file" data-chat-file-input accept=".pdf,.docx,.pptx,.txt" multiple hidden aria-label="Attach up to two study documents, 5 MB each" />
           <div class="study-chat-editorline">
             <button type="button" class="study-chat-attach" data-chat-attach aria-label="Attach images" title="Add up to three images">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.3"/><path d="m4 17 5-5 3 3 3-4 5 6"/>
+              </svg>
+            </button>
+            <button type="button" class="study-chat-file-attach" data-chat-file-attach
+              aria-label="Attach study documents" title="Attach PDF, DOCX, PPTX or TXT (5 MB each)" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M8 12.5 14.4 6a3.4 3.4 0 0 1 4.8 4.8l-8.3 8.3a5 5 0 0 1-7.1-7.1l8.6-8.6"/>
               </svg>
             </button>
             <div class="study-chat-input-wrap">
@@ -149,11 +160,19 @@
   const typingBar = root.querySelector("[data-chat-typing]");
   const typingLabel = root.querySelector("[data-chat-typing-label]");
   const imageInput = root.querySelector("[data-chat-image-input]");
+  const fileInput = root.querySelector("[data-chat-file-input]");
   const attachButton = root.querySelector("[data-chat-attach]");
+  const fileButton = root.querySelector("[data-chat-file-attach]");
   const attachPreview = root.querySelector("[data-chat-attachment-preview]");
   let pendingImages = [];
+  let pendingFiles = [];
+  let fileSharingAvailable = false;
+  const chatMessageColumns = "id,message,created_at,session_id,user_id,nickname,reply_to,edited_at,image_paths";
+  const selectMessageColumns = () => chatMessageColumns +
+    (fileSharingAvailable ? ",file_attachments" : "");
   let typingIdleTimer=0,lastTypingSent=0,channelSubscribed=false,typingActive=false;
   const imageUrlCache = new Map();
+  const fileUrlCache = new Map();
 
   const sessionKey =
     sessionStorage.getItem("studylab_chat_session") ||
@@ -812,9 +831,11 @@
     if (charCount) charCount.textContent = length + "/" + CONFIG.maxLength;
     inputWrap?.classList.toggle("has-text", length > 0);
     if(attachButton)attachButton.disabled = !client || busyMessageAction || Boolean(editTarget);
+    if(fileButton)fileButton.disabled = !client || !fileSharingAvailable ||
+      busyMessageAction || Boolean(editTarget);
     if (sendButton) {
       sendButton.disabled =
-        (!length && !pendingImages.length) ||
+        (!length && !pendingImages.length && !pendingFiles.length) ||
         length > CONFIG.maxLength ||
         !client ||
         busyMessageAction ||
@@ -837,7 +858,7 @@
 
     const { data, error } = await client
       .from(CONFIG.table)
-      .select("id,message,created_at,session_id,user_id,nickname,reply_to,edited_at,image_paths")
+      .select(selectMessageColumns())
       .order("created_at", { ascending: false })
       .order("id", { ascending: false })
       .limit(CONFIG.maxMessages);
@@ -867,7 +888,7 @@
     const startEvents = messageEventSeq;
     try {
       const {data,error} = await client.from(CONFIG.table)
-        .select("id,message,created_at,session_id,user_id,nickname,reply_to,edited_at,image_paths")
+        .select(selectMessageColumns())
         .order("created_at",{ascending:false})
         .order("id",{ascending:false})
         .limit(CONFIG.maxMessages);
@@ -880,6 +901,7 @@
       const nearBottom = list.scrollHeight-list.scrollTop-list.clientHeight<140;
       const previousTop = list.scrollTop;
       const fields = ["message","created_at","edited_at","reply_to","nickname","image_paths"];
+      if(fileSharingAvailable)fields.push("file_attachments");
       for (const row of rows) {
         const previous = messagesById.get(row.id);
         if (!previous || fields.some(field =>
