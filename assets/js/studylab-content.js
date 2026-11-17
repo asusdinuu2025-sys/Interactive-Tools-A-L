@@ -14,7 +14,7 @@
       if (/[\u0000-\u0020\u007f\\]/.test(raw) || raw.startsWith("//"))
         return null;
       if (!/^[a-z][a-z0-9+.-]*:/i.test(raw) &&
-          !/^(?:[./?#]|\w+\.html(?:[?#]|$))/i.test(raw) &&
+          !/^(?:[./?#]|[\w-]+\.html(?:[?#]|$))/i.test(raw) &&
           /^(?:[a-z0-9-]+\.)+[a-z]{2,}(?::[0-9]{2,5})?(?:[/?#]|$)/i.test(raw))
         raw = "https://" + raw;
       const u = new URL(raw, location.href);
@@ -80,7 +80,12 @@
       let card = document.querySelector(
         '[data-cms-id="' + CSS.escape(d.id) + '"]',
       );
-      const href = safeURL(d.url);
+      // Older published simulations were incorrectly treated as external
+      // .html domains. Their verified content ID defines the local viewer URL.
+      const destination = d.resource_type === "simulation"
+        ? "/simulation-viewer.html?id=" + encodeURIComponent(d.id)
+        : d.url;
+      const href = safeURL(destination);
       if (!href) continue;
       // Specialized admin resources use native subject/Telegram/lesson cards.
       // Generic cards and custom sections continue through the old renderer.
@@ -169,14 +174,15 @@
       for (const x of order) parent.insertBefore(x.n, marker);
       marker.remove();
     }
-    // CMS sections may be re-ordered at runtime. Keep More immediately
-    // below Free Lesson Packs, before any subsequently published sections,
-    // even if the lesson card or an extra section has been hidden.
+    // The More anchor is a boundary AFTER the final visible built-in panel.
+    // Do not force it after Free Lesson Packs: admins may order Other A/L
+    // Resources after the lessons, and the rail must reflect actual layout.
     if (page === "index.html") {
-      const lessons = document.getElementById("free-lesson-packs");
       const more = document.getElementById("more-learning-resources");
-      if (lessons && more && lessons.parentElement === more.parentElement)
-        lessons.after(more);
+      const main = more?.parentElement;
+      const builtins = main && [...main.children].filter((node) =>
+        node.matches("section.sl-home-section[data-cms-id]") && !node.hidden);
+      if (builtins?.length) builtins[builtins.length - 1].after(more);
     }
   }
   async function start() {
@@ -232,7 +238,10 @@
         .select("payload")
         .eq("page", page)
         .limit(1000);
-      if (r.error) return;
+      if (r.error) {
+        console.warn("StudyLab published content unavailable:",r.error.message);
+        return;
+      }
       records = (r.data || []).map((x) => x.payload);
       // Connected PR #102 and production must preserve the existing
       // Draft Preview workflow. Never show a private draft to a visitor.
