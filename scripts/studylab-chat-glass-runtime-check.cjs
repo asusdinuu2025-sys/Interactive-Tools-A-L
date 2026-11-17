@@ -22,12 +22,19 @@ const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
  const tracks=[],writes=[],uploads=[],deleted=[];
  let syncCallback;
  let remoteStates={};
- const channel={
-   on(event,options,fn){if(event==="presence"&&options?.event==="sync")syncCallback=fn;return this;},
-   subscribe(fn){fn("SUBSCRIBED");return this;},
-   track(item){tracks.push(item);return Promise.resolve({});},
-   presenceState(){return remoteStates;}
- };
+ let storedMessages=[original];
+ const channels=[];
+ const retired=[];
+ function makeChannel(){
+   const channel={
+     on(event,options,fn){if(event==="presence"&&options?.event==="sync")syncCallback=fn;return this;},
+     subscribe(fn){this.statusCallback=fn;fn("SUBSCRIBED");return this;},
+     track(item){tracks.push(item);return Promise.resolve({});},
+     presenceState(){return remoteStates;}
+   };
+   channels.push(channel);
+   return channel;
+ }
  const storage={
    upload:async(path,blob)=>{uploads.push({path,blob});return{error:null};},
    remove:async(paths)=>{deleted.push(...paths);return{error:null};},
@@ -35,12 +42,18 @@ const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
  };
  const client={
    rpc:async()=>({data:false,error:null}),
-   channel:()=>channel,
+   channel:makeChannel,
+   removeChannel:async(channel)=>{retired.push(channel);return "ok";},
    storage:{from:()=>storage},
    from(table){
      if(table==="studylab_chat_messages")return{
-       select(){return {order(){return this;},limit:async()=>({data:[original],error:null})};},
-       insert:async(row)=>{writes.push(row);return{error:null};}
+       select(){return {order(){return this;},limit:async()=>({
+         data:[...storedMessages].sort((a,b)=>b.created_at.localeCompare(a.created_at)),
+         error:null
+       })};},
+       insert:async(row)=>{writes.push(row);storedMessages.push({
+         ...row,created_at:new Date().toISOString()
+       });return{error:null};}
      };
      if(table==="studylab_chat_reactions")return{
        select(){return {in:async()=>({data:[],error:null})};},
@@ -110,6 +123,33 @@ const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
  assert.equal(w.document.querySelectorAll(".study-chat-pending-tile").length,0);
  toggle.click();
  assert.ok(tracks.some(x=>x.typing===false));
+ // Simulate a dropped WebSocket and two failure callbacks for the same channel.
+ // Missed INSERT and DELETE are repaired by a REST catch-up after reconnect.
+ const firstChannel=channels[0];
+ firstChannel.statusCallback("CHANNEL_ERROR",{message:"simulated temporary outage"});
+ firstChannel.statusCallback("TIMED_OUT");
+ assert.match(w.document.querySelector("[data-chat-status]").textContent,/Reconnecting/);
+ const missed={
+   id:"44444444-4444-4444-8444-444444444444",
+   message:"Message during outage",user_id:other,nickname:"Student B",
+   session_id:"session-b",created_at:new Date(Date.now()+1500).toISOString(),
+   image_paths:[],reply_to:null
+ };
+ storedMessages=storedMessages.filter(row=>row.id!==original.id);
+ storedMessages.push(missed);
+ await wait(2150); // Backoff is 1500-1850 ms, with a safety margin.
+ assert.equal(channels.length,2,"At most one replacement channel after repeated errors");
+ assert.equal(retired.length,1,"Old channel must be removed before replacing it");
+ assert.match(w.document.querySelector("[data-chat-status]").textContent,/Live • newest 100 messages/);
+ assert.equal(w.document.querySelector('[data-message-id="'+original.id+'"]'),null,
+   "A delete missed while offline must be reconciled");
+ assert.ok(w.document.querySelector('[data-message-id="'+missed.id+'"]'),
+   "An insert missed while offline must be reconciled");
+ assert.ok(w.document.querySelector('[data-message-id="'+writes[0].id+'"]'),
+   "Locally sent messages already in the database must be retained");
+ firstChannel.statusCallback("CLOSED");
+ assert.match(w.document.querySelector("[data-chat-status]").textContent,/Live • newest 100 messages/,
+   "Late callbacks from a retired channel must not re-disable live status");
  dom.window.close();
  console.log("PASS: Chat runtime reactions, Presence typing, image compression and image-only message upload.");
 })().catch(e=>{console.error(e);process.exitCode=1});
