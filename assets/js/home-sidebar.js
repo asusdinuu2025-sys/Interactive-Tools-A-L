@@ -210,11 +210,19 @@
 
     const headerBottom = document.querySelector("header.site-header")
       ?.getBoundingClientRect().bottom || 82;
-    const markerLine = Math.max(112,Math.min(185,headerBottom+30));
+    // Activate a panel as soon as its heading enters the main viewing area,
+    // not only after it passes the floating header. The old 185px cap left
+    // Free Lesson Packs selected while Other A/L Resources filled the screen.
+    const markerLine = Math.min(window.innerHeight*0.42,
+      Math.max(headerBottom+100,window.innerHeight*0.36));
     // Re-sort on every scroll: CMS may have moved Free Lesson Packs and
     // Other A/L Resources since these targets were first collected.
     const orderedTargets=scrollTargets.filter(target=>
-      target.element.isConnected && !target.element.hidden).sort((a,b)=>{
+      target.element.isConnected && !target.element.hidden &&
+      (target.navId!=="more" || [...target.element.parentElement.children]
+        .slice([...target.element.parentElement.children].indexOf(target.element)+1)
+        .some(node=>node.matches("section.sl-cms-section") && !node.hidden))
+    ).sort((a,b)=>{
       const position=a.element.compareDocumentPosition(b.element);
       if(position & 4)return -1;
       if(position & 2)return 1;
