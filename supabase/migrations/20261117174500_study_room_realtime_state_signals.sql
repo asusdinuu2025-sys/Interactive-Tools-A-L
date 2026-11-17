@@ -61,7 +61,8 @@ INSERT INTO public.study_room_change_signals(user_id)
 SELECT user_id FROM public.study_room_members
 ON CONFLICT(user_id) DO NOTHING;
 
+-- Stage 1 is additive: older open tabs continue receiving legacy member changes.
+-- Apply the separate stage 2 after the new frontend has been deployed and tested.
 ALTER PUBLICATION supabase_realtime ADD TABLE public.study_room_change_signals;
-ALTER PUBLICATION supabase_realtime DROP TABLE public.study_room_members;
 
 COMMIT;
