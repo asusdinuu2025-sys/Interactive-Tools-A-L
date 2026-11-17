@@ -114,7 +114,7 @@
     ctx.fillStyle = values.text + wordAlpha + ')';
     ctx.shadowBlur = document.documentElement.dataset.theme === 'light' ? 8 : 24;
     ctx.shadowColor = values.glow;
-    ctx.fillText('Study-Lab', w*.5, y);
+    ctx.fillText('StudyLab', w*.5, y);
     ctx.restore();
   }
 
