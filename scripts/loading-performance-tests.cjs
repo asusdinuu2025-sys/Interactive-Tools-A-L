@@ -29,6 +29,34 @@ async function flush(){for(let i=0;i<8;i++)await Promise.resolve();}
     assert(!h.w.document.documentElement.classList.contains('sl-booting'));
     h.dom.window.close();
   }
+  // One intro per session: the flask takes precedence on the first Home load,
+  // but regular reloads and all interior pages use the four-arc boot overlay.
+  {
+    const first=harness();
+    first.w.eval(read('assets/js/page-boot.js'));
+    assert(first.w.document.documentElement.classList.contains('sl-boot-intro'));
+    first.dom.window.close();
+    const repeat=harness();
+    repeat.w.sessionStorage.setItem('studylabSplashSeenV1','1');
+    repeat.w.eval(read('assets/js/page-boot.js'));
+    assert(!repeat.w.document.documentElement.classList.contains('sl-boot-intro'));
+    repeat.dom.window.close();
+    const inner=harness('https://example.org/study-room.html');
+    inner.w.eval(read('assets/js/page-boot.js'));
+    assert(!inner.w.document.documentElement.classList.contains('sl-boot-intro'));
+    inner.dom.window.close();
+  }
+  // Only four independent quarter-rings, not a GIF/canvas or progress bar.
+  {
+    const css=read('assets/css/page-boot.css');
+    assert(css.includes('backdrop-filter: blur(7px)'));
+    assert(css.includes('prefers-reduced-motion: reduce'));
+    assert(css.includes('sl-boot-arc-rotate'));
+    assert(css.includes('--rotation: -360deg'));
+    assert(css.includes('--rotation: 360deg'));
+    assert(!css.includes('sl-booting body { visibility: hidden'),
+      'the live page must stay behind the translucent loader');
+  }
   // Slow auth/CMS cannot indefinitely hide a usable page.
   {
     const h=harness();h.w.StudyLabContentReady=new Promise(()=>{});
@@ -88,6 +116,19 @@ async function flush(){for(let i=0;i<8;i++)await Promise.resolve();}
       }
     }
     const once=read(path.join(temp,'index.html'));assert.equal(build().status,0);assert.equal(read(path.join(temp,'index.html')),once);
+    // Build-time HTML injection must be correct, limited and repeatable.
+    const sync=()=>spawnSync(process.execPath,[path.resolve('scripts/sync-page-boot.mjs')],{cwd:temp,encoding:'utf8'});
+    const synced=sync();assert.equal(synced.status,0,synced.stderr);
+    const firstRender=read(path.join(temp,'index.html'));
+    assert.equal((firstRender.match(/id="sl-boot-loader"/g)||[]).length,1);
+    assert.equal((firstRender.match(/class="sl-boot-ring"/g)||[]).length,4);
+    assert(firstRender.includes('studylab-192.png?v=sl-approved-20261117'));
+    assert(firstRender.includes('<strong class="sl-boot-name">StudyLab</strong>'));
+    assert.equal((firstRender.match(/id="sl-page-boot"/g)||[]).length,1);
+    assert.equal(sync().status,0);
+    assert.equal(read(path.join(temp,'index.html')),firstRender,
+      'running loader injection twice must never duplicate markup');
+
   } finally {fs.rmSync(temp,{recursive:true,force:true});}
   console.log('PASS: early themes, slow/failed startup recovery, disabled/hidden pet suspension and restart, repeat splash, CSS cascade/content preservation and bundle idempotence.');
 })().catch(e=>{console.error(e);process.exitCode=1;});
