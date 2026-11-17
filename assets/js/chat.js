@@ -1516,6 +1516,8 @@
     });
     attachButton?.addEventListener("click",()=>imageInput?.click());
     imageInput?.addEventListener("change",handleImageSelection);
+    fileButton?.addEventListener("click",()=>fileInput?.click());
+    fileInput?.addEventListener("change",handleFileSelection);
     document.addEventListener("visibilitychange",()=>{
       if(document.hidden)publishTyping(false);
       else {
@@ -1614,6 +1616,21 @@
         console.warn("Chat moderator permission lookup unavailable:",moderatorResult.error);
       }
       isChatModerator=moderatorResult.data===true;
+      // The PR includes a migration but the production database is not
+      // modified until the admin explicitly approves it. Feature detection
+      // keeps all existing text/image chat working before that migration.
+      try {
+        const capability=await client.from(CONFIG.table)
+          .select("file_attachments").limit(1);
+        fileSharingAvailable=!capability.error;
+      }catch(_){fileSharingAvailable=false;}
+      if(fileButton){
+        fileButton.title=fileSharingAvailable
+          ? "Attach PDF, DOCX, PPTX or TXT (up to 5 MB each)"
+          : "Study document upload will be available after the database update";
+        fileButton.setAttribute("aria-label",fileButton.title);
+      }
+      updateComposer();
       await loadMessages();
       subscribe();
 
