@@ -171,6 +171,13 @@ async function setup(admin = true, options = {}) {
   w.document.querySelector(".slpopup-toast .slpopup-close").click();
   assert.equal(popupForm.querySelector('[name="link_label"]').value,"View");
   assert.equal(popupForm.querySelector('[name="link_label"]').maxLength,20);
+  const expirySelect=popupForm.querySelector('[name="expiry_period"]');
+  assert.ok(expirySelect,"Admin popup must have an expiry selector");
+  assert.deepEqual([...expirySelect.options].map(x=>x.value),
+    ["24h","7d","1m","3m","6m","9m","1y"]);
+  assert.equal(expirySelect.value,"24h","Existing messages preserve 24-hour default");
+  expirySelect.value="6m";
+  assert.equal(expirySelect.value,"6m");
   popupForm.querySelector('button[aria-label="Close pop-up editor"]').click();
   click("Admins");
   await wait();
@@ -239,6 +246,14 @@ async function setup(admin = true, options = {}) {
     starts_at:new Date().toISOString(),
   });
   assert.equal((await api.popups()).length,1);
+  await api.popupSet("create", {
+    title:"Longer announcement",message:"Extended expiry preview",variant:"important",
+    placement:"top-right",display_seconds:8,expiry_period:"1y",link:"",
+    starts_at:new Date().toISOString(),
+  });
+  const longPopup=(await api.popups()).find(x=>x.title==="Longer announcement");
+  assert.equal(longPopup.expiry_period,"1y");
+  assert(Date.parse(longPopup.expires_at)-Date.parse(longPopup.starts_at)>360*86400000);
   const sample = JSON.parse(w.localStorage.getItem("studylab-admin-preview-v1")).users[2];
   await api.banUser(sample.id,24,"Test moderation");
   assert.equal(JSON.parse(w.localStorage.getItem("studylab-admin-preview-v1"))
