@@ -338,7 +338,7 @@ async function setup(admin = true, options = {}) {
   // The admin CMS may move/reorder extra sections after page load.
   // More belongs after the final built-in panel, before custom sections.
   const cmsDom = new JSDOM(`<main>
-    <section id="free-lesson-packs" data-cms-id="free-lesson-packs" data-cms-order="70">
+    <section class="sl-home-section" id="free-lesson-packs" data-cms-id="free-lesson-packs" data-cms-order="70">
       <h2>Free Lesson Packs</h2><p>Lessons</p></section>
     <div id="more-learning-resources" class="sl-home-more-anchor"></div>
     </main>`,{
