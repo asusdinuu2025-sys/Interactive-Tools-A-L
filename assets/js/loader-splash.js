@@ -4,8 +4,9 @@
   const canvas = document.getElementById('studylabSplashCanvas');
   const loader = document.getElementById('studylabLoader');
   if (!canvas || !loader) return;
-  // Repeat visits remove the intro synchronously; never start an invisible canvas loop.
-  try { if (sessionStorage.getItem('studylabSplashSeenV1') === '1') return; } catch (_) {}
+  // Only the one-time Home intro may start the costly canvas animation.
+  // The head boot script decides before markup renders; no replay after refresh/Back.
+  if (!document.documentElement.classList.contains('sl-first-intro')) return;
 
   const reactionCore = document.querySelector('.studylab-loader-reaction-core');
   if (reactionCore) reactionCore.remove();
@@ -113,7 +114,7 @@
     ctx.fillStyle = values.text + wordAlpha + ')';
     ctx.shadowBlur = document.documentElement.dataset.theme === 'light' ? 8 : 24;
     ctx.shadowColor = values.glow;
-    ctx.fillText('Study-Lab', w*.5, y);
+    ctx.fillText('StudyLab', w*.5, y);
     ctx.restore();
   }
 

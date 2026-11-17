@@ -22,6 +22,7 @@ async function flush(){for(let i=0;i<8;i++)await Promise.resolve();}
 (async()=>{
   for(const saved of ['dark','light','system','invalid']) {
     const h=harness();h.w.localStorage.setItem('studylab-room-mode-v1',saved);
+    h.w.sessionStorage.setItem('studylab-first-entry-in-tab-v2','1');
     h.w.eval(read('assets/js/page-boot.js'));
     assert.equal(h.w.document.documentElement.dataset.theme,saved==='light'||saved==='system'?'light':'dark');
     assert(h.w.document.documentElement.classList.contains('sl-booting'));
@@ -29,9 +30,105 @@ async function flush(){for(let i=0;i<8;i++)await Promise.resolve();}
     assert(!h.w.document.documentElement.classList.contains('sl-booting'));
     h.dom.window.close();
   }
+  // First Home visit in every fresh tab uses the chemistry intro. Every
+  // reload, normal navigation, Back/Forward and later return uses four rings.
+  {
+    const first=harness();
+    first.w.eval(read('assets/js/page-boot.js'));
+    const root=first.w.document.documentElement;
+    assert(root.classList.contains('sl-first-intro'), 'fresh Home tab must show flask');
+    assert(!root.classList.contains('sl-booting'), 'flask and rings must not overlap');
+    assert.equal(first.w.sessionStorage.getItem('studylab-first-entry-in-tab-v2'),'1');
+    const oldLoader=first.w.document.createElement('div');oldLoader.id='studylabLoader';
+    first.w.document.body.append(oldLoader);
+    first.w.dispatchEvent(new first.w.Event('pagehide'));
+    assert(!first.w.document.getElementById('studylabLoader'), 'pagehide clears old flask');
+    assert(!root.classList.contains('sl-first-intro'));
+    first.dom.window.close();
+
+    const returning=harness();
+    returning.w.localStorage.setItem('studylab-first-welcome-intro-v2','1');
+    returning.w.eval(read('assets/js/page-boot.js'));
+    assert(returning.w.document.documentElement.classList.contains('sl-first-intro'),
+      'returning student in fresh Home tab must also get flask');
+    assert(!returning.w.document.documentElement.classList.contains('sl-booting'));
+    returning.dom.window.close();
+
+    const refresh=harness();
+    Object.defineProperty(refresh.w.performance,'getEntriesByType',
+      {value:()=>[{type:'reload'}],configurable:true});
+    refresh.w.eval(read('assets/js/page-boot.js'));
+    assert(refresh.w.document.documentElement.classList.contains('sl-booting'),
+      'refresh must show the four rotating arcs');
+    assert(!refresh.w.document.documentElement.classList.contains('sl-first-intro'));
+    refresh.dom.window.close();
+
+    const back=harness();
+    Object.defineProperty(back.w.performance,'getEntriesByType',
+      {value:()=>[{type:'back_forward'}],configurable:true});
+    back.w.eval(read('assets/js/page-boot.js'));
+    assert(back.w.document.documentElement.classList.contains('sl-booting'),
+      'history navigation without BFCache must show rotating arcs');
+    assert(!back.w.document.documentElement.classList.contains('sl-first-intro'));
+    back.dom.window.close();
+
+    const sameTab=harness();
+    sameTab.w.sessionStorage.setItem('studylab-first-entry-in-tab-v2','1');
+    sameTab.w.eval(read('assets/js/page-boot.js'));
+    assert(sameTab.w.document.documentElement.classList.contains('sl-booting'),
+      'returning to Home in same tab must show arcs');
+    assert(!sameTab.w.document.documentElement.classList.contains('sl-first-intro'));
+    sameTab.dom.window.close();
+
+    const inner=harness('https://example.org/study-room.html');
+    inner.w.eval(read('assets/js/page-boot.js'));
+    assert(inner.w.document.documentElement.classList.contains('sl-booting'),
+      'entering another StudyLab page must show rotating arcs');
+    assert(!inner.w.document.documentElement.classList.contains('sl-first-intro'));
+    inner.dom.window.close();
+
+    const restored=harness();
+    restored.w.sessionStorage.setItem('studylab-first-entry-in-tab-v2','1');
+    restored.w.eval(read('assets/js/page-boot.js'));
+    restored.w.document.dispatchEvent(new restored.w.Event('DOMContentLoaded'));
+    restored.tick(0);await flush();restored.frame();restored.frame();
+    assert(!restored.w.document.documentElement.classList.contains('sl-booting'));
+    restored.w.dispatchEvent(new restored.w.Event('pagehide'));
+    const restoreEvent=new restored.w.Event('pageshow');
+    Object.defineProperty(restoreEvent,'persisted',{value:true});
+    restored.w.dispatchEvent(restoreEvent);
+    assert(restored.w.document.documentElement.classList.contains('sl-booting'),
+      'BFCache Back/Forward must briefly show four rotating arcs');
+    restored.tick(300);
+    assert(!restored.w.document.documentElement.classList.contains('sl-booting'),
+      'restored page must never remain blurred after rings finish');
+    restored.dom.window.close();
+
+    const home=read('index.html');
+    assert(home.includes('sl-dropper-reagent'),'flask must contain matching green reagent');
+    assert(home.includes('sl-flask-mark-a'),'intro uses science-themed background marks');
+    assert(home.includes('html:not(.sl-first-intro) #studylabLoader'),
+      'flask is hidden from the first paint on all non-fresh loads');
+  }
+  // Only four independent quarter-rings, not a GIF/canvas or progress bar.
+  {
+    const css=read('assets/css/page-boot.css');
+    assert(css.includes('backdrop-filter: blur(7px)'));
+    assert(css.includes('#sl-boot-loader::before'), 'blur must stay in the loader background layer');
+    assert(css.includes('.sl-boot-orbits, .sl-boot-name'), 'logo and text need their own foreground');
+    assert(!/html\.sl-booting::before\s*\{[^}]*backdrop-filter/.test(css),
+      'root overlay must not backdrop-blur the foreground logo');
+    assert(css.includes('prefers-reduced-motion: reduce'));
+    assert(css.includes('sl-boot-arc-rotate'));
+    assert(css.includes('--rotation: -360deg'));
+    assert(css.includes('--rotation: 360deg'));
+    assert(!css.includes('sl-booting body { visibility: hidden'),
+      'the live page must stay behind the translucent loader');
+  }
   // Slow auth/CMS cannot indefinitely hide a usable page.
   {
-    const h=harness();h.w.StudyLabContentReady=new Promise(()=>{});
+    const h=harness();h.w.sessionStorage.setItem('studylab-first-entry-in-tab-v2','1');
+    h.w.StudyLabContentReady=new Promise(()=>{});
     h.w.eval(read('assets/js/page-boot.js'));h.w.document.dispatchEvent(new h.w.Event('DOMContentLoaded'));h.tick(0);await flush();
     assert(h.w.document.documentElement.classList.contains('sl-booting'));
     h.tick(3000);await flush();h.frame();h.frame();assert(!h.w.document.documentElement.classList.contains('sl-booting'));h.dom.window.close();
@@ -88,6 +185,19 @@ async function flush(){for(let i=0;i<8;i++)await Promise.resolve();}
       }
     }
     const once=read(path.join(temp,'index.html'));assert.equal(build().status,0);assert.equal(read(path.join(temp,'index.html')),once);
+    // Build-time HTML injection must be correct, limited and repeatable.
+    const sync=()=>spawnSync(process.execPath,[path.resolve('scripts/sync-page-boot.mjs')],{cwd:temp,encoding:'utf8'});
+    const synced=sync();assert.equal(synced.status,0,synced.stderr);
+    const firstRender=read(path.join(temp,'index.html'));
+    assert.equal((firstRender.match(/id="sl-boot-loader"/g)||[]).length,1);
+    assert.equal((firstRender.match(/class="sl-boot-ring"/g)||[]).length,4);
+    assert(firstRender.includes('studylab-192.png?v=sl-approved-20261117'));
+    assert(firstRender.includes('<strong class="sl-boot-name">StudyLab</strong>'));
+    assert.equal((firstRender.match(/id="sl-page-boot"/g)||[]).length,1);
+    assert.equal(sync().status,0);
+    assert.equal(read(path.join(temp,'index.html')),firstRender,
+      'running loader injection twice must never duplicate markup');
+
   } finally {fs.rmSync(temp,{recursive:true,force:true});}
   console.log('PASS: early themes, slow/failed startup recovery, disabled/hidden pet suspension and restart, repeat splash, CSS cascade/content preservation and bundle idempotence.');
 })().catch(e=>{console.error(e);process.exitCode=1;});
