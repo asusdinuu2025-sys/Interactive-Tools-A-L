@@ -153,4 +153,114 @@ REVOKE ALL ON FUNCTION public.studylab_admin_popup_action_v3(text,jsonb)
   FROM PUBLIC,anon;
 GRANT EXECUTE ON FUNCTION public.studylab_admin_popup_action_v3(text,jsonb)
   TO authenticated;
+-- Preserve the original guarded admin Undo implementation while also
+-- restoring a selected pop-up expiry when undoing an edit. Existing snapshots
+-- and all other account/content Undo logic remain byte-for-byte equivalent.
+CREATE OR REPLACE FUNCTION public.studylab_admin_history_set(p_action text, p_id bigint DEFAULT NULL::bigint)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+declare
+ v_event studylab_private.activity%rowtype;
+ v_s jsonb;v_type text;v_target text;
+ v_priv jsonb;v_pub jsonb;v_current boolean;v_before boolean;
+ v_uid uuid;v_field text;v_old_priv jsonb;v_old_pub jsonb;
+ v_old_popup jsonb;v_live_popup jsonb;
+ v_total integer := 0;
+begin
+ if not public.studylab_social_is_admin() then
+   raise exception 'Admin access required' using errcode='42501';
+ end if;
+ if p_action='clear_all' then
+   update studylab_private.activity set hidden=true where not hidden;
+   get diagnostics v_total=row_count;
+   return jsonb_build_object('cleared',v_total);
+ elsif p_action='clear' then
+   if p_id is null then raise exception 'Select a history entry'; end if;
+   update studylab_private.activity set hidden=true
+     where id=p_id and not hidden;
+   get diagnostics v_total=row_count;
+   if v_total=0 then raise exception 'History entry unavailable'; end if;
+   return jsonb_build_object('cleared',1);
+ elsif p_action<>'undo' then
+   raise exception 'Unsupported history action' using errcode='22023';
+ end if;
+ if p_id is null then raise exception 'Choose an action to undo'; end if;
+ select * into v_event from studylab_private.activity
+   where id=p_id and not hidden for update;
+ if not found or v_event.undo_snapshot is null or v_event.undone_at is not null then
+   raise exception 'This action cannot be undone safely';
+ end if;
+ v_s:=v_event.undo_snapshot;v_type:=v_s->>'type';v_target:=v_s->>'id';
+ if v_type='content' then
+   perform pg_advisory_xact_lock(hashtextextended(v_target,0));
+   select to_jsonb(t) into v_priv from studylab_private.content t where id=v_target;
+   select to_jsonb(t) into v_pub from public.studylab_site_content t where id=v_target;
+   if coalesce(v_priv,'null'::jsonb) is distinct from v_s->'after_private' or
+      coalesce(v_pub,'null'::jsonb) is distinct from v_s->'after_public' then
+     raise exception 'Content has changed since this action. Reload before undoing.';
+   end if;
+   v_old_priv:=v_s->'before_private';v_old_pub:=v_s->'before_public';
+   delete from studylab_private.content where id=v_target;
+   delete from public.studylab_site_content where id=v_target;
+   if v_old_priv is distinct from 'null'::jsonb then
+     insert into studylab_private.content(id,draft,revision,published)
+       values(v_target,v_old_priv->'draft',
+         greatest(coalesce((v_priv->>'revision')::integer,0),
+                  (v_old_priv->>'revision')::integer)+1,
+         (v_old_priv->>'published')::boolean);
+   end if;
+   if v_old_pub is distinct from 'null'::jsonb then
+     insert into public.studylab_site_content(id,page,payload)
+       values(v_target,v_old_pub->>'page',v_old_pub->'payload');
+   end if;
+ elsif v_type='user' then
+   v_uid:=v_target::uuid;v_field:=v_s->>'field';
+   v_before:=(v_s->>'before')::boolean;
+   if v_field='admin' then
+     select exists(select 1 from studylab_private.admins where user_id=v_uid) into v_current;
+   else
+     select exists(select 1 from public.studylab_verifications where user_id=v_uid) into v_current;
+   end if;
+   if v_current is distinct from (v_s->>'after')::boolean then
+     raise exception 'Account permissions changed after this action. Undo is unavailable.';
+   end if;
+   perform public.studylab_admin_user_set(v_uid,v_field,v_before);
+ elsif v_type='popup' then
+   v_uid:=v_target::uuid;
+   select to_jsonb(t) into v_live_popup from public.studylab_popups t where id=v_uid for update;
+   if coalesce(v_live_popup,'null'::jsonb) is distinct from v_s->'after' then
+     raise exception 'Pop-up was edited or deleted later. Undo is unavailable.';
+   end if;
+   v_old_popup:=v_s->'before';
+   if v_old_popup='null'::jsonb then
+     if exists(select 1 from studylab_private.popup_receipts where popup_id=v_uid) then
+       raise exception 'Already delivered. Delete the pop-up to stop future deliveries.';
+     end if;
+     delete from public.studylab_popups where id=v_uid;
+   else
+     update public.studylab_popups
+       set title=v_old_popup->>'title',
+           message=v_old_popup->>'message',
+           variant=v_old_popup->>'variant',
+           placement=v_old_popup->>'placement',
+           display_seconds=(v_old_popup->>'display_seconds')::integer,
+           link=v_old_popup->>'link',
+           link_label=coalesce(v_old_popup->>'link_label','View'),
+           expiry_period=coalesce(v_old_popup->>'expiry_period','24h')
+       where id=v_uid;
+   end if;
+ else
+   raise exception 'This operation cannot be undone safely';
+ end if;
+ update studylab_private.activity set undone_at=now() where id=p_id;
+ insert into studylab_private.activity(actor,action,target)
+   values(auth.uid(),'Undo '||v_event.action,v_event.target);
+ return jsonb_build_object('undone',true,'id',p_id);
+end;
+$function$
+
+
 COMMIT;
