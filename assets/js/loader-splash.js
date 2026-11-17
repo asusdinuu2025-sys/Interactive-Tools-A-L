@@ -48,7 +48,7 @@
           core: 'rgba(145,248,255,.44)',
           mid: 'rgba(28,212,241,.30)',
           edge: 'rgba(0,145,190,0)',
-          text: 'rgba(14,86,119,',
+          text: 'rgba(245,252,255,',
           glow: 'rgba(28,210,239,.20)'
         }
       : {
@@ -112,8 +112,8 @@
     ctx.textBaseline = 'middle';
     ctx.font = '800 ' + size + 'px Segoe UI, Arial, sans-serif';
     ctx.fillStyle = values.text + wordAlpha + ')';
-    ctx.shadowBlur = document.documentElement.dataset.theme === 'light' ? 8 : 24;
-    ctx.shadowColor = values.glow;
+    ctx.shadowBlur = 16;
+    ctx.shadowColor = 'rgba(86,202,255,.32)';
     ctx.fillText('StudyLab', w*.5, y);
     ctx.restore();
   }
