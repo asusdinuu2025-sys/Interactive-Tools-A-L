@@ -84,6 +84,125 @@ function make(html){
  assert.ok(names.includes("Custom Extra"));
  d.window.close();
 
+
+ // End-to-end public CMS load, not just direct calls to the native renderer.
+ // Uses entirely mocked records, with no actual Supabase queries or writes.
+ async function loadPublicPage(name,markup,published,withSidebar=false){
+   const dom=new JSDOM("<!doctype html><html><body>"+markup+"</body></html>",{
+     url:"https://studylablk.netlify.app/"+name,runScripts:"outside-only",
+     pretendToBeVisual:true
+   });
+   const w=dom.window;
+   if(!w.CSS)w.CSS={};
+   w.CSS.escape=value=>String(value);
+   w.matchMedia=()=>({matches:false,addEventListener(){},removeEventListener(){}});
+   w.HTMLElement.prototype.scrollIntoView=function(){};
+   w.HTMLElement.prototype.scrollTo=function(){};
+   const client={
+     from(table){
+       assert.equal(table,"studylab_site_content","Public data reader must use only the public CMS table");
+       return {
+         select(){
+           return {
+             eq(column,value){
+               assert.equal(column,"page");
+               assert.equal(value,name);
+               return {limit:async()=>({data:published.filter(p=>p.page===name).map(payload=>({payload})),error:null})};
+             }
+           };
+         }
+       };
+     }
+   };
+   w.supabase={createClient:()=>client};
+   // Preview disables admin writes, but must NOT hide already published cards.
+   w.StudyLabAdminConfig={mode:"preview"};
+   w.eval(read("assets/js/studylab-special-resources.js"));
+   if(withSidebar)w.eval(read("assets/js/home-sidebar.js"));
+   w.eval(read("assets/js/studylab-content.js"));
+   await new Promise(resolve=>w.setTimeout(resolve,45));
+   return dom;
+ }
+ const legacySim={...sample,page:"maths.html",title:"05. Test simulation",
+   url:"https://simulation-viewer.html?id="+sample.id};
+ const mathsPage=await loadPublicPage("maths.html",
+   '<main><section class="tool-grid"></section></main>',[legacySim]);
+ const repaired=mathsPage.window.document.querySelector(".tool-grid > .sl-cms-special");
+ assert.ok(repaired,"Public preview-mode must display live Maths simulation cards");
+ assert.equal(new URL(repaired.href).origin,"https://studylablk.netlify.app",
+   "Old malformed simulation URLs must be repaired locally, not sent to external domains");
+ assert.equal(new URL(repaired.href).pathname,"/simulation-viewer.html");
+ assert.equal(new URL(repaired.href).searchParams.get("id"),sample.id);
+ mathsPage.window.close();
+
+ const sponsoredRecord={...channel,page:"Telegram_Channels.html",telegram_category:"sponsored",
+   url:"https://t.me/example"};
+ const telegramPage=await loadPublicPage("Telegram_Channels.html",
+   '<main><section class="telegram-featured-channel"></section><div class="telegram-all-grid"></div></main>',
+   [sponsoredRecord]);
+ assert.equal(telegramPage.window.document.querySelectorAll(".sl-cms-sponsored-grid .sl-cms-special").length,1,
+   "A published sponsored Telegram channel must render on page load");
+ assert.equal(telegramPage.window.document.querySelector(".sl-cms-sponsor-label")?.textContent,
+   "SPONSORED","Sponsored Telegram badge must contain the right text");
+ telegramPage.window.close();
+
+ const lessonRecord={...pack,page:"lesson-packs.html",url:"https://example.org/lessons"};
+ const lessonsPage=await loadPublicPage("lesson-packs.html",
+   '<main><section class="sl-lessons-publisher-grid"></section></main>',
+   [lessonRecord]);
+ assert.ok(lessonsPage.window.document.querySelector(".sl-lessons-publisher-grid .sl-cms-special"),
+   "A published lesson pack must be visible on page load");
+ lessonsPage.window.close();
+
+ // CMS runtime has Free Lesson Packs order 60, Other A/L Resources 70.
+ // Sidebar must follow the DOM after that change; More must follow the last
+ // built-in panel, never point into the middle of Other A/L Resources.
+ const builtins=[
+   ["practical-simulations",10],["live-study-room",20],["social",30],
+   ["past-papers",40],["telegram-links",50],["other-al-resources",60],
+   ["free-lesson-packs",70]
+ ];
+ const mainMarkup=builtins.map(([id,order])=>
+   '<section class="sl-home-section" id="'+id+'" data-cms-id="'+id+
+   '" data-cms-order="'+order+'"><h2>'+id+'</h2></section>').join("");
+ const homeMarkup='<div id="studyLabHomeLayout" class="sl-home-layout">'+
+   '<div class="sl-home-content"><main class="container">'+
+   '<div id="home-overview"></div>'+mainMarkup+
+   '<div id="more-learning-resources"></div></main></div></div>'+
+   '<footer class="site-footer"></footer>';
+ const homeRecords=[
+   {id:"free-lesson-packs",kind:"section",page:"index.html",title:"Free Lesson Packs",
+     order:60,hidden:false,description:"",layout:"cards"},
+   {id:"other-al-resources",kind:"section",page:"index.html",title:"Other A/L Resources",
+     order:70,hidden:false,description:"",layout:"cards"},
+   {id:"custom-hidden",kind:"section",page:"index.html",title:"Hidden",order:100,
+     hidden:true,description:"",layout:"cards"},
+   {id:"custom-hidden-card",kind:"card",page:"index.html",title:"Hidden card",
+     description:"",url:"https://example.org/hidden",section:"custom-hidden",order:100,hidden:false},
+   {id:"custom-visible",kind:"section",page:"index.html",title:"Extra lessons",
+     order:110,hidden:false,description:"",layout:"cards"},
+   {id:"custom-visible-card",kind:"card",page:"index.html",title:"Public card",
+     description:"Visible",url:"https://example.org/visible",section:"custom-visible",
+     order:110,hidden:false}
+ ];
+ const homePage=await loadPublicPage("index.html",homeMarkup,homeRecords,true);
+ const homeDoc=homePage.window.document;
+ const elements=[...homeDoc.querySelector("main.container").children];
+ const getIndex=id=>elements.indexOf(homeDoc.getElementById(id));
+ assert.ok(getIndex("free-lesson-packs")<getIndex("other-al-resources"));
+ assert.ok(getIndex("other-al-resources")<getIndex("more-learning-resources"),
+   "More anchor must be placed AFTER the last built-in section");
+ const navOrder=[...homeDoc.querySelectorAll(".sl-home-nav-item")]
+   .map(node=>node.dataset.navId);
+ assert.ok(navOrder.indexOf("free-lesson-packs")<navOrder.indexOf("other-al-resources"),
+   "Sidebar must use the saved visual section order");
+ assert.ok(navOrder.indexOf("other-al-resources")<navOrder.indexOf("more"));
+ assert.equal(homeDoc.getElementById("custom-hidden").hidden,true,
+   "Cards inside deliberately hidden custom sections must remain hidden");
+ assert.ok(homeDoc.querySelector("#custom-visible .sl-cms-card"),
+   "Published cards in visible custom sections must appear");
+ homePage.window.close();
+
  const viewer=read("simulation-viewer.html");
  assert.ok(/sandbox="allow-scripts allow-forms"/.test(viewer),"Viewer must sandbox uploaded HTML");
  assert.ok(!/sandbox\\s*=\\s*["'][^"']*allow-same-origin/.test(viewer),"Never give user HTML StudyLab origin access");
