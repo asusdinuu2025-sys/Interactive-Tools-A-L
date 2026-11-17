@@ -90,8 +90,12 @@
   function getCards() {
     return [...grid.querySelectorAll(":scope > .tool-card")].map(element => {
       const text = cardText(element);
-      const lessons = getLessonNumbers(text);
+      const declaredLesson = Number(element.dataset.lesson);
+      const lessons = !isMaths && Number.isInteger(declaredLesson) &&
+        declaredLesson>=1 && declaredLesson<=maxLessons
+        ? [declaredLesson] : getLessonNumbers(text);
       const isPastPaper = /past\s*papers?|past\s*paper|pastpaper/i.test(text);
+      const declaredCategory = element.dataset.filterCategory;
 
       if (isMaths) {
         return {
@@ -99,7 +103,9 @@
           text,
           lessons: [],
           isPastPaper,
-          type: getMathsCategory(text, lessons)
+          type: ["pure","applied","resources","pastpapers"].includes(declaredCategory)
+            ? (declaredCategory==="resources"?"resource":declaredCategory==="pastpapers"?"pastpapers":declaredCategory)
+            : getMathsCategory(text, lessons)
         };
       }
 
