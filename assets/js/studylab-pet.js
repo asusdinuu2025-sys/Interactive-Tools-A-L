@@ -237,12 +237,14 @@
         };
   }
 
+  if (!document.querySelector('link[href*="assets/css/studylab-pet.css"]')) {
   const styleLink = document.createElement("link");
   styleLink.rel = "stylesheet";
   styleLink.href = document.currentScript
     ? new URL("../css/studylab-pet.css", document.currentScript.src).href
     : new URL("assets/css/studylab-pet.css", document.baseURI).href;
   document.head.appendChild(styleLink);
+  }
 
   document.body.insertAdjacentHTML(
     "beforeend",
@@ -748,6 +750,7 @@
     clearTimeout(state.angerTimer);
 
     state.enabled = true;
+    scheduleLife();
     state.sleeping = false;
     state.angerLevel = 0;
     state.angerUntil = 0;
@@ -1836,12 +1839,19 @@
     );
   }, { passive: true });
 
+  let lifeFrame = 0;
+  function scheduleLife() {
+    if (!lifeFrame && state.enabled && !document.hidden) lifeFrame = requestAnimationFrame(lifeLoop);
+  }
+  document.addEventListener("visibilitychange", scheduleLife);
   function lifeLoop(timestamp) {
+    lifeFrame = 0;
+    if (!state.enabled || document.hidden) return;
     updateGaze();
     updateNormalMove(timestamp);
 
     if (!state.enabled || document.hidden || state.dragging) {
-      requestAnimationFrame(lifeLoop);
+      scheduleLife();
       return;
     }
 
@@ -1887,7 +1897,7 @@
       hideThought();
     }
 
-    requestAnimationFrame(lifeLoop);
+    scheduleLife();
   }
 
   character.dataset.eye = state.eye;
@@ -2012,5 +2022,5 @@
   });
   welcomeKnownStudent();
 
-  requestAnimationFrame(lifeLoop);
+  scheduleLife();
 })();

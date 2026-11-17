@@ -61,6 +61,6 @@ for(const petPath of ["assets/js/studylab-pet.js","assets/js/studylab-pet-room.j
   assert.match(pet,/welcomeKnownStudent\(\)/);
   if (petPath.includes("pet-room.js")) assert.match(pet,/goalCelebrationUntil/);
 }
-assert.match(home,/studylab-pet\.js\?v=20261115-brain-v2/);
-assert.match(room,/studylab-pet-room\.js\?v=20261115-brain-v2/);
+assert.match(home,/studylab-pet\.js\?v=20261117-smooth-load/);
+assert.match(room,/studylab-pet-room\.js\?v=20261117-smooth-load/);
 console.log("StudyLab compact profile, avatar, smooth navigation and Pet v2 checks passed.");

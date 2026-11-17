@@ -32,3 +32,5 @@ jobs:
         run: npm ci
       - name: Verify admin permissions and preview behavior
         run: npm run test:admin
+      - name: Verify loading recovery and stylesheet preservation
+        run: node scripts/loading-performance-tests.cjs

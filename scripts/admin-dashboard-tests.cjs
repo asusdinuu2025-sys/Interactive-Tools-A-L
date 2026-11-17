@@ -395,7 +395,7 @@ async function setup(admin = true, options = {}) {
   assert.match(adminMarkup, /Loading dashboard/);
   assert.match(adminMarkup, /pr102-guided-v1/);
   assert.match(read("index.html"), /studylab-popups[.]js[?]v=20261116-v15/);
-  assert.match(read("index.html"), /studylab-content[.]js[?]v=pr102-public-rest-v4/);
+  assert.match(read("index.html"), /studylab-content[.]js[?]v=20261117-smooth-load/);
   assert.match(adminMarkup,/sladmin-brand-mark" aria-hidden="true">ツ/);
   assert.match(adminMarkup,/sladmin-back-icon/);
   assert.match(adminMarkup,/studylab-popups.css/);

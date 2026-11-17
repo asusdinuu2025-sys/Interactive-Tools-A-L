@@ -4,6 +4,8 @@
   const canvas = document.getElementById('studylabSplashCanvas');
   const loader = document.getElementById('studylabLoader');
   if (!canvas || !loader) return;
+  // Repeat visits remove the intro synchronously; never start an invisible canvas loop.
+  try { if (sessionStorage.getItem('studylabSplashSeenV1') === '1') return; } catch (_) {}
 
   const reactionCore = document.querySelector('.studylab-loader-reaction-core');
   if (reactionCore) reactionCore.remove();
@@ -116,6 +118,10 @@
   }
 
   function frame(now) {
+    if (!loader.isConnected || loader.classList.contains('is-exiting')) {
+      window.removeEventListener('resize', resize);
+      return;
+    }
     ctx.clearRect(0, 0, w, h);
     drawSmoke(now);
     drawWordmark(now);
