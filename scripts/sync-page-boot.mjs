@@ -32,8 +32,10 @@ for (const file of readdirSync('.').filter(x => x.endsWith('.html'))) {
     ? html.replace(oldHead, block)
     : html.replace(/<meta\s+charset=[^>]+>/i, match => match + '\n' + block);
   // Idempotent: same result after every build, without duplicated loader nodes.
-  html = html.replace(oldOverlay, '');
+  // Remove the previous generated block together with its surrounding newline.
+  // The canonical body insertion uses exactly one newline before/after the markup.
+  html = html.replace(/\r?\n?<!-- StudyLab boot overlay:[\s\S]*?<!-- \/StudyLab boot overlay -->[ \t]*\r?\n?/, '\n');
   if (!/<body\b[^>]*>/i.test(html)) throw new Error('Missing body tag in ' + file);
-  html = html.replace(/(<body\b[^>]*>)/i, '$1\n' + visual);
+  html = html.replace(/(<body\b[^>]*>)[ \t]*\r?\n*/i, '$1\n' + visual + '\n');
   writeFileSync(file, html);
 }
