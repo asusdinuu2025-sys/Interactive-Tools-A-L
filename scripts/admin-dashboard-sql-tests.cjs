@@ -384,10 +384,31 @@ as $admin_gate$ select auth.uid() in (
         "select studylab_popup_claim($1) as allowed",[created.id])).rows[0].allowed,false,
         "changing expiry never re-delivers claimed notices");
       await as(admin);
+      const undoLog=(await db.query("select studylab_admin_activity() as log")).rows[0].log
+        .find(x=>x.action==="Edit pop-up" && x.target===created.id && x.can_undo);
+      assert.ok(undoLog, "Changing a popup expiry must be safely undo-able");
+      await db.query("select studylab_admin_history_set('undo',$1)",[undoLog.id]);
+      const restored=(await db.query(
+        "select expiry_period from public.studylab_popups where id=$1",
+        [created.id])).rows[0];
+      assert.equal(restored.expiry_period,"7d","Undo restores the original expiry too");
     }
     const log=(await db.query("select studylab_admin_activity() as log")).rows[0].log
       .find(x=>x.action==="Publish pop-up" && x.target===created.id && x.can_undo);
     assert.ok(log,"v3 creates an undo-able audited popup");
+    if(period==="7d"){
+      // A popup remains stored for admin history, but after its expiry it is
+      // invisible to student SELECT and cannot be claimed by even a new user.
+      await db.exec("reset role");
+      await db.query("update public.studylab_popups set starts_at=now()-interval '20 days' where id=$1",
+        [created.id]);
+      await as(student);
+      assert.equal((await db.query("select count(*)::int as n from public.studylab_popups where id=$1",
+        [created.id])).rows[0].n,0,"expired message must not be visible to students");
+      await as(admin);
+      assert.equal((await db.query("select studylab_popup_claim($1) as ok",[created.id])).rows[0].ok,false,
+        "an expired message must not be newly claimed");
+    }
     // Deleting after test avoids accumulating fixtures; admin RPC preserves
     // the same cascade that removes its per-user receipts.
     await db.query("select studylab_admin_popup_action_v3('delete',$1::jsonb)",
