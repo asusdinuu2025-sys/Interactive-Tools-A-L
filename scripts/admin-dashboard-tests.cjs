@@ -406,10 +406,10 @@ async function setup(admin = true, options = {}) {
     /Local preview · PR #102/);
   dom.window.close();
   const adminMarkup = read("admin.html");
-  assert.match(adminMarkup, /studylab-admin\.js\?v=pr102-guided-v1/);
+  assert.match(adminMarkup, /studylab-admin\\.js\\?v=pr108-expiry-v1/);
   assert.match(adminMarkup, /Loading dashboard/);
-  assert.match(adminMarkup, /pr102-guided-v1/);
-  assert.match(read("index.html"), /studylab-popups[.]js[?]v=20261116-v15/);
+  assert.match(adminMarkup, /pr108-expiry-v1/);
+  assert.match(read("index.html"), /studylab-popups[.]js[?]v=pr108-expiry-v1/);
   assert.match(read("index.html"), /studylab-content[.]js[?]v=20261117-smooth-load/);
   assert.match(adminMarkup,/sladmin-brand-mark" aria-hidden="true">ツ/);
   assert.match(adminMarkup,/sladmin-back-icon/);
