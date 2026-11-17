@@ -800,6 +800,12 @@
         .remove(message.image_paths);
       if(storageError)console.warn("Chat image cleanup:",storageError);
     }
+    const documents=Array.isArray(message.file_attachments)
+      ? message.file_attachments.map(item=>item?.path).filter(Boolean):[];
+    if(documents.length){
+      const {error:storageError}=await client.storage.from(CONFIG.fileBucket).remove(documents);
+      if(storageError)console.warn("Chat document cleanup:",storageError);
+    }
   }
   function deleteMessageLocally(id) {
     messagesById.delete(id);reactionsByMessage.delete(id);
@@ -1322,7 +1328,9 @@
       return "This message does not meet the chat limits. Check the text and selected images.";
     if (/failed to fetch|network|timeout|websocket|load failed|connection|offline/.test(reason))
       return "Connection interrupted. Your text and attachments are still here. Retry sending.";
-    if (/image|storage|bucket|mime|file size/.test(reason))
+    if (/document|file|storage|bucket|mime|size/.test(reason))
+      return "Attachment upload failed. Check file limits and try again.";
+    if (/image/.test(reason))
       return "Image upload failed. Check your selected images and try again.";
     // Preserve text on failure, and provide a traceable error code without
     // revealing raw SQL statements or other students' information.
@@ -1355,7 +1363,8 @@
   async function sendMessage() {
     if(!client || !input || busyMessageAction)return;
     const message=input.value.trim();
-    if((!message && !pendingImages.length) || message.length>CONFIG.maxLength){
+    if((!message && !pendingImages.length && !pendingFiles.length) ||
+        message.length>CONFIG.maxLength){
       updateComposer();return;
     }
     const now=Date.now();
@@ -1374,6 +1383,7 @@
       }else{
         const id=crypto.randomUUID();
         const uploaded=[];
+        const uploadedFiles=[];
         try {
           for(let i=0;i<pendingImages.length;i++){
             const path=userId+"/"+id+"/"+i+".webp";
@@ -1382,9 +1392,23 @@
             if(result.error)throw result.error;
             uploaded.push(path);
           }
-          const values={id,message:message||"📷 Photo",session_id:sessionKey,
+          for(let i=0;i<pendingFiles.length;i++){
+            const item=pendingFiles[i];
+            // The server also enforces owner / message ID / allowed extensions.
+            const path=userId+"/"+id+"/"+i+"."+item.extension;
+            const result=await client.storage.from(CONFIG.fileBucket)
+              .upload(path,item.file,{contentType:item.mime,upsert:false});
+            if(result.error)throw result.error;
+            uploadedFiles.push({path,name:item.file.name,size:item.file.size});
+          }
+          const values={
+            id,message:message||(pendingImages.length?"📷 Photo":"📎 File"),
+            session_id:sessionKey,
             user_id:userId,nickname:String(nickname||"Student").trim().slice(0,40)||"Student",
-            image_paths:uploaded};
+            image_paths:uploaded
+          };
+          if(fileSharingAvailable && uploadedFiles.length)
+            values.file_attachments=uploadedFiles;
           if(replyTarget && messagesById.has(replyTarget))values.reply_to=replyTarget;
           ({error}=await writeChatMessage(() => client.from(CONFIG.table).insert(values)));
           if(error)throw error;
@@ -1398,7 +1422,12 @@
         }catch(uploadError){
           if(uploaded.length){
             try{await client.storage.from(CONFIG.imageBucket).remove(uploaded);}
-            catch(cleanupError){console.warn("Chat upload cleanup:",cleanupError);}
+            catch(cleanupError){console.warn("Chat image upload rollback:",cleanupError);}
+          }
+          if(uploadedFiles.length){
+            try{await client.storage.from(CONFIG.fileBucket)
+              .remove(uploadedFiles.map(item=>item.path));}
+            catch(cleanupError){console.warn("Chat file upload rollback:",cleanupError);}
           }
           throw uploadError;
         }
@@ -1406,6 +1435,7 @@
       if(error)throw error;
       input.value="";
       clearPendingImages();
+      clearPendingFiles();
       clearComposerContext();resizeMessageInput();updateComposer();
       publishTyping(false);
     }catch(error){
