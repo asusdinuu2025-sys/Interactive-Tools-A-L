@@ -320,7 +320,8 @@
     void start().catch((error)=>
       console.warn("StudyLab content refresh failed:",error));
   }
-  refreshPublished();
+  window.StudyLabContentReady = start().catch(error =>
+    console.warn("StudyLab initial content failed:", error));
   // Returning from admin or browser back-forward cache should show new
   // published cards without a hard reload. Avoid excessive focus refetches.
   window.addEventListener("pageshow",event=>{

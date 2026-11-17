@@ -1,0 +1,15 @@
+/* Native same-origin transitions keep real links, history and browser navigation.
+   Unsupported browsers retain their existing behavior; no routing interception. */
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: sl-page-out .12s ease both; }
+::view-transition-new(root) { animation: sl-page-in .18s ease both; }
+@keyframes sl-page-out { to { opacity: 0; } }
+@keyframes sl-page-in { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+}
+/* Stop decorative CSS animation work in background tabs, preserving its state. */
+html.sl-tab-hidden *, html.sl-tab-hidden *::before, html.sl-tab-hidden *::after {
+  animation-play-state: paused !important;
+}

@@ -1,5 +1,5 @@
 [build]
-  command = "node scripts/generate-admin-config.mjs && node scripts/generate-sitemap.mjs && node scripts/generate-search-index.mjs"
+  command = "node scripts/generate-admin-config.mjs && node scripts/generate-sitemap.mjs && node scripts/generate-search-index.mjs && node scripts/bundle-styles.mjs"
   publish = "."
   ignore = "bash ./scripts/netlify-ignore.sh"
 
@@ -39,3 +39,14 @@
   for = "/assets/css/studylab-admin.css"
   [headers.values]
     Cache-Control = "no-store, max-age=0, must-revalidate"
+
+# Content-addressed bundles change URL with every CSS edit.
+[[headers]]
+  for = "/assets/css/sl-bundle-*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"

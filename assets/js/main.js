@@ -23,7 +23,7 @@
   }
 
   // A first-time visitor gets dark mode. System mode is opt-in.
-  let themeMode = readSavedMode() || "dark";
+  let themeMode = document.body?.dataset.roomModeChoice || readSavedMode() || "dark";
 
   function resolveTheme(mode) {
     if (mode === "system") return media.matches ? "dark" : "light";
@@ -89,6 +89,10 @@
     document.head.appendChild(lightStyle);
   }
 
+  const syncVisibility = () => root.classList.toggle('sl-tab-hidden', document.hidden);
+  document.addEventListener('visibilitychange', syncVisibility);
+  syncVisibility();
+
   // Apply before DOMContentLoaded where possible, avoiding a light-mode flash.
   applyTheme(themeMode, false);
 
@@ -104,7 +108,11 @@
         light: "system",
         system: "dark"
       }[themeMode] || "dark";
-      applyTheme(nextMode, true);
+      if (document.startViewTransition && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.startViewTransition(() => applyTheme(nextMode, true));
+      } else {
+        applyTheme(nextMode, true);
+      }
     });
   });
 

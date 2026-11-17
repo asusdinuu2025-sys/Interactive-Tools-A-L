@@ -14,9 +14,14 @@
   let activeCard = null;
   let activeGlow = null;
   let idleTimer = 0;
+  let pointerFrame = 0;
+  let latestPointer = null;
 
   function hideActive() {
     window.clearTimeout(idleTimer);
+    cancelAnimationFrame(pointerFrame);
+    pointerFrame = 0;
+    latestPointer = null;
     if (activeGlow) activeGlow.classList.remove("is-visible", "is-idle");
     activeCard = null;
     activeGlow = null;
@@ -33,7 +38,10 @@
     return glow;
   }
 
-  document.addEventListener("pointermove", event => {
+  function paintPointer() {
+    pointerFrame = 0;
+    const event = latestPointer;
+    if (!event) return;
     if (!finePointer.matches || reducedMotion.matches || event.pointerType !== "mouse") {
       hideActive();
       return;
@@ -68,6 +76,11 @@
     idleTimer = window.setTimeout(() => {
       if (activeGlow) activeGlow.classList.add("is-idle");
     }, 1550);
+  }
+
+  document.addEventListener("pointermove", event => {
+    latestPointer = event;
+    if (!pointerFrame) pointerFrame = requestAnimationFrame(paintPointer);
   }, { passive: true });
 
   document.addEventListener("pointerout", event => {
