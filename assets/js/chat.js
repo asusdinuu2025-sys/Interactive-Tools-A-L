@@ -167,6 +167,13 @@
   let userId = null;
   let nickname = "Student";
   let channel = null;
+  let reconnectTimer = 0;
+  let reconnectAttempts = 0;
+  let reconnecting = false;
+  let syncingMessages = false;
+  let syncRequested = false;
+  let lastChatSyncAt = 0;
+  let messageEventSeq = 0;
   let isOpen = false;
   let isExpanded = false;
   let isChatModerator = false;
@@ -848,6 +855,67 @@
     loadReactions();
   }
 
+
+  // Reconcile the newest 100 messages after an interrupted Realtime channel.
+  // Preserve the composer and user interaction state rather than resetting Chat.
+  async function syncChatSnapshot() {
+    if (!client || !list) return;
+    if (syncingMessages) { syncRequested = true; return; }
+    syncingMessages = true;
+    lastChatSyncAt = Date.now();
+    const startEvents = messageEventSeq;
+    try {
+      const {data,error} = await client.from(CONFIG.table)
+        .select("id,message,created_at,session_id,user_id,nickname,reply_to,edited_at,image_paths")
+        .order("created_at",{ascending:false})
+        .order("id",{ascending:false})
+        .limit(CONFIG.maxMessages);
+      if (error) { console.warn("Chat catch-up unavailable:",error); return; }
+      if (startEvents !== messageEventSeq || busyMessageAction) {
+        syncRequested = true; return;
+      }
+      const rows = (data || []).reverse();
+      const ids = new Set(rows.map(row=>row.id));
+      const nearBottom = list.scrollHeight-list.scrollTop-list.clientHeight<140;
+      const previousTop = list.scrollTop;
+      const fields = ["message","created_at","edited_at","reply_to","nickname","image_paths"];
+      for (const row of rows) {
+        const previous = messagesById.get(row.id);
+        if (!previous || fields.some(field =>
+          JSON.stringify(previous[field]) !== JSON.stringify(row[field]))) renderMessage(row);
+      }
+      for (const id of [...messagesById.keys()]) {
+        if (ids.has(id)) continue;
+        messagesById.delete(id);
+        reactionsByMessage.delete(id);
+        const old = [...list.querySelectorAll(".study-chat-message")]
+          .find(node=>node.dataset.messageId===id);
+        old?.remove();
+        if(editTarget===id || replyTarget===id)clearComposerContext();
+      }
+      if (!rows.length) renderInitial([]);
+      else {
+        const nodes = new Map([...list.querySelectorAll(".study-chat-message")]
+          .map(node=>[node.dataset.messageId,node]));
+        for (const row of rows) {
+          const node = nodes.get(row.id);
+          if(node)list.appendChild(node);
+        }
+        refreshDateSeparators();
+        if(nearBottom)scrollToBottom(true);
+        else list.scrollTop=previousTop;
+      }
+      await loadProfiles();
+      await loadReactions();
+    }catch(error){console.warn("Chat catch-up failed:",error);}
+    finally {
+      syncingMessages=false;
+      if(syncRequested){
+        syncRequested=false;
+        window.setTimeout(()=>syncChatSnapshot(),500);
+      }
+    }
+  }
 
   function refreshTyping() {
     if(!typingBar || !channel || !isOpen || document.hidden){
