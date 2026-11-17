@@ -97,7 +97,21 @@ function mount(host,api,rows,onRefresh){
      const file=labeled("Upload standalone .html simulation (5 MB max)","file","html");
      file.querySelector("input").accept=".html,text/html";
      if(!draft?.html_path)file.querySelector("input").required=true;
-     fields.append(file,el("p","Uploaded HTML runs only inside the StudyLab simulation viewer, not inside the account page.","sladmin-publish-note"));
+     fields.append(file);
+     const saved=el("p",null,"sladmin-publish-file-status");
+     const oldFile=draft?.html_path||"";
+     saved.textContent=oldFile
+       ? "✓ Saved HTML: "+(draft.html_name||oldFile.split("/").pop())+
+         " · Kept unless you choose a replacement"
+       : "No HTML uploaded yet · Choose a file before publishing.";
+     file.querySelector("input").addEventListener("change",event=>{
+       const selected=event.target.files?.[0];
+       saved.textContent=selected
+         ? "Selected: "+selected.name+" · Replaces saved HTML only after a successful update"
+         :oldFile?"✓ Saved HTML retained: "+(draft.html_name||oldFile.split("/").pop()):
+          "No HTML uploaded yet.";
+     });
+     fields.append(saved,el("p","Uploaded HTML runs only inside the StudyLab simulation viewer, not inside the account page.","sladmin-publish-note"));
    }else if(kind==="telegram"){
      fields.append(labeled("Telegram channel link","url","link",draft?.url||"https://t.me/",2048));
      fields.append(labeled("Channel handle / teacher (optional)","text","publisher",draft?.publisher||"",100));
@@ -105,8 +119,20 @@ function mount(host,api,rows,onRefresh){
      fields.append(choice("Subject","subject",subjects.map(([v,t])=>[v.replace(".html",""),t]),draft?.subject||"physics"));
      fields.append(labeled("Teacher / publisher","text","publisher",draft?.publisher||"",120));
      fields.append(labeled("Series or pack title","text","series",draft?.series||"",120));
-     fields.append(labeled("Lesson pack link","url","link",draft?.url||"",2048));
+     fields.append(labeled("Lesson pack link (or upload a PDF)","url","link",draft?.url||"",2048));
+     const packPDF=labeled("Upload lesson pack PDF (optional, 5 MB max)","file","pack_pdf");
+     packPDF.querySelector("input").accept=".pdf,application/pdf";
+     fields.append(packPDF);
+     if(draft?.pack_file_path)
+       fields.append(el("p","✓ Saved PDF: "+(draft.pack_file_name||"Uploaded lesson pack")+
+         " · Kept unless replaced.","sladmin-publish-file-status"));
      fields.append(labeled("Cover image URL (optional)","url","image",draft?.image||"",2048));
+     const cover=labeled("Upload cover image (optional, 5 MB max)","file","pack_cover");
+     cover.querySelector("input").accept="image/jpeg,image/png,image/webp";
+     fields.append(cover);
+     if(draft?.cover_file_path)
+       fields.append(el("p","✓ Saved cover: "+(draft.cover_file_name||"Uploaded image")+
+         " · Kept unless replaced.","sladmin-publish-file-status"));
    }else {
      fields.append(labeled("Destination link","url","link",draft?.url||"",2048));
      fields.append(labeled("Image URL (optional)","url","image",draft?.image||"",2048));
