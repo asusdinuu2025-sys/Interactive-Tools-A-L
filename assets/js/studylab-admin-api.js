@@ -42,7 +42,7 @@
     // A bare domain must NOT be interpreted as a path on studylablk.netlify.app.
     // Keep single filenames such as maths.html and paths like ./lessons local.
     if (!/^[a-z][a-z0-9+.-]*:/i.test(value) &&
-        !/^(?:[./?#]|\w+\.html(?:[?#]|$))/i.test(value) &&
+        !/^(?:[./?#]|[\w-]+\.html(?:[?#]|$))/i.test(value) &&
         /^(?:[a-z0-9-]+\.)+[a-z]{2,}(?::[0-9]{2,5})?(?:[/?#]|$)/i.test(value)) {
       value = "https://" + value;
     }
