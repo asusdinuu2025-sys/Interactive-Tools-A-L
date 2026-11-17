@@ -955,14 +955,48 @@
         .catch(()=>{});
     }
   }
-  function subscribe() {
-    if (!client) return;
+  function scheduleChatReconnect(immediate = false) {
+    if (!client || channelSubscribed || reconnecting ||
+        document.hidden || navigator.onLine === false) return;
+    if(reconnectTimer){
+      if(!immediate)return;
+      clearTimeout(reconnectTimer);
+    }
+    const delay=immediate?0:
+      Math.min(30000,1500*2**Math.min(reconnectAttempts,4))+
+      Math.floor(Math.random()*350);
+    reconnectAttempts+=1;
+    reconnectTimer=window.setTimeout(async()=>{
+      reconnectTimer=0;
+      if(channelSubscribed || reconnecting ||
+          document.hidden || navigator.onLine===false)return;
+      reconnecting=true;
+      const old=channel;
+      channel=null; // Discard callbacks from this retired channel.
+      try {
+        if(old && typeof client.removeChannel==="function")
+          await client.removeChannel(old);
+      }catch(error){console.warn("Chat channel cleanup:",error);}
+      finally{reconnecting=false;}
+      if(!channel && !document.hidden && navigator.onLine!==false){
+        try{subscribe();}
+        catch(error){
+          console.warn("Chat resubscribe failed:",error);
+          scheduleChatReconnect();
+        }
+      }
+    },delay);
+  }
 
-    channel = client
+  function subscribe() {
+    if(!client || channel)return;
+    const next=client
       .channel("studylab-chat-room",{config:{presence:{key:sessionKey}}})
       .on("postgres_changes",
         {event:"*",schema:"public",table:CONFIG.table},
         payload=>{
+          if(channel!==next)return;
+          messageEventSeq+=1;
           if(payload.eventType==="DELETE"){
             deleteMessageLocally(payload.old?.id);
             return;
@@ -977,14 +1011,12 @@
             if(!isOpen && row.user_id!==userId)setUnread(unreadCount+1);
             if(wasNearBottom || row.session_id===sessionKey)scrollToBottom(true);
             loadProfiles();
-          } else if(wasKnown){
-            // Keep edits across every open tab without reordering messages.
-            loadProfiles();
-          }
+          }else if(wasKnown)loadProfiles();
         })
       .on("postgres_changes",
         {event:"*",schema:"public",table:"studylab_chat_reactions"},
         payload=>{
+          if(channel!==next)return;
           const id=payload.new?.message_id || payload.old?.message_id;
           if(id)reactionRefreshIds.add(id);
           clearTimeout(reactionSyncTimer);
@@ -994,22 +1026,34 @@
             loadReactions(changed.length?changed:undefined);
           },140);
         })
-      .on("presence",{event:"sync"},refreshTyping)
-      .subscribe(status=>{
-        if(status==="SUBSCRIBED"){
-          channelSubscribed=true;
-          setStatus(true,"Live • newest 100 messages");
-          publishTyping(false);
-        }else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT"||status==="CLOSED"){
-          channelSubscribed=false;
-          // Realtime may temporarily disconnect while ordinary database
-          // sends are still available: avoid implying the entire chat is dead.
-          setStatus(false,"Live updates paused · sending may still work");
-          if(typingBar)typingBar.hidden=true;
-        }
+      .on("presence",{event:"sync"},()=>{
+        if(channel===next)refreshTyping();
       });
+    // Set channel before subscribe(): some channel mocks and implementations
+    // invoke the status callback synchronously.
+    channel=next;
+    next.subscribe((status,error)=>{
+      if(channel!==next)return;
+      if(status==="SUBSCRIBED"){
+        channelSubscribed=true;
+        clearTimeout(reconnectTimer);
+        reconnectTimer=0;
+        reconnectAttempts=0;
+        setStatus(true,"Live • newest 100 messages");
+        publishTyping(false);
+        void syncChatSnapshot();
+      }else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT"||status==="CLOSED"){
+        channelSubscribed=false;
+        typingActive=false;
+        if(error)console.warn("StudyLab Chat realtime "+status+":",error);
+        setStatus(false,navigator.onLine===false
+          ?"Offline · waiting for connection"
+          :"Reconnecting live updates · messages still refresh periodically");
+        if(typingBar)typingBar.hidden=true;
+        scheduleChatReconnect();
+      }
+    });
   }
-
 
   function clearPendingImages() {
     for (const item of pendingImages) URL.revokeObjectURL(item.previewUrl);
