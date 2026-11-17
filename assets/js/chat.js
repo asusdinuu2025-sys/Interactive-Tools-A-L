@@ -87,18 +87,32 @@
           <input type="file" data-chat-image-input accept="image/jpeg,image/png,image/webp" multiple hidden aria-label="Attach up to three images" />
           <input type="file" data-chat-file-input accept=".pdf,.docx,.pptx,.txt" multiple hidden aria-label="Attach up to two study documents, 5 MB each" />
           <div class="study-chat-editorline">
-            <button type="button" class="study-chat-attach" data-chat-attach aria-label="Attach images" title="Add up to three images">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.3"/><path d="m4 17 5-5 3 3 3-4 5 6"/>
-              </svg>
-            </button>
-            <button type="button" class="study-chat-file-attach" data-chat-file-attach
-              aria-label="Attach study documents" title="Attach PDF, DOCX, PPTX or TXT (5 MB each)" disabled>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85"
-                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <button type="button" class="study-chat-attachments-toggle"
+              data-chat-attachments-toggle aria-label="Add photo or document"
+              aria-expanded="false" aria-haspopup="true" title="Attach">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M8 12.5 14.4 6a3.4 3.4 0 0 1 4.8 4.8l-8.3 8.3a5 5 0 0 1-7.1-7.1l8.6-8.6"/>
               </svg>
             </button>
+            <div class="study-chat-attachment-menu" data-chat-attachment-menu hidden>
+              <button type="button" class="study-chat-attach" data-chat-attach
+                aria-label="Attach images" title="Add up to three images">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.3"/>
+                  <path d="m4 17 5-5 3 3 3-4 5 6"/>
+                </svg><span>Image</span>
+              </button>
+              <button type="button" class="study-chat-file-attach" data-chat-file-attach
+                aria-label="Attach study documents" title="PDF, DOCX, PPTX or TXT · 5 MB each" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/>
+                  <path d="M14 2v6h6M8 13h8M8 17h8"/>
+                </svg><span>File</span>
+              </button>
+            </div>
             <div class="study-chat-input-wrap">
               <textarea class="study-chat-input" data-chat-input rows="1" maxlength="500"
                 autocomplete="off" spellcheck="true" placeholder="Message…"
@@ -163,6 +177,25 @@
   const fileInput = root.querySelector("[data-chat-file-input]");
   const attachButton = root.querySelector("[data-chat-attach]");
   const fileButton = root.querySelector("[data-chat-file-attach]");
+  const attachmentsToggle = root.querySelector("[data-chat-attachments-toggle]");
+  const attachmentsMenu = root.querySelector("[data-chat-attachment-menu]");
+  let attachmentMenuClosing = 0;
+  function setAttachmentMenu(open) {
+    if (!attachmentsMenu || !attachmentsToggle) return;
+    clearTimeout(attachmentMenuClosing);
+    if (open) {
+      if (attachmentsToggle.disabled) return;
+      attachmentsMenu.hidden = false;
+      // Next paint animates a lightweight two-choice panel.
+      requestAnimationFrame(()=>attachmentsMenu.classList.add("is-open"));
+    } else {
+      attachmentsMenu.classList.remove("is-open");
+      attachmentMenuClosing = window.setTimeout(()=>{
+        if (!attachmentsMenu.classList.contains("is-open")) attachmentsMenu.hidden = true;
+      },180);
+    }
+    attachmentsToggle.setAttribute("aria-expanded",String(open));
+  }
   const attachPreview = root.querySelector("[data-chat-attachment-preview]");
   let pendingImages = [];
   let pendingFiles = [];
@@ -893,6 +926,8 @@
     if (charCount) charCount.textContent = length + "/" + CONFIG.maxLength;
     inputWrap?.classList.toggle("has-text", length > 0);
     if(attachButton)attachButton.disabled = !client || busyMessageAction || Boolean(editTarget);
+    if(attachmentsToggle)attachmentsToggle.disabled = !client || busyMessageAction ||
+      Boolean(editTarget);
     if(fileButton)fileButton.disabled = !client || !fileSharingAvailable ||
       busyMessageAction || Boolean(editTarget);
     if (sendButton) {
@@ -1514,10 +1549,25 @@
       updateComposer();
       publishTyping(Boolean(input.value.trim()));
     });
-    attachButton?.addEventListener("click",()=>imageInput?.click());
+    attachmentsToggle?.addEventListener("click",event=>{
+      event.stopPropagation();
+      setAttachmentMenu(attachmentsMenu.hidden || !attachmentsMenu.classList.contains("is-open"));
+    });
+    attachButton?.addEventListener("click",()=>{
+      setAttachmentMenu(false);
+      imageInput?.click();
+    });
     imageInput?.addEventListener("change",handleImageSelection);
-    fileButton?.addEventListener("click",()=>fileInput?.click());
+    fileButton?.addEventListener("click",()=>{
+      setAttachmentMenu(false);
+      fileInput?.click();
+    });
     fileInput?.addEventListener("change",handleFileSelection);
+    document.addEventListener("click",event=>{
+      if(attachmentsMenu && !attachmentsMenu.hidden &&
+         !attachmentsMenu.contains(event.target) && !attachmentsToggle?.contains(event.target))
+        setAttachmentMenu(false);
+    });
     document.addEventListener("visibilitychange",()=>{
       if(document.hidden)publishTyping(false);
       else {
@@ -1568,6 +1618,11 @@
 
     document.addEventListener("keydown", event => {
       if (event.key === "Escape" && isOpen) {
+        if(attachmentsMenu && !attachmentsMenu.hidden){
+          setAttachmentMenu(false);
+          attachmentsToggle?.focus();
+          return;
+        }
         const visibleMenu=panel?.querySelector(".study-chat-message-menu:not([hidden])");
         if(visibleMenu){
           visibleMenu.hidden=true;
