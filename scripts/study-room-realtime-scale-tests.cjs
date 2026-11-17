@@ -30,6 +30,13 @@ const assert=require('node:assert/strict');
     `);
     const migration=fs.readFileSync('supabase/migrations/20261117174500_study_room_realtime_state_signals.sql','utf8');
     await db.exec(migration);
+    const stage1=(await db.query(
+      "SELECT tablename FROM pg_publication_tables WHERE pubname='supabase_realtime'"
+    )).rows.map(x=>x.tablename);
+    assert(stage1.includes('study_room_members') && stage1.includes('study_room_change_signals'),
+      'Stage 1 is additive: existing live clients remain compatible');
+    await db.exec(fs.readFileSync(
+      'supabase/migrations/20261117174530_study_room_disable_heartbeat_publication.sql','utf8'));
     const rev=async()=>Number((await db.query(
       "SELECT revision FROM public.study_room_change_signals WHERE user_id='11111111-1111-4111-8111-111111111111'"
     )).rows[0].revision);
