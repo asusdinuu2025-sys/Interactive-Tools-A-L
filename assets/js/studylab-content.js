@@ -1,6 +1,7 @@
 /* Published overrides enhance existing markup; failures leave original content intact. */
 (function () {
   "use strict";
+  const config = window.StudyLabAdminConfig || {mode:"preview"};
   const page = location.pathname.split("/").pop() || "index.html";
   function safeURL(raw, image = false) {
     try {
@@ -244,7 +245,6 @@
       showContentLoadError();
       return;
     }
-    const config = window.StudyLabAdminConfig || {mode:"preview"};
     const client = window.StudyLabAccount?.client ||
       window.supabase?.createClient?.(
         "https://zpvatyxdbshjuqgtexzw.supabase.co",
