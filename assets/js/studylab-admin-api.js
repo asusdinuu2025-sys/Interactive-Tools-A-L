@@ -499,6 +499,16 @@
     if (result.error)throw result.error;
     return {path,url:client.storage.from("studylab-simulations").getPublicUrl(path).data.publicUrl};
   }
+  async function readSimulation(path) {
+    requireAccess();
+    if(!/^html\/[0-9a-f-]{36}\.html$/.test(String(path||"")))
+      throw Error("Invalid saved simulation file.");
+    if(preview) throw Error("Existing HTML previews require the connected admin deployment.");
+    const {data,error}=await client.storage.from("studylab-simulations").download(path);
+    if(error || !data)throw Error(error?.message||"Saved HTML is unavailable in Storage.");
+    if(data.size>5*1024*1024)throw Error("The saved HTML exceeds 5 MB.");
+    return await data.text();
+  }
   async function removeSimulation(path) {
     requireAccess();
     if (!/^html\/[0-9a-f-]{36}\.html$/.test(String(path||"")))
@@ -540,6 +550,7 @@
     upload,
     removeMedia,
     uploadSimulation,
+    readSimulation,
     removeSimulation,
     reset,
     validate,
