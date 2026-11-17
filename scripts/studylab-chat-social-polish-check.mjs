@@ -105,7 +105,7 @@ assert.match(socialMigration,/create table if not exists public\.studylab_social
 assert.doesNotMatch(moderators,/delete from public\.studylab_social_posts/i);
 
 for(const html of [home,room]){
-  assert.match(html,/chat\.js\?v=pr102-telegram-compose-v1/);
+  assert.match(html,/chat\.js\?v=pr102-realtime-recovery-v1/);
   assert.match(html,/chat\.css\?v=pr102-telegram-compose-v1/);
   assert.match(html,/studylab-avatar\.js\?v=20261116-manual-crop-v1/);
 }
@@ -122,7 +122,7 @@ assert.match(chat,/image_paths:uploaded/);
 assert.match(chat,/classList\.add\("is-entering"\)/);
 assert.match(chat,/classList\.add\("is-exiting"\)/);
 assert.match(chat,/closeReactionPicker\(id\)/);
-assert.match(chat,/\.on\("presence",\{event:"sync"\},refreshTyping\)/);
+assert.match(chat,/if\(channel===next\)refreshTyping\(\)/);
 assert.match(chat,/channel\.track/);
 assert.match(chat,/data-chat-typing/);
 assert.match(chat,/data-chat-image-input/);
