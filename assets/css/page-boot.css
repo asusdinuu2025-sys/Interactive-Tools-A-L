@@ -126,11 +126,12 @@ html.sl-booting .sl-boot-ring {
     -webkit-backdrop-filter: blur(4px);
     backdrop-filter: blur(4px);
   }
-  .sl-boot-orbits { transform: scale(.88); margin: -13px 0; }
+  /* Avoid scaling the whole foreground into a soft raster layer on phones. */
+  .sl-boot-orbits { margin: 0; }
 }
 /* The first-session chemistry flask is the intro. Never layer a second intro over it. */
-html.sl-boot-intro::before,
-html.sl-boot-intro #sl-boot-loader {
+html.sl-first-intro::before,
+html.sl-first-intro #sl-boot-loader {
   display: none !important;
 }
 @media (prefers-reduced-motion: reduce) {
