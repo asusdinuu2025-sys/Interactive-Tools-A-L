@@ -249,14 +249,17 @@ body.sl-community-open .sl-home-sidebar {
   visibility: hidden;
   pointer-events: none;
 }
+/* Align a sidebar click with the section heading below the floating bar. */
+#home-overview,
 #practical-simulations,
-#live-study-room-section,
+#live-study-room,
+#social,
 #other-al-resources,
 #past-papers,
 #telegram-links,
 #free-lesson-packs,
 #productivity {
-  scroll-margin-top: 28px;
+  scroll-margin-top: 112px;
 }
 @media (prefers-reduced-motion: reduce) {
   .sl-home-sidebar,
