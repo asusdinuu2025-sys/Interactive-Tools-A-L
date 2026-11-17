@@ -50,6 +50,10 @@ async function flush(){for(let i=0;i<8;i++)await Promise.resolve();}
   {
     const css=read('assets/css/page-boot.css');
     assert(css.includes('backdrop-filter: blur(7px)'));
+    assert(css.includes('#sl-boot-loader::before'), 'blur must stay in the loader background layer');
+    assert(css.includes('.sl-boot-orbits, .sl-boot-name'), 'logo and text need their own foreground');
+    assert(!/html\.sl-booting::before\s*\{[^}]*backdrop-filter/.test(css),
+      'root overlay must not backdrop-blur the foreground logo');
     assert(css.includes('prefers-reduced-motion: reduce'));
     assert(css.includes('sl-boot-arc-rotate'));
     assert(css.includes('--rotation: -360deg'));
