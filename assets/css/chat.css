@@ -1782,3 +1782,81 @@ body.study-room-page[data-room-mode="light"] .study-chat-document {
 @media(prefers-reduced-motion:reduce){
   .study-chat-editorline .study-chat-file-attach {transition:none!important;}
 }
+
+/* PR #102 single paperclip opens a compact glass attachment menu. */
+.study-chat-editorline {
+  grid-template-columns:42px minmax(0,1fr) 43px!important;
+  overflow:visible;
+}
+.study-chat-editorline .study-chat-attachments-toggle {
+  grid-column:1!important;grid-row:1;align-self:end;justify-self:center;
+  display:grid;place-items:center;width:37px;height:39px;min-width:0;
+  border:0;border-radius:13px;background:transparent;
+  color:var(--room-accent,#9bdfff);cursor:pointer;
+  transition:background .17s,transform .17s;
+}
+.study-chat-editorline .study-chat-attachments-toggle:hover:not(:disabled),
+.study-chat-editorline .study-chat-attachments-toggle[aria-expanded="true"] {
+  background:rgba(135,201,248,.15);
+}
+.study-chat-editorline .study-chat-attachments-toggle:disabled {opacity:.45;cursor:not-allowed;}
+.study-chat-editorline .study-chat-attachments-toggle svg {width:22px;height:22px;}
+.study-chat-editorline .study-chat-input-wrap {grid-column:2!important;}
+.study-chat-editorline .study-chat-send {grid-column:3!important;}
+.study-chat-editorline .study-chat-attachment-menu {
+  position:absolute;left:3px;bottom:calc(100% + 11px);z-index:120;
+  display:grid;gap:4px;min-width:142px;padding:7px;
+  border:1px solid rgba(150,210,251,.34);border-radius:17px;
+  background:linear-gradient(135deg,rgba(31,52,86,.97),rgba(25,40,75,.96));
+  box-shadow:0 13px 32px rgba(3,17,45,.29),inset 0 1px rgba(255,255,255,.13);
+  backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);
+  opacity:0;transform:translateY(7px) scale(.95);transform-origin:bottom left;
+  pointer-events:none;
+  transition:opacity .18s ease,transform .18s ease;
+}
+.study-chat-editorline .study-chat-attachment-menu[hidden] {display:none!important;}
+.study-chat-editorline .study-chat-attachment-menu.is-open {
+  opacity:1;transform:translateY(0) scale(1);pointer-events:auto;
+}
+.study-chat-editorline .study-chat-attachment-menu .study-chat-attach,
+.study-chat-editorline .study-chat-attachment-menu .study-chat-file-attach {
+  display:flex!important;grid-column:auto!important;grid-row:auto!important;
+  align-items:center!important;justify-content:flex-start!important;
+  gap:11px;width:100%!important;height:40px!important;min-width:0!important;
+  margin:0;padding:8px 10px;border:0!important;border-radius:11px!important;
+  background:transparent!important;color:#e5f4ff!important;
+  font:700 12px "Nirmala UI","Segoe UI",sans-serif;
+  box-shadow:none!important;cursor:pointer;text-align:left;
+}
+.study-chat-editorline .study-chat-attachment-menu .study-chat-attach:hover:not(:disabled),
+.study-chat-editorline .study-chat-attachment-menu .study-chat-file-attach:hover:not(:disabled) {
+  background:rgba(115,195,251,.2)!important;transform:none;
+}
+.study-chat-editorline .study-chat-attachment-menu .study-chat-file-attach:disabled {
+  opacity:.48;cursor:not-allowed;
+}
+.study-chat-editorline .study-chat-attachment-menu button svg {
+  width:20px;height:20px;flex:0 0 20px;
+}
+html[data-theme="light"] .study-chat-editorline .study-chat-attachment-menu,
+body.study-room-page[data-room-mode="light"] .study-chat-editorline .study-chat-attachment-menu {
+  background:linear-gradient(140deg,rgba(246,251,255,.98),rgba(218,235,252,.97));
+  border-color:rgba(75,145,192,.34);
+  box-shadow:0 13px 28px rgba(34,84,134,.2),inset 0 1px rgba(255,255,255,.8);
+}
+html[data-theme="light"] .study-chat-editorline .study-chat-attachment-menu button,
+body.study-room-page[data-room-mode="light"] .study-chat-editorline .study-chat-attachment-menu button {
+  color:#245779!important;
+}
+html[data-theme="light"] .study-chat-editorline .study-chat-attachment-menu button:hover,
+body.study-room-page[data-room-mode="light"] .study-chat-editorline .study-chat-attachment-menu button:hover {
+  background:rgba(91,163,219,.16)!important;
+}
+@media(max-width:450px){
+  .study-chat-editorline {grid-template-columns:37px minmax(0,1fr) 39px!important;}
+  .study-chat-editorline .study-chat-attachments-toggle {width:34px;height:36px;}
+}
+@media(prefers-reduced-motion:reduce) {
+  .study-chat-editorline .study-chat-attachment-menu,
+  .study-chat-editorline .study-chat-attachments-toggle {transition:none!important;}
+}
