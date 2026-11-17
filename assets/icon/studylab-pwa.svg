@@ -1,1 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#183b68"/><stop offset="1" stop-color="#392d78"/></linearGradient><linearGradient id="cap" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9be9ff"/><stop offset="1" stop-color="#64a9ff"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#bg)"/><circle cx="256" cy="256" r="190" fill="#fff" opacity=".045"/><path d="M92 204 256 122l164 82-164 82-164-82Z" fill="url(#cap)" stroke="#d7f7ff" stroke-width="10" stroke-linejoin="round"/><path d="M153 240v82c59 49 147 49 206 0v-82" fill="none" stroke="#d7f7ff" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/><path d="M420 204v98" fill="none" stroke="#d7f7ff" stroke-width="13" stroke-linecap="round"/><circle cx="420" cy="316" r="15" fill="#7ee7ff"/><path d="M215 375h82" stroke="#8fe7ff" stroke-width="12" stroke-linecap="round" opacity=".85"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="StudyLab SL graduation-cap icon">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0b233e"/><stop offset=".52" stop-color="#09152e"/><stop offset="1" stop-color="#180f36"/></linearGradient>
+  <linearGradient id="cap" x1=".06" y1=".55" x2=".96" y2=".37"><stop offset="0" stop-color="#15d8f9"/><stop offset=".45" stop-color="#2d9ffd"/><stop offset=".73" stop-color="#8270f9"/><stop offset="1" stop-color="#d17bf7"/></linearGradient>
+  <linearGradient id="left" x1="0" y1=".1" x2="1" y2=".9"><stop offset="0" stop-color="#26e2f4"/><stop offset=".75" stop-color="#04bfea"/><stop offset="1" stop-color="#368eff"/></linearGradient>
+  <linearGradient id="right" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3d65f6"/><stop offset=".53" stop-color="#9658eb"/><stop offset="1" stop-color="#e073ed"/></linearGradient>
+  <radialGradient id="halo"><stop offset="0" stop-color="#2abffc" stop-opacity=".11"/><stop offset=".5" stop-color="#586cf6" stop-opacity=".04"/><stop offset="1" stop-color="#586cf6" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="512" height="512" rx="106" fill="url(#bg)"/>
+<circle cx="252" cy="257" r="235" fill="url(#halo)"/>
+<!-- Angular SL lettermark with a hollow graduation cap; no glass or gloss overlays -->
+<path d="M256 225 148 278 148 316 221 352 221 370 148 333 148 374 258 430 258 317 189 283 256 249Z" fill="url(#left)"/>
+<path d="M268 224 308 248 308 365 390 322 390 367 268 430Z" fill="url(#right)"/>
+<path d="M79 181 256 88 433 181 256 272Z M126 181 256 113 386 181 256 245Z" fill="url(#cap)" fill-rule="evenodd"/>
+<path d="M433 181 V252" fill="none" stroke="#bd7af5" stroke-width="10" stroke-linecap="round"/>
+<path d="M433 243 C422 254 421 276 433 287 C447 278 444 260 433 243Z" fill="#d77cf6"/>
+</svg>
