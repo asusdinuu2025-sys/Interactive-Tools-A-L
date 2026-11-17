@@ -123,6 +123,49 @@ function make(html){
    await new Promise(resolve=>w.setTimeout(resolve,45));
    return dom;
  }
+ // The public pages must load data without any Supabase JS SDK, JWT, or
+ // logged-in user. This reproduces a slow/blocked CDN on real browsers.
+ async function loadWithoutSdk(name,markup,row,selector) {
+   const dom=new JSDOM("<!doctype html><html><body>"+markup+"</body></html>",{
+     url:"https://deploy-preview-102--studylablk.netlify.app/"+name,
+     runScripts:"outside-only",pretendToBeVisual:true
+   });
+   const w=dom.window;
+   if(!w.CSS)w.CSS={};
+   w.CSS.escape=value=>String(value);
+   let requested=false;
+   w.fetch=async(url,options)=>{
+     requested=true;
+     assert.match(url,/\/rest\/v1\/studylab_site_content\?select=payload&page=eq\./);
+     assert.ok(url.includes(encodeURIComponent(name)),"Request must filter by destination page");
+     assert.equal(options.headers.Accept,"application/json");
+     assert.ok(options.headers.apikey.startsWith("sb_publishable_"));
+     assert.equal(options.cache,"no-store");
+     return {ok:true,json:async()=>[{payload:row}]};
+   };
+   w.StudyLabAdminConfig={mode:"connected"};
+   w.eval(read("assets/js/studylab-special-resources.js"));
+   w.eval(read("assets/js/studylab-content.js"));
+   await new Promise(resolve=>w.setTimeout(resolve,45));
+   assert.equal(requested,true,"Native public REST request must run");
+   assert.ok(w.document.querySelector(selector),
+     "Published "+row.resource_type+" must appear without optional Supabase SDK");
+   dom.window.close();
+ }
+ await loadWithoutSdk("maths.html",
+   '<main><section class="tool-grid"></section></main>',
+   {...sample,page:"maths.html",url:"/simulation-viewer.html?id="+sample.id},
+   ".tool-grid > a.sl-cms-special");
+ await loadWithoutSdk("Telegram_Channels.html",
+   '<main><section class="telegram-featured-channel"></section><div class="telegram-all-grid"></div></main>',
+   {...channel,page:"Telegram_Channels.html",telegram_category:"sponsored",
+     url:"https://t.me/study"},
+   ".sl-cms-sponsored-grid > a.sl-cms-special");
+ await loadWithoutSdk("lesson-packs.html",
+   '<main><section class="sl-lessons-publisher-grid"></section></main>',
+   {...pack,page:"lesson-packs.html",url:"https://example.org/pack.pdf"},
+   ".sl-lessons-publisher-grid > a.sl-cms-special");
+
  const legacySim={...sample,page:"maths.html",title:"05. Test simulation",
    url:"https://simulation-viewer.html?id="+sample.id};
  const mathsPage=await loadPublicPage("maths.html",
