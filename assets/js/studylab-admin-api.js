@@ -237,6 +237,16 @@
     persist();
     return row;
   }
+  async function verifyPublishedContent(item) {
+    requireAccess();
+    if (preview) return false;
+    const {data,error}=await client.from("studylab_site_content")
+      .select("id,page,payload").eq("id",item.id).maybeSingle();
+    if (error) throw Error("Publication read-back failed: "+error.message);
+    return Boolean(data && data.page===item.page &&
+      data.payload?.id===item.id && data.payload?.hidden===false &&
+      data.payload?.deleted!==true && data.payload?.resource_type===item.resource_type);
+  }
   async function deleteContent(record) {
     requireAccess();
     const { id, kind, page, title } = record.draft;
@@ -538,6 +548,7 @@
     init,
     content,
     save,
+    verifyPublishedContent,
     deleteContent,
     popups,
     popupSet,
