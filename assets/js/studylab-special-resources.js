@@ -59,7 +59,7 @@ function apply(d,href){
    if(d.emoji)icon.textContent=d.emoji;
    else {const img=el("img");img.src=telegramSvg;img.alt="";icon.append(img);}
    const copy=el("span");
-   if(sponsored)copy.append(el("small","SPONSORED","sl-cms-sponsor-label"));
+   if(sponsored)copy.append(el("small","sl-cms-sponsor-label","SPONSORED"));
    copy.append(el("strong",null,d.resource_title||d.title),el("span",null,d.description||"StudyLab educational channel"));
    const action=el("span","telegram-open");
    const image=el("img");image.src=telegramSvg;image.alt="";
