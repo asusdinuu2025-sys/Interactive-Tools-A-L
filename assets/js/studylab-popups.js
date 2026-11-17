@@ -1,4 +1,4 @@
-/* StudyLab one-time notices: 24h server expiry and atomic per-account claims. */
+/* StudyLab one-time notices: selected server-side expiry and atomic per-account claims. */
 (function () {
   "use strict";
   if (window.StudyLabPopupsLoaded) return;
@@ -128,14 +128,22 @@
     const client = window.StudyLabAccount?.client ||
       window.supabase?.createClient?.(PROJECT,KEY);
     if (!client) return;
-    // Supabase RLS allows only messages within their exact 24-hour window.
+    // Supabase RLS allows only messages within their selected expiry window.
     // Recheck the account before reading or claiming delivery. A pre-login
     // visitor must not consume a once-only notification.
     const auth = await client.auth.getUser();
     if (!auth.data?.user?.id || auth.error) return;
-    const resp = await client.from("studylab_popups")
-      .select("id,title,message,variant,placement,display_seconds,link,link_label,starts_at")
+    let resp = await client.from("studylab_popups")
+      .select("id,title,message,variant,placement,display_seconds,link,link_label,starts_at,expires_at")
       .order("starts_at",{ascending:false}).limit(8);
+    // PR migration is staged: production may still have the original 24h
+    // schema. Never break existing popup delivery while awaiting approval.
+    if (resp.error && /42703|PGRST204|column.*does not exist|expires_at/i
+        .test(String(resp.error.code || "") + " " + String(resp.error.message || ""))) {
+      resp = await client.from("studylab_popups")
+        .select("id,title,message,variant,placement,display_seconds,link,link_label,starts_at")
+        .order("starts_at",{ascending:false}).limit(8);
+    }
     if (resp.error || !resp.data?.length) return;
     let authAccount = null;
     try { authAccount = (await client.auth.getUser()).data?.user || null; }
@@ -144,8 +152,10 @@
       // If the account chooser opens again, don't consume a delivery receipt.
       if (!(await waitForHomeEntry())) return;
       const startAt = new Date(item.starts_at).getTime();
-      if (!Number.isFinite(startAt) ||
-          Date.now()<startAt || Date.now()>=startAt+86400000) continue;
+      const stopAt = item.expires_at
+        ? new Date(item.expires_at).getTime() : startAt + 86400000;
+      if (!Number.isFinite(startAt) || !Number.isFinite(stopAt) ||
+          Date.now() < startAt || Date.now() >= stopAt) continue;
       const key = localPrefix + item.id + ":" + (authAccount?.id || "browser");
       if (localSeen(key)) continue;
       if (authAccount?.id) {
