@@ -22,7 +22,7 @@ async function flush(){for(let i=0;i<8;i++)await Promise.resolve();}
 (async()=>{
   for(const saved of ['dark','light','system','invalid']) {
     const h=harness();h.w.localStorage.setItem('studylab-room-mode-v1',saved);
-    h.w.localStorage.setItem('studylab-first-welcome-intro-v2','1');
+    h.w.sessionStorage.setItem('studylab-first-entry-in-tab-v2','1');
     h.w.eval(read('assets/js/page-boot.js'));
     assert.equal(h.w.document.documentElement.dataset.theme,saved==='light'||saved==='system'?'light':'dark');
     assert(h.w.document.documentElement.classList.contains('sl-booting'));
@@ -30,64 +30,85 @@ async function flush(){for(let i=0;i<8;i++)await Promise.resolve();}
     assert(!h.w.document.documentElement.classList.contains('sl-booting'));
     h.dom.window.close();
   }
-  // One lifetime intro before Welcome; rings only on first Home entry of a new tab.
-  // Reload, Back/Forward, subpage navigation and BFCache restore never replay either.
+  // First Home visit in every fresh tab uses the chemistry intro. Every
+  // reload, normal navigation, Back/Forward and later return uses four rings.
   {
     const first=harness();
     first.w.eval(read('assets/js/page-boot.js'));
     const root=first.w.document.documentElement;
-    assert(root.classList.contains('sl-first-intro'),'first visit needs flask intro');
-    assert(!root.classList.contains('sl-booting'),'do not stack ring over flask');
-    assert.equal(first.w.localStorage.getItem('studylab-first-welcome-intro-v2'),'1');
+    assert(root.classList.contains('sl-first-intro'), 'fresh Home tab must show flask');
+    assert(!root.classList.contains('sl-booting'), 'flask and rings must not overlap');
     assert.equal(first.w.sessionStorage.getItem('studylab-first-entry-in-tab-v2'),'1');
     const oldLoader=first.w.document.createElement('div');oldLoader.id='studylabLoader';
     first.w.document.body.append(oldLoader);
     first.w.dispatchEvent(new first.w.Event('pagehide'));
-    assert(!first.w.document.getElementById('studylabLoader'),'pagehide must remove old intro before BFCache');
+    assert(!first.w.document.getElementById('studylabLoader'), 'pagehide clears old flask');
     assert(!root.classList.contains('sl-first-intro'));
     first.dom.window.close();
 
     const returning=harness();
     returning.w.localStorage.setItem('studylab-first-welcome-intro-v2','1');
     returning.w.eval(read('assets/js/page-boot.js'));
-    assert(returning.w.document.documentElement.classList.contains('sl-booting'),
-      'returning student initial Home visit gets four rings');
-    assert(!returning.w.document.documentElement.classList.contains('sl-first-intro'));
+    assert(returning.w.document.documentElement.classList.contains('sl-first-intro'),
+      'returning student in fresh Home tab must also get flask');
+    assert(!returning.w.document.documentElement.classList.contains('sl-booting'));
     returning.dom.window.close();
 
     const refresh=harness();
-    refresh.w.localStorage.setItem('studylab-first-welcome-intro-v2','1');
-    Object.defineProperty(refresh.w.performance,'getEntriesByType',{value:()=>[{type:'reload'}],configurable:true});
+    Object.defineProperty(refresh.w.performance,'getEntriesByType',
+      {value:()=>[{type:'reload'}],configurable:true});
     refresh.w.eval(read('assets/js/page-boot.js'));
-    assert(!refresh.w.document.documentElement.classList.contains('sl-booting'));
+    assert(refresh.w.document.documentElement.classList.contains('sl-booting'),
+      'refresh must show the four rotating arcs');
     assert(!refresh.w.document.documentElement.classList.contains('sl-first-intro'));
     refresh.dom.window.close();
 
     const back=harness();
-    Object.defineProperty(back.w.performance,'getEntriesByType',{value:()=>[{type:'back_forward'}],configurable:true});
+    Object.defineProperty(back.w.performance,'getEntriesByType',
+      {value:()=>[{type:'back_forward'}],configurable:true});
     back.w.eval(read('assets/js/page-boot.js'));
+    assert(back.w.document.documentElement.classList.contains('sl-booting'),
+      'history navigation without BFCache must show rotating arcs');
     assert(!back.w.document.documentElement.classList.contains('sl-first-intro'));
-    assert(!back.w.document.documentElement.classList.contains('sl-booting'));
     back.dom.window.close();
 
     const sameTab=harness();
-    sameTab.w.localStorage.setItem('studylab-first-welcome-intro-v2','1');
     sameTab.w.sessionStorage.setItem('studylab-first-entry-in-tab-v2','1');
     sameTab.w.eval(read('assets/js/page-boot.js'));
-    assert(!sameTab.w.document.documentElement.classList.contains('sl-booting'));
+    assert(sameTab.w.document.documentElement.classList.contains('sl-booting'),
+      'returning to Home in same tab must show arcs');
+    assert(!sameTab.w.document.documentElement.classList.contains('sl-first-intro'));
     sameTab.dom.window.close();
 
     const inner=harness('https://example.org/study-room.html');
     inner.w.eval(read('assets/js/page-boot.js'));
+    assert(inner.w.document.documentElement.classList.contains('sl-booting'),
+      'entering another StudyLab page must show rotating arcs');
     assert(!inner.w.document.documentElement.classList.contains('sl-first-intro'));
-    assert(!inner.w.document.documentElement.classList.contains('sl-booting'));
     inner.dom.window.close();
+
+    const restored=harness();
+    restored.w.sessionStorage.setItem('studylab-first-entry-in-tab-v2','1');
+    restored.w.eval(read('assets/js/page-boot.js'));
+    restored.w.document.dispatchEvent(new restored.w.Event('DOMContentLoaded'));
+    restored.tick(0);await flush();restored.frame();restored.frame();
+    assert(!restored.w.document.documentElement.classList.contains('sl-booting'));
+    restored.w.dispatchEvent(new restored.w.Event('pagehide'));
+    const restoreEvent=new restored.w.Event('pageshow');
+    Object.defineProperty(restoreEvent,'persisted',{value:true});
+    restored.w.dispatchEvent(restoreEvent);
+    assert(restored.w.document.documentElement.classList.contains('sl-booting'),
+      'BFCache Back/Forward must briefly show four rotating arcs');
+    restored.tick(300);
+    assert(!restored.w.document.documentElement.classList.contains('sl-booting'),
+      'restored page must never remain blurred after rings finish');
+    restored.dom.window.close();
 
     const home=read('index.html');
     assert(home.includes('sl-dropper-reagent'),'flask must contain matching green reagent');
     assert(home.includes('sl-flask-mark-a'),'intro uses science-themed background marks');
     assert(home.includes('html:not(.sl-first-intro) #studylabLoader'),
-      'intro must be hidden from first render on all subsequent visits');
+      'flask is hidden from the first paint on all non-fresh loads');
   }
   // Only four independent quarter-rings, not a GIF/canvas or progress bar.
   {
@@ -106,7 +127,7 @@ async function flush(){for(let i=0;i<8;i++)await Promise.resolve();}
   }
   // Slow auth/CMS cannot indefinitely hide a usable page.
   {
-    const h=harness();h.w.localStorage.setItem('studylab-first-welcome-intro-v2','1');
+    const h=harness();h.w.sessionStorage.setItem('studylab-first-entry-in-tab-v2','1');
     h.w.StudyLabContentReady=new Promise(()=>{});
     h.w.eval(read('assets/js/page-boot.js'));h.w.document.dispatchEvent(new h.w.Event('DOMContentLoaded'));h.tick(0);await flush();
     assert(h.w.document.documentElement.classList.contains('sl-booting'));
