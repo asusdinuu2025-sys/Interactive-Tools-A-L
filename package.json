@@ -3,5 +3,12 @@
   "private": true,
   "dependencies": {
     "@netlify/blobs": "10.7.13"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.3.14",
+    "jsdom": "26.1.0"
+  },
+  "scripts": {
+    "test:admin": "node scripts/admin-dashboard-tests.cjs && node scripts/admin-dashboard-sql-tests.cjs && node scripts/studylab-chat-image-sql-check.cjs && node scripts/studylab-chat-glass-runtime-check.cjs && node scripts/studylab-popups-home-entry-check.cjs && node scripts/studylab-popup-home-gate-check.cjs && node scripts/studylab-guided-publisher-check.cjs && node scripts/studylab-publisher-save-test.cjs && node scripts/studylab-countdown-sidebar-check.cjs"
   }
 }

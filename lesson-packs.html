@@ -62,7 +62,8 @@
 <link rel="stylesheet" href="assets/css/subject-home-glass.css?v=1">
 <link rel="stylesheet" href="assets/css/resource-home-glass.css?v=1">
   <link rel="stylesheet" href="assets/css/interior-neon-glass.css?v=20261114-neon-v1">
-  <link rel="stylesheet" href="assets/css/studylab-content.css?v=live-cms-20261117-v1">
+  <link rel="stylesheet" href="assets/css/studylab-content.css?v=pr102-public-rest-v3">
+  <link rel="stylesheet" href="assets/css/studylab-popups.css?v=20261116-v13" />
 </head>
 <body class="sl-subject-hub sl-resource-hub sl-lessons-hub" data-sl-neon-page="lessons">
   <header class="site-header sl-subject-topbar">
@@ -91,7 +92,7 @@
     </div>
 
     <section class="sl-lessons-publisher-grid" aria-label="Available lesson packs">
-      <a class="sl-lesson-publisher-card" href="smk-physics-lessons.html" aria-label="Open SMK Physics 2027 Speed Revise Pack lessons">
+      <a class="sl-lesson-publisher-card" href="smk-physics-lessons.html" aria-label="Open SMK Physics 2027 Speed Revise Pack lessons" data-cms-id="lesson-packs-card-0" data-cms-order="10">
         <span class="sl-lesson-publisher-identity">
           <span class="sl-lesson-publisher-mark" aria-hidden="true">
             <svg viewBox="0 0 24 24" focusable="false"><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(-60 12 12)"/><circle cx="12" cy="12" r="1.5"/></svg>
@@ -114,9 +115,13 @@
   <script src="assets/js/study-dashboard.js?v=20261114-local-cleanup-v1"></script>
 <script src="assets/js/studylab-pet.js" defer></script>
   <script src="assets/js/interior-neon-doodles.js?v=20261114-neon-v1"></script>
-
-  <!-- Publicly published cards: simulations, Telegram channels and lesson packs. -->
-  <script src="assets/js/studylab-special-resources.js?v=live-cms-20261117-v1"></script>
-  <script src="assets/js/studylab-content.js?v=live-cms-20261117-v1"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.2/dist/umd/supabase.js"></script>
+  <script src="assets/js/studylab-admin-config.js"></script>
+  <script src="assets/js/studylab-special-resources.js?v=pr102-public-visibility-v2"></script>
+  <script src="assets/js/studylab-content.js?v=pr102-public-rest-v4"></script>
+  <!-- Site-wide one-time announcements and account moderation checks. -->
+  <script src="assets/js/studylab-ban-guard.js?v=20261116-v1"></script>
+  <script src="assets/js/studylab-popup-format.js?v=20261116-v1"></script>
+  <script src="assets/js/studylab-popups.js?v=20261116-v13"></script>
 </body>
 </html>

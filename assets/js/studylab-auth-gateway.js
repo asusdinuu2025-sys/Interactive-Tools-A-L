@@ -49,7 +49,16 @@ if(finePointer){
 function view(name){screens.forEach(x=>x.hidden=x.dataset.screen!==name);status.hidden=true;status.textContent="";}
 function message(s,type="error"){status.textContent=s;status.dataset.type=type;status.hidden=!s;}
 function busy(v){buttons.forEach(b=>b.disabled=v);}
-function close(){root.classList.add("auth-leaving");window.setTimeout(()=>root.hidden=true,280);}
+function close(){
+  root.classList.add("auth-leaving");
+  window.setTimeout(()=>{
+    root.hidden=true;
+    // Only the actual completion of the welcome/login/guest flow can release
+    // pending one-time homepage pop-ups. URL-only checks are insufficient:
+    // the welcome screen itself lives at /index.html.
+    window.dispatchEvent(new Event("studylab-home-entered"));
+  },280);
+}
 function authErrorMessage(error,intent){
   const raw=String(error?.message||error?.error_description||error?.msg||"").trim();
   const detail=raw.toLowerCase();
