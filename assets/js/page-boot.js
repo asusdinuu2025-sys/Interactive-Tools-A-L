@@ -1,4 +1,4 @@
-/* Inlined before page styles. First-visit intro and loading must never replay on refresh, history or internal navigation. */
+/* Inlined in the page head: apply theme and select the correct StudyLab loading scene. */
 (function () {
   'use strict';
   const root = document.documentElement;
@@ -6,50 +6,43 @@
   const valid = value => ['dark', 'light', 'system'].includes(value);
   const mode = read('studylab-room-mode-v1') || read('etools-theme');
   const choice = valid(mode) ? mode : 'dark';
-  root.dataset.theme = choice === 'system' ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : choice;
+  root.dataset.theme = choice === 'system'
+    ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : choice;
   root.dataset.themeMode = choice;
 
   const home = /(?:\/|\/index\.html)$/i.test(location.pathname);
-  const INTRO_KEY = 'studylab-first-welcome-intro-v2';
   const ENTRY_KEY = 'studylab-first-entry-in-tab-v2';
   const nav = (typeof performance.getEntriesByType === 'function' &&
     performance.getEntriesByType('navigation')[0]) || null;
   const navigation = nav?.type || 'navigate';
-  const isNewNavigation = navigation === 'navigate';
-  let showFlask = false;
-  let showRings = false;
 
-  // A first-time visitor gets the chemistry introduction before the auth welcome.
-  // Returning students get the fast four-arc loader on the initial Home entry in
-  // a fresh browser tab, but NEVER on reload, browser Back/Forward or subpages.
-  // Reserve the first-visit flag synchronously, so refresh mid-intro cannot replay it.
+  // Flask: the first *new navigation to Home* in this tab, even for returning
+  // users. Rings: every other navigation, including reloads, links and history.
+  // Reserve entry before rendering, so a refresh in the middle shows rings.
+  let showFlask = false;
   try {
-    const firstInTab = sessionStorage.getItem(ENTRY_KEY) !== '1';
-    const introPlayed = localStorage.getItem(INTRO_KEY) === '1';
-    if (home && isNewNavigation && firstInTab) {
-      showFlask = !introPlayed;
-      showRings = introPlayed;
-    }
+    showFlask = home && navigation === 'navigate' &&
+      sessionStorage.getItem(ENTRY_KEY) !== '1';
     sessionStorage.setItem(ENTRY_KEY, '1');
-    if (showFlask) localStorage.setItem(INTRO_KEY, '1');
   } catch (_) {
-    // Without persistent storage, avoid any repeating or stuck animation.
-    showFlask = false;
-    showRings = false;
+    // No session storage: safely use the normal rings instead of replaying intro.
   }
 
-  if (showFlask) root.classList.add('sl-first-intro');
-  if (showRings) root.classList.add('sl-booting');
-  let finished = false;
+  root.classList.add(showFlask ? 'sl-first-intro' : 'sl-booting');
+  let ready = false;
+  let failsafe;
+  let restoreTimer;
+
   function reveal() {
-    if (finished) return;
-    finished = true;
+    if (ready) return;
+    ready = true;
     clearTimeout(failsafe);
     root.classList.remove('sl-booting');
     root.classList.add('sl-page-ready');
   }
-  // A failed CDN, auth or network request must not trap students behind a loader.
-  const failsafe = setTimeout(reveal, 12000);
+
+  // A failed script, CDN, auth service or connection may not trap the page.
+  failsafe = setTimeout(reveal, 12000);
   document.addEventListener('DOMContentLoaded', function () {
     setTimeout(function () {
       const tasks = [window.StudyLabAccount?.startup, window.StudyLabContentReady].filter(Boolean);
@@ -64,16 +57,24 @@
     }, 0);
   }, { once: true });
 
-  // BFCache navigation can restore previous DOM/CSS classes. Never replay the intro.
-  function leavePage() {
+  // On BFCache restores no new document is loaded and the boot script isn't run
+  // again. Briefly replay the same four arcs and then release them safely.
+  window.addEventListener('pagehide', function () {
+    clearTimeout(restoreTimer);
     root.classList.remove('sl-booting', 'sl-first-intro');
-    const intro = document.getElementById('studylabLoader');
-    if (intro) intro.remove();
-  }
-  window.addEventListener('pagehide', leavePage);
-  window.addEventListener('pageshow', event => {
+    const flask = document.getElementById('studylabLoader');
+    if (flask) flask.remove();
+  });
+  window.addEventListener('pageshow', function (event) {
     if (!event.persisted) return;
-    leavePage();
-    reveal();
+    clearTimeout(restoreTimer);
+    root.classList.remove('sl-first-intro');
+    root.classList.add('sl-booting');
+    // A restored history page is already ready: a short arc reveal, not a
+    // fabricated three-second load or another chemistry introduction.
+    restoreTimer = setTimeout(function () {
+      root.classList.remove('sl-booting');
+      root.classList.add('sl-page-ready');
+    }, 300);
   });
 })();
