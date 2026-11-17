@@ -235,7 +235,9 @@
     host.before(notice);
   }
 
+  let lastAttemptAt = 0;
   async function start() {
+    lastAttemptAt = Date.now();
     let records;
     try {
       records = await readPublished();
@@ -314,7 +316,17 @@
       detail:{page,records:records.length}
     }));
   }
-  start().catch((e) =>
-    console.warn("StudyLab content kept its existing version:", e.message),
-  );
+  function refreshPublished() {
+    void start().catch((error)=>
+      console.warn("StudyLab content refresh failed:",error));
+  }
+  refreshPublished();
+  // Returning from admin or browser back-forward cache should show new
+  // published cards without a hard reload. Avoid excessive focus refetches.
+  window.addEventListener("pageshow",event=>{
+    if(event.persisted)refreshPublished();
+  });
+  window.addEventListener("focus",()=>{
+    if(Date.now()-lastAttemptAt>5000)refreshPublished();
+  });
 })();
