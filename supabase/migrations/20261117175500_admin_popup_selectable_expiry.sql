@@ -260,7 +260,6 @@ begin
    values(auth.uid(),'Undo '||v_event.action,v_event.target);
  return jsonb_build_object('undone',true,'id',p_id);
 end;
-$function$
-
+$function$;
 
 COMMIT;
