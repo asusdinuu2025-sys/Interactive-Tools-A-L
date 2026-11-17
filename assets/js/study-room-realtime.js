@@ -694,13 +694,40 @@
       });
       await loadRows();
       startRoomPresenceLifecycle();
-      client.channel('study-room-live')
-        .on('postgres_changes', {event:'*',schema:'public',table:'study_room_members'}, () => {
-          scheduleGlobalRefresh();
-        })
-        .on('postgres_changes', {event:'UPDATE',schema:'public',table:'study_room_members',filter:'user_id=eq.' + userId}, () => {
-          refreshOwnRow().catch(e => console.error('Could not refresh own Study Room state', e));
-        }).subscribe();
+      // PR #108: heartbeat-safe Realtime. After the isolated SQL migration,
+      // publish compact state-change events only (start, pause, away, end,
+      // subject, rollovers). Heartbeats and crediting RPCs still run unchanged,
+      // but their 20-second row updates no longer fan out to every student.
+      //
+      // Preview / pre-migration compatibility: if the signal table does not
+      // exist yet, retain the original listeners. Never break the existing room.
+      let signalSupported = false;
+      try {
+        const capability = await client.from('study_room_change_signals')
+          .select('user_id').limit(1);
+        signalSupported = !capability.error;
+      } catch (_) { /* original publication remains until migration */ }
+      const channel = client.channel(signalSupported ? 'study-room-state-signals' : 'study-room-live');
+      if (signalSupported) {
+        channel.on('postgres_changes',
+          {event:'*',schema:'public',table:'study_room_change_signals'}, payload => {
+            // Cross-device changes to this student's session appear promptly.
+            if (payload.new?.user_id === userId) {
+              refreshOwnRow().catch(e => console.error('Could not refresh own Study Room state', e));
+            }
+            // Preserve coalesced global rankings and all original UI behavior.
+            scheduleGlobalRefresh();
+          });
+      } else {
+        channel
+          .on('postgres_changes', {event:'*',schema:'public',table:'study_room_members'}, () => {
+            scheduleGlobalRefresh();
+          })
+          .on('postgres_changes', {event:'UPDATE',schema:'public',table:'study_room_members',filter:'user_id=eq.' + userId}, () => {
+            refreshOwnRow().catch(e => console.error('Could not refresh own Study Room state', e));
+          });
+      }
+      channel.subscribe();
       join.addEventListener('click', startStudy);
       pause.addEventListener('click', () => {
         if (sessionAction || !member?.session_active) return;
