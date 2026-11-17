@@ -336,7 +336,7 @@ async function setup(admin = true, options = {}) {
   assert.doesNotMatch(todayPanel,/Yesterday action/);
   dom.window.close();
   // The admin CMS may move/reorder extra sections after page load.
-  // More must remain immediately below Free Lesson Packs in the actual DOM.
+  // More belongs after the final built-in panel, before custom sections.
   const cmsDom = new JSDOM(`<main>
     <section id="free-lesson-packs" data-cms-id="free-lesson-packs" data-cms-order="70">
       <h2>Free Lesson Packs</h2><p>Lessons</p></section>
@@ -347,13 +347,19 @@ async function setup(admin = true, options = {}) {
     });
   const cmsWindow = cmsDom.window;
   if (!cmsWindow.CSS) cmsWindow.CSS = {};
-  cmsWindow.CSS.escape = value=>String(value).replace(/[^a-z0-9_-]/gi,"\\  // One failed API request must not suppress the overview stats or its actions.");
+  cmsWindow.CSS.escape = value=>String(value);
   cmsWindow.StudyLabAdminConfig = {mode:"preview"};
   cmsWindow.StudyLabAccount = {
     startup:Promise.resolve(),
     client:{
       auth:{getUser:async()=>({data:{user:{id:"24e78cd0-4565-407a-96f7-9cfde083f6d2"}}})},
-      rpc:async()=>({data:true})
+      rpc:async()=>({data:true}),
+      from(table){
+        assert.equal(table,"studylab_site_content");
+        return {select(){
+          return {eq(){return {limit:async()=>({data:[],error:null})}}};
+        }};
+      }
     }
   };
   cmsWindow.localStorage.setItem("studylab-admin-preview-v1",JSON.stringify({
@@ -389,7 +395,7 @@ async function setup(admin = true, options = {}) {
   assert.match(adminMarkup, /Loading dashboard/);
   assert.match(adminMarkup, /pr102-guided-v1/);
   assert.match(read("index.html"), /studylab-popups[.]js[?]v=20261116-v15/);
-  assert.match(read("index.html"), /studylab-content[.]js[?]v=pr102-guided-v1/);
+  assert.match(read("index.html"), /studylab-content[.]js[?]v=pr102-public-visibility-v2/);
   assert.match(adminMarkup,/sladmin-brand-mark" aria-hidden="true">ツ/);
   assert.match(adminMarkup,/sladmin-back-icon/);
   assert.match(adminMarkup,/studylab-popups.css/);
@@ -414,11 +420,11 @@ async function setup(admin = true, options = {}) {
   const sidebarJs = read("assets/js/home-sidebar.js");
   const cmsJs = read("assets/js/studylab-content.js");
   assert.match(homeHtml,/id="more-learning-resources"/);
-  assert.match(homeHtml,/home-sidebar[.]js[?]v=10/);
+  assert.match(homeHtml,/home-sidebar[.]js[?]v=11/);
   assert.match(sidebarJs,/data-nav-id="more"/);
   assert.match(sidebarJs,/href="#more-learning-resources"/);
   assert.match(sidebarJs,/\["more", "more-learning-resources"\]/);
-  assert.match(cmsJs,/lessons\.after\(more\)/);
+  assert.match(cmsJs,/builtins\[builtins\.length - 1\]\.after\(more\)/);
   assert.match(read("assets/css/home-sidebar.css"),/\.sl-home-more-anchor/);
   const popupCss=read("assets/css/studylab-popups.css");
   assert.match(popupCss,/slpopup-toast/);
