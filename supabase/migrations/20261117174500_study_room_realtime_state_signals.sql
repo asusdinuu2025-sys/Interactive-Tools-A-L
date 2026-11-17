@@ -5,7 +5,7 @@
 BEGIN;
 
 CREATE TABLE public.study_room_change_signals (
-  user_id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id uuid PRIMARY KEY,
   revision bigint NOT NULL DEFAULT 1,
   changed_at timestamptz NOT NULL DEFAULT now()
 );
