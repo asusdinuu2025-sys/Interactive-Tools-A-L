@@ -138,6 +138,8 @@ body.sl-community-open .study-quick-button {
   .sl-feed-toggle { padding-inline: 11px; }
 }
 @media (max-width: 720px) {
+  /* Mobile Social is full-screen. Keep the fixed Home header underneath it. */
+  .sl-feed-panel { z-index: 1010; }
   .sl-feed-panel, .sl-feed-panel[data-size="half"] {
     top: 8px; right: 8px; bottom: 8px; left: 8px; width: auto; height: auto;
     padding: 14px; border-radius: 18px;
