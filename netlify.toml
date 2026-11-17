@@ -1,5 +1,5 @@
 [build]
-  command = "node scripts/generate-admin-config.mjs && node scripts/generate-sitemap.mjs && node scripts/generate-search-index.mjs && node scripts/sync-page-boot.mjs && node scripts/bundle-styles.mjs"
+  command = "node scripts/generate-admin-config.mjs && node scripts/generate-sitemap.mjs && node scripts/generate-search-index.mjs && node scripts/sync-page-boot.mjs && node scripts/generate-brand-icons.mjs && node scripts/bundle-styles.mjs"
   publish = "."
   ignore = "bash ./scripts/netlify-ignore.sh"
 
