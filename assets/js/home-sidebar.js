@@ -77,23 +77,29 @@
   // The Sections dashboard can change built-in section orders at runtime.
   // Mirror the saved live CMS order instead of freezing a different sidebar order.
   function syncNavigationOrder() {
+    // Order navigation from the real DOM after published CMS rearrangements,
+    // not from the original hard-coded list or a stale numeric fallback.
     const ordered=navItems.slice().sort((a,b)=>{
-      function order(item) {
-        const id=item.dataset.navId;
-        if(id==="home")return -100000;
-        if(id==="more")return 100000;
-        const target=document.getElementById(id);
-        const fromCMS=Number(target?.dataset?.cmsOrder);
-        if(target?.dataset?.cmsOrder && Number.isFinite(fromCMS))return fromCMS;
-        return (navItems.indexOf(item)+1)*10;
+      if(a.dataset.navId==="home")return -1;
+      if(b.dataset.navId==="home")return 1;
+      if(a.dataset.navId==="more")return 1;
+      if(b.dataset.navId==="more")return -1;
+      const left=document.getElementById(a.dataset.navId);
+      const right=document.getElementById(b.dataset.navId);
+      if(left && right){
+        const position=left.compareDocumentPosition(right);
+        if(position & 4)return -1; // following
+        if(position & 2)return 1;  // preceding
       }
-      return order(a)-order(b)||navItems.indexOf(a)-navItems.indexOf(b);
+      return navItems.indexOf(a)-navItems.indexOf(b);
     });
     for(const item of ordered)nav.append(item);
     const active=navItems.find(x=>x.classList.contains("is-active"));
     if(active && indicator){
+      indicator.style.height=active.offsetHeight+"px";
       indicator.style.transform="translate3d(0,"+active.offsetTop+"px,0)";
     }
+    scheduleScrollSync();
   }
   window.addEventListener("studylab-content-applied",syncNavigationOrder);
   syncNavigationOrder();
@@ -191,7 +197,8 @@
 
     if (pendingNavigation) {
       const targetTop = pendingNavigation.element.getBoundingClientRect().top;
-      if (Math.abs(targetTop - 100) <= 22) {
+      if (Math.abs(targetTop - 112) <= 32 ||
+          window.scrollY+window.innerHeight>=document.documentElement.scrollHeight-3) {
         pendingNavigation = null;
       } else {
         setActive(pendingNavigation.navId);
@@ -199,12 +206,30 @@
       }
     }
 
-    const markerLine = Math.min(window.innerHeight * 0.36, 300);
-    let current = null;
-    scrollTargets.forEach(target => {
-      if (target.element.getBoundingClientRect().top <= markerLine) current = target;
+    const headerBottom = document.querySelector("header.site-header")
+      ?.getBoundingClientRect().bottom || 82;
+    const markerLine = Math.max(112,Math.min(185,headerBottom+30));
+    // Re-sort on every scroll: CMS may have moved Free Lesson Packs and
+    // Other A/L Resources since these targets were first collected.
+    const orderedTargets=scrollTargets.filter(target=>
+      target.element.isConnected && !target.element.hidden).sort((a,b)=>{
+      const position=a.element.compareDocumentPosition(b.element);
+      if(position & 4)return -1;
+      if(position & 2)return 1;
+      return 0;
     });
-    setActive(current ? current.navId : "home");
+    let current=null;
+    for(const target of orderedTargets){
+      if(target.element.getBoundingClientRect().top<=markerLine)current=target;
+    }
+    // A 1px More anchor near the footer cannot always scroll to the
+    // heading offset. Highlight it once the visitor reaches that boundary.
+    const more=document.getElementById("more-learning-resources");
+    const atPageEnd=window.scrollY+window.innerHeight>=
+      document.documentElement.scrollHeight-3;
+    if(atPageEnd && more?.getBoundingClientRect().top<=window.innerHeight-40)
+      current=orderedTargets.find(target=>target.navId==="more")||current;
+    setActive(current?.navId||"home");
   }
 
   function scheduleScrollSync() {
