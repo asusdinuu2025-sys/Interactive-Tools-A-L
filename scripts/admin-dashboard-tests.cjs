@@ -415,8 +415,8 @@ async function setup(admin = true, options = {}) {
   const adminMarkup = read("admin.html");
   assert.match(adminMarkup, /studylab-admin\.js\?v=pr112-carousel-v3/);
   assert.match(adminMarkup, /Loading dashboard/);
-  assert.match(adminMarkup, /pr110-connected-v1/);
-  assert.match(adminMarkup, /studylab-admin-config[.]js[?]v=pr110-connected-v1/);
+  assert.match(adminMarkup, /pr114-connected-v1/);
+  assert.match(adminMarkup, /studylab-admin-config[.]js[?]v=pr114-connected-v1/);
   assert.match(read("index.html"), /studylab-popups[.]js[?]v=pr109-live-v1/);
   assert.match(read("index.html"), /studylab-content[.]js[?]v=pr111-canonical-pages-v1/);
   assert.match(adminMarkup,/sladmin-brand-mark" aria-hidden="true">ツ/);
@@ -451,8 +451,8 @@ async function setup(admin = true, options = {}) {
     "Keep the original featured channel's title and description");
   assert.match(telegramMarkup, /href="https:\/\/t[.]me\/AL_LESSONS"/,
     "Keep the original featured channel's Join button");
-  assert.match(adminMarkup,/studylab-admin-publisher[.]js[?]v=pr112-carousel-v3/);
-  assert.match(adminMarkup,/studylab-admin[.]css[?]v=pr112-carousel-v3/);
+  assert.match(adminMarkup,/studylab-admin-publisher[.]js[?]v=pr114-sleek-icons-v1/);
+  assert.match(adminMarkup,/studylab-admin[.]css[?]v=pr114-sleek-icons-v1/);
   assert.match(telegramMarkup,/studylab-content[.]js[?]v=pr112-carousel-settings-v3/);
   assert.match(adminMarkup,/studylab-admin[.]js[?]v=pr112-carousel-v3/);
   assert.match(read("assets/css/telegram-channel-browser.css"),
