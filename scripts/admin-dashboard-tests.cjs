@@ -441,8 +441,8 @@ async function setup(admin = true, options = {}) {
   const telegramMarkup=read("Telegram_Channels.html");
   assert.match(telegramMarkup,/studylab-content[.]css[?]v=pr112-channel-avatars-v1/);
   assert.match(telegramMarkup,/studylab-special-resources[.]js[?]v=pr112-browser-v2/);
-  assert.match(telegramMarkup,/telegram-channel-browser[.]css[?]v=pr112-browser-v1/);
-  assert.match(telegramMarkup,/telegram-channel-browser[.]js[?]v=pr112-browser-v2/);
+  assert.match(telegramMarkup,/telegram-channel-browser[.]css[?]v=pr112-carousel-v3/);
+  assert.match(telegramMarkup,/telegram-channel-browser[.]js[?]v=pr112-carousel-v3/);
   assert.ok(!read("assets/js/telegram-channel-browser.js").includes("window.location ="),
     "View All and filter navigation must remain on the Telegram page");
   assert.doesNotMatch(telegramMarkup, /class="telegram-featured-count"/,
@@ -451,8 +451,16 @@ async function setup(admin = true, options = {}) {
     "Keep the original featured channel's title and description");
   assert.match(telegramMarkup, /href="https:\/\/t[.]me\/AL_LESSONS"/,
     "Keep the original featured channel's Join button");
-  assert.match(adminMarkup,/studylab-admin-publisher[.]js[?]v=pr112-browser-v1/);
-  assert.match(adminMarkup,/studylab-admin[.]css[?]v=pr112-channel-avatars-v1/);
+  assert.match(adminMarkup,/studylab-admin-publisher[.]js[?]v=pr112-carousel-v3/);
+  assert.match(adminMarkup,/studylab-admin[.]css[?]v=pr112-carousel-v3/);
+  assert.match(telegramMarkup,/studylab-content[.]js[?]v=pr112-carousel-settings-v3/);
+  assert.match(adminMarkup,/studylab-admin[.]js[?]v=pr112-carousel-v3/);
+  assert.match(read("assets/css/telegram-channel-browser.css"),
+    /repeat\(4,minmax\(0,1fr\)\)/,
+    "Collapsed All Subjects uses four columns on desktop");
+  assert.match(read("assets/js/studylab-admin-publisher.js"),
+    /auto_advance_seconds/,
+    "Admin carousel timing must use the existing publishing workflow");
   const homeHtml = read("index.html");
   const sidebarJs = read("assets/js/home-sidebar.js");
   const cmsJs = read("assets/js/studylab-content.js");
