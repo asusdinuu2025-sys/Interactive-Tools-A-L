@@ -2,7 +2,21 @@
 (function () {
   "use strict";
   const config = window.StudyLabAdminConfig || {mode:"public"};
-  const page = location.pathname.split("/").pop() || "index.html";
+  // Netlify may serve the same page at /lesson-packs and /lesson-packs.html.
+  // Supabase stores canonical .html page keys: normalize before BOTH the
+  // public REST lookup and the on-page renderer / private draft overlays.
+  const canonicalPages = Object.freeze({
+    index: "index.html",
+    maths: "maths.html",
+    physics: "physics.html",
+    chemistry: "chemistry.html",
+    biology: "biology.html",
+    telegram_channels: "Telegram_Channels.html",
+    "lesson-packs": "lesson-packs.html"
+  });
+  const segment = location.pathname.split("/").filter(Boolean).pop() || "index";
+  const pageKey = segment.replace(/\.html$/i, "").toLowerCase();
+  const page = canonicalPages[pageKey] || segment;
   function safeURL(raw, image = false) {
     try {
       raw = String(raw || "").trim();
