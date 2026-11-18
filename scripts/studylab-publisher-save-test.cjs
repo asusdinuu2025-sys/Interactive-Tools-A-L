@@ -93,6 +93,9 @@ const clickPublish=async dialog=>{
   d=open("telegram",true);
   d.querySelector('[name="title"]').value="Chemistry Channel";
   d.querySelector('[name="link"]').value="https://t.me/chemistry2028";
+  assert.equal(d.querySelector('[name="order"]'),null,
+    "Telegram publisher must assign order automatically without an extra field");
+  assert.match(d.textContent,/Newest channels appear first automatically/);
   await clickPublish(d);
   assert.equal(saved[2].item.resource_type,"telegram");
   assert.equal(saved[2].item.telegram_category,"sponsored");
@@ -201,6 +204,33 @@ const clickPublish=async dialog=>{
   assert.equal(uploadedMedia.length,5);
   d.close();
 
+  // New Telegram card auto-orders after existing entries across categories.
+  // Editing it must not move it to the front or change its saved position.
+  const seeded=[{id:"old-sponsor",draft:{page:"Telegram_Channels.html",
+    kind:"card",resource_type:"telegram",telegram_category:"sponsored",order:280}},
+    {id:"old-maths",draft:{page:"Telegram_Channels.html",
+      kind:"card",resource_type:"telegram",telegram_category:"maths",order:300}}];
+  const seededHost=w.document.createElement("main");
+  w.document.body.append(seededHost);
+  const publisher2=w.StudyLabAdminPublisher.mount(seededHost,api,seeded,async()=>{});
+  const previousCount=saved.length;
+  publisher2.open("telegram","biology");
+  d=findDialog();
+  d.querySelector('[name="title"]').value="Newest BIO";
+  d.querySelector('[name="link"]').value="https://t.me/newbio";
+  assert.equal(d.querySelector('[name="order"]'),null);
+  await clickPublish(d);
+  assert.equal(saved[previousCount].item.order,310,
+    "Newly published channels get next order number across categories");
+  const newer=saved[previousCount].item;
+  publisher2.open("telegram","biology",{
+    id:newer.id,draft:newer,revision:1,published:true
+  });
+  d=findDialog();
+  await clickPublish(d);
+  assert.equal(saved[previousCount+1].item.order,310,
+    "Editing an existing channel retains its original newest-first position");
+
   dom.window.close();
-  console.log("PASS: HTML, Telegram avatar upload/retain/replace/remove/rollback, PDF lesson pack and cover publishing.");
+  console.log("PASS: automatic Telegram publishing order, avatar upload/edit/rollback, HTML and PDF publishing.");
 })().catch(err=>{console.error(err);process.exitCode=1});
