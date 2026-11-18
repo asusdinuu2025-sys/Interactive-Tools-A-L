@@ -413,7 +413,7 @@ async function setup(admin = true, options = {}) {
     /Local preview · Isolated/);
   dom.window.close();
   const adminMarkup = read("admin.html");
-  assert.match(adminMarkup, /studylab-admin\.js\?v=pr112-carousel-v3/);
+  assert.match(adminMarkup, /studylab-admin\.js\?v=pr114-subject-actions-v1/);
   assert.match(adminMarkup, /Loading dashboard/);
   assert.match(adminMarkup, /pr114-connected-v1/);
   assert.match(adminMarkup, /studylab-admin-config[.]js[?]v=pr114-connected-v1/);
@@ -451,10 +451,10 @@ async function setup(admin = true, options = {}) {
     "Keep the original featured channel's title and description");
   assert.match(telegramMarkup, /href="https:\/\/t[.]me\/AL_LESSONS"/,
     "Keep the original featured channel's Join button");
-  assert.match(adminMarkup,/studylab-admin-publisher[.]js[?]v=pr114-sleek-icons-v1/);
+  assert.match(adminMarkup,/studylab-admin-publisher[.]js[?]v=pr114-subject-actions-v1/);
   assert.match(adminMarkup,/studylab-admin[.]css[?]v=pr114-sleek-icons-v1/);
   assert.match(telegramMarkup,/studylab-content[.]js[?]v=pr112-carousel-settings-v3/);
-  assert.match(adminMarkup,/studylab-admin[.]js[?]v=pr112-carousel-v3/);
+  assert.match(adminMarkup,/studylab-admin[.]js[?]v=pr114-subject-actions-v1/);
   assert.match(read("assets/css/telegram-channel-browser.css"),
     /repeat\(4,minmax\(0,1fr\)\)/,
     "Collapsed All Subjects uses four columns on desktop");
@@ -492,7 +492,7 @@ async function setup(admin = true, options = {}) {
   assert.ok(!adminMarkup.includes('href="assets/css/main.css"'),
     "Admin must use isolated CSS, not global home rules");
   const cardCode = read("assets/js/studylab-content.js");
-  assert.ok(cardCode.includes('d.button_label || "Open resource"'));
+  assert.ok(cardCode.includes('window.StudyLabSpecialResources?.buttonLabel'));
   assert.ok(!cardCode.includes('"Open resource →"'));
   const popupCode = read("assets/js/studylab-popups.js");
   assert.ok(popupCode.includes('item.link_label || "View"'));
