@@ -195,7 +195,7 @@ function mount(host,api,rows,onRefresh){
    const status=el("p","", "sladmin-publish-status");status.dataset.publisherStatus="";
    actionBar.append(preview,draftBtn,publish);
    const modeNotice=el("p",api.preview
-     ? "Local-only editor: nothing appears to other students. Open PR #102 deploy preview to publish."
+     ? "Local-only editor: nothing appears to other students. Open a production-connected Admin deployment to publish."
      : "Connected to StudyLab publishing. Published cards appear on their destination pages.",
      "sladmin-publish-note sladmin-publish-mode-note");
    form.append(head,modeNotice,fields,status,actionBar);dialog.append(form);document.body.append(dialog);
