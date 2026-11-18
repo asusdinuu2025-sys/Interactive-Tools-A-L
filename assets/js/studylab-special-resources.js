@@ -26,12 +26,12 @@ function defaultButtonLabel(page,href){
 }
 function buttonLabel(page,raw,href){
  const value=String(raw||"").trim()
-   .replace(/\\s*(?:→|➔|➜|➡|⇒|➝|-->|->)\\s*$/u,"").trim();
+   .replace(/\s*(?:→|➔|➜|➡|⇒|➝|-->|->)\s*$/u,"").trim();
  if(!subjectPages.includes(page))return value||"Open Tool";
  // Existing labels are generated defaults, not deliberate admin overrides.
  const old=/^(?:open tool|open resource|view papers|මෙවලම විවෘත කරන්න)$/iu.test(value);
- if(!value||old||value.length>22||value.split(/\\s+/u).length>2||
-    /[<>\\u0000-\\u001f\\u007f→➔➜➡⇒➝]/u.test(value))
+ if(!value||old||value.length>22||value.split(/\s+/u).length>2||
+    /[<>\u0000-\u001f\u007f→➔➜➡⇒➝]/u.test(value))
    return defaultButtonLabel(page,href);
  return value;
 }
