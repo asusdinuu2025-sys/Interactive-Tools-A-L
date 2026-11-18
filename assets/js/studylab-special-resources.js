@@ -95,9 +95,7 @@ function apply(d,href){
      const copy=el("div","telegram-featured-copy");
      copy.append(el("span","telegram-featured-eyebrow","✦ Featured Channel"),
        el("h2",null,d.resource_title||d.title),
-       el("p",null,d.description||"StudyLab educational channel"),
-       el("span","telegram-featured-count",
-         "👥 ග්‍රාහකයින්ගේ වත්මන් ගණන Telegram තුළ බලන්න"));
+       el("p",null,d.description||"StudyLab educational channel"));
      const action=el("div","telegram-featured-action");
      const join=el("a","telegram-open");
      setDestination(join,href);
