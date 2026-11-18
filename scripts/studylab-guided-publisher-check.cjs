@@ -88,6 +88,7 @@ function make(html){
  // End-to-end public CMS load, not just direct calls to the native renderer.
  // Uses entirely mocked records, with no actual Supabase queries or writes.
  async function loadPublicPage(name,markup,published,withSidebar=false){
+   const canonical=published[0]?.page || "index.html";
    const dom=new JSDOM("<!doctype html><html><body>"+markup+"</body></html>",{
      url:"https://studylablk.netlify.app/"+name,runScripts:"outside-only",
      pretendToBeVisual:true
@@ -106,8 +107,8 @@ function make(html){
            return {
              eq(column,value){
                assert.equal(column,"page");
-               assert.equal(value,name);
-               return {limit:async()=>({data:published.filter(p=>p.page===name).map(payload=>({payload})),error:null})};
+               assert.equal(value,canonical,"SDK fallback must query canonical .html page");
+               return {limit:async()=>({data:published.filter(p=>p.page===canonical).map(payload=>({payload})),error:null})};
              }
            };
          }
@@ -137,7 +138,7 @@ function make(html){
    w.fetch=async(url,options)=>{
      requested=true;
      assert.match(url,/\/rest\/v1\/studylab_site_content\?select=payload&page=eq\./);
-     assert.ok(url.includes(encodeURIComponent(name)),"Request must filter by destination page");
+     assert.ok(url.includes("page=eq."+encodeURIComponent(row.page)),"Request must filter by destination page");
      assert.equal(options.headers.Accept,"application/json");
      assert.ok(options.headers.apikey.startsWith("sb_publishable_"));
      assert.equal(options.cache,"no-store");
@@ -165,6 +166,46 @@ function make(html){
    '<main><section class="sl-lessons-publisher-grid"></section></main>',
    {...pack,page:"lesson-packs.html",url:"https://example.org/pack.pdf"},
    ".sl-lessons-publisher-grid > a.sl-cms-special");
+
+
+ // Netlify serves /lesson-packs and /lesson-packs.html as the same page.
+ // Public REST and fallback SDK must always query the canonical .html key.
+ for (const [route,canonical] of [
+   ["maths","maths.html"],["maths/","maths.html"],
+   ["physics","physics.html"],["chemistry","chemistry.html"],
+   ["biology","biology.html"]
+ ]) {
+   await loadWithoutSdk(route,
+     '<main><section class="tool-grid"></section></main>',
+     {...sample,page:canonical,url:"/simulation-viewer.html?id="+sample.id},
+     ".tool-grid > a.sl-cms-special");
+ }
+ for (const route of ["lesson-packs","lesson-packs/","lesson-packs.html"]) {
+   await loadWithoutSdk(route,
+     '<main><section class="sl-lessons-publisher-grid"></section></main>',
+     {...pack,page:"lesson-packs.html",url:"https://example.org/pack.pdf"},
+     ".sl-lessons-publisher-grid > a.sl-cms-special");
+ }
+ for (const route of ["Telegram_Channels","telegram_channels","Telegram_Channels.html"]) {
+   await loadWithoutSdk(route,
+     '<main><section class="telegram-featured-channel"></section><div class="telegram-all-grid"></div></main>',
+     {...channel,page:"Telegram_Channels.html",telegram_category:"sponsored",
+       url:"https://t.me/study"},
+     ".sl-cms-sponsored-grid > a.sl-cms-special");
+ }
+ for (const route of ["","index","index.html"]) {
+   await loadWithoutSdk(route,'<main><div data-cms-additions></div></main>',
+     {id:"generic-home-test",kind:"card",page:"index.html",title:"Public Home card",
+       description:"Live without redeploy",url:"https://example.org/resources",order:20,
+       hidden:false},
+     '[data-cms-additions] > a[data-cms-id="generic-home-test"]');
+ }
+ const cleanSdk=await loadPublicPage("lesson-packs",
+   '<main><section class="sl-lessons-publisher-grid"></section></main>',
+   [{...pack,page:"lesson-packs.html",url:"https://example.org/pack.pdf"}]);
+ assert.ok(cleanSdk.window.document.querySelector(".sl-lessons-publisher-grid > a.sl-cms-special"),
+   "SDK fallback on clean URL must render already-published lesson packs");
+ cleanSdk.window.close();
 
  const legacySim={...sample,page:"maths.html",title:"05. Test simulation",
    url:"https://simulation-viewer.html?id="+sample.id};
