@@ -714,6 +714,22 @@
     wrap.append(input);
     return wrap;
   }
+  function subjectButtonDefault(d){
+    if(d.page==="maths.html"||d.page==="biology.html")return "Open";
+    if(d.page==="chemistry.html")return "Open Practical Simulation";
+    if(d.page==="physics.html"){
+      try{if(new URL(d.url,location.href).hostname==="phet.colorado.edu")return "Open PhET";}
+      catch(_){ /* No external simulation URL. */ }
+      return "Open Practical Simulation";
+    }
+    return "";
+  }
+  function editableSubjectLabel(d){
+    const value=String(d.button_label||"").trim();
+    if(/^(?:open tool|open resource|view papers|මෙවලම විවෘත කරන්න)$/iu.test(value))
+      return "";
+    return value;
+  }
   function edit(record, kind = "card") {
     editing = record || {
       revision: 0,
@@ -738,14 +754,27 @@
       field("title", "Title", d.title),
       field("description", "Description", d.description, "textarea"),
     );
-    if (d.kind === "card")
+    if (d.kind === "card") {
+      const subjectDefault=subjectButtonDefault(d);
+      const subjectButton=Boolean(subjectDefault);
+      const buttonField=textLabel("button_label",
+        subjectButton ? "Custom button text · 1–2 words, max 22 characters" :
+          "Card button · max 22 characters",
+        subjectButton ? editableSubjectLabel(d) : d.button_label||"Open resource",
+        subjectButton ? ["","Open","Explore","Start Now","View","Try"] :
+          ["Open resource","Open","Open link","View","Try","Learn more"],22);
+      if(subjectButton){
+        buttonField.querySelector("input").placeholder=subjectDefault;
+        buttonField.append(el("small",
+          "Leave empty for the automatic label: "+subjectDefault,
+          "sladmin-button-hint"));
+      }
       fields.append(
         field("url", "Destination link (website, domain or internal path)", d.url),
         field("image", "Image URL (optional)", d.image),
-        textLabel("button_label", "Card button · max 22 characters",
-          d.button_label || "Open resource",
-          ["Open resource","Open","Open link","View","Try","Learn more"],22),
+        buttonField,
       );
+    }
     const page = field(
       "page",
       "Page",
