@@ -117,6 +117,7 @@ body.sl-telegram-hub .sl-tg-section-expanded .sl-tg-sponsored-list {
   display:grid;gap:14px;
 }
 body.sl-telegram-hub .sl-tg-filtered-out,
+body.sl-telegram-hub [data-tg-category] [hidden],
 body.sl-telegram-hub [data-tg-category][hidden],
 body.sl-telegram-hub .sl-tg-carousel-arrow[hidden],
 body.sl-telegram-hub .sl-tg-sponsor-count[hidden],
