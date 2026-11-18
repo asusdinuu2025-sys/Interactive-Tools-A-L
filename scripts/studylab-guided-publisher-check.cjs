@@ -37,11 +37,39 @@ function make(html){
  const card=doc.window.document.querySelector(".tool-grid > a.tool-card");
  assert.equal(card.dataset.lesson,"8");
  assert.equal(card.querySelector(".card-icon").textContent,"⚡");
- assert.equal(card.querySelector(".open-tool-btn").textContent,"Open Tool");
+ assert.equal(card.querySelector(".open-tool-btn").textContent,"Open Practical Simulation");
+ const subjectActions=doc.window.StudyLabSpecialResources.buttonLabel;
+ assert.equal(subjectActions("maths.html","View Papers →","tools/Maths/Maths_Past_Papers.html"),"Open");
+ assert.equal(subjectActions("biology.html","Open Tool →","tools/biology/test.html"),"Open");
+ assert.equal(subjectActions("chemistry.html","Open Tool →","tools/chemistry/test.html"),
+   "Open Practical Simulation");
+ assert.equal(subjectActions("physics.html","Open Tool →",
+   "https://phet.colorado.edu/sims/html/pendulum-lab/latest/pendulum-lab_en.html"),
+   "Open PhET");
+ assert.equal(subjectActions("physics.html","Explore Now →","tools/physics/meter_bridge.html"),
+   "Explore Now","Admin custom wording should override the default with no arrow");
+ assert.equal(subjectActions("maths.html","මෙවලම විවෘත කරන්න →","tools/Maths/Vectors.html"),
+   "Open","Legacy Sinhala action text should normalize");
+ assert.equal(subjectActions("chemistry.html","A".repeat(23),"tools/chemistry/test.html"),
+   "Open Practical Simulation","Invalid saved labels fall back to the subject default");
  assert.ok(card.href.includes("simulation-viewer.html"));
  const math={...sample,resource_type:"simulation",id:"custom-22222222-2222-4222-8222-222222222222",maths_category:"applied"};
  render(math,"simulation-viewer.html?id="+math.id);
  assert.equal(doc.window.document.querySelectorAll(".tool-card")[1].dataset.filterCategory,"applied");
+ assert.equal(doc.window.document.querySelectorAll(".tool-card")[1]
+   .querySelector(".open-tool-btn").textContent,"Open Practical Simulation");
+ // Newly uploaded cards follow their page's defaults even without a stored label.
+ const mathsCard={...sample,id:"test-maths-default",page:"maths.html"};
+ render(mathsCard,"simulation-viewer.html?id=test-maths-default");
+ assert.equal(doc.window.document.querySelector('[data-cms-id="test-maths-default"] .open-tool-btn').textContent,"Open");
+ const chemistryCard={...sample,id:"test-chem-default",page:"chemistry.html"};
+ render(chemistryCard,"simulation-viewer.html?id=test-chem-default");
+ assert.equal(doc.window.document.querySelector('[data-cms-id="test-chem-default"] .open-tool-btn').textContent,
+   "Open Practical Simulation");
+ const custom={...sample,id:"test-maths-custom",page:"maths.html",button_label:"Start Now"};
+ render(custom,"simulation-viewer.html?id=test-maths-custom");
+ assert.equal(doc.window.document.querySelector('[data-cms-id="test-maths-custom"] .open-tool-btn').textContent,
+   "Start Now");
  const channel={...sample,resource_type:"telegram",id:"custom-33333333-3333-4333-8333-333333333333",
    telegram_category:"maths",title:"Revision Channel"};
  render(channel,"https://t.me/example");
@@ -127,12 +155,18 @@ function make(html){
  assert.equal(d.window.document.querySelectorAll(".sladmin-path-choice").length,4);
  d.window.document.querySelector(".sladmin-path-choice").click();
  assert.ok(d.window.document.querySelector(".sladmin-publish-dialog input[name=html]"));
+ const ctaField=d.window.document.querySelector(".sladmin-publish-dialog input[name=button_label]");
+ assert.ok(ctaField,"Simulations should expose a custom CTA field");
+ assert.equal(ctaField.maxLength,22,"Field must respect the live database limit");
+ assert.equal(ctaField.placeholder,"Open","Maths preset must be Open");
  assert.ok(d.window.document.querySelector(".sladmin-publish-dialog input[name=lesson_number]"));
  assert.ok(d.window.document.querySelector(".sladmin-publish-dialog select[name=maths_category]"),
    "Maths simulation form includes Pure/Applied categories");
  d.window.document.querySelector(".sladmin-publish-dialog").close();
  d.window.document.querySelectorAll(".sladmin-path-choice")[1].click();
  assert.ok(d.window.document.querySelector(".sladmin-publish-dialog input[name=lesson_number]"));
+ assert.equal(d.window.document.querySelector(".sladmin-publish-dialog input[name=button_label]").placeholder,
+   "Open Practical Simulation","Physics label must be display-only and not saved by default");
  assert.equal(d.window.document.querySelector(".sladmin-publish-dialog select[name=maths_category]"),null,
    "Physics uses lesson filtering, not Pure/Applied category choices");
  d.window.document.querySelector(".sladmin-publish-dialog").close();
