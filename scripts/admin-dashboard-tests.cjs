@@ -198,7 +198,10 @@ async function setup(admin = true, options = {}) {
     JSON.parse(w.localStorage.getItem("studylab-admin-preview-v1")).activity
       .length >= 2,
   );
-  assert.deepEqual(calls, ["studylab_social_is_admin","studylab_admin_readonly_stats_v1"]);
+  assert.equal(calls[0],"studylab_social_is_admin");
+  assert(calls.includes("studylab_admin_readonly_stats_v1"));
+  assert(calls.includes("studylab_admin_activity"),
+    "Authorized previews must fetch live audit history read-only");
   const api = w.StudyLabAdminAPI;
   const normalized = api.validate({
     ...state.published[0], url:"studylablk.netlify.app", button_label:"Try"
@@ -211,7 +214,7 @@ async function setup(admin = true, options = {}) {
   click("Activity");
   await wait();
   assert.ok([...w.document.querySelectorAll("#sladmin-content button")]
-    .some(b=>b.textContent==="Clear all"));
+    .some(b=>b.textContent==="Clear preview history"));
   assert.ok([...w.document.querySelectorAll("#sladmin-content button")]
     .some(b=>b.textContent==="Undo" && b.disabled));
   const clearResult = await api.history("clear_all");
