@@ -63,7 +63,8 @@ add(make("math-late","maths",310,"Maths Newest"));
 add(make("sponsor-earlier","sponsored",280,"Sponsored Earlier"));
 add(make("sponsor-latest","sponsored",320,"Sponsored Latest"));
 add(make("bio-latest","biology",330,"BIO New"));
-add(make("chem-latest","chemistry",340,"Organic Chemistry New"));
+add({...make("chem-latest","chemistry",340,"Organic Chemistry New"),
+  publisher:"Teacher Search Alias Unique"});
 add(make("physics-latest","physics",350,"Physics New"));
 add(make("general-latest","all",360,"Mixed Subjects New"));
 w.dispatchEvent(new w.CustomEvent("studylab-content-applied",{detail:{page:"Telegram_Channels.html"}}));
@@ -144,6 +145,11 @@ query.dispatchEvent(new w.Event("input",{bubbles:true}));
 assert.equal(cats("chemistry").hidden,false,"Search must show matching Chemistry section");
 assert.equal(cats("maths").hidden,true,"Search hides unrelated sections");
 assert.equal(visibleCards('#sl-tg-chemistry > .telegram-channel').length,1);
+query.value="teacher search alias unique";
+query.dispatchEvent(new w.Event("input",{bubbles:true}));
+assert.equal(cats("chemistry").hidden,false,
+  "Teacher field must be searchable even when absent from visible channel title");
+assert.equal(visibleCards("#sl-tg-chemistry > .telegram-channel").length,1);
 query.value="xxxxxxxx-no-channel";
 query.dispatchEvent(new w.Event("input",{bubbles:true}));
 assert.equal(doc.querySelector(".sl-tg-no-results").hidden,false,
