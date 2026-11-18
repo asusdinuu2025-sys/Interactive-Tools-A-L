@@ -83,7 +83,7 @@ function make(html){
  assert.equal(featured.querySelector(".telegram-featured-action .telegram-open").href,
    "https://t.me/example");
  assert.equal(featured.querySelector(".telegram-featured-count")?.textContent.includes("Telegram"),true);
- assert.ok(featured.previousElementSibling.classList.contains("telegram-featured-channel"),
+ assert.ok(featured.parentElement.previousElementSibling.classList.contains("telegram-featured-channel"),
    "Additional sponsors appear directly under the existing featured channel");
  render({...sponsored,image:"https://example.org/sponsor.png"},"https://t.me/example");
  assert.equal(featured.querySelector(".telegram-featured-avatar .sl-cms-avatar-photo")?.src,
