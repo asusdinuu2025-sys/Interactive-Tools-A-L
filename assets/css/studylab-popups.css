@@ -96,6 +96,8 @@
 .slpopup-toast a.slpopup-link:hover {background:rgba(129,190,251,.26);}
 .slpopup-toast:is(:hover,:focus-within)::after,
 .slpopup-toast.slpopup-paused::after {animation-play-state:paused;}
+/* Persistent message stays visible until the visitor clicks ×. */
+.slpopup-toast[data-persistent="true"]::after { display:none !important; }
 .slpopup-toast::after {
   content:"";
   display:block;
