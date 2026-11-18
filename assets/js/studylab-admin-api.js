@@ -58,6 +58,14 @@
       throw Error("Enter a title of 1–160 characters.");
     if ((item.description || "").length > 1500)
       throw Error("Description is too long.");
+    // Optional metadata is stored inside the existing JSON content payload.
+    // No SQL migration or broader Supabase permissions are required.
+    for (const [name,limit] of [["kicker",48],["eyebrow",40],["emoji",12]]) {
+      const value=String(item[name]||"").trim();
+      if(value.length>limit||/[<>\u0000-\u001f\u007f]/u.test(value))
+        throw Error(name+" must be "+limit+" plain-text characters or fewer.");
+      if(item[name]!==undefined)item[name]=value;
+    }
     if (!Number.isInteger(item.order) || item.order < 0 || item.order > 10000)
       throw Error("Order must be 0–10000.");
     if (item.kind === "card" && !item.url)
