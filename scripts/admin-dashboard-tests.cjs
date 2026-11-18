@@ -433,12 +433,16 @@ async function setup(admin = true, options = {}) {
   assert.match(contentCss,/overflow-wrap:anywhere/);
   assert.match(read("assets/css/studylab-popups.css"),/slpopup-link-preview/);
   for (const page of ["index.html","maths.html","physics.html",
-      "chemistry.html","biology.html","Telegram_Channels.html",
-      "lesson-packs.html"]) {
+      "chemistry.html","biology.html","lesson-packs.html"]) {
     assert.match(read(page),
       /studylab-content[.]css[?]v=pr102-public-rest-v3/,
-      page + " must fetch the new CSS instead of stale browser copies");
+      page + " must retain the existing CMS stylesheet");
   }
+  const telegramMarkup=read("Telegram_Channels.html");
+  assert.match(telegramMarkup,/studylab-content[.]css[?]v=pr112-channel-avatars-v1/);
+  assert.match(telegramMarkup,/studylab-special-resources[.]js[?]v=pr112-channel-avatars-v1/);
+  assert.match(adminMarkup,/studylab-admin-publisher[.]js[?]v=pr112-channel-avatars-v1/);
+  assert.match(adminMarkup,/studylab-admin[.]css[?]v=pr112-channel-avatars-v1/);
   const homeHtml = read("index.html");
   const sidebarJs = read("assets/js/home-sidebar.js");
   const cmsJs = read("assets/js/studylab-content.js");
