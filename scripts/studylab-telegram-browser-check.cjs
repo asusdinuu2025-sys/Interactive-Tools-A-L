@@ -93,6 +93,13 @@ assert.equal(visibleCards("#sl-tg-sponsored-cards > .telegram-featured-channel")
 const next=doc.querySelector('[aria-label="Next sponsored channel"]');
 const prev=doc.querySelector('[aria-label="Previous sponsored channel"]');
 assert(!next.hidden && !prev.hidden,"Carousel arrows appear with multiple sponsors");
+const glassNav=doc.querySelector(".sl-tg-carousel-nav");
+assert(glassNav && glassNav.contains(next) && glassNav.contains(prev),
+  "Both sponsored arrows must share one glass navigation pill");
+assert.equal(glassNav.hidden,false,"Visible carousel must reveal its navigation pill");
+assert.equal(glassNav.querySelectorAll(".sl-tg-carousel-arrow svg path").length,2,
+  "Navigation uses crisp SVG chevrons instead of oversized text arrows");
+assert.equal(glassNav.getAttribute("aria-label"),"Sponsored channel navigation");
 next.click();
 assert.equal(visibleCards("#sl-tg-sponsored-cards > .telegram-featured-channel")[0]
  .querySelector("h2")?.textContent,"Sponsored Earlier");
@@ -108,12 +115,14 @@ assert(visibleCards("#sl-tg-sponsored-cards > .telegram-featured-channel")[0]
 
 const sponsorMore=cats("sponsored").querySelector(".sl-tg-view-all");
 sponsorMore.click();
+assert.equal(glassNav.hidden,true,"Expanded sponsors must hide the empty navigation pill");
 assert.equal(sponsorMore.getAttribute("aria-expanded"),"true");
 assert.equal(visibleCards("#sl-tg-sponsored-cards > .telegram-featured-channel").length,3,
   "Sponsored View All expands the same page and displays every existing/new sponsor");
 assert.equal(sponsorMore.textContent,"Show Less");
 assert.equal(w.location.pathname,"/Telegram_Channels.html","View All must not navigate");
 sponsorMore.click();
+assert.equal(glassNav.hidden,false,"Collapsing sponsors restores navigation");
 assert.equal(visibleCards("#sl-tg-sponsored-cards > .telegram-featured-channel").length,1);
 
 // Auto rotation defaults to two seconds and is configurable by Admin.
