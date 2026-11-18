@@ -1053,6 +1053,18 @@ html[data-theme="light"] .sl-admin-page button.sladmin-danger:hover:not(:disable
 .sladmin-publish-field textarea {min-height:92px;resize:vertical;}
 .sladmin-publish-field input:focus,.sladmin-publish-field select:focus,.sladmin-publish-field textarea:focus {border-color:rgba(104,204,255,.68);}
 .sladmin-publish-note {grid-column:1/-1;color:var(--sladmin-muted);font-size:.77rem;margin:0;}
+/* PR112 global carousel timing uses the existing Admin glass palette. */
+.sladmin-telegram-carousel-settings {
+  display:flex;align-items:center;flex-wrap:wrap;gap:11px;
+  padding:14px 16px;margin-top:12px;
+  border:1px solid var(--sladmin-line,rgba(135,196,255,.22));
+  border-radius:17px;
+  background:rgba(91,160,222,.075);
+}
+.sladmin-telegram-carousel-settings > strong {color:var(--sladmin-text);font-size:.86rem;}
+.sladmin-telegram-carousel-settings > p {flex:1 1 260px;}
+.sladmin-telegram-carousel-settings > button {flex:0 0 auto;}
+.sladmin-publish-dialog [name="auto_advance_seconds"] {max-width:130px;}
 .sladmin-publish-status {min-height:18px;font-size:.81rem;color:var(--sladmin-muted);}
 .sladmin-publish-status.is-error {color:#ff8ca3;}
 .sladmin-html-preview {width:min(96vw,1200px);max-height:93dvh;}
