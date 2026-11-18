@@ -199,7 +199,8 @@
     if (!state.search) return true;
     const link = card.querySelector("a[href]")?.getAttribute("href") ||
       card.getAttribute("href") || "";
-    return (card.textContent + " " + link).toLocaleLowerCase().includes(state.search);
+    return (card.textContent + " " + link + " " +
+      (card.dataset.tgSearch || "")).toLocaleLowerCase().includes(state.search);
   }
   function visibleSponsors() {
     return cardsOf("sponsored").filter(card => !card.hidden && matches(card));
