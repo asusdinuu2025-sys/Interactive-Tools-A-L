@@ -279,6 +279,15 @@ function mount(host,api,rows,onRefresh){
    }else {
      fields.append(labeled("Destination link","url","link",draft?.url||"",2048));
      fields.append(labeled("Image URL (optional)","url","image",draft?.image||"",2048));
+     if(kind==="custom"){
+       fields.append(labeled("Button text (editable, max 22 characters)",
+         "text","button_label",draft?.button_label||"Open resource",22));
+       fields.append(labeled("Small card label / badge (optional)",
+         "text","eyebrow",draft?.eyebrow||"",40));
+       fields.append(el("p",
+         "Resource cards follow their section's layout: compact rows in List mode, existing cards in Grid mode. The section's translucent background stays unchanged.",
+         "sladmin-publish-note"));
+     }
    }
    if(kind!=="telegram")fields.append(labeled("Emoji / icon (optional)","text","emoji",draft?.emoji||"",12));
    if(kind==="telegram"){
@@ -321,7 +330,9 @@ function mount(host,api,rows,onRefresh){
          String(d.get("link")||"").trim(),
        image:kind==="telegram" ? String(draft?.image||"") : String(d.get("image")||"").trim(),
        button_label:kind==="simulation"?String(d.get("button_label")||"").trim():
-         kind==="telegram"?"Open Channel":kind==="lesson-pack"?"View Lessons":"Open resource"
+         kind==="custom"?String(d.get("button_label")||"").trim():
+         kind==="telegram"?"Open Channel":kind==="lesson-pack"?"View Lessons":"Open resource",
+       ...(kind==="custom"?{eyebrow:String(d.get("eyebrow")||"").trim()}:{}),
      };
      // Existing custom section cards keep their section and page semantics.
      if(kind==="simulation"){
@@ -358,6 +369,13 @@ function mount(host,api,rows,onRefresh){
        info.pack_file_name=draft?.pack_file_name||"";
        info.cover_file_path=draft?.cover_file_path||"";
        info.cover_file_name=draft?.cover_file_name||"";
+     }
+     if(kind==="custom"){
+       if(!info.button_label||info.button_label.length>22||
+          /[<>\u0000-\u001f\u007f→➔➜➡⇒➝]/u.test(info.button_label))
+         throw Error("Button text must be 1–22 plain-text characters, with no arrows.");
+       if(info.eyebrow.length>40||/[<>\u0000-\u001f\u007f]/u.test(info.eyebrow))
+         throw Error("Card badge must be at most 40 plain-text characters.");
      }
      if(kind==="simulation"){
        if(info.button_label){
