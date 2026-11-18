@@ -177,6 +177,18 @@ function mount(host,api,rows,onRefresh){
      fields.append(labeled("Topic","text","topic",draft?.topic||"",120));
      fields.append(labeled("Lesson number (optional)","number","lesson_number",draft?.lesson_number||""));
      fields.append(labeled("Lesson name (optional)","text","lesson_name",draft?.lesson_name||"",120));
+     // Default labels longer than the server's 22-character limit are
+     // displayed by the public page and never sent to Supabase as custom text.
+     const subjectActionDefault=(destination==="physics.html"||destination==="chemistry.html")
+       ? "Open Practical Simulation" : "Open";
+     const priorLabel=String(draft?.button_label||"").trim();
+     const customLabel=/^(?:open tool|open resource|view papers|මෙවලම විවෘත කරන්න)$/iu.test(priorLabel)
+       ? "" : priorLabel;
+     const buttonField=labeled("Custom button text (optional, 1–2 words, max 22 characters)",
+       "text","button_label",customLabel,22);
+     buttonField.querySelector("input").placeholder=subjectActionDefault;
+     fields.append(buttonField,el("p",
+       "Leave blank to show: "+subjectActionDefault,"sladmin-publish-note"));
      // Pure / Applied classification belongs to Combined Mathematics only.
      // Other subject pages use their numbered A/L lesson filter.
      if(destination==="maths.html") fields.append(choice("Mathematics category","maths_category",
@@ -308,7 +320,7 @@ function mount(host,api,rows,onRefresh){
        url:kind==="simulation"?"/simulation-viewer.html?id="+encodeURIComponent(draft?.id||"") :
          String(d.get("link")||"").trim(),
        image:kind==="telegram" ? String(draft?.image||"") : String(d.get("image")||"").trim(),
-       button_label:kind==="simulation"?"Open Tool":
+       button_label:kind==="simulation"?String(d.get("button_label")||"").trim():
          kind==="telegram"?"Open Channel":kind==="lesson-pack"?"View Lessons":"Open resource"
      };
      // Existing custom section cards keep their section and page semantics.
@@ -346,6 +358,13 @@ function mount(host,api,rows,onRefresh){
        info.pack_file_name=draft?.pack_file_name||"";
        info.cover_file_path=draft?.cover_file_path||"";
        info.cover_file_name=draft?.cover_file_name||"";
+     }
+     if(kind==="simulation"){
+       if(info.button_label){
+         if(info.button_label.length>22||info.button_label.split(/\s+/u).length>2||
+            /[<>→➔➜➡⇒➝\u0000-\u001f\u007f]/u.test(info.button_label))
+           throw Error("Use 1–2 words, maximum 22 characters and no arrows.");
+       }else delete info.button_label;
      }
      if(!info.url && !(kind==="lesson-pack" && form.elements.pack_pdf?.files?.[0]))
        throw Error("Provide a destination link or upload a lesson pack PDF.");
