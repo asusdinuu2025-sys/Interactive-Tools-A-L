@@ -978,9 +978,33 @@ html[data-theme="light"] .sl-admin-page button.sladmin-danger:hover:not(:disable
 }
 .sladmin-publish-icon {
   display:grid;place-items:center;grid-column:1;grid-row:1/3;
-  width:40px;height:40px;border-radius:14px;
-  background:rgba(141,191,239,.12);border:1px solid rgba(143,208,255,.24);
-  color:var(--sladmin-text);font:800 22px/1 "Nirmala UI","Segoe UI",sans-serif;
+  width:40px;height:40px;border-radius:14px;flex:0 0 40px;
+  color:#d1ebf8;
+  background:linear-gradient(145deg,rgba(184,222,246,.15),rgba(116,179,224,.06));
+  border:1px solid rgba(169,216,249,.29);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 3px 11px rgba(4,23,49,.07);
+  transition:background .2s,border-color .2s,color .2s;
+}
+.sladmin-publish-icon svg {
+  display:block;width:21px;height:21px;
+  fill:none;stroke:currentColor;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round;
+}
+.sladmin-publish-choice:hover .sladmin-publish-icon,
+.sladmin-publish-choice.is-selected .sladmin-publish-icon {
+  color:#e9fbff;border-color:rgba(130,222,244,.49);
+  background:linear-gradient(145deg,rgba(122,212,236,.22),rgba(115,176,234,.10));
+}
+html[data-theme="light"] .sladmin-publish-icon {
+  color:#295775;
+  background:linear-gradient(145deg,rgba(255,255,255,.66),rgba(167,206,235,.31));
+  border-color:rgba(97,161,205,.31);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.82),0 3px 9px rgba(43,91,139,.06);
+}
+html[data-theme="light"] .sladmin-publish-choice:hover .sladmin-publish-icon,
+html[data-theme="light"] .sladmin-publish-choice.is-selected .sladmin-publish-icon {
+  color:#1c617d;border-color:rgba(76,160,202,.43);
+  background:linear-gradient(145deg,rgba(235,251,255,.90),rgba(146,208,228,.38));
 }
 .sladmin-publish-options {margin-top:13px;}
 .sladmin-publish-options:empty {display:none;}
