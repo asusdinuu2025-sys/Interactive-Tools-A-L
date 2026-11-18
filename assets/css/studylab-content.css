@@ -294,17 +294,25 @@ body[data-theme="light"] section.sl-cms-section .sl-cms-grid > a.sl-cms-card {
   -webkit-backdrop-filter:blur(7px);
   backdrop-filter:blur(7px);
 }
-.sl-cms-sponsored-grid {
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,235px),1fr));
-  width:100%;gap:13px;margin:14px 0 24px;
+/* Dynamically published sponsors use the EXISTING featured card classes.
+   The wrapper stacks matching wide cards rather than shrinking them to tiles. */
+.sl-cms-sponsored-grid {display:block;width:100%;margin:0;}
+.sl-cms-sponsored-grid > .telegram-featured-channel.sl-cms-sponsored {margin-bottom:19px;}
+/* A channel avatar covers only its original Telegram square.
+   Broken pictures are removed by JS, revealing the original Telegram icon. */
+body.sl-telegram-hub .sl-cms-channel-avatar {
+  position:relative;overflow:hidden;isolation:isolate;
 }
-.sl-cms-sponsored-grid .sl-cms-sponsored {
-  border:1px solid rgba(111,204,255,.42);
-  border-radius:23px;
-  padding:18px;
-  background:linear-gradient(125deg,rgba(45,146,215,.14),rgba(129,99,231,.13));
-  color:inherit;text-decoration:none;
-  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+body.sl-telegram-hub .telegram-channel-icon.sl-cms-channel-avatar > img.sl-cms-avatar-photo,
+body.sl-telegram-hub .telegram-featured-avatar.sl-cms-channel-avatar > img.sl-cms-avatar-photo {
+  display:block;position:absolute;inset:0;z-index:2;
+  width:100%;height:100%;max-width:none;max-height:none;margin:0;
+  border:0;border-radius:inherit;object-fit:cover;object-position:center;
+  filter:none!important;opacity:1;
+}
+body.sl-telegram-hub .sl-cms-sponsored .telegram-featured-avatar-fallback img {
+  display:block;width:42px;height:42px;max-width:58%;
+  object-fit:contain;filter:brightness(0) invert(1);
 }
 .sl-cms-sponsor-label {
   display:block;
