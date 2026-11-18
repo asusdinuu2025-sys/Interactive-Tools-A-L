@@ -435,11 +435,14 @@ as $admin_gate$ select auth.uid() in (
     await as(student);
     assert.equal((await db.query(
       "select studylab_popup_claim($1) as claimed",[created.id])).rows[0].claimed,true);
-    await as(admin);
+    // Administrator RPCs are authorized, but raw private receipt tables
+    // deliberately deny direct access even to an authenticated admin.
+    await db.exec("reset role");
     const receiptBefore=(await db.query(
       "select count(*)::integer as n from studylab_private.popup_receipts where popup_id=$1",
       [created.id])).rows[0].n;
     assert.equal(receiptBefore,1);
+    await as(admin);
     await db.query("select studylab_admin_popup_action_v3('delete',$1::jsonb)",
       [JSON.stringify({id:created.id})]);
     await db.exec("reset role");
