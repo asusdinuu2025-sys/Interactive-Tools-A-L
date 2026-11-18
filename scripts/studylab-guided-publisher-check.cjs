@@ -82,7 +82,8 @@ function make(html){
  assert.ok(featured.querySelector(".telegram-featured-action .telegram-open"));
  assert.equal(featured.querySelector(".telegram-featured-action .telegram-open").href,
    "https://t.me/example");
- assert.equal(featured.querySelector(".telegram-featured-count")?.textContent.includes("Telegram"),true);
+ assert.equal(featured.querySelector(".telegram-featured-count"),null,
+   "Admin-published sponsored cards must not insert automatic Sinhala subscriber text");
  assert.ok(featured.parentElement.previousElementSibling.classList.contains("telegram-featured-channel"),
    "Additional sponsors appear directly under the existing featured channel");
  render({...sponsored,image:"https://example.org/sponsor.png"},"https://t.me/example");
