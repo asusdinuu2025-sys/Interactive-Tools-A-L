@@ -125,11 +125,30 @@ function apply(d,href){
    return true;
  }
  if(kind==="lesson-pack"){
+   const subject=String(d.subject||"").trim().toLowerCase();
+   card.dataset.lessonSubject=subject;
+   const subjectIcons={maths:"📐",mathematics:"📐",physics:"⚛",chemistry:"⚗",biology:"🧬"};
    const identity=el("span","sl-lesson-publisher-identity");
-   identity.append(
-     el("span","sl-lesson-publisher-mark",d.emoji||"📚"),
-     el("span","sl-lesson-publisher-topline","FREE "+String(d.subject||"A/L").toUpperCase()+" · 2027 A/L")
-   );
+   const mark=el("span","sl-lesson-publisher-mark");
+   const fallback=el("span","sl-lesson-publisher-fallback",
+     d.emoji||subjectIcons[subject]||"📚");
+   mark.append(fallback);
+   if(d.image){
+     // The cover replaces the icon within a single mark, rather than sitting beside it.
+     const picture=el("img","sl-cms-lesson-image");
+     picture.alt="";
+     picture.loading="lazy";
+     picture.addEventListener("error",()=>{
+       picture.remove();
+       mark.classList.remove("sl-has-cover");
+     },{once:true});
+     mark.classList.add("sl-has-cover");
+     mark.prepend(picture);
+     picture.src=d.image;
+   }
+   identity.append(mark,
+     el("span","sl-lesson-publisher-topline",
+       "FREE "+String(d.subject||"A/L").toUpperCase()+" · 2027 A/L"));
    const body=el("span","sl-lesson-publisher-body");
    body.append(el("strong","sl-lesson-publisher-title",d.resource_title||d.title),
      el("span","sl-lesson-publisher-series",d.series||d.publisher||"STUDYLAB LESSON PACK"),
@@ -139,11 +158,6 @@ function apply(d,href){
    const action=el("span","sl-lesson-publisher-action");
    action.append(el("span",null,d.button_label||"View Lessons"));
    card.append(identity,body,topics,action);
-   if(d.image){
-     const picture=el("img","sl-cms-lesson-image");
-     picture.alt="";picture.loading="lazy";picture.src=d.image;
-     identity.prepend(picture);
-   }
    return true;
  }
  return false;
