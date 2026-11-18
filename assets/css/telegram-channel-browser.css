@@ -79,10 +79,25 @@ body.sl-telegram-hub .sl-tg-sponsored-toolbar .telegram-sponsored-bar {
 body.sl-telegram-hub .sl-tg-sponsored-actions {
   display:flex;align-items:center;gap:7px;margin-left:auto;flex-wrap:wrap;
 }
+/* Strong blue-glass contrast makes arrows readable over either gradient. */
 body.sl-telegram-hub .sl-tg-carousel-arrow {
-  display:grid;place-items:center;width:34px;height:34px;
-  border-radius:50%;font:700 1.4rem/1 "Segoe UI",sans-serif;
+  display:grid;place-items:center;width:43px;height:43px;
+  flex:0 0 43px;
+  border-radius:50%;
+  color:#fff;
+  font:900 1.85rem/1 "Segoe UI",sans-serif;
+  background:linear-gradient(135deg,#168fd8,#1459c5);
+  border:2px solid rgba(170,238,255,.9);
+  box-shadow:0 4px 15px rgba(0,32,98,.42),0 0 0 2px rgba(16,167,245,.14),
+    inset 0 1px 1px rgba(255,255,255,.35);
+  text-shadow:0 1px 2px rgba(0,25,70,.55);
 }
+body.sl-telegram-hub .sl-tg-carousel-arrow:hover {
+  color:#fff;background:linear-gradient(135deg,#27b6ee,#286be1);
+  border-color:#effaff;box-shadow:0 5px 18px rgba(19,114,232,.44),
+    0 0 0 2px rgba(118,218,255,.25);
+}
+body.sl-telegram-hub .sl-tg-carousel-arrow:active {transform:scale(.96);}
 body.sl-telegram-hub .sl-tg-sponsor-count {
   min-width:38px;text-align:center;font-size:.73rem;
   font-weight:700;color:#bad9ef;font-variant-numeric:tabular-nums;
@@ -149,10 +164,22 @@ html[data-theme="light"] body.sl-telegram-hub .sl-tg-view-all,
 html[data-theme="light"] body.sl-telegram-hub .sl-tg-carousel-arrow {
   color:#28506d;
 }
+html[data-theme="light"] body.sl-telegram-hub .sl-tg-carousel-arrow {
+  color:#fff;
+  background:linear-gradient(135deg,#1796df,#1a63cc);
+  border-color:#5bbaed;
+}
 html[data-theme="light"] body.sl-telegram-hub .sl-tg-search input {color:#284862;}
 html[data-theme="light"] body.sl-telegram-hub .sl-tg-search input::placeholder,
 html[data-theme="light"] body.sl-telegram-hub .sl-tg-search-icon,
 html[data-theme="light"] body.sl-telegram-hub .sl-tg-sponsor-count {color:#53799b;}
+/* Four collapsed All Subjects cards form ONE desktop row.
+   View All keeps the original three-column grid; phones stay responsive. */
+@media(min-width:1000px) {
+  body.sl-telegram-hub .telegram-all:not(.sl-tg-section-expanded) .telegram-all-grid {
+    grid-template-columns:repeat(4,minmax(0,1fr));
+  }
+}
 @media(max-width:780px) {
   body.sl-telegram-hub .sl-tg-filter-bar {
     top:calc(max(11px, env(safe-area-inset-top)) + 65px);
@@ -166,7 +193,7 @@ html[data-theme="light"] body.sl-telegram-hub .sl-tg-sponsor-count {color:#53799
 @media(max-width:420px) {
   body.sl-telegram-hub .sl-tg-sponsored-toolbar {align-items:start;}
   body.sl-telegram-hub .sl-tg-sponsored-actions {gap:5px;}
-  body.sl-telegram-hub .sl-tg-carousel-arrow {width:31px;height:31px;}
+  body.sl-telegram-hub .sl-tg-carousel-arrow {width:39px;height:39px;flex-basis:39px;font-size:1.6rem;}
   body.sl-telegram-hub .sl-tg-view-all {padding:6px 10px;}
 }
 @media(prefers-reduced-motion:reduce) {
