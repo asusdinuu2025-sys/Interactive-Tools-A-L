@@ -89,6 +89,8 @@ function apply(d,href){
    return true;
  }
  if(kind==="telegram"){
+   // Search by stored teacher/handle even when the field is not in the title.
+   card.dataset.tgSearch=String(d.publisher||"")+" "+String(d.title||"");
    // Match the existing wide featured card, including the Join button layout.
    if(sponsored){
      const avatar=channelAvatar(d,true);
