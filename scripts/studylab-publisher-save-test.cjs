@@ -113,6 +113,94 @@ const clickPublish=async dialog=>{
   assert.equal(uploadedMedia.length,2);
   assert.equal(deletedMedia.length,0);
   assert.equal(deletedHTML.length,0);
+
+  // PR112: No group image means the original Telegram icon, not an emoji.
+  assert.equal(saved[2].item.image,"");
+  assert.equal(saved[2].item.avatar_file_path,"");
+
+  // Add a group picture to the existing sponsored channel via existing media API.
+  publisher.open("telegram","sponsored",{
+    id:saved[2].item.id,draft:saved[2].item,revision:1,published:true
+  });
+  d=findDialog();
+  assert.ok(d.querySelector('[name="telegram_avatar"]'),"Telegram editor offers a group photo");
+  assert.equal(d.querySelector('[name="emoji"]'),null,
+    "Telegram editor should no longer tempt admins to replace the default icon with emoji");
+  assert.match(d.textContent,/Original Telegram icon/);
+  setFile(d.querySelector('[name="telegram_avatar"]'),
+    new w.File(["JPG"],"chemistry-dp.jpg",{type:"image/jpeg"}));
+  await clickPublish(d);
+  const pictured=saved[4].item;
+  assert.equal(pictured.telegram_category,"sponsored");
+  assert.equal(pictured.avatar_file_name,"chemistry-dp.jpg");
+  assert.equal(pictured.avatar_file_path,"uploads/3.png");
+  assert.equal(pictured.image,"https://example.org/uploads/3.png");
+  assert.equal(deletedMedia.length,0);
+
+  // Editing details without a new file must retain the current picture.
+  publisher.open("telegram","sponsored",{
+    id:pictured.id,draft:pictured,revision:2,published:true
+  });
+  d=findDialog();
+  assert.ok(d.querySelector(".sladmin-publish-avatar-thumbnail"));
+  await clickPublish(d);
+  assert.equal(saved[5].item.avatar_file_path,"uploads/3.png");
+  assert.equal(uploadedMedia.length,3);
+
+  // Replacement removes only the previous file after successfully saving.
+  publisher.open("telegram","sponsored",{
+    id:pictured.id,draft:saved[5].item,revision:3,published:true
+  });
+  d=findDialog();
+  setFile(d.querySelector('[name="telegram_avatar"]'),
+    new w.File(["PNG"],"new-dp.png",{type:"image/png"}));
+  await clickPublish(d);
+  assert.equal(saved[6].item.avatar_file_path,"uploads/4.png");
+  assert.deepEqual(deletedMedia,["uploads/3.png"]);
+
+  // Removing the profile image restores the default Telegram logo on the
+  // public card without removing the rest of the channel details.
+  publisher.open("telegram","sponsored",{
+    id:pictured.id,draft:saved[6].item,revision:4,published:true
+  });
+  d=findDialog();
+  const remove=d.querySelector('[name="remove_telegram_avatar"]');
+  assert.ok(remove,"Existing Telegram image must be removable");
+  remove.checked=true;
+  await clickPublish(d);
+  assert.equal(saved[7].item.image,"");
+  assert.equal(saved[7].item.avatar_file_path,"");
+  assert.equal(saved[7].item.title,"Chemistry Channel");
+  assert.deepEqual(deletedMedia,["uploads/3.png","uploads/4.png"]);
+
+  // A failed database save must clean up ONLY the fresh upload, retaining
+  // any previously saved photo. Never claim success after a failed RPC.
+  const previousSave=api.save;
+  api.save=async()=>{throw Error("Test write rejected")};
+  publisher.open("telegram","sponsored",{
+    id:pictured.id,draft:saved[6].item,revision:4,published:true
+  });
+  d=findDialog();
+  setFile(d.querySelector('[name="telegram_avatar"]'),
+    new w.File(["PNG"],"rejected.png",{type:"image/png"}));
+  await clickPublish(d);
+  assert.match(d.querySelector("[data-publisher-status]").textContent,/Test write rejected/);
+  assert.ok(deletedMedia.includes("uploads/5.png"));
+  api.save=previousSave;
+  d.close();
+
+  // PDF is not a Telegram profile image.
+  publisher.open("telegram","sponsored",{
+    id:pictured.id,draft:saved[7].item,revision:5,published:true
+  });
+  d=findDialog();
+  setFile(d.querySelector('[name="telegram_avatar"]'),
+    new w.File(["%PDF-1.7"],"bad.pdf",{type:"application/pdf"}));
+  await clickPublish(d);
+  assert.match(d.querySelector("[data-publisher-status]").textContent,/JPG, PNG or WebP/);
+  assert.equal(uploadedMedia.length,5);
+  d.close();
+
   dom.window.close();
-  console.log("PASS: HTML upload/edit/preview, Telegram channel, PDF lesson pack and cover publishing.");
+  console.log("PASS: HTML, Telegram avatar upload/retain/replace/remove/rollback, PDF lesson pack and cover publishing.");
 })().catch(err=>{console.error(err);process.exitCode=1});
