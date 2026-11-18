@@ -150,7 +150,7 @@ const notices=read("assets/js/studylab-popups.js");
 assert.match(notices,/path\.endsWith\("\/index\.html"\)/);
 assert.match(notices,/await account\.startup/);
 assert.match(notices,/studylab-home-entered/);
-assert.match(notices,/if \(!alreadyEntered/);
+assert.match(notices,/if \(!enteredOnStartup/);
 assert.match(read("assets/js/studylab-auth-gateway.js"),/studylab-home-entered/);
 assert.match(notices,/client\.auth\.getUser\(\)/);
 console.log("Chat image upload, animated reactions, typing Presence and Follow theme checks passed.");
