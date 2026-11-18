@@ -89,8 +89,9 @@ async function setup(admin = true, options = {}) {
   assert.equal(w.document.querySelector("#sladmin-workspace").hidden, false);
   assert.equal(w.document.querySelectorAll(".sladmin-stats .sladmin-card").length, 4);
   assert.equal(w.document.querySelectorAll(".sladmin-quick-icon").length,6);
-  assert.equal(w.document.querySelector("#sladmin-mode").hidden,true,
-    "The redundant connected-preview notice should not occupy screen space");
+  assert.equal(w.document.querySelector("#sladmin-mode").hidden,false,
+    "Preview-only mode must stay visible so admins don't mistake local messages for live publishing");
+  assert.match(w.document.querySelector("#sladmin-mode").textContent,/Preview workspace/);
   // Pop-up markdown is rendered as DOM nodes, never unsanitized HTML.
   const rich = w.document.createElement("p");
   w.StudyLabPopupFormat.render(rich,
@@ -156,7 +157,8 @@ async function setup(admin = true, options = {}) {
   assert.equal(state.published.length, 1);
   assert.equal(state.published[0].title, "Safe <script>title</script>");
   assert.equal(w.document.querySelectorAll(".sladmin-row script").length, 0);
-  assert.equal(w.document.querySelector("#sladmin-mode").hidden,true);
+  assert.equal(w.document.querySelector("#sladmin-mode").hidden,false,
+    "Preview status remains visible after editing or publishing local drafts");
   click("Pop-up Messages");
   await wait();
   click("+ New pop-up");
@@ -196,7 +198,10 @@ async function setup(admin = true, options = {}) {
     JSON.parse(w.localStorage.getItem("studylab-admin-preview-v1")).activity
       .length >= 2,
   );
-  assert.deepEqual(calls, ["studylab_social_is_admin","studylab_admin_readonly_stats_v1"]);
+  assert.equal(calls[0],"studylab_social_is_admin");
+  assert(calls.includes("studylab_admin_readonly_stats_v1"));
+  assert(calls.includes("studylab_admin_activity"),
+    "Authorized previews must fetch live audit history read-only");
   const api = w.StudyLabAdminAPI;
   const normalized = api.validate({
     ...state.published[0], url:"studylablk.netlify.app", button_label:"Try"
@@ -209,7 +214,7 @@ async function setup(admin = true, options = {}) {
   click("Activity");
   await wait();
   assert.ok([...w.document.querySelectorAll("#sladmin-content button")]
-    .some(b=>b.textContent==="Clear all"));
+    .some(b=>b.textContent==="Clear preview history"));
   assert.ok([...w.document.querySelectorAll("#sladmin-content button")]
     .some(b=>b.textContent==="Undo" && b.disabled));
   const clearResult = await api.history("clear_all");
@@ -406,10 +411,10 @@ async function setup(admin = true, options = {}) {
     /Local preview · PR #102/);
   dom.window.close();
   const adminMarkup = read("admin.html");
-  assert.match(adminMarkup, /studylab-admin\.js\?v=pr108-expiry-v1/);
+  assert.match(adminMarkup, /studylab-admin\.js\?v=pr109-delivery-v1/);
   assert.match(adminMarkup, /Loading dashboard/);
-  assert.match(adminMarkup, /pr108-expiry-v1/);
-  assert.match(read("index.html"), /studylab-popups[.]js[?]v=pr108-expiry-v1/);
+  assert.match(adminMarkup, /pr109-delivery-v1/);
+  assert.match(read("index.html"), /studylab-popups[.]js[?]v=pr109-live-v1/);
   assert.match(read("index.html"), /studylab-content[.]js[?]v=20261117-smooth-load/);
   assert.match(adminMarkup,/sladmin-brand-mark" aria-hidden="true">ツ/);
   assert.match(adminMarkup,/sladmin-back-icon/);

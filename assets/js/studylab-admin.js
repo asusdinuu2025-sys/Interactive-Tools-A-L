@@ -222,9 +222,11 @@
     if (version !== request) return;
     const toolbar = el("div", undefined, "sladmin-toolbar sladmin-history-actions");
     toolbar.append(el("span",
-      "Clear hides a log entry. Undo reverses eligible unchanged actions.",
+      api.preview
+        ? "Live Supabase audit history is shown READ-ONLY here. Preview actions remain local to this device."
+        : "Clear hides a log entry. Undo reverses eligible unchanged actions.",
       "sladmin-history-info"));
-    toolbar.append(button("Clear all", async () => {
+    toolbar.append(button(api.preview ? "Clear preview history" : "Clear all", async () => {
       if (!confirm("Hide all activity from this dashboard? This will NOT undo any changes. The protected audit record stays in Supabase.")) return;
       await api.history("clear_all");
       await render();
@@ -248,9 +250,11 @@
           status("Change undone. A new audit entry records the reversal.");
         }, "sladmin-undo"),
       ];
-      if (!a.id) {
+      if (!a.id || a.readonly) {
         actions[0].disabled = true;
-        actions[0].title = "Older local log entries cannot be cleared individually";
+        actions[0].title = a.readonly
+          ? "Open the production Admin dashboard to manage live audit history"
+          : "Older local log entries cannot be cleared individually";
       }
       if (!a.can_undo || a.undone_at) {
         actions[1].disabled = true;
@@ -259,7 +263,8 @@
           : "No safe undo snapshot for this action";
       }
       list.append(row(
-        a.action + (a.undone_at ? " · Undone" : ""),
+        (api.preview ? (a.readonly ? "LIVE · " : "PREVIEW · ") : "") +
+          a.action + (a.undone_at ? " · Undone" : ""),
         a.target + " · " + new Date(a.created_at).toLocaleString(),
         actions, "↻",
       ));
@@ -867,12 +872,17 @@
     if (item.link) popup.append(el("span",
       item.link_label || "View", "slpopup-link slpopup-link-preview"));
     popup.append(el("small", "Admin preview · Not sent"));
-    const seconds = Math.max(3, Math.min(30, Number(item.display_seconds) || 8));
+    const requested = Number(item.display_seconds);
+    const persistent = requested === 0;
+    const seconds = persistent ? 0 : Math.max(3, Math.min(60,Number.isFinite(requested) ? requested : 8));
     popup.style.setProperty("--slpopup-seconds", seconds + "s");
+    if (persistent) popup.dataset.persistent = "true";
     document.body.append(popup);
-    stopTimer = window.StudyLabPopupFormat?.armTimer
-      ? window.StudyLabPopupFormat.armTimer(popup, seconds * 1000, dismiss)
-      : (() => { const id = setTimeout(dismiss, seconds * 1000); return () => clearTimeout(id); })();
+    if (!persistent) {
+      stopTimer = window.StudyLabPopupFormat?.armTimer
+        ? window.StudyLabPopupFormat.armTimer(popup, seconds * 1000, dismiss)
+        : (() => { const id = setTimeout(dismiss, seconds * 1000); return () => clearTimeout(id); })();
+    }
   }
   function popupEditor(record = null) {
     const dialog = el("dialog", undefined, "sladmin-dialog sladmin-popup-dialog");
@@ -897,8 +907,8 @@
         ["top-right","Upper right"],["top-center","Upper middle"],
         ["center","Center screen"],["bottom-right","Lower right"],
       ]),
-      field("display_seconds", "Display time (3–30 seconds)",
-        data.display_seconds || 8,"number"),
+      field("display_seconds", "Display time (3–60 seconds)",
+        data.display_seconds === 0 ? 8 : (data.display_seconds || 8),"number"),
       field("expiry_period", "Available to visitors for",
         data.expiry_period || "24h", "text", [
           ["24h","24 hours"],["7d","7 days"],["1m","1 month"],
@@ -913,7 +923,18 @@
     fields.querySelector('[name="title"]').maxLength = 120;
     fields.querySelector('[name="message"]').maxLength = 800;
     const duration = fields.querySelector('[name="display_seconds"]');
-    duration.min = "3"; duration.max = "30";
+    duration.min = "3"; duration.max = "60";
+    const hold = field("until_dismissed", "Until visitor clicks × (no countdown)",
+      data.display_seconds === 0,"checkbox");
+    hold.classList.add("sladmin-wide");
+    fields.insertBefore(hold, fields.querySelector('[name="expiry_period"]').closest("label"));
+    const holdInput = hold.querySelector("input");
+    const updateHold = () => {
+      duration.disabled = holdInput.checked;
+      duration.closest("label").style.opacity = holdInput.checked ? ".5" : "";
+    };
+    holdInput.addEventListener("change",updateHold);
+    updateHold();
     const messageLabel = fields.querySelector('[name="message"]').closest("label");
     messageLabel.classList.add("sladmin-wide");
     fields.insertBefore(el("p",
@@ -937,7 +958,7 @@
         message: String(fd.get("message") || "").trim(),
         variant: String(fd.get("variant") || "info"),
         placement: String(fd.get("placement") || "top-right"),
-        display_seconds: Number(fd.get("display_seconds") || 8),
+        display_seconds: fields.querySelector('[name="until_dismissed"]').checked ? 0 : Number(fd.get("display_seconds") || 8),
         expiry_period: String(fd.get("expiry_period") || "24h"),
         link: String(fd.get("link") || "").trim(),
         link_label: String(fd.get("link_label") || "View").trim(),
@@ -945,7 +966,7 @@
       };
       if (!item.title || !item.message || item.title.length>120 ||
           item.message.length>800 || !Number.isInteger(item.display_seconds) ||
-          item.display_seconds<3 || item.display_seconds>30 ||
+          (item.display_seconds !== 0 && (item.display_seconds<3 || item.display_seconds>60)) ||
           !["24h","7d","1m","3m","6m","9m","1y"].includes(item.expiry_period) ||
           !item.link_label || item.link_label.length>20 ||
           /[\u0000-\u001f<>]/.test(item.link_label) ||
@@ -968,15 +989,17 @@
       event.preventDefault(); send.disabled = true;
       try {
         const item = readForm();
-        if (!record && !confirm(
+        if (!record && !api.preview && !confirm(
           "Send this pop-up to StudyLab visitors for " +
           fields.querySelector('[name="expiry_period"]').selectedOptions[0].text +
           " after its scheduled start?")) return;
         await api.popupSet(record ? "update" : "create", item);
         dismiss();
         await render();
-        status(record ? "Message updated. Existing viewers will not see it twice."
-          : "Message scheduled/published for one-time delivery until its selected expiry.");
+        status(api.preview
+          ? "PREVIEW ONLY: saved on this device, NOT published to students. Open production Admin to publish."
+          : record ? "Message updated in the LIVE database. Existing viewers will not see it twice."
+          : "Message verified in the LIVE database. Eligible Home visitors will receive it once.");
       } catch (e) { error.textContent = e.message || "Couldn't save the message."; }
       finally { send.disabled = false; }
     };
@@ -987,7 +1010,9 @@
       list = el("div", undefined, "sladmin-list");
     toolbar.append(button("+ New pop-up", () => popupEditor(), "sladmin-primary"));
     host.append(el("p",
-      "Choose each message’s expiry: 24 hours, 7 days, 1, 3, 6, or 9 months, or 1 year. A signed-in student sees it once across devices; this controls availability, not the on-screen display time.",
+      api.preview
+        ? "PREVIEW ONLY · These messages are saved on this device and never sent to students. Open the production StudyLab Admin Dashboard to publish."
+        : "LIVE PUBLISHING · Choose 24 hours, 7 days, 1, 3, 6, or 9 months, or 1 year of delivery eligibility. Display time is separately 3–60 seconds or until the visitor clicks ×. Each student receives a message once.",
       "sladmin-preview-explanation"), toolbar, list);
     const rows = await api.popups();
     if (version !== request) return;
@@ -999,14 +1024,14 @@
       const state = now < begin ? "Scheduled" : now >= end ? "Expired" : "Active";
       list.append(row(p.title,
         state + " · " + p.variant + " · " + p.placement +
-          " · " + p.display_seconds + " sec · Expires " +
+          " · " + (p.display_seconds === 0 ? "Until ×" : p.display_seconds + " sec") + " · Expires " +
           new Date(end).toLocaleString() +
           " · Seen by " + (p.delivered || 0) + " accounts",
         [
           button("Preview", () => floatingPreview(p)),
           button("Edit", () => popupEditor(p)),
           button("Delete", async () => {
-            if (!confirm("Delete pop-up \"" + p.title +
+            if (!confirm("Permanently delete pop-up \"" + p.title +
               "\" permanently, including its delivery receipts?")) return;
             await api.popupSet("delete", { id: p.id });
             await render();
@@ -1153,9 +1178,9 @@
           : api.preview ? "Local preview · PR #102" : "StudyLab Admin · Live",
         "sladmin-build-label",
       ));
-      // The connected-status notice is redundant once access is verified.
-      // Keep its text for diagnostics, but not a permanent on-screen card.
-      $("#sladmin-mode").hidden = true;
+      // A preview must NEVER masquerade as a live publisher. Keep the
+      // clear mode notice visible in preview; live production remains clean.
+      $("#sladmin-mode").hidden = !api.preview;
       await navigate("Overview");
     } catch (e) {
 

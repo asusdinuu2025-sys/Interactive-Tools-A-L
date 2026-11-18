@@ -339,7 +339,17 @@
     const v3 = await client.rpc("studylab_admin_popup_action_v3", {
       p_action: action, p_data: payload
     });
-    if (!v3.error) return v3.data;
+    if (!v3.error) {
+      // Don't report publication success merely because a browser saved a
+      // preview. Verify the server actually exposes the saved entry to admins.
+      const current = await rpc("studylab_admin_popup_list");
+      const id = String(v3.data?.id || data.id || "");
+      const exists = (Array.isArray(current) ? current : [])
+        .some(item => String(item.id) === id);
+      if (action === "delete" ? exists : !exists)
+        throw Error("Popup write could not be verified. Check the live message list before retrying.");
+      return v3.data;
+    }
     // Compatibility while the pending migration is not installed: the existing
     // 24h workflow must keep working. Never silently publish a longer duration
     // as 24h, or hide genuine permission/server errors behind a fallback.
@@ -431,7 +441,21 @@
   }
   async function activity() {
     requireAccess();
-    return preview ? clone(state.activity) : await rpc("studylab_admin_activity");
+    if (!preview) return rpc("studylab_admin_activity");
+    // PR previews never mutate live audit records, but authorized admins can
+    // read the real audit history instead of seeing a misleading empty list.
+    const local = clone(state.activity || []).map(entry =>
+      ({...entry,source:"preview",can_undo:false,readonly:false}));
+    try {
+      const live = await rpc("studylab_admin_activity");
+      const observed = (Array.isArray(live) ? live : []).map(entry =>
+        ({...entry,source:"live",can_undo:false,readonly:true}));
+      return [...local,...observed].sort((a,b)=>
+        new Date(b.created_at).getTime()-new Date(a.created_at).getTime()).slice(0,200);
+    } catch (error) {
+      console.warn("StudyLab live activity preview unavailable:",error.message);
+      return local;
+    }
   }
   async function history(action, id = null) {
     requireAccess();

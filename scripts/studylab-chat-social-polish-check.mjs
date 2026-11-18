@@ -144,13 +144,13 @@ assert.match(imageSql,/for insert to authenticated/);
 assert.match(imageSql,/for delete to authenticated/);
 for(const html of [home,room]){
   assert.match(html,/studylab-follow\.css\?v=20261116-follow-colors-v2/);
-  assert.match(html,/studylab-popups\.js\?v=pr108-expiry-v1/);
+  assert.match(html,/studylab-popups\.js\?v=pr109-live-v1/);
 }
 const notices=read("assets/js/studylab-popups.js");
 assert.match(notices,/path\.endsWith\("\/index\.html"\)/);
 assert.match(notices,/await account\.startup/);
 assert.match(notices,/studylab-home-entered/);
-assert.match(notices,/if \(!alreadyEntered/);
+assert.match(notices,/if \(!enteredOnStartup/);
 assert.match(read("assets/js/studylab-auth-gateway.js"),/studylab-home-entered/);
 assert.match(notices,/client\.auth\.getUser\(\)/);
 console.log("Chat image upload, animated reactions, typing Presence and Follow theme checks passed.");
