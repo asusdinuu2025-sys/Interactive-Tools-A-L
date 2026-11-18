@@ -6,11 +6,28 @@ if(window.StudyLabAdminPublisher)return;
 const subjects=[["maths.html","Mathematics"],["physics.html","Physics"],["chemistry.html","Chemistry"],["biology.html","Biology"]];
 const carouselSettingsId="studylab-telegram-carousel-settings";
 const groups=[
- {id:"simulation",name:"Practical Simulations",icon:"⚗",hint:"Upload a standalone HTML tool to an existing subject"},
- {id:"telegram",name:"A/L Telegram Channels",icon:"➤",hint:"Publish to Sponsored, subject channels or All"},
- {id:"lesson-pack",name:"Free Lesson Packs",icon:"▤",hint:"Create matching lesson and revision-pack cards"},
- {id:"custom",name:"Custom Sections",icon:"▦",hint:"Add a resource inside an existing or new section"}
+ {id:"simulation",name:"Practical Simulations",hint:"Upload a standalone HTML tool to an existing subject"},
+ {id:"telegram",name:"A/L Telegram Channels",hint:"Publish to Sponsored, subject channels or All"},
+ {id:"lesson-pack",name:"Free Lesson Packs",hint:"Create matching lesson and revision-pack cards"},
+ {id:"custom",name:"Custom Sections",hint:"Add a resource inside an existing or new section"}
 ];
+// Static, stroke-based artwork: no emoji fonts, external icon dependency or fetches.
+const publishGlyphs=Object.freeze({
+ simulation:'<path d="M9 3h6M10 3v7l-5.3 8.5A2 2 0 0 0 6.4 21h11.2a2 2 0 0 0 1.7-2.5L14 10V3"/><path d="M8 16h8"/>',
+ telegram:'<path d="m21.5 2.5-19 7.7 7.9 3.5 3.7 7.8 7.4-19Z"/><path d="M21.5 2.5 10.4 13.7"/>',
+ "lesson-pack":'<path d="M4.5 19V5a2 2 0 0 1 2-2H20v14H6.5a2 2 0 0 0 0 4H20v-4"/><path d="M9 8h7M9 12h5"/>',
+ custom:'<rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.8"/>'
+});
+function publishIcon(kind){
+ const wrap=el("span",null,"sladmin-publish-icon");
+ const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
+ svg.setAttribute("viewBox","0 0 24 24");
+ svg.setAttribute("aria-hidden","true");
+ svg.setAttribute("focusable","false");
+ svg.innerHTML=publishGlyphs[kind];
+ wrap.append(svg);
+ return wrap;
+}
 const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined&&text!==null)n.textContent=text;if(cls)n.className=cls;return n;};
 function labeled(text,type="text",name="",value="",limit=0){
  const wrap=el("label",null,"sladmin-publish-field"),title=el("span",text);
@@ -41,7 +58,7 @@ function mount(host,api,rows,onRefresh){
  const entries=groups.map(group=>{
    const button=el("button",null,"sladmin-publish-choice");
    button.type="button";button.dataset.kind=group.id;
-   const icon=el("span",group.icon,"sladmin-publish-icon");
+   const icon=publishIcon(group.id);
    button.append(icon,el("strong",group.name),el("small",group.hint));
    button.addEventListener("click",()=>{
      current=current===group.id?"":group.id;
