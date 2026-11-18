@@ -193,6 +193,19 @@ function make(html){
  d.window.document.querySelector("[data-kind=custom]").click();
  const names=[...d.window.document.querySelectorAll(".sladmin-path-choice")].map(x=>x.textContent);
  assert.ok(names.includes("Custom Extra"));
+ const customChoice=[...d.window.document.querySelectorAll(".sladmin-path-choice")]
+   .find(button=>button.textContent==="Custom Extra");
+ customChoice.click();
+ const customForm=d.window.document.querySelector(".sladmin-publish-dialog form");
+ const customButton=customForm.elements.button_label;
+ assert.ok(customButton,"Guided Custom Sections must expose button labels");
+ assert.equal(customButton.maxLength,22);
+ assert.equal(customButton.value,"Open resource");
+ assert.ok(customForm.elements.eyebrow,"Guided custom items must support badges");
+ assert.ok(customForm.elements.emoji,"Guided custom items must support icon fallback");
+ customButton.value="Explore More";
+ assert.equal(customButton.value,"Explore More");
+ d.window.document.querySelector(".sladmin-publish-dialog").close();
  d.window.close();
 
 
