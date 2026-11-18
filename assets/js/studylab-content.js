@@ -160,10 +160,14 @@
       if (title) title.textContent = d.title;
       if (desc) desc.textContent = d.description || "";
       card.dataset.cmsOrder = d.order;
-      const open = card.querySelector(".sl-cms-open");
+      const open = card.querySelector(".sl-cms-open,.open-tool-btn");
       if (open) {
-        const label = String(d.button_label || "Open resource").trim();
-        open.textContent = label.slice(0, 22) || "Open resource";
+        const subjectLabel=window.StudyLabSpecialResources?.buttonLabel;
+        const isSubject=["maths.html","physics.html","chemistry.html","biology.html"].includes(page);
+        const label=isSubject && subjectLabel
+          ? subjectLabel(page,d.button_label,href)
+          : String(d.button_label||"Open resource").trim().replace(/\\s*[→➔➜➡⇒➝]\\s*$/u,"");
+        open.textContent=label||"Open resource";
       }
       let img = card.querySelector(".sl-cms-image");
       if (d.image && safeURL(d.image, true)) {
