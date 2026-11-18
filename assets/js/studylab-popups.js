@@ -144,6 +144,13 @@
         let resp = await client.from("studylab_popups")
           .select("id,title,message,variant,placement,display_seconds,link,link_label,starts_at,expires_at")
           .order("starts_at",{ascending:false}).limit(12);
+        // Old schema compatibility when testing a rollback or a stale replica.
+        if (resp.error && /42703|PGRST204|column.*does not exist|expires_at/i.test(
+          String(resp.error.code || "") + " " + String(resp.error.message || ""))) {
+          resp = await client.from("studylab_popups")
+            .select("id,title,message,variant,placement,display_seconds,link,link_label,starts_at")
+            .order("starts_at",{ascending:false}).limit(12);
+        }
         if (resp.error) {
           console.warn("StudyLab pop-up retrieval failed:",resp.error.message);
           return;
@@ -151,7 +158,8 @@
         for (const item of resp.data || []) {
           if (closed || !homeIsVisible() || window.StudyLabBanned) return;
           const startAt = new Date(item.starts_at).getTime();
-          const stopAt = new Date(item.expires_at).getTime();
+          const stopAt = item.expires_at
+            ? new Date(item.expires_at).getTime() : startAt + 86400000;
           if (!Number.isFinite(startAt) || !Number.isFinite(stopAt) ||
               Date.now() < startAt || Date.now() >= stopAt) continue;
           const key = localPrefix + item.id + ":" + uid;
