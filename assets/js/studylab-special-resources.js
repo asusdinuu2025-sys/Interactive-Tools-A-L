@@ -10,6 +10,31 @@ const el=(tag,cls,text)=>{
  return node;
 };
 const telegramSvg="assets/images/telegram-doodles/brand-telegram.svg";
+
+const subjectPages=["maths.html","physics.html","chemistry.html","biology.html"];
+function defaultButtonLabel(page,href){
+ if(page==="maths.html"||page==="biology.html")return "Open";
+ if(page==="chemistry.html")return "Open Practical Simulation";
+ if(page==="physics.html"){
+   try{
+     const origin=new URL(href||"",location.href).hostname.toLowerCase();
+     if(origin==="phet.colorado.edu")return "Open PhET";
+   }catch(_){ /* Invalid destination is not a PhET simulation. */ }
+   return "Open Practical Simulation";
+ }
+ return "Open resource";
+}
+function buttonLabel(page,raw,href){
+ const value=String(raw||"").trim()
+   .replace(/\\s*(?:→|➔|➜|➡|⇒|➝|-->|->)\\s*$/u,"").trim();
+ if(!subjectPages.includes(page))return value||"Open Tool";
+ // Existing labels are generated defaults, not deliberate admin overrides.
+ const old=/^(?:open tool|open resource|view papers|මෙවලම විවෘත කරන්න)$/iu.test(value);
+ if(!value||old||value.length>22||value.split(/\\s+/u).length>2||
+    /[<>\\u0000-\\u001f\\u007f→➔➜➡⇒➝]/u.test(value))
+   return defaultButtonLabel(page,href);
+ return value;
+}
 function validChannelImage(raw){
   const value=String(raw||"").trim();
   if(!value)return "";
@@ -82,7 +107,7 @@ function apply(d,href){
    const icon=el("span","card-icon",d.emoji||"🔬");
    const title=el("h3",null,d.title);
    const description=el("p",null,d.description||d.topic||d.lesson_name||"Interactive learning");
-   const open=el("span","open-tool-btn",d.button_label||"Open Tool");
+   const open=el("span","open-tool-btn",buttonLabel(d.page,d.button_label,href));
    card.dataset.lesson=String(d.lesson_number||"");
    card.dataset.filterCategory=d.maths_category||"";
    card.append(icon,title,description,open);
@@ -182,5 +207,5 @@ function findTelegramHost(group){
    .find(section=>section.querySelector("h2")?.textContent.trim().toLowerCase().includes(heading))||
    document.querySelector(".telegram-all-grid");
 }
-window.StudyLabSpecialResources=Object.freeze({apply});
+window.StudyLabSpecialResources=Object.freeze({apply,buttonLabel,defaultButtonLabel});
 })();
