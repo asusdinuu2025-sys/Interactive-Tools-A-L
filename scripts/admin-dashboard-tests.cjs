@@ -441,13 +441,17 @@ async function setup(admin = true, options = {}) {
   const telegramMarkup=read("Telegram_Channels.html");
   assert.match(telegramMarkup,/studylab-content[.]css[?]v=pr112-channel-avatars-v1/);
   assert.match(telegramMarkup,/studylab-special-resources[.]js[?]v=pr112-channel-avatars-v2/);
+  assert.match(telegramMarkup,/telegram-channel-browser[.]css[?]v=pr112-browser-v1/);
+  assert.match(telegramMarkup,/telegram-channel-browser[.]js[?]v=pr112-browser-v1/);
+  assert.ok(!read("assets/js/telegram-channel-browser.js").includes("window.location ="),
+    "View All and filter navigation must remain on the Telegram page");
   assert.doesNotMatch(telegramMarkup, /class="telegram-featured-count"/,
     "Original A/L Lessons featured card must not show the automatic Sinhala subscriber line");
   assert.match(telegramMarkup, /A\/L Lessons — @AL_LESSONS/,
     "Keep the original featured channel's title and description");
   assert.match(telegramMarkup, /href="https:\/\/t[.]me\/AL_LESSONS"/,
     "Keep the original featured channel's Join button");
-  assert.match(adminMarkup,/studylab-admin-publisher[.]js[?]v=pr112-channel-avatars-v1/);
+  assert.match(adminMarkup,/studylab-admin-publisher[.]js[?]v=pr112-browser-v1/);
   assert.match(adminMarkup,/studylab-admin[.]css[?]v=pr112-channel-avatars-v1/);
   const homeHtml = read("index.html");
   const sidebarJs = read("assets/js/home-sidebar.js");
