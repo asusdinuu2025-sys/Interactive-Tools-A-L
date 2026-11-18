@@ -1159,8 +1159,10 @@
       $("#sladmin-gate").hidden = true;
       $("#sladmin-workspace").hidden = false;
       $("#sladmin-identity").textContent = "Administrator";
+      const previewId = window.StudyLabAdminConfig?.reviewId;
+      const previewName = previewId ? "PR #" + previewId : "Preview";
       $("#sladmin-mode").append(
-        el("strong", api.connectedPreview ? "PR #102 · Live admin controls. "
+        el("strong", api.connectedPreview ? previewName + " · Live admin controls. "
           : api.preview ? "Preview workspace. " : "Live workspace. "),
         document.createTextNode(
           api.connectedPreview
@@ -1174,13 +1176,15 @@
       );
       $("#sladmin-mode").append(el(
         "small",
-        api.connectedPreview ? "Connected admin preview · PR #102"
-          : api.preview ? "Local preview · PR #102" : "StudyLab Admin · Live",
+        api.connectedPreview ? "Connected admin preview · " + previewName
+          : api.preview ? "Local preview · " + (previewId ? previewName : "Isolated")
+            : "StudyLab Admin · Live",
         "sladmin-build-label",
       ));
-      // A preview must NEVER masquerade as a live publisher. Keep the
-      // clear mode notice visible in preview; live production remains clean.
-      $("#sladmin-mode").hidden = !api.preview;
+      // Approved connected previews share LIVE production admin data.
+      // Keep their warning visible, as well as local-only preview warnings.
+      // The normal production Admin dashboard keeps the existing clean layout.
+      $("#sladmin-mode").hidden = !(api.preview || api.connectedPreview);
       await navigate("Overview");
     } catch (e) {
 
