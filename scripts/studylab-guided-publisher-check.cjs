@@ -130,6 +130,25 @@ function make(html){
  assert.equal(render({...sample,resource_type:"custom"},"https://example.org"),false);
  doc.window.close();
 
+ // All existing built-in subject buttons must be arrow-free and match
+ // the requested defaults; the source links and lesson filters stay untouched.
+ for(const [page,standard] of [
+   ["maths.html","Open"],["biology.html","Open"],
+   ["chemistry.html","Open Practical Simulation"],
+   ["physics.html","Open Practical Simulation"]
+ ]){
+   const html=read(page);
+   const buttons=[...html.matchAll(/<span class="open-tool-btn">([^<]*)<\/span>/g)]
+     .map(x=>x[1].trim());
+   assert.ok(buttons.length>=10,page+" must retain all built-in tool buttons");
+   assert.ok(buttons.every(label=>label===standard||
+     (page==="physics.html" && label==="Open PhET")),
+     page+" has an unexpected or legacy button label");
+   if(page==="physics.html")assert.equal(buttons.filter(x=>x==="Open PhET").length,26,
+     "Official Physics PhET cards must retain their own label");
+   assert(!buttons.some(x=>/[→➜➡⇒]/u.test(x)),
+     "Button arrows must be removed from "+page);
+ }
  const d=make("<main id='host'></main>");
  d.window.eval(read("assets/js/studylab-admin-publisher.js"));
  const groups=[{id:"free-lesson-packs",draft:{id:"free-lesson-packs",kind:"section",page:"index.html",title:"Free Lessons",order:60,hidden:false}},
