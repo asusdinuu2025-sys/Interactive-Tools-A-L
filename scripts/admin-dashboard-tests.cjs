@@ -89,8 +89,9 @@ async function setup(admin = true, options = {}) {
   assert.equal(w.document.querySelector("#sladmin-workspace").hidden, false);
   assert.equal(w.document.querySelectorAll(".sladmin-stats .sladmin-card").length, 4);
   assert.equal(w.document.querySelectorAll(".sladmin-quick-icon").length,6);
-  assert.equal(w.document.querySelector("#sladmin-mode").hidden,true,
-    "The redundant connected-preview notice should not occupy screen space");
+  assert.equal(w.document.querySelector("#sladmin-mode").hidden,false,
+    "Preview-only mode must stay visible so admins don't mistake local messages for live publishing");
+  assert.match(w.document.querySelector("#sladmin-mode").textContent,/Preview workspace/);
   // Pop-up markdown is rendered as DOM nodes, never unsanitized HTML.
   const rich = w.document.createElement("p");
   w.StudyLabPopupFormat.render(rich,
