@@ -413,7 +413,7 @@ async function setup(admin = true, options = {}) {
     /Local preview · Isolated/);
   dom.window.close();
   const adminMarkup = read("admin.html");
-  assert.match(adminMarkup, /studylab-admin\.js\?v=pr110-connected-v1/);
+  assert.match(adminMarkup, /studylab-admin\.js\?v=pr112-carousel-v3/);
   assert.match(adminMarkup, /Loading dashboard/);
   assert.match(adminMarkup, /pr110-connected-v1/);
   assert.match(adminMarkup, /studylab-admin-config[.]js[?]v=pr110-connected-v1/);
