@@ -157,7 +157,8 @@ async function setup(admin = true, options = {}) {
   assert.equal(state.published.length, 1);
   assert.equal(state.published[0].title, "Safe <script>title</script>");
   assert.equal(w.document.querySelectorAll(".sladmin-row script").length, 0);
-  assert.equal(w.document.querySelector("#sladmin-mode").hidden,true);
+  assert.equal(w.document.querySelector("#sladmin-mode").hidden,false,
+    "Preview status remains visible after editing or publishing local drafts");
   click("Pop-up Messages");
   await wait();
   click("+ New pop-up");
