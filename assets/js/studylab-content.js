@@ -188,6 +188,12 @@
           img.loading = "lazy";
           card.prepend(img);
         }
+        img.onerror=()=>{
+          img.remove();
+          // If a linked cover disappears, reveal the card's subject/resource icon.
+          const visual=card.querySelector(".sl-cms-list-icon");
+          if(visual)visual.hidden=false;
+        };
         img.src = safeURL(d.image, true);
       } else img?.remove();
       // The existing card-grid markup and visual rules stay intact. List mode
