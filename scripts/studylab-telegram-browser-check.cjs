@@ -12,9 +12,9 @@ const dom=new JSDOM(
       '<div class="telegram-featured-copy">A/L Lessons</div>'+
       '<a class="telegram-open" href="https://t.me/AL_LESSONS">Join Channel</a></section>'+
       '<section class="telegram-subject-grid">'+
-      ...["Mathematics","Biology","Chemistry","Physics"].map(name=>
+      ["Mathematics","Biology","Chemistry","Physics"].map(name=>
         '<section class="telegram-subject"><div class="telegram-subject-head">'+
-        '<div><h2>'+name+'</h2></div></div></section>')+
+        '<div><h2>'+name+'</h2></div></div></section>').join("")+
       '</section>'+
       '<section class="telegram-all"><div class="telegram-all-head">'+
       '<div><h2>All Subjects</h2></div></div>'+
