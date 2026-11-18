@@ -303,6 +303,8 @@ async function setup(admin = true, options = {}) {
   }));
   assert.equal(w.StudyLabAdminAPI.connectedPreview, true);
   assert.equal(w.StudyLabAdminAPI.preview, false);
+  assert.equal(w.document.querySelector("#sladmin-mode").hidden,false,
+    "The connected Admin preview must clearly warn that edits modify live Supabase");
   assert.match(w.document.querySelector("#sladmin-mode").textContent,
     /real StudyLab database/);
   assert.ok(calls.includes("studylab_admin_users"));
@@ -408,12 +410,13 @@ async function setup(admin = true, options = {}) {
   assert.equal(w.document.querySelector("#sladmin-save-state").textContent, "Some data unavailable");
   assert.equal(w.document.querySelectorAll(".sladmin-overview-grid .sladmin-quick").length, 6);
   assert.match(w.document.querySelector(".sladmin-build-label").textContent,
-    /Local preview · PR #102/);
+    /Local preview · Isolated/);
   dom.window.close();
   const adminMarkup = read("admin.html");
-  assert.match(adminMarkup, /studylab-admin\.js\?v=pr109-delivery-v1/);
+  assert.match(adminMarkup, /studylab-admin\.js\?v=pr110-connected-v1/);
   assert.match(adminMarkup, /Loading dashboard/);
-  assert.match(adminMarkup, /pr109-delivery-v1/);
+  assert.match(adminMarkup, /pr110-connected-v1/);
+  assert.match(adminMarkup, /studylab-admin-config[.]js[?]v=pr110-connected-v1/);
   assert.match(read("index.html"), /studylab-popups[.]js[?]v=pr109-live-v1/);
   assert.match(read("index.html"), /studylab-content[.]js[?]v=pr111-canonical-pages-v1/);
   assert.match(adminMarkup,/sladmin-brand-mark" aria-hidden="true">ツ/);

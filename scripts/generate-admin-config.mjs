@@ -1,16 +1,18 @@
 import { writeFileSync } from "node:fs";
 
-// The owner has approved full PR #102 for production. The client mode
-// enables the admin interface only: Supabase still independently verifies
-// authenticated admin membership for every read and write RPC and storage action.
-// Unrelated deploy previews remain local-only; PR #102 stays connected.
+// Only owner-approved Netlify deploy previews use real Supabase admin actions.
+// This client mode does not grant admin rights: server-side RPCs and Storage RLS
+// still check the signed-in admin account for every privileged operation.
+// PR #102 remains connected; PR #110 is now owner-approved. Other previews
+// and branch deploys stay isolated and cannot modify production data.
 const liveProduction = process.env.CONTEXT === "production";
-const approvedPreview = process.env.CONTEXT === "deploy-preview" &&
-  process.env.REVIEW_ID === "102";
+const reviewId = process.env.CONTEXT === "deploy-preview" &&
+  /^\d+$/.test(process.env.REVIEW_ID || "") ? process.env.REVIEW_ID : null;
+const approvedPreview = reviewId === "102" || reviewId === "110";
 const mode = liveProduction ? "live" : approvedPreview ? "connected" : "preview";
 
 writeFileSync(
   "assets/js/studylab-admin-config.js",
-  `window.StudyLabAdminConfig = Object.freeze(${JSON.stringify({ mode })});\n`,
+  `window.StudyLabAdminConfig = Object.freeze(${JSON.stringify({ mode, reviewId })});\n`,
 );
 console.log(`StudyLab Admin Dashboard: ${mode}`);

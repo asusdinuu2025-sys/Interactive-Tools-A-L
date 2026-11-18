@@ -17,10 +17,18 @@ function verify(context,review,expected) {
     assert.equal(result.status,0,result.stderr||result.stdout);
     const data=readFileSync(join(root,"assets/js/studylab-admin-config.js"),"utf8");
     assert.match(data,new RegExp('"mode":"'+expected+'"'));
+    if (context === "deploy-preview") {
+      assert.match(data,new RegExp('"reviewId":"'+review+'"'));
+    }
   }finally{rmSync(root,{recursive:true,force:true});}
 }
 verify("production","","live");
 verify("deploy-preview","102","connected");
+verify("deploy-preview","110","connected");
+verify("deploy-preview","109","preview");
+verify("deploy-preview","111","preview");
 verify("deploy-preview","104","preview");
 verify("branch-deploy","","preview");
-console.log("PASS: authorized admin controls enabled only in production and approved PR102.");
+verify("production","110","live");
+verify("branch-deploy","110","preview");
+console.log("PASS: production and PR #102/#110 use live admin controls; all other previews stay isolated.");
