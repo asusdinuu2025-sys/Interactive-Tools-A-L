@@ -108,6 +108,21 @@ function make(html){
  {id:"custom-extra",draft:{id:"custom-extra",kind:"section",page:"index.html",title:"Custom Extra",order:100,hidden:false}}];
  d.window.StudyLabAdminPublisher.mount(d.window.document.querySelector("#host"),{},groups,()=>{});
  assert.equal(d.window.document.querySelectorAll(".sladmin-publish-choice").length,4);
+ for(const kind of ["simulation","telegram","lesson-pack","custom"]){
+   const button=d.window.document.querySelector('[data-kind="'+kind+'"]');
+   const icon=button.querySelector(".sladmin-publish-icon svg");
+   assert.ok(icon,"Each publishing category must have a vector icon: "+kind);
+   assert.equal(icon.getAttribute("viewBox"),"0 0 24 24");
+   assert.equal(icon.getAttribute("aria-hidden"),"true");
+   assert.ok(icon.querySelector("path,rect"),"SVG artwork must exist for "+kind);
+   assert.equal(button.querySelector(".sladmin-publish-icon").textContent.trim(),"",
+     "Old text icons must be replaced: "+kind);
+ }
+ assert.equal(d.window.document.querySelector('[data-kind="custom"] svg').querySelectorAll("rect").length,4,
+   "Custom Sections must have a four-panel layout icon");
+ const publishCss=read("assets/css/studylab-admin.css");
+ assert.ok(publishCss.includes('html[data-theme="light"] .sladmin-publish-icon'),
+   "The publisher icons must adapt to the light theme");
  d.window.document.querySelector("[data-kind=simulation]").click();
  assert.equal(d.window.document.querySelectorAll(".sladmin-path-choice").length,4);
  d.window.document.querySelector(".sladmin-path-choice").click();
