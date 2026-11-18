@@ -115,6 +115,15 @@ body.sl-telegram-hub .sl-tg-sponsored-list {margin:0;display:block;}
 body.sl-telegram-hub .sl-tg-sponsored-list > .telegram-featured-channel {
   margin:0;
 }
+/* A brief, GPU-friendly slide/fade on each carousel change. */
+body.sl-telegram-hub .sl-tg-sponsored-section:not(.sl-tg-section-expanded)
+  .sl-tg-sponsored-list > .telegram-featured-channel:not(.sl-tg-filtered-out) {
+  animation:slTgSponsoredEnter .32s ease-out both;
+}
+@keyframes slTgSponsoredEnter {
+  from {opacity:.42;transform:translateX(12px);}
+  to {opacity:1;transform:translateX(0);}
+}
 body.sl-telegram-hub .sl-tg-carousel-dots {
   display:flex;align-items:center;justify-content:center;
   min-height:21px;gap:8px;margin:11px 0 0;
@@ -197,6 +206,9 @@ html[data-theme="light"] body.sl-telegram-hub .sl-tg-sponsor-count {color:#53799
   body.sl-telegram-hub .sl-tg-view-all {padding:6px 10px;}
 }
 @media(prefers-reduced-motion:reduce) {
+  body.sl-telegram-hub .sl-tg-sponsored-list > .telegram-featured-channel {
+    animation:none!important;
+  }
   body.sl-telegram-hub .sl-tg-filter-button,
   body.sl-telegram-hub .sl-tg-view-all,
   body.sl-telegram-hub .sl-tg-carousel-arrow {transition:none;}
