@@ -67,6 +67,11 @@ w.eval(read("assets/js/studylab-content.js"));
   assert.ok(photo.querySelector('img.sl-cms-image'));
   assert.equal(photo.querySelector(".sl-cms-list-icon").hidden,true,
     "Uploaded pictures replace the list icon instead of creating a duplicate");
+  photo.querySelector("img.sl-cms-image").dispatchEvent(new w.Event("error"));
+  assert.equal(photo.querySelector("img.sl-cms-image"),null,
+    "Broken image must not leave a missing-photo frame");
+  assert.equal(photo.querySelector(".sl-cms-list-icon").hidden,false,
+    "Failed image must automatically reveal the fallback resource icon");
   assert.equal(icon.querySelector(".sl-cms-list-icon").textContent,"📘");
   assert.equal(icon.querySelector(".sl-cms-open").textContent,"Open Tools");
   assert(!icon.querySelector("img.sl-cms-image"),"Emoji fallback must work without images");
