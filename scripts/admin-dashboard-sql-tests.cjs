@@ -58,6 +58,13 @@ as $admin_gate$ select auth.uid() in (
   // Apply the PR #108 expiry upgrade only to this throwaway PGlite database.
   await db.exec(fs.readFileSync(
     "supabase/migrations/20261117175500_admin_popup_selectable_expiry.sql","utf8"));
+  // PR109 schema on an isolated local database. pg_cron scheduling and
+  // Supabase's Realtime publication are integration-checked on the server.
+  const popupUpgrade=fs.readFileSync(
+    "supabase/migrations/20261118094500_popup_live_delivery_weekly_cleanup.sql","utf8")
+    .replace(/ALTER PUBLICATION supabase_realtime ADD TABLE public[.]studylab_popups;/,"")
+    .replace(/SELECT cron[.]schedule\([\s\S]*?\);\s*(?=COMMIT;)/,"");
+  await db.exec(popupUpgrade);
   const admin = "24e78cd0-4565-407a-96f7-9cfde083f6d2",
     student = "11111111-1111-4111-8111-111111111111";
   async function as(id, role = "authenticated") {
@@ -414,6 +421,63 @@ as $admin_gate$ select auth.uid() in (
     await db.query("select studylab_admin_popup_action_v3('delete',$1::jsonb)",
       [JSON.stringify({id:created.id})]);
   }
+  // Both new display modes must pass the original admin-only setter and
+  // enforce once-only receipt behavior. Manual delete must cascade receipts.
+  for(const duration of [0,60]){
+    const item={title:"Display "+duration,message:"Display test",variant:"info",
+      placement:"top-right",display_seconds:duration,link:"",link_label:"View",
+      starts_at:new Date().toISOString(),expiry_period:"24h"};
+    await as(admin);
+    const created=(await db.query(
+      "select studylab_admin_popup_action_v3('create',$1::jsonb) as data",
+      [JSON.stringify(item)])).rows[0].data;
+    assert.equal(created.display_seconds,duration);
+    await as(student);
+    assert.equal((await db.query(
+      "select studylab_popup_claim($1) as claimed",[created.id])).rows[0].claimed,true);
+    await as(admin);
+    const receiptBefore=(await db.query(
+      "select count(*)::integer as n from studylab_private.popup_receipts where popup_id=$1",
+      [created.id])).rows[0].n;
+    assert.equal(receiptBefore,1);
+    await db.query("select studylab_admin_popup_action_v3('delete',$1::jsonb)",
+      [JSON.stringify({id:created.id})]);
+    await db.exec("reset role");
+    const remaining=(await db.query(
+      "select count(*)::integer as n from studylab_private.popup_receipts where popup_id=$1",
+      [created.id])).rows[0].n;
+    assert.equal(remaining,0,"Manual delete must physically cascade delivery receipts");
+  }
+  await as(admin);
+  await assert.rejects(db.query(
+    "select studylab_admin_popup_action_v3('create',$1::jsonb)",[JSON.stringify({
+      title:"Too long",message:"No",variant:"info",placement:"top-right",
+      display_seconds:61,link:"",link_label:"View",expiry_period:"24h"
+    })]),/Invalid popup settings/);
+  const due=(await db.query(
+    "select studylab_admin_popup_action_v3('create',$1::jsonb) as data",
+    [JSON.stringify({title:"Expired scheduled cleanup",message:"Clean it",
+      variant:"info",placement:"top-right",display_seconds:8,
+      link:"",link_label:"View",expiry_period:"24h",starts_at:new Date().toISOString()})]
+  )).rows[0].data;
+  await as(student);
+  await db.query("select studylab_popup_claim($1)",[due.id]);
+  await db.exec("reset role");
+  await db.query("update public.studylab_popups set starts_at=now()-interval '3 days' where id=$1",
+    [due.id]);
+  const auditCount=(await db.query(
+    "select count(*)::integer as n from studylab_private.activity")).rows[0].n;
+  const purge=(await db.query(
+    "select studylab_private.purge_expired_popups_weekly() as deleted")).rows[0].deleted;
+  assert(purge>=1,"Weekly cleanup must delete expired popup rows");
+  assert.equal((await db.query(
+    "select count(*)::integer as n from public.studylab_popups where id=$1",[due.id])).rows[0].n,0);
+  assert.equal((await db.query(
+    "select count(*)::integer as n from studylab_private.popup_receipts where popup_id=$1",[due.id])).rows[0].n,0);
+  assert.equal((await db.query(
+    "select count(*)::integer as n from studylab_private.activity")).rows[0].n,auditCount,
+    "Weekly cleanup must keep independent protected activity history");
+  await as(admin);
   logs=(await db.query("select studylab_admin_activity() as log")).rows[0].log;
   await db.exec("reset role");
   const retainedBefore=(await db.query(
@@ -434,6 +498,6 @@ as $admin_gate$ select auth.uid() in (
 
   await db.close();
   console.log(
-    "PASS: SQL authorization, grants, private drafts, publication, guarded deletion, selectable popup expiry with one-time claims, ban ledger, verified undo snapshots, soft history clearing, editable labels, stale writes, grant/revoke and verification.",
+    "PASS: SQL authorization, grants, private drafts, publication, guarded deletion, selectable popup expiry, 60s/persistent displays, receipt-cascading weekly purge, ban ledger, verified undo snapshots, soft history clearing, editable labels, stale writes, grant/revoke and verification.",
   );
 })();
