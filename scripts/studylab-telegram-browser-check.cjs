@@ -24,6 +24,11 @@ const dom=new JSDOM(
     runScripts:"outside-only",pretendToBeVisual:true
   });
 const w=dom.window,doc=w.document;
+// Fake the clock: assert exact intervals and transitions without waiting.
+const pending=new Map();let timerId=0;
+w.setTimeout=(callback,delay)=>{const id=++timerId;pending.set(id,{callback,delay});return id;};
+w.clearTimeout=id=>pending.delete(id);
+const pendingTimer=()=>[...pending.values()][0];
 w.CSS={escape:token=>String(token)};
 function staticCard(host,title,order,all=false) {
   const a=doc.createElement("a");
@@ -111,6 +116,36 @@ assert.equal(w.location.pathname,"/Telegram_Channels.html","View All must not na
 sponsorMore.click();
 assert.equal(visibleCards("#sl-tg-sponsored-cards > .telegram-featured-channel").length,1);
 
+// Auto rotation defaults to two seconds and is configurable by Admin.
+assert.equal(w.StudyLabTelegramBrowser.getAutoAdvanceSeconds(),2);
+assert.equal(pending.size,1,"One carousel timer only; never stack intervals");
+assert.equal(pendingTimer().delay,2000,"Default auto-slide interval is 2 seconds");
+const currentSlide=visibleCards("#sl-tg-sponsored-cards > .telegram-featured-channel")[0];
+const fired=pendingTimer().callback;
+fired();
+assert.notEqual(visibleCards("#sl-tg-sponsored-cards > .telegram-featured-channel")[0],
+  currentSlide,"Automatic carousel timeout advances to the next card");
+assert.equal(pending.size,1,"Each automatic transition schedules exactly one next tick");
+w.StudyLabTelegramBrowser.setAutoAdvanceSeconds(5);
+assert.equal(w.StudyLabTelegramBrowser.getAutoAdvanceSeconds(),5);
+assert.equal(pendingTimer().delay,5000,"Admin-configured five-second interval must be honored");
+w.StudyLabTelegramBrowser.setAutoAdvanceSeconds(1);
+assert.equal(w.StudyLabTelegramBrowser.getAutoAdvanceSeconds(),2,
+  "Unsafe intervals outside 2–60 must use the 2s default");
+const sponsored=cats("sponsored");
+sponsored.dispatchEvent(new w.Event("mouseenter"));
+assert.equal(pending.size,0,"Stop automatic motion while hovering");
+sponsored.dispatchEvent(new w.Event("mouseleave"));
+assert.equal(pendingTimer().delay,2000,"Resume when pointer leaves carousel");
+sponsored.dispatchEvent(new w.Event("focusin"));
+assert.equal(pending.size,0,"Stop carousel when user is navigating by keyboard");
+sponsored.dispatchEvent(new w.FocusEvent("focusout",{relatedTarget:null}));
+assert.equal(pending.size,1,"Resume when keyboard focus leaves");
+sponsorMore.click();
+assert.equal(pending.size,0,"Never auto-advance when View All is expanded");
+sponsorMore.click();
+assert.equal(pending.size,1,"Return to auto-advance in compact mode");
+
 const mathMore=cats("maths").querySelector(".sl-tg-view-all");
 assert.equal(mathMore.textContent,"View All");
 mathMore.click();
@@ -171,4 +206,4 @@ assert.equal(doc.querySelector('[data-cms-id="hidden-physics"]').hidden,true,
  "Admin-hidden cards must not be exposed by filters or View All");
 assert.equal(doc.querySelectorAll(".sl-tg-filtered-out").length>0,true);
 dom.window.close();
-console.log("PASS: seven Telegram filters, newest-first ordering, carousel navigation, inline expansion, search, re-render, and hidden-content safety.");
+console.log("PASS: seven Telegram filters, 2s/configurable sponsored rotation, pause/resume, ordering, in-page View All, search, and hidden-content safety.");
