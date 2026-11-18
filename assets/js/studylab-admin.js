@@ -782,7 +782,6 @@
     } else {
       fields.append(field("kicker","Small heading above section title (optional)",d.kicker));
     }
-    }
     const page = field(
       "page",
       "Page",
