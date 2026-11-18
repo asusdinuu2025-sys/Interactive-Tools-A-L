@@ -222,9 +222,11 @@
     if (version !== request) return;
     const toolbar = el("div", undefined, "sladmin-toolbar sladmin-history-actions");
     toolbar.append(el("span",
-      "Clear hides a log entry. Undo reverses eligible unchanged actions.",
+      api.preview
+        ? "Live Supabase audit history is shown READ-ONLY here. Preview actions remain local to this device."
+        : "Clear hides a log entry. Undo reverses eligible unchanged actions.",
       "sladmin-history-info"));
-    toolbar.append(button("Clear all", async () => {
+    toolbar.append(button(api.preview ? "Clear preview history" : "Clear all", async () => {
       if (!confirm("Hide all activity from this dashboard? This will NOT undo any changes. The protected audit record stays in Supabase.")) return;
       await api.history("clear_all");
       await render();
@@ -248,9 +250,11 @@
           status("Change undone. A new audit entry records the reversal.");
         }, "sladmin-undo"),
       ];
-      if (!a.id) {
+      if (!a.id || a.readonly) {
         actions[0].disabled = true;
-        actions[0].title = "Older local log entries cannot be cleared individually";
+        actions[0].title = a.readonly
+          ? "Open the production Admin dashboard to manage live audit history"
+          : "Older local log entries cannot be cleared individually";
       }
       if (!a.can_undo || a.undone_at) {
         actions[1].disabled = true;
@@ -259,7 +263,8 @@
           : "No safe undo snapshot for this action";
       }
       list.append(row(
-        a.action + (a.undone_at ? " · Undone" : ""),
+        (api.preview ? (a.readonly ? "LIVE · " : "PREVIEW · ") : "") +
+          a.action + (a.undone_at ? " · Undone" : ""),
         a.target + " · " + new Date(a.created_at).toLocaleString(),
         actions, "↻",
       ));
