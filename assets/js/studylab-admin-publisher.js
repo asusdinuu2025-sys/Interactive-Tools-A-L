@@ -4,6 +4,7 @@
 "use strict";
 if(window.StudyLabAdminPublisher)return;
 const subjects=[["maths.html","Mathematics"],["physics.html","Physics"],["chemistry.html","Chemistry"],["biology.html","Biology"]];
+const carouselSettingsId="studylab-telegram-carousel-settings";
 const groups=[
  {id:"simulation",name:"Practical Simulations",icon:"⚗",hint:"Upload a standalone HTML tool to an existing subject"},
  {id:"telegram",name:"A/L Telegram Channels",icon:"➤",hint:"Publish to Sponsored, subject channels or All"},
@@ -71,6 +72,76 @@ function mount(host,api,rows,onRefresh){
      choices.append(button);
    }
    options.append(el("p","Select the destination:"),choices);
+   if(kind==="telegram"){
+     const setting=el("div",null,"sladmin-telegram-carousel-settings");
+     setting.append(el("strong","Sponsored carousel"));
+     setting.append(el("p",
+       "Automatically rotate sponsored channels. Default: every 2 seconds.",
+       "sladmin-publish-note"));
+     const editTime=el("button","Adjust auto-slide time","sladmin-path-choice");
+     editTime.type="button";
+     editTime.addEventListener("click",openCarouselSettings);
+     setting.append(editTime);options.append(setting);
+   }
+ }
+ function openCarouselSettings(){
+   const record=rows.find(r=>r.draft?.id===carouselSettingsId);
+   const existing=Number(record?.draft?.auto_advance_seconds);
+   const selected=Number.isInteger(existing)&&existing>=2&&existing<=60?existing:2;
+   const dialog=el("dialog",null,"sladmin-dialog sladmin-publish-dialog");
+   const form=el("form");
+   const head=el("header");
+   head.append(el("h2","Sponsored carousel settings"));
+   const close=el("button","×");
+   close.type="button";close.setAttribute("aria-label","Close carousel settings");
+   close.addEventListener("click",()=>dialog.close());head.append(close);
+   const field=labeled("Automatic slide interval (seconds)",
+     "number","auto_advance_seconds",selected);
+   const input=field.querySelector("input");
+   input.min="2";input.max="60";input.step="1";input.required=true;
+   const info=el("p",
+     "Default: 2 seconds. Pauses on hover, keyboard focus, search, View All, " +
+     "background tabs and reduced-motion preferences. Once published, " +
+     "the selected interval applies to all StudyLab visitors.",
+     "sladmin-publish-note");
+   const status=el("p",null,"sladmin-publish-status");
+   status.dataset.publisherStatus="";
+   const save=el("button","Save carousel timing","sladmin-primary");
+   save.type="button";
+   const actions=el("div",null,"sladmin-editor-actions");
+   actions.append(save);
+   form.append(head,field,info,status,actions);
+   dialog.append(form);document.body.append(dialog);
+   dialog.addEventListener("close",()=>dialog.remove(),{once:true});
+   dialog.showModal();
+   save.addEventListener("click",async()=>{
+     const speed=Number(input.value);
+     if(!Number.isInteger(speed)||speed<2||speed>60){
+       addStatus(form,"Choose a whole number between 2 and 60 seconds.",true);
+       return;
+     }
+     save.disabled=true;
+     try{
+       // Uses the existing authenticated Admin content/save RPC and audit log.
+       // This hidden special record is configuration, never a visible card.
+       const item={
+         id:carouselSettingsId,kind:"card",page:"Telegram_Channels.html",
+         resource_type:"telegram-carousel-settings",
+         title:"Telegram Sponsored Carousel Settings",
+         description:"Sponsored channel automatic slide interval",
+         order:0,hidden:true,url:"https://t.me/",image:"",
+         button_label:"Settings",auto_advance_seconds:speed
+       };
+       await api.save(item,record?.revision||0,"publish");
+       const entries=await api.content();
+       const confirmed=entries.find(r=>r.id===carouselSettingsId);
+       if(!confirmed||Number(confirmed.draft?.auto_advance_seconds)!==speed)
+         throw Error("Saved, but could not verify the timing. Refresh Admin to check.");
+       dialog.close();
+       await onRefresh();
+     }catch(e){addStatus(form,e.message||"Could not save interval.",true);}
+     finally{save.disabled=false;}
+   });
  }
  function openEditor(kind,destination,record=null){
    const draft=record?.draft||null;
