@@ -598,6 +598,7 @@
       const items = rows
         .filter(
           (r) =>
+            r.draft.id !== "studylab-telegram-carousel-settings" &&
             r.draft.kind === (sectionMode ? "section" : "card") &&
             (!filter.value || r.draft.page === filter.value) &&
             r.draft.title.toLowerCase().includes(search.value.toLowerCase()),
