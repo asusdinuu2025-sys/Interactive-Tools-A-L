@@ -121,8 +121,10 @@ assert.equal(w.StudyLabTelegramBrowser.getAutoAdvanceSeconds(),2);
 assert.equal(pending.size,1,"One carousel timer only; never stack intervals");
 assert.equal(pendingTimer().delay,2000,"Default auto-slide interval is 2 seconds");
 const currentSlide=visibleCards("#sl-tg-sponsored-cards > .telegram-featured-channel")[0];
-const fired=pendingTimer().callback;
-fired();
+const [firedId,firedTimer]=pending.entries().next().value;
+// Real one-shot timeouts remove themselves before invoking their callback.
+pending.delete(firedId);
+firedTimer.callback();
 assert.notEqual(visibleCards("#sl-tg-sponsored-cards > .telegram-featured-channel")[0],
   currentSlide,"Automatic carousel timeout advances to the next card");
 assert.equal(pending.size,1,"Each automatic transition schedules exactly one next tick");
