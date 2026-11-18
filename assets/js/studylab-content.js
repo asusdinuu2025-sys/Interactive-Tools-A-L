@@ -75,7 +75,9 @@
         section = el("section", "sl-cms-section");
         section.id = d.id;
         section.dataset.cmsId = d.id;
-        section.append(el("h2"), el("p"), el("div", "sl-cms-grid"));
+        const heading = el("header", "sl-cms-section-heading");
+        heading.append(el("span", "sl-cms-section-kicker"), el("h2"), el("p"));
+        section.append(heading, el("div", "sl-cms-grid"));
         document.querySelector("main")?.append(section);
       }
       section.hidden = !!d.hidden;
@@ -86,6 +88,15 @@
           section.querySelector(":scope > p");
       if (title) title.textContent = d.title;
       if (desc) desc.textContent = d.description || "";
+      let kicker=section.querySelector(".sl-cms-section-kicker");
+      if(!kicker && section.classList.contains("sl-cms-section")){
+        kicker=el("span","sl-cms-section-kicker");
+        (section.querySelector(".sl-cms-section-heading") || section).prepend(kicker);
+      }
+      if(kicker){
+        kicker.textContent=String(d.kicker||"").slice(0,48);
+        kicker.hidden=!kicker.textContent;
+      }
       section.dataset.cmsOrder = d.order;
       document
         .querySelectorAll(
@@ -160,10 +171,14 @@
       if (title) title.textContent = d.title;
       if (desc) desc.textContent = d.description || "";
       card.dataset.cmsOrder = d.order;
-      const open = card.querySelector(".sl-cms-open");
+      const open = card.querySelector(".sl-cms-open,.open-tool-btn");
       if (open) {
-        const label = String(d.button_label || "Open resource").trim();
-        open.textContent = label.slice(0, 22) || "Open resource";
+        const subjectLabel=window.StudyLabSpecialResources?.buttonLabel;
+        const isSubject=["maths.html","physics.html","chemistry.html","biology.html"].includes(page);
+        const label=isSubject && subjectLabel
+          ? subjectLabel(page,d.button_label,href)
+          : String(d.button_label||"Open resource").trim().replace(/\s*[→➔➜➡⇒➝]\s*$/u,"");
+        open.textContent=label||"Open resource";
       }
       let img = card.querySelector(".sl-cms-image");
       if (d.image && safeURL(d.image, true)) {
@@ -173,8 +188,46 @@
           img.loading = "lazy";
           card.prepend(img);
         }
+        img.onerror=()=>{
+          img.remove();
+          // If a linked cover disappears, reveal the card's subject/resource icon.
+          const visual=card.querySelector(".sl-cms-list-icon");
+          if(visual)visual.hidden=false;
+        };
         img.src = safeURL(d.image, true);
       } else img?.remove();
+      // The existing card-grid markup and visual rules stay intact. List mode
+      // gets a small visual fallback when no image was uploaded.
+      if(card.classList.contains("sl-cms-card")){
+        let badge=card.querySelector(".sl-cms-card-kicker");
+        const badgeText=String(d.eyebrow||"").trim().slice(0,40);
+        if(badgeText && !badge){
+          badge=el("span","sl-cms-card-kicker");
+          card.querySelector("h3")?.before(badge);
+        }
+        if(badge){
+          badge.textContent=badgeText;
+          badge.hidden=!badgeText;
+        }
+        let visual=card.querySelector(".sl-cms-list-icon");
+        if(!visual){
+          visual=el("span","sl-cms-list-icon");
+          visual.setAttribute("aria-hidden","true");
+          card.prepend(visual);
+        }
+        visual.hidden=!!card.querySelector("img.sl-cms-image");
+        const emoji=String(d.emoji||"").trim().slice(0,12);
+        if(emoji)visual.textContent=emoji;
+        else {
+          const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
+          svg.setAttribute("viewBox","0 0 24 24");
+          svg.setAttribute("aria-hidden","true");
+          const path=document.createElementNS("http://www.w3.org/2000/svg","path");
+          path.setAttribute("d","M4 5.5C6.8 4.5 9.3 4.8 12 6.5c2.7-1.7 5.2-2 8-.95V19c-2.7-1-5.4-.85-8 1-2.6-1.85-5.3-2-8-1V5.5ZM12 6.5V20");
+          svg.append(path);
+          visual.replaceChildren(svg);
+        }
+      }
     }
     // Only reorder siblings of the same kind; preserve scripts, headings and functional sections.
     const parents = new Set(

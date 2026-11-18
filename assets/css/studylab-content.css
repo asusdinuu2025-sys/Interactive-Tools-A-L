@@ -348,3 +348,110 @@ html[data-theme="light"] .sl-cms-special {
   font:700 12px "Nirmala UI","Segoe UI",sans-serif;cursor:pointer;
 }
 .sl-cms-load-error button:hover {background:rgba(133,190,237,.16);}
+
+
+/* Custom sections: match the existing home headings, while preserving the
+   outer panel's original low-opacity glass/background in either theme. */
+section.sl-cms-section .sl-cms-section-heading {
+  display:grid;gap:6px;min-width:0;margin:0;
+}
+section.sl-cms-section .sl-cms-section-heading h2 {
+  margin:0;
+  font:820 clamp(1.35rem,2vw,1.8rem)/1.25 "Nirmala UI","Segoe UI",sans-serif;
+  letter-spacing:-.025em;
+}
+section.sl-cms-section .sl-cms-section-heading p {
+  max-width:72ch;margin:0;opacity:.82;line-height:1.55;
+  font-size:clamp(.82rem,1.2vw,.92rem);
+}
+section.sl-cms-section .sl-cms-section-kicker,
+section.sl-cms-section .sl-cms-card-kicker {
+  display:inline-block;width:max-content;max-width:100%;
+  color:#89ddf4;font:820 .67rem/1.45 "Nirmala UI","Segoe UI",sans-serif;
+  letter-spacing:.12em;text-transform:uppercase;overflow-wrap:anywhere;
+}
+section.sl-cms-section .sl-cms-section-kicker[hidden],
+section.sl-cms-section .sl-cms-card-kicker[hidden] {display:none!important;}
+html[data-theme="light"] section.sl-cms-section .sl-cms-section-kicker,
+html[data-theme="light"] section.sl-cms-section .sl-cms-card-kicker {
+  color:#3f7895;
+}
+section.sl-cms-section .sl-cms-card-kicker {
+  border:1px solid rgba(117,208,232,.18);border-radius:999px;
+  padding:5px 9px;background:rgba(92,194,224,.065);
+  font-size:.63rem;letter-spacing:.065em;
+}
+section.sl-cms-section .sl-cms-list-icon {display:none;}
+
+/* Only the LIST setting changes layout. Card/grid mode remains unchanged. */
+section.sl-cms-section[data-layout="list"] > .sl-cms-grid {
+  display:grid;grid-template-columns:minmax(0,1fr);gap:12px;
+}
+section.sl-cms-section[data-layout="list"] > .sl-cms-grid > a.sl-cms-card {
+  display:grid;grid-template-columns:72px minmax(0,1fr) auto;
+  grid-template-rows:repeat(3,auto);column-gap:18px;row-gap:5px;
+  align-items:center;min-height:112px;padding:17px 19px;
+  border-radius:19px;overflow:hidden;
+}
+section.sl-cms-section[data-layout="list"] > .sl-cms-grid > a.sl-cms-card > h3,
+section.sl-cms-section[data-layout="list"] > .sl-cms-grid > a.sl-cms-card > p,
+section.sl-cms-section[data-layout="list"] > .sl-cms-grid > a.sl-cms-card > .sl-cms-card-kicker {
+  grid-column:2;grid-row:auto;min-width:0;max-width:100%;
+  justify-self:start;align-self:center;
+}
+section.sl-cms-section[data-layout="list"] > .sl-cms-grid > a.sl-cms-card > h3 {
+  font-size:clamp(1rem,1.2vw,1.2rem);line-height:1.38;
+}
+section.sl-cms-section[data-layout="list"] > .sl-cms-grid > a.sl-cms-card > p {
+  line-height:1.5;opacity:.78;
+}
+section.sl-cms-section[data-layout="list"] > .sl-cms-grid > a.sl-cms-card > img.sl-cms-image,
+section.sl-cms-section[data-layout="list"] > .sl-cms-grid > a.sl-cms-card > .sl-cms-list-icon {
+  grid-column:1;grid-row:1 / span 3;justify-self:center;align-self:center;
+  width:72px;height:72px;min-width:0;max-width:72px;max-height:72px;
+  margin:0;padding:6px;box-sizing:border-box;object-fit:contain;
+  border-radius:16px;border:1px solid rgba(150,205,250,.23);
+  background:rgba(117,193,237,.09);
+}
+section.sl-cms-section[data-layout="list"] > .sl-cms-grid > a.sl-cms-card > .sl-cms-list-icon {
+  display:grid;place-items:center;color:#9cdef5;font-size:1.6rem;
+  font-family:"Nirmala UI","Segoe UI",sans-serif;
+  background:linear-gradient(140deg,rgba(111,206,236,.15),rgba(154,146,235,.09));
+}
+section.sl-cms-section[data-layout="list"] .sl-cms-list-icon[hidden] {display:none!important;}
+section.sl-cms-section[data-layout="list"] .sl-cms-list-icon svg {
+  width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:1.55;
+  stroke-linecap:round;stroke-linejoin:round;
+}
+section.sl-cms-section[data-layout="list"] > .sl-cms-grid > a.sl-cms-card > .sl-cms-open {
+  grid-column:3;grid-row:1 / span 3;align-self:center;justify-self:end;
+  margin:0;max-width:180px;white-space:normal;text-align:center;
+}
+html[data-theme="light"] section.sl-cms-section[data-layout="list"] .sl-cms-list-icon {
+  color:#376d90;border-color:rgba(87,161,208,.25);
+  background:rgba(131,197,233,.19);
+}
+@media(max-width:850px){
+  section.sl-cms-section[data-layout="list"] > .sl-cms-grid > a.sl-cms-card {
+    grid-template-columns:60px minmax(0,1fr);column-gap:13px;
+    padding:15px;min-height:98px;
+  }
+  section.sl-cms-section[data-layout="list"] > .sl-cms-grid > a.sl-cms-card > img.sl-cms-image,
+  section.sl-cms-section[data-layout="list"] > .sl-cms-grid > a.sl-cms-card > .sl-cms-list-icon {
+    width:60px;height:60px;max-width:60px;max-height:60px;
+  }
+  section.sl-cms-section[data-layout="list"] > .sl-cms-grid > a.sl-cms-card > .sl-cms-open {
+    grid-column:2;grid-row:auto;justify-self:start;margin-top:7px;max-width:100%;
+  }
+}
+@media(max-width:480px){
+  section.sl-cms-section[data-layout="list"] > .sl-cms-grid > a.sl-cms-card {
+    grid-template-columns:52px minmax(0,1fr);column-gap:12px;
+    row-gap:7px;padding:13px;border-radius:17px;
+  }
+  section.sl-cms-section[data-layout="list"] > .sl-cms-grid > a.sl-cms-card > img.sl-cms-image,
+  section.sl-cms-section[data-layout="list"] > .sl-cms-grid > a.sl-cms-card > .sl-cms-list-icon {
+    width:52px;height:52px;max-width:52px;max-height:52px;
+    border-radius:13px;
+  }
+}

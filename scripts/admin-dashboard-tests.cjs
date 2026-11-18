@@ -157,6 +157,19 @@ async function setup(admin = true, options = {}) {
   assert.equal(state.published.length, 1);
   assert.equal(state.published[0].title, "Safe <script>title</script>");
   assert.equal(w.document.querySelectorAll(".sladmin-row script").length, 0);
+  click("Sections");
+  await wait();
+  click("+ New section");
+  await wait();
+  const sectionEditor=w.document.querySelector("#sladmin-form");
+  assert.ok(sectionEditor.elements.kicker,"Custom sections need a small-heading field");
+  assert.ok(sectionEditor.elements.layout,"Sections must retain the grid/list toggle");
+  assert.equal(sectionEditor.elements.page,undefined,
+    "New sections always belong to Home; no redundant Page dropdown");
+  assert.deepEqual([...sectionEditor.elements.layout.options].map(o=>o.value),["cards","list"]);
+  w.document.querySelector("#sladmin-editor").close();
+  click("Content");
+  await wait();
   assert.equal(w.document.querySelector("#sladmin-mode").hidden,false,
     "Preview status remains visible after editing or publishing local drafts");
   click("Pop-up Messages");
@@ -208,6 +221,13 @@ async function setup(admin = true, options = {}) {
   });
   assert.equal(normalized.url,"https://studylablk.netlify.app");
   assert.equal(normalized.button_label,"Try");
+  const sampleSection={id:"custom-section-new",kind:"section",title:"Example",page:"index.html",
+    order:100,description:"Example section",image:"",hidden:false,kicker:"STUDY TOOLS",layout:"list"};
+  assert.equal(api.validate({...sampleSection}).kicker,"STUDY TOOLS");
+  assert.throws(()=>api.validate({...sampleSection,kicker:"X".repeat(49)}),/kicker/);
+  assert.equal(api.validate({...state.published[0],eyebrow:"STUDY UTILITIES",
+    emoji:"📚"}).eyebrow,"STUDY UTILITIES");
+  assert.throws(()=>api.validate({...state.published[0],eyebrow:"X".repeat(41)}),/eyebrow/);
   assert.throws(() => api.validate({
     ...state.published[0],button_label:"A".repeat(23)
   }),/Button label/);
@@ -413,12 +433,12 @@ async function setup(admin = true, options = {}) {
     /Local preview · Isolated/);
   dom.window.close();
   const adminMarkup = read("admin.html");
-  assert.match(adminMarkup, /studylab-admin\.js\?v=pr112-carousel-v3/);
+  assert.match(adminMarkup, /studylab-admin\.js\?v=pr114-custom-sections-v1/);
   assert.match(adminMarkup, /Loading dashboard/);
-  assert.match(adminMarkup, /pr110-connected-v1/);
-  assert.match(adminMarkup, /studylab-admin-config[.]js[?]v=pr110-connected-v1/);
+  assert.match(adminMarkup, /pr114-connected-v1/);
+  assert.match(adminMarkup, /studylab-admin-config[.]js[?]v=pr114-connected-v1/);
   assert.match(read("index.html"), /studylab-popups[.]js[?]v=pr109-live-v1/);
-  assert.match(read("index.html"), /studylab-content[.]js[?]v=pr111-canonical-pages-v1/);
+  assert.match(read("index.html"), /studylab-content[.]js[?]v=pr114-custom-sections-v1/);
   assert.match(adminMarkup,/sladmin-brand-mark" aria-hidden="true">ツ/);
   assert.match(adminMarkup,/sladmin-back-icon/);
   assert.match(adminMarkup,/studylab-popups.css/);
@@ -432,7 +452,10 @@ async function setup(admin = true, options = {}) {
   assert.match(contentCss,/max-width:100%/);
   assert.match(contentCss,/overflow-wrap:anywhere/);
   assert.match(read("assets/css/studylab-popups.css"),/slpopup-link-preview/);
-  for (const page of ["index.html","maths.html","physics.html",
+  assert.match(read("index.html"),
+    /studylab-content[.]css[?]v=pr114-custom-sections-v1/,
+    "Home must use the refreshed custom section stylesheet");
+  for (const page of ["maths.html","physics.html",
       "chemistry.html","biology.html","lesson-packs.html"]) {
     assert.match(read(page),
       /studylab-content[.]css[?]v=pr102-public-rest-v3/,
@@ -451,10 +474,10 @@ async function setup(admin = true, options = {}) {
     "Keep the original featured channel's title and description");
   assert.match(telegramMarkup, /href="https:\/\/t[.]me\/AL_LESSONS"/,
     "Keep the original featured channel's Join button");
-  assert.match(adminMarkup,/studylab-admin-publisher[.]js[?]v=pr112-carousel-v3/);
-  assert.match(adminMarkup,/studylab-admin[.]css[?]v=pr112-carousel-v3/);
+  assert.match(adminMarkup,/studylab-admin-publisher[.]js[?]v=pr114-custom-sections-v1/);
+  assert.match(adminMarkup,/studylab-admin[.]css[?]v=pr114-sleek-icons-v1/);
   assert.match(telegramMarkup,/studylab-content[.]js[?]v=pr112-carousel-settings-v3/);
-  assert.match(adminMarkup,/studylab-admin[.]js[?]v=pr112-carousel-v3/);
+  assert.match(adminMarkup,/studylab-admin[.]js[?]v=pr114-custom-sections-v1/);
   assert.match(read("assets/css/telegram-channel-browser.css"),
     /repeat\(4,minmax\(0,1fr\)\)/,
     "Collapsed All Subjects uses four columns on desktop");
@@ -492,7 +515,7 @@ async function setup(admin = true, options = {}) {
   assert.ok(!adminMarkup.includes('href="assets/css/main.css"'),
     "Admin must use isolated CSS, not global home rules");
   const cardCode = read("assets/js/studylab-content.js");
-  assert.ok(cardCode.includes('d.button_label || "Open resource"'));
+  assert.ok(cardCode.includes('window.StudyLabSpecialResources?.buttonLabel'));
   assert.ok(!cardCode.includes('"Open resource →"'));
   const popupCode = read("assets/js/studylab-popups.js");
   assert.ok(popupCode.includes('item.link_label || "View"'));

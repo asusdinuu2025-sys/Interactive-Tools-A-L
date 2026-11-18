@@ -6,11 +6,28 @@ if(window.StudyLabAdminPublisher)return;
 const subjects=[["maths.html","Mathematics"],["physics.html","Physics"],["chemistry.html","Chemistry"],["biology.html","Biology"]];
 const carouselSettingsId="studylab-telegram-carousel-settings";
 const groups=[
- {id:"simulation",name:"Practical Simulations",icon:"⚗",hint:"Upload a standalone HTML tool to an existing subject"},
- {id:"telegram",name:"A/L Telegram Channels",icon:"➤",hint:"Publish to Sponsored, subject channels or All"},
- {id:"lesson-pack",name:"Free Lesson Packs",icon:"▤",hint:"Create matching lesson and revision-pack cards"},
- {id:"custom",name:"Custom Sections",icon:"▦",hint:"Add a resource inside an existing or new section"}
+ {id:"simulation",name:"Practical Simulations",hint:"Upload a standalone HTML tool to an existing subject"},
+ {id:"telegram",name:"A/L Telegram Channels",hint:"Publish to Sponsored, subject channels or All"},
+ {id:"lesson-pack",name:"Free Lesson Packs",hint:"Create matching lesson and revision-pack cards"},
+ {id:"custom",name:"Custom Sections",hint:"Add a resource inside an existing or new section"}
 ];
+// Static, stroke-based artwork: no emoji fonts, external icon dependency or fetches.
+const publishGlyphs=Object.freeze({
+ simulation:'<path d="M9 3h6M10 3v7l-5.3 8.5A2 2 0 0 0 6.4 21h11.2a2 2 0 0 0 1.7-2.5L14 10V3"/><path d="M8 16h8"/>',
+ telegram:'<path d="m21.5 2.5-19 7.7 7.9 3.5 3.7 7.8 7.4-19Z"/><path d="M21.5 2.5 10.4 13.7"/>',
+ "lesson-pack":'<path d="M4.5 19V5a2 2 0 0 1 2-2H20v14H6.5a2 2 0 0 0 0 4H20v-4"/><path d="M9 8h7M9 12h5"/>',
+ custom:'<rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.8"/>'
+});
+function publishIcon(kind){
+ const wrap=el("span",null,"sladmin-publish-icon");
+ const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
+ svg.setAttribute("viewBox","0 0 24 24");
+ svg.setAttribute("aria-hidden","true");
+ svg.setAttribute("focusable","false");
+ svg.innerHTML=publishGlyphs[kind];
+ wrap.append(svg);
+ return wrap;
+}
 const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined&&text!==null)n.textContent=text;if(cls)n.className=cls;return n;};
 function labeled(text,type="text",name="",value="",limit=0){
  const wrap=el("label",null,"sladmin-publish-field"),title=el("span",text);
@@ -41,7 +58,7 @@ function mount(host,api,rows,onRefresh){
  const entries=groups.map(group=>{
    const button=el("button",null,"sladmin-publish-choice");
    button.type="button";button.dataset.kind=group.id;
-   const icon=el("span",group.icon,"sladmin-publish-icon");
+   const icon=publishIcon(group.id);
    button.append(icon,el("strong",group.name),el("small",group.hint));
    button.addEventListener("click",()=>{
      current=current===group.id?"":group.id;
@@ -160,6 +177,18 @@ function mount(host,api,rows,onRefresh){
      fields.append(labeled("Topic","text","topic",draft?.topic||"",120));
      fields.append(labeled("Lesson number (optional)","number","lesson_number",draft?.lesson_number||""));
      fields.append(labeled("Lesson name (optional)","text","lesson_name",draft?.lesson_name||"",120));
+     // Default labels longer than the server's 22-character limit are
+     // displayed by the public page and never sent to Supabase as custom text.
+     const subjectActionDefault=(destination==="physics.html"||destination==="chemistry.html")
+       ? "Open Practical Simulation" : "Open";
+     const priorLabel=String(draft?.button_label||"").trim();
+     const customLabel=/^(?:open tool|open resource|view papers|මෙවලම විවෘත කරන්න)$/iu.test(priorLabel)
+       ? "" : priorLabel;
+     const buttonField=labeled("Custom button text (optional, 1–2 words, max 22 characters)",
+       "text","button_label",customLabel,22);
+     buttonField.querySelector("input").placeholder=subjectActionDefault;
+     fields.append(buttonField,el("p",
+       "Leave blank to show: "+subjectActionDefault,"sladmin-publish-note"));
      // Pure / Applied classification belongs to Combined Mathematics only.
      // Other subject pages use their numbered A/L lesson filter.
      if(destination==="maths.html") fields.append(choice("Mathematics category","maths_category",
@@ -250,6 +279,15 @@ function mount(host,api,rows,onRefresh){
    }else {
      fields.append(labeled("Destination link","url","link",draft?.url||"",2048));
      fields.append(labeled("Image URL (optional)","url","image",draft?.image||"",2048));
+     if(kind==="custom"){
+       fields.append(labeled("Button text (editable, max 22 characters)",
+         "text","button_label",draft?.button_label||"Open resource",22));
+       fields.append(labeled("Small card label / badge (optional)",
+         "text","eyebrow",draft?.eyebrow||"",40));
+       fields.append(el("p",
+         "Resource cards follow their section's layout: compact rows in List mode, existing cards in Grid mode. The section's translucent background stays unchanged.",
+         "sladmin-publish-note"));
+     }
    }
    if(kind!=="telegram")fields.append(labeled("Emoji / icon (optional)","text","emoji",draft?.emoji||"",12));
    if(kind==="telegram"){
@@ -291,8 +329,10 @@ function mount(host,api,rows,onRefresh){
        url:kind==="simulation"?"/simulation-viewer.html?id="+encodeURIComponent(draft?.id||"") :
          String(d.get("link")||"").trim(),
        image:kind==="telegram" ? String(draft?.image||"") : String(d.get("image")||"").trim(),
-       button_label:kind==="simulation"?"Open Tool":
-         kind==="telegram"?"Open Channel":kind==="lesson-pack"?"View Lessons":"Open resource"
+       button_label:kind==="simulation"?String(d.get("button_label")||"").trim():
+         kind==="custom"?String(d.get("button_label")||"").trim():
+         kind==="telegram"?"Open Channel":kind==="lesson-pack"?"View Lessons":"Open resource",
+       ...(kind==="custom"?{eyebrow:String(d.get("eyebrow")||"").trim()}:{}),
      };
      // Existing custom section cards keep their section and page semantics.
      if(kind==="simulation"){
@@ -329,6 +369,20 @@ function mount(host,api,rows,onRefresh){
        info.pack_file_name=draft?.pack_file_name||"";
        info.cover_file_path=draft?.cover_file_path||"";
        info.cover_file_name=draft?.cover_file_name||"";
+     }
+     if(kind==="custom"){
+       if(!info.button_label||info.button_label.length>22||
+          /[<>\u0000-\u001f\u007f→➔➜➡⇒➝]/u.test(info.button_label))
+         throw Error("Button text must be 1–22 plain-text characters, with no arrows.");
+       if(info.eyebrow.length>40||/[<>\u0000-\u001f\u007f]/u.test(info.eyebrow))
+         throw Error("Card badge must be at most 40 plain-text characters.");
+     }
+     if(kind==="simulation"){
+       if(info.button_label){
+         if(info.button_label.length>22||info.button_label.split(/\s+/u).length>2||
+            /[<>→➔➜➡⇒➝\u0000-\u001f\u007f]/u.test(info.button_label))
+           throw Error("Use 1–2 words, maximum 22 characters and no arrows.");
+       }else delete info.button_label;
      }
      if(!info.url && !(kind==="lesson-pack" && form.elements.pack_pdf?.files?.[0]))
        throw Error("Provide a destination link or upload a lesson pack PDF.");

@@ -58,6 +58,14 @@
       throw Error("Enter a title of 1–160 characters.");
     if ((item.description || "").length > 1500)
       throw Error("Description is too long.");
+    // Optional metadata is stored inside the existing JSON content payload.
+    // No SQL migration or broader Supabase permissions are required.
+    for (const [name,limit] of [["kicker",48],["eyebrow",40],["emoji",12]]) {
+      const value=String(item[name]||"").trim();
+      if(value.length>limit||/[<>\u0000-\u001f\u007f]/u.test(value))
+        throw Error(name+" must be "+limit+" plain-text characters or fewer.");
+      if(item[name]!==undefined)item[name]=value;
+    }
     if (!Number.isInteger(item.order) || item.order < 0 || item.order > 10000)
       throw Error("Order must be 0–10000.");
     if (item.kind === "card" && !item.url)
@@ -65,10 +73,22 @@
     item.url = safeURL(item.url);
     item.image = safeURL(item.image, true);
     if (item.kind === "card") {
-      item.button_label = String(item.button_label || "Open resource").trim();
-      if (!item.button_label || item.button_label.length > 22 ||
-          /[\u0000-\u001f<>]/.test(item.button_label))
-        throw Error("Button label must be 1–22 plain-text characters.");
+      const subjectCard=["maths.html","physics.html","chemistry.html","biology.html"]
+        .includes(item.page);
+      const label=String(item.button_label??"").trim();
+      // Blank subject labels use the built-in preset at render time. Physics and
+      // Chemistry presets are 25 characters, while the existing secure DB RPC
+      // intentionally restricts stored custom labels to 22 characters.
+      if(subjectCard && !label) delete item.button_label;
+      else {
+        if(!label||label.length>22||
+           /[\u0000-\u001f<>→➔➜➡⇒➝]/u.test(label)||
+           (subjectCard && label.split(/\s+/u).length>2))
+          throw Error(subjectCard
+            ? "Use 1–2 words, up to 22 characters, with no arrows."
+            : "Button label must be 1–22 plain-text characters.");
+        item.button_label=label;
+      }
     }
     if (
       ![

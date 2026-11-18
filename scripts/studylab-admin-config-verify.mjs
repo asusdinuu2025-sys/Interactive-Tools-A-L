@@ -25,10 +25,14 @@ function verify(context,review,expected) {
 verify("production","","live");
 verify("deploy-preview","102","connected");
 verify("deploy-preview","110","connected");
+verify("deploy-preview","114","connected");
 verify("deploy-preview","109","preview");
 verify("deploy-preview","111","preview");
+verify("deploy-preview","112","preview");
+verify("deploy-preview","113","preview");
+verify("deploy-preview","115","preview");
 verify("deploy-preview","104","preview");
 verify("branch-deploy","","preview");
-verify("production","110","live");
-verify("branch-deploy","110","preview");
-console.log("PASS: production and PR #102/#110 use live admin controls; all other previews stay isolated.");
+verify("production","114","live");
+verify("branch-deploy","114","preview");
+console.log("PASS: production and owner-approved PR #102/#110/#114 use live admin controls; other previews are isolated.");

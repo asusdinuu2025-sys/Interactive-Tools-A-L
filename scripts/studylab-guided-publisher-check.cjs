@@ -37,11 +37,39 @@ function make(html){
  const card=doc.window.document.querySelector(".tool-grid > a.tool-card");
  assert.equal(card.dataset.lesson,"8");
  assert.equal(card.querySelector(".card-icon").textContent,"⚡");
- assert.equal(card.querySelector(".open-tool-btn").textContent,"Open Tool");
+ assert.equal(card.querySelector(".open-tool-btn").textContent,"Open Practical Simulation");
+ const subjectActions=doc.window.StudyLabSpecialResources.buttonLabel;
+ assert.equal(subjectActions("maths.html","View Papers →","tools/Maths/Maths_Past_Papers.html"),"Open");
+ assert.equal(subjectActions("biology.html","Open Tool →","tools/biology/test.html"),"Open");
+ assert.equal(subjectActions("chemistry.html","Open Tool →","tools/chemistry/test.html"),
+   "Open Practical Simulation");
+ assert.equal(subjectActions("physics.html","Open Tool →",
+   "https://phet.colorado.edu/sims/html/pendulum-lab/latest/pendulum-lab_en.html"),
+   "Open PhET");
+ assert.equal(subjectActions("physics.html","Explore Now →","tools/physics/meter_bridge.html"),
+   "Explore Now","Admin custom wording should override the default with no arrow");
+ assert.equal(subjectActions("maths.html","මෙවලම විවෘත කරන්න →","tools/Maths/Vectors.html"),
+   "Open","Legacy Sinhala action text should normalize");
+ assert.equal(subjectActions("chemistry.html","A".repeat(23),"tools/chemistry/test.html"),
+   "Open Practical Simulation","Invalid saved labels fall back to the subject default");
  assert.ok(card.href.includes("simulation-viewer.html"));
  const math={...sample,resource_type:"simulation",id:"custom-22222222-2222-4222-8222-222222222222",maths_category:"applied"};
  render(math,"simulation-viewer.html?id="+math.id);
  assert.equal(doc.window.document.querySelectorAll(".tool-card")[1].dataset.filterCategory,"applied");
+ assert.equal(doc.window.document.querySelectorAll(".tool-card")[1]
+   .querySelector(".open-tool-btn").textContent,"Open Practical Simulation");
+ // Newly uploaded cards follow their page's defaults even without a stored label.
+ const mathsCard={...sample,id:"test-maths-default",page:"maths.html"};
+ render(mathsCard,"simulation-viewer.html?id=test-maths-default");
+ assert.equal(doc.window.document.querySelector('[data-cms-id="test-maths-default"] .open-tool-btn').textContent,"Open");
+ const chemistryCard={...sample,id:"test-chem-default",page:"chemistry.html"};
+ render(chemistryCard,"simulation-viewer.html?id=test-chem-default");
+ assert.equal(doc.window.document.querySelector('[data-cms-id="test-chem-default"] .open-tool-btn').textContent,
+   "Open Practical Simulation");
+ const custom={...sample,id:"test-maths-custom",page:"maths.html",button_label:"Start Now"};
+ render(custom,"simulation-viewer.html?id=test-maths-custom");
+ assert.equal(doc.window.document.querySelector('[data-cms-id="test-maths-custom"] .open-tool-btn').textContent,
+   "Start Now");
  const channel={...sample,resource_type:"telegram",id:"custom-33333333-3333-4333-8333-333333333333",
    telegram_category:"maths",title:"Revision Channel"};
  render(channel,"https://t.me/example");
@@ -102,22 +130,62 @@ function make(html){
  assert.equal(render({...sample,resource_type:"custom"},"https://example.org"),false);
  doc.window.close();
 
+ // All existing built-in subject buttons must be arrow-free and match
+ // the requested defaults; the source links and lesson filters stay untouched.
+ for(const [page,standard] of [
+   ["maths.html","Open"],["biology.html","Open"],
+   ["chemistry.html","Open Practical Simulation"],
+   ["physics.html","Open Practical Simulation"]
+ ]){
+   const html=read(page);
+   const buttons=[...html.matchAll(/<span class="open-tool-btn">([^<]*)<\/span>/g)]
+     .map(x=>x[1].trim());
+   assert.ok(buttons.length>=10,page+" must retain all built-in tool buttons");
+   assert.ok(buttons.every(label=>label===standard||
+     (page==="physics.html" && label==="Open PhET")),
+     page+" has an unexpected or legacy button label");
+   if(page==="physics.html")assert.equal(buttons.filter(x=>x==="Open PhET").length,26,
+     "Official Physics PhET cards must retain their own label");
+   assert(!buttons.some(x=>/[→➜➡⇒]/u.test(x)),
+     "Button arrows must be removed from "+page);
+ }
  const d=make("<main id='host'></main>");
  d.window.eval(read("assets/js/studylab-admin-publisher.js"));
  const groups=[{id:"free-lesson-packs",draft:{id:"free-lesson-packs",kind:"section",page:"index.html",title:"Free Lessons",order:60,hidden:false}},
  {id:"custom-extra",draft:{id:"custom-extra",kind:"section",page:"index.html",title:"Custom Extra",order:100,hidden:false}}];
  d.window.StudyLabAdminPublisher.mount(d.window.document.querySelector("#host"),{},groups,()=>{});
  assert.equal(d.window.document.querySelectorAll(".sladmin-publish-choice").length,4);
+ for(const kind of ["simulation","telegram","lesson-pack","custom"]){
+   const button=d.window.document.querySelector('[data-kind="'+kind+'"]');
+   const icon=button.querySelector(".sladmin-publish-icon svg");
+   assert.ok(icon,"Each publishing category must have a vector icon: "+kind);
+   assert.equal(icon.getAttribute("viewBox"),"0 0 24 24");
+   assert.equal(icon.getAttribute("aria-hidden"),"true");
+   assert.ok(icon.querySelector("path,rect"),"SVG artwork must exist for "+kind);
+   assert.equal(button.querySelector(".sladmin-publish-icon").textContent.trim(),"",
+     "Old text icons must be replaced: "+kind);
+ }
+ assert.equal(d.window.document.querySelector('[data-kind="custom"] svg').querySelectorAll("rect").length,4,
+   "Custom Sections must have a four-panel layout icon");
+ const publishCss=read("assets/css/studylab-admin.css");
+ assert.ok(publishCss.includes('html[data-theme="light"] .sladmin-publish-icon'),
+   "The publisher icons must adapt to the light theme");
  d.window.document.querySelector("[data-kind=simulation]").click();
  assert.equal(d.window.document.querySelectorAll(".sladmin-path-choice").length,4);
  d.window.document.querySelector(".sladmin-path-choice").click();
  assert.ok(d.window.document.querySelector(".sladmin-publish-dialog input[name=html]"));
+ const ctaField=d.window.document.querySelector(".sladmin-publish-dialog input[name=button_label]");
+ assert.ok(ctaField,"Simulations should expose a custom CTA field");
+ assert.equal(ctaField.maxLength,22,"Field must respect the live database limit");
+ assert.equal(ctaField.placeholder,"Open","Maths preset must be Open");
  assert.ok(d.window.document.querySelector(".sladmin-publish-dialog input[name=lesson_number]"));
  assert.ok(d.window.document.querySelector(".sladmin-publish-dialog select[name=maths_category]"),
    "Maths simulation form includes Pure/Applied categories");
  d.window.document.querySelector(".sladmin-publish-dialog").close();
  d.window.document.querySelectorAll(".sladmin-path-choice")[1].click();
  assert.ok(d.window.document.querySelector(".sladmin-publish-dialog input[name=lesson_number]"));
+ assert.equal(d.window.document.querySelector(".sladmin-publish-dialog input[name=button_label]").placeholder,
+   "Open Practical Simulation","Physics label must be display-only and not saved by default");
  assert.equal(d.window.document.querySelector(".sladmin-publish-dialog select[name=maths_category]"),null,
    "Physics uses lesson filtering, not Pure/Applied category choices");
  d.window.document.querySelector(".sladmin-publish-dialog").close();
@@ -125,6 +193,19 @@ function make(html){
  d.window.document.querySelector("[data-kind=custom]").click();
  const names=[...d.window.document.querySelectorAll(".sladmin-path-choice")].map(x=>x.textContent);
  assert.ok(names.includes("Custom Extra"));
+ const customChoice=[...d.window.document.querySelectorAll(".sladmin-path-choice")]
+   .find(button=>button.textContent==="Custom Extra");
+ customChoice.click();
+ const customForm=d.window.document.querySelector(".sladmin-publish-dialog form");
+ const customButton=customForm.elements.button_label;
+ assert.ok(customButton,"Guided Custom Sections must expose button labels");
+ assert.equal(customButton.maxLength,22);
+ assert.equal(customButton.value,"Open resource");
+ assert.ok(customForm.elements.eyebrow,"Guided custom items must support badges");
+ assert.ok(customForm.elements.emoji,"Guided custom items must support icon fallback");
+ customButton.value="Explore More";
+ assert.equal(customButton.value,"Explore More");
+ d.window.document.querySelector(".sladmin-publish-dialog").close();
  d.window.close();
 
 

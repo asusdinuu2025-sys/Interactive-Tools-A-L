@@ -706,6 +706,9 @@
       input.maxLength = 160;
     }
     if (name === "description") input.maxLength = 1500;
+    if (name === "kicker") input.maxLength = 48;
+    if (name === "eyebrow") input.maxLength = 40;
+    if (name === "emoji") input.maxLength = 12;
     if (type === "number") {
       input.min = "0";
       input.max = "10000";
@@ -713,6 +716,22 @@
     }
     wrap.append(input);
     return wrap;
+  }
+  function subjectButtonDefault(d){
+    if(d.page==="maths.html"||d.page==="biology.html")return "Open";
+    if(d.page==="chemistry.html")return "Open Practical Simulation";
+    if(d.page==="physics.html"){
+      try{if(new URL(d.url,location.href).hostname==="phet.colorado.edu")return "Open PhET";}
+      catch(_){ /* No external simulation URL. */ }
+      return "Open Practical Simulation";
+    }
+    return "";
+  }
+  function editableSubjectLabel(d){
+    const value=String(d.button_label||"").trim();
+    if(/^(?:open tool|open resource|view papers|මෙවලම විවෘත කරන්න)$/iu.test(value))
+      return "";
+    return value;
   }
   function edit(record, kind = "card") {
     editing = record || {
@@ -738,14 +757,31 @@
       field("title", "Title", d.title),
       field("description", "Description", d.description, "textarea"),
     );
-    if (d.kind === "card")
+    if (d.kind === "card") {
+      const subjectDefault=subjectButtonDefault(d);
+      const subjectButton=Boolean(subjectDefault);
+      const buttonField=textLabel("button_label",
+        subjectButton ? "Custom button text · 1–2 words, max 22 characters" :
+          "Button text (customizable · max 22 characters)",
+        subjectButton ? editableSubjectLabel(d) : d.button_label||"Open resource",
+        subjectButton ? ["","Open","Explore","Start Now","View","Try"] :
+          ["Open resource","Open","Open link","View","Try","Learn more"],22);
+      if(subjectButton){
+        buttonField.querySelector("input").placeholder=subjectDefault;
+        buttonField.append(el("small",
+          "Leave empty for the automatic label: "+subjectDefault,
+          "sladmin-button-hint"));
+      }
       fields.append(
         field("url", "Destination link (website, domain or internal path)", d.url),
         field("image", "Image URL (optional)", d.image),
-        textLabel("button_label", "Card button · max 22 characters",
-          d.button_label || "Open resource",
-          ["Open resource","Open","Open link","View","Try","Learn more"],22),
+        field("emoji","Icon / emoji (shown in list if no image)",d.emoji),
+        field("eyebrow","Small label / badge (optional)",d.eyebrow),
+        buttonField,
       );
+    } else {
+      fields.append(field("kicker","Small heading above section title (optional)",d.kicker));
+    }
     const page = field(
       "page",
       "Page",
@@ -754,7 +790,12 @@
       d.kind === "section" ? [pageOptions[0]] : pageOptions,
     );
     page.querySelector("select").disabled = !!record?.builtin;
-    fields.append(page, field("order", "Display order", d.order, "number"));
+    if(d.kind==="section"){
+      fields.append(el("small",
+        "Sections are automatically added to the Home page. No page selection is needed.",
+        "sladmin-button-hint"));
+    }else fields.append(page);
+    fields.append(field("order", "Display order", d.order, "number"));
     if (d.kind === "card") {
       fields.append(
         field("section", "Homepage section (optional)", d.section, "text", [
@@ -775,13 +816,15 @@
             .map((x) => [x.id, x.draft.title]),
         ]),
       );
-    } else if (!record?.builtin)
-      fields.append(
-        field("layout", "Section layout", d.layout || "cards", "text", [
-          ["cards", "Card grid"],
-          ["list", "List"],
-        ]),
-      );
+    } else if (!record?.builtin) {
+      fields.append(field("layout","Section layout",d.layout||"cards","text",[
+        ["cards","Card grid (existing design)"],
+        ["list","Resource list (compact rows)"],
+      ]));
+      fields.append(el("small",
+        "Both layouts keep the original translucent section background. Lists show the icon, title, description and action side by side.",
+        "sladmin-button-hint"));
+    }
     fields.append(
       field("hidden", "Hidden from students", d.hidden, "checkbox"),
     );
@@ -801,11 +844,15 @@
       "url",
       "image",
       "button_label",
+      "eyebrow",
+      "emoji",
+      "kicker",
       "page",
       "section",
       "layout",
     ])
       if (form.elements[n]) d[n] = form.elements[n].value.trim();
+    if(d.kind==="section")d.page="index.html";
     d.order = Number(form.elements.order.value);
     d.hidden = form.elements.hidden.checked;
     return api.validate(d);
