@@ -15,7 +15,7 @@
     "lesson-packs": "lesson-packs.html"
   });
   const segment = location.pathname.split("/").filter(Boolean).pop() || "index";
-  const pageKey = segment.replace(/\\.html$/i, "").toLowerCase();
+  const pageKey = segment.replace(/\.html$/i, "").toLowerCase();
   const page = canonicalPages[pageKey] || segment;
   function safeURL(raw, image = false) {
     try {
