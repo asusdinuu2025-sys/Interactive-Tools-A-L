@@ -106,7 +106,7 @@
   async function start() {
     // The StudyLab welcome, sign-in and signup screens use the Home URL.
     // Not a single receipt may be claimed until Home was actually entered.
-    const path = location.pathname.replace(/\\/+$/, "").toLowerCase();
+    const path = location.pathname.replace(/\/+$/, "").toLowerCase();
     if (!(path === "" || path === "/" || path.endsWith("/index.html"))) return;
     if (!(await waitForHomeEntry())) return;
     const account = window.StudyLabAccount;
