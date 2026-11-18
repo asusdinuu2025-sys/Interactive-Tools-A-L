@@ -22,6 +22,13 @@
     return node;
   };
   const state = {filter: "all", search: "", sponsorIndex: 0, expanded: new Set()};
+  let intervalSeconds=2;
+  let autoTimer=null;
+  let hovering=false,focused=false;
+  const reducedMotion=Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches);
+  const stopAuto=()=>{
+    if(autoTimer!==null){window.clearTimeout(autoTimer);autoTimer=null;}
+  };
   const sections = new Map();
   const controls = new Map();
   const limit = 4;
@@ -205,6 +212,25 @@
   function visibleSponsors() {
     return cardsOf("sponsored").filter(card => !card.hidden && matches(card));
   }
+  function scheduleAuto(){
+    stopAuto();
+    const allowed=(state.filter==="all"||state.filter==="sponsored") &&
+      !state.search && !state.expanded.has("sponsored") &&
+      !document.hidden && !hovering && !focused && !reducedMotion;
+    if(!allowed||visibleSponsors().length<2)return;
+    autoTimer=window.setTimeout(()=>{
+      autoTimer=null;
+      const length=visibleSponsors().length;
+      if(length<2)return;
+      state.sponsorIndex=(state.sponsorIndex+1)%length;
+      render();
+    },intervalSeconds*1000);
+  }
+  function setAutoAdvanceSeconds(value){
+    const parsed=Number(value);
+    intervalSeconds=Number.isInteger(parsed)&&parsed>=2&&parsed<=60?parsed:2;
+    render();
+  }
   function updateDots(list, active) {
     dots.replaceChildren();
     if (list.length < 2 || state.expanded.has("sponsored") || state.search) {
@@ -268,7 +294,19 @@
       if (categoryAllowed) matchesCount += eligible.length;
     }
     noResults.hidden = !searching || matchesCount !== 0;
+    scheduleAuto();
   }
+  // Do not move a carousel while someone is interacting with its content.
+  sponsorSection.addEventListener("mouseenter",()=>{hovering=true;stopAuto();});
+  sponsorSection.addEventListener("mouseleave",()=>{hovering=false;scheduleAuto();});
+  sponsorSection.addEventListener("focusin",()=>{focused=true;stopAuto();});
+  sponsorSection.addEventListener("focusout",event=>{
+    if(!event.relatedTarget||!sponsorSection.contains(event.relatedTarget)){
+      focused=false;scheduleAuto();
+    }
+  });
+  document.addEventListener("visibilitychange",scheduleAuto);
+  window.addEventListener("pagehide",stopAuto,{once:true});
   sponsorSection.addEventListener("keydown", event => {
     if (event.target.closest("button,a,input")) return;
     if (event.key === "ArrowLeft") previous.click();
@@ -280,5 +318,6 @@
     render();
   });
   render();
-  window.StudyLabTelegramBrowser = Object.freeze({refresh:render});
+  window.StudyLabTelegramBrowser = Object.freeze({refresh:render,setAutoAdvanceSeconds,
+    getAutoAdvanceSeconds:()=>intervalSeconds});
 })();
