@@ -203,7 +203,7 @@ function make(html){
    '<main><section class="telegram-featured-channel"></section><div class="telegram-all-grid"></div></main>',
    {...channel,page:"Telegram_Channels.html",telegram_category:"sponsored",
      url:"https://t.me/study"},
-   ".sl-cms-sponsored-grid > a.sl-cms-special");
+   ".sl-cms-sponsored-grid > section.telegram-featured-channel.sl-cms-special");
  await loadWithoutSdk("lesson-packs.html",
    '<main><section class="sl-lessons-publisher-grid"></section></main>',
    {...pack,page:"lesson-packs.html",url:"https://example.org/pack.pdf"},
@@ -233,7 +233,7 @@ function make(html){
      '<main><section class="telegram-featured-channel"></section><div class="telegram-all-grid"></div></main>',
      {...channel,page:"Telegram_Channels.html",telegram_category:"sponsored",
        url:"https://t.me/study"},
-     ".sl-cms-sponsored-grid > a.sl-cms-special");
+     ".sl-cms-sponsored-grid > section.telegram-featured-channel.sl-cms-special");
  }
  for (const route of ["","index","index.html"]) {
    await loadWithoutSdk(route,'<main><div data-cms-additions></div></main>',
