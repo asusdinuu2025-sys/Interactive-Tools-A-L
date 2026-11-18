@@ -1028,6 +1028,18 @@ html[data-theme="light"] .sl-admin-page button.sladmin-danger:hover:not(:disable
   color:var(--sladmin-text);background:rgba(124,179,229,.075);
   font-size:.78rem;overflow-wrap:anywhere;
 }
+.sladmin-publish-avatar-thumbnail {
+  width:42px;height:42px;flex:0 0 42px;object-fit:cover;
+  border-radius:11px;border:1px solid rgba(127,199,243,.32);
+}
+.sladmin-publish-avatar-remove {
+  grid-column:1/-1;display:flex;align-items:center;gap:9px;
+  color:var(--sladmin-text);font-size:.8rem;cursor:pointer;
+}
+.sladmin-publish-avatar-remove input {
+  width:16px;height:16px;min-height:0;flex:0 0 16px;
+  accent-color:#55b9eb;
+}
 .sladmin-publish-file-status a {color:var(--sladmin-text);text-underline-offset:3px;}
 .sladmin-publish-file-status strong {color:var(--sladmin-text);}
 .sladmin-publish-field {display:flex;min-width:0;flex-direction:column;gap:7px;font-size:.77rem;color:var(--sladmin-muted);}
