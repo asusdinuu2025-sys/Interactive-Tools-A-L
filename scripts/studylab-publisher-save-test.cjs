@@ -35,7 +35,9 @@ const api={
   save:async (item,revision,action)=>{
     saved.push({item:{...item},revision,action});
     return {draft:item,revision:revision+1,published:action==="publish"};
-  }
+  },
+  content:async()=>saved.map(row=>({id:row.item.id,draft:row.item,
+    revision:row.revision+1,published:row.action==="publish"}))
 };
 w.eval(fs.readFileSync("assets/js/studylab-admin-publisher.js","utf8"));
 const publisher=w.StudyLabAdminPublisher.mount(
@@ -230,6 +232,35 @@ const clickPublish=async dialog=>{
   await clickPublish(d);
   assert.equal(saved[previousCount+1].item.order,310,
     "Editing an existing channel retains its original newest-first position");
+
+  // Global timing is an internal hidden content record, saved through the
+  // same revision-safe authorized Admin publishing workflow.
+  const telegramChoice=seededHost.querySelector('[data-kind="telegram"]');
+  telegramChoice.click();
+  const intervalButton=seededHost.querySelector(".sladmin-telegram-carousel-settings button");
+  assert.ok(intervalButton,"Telegram Admin menu offers Sponsored timing settings");
+  intervalButton.click();
+  d=findDialog();
+  assert.match(d.textContent,/Sponsored carousel settings/);
+  const seconds=d.querySelector('[name="auto_advance_seconds"]');
+  assert.equal(seconds.value,"2","First published interval defaults to two seconds");
+  seconds.value="1";
+  d.querySelector(".sladmin-editor-actions button").click();
+  await wait(10);
+  assert.match(d.querySelector("[data-publisher-status]").textContent,/between 2 and 60/,
+    "Reject intervals below two seconds");
+  const beforeSetting=saved.length;
+  seconds.value="5";
+  d.querySelector(".sladmin-editor-actions button").click();
+  await wait(40);
+  assert.equal(saved.length,beforeSetting+1);
+  const setting=saved.at(-1).item;
+  assert.equal(setting.id,"studylab-telegram-carousel-settings");
+  assert.equal(setting.resource_type,"telegram-carousel-settings");
+  assert.equal(setting.auto_advance_seconds,5);
+  assert.equal(setting.hidden,true,"Config row must not be shown as a Telegram card");
+  assert.equal(setting.page,"Telegram_Channels.html");
+  assert.equal(saved.at(-1).action,"publish");
 
   dom.window.close();
   console.log("PASS: automatic Telegram publishing order, avatar upload/edit/rollback, HTML and PDF publishing.");
