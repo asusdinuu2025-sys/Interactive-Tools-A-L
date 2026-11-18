@@ -268,8 +268,12 @@ function make(html){
    [sponsoredRecord]);
  assert.equal(telegramPage.window.document.querySelectorAll(".sl-cms-sponsored-grid .sl-cms-special").length,1,
    "A published sponsored Telegram channel must render on page load");
- assert.equal(telegramPage.window.document.querySelector(".sl-cms-sponsor-label")?.textContent,
-   "SPONSORED","Sponsored Telegram badge must contain the right text");
+ assert.equal(telegramPage.window.document.querySelector(
+   ".sl-cms-sponsored-grid .telegram-featured-eyebrow")?.textContent,
+   "✦ Featured Channel","New sponsors must match the original featured heading");
+ assert.equal(telegramPage.window.document.querySelector(
+   ".sl-cms-sponsored-grid .telegram-featured-action .telegram-open")?.href,
+   "https://t.me/example","Featured sponsor Join button must open the channel");
  telegramPage.window.close();
 
  const lessonRecord={...pack,page:"lesson-packs.html",url:"https://example.org/lessons"};
