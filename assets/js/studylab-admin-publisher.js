@@ -181,7 +181,14 @@ function mount(host,api,rows,onRefresh){
      fields.append(labeled("Image URL (optional)","url","image",draft?.image||"",2048));
    }
    if(kind!=="telegram")fields.append(labeled("Emoji / icon (optional)","text","emoji",draft?.emoji||"",12));
-   fields.append(labeled("Display order","number","order",draft?.order??nextOrder(page,kind==="custom"?destination:"")));
+   if(kind==="telegram"){
+     fields.append(el("p",
+       "Newest channels appear first automatically in Sponsored, subject and All Subjects lists.",
+       "sladmin-publish-note sladmin-telegram-sort-note"));
+   }else{
+     fields.append(labeled("Display order","number","order",
+       draft?.order??nextOrder(page,kind==="custom"?destination:"")));
+   }
    const actionBar=el("div",null,"sladmin-editor-actions");
    const preview=el("button","Preview"),draftBtn=el("button","Save draft"),publish=el("button","Publish","sladmin-primary");
    for(const b of [preview,draftBtn,publish])b.type="button";
@@ -199,7 +206,10 @@ function mount(host,api,rows,onRefresh){
      const title=String(d.get("title")||"").trim();
      const description=String(d.get("description")||"").trim();
      if(!title||title.length>160)throw Error("Enter a title up to 160 characters.");
-     const order=Number(d.get("order"));
+     // Telegram order is automatic: new channels are assigned the next
+     // position; editing an existing channel keeps its original position.
+     const order=kind==="telegram" ?
+       Number(draft?.order??nextOrder(page)) : Number(d.get("order"));
      if(!Number.isInteger(order)||order<0||order>10000)throw Error("Order must be 0–10000.");
      const emoji=kind==="telegram" ? String(draft?.emoji||"") : String(d.get("emoji")||"").trim();
      if(emoji.length>12)throw Error("Keep your emoji/icon under 12 characters.");
