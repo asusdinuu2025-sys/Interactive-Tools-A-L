@@ -93,8 +93,26 @@
   const sponsorActions = elem("div", "sl-tg-sponsored-actions");
   const sponsorCount = elem("span", "sl-tg-sponsor-count");
   sponsorCount.setAttribute("aria-live", "polite");
-  const previous = elem("button", "sl-tg-carousel-arrow", "‹");
-  const next = elem("button", "sl-tg-carousel-arrow", "›");
+  // Use the same compact glass navigation control in both site themes.
+  const arrowIcon = direction => {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("aria-hidden", "true");
+    svg.setAttribute("focusable", "false");
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", direction < 0 ? "M14.5 5.5 8 12l6.5 6.5" :
+      "M9.5 5.5 16 12l-6.5 6.5");
+    svg.append(path);
+    return svg;
+  };
+  const previous = elem("button", "sl-tg-carousel-arrow");
+  const next = elem("button", "sl-tg-carousel-arrow");
+  previous.append(arrowIcon(-1));
+  next.append(arrowIcon(1));
+  const carouselNav = elem("div", "sl-tg-carousel-nav");
+  carouselNav.setAttribute("role", "group");
+  carouselNav.setAttribute("aria-label", "Sponsored channel navigation");
+  carouselNav.append(previous, next);
   for (const [button, direction, label] of [
     [previous, -1, "Previous sponsored channel"],
     [next, 1, "Next sponsored channel"]
@@ -117,7 +135,7 @@
     else state.expanded.add("sponsored");
     render();
   });
-  sponsorActions.append(sponsorCount, previous, next, sponsorMore);
+  sponsorActions.append(sponsorCount, carouselNav, sponsorMore);
   sponsorToolbar.append(sponsorBadge, sponsorActions);
   const sponsorHost = elem("div", "sl-cms-sponsored-grid sl-tg-sponsored-list");
   sponsorHost.dataset.cmsSponsored = "";
@@ -266,7 +284,8 @@
           !categoryAllowed || !eligible.includes(card) ||
           (!expanded && !searching && eligible[index] !== card)));
         const carousel = !expanded && !searching && eligible.length > 1;
-        previous.hidden = next.hidden = !categoryAllowed || !carousel;
+        carouselNav.hidden = !categoryAllowed || !carousel;
+        previous.hidden = next.hidden = carouselNav.hidden;
         sponsorCount.hidden = !categoryAllowed || !carousel;
         sponsorCount.textContent = eligible.length ? (index + 1) + " / " + eligible.length : "";
         sponsorMore.hidden = !categoryAllowed || searching || eligible.length <= 1;
