@@ -1,0 +1,228 @@
+/* PR112: compact channel navigation layered onto the existing Telegram glass UI.
+   Static content, card colors, theme design and Telegram links stay unchanged. */
+body.sl-telegram-hub .sl-tg-filter-bar {
+  position:sticky;
+  top:calc(max(13px, env(safe-area-inset-top)) + 76px);
+  z-index:900;
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  width:100%;box-sizing:border-box;
+  margin:0 0 19px;padding:11px 15px;
+  border:1px solid rgba(145,218,255,.3);
+  border-radius:20px;
+  background:linear-gradient(110deg,rgba(33,84,142,.78),rgba(26,65,122,.73));
+  box-shadow:0 9px 28px rgba(9,29,62,.19),inset 0 1px 0 rgba(255,255,255,.14);
+  -webkit-backdrop-filter:blur(9px) saturate(128%);
+  backdrop-filter:blur(9px) saturate(128%);
+}
+body.sl-telegram-hub .sl-tg-filter-heading {
+  font:760 .79rem "Nirmala UI","Segoe UI",sans-serif;
+  color:#d9f1ff;white-space:nowrap;
+}
+body.sl-telegram-hub .sl-tg-filter-options {
+  display:flex;align-items:center;flex:1 1 400px;
+  gap:6px;min-width:0;overflow-x:auto;scrollbar-width:thin;
+  scrollbar-color:rgba(152,205,238,.35) transparent;
+  padding:3px 0;
+}
+body.sl-telegram-hub .sl-tg-filter-button,
+body.sl-telegram-hub .sl-tg-view-all,
+body.sl-telegram-hub .sl-tg-carousel-arrow,
+body.sl-telegram-hub .sl-tg-carousel-dot {
+  font-family:"Nirmala UI","Segoe UI",sans-serif;
+  cursor:pointer;
+  color:#dcefff;
+  border:1px solid rgba(135,206,249,.32);
+  background:rgba(136,192,247,.08);
+  transition:background .18s,border-color .18s,box-shadow .18s,transform .18s;
+}
+body.sl-telegram-hub .sl-tg-filter-button {
+  flex:0 0 auto;border-radius:999px;
+  padding:9px 12px;font-size:.76rem;font-weight:720;white-space:nowrap;
+}
+body.sl-telegram-hub .sl-tg-filter-button:hover,
+body.sl-telegram-hub .sl-tg-view-all:hover,
+body.sl-telegram-hub .sl-tg-carousel-arrow:hover {
+  background:rgba(101,197,246,.2);border-color:rgba(103,206,255,.64);
+}
+body.sl-telegram-hub .sl-tg-filter-button[aria-pressed="true"] {
+  border-color:rgba(80,217,255,.78);
+  color:#fff;
+  background:linear-gradient(130deg,rgba(37,166,238,.8),rgba(37,113,231,.85));
+  box-shadow:0 0 13px rgba(37,166,238,.31),inset 0 1px 0 rgba(255,255,255,.23);
+}
+body.sl-telegram-hub .sl-tg-search {
+  display:flex;align-items:center;gap:7px;
+  flex:0 1 200px;min-width:150px;padding:0 11px;
+  min-height:39px;border:1px solid rgba(141,204,245,.29);
+  border-radius:999px;background:rgba(89,150,207,.09);
+}
+body.sl-telegram-hub .sl-tg-search-icon {
+  color:#aadaf4;font-size:1.3rem;line-height:1;
+}
+body.sl-telegram-hub .sl-tg-search input {
+  width:100%;min-width:0;min-height:36px;
+  border:0;outline:none;background:transparent;
+  color:#effaff;font:500 .8rem "Nirmala UI","Segoe UI",sans-serif;
+}
+body.sl-telegram-hub .sl-tg-search input::placeholder {color:#afd0e6;opacity:.9;}
+body.sl-telegram-hub .sl-tg-search:focus-within {
+  outline:2px solid rgba(93,208,251,.6);outline-offset:2px;
+}
+body.sl-telegram-hub .sl-tg-sponsored-section {margin-bottom:19px;min-width:0;}
+body.sl-telegram-hub .sl-tg-sponsored-toolbar {
+  display:flex;justify-content:space-between;align-items:center;gap:11px;
+  flex-wrap:wrap;margin-bottom:10px;
+}
+body.sl-telegram-hub .sl-tg-sponsored-toolbar .telegram-sponsored-bar {
+  margin:0;max-width:100%;
+}
+body.sl-telegram-hub .sl-tg-sponsored-actions {
+  display:flex;align-items:center;gap:7px;margin-left:auto;flex-wrap:wrap;
+}
+/* Minimal paired glass chevrons: a single quiet control instead of neon circles. */
+body.sl-telegram-hub .sl-tg-carousel-nav {
+  display:inline-flex;align-items:center;gap:2px;flex:0 0 auto;padding:3px;
+  border:1px solid rgba(160,217,248,.34);border-radius:999px;
+  background:linear-gradient(135deg,rgba(102,165,212,.25),rgba(17,56,95,.37));
+  box-shadow:0 4px 14px rgba(5,25,53,.15),inset 0 1px 0 rgba(255,255,255,.19);
+  -webkit-backdrop-filter:blur(8px) saturate(135%);
+  backdrop-filter:blur(8px) saturate(135%);
+}
+body.sl-telegram-hub .sl-tg-carousel-nav[hidden] {display:none!important;}
+body.sl-telegram-hub .sl-tg-carousel-arrow {
+  display:grid;place-items:center;width:36px;height:36px;flex:0 0 36px;
+  padding:0;border:0;border-radius:50%;
+  color:#e6f5ff;background:transparent;box-shadow:none;text-shadow:none;
+}
+body.sl-telegram-hub .sl-tg-carousel-arrow svg {
+  display:block;width:18px;height:18px;fill:none;stroke:currentColor;
+  stroke-width:2.15;stroke-linecap:round;stroke-linejoin:round;
+}
+body.sl-telegram-hub .sl-tg-carousel-arrow:hover {
+  color:#fff;background:rgba(134,208,251,.23);border-color:transparent;
+  box-shadow:inset 0 0 0 1px rgba(173,224,255,.18);
+}
+body.sl-telegram-hub .sl-tg-carousel-arrow:active {transform:scale(.95);}
+body.sl-telegram-hub .sl-tg-sponsor-count {
+  min-width:38px;text-align:center;font-size:.73rem;
+  font-weight:700;color:#bad9ef;font-variant-numeric:tabular-nums;
+}
+body.sl-telegram-hub .sl-tg-view-all {
+  flex:0 0 auto;min-height:34px;padding:7px 13px;
+  border-radius:999px;font-size:.78rem;font-weight:740;
+  white-space:nowrap;
+}
+body.sl-telegram-hub .telegram-subject-head > .sl-tg-view-all,
+body.sl-telegram-hub .telegram-all-head > .sl-tg-view-all {
+  margin-left:auto;align-self:center;
+}
+body.sl-telegram-hub .sl-tg-sponsored-list {margin:0;display:block;}
+body.sl-telegram-hub .sl-tg-sponsored-list > .telegram-featured-channel {
+  margin:0;
+}
+/* A brief, GPU-friendly slide/fade on each carousel change. */
+body.sl-telegram-hub .sl-tg-sponsored-section:not(.sl-tg-section-expanded)
+  .sl-tg-sponsored-list > .telegram-featured-channel:not(.sl-tg-filtered-out) {
+  animation:slTgSponsoredEnter .32s ease-out both;
+}
+@keyframes slTgSponsoredEnter {
+  from {opacity:.42;transform:translateX(12px);}
+  to {opacity:1;transform:translateX(0);}
+}
+body.sl-telegram-hub .sl-tg-carousel-dots {
+  display:flex;align-items:center;justify-content:center;
+  min-height:21px;gap:8px;margin:11px 0 0;
+}
+body.sl-telegram-hub .sl-tg-carousel-dot {
+  width:9px;height:9px;padding:0;
+  border-radius:50%;background:rgba(172,216,249,.4);
+  border-color:rgba(172,216,249,.3);
+}
+body.sl-telegram-hub .sl-tg-carousel-dot[aria-pressed="true"] {
+  background:#59d3ff;border-color:#79e1ff;
+  box-shadow:0 0 10px rgba(85,209,255,.56);
+}
+body.sl-telegram-hub .sl-tg-section-expanded .sl-tg-sponsored-list {
+  display:grid;gap:14px;
+}
+body.sl-telegram-hub .sl-tg-filtered-out,
+body.sl-telegram-hub [data-tg-category] [hidden],
+body.sl-telegram-hub [data-tg-category][hidden],
+body.sl-telegram-hub .sl-tg-carousel-arrow[hidden],
+body.sl-telegram-hub .sl-tg-sponsor-count[hidden],
+body.sl-telegram-hub .sl-tg-view-all[hidden],
+body.sl-telegram-hub .sl-tg-carousel-dots[hidden],
+body.sl-telegram-hub .sl-tg-no-results[hidden] {
+  display:none!important;
+}
+body.sl-telegram-hub .sl-tg-no-results {
+  padding:16px;text-align:center;border-radius:15px;
+  border:1px solid rgba(135,206,249,.3);
+  background:rgba(88,143,213,.11);
+  color:var(--text-secondary);
+}
+body.sl-telegram-hub .sl-tg-filter-button:focus-visible,
+body.sl-telegram-hub .sl-tg-view-all:focus-visible,
+body.sl-telegram-hub .sl-tg-carousel-arrow:focus-visible,
+body.sl-telegram-hub .sl-tg-carousel-dot:focus-visible {
+  outline:2px solid #91e5ff;outline-offset:3px;
+}
+/* The page's original light palette remains authoritative; only new controls adapt. */
+html[data-theme="light"] body.sl-telegram-hub .sl-tg-filter-bar {
+  background:linear-gradient(115deg,rgba(237,249,255,.88),rgba(194,221,250,.84));
+  border-color:rgba(76,154,216,.32);
+}
+html[data-theme="light"] body.sl-telegram-hub .sl-tg-filter-heading,
+html[data-theme="light"] body.sl-telegram-hub .sl-tg-filter-button:not([aria-pressed="true"]),
+html[data-theme="light"] body.sl-telegram-hub .sl-tg-view-all,
+html[data-theme="light"] body.sl-telegram-hub .sl-tg-carousel-arrow {
+  color:#28506d;
+}
+html[data-theme="light"] body.sl-telegram-hub .sl-tg-carousel-nav {
+  background:linear-gradient(135deg,rgba(255,255,255,.78),rgba(216,238,252,.57));
+  border-color:rgba(72,142,190,.29);
+  box-shadow:0 4px 14px rgba(35,84,120,.1),inset 0 1px 0 rgba(255,255,255,.92);
+}
+html[data-theme="light"] body.sl-telegram-hub .sl-tg-carousel-arrow {
+  color:#255473;background:transparent;border-color:transparent;
+}
+html[data-theme="light"] body.sl-telegram-hub .sl-tg-carousel-arrow:hover {
+  color:#12486e;background:rgba(104,178,225,.24);
+  box-shadow:inset 0 0 0 1px rgba(67,133,183,.13);
+}
+html[data-theme="light"] body.sl-telegram-hub .sl-tg-search input {color:#284862;}
+html[data-theme="light"] body.sl-telegram-hub .sl-tg-search input::placeholder,
+html[data-theme="light"] body.sl-telegram-hub .sl-tg-search-icon,
+html[data-theme="light"] body.sl-telegram-hub .sl-tg-sponsor-count {color:#53799b;}
+/* Four collapsed All Subjects cards form ONE desktop row.
+   View All keeps the original three-column grid; phones stay responsive. */
+@media(min-width:1000px) {
+  body.sl-telegram-hub .telegram-all:not(.sl-tg-section-expanded) .telegram-all-grid {
+    grid-template-columns:repeat(4,minmax(0,1fr));
+  }
+}
+@media(max-width:780px) {
+  body.sl-telegram-hub .sl-tg-filter-bar {
+    top:calc(max(11px, env(safe-area-inset-top)) + 65px);
+    padding:10px;gap:8px;border-radius:17px;
+  }
+  body.sl-telegram-hub .sl-tg-filter-heading {display:none;}
+  body.sl-telegram-hub .sl-tg-filter-options {flex-basis:100%;order:1;}
+  body.sl-telegram-hub .sl-tg-search {flex:1 1 100%;order:0;}
+  body.sl-telegram-hub .sl-tg-filter-button {padding:8px 11px;}
+}
+@media(max-width:420px) {
+  body.sl-telegram-hub .sl-tg-sponsored-toolbar {align-items:start;}
+  body.sl-telegram-hub .sl-tg-sponsored-actions {gap:5px;}
+  body.sl-telegram-hub .sl-tg-carousel-arrow {width:34px;height:34px;flex-basis:34px;}
+  body.sl-telegram-hub .sl-tg-carousel-arrow svg {width:17px;height:17px;}
+  body.sl-telegram-hub .sl-tg-view-all {padding:6px 10px;}
+}
+@media(prefers-reduced-motion:reduce) {
+  body.sl-telegram-hub .sl-tg-sponsored-list > .telegram-featured-channel {
+    animation:none!important;
+  }
+  body.sl-telegram-hub .sl-tg-filter-button,
+  body.sl-telegram-hub .sl-tg-view-all,
+  body.sl-telegram-hub .sl-tg-carousel-arrow {transition:none;}
+}

@@ -35,7 +35,9 @@ const api={
   save:async (item,revision,action)=>{
     saved.push({item:{...item},revision,action});
     return {draft:item,revision:revision+1,published:action==="publish"};
-  }
+  },
+  content:async()=>saved.map(row=>({id:row.item.id,draft:row.item,
+    revision:row.revision+1,published:row.action==="publish"}))
 };
 w.eval(fs.readFileSync("assets/js/studylab-admin-publisher.js","utf8"));
 const publisher=w.StudyLabAdminPublisher.mount(
@@ -93,6 +95,9 @@ const clickPublish=async dialog=>{
   d=open("telegram",true);
   d.querySelector('[name="title"]').value="Chemistry Channel";
   d.querySelector('[name="link"]').value="https://t.me/chemistry2028";
+  assert.equal(d.querySelector('[name="order"]'),null,
+    "Telegram publisher must assign order automatically without an extra field");
+  assert.match(d.textContent,/Newest channels appear first automatically/);
   await clickPublish(d);
   assert.equal(saved[2].item.resource_type,"telegram");
   assert.equal(saved[2].item.telegram_category,"sponsored");
@@ -113,6 +118,150 @@ const clickPublish=async dialog=>{
   assert.equal(uploadedMedia.length,2);
   assert.equal(deletedMedia.length,0);
   assert.equal(deletedHTML.length,0);
+
+  // PR112: No group image means the original Telegram icon, not an emoji.
+  assert.equal(saved[2].item.image,"");
+  assert.equal(saved[2].item.avatar_file_path,"");
+
+  // Add a group picture to the existing sponsored channel via existing media API.
+  publisher.open("telegram","sponsored",{
+    id:saved[2].item.id,draft:saved[2].item,revision:1,published:true
+  });
+  d=findDialog();
+  assert.ok(d.querySelector('[name="telegram_avatar"]'),"Telegram editor offers a group photo");
+  assert.equal(d.querySelector('[name="emoji"]'),null,
+    "Telegram editor should no longer tempt admins to replace the default icon with emoji");
+  assert.match(d.textContent,/Original Telegram icon/);
+  setFile(d.querySelector('[name="telegram_avatar"]'),
+    new w.File(["JPG"],"chemistry-dp.jpg",{type:"image/jpeg"}));
+  await clickPublish(d);
+  const pictured=saved[4].item;
+  assert.equal(pictured.telegram_category,"sponsored");
+  assert.equal(pictured.avatar_file_name,"chemistry-dp.jpg");
+  assert.equal(pictured.avatar_file_path,"uploads/3.png");
+  assert.equal(pictured.image,"https://example.org/uploads/3.png");
+  assert.equal(deletedMedia.length,0);
+
+  // Editing details without a new file must retain the current picture.
+  publisher.open("telegram","sponsored",{
+    id:pictured.id,draft:pictured,revision:2,published:true
+  });
+  d=findDialog();
+  assert.ok(d.querySelector(".sladmin-publish-avatar-thumbnail"));
+  await clickPublish(d);
+  assert.equal(saved[5].item.avatar_file_path,"uploads/3.png");
+  assert.equal(uploadedMedia.length,3);
+
+  // Replacement removes only the previous file after successfully saving.
+  publisher.open("telegram","sponsored",{
+    id:pictured.id,draft:saved[5].item,revision:3,published:true
+  });
+  d=findDialog();
+  setFile(d.querySelector('[name="telegram_avatar"]'),
+    new w.File(["PNG"],"new-dp.png",{type:"image/png"}));
+  await clickPublish(d);
+  assert.equal(saved[6].item.avatar_file_path,"uploads/4.png");
+  assert.deepEqual(deletedMedia,["uploads/3.png"]);
+
+  // Removing the profile image restores the default Telegram logo on the
+  // public card without removing the rest of the channel details.
+  publisher.open("telegram","sponsored",{
+    id:pictured.id,draft:saved[6].item,revision:4,published:true
+  });
+  d=findDialog();
+  const remove=d.querySelector('[name="remove_telegram_avatar"]');
+  assert.ok(remove,"Existing Telegram image must be removable");
+  remove.checked=true;
+  await clickPublish(d);
+  assert.equal(saved[7].item.image,"");
+  assert.equal(saved[7].item.avatar_file_path,"");
+  assert.equal(saved[7].item.title,"Chemistry Channel");
+  assert.deepEqual(deletedMedia,["uploads/3.png","uploads/4.png"]);
+
+  // A failed database save must clean up ONLY the fresh upload, retaining
+  // any previously saved photo. Never claim success after a failed RPC.
+  const previousSave=api.save;
+  api.save=async()=>{throw Error("Test write rejected")};
+  publisher.open("telegram","sponsored",{
+    id:pictured.id,draft:saved[6].item,revision:4,published:true
+  });
+  d=findDialog();
+  setFile(d.querySelector('[name="telegram_avatar"]'),
+    new w.File(["PNG"],"rejected.png",{type:"image/png"}));
+  await clickPublish(d);
+  assert.match(d.querySelector("[data-publisher-status]").textContent,/Test write rejected/);
+  assert.ok(deletedMedia.includes("uploads/5.png"));
+  api.save=previousSave;
+  d.close();
+
+  // PDF is not a Telegram profile image.
+  publisher.open("telegram","sponsored",{
+    id:pictured.id,draft:saved[7].item,revision:5,published:true
+  });
+  d=findDialog();
+  setFile(d.querySelector('[name="telegram_avatar"]'),
+    new w.File(["%PDF-1.7"],"bad.pdf",{type:"application/pdf"}));
+  await clickPublish(d);
+  assert.match(d.querySelector("[data-publisher-status]").textContent,/JPG, PNG or WebP/);
+  assert.equal(uploadedMedia.length,5);
+  d.close();
+
+  // New Telegram card auto-orders after existing entries across categories.
+  // Editing it must not move it to the front or change its saved position.
+  const seeded=[{id:"old-sponsor",draft:{page:"Telegram_Channels.html",
+    kind:"card",resource_type:"telegram",telegram_category:"sponsored",order:280}},
+    {id:"old-maths",draft:{page:"Telegram_Channels.html",
+      kind:"card",resource_type:"telegram",telegram_category:"maths",order:300}}];
+  const seededHost=w.document.createElement("main");
+  w.document.body.append(seededHost);
+  const publisher2=w.StudyLabAdminPublisher.mount(seededHost,api,seeded,async()=>{});
+  const previousCount=saved.length;
+  publisher2.open("telegram","biology");
+  d=findDialog();
+  d.querySelector('[name="title"]').value="Newest BIO";
+  d.querySelector('[name="link"]').value="https://t.me/newbio";
+  assert.equal(d.querySelector('[name="order"]'),null);
+  await clickPublish(d);
+  assert.equal(saved[previousCount].item.order,310,
+    "Newly published channels get next order number across categories");
+  const newer=saved[previousCount].item;
+  publisher2.open("telegram","biology",{
+    id:newer.id,draft:newer,revision:1,published:true
+  });
+  d=findDialog();
+  await clickPublish(d);
+  assert.equal(saved[previousCount+1].item.order,310,
+    "Editing an existing channel retains its original newest-first position");
+
+  // Global timing is an internal hidden content record, saved through the
+  // same revision-safe authorized Admin publishing workflow.
+  const telegramChoice=seededHost.querySelector('[data-kind="telegram"]');
+  telegramChoice.click();
+  const intervalButton=seededHost.querySelector(".sladmin-telegram-carousel-settings button");
+  assert.ok(intervalButton,"Telegram Admin menu offers Sponsored timing settings");
+  intervalButton.click();
+  d=findDialog();
+  assert.match(d.textContent,/Sponsored carousel settings/);
+  const seconds=d.querySelector('[name="auto_advance_seconds"]');
+  assert.equal(seconds.value,"2","First published interval defaults to two seconds");
+  seconds.value="1";
+  d.querySelector(".sladmin-editor-actions button").click();
+  await wait(10);
+  assert.match(d.querySelector("[data-publisher-status]").textContent,/between 2 and 60/,
+    "Reject intervals below two seconds");
+  const beforeSetting=saved.length;
+  seconds.value="5";
+  d.querySelector(".sladmin-editor-actions button").click();
+  await wait(40);
+  assert.equal(saved.length,beforeSetting+1);
+  const setting=saved.at(-1).item;
+  assert.equal(setting.id,"studylab-telegram-carousel-settings");
+  assert.equal(setting.resource_type,"telegram-carousel-settings");
+  assert.equal(setting.auto_advance_seconds,5);
+  assert.equal(setting.hidden,true,"Config row must not be shown as a Telegram card");
+  assert.equal(setting.page,"Telegram_Channels.html");
+  assert.equal(saved.at(-1).action,"publish");
+
   dom.window.close();
-  console.log("PASS: HTML upload/edit/preview, Telegram channel, PDF lesson pack and cover publishing.");
+  console.log("PASS: automatic Telegram publishing order, avatar upload/edit/rollback, HTML and PDF publishing.");
 })().catch(err=>{console.error(err);process.exitCode=1});

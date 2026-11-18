@@ -52,6 +52,49 @@ function make(html){
  const sponsored={...channel,id:"custom-55555555-5555-4555-8555-555555555555",telegram_category:"sponsored"};
  render(sponsored,"https://t.me/example");
  assert.ok(doc.window.document.querySelector(".sl-cms-sponsored-grid .sl-cms-sponsored"));
+
+ // PR112: Existing emoji strings no longer replace the default Telegram
+ // symbol. Uploaded channel images cover the same square without resizing it.
+ const channelCard=doc.window.document.querySelector(".telegram-subject .telegram-channel");
+ assert.ok(channelCard.querySelector(".telegram-channel-icon img[src$='brand-telegram.svg']"));
+ assert.equal(channelCard.querySelector(".telegram-channel-icon").textContent.includes("⚡"),false,
+   "Legacy emoji values must not replace the default paper-plane icon");
+ const pictured={...channel,id:"custom-photo-channel",image:"https://example.org/group.webp",emoji:":)"};
+ render(pictured,"https://t.me/photo");
+ let icon=doc.window.document.querySelector('[data-cms-id="custom-photo-channel"] .telegram-channel-icon');
+ assert.equal(icon.querySelector(".sl-cms-avatar-photo")?.src,"https://example.org/group.webp");
+ assert.ok(icon.querySelector('img[src$="brand-telegram.svg"]'),
+   "Telegram fallback must remain underneath uploaded pictures");
+ render({...pictured,image:""},"https://t.me/photo");
+ icon=doc.window.document.querySelector('[data-cms-id="custom-photo-channel"] .telegram-channel-icon');
+ assert.equal(icon.querySelector(".sl-cms-avatar-photo"),null,
+   "Removing the picture must immediately restore Telegram fallback");
+ render({...pictured,image:"javascript:alert(1)"},"https://t.me/photo");
+ assert.equal(icon.querySelector(".sl-cms-avatar-photo"),null,"Unsafe URLs are ignored");
+
+ const featured=doc.window.document.querySelector(".sl-cms-sponsored-grid > .telegram-featured-channel.sl-cms-sponsored");
+ assert.ok(featured,"New sponsored cards must reuse the original featured layout");
+ assert.equal(featured.tagName,"SECTION","Sponsor's own Join button must be the only link");
+ assert.equal(featured.hasAttribute("href"),false);
+ assert.ok(featured.querySelector(".telegram-featured-avatar"));
+ assert.ok(featured.querySelector(".telegram-featured-copy h2"));
+ assert.ok(featured.querySelector(".telegram-featured-eyebrow"));
+ assert.ok(featured.querySelector(".telegram-featured-action .telegram-open"));
+ assert.equal(featured.querySelector(".telegram-featured-action .telegram-open").href,
+   "https://t.me/example");
+ assert.equal(featured.querySelector(".telegram-featured-count"),null,
+   "Admin-published sponsored cards must not insert automatic Sinhala subscriber text");
+ assert.ok(featured.parentElement.previousElementSibling.classList.contains("telegram-featured-channel"),
+   "Additional sponsors appear directly under the existing featured channel");
+ render({...sponsored,image:"https://example.org/sponsor.png"},"https://t.me/example");
+ assert.equal(featured.querySelector(".telegram-featured-avatar .sl-cms-avatar-photo")?.src,
+   "https://example.org/sponsor.png");
+ render({...sponsored,image:"",emoji:":)"},"https://t.me/example");
+ assert.equal(featured.querySelector(".sl-cms-avatar-photo"),null);
+ assert.ok(featured.querySelector(".telegram-featured-avatar-fallback img"));
+ assert.equal(doc.window.document.querySelectorAll(".sl-cms-sponsored-grid .sl-cms-sponsored").length,1,
+   "Rerender must not duplicate featured cards");
+
  const pack={...sample,resource_type:"lesson-pack",id:"custom-66666666-6666-4666-8666-666666666666",
   title:"Study Pack",subject:"physics",publisher:"StudyLab Teacher",series:"2027 Revision Pack"};
  render(pack,"https://example.org/lessons");
@@ -161,7 +204,7 @@ function make(html){
    '<main><section class="telegram-featured-channel"></section><div class="telegram-all-grid"></div></main>',
    {...channel,page:"Telegram_Channels.html",telegram_category:"sponsored",
      url:"https://t.me/study"},
-   ".sl-cms-sponsored-grid > a.sl-cms-special");
+   ".sl-cms-sponsored-grid > section.telegram-featured-channel.sl-cms-special");
  await loadWithoutSdk("lesson-packs.html",
    '<main><section class="sl-lessons-publisher-grid"></section></main>',
    {...pack,page:"lesson-packs.html",url:"https://example.org/pack.pdf"},
@@ -191,7 +234,7 @@ function make(html){
      '<main><section class="telegram-featured-channel"></section><div class="telegram-all-grid"></div></main>',
      {...channel,page:"Telegram_Channels.html",telegram_category:"sponsored",
        url:"https://t.me/study"},
-     ".sl-cms-sponsored-grid > a.sl-cms-special");
+     ".sl-cms-sponsored-grid > section.telegram-featured-channel.sl-cms-special");
  }
  for (const route of ["","index","index.html"]) {
    await loadWithoutSdk(route,'<main><div data-cms-additions></div></main>',
@@ -226,8 +269,12 @@ function make(html){
    [sponsoredRecord]);
  assert.equal(telegramPage.window.document.querySelectorAll(".sl-cms-sponsored-grid .sl-cms-special").length,1,
    "A published sponsored Telegram channel must render on page load");
- assert.equal(telegramPage.window.document.querySelector(".sl-cms-sponsor-label")?.textContent,
-   "SPONSORED","Sponsored Telegram badge must contain the right text");
+ assert.equal(telegramPage.window.document.querySelector(
+   ".sl-cms-sponsored-grid .telegram-featured-eyebrow")?.textContent,
+   "✦ Featured Channel","New sponsors must match the original featured heading");
+ assert.equal(telegramPage.window.document.querySelector(
+   ".sl-cms-sponsored-grid .telegram-featured-action .telegram-open")?.href,
+   "https://t.me/example","Featured sponsor Join button must open the channel");
  telegramPage.window.close();
 
  const lessonRecord={...pack,page:"lesson-packs.html",url:"https://example.org/lessons"};

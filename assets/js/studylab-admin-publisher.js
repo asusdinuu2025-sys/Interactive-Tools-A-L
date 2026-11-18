@@ -4,6 +4,7 @@
 "use strict";
 if(window.StudyLabAdminPublisher)return;
 const subjects=[["maths.html","Mathematics"],["physics.html","Physics"],["chemistry.html","Chemistry"],["biology.html","Biology"]];
+const carouselSettingsId="studylab-telegram-carousel-settings";
 const groups=[
  {id:"simulation",name:"Practical Simulations",icon:"⚗",hint:"Upload a standalone HTML tool to an existing subject"},
  {id:"telegram",name:"A/L Telegram Channels",icon:"➤",hint:"Publish to Sponsored, subject channels or All"},
@@ -71,6 +72,76 @@ function mount(host,api,rows,onRefresh){
      choices.append(button);
    }
    options.append(el("p","Select the destination:"),choices);
+   if(kind==="telegram"){
+     const setting=el("div",null,"sladmin-telegram-carousel-settings");
+     setting.append(el("strong","Sponsored carousel"));
+     setting.append(el("p",
+       "Automatically rotate sponsored channels. Default: every 2 seconds.",
+       "sladmin-publish-note"));
+     const editTime=el("button","Adjust auto-slide time","sladmin-path-choice");
+     editTime.type="button";
+     editTime.addEventListener("click",openCarouselSettings);
+     setting.append(editTime);options.append(setting);
+   }
+ }
+ function openCarouselSettings(){
+   const record=rows.find(r=>r.draft?.id===carouselSettingsId);
+   const existing=Number(record?.draft?.auto_advance_seconds);
+   const selected=Number.isInteger(existing)&&existing>=2&&existing<=60?existing:2;
+   const dialog=el("dialog",null,"sladmin-dialog sladmin-publish-dialog");
+   const form=el("form");
+   const head=el("header");
+   head.append(el("h2","Sponsored carousel settings"));
+   const close=el("button","×");
+   close.type="button";close.setAttribute("aria-label","Close carousel settings");
+   close.addEventListener("click",()=>dialog.close());head.append(close);
+   const field=labeled("Automatic slide interval (seconds)",
+     "number","auto_advance_seconds",selected);
+   const input=field.querySelector("input");
+   input.min="2";input.max="60";input.step="1";input.required=true;
+   const info=el("p",
+     "Default: 2 seconds. Pauses on hover, keyboard focus, search, View All, " +
+     "background tabs and reduced-motion preferences. Once published, " +
+     "the selected interval applies to all StudyLab visitors.",
+     "sladmin-publish-note");
+   const status=el("p",null,"sladmin-publish-status");
+   status.dataset.publisherStatus="";
+   const save=el("button","Save carousel timing","sladmin-primary");
+   save.type="button";
+   const actions=el("div",null,"sladmin-editor-actions");
+   actions.append(save);
+   form.append(head,field,info,status,actions);
+   dialog.append(form);document.body.append(dialog);
+   dialog.addEventListener("close",()=>dialog.remove(),{once:true});
+   dialog.showModal();
+   save.addEventListener("click",async()=>{
+     const speed=Number(input.value);
+     if(!Number.isInteger(speed)||speed<2||speed>60){
+       addStatus(form,"Choose a whole number between 2 and 60 seconds.",true);
+       return;
+     }
+     save.disabled=true;
+     try{
+       // Uses the existing authenticated Admin content/save RPC and audit log.
+       // This hidden special record is configuration, never a visible card.
+       const item={
+         id:carouselSettingsId,kind:"card",page:"Telegram_Channels.html",
+         resource_type:"telegram-carousel-settings",
+         title:"Telegram Sponsored Carousel Settings",
+         description:"Sponsored channel automatic slide interval",
+         order:0,hidden:true,url:"https://t.me/",image:"",
+         button_label:"Settings",auto_advance_seconds:speed
+       };
+       await api.save(item,record?.revision||0,"publish");
+       const entries=await api.content();
+       const confirmed=entries.find(r=>r.id===carouselSettingsId);
+       if(!confirmed||Number(confirmed.draft?.auto_advance_seconds)!==speed)
+         throw Error("Saved, but could not verify the timing. Refresh Admin to check.");
+       dialog.close();
+       await onRefresh();
+     }catch(e){addStatus(form,e.message||"Could not save interval.",true);}
+     finally{save.disabled=false;}
+   });
  }
  function openEditor(kind,destination,record=null){
    const draft=record?.draft||null;
@@ -115,6 +186,49 @@ function mount(host,api,rows,onRefresh){
    }else if(kind==="telegram"){
      fields.append(labeled("Telegram channel link","url","link",draft?.url||"https://t.me/",2048));
      fields.append(labeled("Channel handle / teacher (optional)","text","publisher",draft?.publisher||"",100));
+     // The same existing Admin image uploader and storage bucket used for
+     // lesson packs. No new bucket or migration is required.
+     const avatar=labeled("Telegram group picture (optional, JPG/PNG/WebP, max 5 MB)",
+       "file","telegram_avatar");
+     const avatarFile=avatar.querySelector("input");
+     avatarFile.accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp";
+     fields.append(avatar);
+     const avatarStatus=el("p",null,"sladmin-publish-file-status sladmin-publish-avatar-status");
+     function describeAvatar(){
+       avatarStatus.replaceChildren();
+       const selected=avatarFile.files?.[0];
+       if(selected)avatarStatus.append(document.createTextNode(
+         "Selected: "+selected.name+" · Uploaded when you save"));
+       else if(form.elements.remove_telegram_avatar?.checked)
+         avatarStatus.append(document.createTextNode(
+           "Remove picture · Original Telegram icon will be displayed."));
+       else if(draft?.image){
+         const thumb=el("img");thumb.src=draft.image;thumb.alt="";
+         thumb.className="sladmin-publish-avatar-thumbnail";
+         thumb.addEventListener("error",()=>thumb.remove());
+         avatarStatus.append(thumb,document.createTextNode(
+           "Saved group picture · "+(draft.avatar_file_name||"Existing picture")+
+           " · Kept unless replaced or removed"));
+       }else avatarStatus.append(document.createTextNode(
+         "No group picture · Original Telegram icon will be used."));
+     }
+     if(draft?.image){
+       const remove=el("label",null,"sladmin-publish-avatar-remove");
+       const tick=el("input");tick.type="checkbox";tick.name="remove_telegram_avatar";
+       remove.append(tick,document.createTextNode("Remove current group picture"));
+       tick.addEventListener("change",()=>{
+         if(tick.checked)avatarFile.value="";
+         describeAvatar();
+       });
+       fields.append(remove);
+     }
+     avatarFile.addEventListener("change",()=>{
+       if(avatarFile.files?.[0] && form.elements.remove_telegram_avatar)
+         form.elements.remove_telegram_avatar.checked=false;
+       describeAvatar();
+     });
+     describeAvatar();
+     fields.append(avatarStatus);
    }else if(kind==="lesson-pack"){
      fields.append(choice("Subject","subject",subjects.map(([v,t])=>[v.replace(".html",""),t]),draft?.subject||"physics"));
      fields.append(labeled("Teacher / publisher","text","publisher",draft?.publisher||"",120));
@@ -137,15 +251,22 @@ function mount(host,api,rows,onRefresh){
      fields.append(labeled("Destination link","url","link",draft?.url||"",2048));
      fields.append(labeled("Image URL (optional)","url","image",draft?.image||"",2048));
    }
-   fields.append(labeled("Emoji / icon (optional)","text","emoji",draft?.emoji||"",12));
-   fields.append(labeled("Display order","number","order",draft?.order??nextOrder(page,kind==="custom"?destination:"")));
+   if(kind!=="telegram")fields.append(labeled("Emoji / icon (optional)","text","emoji",draft?.emoji||"",12));
+   if(kind==="telegram"){
+     fields.append(el("p",
+       "Newest channels appear first automatically in Sponsored, subject and All Subjects lists.",
+       "sladmin-publish-note sladmin-telegram-sort-note"));
+   }else{
+     fields.append(labeled("Display order","number","order",
+       draft?.order??nextOrder(page,kind==="custom"?destination:"")));
+   }
    const actionBar=el("div",null,"sladmin-editor-actions");
    const preview=el("button","Preview"),draftBtn=el("button","Save draft"),publish=el("button","Publish","sladmin-primary");
    for(const b of [preview,draftBtn,publish])b.type="button";
    const status=el("p","", "sladmin-publish-status");status.dataset.publisherStatus="";
    actionBar.append(preview,draftBtn,publish);
    const modeNotice=el("p",api.preview
-     ? "Local-only editor: nothing appears to other students. Open PR #102 deploy preview to publish."
+     ? "Local-only editor: nothing appears to other students. Open a production-connected Admin deployment to publish."
      : "Connected to StudyLab publishing. Published cards appear on their destination pages.",
      "sladmin-publish-note sladmin-publish-mode-note");
    form.append(head,modeNotice,fields,status,actionBar);dialog.append(form);document.body.append(dialog);
@@ -156,9 +277,12 @@ function mount(host,api,rows,onRefresh){
      const title=String(d.get("title")||"").trim();
      const description=String(d.get("description")||"").trim();
      if(!title||title.length>160)throw Error("Enter a title up to 160 characters.");
-     const order=Number(d.get("order"));
+     // Telegram order is automatic: new channels are assigned the next
+     // position; editing an existing channel keeps its original position.
+     const order=kind==="telegram" ?
+       Number(draft?.order??nextOrder(page)) : Number(d.get("order"));
      if(!Number.isInteger(order)||order<0||order>10000)throw Error("Order must be 0–10000.");
-     const emoji=String(d.get("emoji")||"").trim();
+     const emoji=kind==="telegram" ? String(draft?.emoji||"") : String(d.get("emoji")||"").trim();
      if(emoji.length>12)throw Error("Keep your emoji/icon under 12 characters.");
      const info={
        id:draft?.id||"custom-"+crypto.randomUUID(),kind:"card",page,
@@ -166,7 +290,8 @@ function mount(host,api,rows,onRefresh){
        emoji,hidden:false,section:kind==="custom"?destination:"",
        url:kind==="simulation"?"/simulation-viewer.html?id="+encodeURIComponent(draft?.id||"") :
          String(d.get("link")||"").trim(),
-       image:String(d.get("image")||"").trim(),button_label:kind==="simulation"?"Open Tool":
+       image:kind==="telegram" ? String(draft?.image||"") : String(d.get("image")||"").trim(),
+       button_label:kind==="simulation"?"Open Tool":
          kind==="telegram"?"Open Channel":kind==="lesson-pack"?"View Lessons":"Open resource"
      };
      // Existing custom section cards keep their section and page semantics.
@@ -191,6 +316,11 @@ function mount(host,api,rows,onRefresh){
        if(new URL(info.url).pathname==="/")
          throw Error("Enter a full Telegram channel link such as https://t.me/yourchannel.");
        info.publisher=String(d.get("publisher")||"").trim().slice(0,100);
+       info.avatar_file_path=draft?.avatar_file_path||"";
+       info.avatar_file_name=draft?.avatar_file_name||"";
+       if(form.elements.remove_telegram_avatar?.checked){
+         info.image="";info.avatar_file_path="";info.avatar_file_name="";
+       }
      }else if(kind==="lesson-pack"){
        info.subject=String(d.get("subject")||"physics");
        info.publisher=String(d.get("publisher")||"").trim().slice(0,120);
@@ -239,6 +369,12 @@ function mount(host,api,rows,onRefresh){
      const newSimulation=form.elements.html?.files?.[0];
      const newPDF=form.elements.pack_pdf?.files?.[0];
      const newCover=form.elements.pack_cover?.files?.[0];
+     const newAvatar=form.elements.telegram_avatar?.files?.[0];
+     if(newAvatar && (!["image/jpeg","image/png","image/webp"].includes(newAvatar.type) ||
+        !newAvatar.size || newAvatar.size>5*1024*1024)){
+       addStatus(form,"Choose a JPG, PNG or WebP group picture under 5 MB.",true);
+       return;
+     }
      for(const b of [draftBtn,publish,preview])b.disabled=true;
      let uploadedSimulation=null,committed=false;
      const uploadedMedia=[];
@@ -250,6 +386,13 @@ function mount(host,api,rows,onRefresh){
            info.html_name=newSimulation.name.slice(0,120);
          }
          if(!info.html_path)throw Error("Upload an HTML file before publishing.");
+       }
+       if(kind==="telegram" && newAvatar){
+         const saved=await api.upload(newAvatar);
+         uploadedMedia.push(saved);
+         info.image=saved.url;
+         info.avatar_file_path=saved.path;
+         info.avatar_file_name=newAvatar.name.slice(0,120);
        }
        if(kind==="lesson-pack"){
          if(newPDF){
@@ -280,6 +423,10 @@ function mount(host,api,rows,onRefresh){
           draft.html_path!==uploadedSimulation.path)
          api.removeSimulation(draft.html_path)
            .catch(e=>console.warn("Old simulation cleanup:",e));
+       if(kind==="telegram" && draft?.avatar_file_path &&
+          draft.avatar_file_path!==info.avatar_file_path)
+         api.removeMedia(draft.avatar_file_path)
+           .catch(e=>console.warn("Old Telegram picture cleanup:",e));
        if(kind==="lesson-pack" && uploadedMedia.length){
          for(const [before,after] of [[draft?.pack_file_path,info.pack_file_path],
            [draft?.cover_file_path,info.cover_file_path]])

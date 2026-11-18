@@ -49,6 +49,13 @@
   };
   function apply(records) {
     const items = records.filter((x) => x.page === page);
+    if(page==="Telegram_Channels.html"){
+      const settings=items.find(x=>
+        x.id==="studylab-telegram-carousel-settings" &&
+        x.resource_type==="telegram-carousel-settings" && !x.deleted);
+      window.StudyLabTelegramBrowser?.setAutoAdvanceSeconds(
+        settings?.auto_advance_seconds ?? 2);
+    }
     // A deleted built-in card remains in static HTML. The server sends only
     // its tiny tombstone, which permanently hides that element on refresh.
     for (const d of items.filter((x) => x.deleted === true)) {
@@ -90,7 +97,8 @@
         )
         .forEach((n) => (n.hidden = !!d.hidden));
     }
-    for (const d of items.filter((x) => !x.deleted && x.kind === "card")) {
+    for (const d of items.filter((x) => !x.deleted && x.kind === "card" &&
+      x.resource_type !== "telegram-carousel-settings")) {
       let card = document.querySelector(
         '[data-cms-id="' + CSS.escape(d.id) + '"]',
       );

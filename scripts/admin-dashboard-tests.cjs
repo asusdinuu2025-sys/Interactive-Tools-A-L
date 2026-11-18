@@ -413,7 +413,7 @@ async function setup(admin = true, options = {}) {
     /Local preview · Isolated/);
   dom.window.close();
   const adminMarkup = read("admin.html");
-  assert.match(adminMarkup, /studylab-admin\.js\?v=pr110-connected-v1/);
+  assert.match(adminMarkup, /studylab-admin\.js\?v=pr112-carousel-v3/);
   assert.match(adminMarkup, /Loading dashboard/);
   assert.match(adminMarkup, /pr110-connected-v1/);
   assert.match(adminMarkup, /studylab-admin-config[.]js[?]v=pr110-connected-v1/);
@@ -433,12 +433,34 @@ async function setup(admin = true, options = {}) {
   assert.match(contentCss,/overflow-wrap:anywhere/);
   assert.match(read("assets/css/studylab-popups.css"),/slpopup-link-preview/);
   for (const page of ["index.html","maths.html","physics.html",
-      "chemistry.html","biology.html","Telegram_Channels.html",
-      "lesson-packs.html"]) {
+      "chemistry.html","biology.html","lesson-packs.html"]) {
     assert.match(read(page),
       /studylab-content[.]css[?]v=pr102-public-rest-v3/,
-      page + " must fetch the new CSS instead of stale browser copies");
+      page + " must retain the existing CMS stylesheet");
   }
+  const telegramMarkup=read("Telegram_Channels.html");
+  assert.match(telegramMarkup,/studylab-content[.]css[?]v=pr112-channel-avatars-v1/);
+  assert.match(telegramMarkup,/studylab-special-resources[.]js[?]v=pr112-browser-v2/);
+  assert.match(telegramMarkup,/telegram-channel-browser[.]css[?]v=pr112-glass-nav-v5/);
+  assert.match(telegramMarkup,/telegram-channel-browser[.]js[?]v=pr112-glass-nav-v4/);
+  assert.ok(!read("assets/js/telegram-channel-browser.js").includes("window.location ="),
+    "View All and filter navigation must remain on the Telegram page");
+  assert.doesNotMatch(telegramMarkup, /class="telegram-featured-count"/,
+    "Original A/L Lessons featured card must not show the automatic Sinhala subscriber line");
+  assert.match(telegramMarkup, /A\/L Lessons — @AL_LESSONS/,
+    "Keep the original featured channel's title and description");
+  assert.match(telegramMarkup, /href="https:\/\/t[.]me\/AL_LESSONS"/,
+    "Keep the original featured channel's Join button");
+  assert.match(adminMarkup,/studylab-admin-publisher[.]js[?]v=pr112-carousel-v3/);
+  assert.match(adminMarkup,/studylab-admin[.]css[?]v=pr112-carousel-v3/);
+  assert.match(telegramMarkup,/studylab-content[.]js[?]v=pr112-carousel-settings-v3/);
+  assert.match(adminMarkup,/studylab-admin[.]js[?]v=pr112-carousel-v3/);
+  assert.match(read("assets/css/telegram-channel-browser.css"),
+    /repeat\(4,minmax\(0,1fr\)\)/,
+    "Collapsed All Subjects uses four columns on desktop");
+  assert.match(read("assets/js/studylab-admin-publisher.js"),
+    /auto_advance_seconds/,
+    "Admin carousel timing must use the existing publishing workflow");
   const homeHtml = read("index.html");
   const sidebarJs = read("assets/js/home-sidebar.js");
   const cmsJs = read("assets/js/studylab-content.js");
