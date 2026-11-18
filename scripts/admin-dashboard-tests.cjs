@@ -441,8 +441,8 @@ async function setup(admin = true, options = {}) {
   const telegramMarkup=read("Telegram_Channels.html");
   assert.match(telegramMarkup,/studylab-content[.]css[?]v=pr112-channel-avatars-v1/);
   assert.match(telegramMarkup,/studylab-special-resources[.]js[?]v=pr112-browser-v2/);
-  assert.match(telegramMarkup,/telegram-channel-browser[.]css[?]v=pr112-carousel-v4/);
-  assert.match(telegramMarkup,/telegram-channel-browser[.]js[?]v=pr112-carousel-v3/);
+  assert.match(telegramMarkup,/telegram-channel-browser[.]css[?]v=pr112-glass-nav-v5/);
+  assert.match(telegramMarkup,/telegram-channel-browser[.]js[?]v=pr112-glass-nav-v4/);
   assert.ok(!read("assets/js/telegram-channel-browser.js").includes("window.location ="),
     "View All and filter navigation must remain on the Telegram page");
   assert.doesNotMatch(telegramMarkup, /class="telegram-featured-count"/,
