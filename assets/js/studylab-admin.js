@@ -953,7 +953,7 @@
         message: String(fd.get("message") || "").trim(),
         variant: String(fd.get("variant") || "info"),
         placement: String(fd.get("placement") || "top-right"),
-        display_seconds: fd.get("until_dismissed") === "on" ? 0 : Number(fd.get("display_seconds") || 8),
+        display_seconds: fields.querySelector('[name="until_dismissed"]').checked ? 0 : Number(fd.get("display_seconds") || 8),
         expiry_period: String(fd.get("expiry_period") || "24h"),
         link: String(fd.get("link") || "").trim(),
         link_label: String(fd.get("link_label") || "View").trim(),
