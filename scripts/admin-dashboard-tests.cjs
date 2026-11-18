@@ -440,7 +440,7 @@ async function setup(admin = true, options = {}) {
   }
   const telegramMarkup=read("Telegram_Channels.html");
   assert.match(telegramMarkup,/studylab-content[.]css[?]v=pr112-channel-avatars-v1/);
-  assert.match(telegramMarkup,/studylab-special-resources[.]js[?]v=pr112-channel-avatars-v1/);
+  assert.match(telegramMarkup,/studylab-special-resources[.]js[?]v=pr112-channel-avatars-v2/);
   assert.match(adminMarkup,/studylab-admin-publisher[.]js[?]v=pr112-channel-avatars-v1/);
   assert.match(adminMarkup,/studylab-admin[.]css[?]v=pr112-channel-avatars-v1/);
   const homeHtml = read("index.html");
