@@ -35,6 +35,12 @@
   [headers.values]
     Cache-Control = "no-store, max-age=0, must-revalidate"
 
+# The admin mode controls live vs local publishing. Never cache an old value.
+[[headers]]
+  for = "/assets/js/studylab-admin-config.js"
+  [headers.values]
+    Cache-Control = "no-store, max-age=0, must-revalidate"
+
 [[headers]]
   for = "/assets/css/studylab-admin.css"
   [headers.values]
