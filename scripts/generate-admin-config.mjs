@@ -1,18 +1,9 @@
-import { writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 
-// Only owner-approved Netlify deploy previews use real Supabase admin actions.
-// This client mode does not grant admin rights: server-side RPCs and Storage RLS
-// still check the signed-in admin account for every privileged operation.
-// Owner-approved previews: #102, #110 and #114. Other previews and branch
-// deploys remain isolated, so an unreviewed branch cannot change live data.
-const liveProduction = process.env.CONTEXT === "production";
-const reviewId = process.env.CONTEXT === "deploy-preview" &&
-  /^\d+$/.test(process.env.REVIEW_ID || "") ? process.env.REVIEW_ID : null;
-const approvedPreview = ["102", "110", "114"].includes(reviewId);
-const mode = liveProduction ? "live" : approvedPreview ? "connected" : "preview";
-
-writeFileSync(
-  "assets/js/studylab-admin-config.js",
-  `window.StudyLabAdminConfig = Object.freeze(${JSON.stringify({ mode, reviewId })});\n`,
-);
-console.log(`StudyLab Admin Dashboard: ${mode}`);
+// Always publish the exact same host-verified Admin configuration. Netlify's
+// build CONTEXT/REVIEW_ID can be absent on skipped, locked, or cached builds.
+// The trusted hostname and existing server-side Admin RPC controls decide
+// which deployment can publish real StudyLab content.
+const source=readFileSync(new URL("../assets/js/studylab-admin-config.js",import.meta.url),"utf8");
+writeFileSync("assets/js/studylab-admin-config.js",source);
+console.log("StudyLab Admin: host-verified runtime mode (production live, approved previews connected)");

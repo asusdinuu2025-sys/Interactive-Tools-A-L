@@ -435,8 +435,8 @@ async function setup(admin = true, options = {}) {
   const adminMarkup = read("admin.html");
   assert.match(adminMarkup, /studylab-admin\.js\?v=pr114-custom-sections-v1/);
   assert.match(adminMarkup, /Loading dashboard/);
-  assert.match(adminMarkup, /pr114-connected-v1/);
-  assert.match(adminMarkup, /studylab-admin-config[.]js[?]v=pr114-connected-v1/);
+  assert.match(adminMarkup, /pr115-host-verified-v1/);
+  assert.match(adminMarkup, /studylab-admin-config[.]js[?]v=pr115-host-verified-v1/);
   assert.match(read("index.html"), /studylab-popups[.]js[?]v=pr109-live-v1/);
   assert.match(read("index.html"), /studylab-content[.]js[?]v=pr114-custom-sections-v1/);
   assert.match(adminMarkup,/sladmin-brand-mark" aria-hidden="true">ツ/);

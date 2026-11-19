@@ -95,8 +95,11 @@ w.eval(read("assets/js/studylab-content.js"));
   assert(read("admin.html").includes("studylab-admin.js?v=pr114-custom-sections-v1"));
   assert(read("admin.html").includes("studylab-admin-publisher.js?v=pr114-custom-sections-v1"));
   assert(read("admin.html").includes("studylab-admin-api.js?v=pr114-custom-sections-v1"));
-  const generator=read("scripts/generate-admin-config.mjs");
-  assert(generator.includes('"114"'),"PR114 must remain explicitly live connected");
+  const adminMode=read("assets/js/studylab-admin-config.js");
+  assert(adminMode.includes('"114"') && adminMode.includes('"115"'),
+    "Merged PR114 and approved PR115 must both resolve to connected Admin mode");
+  assert(adminMode.includes('host==="studylablk.netlify.app"'),
+    "Production must use live Admin mode even if a previous deploy skipped config generation");
   w.close();
   console.log("PASS: custom sections preserve glass, responsive list rows, grid, badges and live config");
 })().catch(error=>{console.error(error);process.exitCode=1;dom.window.close()});
