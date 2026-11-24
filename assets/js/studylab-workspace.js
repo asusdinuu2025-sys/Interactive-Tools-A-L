@@ -44,7 +44,7 @@ const activityRoutes={
  "maths.html":["Mathematics","/maths.html"],"physics.html":["Physics","/physics.html"],"chemistry.html":["Chemistry","/chemistry.html"],"biology.html":["Biology","/biology.html"],"exam-hub.html":["Past Papers","/exam-hub.html"],"lesson-packs.html":["Free Lesson Packs","/lesson-packs.html"],"Telegram_Channels.html":["A/L Telegram Channels","/Telegram_Channels.html"],"Audio_Books.html":["Audio Books","/Audio_Books.html"],"study-tools.html":["Study Tools","/study-tools.html"],"generalenglish.html":["General English","/generalenglish.html"],"generalknowledge.html":["General Knowledge","/generalknowledge.html"],"git.html":["General Information Technology","/git.html"],"smk-physics-lessons.html":["Physics Lessons","/smk-physics-lessons.html"]
 };
 const activityKey=()=> "studylab-last-activity-v1:"+(root.StudyLabAccount?.getUser?.()?.id||"this-browser");
-function recordActivity(title,path,kind="page"){const href=url(path);if(!href||new URL(href).origin!==location.origin)return;write(activityKey(),{title,url:href,savedAt:Date.now(),kind});refreshContinue();}
+function recordActivity(title,path,kind="page"){const href=url(path);if(!href||new URL(href).origin!==location.origin)return;const data={title,url:href,savedAt:Date.now(),kind};write(activityKey(),data);refreshContinue();}
 function refreshContinue(){
  const recent=(root.StudyLabResourceDashboard?.recent()||[])[0],activity=read(activityKey(),null),last=activity&&(!recent||activity.savedAt>=Number(recent.savedAt||0))?activity:recent;
  for(const host of d.querySelectorAll("[data-slws-continue]")){

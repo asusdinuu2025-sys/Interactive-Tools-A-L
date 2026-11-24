@@ -595,7 +595,7 @@
       const count=make("span","sl-social-photo-index",String(index+1)),tools=make("div","sl-social-photo-tools");
       const button=(label,title,action,boundary=false)=>{const b=make("button","sl-social-photo-action",label);b.type="button";b.title=title;b.setAttribute("aria-label",title);b.dataset.boundary=String(boundary);b.disabled=boundary||busy||editingPhoto;b.onclick=action;return b;};
       const remove=button("×","Remove photo "+(index+1),()=>{if(busy||editingPhoto)return;selectedPhotos.splice(index,1);renderImagePreviews(selectedPhotos);});remove.classList.add("sl-feed-image-remove");
-      tools.append(button("←","Move photo earlier",()=>changeOrder(index,index-1),index===0),button("Crop","Crop photo "+(index+1),async()=>{
+      tools.append(button("←","Move photo earlier",()=>changeOrder(index,index-1),index===0),button("↻","Replace photo "+(index+1),()=>replacePhoto(index)),button("Crop","Crop photo "+(index+1),async()=>{
         if(busy||editingPhoto||!socialTools)return;editingPhoto=true;postButton.disabled=true;input.disabled=true;
         try{const next=await socialTools.crop(file);if(next&&selectedPhotos[index]===file)selectedPhotos[index]=next;}
         catch(e){setStatus(e.message,true);}
@@ -609,6 +609,14 @@
     });
     fileCount.textContent=files.length?files.length+" / 4 photos · arrange before posting":"No photos selected";
     imagePreview.hidden=!files.length;
+  }
+  function replacePhoto(index){
+    if(busy||editingPhoto||!selectedPhotos[index])return;
+    const original=selectedPhotos[index],picker=document.createElement("input");picker.type="file";picker.accept=ALLOWED_TYPES.join(",");picker.hidden=true;form.append(picker);
+    const clean=()=>picker.remove();
+    picker.addEventListener("cancel",clean,{once:true});
+    picker.addEventListener("change",()=>{try{const next=picker.files?.[0];if(!next||busy||editingPhoto||selectedPhotos[index]!==original)return;validFiles([next]);selectedPhotos[index]=next;renderImagePreviews(selectedPhotos);setStatus("");}catch(e){setStatus(e.message,true);}finally{clean();}},{once:true});
+    picker.click();
   }
   function validFiles(files) {
     if (files.length > MAX_IMAGES) throw new Error("You can attach up to 4 photos to one post.");
@@ -870,6 +878,7 @@
       });
       const commentsButton = make("button", "sl-feed-action", "Comments · " + (commentCountsByPost.get(post.id) || 0));
       commentsButton.type = "button";
+      commentsButton.setAttribute("aria-expanded","false");
       commentsButton.dataset.commentCount = String(commentCountsByPost.get(post.id) || 0);
       commentsButton.addEventListener("click", () => toggleComments(card, post, client, currentUserId));
       actions.append(like, commentsButton);
@@ -926,22 +935,24 @@
       commentButton.textContent = "Comments · " + count;
     }
   }
-  async function toggleComments(card, post, client, currentUserId) {
-    let area = card.querySelector(".sl-feed-comments");
-    if (area) { if(area.querySelector(".sl-feed-comment-form button:disabled"))return;await animateOut(area,"is-removing"); return; }
-    area = make("section", "sl-feed-comments sl-social-comments-enter");
-    area.append(make("p", "sl-feed-loading", "Loading comments…"));
-    card.append(area);
+  async function toggleComments(card, post, client, currentUserId, refresh=false) {
+    let area=card.querySelector(".sl-feed-comments");
+    const trigger=card.querySelector("[data-comment-count]");
+    if(area&&!refresh){if(area.querySelector(".sl-feed-comment-form button:disabled")||area.classList.contains("is-removing"))return;trigger?.setAttribute("aria-expanded","false");await animateOut(area,"is-removing");return;}
+    const known=new Set([...(area?.querySelectorAll("[data-comment-id]")||[])].map(x=>x.dataset.commentId));
+    if(!area){area=make("section","sl-feed-comments sl-social-comments-enter");area.append(make("p","sl-feed-loading","Loading comments…"));card.append(area);trigger?.setAttribute("aria-expanded","true");}
     try {
       const { data, error } = await client.from("studylab_social_comments")
         .select("id,author_id,author_display_name,author_username,author_gender,body,status,created_at")
         .eq("post_id", post.id).eq("status", "approved").order("created_at", { ascending: true }).limit(50);
       if (error) throw error;
-      area.replaceChildren();
+      if(!area.isConnected||area.classList.contains("is-removing"))return;
       await window.StudyLabAvatar?.prefetch((data||[]).map(comment=>comment.author_id))
         .catch(error=>console.warn("Comment pictures unavailable:",error));
+      if(!area.isConnected||area.classList.contains("is-removing"))return;
+      area.replaceChildren();
       (data || []).forEach(comment => {
-        const item = make("div", "sl-feed-comment is-entering");
+        const item=make("div","sl-feed-comment"+(known.has(comment.id)?"":" is-entering"));item.dataset.commentId=comment.id;
         const header = make("div", "sl-feed-comment-head");
         const commentGender = comment.author_gender === "female" ? "female" : comment.author_gender === "male" ? "male" : "neutral";
         const commentAvatar = make("span","sl-feed-avatar sl-feed-comment-avatar sl-feed-avatar-" + commentGender);
@@ -1019,7 +1030,7 @@
       commentForm.addEventListener("submit", async event => {
         event.preventDefault();
         const body = field.value.trim();
-        if (!body) return;
+        if (!body || send.disabled) return;
         const restore = setButtonBusy(send, "Sending…");
         field.disabled = true;
         try {
@@ -1030,8 +1041,8 @@
           if (error) throw error;
           adjustCommentCount(card, 1);
           field.value = "";
-          area.remove();
-          await toggleComments(card, post, client, currentUserId);
+          await toggleComments(card, post, client, currentUserId, true);
+          area.querySelector(".sl-feed-comment-form input")?.focus({preventScroll:true});
           setStatus("Comment published.");
         } catch (error) {
           restore();
@@ -1041,53 +1052,10 @@
       });
       area.append(commentForm);
     } catch (error) {
-      area.replaceChildren(make("p", "sl-feed-error", error.message || "Could not load comments."));
+      if(refresh){const b=area.querySelector(".sl-feed-comment-form button"),field=area.querySelector(".sl-feed-comment-form input");if(b){b.disabled=false;b.textContent="Send";}if(field)field.disabled=false;setStatus("Comment saved, but the thread could not refresh. Reopen comments to update.",true);}
+      else area.replaceChildren(make("p","sl-feed-error",error.message||"Could not load comments."));
     }
   }
-  function renderCommunityProfiles(posts) {
-    const list = panel.querySelector(".sl-feed-member-list");
-    if (!list) return;
-     const unique = new Map();
-    for (const post of posts) {
-      if (post.status !== "approved" || !post.author_id || unique.has(post.author_id)) continue;
-      unique.set(post.author_id, post);
-    }
-    const members = [...unique.values()].slice(0, 10);
-    list.replaceChildren();
-    if (!members.length) {
-      list.append(make("p", "sl-feed-members-empty", "Student profiles will appear here as they post."));
-      return;
-    }
-    for (const member of members) {
-      const row = make("div", "sl-feed-member");
-      const memberGender = member.author_gender === "female" ? "female" : "male";
-      const avatar = make("span","sl-feed-member-avatar sl-feed-avatar-" + memberGender);
-      avatar.style.setProperty("--sl-member-hue", memberGender === "female" ? "326" : "195");
-      avatar.innerHTML = memberGender === "female"
-        ? '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3.2"/><path d="M7 20l1-4.2a4.1 4.1 0 0 1 8 0l1 4.2z"/></svg>'
-        : '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3.2"/><path d="M4.5 20v-2.5a7.5 7.5 0 0 1 15 0V20z"/></svg>';
-      window.StudyLabAvatar?.decorate(avatar,member.author_id);
-      const copy = make("span", "sl-feed-member-copy");
-      const memberName = make("strong", "", member.author_display_name || "Student");
-      window.StudyLabNameMark?.decorate(memberName, member.author_id);
-      copy.append(memberName);
-      copy.append(make("small", "", "@" + (member.author_username || "student")));
-      row.append(avatar, copy);
-      row.classList.add("sl-follow-profile-trigger");
-      row.setAttribute("role","button");
-      row.tabIndex=0;
-      row.setAttribute("aria-label","View profile of "+(member.author_display_name||"Student"));
-      row.addEventListener("click",()=>window.StudyLabProfileView?.open({userId:member.author_id}));
-      row.addEventListener("keydown",event=>{
-        if(event.key==="Enter"||event.key===" "){
-          event.preventDefault();
-          window.StudyLabProfileView?.open({userId:member.author_id});
-        }
-      });
-      list.append(row);
-    }
-  }
-
   // Simple Instagram-style Social notifications: likes and comments on your posts.
   let socialNotificationChannel = null;
   let socialNotificationUserId = null;
@@ -1310,11 +1278,12 @@
     loadSocialNotifications(client, userId);
     socialNotificationChannel = client.channel("studylab-social-notifications-" + userId)
       .on("postgres_changes", {
-        event: "*",
+        event: "INSERT",
         schema: "public",
         table: "studylab_social_notifications",
         filter: "recipient_id=eq." + userId
       }, () => loadSocialNotifications(client, userId))
+      .on("postgres_changes",{event:"UPDATE",schema:"public",table:"studylab_social_notifications",filter:"recipient_id=eq."+userId},()=>loadSocialNotifications(client,userId))
       .subscribe();
   }
 
@@ -1333,6 +1302,11 @@
     }
   }
   window.setInterval(refreshNoticeDayIfChanged,30000);
+  window.StudyLabAccount?.client?.auth?.onAuthStateChange?.((_event,session)=>{
+    const id=session?.user?.id||null;
+    if(id===socialNotificationUserId)return;
+    window.setTimeout(()=>{const account=window.StudyLabAccount,current=account?.getUser?.()?.id||null;if(current!==id)return;if(id)setupSocialNotifications(account.client,id);else{if(socialNotificationChannel)account.client.removeChannel(socialNotificationChannel);socialNotificationChannel=null;socialNotificationUserId=null;socialNotificationRows=[];updateSocialNotificationBadge(0);socialTools?.updateUnread("follow",0);}},0);
+  });
   // Initialize existing notification subscription before the first Social visit.
   Promise.resolve(window.StudyLabAccount?.ready).then(()=>{const account=window.StudyLabAccount;const user=account?.getUser?.();if(user?.id&&account.client)setupSocialNotifications(account.client,user.id);}).catch(()=>{});
   document.addEventListener("visibilitychange",()=>{

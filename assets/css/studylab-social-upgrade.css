@@ -83,3 +83,5 @@ html[data-theme=light] .sl-social-highlight-cta{color:#176d9b}
 @media(prefers-reduced-motion:reduce){.sl-social-modal,.sl-social-like-pop,.sl-social-comments-enter,.sl-social-comments-enter.is-removing{animation:none!important}}
 html[data-sl-lite=on] .sl-social-modal::backdrop{backdrop-filter:none}
 html[data-sl-lite=on] :is(.sl-social-modal,.sl-social-like-pop,.sl-social-comments-enter,.sl-social-comments-enter.is-removing){animation:none!important}
+
+.sl-social-photo-tools{flex-wrap:wrap;justify-content:center}.sl-social-photo-action{flex:1 1 auto;min-width:24px}.sl-social-photo-action.sl-feed-image-remove{flex:none}
