@@ -92,9 +92,9 @@ w.eval(read("assets/js/studylab-content.js"));
     "Resource rows must adapt to narrow mobile screens");
   assert(read("index.html").includes("studylab-content.css?v=pr114-custom-sections-v1"));
   assert(read("index.html").includes("studylab-content.js?v=pr114-custom-sections-v1"));
-  assert(read("admin.html").includes("studylab-admin.js?v=pr114-custom-sections-v1"));
+  assert(read("admin.html").includes("studylab-admin.js?v=guardian-v1"));
   assert(read("admin.html").includes("studylab-admin-publisher.js?v=pr114-custom-sections-v1"));
-  assert(read("admin.html").includes("studylab-admin-api.js?v=pr114-custom-sections-v1"));
+  assert(read("admin.html").includes("studylab-admin-api.js?v=guardian-live-v1"));
   const adminMode=read("assets/js/studylab-admin-config.js");
   assert(adminMode.includes('"114"') && adminMode.includes('"115"'),
     "Merged PR114 and approved PR115 must both resolve to connected Admin mode");

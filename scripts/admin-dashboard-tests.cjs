@@ -433,7 +433,9 @@ async function setup(admin = true, options = {}) {
     /Local preview · Isolated/);
   dom.window.close();
   const adminMarkup = read("admin.html");
-  assert.match(adminMarkup, /studylab-admin\.js\?v=pr114-custom-sections-v1/);
+  assert.match(adminMarkup, /studylab-admin\.js\?v=guardian-v1/);
+  assert.match(adminMarkup, /studylab-admin-guardian[.]js[?]v=polish-v1/);
+  assert.match(adminMarkup, /studylab-admin-guardian[.]css[?]v=polish-v1/);
   assert.match(adminMarkup, /Loading dashboard/);
   assert.match(adminMarkup, /pr115-host-verified-v1/);
   assert.match(adminMarkup, /studylab-admin-config[.]js[?]v=pr115-host-verified-v1/);
@@ -477,7 +479,7 @@ async function setup(admin = true, options = {}) {
   assert.match(adminMarkup,/studylab-admin-publisher[.]js[?]v=pr114-custom-sections-v1/);
   assert.match(adminMarkup,/studylab-admin[.]css[?]v=pr114-sleek-icons-v1/);
   assert.match(telegramMarkup,/studylab-content[.]js[?]v=pr112-carousel-settings-v3/);
-  assert.match(adminMarkup,/studylab-admin[.]js[?]v=pr114-custom-sections-v1/);
+  assert.match(adminMarkup,/studylab-admin[.]js[?]v=guardian-v1/);
   assert.match(read("assets/css/telegram-channel-browser.css"),
     /repeat\(4,minmax\(0,1fr\)\)/,
     "Collapsed All Subjects uses four columns on desktop");
