@@ -175,7 +175,7 @@
   document.addEventListener("keydown", event => {
     // Let the top-level View Profile / account-deletion modal own keyboard
     // focus and Escape while it is above the Social drawer.
-    if (document.querySelector("#slProfileViewer:not([hidden]),#slProfileDeleteConfirmation:not([hidden])")) return;
+    if (document.querySelector("#slProfileViewer:not([hidden]),#slProfileDeleteConfirmation:not([hidden]),.sl-social-modal[open]")) return;
     const isOpen = toggle.getAttribute("aria-expanded") === "true";
     if (event.key === "Escape" && isOpen) {
       event.preventDefault();

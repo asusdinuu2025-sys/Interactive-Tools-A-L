@@ -153,6 +153,7 @@
     alertsToggle.setAttribute("aria-label",unreadCount
       ?"New followers, "+unreadCount+" unread":"New followers");
     markAll.disabled=unreadCount===0;
+    window.StudyLabSocialTools?.updateUnread("follow",unreadCount);
   }
   function timeAgo(date){
     const sec=Math.max(0,Math.floor((Date.now()-new Date(date).getTime())/1000));
@@ -259,9 +260,10 @@
     if(event.detail?.open)loadAlerts();
     else closePanels();
   });
-  // Poll only while the Social panel is visible. No extra realtime subscription
+  Promise.resolve(window.StudyLabAccount?.ready).then(()=>loadAlerts()).catch(()=>{});
+  // Poll only while the page is visible. No extra realtime subscription
   // or background notification service needed for this lightweight feature.
   window.setInterval(()=>{
-    if(!document.hidden&&panel.getAttribute("aria-hidden")==="false")loadAlerts();
+    if(!document.hidden)loadAlerts();
   },35000);
 })();

@@ -24,7 +24,7 @@
 
   form.innerHTML = `
     <button class="sl-feed-create-trigger" type="button" aria-label="Click here to bigger view">
-      <span aria-hidden="true">✎</span><span>Click here to bigger view</span>
+      <span aria-hidden="true">✎</span><span>Create a post · expand editor</span>
     </button>
     <div class="sl-feed-compose-expanded-head">
       <strong>Create a post</strong>
@@ -45,13 +45,14 @@
         <span aria-hidden="true">＋</span> Add photos
       </label>
       <span class="sl-feed-file-count">No photos selected</span>
+      <button class="sl-feed-video-link sl-feed-file-button" type="button">Video link</button>
     </div>
+    <div class="sl-feed-image-preview" aria-label="Selected photo previews"></div>
     <div class="sl-feed-compose-foot">
       <span class="sl-feed-image-note">JPEG, PNG or WebP · up to 4 MB each · max 4 photos</span>
       <span class="sl-feed-word-count" aria-live="polite">0 / 1,000 words</span>
-      <button class="sl-feed-post-button" type="submit">Post</button>
+      <button class="sl-feed-post-button" type="submit">Preview &amp; Post</button>
     </div>
-    <div class="sl-feed-image-preview" aria-label="Selected photo previews"></div>
     <p class="sl-feed-compose-status" role="status" aria-live="polite"></p>`;
   textarea = form.querySelector(".sl-feed-editor");
   postButton = form.querySelector(".sl-feed-post-button");
@@ -77,13 +78,14 @@
   const createTrigger = form.querySelector(".sl-feed-create-trigger");
   const createTriggerLabel = createTrigger?.querySelector("span:last-child");
   function syncPhoneComposerLabel() {
-    const phoneLabel = "Click here to Upload / Create posts";
-    if (createTriggerLabel) createTriggerLabel.textContent = phoneFeedMedia.matches ? phoneLabel : "Click here to bigger view";
-    createTrigger?.setAttribute("aria-label", phoneFeedMedia.matches ? phoneLabel : "Click here to bigger view");
+    const phoneLabel = "Create a post";
+    if (createTriggerLabel) createTriggerLabel.textContent = phoneFeedMedia.matches ? phoneLabel : "Create a post · expand editor";
+    createTrigger?.setAttribute("aria-label", phoneFeedMedia.matches ? phoneLabel : "Create a post · expand editor");
   }
   syncPhoneComposerLabel();
   phoneFeedMedia.addEventListener?.("change", syncPhoneComposerLabel);
-  let previewUrls = [];
+  let previewUrls = [], selectedPhotos = [], editingPhoto = false;
+  const socialTools = window.StudyLabSocialTools;
 
   function setComposerExpanded(expanded) {
     form.classList.toggle("is-expanded", expanded);
@@ -480,11 +482,13 @@
       spinner.setAttribute("aria-hidden", "true");
       postButton.append(spinner, document.createTextNode("Posting…"));
     } else {
-      postButton.textContent = "Post";
+      postButton.textContent = "Preview & Post";
       status.querySelector(".sl-feed-upload-spinner")?.remove();
     }
     textarea.disabled = value;
     input.disabled = value;
+    form.querySelector(".sl-feed-video-link").disabled=value;
+    imagePreview.querySelectorAll("button").forEach(b=>b.disabled=value||b.dataset.boundary==="true");
   }
   function make(tag, className, text) {
     const node = document.createElement(tag);
@@ -582,33 +586,28 @@
   }
   function renderImagePreviews(files) {
     previewUrls.forEach(url => URL.revokeObjectURL(url));
-    previewUrls = [];
-    imagePreview.replaceChildren();
-    files.slice(0,MAX_IMAGES).forEach((file, index) => {
-      const item = make("div", "sl-feed-image-preview-item");
-      const url = URL.createObjectURL(file);
-      previewUrls.push(url);
-      const img = document.createElement("img");
-      img.src = url;
-      img.alt = "Selected image preview";
-      const remove = make("button", "sl-feed-image-remove", "×");
-      remove.type = "button";
-      remove.setAttribute("aria-label", "Remove selected photo " + (index + 1));
-      remove.title = "Remove photo";
-      remove.addEventListener("click", () => {
-        const transfer = new DataTransfer();
-        [...(input.files || [])].forEach((selected, selectedIndex) => {
-          if (selectedIndex !== index) transfer.items.add(selected);
-        });
-        input.files = transfer.files;
-        const remaining = [...input.files];
-        fileCount.textContent = remaining.length ? remaining.length + " photo(s) selected" : "No photos selected";
-        renderImagePreviews(remaining);
-      });
-      item.append(img, remove);
-      imagePreview.append(item);
+    previewUrls = []; imagePreview.replaceChildren();
+    const changeOrder=(from,to)=>{if(busy||editingPhoto||!socialTools)return;selectedPhotos=socialTools.move(selectedPhotos,from,to);renderImagePreviews(selectedPhotos);};
+    files.slice(0,MAX_IMAGES).forEach((file,index)=>{
+      const item=make("div","sl-feed-image-preview-item"),url=URL.createObjectURL(file);previewUrls.push(url);
+      const img=document.createElement("img");img.src=url;img.alt="Selected photo "+(index+1);
+      const count=make("span","sl-social-photo-index",String(index+1)),tools=make("div","sl-social-photo-tools");
+      const button=(label,title,action,boundary=false)=>{const b=make("button","sl-social-photo-action",label);b.type="button";b.title=title;b.setAttribute("aria-label",title);b.dataset.boundary=String(boundary);b.disabled=boundary||busy||editingPhoto;b.onclick=action;return b;};
+      const remove=button("×","Remove photo "+(index+1),()=>{if(busy||editingPhoto)return;selectedPhotos.splice(index,1);renderImagePreviews(selectedPhotos);});remove.classList.add("sl-feed-image-remove");
+      tools.append(button("←","Move photo earlier",()=>changeOrder(index,index-1),index===0),button("Crop","Crop photo "+(index+1),async()=>{
+        if(busy||editingPhoto||!socialTools)return;editingPhoto=true;postButton.disabled=true;input.disabled=true;
+        try{const next=await socialTools.crop(file);if(next&&selectedPhotos[index]===file)selectedPhotos[index]=next;}
+        catch(e){setStatus(e.message,true);}
+        finally{editingPhoto=false;postButton.disabled=busy;input.disabled=busy;renderImagePreviews(selectedPhotos);}
+      }),button("→","Move photo later",()=>changeOrder(index,index+1),index===files.length-1));
+      item.draggable=true;
+      item.addEventListener("dragstart",event=>{if(busy||editingPhoto){event.preventDefault();return;}event.dataTransfer.setData("application/x-studylab-photo-index",String(index));event.dataTransfer.effectAllowed="move";});
+      item.addEventListener("dragover",event=>{if(!busy&&!editingPhoto&&event.dataTransfer.types.includes("application/x-studylab-photo-index"))event.preventDefault();});
+      item.addEventListener("drop",event=>{event.preventDefault();const raw=event.dataTransfer.getData("application/x-studylab-photo-index");if(/^[0-3]$/.test(raw))changeOrder(Number(raw),index);});
+      item.append(img,count,remove,tools);imagePreview.append(item);
     });
-    imagePreview.hidden = !files.length;
+    fileCount.textContent=files.length?files.length+" / 4 photos · arrange before posting":"No photos selected";
+    imagePreview.hidden=!files.length;
   }
   function validFiles(files) {
     if (files.length > MAX_IMAGES) throw new Error("You can attach up to 4 photos to one post.");
@@ -745,6 +744,8 @@
       const body = make("p", "sl-feed-post-body");
       body.innerHTML = renderFormattedText(post.body);
       card.append(body);
+      const video=[...body.querySelectorAll("a[href]")].map(a=>socialTools?.videoURL(a.href)).find(Boolean);
+      if(video){const link=make("a","sl-social-video-card");link.href=video;link.target="_blank";link.rel="noopener noreferrer";link.append(make("span","sl-social-video-play","▶"),make("strong",null,"Watch on YouTube"),make("small",null,"External video · Content not reviewed by Guardian"));card.append(link);}
       if (post.body.length > 260) {
         body.classList.add("is-collapsed");
         const readMore = make("button", "sl-feed-read-more", "Read more");
@@ -760,7 +761,7 @@
       }
     }
 
-    const imageRows = post.studylab_social_post_images || [];
+    const imageRows = socialTools?.orderedImages(post.studylab_social_post_images || []) || post.studylab_social_post_images || [];
     if (imageRows.length) {
       const galleryWrap = make("div", "sl-feed-gallery-wrap");
       const gallery = make("div", "sl-feed-gallery");
@@ -844,11 +845,15 @@
       card._slSocialLikeState = likeState;
       like.type = "button";
       like.setAttribute("aria-pressed", String(likeState.liked));
+      like.classList.toggle("is-liked",likeState.liked);
       like.addEventListener("click", async () => {
         if (like.disabled) return;
-        const restore = setButtonBusy(like, "Updating…");
+        const previous={liked:likeState.liked,count:likeState.count};
+        const paint=()=>{like.textContent=(likeState.liked?"♥ Liked":"♡ Like")+" · "+likeState.count;like.setAttribute("aria-pressed",String(likeState.liked));like.classList.toggle("is-liked",likeState.liked);};
+        like.disabled=true;likeState.pending=true;likeState.liked=!previous.liked;likeState.count=Math.max(0,previous.count+(likeState.liked?1:-1));paint();
+        like.classList.remove("sl-social-like-pop");void like.offsetWidth;like.classList.add("sl-social-like-pop");
         try {
-          if (likeState.liked) {
+          if (previous.liked) {
             const { error } = await client.from("studylab_social_likes").delete()
               .eq("post_id", post.id).eq("user_id", currentUserId);
             if (error) throw error;
@@ -857,16 +862,10 @@
               .insert({ post_id: post.id, user_id: currentUserId });
             if (error) throw error;
           }
-          likeState.liked = !likeState.liked;
-          likeState.count = Math.max(0, likeState.count + (likeState.liked ? 1 : -1));
-          restore();
-          like.textContent = (likeState.liked ? "♥ Liked" : "♡ Like") + " · " + likeState.count;
-          like.setAttribute("aria-pressed", String(likeState.liked));
-          like.classList.toggle("is-liked", likeState.liked);
         } catch (error) {
-          restore();
+          Object.assign(likeState,previous);paint();
           setStatus(error.message || "Could not update like.", true);
-        }
+        }finally{likeState.pending=false;like.disabled=false;}
       });
       const commentsButton = make("button", "sl-feed-action", "Comments · " + (commentCountsByPost.get(post.id) || 0));
       commentsButton.type = "button";
@@ -882,7 +881,7 @@
         const confirmation = deletingAnotherStudentPost
           ? "As an admin, permanently delete this student's post? This cannot be undone."
           : "Delete this post permanently? This cannot be undone.";
-        if (!window.confirm(confirmation)) return;
+        if (!await socialTools?.modal("Delete this post?",confirmation,null,"Delete post",true)) return;
         removePost.disabled = true;
         try {
           // An authenticated Edge Function deletes uploaded files using
@@ -911,7 +910,7 @@
   }
   function syncPostCardState(card, post, likesByPost, commentCountsByPost) {
     const likeState = card._slSocialLikeState;
-    if (likeState) {
+    if (likeState && !likeState.pending) {
       const rows = likesByPost.get(post.id) || [];
       likeState.liked = rows.some(row => row.user_id === card.dataset.currentUserId);
       likeState.count = rows.length;
@@ -928,8 +927,8 @@
   }
   async function toggleComments(card, post, client, currentUserId) {
     let area = card.querySelector(".sl-feed-comments");
-    if (area) { area.remove(); return; }
-    area = make("section", "sl-feed-comments");
+    if (area) { if(area.querySelector(".sl-feed-comment-form button:disabled"))return;await animateOut(area,"is-removing"); return; }
+    area = make("section", "sl-feed-comments sl-social-comments-enter");
     area.append(make("p", "sl-feed-loading", "Loading comments…"));
     card.append(area);
     try {
@@ -976,7 +975,7 @@
           const removeComment = make("button", "sl-feed-comment-menu-delete sl-feed-delete-comment", "Delete");
           removeComment.type = "button";
           removeComment.addEventListener("click", async () => {
-            if (!window.confirm("Delete this comment permanently? This cannot be undone.")) return;
+            if (!await socialTools?.modal("Delete comment?","This action cannot be undone.",null,"Delete comment",true)) return;
             commentMenu.open = false;
             const restore = setButtonBusy(removeComment, "Deleting…");
             item.classList.add("is-action-pending");
@@ -1152,6 +1151,7 @@
     if (markAll) markAll.disabled = value === 0;
     badge.textContent = value > 99 ? "99+" : String(value);
     badge.hidden = value === 0;
+    socialTools?.updateUnread("social",value);
     toggle.setAttribute("aria-label", value ? "Notifications, " + value + " unread" : "Notifications");
   }
 
@@ -1198,6 +1198,7 @@
       ]);
       if (rowsResult.error) throw rowsResult.error;
       if (countResult.error) throw countResult.error;
+      if(accountClient().getUser()?.id!==userId)return;
       socialNotificationRows = rowsResult.data || [];
       updateSocialNotificationBadge(countResult.count || 0);
       renderSocialNotifications();
@@ -1330,6 +1331,8 @@
     }
   }
   window.setInterval(refreshNoticeDayIfChanged,30000);
+  // Initialize existing notification subscription before the first Social visit.
+  Promise.resolve(window.StudyLabAccount?.ready).then(()=>{const account=window.StudyLabAccount;const user=account?.getUser?.();if(user?.id&&account.client)setupSocialNotifications(account.client,user.id);}).catch(()=>{});
   document.addEventListener("visibilitychange",()=>{
     if(!document.hidden)refreshNoticeDayIfChanged();
   });
@@ -1495,11 +1498,11 @@
   collapseComposer?.addEventListener("click",() => setComposerExpanded(false));
   form.addEventListener("submit", async event => {
     event.preventDefault();
-    if (busy) return;
+    if (busy || editingPhoto) return;
     try {
       const account = accountClient();
       const user = await requireBasicProfile();
-      const files = [...(input.files || [])];
+      let files = selectedPhotos.slice();
       validFiles(files);
       const body = textarea.value.trim();
       const words = countPostWords(editor.textContent);
@@ -1507,7 +1510,12 @@
       if (body.length > MAX_POST_CHARS) throw new Error("Your formatted post is too long. Keep it under 15,000 characters.");
       if (!body && !files.length) throw new Error("Write something or attach a photo.");
       setBusy(true);
-      setStatus(files.length ? "Preparing your post…" : "Publishing your post…");
+      const preview=document.createElement("div");preview.innerHTML=renderFormattedText(body);
+      if(!await socialTools?.preview(preview,files))return;
+      if(account.getUser()?.id!==user.id)throw Error("Account changed. Reload before publishing.");
+      setStatus(files.length?"Preparing your post…":"Checking your post…");
+      if(socialTools)files=await Promise.all(files.map(socialTools.compress));
+      validFiles(files);
       await window.StudyLabGuardianCheck(account.client,"posts",body);
       const { data: post, error: postError } = await account.client.from("studylab_social_posts")
         .insert({ author_id: user.id, body }).select("id").single();
@@ -1517,7 +1525,7 @@
       try {
         for (const [fileIndex, file] of files.entries()) {
           setStatus("Uploading photo " + (fileIndex + 1) + " of " + files.length + "…");
-          const path = user.id + "/" + post.id + "/" + crypto.randomUUID() + "." + fileExtension(file);
+          const path = user.id + "/" + post.id + "/" + "order-0"+(fileIndex+1)+"-"+crypto.randomUUID() + "." + fileExtension(file);
           const { error: uploadError } = await account.client.storage.from(BUCKET)
             .upload(path, file, { contentType: file.type, upsert: false, cacheControl: "3600" });
           if (uploadError) throw uploadError;
@@ -1556,6 +1564,7 @@
       updateWordCount();
       setComposerExpanded(false);
       input.value = "";
+      selectedPhotos=[];
       fileCount.textContent = "No photos selected";
       renderImagePreviews([]);
       setStatus(files.length ? "Your photo post is live." : "Your post is live.");
@@ -1568,18 +1577,25 @@
   });
 
   input.addEventListener("change", () => {
-    try {
-      validFiles([...(input.files || [])]);
-      fileCount.textContent = input.files.length ? input.files.length + " photo(s) selected" : "No photos selected";
-      renderImagePreviews([...(input.files || [])]);
-      setStatus("");
-    } catch (error) {
-      input.value = "";
-      fileCount.textContent = "No photos selected";
-      renderImagePreviews([]);
-      setStatus(error.message, true);
-    }
+    if(busy||editingPhoto){input.value="";return;}
+    try{
+      const next=[...selectedPhotos,...(input.files||[])];validFiles(next);
+      selectedPhotos=next;renderImagePreviews(selectedPhotos);setStatus("");
+    }catch(error){setStatus(error.message,true);}
+    finally{input.value="";}
   });
+  form.querySelector(".sl-feed-video-link")?.addEventListener("click",async()=>{
+    if(busy||editingPhoto||!socialTools)return;
+    let link;
+    await socialTools.modal("Add educational video link","Only YouTube watch links are supported. Share appropriate study videos. No video files are uploaded or autoplayed.",(host,ok,finish)=>{
+      const field=make("input","sl-social-video-input");field.type="url";field.placeholder="https://www.youtube.com/watch?v=…";field.setAttribute("aria-label","YouTube video link");
+      const status=make("p","sl-social-modal-copy");host.append(field,status);
+      ok.onclick=()=>{link=socialTools.videoURL(field.value.trim());if(!link){status.textContent="Enter a valid YouTube watch link.";return;}finish(true);};
+    },"Add link");
+    if(!link)return;
+    const a=make("a",null,link);a.href=link;editor.append(document.createElement("br"),a);updateWordCount();saveEditorSelection();
+  });
+
 
   document.addEventListener("click", event => {
     const toggle = event.target.closest(".sl-feed-toggle");
