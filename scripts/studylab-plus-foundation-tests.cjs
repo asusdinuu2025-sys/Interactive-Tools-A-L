@@ -1,5 +1,5 @@
 const assert=require("node:assert/strict");
-const {normalize,core,planned,eligible,demoAllowed,appearance,filterSponsored,validFrame,covers,frames}=require("../assets/js/studylab-plus.js");
+const {normalize,core,planned,eligible,demoAllowed,appearance,filterSponsored,validFrame,covers,frames,details,plans,hasPremiumDraft}=require("../assets/js/studylab-plus.js");
 assert.equal(normalize(null).active,false);assert.equal(normalize({enabled:false,active:true}).active,false);
 assert.equal(normalize({enabled:true,active:true,billing_ready:true}).billing_ready,false);
 assert.equal(normalize({enabled:true,active:true}).active,true);
@@ -11,9 +11,9 @@ assert.equal(demoAllowed("deploy-preview-119--studylablk.netlify.app"),true);ass
 console.log("PASS: registered account eligibility and preview-only demo host.");
 
 assert.equal(demoAllowed("localhost"),true);
-assert.deepEqual(appearance({active:false,cover:"aurora",frame:"gold"}),{active:false,cover:"default",frame:"default",effect:"default",bubble:"default",pet:"default",timer:"standard"});
-assert.deepEqual(appearance({active:true,cover:"aurora",frame:"gold"}),{active:true,cover:"aurora",frame:"gold",effect:"default",bubble:"default",pet:"default",timer:"standard"});
-assert.deepEqual(appearance({active:true,cover:"url(unsafe)",frame:"invalid"}),{active:true,cover:"default",frame:"default",effect:"default",bubble:"default",pet:"default",timer:"standard"});
+assert.deepEqual(appearance({active:false,cover:"aurora",frame:"gold"}),{active:false,cover:"default",frame:"default",effect:"default",bubble:"default",pet:"default",timer:"standard",details:details(null)});
+assert.deepEqual(appearance({active:true,cover:"aurora",frame:"gold"}),{active:true,cover:"aurora",frame:"gold",effect:"default",bubble:"default",pet:"default",timer:"standard",details:details(null)});
+assert.deepEqual(appearance({active:true,cover:"url(unsafe)",frame:"invalid"}),{active:true,cover:"default",frame:"default",effect:"default",bubble:"default",pet:"default",timer:"standard",details:details(null)});
 const banners=[{kind:"announcement"},{kind:"sponsored"},{kind:"announcement",design:{preset:"sponsored"}},{kind:"feature"},{kind:"resource"}];
 assert.equal(filterSponsored(banners,false).length,5);
 assert.deepEqual(filterSponsored(banners,true),banners);
@@ -49,3 +49,23 @@ assert.equal(appearance({active:true,bubble:"unsafe"}).bubble,"default");
 assert.equal((sql.match(/create table public\.studylab_plus_appearance/g)||[]).length,1);
 const room=fs.readFileSync(path.join(__dirname,"../assets/js/study-room-realtime.js"),"utf8");
 assert.match(room,/room-rank-subject/);assert.doesNotMatch(room,/querySelector\('\.room-rank-info span'\)/);
+
+assert.equal(hasPremiumDraft({}),false);
+assert.equal(hasPremiumDraft({cover:"galaxy"}),true);
+assert.equal(hasPremiumDraft({details:{shape:"orb"}}),true);
+assert.equal(hasPremiumDraft({details:{eyeColor:"url(unsafe)"}}),false);
+assert.deepEqual(plans.map(p=>[p.months,p.price]),[[1,199],[3,499],[12,1799]]);
+assert.equal(details({eyeColor:"#ABCDEF",timerAccent:"red",shape:"orb",eyes:"star",glow:"neon",mouth:"smile"}).eyeColor,"#abcdef");
+assert.equal(details({timerAccent:"red"}).timerAccent,"default");
+assert.deepEqual(appearance({active:false,details:{shape:"orb",eyes:"star"}}).details,details(null));
+assert.match(plusCode,/if\(!latest.active&&!hasPremiumDraft\(draft\)\)/);
+assert.match(plusCode,/p_details:next.details/);
+assert.match(sql,/p_details jsonb/);
+assert.match(sql,/details jsonb not null/);
+assert.match(sql,/coalesce\(details->>'eyeColor'/);
+assert.match(room,/sl-plus-name-text/);
+assert.match(plusCss,/\.room-person-card\[data-plus-effect\]/);
+const pet=fs.readFileSync(path.join(__dirname,"../assets/js/studylab-pet.js"),"utf8");
+const roomPet=fs.readFileSync(path.join(__dirname,"../assets/js/studylab-pet-room.js"),"utf8");
+for(const code of [pet,roomPet]){assert.match(code,/plus.openStudio\("pet"\)/);assert.match(code,/plus.paintPet\(character,state\)/);}
+console.log("PASS: Studio draft entitlement, pricing, pet details, shared cosmetic validation and integration paths.");
