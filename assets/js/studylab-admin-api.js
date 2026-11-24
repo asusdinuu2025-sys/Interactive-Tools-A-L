@@ -639,6 +639,8 @@
   window.StudyLabAdminAPI = Object.freeze({
     guardianPreview,
     guardianSettings,
+    verificationQueue:async()=>{requireAccess();return rpc('studylab_verification_queue');},
+    reviewVerification:async(id,approve)=>{requireAccess();if(preview)throw Error('Read-only preview: use the approved live admin deployment.');return rpc('studylab_review_verification',{p_user:id,p_approve:approve});},
     deviceOverview:async()=>{
       requireAccess();if(preview&&!livePreviewStats)throw Error("Live device counts are not connected in this preview.");
       if(!client?.channel||!window.StudyLabWorkspace)throw Error("Presence unavailable.");

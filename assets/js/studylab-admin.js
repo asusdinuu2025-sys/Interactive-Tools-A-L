@@ -357,6 +357,12 @@
     deviceCard.append(deviceStats,deviceStatus,reloadDevices);host.append(deviceCard);
     if(typeof api.deviceOverview==="function")reloadDevices.click();else deviceStatus.textContent="Device statistics are not connected.";
 
+    const verifyCard=el("article",undefined,"sladmin-card slws-device-card"),verifyRows=el("div"),verifyStatus=el("p","Loading verification requests…");
+    verifyCard.append(el("h3","Blue badge requests"),el("p","Review StudyLab account badge applications. No identity documents are requested."),verifyStatus,verifyRows);
+    const refreshVerification=async()=>{verifyRows.replaceChildren();try{const rows=await api.verificationQueue();if(!verifyCard.isConnected)return;verifyStatus.textContent=rows.length+" pending"+(api.preview?" · Read-only preview":"");
+      for(const row of rows){const card=el("div",undefined,"sladmin-card"),actions=el("div",undefined,"sladmin-verification-actions");card.append(el("strong",row.display_name||"Student"),el("p","@"+(row.username||"—")+" · "+new Date(row.requested_at).toLocaleString()));
+        for(const [label,value] of [["Approve",true],["Reject",false]]){const b=button(label,async()=>{if(!confirm(label+" this verification request?"))return;for(const x of actions.querySelectorAll("button"))x.disabled=true;try{await api.reviewVerification(row.user_id,value);await refreshVerification();}catch(e){verifyStatus.textContent=e.message;for(const x of actions.querySelectorAll("button"))x.disabled=false;}});b.disabled=api.preview;actions.append(b);}card.append(actions);verifyRows.append(card);}
+    }catch(e){verifyStatus.textContent=e.message||"Verification requests unavailable.";}};verifyCard.append(button("Refresh requests",refreshVerification));host.append(verifyCard);if(api.verificationQueue)void refreshVerification();
     // A stalled API call must not block the entire dashboard forever.
     async function fetchWithTimeout(label, getValue) {
       let timeout;

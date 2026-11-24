@@ -959,6 +959,7 @@
         viewStatus.hidden=false;
       }
     }
+    if(serial===viewSequence&&!view.hidden&&own){if(["followers","following"].includes(options.listType))openList(options.listType);else if(options.editSection==="identity"){const callback=editHandler;closeView(false);callback?.();}}
     return true;
   }
 
