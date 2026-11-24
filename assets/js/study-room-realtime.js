@@ -275,7 +275,9 @@
   }
   function setLiveText(node, value) {
     const label = String(value ?? '');
-    if (node && node.textContent !== label) node.textContent = label;
+    if (!node) return;
+    if(node.matches('.room-rank-info strong,.room-person-card-name')){let text=[...node.childNodes].find(n=>n.nodeType===3);if(!text){text=document.createTextNode(label);node.prepend(text);}else if(text.nodeValue!==label)text.nodeValue=label;return;}
+    if (node.textContent !== label) node.textContent = label;
   }
   window.addEventListener("studylab:follow-error", event => {
     say(event.detail?.message || "Could not update following. Please retry.", true);
@@ -422,7 +424,7 @@
           item.className = 'room-rank';
           item.dataset.userId = id;
           item.innerHTML = "<span class='room-rank-number'></span><div class='room-avatar'></div>" +
-            "<div class='room-rank-info'><strong></strong><span></span></div><span class='room-time'></span>";
+            "<div class='room-rank-info'><strong></strong><span class='room-rank-subject'></span></div><span class='room-time'></span>";
         }
         const avatar = item.querySelector('.room-avatar');
         const gender = r.gender === 'female' ? 'female' : 'male';
@@ -436,7 +438,7 @@
         const rankName = item.querySelector('.room-rank-info strong');
         setLiveText(rankName, r.display_name || 'Student');
         window.StudyLabNameMark?.decorate(rankName, id);
-        setLiveText(item.querySelector('.room-rank-info span'), r.subject || '—');
+        setLiveText(item.querySelector('.room-rank-subject'), r.subject || '—');
         setLiveText(item.querySelector('.room-time'), compact(r.score));
         if (board.children[i] !== item) board.insertBefore(item, board.children[i] || null);
       });
