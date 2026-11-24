@@ -14,9 +14,10 @@ const petShapes=["default","capsule","square","orb"],petEyes=["default","round",
 const colorValue=(v)=>typeof v==="string"&&/^#[0-9a-f]{6}$/i.test(v)?v.toLowerCase():"default";
 function details(v){return {shape:petShapes.includes(v?.shape)?v.shape:"default",eyes:petEyes.includes(v?.eyes)?v.eyes:"default",glow:petGlows.includes(v?.glow)?v.glow:"default",mouth:petMouths.includes(v?.mouth)?v.mouth:"default",eyeColor:colorValue(v?.eyeColor),timerAccent:colorValue(v?.timerAccent)};}
 function appearance(s){const active=s?.active===true;return {active,cover:active&&covers.includes(s.cover)?s.cover:"default",frame:active&&validFrame(s.frame)?s.frame:"default",effect:active&&effects.includes(s.effect)?s.effect:"default",bubble:active&&bubbles.includes(s.bubble)?s.bubble:"default",pet:active&&pets.includes(s.pet)?s.pet:"default",timer:active&&timerModes.includes(s.timer)?s.timer:"standard",details:details(active?s.details:null)};}
+function hasPremiumDraft(s){const a=appearance({...s,active:true}),base=appearance({active:true});return JSON.stringify(a)!==JSON.stringify(base);}
 function sponsored(item){return item?.kind==="sponsored"||item?.design?.preset==="sponsored";}
 function filterSponsored(items){return items;}
-if(typeof module!=="undefined"&&module.exports){module.exports={normalize,core,planned,eligible,demoAllowed,appearance,sponsored,filterSponsored,validFrame,covers,frames,effects,bubbles,pets,timerModes,plans,details,petShapes,petEyes,petGlows,petMouths};return;}
+if(typeof module!=="undefined"&&module.exports){module.exports={normalize,core,planned,eligible,demoAllowed,appearance,sponsored,filterSponsored,validFrame,covers,frames,effects,bubbles,pets,timerModes,plans,details,petShapes,petEyes,petGlows,petMouths,hasPremiumDraft};return;}
 const d=root.document;
 const E=(tag,text,cls)=>{const n=d.createElement(tag);if(text!=null)n.textContent=text;if(cls)n.className=cls;return n;};
 const preview=demoAllowed(root.location.hostname);
@@ -80,7 +81,7 @@ async function openStudio(initial="cover"){
  const note=E("p",saved.demo?"Demo mode · Changes apply only to this tab.":saved.active?"Preview your design, then apply it to your account.":"Explore every design for free. Plus is required only when applying premium changes.","sl-plus-notice");
  const layout=E("div",null,"sl-plus-studio-layout"),previewPane=E("section",null,"sl-plus-studio-preview"),controls=E("section",null,"sl-plus-studio-controls"),tabs=E("nav",null,"sl-plus-studio-tabs"),options=E("div",null,"sl-plus-studio-options");
  const sample=E("div",null,"sl-plus-appearance-sample"),sampleAvatar=E("div","✦","sl-plus-sample-avatar"),sampleName=E("strong","Your profile"),sampleBadge=E("small","✦ Plus","sl-plus-inline-badge");
- sample.append(sampleAvatar,sampleName,sampleBadge,E("small","Your profile appearance"));
+ const currentProfile=d.querySelector(".sl-pv-dialog:not([hidden]) .sl-pv-name");const currentPhoto=d.querySelector(".sl-pv-dialog:not([hidden]) .sl-pv-avatar img.sl-avatar-photo:not([hidden])");if(currentProfile&&currentProfile.closest(".sl-pv-view:not([hidden])")){const nameText=[...currentProfile.childNodes].filter(n=>n.nodeType===3).map(n=>n.textContent).join("").trim();if(nameText)sampleName.textContent=nameText;if(currentPhoto){const img=currentPhoto.cloneNode(false);img.removeAttribute("id");img.className="sl-plus-sample-photo";img.alt="";sampleAvatar.replaceChildren(img);}}sample.append(sampleAvatar,sampleName,sampleBadge,E("small","Your profile appearance"));
  const live=E("article",null,"room-person-card sl-plus-live-sample");live.append(E("small","● Studying now"),E("strong","Your studying card"),E("small","Combined Mathematics"),E("strong","00:42:18"));
  const chat=E("article",null,"study-chat-message sl-plus-chat-sample");chat.append(E("strong","You · ✦ Plus"),E("p","Ready for another study session."));
  const petBox=E("div",null,"sl-plus-pet-preview"),pet=E("div",null,"sl-pet-character sl-plus-pet-sample"),face=E("div",null,"sl-pet-visual");for(const side of ["left","right"]){const eye=E("div",null,"sl-pet-eye "+side);eye.append(E("i"));face.append(eye);}face.append(E("div",null,"sl-pet-mouth"));pet.append(face);petBox.append(pet,E("small","Your study companion"));
@@ -125,6 +126,7 @@ async function openStudio(initial="cover"){
  apply.onclick=async()=>{apply.disabled=true;try{
   if(account.getUser()?.id!==user.id)throw Error("Session changed. Reopen the studio.");
   const latest=await profileState(user.id);if(account.getUser()?.id!==user.id)throw Error("Session changed.");
+  if(!latest.active&&!hasPremiumDraft(draft)){editor.close();return;}
   if(!latest.active){message.textContent="Your preview is unchanged. Choose Plus to apply.";await open("your selected designs");return;}
   await saveAppearance(draft.cover,draft.frame,{effect:draft.effect,bubble:draft.bubble,pet:draft.pet,timer:draft.timer,details:draft.details});editor.close();
  }catch(e){message.textContent=e.message||"Could not save appearance.";}finally{apply.disabled=false;}};
@@ -159,7 +161,7 @@ async function open(feature){
  const banner=E("p",state.active?(state.expires_at?"Complimentary · Expires "+new Date(state.expires_at).toLocaleDateString():"Complimentary · No expiry"):preview?"Test mode · No real payments or membership changes":"Purchases not available yet.","sl-plus-notice");
  const grid=E("div",null,"sl-plus-grid");
  for(const plus of [false,true]){
-  const card=E("section",null,"sl-plus-plan"+(plus?" is-plus":""));card.append(E("h3",plus?"✦ StudyLab Plus":"StudyLab Free"),E("strong",plus?"Rs. 199":"Rs. 0","sl-plus-price"),E("p",plus?"Choose your billing period":"All essential learning tools"));
+  const card=E("section",null,"sl-plus-plan"+(plus?" is-plus":""));card.append(E("h3",plus?"✦ StudyLab Plus":"StudyLab Free"),E("strong",plus?"Rs. 199 / month":"Rs. 0","sl-plus-price"),E("p",plus?"Choose your billing period":"All essential learning tools"));
   if(plus){const choices=E("div",null,"sl-plus-duration-grid");const price=card.querySelector(".sl-plus-price");let selected=plans[0];for(const plan of plans){const choice=E("button",null,"sl-plus-duration");choice.type="button";choice.dataset.months=String(plan.months);choice.setAttribute("aria-pressed",String(plan===selected));choice.append(E("strong",plan.label),E("span","Rs. "+plan.price.toLocaleString("en-LK")),E("small",plan.months===1?"Per month":"Save Rs. "+(199*plan.months-plan.price)));choice.onclick=()=>{selected=plan;price.textContent="Rs. "+plan.price.toLocaleString("en-LK")+" / "+(plan.months===1?"month":plan.months+" months");for(const item of choices.children)item.setAttribute("aria-pressed",String(item.dataset.months===String(plan.months)));};choices.append(choice);}card.append(choices);}
   const action=E("button",plus?(currentDemo()?"Plus demo active":state.active?"Membership active":"Checkout not available yet"):(currentDemo()?"Free plan (demo)":state.active?"Free plan":"Your current plan"),"sl-plus-action");action.type="button";action.disabled=true;if(preview&&plus){action.disabled=false;action.textContent=currentDemo()?"Switch to Free demo":"Try Plus demo";action.onclick=()=>{if(root.StudyLabAccount?.getUser?.()?.id!==session){close();return;}setDemo(!currentDemo());close();};}card.append(action);
   const list=E("ul");for(const f of (plus?["Everything in Free",...planned]:core))list.append(E("li",f));card.append(list);
