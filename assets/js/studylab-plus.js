@@ -2,16 +2,17 @@
 (function(root){
 "use strict";
 const core=["Live Study Room and standard timer","Social and Chat","Past papers and simulations","Existing profile pictures and themes","Tasks, notes and bookmarks","Guardian safety screening"];
-const planned=["Ad-free experience","Plus membership badge","Premium profile covers and frames","Custom backgrounds and appearance","Compact and micro floating timer","Extra Pet designs","Advanced study reports"];
+const planned=["Plus membership badge","Custom studying cards and chat bubbles","Premium profile covers and frames","Custom backgrounds and appearance","Compact and micro floating timer","Extra Pet designs","Advanced study reports"];
 function normalize(s){return {enabled:s?.enabled===true,active:s?.active===true&&s?.enabled===true,granted:s?.granted===true,expires_at:s?.expires_at||null,billing_ready:false};}
 function eligible(u){return Boolean(u?.id&&!u.is_anonymous);}
 function demoAllowed(host){return /^deploy-preview-[0-9]+--studylablk\.netlify\.app$/.test(host)||["localhost","127.0.0.1"].includes(host);}
 const covers=["default","aurora","ocean","sunset","galaxy","nebula","starlight","mountains","forest","sakura","midnight","prism"],frames=["default","violet","cyan","gold","rose","mint","silver","rainbow"];
 function validFrame(value){return typeof value==="string"&&(frames.includes(value)||/^#[0-9a-f]{6}$/i.test(value));}
-function appearance(s){return {active:s?.active===true,cover:s?.active===true&&covers.includes(s.cover)?s.cover:"default",frame:s?.active===true&&validFrame(s.frame)?s.frame:"default"};}
+const effects=["default","aurora","galaxy","pulse","sakura","ocean"],bubbles=["default","violet","cyan","rose","mint","gold"],pets=["default","nebula","mint","rose","gold"],timerModes=["standard","compact","micro"];
+function appearance(s){const active=s?.active===true;return {active,cover:active&&covers.includes(s.cover)?s.cover:"default",frame:active&&validFrame(s.frame)?s.frame:"default",effect:active&&effects.includes(s.effect)?s.effect:"default",bubble:active&&bubbles.includes(s.bubble)?s.bubble:"default",pet:active&&pets.includes(s.pet)?s.pet:"default",timer:active&&timerModes.includes(s.timer)?s.timer:"standard"};}
 function sponsored(item){return item?.kind==="sponsored"||item?.design?.preset==="sponsored";}
-function filterSponsored(items,active){return active===true?items.filter(x=>!sponsored(x)):items;}
-if(typeof module!=="undefined"&&module.exports){module.exports={normalize,core,planned,eligible,demoAllowed,appearance,sponsored,filterSponsored,validFrame,covers,frames};return;}
+function filterSponsored(items){return items;}
+if(typeof module!=="undefined"&&module.exports){module.exports={normalize,core,planned,eligible,demoAllowed,appearance,sponsored,filterSponsored,validFrame,covers,frames,effects,bubbles,pets,timerModes};return;}
 const d=root.document;
 const E=(tag,text,cls)=>{const n=d.createElement(tag);if(text!=null)n.textContent=text;if(cls)n.className=cls;return n;};
 const preview=demoAllowed(root.location.hostname);
@@ -22,20 +23,22 @@ function currentDemo(){const u=root.StudyLabAccount?.getUser?.();if(!preview||!e
 function persistDemo(){try{if(demoUser)root.sessionStorage.setItem("sl-plus-demo",JSON.stringify({user:demoUser,appearance:demoAppearance}));else root.sessionStorage.removeItem("sl-plus-demo");}catch(_){}}
 function changed(){d.dispatchEvent(new Event("studylab:plus-changed"));}
 function setDemo(on){const u=root.StudyLabAccount?.getUser?.();if(!preview||!eligible(u))return;if(on&&demoUser!==u.id)demoAppearance=appearance(null);demoUser=on?u.id:null;persistDemo();changed();}
-async function adFree(){if(preview)return currentDemo();return (await status()).active;}
+async function adFree(){return false;}
 async function profileState(id){
  const a=root.StudyLabAccount;await a?.ready;const u=a?.getUser?.();if(!eligible(u)||!id)return appearance(null);
  if(preview&&id===u.id)return currentDemo()?{...demoAppearance,active:true,demo:true}:appearance(null);
  try{const r=await a.client.rpc("studylab_plus_profile_state",{p_user:id});return r.error||a.getUser()?.id!==u.id?appearance(null):appearance(r.data);}catch(_){return appearance(null);}
 }
-async function saveAppearance(cover,frame){
+async function saveAppearance(cover,frame,extras={}){
  if(!covers.includes(cover)||!validFrame(frame))throw Error("Choose a valid appearance.");
  const a=root.StudyLabAccount;await a?.ready;const u=a?.getUser?.();if(!eligible(u))throw Error("Sign in first.");
- if(currentDemo()){demoAppearance=appearance({active:true,cover,frame});persistDemo();changed();return;}
+ const prior=await profileState(u.id);const next=appearance({...prior,...extras,active:true,cover,frame});if(currentDemo()){demoAppearance=next;persistDemo();changed();return;}
  const state=await status();if(!state.active||a.getUser()?.id!==u.id)throw Error("Active Plus required.");
  if(preview)throw Error("Preview is read-only for real membership. Switch to demo mode.");
- const r=await a.client.rpc("studylab_plus_save_appearance",{p_cover:cover,p_frame:frame});if(r.error||a.getUser()?.id!==u.id)throw Error(r.error?.message||"Session changed.");changed();
+ const r=await a.client.rpc("studylab_plus_save_appearance",{p_cover:next.cover,p_frame:next.frame,p_effect:next.effect,p_bubble:next.bubble,p_pet:next.pet,p_timer:next.timer});if(r.error||a.getUser()?.id!==u.id)throw Error(r.error?.message||"Session changed.");badgeCache.delete(u.id);changed();
 }
+async function ownAppearance(){const a=root.StudyLabAccount;await a?.ready;return profileState(a?.getUser?.()?.id);}
+async function savePreference(key,value){const s=await ownAppearance();if(!s.active){await open("Premium customization");return false;}const allowed={pet:pets,timer:timerModes,effect:effects,bubble:bubbles};if(!allowed[key]?.includes(value))return false;await saveAppearance(s.cover,s.frame,{[key]:value});return true;}
 function paintAppearance(panel,avatar,state){
  panel.dataset.plusCover=state.active?state.cover:"default";
  avatar.dataset.plusFrame=state.active?state.frame:"default";
@@ -59,16 +62,17 @@ function profileEditor(panel,id){
  const b=E("button","Customize Plus profile","sl-plus-profile-entry sl-plus-customize");b.type="button";
  b.onclick=async()=>{const s=await profileState(id);if(!s.active){void open("Premium profile covers and frames");return;}
   const editor=E("dialog",null,"sl-plus-dialog sl-plus-editor"),title=E("h2","Customize your profile"),note=E("p",s.demo?"Preview only. These changes are saved in this tab, not your real account.":"Select a cover and ring. Your appearance follows your account.");
-  let cover=s.cover,frame=s.frame;
+  let cover=s.cover,frame=s.frame;const extras={effect:s.effect,bubble:s.bubble};
   const sample=E("div",null,"sl-plus-appearance-sample"),sampleAvatar=E("div","✦","sl-plus-sample-avatar"),sampleName=E("strong","Your profile · Plus");sample.append(sampleAvatar,sampleName);
   const gallery=E("div",null,"sl-plus-cover-gallery"),rings=E("div",null,"sl-plus-ring-gallery"),picker=E("input"),pickerLabel=E("label","Custom ring colour","sl-plus-color-label");picker.type="color";picker.value=/^#[0-9a-f]{6}$/i.test(frame)?frame:"#b29bff";pickerLabel.append(picker);
   function update(){paintAppearance(sample,sampleAvatar,{active:true,cover,frame});for(const el of gallery.children)el.setAttribute("aria-pressed",String(el.dataset.choice===cover));for(const el of rings.children)el.setAttribute("aria-pressed",String(el.dataset.choice===frame));}
   for(const key of covers){const tile=E("button",null,"sl-plus-cover-tile");tile.type="button";tile.dataset.choice=key;tile.dataset.plusCover=key;tile.append(E("span",key[0].toUpperCase()+key.slice(1)));tile.onclick=()=>{cover=key;update();};gallery.append(tile);}
   for(const key of frames){const tile=E("button",key[0].toUpperCase()+key.slice(1),"sl-plus-ring-choice");tile.type="button";tile.dataset.choice=key;tile.dataset.plusFrame=key;tile.onclick=()=>{frame=key;update();};rings.append(tile);}
   picker.oninput=()=>{frame=picker.value;update();};
+  const options=E("div",null,"sl-plus-options");for(const [key,label,values] of [["effect","Live studying card effect",effects],["bubble","Chat bubble colour",bubbles]]){const field=E("label",label,"sl-plus-color-label"),select=E("select");for(const value of values){const option=E("option",value[0].toUpperCase()+value.slice(1));option.value=value;select.append(option);}select.value=extras[key];select.onchange=()=>{extras[key]=select.value;};field.append(select);options.append(field);}
   const actions=E("div",null,"sl-plus-editor-actions"),save=E("button","Save appearance","sl-plus-profile-entry"),cancel=E("button","Close","sl-plus-profile-entry"),msg=E("p");msg.setAttribute("role","status");save.type=cancel.type="button";
-  save.onclick=async()=>{save.disabled=true;try{if(a.getUser()?.id!==id)throw Error("Session changed.");await saveAppearance(cover,frame);editor.close();}catch(e){msg.textContent=e.message;save.disabled=false;}};
-  cancel.onclick=()=>editor.close();actions.append(save,cancel);editor.append(title,note,sample,E("h3","Profile covers"),gallery,E("h3","Avatar ring"),rings,pickerLabel,actions,msg);update();editor.addEventListener("close",()=>{editor.remove();if(b.isConnected)b.focus();});d.body.append(editor);try{editor.showModal();}catch(_){editor.remove();}
+  save.onclick=async()=>{save.disabled=true;try{if(a.getUser()?.id!==id)throw Error("Session changed.");await saveAppearance(cover,frame,extras);editor.close();}catch(e){msg.textContent=e.message;save.disabled=false;}};
+  cancel.onclick=()=>editor.close();actions.append(save,cancel);editor.append(title,note,sample,E("h3","Profile covers"),gallery,E("h3","Avatar ring"),rings,pickerLabel,options,actions,msg);update();editor.addEventListener("close",()=>{editor.remove();if(b.isConnected)b.focus();});d.body.append(editor);try{editor.showModal();}catch(_){editor.remove();}
  };
  panel.querySelector(".sl-pv-actions")?.append(b);
 }
@@ -112,10 +116,10 @@ const badgeQueue=new Set(),badgeCache=new Map();let badgeTimer=null,badgeBlocked
 const validId=id=>typeof id==="string"&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 function renderNameBadge(node,id){
  const own=root.StudyLabAccount?.getUser?.()?.id===id,demo=own&&currentDemo(),cached=badgeCache.get(id);
- const show=demo||Boolean(cached?.active&&cached.until>Date.now());
+ const show=demo||Boolean(cached?.active&&cached.until>Date.now());const state=demo?appearance({...demoAppearance,active:true}):show?appearance(cached):appearance(null);const surface=node.closest(".room-person-card,.study-chat-message");if(surface){if(surface.classList.contains("room-person-card"))surface.dataset.plusEffect=state.effect;else surface.dataset.plusBubble=state.bubble;}
  let mark=node.querySelector(":scope > .sl-plus-inline-badge");
  if(!show){mark?.remove();return;}
- if(!mark){mark=E("span",null,"sl-plus-inline-badge");node.append(mark);}
+ if(!mark){mark=E("small",null,"sl-plus-inline-badge");node.append(mark);}
  mark.textContent=demo?"✦ Plus demo":"✦ Plus";mark.title=demo?"Preview only":"StudyLab Plus";
 }
 function decorateName(node,id){
@@ -130,8 +134,8 @@ function decorateName(node,id){
 async function flushBadges(){
  badgeTimer=null;const a=root.StudyLabAccount;await a?.ready;const viewer=a?.getUser?.();const ids=[...badgeQueue].slice(0,100);ids.forEach(id=>badgeQueue.delete(id));if(!eligible(viewer)||!ids.length)return;
  if(badgeViewer!==viewer.id){badgeCache.clear();badgeViewer=viewer.id;}
- try{const result=await a.client.rpc("studylab_plus_badges",{p_users:ids});if(a.getUser()?.id!==viewer.id)return;if(result.error)throw result.error;
- const members=new Set(Array.isArray(result.data)?result.data:[]);for(const id of ids)badgeCache.set(id,{active:members.has(id),until:Date.now()+60000});
+ try{const result=await a.client.rpc("studylab_plus_public_styles",{p_users:ids});if(a.getUser()?.id!==viewer.id)return;if(result.error)throw result.error;
+ const members=result.data&&typeof result.data==="object"?result.data:{};for(const id of ids)badgeCache.set(id,{...appearance(members[id]),until:Date.now()+60000});
  }catch(_){badgeBlockedUntil=Date.now()+60000;badgeCache.clear();badgeQueue.clear();}
  d.querySelectorAll("[data-sl-plus-user]").forEach(node=>renderNameBadge(node,node.dataset.slPlusUser));
  if(badgeQueue.size&&!badgeTimer)badgeTimer=setTimeout(flushBadges,100);
@@ -145,5 +149,5 @@ account?.client?.auth?.onAuthStateChange?.((event,session)=>{
  const uid=session?.user?.id||null;if(event==="SIGNED_OUT"||(badgeViewer&&badgeViewer!==uid)){badgeCache.clear();badgeQueue.clear();badgeViewer=uid;demoUser=null;demoAppearance=appearance(null);persistDemo();setTimeout(()=>{close();changed();},0);}
 });
 
-root.StudyLabPlus=Object.freeze({status,sync,open,adFree,filterSponsored,refreshProfile,clearProfile,decorateName});
+root.StudyLabPlus=Object.freeze({status,sync,open,adFree,filterSponsored,refreshProfile,clearProfile,decorateName,ownAppearance,savePreference});
 })(typeof window!=="undefined"?window:globalThis);
