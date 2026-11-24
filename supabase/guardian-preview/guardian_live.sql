@@ -49,17 +49,17 @@ alter table studylab_private.guardian_events enable row level security;
 revoke all on studylab_private.guardian_events from public,anon,authenticated;
 create index if not exists guardian_event_time_idx on studylab_private.guardian_events(created_at);
 create or replace function public.studylab_guardian_mode(p_surface text)
-returns boolean language sql stable security definer set search_path='' as $
+returns boolean language sql stable security definer set search_path='' as $$
  select (select auth.uid()) is not null and exists(
  select 1 from studylab_private.guardian_settings
  where singleton and settings->>'enabled'='true' and settings->>'ai'='true'
  and p_surface in ('chat','posts','comments') and settings->>p_surface='true')
-$;
+$$;
 revoke all on function public.studylab_guardian_mode(text) from public,anon,authenticated;
 grant execute on function public.studylab_guardian_mode(text) to authenticated;
 
 create or replace function public.studylab_guardian_begin(p_actor uuid,p_surface text)
-returns text language plpgsql security definer set search_path='' as $
+returns text language plpgsql security definer set search_path='' as $$
 declare n integer; cfg jsonb;
 begin
  if p_actor is null or p_surface not in ('chat','posts','comments') then raise exception 'Invalid moderation request'; end if;
@@ -70,12 +70,12 @@ begin
  on conflict(actor,bucket) do update set attempts=guardian_quota.attempts+1 returning attempts into n;
  if n>25 then return 'rate'; end if;
  return 'check';
-end $;
+end $$;
 revoke all on function public.studylab_guardian_begin(uuid,text) from public,anon,authenticated;
 grant execute on function public.studylab_guardian_begin(uuid,text) to service_role;
 
 create or replace function public.studylab_guardian_complete(p_actor uuid,p_surface text,p_body text,p_allowed boolean)
-returns void language plpgsql security definer set search_path='' as $
+returns void language plpgsql security definer set search_path='' as $$
 begin
  if p_actor is null or p_surface not in ('chat','posts','comments') or p_body is null or length(p_body)>15000 or p_allowed is null then raise exception 'Invalid moderation result'; end if;
  delete from studylab_private.guardian_permits where expires_at<now();
@@ -87,12 +87,12 @@ begin
  else
    insert into studylab_private.guardian_events(surface,outcome,reason) values(p_surface,'blocked','AI flagged public text');
  end if;
-end $;
+end $$;
 revoke all on function public.studylab_guardian_complete(uuid,text,text,boolean) from public,anon,authenticated;
 grant execute on function public.studylab_guardian_complete(uuid,text,text,boolean) to service_role;
 
 create or replace function public.studylab_guardian_history()
-returns jsonb language plpgsql security definer set search_path='' as $
+returns jsonb language plpgsql security definer set search_path='' as $$
 declare result jsonb;
 begin
  if (select auth.uid()) is null or not exists(select 1 from auth.users u where u.id=(select auth.uid()) and u.raw_app_meta_data->>'role'='admin') then
@@ -101,12 +101,13 @@ begin
  select coalesce(jsonb_agg(to_jsonb(e) order by e.created_at desc),'[]'::jsonb) into result
  from (select created_at,surface,outcome,reason from studylab_private.guardian_events where created_at>=now()-interval '30 days' order by created_at desc limit 50) e;
  return result;
-end $;
+end $$;
 revoke all on function public.studylab_guardian_history() from public,anon,authenticated;
 grant execute on function public.studylab_guardian_history() to authenticated;
 
 create or replace function studylab_private.guardian_check()
 returns trigger language plpgsql security definer set search_path='' as $$
+<<gate>>
 declare cfg jsonb; surface text; body text; actor uuid; recent integer; threshold integer;
 begin
   select settings into cfg from studylab_private.guardian_settings where singleton;
@@ -141,12 +142,12 @@ begin
     end if;
     if actor is null then raise exception 'Guardian: sign in before publishing.' using errcode='23514'; end if;
     delete from studylab_private.guardian_permits
-    where guardian_permits.actor=guardian_check.actor and guardian_permits.surface=guardian_check.surface
+    where guardian_permits.actor=gate.actor and guardian_permits.surface=gate.surface
     and fingerprint=sha256(convert_to(btrim(coalesce(body,'')),'UTF8')) and expires_at>now();
     if not found then raise exception 'Guardian: moderation approval required. Refresh StudyLab and try again.' using errcode='23514'; end if;
   end if;
   return new;
-end $;
+end $$;
 revoke all on function studylab_private.guardian_check() from public, anon, authenticated;
 create index if not exists guardian_chat_actor_time_idx on public.studylab_chat_messages(user_id,created_at desc);
 create index if not exists guardian_posts_actor_time_idx on public.studylab_social_posts(author_id,created_at desc);
