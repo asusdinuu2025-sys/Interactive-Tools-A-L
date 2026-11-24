@@ -639,6 +639,7 @@
   window.StudyLabAdminAPI = Object.freeze({
     guardianPreview,
     guardianSettings,
+    guardianPostStatus:async()=>{requireAccess();if(preview||connectedPreview)throw Error("Live status is unavailable in preview.");return rpc("studylab_guardian_post_status");},
     guardianChatMode:async(value)=>{requireAccess();if(preview||connectedPreview)throw Error("Preview cannot change live chat mode.");return value===undefined?rpc("studylab_guardian_chat_mode"):rpc("studylab_guardian_set_chat_mode",{p_mode:value});},
     guardianWords:async(value)=>{requireAccess();if(preview||connectedPreview)throw Error("Preview cannot change live word settings.");return rpc("studylab_guardian_words",value?{p_enabled:value.enabled,p_words:value.words,p_version:value.version}:{});},
     guardianHistory: async()=>{requireAccess();return rpc("studylab_guardian_history");},

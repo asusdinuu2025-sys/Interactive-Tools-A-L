@@ -1,17 +1,17 @@
 import { createClient } from "npm:@supabase/supabase-js@2.99.2";
 const url=Deno.env.get("SUPABASE_URL")||"", serviceKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")||"";
-const secret=Deno.env.get("STUDYLAB_GUARDIAN_POST_WORKER_TOKEN")||"", apiKey=Deno.env.get("STUDYLAB_GUARDIAN_OPENAI_KEY")||"";
-const eq=async(a:string,b:string)=>{
- const enc=new TextEncoder();
- const [x,y]=await Promise.all([crypto.subtle.digest("SHA-256",enc.encode(a)),crypto.subtle.digest("SHA-256",enc.encode(b))]);
- const aa=new Uint8Array(x),bb=new Uint8Array(y);let d=0;for(let i=0;i<aa.length;i++)d|=aa[i]^bb[i];return d===0;
-};
+const apiKey=Deno.env.get("STUDYLAB_GUARDIAN_OPENAI_KEY")||"";
 Deno.serve(async(req)=>{
- if(req.method!=="POST"||!secret||secret.length<32||!await eq(req.headers.get("x-guardian-worker")||"",secret))return new Response(null,{status:401});
- if(!url||!serviceKey||!apiKey)return new Response(null,{status:503});
+ const token=req.headers.get("x-guardian-worker")||"";
+ if(req.method!=="POST"||! /^[a-f0-9]{64}$/.test(token))return new Response(null,{status:401});
+ if(!url||!serviceKey)return new Response(null,{status:503});
  const db=createClient(url,serviceKey,{auth:{persistSession:false,autoRefreshToken:false}});
+ // Only a fresh database-issued one-use ticket may invoke the worker.
+ const auth=await db.rpc("studylab_guardian_post_authorize",{p_token:token});
+ if(auth.error||auth.data!==true)return new Response(null,{status:401});
  const health=async(ok:boolean)=>{const r=await db.rpc("studylab_guardian_post_health",{p_ok:ok});if(r.error)throw Error("health unavailable");};
  try{
+  if(!apiKey)throw Error("provider unavailable");
   const result=await db.rpc("studylab_guardian_post_claim");
   if(result.error||!Array.isArray(result.data))throw Error("queue unavailable");
   const jobs=result.data as {id:string,lease:string,text:string}[];
