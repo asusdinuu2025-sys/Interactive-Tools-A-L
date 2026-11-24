@@ -81,19 +81,20 @@
     }catch(err){status(msg,err.message,"warn");}},true);
     save.disabled=loadFailed;actions.append(msg,save);controls.append(actions);
     if(loadFailed)status(msg,"Server settings unavailable. You can still use the test lab.","warn");
-    const chatModeCard=card("Chat moderation mode","Choose how text messages appear to their sender. Both modes screen before public delivery.","chat");
-    const modeSelect=e("select");for(const [value,label] of [["instant","Instant · pending for sender"],["strict","Strict · wait before displaying"]]){const opt=e("option",label);opt.value=value;modeSelect.append(opt);}
+    const chatModeCard=card("Chat moderation mode","Choose when text messages appear. Instant Private is the recommended default.","chat");
+    const modeSelect=e("select");for(const [value,label] of [["instant","Instant Private · pending for sender"],["strict","Strict · wait before displaying"],["public","Instant Public · post-check (experimental)"]]){const opt=e("option",label);opt.value=value;modeSelect.append(opt);}
     const modeFeedback=e("p","Loading chat delivery preference…","slg-feedback");modeFeedback.setAttribute("role","status");
     modeSelect.disabled=true;
+    const publicModeNote=e("p","Instant Public is experimental. Other students may see or capture content before removal. Live activation requires a verified moderation worker. Preview selection does not change live delivery.","slg-note");
     const chatModeSave=btn("Save chat mode",async()=>{try{
-      if(live){if(!confirm("Save this chat delivery mode for all students?"))return;modeSelect.value=await api.guardianChatMode(modeSelect.value);}
+      if(live){if(!confirm(modeSelect.value==="public"?"Enable experimental public delivery? Other students may see content before removal. Use Instant Private for the safest experience.":"Save this chat delivery mode for all students?"))return;modeSelect.value=await api.guardianChatMode(modeSelect.value);}
       else localStorage.setItem("studylab-guardian-chat-mode-preview",modeSelect.value);
       status(modeFeedback,live?"Saved. New chat sessions and reopened chat panels will use this mode.":"Preview preference saved on this device.","ok");
     }catch(err){status(modeFeedback,err.message,"warn");}},true);
     chatModeSave.disabled=true;
     const chatModeActions=e("div",undefined,"slg-save");chatModeActions.append(modeFeedback,chatModeSave);
-    chatModeCard.append(field("Text chat delivery",modeSelect),e("p","Instant mode displays a private pending bubble while checking safety. Attachments and edits still use the existing send flow. Social posts and comments are unchanged.","slg-note"),chatModeActions);wrap.append(chatModeCard);
-    try{const current=live?await api.guardianChatMode():localStorage.getItem("studylab-guardian-chat-mode-preview")||"instant";modeSelect.value=current==="strict"?"strict":"instant";modeSelect.disabled=false;chatModeSave.disabled=false;status(modeFeedback,live?"Live preference":"Preview preference");}
+    chatModeCard.append(field("Text chat delivery",modeSelect),e("p","Instant Private screens before public delivery. Instant Public is reserved for eligible new plain-text messages; everything else keeps pre-publication screening. Attachments, edits and Social are unchanged.","slg-note"),publicModeNote,chatModeActions);wrap.append(chatModeCard);
+    try{const current=live?await api.guardianChatMode():localStorage.getItem("studylab-guardian-chat-mode-preview")||"instant";modeSelect.value=["strict","instant","public"].includes(current)?current:"instant";modeSelect.disabled=false;chatModeSave.disabled=false;status(modeFeedback,live?"Live preference":"Preview preference");}
     catch(err){status(modeFeedback,"Chat mode settings unavailable. Existing protection remains active.","warn");}
     const wordEngine=window.StudyLabGuardianWords, wordKey="studylab-guardian-words-preview-v1";
     const wordsCard=card("Custom word filter","Add English, Singlish or Sinhala words and phrases that AI may miss.","chat");

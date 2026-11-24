@@ -241,7 +241,7 @@
   let replyTarget = null;
   let editTarget = null;
   let busyMessageAction = false;
-  let instantChatMode=true, queueRunning=false, lastQueueWrite=0;
+  let instantChatMode=true, publicChatMode=false, queueRunning=false, lastQueueWrite=0;
   const pendingTextQueue=[], pendingTextCards=new Map();
   const pendingTextHost=document.createElement("div");
   pendingTextHost.className="study-chat-pending-text-host";
@@ -1454,7 +1454,7 @@
   async function loadInstantChatMode(){
     try{
       const r=await client.rpc("studylab_guardian_chat_mode");
-      if(!r.error&&["instant","strict"].includes(r.data)){instantChatMode=r.data==="instant";updateComposer();}
+      if(!r.error&&["instant","strict","public"].includes(r.data)){instantChatMode=r.data!=="strict";publicChatMode=r.data==="public";updateComposer();}
     }catch(_){}
   }
   function queueText(message,now){
@@ -1480,12 +1480,24 @@
           // Space successful writes to respect the existing DB chat rate limit.
           const wait=Math.max(0,CONFIG.rateLimitMs+50-(Date.now()-lastQueueWrite));
           if(wait)await new Promise(resolve=>window.setTimeout(resolve,wait));
-          await window.StudyLabGuardianCheck(item.client,"chat",item.message);
-          if(client!==item.client||userId!==item.actor)throw Error("Guardian: chat account changed. Reload before sending.");
           const values={id:item.id,message:item.message,session_id:sessionKey,user_id:item.actor,nickname:item.nickname,image_paths:[]};
           if(item.replyTo&&messagesById.has(item.replyTo))values.reply_to=item.replyTo;
-          const {error}=await writeChatMessage(()=>item.client.from(CONFIG.table).insert(values));
-          if(error)throw error;
+          // Only the server can authorize experimental delivery. A stale preference
+          // or unavailable worker must fall back to the ordinary preflight.
+          let result;
+          const sameAccount=()=>{if(client!==item.client||userId!==item.actor)throw Error("Guardian: chat account changed. Reload before sending.");};
+          if(publicChatMode && typeof window.StudyLabGuardianNotice==="function"){
+            window.StudyLabGuardianNotice();
+            sameAccount();
+            result=await writeChatMessage(()=>item.client.from(CONFIG.table).insert(values));
+          }
+          if(!result || (result.error?.code==="23514"&&String(result.error.message||"").startsWith("Guardian: moderation approval required."))){
+            updatePendingCard(item,"pending","Checking safety · only you can see this");
+            await window.StudyLabGuardianCheck(item.client,"chat",item.message);
+            sameAccount();
+            result=await writeChatMessage(()=>item.client.from(CONFIG.table).insert(values));
+          }
+          if(result.error)throw result.error;
           lastQueueWrite=Date.now();
           window.setTimeout(updateComposer,CONFIG.rateLimitMs+20);
           clearPendingCard(item.id);
