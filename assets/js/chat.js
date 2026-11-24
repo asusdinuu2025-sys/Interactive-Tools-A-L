@@ -776,6 +776,7 @@
     timestamp.textContent=formatTime(row.created_at)+(row.edited_at?" · edited":"");
     footer.append(footerActions,timestamp);
     article.replaceChildren(header,body,usedReactions,reactions,footer);
+    if(safeUuid(row.user_id))window.StudyLabPlus?.decorateName?.(name,row.user_id);
 
     if(!existing){
       if(animate && !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches)
