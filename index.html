@@ -1259,7 +1259,7 @@ html[data-theme="light"].sl-booting::after { border-top-color: #087da0; }
 
   <link rel="stylesheet" href="assets/css/live-layer.css?v=pr102-year-choice-v1">
   <link rel="stylesheet" href="assets/css/study-room.css?v=20261027-letter-outline-v4">
-  <link rel="stylesheet" href="assets/css/chat.css?v=pr102-attachment-menu-v3">
+  <link rel="stylesheet" href="assets/css/chat.css?v=pr102-attachment-menu-v3-instant-v1-notify-v6">
 
   <link rel="stylesheet" href="assets/css/feedback.css">
 
@@ -1815,7 +1815,7 @@ html[data-theme="light"].sl-booting::after { border-top-color: #087da0; }
   <link rel="stylesheet" href="assets/css/home-final-light-polish.css?v=2">
   <link rel="stylesheet" href="assets/css/home-ambient-final.css?v=2">
   <link rel="stylesheet" href="assets/css/home-dashboard-finish.css?v=3">
-  <link rel="stylesheet" href="assets/css/studylab-announcements.css?v=20261116-custom-banners-v4">
+  <link rel="stylesheet" href="assets/css/studylab-announcements.css?v=20261116-custom-banners-v4-design-v5">
   <link rel="stylesheet" href="assets/css/home-cta-glass.css?v=1">
   <link rel="stylesheet" href="assets/css/studylab-global-search.css?v=20261114-v1">
   <link rel="stylesheet" href="assets/css/studylab-name-mark.css?v=20261114-selected-v1">
@@ -1892,6 +1892,9 @@ html[data-theme="light"].sl-booting::after { border-top-color: #087da0; }
   <link rel="stylesheet" href="assets/css/studylab-popups.css?v=pr109-persistent-v1" />
   <link rel="stylesheet" href="assets/css/studylab-pet.css" data-sl-pet-style>
   <link rel="stylesheet" href="assets/css/page-transitions.css?v=pr108-sharp-v1">
+  <link rel="stylesheet" href="assets/css/home-responsive-navigation.css?v=1">
+  <link rel="stylesheet" href="assets/css/studylab-workspace.css?v=workspace-v1-activity-v2">
+  <link rel="stylesheet" href="assets/css/studylab-social-upgrade.css?v=5">
 </head>
 
 
@@ -3432,17 +3435,18 @@ html[data-theme="light"].sl-booting::after { border-top-color: #087da0; }
   <script src="assets/js/studylab-account.js?v=20261115-bio35-v4"></script>
   <script src="assets/js/studylab-avatar.js?v=20261116-manual-crop-v1"></script>
   <script src="assets/js/studylab-follow.js?v=20261114-follow-v1"></script>
-  <script src="assets/js/studylab-name-mark.js?v=20261114-selected-v1"></script>
-  <script src="assets/js/studylab-profile-view.js?v=20261116-manual-crop-v1"></script>
+  <script src="assets/js/studylab-name-mark.js?v=20261114-selected-v1-own-v1"></script>
+  <script src="assets/js/studylab-profile-view.js?v=20261116-manual-crop-v1-own-v1"></script>
   <script src="assets/js/studylab-auth-gateway.js?v=20261116-home-entry-gate-v1"></script>
   <script src="assets/js/profile.js?v=20261116-header-name-v3"></script>
   <script src="assets/js/main.js?v=20261117-smooth-load"></script>
   <script src="assets/js/studylab-global-search.js?v=pr102-guided-v1"></script>
-  <script src="assets/js/study-dashboard.js?v=20261114-global-search-v1"></script>
+  <script src="assets/js/studylab-workspace.js?v=workspace-v1-activity-v2"></script>
+  <script src="assets/js/study-dashboard.js?v=20261114-global-search-v1-workspace-v1-activity-v2"></script>
   <script src="assets/js/student-milestone.js"></script>
-  <script src="assets/js/live-layer.js?v=pr102-year-choice-v1"></script>
-  <script src="assets/js/studylab-guardian-check.js?v=live-v1"></script>
-  <script src="assets/js/chat.js?v=guardian-live-v1"></script>
+  <script src="assets/js/live-layer.js?v=pr102-year-choice-v1-workspace-v1-activity-v2"></script>
+  <script src="assets/js/studylab-guardian-check.js?v=live-v1-post-preview-dialog-v3"></script>
+  <script src="assets/js/chat.js?v=guardian-live-v1-instant-v1-post-preview-notify-v6"></script>
   <script src="assets/js/feedback.js"></script>
   <script src="assets/js/loader-splash.js?v=pr108-white-intro-v1"></script>
 
@@ -3550,13 +3554,15 @@ html[data-theme="light"].sl-booting::after { border-top-color: #087da0; }
 </style>
 <script src="assets/js/home-card-glow.js?v=20261117-smooth-load" defer></script>
   <script src="assets/js/pwa.js?v=1.0.1"></script>
-  <script src="assets/js/feed-drawer.js?v=21" defer></script>
-  <script src="assets/js/studylab-social-follow-ui.js?v=20261114-follow-v1" defer></script>
-  <script src="assets/js/home-sidebar.js?v=12" defer></script>
+  <script src="assets/js/feed-drawer.js?v=21-social-v2" defer></script>
+  <script src="assets/js/studylab-social-tools.js?v=social-v3" defer></script>
+  <script src="assets/js/studylab-social-own-profile.js?v=3" defer></script>
+  <script src="assets/js/studylab-social-follow-ui.js?v=20261114-follow-v1-social-v1" defer></script>
+  <script src="assets/js/home-sidebar.js?v=13-responsive" defer></script>
   <script src="assets/js/home-popup-clearance.js?v=1" defer></script>
   <script src="assets/js/home-panels.js?v=20261115-room-live-count-v1" defer></script>
-  <script src="assets/js/studylab-social.js?v=guardian-live-v1" defer></script>
-  <script src="assets/js/studylab-announcements.js?v=20261116-custom-banners-v4" defer></script>
+  <script src="assets/js/studylab-social.js?v=guardian-live-v1-social-v2" defer></script>
+  <script src="assets/js/studylab-announcements.js?v=20261116-custom-banners-v4-design-v5-social-v1" defer></script>
 
   <script>
     /* Phone-only: keep the greeting below the real, post-load header height. */

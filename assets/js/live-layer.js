@@ -169,6 +169,7 @@
             await channel.track({
               user_id: user.id,
               page: location.pathname,
+              device_type: window.StudyLabWorkspace?.deviceType(navigator)||"unknown",
               online_at: new Date().toISOString()
             });
             refreshPresence();

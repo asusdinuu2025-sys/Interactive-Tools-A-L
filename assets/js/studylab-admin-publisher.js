@@ -18,6 +18,12 @@ const publishGlyphs=Object.freeze({
  "lesson-pack":'<path d="M4.5 19V5a2 2 0 0 1 2-2H20v14H6.5a2 2 0 0 0 0 4H20v-4"/><path d="M9 8h7M9 12h5"/>',
  custom:'<rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.8"/>'
 });
+function reusableImage(value){
+ const raw=String(value||"").trim();if(!raw)return "";
+ const base="https://zpvatyxdbshjuqgtexzw.supabase.co/storage/v1/object/public/studylab-admin-media/";
+ if(!raw.startsWith(base)||!/^uploads\/[a-zA-Z0-9_-]+\.(?:jpg|jpeg|png|webp)$/i.test(raw.slice(base.length)))throw Error("Use a public JPG, PNG or WebP link copied from the StudyLab Admin Media library.");
+ return raw;
+}
 function publishIcon(kind){
  const wrap=el("span",null,"sladmin-publish-icon");
  const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
@@ -222,6 +228,10 @@ function mount(host,api,rows,onRefresh){
      const avatarFile=avatar.querySelector("input");
      avatarFile.accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp";
      fields.append(avatar);
+     const reuse=labeled("Reuse Supabase media link (optional)","url","telegram_avatar_url","",2048);
+     const reuseInput=reuse.querySelector("input");reuseInput.placeholder="Paste a public image URL from Media library";
+     fields.append(reuse,el("p","Reuse an existing image without uploading a duplicate. Existing shared files are retained when a card changes.","sladmin-publish-note"));
+     if(draft?.image&&draft.image.includes("/storage/v1/object/public/studylab-admin-media/"))reuseInput.value=draft.image;
      const avatarStatus=el("p",null,"sladmin-publish-file-status sladmin-publish-avatar-status");
      function describeAvatar(){
        avatarStatus.replaceChildren();
@@ -231,6 +241,10 @@ function mount(host,api,rows,onRefresh){
        else if(form.elements.remove_telegram_avatar?.checked)
          avatarStatus.append(document.createTextNode(
            "Remove picture · Original Telegram icon will be displayed."));
+       else if(reuseInput.value.trim()){
+         try{const thumb=el("img");thumb.src=reusableImage(reuseInput.value);thumb.alt="";thumb.className="sladmin-publish-avatar-thumbnail";thumb.addEventListener("error",()=>thumb.remove());avatarStatus.append(thumb,document.createTextNode("Reuse image · No new upload"));}
+         catch(e){avatarStatus.textContent=e.message;}
+       }
        else if(draft?.image){
          const thumb=el("img");thumb.src=draft.image;thumb.alt="";
          thumb.className="sladmin-publish-avatar-thumbnail";
@@ -246,12 +260,14 @@ function mount(host,api,rows,onRefresh){
        const tick=el("input");tick.type="checkbox";tick.name="remove_telegram_avatar";
        remove.append(tick,document.createTextNode("Remove current group picture"));
        tick.addEventListener("change",()=>{
-         if(tick.checked)avatarFile.value="";
+         if(tick.checked){avatarFile.value="";reuseInput.value="";}
          describeAvatar();
        });
        fields.append(remove);
      }
+     reuseInput.addEventListener("input",()=>{if(reuseInput.value.trim()){avatarFile.value="";if(form.elements.remove_telegram_avatar)form.elements.remove_telegram_avatar.checked=false;}describeAvatar();});
      avatarFile.addEventListener("change",()=>{
+       if(avatarFile.files?.[0])reuseInput.value="";
        if(avatarFile.files?.[0] && form.elements.remove_telegram_avatar)
          form.elements.remove_telegram_avatar.checked=false;
        describeAvatar();
@@ -358,6 +374,8 @@ function mount(host,api,rows,onRefresh){
        info.publisher=String(d.get("publisher")||"").trim().slice(0,100);
        info.avatar_file_path=draft?.avatar_file_path||"";
        info.avatar_file_name=draft?.avatar_file_name||"";
+       const reuse=String(d.get("telegram_avatar_url")||"").trim();
+       if(reuse&&reuse!==draft?.image){info.image=reusableImage(reuse);info.avatar_file_path="";info.avatar_file_name="Reused media";}
        if(form.elements.remove_telegram_avatar?.checked){
          info.image="";info.avatar_file_path="";info.avatar_file_name="";
        }
@@ -477,13 +495,11 @@ function mount(host,api,rows,onRefresh){
           draft.html_path!==uploadedSimulation.path)
          api.removeSimulation(draft.html_path)
            .catch(e=>console.warn("Old simulation cleanup:",e));
-       if(kind==="telegram" && draft?.avatar_file_path &&
-          draft.avatar_file_path!==info.avatar_file_path)
-         api.removeMedia(draft.avatar_file_path)
-           .catch(e=>console.warn("Old Telegram picture cleanup:",e));
+       // Telegram artwork is reusable across cards and announcements.
+       // Never automatically delete a previous image after editing or removing a card.
        if(kind==="lesson-pack" && uploadedMedia.length){
-         for(const [before,after] of [[draft?.pack_file_path,info.pack_file_path],
-           [draft?.cover_file_path,info.cover_file_path]])
+         // Covers are shared media too. PDF replacement retains its previous cleanup.
+         for(const [before,after] of [[draft?.pack_file_path,info.pack_file_path]])
            if(before && before!==after)
              api.removeMedia(before)
                .catch(e=>console.warn("Old lesson file cleanup:",e));

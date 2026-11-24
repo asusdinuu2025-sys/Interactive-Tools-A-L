@@ -58,7 +58,7 @@ for(const page of ["index.html","study-room.html"]){
 }
 assert.match(social,/StudyLabAvatar\?\.decorate\(avatar,post\.author_id\)/);
 assert.match(social,/StudyLabAvatar\?\.decorate\(commentAvatar,comment\.author_id\)/);
-assert.match(social,/StudyLabAvatar\?\.decorate\(avatar,member\.author_id\)/);
+// Community Profiles was replaced by admin-curated resources. Post/comment avatars remain required.
 assert.match(room,/StudyLabAvatar\?\.decorate\(avatar,id\)/);
 assert.match(css,/sl-avatar-has-image > svg/);
 assert.match(css,/slr-crown-avatar::before/);

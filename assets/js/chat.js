@@ -59,7 +59,7 @@
               <span data-chat-status>Connecting…</span>
             </div>
           </div>
-          <div class="study-chat-head-actions">
+          <div class="study-chat-head-actions"><button type="button" class="study-chat-expand sl-chat-mute" data-chat-mute aria-pressed="false" aria-label="Enable chat notifications" title="Enable chat notifications"></button>
             <button type="button" class="study-chat-expand" data-chat-expand
               aria-label="Expand chat window" aria-pressed="false" title="Expand chat">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -234,6 +234,41 @@
   let isExpanded = false;
   let isChatModerator = false;
   let unreadCount = 0;
+  const muteButton=root.querySelector("[data-chat-mute]");
+  let notificationState={enabled:false,seen:0}, notificationUser="", toastQueue=[],toastTimers=new Map(),previewPending=new Map(),previewTimer=0,previewEpoch=0,previewBusy=false;
+  const toastHost=document.createElement("div");toastHost.className="sl-chat-toasts";toastHost.setAttribute("aria-label","Chat notifications");document.body.append(toastHost);
+  const notifyKey=()=>"studylab-chat-notifications-v1:"+notificationUser;
+  function saveNotifications(){if(notificationUser)try{localStorage.setItem(notifyKey(),JSON.stringify(notificationState));}catch(_){}}
+  function clearToasts(){previewEpoch++;clearTimeout(previewTimer);previewTimer=0;previewPending.clear();toastQueue=[];for(const timer of toastTimers.values())clearTimeout(timer);toastTimers.clear();toastHost.replaceChildren();}
+  function paintMute(){if(!muteButton)return;const enabled=notificationState.enabled;muteButton.setAttribute("aria-pressed",String(enabled));muteButton.title=enabled?"Mute chat notifications":"Enable chat notifications";muteButton.setAttribute("aria-label",muteButton.title);muteButton.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/>'+(!enabled?'<path d="M3 3l18 18"/>':'')+'</svg>';}
+  function readNotificationState(){notificationUser=userId||"";notificationState={enabled:false,seen:0};try{const v=JSON.parse(localStorage.getItem(notifyKey()));if(v)notificationState={enabled:v.enabled===true,seen:Number(v.seen)||0};}catch(_){}paintMute();}
+  function markChatSeen(){const timestamps=[...messagesById.values()].map(r=>Date.parse(r.created_at)).filter(Number.isFinite);notificationState.seen=Math.max(notificationState.seen,...timestamps, timestamps.length?0:(notificationState.seen||Date.now()));saveNotifications();setUnread(0);clearToasts();}
+  function reconcileUnread(rows){if(!notificationState.enabled||isOpen&&!document.hidden){markChatSeen();return;}setUnread(rows.filter(r=>r.user_id!==userId&&Date.parse(r.created_at)>notificationState.seen).length);}
+  function pumpToasts(){if(!notificationState.enabled||document.hidden||isOpen||document.documentElement.dataset.slFocus==="on"){clearToasts();return;}
+    while(toastTimers.size<2&&toastQueue.length){const row=toastQueue.shift(),item=document.createElement("button");item.type="button";item.className="sl-chat-toast";item.dataset.chatToastId=String(row.id);const name=document.createElement("strong"),body=document.createElement("span");name.textContent=String(row.nickname||"Student");body.textContent=String(row.message||"New attachment");item.append(name,body);item.onclick=()=>setOpen(true);toastHost.append(item);const timer=setTimeout(()=>{toastTimers.delete(row.id);item.remove();pumpToasts();},3000);toastTimers.set(row.id,timer);}
+  }
+  function canPreview(){return notificationState.enabled&&!document.hidden&&!isOpen&&document.documentElement.dataset.slFocus!=="on"&&window.StudyLabAccount?.getUser?.()?.id===notificationUser;}
+  function schedulePreview(delay=0){if(previewTimer||previewBusy||!previewPending.size||!canPreview())return;previewTimer=setTimeout(()=>{previewTimer=0;void flushPreviews();},delay);}
+  async function flushPreviews(){
+    if(!canPreview()||!client){clearToasts();return;}
+    if(previewBusy)return;previewBusy=true;const epoch=previewEpoch;
+    try{
+      const now=Date.now();for(const [id,expiry] of previewPending)if(expiry<=now)previewPending.delete(id);
+      const ids=[...previewPending.keys()].slice(0,20);if(!ids.length)return;
+      const r=await client.rpc("studylab_chat_notification_previews",{p_ids:ids});
+      if(epoch!==previewEpoch||!canPreview()||r.error||!Array.isArray(r.data))return;
+      const safe=new Map(r.data.map(row=>[row.id,row]));
+      for(const id of ids){const row=safe.get(id);if(!row||!previewPending.has(id)||!messagesById.has(id))continue;previewPending.delete(id);if(toastQueue.length<20)toastQueue.push(row);}
+      pumpToasts();
+    }catch(_){/* A missing or interrupted approval check never exposes unchecked text. */}
+    finally{previewBusy=false;schedulePreview(1000);}
+  }
+  function notifyIncoming(row){if(!notificationState.enabled||row.user_id===userId||window.StudyLabAccount?.getUser?.()?.id!==notificationUser)return;if(isOpen&&!document.hidden){markChatSeen();return;}setUnread(unreadCount+1);if(canPreview()&&previewPending.size<20){previewPending.set(row.id,Date.now()+15000);schedulePreview();}}
+  paintMute();
+  muteButton?.addEventListener("click",()=>{if(!notificationUser)return;notificationState.enabled=!notificationState.enabled;markChatSeen();paintMute();});
+  window.addEventListener("storage",e=>{if(notificationUser&&e.key===notifyKey()){readNotificationState();clearToasts();reconcileUnread([...messagesById.values()]);}});
+  window.addEventListener("studylab-workspace-settings",()=>{if(document.documentElement.dataset.slFocus==="on")clearToasts();});
+  document.addEventListener("visibilitychange",()=>{clearToasts();if(!document.hidden){if(isOpen)markChatSeen();else if(client)void syncChatSnapshot();}});
   let lastSentAt = 0;
   let messagesById = new Map();
   let profilesById = new Map();
@@ -241,6 +276,12 @@
   let replyTarget = null;
   let editTarget = null;
   let busyMessageAction = false;
+  let instantChatMode=true, publicChatMode=false, queueRunning=false, lastQueueWrite=0;
+  const pendingTextQueue=[], pendingTextCards=new Map();
+  const pendingTextHost=document.createElement("div");
+  pendingTextHost.className="study-chat-pending-text-host";
+  pendingTextHost.setAttribute("aria-label","Your pending messages");
+  const MAX_TEXT_QUEUE=4;
   let reactionSyncTimer = 0;
   const reactionRefreshIds = new Set();
   const REACTIONS = ["👍","😂","🔥","❤️"];
@@ -292,6 +333,7 @@
     if (!user?.id) throw new Error("StudyLab student account unavailable.");
 
     userId = user.id;
+    readNotificationState();
 
     const profile = await account.getProfile?.();
     if (profile?.display_name) {
@@ -325,14 +367,14 @@
 
     if (!unread) return;
 
-    if (unreadCount === 0) {
+    if (!notificationState.enabled || unreadCount === 0) {
       unread.textContent = "";
       unread.hidden = true;
       unread.removeAttribute("aria-label");
       return;
     }
 
-    unread.textContent = unreadCount > 9 ? "9+" : String(unreadCount);
+    unread.textContent = unreadCount > 99 ? "99+" : String(unreadCount);
     unread.setAttribute(
       "aria-label",
       unreadCount === 1 ? "1 unread message" : unreadCount + " unread messages"
@@ -484,6 +526,7 @@
     const existing=[...list.querySelectorAll(".study-chat-message")]
       .find(node=>node.dataset.messageId===row.id);
     messagesById.set(row.id,row);
+    if(row.user_id===userId&&pendingTextCards.has(row.id))clearPendingCard(row.id);
     clearEmptyState();
 
     const article=existing||document.createElement("article");
@@ -749,6 +792,7 @@
     }
     // Dates are derived from actual message timestamps, not stored separately.
     if(!existing)refreshDateSeparators();
+    placePendingText();
   }
 
   async function loadProfiles() {
@@ -845,7 +889,8 @@
     }
   }
   function deleteMessageLocally(id) {
-    messagesById.delete(id);reactionsByMessage.delete(id);
+    previewPending.delete(id);toastQueue=toastQueue.filter(row=>row.id!==id);const timer=toastTimers.get(id);if(timer){clearTimeout(timer);toastTimers.delete(id);toastHost.querySelectorAll("[data-chat-toast-id]").forEach(node=>{if(node.dataset.chatToastId===String(id))node.remove();});pumpToasts();}
+    messagesById.delete(id);reactionsByMessage.delete(id);reconcileUnread([...messagesById.values()]);
     for(const element of list.querySelectorAll(".study-chat-message")){
       if(element.dataset.messageId!==id)continue;
       if(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches)element.remove();
@@ -908,11 +953,13 @@
       empty.className = "study-chat-empty";
       empty.textContent = "No messages yet. Start a study-related conversation.";
       list.appendChild(empty);
+      placePendingText();
       return;
     }
 
     rows.slice(-CONFIG.maxMessages).forEach(renderMessage);
     refreshDateSeparators();
+    placePendingText();
     scrollToBottom(true);
   }
 
@@ -940,7 +987,10 @@
         length > CONFIG.maxLength ||
         !client ||
         busyMessageAction ||
-        (!editTarget && Date.now() - lastSentAt < CONFIG.rateLimitMs);
+        (pendingTextQueue.length>0 && (!instantChatMode || Boolean(editTarget) || Boolean(pendingImages.length+pendingFiles.length))) ||
+        pendingTextQueue.length>=MAX_TEXT_QUEUE ||
+        (!editTarget && Date.now() - lastSentAt < CONFIG.rateLimitMs) ||
+        (!editTarget && (!instantChatMode||pendingImages.length||pendingFiles.length) && Date.now()-lastQueueWrite<CONFIG.rateLimitMs);
     }
   }
 
@@ -971,7 +1021,7 @@
       return;
     }
 
-    renderInitial((data || []).reverse());
+    const rows=(data||[]).reverse();renderInitial(rows);reconcileUnread(rows);
     // Separate, read-only student identity lookup: never expose private
     // student profile fields or require individual profile queries per bubble.
     loadProfiles();
@@ -1026,9 +1076,11 @@
           if(node)list.appendChild(node);
         }
         refreshDateSeparators();
+        placePendingText();
         if(nearBottom)scrollToBottom(true);
         else list.scrollTop=previousTop;
       }
+      reconcileUnread(rows);
       await loadProfiles();
       await loadReactions();
     }catch(error){console.warn("Chat catch-up failed:",error);}
@@ -1127,12 +1179,13 @@
           }
           const row=payload.new;
           if(!row?.id)return;
+          if(pendingTextCards.has(row.id)&&row.user_id===userId)clearPendingCard(row.id);
           const wasKnown=messagesById.has(row.id);
           const wasNearBottom=list &&
             list.scrollHeight-list.scrollTop-list.clientHeight<140;
           renderMessage(row,payload.eventType==="INSERT");
           if(payload.eventType==="INSERT"){
-            if(!isOpen && row.user_id!==userId)setUnread(unreadCount+1);
+            if(!wasKnown)notifyIncoming(row);
             if(wasNearBottom || row.session_id===sessionKey)scrollToBottom(true);
             loadProfiles();
           }else if(wasKnown)loadProfiles();
@@ -1400,6 +1453,104 @@
     return result;
   }
 
+  // Local-only outbox: never put pending content in the public message map or Realtime.
+  function placePendingText(){
+    if(!list)return;
+    if(pendingTextCards.size){if(list.lastElementChild!==pendingTextHost)list.appendChild(pendingTextHost);}
+    else pendingTextHost.remove();
+  }
+  function updatePendingCard(item,state,detail){
+    let card=pendingTextCards.get(item.id);
+    if(!card){
+      card=document.createElement("article");card.className="study-chat-local-pending";
+      card.dataset.localMessageId=item.id;
+      const name=document.createElement("strong");name.textContent="You";
+      const body=document.createElement("div");body.className="study-chat-local-text";body.textContent=item.message;
+      const meta=document.createElement("div");meta.className="study-chat-local-state";meta.setAttribute("role","status");
+      const actions=document.createElement("div");actions.className="study-chat-local-actions";
+      card.append(name,body,meta,actions);pendingTextCards.set(item.id,card);pendingTextHost.append(card);
+    }
+    card.dataset.state=state;
+    card.querySelector(".study-chat-local-state").textContent=detail;
+    const actions=card.querySelector(".study-chat-local-actions");actions.replaceChildren();
+    if(state==="failed"){
+      const revise=document.createElement("button");revise.type="button";revise.textContent="Edit draft";
+      revise.onclick=()=>{
+        if(input.value.trim()||editTarget||pendingImages.length||pendingFiles.length){chatFeedback("Finish your current draft first.",true);return;}
+        input.value=item.message;
+        if(item.replyTo&&messagesById.has(item.replyTo))replyTarget=item.replyTo;
+        clearPendingCard(item.id);showComposerContext();input.focus();updateComposer();
+      };
+      const dismiss=document.createElement("button");dismiss.type="button";dismiss.textContent="Dismiss";dismiss.onclick=()=>clearPendingCard(item.id);
+      actions.append(revise,dismiss);
+    }
+    placePendingText();
+  }
+  function clearPendingCard(id){
+    pendingTextCards.get(id)?.remove();pendingTextCards.delete(id);placePendingText();
+  }
+  async function loadInstantChatMode(){
+    try{
+      const r=await client.rpc("studylab_guardian_chat_mode");
+      if(!r.error&&["instant","strict","public"].includes(r.data)){instantChatMode=r.data!=="strict";publicChatMode=r.data==="public";updateComposer();}
+    }catch(_){}
+  }
+  function queueText(message,now){
+    const item={id:crypto.randomUUID(),message,replyTo:replyTarget,actor:userId,client,nickname:String(nickname||"Student").trim().slice(0,40)||"Student"};
+    pendingTextQueue.push(item);lastSentAt=now;
+    // Keep at most six failed local cards; never remove active queued messages.
+    const failed=[...pendingTextCards.entries()].filter(([,n])=>n.dataset.state==="failed");
+    if(failed.length>=6)clearPendingCard(failed[0][0]);
+    updatePendingCard(item,"pending","Waiting for safety check · only you can see this");
+    input.value="";clearComposerContext();publishTyping(false);chatFeedback("");updateComposer();scrollToBottom(true);
+    window.setTimeout(updateComposer,CONFIG.rateLimitMs+20);
+    void drainTextQueue();
+  }
+  async function drainTextQueue(){
+    if(queueRunning)return;queueRunning=true;
+    try{
+      while(pendingTextQueue.length){
+        const item=pendingTextQueue[0];
+        try{
+          if(client!==item.client||userId!==item.actor)throw Error("Guardian: chat account changed. Reload before sending.");
+          updatePendingCard(item,"pending","Checking safety · only you can see this");
+          // Approval is still required BEFORE the public INSERT. No unchecked content is broadcast.
+          // Space successful writes to respect the existing DB chat rate limit.
+          const wait=Math.max(0,CONFIG.rateLimitMs+50-(Date.now()-lastQueueWrite));
+          if(wait)await new Promise(resolve=>window.setTimeout(resolve,wait));
+          const values={id:item.id,message:item.message,session_id:sessionKey,user_id:item.actor,nickname:item.nickname,image_paths:[]};
+          if(item.replyTo&&messagesById.has(item.replyTo))values.reply_to=item.replyTo;
+          // Only the server can authorize experimental delivery. A stale preference
+          // or unavailable worker must fall back to the ordinary preflight.
+          let result;
+          const sameAccount=()=>{if(client!==item.client||userId!==item.actor)throw Error("Guardian: chat account changed. Reload before sending.");};
+          if(publicChatMode && typeof window.StudyLabGuardianNotice==="function"){
+            await window.StudyLabGuardianNotice();
+            sameAccount();
+            result=await writeChatMessage(()=>item.client.from(CONFIG.table).insert(values));
+          }
+          if(!result || (result.error?.code==="23514"&&String(result.error.message||"").startsWith("Guardian: moderation approval required."))){
+            updatePendingCard(item,"pending","Checking safety · only you can see this");
+            await window.StudyLabGuardianCheck(item.client,"chat",item.message);
+            sameAccount();
+            result=await writeChatMessage(()=>item.client.from(CONFIG.table).insert(values));
+          }
+          if(result.error)throw result.error;
+          lastQueueWrite=Date.now();
+          window.setTimeout(updateComposer,CONFIG.rateLimitMs+20);
+          clearPendingCard(item.id);
+          if(!messagesById.has(item.id)){messageEventSeq+=1;renderMessage({...values,created_at:new Date().toISOString()},true);}
+          scrollToBottom(true);
+        }catch(error){
+          // A lost acknowledgement can coincide with a successful Realtime INSERT.
+          // Never auto-retry an unknown write or create a duplicate message.
+          if(messagesById.has(item.id))clearPendingCard(item.id);
+          else updatePendingCard(item,"failed",messageFailure(error,false));
+        }finally{pendingTextQueue.shift();updateComposer();}
+      }
+    }finally{queueRunning=false;updateComposer();}
+  }
+
   async function sendMessage() {
     if(!client || !input || busyMessageAction)return;
     const message=input.value.trim();
@@ -1409,6 +1560,12 @@
     }
     const now=Date.now();
     if(!editTarget && now-lastSentAt<CONFIG.rateLimitMs)return;
+    if(pendingTextQueue.length>=MAX_TEXT_QUEUE)return;
+    if(instantChatMode&&!editTarget&&!pendingImages.length&&!pendingFiles.length){
+      queueText(message,now);return;
+    }
+    if(pendingTextQueue.length){chatFeedback("Your pending messages are being sent. Please try again shortly.",true);return;}
+    if(!editTarget&&Date.now()-lastQueueWrite<CONFIG.rateLimitMs){chatFeedback("Please wait a moment before sending another message.",true);return;}
     busyMessageAction=true;
     if(!editTarget)lastSentAt=now;
     updateComposer();chatFeedback("");
@@ -1453,6 +1610,7 @@
           if(replyTarget && messagesById.has(replyTarget))values.reply_to=replyTarget;
           ({error}=await writeChatMessage(() => client.from(CONFIG.table).insert(values)));
           if(error)throw error;
+          lastQueueWrite=Date.now();
           // A successful server insert must be visible to its author even if
           // the WebSocket channel is temporarily disconnected.
           if(!messagesById.has(id)){
@@ -1526,9 +1684,10 @@
       syncMobileChatHeaderOffset();
       if(!channelSubscribed)scheduleChatReconnect(true);
       if(client && Date.now()-lastChatSyncAt>30000)void syncChatSnapshot();
+      if(client)void loadInstantChatMode();
       window.dispatchEvent(new Event("studylab-chat-open"));
       closeQuickAccess();
-      setUnread(0);
+      markChatSeen();
       scrollToBottom(true);
       resizeMessageInput();
       refreshTyping();
@@ -1620,6 +1779,7 @@
     });
 
     document.addEventListener("click", event => {
+      if(event.target.closest?.(".sl-guardian-notice")||document.querySelector(".sl-guardian-notice[open]"))return;
       if (
         isOpen &&
         panel &&
@@ -1632,6 +1792,7 @@
     });
 
     document.addEventListener("keydown", event => {
+      if(document.querySelector(".sl-guardian-notice[open]"))return;
       if (event.key === "Escape" && isOpen) {
         if(attachmentsMenu && !attachmentsMenu.hidden){
           setAttachmentMenu(false);
@@ -1686,6 +1847,7 @@
         console.warn("Chat moderator permission lookup unavailable:",moderatorResult.error);
       }
       isChatModerator=moderatorResult.data===true;
+      void loadInstantChatMode();
       // The PR includes a migration but the production database is not
       // modified until the admin explicitly approves it. Feature detection
       // keeps all existing text/image chat working before that migration.

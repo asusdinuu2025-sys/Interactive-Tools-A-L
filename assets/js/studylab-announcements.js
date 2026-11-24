@@ -26,6 +26,50 @@
   bannerImage.alt="";bannerImage.loading="lazy";bannerImage.decoding="async";
   bannerImage.hidden=true;
   card.insertBefore(bannerImage,els.main);
+  // Shared media always points at this project's public admin image bucket.
+  const MEDIA_PREFIX="https://zpvatyxdbshjuqgtexzw.supabase.co/storage/v1/object/public/studylab-admin-media/";
+  function sharedImage(raw){
+    const value=text(raw);if(!value)return "";
+    return value.startsWith(MEDIA_PREFIX)&&/^uploads\/[a-zA-Z0-9_-]+\.(jpg|jpeg|png|webp)$/i.test(value.slice(MEDIA_PREFIX.length))?value:"";
+  }
+  const designDefaults={layout:"classic",preset:"",badge:"",icon:"arrow",color:"default",button_shape:"pill",button_size:"normal",media_url:"",dp_url:"",dp_shape:"square",dp_size:75,bg_fit:"cover",bg_x:50,bg_y:50,bg_zoom:100,dp_fit:"cover"};
+  const choices={layout:["classic","clean-text","profile","clean-image"],preset:["","telegram","resource","sponsored","custom"],icon:["arrow","telegram","download","book","link","play","chat","profile","none"],color:["default","blue","green","purple","orange","neutral"],button_shape:["pill","rounded"],button_size:["compact","normal","large"],dp_shape:["square","round"],bg_fit:["cover","contain"],dp_fit:["cover","contain"]};
+  const ranges={dp_size:[45,95],bg_x:[0,100],bg_y:[0,100],bg_zoom:[100,180]};
+  function normalizeDesign(raw){
+    const d={...designDefaults};
+    for(const [key,values] of Object.entries(choices))if(values.includes(raw?.[key]))d[key]=raw[key];
+    for(const [key,[min,max]] of Object.entries(ranges)){const n=Number(raw?.[key]);if(raw?.[key]!=null&&Number.isFinite(n))d[key]=Math.round(Math.min(max,Math.max(min,n)));}
+    d.badge=text(raw?.badge).slice(0,36);d.media_url=sharedImage(raw?.media_url);d.dp_url=sharedImage(raw?.dp_url);
+    return d;
+  }
+  function compactDesign(raw){const d=normalizeDesign(raw);return Object.fromEntries(Object.entries(d).filter(([k,v])=>v!==designDefaults[k]));}
+  function bannerUrl(item){return sharedImage(item?.design?.media_url)||imageUrl(item?.image_path)||(item?.design?.layout==="profile"?sharedImage(item.design.dp_url):"");}
+  const buttonIcons={
+    telegram:'<path d="m21 3-18 7 7 3 3 8 8-18ZM21 3 10 13"/>',
+    download:'<path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/>',
+    book:'<path d="M12 5v15M3 4h4a5 5 0 0 1 5 3 5 5 0 0 1 5-3h4v15h-4a5 5 0 0 0-5 2 5 5 0 0 0-5-2H3Z"/>',
+    link:'<path d="M10 13a4 4 0 0 0 6 0l4-4a4 4 0 0 0-6-6l-2 2m0 6a4 4 0 0 0-6 0l-4 4a4 4 0 0 0 6 6l2-2"/>',
+    play:'<path d="m8 4 13 8-13 8Z"/>',
+    chat:'<path d="M21 5H3v13h5l-3 4 9-4h7Z"/>',
+    profile:'<circle cx="12" cy="7" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/>'
+  };
+  const cta=els.action.closest(".sl-discovery-cta"),originalIcon=cta?.querySelector("svg")?.innerHTML||"";
+  const dp=document.createElement("img");dp.className="sl-ann-channel-dp";dp.alt="";dp.hidden=true;dp.decoding="async";els.main.append(dp);
+  function applyDesign(item){
+    const d=normalizeDesign(item.design),url=bannerUrl(item);
+    card.dataset.annLayout=d.layout;card.dataset.annColor=d.color;card.dataset.annShape=d.button_shape;card.dataset.annSize=d.button_size;
+    card.dataset.annDpShape=d.dp_shape;card.dataset.annZoom=String(d.bg_zoom);
+    bannerImage.style.objectFit=d.bg_fit;bannerImage.style.objectPosition=d.bg_x+"% "+d.bg_y+"%";
+    bannerImage.style.setProperty("--ann-bg-zoom",String(d.bg_zoom/100));
+    card.style.setProperty("--ann-dp-size",d.dp_size+"%");
+    card.style.setProperty("--ann-dp-factor",String(d.dp_size/100));
+    dp.style.objectFit=d.dp_fit;
+    const portrait=d.layout==="profile"?(d.dp_url||url):"";
+    dp.hidden=!portrait;if(portrait)dp.src=portrait;else dp.removeAttribute("src");
+    card.classList.toggle("has-ann-dp",Boolean(portrait));
+    if(d.badge)els.badge.textContent=d.badge;
+    const svg=cta?.querySelector("svg");if(svg){svg.hidden=d.icon==="none";svg.innerHTML=buttonIcons[d.icon]||originalIcon;}
+  }
   const art={
     profile:'<svg viewBox="0 0 230 150" fill="none" aria-hidden="true"><rect x="75" y="17" width="112" height="116" rx="25" stroke="currentColor" stroke-width="3" opacity=".9"/><circle cx="131" cy="65" r="20" stroke="currentColor" stroke-width="4"/><path d="M95 112c5-31 66-31 72 0" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><circle cx="61" cy="91" r="28" fill="#aa73ff" fill-opacity=".23" stroke="#ab8fff" stroke-width="3"/><path d="M51 103c1-16 19-16 20 0m-10-19a8 8 0 1 0 0 16" stroke="#d2b4ff" stroke-width="3"/><path d="m176 111 8 7 14-17" stroke="#3ce5e6" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     social:'<svg viewBox="0 0 230 150" fill="none" aria-hidden="true"><circle cx="90" cy="65" r="23" stroke="currentColor" stroke-width="4"/><circle cx="149" cy="58" r="19" stroke="#d6a3ff" stroke-width="4"/><path d="M44 122c3-34 87-34 91 0M127 106c15-16 47-12 53 9" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><path d="M187 18h-48a14 14 0 0 0-14 14v7a14 14 0 0 0 14 14h11l12 10V53h25a14 14 0 0 0 14-14v-7a14 14 0 0 0-14-14Z" stroke="#7ae7ff" stroke-width="3"/></svg>',
@@ -150,12 +194,13 @@
     els.action.textContent=item.cta_label||"Explore";
     els.main.setAttribute("aria-label",item.title+". "+(item.cta_label||"Explore"));
     els.art.innerHTML=item.art_key==="none"?"":(art[item.art_key]||art.announcement);
-    const url=imageUrl(item.image_path);
+    const url=bannerUrl(item);
+    applyDesign(item);
     bannerImage.hidden=!url;
     if(url)bannerImage.src=url;
     else bannerImage.removeAttribute("src");
     card.classList.toggle("has-uploaded-banner",Boolean(url));
-    card.classList.toggle("sl-discovery-image-only",item.display_mode==="image"&&Boolean(url));
+    card.classList.toggle("sl-discovery-image-only",(item.display_mode==="image"||item.design?.layout==="clean-image")&&Boolean(url));
     card.classList.toggle("sl-discovery-no-art",item.art_key==="none");
     card.dataset.discoveryKind=item.kind||"announcement";
     card.dataset.transitionStyle=item.transition_style||"fade";
@@ -221,12 +266,18 @@
   if("IntersectionObserver" in window){
     new IntersectionObserver(entries=>{visible=entries[0]?.isIntersecting!==false;},{threshold:.25}).observe(card);
   }
+  let designAvailable=true;
+  async function readBanners(){
+    const fields="id,kind,title,body,cta_label,target_path,art_key,image_path,sort_order,display_seconds,transition_style,display_mode,published,starts_at,ends_at,created_at";
+    const read=columns=>client.from("studylab_announcements").select(columns).order("sort_order",{ascending:true}).order("created_at",{ascending:true}).limit(150);
+    let result=await read(fields+",design");
+    if(result.error&&/design|42703|PGRST204/i.test(result.error.message+" "+result.error.code)){designAvailable=false;result=await read(fields);}
+    else if(!result.error)designAvailable=true;
+    return result;
+  }
   async function loadAnnouncements(){
     if(!client)return;
-    const {data,error}=await client.from("studylab_announcements")
-      .select("id,kind,title,body,cta_label,target_path,art_key,image_path,sort_order,display_seconds,transition_style,display_mode,published,starts_at,ends_at,created_at")
-      .order("sort_order",{ascending:true})
-      .order("created_at",{ascending:true}).limit(150);
+    const {data,error}=await readBanners();
     if(error){
       console.warn("Announcements unavailable:",error.message);
       return;
@@ -238,6 +289,7 @@
     stopTransition();
     current=Math.min(current,Math.max(0,items.length-1));
     render();scheduleRotation();
+    document.dispatchEvent(new Event("studylab:announcements-ready"));
   }
   function scheduleRotation(){
     if(rotation){clearTimeout(rotation);rotation=null;}
@@ -274,8 +326,8 @@
     const btn=document.createElement("button");btn.type="button";btn.className="sl-ann-card-action";
     btn.textContent=item.cta_label||"Explore";
     btn.addEventListener("click",()=>{historyDialog?.dlg.close();explore(item);});
-    if(item.image_path){
-      const src=imageUrl(item.image_path);
+    if(bannerUrl(item)){
+      const src=bannerUrl(item);
       if(src){
         const img=document.createElement("img");img.className="sl-ann-history-image";
         img.alt="";img.loading="lazy";img.src=src;box.append(img);
@@ -324,10 +376,11 @@
     return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);
   }
   async function convertImage(crop){
-    const canvas=document.createElement("canvas");canvas.width=W;canvas.height=H;
+    const canvas=document.createElement("canvas");canvas.width=crop.ratio===1?800:W;canvas.height=crop.ratio===1?800:H;
     const ctx=canvas.getContext("2d");
     if(!ctx)throw new Error("This browser cannot process images.");
-    ctx.drawImage(crop.image,crop.x,crop.y,crop.w,crop.h,0,0,W,H);
+    if(crop.ratio===1)ctx.drawImage(crop.image,crop.x,crop.y,crop.w,crop.h,0,0,800,800);
+    else ctx.drawImage(crop.image,crop.x,crop.y,crop.w,crop.h,0,0,W,H);
     const exportBlob=quality=>new Promise(done=>canvas.toBlob(done,"image/webp",quality));
     for(const q of [.9,.8,.7,.6,.5]){
       const result=await exportBlob(q);
@@ -345,21 +398,34 @@
     content.append(intro);
     const form=document.createElement("form");form.className="sl-ann-editor";
     form.innerHTML=[
-      '<label>Post type<select name="kind"><option value="feature">New feature</option><option value="announcement">Announcement / advertisement</option><option value="discover">Discover StudyLab</option></select></label>',
+      '<label>Post type<select name="kind"><option value="feature">New feature</option><option value="announcement">Announcement / advertisement</option><option value="discover">Discover StudyLab</option><option value="telegram">Telegram channel</option><option value="resource">Learning resource</option><option value="sponsored">Sponsored / promotion</option><option value="custom">Custom type</option></select></label>',
       '<label>Headline<input name="title" maxlength="90" minlength="3" required placeholder="New StudyLab feature"></label>',
       '<label>Short message<textarea name="body" maxlength="300" minlength="5" rows="3" required placeholder="Shown below the headline on standard banners."></textarea></label>',
       '<div class="sl-ann-form-pair"><label>Button text<input name="cta_label" maxlength="36" value="Explore" required></label><label>Slide order<input name="sort_order" type="number" min="1" max="10000" step="1" value="1000" required></label></div>',
       '<label>Open when clicked<select name="target_path"><option value="/#profile">View Profile</option><option value="/#social">Social / Followers</option><option value="/study-room.html?completeProfile=1&amp;returnTo=%2Fstudy-room.html">Enter Live Study Room</option><option value="/#study-chat">Open Chat</option><option value="/#practical-simulations">Practical Simulations</option><option value="/#about-studylab">About StudyLab</option><option value="/#past-papers">Past Papers</option><option value="/#telegram-links">Telegram channels</option><option value="/#other-al-resources">Other A/L resources</option><option value="/#home-overview">Home</option><option value="custom">Any website or StudyLab link...</option></select></label>',
       '<label class="sl-ann-custom-path" hidden>Link address<input name="custom_path" type="text" maxlength="2048" placeholder="https://example.com or /physics.html" autocomplete="off"></label>',
       '<p class="sl-ann-image-guidance">External HTTP(S) links open in a separate tab. Only approved administrators can publish them.</p>',
-      '<div class="sl-ann-form-pair"><label>Banner layout<select name="display_mode"><option value="standard">Normal: headline and button</option><option value="image">Image only: clean artwork / ad</option></select></label><label>Decorative illustration<select name="art_key"><option value="announcement">Announcement megaphone</option><option value="none">None</option><option value="profile">Profile</option><option value="social">Community</option><option value="room">Study timer</option><option value="chat">Chat</option><option value="science">Science</option><option value="about">StudyLab</option></select></label></div>',
+      '<div class="sl-ann-form-pair"><label>Banner layout<select name="display_mode"><option value="standard">Normal: headline and button</option><option value="image">Image only: clean artwork / ad</option><option value="clean-text">Clean image + text and button</option><option value="profile">Channel profile picture + background</option></select></label><label>Decorative illustration<select name="art_key"><option value="announcement">Announcement megaphone</option><option value="none">None</option><option value="profile">Profile</option><option value="social">Community</option><option value="room">Study timer</option><option value="chat">Chat</option><option value="science">Science</option><option value="about">StudyLab</option></select></label></div>',
       '<div class="sl-ann-form-pair"><label>Transition effect<select name="transition_style"><option value="fade">Soft fade</option><option value="slide">Slide away</option><option value="dissolve">Soft dissolve / dust</option><option value="zoom">Soft zoom out</option><option value="none">None: instant change</option></select></label><label>Display time<span class="sl-ann-range-line"><input name="display_seconds" type="range" min="1" max="10" step="1" value="4"><output data-duration-value>4 seconds</output></span></label></div>',
+      '<details class="sl-ann-design-options" open><summary>Appearance & reusable media</summary>',
+      '<label>Custom badge / type label (optional)<input name="badge" maxlength="36" placeholder="e.g. TELEGRAM CHANNEL"></label>',
+      '<div class="sl-ann-form-pair"><label>Button icon<select name="icon"><option value="arrow">Arrow (original)</option><option value="telegram">Telegram</option><option value="download">Download</option><option value="book">Book / lessons</option><option value="link">External link</option><option value="play">Play</option><option value="chat">Chat</option><option value="profile">Profile</option><option value="none">None</option></select></label><label>Button colour<select name="color"><option value="default">Original</option><option value="blue">Telegram blue</option><option value="green">Green</option><option value="purple">Purple</option><option value="orange">Orange</option><option value="neutral">Neutral glass</option></select></label></div>',
+      '<div class="sl-ann-form-pair"><label>Button shape<select name="button_shape"><option value="pill">Original pill</option><option value="rounded">Rounded square</option></select></label><label>Button size<select name="button_size"><option value="normal">Normal</option><option value="compact">Compact</option><option value="large">Large</option></select></label></div>',
+      '<label>Reuse Supabase banner image URL<input name="media_url" type="url" maxlength="2048" placeholder="Paste public image link from Admin Media"></label>',
+      '<label>Channel picture / DP media URL (optional)<input name="dp_url" type="url" maxlength="2048" placeholder="Blank: reuse the banner image in profile layout"></label>',
+      '<div class="sl-ann-form-pair"><label>Background image fit<select name="bg_fit"><option value="cover">Fill / cover</option><option value="contain">Fit entire image</option></select></label><label>Profile image fit<select name="dp_fit"><option value="cover">Fill square / circle</option><option value="contain">Fit whole picture</option></select></label></div>',
+      '<div class="sl-ann-form-pair"><label>Background horizontal position<input type="range" name="bg_x" min="0" max="100" value="50"></label><label>Background vertical position<input type="range" name="bg_y" min="0" max="100" value="50"></label></div>',
+      '<label>Background zoom<input type="range" name="bg_zoom" min="100" max="180" value="100"></label>',
+      '<div class="sl-ann-form-pair"><label>Profile picture shape<select name="dp_shape"><option value="square">Rounded square</option><option value="round">Circle</option></select></label><label>Profile picture size<input type="range" name="dp_size" min="45" max="95" value="75"></label></div>',
+      '<div class="sl-ann-design-preview" data-design-preview aria-label="Appearance preview"><img data-design-bg alt="" hidden><div data-design-copy><small data-design-badge></small><strong data-design-title></strong><span data-design-body></span><b data-design-cta></b></div><img data-design-dp alt="" hidden></div>',
+      '<p class="sl-ann-image-guidance">Reuse existing public image links without another upload. Shared images are not deleted when this announcement changes.</p></details>',
+      '<label>New image crop shape<select name="crop_aspect"><option value="wide">Wide banner · 1200 × 480</option><option value="square">Square artwork / DP · 800 × 800</option></select></label>',
       '<label>Custom banner image (optional)<input name="image_file" type="file" accept="image/jpeg,image/png,image/webp"></label>',
-      '<p class="sl-ann-image-guidance">Recommended 1200 × 480 px (2.5:1). JPG/PNG/WebP, original up to 8 MB, final 1200 × 480 WebP ≤ 2 MB. Upload a picture, then drag the frame and adjust zoom to select its crop.</p>',
+      '<p class="sl-ann-image-guidance">Wide or square crops. JPG/PNG/WebP, original up to 8 MB, final WebP ≤ 2 MB. Upload a picture, then drag the frame and adjust zoom to select its crop.</p>',
       '<div class="sl-ann-crop-editor" data-crop-editor hidden>',
       '  <div class="sl-ann-crop-stage" data-crop-stage><img data-crop-source alt="Original image for cropping" draggable="false"><div class="sl-ann-crop-box" data-crop-box tabindex="0" role="group" aria-label="Move crop selection using drag or arrow keys"><span>DRAG TO POSITION</span></div></div>',
       '  <label>Crop zoom <span class="sl-ann-range-line"><input type="range" data-crop-zoom min="1" max="3" step="0.1" value="1"><output data-zoom-value>1.0×</output></span></label>',
-      '  <p class="sl-ann-image-guidance">Selected 2.5:1 area (drag rectangle or use arrow keys). Cropping applies before upload, not to your original file.</p>',
+      '  <p class="sl-ann-image-guidance">Selected area (drag rectangle or use arrow keys). Cropping applies before upload, not to your original file.</p>',
       '  <canvas data-crop-preview width="600" height="240" class="sl-ann-crop-result" aria-label="Preview of selected banner area"></canvas>',
       '</div>',
       '<img class="sl-ann-image-preview" data-banner-preview alt="Existing banner image" hidden>',
@@ -389,6 +455,33 @@
     const zoomValue=form.querySelector("[data-zoom-value]");
     const durationValue=form.querySelector("[data-duration-value]");
     let editing=null,crop=null,processing=false,loadToken=0;
+    const previewBox=form.querySelector("[data-design-preview]");
+    const presets={telegram:{badge:"TELEGRAM CHANNEL",icon:"telegram",color:"blue",layout:"profile"},resource:{badge:"LEARNING RESOURCE",icon:"book",color:"green",layout:"clean-text"},sponsored:{badge:"SPONSORED",icon:"link",color:"orange",layout:"clean-text"},custom:{badge:"",icon:"arrow",color:"default",layout:"classic"}};
+    function readDesign(){
+      const raw={};for(const k of Object.keys(designDefaults)){if(find(k))raw[k]=find(k).value;}
+      raw.preset=Object.prototype.hasOwnProperty.call(presets,find("kind").value)?find("kind").value:"";
+      const layout=find("display_mode").value;
+      raw.layout=layout==="clean-text"||layout==="profile"?layout:layout==="image"&&raw.media_url?"clean-image":"classic";
+      return normalizeDesign(raw);
+    }
+    function designPreview(){
+      const d=readDesign(),bg=previewBox.querySelector("[data-design-bg]"),pic=previewBox.querySelector("[data-design-dp]");
+      const raw=sharedImage(find("media_url").value)||crop?.url||(removeField.checked?"":imageUrl(editing?.image_path))||(d.layout==="profile"?d.dp_url:"");
+      for(const [node,src] of [[bg,raw],[pic,d.layout==="profile"?(d.dp_url||raw):""]]){node.hidden=!src;if(src){if(node.getAttribute("src")!==src)node.src=src;}else node.removeAttribute("src");}
+      previewBox.dataset.layout=find("display_mode").value==="image"?"clean-image":d.layout;previewBox.dataset.color=d.color;previewBox.dataset.shape=d.button_shape;previewBox.dataset.dpShape=d.dp_shape;previewBox.dataset.size=d.button_size;
+      bg.style.objectFit=d.bg_fit;bg.style.objectPosition=d.bg_x+"% "+d.bg_y+"%";bg.style.transform="scale("+d.bg_zoom/100+")";
+      pic.style.objectFit=d.dp_fit;previewBox.style.setProperty("--ann-dp-size",d.dp_size+"%");previewBox.style.setProperty("--ann-dp-factor",String(d.dp_size/100));
+      previewBox.querySelector("[data-design-badge]").textContent=d.badge||kindLabel({kind:find("kind").value});
+      previewBox.querySelector("[data-design-title]").textContent=find("title").value||"Announcement headline";
+      previewBox.querySelector("[data-design-body]").textContent=find("body").value||"Short message";
+      const action=previewBox.querySelector("[data-design-cta]");action.textContent=find("cta_label").value||"Explore";
+      if(buttonIcons[d.icon]){const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");svg.setAttribute("viewBox","0 0 24 24");svg.innerHTML=buttonIcons[d.icon];action.append(svg);}
+      else if(d.icon==="arrow")action.append(" →");
+    }
+    form.addEventListener("input",designPreview);
+    form.addEventListener("change",designPreview);
+    find("kind").addEventListener("change",()=>{const preset=presets[find("kind").value];if(preset){for(const k of ["badge","icon","color"])find(k).value=preset[k];find("display_mode").value=preset.layout==="classic"?"standard":preset.layout;}designPreview();});
+
     let pointer=null;
     const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
     const setStatus=(message,bad=false)=>{
@@ -412,6 +505,7 @@
     find("display_seconds").addEventListener("input",updateDuration);
     function targetChanged(){customWrapper.hidden=selectTarget.value!=="custom";}
     selectTarget.addEventListener("change",targetChanged);
+    find("media_url").addEventListener("input",()=>{if(find("media_url").value.trim()){clearCrop();fileField.value="";removeField.checked=false;setPreview(sharedImage(find("media_url").value));}designPreview();});
     function layoutChanged(){
       if(find("display_mode").value==="image"){
         setStatus("Image-only banners show your picture edge-to-edge, without text overlays or decorative effects.");
@@ -425,7 +519,7 @@
       selectTarget.value="/#profile";targetChanged();
       find("sort_order").value="1000";updateDuration();
       setStatus("Ready to create a new banner.");
-      submit.disabled=false;
+      submit.disabled=false;designPreview();
     }
     form.querySelector("[data-new-post]").addEventListener("click",resetEditor);
     function cropBounds(){
@@ -466,8 +560,10 @@
         if(token!==loadToken){URL.revokeObjectURL(url);return;}
         if(!image.naturalWidth||!image.naturalHeight)
           throw new Error("Image dimensions are invalid.");
-        const w=Math.min(image.naturalWidth,image.naturalHeight*W/H),h=w*H/W;
-        crop={image,url,w,h,x:(image.naturalWidth-w)/2,y:(image.naturalHeight-h)/2};
+        const ratio=find("crop_aspect").value==="square"?1:W/H;
+        const w=Math.min(image.naturalWidth,image.naturalHeight*ratio),h=w/ratio;
+        crop={image,url,w,h,ratio,x:(image.naturalWidth-w)/2,y:(image.naturalHeight-h)/2};
+        cropPreview.width=ratio===1?400:600;cropPreview.height=ratio===1?400:240;cropPreview.dataset.aspect=ratio===1?"square":"wide";
         cropSource.src=url;
         cropEditor.hidden=false;setPreview("");
         cropZoom.value="1";zoomValue.textContent="1.0×";
@@ -506,13 +602,19 @@
     cropZoom.addEventListener("input",()=>{
       if(!crop)return;
       const zoom=Number(cropZoom.value);
-      const baseW=Math.min(crop.image.naturalWidth,crop.image.naturalHeight*W/H);
-      const newW=baseW/zoom,newH=newW*H/W;
+      const baseW=Math.min(crop.image.naturalWidth,crop.image.naturalHeight*crop.ratio);
+      const newW=baseW/zoom,newH=newW/crop.ratio;
       const cx=crop.x+crop.w/2,cy=crop.y+crop.h/2;
       crop.w=newW;crop.h=newH;
       crop.x=clamp(cx-newW/2,0,crop.image.naturalWidth-newW);
       crop.y=clamp(cy-newH/2,0,crop.image.naturalHeight-newH);
       zoomValue.textContent=zoom.toFixed(1)+"×";paintCrop();
+    });
+    find("crop_aspect").addEventListener("change",()=>{
+      if(!crop)return;const ratio=find("crop_aspect").value==="square"?1:W/H;
+      const w=Math.min(crop.image.naturalWidth,crop.image.naturalHeight*ratio),h=w/ratio;
+      const cx=crop.x+crop.w/2,cy=crop.y+crop.h/2;Object.assign(crop,{ratio,w,h,x:clamp(cx-w/2,0,crop.image.naturalWidth-w),y:clamp(cy-h/2,0,crop.image.naturalHeight-h)});
+      cropPreview.width=ratio===1?400:600;cropPreview.height=ratio===1?400:240;cropPreview.dataset.aspect=ratio===1?"square":"wide";cropZoom.value="1";zoomValue.textContent="1.0×";paintCrop();
     });
     if("ResizeObserver" in window){
       const observer=new ResizeObserver(()=>paintCrop());observer.observe(cropStage);
@@ -534,12 +636,17 @@
       }else{
         selectTarget.value="custom";find("custom_path").value=item.target_path;
       }
+      const d=normalizeDesign(item.design);
+      for(const k of Object.keys(designDefaults))if(find(k))find(k).value=d[k];
+      if(d.preset)find("kind").value=d.preset;
+      if(d.layout==="clean-text"||d.layout==="profile")find("display_mode").value=d.layout;
+      if(d.layout==="clean-image")find("display_mode").value="image";
       targetChanged();updateDuration();
       find("starts_at").value=localTime(item.starts_at);
       find("ends_at").value=localTime(item.ends_at);
       find("published").checked=Boolean(item.published);
-      removeLabel.hidden=!item.image_path;
-      setPreview(imageUrl(item.image_path));
+      removeLabel.hidden=!bannerUrl(item);
+      setPreview(bannerUrl(item));designPreview();
       setStatus("Editing: "+item.title+". To recrop an older picture, upload its original again.");
       form.scrollIntoView({behavior:reduced.matches?"auto":"smooth",block:"start"});
     }
@@ -551,7 +658,7 @@
       setStatus("Loading image crop editor...");
       try{
         await prepareCrop(file);
-        removeField.checked=false;
+        find("media_url").value="";removeField.checked=false;designPreview();
         setStatus("Drag the highlighted rectangle to select the area, and adjust zoom if needed.");
       }catch(e){
         fileField.value="";clearCrop();setPreview(imageUrl(editing?.image_path));
@@ -560,7 +667,7 @@
     });
     removeField.addEventListener("change",()=>{
       if(removeField.checked){
-        clearCrop();fileField.value="";setPreview("");
+        clearCrop();fileField.value="";find("media_url").value="";setPreview("");designPreview();
       }else setPreview(imageUrl(editing?.image_path));
     });
     function labelStatus(item){
@@ -571,16 +678,14 @@
       return "Published";
     }
     async function refreshList(){
-      const {data,error}=await client.from("studylab_announcements")
-        .select("id,kind,title,body,cta_label,target_path,art_key,image_path,sort_order,display_seconds,transition_style,display_mode,published,starts_at,ends_at,created_at")
-        .order("sort_order",{ascending:true}).order("created_at",{ascending:true}).limit(150);
+      const {data,error}=await readBanners();
       list.replaceChildren(listTitle);
       if(error){emptyMessage(list,error.message);return;}
       if(!data?.length){emptyMessage(list,"No banners yet. Create the first post above.");return;}
       for(const item of data){
         const row=document.createElement("div");row.className="sl-ann-admin-row";
-        if(item.image_path){
-          const url=imageUrl(item.image_path);
+        if(bannerUrl(item)){
+          const url=bannerUrl(item);
           if(url){
             const thumb=document.createElement("img");
             thumb.src=url;thumb.alt="";thumb.loading="lazy";
@@ -632,8 +737,12 @@
         !Number.isInteger(seconds)||seconds<1||seconds>10){
         setStatus("Order must be 1–10000 and display time must be 1–10 seconds.",true);return;
       }
-      const mode=field("display_mode");
-      if(mode==="image"&&!crop&&(!editing?.image_path||removeField.checked)){
+      const mode=field("display_mode"),design=readDesign();
+      for(const key of ["media_url","dp_url"]){if(field(key)&&!sharedImage(field(key))){setStatus("Paste a valid public JPG, PNG or WebP link from StudyLab Admin Media.",true);return;}}
+      if(!designAvailable&&Object.keys(compactDesign(design)).length){setStatus("New announcement designs require the database update. Classic banners still work.",true);return;}
+      if(design.media_url&&crop){setStatus("Choose either the uploaded image or the reusable banner link, not both.",true);return;}
+      if(mode==="profile"&&!design.dp_url&&!design.media_url&&!crop&&(!editing?.image_path||removeField.checked)){setStatus("Choose a channel picture or reusable media URL for profile layout.",true);return;}
+      if(mode==="image"&&!design.media_url&&!crop&&(!editing?.image_path||removeField.checked)){
         setStatus("Choose a banner picture before using Image-only mode.",true);return;
       }
       const start=field("starts_at"),end=field("ends_at");
@@ -660,13 +769,13 @@
           if(uploadError)throw uploadError;
         }
         const oldImage=editing?.image_path||null;
-        const nextImage=newImagePath||(removeField.checked?null:oldImage);
+        const nextImage=newImagePath||(removeField.checked||design.media_url?null:oldImage);
         const payload={
-          kind:field("kind"),title:field("title"),body:field("body"),
+          kind:design.preset?"announcement":field("kind"),title:field("title"),body:field("body"),
           cta_label:field("cta_label"),target_path:destination,
           art_key:field("art_key"),image_path:nextImage,sort_order:order,
           display_seconds:seconds,transition_style:field("transition_style"),
-          display_mode:mode,published:find("published").checked,
+          display_mode:mode==="image"&&!design.media_url?"image":"standard",...(designAvailable?{design:compactDesign(design)}:{}),published:find("published").checked,
           starts_at:startIso,ends_at:endIso,updated_at:new Date().toISOString()
         };
         let query;
@@ -692,7 +801,12 @@
     await refreshList();
     if(!dlg.open)dlg.showModal();
   }
-  window.StudyLabAnnouncements=Object.freeze({openHistory,openManager,canManage});
+  function socialCards(){
+    const now=Date.now();
+    return items.filter(item=>["sponsored","resource"].includes(item.design?.preset)&&(!item.ends_at||new Date(item.ends_at).getTime()>now))
+      .slice(0,4).map(item=>({title:item.title,body:item.body,image:bannerUrl(item),target:safeDestination(item.target_path).href,cta:item.cta_label,label:item.design.preset==="sponsored"?"Sponsored":"Featured resource"}));
+  }
+  window.StudyLabAnnouncements=Object.freeze({openHistory,openManager,canManage,socialCards});
   Promise.resolve(account?.ready).then(async()=>{
     await verifyAdmin();
     await loadAnnouncements();

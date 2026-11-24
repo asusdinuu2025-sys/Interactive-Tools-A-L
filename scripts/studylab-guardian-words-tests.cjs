@@ -1,0 +1,16 @@
+const assert=require("node:assert/strict");
+const {normalize,parse,matches}=require("../assets/js/studylab-guardian-words.js");
+assert.deepEqual(parse("ExampleTerm\nexampleterm\nanother phrase\n\n"),["exampleterm","another phrase"]);
+assert.equal(normalize("  EXAMPLE, term! "), "example term");
+assert.equal(matches("EXAMPLETERM!",["exampleterm"]),true);
+assert.equal(matches("preexampleterm",["exampleterm"]),false);
+assert.equal(matches("exampleterms",["exampleterm"]),false);
+assert.equal(matches("another, phrase",["another phrase"]),true);
+assert.equal(matches("another different phrase",["another phrase"]),false);
+assert.equal(matches("අද පාඩම්",["පාඩම්"]),true);
+assert.equal(matches("අද පාඩම්",["අද පාඩම්"]),true);
+assert.equal(matches("ordinary lesson",[]),false);
+assert.throws(()=>parse("!!!"));
+assert.throws(()=>parse("a".repeat(81)));
+assert.throws(()=>parse(Array.from({length:201},(_,i)=>"term"+i).join("\n")));
+console.log("PASS: custom word normalization, boundaries, phrases, Sinhala, duplicates and limits.");

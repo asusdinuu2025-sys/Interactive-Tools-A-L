@@ -639,6 +639,22 @@
   window.StudyLabAdminAPI = Object.freeze({
     guardianPreview,
     guardianSettings,
+    verificationQueue:async()=>{requireAccess();return rpc('studylab_verification_queue');},
+    reviewVerification:async(id,approve)=>{requireAccess();if(preview)throw Error('Read-only preview: use the approved live admin deployment.');return rpc('studylab_review_verification',{p_user:id,p_approve:approve});},
+    deviceOverview:async()=>{
+      requireAccess();if(preview&&!livePreviewStats)throw Error("Live device counts are not connected in this preview.");
+      if(!client?.channel||!window.StudyLabWorkspace)throw Error("Presence unavailable.");
+      const channel=client.channel("studylab-live");
+      let timer;
+      try{return await new Promise((resolve,reject)=>{
+        timer=setTimeout(()=>reject(Error("Device presence unavailable.")),6000);
+        channel.on("presence",{event:"sync"},()=>resolve(window.StudyLabWorkspace.aggregatePresence(channel.presenceState())))
+          .subscribe(state=>{if(state==="CHANNEL_ERROR"||state==="TIMED_OUT")reject(Error("Device presence unavailable."));});
+      });}finally{clearTimeout(timer);try{await client.removeChannel(channel);}catch(_){}}
+    },
+    guardianPostStatus:async()=>{requireAccess();if(preview||connectedPreview)throw Error("Live status is unavailable in preview.");return rpc("studylab_guardian_post_status");},
+    guardianChatMode:async(value)=>{requireAccess();if(preview||connectedPreview)throw Error("Preview cannot change live chat mode.");return value===undefined?rpc("studylab_guardian_chat_mode"):rpc("studylab_guardian_set_chat_mode",{p_mode:value});},
+    guardianWords:async(value)=>{requireAccess();if(preview||connectedPreview)throw Error("Preview cannot change live word settings.");return rpc("studylab_guardian_words",value?{p_enabled:value.enabled,p_words:value.words,p_version:value.version}:{});},
     guardianHistory: async()=>{requireAccess();return rpc("studylab_guardian_history");},
     init,
     content,

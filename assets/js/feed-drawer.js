@@ -175,7 +175,7 @@
   document.addEventListener("keydown", event => {
     // Let the top-level View Profile / account-deletion modal own keyboard
     // focus and Escape while it is above the Social drawer.
-    if (document.querySelector("#slProfileViewer:not([hidden]),#slProfileDeleteConfirmation:not([hidden])")) return;
+    if (document.querySelector("#slProfileViewer:not([hidden]),#slProfileDeleteConfirmation:not([hidden]),.sl-social-modal[open],.sl-guardian-notice[open]")) return;
     const isOpen = toggle.getAttribute("aria-expanded") === "true";
     if (event.key === "Escape" && isOpen) {
       event.preventDefault();
@@ -201,6 +201,7 @@
       first.focus();
     }
   });
+  if(location.hash==="#study-social"){history.replaceState(null,"",location.pathname+location.search);window.setTimeout(()=>{setOpen(true);window.dispatchEvent(new Event("studylab-social-refresh"));},0);}
   window.addEventListener("resize", () => {
     document.body.classList.toggle("sl-community-open", toggle.getAttribute("aria-expanded") === "true");
   });

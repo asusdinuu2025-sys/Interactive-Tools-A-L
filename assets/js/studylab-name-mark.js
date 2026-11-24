@@ -36,6 +36,7 @@
   document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll("[data-sl-badge-user]").forEach(node => scheduleLookup(node.dataset.slBadgeUser));
   });
+  function refresh(userId){if(!userId)return;queried.delete(userId);scheduleLookup(userId);}
   const NS = "http://www.w3.org/2000/svg";
 
   function isMarked(userId) {
@@ -79,7 +80,7 @@
   }
 
   Object.defineProperty(window, "StudyLabNameMark", {
-    value: Object.freeze({ isMarked, decorate }),
+    value: Object.freeze({ isMarked, decorate, refresh }),
     writable: false, configurable: false
   });
 })();
