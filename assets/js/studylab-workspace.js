@@ -22,7 +22,7 @@ const E=(tag,text,cls)=>{const x=d.createElement(tag);if(text!=null)x.textConten
 const B=(label,fn)=>{const b=E("button",label,"slws-button");b.type="button";b.addEventListener("click",fn);return b;};
 function url(value){try{const u=new URL(value,location.href);return ["https:","http:"].includes(u.protocol)&&!u.username&&!u.password?u.href:null;}catch(_){return null;}}
 function resources(host,items,remove=false){
- host.replaceChildren();if(!items.length){host.append(E("p",remove?"Save learning resources with their favorite star.":"No learning resources opened yet.","slws-muted"));return;}
+ host.replaceChildren();if(!items.length){host.append(E("p",remove?"Save learning resources with their favorite star or the Save button in Recent.":"No learning resources opened yet.","slws-muted"));return;}
  for(const item of items){const href=url(item.url);if(!href)continue;const row=E("div",null,"slws-resource"),a=E("a",null,"slws-resource-link");a.href=href;a.append(E("strong",item.title||"Learning resource"),E("small",item.subject||"StudyLab","slws-muted"));a.addEventListener("click",()=>root.StudyLabResourceDashboard?.record(item));row.append(a);if(remove)row.append(B("Remove",()=>root.StudyLabResourceDashboard?.removeFavorite(item.url)));else{const saved=(root.StudyLabResourceDashboard?.favorites()||[]).some(x=>x.url===item.url);row.append(B(saved?"Saved":"Save",()=>root.StudyLabResourceDashboard?.saveFavorite(item)));}host.append(row);}
 }
 function notes(host){
