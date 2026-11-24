@@ -76,127 +76,51 @@ begin
 end; $$;
 revoke all on function public.studylab_plus_status(),public.studylab_plus_admin_status(uuid),public.studylab_plus_admin_grant(uuid,integer),public.studylab_plus_admin_enable(boolean) from public,anon,authenticated;
 grant execute on function public.studylab_plus_status(),public.studylab_plus_admin_status(uuid),public.studylab_plus_admin_grant(uuid,integer),public.studylab_plus_admin_enable(boolean) to authenticated;
--- Preset-only appearance; no user-supplied CSS, images or arbitrary URLs.
+-- Cosmetics are account-owned, validated, and exposed only through a minimal read projection.
 create table public.studylab_plus_appearance (
  user_id uuid primary key references auth.users(id) on delete cascade,
  cover text not null default 'default' check(cover in ('default','aurora','ocean','sunset','galaxy','nebula','starlight','mountains','forest','sakura','midnight','prism')),
- frame text not null default 'default' check(frame in ('default','violet','cyan','gold','rose','mint','silver','rainbow') or frame ~ '^#[0-9a-fA-F]{6}
+ frame text not null default 'default' check(frame in ('default','violet','cyan','gold','rose','mint','silver','rainbow') or frame ~ '^#[0-9a-fA-F]{6}$'),
+ effect text not null default 'default' check(effect in ('default','aurora','galaxy','pulse','sakura','ocean')),
+ bubble text not null default 'default' check(bubble in ('default','violet','cyan','rose','mint','gold')),
+ pet text not null default 'default' check(pet in ('default','nebula','mint','rose','gold')),
+ timer text not null default 'standard' check(timer in ('standard','compact','micro'))
 );
 alter table public.studylab_plus_appearance enable row level security;
 revoke all on public.studylab_plus_appearance from public,anon,authenticated;
--- Public-facing cosmetic projection only. Never returns grants, expiry or billing information for other accounts.
-create function public.studylab_plus_profile_state(p_user uuid) returns jsonb
-language plpgsql stable security definer set search_path='' as $$
-declare active boolean; appearance public.studylab_plus_appearance%rowtype;
-begin
- if auth.uid() is null or not exists(select 1 from auth.users u where u.id=auth.uid() and not coalesce(u.is_anonymous,false)) then
-  return jsonb_build_object('active',false);
- end if;
- select exists(select 1 from public.studylab_plus_settings s join public.studylab_plus_grants g on g.user_id=p_user join auth.users u on u.id=g.user_id join public.studylab_profiles p on p.id=u.id
- where s.singleton and s.enabled and not coalesce(u.is_anonymous,false) and p.deleted_at is null and (g.expires_at is null or g.expires_at>now())) into active;
- if not active then return jsonb_build_object('active',false); end if;
- select * into appearance from public.studylab_plus_appearance where user_id=p_user;
- return jsonb_build_object('active',true,'cover',coalesce(appearance.cover,'default'),'frame',coalesce(appearance.frame,'default'));
-end; $$;
-create function public.studylab_plus_save_appearance(p_cover text,p_frame text) returns jsonb
-language plpgsql security definer set search_path='' as $$
-declare uid uuid:=auth.uid();
-begin
- if uid is null or not coalesce((public.studylab_plus_status()->>'active')::boolean,false) then raise exception 'Active Plus required' using errcode='42501'; end if;
- if p_cover is null or p_cover not in ('default','aurora','ocean','sunset','galaxy','nebula','starlight','mountains','forest','sakura','midnight','prism') or p_frame is null or (p_frame not in ('default','violet','cyan','gold','rose','mint','silver','rainbow') and p_frame !~ '^#[0-9a-fA-F]{6} then raise exception 'Invalid appearance'; end if;
- insert into public.studylab_plus_appearance(user_id,cover,frame) values(uid,p_cover,p_frame)
- on conflict(user_id) do update set cover=excluded.cover,frame=excluded.frame;
- return public.studylab_plus_profile_state(uid);
-end; $$;
-revoke all on function public.studylab_plus_profile_state(uuid),public.studylab_plus_save_appearance(text,text) from public,anon,authenticated;
-grant execute on function public.studylab_plus_profile_state(uuid),public.studylab_plus_save_appearance(text,text) to authenticated;
 
--- Only public cosmetic membership indicators; no subscription or expiry data.
-create function public.studylab_plus_badges(p_users uuid[]) returns uuid[]
+create function public.studylab_plus_public_styles(p_users uuid[]) returns jsonb
 language plpgsql stable security definer set search_path='' as $$
-declare result uuid[];
+declare result jsonb;
 begin
- if auth.uid() is null or not exists(select 1 from auth.users u where u.id=auth.uid() and not coalesce(u.is_anonymous,false)) or coalesce(cardinality(p_users),0)>100 then return array[]::uuid[]; end if;
- select coalesce(array_agg(g.user_id),array[]::uuid[]) into result
+ if auth.uid() is null or not exists(select 1 from auth.users u where u.id=auth.uid() and not coalesce(u.is_anonymous,false)) or coalesce(cardinality(p_users),0)>100 then return '{}'::jsonb; end if;
+ select coalesce(jsonb_object_agg(g.user_id::text,jsonb_build_object('active',true,'cover',coalesce(a.cover,'default'),'frame',coalesce(a.frame,'default'),'effect',coalesce(a.effect,'default'),'bubble',coalesce(a.bubble,'default'))),'{}'::jsonb) into result
  from public.studylab_plus_grants g join public.studylab_plus_settings s on s.singleton and s.enabled
  join auth.users u on u.id=g.user_id join public.studylab_profiles p on p.id=u.id
+ left join public.studylab_plus_appearance a on a.user_id=g.user_id
  where g.user_id=any(p_users) and not coalesce(u.is_anonymous,false) and p.deleted_at is null and (g.expires_at is null or g.expires_at>now());
  return result;
 end; $$;
-revoke all on function public.studylab_plus_badges(uuid[]) from public,anon,authenticated;
-grant execute on function public.studylab_plus_badges(uuid[]) to authenticated;
-
-commit;
-)
-);
-alter table public.studylab_plus_appearance enable row level security;
-revoke all on public.studylab_plus_appearance from public,anon,authenticated;
--- Public-facing cosmetic projection only. Never returns grants, expiry or billing information for other accounts.
 create function public.studylab_plus_profile_state(p_user uuid) returns jsonb
 language plpgsql stable security definer set search_path='' as $$
-declare active boolean; appearance public.studylab_plus_appearance%rowtype;
+declare result jsonb; prefs public.studylab_plus_appearance%rowtype;
 begin
- if auth.uid() is null or not exists(select 1 from auth.users u where u.id=auth.uid() and not coalesce(u.is_anonymous,false)) then
-  return jsonb_build_object('active',false);
+ result:=coalesce(public.studylab_plus_public_styles(array[p_user])->p_user::text,'{"active":false}'::jsonb);
+ if auth.uid()=p_user and coalesce((result->>'active')::boolean,false) then
+  select * into prefs from public.studylab_plus_appearance where user_id=p_user;
+  result:=result||jsonb_build_object('pet',coalesce(prefs.pet,'default'),'timer',coalesce(prefs.timer,'standard'));
  end if;
- select exists(select 1 from public.studylab_plus_settings s join public.studylab_plus_grants g on g.user_id=p_user join auth.users u on u.id=g.user_id join public.studylab_profiles p on p.id=u.id
- where s.singleton and s.enabled and not coalesce(u.is_anonymous,false) and p.deleted_at is null and (g.expires_at is null or g.expires_at>now())) into active;
- if not active then return jsonb_build_object('active',false); end if;
- select * into appearance from public.studylab_plus_appearance where user_id=p_user;
- return jsonb_build_object('active',true,'cover',coalesce(appearance.cover,'default'),'frame',coalesce(appearance.frame,'default'));
+ return result;
 end; $$;
-create function public.studylab_plus_save_appearance(p_cover text,p_frame text) returns jsonb
+create function public.studylab_plus_save_appearance(p_cover text,p_frame text,p_effect text,p_bubble text,p_pet text,p_timer text) returns jsonb
 language plpgsql security definer set search_path='' as $$
 declare uid uuid:=auth.uid();
 begin
  if uid is null or not coalesce((public.studylab_plus_status()->>'active')::boolean,false) then raise exception 'Active Plus required' using errcode='42501'; end if;
- if p_cover is null or p_cover not in ('default','aurora','ocean','sunset','galaxy','nebula','starlight','mountains','forest','sakura','midnight','prism') or p_frame is null or p_frame not in ('default','violet','cyan','gold') then raise exception 'Invalid appearance'; end if;
- insert into public.studylab_plus_appearance(user_id,cover,frame) values(uid,p_cover,p_frame)
- on conflict(user_id) do update set cover=excluded.cover,frame=excluded.frame;
+ insert into public.studylab_plus_appearance(user_id,cover,frame,effect,bubble,pet,timer) values(uid,p_cover,p_frame,p_effect,p_bubble,p_pet,p_timer)
+ on conflict(user_id) do update set cover=excluded.cover,frame=excluded.frame,effect=excluded.effect,bubble=excluded.bubble,pet=excluded.pet,timer=excluded.timer;
  return public.studylab_plus_profile_state(uid);
 end; $$;
-revoke all on function public.studylab_plus_profile_state(uuid),public.studylab_plus_save_appearance(text,text) from public,anon,authenticated;
-grant execute on function public.studylab_plus_profile_state(uuid),public.studylab_plus_save_appearance(text,text) to authenticated;
-
-commit;
-) then raise exception 'Invalid appearance'; end if;
- insert into public.studylab_plus_appearance(user_id,cover,frame) values(uid,p_cover,p_frame)
- on conflict(user_id) do update set cover=excluded.cover,frame=excluded.frame;
- return public.studylab_plus_profile_state(uid);
-end; $$;
-revoke all on function public.studylab_plus_profile_state(uuid),public.studylab_plus_save_appearance(text,text) from public,anon,authenticated;
-grant execute on function public.studylab_plus_profile_state(uuid),public.studylab_plus_save_appearance(text,text) to authenticated;
-
-commit;
-)
-);
-alter table public.studylab_plus_appearance enable row level security;
-revoke all on public.studylab_plus_appearance from public,anon,authenticated;
--- Public-facing cosmetic projection only. Never returns grants, expiry or billing information for other accounts.
-create function public.studylab_plus_profile_state(p_user uuid) returns jsonb
-language plpgsql stable security definer set search_path='' as $$
-declare active boolean; appearance public.studylab_plus_appearance%rowtype;
-begin
- if auth.uid() is null or not exists(select 1 from auth.users u where u.id=auth.uid() and not coalesce(u.is_anonymous,false)) then
-  return jsonb_build_object('active',false);
- end if;
- select exists(select 1 from public.studylab_plus_settings s join public.studylab_plus_grants g on g.user_id=p_user join auth.users u on u.id=g.user_id join public.studylab_profiles p on p.id=u.id
- where s.singleton and s.enabled and not coalesce(u.is_anonymous,false) and p.deleted_at is null and (g.expires_at is null or g.expires_at>now())) into active;
- if not active then return jsonb_build_object('active',false); end if;
- select * into appearance from public.studylab_plus_appearance where user_id=p_user;
- return jsonb_build_object('active',true,'cover',coalesce(appearance.cover,'default'),'frame',coalesce(appearance.frame,'default'));
-end; $$;
-create function public.studylab_plus_save_appearance(p_cover text,p_frame text) returns jsonb
-language plpgsql security definer set search_path='' as $$
-declare uid uuid:=auth.uid();
-begin
- if uid is null or not coalesce((public.studylab_plus_status()->>'active')::boolean,false) then raise exception 'Active Plus required' using errcode='42501'; end if;
- if p_cover is null or p_cover not in ('default','aurora','ocean','sunset','galaxy','nebula','starlight','mountains','forest','sakura','midnight','prism') or p_frame is null or p_frame not in ('default','violet','cyan','gold') then raise exception 'Invalid appearance'; end if;
- insert into public.studylab_plus_appearance(user_id,cover,frame) values(uid,p_cover,p_frame)
- on conflict(user_id) do update set cover=excluded.cover,frame=excluded.frame;
- return public.studylab_plus_profile_state(uid);
-end; $$;
-revoke all on function public.studylab_plus_profile_state(uuid),public.studylab_plus_save_appearance(text,text) from public,anon,authenticated;
-grant execute on function public.studylab_plus_profile_state(uuid),public.studylab_plus_save_appearance(text,text) to authenticated;
-
+revoke all on function public.studylab_plus_public_styles(uuid[]),public.studylab_plus_profile_state(uuid),public.studylab_plus_save_appearance(text,text,text,text,text,text) from public,anon,authenticated;
+grant execute on function public.studylab_plus_public_styles(uuid[]),public.studylab_plus_profile_state(uuid),public.studylab_plus_save_appearance(text,text,text,text,text,text) to authenticated;
 commit;
