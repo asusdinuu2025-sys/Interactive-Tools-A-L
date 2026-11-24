@@ -32,7 +32,7 @@ async function profileState(id){
 async function saveAppearance(cover,frame,extras={}){
  if(!covers.includes(cover)||!validFrame(frame))throw Error("Choose a valid appearance.");
  const a=root.StudyLabAccount;await a?.ready;const u=a?.getUser?.();if(!eligible(u))throw Error("Sign in first.");
- const prior=await profileState(u.id);const next=appearance({...prior,...extras,active:true,cover,frame});if(currentDemo()){demoAppearance=next;persistDemo();changed();return;}
+ const prior=await profileState(u.id);if(a.getUser()?.id!==u.id)throw Error("Session changed.");const next=appearance({...prior,...extras,active:true,cover,frame});if(currentDemo()){demoAppearance=next;persistDemo();changed();return;}
  const state=await status();if(!state.active||a.getUser()?.id!==u.id)throw Error("Active Plus required.");
  if(preview)throw Error("Preview is read-only for real membership. Switch to demo mode.");
  const r=await a.client.rpc("studylab_plus_save_appearance",{p_cover:next.cover,p_frame:next.frame,p_effect:next.effect,p_bubble:next.bubble,p_pet:next.pet,p_timer:next.timer});if(r.error||a.getUser()?.id!==u.id)throw Error(r.error?.message||"Session changed.");badgeCache.delete(u.id);changed();
@@ -116,18 +116,18 @@ const badgeQueue=new Set(),badgeCache=new Map();let badgeTimer=null,badgeBlocked
 const validId=id=>typeof id==="string"&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 function renderNameBadge(node,id){
  const own=root.StudyLabAccount?.getUser?.()?.id===id,demo=own&&currentDemo(),cached=badgeCache.get(id);
- const show=demo||Boolean(cached?.active&&cached.until>Date.now());const state=demo?appearance({...demoAppearance,active:true}):show?appearance(cached):appearance(null);const surface=node.closest(".room-person-card,.study-chat-message");if(surface){if(surface.classList.contains("room-person-card"))surface.dataset.plusEffect=state.effect;else surface.dataset.plusBubble=state.bubble;}
+ const show=demo||Boolean(cached?.active&&cached.until>Date.now());const state=demo?appearance({...demoAppearance,active:true}):show?appearance(cached):appearance(null);const surface=node.closest(".room-person-card,.room-rank,.study-chat-message");if(surface){if(surface.classList.contains("room-person-card"))surface.dataset.plusEffect=state.effect;else if(surface.classList.contains("study-chat-message"))surface.dataset.plusBubble=state.bubble;const avatar=surface.querySelector(".room-avatar,.study-chat-message-avatar");if(avatar){avatar.dataset.plusFrame=state.frame;avatar.style.removeProperty("--sl-plus-ring");if(/^#[0-9a-f]{6}$/i.test(state.frame)){avatar.dataset.plusFrame="custom";avatar.style.setProperty("--sl-plus-ring",state.frame);}}}
  let mark=node.querySelector(":scope > .sl-plus-inline-badge");
  if(!show){mark?.remove();return;}
  if(!mark){mark=E("small",null,"sl-plus-inline-badge");node.append(mark);}
- mark.textContent=demo?"✦ Plus demo":"✦ Plus";mark.title=demo?"Preview only":"StudyLab Plus";
+ mark.textContent="✦ Plus";mark.title=demo?"Plus demo · Preview only":"StudyLab Plus";if(demo)mark.setAttribute("aria-label","StudyLab Plus demo");else mark.removeAttribute("aria-label");
 }
 function decorateName(node,id){
  if(!node)return;
  if(node.closest(".sl-pv-dialog"))return; // Profile view has a dedicated badge and appearance.
  node.dataset.slPlusUser=validId(id)?id:"";
  renderNameBadge(node,id);
- if(!validId(id)||badgeBlockedUntil>Date.now()||badgeCache.get(id)?.until>Date.now())return;
+ if((preview&&id===root.StudyLabAccount?.getUser?.()?.id)||!validId(id)||badgeBlockedUntil>Date.now()||badgeCache.get(id)?.until>Date.now())return;
  badgeQueue.add(id);
  if(!badgeTimer)badgeTimer=setTimeout(flushBadges,100);
 }
