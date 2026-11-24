@@ -105,11 +105,11 @@ assert.match(socialMigration,/create table if not exists public\.studylab_social
 assert.doesNotMatch(moderators,/delete from public\.studylab_social_posts/i);
 
 for(const html of [home,room]){
-  assert.match(html,/chat\.js\?v=pr102-attachment-menu-v3/);
+  assert.match(html,/chat\.js\?v=guardian-live-v1/);
   assert.match(html,/chat\.css\?v=pr102-attachment-menu-v3/);
   assert.match(html,/studylab-avatar\.js\?v=20261116-manual-crop-v1/);
 }
-assert.match(home,/studylab-social\.js\?v=20261115-social-likes-only-v3/);
+assert.match(home,/studylab-social\.js\?v=guardian-live-v1/);
 assert.match(home,/feed-drawer\.css\?v=20261115-social-likes-only-v3/);
 
 /* PR #102 smoke checks for connected Chat, alongside legacy ownership checks. */

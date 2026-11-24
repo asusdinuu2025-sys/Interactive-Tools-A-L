@@ -77,6 +77,7 @@ const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
  w.HTMLCanvasElement.prototype.toBlob=function(callback){
    callback(new w.Blob(["compressed"],{type:"image/webp"}));
  };
+ w.eval(readFileSync("assets/js/studylab-guardian-check.js","utf8"));
  w.eval(readFileSync("assets/js/chat.js","utf8"));
  await wait(70);
  const panel=w.document.querySelector(".study-chat-panel");
@@ -234,6 +235,7 @@ const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
    getProfile:async()=>({display_name:"Student A"}),client:legacyClient
  };
  old.supabase={createClient:()=>legacyClient};
+ old.eval(readFileSync("assets/js/studylab-guardian-check.js","utf8"));
  old.eval(readFileSync("assets/js/chat.js","utf8"));
  await wait(90);
  assert.equal(old.document.querySelector("[data-chat-file-attach]").disabled,true,
