@@ -276,7 +276,7 @@
   function setLiveText(node, value) {
     const label = String(value ?? '');
     if (!node) return;
-    if(node.matches('.room-rank-info strong,.room-person-card-name')){let text=[...node.childNodes].find(n=>n.nodeType===3);if(!text){text=document.createTextNode(label);node.prepend(text);}else if(text.nodeValue!==label)text.nodeValue=label;return;}
+    if(node.matches('.room-person-card-name')){let text=node.querySelector(":scope > .sl-plus-name-text");if(!text){for(const child of [...node.childNodes])if(child.nodeType===3)child.remove();text=document.createElement("span");text.className="sl-plus-name-text";node.prepend(text);}if(text.textContent!==label)text.textContent=label;return;}if(node.matches('.room-rank-info strong')){let text=[...node.childNodes].find(n=>n.nodeType===3);if(!text){text=document.createTextNode(label);node.prepend(text);}else if(text.nodeValue!==label)text.nodeValue=label;return;}
     if (node.textContent !== label) node.textContent = label;
   }
   window.addEventListener("studylab:follow-error", event => {
