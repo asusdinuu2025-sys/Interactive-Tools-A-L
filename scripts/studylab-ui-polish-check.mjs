@@ -94,7 +94,7 @@ for(const html of [roomHtml,homeHtml]){
   assert.match(html,/studylab-profile-view\.js\?v=20261116-manual-crop-v1/);
   assert.match(html,/studylab-follow\.css\?v=20261116-follow-colors-v2/);
   assert.match(html,/chat\.css\?v=pr102-attachment-menu-v3/);
-  assert.match(html,/chat\.js\?v=pr102-attachment-menu-v3/);
+  assert.match(html,/chat\.js\?v=guardian-live-v1/);
   assert.match(html,/studylab-avatar\.js\?v=20261116-manual-crop-v1/,
     "The manual crop renderer must have an updated production asset version");
 }
