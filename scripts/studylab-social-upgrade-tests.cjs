@@ -43,7 +43,7 @@ assert.deepEqual(events,["guardian","insert-post","upload","upload","upload","pu
 assert.equal(form.querySelectorAll(".sl-feed-image-preview-item").length,0);
 const like=d.querySelector(".sl-feed-post-actions button[aria-pressed]");assert.ok(like);likeReject=true;like.click();assert.equal(like.getAttribute("aria-pressed"),"true");likeResolve();await wait();assert.equal(like.getAttribute("aria-pressed"),"false");likeReject=false;like.click();likeResolve();await wait();assert.equal(like.getAttribute("aria-pressed"),"true");
 d.querySelector(".sl-feed-delete-post").click();await wait();assert.match(d.querySelector(".sl-social-modal").textContent,/Delete this post/);d.querySelector(".sl-social-modal-actions button").click();await wait();assert.ok(d.querySelector(".sl-feed-post"));
-assert.ok(d.querySelector(".sl-social-featured-list"));assert.doesNotMatch(d.querySelector(".sl-feed-right-rail").textContent,/Community profiles/);
+assert.ok(d.querySelector(".sl-feed-member-list"));assert.match(d.querySelector(".sl-feed-right-rail").textContent,/Community profiles/);assert.equal(d.querySelector(".sl-social-featured-list"),null);
 console.log("PASS: Social photo ordering, preview cancel, Guardian-first publication, failed-like rollback, delete confirmation and combined unread dot.");
 }finally{dom.window.close();}
 })().catch(error=>{console.error(error);process.exitCode=1;});

@@ -83,33 +83,13 @@
   communityIntro.innerHTML = '<div class="sl-feed-community-cover"></div><div class="sl-feed-community-intro-copy"><span class="sl-feed-community-kicker">STUDYLAB COMMUNITY</span><h2>StudyLab Social</h2><p>A shared space for A/L students</p></div>';
   const membersCard = document.createElement("section");
   membersCard.className = "sl-feed-members-card";
-  membersCard.innerHTML = '<div class="sl-feed-members-heading"><strong>Featured resources</strong><span>StudyLab highlights</span></div><div class="sl-social-featured-list" aria-live="polite"></div>';
+  membersCard.innerHTML = '<div class="sl-feed-members-heading"><strong>Community profiles</strong><span>From recent posts</span></div><div class="sl-feed-member-list" aria-live="polite"><p class="sl-feed-members-empty">Student profiles will appear here as they post.</p></div>';
   feedInner.parentNode.replaceChild(feedStage, feedInner);
   feedInner.removeChild(feedHead);
   panel.insertBefore(feedHead, feedStage);
   leftRail.append(composer);
   center.append(feedInner);
   rightRail.append(membersCard);
-  function renderHighlights(){
-    const host=membersCard.querySelector(".sl-social-featured-list");
-    if(!host)return;
-    host.replaceChildren();
-    const items=window.StudyLabAnnouncements?.socialCards?.()||[];
-    const defaults=[{title:"Past papers",body:"Find A/L revision papers.",target:"/exam-hub.html",label:"Featured resource"},{title:"Free lesson packs",body:"Explore learning materials.",target:"/lesson-packs.html",label:"Featured resource"}];
-    for(const item of (items.length?items:defaults)){
-      const a=document.createElement("a");a.className="sl-social-highlight";a.href=item.target;
-      if(new URL(a.href).origin!==location.origin){a.target="_blank";a.rel="noopener noreferrer";}
-      const tag=document.createElement("small");tag.textContent=item.label;
-      if(item.image){const img=document.createElement("img");img.src=item.image;img.loading="lazy";img.alt="";a.append(img);}
-      const title=document.createElement("strong");title.textContent=item.title;
-      const body=document.createElement("span");body.textContent=item.body||"";
-      const cta=document.createElement("span");cta.className="sl-social-highlight-cta";cta.textContent=(item.cta||"Explore")+" →";
-      a.append(tag,title,body,cta);host.append(a);
-    }
-  }
-  window.addEventListener("studylab-social-highlights",()=>{renderHighlights();window.StudyLabSocialTools?.modal("Featured resources","StudyLab highlights and clearly labelled sponsored content.",host=>host.append(membersCard.querySelector(".sl-social-featured-list").cloneNode(true)),"Done");});
-  document.addEventListener("studylab:announcements-ready",renderHighlights);
-  renderHighlights();
   feedStage.append(leftRail, center, rightRail);
 
   const actions = header.querySelector(".header-actions");
@@ -167,7 +147,6 @@
   function setOpen(open) {
     if (open) {
       closeFloatingTools();
-      renderHighlights();
       panel.dataset.size = "full";
     }
     layout.classList.toggle("is-feed-open", open);
@@ -196,7 +175,7 @@
   document.addEventListener("keydown", event => {
     // Let the top-level View Profile / account-deletion modal own keyboard
     // focus and Escape while it is above the Social drawer.
-    if (document.querySelector("#slProfileViewer:not([hidden]),#slProfileDeleteConfirmation:not([hidden]),.sl-social-modal[open]")) return;
+    if (document.querySelector("#slProfileViewer:not([hidden]),#slProfileDeleteConfirmation:not([hidden]),.sl-social-modal[open],.sl-guardian-notice[open]")) return;
     const isOpen = toggle.getAttribute("aria-expanded") === "true";
     if (event.key === "Escape" && isOpen) {
       event.preventDefault();

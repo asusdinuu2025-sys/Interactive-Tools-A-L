@@ -573,7 +573,7 @@
     controls = make("div", "sl-feed-sortbar");
     controls.innerHTML = '<span class="sl-feed-sort-label">Community feed</span><div role="group" aria-label="Sort posts"><button type="button" data-feed-sort="newest" aria-pressed="true">Newest</button><button type="button" data-feed-sort="popular" aria-pressed="false">Popular</button></div>';
     stream.before(controls);
-    const featured=make("button","sl-feed-action sl-social-featured-trigger","Featured");featured.type="button";featured.onclick=()=>window.dispatchEvent(new Event("studylab-social-highlights"));controls.querySelector("[role=group]").prepend(featured);
+    const community=make("button","sl-feed-action sl-social-featured-trigger","Community");community.type="button";community.onclick=()=>openCommunityProfiles();controls.querySelector("[role=group]").prepend(community);
     controls.querySelectorAll("[data-feed-sort]").forEach(button => button.addEventListener("click", () => {
       sortMode = button.dataset.feedSort;
       controls.querySelectorAll("[data-feed-sort]").forEach(item => {
@@ -1315,6 +1315,62 @@
 
   let feedLoadCount = 0;
   let lastFeedLoadedAt = 0;
+  function renderCommunityProfiles(posts, list = panel.querySelector(".sl-feed-member-list")) {
+    if (!list) return;
+     const unique = new Map();
+    for (const post of [...posts].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))) {
+      if (post.status !== "approved" || !post.author_id || unique.has(post.author_id)) continue;
+      unique.set(post.author_id, post);
+    }
+    const members = [...unique.values()].slice(0, 6);
+    list.replaceChildren();
+    if (!members.length) {
+      list.append(make("p", "sl-feed-members-empty", "Student profiles will appear here as they post."));
+      return;
+    }
+    for (const member of members) {
+      const row = make("button", "sl-feed-member");row.type="button";
+      const memberGender = member.author_gender === "female" ? "female" : "male";
+      const avatar = make("span","sl-feed-member-avatar sl-feed-avatar-" + memberGender);
+      avatar.style.setProperty("--sl-member-hue", memberGender === "female" ? "326" : "195");
+      avatar.innerHTML = memberGender === "female"
+        ? '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3.2"/><path d="M7 20l1-4.2a4.1 4.1 0 0 1 8 0l1 4.2z"/></svg>'
+        : '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3.2"/><path d="M4.5 20v-2.5a7.5 7.5 0 0 1 15 0V20z"/></svg>';
+      window.StudyLabAvatar?.decorate(avatar,member.author_id);
+      const copy = make("span", "sl-feed-member-copy");
+      const memberName = make("strong", "", member.author_display_name || "Student");
+      window.StudyLabNameMark?.decorate(memberName, member.author_id);
+      copy.append(memberName);
+      copy.append(make("small", "", "@" + (member.author_username || "student")));
+      row.append(avatar, copy);
+      row.classList.add("sl-follow-profile-trigger");
+      row.setAttribute("aria-label","View profile of "+(member.author_display_name||"Student"));
+      row.addEventListener("click",()=>{list.closest("dialog")?.close();window.StudyLabProfileView?.open({userId:member.author_id});});
+      list.append(row);
+    }
+  }
+
+  let recentCommunityPosts=[], communityDialog=null, communityTimer=0;
+  function openCommunityProfiles(){
+    if(communityDialog?.open)return;
+    const dialog=make("dialog","sl-social-modal sl-social-community-dialog");
+    const list=make("div","sl-feed-member-list"),close=make("button","sl-social-modal-button","Close");close.type="button";close.onclick=()=>dialog.close();
+    dialog.setAttribute("aria-label","Community profiles");dialog.append(make("h2",null,"Community profiles"),list,close);
+    dialog.addEventListener("close",()=>{dialog.remove();if(communityDialog===dialog)communityDialog=null;});
+    dialog.addEventListener("cancel",e=>{e.preventDefault();dialog.close();});
+    document.body.append(dialog);communityDialog=dialog;renderCommunityProfiles(recentCommunityPosts,list);
+    try{dialog.showModal();}catch(_){dialog.remove();communityDialog=null;}
+  }
+  function updateCommunityProfiles(posts){recentCommunityPosts=posts;renderCommunityProfiles(posts);if(communityDialog?.open)renderCommunityProfiles(posts,communityDialog.querySelector(".sl-feed-member-list"));}
+  async function refreshCommunityProfiles(){
+    if(document.hidden||panel.getAttribute("aria-hidden")==="true")return;
+    try{const account=accountClient();await account.ready;const uid=account.getUser()?.id;if(!uid)return;
+      const result=await account.client.from("studylab_social_posts").select("author_id,author_display_name,author_username,author_gender,status,created_at").eq("status","approved").order("created_at",{ascending:false}).limit(40);
+      if(!result.error&&account.getUser()?.id===uid&&panel.getAttribute("aria-hidden")!=="true")updateCommunityProfiles(result.data||[]);
+    }catch(_){}
+  }
+  window.addEventListener("studylab:social-visibility",e=>{clearInterval(communityTimer);if(e.detail?.open){communityTimer=setInterval(refreshCommunityProfiles,30000);if(feedHasLoaded)void refreshCommunityProfiles();}else{communityDialog?.close();}});
+
   async function loadFeed() {
     if (feedLoadCount > 0) return;
     feedLoadCount++;
@@ -1358,7 +1414,7 @@
       }
       await window.StudyLabAvatar?.prefetch(posts.map(post=>post.author_id))
         .catch(error=>console.warn("Social profile pictures unavailable:",error));
-      // Featured resources are supplied by the announcement editor, not student profiles.
+      updateCommunityProfiles(posts);
       const approvedIds = posts.filter(post => post.status === "approved").map(post => post.id);
       const likesByPost = new Map();
       const commentCountsByPost = new Map();

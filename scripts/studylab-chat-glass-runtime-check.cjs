@@ -41,7 +41,7 @@ const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
    createSignedUrl:async()=>({data:{signedUrl:"https://example.test/private.png"},error:null})
  };
  const client={
-   rpc:async()=>({data:false,error:null}),
+   rpc:async(name,args)=>({data:name==="studylab_chat_notification_previews"?storedMessages.filter(r=>args.p_ids.includes(r.id)).map(r=>({id:r.id,message:r.message,nickname:r.nickname})):false,error:null}),
    channel:makeChannel,
    removeChannel:async(channel)=>{retired.push(channel);return "ok";},
    storage:{from:()=>storage},
@@ -200,7 +200,7 @@ const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
  function incoming(sender=other){const row={...original,id:"55555555-5555-4555-8555-"+String(seq++).padStart(12,"0"),user_id:sender,created_at:new Date(Date.now()+20000+seq).toISOString(),message:"Study update "+seq};storedMessages.push(row);messageCallback({eventType:"INSERT",new:row});return row;}
  incoming();assert.equal(badge.hidden,true);assert.equal(w.document.querySelectorAll(".sl-chat-toast").length,0);
  mute.click();assert.equal(mute.getAttribute("aria-pressed"),"true");
- const newest=incoming();incoming();incoming();assert.equal(badge.textContent,"3");assert.equal(w.document.querySelectorAll(".sl-chat-toast").length,2);
+ const newest=incoming();incoming();incoming();assert.equal(badge.textContent,"3");await wait(35);assert.equal(w.document.querySelectorAll(".sl-chat-toast").length,2);assert.match(w.document.querySelector(".sl-chat-toast").textContent,/Study update/);
  incoming(me);assert.equal(badge.textContent,"3");
  messageCallback({eventType:"DELETE",old:{id:newest.id}});assert.equal(w.document.querySelectorAll(".sl-chat-toast").length,2);
  toggle.click();assert.equal(badge.hidden,true);assert.equal(w.document.querySelectorAll(".sl-chat-toast").length,0);
