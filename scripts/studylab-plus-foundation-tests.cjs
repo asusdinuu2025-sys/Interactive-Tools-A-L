@@ -1,5 +1,5 @@
 const assert=require("node:assert/strict");
-const {normalize,core,planned,eligible,demoAllowed,appearance,filterSponsored}=require("../assets/js/studylab-plus.js");
+const {normalize,core,planned,eligible,demoAllowed,appearance,filterSponsored,validFrame,covers,frames}=require("../assets/js/studylab-plus.js");
 assert.equal(normalize(null).active,false);assert.equal(normalize({enabled:false,active:true}).active,false);
 assert.equal(normalize({enabled:true,active:true,billing_ready:true}).billing_ready,false);
 assert.equal(normalize({enabled:true,active:true}).active,true);
@@ -26,3 +26,19 @@ assert.match(sql,/not coalesce\(public\.studylab_social_is_admin\(\),false\)/);
 const profile=fs.readFileSync(path.join(__dirname,"../assets/js/studylab-profile-view.js"),"utf8");
 assert.match(profile,/view\.hidden=false;\s*if\(own&&plusEntry\)void window\.StudyLabPlus\?\.sync/);
 console.log("PASS: preset validation, sponsor filtering, SQL guards and profile opening sequence.");
+
+assert.equal(covers.length,12);assert.equal(frames.length,8);
+assert.equal(validFrame("#00aAFF"),true);assert.equal(validFrame("url(javascript:bad)"),false);
+assert.equal(appearance({active:true,cover:"galaxy",frame:"#00AAFF"}).frame,"#00AAFF");
+assert.equal(appearance({active:false,cover:"galaxy",frame:"#00AAFF"}).cover,"default");
+assert.doesNotMatch(sql,/\bas \$\n|\bend; \$;/);
+assert.match(sql,/studylab_plus_badges\(p_users uuid\[\]\)/);
+assert.match(sql,/cardinality\(p_users\),0\)>100/);
+const plusCode=fs.readFileSync(path.join(__dirname,"../assets/js/studylab-plus.js"),"utf8");
+const plusCss=fs.readFileSync(path.join(__dirname,"../assets/css/studylab-plus.css"),"utf8");
+assert.match(plusCode,/sl-plus-plans/);
+assert.match(plusCode,/picker.type="color"/);
+assert.match(plusCss,/prefers-reduced-motion:reduce/);
+const telegramCode=fs.readFileSync(path.join(__dirname,"../assets/js/telegram-channel-browser.js"),"utf8");
+assert.match(telegramCode,/plusAdFree&&key==="sponsored"/);
+console.log("PASS: cover and ring catalog, custom color validation, staged SQL delimiters, responsive motion and sponsored controls.");
