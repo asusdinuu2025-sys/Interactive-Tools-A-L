@@ -107,6 +107,7 @@
       a.append(tag,title,body,cta);host.append(a);
     }
   }
+  window.addEventListener("studylab-social-highlights",()=>{renderHighlights();window.StudyLabSocialTools?.modal("Featured resources","StudyLab highlights and clearly labelled sponsored content.",host=>host.append(membersCard.querySelector(".sl-social-featured-list").cloneNode(true)),"Done");});
   document.addEventListener("studylab:announcements-ready",renderHighlights);
   renderHighlights();
   feedStage.append(leftRail, center, rightRail);

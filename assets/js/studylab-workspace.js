@@ -55,16 +55,16 @@ function refreshContinue(){
    a.addEventListener("click",event=>{
     const target=new URL(href);
     if(target.hash==="#study-social"&&d.querySelector(".sl-feed-toggle")){event.preventDefault();const b=d.querySelector(".sl-feed-toggle");if(b.getAttribute("aria-expanded")!=="true")b.click();}
-    else if(target.hash==="#study-chat"&&d.querySelector("[data-chat-button]")){event.preventDefault();const b=d.querySelector("[data-chat-button]");if(b.getAttribute("aria-expanded")!=="true")b.click();}
-    else if(target.hash==="#study-ai"&&d.querySelector("[data-ai-launcher]")){event.preventDefault();const b=d.querySelector("[data-ai-launcher]");if(b.getAttribute("aria-expanded")!=="true")b.click();}
+    else if(target.hash==="#study-chat"&&(/\/study-room(?:\.html)?$/.test(target.pathname)===/\/study-room(?:\.html)?$/.test(location.pathname))&&d.querySelector("[data-chat-button]")){event.preventDefault();const b=d.querySelector("[data-chat-button]");if(b.getAttribute("aria-expanded")!=="true")b.click();}
+    else if(target.hash==="#study-ai"&&(/\/study-room(?:\.html)?$/.test(target.pathname)===/\/study-room(?:\.html)?$/.test(location.pathname))&&d.querySelector("[data-ai-launcher]")){event.preventDefault();const b=d.querySelector("[data-ai-launcher]");if(b.getAttribute("aria-expanded")!=="true")b.click();}
    });host.append(a);
   }else resources(host,[last]);
  }
 }
-Promise.resolve(root.StudyLabAccount?.ready).catch(()=>{}).then(()=>{const r=activityRoutes[location.pathname.split("/").pop()];if(r)recordActivity(...r);else refreshContinue();});
+Promise.resolve(root.StudyLabAccount?.ready).catch(()=>{}).then(()=>{const path=location.pathname.split("/").pop(),r=activityRoutes[path]||activityRoutes[path+".html"];if(r)recordActivity(...r);else refreshContinue();});
 root.addEventListener("studylab:social-visibility",e=>{if(e.detail?.open)recordActivity("StudyLab Social","/#study-social","social");});
-root.addEventListener("studylab-chat-open",()=>recordActivity("StudyLab Chat",location.pathname.endsWith("study-room.html")?"/study-room.html#study-chat":"/#study-chat","chat"));
-root.addEventListener("studylab-ai-open",()=>recordActivity("AI Tutor",location.pathname.endsWith("study-room.html")?"/study-room.html#study-ai":"/#study-ai","ai"));
+root.addEventListener("studylab-chat-open",()=>recordActivity("StudyLab Chat",/\/study-room(?:\.html)?$/.test(location.pathname)?"/study-room.html#study-chat":"/#study-chat","chat"));
+root.addEventListener("studylab-ai-open",()=>recordActivity("AI Tutor",/\/study-room(?:\.html)?$/.test(location.pathname)?"/study-room.html#study-ai":"/#study-ai","ai"));
 function resumePanel(){
  const hash=location.hash,selector=hash==="#study-chat"?"[data-chat-button]":hash==="#study-ai"?"[data-ai-launcher]":null;
  if(!selector)return;

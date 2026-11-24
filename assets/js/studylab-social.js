@@ -573,6 +573,7 @@
     controls = make("div", "sl-feed-sortbar");
     controls.innerHTML = '<span class="sl-feed-sort-label">Community feed</span><div role="group" aria-label="Sort posts"><button type="button" data-feed-sort="newest" aria-pressed="true">Newest</button><button type="button" data-feed-sort="popular" aria-pressed="false">Popular</button></div>';
     stream.before(controls);
+    const featured=make("button","sl-feed-action sl-social-featured-trigger","Featured");featured.type="button";featured.onclick=()=>window.dispatchEvent(new Event("studylab-social-highlights"));controls.querySelector("[role=group]").prepend(featured);
     controls.querySelectorAll("[data-feed-sort]").forEach(button => button.addEventListener("click", () => {
       sortMode = button.dataset.feedSort;
       controls.querySelectorAll("[data-feed-sort]").forEach(item => {
@@ -1305,10 +1306,11 @@
       socialNotificationChannel = null;
     }
     socialNotificationUserId = userId;
+    socialNotificationRows=[];updateSocialNotificationBadge(0);
     loadSocialNotifications(client, userId);
     socialNotificationChannel = client.channel("studylab-social-notifications-" + userId)
       .on("postgres_changes", {
-        event: "INSERT",
+        event: "*",
         schema: "public",
         table: "studylab_social_notifications",
         filter: "recipient_id=eq." + userId
@@ -1334,7 +1336,7 @@
   // Initialize existing notification subscription before the first Social visit.
   Promise.resolve(window.StudyLabAccount?.ready).then(()=>{const account=window.StudyLabAccount;const user=account?.getUser?.();if(user?.id&&account.client)setupSocialNotifications(account.client,user.id);}).catch(()=>{});
   document.addEventListener("visibilitychange",()=>{
-    if(!document.hidden)refreshNoticeDayIfChanged();
+    if(!document.hidden){refreshNoticeDayIfChanged();const account=window.StudyLabAccount,user=account?.getUser?.();if(user?.id&&account.client)setupSocialNotifications(account.client,user.id);else updateSocialNotificationBadge(0);}
   });
 
   let feedLoadCount = 0;

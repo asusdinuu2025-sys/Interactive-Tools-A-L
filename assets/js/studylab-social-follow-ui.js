@@ -196,12 +196,17 @@
   async function loadAlerts(){
     if(loadingAlerts)return;
     const own=follow.currentId();
-    if(!own)return;
+    if(!own){updateUnread(0);return;}
     loadingAlerts=true;
     try{
       const db=window.StudyLabAccount?.client;
       if(!db)return;
       const cutoff=alertAge();
+      if(panel.getAttribute("aria-hidden")==="true"){
+        const total=await db.from("studylab_follow_alerts").select("id",{count:"exact",head:true}).eq("recipient_id",own).eq("is_read",false).gte("created_at",cutoff);
+        if(!total.error&&follow.currentId()===own)updateUnread(total.count||0);
+        return;
+      }
       const [items,total]=await Promise.all([
         db.from("studylab_follow_alerts")
           .select("id,actor_id,recipient_id,is_read,created_at")
@@ -213,6 +218,7 @@
       ]);
       if(items.error)throw items.error;
       if(total.error)throw total.error;
+      if(follow.currentId()!==own)return;
       displayedAlerts=items.data||[];
       const ids=displayedAlerts.map(r=>r.actor_id);
       const people=await follow.lookup(ids);
