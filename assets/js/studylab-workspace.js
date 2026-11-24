@@ -39,8 +39,41 @@ function settings(host){
  }
  const keys=E("details",null,"slws-shortcuts");keys.append(E("summary","Keyboard shortcuts"));for(const [k,v] of [["Ctrl/⌘ + K","Search"],["Alt + Q","Quick Access / Workspace"],["Alt + C","Chat"],["Alt + N","Notes"],["Alt + F","Focus Mode"],["Alt + L","Lite Mode"],["Esc","Existing panel close controls"]]){const line=E("div",null,"slws-key");line.append(E("kbd",k),E("span",v));keys.append(line);}keys.append(E("p","Some browser-reserved shortcuts may take priority.","slws-muted"));host.append(keys,status);
 }
-function refreshContinue(){const last=(root.StudyLabResourceDashboard?.recent()||[])[0];for(const host of d.querySelectorAll("[data-slws-continue]")){host.hidden=!last;if(last)resources(host,[last]);}}
-function mountQuick(panel){if(panel.querySelector(".slws-quick-extra"))return;const c=E("section",null,"study-quick-section slws-continue"),list=E("div");list.dataset.slwsContinue="";c.append(E("div","Continue learning","study-quick-section-title"),list);panel.insertBefore(c,panel.querySelector(".study-quick-progress"));const extra=E("section",null,"study-quick-section slws-quick-extra"),s=E("details"),n=E("details");s.append(E("summary","Workspace settings"));settings(s);n.dataset.slwsNotes="";n.append(E("summary","Quick Notes"));notes(n);extra.append(s,n);panel.append(extra);refreshContinue();}
+const activityRoutes={
+ "study-room.html":["Live Study Room","/study-room.html?completeProfile=1&returnTo=%2Fstudy-room.html"],
+ "maths.html":["Mathematics","/maths.html"],"physics.html":["Physics","/physics.html"],"chemistry.html":["Chemistry","/chemistry.html"],"biology.html":["Biology","/biology.html"],"exam-hub.html":["Past Papers","/exam-hub.html"],"lesson-packs.html":["Free Lesson Packs","/lesson-packs.html"],"Telegram_Channels.html":["A/L Telegram Channels","/Telegram_Channels.html"],"Audio_Books.html":["Audio Books","/Audio_Books.html"],"study-tools.html":["Study Tools","/study-tools.html"],"generalenglish.html":["General English","/generalenglish.html"],"generalknowledge.html":["General Knowledge","/generalknowledge.html"],"git.html":["General Information Technology","/git.html"],"smk-physics-lessons.html":["Physics Lessons","/smk-physics-lessons.html"]
+};
+const activityKey=()=> "studylab-last-activity-v1:"+(root.StudyLabAccount?.getUser?.()?.id||"this-browser");
+function recordActivity(title,path,kind="page"){const href=url(path);if(!href||new URL(href).origin!==location.origin)return;write(activityKey(),{title,url:href,savedAt:Date.now(),kind});refreshContinue();}
+function refreshContinue(){
+ const recent=(root.StudyLabResourceDashboard?.recent()||[])[0],activity=read(activityKey(),null),last=activity&&(!recent||activity.savedAt>=Number(recent.savedAt||0))?activity:recent;
+ for(const host of d.querySelectorAll("[data-slws-continue]")){
+  host.hidden=!last;if(!last)continue;
+  if(last.kind){
+   host.replaceChildren();const a=E("a",null,"slws-resource slws-activity-link"),href=url(last.url);if(!href||new URL(href).origin!==location.origin){host.hidden=true;continue;}
+   a.href=href;const copy=E("span",null,"slws-resource-link");copy.append(E("strong",last.title),E("small","Last visited activity","slws-muted"));a.append(copy,E("span","→","slws-activity-arrow"));
+   a.addEventListener("click",event=>{
+    const target=new URL(href);
+    if(target.hash==="#study-social"&&d.querySelector(".sl-feed-toggle")){event.preventDefault();const b=d.querySelector(".sl-feed-toggle");if(b.getAttribute("aria-expanded")!=="true")b.click();}
+    else if(target.hash==="#study-chat"&&d.querySelector("[data-chat-button]")){event.preventDefault();const b=d.querySelector("[data-chat-button]");if(b.getAttribute("aria-expanded")!=="true")b.click();}
+    else if(target.hash==="#study-ai"&&d.querySelector("[data-ai-launcher]")){event.preventDefault();const b=d.querySelector("[data-ai-launcher]");if(b.getAttribute("aria-expanded")!=="true")b.click();}
+   });host.append(a);
+  }else resources(host,[last]);
+ }
+}
+Promise.resolve(root.StudyLabAccount?.ready).catch(()=>{}).then(()=>{const r=activityRoutes[location.pathname.split("/").pop()];if(r)recordActivity(...r);else refreshContinue();});
+root.addEventListener("studylab:social-visibility",e=>{if(e.detail?.open)recordActivity("StudyLab Social","/#study-social","social");});
+root.addEventListener("studylab-chat-open",()=>recordActivity("StudyLab Chat",location.pathname.endsWith("study-room.html")?"/study-room.html#study-chat":"/#study-chat","chat"));
+root.addEventListener("studylab-ai-open",()=>recordActivity("AI Tutor",location.pathname.endsWith("study-room.html")?"/study-room.html#study-ai":"/#study-ai","ai"));
+function resumePanel(){
+ const hash=location.hash,selector=hash==="#study-chat"?"[data-chat-button]":hash==="#study-ai"?"[data-ai-launcher]":null;
+ if(!selector)return;
+ const b=d.querySelector(selector);if(!b)return;
+ history.replaceState(null,"",location.pathname+location.search);if(b.getAttribute("aria-expanded")!=="true")b.click();
+}
+if(d.readyState==="loading")d.addEventListener("DOMContentLoaded",resumePanel,{once:true});else setTimeout(resumePanel,0);
+
+function mountQuick(panel){if(panel.querySelector(".slws-quick-extra"))return;const c=E("section",null,"study-quick-section slws-continue"),list=E("div");list.dataset.slwsContinue="";c.append(E("div","Continue activity","study-quick-section-title"),list);panel.insertBefore(c,panel.querySelector(".study-quick-progress"));const extra=E("section",null,"study-quick-section slws-quick-extra"),s=E("details"),n=E("details");s.append(E("summary","Workspace settings"));settings(s);n.dataset.slwsNotes="";n.append(E("summary","Quick Notes"));notes(n);extra.append(s,n);panel.append(extra);refreshContinue();}
 function mountHome(){const copy=d.querySelector(".sl-home-intro-copy");if(!copy||copy.querySelector("[data-slws-continue]"))return;const h=E("div",null,"slws-home-continue");h.dataset.slwsContinue="";h.hidden=true;copy.append(h);refreshContinue();}
 function mountRoom(panel,tasks){
  if(!panel||!tasks||panel.querySelector("#slStudyWorkspace"))return;

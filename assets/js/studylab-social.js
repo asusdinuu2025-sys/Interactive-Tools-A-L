@@ -1382,7 +1382,7 @@
       }
       await window.StudyLabAvatar?.prefetch(posts.map(post=>post.author_id))
         .catch(error=>console.warn("Social profile pictures unavailable:",error));
-      renderCommunityProfiles(posts);
+      // Featured resources are supplied by the announcement editor, not student profiles.
       const approvedIds = posts.filter(post => post.status === "approved").map(post => post.id);
       const likesByPost = new Map();
       const commentCountsByPost = new Map();
@@ -1499,6 +1499,7 @@
   form.addEventListener("submit", async event => {
     event.preventDefault();
     if (busy || editingPhoto) return;
+    setBusy(true);
     try {
       const account = accountClient();
       const user = await requireBasicProfile();
@@ -1508,8 +1509,7 @@
       const words = countPostWords(editor.textContent);
       if (words > MAX_POST_WORDS) throw new Error("Your post is over the 1,000-word limit.");
       if (body.length > MAX_POST_CHARS) throw new Error("Your formatted post is too long. Keep it under 15,000 characters.");
-      if (!body && !files.length) throw new Error("Write something or attach a photo.");
-      setBusy(true);
+      if (!editor.textContent.trim() && !files.length) throw new Error("Write something or attach a photo.");
       const preview=document.createElement("div");preview.innerHTML=renderFormattedText(body);
       if(!await socialTools?.preview(preview,files))return;
       if(account.getUser()?.id!==user.id)throw Error("Account changed. Reload before publishing.");
