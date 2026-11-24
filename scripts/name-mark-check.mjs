@@ -61,7 +61,7 @@ for(const file of ["index.html","study-room.html"]){
 }
 const modules=[
  ["assets/js/profile.js",2],
- ["assets/js/studylab-social.js",3],
+ ["assets/js/studylab-social.js",2],
  ["assets/js/study-room-realtime.js",2],
  ["assets/js/home-panels.js",2]
 ];

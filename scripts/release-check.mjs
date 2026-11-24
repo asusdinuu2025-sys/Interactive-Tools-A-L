@@ -8,6 +8,7 @@ const errors = [];
 const requiredPages = ["index.html", "study-room.html", "study-room-mini.html", "study-tools.html", "exam-hub.html"];
 const syntaxFiles = [
   "assets/js/studylab-social.js",
+  "assets/js/studylab-social-tools.js",
   "assets/js/studylab-follow.js",
   "assets/js/studylab-social-follow-ui.js",
   "assets/js/studylab-profile-view.js",
