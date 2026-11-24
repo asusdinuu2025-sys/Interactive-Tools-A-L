@@ -1860,3 +1860,11 @@ body.study-room-page[data-room-mode="light"] .study-chat-editorline .study-chat-
   .study-chat-editorline .study-chat-attachment-menu,
   .study-chat-editorline .study-chat-attachments-toggle {transition:none!important;}
 }
+
+/* Sender-only pending text: never counted as public chat history. */
+.study-chat-pending-text-host{display:flex;flex-direction:column;gap:9px;flex:none;min-width:0}
+.study-chat-local-pending{align-self:flex-end;max-width:min(88%,460px);min-width:120px;padding:10px 13px;border:1px solid rgba(93,188,222,.3);border-radius:17px 17px 4px 17px;background:linear-gradient(145deg,rgba(28,149,179,.19),rgba(39,100,145,.12));color:inherit;overflow-wrap:anywhere}
+.study-chat-local-pending>strong{font-size:11px;color:inherit;opacity:.8}.study-chat-local-text{white-space:pre-wrap;font-size:13px;line-height:1.5;margin:4px 0}
+.study-chat-local-state{font-size:10px;line-height:1.4;opacity:.82}.study-chat-local-pending[data-state="failed"]{border-color:rgba(223,128,117,.7);background:rgba(194,85,85,.09)}
+.study-chat-local-actions{display:flex;justify-content:flex-end;gap:7px;margin-top:4px}.study-chat-local-actions:empty{display:none}
+.study-chat-local-actions button{border:1px solid currentColor;border-radius:8px;background:transparent;color:inherit;font:inherit;font-size:11px;padding:4px 8px;cursor:pointer}

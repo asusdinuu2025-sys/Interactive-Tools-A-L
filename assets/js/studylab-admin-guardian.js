@@ -81,6 +81,20 @@
     }catch(err){status(msg,err.message,"warn");}},true);
     save.disabled=loadFailed;actions.append(msg,save);controls.append(actions);
     if(loadFailed)status(msg,"Server settings unavailable. You can still use the test lab.","warn");
+    const chatModeCard=card("Chat moderation mode","Choose how text messages appear to their sender. Both modes screen before public delivery.","chat");
+    const modeSelect=e("select");for(const [value,label] of [["instant","Instant · pending for sender"],["strict","Strict · wait before displaying"]]){const opt=e("option",label);opt.value=value;modeSelect.append(opt);}
+    const modeFeedback=e("p","Loading chat delivery preference…","slg-feedback");modeFeedback.setAttribute("role","status");
+    modeSelect.disabled=true;
+    const chatModeSave=btn("Save chat mode",async()=>{try{
+      if(live){if(!confirm("Save this chat delivery mode for all students?"))return;modeSelect.value=await api.guardianChatMode(modeSelect.value);}
+      else localStorage.setItem("studylab-guardian-chat-mode-preview",modeSelect.value);
+      status(modeFeedback,live?"Saved. New chat sessions and reopened chat panels will use this mode.":"Preview preference saved on this device.","ok");
+    }catch(err){status(modeFeedback,err.message,"warn");}},true);
+    chatModeSave.disabled=true;
+    const chatModeActions=e("div",undefined,"slg-save");chatModeActions.append(modeFeedback,chatModeSave);
+    chatModeCard.append(field("Text chat delivery",modeSelect),e("p","Instant mode displays a private pending bubble while checking safety. Attachments and edits still use the existing send flow. Social posts and comments are unchanged.","slg-note"),chatModeActions);wrap.append(chatModeCard);
+    try{const current=live?await api.guardianChatMode():localStorage.getItem("studylab-guardian-chat-mode-preview")||"instant";modeSelect.value=current==="strict"?"strict":"instant";modeSelect.disabled=false;chatModeSave.disabled=false;status(modeFeedback,live?"Live preference":"Preview preference");}
+    catch(err){status(modeFeedback,"Chat mode settings unavailable. Existing protection remains active.","warn");}
     const wordEngine=window.StudyLabGuardianWords, wordKey="studylab-guardian-words-preview-v1";
     const wordsCard=card("Custom word filter","Add English, Singlish or Sinhala words and phrases that AI may miss.","chat");
     const wordInfo=e("p","Loading custom word settings…","slg-note");
