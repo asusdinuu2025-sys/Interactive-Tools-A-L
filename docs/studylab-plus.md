@@ -20,9 +20,11 @@ Responsive testing across portrait/landscape, desktop and tablet; Light/Dark/Sys
 
 ## Phase 2A preview test instructions
 - Open the deploy preview for PR #119 (or serve the branch locally on localhost). Sign in and open your own View Profile. The comparison button does not require the membership SQL in preview.
-- Click Get StudyLab Plus, then Try Plus demo. Return to the profile: the badge must say Plus demo. Customize Plus profile opens the preset editor; changes are in memory only, disappear when switching back to Free or reloading, and never change real grants.
+- Click Get StudyLab Plus, then Try Plus demo. Return to the profile: the badge must say Plus demo. Customize Plus profile opens the preset editor; appearance is scoped to this preview tab and signed-in user, survives navigation and reload in that tab, and never changes real grants. Switch back to Free to reset the demo.
 - In Free demo, the customize button opens the comparison instead of allowing edits. Switch to Free demo to restore default appearance.
-- Compare explicitly sponsored banners in the announcement carousel and announcement-derived social cards. Essential announcements and learning resources are retained. Other ad placements still require inventory and integration before an ad-free claim.
+- Compare explicitly sponsored banners in the announcement carousel and announcement-derived social cards. Essential announcements and learning resources are retained. The Sponsored Telegram section and its category control also hide in Plus. Other ad placements still require inventory before a site-wide ad-free claim.
 - Real membership: staged SQL adds server-authorized preset storage and a minimal cosmetic profile projection. The rollout remains disabled by default; no database changes have been applied. Test on an isolated database before production, including guest/ordinary user/admin permissions, expiry and revoke, cross-account access, and deleted users.
-- The admin dashboard is read-only in preview and offers refresh/status guidance. Existing blue verification remains separate; the Plus badge is currently wired to View Profile, not all social and study-room surfaces.
+- The admin dashboard is read-only in preview and offers refresh/status guidance. Existing blue verification remains separate; the Plus badge is wired to View Profile and shared name decoration on the home and study-room pages. Verify individual social and study-room surfaces after deployment.
 - Billing remains disabled. Do not merge until checks pass and the remaining features and payment sandbox have been tested.
+
+Phase 2B: compact comparison on desktop, scroll fallback on small screens; 12 illustrated or gradient cover presets with floating motifs (reduced-motion and Lite Mode respected), eight ring presets and validated custom hex colors. The updated migration is staged, not installed. Billing and production activation remain disabled.
