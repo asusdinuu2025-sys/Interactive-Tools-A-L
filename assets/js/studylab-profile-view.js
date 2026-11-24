@@ -905,7 +905,8 @@
     bioNode.textContent="Loading bio…";
     dialog.setAttribute("aria-describedby","slPvDescription");
     dialog.querySelector(".sl-pv-actions").hidden=!own;
-    const plusEntry=dialog.querySelector(".sl-plus-profile-entry");if(plusEntry){plusEntry.hidden=true;if(own)void window.StudyLabPlus?.sync(plusEntry);}
+    window.StudyLabPlus?.clearProfile(dialog,avatarNode);
+    const plusEntry=dialog.querySelector(".sl-plus-profile-entry");if(plusEntry)plusEntry.hidden=true;
     followAction.hidden=own;
     followAction.replaceChildren();
     if(!own){
@@ -914,6 +915,7 @@
       else followAction.append(element("p","sl-pv-status","Follow is temporarily unavailable."));
     }
     view.hidden=false;
+    if(own&&plusEntry)void window.StudyLabPlus?.sync(plusEntry);
     document.body.classList.add("sl-profile-view-open");
     requestAnimationFrame(()=>dismiss.focus());
     updateCounts(id,serial);
@@ -960,6 +962,7 @@
         viewStatus.hidden=false;
       }
     }
+    if(serial===viewSequence&&!view.hidden)void window.StudyLabPlus?.refreshProfile(dialog,avatarNode,nameNode,id,own,()=>serial===viewSequence&&!view.hidden&&viewedUserId===id);
     if(serial===viewSequence&&!view.hidden&&own){if(["followers","following"].includes(options.listType))openList(options.listType);else if(options.editSection==="identity"){const callback=editHandler;closeView(false);callback?.();}}
     return true;
   }
@@ -1019,6 +1022,13 @@
     if(event.detail?.targetId===viewedUserId || viewedUserId===window.StudyLabFollow?.currentId()){
       updateCounts(viewedUserId,viewSequence);
     }
+  });
+  document.addEventListener("studylab:plus-changed",()=>{
+    if(!view||view.hidden||!viewedUserId)return;
+    const id=viewedUserId,serial=viewSequence,own=id===window.StudyLabAccount?.getUser?.()?.id;
+    const entry=dialog.querySelector(".sl-plus-profile-entry");
+    if(own&&entry)void window.StudyLabPlus?.sync(entry);
+    void window.StudyLabPlus?.refreshProfile(dialog,avatarNode,nameNode,id,own,()=>serial===viewSequence&&!view.hidden&&viewedUserId===id);
   });
   Object.defineProperty(window,"StudyLabProfileView",{
     value:Object.freeze({open}),writable:false,configurable:false
