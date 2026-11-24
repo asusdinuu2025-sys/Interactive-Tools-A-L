@@ -22,7 +22,7 @@
     return node;
   };
   const state = {filter: "all", search: "", sponsorIndex: 0, expanded: new Set()};
-  let intervalSeconds=2;
+  let intervalSeconds=2,plusAdFree=false;
   let autoTimer=null;
   let hovering=false,focused=false;
   const reducedMotion=Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches);
@@ -228,7 +228,7 @@
       (card.dataset.tgSearch || "")).toLocaleLowerCase().includes(state.search);
   }
   function visibleSponsors() {
-    return cardsOf("sponsored").filter(card => !card.hidden && matches(card));
+    return plusAdFree?[]:cardsOf("sponsored").filter(card => !card.hidden && matches(card));
   }
   function scheduleAuto(){
     stopAuto();
@@ -273,8 +273,8 @@
     let matchesCount = 0;
     for (const [key, section] of sections) {
       const cards = reorder(key);
-      const categoryAllowed = state.filter === "all" || state.filter === key;
-      const eligible = cards.filter(card => !card.hidden && matches(card));
+      const categoryAllowed = !(plusAdFree&&key==="sponsored")&&(state.filter === "all" || state.filter === key);
+      const eligible = plusAdFree&&key==="sponsored"?[]:cards.filter(card => !card.hidden && matches(card));
       const expanded = state.expanded.has(key);
       section.classList.toggle("sl-tg-section-expanded", expanded);
       if (key === "sponsored") {
@@ -338,5 +338,5 @@
   });
   render();
   window.StudyLabTelegramBrowser = Object.freeze({refresh:render,setAutoAdvanceSeconds,
-    getAutoAdvanceSeconds:()=>intervalSeconds});
+    setPlusAdFree(value){plusAdFree=value===true;buttons.get("sponsored").hidden=plusAdFree;if(plusAdFree&&state.filter==="sponsored"){state.filter="all";for(const [category,button] of buttons)button.setAttribute("aria-pressed",String(category==="all"));}render();},getAutoAdvanceSeconds:()=>intervalSeconds});
 })();
