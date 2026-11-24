@@ -76,7 +76,7 @@
   const collapseButton = sidebar.querySelector(".sl-home-sidebar-collapse");
   const navItems = [...sidebar.querySelectorAll(".sl-home-nav-item")];
   // Keep the same navigation DOM and existing quick-action dock. Only presentation changes.
-  const compactRail = window.matchMedia("(min-width: 800px) and (max-width: 1179px) and (min-height: 421px)");
+  const compactRail = window.matchMedia("(min-width: 800px) and (max-width: 1179.98px) and (min-height: 421px)");
   const shortTouch = window.matchMedia("(pointer: coarse) and (max-height: 520px)");
   const header=document.getElementById("home-top");
   const brand=header?.querySelector(".brand");
@@ -105,6 +105,7 @@
   }
   function applyNavigation(){
     layout.dataset.navPresentation=presentation;
+    document.documentElement.dataset.slHomeNav=presentation;
     const open=presentation==="drawer"&&drawerOpen;
     sidebar.classList.toggle("is-mobile-open",open);
     sidebar.classList.toggle("is-compact-expanded",presentation==="rail"&&compactExpanded);
@@ -140,7 +141,13 @@
   });
   shade.addEventListener("click",()=>closeResponsiveNavigation(true));
   document.addEventListener("keydown",event=>{
-    if(event.key==="Escape"&&(drawerOpen||compactExpanded)){event.preventDefault();closeResponsiveNavigation(true);}
+    if(event.key==="Escape"&&(drawerOpen||compactExpanded)){event.preventDefault();closeResponsiveNavigation(true);return;}
+    if(event.key==="Tab"&&drawerOpen){
+      const controls=[collapseButton,...navItems].filter(n=>!n.hidden);
+      const first=controls[0],last=controls[controls.length-1];
+      if(!sidebar.contains(document.activeElement)||(event.shiftKey&&document.activeElement===first)){event.preventDefault();(event.shiftKey?last:first)?.focus();}
+      else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+    }
   });
   document.addEventListener("pointerdown",event=>{
     if(compactExpanded&&!sidebar.contains(event.target))closeResponsiveNavigation();

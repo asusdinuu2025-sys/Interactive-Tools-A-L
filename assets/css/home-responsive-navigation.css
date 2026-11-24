@@ -3,7 +3,7 @@
    phones and short touch viewports use the very same navigation in a drawer. */
 .sl-home-mobile-nav-toggle,.sl-home-nav-shade{display:none!important}
 .sl-home-mobile-nav-toggle[hidden],.sl-home-nav-shade[hidden]{display:none!important}
-@media (max-width:1179px){
+@media (max-width:1179.98px){
   #studyLabHomeLayout[data-nav-presentation] .sl-home-sidebar{
     box-sizing:border-box!important;left:max(8px,env(safe-area-inset-left,0px))!important;
     top:max(9px,env(safe-area-inset-top,0px))!important;bottom:auto!important;transform:none!important;
@@ -36,13 +36,13 @@
   #studyLabHomeLayout[data-nav-presentation="rail"] .sl-home-content>main.container{
     width:calc(100% - 24px)!important;margin-top:var(--sl-responsive-header-clearance,88px)!important;
   }
-  html body:has(#studyLabHomeLayout[data-nav-presentation="rail"]) #home-top.site-header{
+  html[data-sl-home-nav="rail"] body #home-top.site-header{
     left:calc(50% + 39px)!important;right:auto!important;transform:translateX(-50%)!important;
     width:calc(100vw - 102px)!important;max-width:calc(100vw - 102px)!important;min-width:0!important;
     gap:10px!important;padding-inline:14px!important;
   }
-  html body:has(#studyLabHomeLayout[data-nav-presentation="rail"]) #home-top.site-header .brand{min-width:0!important;flex:1 1 0!important}
-  html body:has(#studyLabHomeLayout[data-nav-presentation="rail"]) #home-top.site-header .header-actions{min-width:0!important;flex-wrap:wrap!important;gap:6px!important}
+  html[data-sl-home-nav="rail"] body #home-top.site-header .brand{min-width:0!important;flex:1 1 0!important}
+  html[data-sl-home-nav="rail"] body #home-top.site-header .header-actions{min-width:0!important;flex-wrap:wrap!important;gap:6px!important}
   #studyLabHomeLayout[data-nav-presentation="drawer"] .sl-home-sidebar{display:none!important}
   #studyLabHomeLayout[data-nav-presentation="drawer"] .sl-home-sidebar.is-mobile-open{
     display:flex!important;width:min(248px,calc(100vw - 26px))!important;z-index:1195!important;
@@ -60,6 +60,10 @@
   #home-top.site-header .sl-home-mobile-nav-toggle:focus-visible{outline:2px solid currentColor;outline-offset:2px}
   #studyLabHomeLayout[data-nav-presentation="drawer"] .sl-home-content>main.container{
     margin-top:var(--sl-responsive-header-clearance,var(--sl-mobile-header-clearance,88px))!important;
+  }
+  @media(min-width:800px) and (max-width:980px){
+    html[data-sl-home-nav="rail"] body #home-top.site-header .header-actions{flex:0 1 auto!important;justify-content:flex-end!important}
+    html[data-sl-home-nav="rail"] body #home-top.site-header .brand-title-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap!important}
   }
   /* Leave the existing floating Pet/AI/Chat controls in their original locations. */
   body.sl-community-open #studyLabHomeLayout .sl-home-sidebar{visibility:hidden!important;pointer-events:none!important}
