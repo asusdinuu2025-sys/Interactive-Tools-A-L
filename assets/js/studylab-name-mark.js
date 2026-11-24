@@ -46,6 +46,7 @@
   function decorate(nameNode, userId) {
     if (!nameNode || typeof nameNode.querySelector !== "function") return;
     nameNode.dataset.slBadgeUser = String(userId || "");
+    window.StudyLabPlus?.decorateName?.(nameNode,userId);
     if (userId) scheduleLookup(userId);
     const existing = nameNode.querySelector(":scope > .sl-name-mark");
     if (!isMarked(userId)) {
