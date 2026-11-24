@@ -13,7 +13,7 @@ const preview=demoAllowed(root.location.hostname);
 let dialog=null,session=null;
 async function status(){try{const a=root.StudyLabAccount;await a?.ready;const u=a?.getUser?.();if(!eligible(u))return normalize(null);const r=await a.client.rpc("studylab_plus_status");if(r.error||a.getUser()?.id!==u.id)return normalize(null);return normalize(r.data);}catch(_){return normalize(null);}}
 function close(){dialog?.close();}
-async function sync(button){if(!button)return;button.hidden=true;const a=root.StudyLabAccount;await a?.ready;const u=a?.getUser?.();if(!eligible(u))return;const uid=u.id;const state=await status();if(a.getUser()?.id!==uid||!eligible(a.getUser())||!button.isConnected||button.closest("[hidden]"))return;button.hidden=!(preview||state.enabled);button.textContent=state.active?"Manage Plus":"Get StudyLab Plus";}
+async function sync(button){if(!button)return;button.hidden=true;const a=root.StudyLabAccount;await a?.ready;const u=a?.getUser?.();if(!eligible(u))return;const uid=u.id;const state=await status();if(a.getUser()?.id!==uid||!eligible(a.getUser())||!button.isConnected||button.parentElement?.closest("[hidden]"))return;button.hidden=!(preview||state.enabled);button.textContent=state.active?"Manage Plus":"Get StudyLab Plus";}
 async function open(feature){
  if(dialog?.open)return;
  const a=root.StudyLabAccount;await a?.ready;const u=a?.getUser?.();if(!eligible(u))return;
