@@ -639,6 +639,7 @@
   window.StudyLabAdminAPI = Object.freeze({
     guardianPreview,
     guardianSettings,
+    guardianWords:async(value)=>{requireAccess();if(preview||connectedPreview)throw Error("Preview cannot change live word settings.");return rpc("studylab_guardian_words",value?{p_enabled:value.enabled,p_words:value.words,p_version:value.version}:{});},
     guardianHistory: async()=>{requireAccess();return rpc("studylab_guardian_history");},
     init,
     content,

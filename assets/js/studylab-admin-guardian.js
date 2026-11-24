@@ -81,6 +81,38 @@
     }catch(err){status(msg,err.message,"warn");}},true);
     save.disabled=loadFailed;actions.append(msg,save);controls.append(actions);
     if(loadFailed)status(msg,"Server settings unavailable. You can still use the test lab.","warn");
+    const wordEngine=window.StudyLabGuardianWords, wordKey="studylab-guardian-words-preview-v1";
+    const wordsCard=card("Custom word filter","Add English, Singlish or Sinhala words and phrases that AI may miss.","chat");
+    const wordInfo=e("p","Loading custom word settings…","slg-note");
+    const wordEnabled=e("input");wordEnabled.type="checkbox";wordEnabled.setAttribute("role","switch");wordEnabled.setAttribute("aria-label","Custom word filter");
+    const wordLabel=e("label",undefined,"slg-toggle"),wordCopy=e("span",undefined,"slg-toggle-copy"),wordSwitch=e("span",undefined,"slg-switch");
+    wordCopy.append(e("strong","Custom word filter"),e("small","Requires Guardian master switch and the relevant community area."));wordSwitch.append(wordEnabled,e("span",undefined,"slg-track"));wordLabel.append(wordCopy,wordSwitch);
+    const wordText=e("textarea");wordText.rows=6;wordText.maxLength=25000;wordText.placeholder="One word or phrase per line…";wordText.setAttribute("aria-label","Custom blocked words");
+    const wordCount=e("small","0 / 200 entries","slg-count"),wordFeedback=e("p","","slg-feedback");wordFeedback.setAttribute("role","status");
+    let wordState={enabled:false,words:[],version:0},wordAvailable=false;
+    function readWordDraft(){return wordEngine.parse(wordText.value);}
+    function refreshWordCount(){try{wordCount.textContent=readWordDraft().length+" / 200 entries";}catch(err){wordCount.textContent=err.message;}}
+    function showWordState(){wordEnabled.checked=wordState.enabled;wordText.value=wordState.words.join("\n");refreshWordCount();}
+    function updateWordDraft(){refreshWordCount();status(wordFeedback,"Unsaved word-list changes.","warn");}
+    wordText.addEventListener("input",updateWordDraft);wordEnabled.addEventListener("change",updateWordDraft);
+    const wordSave=btn("Save word list",async()=>{try{
+      if(!wordAvailable)throw Error("Custom word database module is unavailable.");
+      const next={enabled:wordEnabled.checked,words:readWordDraft(),version:wordState.version};
+      if(live){if(!confirm("Save the custom word filter for all students?"))return;wordState=await api.guardianWords(next);}
+      else{localStorage.setItem(wordKey,JSON.stringify(next));wordState=next;}
+      showWordState();status(wordFeedback,live?"Saved live word filter.":"Saved preview word filter on this device.","ok");
+    }catch(err){status(wordFeedback,err.message,"warn");}},true);
+    wordSave.disabled=true;wordEnabled.disabled=true;wordText.disabled=true;
+    const wordActions=e("div",undefined,"slg-save");wordActions.append(wordFeedback,wordSave);
+    wordsCard.append(wordInfo,wordLabel,field("Blocked words and phrases · one per line",wordText),wordCount,e("p","Case-insensitive whole-word and phrase matching. Punctuation between words is normalized. Avoid common academic terms: this is a literal list, not a context-aware model.","slg-note"),wordActions);
+    wrap.append(wordsCard);
+    try{
+      const stored=live?await api.guardianWords():JSON.parse(localStorage.getItem(wordKey)||"null");
+      if(stored){wordState={enabled:stored.enabled===true,words:wordEngine.parse((stored.words||[]).join("\n")),version:Number(stored.version)||0};}
+      if(!wrap.isConnected)return;
+      wordAvailable=true;wordEnabled.disabled=false;wordText.disabled=false;wordSave.disabled=false;showWordState();
+      wordInfo.textContent=live?"Live word list · Changes apply only after saving.":"Preview list · Saved on this device; no production changes.";
+    }catch(err){wordInfo.textContent="Custom word settings unavailable. Existing Guardian controls still work.";status(wordFeedback,"Database module is not installed or access failed.","warn");}
     const text=e("textarea");text.rows=5;text.maxLength=2000;text.placeholder="Enter a fictional test message…";text.setAttribute("aria-label","Synthetic test message");
     const counter=e("small","0 / 2000","slg-count");text.addEventListener("input",()=>{counter.textContent=text.value.length+" / 2000";});
     const surface=e("select");for(const [key,label] of [["chat","Chat messages"],["posts","Social posts"],["comments","Social comments"]]){const opt=e("option",label);opt.value=key;surface.append(opt);}surface.setAttribute("aria-label","Test surface");
@@ -93,6 +125,7 @@
     const run=async work=>{if(busy)return;busy=true;try{await work();}finally{busy=false;}};
     const testButtons=e("div",undefined,"slg-test-actions");
     testButtons.append(btn("Run rules test",()=>run(async()=>{try{
+      if(wordAvailable&&settings.enabled&&settings[surface.value]&&wordEnabled.checked&&wordEngine.matches(text.value,readWordDraft())){report("BLOCKED","Matches a custom word or phrase (current draft list).","warn");return;}
       const r=engine.classify({text:text.value,surface:surface.value,recentCount:Math.min(100,Math.max(0,Number(count.value)||0)),hasMedia:media.checked},settings);
       report(r.decision==="allow"?"Allowed":r.decision.toUpperCase(),r.reason,r.decision==="allow"?"ok":"warn");
     }catch(err){report("Test unavailable",err.message,"warn");}})),btn("Test server AI (synthetic text only)",()=>run(async()=>{
