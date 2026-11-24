@@ -112,3 +112,5 @@ html[data-sl-lite=on] .sl-plus-floats span{animation:none}
 .sl-plus-color-label input{width:42px;height:30px;border:1px solid #8299bc80;border-radius:6px;background:transparent;cursor:pointer}
 .sl-plus-editor-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media(max-width:480px){.sl-plus-cover-gallery{grid-template-columns:repeat(3,minmax(0,1fr))}.sl-plus-ring-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.sl-plus-inline-badge{display:inline-flex;vertical-align:middle;white-space:nowrap;margin-inline-start:5px;font-size:.65em;font-weight:750;line-height:1.35;border-radius:99px;padding:1px 5px;border:1px solid #9d83e4a0;color:#9e83eb;background:#8f72d61a}
