@@ -43,7 +43,7 @@
     return d;
   }
   function compactDesign(raw){const d=normalizeDesign(raw);return Object.fromEntries(Object.entries(d).filter(([k,v])=>v!==designDefaults[k]));}
-  function bannerUrl(item){return sharedImage(item?.design?.media_url)||imageUrl(item?.image_path);}
+  function bannerUrl(item){return sharedImage(item?.design?.media_url)||imageUrl(item?.image_path)||(item?.design?.layout==="profile"?sharedImage(item.design.dp_url):"");}
   const buttonIcons={
     telegram:'<path d="m21 3-18 7 7 3 3 8 8-18ZM21 3 10 13"/>',
     download:'<path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/>',
@@ -58,7 +58,7 @@
   function applyDesign(item){
     const d=normalizeDesign(item.design),url=bannerUrl(item);
     card.dataset.annLayout=d.layout;card.dataset.annColor=d.color;card.dataset.annShape=d.button_shape;card.dataset.annSize=d.button_size;
-    card.dataset.annDpShape=d.dp_shape;
+    card.dataset.annDpShape=d.dp_shape;card.dataset.annZoom=String(d.bg_zoom);
     bannerImage.style.objectFit=d.bg_fit;bannerImage.style.objectPosition=d.bg_x+"% "+d.bg_y+"%";
     bannerImage.style.setProperty("--ann-bg-zoom",String(d.bg_zoom/100));
     card.style.setProperty("--ann-dp-size",d.dp_size+"%");
@@ -265,12 +265,18 @@
   if("IntersectionObserver" in window){
     new IntersectionObserver(entries=>{visible=entries[0]?.isIntersecting!==false;},{threshold:.25}).observe(card);
   }
+  let designAvailable=true;
+  async function readBanners(){
+    const fields="id,kind,title,body,cta_label,target_path,art_key,image_path,sort_order,display_seconds,transition_style,display_mode,published,starts_at,ends_at,created_at";
+    const read=columns=>client.from("studylab_announcements").select(columns).order("sort_order",{ascending:true}).order("created_at",{ascending:true}).limit(150);
+    let result=await read(fields+",design");
+    if(result.error&&/design|42703|PGRST204/i.test(result.error.message+" "+result.error.code)){designAvailable=false;result=await read(fields);}
+    else if(!result.error)designAvailable=true;
+    return result;
+  }
   async function loadAnnouncements(){
     if(!client)return;
-    const {data,error}=await client.from("studylab_announcements")
-      .select("id,kind,title,body,cta_label,target_path,art_key,image_path,sort_order,display_seconds,transition_style,display_mode,published,starts_at,ends_at,created_at,design")
-      .order("sort_order",{ascending:true})
-      .order("created_at",{ascending:true}).limit(150);
+    const {data,error}=await readBanners();
     if(error){
       console.warn("Announcements unavailable:",error.message);
       return;
@@ -449,14 +455,14 @@
     const presets={telegram:{badge:"TELEGRAM CHANNEL",icon:"telegram",color:"blue",layout:"profile"},resource:{badge:"LEARNING RESOURCE",icon:"book",color:"green",layout:"clean-text"},sponsored:{badge:"SPONSORED",icon:"link",color:"orange",layout:"clean-text"},custom:{badge:"",icon:"arrow",color:"default",layout:"classic"}};
     function readDesign(){
       const raw={};for(const k of Object.keys(designDefaults)){if(find(k))raw[k]=find(k).value;}
-      raw.preset=Object.hasOwn(presets,find("kind").value)?find("kind").value:"";
+      raw.preset=Object.prototype.hasOwnProperty.call(presets,find("kind").value)?find("kind").value:"";
       const layout=find("display_mode").value;
       raw.layout=layout==="clean-text"||layout==="profile"?layout:layout==="image"&&raw.media_url?"clean-image":"classic";
       return normalizeDesign(raw);
     }
     function designPreview(){
       const d=readDesign(),bg=previewBox.querySelector("[data-design-bg]"),pic=previewBox.querySelector("[data-design-dp]");
-      const raw=sharedImage(find("media_url").value)||crop?.url||(removeField.checked?"":imageUrl(editing?.image_path));
+      const raw=sharedImage(find("media_url").value)||crop?.url||(removeField.checked?"":imageUrl(editing?.image_path))||(d.layout==="profile"?d.dp_url:"");
       for(const [node,src] of [[bg,raw],[pic,d.layout==="profile"?(d.dp_url||raw):""]]){node.hidden=!src;if(src)node.src=src;else node.removeAttribute("src");}
       previewBox.dataset.layout=find("display_mode").value==="image"?"clean-image":d.layout;previewBox.dataset.color=d.color;previewBox.dataset.shape=d.button_shape;previewBox.dataset.dpShape=d.dp_shape;previewBox.dataset.size=d.button_size;
       bg.style.objectFit=d.bg_fit;bg.style.objectPosition=d.bg_x+"% "+d.bg_y+"%";bg.style.transform="scale("+d.bg_zoom/100+")";
@@ -495,6 +501,7 @@
     find("display_seconds").addEventListener("input",updateDuration);
     function targetChanged(){customWrapper.hidden=selectTarget.value!=="custom";}
     selectTarget.addEventListener("change",targetChanged);
+    find("media_url").addEventListener("input",()=>{if(find("media_url").value.trim()){clearCrop();fileField.value="";removeField.checked=false;setPreview(sharedImage(find("media_url").value));}designPreview();});
     function layoutChanged(){
       if(find("display_mode").value==="image"){
         setStatus("Image-only banners show your picture edge-to-edge, without text overlays or decorative effects.");
@@ -659,9 +666,7 @@
       return "Published";
     }
     async function refreshList(){
-      const {data,error}=await client.from("studylab_announcements")
-        .select("id,kind,title,body,cta_label,target_path,art_key,image_path,sort_order,display_seconds,transition_style,display_mode,published,starts_at,ends_at,created_at,design")
-        .order("sort_order",{ascending:true}).order("created_at",{ascending:true}).limit(150);
+      const {data,error}=await readBanners();
       list.replaceChildren(listTitle);
       if(error){emptyMessage(list,error.message);return;}
       if(!data?.length){emptyMessage(list,"No banners yet. Create the first post above.");return;}
@@ -722,7 +727,9 @@
       }
       const mode=field("display_mode"),design=readDesign();
       for(const key of ["media_url","dp_url"]){if(field(key)&&!sharedImage(field(key))){setStatus("Paste a valid public JPG, PNG or WebP link from StudyLab Admin Media.",true);return;}}
+      if(!designAvailable&&Object.keys(compactDesign(design)).length){setStatus("New announcement designs require the database update. Classic banners still work.",true);return;}
       if(design.media_url&&crop){setStatus("Choose either the uploaded image or the reusable banner link, not both.",true);return;}
+      if(mode==="profile"&&!design.dp_url&&!design.media_url&&!crop&&(!editing?.image_path||removeField.checked)){setStatus("Choose a channel picture or reusable media URL for profile layout.",true);return;}
       if(mode==="image"&&!design.media_url&&!crop&&(!editing?.image_path||removeField.checked)){
         setStatus("Choose a banner picture before using Image-only mode.",true);return;
       }
@@ -756,7 +763,7 @@
           cta_label:field("cta_label"),target_path:destination,
           art_key:field("art_key"),image_path:nextImage,sort_order:order,
           display_seconds:seconds,transition_style:field("transition_style"),
-          display_mode:mode==="image"&&!design.media_url?"image":"standard",design:compactDesign(design),published:find("published").checked,
+          display_mode:mode==="image"&&!design.media_url?"image":"standard",...(designAvailable?{design:compactDesign(design)}:{}),published:find("published").checked,
           starts_at:startIso,ends_at:endIso,updated_at:new Date().toISOString()
         };
         let query;

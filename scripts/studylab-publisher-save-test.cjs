@@ -152,7 +152,7 @@ const clickPublish=async dialog=>{
   assert.equal(saved[5].item.avatar_file_path,"uploads/3.png");
   assert.equal(uploadedMedia.length,3);
 
-  // Replacement removes only the previous file after successfully saving.
+  // Replacement preserves previously published shared media.
   publisher.open("telegram","sponsored",{
     id:pictured.id,draft:saved[5].item,revision:3,published:true
   });
@@ -161,7 +161,7 @@ const clickPublish=async dialog=>{
     new w.File(["PNG"],"new-dp.png",{type:"image/png"}));
   await clickPublish(d);
   assert.equal(saved[6].item.avatar_file_path,"uploads/4.png");
-  assert.deepEqual(deletedMedia,["uploads/3.png"]);
+  assert.deepEqual(deletedMedia,[]);
 
   // Removing the profile image restores the default Telegram logo on the
   // public card without removing the rest of the channel details.
@@ -176,7 +176,7 @@ const clickPublish=async dialog=>{
   assert.equal(saved[7].item.image,"");
   assert.equal(saved[7].item.avatar_file_path,"");
   assert.equal(saved[7].item.title,"Chemistry Channel");
-  assert.deepEqual(deletedMedia,["uploads/3.png","uploads/4.png"]);
+  assert.deepEqual(deletedMedia,[]);
 
   // A failed database save must clean up ONLY the fresh upload, retaining
   // any previously saved photo. Never claim success after a failed RPC.
@@ -232,6 +232,27 @@ const clickPublish=async dialog=>{
   await clickPublish(d);
   assert.equal(saved[previousCount+1].item.order,310,
     "Editing an existing channel retains its original newest-first position");
+
+  // All six channel destinations can reuse an image without uploading it again.
+  const shared="https://zpvatyxdbshjuqgtexzw.supabase.co/storage/v1/object/public/studylab-admin-media/uploads/shared-test.png";
+  const beforeMedia=uploadedMedia.length;
+  for(const category of ["sponsored","maths","biology","physics","chemistry","all"]){
+    publisher2.open("telegram",category);
+    d=findDialog();d.querySelector('[name="title"]').value="Reuse "+category;
+    d.querySelector('[name="link"]').value="https://t.me/examplechannel";
+    d.querySelector('[name="telegram_avatar_url"]').value=shared;
+    await clickPublish(d);
+    assert.equal(saved.at(-1).item.image,shared);
+    assert.equal(saved.at(-1).item.telegram_category,category);
+    assert.equal(saved.at(-1).item.avatar_file_path,"");
+  }
+  assert.equal(uploadedMedia.length,beforeMedia);
+  publisher2.open("telegram","all");d=findDialog();
+  d.querySelector('[name="title"]').value="Invalid media test";
+  d.querySelector('[name="link"]').value="https://t.me/examplechannel";
+  d.querySelector('[name="telegram_avatar_url"]').value="https://example.invalid/image.png";
+  const beforeInvalid=saved.length;await clickPublish(d);
+  assert.equal(saved.length,beforeInvalid);assert.match(d.querySelector("[data-publisher-status]").textContent,/StudyLab Admin Media/);d.close();
 
   // Global timing is an internal hidden content record, saved through the
   // same revision-safe authorized Admin publishing workflow.
