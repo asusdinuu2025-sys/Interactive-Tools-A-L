@@ -62,6 +62,7 @@
     bannerImage.style.objectFit=d.bg_fit;bannerImage.style.objectPosition=d.bg_x+"% "+d.bg_y+"%";
     bannerImage.style.setProperty("--ann-bg-zoom",String(d.bg_zoom/100));
     card.style.setProperty("--ann-dp-size",d.dp_size+"%");
+    card.style.setProperty("--ann-dp-factor",String(d.dp_size/100));
     dp.style.objectFit=d.dp_fit;
     const portrait=d.layout==="profile"?(d.dp_url||url):"";
     dp.hidden=!portrait;if(portrait)dp.src=portrait;else dp.removeAttribute("src");
@@ -374,10 +375,11 @@
     return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);
   }
   async function convertImage(crop){
-    const canvas=document.createElement("canvas");canvas.width=W;canvas.height=H;
+    const canvas=document.createElement("canvas");canvas.width=crop.ratio===1?800:W;canvas.height=crop.ratio===1?800:H;
     const ctx=canvas.getContext("2d");
     if(!ctx)throw new Error("This browser cannot process images.");
-    ctx.drawImage(crop.image,crop.x,crop.y,crop.w,crop.h,0,0,W,H);
+    if(crop.ratio===1)ctx.drawImage(crop.image,crop.x,crop.y,crop.w,crop.h,0,0,800,800);
+    else ctx.drawImage(crop.image,crop.x,crop.y,crop.w,crop.h,0,0,W,H);
     const exportBlob=quality=>new Promise(done=>canvas.toBlob(done,"image/webp",quality));
     for(const q of [.9,.8,.7,.6,.5]){
       const result=await exportBlob(q);
@@ -416,12 +418,13 @@
       '<div class="sl-ann-form-pair"><label>Profile picture shape<select name="dp_shape"><option value="square">Rounded square</option><option value="round">Circle</option></select></label><label>Profile picture size<input type="range" name="dp_size" min="45" max="95" value="75"></label></div>',
       '<div class="sl-ann-design-preview" data-design-preview aria-label="Appearance preview"><img data-design-bg alt="" hidden><div data-design-copy><small data-design-badge></small><strong data-design-title></strong><span data-design-body></span><b data-design-cta></b></div><img data-design-dp alt="" hidden></div>',
       '<p class="sl-ann-image-guidance">Reuse existing public image links without another upload. Shared images are not deleted when this announcement changes.</p></details>',
+      '<label>New image crop shape<select name="crop_aspect"><option value="wide">Wide banner · 1200 × 480</option><option value="square">Square artwork / DP · 800 × 800</option></select></label>',
       '<label>Custom banner image (optional)<input name="image_file" type="file" accept="image/jpeg,image/png,image/webp"></label>',
-      '<p class="sl-ann-image-guidance">Recommended 1200 × 480 px (2.5:1). JPG/PNG/WebP, original up to 8 MB, final 1200 × 480 WebP ≤ 2 MB. Upload a picture, then drag the frame and adjust zoom to select its crop.</p>',
+      '<p class="sl-ann-image-guidance">Wide or square crops. JPG/PNG/WebP, original up to 8 MB, final WebP ≤ 2 MB. Upload a picture, then drag the frame and adjust zoom to select its crop.</p>',
       '<div class="sl-ann-crop-editor" data-crop-editor hidden>',
       '  <div class="sl-ann-crop-stage" data-crop-stage><img data-crop-source alt="Original image for cropping" draggable="false"><div class="sl-ann-crop-box" data-crop-box tabindex="0" role="group" aria-label="Move crop selection using drag or arrow keys"><span>DRAG TO POSITION</span></div></div>',
       '  <label>Crop zoom <span class="sl-ann-range-line"><input type="range" data-crop-zoom min="1" max="3" step="0.1" value="1"><output data-zoom-value>1.0×</output></span></label>',
-      '  <p class="sl-ann-image-guidance">Selected 2.5:1 area (drag rectangle or use arrow keys). Cropping applies before upload, not to your original file.</p>',
+      '  <p class="sl-ann-image-guidance">Selected area (drag rectangle or use arrow keys). Cropping applies before upload, not to your original file.</p>',
       '  <canvas data-crop-preview width="600" height="240" class="sl-ann-crop-result" aria-label="Preview of selected banner area"></canvas>',
       '</div>',
       '<img class="sl-ann-image-preview" data-banner-preview alt="Existing banner image" hidden>',
@@ -463,10 +466,10 @@
     function designPreview(){
       const d=readDesign(),bg=previewBox.querySelector("[data-design-bg]"),pic=previewBox.querySelector("[data-design-dp]");
       const raw=sharedImage(find("media_url").value)||crop?.url||(removeField.checked?"":imageUrl(editing?.image_path))||(d.layout==="profile"?d.dp_url:"");
-      for(const [node,src] of [[bg,raw],[pic,d.layout==="profile"?(d.dp_url||raw):""]]){node.hidden=!src;if(src)node.src=src;else node.removeAttribute("src");}
+      for(const [node,src] of [[bg,raw],[pic,d.layout==="profile"?(d.dp_url||raw):""]]){node.hidden=!src;if(src){if(node.getAttribute("src")!==src)node.src=src;}else node.removeAttribute("src");}
       previewBox.dataset.layout=find("display_mode").value==="image"?"clean-image":d.layout;previewBox.dataset.color=d.color;previewBox.dataset.shape=d.button_shape;previewBox.dataset.dpShape=d.dp_shape;previewBox.dataset.size=d.button_size;
       bg.style.objectFit=d.bg_fit;bg.style.objectPosition=d.bg_x+"% "+d.bg_y+"%";bg.style.transform="scale("+d.bg_zoom/100+")";
-      pic.style.objectFit=d.dp_fit;previewBox.style.setProperty("--ann-dp-size",d.dp_size+"%");
+      pic.style.objectFit=d.dp_fit;previewBox.style.setProperty("--ann-dp-size",d.dp_size+"%");previewBox.style.setProperty("--ann-dp-factor",String(d.dp_size/100));
       previewBox.querySelector("[data-design-badge]").textContent=d.badge||kindLabel({kind:find("kind").value});
       previewBox.querySelector("[data-design-title]").textContent=find("title").value||"Announcement headline";
       previewBox.querySelector("[data-design-body]").textContent=find("body").value||"Short message";
@@ -556,8 +559,10 @@
         if(token!==loadToken){URL.revokeObjectURL(url);return;}
         if(!image.naturalWidth||!image.naturalHeight)
           throw new Error("Image dimensions are invalid.");
-        const w=Math.min(image.naturalWidth,image.naturalHeight*W/H),h=w*H/W;
-        crop={image,url,w,h,x:(image.naturalWidth-w)/2,y:(image.naturalHeight-h)/2};
+        const ratio=find("crop_aspect").value==="square"?1:W/H;
+        const w=Math.min(image.naturalWidth,image.naturalHeight*ratio),h=w/ratio;
+        crop={image,url,w,h,ratio,x:(image.naturalWidth-w)/2,y:(image.naturalHeight-h)/2};
+        cropPreview.width=ratio===1?400:600;cropPreview.height=ratio===1?400:240;cropPreview.dataset.aspect=ratio===1?"square":"wide";
         cropSource.src=url;
         cropEditor.hidden=false;setPreview("");
         cropZoom.value="1";zoomValue.textContent="1.0×";
@@ -596,13 +601,19 @@
     cropZoom.addEventListener("input",()=>{
       if(!crop)return;
       const zoom=Number(cropZoom.value);
-      const baseW=Math.min(crop.image.naturalWidth,crop.image.naturalHeight*W/H);
-      const newW=baseW/zoom,newH=newW*H/W;
+      const baseW=Math.min(crop.image.naturalWidth,crop.image.naturalHeight*crop.ratio);
+      const newW=baseW/zoom,newH=newW/crop.ratio;
       const cx=crop.x+crop.w/2,cy=crop.y+crop.h/2;
       crop.w=newW;crop.h=newH;
       crop.x=clamp(cx-newW/2,0,crop.image.naturalWidth-newW);
       crop.y=clamp(cy-newH/2,0,crop.image.naturalHeight-newH);
       zoomValue.textContent=zoom.toFixed(1)+"×";paintCrop();
+    });
+    find("crop_aspect").addEventListener("change",()=>{
+      if(!crop)return;const ratio=find("crop_aspect").value==="square"?1:W/H;
+      const w=Math.min(crop.image.naturalWidth,crop.image.naturalHeight*ratio),h=w/ratio;
+      const cx=crop.x+crop.w/2,cy=crop.y+crop.h/2;Object.assign(crop,{ratio,w,h,x:clamp(cx-w/2,0,crop.image.naturalWidth-w),y:clamp(cy-h/2,0,crop.image.naturalHeight-h)});
+      cropPreview.width=ratio===1?400:600;cropPreview.height=ratio===1?400:240;cropPreview.dataset.aspect=ratio===1?"square":"wide";cropZoom.value="1";zoomValue.textContent="1.0×";paintCrop();
     });
     if("ResizeObserver" in window){
       const observer=new ResizeObserver(()=>paintCrop());observer.observe(cropStage);
