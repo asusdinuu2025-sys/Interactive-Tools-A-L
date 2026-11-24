@@ -289,6 +289,7 @@
     stopTransition();
     current=Math.min(current,Math.max(0,items.length-1));
     render();scheduleRotation();
+    document.dispatchEvent(new Event("studylab:announcements-ready"));
   }
   function scheduleRotation(){
     if(rotation){clearTimeout(rotation);rotation=null;}
@@ -800,7 +801,12 @@
     await refreshList();
     if(!dlg.open)dlg.showModal();
   }
-  window.StudyLabAnnouncements=Object.freeze({openHistory,openManager,canManage});
+  function socialCards(){
+    const now=Date.now();
+    return items.filter(item=>["sponsored","resource"].includes(item.design?.preset)&&(!item.ends_at||new Date(item.ends_at).getTime()>now))
+      .slice(0,4).map(item=>({title:item.title,body:item.body,image:bannerUrl(item),target:safeDestination(item.target_path).href,cta:item.cta_label,label:item.design.preset==="sponsored"?"Sponsored":"Featured resource"}));
+  }
+  window.StudyLabAnnouncements=Object.freeze({openHistory,openManager,canManage,socialCards});
   Promise.resolve(account?.ready).then(async()=>{
     await verifyAdmin();
     await loadAnnouncements();
