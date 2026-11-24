@@ -279,7 +279,6 @@
     if(!client)return;
     const generation=++loadGeneration;
     const {data,error}=await readBanners();
-    const plus=await window.StudyLabPlus?.adFree?.().catch(()=>false);
     if(generation!==loadGeneration)return;
     if(error){
       console.warn("Announcements unavailable:",error.message);
@@ -288,7 +287,6 @@
     const now=Date.now();
     historyItems=(data||[]).filter(x=>x.published&&new Date(x.starts_at).getTime()<=now
       &&safeDestination(x.target_path));
-    historyItems=window.StudyLabPlus?.filterSponsored(historyItems,plus)||historyItems;
     items=historyItems.filter(x=>!x.ends_at||new Date(x.ends_at).getTime()>now);
     stopTransition();
     current=Math.min(current,Math.max(0,items.length-1));
