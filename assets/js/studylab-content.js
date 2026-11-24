@@ -327,13 +327,6 @@
         "https://zpvatyxdbshjuqgtexzw.supabase.co",
         "sb_publishable_zd8S3PcyicJX6Cgyh0ez8A_sUSTCuiB"
       );
-    if(page==="Telegram_Channels.html"&&client&&window.StudyLabTelegramBrowser?.setPlusAdFree){
-      void (async()=>{let active=false;try{const session=(await client.auth.getSession()).data?.session;if(session?.user&&!session.user.is_anonymous){
-        const preview=/^deploy-preview-[0-9]+--studylablk\.netlify\.app$/.test(location.hostname)||["localhost","127.0.0.1"].includes(location.hostname);
-        let demo=false;if(preview){try{demo=JSON.parse(sessionStorage.getItem("sl-plus-demo")||"null")?.user===session.user.id;}catch(_){}}
-        if(preview)active=demo;else{const result=await client.rpc("studylab_plus_status");active=!result.error&&result.data?.enabled===true&&result.data?.active===true;}
-      }}catch(_){}window.StudyLabTelegramBrowser.setPlusAdFree(active);})();
-    }
     const draftMode = new URLSearchParams(location.search).get("admin-preview")==="1";
     if (config.mode === "preview") {
       // Sandboxed admin edits are private local overlays. Visitors only see
