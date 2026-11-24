@@ -59,7 +59,7 @@
               <span data-chat-status>Connecting…</span>
             </div>
           </div>
-          <div class="study-chat-head-actions">
+          <div class="study-chat-head-actions"><button type="button" class="study-chat-expand sl-chat-mute" data-chat-mute aria-pressed="false" aria-label="Enable chat notifications" title="Enable chat notifications"></button>
             <button type="button" class="study-chat-expand" data-chat-expand
               aria-label="Expand chat window" aria-pressed="false" title="Expand chat">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -234,6 +234,25 @@
   let isExpanded = false;
   let isChatModerator = false;
   let unreadCount = 0;
+  const muteButton=root.querySelector("[data-chat-mute]");
+  let notificationState={enabled:false,seen:0}, notificationUser="", toastQueue=[],toastTimers=new Map();
+  const toastHost=document.createElement("div");toastHost.className="sl-chat-toasts";toastHost.setAttribute("aria-label","Chat notifications");document.body.append(toastHost);
+  const notifyKey=()=>"studylab-chat-notifications-v1:"+notificationUser;
+  function saveNotifications(){if(notificationUser)try{localStorage.setItem(notifyKey(),JSON.stringify(notificationState));}catch(_){}}
+  function clearToasts(){toastQueue=[];for(const timer of toastTimers.values())clearTimeout(timer);toastTimers.clear();toastHost.replaceChildren();}
+  function paintMute(){if(!muteButton)return;const enabled=notificationState.enabled;muteButton.setAttribute("aria-pressed",String(enabled));muteButton.title=enabled?"Mute chat notifications":"Enable chat notifications";muteButton.setAttribute("aria-label",muteButton.title);muteButton.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/>'+(!enabled?'<path d="M3 3l18 18"/>':'')+'</svg>';}
+  function readNotificationState(){notificationUser=userId||"";notificationState={enabled:false,seen:0};try{const v=JSON.parse(localStorage.getItem(notifyKey()));if(v)notificationState={enabled:v.enabled===true,seen:Number(v.seen)||0};}catch(_){}paintMute();}
+  function markChatSeen(){notificationState.seen=Math.max(notificationState.seen,Date.now());saveNotifications();setUnread(0);clearToasts();}
+  function reconcileUnread(rows){if(!notificationState.enabled||isOpen&&!document.hidden){markChatSeen();return;}setUnread(rows.filter(r=>r.user_id!==userId&&Date.parse(r.created_at)>notificationState.seen).length);}
+  function pumpToasts(){if(!notificationState.enabled||document.hidden||isOpen||document.documentElement.dataset.slFocus==="on"){clearToasts();return;}
+    while(toastTimers.size<2&&toastQueue.length){const row=toastQueue.shift(),item=document.createElement("button");item.type="button";item.className="sl-chat-toast";const name=document.createElement("strong"),body=document.createElement("span");name.textContent=String(row.nickname||"Student");body.textContent=String(row.message||"New attachment");item.append(name,body);item.onclick=()=>setOpen(true);toastHost.append(item);const timer=setTimeout(()=>{toastTimers.delete(row.id);item.remove();pumpToasts();},3000);toastTimers.set(row.id,timer);}
+  }
+  function notifyIncoming(row){if(!notificationState.enabled||row.user_id===userId)return;if(isOpen&&!document.hidden){markChatSeen();return;}setUnread(unreadCount+1);if(!document.hidden&&document.documentElement.dataset.slFocus!=="on"){if(toastQueue.length<20)toastQueue.push(row);pumpToasts();}}
+  paintMute();
+  muteButton?.addEventListener("click",()=>{if(!notificationUser)return;notificationState.enabled=!notificationState.enabled;markChatSeen();paintMute();});
+  window.addEventListener("storage",e=>{if(notificationUser&&e.key===notifyKey()){readNotificationState();clearToasts();reconcileUnread([...messagesById.values()]);}});
+  window.addEventListener("studylab-workspace-settings",()=>{if(document.documentElement.dataset.slFocus==="on")clearToasts();});
+  document.addEventListener("visibilitychange",()=>{clearToasts();if(!document.hidden){if(isOpen)markChatSeen();else if(client)void syncChatSnapshot();}});
   let lastSentAt = 0;
   let messagesById = new Map();
   let profilesById = new Map();
@@ -298,6 +317,7 @@
     if (!user?.id) throw new Error("StudyLab student account unavailable.");
 
     userId = user.id;
+    readNotificationState();
 
     const profile = await account.getProfile?.();
     if (profile?.display_name) {
@@ -331,14 +351,14 @@
 
     if (!unread) return;
 
-    if (unreadCount === 0) {
+    if (!notificationState.enabled || unreadCount === 0) {
       unread.textContent = "";
       unread.hidden = true;
       unread.removeAttribute("aria-label");
       return;
     }
 
-    unread.textContent = unreadCount > 9 ? "9+" : String(unreadCount);
+    unread.textContent = unreadCount > 99 ? "99+" : String(unreadCount);
     unread.setAttribute(
       "aria-label",
       unreadCount === 1 ? "1 unread message" : unreadCount + " unread messages"
@@ -984,7 +1004,7 @@
       return;
     }
 
-    renderInitial((data || []).reverse());
+    const rows=(data||[]).reverse();renderInitial(rows);reconcileUnread(rows);
     // Separate, read-only student identity lookup: never expose private
     // student profile fields or require individual profile queries per bubble.
     loadProfiles();
@@ -1043,6 +1063,7 @@
         if(nearBottom)scrollToBottom(true);
         else list.scrollTop=previousTop;
       }
+      reconcileUnread(rows);
       await loadProfiles();
       await loadReactions();
     }catch(error){console.warn("Chat catch-up failed:",error);}
@@ -1147,7 +1168,7 @@
             list.scrollHeight-list.scrollTop-list.clientHeight<140;
           renderMessage(row,payload.eventType==="INSERT");
           if(payload.eventType==="INSERT"){
-            if(!isOpen && row.user_id!==userId)setUnread(unreadCount+1);
+            if(!wasKnown)notifyIncoming(row);
             if(wasNearBottom || row.session_id===sessionKey)scrollToBottom(true);
             loadProfiles();
           }else if(wasKnown)loadProfiles();
@@ -1649,7 +1670,7 @@
       if(client)void loadInstantChatMode();
       window.dispatchEvent(new Event("studylab-chat-open"));
       closeQuickAccess();
-      setUnread(0);
+      markChatSeen();
       scrollToBottom(true);
       resizeMessageInput();
       refreshTyping();
