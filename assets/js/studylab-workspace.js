@@ -10,6 +10,7 @@ function deviceType(n={}){
 }
 function aggregatePresence(state){const counts={desktop:0,mobile:0,tablet:0,unknown:0};for(const a of Object.values(state||{})){if(!Array.isArray(a)||!a.length)continue;const k=a[a.length-1]?.device_type;counts[["desktop","mobile","tablet"].includes(k)?k:"unknown"]++;}return counts;}
 if(typeof module!=="undefined"&&module.exports){module.exports={deviceType,aggregatePresence};return;}
+if(/\/admin\.html$/i.test(root.location.pathname)){root.StudyLabWorkspace=Object.freeze({deviceType,aggregatePresence});return;}
 const d=root.document,KEY="studylab-workspace-settings-v1",PREFIX="studylab-workspace-note-v1:";
 function read(k,f){try{return JSON.parse(localStorage.getItem(k))??f;}catch(_){return f;}}
 function write(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(_){return false;}}
