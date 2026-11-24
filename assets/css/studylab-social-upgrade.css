@@ -85,3 +85,5 @@ html[data-sl-lite=on] .sl-social-modal::backdrop{backdrop-filter:none}
 html[data-sl-lite=on] :is(.sl-social-modal,.sl-social-like-pop,.sl-social-comments-enter,.sl-social-comments-enter.is-removing){animation:none!important}
 
 .sl-social-photo-tools{flex-wrap:wrap;justify-content:center}.sl-social-photo-action{flex:1 1 auto;min-width:24px}.sl-social-photo-action.sl-feed-image-remove{flex:none}
+
+.sl-social-crop-stage{display:grid;place-items:center;background:#0b1422;border-radius:14px;padding:10px;min-width:0}.sl-social-crop-interactive{display:block;max-width:100%;max-height:45dvh;object-fit:contain;touch-action:none;cursor:move}.sl-social-crop-toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;margin-top:10px}.sl-social-crop-toolbar button{padding:7px 12px;min-height:40px}.sl-social-crop-toolbar select{font:inherit;color:inherit;background:transparent;border:1px solid #6c8aa8;border-radius:9px;padding:8px;min-height:40px}.sl-social-crop-toolbar option{color:#17283e;background:#eaf4ff}
