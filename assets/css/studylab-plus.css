@@ -164,3 +164,8 @@ html:is([data-plus-timer="compact"],[data-plus-timer="micro"]) body.sl-mini-wind
 html[data-plus-timer="micro"] body.sl-mini-window .status,.sl-mini-timer-panel[data-plus-timer="micro"] .sl-mini-timer-status{font-size:10px!important}
 .sl-mini-timer-panel[data-plus-timer="micro"] .sl-mini-timer-hint{display:none}
 html:is([data-plus-timer="compact"],[data-plus-timer="micro"]) body.sl-mini-window .head strong{font-size:10px}
+
+.room-rank-info strong .sl-name-mark{color:#38a9ff!important;flex-shrink:0;width:14px;height:14px;font-size:14px}
+html[data-theme="light"] .room-rank-info strong .sl-name-mark{color:#0d75df!important}
+html[data-sl-lite="on"] .room-person-card[data-plus-effect]::after{animation:none!important}
+.sl-plus-timer-select{color:var(--mini-ink,inherit);background:var(--mini-base,#26364d)}
