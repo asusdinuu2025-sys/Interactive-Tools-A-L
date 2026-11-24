@@ -490,6 +490,7 @@
     const existing=[...list.querySelectorAll(".study-chat-message")]
       .find(node=>node.dataset.messageId===row.id);
     messagesById.set(row.id,row);
+    if(row.user_id===userId&&pendingTextCards.has(row.id))clearPendingCard(row.id);
     clearEmptyState();
 
     const article=existing||document.createElement("article");
@@ -951,7 +952,8 @@
         busyMessageAction ||
         (pendingTextQueue.length>0 && (!instantChatMode || Boolean(editTarget) || Boolean(pendingImages.length+pendingFiles.length))) ||
         pendingTextQueue.length>=MAX_TEXT_QUEUE ||
-        (!editTarget && Date.now() - lastSentAt < CONFIG.rateLimitMs);
+        (!editTarget && Date.now() - lastSentAt < CONFIG.rateLimitMs) ||
+        (!editTarget && (!instantChatMode||pendingImages.length||pendingFiles.length) && Date.now()-lastQueueWrite<CONFIG.rateLimitMs);
     }
   }
 
@@ -1485,6 +1487,7 @@
           const {error}=await writeChatMessage(()=>item.client.from(CONFIG.table).insert(values));
           if(error)throw error;
           lastQueueWrite=Date.now();
+          window.setTimeout(updateComposer,CONFIG.rateLimitMs+20);
           clearPendingCard(item.id);
           if(!messagesById.has(item.id)){messageEventSeq+=1;renderMessage({...values,created_at:new Date().toISOString()},true);}
           scrollToBottom(true);
@@ -1512,6 +1515,7 @@
       queueText(message,now);return;
     }
     if(pendingTextQueue.length){chatFeedback("Your pending messages are being sent. Please try again shortly.",true);return;}
+    if(!editTarget&&Date.now()-lastQueueWrite<CONFIG.rateLimitMs){chatFeedback("Please wait a moment before sending another message.",true);return;}
     busyMessageAction=true;
     if(!editTarget)lastSentAt=now;
     updateComposer();chatFeedback("");
