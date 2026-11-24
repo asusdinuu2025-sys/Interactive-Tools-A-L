@@ -28,7 +28,7 @@ create function public.studylab_plus_status() returns jsonb
 language plpgsql stable security definer set search_path='' as $$
 declare uid uuid:=auth.uid(); g public.studylab_plus_grants%rowtype; enabled boolean;
 begin
- if uid is null then raise exception 'Sign in required' using errcode='42501'; end if;
+ if uid is null or not exists(select 1 from auth.users u join public.studylab_profiles p on p.id=u.id where u.id=uid and not coalesce(u.is_anonymous,false) and p.deleted_at is null) then raise exception 'Registered profile required' using errcode='42501'; end if;
  select s.enabled into enabled from public.studylab_plus_settings s where singleton;
  select * into g from public.studylab_plus_grants where user_id=uid;
  return jsonb_build_object('enabled',enabled,'active',enabled and g.user_id is not null and (g.expires_at is null or g.expires_at>now()),'granted',g.user_id is not null and (g.expires_at is null or g.expires_at>now()),'expires_at',g.expires_at,'billing_ready',false);
@@ -37,7 +37,7 @@ create function public.studylab_plus_admin_status(p_user uuid default null) retu
 language plpgsql stable security definer set search_path='' as $$
 declare g public.studylab_plus_grants%rowtype; enabled boolean; total bigint;
 begin
- if auth.uid() is null or not public.studylab_social_is_admin() then raise exception 'Admin access required' using errcode='42501'; end if;
+ if auth.uid() is null or not coalesce(public.studylab_social_is_admin(),false) then raise exception 'Admin access required' using errcode='42501'; end if;
  select s.enabled into enabled from public.studylab_plus_settings s where singleton;
  select count(*) into total from public.studylab_plus_grants where expires_at is null or expires_at>now();
  select * into g from public.studylab_plus_grants where user_id=p_user;
@@ -47,7 +47,7 @@ create function public.studylab_plus_admin_grant(p_user uuid,p_days integer) ret
 language plpgsql security definer set search_path='' as $$
 declare uid uuid:=auth.uid(); old public.studylab_plus_grants%rowtype; expiry timestamptz; operation text;
 begin
- if uid is null or not public.studylab_social_is_admin() then raise exception 'Admin access required' using errcode='42501'; end if;
+ if uid is null or not coalesce(public.studylab_social_is_admin(),false) then raise exception 'Admin access required' using errcode='42501'; end if;
  if p_days is null or p_days not in (-1,0,7,30,90,365) then raise exception 'Invalid membership duration'; end if;
  if not exists(select 1 from auth.users u join public.studylab_profiles p on p.id=u.id where u.id=p_user and not coalesce(u.is_anonymous,false) and p.deleted_at is null) then raise exception 'Registered profile required'; end if;
  perform pg_advisory_xact_lock(hashtextextended(p_user::text,129));
@@ -68,7 +68,7 @@ end; $$;
 create function public.studylab_plus_admin_enable(p_enabled boolean) returns jsonb
 language plpgsql security definer set search_path='' as $$
 begin
- if auth.uid() is null or not public.studylab_social_is_admin() then raise exception 'Admin access required' using errcode='42501'; end if;
+ if auth.uid() is null or not coalesce(public.studylab_social_is_admin(),false) then raise exception 'Admin access required' using errcode='42501'; end if;
  if p_enabled is null then raise exception 'Choose rollout setting'; end if;
  update public.studylab_plus_settings set enabled=p_enabled where singleton and enabled is distinct from p_enabled;
  if found then insert into public.studylab_plus_audit(actor_id,action) values(auth.uid(),case when p_enabled then 'enable' else 'disable' end); end if;
@@ -76,4 +76,39 @@ begin
 end; $$;
 revoke all on function public.studylab_plus_status(),public.studylab_plus_admin_status(uuid),public.studylab_plus_admin_grant(uuid,integer),public.studylab_plus_admin_enable(boolean) from public,anon,authenticated;
 grant execute on function public.studylab_plus_status(),public.studylab_plus_admin_status(uuid),public.studylab_plus_admin_grant(uuid,integer),public.studylab_plus_admin_enable(boolean) to authenticated;
+-- Preset-only appearance; no user-supplied CSS, images or arbitrary URLs.
+create table public.studylab_plus_appearance (
+ user_id uuid primary key references auth.users(id) on delete cascade,
+ cover text not null default 'default' check(cover in ('default','aurora','ocean','sunset')),
+ frame text not null default 'default' check(frame in ('default','violet','cyan','gold'))
+);
+alter table public.studylab_plus_appearance enable row level security;
+revoke all on public.studylab_plus_appearance from public,anon,authenticated;
+-- Public-facing cosmetic projection only. Never returns grants, expiry or billing information for other accounts.
+create function public.studylab_plus_profile_state(p_user uuid) returns jsonb
+language plpgsql stable security definer set search_path='' as $
+declare active boolean; appearance public.studylab_plus_appearance%rowtype;
+begin
+ if auth.uid() is null or not exists(select 1 from auth.users u where u.id=auth.uid() and not coalesce(u.is_anonymous,false)) then
+  return jsonb_build_object('active',false);
+ end if;
+ select exists(select 1 from public.studylab_plus_settings s join public.studylab_plus_grants g on g.user_id=p_user join auth.users u on u.id=g.user_id join public.studylab_profiles p on p.id=u.id
+ where s.singleton and s.enabled and not coalesce(u.is_anonymous,false) and p.deleted_at is null and (g.expires_at is null or g.expires_at>now())) into active;
+ if not active then return jsonb_build_object('active',false); end if;
+ select * into appearance from public.studylab_plus_appearance where user_id=p_user;
+ return jsonb_build_object('active',true,'cover',coalesce(appearance.cover,'default'),'frame',coalesce(appearance.frame,'default'));
+end; $;
+create function public.studylab_plus_save_appearance(p_cover text,p_frame text) returns jsonb
+language plpgsql security definer set search_path='' as $
+declare uid uuid:=auth.uid();
+begin
+ if uid is null or not coalesce((public.studylab_plus_status()->>'active')::boolean,false) then raise exception 'Active Plus required' using errcode='42501'; end if;
+ if p_cover is null or p_cover not in ('default','aurora','ocean','sunset') or p_frame is null or p_frame not in ('default','violet','cyan','gold') then raise exception 'Invalid appearance'; end if;
+ insert into public.studylab_plus_appearance(user_id,cover,frame) values(uid,p_cover,p_frame)
+ on conflict(user_id) do update set cover=excluded.cover,frame=excluded.frame;
+ return public.studylab_plus_profile_state(uid);
+end; $;
+revoke all on function public.studylab_plus_profile_state(uuid),public.studylab_plus_save_appearance(text,text) from public,anon,authenticated;
+grant execute on function public.studylab_plus_profile_state(uuid),public.studylab_plus_save_appearance(text,text) to authenticated;
+
 commit;
