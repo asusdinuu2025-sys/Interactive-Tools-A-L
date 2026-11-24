@@ -22,10 +22,10 @@ function currentDemo(){const u=root.StudyLabAccount?.getUser?.();if(!preview||!e
 function persistDemo(){try{if(demoUser)root.sessionStorage.setItem("sl-plus-demo",JSON.stringify({user:demoUser,appearance:demoAppearance}));else root.sessionStorage.removeItem("sl-plus-demo");}catch(_){}}
 function changed(){d.dispatchEvent(new Event("studylab:plus-changed"));}
 function setDemo(on){const u=root.StudyLabAccount?.getUser?.();if(!preview||!eligible(u))return;if(on&&demoUser!==u.id)demoAppearance=appearance(null);demoUser=on?u.id:null;persistDemo();changed();}
-async function adFree(){if(currentDemo())return true;return (await status()).active;}
+async function adFree(){if(preview)return currentDemo();return (await status()).active;}
 async function profileState(id){
  const a=root.StudyLabAccount;await a?.ready;const u=a?.getUser?.();if(!eligible(u)||!id)return appearance(null);
- if(currentDemo()&&id===u.id)return {...demoAppearance,active:true,demo:true};
+ if(preview&&id===u.id)return currentDemo()?{...demoAppearance,active:true,demo:true}:appearance(null);
  try{const r=await a.client.rpc("studylab_plus_profile_state",{p_user:id});return r.error||a.getUser()?.id!==u.id?appearance(null):appearance(r.data);}catch(_){return appearance(null);}
 }
 async function saveAppearance(cover,frame){
