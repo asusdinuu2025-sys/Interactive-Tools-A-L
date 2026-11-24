@@ -3,7 +3,7 @@ const {normalize,core,planned,eligible,demoAllowed,appearance,filterSponsored,va
 assert.equal(normalize(null).active,false);assert.equal(normalize({enabled:false,active:true}).active,false);
 assert.equal(normalize({enabled:true,active:true,billing_ready:true}).billing_ready,false);
 assert.equal(normalize({enabled:true,active:true}).active,true);
-assert.ok(core.some(x=>x.includes("Existing profile pictures")));assert.ok(planned.includes("Ad-free experience"));
+assert.ok(core.some(x=>x.includes("Existing profile pictures")));assert.ok(!planned.includes("Ad-free experience"));assert.ok(planned.includes("Custom studying cards and chat bubbles"));
 console.log("PASS: Plus defaults fail closed, billing disabled, existing free features retained in comparison.");
 
 assert.equal(eligible(null),false);assert.equal(eligible({id:"guest",is_anonymous:true}),false);assert.equal(eligible({id:"student",is_anonymous:false}),true);
@@ -11,12 +11,12 @@ assert.equal(demoAllowed("deploy-preview-119--studylablk.netlify.app"),true);ass
 console.log("PASS: registered account eligibility and preview-only demo host.");
 
 assert.equal(demoAllowed("localhost"),true);
-assert.deepEqual(appearance({active:false,cover:"aurora",frame:"gold"}),{active:false,cover:"default",frame:"default"});
-assert.deepEqual(appearance({active:true,cover:"aurora",frame:"gold"}),{active:true,cover:"aurora",frame:"gold"});
-assert.deepEqual(appearance({active:true,cover:"url(unsafe)",frame:"invalid"}),{active:true,cover:"default",frame:"default"});
+assert.deepEqual(appearance({active:false,cover:"aurora",frame:"gold"}),{active:false,cover:"default",frame:"default",effect:"default",bubble:"default",pet:"default",timer:"standard"});
+assert.deepEqual(appearance({active:true,cover:"aurora",frame:"gold"}),{active:true,cover:"aurora",frame:"gold",effect:"default",bubble:"default",pet:"default",timer:"standard"});
+assert.deepEqual(appearance({active:true,cover:"url(unsafe)",frame:"invalid"}),{active:true,cover:"default",frame:"default",effect:"default",bubble:"default",pet:"default",timer:"standard"});
 const banners=[{kind:"announcement"},{kind:"sponsored"},{kind:"announcement",design:{preset:"sponsored"}},{kind:"feature"},{kind:"resource"}];
 assert.equal(filterSponsored(banners,false).length,5);
-assert.deepEqual(filterSponsored(banners,true),[banners[0],banners[3],banners[4]]);
+assert.deepEqual(filterSponsored(banners,true),banners);
 const fs=require("node:fs"),path=require("node:path");
 const sql=fs.readFileSync(path.join(__dirname,"../supabase/plus-preview/plus_foundation.sql"),"utf8");
 assert.match(sql,/studylab_plus_appearance enable row level security/);
@@ -32,7 +32,7 @@ assert.equal(validFrame("#00aAFF"),true);assert.equal(validFrame("url(javascript
 assert.equal(appearance({active:true,cover:"galaxy",frame:"#00AAFF"}).frame,"#00AAFF");
 assert.equal(appearance({active:false,cover:"galaxy",frame:"#00AAFF"}).cover,"default");
 assert.doesNotMatch(sql,/\bas \$\n|\bend; \$;/);
-assert.match(sql,/studylab_plus_badges\(p_users uuid\[\]\)/);
+assert.match(sql,/studylab_plus_public_styles\(p_users uuid\[\]\)/);
 assert.match(sql,/cardinality\(p_users\),0\)>100/);
 const plusCode=fs.readFileSync(path.join(__dirname,"../assets/js/studylab-plus.js"),"utf8");
 const plusCss=fs.readFileSync(path.join(__dirname,"../assets/css/studylab-plus.css"),"utf8");
@@ -40,5 +40,12 @@ assert.match(plusCode,/sl-plus-plans/);
 assert.match(plusCode,/picker.type="color"/);
 assert.match(plusCss,/prefers-reduced-motion:reduce/);
 const telegramCode=fs.readFileSync(path.join(__dirname,"../assets/js/telegram-channel-browser.js"),"utf8");
-assert.match(telegramCode,/plusAdFree&&key==="sponsored"/);
+assert.doesNotMatch(telegramCode,/plusAdFree/);
 console.log("PASS: cover and ring catalog, custom color validation, staged SQL delimiters, responsive motion and sponsored controls.");
+
+assert.equal(appearance({active:true,effect:"galaxy",bubble:"mint",pet:"nebula",timer:"micro"}).timer,"micro");
+assert.equal(appearance({active:false,effect:"galaxy",bubble:"mint",pet:"nebula",timer:"micro"}).effect,"default");
+assert.equal(appearance({active:true,bubble:"unsafe"}).bubble,"default");
+assert.equal((sql.match(/create table public\.studylab_plus_appearance/g)||[]).length,1);
+const room=fs.readFileSync(path.join(__dirname,"../assets/js/study-room-realtime.js"),"utf8");
+assert.match(room,/room-rank-subject/);assert.doesNotMatch(room,/querySelector\('\.room-rank-info span'\)/);
