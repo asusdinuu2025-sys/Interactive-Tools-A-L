@@ -630,7 +630,7 @@
     const actions=element("div","sl-pv-actions");
     edit = createButton("sl-pv-edit","edit","Edit Profile");
     deleteStart = createButton("sl-pv-delete","trash","Delete Account");
-    actions.append(edit,deleteStart);
+    const plusEntry=button("sl-plus-profile-entry","Get StudyLab Plus");plusEntry.hidden=true;plusEntry.onclick=()=>window.StudyLabPlus?.open();actions.append(edit,deleteStart,plusEntry);
     followAction=element("div","sl-pv-follow-action");
     followAction.hidden=true;
 
@@ -905,6 +905,7 @@
     bioNode.textContent="Loading bio…";
     dialog.setAttribute("aria-describedby","slPvDescription");
     dialog.querySelector(".sl-pv-actions").hidden=!own;
+    const plusEntry=dialog.querySelector(".sl-plus-profile-entry");if(plusEntry){plusEntry.hidden=true;if(own)void window.StudyLabPlus?.sync(plusEntry);}
     followAction.hidden=own;
     followAction.replaceChildren();
     if(!own){

@@ -363,6 +363,10 @@
       for(const row of rows){const card=el("div",undefined,"sladmin-card"),actions=el("div",undefined,"sladmin-verification-actions");card.append(el("strong",row.display_name||"Student"),el("p","@"+(row.username||"—")+" · "+new Date(row.requested_at).toLocaleString()));
         for(const [label,value] of [["Approve",true],["Reject",false]]){const b=button(label,async()=>{if(!confirm(label+" this verification request?"))return;for(const x of actions.querySelectorAll("button"))x.disabled=true;try{await api.reviewVerification(row.user_id,value);await refreshVerification();}catch(e){verifyStatus.textContent=e.message;for(const x of actions.querySelectorAll("button"))x.disabled=false;}});b.disabled=api.preview;actions.append(b);}card.append(actions);verifyRows.append(card);}
     }catch(e){verifyStatus.textContent=e.message||"Verification requests unavailable.";}};verifyCard.append(button("Refresh requests",refreshVerification));host.append(verifyCard);if(api.verificationQueue)void refreshVerification();
+    const plusCard=el("article",undefined,"sladmin-card"),plusState=el("p","Checking Plus configuration…"),plusToggle=button("Enable Plus",async()=>{if(!confirm("Change StudyLab Plus rollout? Billing remains disabled."))return;plusToggle.disabled=true;try{const current=await api.plusStatus();await api.plusEnable(!current.enabled);await loadPlus();}catch(e){plusState.textContent=e.message;}});
+    plusToggle.disabled=true;plusCard.append(el("h3","StudyLab Plus"),el("p","Complimentary memberships and launch controls. Card payments are disabled."),plusState,plusToggle);host.append(plusCard);
+    async function loadPlus(){try{const s=await api.plusStatus();if(!plusCard.isConnected)return;plusState.textContent=(s.enabled?"Enabled":"Disabled")+" · "+s.complimentary_count+" active complimentary grants";plusToggle.textContent=s.enabled?"Disable Plus":"Enable Plus";plusToggle.disabled=api.preview||api.connectedPreview;}catch(_){plusState.textContent="Membership database is not installed. Billing disabled.";}}
+    if(api.plusStatus)void loadPlus();
     // A stalled API call must not block the entire dashboard forever.
     async function fetchWithTimeout(label, getValue) {
       let timeout;
@@ -580,6 +584,10 @@
     ])
       dl.append(el("dt", key), el("dd", value));
     dialog.append(dl);
+    if(api.plusStatus){const section=el("section",undefined,"sladmin-card"),status=el("p","Checking membership…"),duration=el("select");duration.setAttribute("aria-label","Complimentary Plus duration");for(const [n,label] of [[7,"7 days"],[30,"30 days"],[90,"90 days"],[365,"1 year"],[-1,"Lifetime"]]){const o=el("option",label);o.value=String(n);duration.append(o);}duration.value="30";const grant=button("Grant / extend Plus",()=>change(Number(duration.value))),revoke=button("Revoke complimentary Plus",()=>change(0));grant.disabled=revoke.disabled=true;section.append(el("h3","Plus membership"),status,duration,grant,revoke);dialog.append(section);
+      async function refresh(){try{const s=await api.plusStatus(u.id);status.textContent=s.granted?(s.expires_at?"Complimentary · "+new Date(s.expires_at).toLocaleDateString():"Complimentary · Lifetime"):"Free account";grant.disabled=api.preview||api.connectedPreview||u.guest;revoke.disabled=grant.disabled||!s.granted;}catch(_){status.textContent="Membership database unavailable.";grant.disabled=revoke.disabled=true;}}
+      async function change(days){if(!confirm(days===0?"Revoke complimentary Plus?":"Grant or extend complimentary Plus for this account?"))return;grant.disabled=revoke.disabled=true;try{await api.plusGrant(u.id,days);await refresh();}catch(e){status.textContent=e.message;}}
+      void refresh();}
     document.body.append(dialog);
     dialog.addEventListener("close", () => dialog.remove());
     dialog.showModal();
