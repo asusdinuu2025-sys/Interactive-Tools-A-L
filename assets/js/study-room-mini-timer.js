@@ -16,7 +16,8 @@
   let standaloneWindow=null;
   function openIndependentWindow(opener=window){
     if(standaloneWindow&&!standaloneWindow.closed){standaloneWindow.focus();return;}
-    standaloneWindow=opener.open("study-room-mini.html","StudyLabIndependentTimer","popup,width=370,height=280,resizable=yes");
+    const [width,height]=modes[plusMode];
+    standaloneWindow=opener.open("study-room-mini.html","StudyLabIndependentTimer","popup,width="+width+",height="+height+",resizable=yes");
     if(standaloneWindow)standaloneWindow.focus();
     else{
       panel.hidden=false;
