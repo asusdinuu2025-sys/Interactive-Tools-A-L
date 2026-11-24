@@ -84,7 +84,14 @@ create table public.studylab_plus_appearance (
  effect text not null default 'default' check(effect in ('default','aurora','galaxy','pulse','sakura','ocean')),
  bubble text not null default 'default' check(bubble in ('default','violet','cyan','rose','mint','gold')),
  pet text not null default 'default' check(pet in ('default','nebula','mint','rose','gold')),
- timer text not null default 'standard' check(timer in ('standard','compact','micro'))
+ timer text not null default 'standard' check(timer in ('standard','compact','micro')),
+ details jsonb not null default '{"shape":"default","eyes":"default","glow":"default","mouth":"default","eyeColor":"default","timerAccent":"default"}'::jsonb check (jsonb_typeof(details)='object' and details ?& array['shape','eyes','glow','mouth','eyeColor','timerAccent'] and details - array['shape','eyes','glow','mouth','eyeColor','timerAccent'] = '{}'::jsonb
+ and coalesce(details->>'shape','') in ('default','capsule','square','orb')
+ and coalesce(details->>'eyes','') in ('default','round','pixel','star','arc')
+ and coalesce(details->>'glow','') in ('default','none','soft','neon','galaxy','spark')
+ and coalesce(details->>'mouth','') in ('default','smile','dot','none')
+ and coalesce(details->>'eyeColor','') ~ '^(default|#[0-9a-fA-F]{6})$'
+ and coalesce(details->>'timerAccent','') ~ '^(default|#[0-9a-fA-F]{6})$')
 );
 alter table public.studylab_plus_appearance enable row level security;
 revoke all on public.studylab_plus_appearance from public,anon,authenticated;
@@ -108,19 +115,19 @@ begin
  result:=coalesce(public.studylab_plus_public_styles(array[p_user])->p_user::text,'{"active":false}'::jsonb);
  if auth.uid()=p_user and coalesce((result->>'active')::boolean,false) then
   select * into prefs from public.studylab_plus_appearance where user_id=p_user;
-  result:=result||jsonb_build_object('pet',coalesce(prefs.pet,'default'),'timer',coalesce(prefs.timer,'standard'));
+  result:=result||jsonb_build_object('pet',coalesce(prefs.pet,'default'),'timer',coalesce(prefs.timer,'standard'),'details',coalesce(prefs.details,'{"shape":"default","eyes":"default","glow":"default","mouth":"default","eyeColor":"default","timerAccent":"default"}'::jsonb));
  end if;
  return result;
 end; $$;
-create function public.studylab_plus_save_appearance(p_cover text,p_frame text,p_effect text,p_bubble text,p_pet text,p_timer text) returns jsonb
+create function public.studylab_plus_save_appearance(p_cover text,p_frame text,p_effect text,p_bubble text,p_pet text,p_timer text,p_details jsonb) returns jsonb
 language plpgsql security definer set search_path='' as $$
 declare uid uuid:=auth.uid();
 begin
  if uid is null or not coalesce((public.studylab_plus_status()->>'active')::boolean,false) then raise exception 'Active Plus required' using errcode='42501'; end if;
- insert into public.studylab_plus_appearance(user_id,cover,frame,effect,bubble,pet,timer) values(uid,p_cover,p_frame,p_effect,p_bubble,p_pet,p_timer)
- on conflict(user_id) do update set cover=excluded.cover,frame=excluded.frame,effect=excluded.effect,bubble=excluded.bubble,pet=excluded.pet,timer=excluded.timer;
+ insert into public.studylab_plus_appearance(user_id,cover,frame,effect,bubble,pet,timer,details) values(uid,p_cover,p_frame,p_effect,p_bubble,p_pet,p_timer,p_details)
+ on conflict(user_id) do update set cover=excluded.cover,frame=excluded.frame,effect=excluded.effect,bubble=excluded.bubble,pet=excluded.pet,timer=excluded.timer,details=excluded.details;
  return public.studylab_plus_profile_state(uid);
 end; $$;
-revoke all on function public.studylab_plus_public_styles(uuid[]),public.studylab_plus_profile_state(uuid),public.studylab_plus_save_appearance(text,text,text,text,text,text) from public,anon,authenticated;
-grant execute on function public.studylab_plus_public_styles(uuid[]),public.studylab_plus_profile_state(uuid),public.studylab_plus_save_appearance(text,text,text,text,text,text) to authenticated;
+revoke all on function public.studylab_plus_public_styles(uuid[]),public.studylab_plus_profile_state(uuid),public.studylab_plus_save_appearance(text,text,text,text,text,text,jsonb) from public,anon,authenticated;
+grant execute on function public.studylab_plus_public_styles(uuid[]),public.studylab_plus_profile_state(uuid),public.studylab_plus_save_appearance(text,text,text,text,text,text,jsonb) to authenticated;
 commit;
