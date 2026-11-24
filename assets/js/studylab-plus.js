@@ -107,5 +107,43 @@ async function open(feature){
  node.addEventListener("cancel",e=>{e.preventDefault();close();});node.addEventListener("close",()=>{node.remove();if(dialog===node){dialog=null;session=null;}previous?.focus?.({preventScroll:true});});
  d.body.append(node);try{node.showModal();x.focus();}catch(_){node.remove();dialog=null;session=null;}
 }
-root.StudyLabPlus=Object.freeze({status,sync,open,adFree,filterSponsored,refreshProfile,clearProfile});
+
+const badgeQueue=new Set(),badgeCache=new Map();let badgeTimer=null,badgeBlockedUntil=0,badgeViewer=null;
+const validId=id=>typeof id==="string"&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+function renderNameBadge(node,id){
+ const own=root.StudyLabAccount?.getUser?.()?.id===id,demo=own&&currentDemo(),cached=badgeCache.get(id);
+ const show=demo||Boolean(cached?.active&&cached.until>Date.now());
+ let mark=node.querySelector(":scope > .sl-plus-inline-badge");
+ if(!show){mark?.remove();return;}
+ if(!mark){mark=E("span",null,"sl-plus-inline-badge");node.append(mark);}
+ mark.textContent=demo?"✦ Plus demo":"✦ Plus";mark.title=demo?"Preview only":"StudyLab Plus";
+}
+function decorateName(node,id){
+ if(!node)return;
+ if(node.closest(".sl-pv-dialog"))return; // Profile view has a dedicated badge and appearance.
+ node.dataset.slPlusUser=validId(id)?id:"";
+ renderNameBadge(node,id);
+ if(!validId(id)||badgeBlockedUntil>Date.now()||badgeCache.get(id)?.until>Date.now())return;
+ badgeQueue.add(id);
+ if(!badgeTimer)badgeTimer=setTimeout(flushBadges,100);
+}
+async function flushBadges(){
+ badgeTimer=null;const a=root.StudyLabAccount;await a?.ready;const viewer=a?.getUser?.();const ids=[...badgeQueue].slice(0,100);ids.forEach(id=>badgeQueue.delete(id));if(!eligible(viewer)||!ids.length)return;
+ if(badgeViewer!==viewer.id){badgeCache.clear();badgeViewer=viewer.id;}
+ try{const result=await a.client.rpc("studylab_plus_badges",{p_users:ids});if(a.getUser()?.id!==viewer.id)return;if(result.error)throw result.error;
+ const members=new Set(Array.isArray(result.data)?result.data:[]);for(const id of ids)badgeCache.set(id,{active:members.has(id),until:Date.now()+60000});
+ }catch(_){badgeBlockedUntil=Date.now()+60000;badgeCache.clear();badgeQueue.clear();}
+ d.querySelectorAll("[data-sl-plus-user]").forEach(node=>renderNameBadge(node,node.dataset.slPlusUser));
+ if(badgeQueue.size&&!badgeTimer)badgeTimer=setTimeout(flushBadges,100);
+}
+function refreshNames(){d.querySelectorAll("[data-sl-plus-user]").forEach(node=>decorateName(node,node.dataset.slPlusUser));}
+d.addEventListener("studylab:plus-changed",refreshNames);
+d.addEventListener("visibilitychange",()=>{if(!d.hidden)refreshNames();});
+setInterval(()=>{if(!d.hidden&&d.querySelector("[data-sl-plus-user]"))refreshNames();},60000);
+const account=root.StudyLabAccount;
+account?.client?.auth?.onAuthStateChange?.((event,session)=>{
+ const uid=session?.user?.id||null;if(event==="SIGNED_OUT"||(badgeViewer&&badgeViewer!==uid)){badgeCache.clear();badgeQueue.clear();badgeViewer=uid;demoUser=null;demoAppearance=appearance(null);persistDemo();setTimeout(()=>{close();changed();},0);}
+});
+
+root.StudyLabPlus=Object.freeze({status,sync,open,adFree,filterSponsored,refreshProfile,clearProfile,decorateName});
 })(typeof window!=="undefined"?window:globalThis);
