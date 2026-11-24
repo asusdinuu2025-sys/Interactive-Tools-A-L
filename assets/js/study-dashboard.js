@@ -1016,10 +1016,11 @@
   // Additional learning-card links use the existing local recent/favorite maps.
   // Never track general links, social content, chat, profile or admin actions.
   document.addEventListener("click",event=>{
-    const anchor=event.target.closest?.("a.sl-lesson-publisher-card[href],a.examhub-card[href],a.utility-card[href],a.subject-card[href]");
+    const anchor=event.target.closest?.("a.sl-lesson-publisher-card[href],a.examhub-card[href],a.utility-card[href],a.subject-card[href],a.paper-btn[href],a.resource-link[href]");
     if(!anchor||anchor.matches(".tool-card")||event.target.closest(".study-favorite-toggle"))return;
     const url=safeResourceURL(anchor.href);if(!url)return;
-    const title=anchor.querySelector("h2,h3,h4,strong")?.textContent?.trim()||anchor.getAttribute("aria-label")||anchor.textContent.trim().slice(0,120);
+    const heading=anchor.closest(".paper-card,.resource-card,.lesson-card")?.querySelector("h2,h3,h4,strong")?.textContent?.trim();
+    const title=anchor.querySelector("h2,h3,h4,strong")?.textContent?.trim()||anchor.getAttribute("aria-label")||(heading?heading+" · "+anchor.textContent.trim():anchor.textContent.trim().slice(0,120));
     if(title)recordMeta({url,title,subject:subject||"study-lab",description:""});
   });
   window.StudyLabResourceDashboard=Object.freeze({
