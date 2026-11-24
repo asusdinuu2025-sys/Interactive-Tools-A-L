@@ -778,7 +778,7 @@
       </div>
 
       <section class="study-quick-section">
-        <div class="study-quick-section-title">⭐ Favorites <span id="studyFavoriteCount">0</span></div>
+        <div class="study-quick-section-title">⭐ My Library <span id="studyFavoriteCount">0</span></div>
         <div id="studyFavoriteList" class="study-quick-list"></div>
       </section>
 
@@ -789,6 +789,7 @@
     `;
 
     document.body.append(button, panel);
+    window.StudyLabWorkspace?.mountQuick(panel);
 
     const close = panel.querySelector(".study-quick-close");
     const panelSearch = panel.querySelector("#studyQuickSearchPanel");
@@ -886,6 +887,7 @@
   }
 
   function refreshQuickPanel() {
+    window.dispatchEvent(new Event("studylab-resource-dashboard-change"));
     const panel = document.getElementById("studyQuickAccessPanel");
     if (!panel) return;
 
@@ -1010,6 +1012,33 @@
     });
   }
 
+  function safeResourceURL(raw){try{const u=new URL(raw,location.href);return ["https:","http:"].includes(u.protocol)&&!u.username&&!u.password?u.href:null;}catch(_){return null;}}
+  // Additional learning-card links use the existing local recent/favorite maps.
+  // Never track general links, social content, chat, profile or admin actions.
+  document.addEventListener("click",event=>{
+    const anchor=event.target.closest?.("a.sl-lesson-publisher-card[href],a.examhub-card[href],a.utility-card[href],a.subject-card[href]");
+    if(!anchor||anchor.matches(".tool-card")||event.target.closest(".study-favorite-toggle"))return;
+    const url=safeResourceURL(anchor.href);if(!url)return;
+    const title=anchor.querySelector("h2,h3,h4,strong")?.textContent?.trim()||anchor.getAttribute("aria-label")||anchor.textContent.trim().slice(0,120);
+    if(title)recordMeta({url,title,subject:subject||"study-lab",description:""});
+  });
+  window.StudyLabResourceDashboard=Object.freeze({
+    recent:getRecent,
+    favorites:()=>[...cloud.favorites.values()].map(x=>({url:x.tool_url,title:x.title,description:x.description,subject:x.subject})),
+    record:item=>{const url=safeResourceURL(item?.url);if(url)recordMeta({...item,url});},
+    focusSearch,
+    saveFavorite:item=>{
+      const url=safeResourceURL(item?.url);if(!cloud.ready||!url)return false;
+      cloud.favorites.set(url,{tool_url:url,title:String(item.title||"Learning resource").slice(0,160),subject:item.subject||"study-lab",description:item.description||""});
+      persistDashboardLocal();document.querySelectorAll(".tool-card").forEach(card=>{const b=card.querySelector(".study-favorite-toggle");if(b&&card.href===url)updateFavoriteButton(card,b);});refreshQuickPanel();return true;
+    },
+    removeFavorite:url=>{
+      if(!cloud.ready||!cloud.favorites.has(url))return false;
+      cloud.favorites.delete(url);persistDashboardLocal();
+      document.querySelectorAll(".tool-card").forEach(card=>{const b=card.querySelector(".study-favorite-toggle");if(b&&card.href===url)updateFavoriteButton(card,b);});
+      refreshQuickPanel();return true;
+    }
+  });
   async function boot() {
     // Make header search responsive immediately, not after account/cloud setup.
     createSearchBar();
@@ -1039,6 +1068,7 @@
     refreshProgress();
     createQuickAccess();
     refreshQuickPanel();
+    window.StudyLabWorkspace?.mountHome();
     setupCardObservers();
   }
 
