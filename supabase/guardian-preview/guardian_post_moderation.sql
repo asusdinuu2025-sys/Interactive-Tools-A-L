@@ -3,7 +3,7 @@
 begin;
 create table if not exists studylab_private.guardian_post_worker_state(
  singleton boolean primary key default true check(singleton),
- last_ok timestamptz, ready boolean not null default false
+ last_ok timestamptz, last_watchdog timestamptz, ready boolean not null default false
 );
 insert into studylab_private.guardian_post_worker_state(singleton) values(true) on conflict do nothing;
 alter table studylab_private.guardian_post_worker_state enable row level security;
@@ -21,7 +21,7 @@ alter table studylab_private.guardian_chat_preferences drop constraint if exists
 alter table studylab_private.guardian_chat_preferences add constraint guardian_chat_preferences_mode_check check(mode in ('instant','strict','public'));
 create or replace function studylab_private.guardian_post_ready()
 returns boolean language sql stable security definer set search_path='' as $post$
- select exists(select 1 from studylab_private.guardian_post_worker_state where singleton and ready and last_ok>clock_timestamp()-interval '20 seconds')
+ select exists(select 1 from studylab_private.guardian_post_worker_state where singleton and ready and last_ok>clock_timestamp()-interval '20 seconds' and last_watchdog>clock_timestamp()-interval '8 seconds')
  and exists(select 1 from studylab_private.guardian_settings where singleton and settings->>'enabled'='true' and settings->>'chat'='true' and settings->>'ai'='true' and settings->>'links'='true' and settings->>'spam'='true')
  and exists(select 1 from studylab_private.guardian_word_settings where singleton and enabled and cardinality(words)>0)
 $post$;
@@ -111,6 +111,7 @@ create or replace function studylab_private.guardian_post_expire()
 returns void language plpgsql security definer set search_path='' as $post$
 declare j record;
 begin
+ update studylab_private.guardian_post_worker_state set last_watchdog=clock_timestamp() where singleton;
  for j in select message_id from studylab_private.guardian_post_jobs where expires_at<=clock_timestamp() order by expires_at limit 20 loop
   perform 1 from public.studylab_chat_messages where id=j.message_id for update;
   if exists(select 1 from studylab_private.guardian_post_jobs q where q.message_id=j.message_id and q.expires_at<=clock_timestamp()) then

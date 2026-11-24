@@ -12,8 +12,7 @@ select cron.schedule('studylab-guardian-post-worker','3 seconds',$job$
   headers:=jsonb_build_object('Content-Type','application/json','x-guardian-worker',(select decrypted_secret from vault.decrypted_secrets where name='guardian_post_worker_token')),
   body:='{}'::jsonb,timeout_milliseconds:=7000)
  where exists(select 1 from studylab_private.guardian_post_jobs)
- or exists(select 1 from studylab_private.guardian_chat_preferences where singleton and mode='public')
- or exists(select 1 from studylab_private.guardian_post_worker_state where singleton and ready);
+ or exists(select 1 from studylab_private.guardian_chat_preferences where singleton and mode='public');
 $job$);
 -- Bootstrap one authenticated synthetic worker invocation ONLY after confirming both
 -- schedules run. The third mode stays unavailable until health is fresh.
