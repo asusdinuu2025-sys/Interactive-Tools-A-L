@@ -1879,3 +1879,7 @@ html[data-sl-focus=on] .sl-chat-toasts{display:none}
 .study-chat-unread:not([hidden]){background:#e83f58!important;color:white!important}
 @keyframes sl-chat-toast-in{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.sl-chat-toast{animation:none}}html[data-sl-lite=on] .sl-chat-toast{animation:none}
+
+.sl-guardian-notice{box-sizing:border-box;width:min(440px,calc(100vw - 28px));max-height:calc(100dvh - 28px);overflow:auto;padding:22px;border:1px solid #587b9b;border-radius:20px;background:linear-gradient(145deg,#23374e,#142238);color:#edf6ff;font:inherit;box-shadow:0 20px 80px #0006;z-index:30000}
+.sl-guardian-notice::backdrop{background:#06101bc4;backdrop-filter:blur(4px)}.sl-guardian-notice h2{margin:0 0 10px;font-size:1.1rem}.sl-guardian-notice p{font-size:.88rem;line-height:1.6;margin:0 0 18px}.sl-guardian-notice-actions{display:flex;gap:9px;justify-content:flex-end}.sl-guardian-notice-actions button{font:inherit;font-weight:700;border:1px solid #7396b7;border-radius:10px;padding:10px 16px;min-height:42px;color:inherit;background:#ffffff10;cursor:pointer}.sl-guardian-notice-actions .is-primary{color:#fff;background:#267cbd}.sl-guardian-fallback{position:fixed;inset:0;margin:auto;box-shadow:0 0 0 100vmax #06101bc4}
+html[data-theme=light] .sl-guardian-notice{background:#edf5fc;color:#19334d;border-color:#afc8df}html[data-sl-lite=on] .sl-guardian-notice::backdrop{backdrop-filter:none}
