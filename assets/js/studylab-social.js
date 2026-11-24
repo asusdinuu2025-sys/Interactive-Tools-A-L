@@ -1024,6 +1024,7 @@
         field.disabled = true;
         try {
           const commenter = await requireBasicProfile();
+          await window.StudyLabGuardianCheck(client,"comments",body);
           const { error } = await client.from("studylab_social_comments")
             .insert({ post_id: post.id, author_id: commenter.id, body });
           if (error) throw error;
@@ -1507,6 +1508,7 @@
       if (!body && !files.length) throw new Error("Write something or attach a photo.");
       setBusy(true);
       setStatus(files.length ? "Preparing your post…" : "Publishing your post…");
+      await window.StudyLabGuardianCheck(account.client,"posts",body);
       const { data: post, error: postError } = await account.client.from("studylab_social_posts")
         .insert({ author_id: user.id, body }).select("id").single();
       if (postError) throw postError;

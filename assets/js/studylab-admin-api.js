@@ -639,6 +639,7 @@
   window.StudyLabAdminAPI = Object.freeze({
     guardianPreview,
     guardianSettings,
+    guardianHistory: async()=>{requireAccess();return rpc("studylab_guardian_history");},
     init,
     content,
     save,

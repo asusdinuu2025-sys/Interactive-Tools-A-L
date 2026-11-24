@@ -1,7 +1,7 @@
 /* Shared deterministic preview rules; not a link reputation service. */
 (function(root){
   "use strict";
-  const defaults=Object.freeze({enabled:false,chat:true,posts:true,comments:true,links:true,spam:true});
+  const defaults=Object.freeze({enabled:false,chat:true,posts:true,comments:true,links:true,spam:true,ai:false});
   const normalize=s=>Object.fromEntries(Object.keys(defaults).map(k=>[k,typeof s?.[k]==="boolean"?s[k]:defaults[k]]));
   function classify(input, settings){
     const s=normalize(settings), text=String(input?.text??""), surface=input?.surface||"chat";

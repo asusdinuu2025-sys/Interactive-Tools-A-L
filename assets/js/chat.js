@@ -1353,6 +1353,7 @@
   }
 
   function messageFailure(error, editing) {
+    if(String(error?.message||"").startsWith("Guardian:")) return String(error.message);
     const reason=String(error?.message || "").toLowerCase();
     const code=String(error?.code || "").toUpperCase();
     if (/wait before sending|rate.limit|too many requests/.test(reason) || code==="429")
@@ -1413,6 +1414,7 @@
     updateComposer();chatFeedback("");
     try {
       const editingId=editTarget;
+      await window.StudyLabGuardianCheck(client,"chat",message||(pendingImages.length?"📷 Photo":"📎 File"));
       let error;
       if(editingId){
         if(messagesById.get(editingId)?.user_id!==userId)
