@@ -242,7 +242,7 @@
   function clearToasts(){toastQueue=[];for(const timer of toastTimers.values())clearTimeout(timer);toastTimers.clear();toastHost.replaceChildren();}
   function paintMute(){if(!muteButton)return;const enabled=notificationState.enabled;muteButton.setAttribute("aria-pressed",String(enabled));muteButton.title=enabled?"Mute chat notifications":"Enable chat notifications";muteButton.setAttribute("aria-label",muteButton.title);muteButton.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/>'+(!enabled?'<path d="M3 3l18 18"/>':'')+'</svg>';}
   function readNotificationState(){notificationUser=userId||"";notificationState={enabled:false,seen:0};try{const v=JSON.parse(localStorage.getItem(notifyKey()));if(v)notificationState={enabled:v.enabled===true,seen:Number(v.seen)||0};}catch(_){}paintMute();}
-  function markChatSeen(){const timestamps=[...messagesById.values()].map(r=>Date.parse(r.created_at)).filter(Number.isFinite);notificationState.seen=Math.max(notificationState.seen,...timestamps, timestamps.length?0:Date.now());saveNotifications();setUnread(0);clearToasts();}
+  function markChatSeen(){const timestamps=[...messagesById.values()].map(r=>Date.parse(r.created_at)).filter(Number.isFinite);notificationState.seen=Math.max(notificationState.seen,...timestamps, timestamps.length?0:(notificationState.seen||Date.now()));saveNotifications();setUnread(0);clearToasts();}
   function reconcileUnread(rows){if(!notificationState.enabled||isOpen&&!document.hidden){markChatSeen();return;}setUnread(rows.filter(r=>r.user_id!==userId&&Date.parse(r.created_at)>notificationState.seen).length);}
   function pumpToasts(){if(!notificationState.enabled||document.hidden||isOpen||document.documentElement.dataset.slFocus==="on"){clearToasts();return;}
     while(toastTimers.size<2&&toastQueue.length){const row=toastQueue.shift(),item=document.createElement("button");item.type="button";item.className="sl-chat-toast";item.dataset.chatToastId=String(row.id);const name=document.createElement("strong"),body=document.createElement("span");name.textContent=String(row.nickname||"Student");body.textContent=publicChatMode?"New chat message":String(row.message||"New attachment");item.append(name,body);item.onclick=()=>setOpen(true);toastHost.append(item);const timer=setTimeout(()=>{toastTimers.delete(row.id);item.remove();pumpToasts();},3000);toastTimers.set(row.id,timer);}
@@ -874,7 +874,7 @@
   }
   function deleteMessageLocally(id) {
     toastQueue=toastQueue.filter(row=>row.id!==id);const timer=toastTimers.get(id);if(timer){clearTimeout(timer);toastTimers.delete(id);toastHost.querySelectorAll("[data-chat-toast-id]").forEach(node=>{if(node.dataset.chatToastId===String(id))node.remove();});pumpToasts();}
-    messagesById.delete(id);reactionsByMessage.delete(id);
+    messagesById.delete(id);reactionsByMessage.delete(id);reconcileUnread([...messagesById.values()]);
     for(const element of list.querySelectorAll(".study-chat-message")){
       if(element.dataset.messageId!==id)continue;
       if(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches)element.remove();

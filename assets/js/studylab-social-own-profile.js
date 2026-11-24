@@ -12,12 +12,13 @@ async function render(host){
   const user=account?.getUser?.();if(token!==versions.get(host)||!host.isConnected)return;
   host.replaceChildren(E("h3","Your profile"));
   if(!user||user.is_anonymous){host.append(E("p","Sign in to view and edit your profile."),B("Sign in",()=>{mobileDialog?.close();window.StudyLabAuthGateway?.open("login");}));return;}
-  const [profile,counts]=await Promise.all([account.getProfile(true),window.StudyLabFollow?.stats(user.id).catch(()=>null)]);
+  const [profile,counts,posts]=await Promise.all([account.getProfile(true),window.StudyLabFollow?.stats(user.id).catch(()=>null),Promise.resolve(account.client.from("studylab_social_posts").select("id",{head:true,count:"exact"}).eq("author_id",user.id)).catch(()=>null)]);
   if(token!==versions.get(host)||!host.isConnected||account.getUser()?.id!==user.id)return;
   const avatar=E("div",null,"sl-pv-avatar sl-social-own-avatar");avatar.classList.toggle("sl-pv-avatar-female",profile?.gender==="female");avatar.innerHTML='<svg viewBox="0 0 24 24" width="35" height="35" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></svg>';
   const name=E("strong",profile?.display_name||"Student","sl-social-own-name"),username=E("small",profile?.username?"@"+profile.username:"Username not set"),bio=E("p",profile?.bio||"No bio yet.","sl-social-own-bio");
   host.append(avatar,name,username,bio);window.StudyLabAvatar?.decorate(avatar,user.id);window.StudyLabNameMark?.decorate(name,user.id);
   const stats=E("div",null,"sl-social-own-counts");
+  stats.append(E("span",(posts?.error?"—":posts?.count??"—")+" posts","sl-social-post-count"));
   for(const k of ["followers","following"]){const b=B((counts?.[k]??"—")+" "+k,()=>showProfile({listType:k}));stats.append(b);}
   host.append(stats,B("Edit name & username",()=>showProfile({editSection:"identity"})),B("Edit photo & bio",()=>showProfile()));
   const status=E("p","Checking badge status…","sl-social-own-status"),apply=B("Apply for verification",async()=>{
