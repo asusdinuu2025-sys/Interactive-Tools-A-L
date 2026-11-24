@@ -395,6 +395,7 @@
       const saved = r.today_date === today ? Number(r.today_seconds) || 0 : 0;
       setLiveText(card.querySelector('.room-person-card-time'), profileDuration(saved + pendingSeconds(r, boundary)));
       if (people.children[index] !== card) people.insertBefore(card, people.children[index] || null);
+      window.StudyLabPlus?.decorateName?.(liveName,id);
     });
     for (const card of [...people.querySelectorAll('.room-person-card')]) {
       if (!visible.has(card.dataset.userId)) card.remove();
@@ -441,6 +442,7 @@
         setLiveText(item.querySelector('.room-rank-subject'), r.subject || '—');
         setLiveText(item.querySelector('.room-time'), compact(r.score));
         if (board.children[i] !== item) board.insertBefore(item, board.children[i] || null);
+        window.StudyLabPlus?.decorateName?.(rankName,id);
       });
       for (const item of [...board.querySelectorAll('.room-rank')]) {
         if (!visible.has(item.dataset.userId)) item.remove();
