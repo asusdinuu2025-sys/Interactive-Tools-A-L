@@ -1,0 +1,67 @@
+/* Home-only responsive navigation. Loaded last to preserve desktop cascade.
+   Desktop >=1180px is unchanged; medium rail occupies a fixed narrow gutter;
+   phones and short touch viewports use the very same navigation in a drawer. */
+.sl-home-mobile-nav-toggle,.sl-home-nav-shade{display:none!important}
+.sl-home-mobile-nav-toggle[hidden],.sl-home-nav-shade[hidden]{display:none!important}
+@media (max-width:1179px){
+  #studyLabHomeLayout[data-nav-presentation] .sl-home-sidebar{
+    box-sizing:border-box!important;left:max(8px,env(safe-area-inset-left,0px))!important;
+    top:max(9px,env(safe-area-inset-top,0px))!important;bottom:auto!important;transform:none!important;
+    height:auto!important;max-height:calc(100vh - 20px)!important;max-height:calc(100dvh - 20px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))!important;
+    overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain;
+    scrollbar-width:none;gap:9px!important;padding:10px!important;border-radius:19px!important;
+    background:linear-gradient(145deg,rgba(32,51,79,.93),rgba(13,25,44,.96))!important;
+  }
+  html[data-theme="light"] #studyLabHomeLayout[data-nav-presentation] .sl-home-sidebar{
+    background:linear-gradient(145deg,rgba(246,251,255,.96),rgba(224,237,250,.95))!important;
+    border-color:rgba(255,255,255,.9)!important;
+  }
+  #studyLabHomeLayout[data-nav-presentation] .sl-home-sidebar::-webkit-scrollbar{display:none}
+  #studyLabHomeLayout[data-nav-presentation] .sl-home-sidebar-head{flex:0 0 auto;min-height:40px;padding:0 2px 7px!important}
+  #studyLabHomeLayout[data-nav-presentation] .sl-home-sidebar-nav{flex:0 0 auto;min-height:0;overflow:visible;gap:4px!important}
+  #studyLabHomeLayout[data-nav-presentation] .sl-home-nav-item{box-sizing:border-box;min-height:42px!important;height:42px!important}
+  #studyLabHomeLayout[data-nav-presentation] .sl-home-sidebar-collapse{width:38px!important;height:38px!important;flex-basis:38px!important}
+  #studyLabHomeLayout[data-nav-presentation] .sl-home-section,
+  #studyLabHomeLayout[data-nav-presentation] .sl-home-more-anchor{scroll-margin-top:var(--sl-responsive-header-clearance,112px)!important}
+  #studyLabHomeLayout[data-nav-presentation="rail"] .sl-home-sidebar{
+    display:flex!important;width:62px!important;z-index:990!important;padding-inline:6px!important;
+  }
+  #studyLabHomeLayout[data-nav-presentation="rail"] .sl-home-sidebar.is-compact-expanded{
+    width:min(224px,calc(100vw - 20px))!important;padding-inline:10px!important;z-index:1195!important;
+  }
+  #studyLabHomeLayout[data-nav-presentation="rail"] .sl-home-sidebar.is-collapsed .sl-home-sidebar-brand-mark,
+  #studyLabHomeLayout[data-nav-presentation="rail"] .sl-home-sidebar.is-collapsed .sl-home-sidebar-hint{display:none!important}
+  #studyLabHomeLayout[data-nav-presentation="rail"] .sl-home-sidebar.is-collapsed .sl-home-nav-item{justify-content:center!important;padding:0!important;gap:0!important}
+  #studyLabHomeLayout[data-nav-presentation="rail"] .sl-home-content{box-sizing:border-box!important;padding-left:78px!important;padding-right:0!important;min-width:0!important}
+  #studyLabHomeLayout[data-nav-presentation="rail"] .sl-home-content>main.container{
+    width:calc(100% - 24px)!important;margin-top:var(--sl-responsive-header-clearance,88px)!important;
+  }
+  html body:has(#studyLabHomeLayout[data-nav-presentation="rail"]) #home-top.site-header{
+    left:calc(50% + 39px)!important;right:auto!important;transform:translateX(-50%)!important;
+    width:calc(100vw - 102px)!important;max-width:calc(100vw - 102px)!important;min-width:0!important;
+    gap:10px!important;padding-inline:14px!important;
+  }
+  html body:has(#studyLabHomeLayout[data-nav-presentation="rail"]) #home-top.site-header .brand{min-width:0!important;flex:1 1 0!important}
+  html body:has(#studyLabHomeLayout[data-nav-presentation="rail"]) #home-top.site-header .header-actions{min-width:0!important;flex-wrap:wrap!important;gap:6px!important}
+  #studyLabHomeLayout[data-nav-presentation="drawer"] .sl-home-sidebar{display:none!important}
+  #studyLabHomeLayout[data-nav-presentation="drawer"] .sl-home-sidebar.is-mobile-open{
+    display:flex!important;width:min(248px,calc(100vw - 26px))!important;z-index:1195!important;
+  }
+  #studyLabHomeLayout[data-nav-presentation="drawer"] .sl-home-nav-shade:not([hidden]){
+    display:block!important;position:fixed;inset:0;z-index:1194;background:rgba(4,10,21,.48);
+    border:0;padding:0;margin:0;width:100%;height:100%;cursor:pointer;
+  }
+  #home-top.site-header .sl-home-mobile-nav-toggle:not([hidden]){
+    display:grid!important;place-items:center;flex:0 0 38px;width:38px;height:38px;
+    margin-left:auto;padding:0;border-radius:11px;border:1px solid rgba(185,220,255,.24);
+    background:rgba(130,175,230,.12);color:inherit;cursor:pointer;
+  }
+  #home-top.site-header .sl-home-mobile-nav-toggle svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round}
+  #home-top.site-header .sl-home-mobile-nav-toggle:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+  #studyLabHomeLayout[data-nav-presentation="drawer"] .sl-home-content>main.container{
+    margin-top:var(--sl-responsive-header-clearance,var(--sl-mobile-header-clearance,88px))!important;
+  }
+  /* Leave the existing floating Pet/AI/Chat controls in their original locations. */
+  body.sl-community-open #studyLabHomeLayout .sl-home-sidebar{visibility:hidden!important;pointer-events:none!important}
+  @media(prefers-reduced-motion:reduce){#studyLabHomeLayout[data-nav-presentation] .sl-home-sidebar{transition:none!important}}
+}

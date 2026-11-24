@@ -12,6 +12,7 @@
   const sidebar = document.createElement("aside");
   sidebar.className = "sl-home-sidebar";
   sidebar.setAttribute("aria-label", "StudyLab home navigation");
+  sidebar.id="studyLabHomeNavigation";
   sidebar.innerHTML = `
     <div class="sl-home-sidebar-head">
       <span class="sl-home-sidebar-brand-mark" aria-label="StudyLab"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m2 9 10-5 10 5-10 5L2 9Z"/><path d="M6 11v5c3.5 3 8.5 3 12 0v-5M22 9v6"/></svg></span>
@@ -74,6 +75,91 @@
   const indicator = sidebar.querySelector(".sl-home-nav-indicator");
   const collapseButton = sidebar.querySelector(".sl-home-sidebar-collapse");
   const navItems = [...sidebar.querySelectorAll(".sl-home-nav-item")];
+  // Keep the same navigation DOM and existing quick-action dock. Only presentation changes.
+  const compactRail = window.matchMedia("(min-width: 800px) and (max-width: 1179px) and (min-height: 421px)");
+  const shortTouch = window.matchMedia("(pointer: coarse) and (max-height: 520px)");
+  const header=document.getElementById("home-top");
+  const brand=header?.querySelector(".brand");
+  const menuButton=document.createElement("button");
+  menuButton.type="button";menuButton.className="sl-home-mobile-nav-toggle";
+  menuButton.setAttribute("aria-label","Open navigation");menuButton.title="Open navigation";
+  menuButton.setAttribute("aria-controls",sidebar.id);menuButton.setAttribute("aria-expanded","false");
+  menuButton.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>';
+  if(brand)brand.append(menuButton);else if(header)header.append(menuButton);
+  const shade=document.createElement("button");
+  shade.type="button";shade.className="sl-home-nav-shade";shade.tabIndex=-1;
+  shade.setAttribute("aria-label","Close navigation");shade.hidden=true;layout.insertBefore(shade,sidebar);
+  let presentation="",desktopCollapsed=false,compactExpanded=false,drawerOpen=false;
+  function refreshIndicator(){
+    const active=navItems.find(x=>x.classList.contains("is-active"));
+    if(active&&indicator){indicator.style.height=active.offsetHeight+"px";indicator.style.transform="translate3d(0,"+active.offsetTop+"px,0)";}
+  }
+  function setCollapsed(collapsed){
+    sidebar.classList.toggle("is-collapsed",collapsed);
+    collapseButton.setAttribute("aria-expanded",String(!collapsed));
+    collapseButton.setAttribute("aria-label",collapsed?"Expand navigation":"Collapse navigation");
+    collapseButton.title=collapsed?"Expand navigation":"Collapse navigation";
+    collapseButton.innerHTML=collapsed
+      ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 5 7 7-7 7"/></svg>'
+      : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>';
+  }
+  function applyNavigation(){
+    layout.dataset.navPresentation=presentation;
+    const open=presentation==="drawer"&&drawerOpen;
+    sidebar.classList.toggle("is-mobile-open",open);
+    sidebar.classList.toggle("is-compact-expanded",presentation==="rail"&&compactExpanded);
+    layout.classList.toggle("is-mobile-nav-open",open);
+    menuButton.setAttribute("aria-expanded",String(open));
+    menuButton.setAttribute("aria-label",open?"Close navigation":"Open navigation");
+    menuButton.title=open?"Close navigation":"Open navigation";
+    shade.hidden=!open;
+    setCollapsed(presentation==="desktop"?desktopCollapsed:presentation==="rail"?!compactExpanded:false);
+    // In drawer mode a hidden sidebar must never be keyboard-focusable.
+    if(presentation==="drawer"&&!open){sidebar.setAttribute("inert","");sidebar.setAttribute("aria-hidden","true");}
+    else{sidebar.removeAttribute("inert");sidebar.removeAttribute("aria-hidden");}
+    if(presentation==="drawer"){collapseButton.setAttribute("aria-label","Close navigation");collapseButton.title="Close navigation";collapseButton.setAttribute("aria-expanded",String(open));}
+    menuButton.hidden=presentation!=="drawer";
+    window.requestAnimationFrame(refreshIndicator);
+  }
+  function syncPresentation(){
+    const next=desktopDock.matches?"desktop":compactRail.matches&&!shortTouch.matches?"rail":"drawer";
+    if(next===presentation)return;
+    const previous=presentation;
+    presentation=next;compactExpanded=false;drawerOpen=false;
+    applyNavigation();
+    if(previous&&sidebar.contains(document.activeElement)&&presentation==="drawer")menuButton.focus();
+  }
+  function closeResponsiveNavigation(restoreFocus=false){
+    if(presentation==="drawer"&&drawerOpen){drawerOpen=false;applyNavigation();if(restoreFocus)menuButton.focus();}
+    if(presentation==="rail"&&compactExpanded){compactExpanded=false;applyNavigation();if(restoreFocus)collapseButton.focus();}
+  }
+  menuButton.addEventListener("click",()=>{
+    if(presentation!=="drawer")return;
+    drawerOpen=!drawerOpen;applyNavigation();
+    if(drawerOpen)collapseButton.focus();else menuButton.focus();
+  });
+  shade.addEventListener("click",()=>closeResponsiveNavigation(true));
+  document.addEventListener("keydown",event=>{
+    if(event.key==="Escape"&&(drawerOpen||compactExpanded)){event.preventDefault();closeResponsiveNavigation(true);}
+  });
+  document.addEventListener("pointerdown",event=>{
+    if(compactExpanded&&!sidebar.contains(event.target))closeResponsiveNavigation();
+  });
+  desktopDock.addEventListener?.("change",syncPresentation);
+  compactRail.addEventListener?.("change",syncPresentation);
+  shortTouch.addEventListener?.("change",syncPresentation);
+  window.addEventListener("resize",syncPresentation);
+  syncPresentation();
+  // Track the actual fixed-header height after wrapping, resizing or installing the PWA.
+  function syncHeaderClearance(){
+    if(!header)return;
+    const bottom=header.getBoundingClientRect().bottom;
+    if(bottom>0)layout.style.setProperty("--sl-responsive-header-clearance",Math.ceil(bottom+12)+"px");
+  }
+  if(header&&typeof ResizeObserver==="function")new ResizeObserver(syncHeaderClearance).observe(header);
+  window.addEventListener("resize",syncHeaderClearance);
+  window.requestAnimationFrame(syncHeaderClearance);
+
   // The Sections dashboard can change built-in section orders at runtime.
   // Mirror the saved live CMS order instead of freezing a different sidebar order.
   function syncNavigationOrder() {
@@ -199,7 +285,8 @@
 
     if (pendingNavigation) {
       const targetTop = pendingNavigation.element.getBoundingClientRect().top;
-      if (Math.abs(targetTop - 112) <= 32 ||
+      const scrollOffset=presentation==="desktop"?112:Math.max(88,(header?.getBoundingClientRect().bottom||76)+12);
+      if (Math.abs(targetTop - scrollOffset) <= 32 ||
           window.scrollY+window.innerHeight>=document.documentElement.scrollHeight-3) {
         pendingNavigation = null;
       } else {
@@ -259,6 +346,7 @@
 
       pendingNavigation = { navId: id, element: target };
       setActive(id);
+      closeResponsiveNavigation(presentation==="drawer");
 
       const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       target.scrollIntoView({
@@ -292,19 +380,16 @@
   });
 
   collapseButton.addEventListener("click", () => {
-    const collapsed = sidebar.classList.toggle("is-collapsed");
-    collapseButton.setAttribute("aria-expanded", String(!collapsed));
-    collapseButton.setAttribute("aria-label", collapsed ? "Expand navigation" : "Collapse navigation");
-    collapseButton.title = collapsed ? "Expand navigation" : "Collapse navigation";
-    collapseButton.innerHTML = collapsed
-      ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 5 7 7-7 7"/></svg>'
-      : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>';
+    if(presentation==="drawer"){closeResponsiveNavigation(true);return;}
+    if(presentation==="rail")compactExpanded=!compactExpanded;
+    else desktopCollapsed=!desktopCollapsed;
+    applyNavigation();
   });
 
   const socialToggle = document.querySelector(".sl-feed-toggle");
   if (socialToggle) {
     const socialObserver = new MutationObserver(() => {
-      if (socialToggle.getAttribute("aria-expanded") === "true") setActive("social");
+      if (socialToggle.getAttribute("aria-expanded") === "true"){closeResponsiveNavigation();setActive("social");}
       else scheduleScrollSync();
     });
     socialObserver.observe(socialToggle, { attributes: true, attributeFilter: ["aria-expanded"] });
