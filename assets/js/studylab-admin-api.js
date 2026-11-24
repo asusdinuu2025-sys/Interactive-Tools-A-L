@@ -625,7 +625,20 @@
     localStorage.removeItem(KEY);
     location.reload();
   }
+  async function guardianPreview(input) {
+    requireAccess();
+    const r = await client.functions.invoke("studylab-guardian-preview", { body: input });
+    if (r.error) throw Error("Guardian server unavailable or access denied.");
+    return r.data;
+  }
+  async function guardianSettings(settings) {
+    requireAccess();
+    if (preview || connectedPreview) throw Error("Preview cannot change live Guardian settings.");
+    return rpc("studylab_guardian_settings", { p_settings: settings ?? null });
+  }
   window.StudyLabAdminAPI = Object.freeze({
+    guardianPreview,
+    guardianSettings,
     init,
     content,
     save,

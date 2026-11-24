@@ -10,6 +10,7 @@
     "Sections",
     "Media",
     "Pop-up Messages",
+    "Bot Management",
     "Activity",
   ];
   let active = "Overview",
@@ -218,6 +219,7 @@
       return contentList(host, version);
     if (active === "Media") return mediaList(host, version);
     if (active === "Pop-up Messages") return popupList(host, version);
+    if (active === "Bot Management") return window.StudyLabGuardianPanel.render(host, api);
     const entries = await api.activity();
     if (version !== request) return;
     const toolbar = el("div", undefined, "sladmin-toolbar sladmin-history-actions");
