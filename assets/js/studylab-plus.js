@@ -14,12 +14,12 @@ if(typeof module!=="undefined"&&module.exports){module.exports={normalize,core,p
 const d=root.document;
 const E=(tag,text,cls)=>{const n=d.createElement(tag);if(text!=null)n.textContent=text;if(cls)n.className=cls;return n;};
 const preview=demoAllowed(root.location.hostname);
-let dialog=null,session=null,demoUser=null,demoAppearance=appearance(null);
+let dialog=null,session=null,demoUser=null,demoAppearance=appearance(null);const refreshGeneration=new WeakMap();
 async function status(){try{const a=root.StudyLabAccount;await a?.ready;const u=a?.getUser?.();if(!eligible(u))return normalize(null);const r=await a.client.rpc("studylab_plus_status");if(r.error||a.getUser()?.id!==u.id)return normalize(null);return normalize(r.data);}catch(_){return normalize(null);}}
 function close(){dialog?.close();}
 function currentDemo(){const u=root.StudyLabAccount?.getUser?.();return preview&&eligible(u)&&demoUser===u.id;}
 function changed(){d.dispatchEvent(new Event("studylab:plus-changed"));}
-function setDemo(on){const u=root.StudyLabAccount?.getUser?.();if(!preview||!eligible(u))return;demoUser=on?u.id:null;changed();}
+function setDemo(on){const u=root.StudyLabAccount?.getUser?.();if(!preview||!eligible(u))return;if(on&&demoUser!==u.id)demoAppearance=appearance(null);demoUser=on?u.id:null;changed();}
 async function adFree(){if(currentDemo())return true;return (await status()).active;}
 async function profileState(id){
  const a=root.StudyLabAccount;await a?.ready;const u=a?.getUser?.();if(!eligible(u)||!id)return appearance(null);
@@ -53,11 +53,14 @@ function profileEditor(panel,id){
  panel.querySelector(".sl-pv-actions")?.append(b);
 }
 async function refreshProfile(panel,avatar,name,id,own,valid){
- const state=await profileState(id);if(!valid())return;paintProfile(panel,avatar,name,state);
- if(own&&(preview||(await status()).enabled)&&valid())profileEditor(panel,id);
+ const generation=(refreshGeneration.get(panel)||0)+1;refreshGeneration.set(panel,generation);
+ const stillValid=()=>valid()&&refreshGeneration.get(panel)===generation;
+ if(own&&preview&&stillValid())profileEditor(panel,id);
+ const state=await profileState(id);if(!stillValid())return;paintProfile(panel,avatar,name,state);
+ if(own&&!preview&&(await status()).enabled&&stillValid())profileEditor(panel,id);
 }
-function clearProfile(panel,avatar){panel.querySelector(".sl-plus-member-badge")?.remove();panel.querySelector(".sl-plus-customize")?.remove();delete panel.dataset.plusCover;delete avatar.dataset.plusFrame;}
-async function sync(button){if(!button)return;button.hidden=true;const a=root.StudyLabAccount;await a?.ready;const u=a?.getUser?.();if(!eligible(u))return;const uid=u.id;if(preview){button.hidden=false;button.textContent=currentDemo()?"Manage Plus demo":"Get StudyLab Plus";}const state=await status();if(a.getUser()?.id!==uid||!eligible(a.getUser())||!button.isConnected||button.parentElement?.closest("[hidden]"))return;button.hidden=!(preview||state.enabled);button.textContent=currentDemo()?"Manage Plus demo":state.active?"Manage Plus":"Get StudyLab Plus";}
+function clearProfile(panel,avatar){refreshGeneration.set(panel,(refreshGeneration.get(panel)||0)+1);panel.querySelector(".sl-plus-member-badge")?.remove();panel.querySelector(".sl-plus-customize")?.remove();delete panel.dataset.plusCover;delete avatar.dataset.plusFrame;}
+async function sync(button){if(!button)return;button.hidden=true;const a=root.StudyLabAccount;await a?.ready;const u=a?.getUser?.();if(!eligible(u))return;const uid=u.id;if(preview){if(button.isConnected&&!button.parentElement?.closest("[hidden]")){button.hidden=false;button.textContent=currentDemo()?"Manage Plus demo":"Get StudyLab Plus";}return;}const state=await status();if(a.getUser()?.id!==uid||!eligible(a.getUser())||!button.isConnected||button.parentElement?.closest("[hidden]"))return;button.hidden=!(preview||state.enabled);button.textContent=currentDemo()?"Manage Plus demo":state.active?"Manage Plus":"Get StudyLab Plus";}
 async function open(feature){
  if(dialog?.open)return;
  const a=root.StudyLabAccount;await a?.ready;const u=a?.getUser?.();if(!eligible(u))return;
@@ -73,9 +76,9 @@ async function open(feature){
  const grid=E("div",null,"sl-plus-grid");
  for(const plus of [false,true]){
   const card=E("section",null,"sl-plus-plan"+(plus?" is-plus":""));card.append(E("h3",plus?"✦ StudyLab Plus":"StudyLab Free"),E("strong",plus?"Price to be confirmed":"Rs. 0","sl-plus-price"),E("p",plus?"Monthly renewal planned · Cancel before next billing date":"All existing learning tools remain free"));
-  const action=E("button",plus?(state.active?"Membership active":"Checkout not available yet"):(state.active?"Free plan":"Your current plan"),"sl-plus-action");action.type="button";action.disabled=true;card.append(action);
+  const action=E("button",plus?(currentDemo()?"Plus demo active":state.active?"Membership active":"Checkout not available yet"):(currentDemo()?"Free plan (demo)":state.active?"Free plan":"Your current plan"),"sl-plus-action");action.type="button";action.disabled=true;card.append(action);
   const list=E("ul");for(const f of (plus?["Everything in Free",...planned]:core))list.append(E("li",f));card.append(list);
-  if(plus)card.append(E("small","Planned features shown for comparison; not available to purchase yet."));
+  if(plus)card.append(E("small","Badge, covers and frames, and sponsored announcement filtering are in development. Other benefits are planned. No purchases are available."));
   grid.append(card);
  }
  node.append(head,title,sub,banner,grid);
@@ -84,7 +87,7 @@ async function open(feature){
   toggle.type="button";toggle.setAttribute("aria-expanded","false");sample.hidden=true;
   sample.append(E("h3","Example student · ✦ Plus"),E("p","Illustrative profile badge · Premium background · Extra pet designs"),E("p","Manage Plus · Monthly subscription · Cancel renewal"),E("p","These are examples, not active features. No card details are collected."));
   toggle.onclick=()=>{sample.hidden=!sample.hidden;toggle.setAttribute("aria-expanded",String(!sample.hidden));toggle.textContent=sample.hidden?"Show Plus member example":"Hide Plus member example";};
-  const mode=E("button",currentDemo()?"Switch to Free demo":"Try Plus demo","sl-plus-profile-entry");mode.type="button";mode.onclick=()=>{setDemo(!currentDemo());close();};
+  const mode=E("button",currentDemo()?"Switch to Free demo":"Try Plus demo","sl-plus-profile-entry");mode.type="button";mode.onclick=()=>{if(root.StudyLabAccount?.getUser?.()?.id!==session){close();return;}setDemo(!currentDemo());close();};
   demo.append(demoTitle,demoNote,mode,toggle,sample);node.append(demo);
  }
  node.append(E("p","Blue verification remains separately awarded by administrators. Plus membership does not confer administrator rights.","sl-plus-foot"));
