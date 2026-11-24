@@ -298,6 +298,20 @@
   const thoughtText = stage.querySelector("[data-pet-thought-text]");
   const launcher = document.getElementById("studylabPetLauncher");
   const panel = document.getElementById("studylabPetPanel");
+  // Plus styles extend the existing pet without changing its behaviour.
+  const plus=window.StudyLabPlus;
+  if(plus){
+    const row=document.createElement("div");row.className="sl-pet-setting sl-plus-pet-setting";row.hidden=true;
+    const label=document.createElement("span");label.textContent="✦ Plus pet design";
+    const picker=document.createElement("select");picker.className="sl-plus-pet-select";picker.setAttribute("aria-label","Premium pet design");
+    for(const [value,title] of [["default","Original"],["nebula","Nebula"],["mint","Mint robot"],["rose","Sakura robot"],["gold","Golden robot"]]){const option=document.createElement("option");option.value=value;option.textContent=title;picker.append(option);}
+    row.append(label,picker);panel.append(row);
+    let generation=0;
+    async function refreshPlusPet(){const g=++generation;const state=await plus.ownAppearance();if(g!==generation)return;row.hidden=!state.active;character.dataset.plusPet=state.active?state.pet:"default";picker.value=state.active?state.pet:"default";}
+    picker.addEventListener("change",async()=>{picker.disabled=true;try{await plus.savePreference("pet",picker.value);}catch(error){console.warn("Pet design not saved",error);picker.title="Could not save design";}finally{await refreshPlusPet();picker.disabled=false;}});
+    document.addEventListener("studylab:plus-changed",refreshPlusPet);void refreshPlusPet();
+  }
+
   const closeButton = panel.querySelector("[data-pet-close]");
   const enableButton = panel.querySelector("[data-pet-enable]");
   const disableButton = panel.querySelector("[data-pet-disable]");
