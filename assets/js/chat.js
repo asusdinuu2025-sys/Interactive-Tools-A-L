@@ -1779,6 +1779,7 @@
     });
 
     document.addEventListener("click", event => {
+      if(event.target.closest?.(".sl-guardian-notice")||document.querySelector(".sl-guardian-notice[open]"))return;
       if (
         isOpen &&
         panel &&

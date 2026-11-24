@@ -13,7 +13,7 @@
       const cancel=d.createElement("button"),ok=d.createElement("button");cancel.type=ok.type="button";cancel.textContent="Cancel";ok.textContent="Continue";ok.className="is-primary";
       let done=false;const prior=d.activeElement;
       const finish=value=>{if(done)return;done=true;dialog.remove();prior?.focus?.({preventScroll:true});resolve(value);};
-      cancel.onclick=()=>finish(false);ok.onclick=()=>finish(true);
+      cancel.onclick=e=>{e.stopPropagation();finish(false);};ok.onclick=e=>{e.stopPropagation();finish(true);};
       dialog.addEventListener("cancel",e=>{e.preventDefault();e.stopPropagation();finish(false);});
       dialog.addEventListener("keydown",e=>{if(e.key==="Escape"){e.stopPropagation();e.preventDefault();finish(false);}});
       buttons.append(cancel,ok);dialog.append(h,p,buttons);d.body.append(dialog);

@@ -10,6 +10,7 @@ const {readFileSync}=require("node:fs");
  const check=window.StudyLabGuardianCheck;
  await check(mock(false,"blocked"),"chat","Synthetic");
  assert.equal(calls,0);
+ const cancelled=check(mock(true,"allowed"),"chat","Synthetic");await new Promise(r=>setTimeout(r,0));window.document.querySelector(".sl-guardian-notice-actions button").click();await assert.rejects(cancelled,/not submitted/);assert.equal(calls,0);assert.equal(seen,false);
  const first=check(mock(true,"allowed"),"posts","Synthetic");await new Promise(r=>setTimeout(r,0));assert.equal(calls,0);const dialog=window.document.querySelector(".sl-guardian-notice");assert.ok(dialog);assert.match(dialog.textContent,/OpenAI/);dialog.querySelector(".is-primary").click();await first;
  assert.equal(calls,1);assert.equal(seen,true);
  for(const status of ["blocked","rate","unavailable"])await assert.rejects(()=>check(mock(true,status),"comments","Synthetic"));
