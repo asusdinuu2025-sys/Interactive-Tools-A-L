@@ -169,3 +169,73 @@ html:is([data-plus-timer="compact"],[data-plus-timer="micro"]) body.sl-mini-wind
 html[data-theme="light"] .room-rank-info strong .sl-name-mark{color:#0d75df!important}
 html[data-sl-lite="on"] .room-person-card[data-plus-effect]::after{animation:none!important}
 .sl-plus-timer-select{color:var(--mini-ink,inherit);background:var(--mini-base,#26364d)}
+
+/* Studio: previews are isolated, flexible, keyboard-accessible and never mutate the actual UI. */
+.sl-plus-studio{width:min(980px,calc(100vw - 28px));padding:22px;overflow:auto}
+.sl-plus-studio .sl-plus-head h2{margin:5px 0 0}.sl-plus-studio-layout{display:grid;grid-template-columns:minmax(225px,.85fr) minmax(0,1.45fr);gap:16px;align-items:start}
+.sl-plus-studio-preview{position:sticky;top:0;display:flex;flex-direction:column;gap:15px;padding:15px;border-radius:19px;background:#889cc911;border:1px solid #8599c33b;min-height:235px;min-width:0;overflow:hidden;align-items:stretch}
+.sl-plus-studio-preview>[hidden]{display:none!important}.sl-plus-studio-preview>.sl-plus-appearance-sample{min-height:225px;justify-content:center}
+.sl-plus-studio-controls{min-width:0}.sl-plus-studio-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:16px}
+.sl-plus-studio-tabs button,.sl-plus-studio-tile,.sl-plus-duration,.sl-plus-studio-color button{border:1px solid #8797bc44;border-radius:11px;background:#8d9fc411;color:inherit;font:inherit;cursor:pointer;min-width:0}
+.sl-plus-studio-tabs button{font-size:.78rem;font-weight:750;padding:9px 5px}
+.sl-plus-studio-tabs [aria-pressed=true],.sl-plus-studio-tile[aria-pressed=true],.sl-plus-duration[aria-pressed=true]{border-color:#a28af3;background:#9275d82d;box-shadow:inset 0 0 0 1px #a28af355}
+.sl-plus-studio-options h3{font-size:.9rem;margin:16px 0 8px}
+.sl-plus-tile-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.sl-plus-studio-tile{display:flex;flex-direction:column;align-items:center;gap:6px;padding:6px;font-size:.75rem;font-weight:700;transition:background .15s,border-color .15s}
+.sl-plus-tile-swatch{position:relative;width:100%;height:55px;border-radius:8px;background:#8798c520;display:grid;place-items:center;color:#d5c8ff;font-size:1.4rem;overflow:hidden}
+.sl-plus-tile-swatch.study-chat-message,.sl-plus-tile-swatch.room-person-card{min-height:0;max-width:100%;margin:0;padding:0;aspect-ratio:auto}
+.sl-plus-ring-swatch{width:30px;height:30px;border-radius:50%;background:#1e304b;display:grid;place-items:center}
+.sl-plus-pet-tile{border:1px solid #708dad;border-radius:12px;background:#141d2a;color:#61dfff;width:48px;height:31px;display:grid;place-items:center;letter-spacing:.2em}.sl-plus-pet-tile[data-pet=nebula]{background:#3c2860;color:#c8afff}.sl-plus-pet-tile[data-pet=mint]{background:#244d46;color:#87f8c3}.sl-plus-pet-tile[data-pet=rose]{background:#592d4a;color:#ffb5db}.sl-plus-pet-tile[data-pet=gold]{background:#524329;color:#ffe08a}
+.sl-plus-studio-color{display:flex;align-items:center;gap:10px;margin:12px 0;font-size:.8rem;font-weight:700}.sl-plus-studio-color input{margin-inline-start:auto;width:40px;height:30px;border:0;background:transparent;cursor:pointer}.sl-plus-studio-color button{padding:5px 10px}
+.sl-plus-studio-actions{display:grid;grid-template-columns:1fr 1.6fr;gap:10px;margin-top:10px}.sl-plus-studio-actions .sl-plus-profile-entry{grid-column:auto}.sl-plus-apply{background:linear-gradient(120deg,#6853ad,#3f6f9e);color:white;border-color:#b5a5f7}.sl-plus-studio-message{min-height:1.25em;margin:8px 0 0;color:inherit}
+.sl-plus-live-sample{position:relative;display:grid;gap:12px;padding:24px;min-height:220px;border:1px solid #8094c055;border-radius:17px;background:#26375144;isolation:isolate}.sl-plus-live-sample strong:last-child{font-size:1.7rem;font-variant-numeric:tabular-nums}
+.sl-plus-chat-sample{width:100%;max-width:100%;padding:16px!important;border:1px solid #8094c055;border-radius:16px 16px 4px 16px;background:#8094c022}.sl-plus-chat-sample p{margin:8px 0 0}
+.sl-plus-pet-preview{position:relative;display:grid;place-items:center;min-height:225px;gap:16px;padding:24px}.sl-plus-pet-preview .sl-plus-pet-sample{position:relative;inset:auto;transform:none;pointer-events:none;cursor:default;scale:1.35;margin:16px}
+.sl-plus-clock-sample{--sl-plus-timer-accent:#b5a3ff;display:grid;gap:10px;text-align:center;border:1px solid color-mix(in srgb,var(--sl-plus-timer-accent) 65%,transparent);border-radius:18px;padding:20px;background:color-mix(in srgb,var(--sl-plus-timer-accent) 12%,transparent);box-shadow:0 0 20px color-mix(in srgb,var(--sl-plus-timer-accent) 14%,transparent)}.sl-plus-clock-sample strong{font-size:2rem;font-variant-numeric:tabular-nums;color:inherit;text-shadow:0 0 12px var(--sl-plus-timer-accent)}.sl-plus-clock-sample[data-plus-timer=compact]{padding:12px;width:85%;align-self:center}.sl-plus-clock-sample[data-plus-timer=micro]{padding:8px;width:70%;align-self:center}.sl-plus-clock-sample[data-plus-timer=micro] strong{font-size:1.3rem}
+.sl-plus-duration-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:7px 0}.sl-plus-duration{display:flex;flex-direction:column;gap:3px;padding:6px 3px;font-size:.7rem;line-height:1.25;text-align:center;align-items:center}.sl-plus-duration strong{font-size:.72rem}.sl-plus-duration small{font-size:.61rem;opacity:.85}
+html[data-theme=light] .sl-plus-tile-swatch{color:#405589}
+@media(max-width:680px){.sl-plus-studio{padding:12px}.sl-plus-studio-layout{grid-template-columns:1fr;gap:9px}.sl-plus-studio-preview{position:static;min-height:0;padding:10px}.sl-plus-studio-preview>.sl-plus-appearance-sample,.sl-plus-live-sample,.sl-plus-pet-preview{min-height:150px}.sl-plus-studio-tabs{margin-bottom:6px}.sl-plus-studio-tile{font-size:.7rem}}
+/* Sender and avatar rings must not be clipped by the chat header. */
+.study-chat-message .study-chat-message-author{overflow:visible!important;min-width:0;align-items:center;padding-left:4px;max-width:100%}
+.study-chat-message .study-chat-message-head{gap:7px;min-width:0}
+.study-chat-message .study-chat-message-name{overflow:visible!important;flex-wrap:nowrap!important;min-width:0;flex:1 1 auto}
+.study-chat-message .study-chat-message-name-text{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.study-chat-message .sl-plus-inline-badge{margin-inline-start:0;flex:0 0 auto}
+.study-chat-message .study-chat-message-menu-wrap{flex:0 0 auto}
+.study-chat-message-avatar[data-plus-frame]:not([data-plus-frame=default]){outline-offset:1px;outline-width:1.5px}
+/* Keep the premium surface in the actual room theme cascade. Geometry stays independent of effects. */
+body.study-room-page[data-room-theme] .room-page .room-people-grid .room-person-card{display:flex;flex-direction:column;aspect-ratio:auto;min-height:210px;min-width:0;overflow:visible}
+body.study-room-page[data-room-theme] .room-people-grid .room-person-card-name-row{display:flex!important;align-items:center!important;gap:5px!important;min-height:30px!important;margin:12px 0 0!important;overflow:visible!important;flex-shrink:0!important}
+body.study-room-page[data-room-theme] .room-people-grid .room-person-card-name-row .room-person-card-name{display:flex!important;align-items:center;gap:3px;line-height:1.35!important;margin:0!important;min-height:24px!important;overflow:visible!important;flex:1 1 0!important}
+.room-person-card-name .sl-plus-name-text{min-width:0;flex:1 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.room-person-card-name .sl-plus-inline-badge,.room-person-card-name .sl-name-mark{flex:0 0 auto;margin:0;font-size:.62em}
+.room-person-card-name .sl-name-mark{width:13px;height:13px}
+body.study-room-page[data-room-theme] .room-people-grid .room-person-card-rank{min-width:28px;padding:3px 6px;min-height:23px}
+body.study-room-page[data-room-theme] .room-page .room-people-grid .room-person-card[data-plus-effect]:not([data-plus-effect=default]){isolation:isolate;background:radial-gradient(ellipse at 12% 0%,color-mix(in srgb,var(--sl-card-accent) 30%,transparent),transparent 76%),color-mix(in srgb,var(--room-card) 55%,transparent)!important;border-color:color-mix(in srgb,var(--sl-card-accent) 72%,transparent)!important;box-shadow:inset 0 1px 0 color-mix(in srgb,var(--sl-card-accent) 26%,transparent),0 0 18px color-mix(in srgb,var(--sl-card-accent) 12%,transparent)!important;animation:none!important}
+body.study-room-page[data-room-mode=light][data-room-theme] .room-page .room-people-grid .room-person-card[data-plus-effect]:not([data-plus-effect=default]){background:radial-gradient(ellipse at 12% 0%,color-mix(in srgb,var(--sl-card-accent) 35%,transparent),transparent 78%),color-mix(in srgb,var(--room-card) 38%,#fff)!important}
+.room-person-card[data-plus-effect]:not([data-plus-effect=default])::after{transform:none;animation:sl-plus-card-glow-opacity 5s ease-in-out infinite alternate}
+@keyframes sl-plus-card-glow-opacity{from{opacity:.2}to{opacity:.65}}
+@media(prefers-reduced-motion:reduce){.room-person-card[data-plus-effect]::after{animation:none!important}}
+html[data-sl-lite=on] .room-person-card[data-plus-effect]::after{animation:none!important}
+/* Premium pet body, eyes, aura and mouth preserve the original behaviour engine. */
+.sl-pet-character[data-plus-shape=capsule]{border-radius:40px!important}
+.sl-pet-character[data-plus-shape=square]{border-radius:8px!important}
+.sl-pet-character[data-plus-shape=orb]{width:76px;height:76px;border-radius:50%!important}
+.sl-pet-character[data-plus-shape=orb] .sl-pet-eye.left{left:12px}.sl-pet-character[data-plus-shape=orb] .sl-pet-eye.right{right:12px}
+.sl-pet-character[data-plus-eyes=round] .sl-pet-eye>i{border-radius:50%!important}
+.sl-pet-character[data-plus-eyes=pixel] .sl-pet-eye>i{border-radius:1px!important}
+.sl-pet-character[data-plus-eyes=star] .sl-pet-eye>i{clip-path:polygon(50% 0,65% 35%,100% 50%,65% 65%,50% 100%,35% 65%,0 50%,35% 35%)}
+.sl-pet-character[data-plus-eyes=arc] .sl-pet-eye>i{border-radius:50% 50% 12% 12%!important;height:14px!important;clip-path:polygon(0 50%,18% 12%,50% 0,82% 12%,100% 50%,100% 85%,82% 45%,50% 32%,18% 45%,0 85%)}
+.sl-pet-character[data-plus-eye-color=custom] .sl-pet-eye>i{background:var(--sl-plus-eye-color)!important;box-shadow:0 0 12px var(--sl-plus-eye-color)!important}
+.sl-pet-character[data-plus-eye-color=custom] .sl-pet-mouth{border-color:var(--sl-plus-eye-color)!important}
+.sl-pet-character[data-plus-glow=none]{box-shadow:none!important}
+.sl-pet-character[data-plus-glow=soft]{box-shadow:0 0 15px #ac9aff66!important}
+.sl-pet-character[data-plus-glow=neon]{box-shadow:0 0 22px var(--sl-plus-eye-color,#75e5f7),inset 0 0 8px #ffffff20!important}
+.sl-pet-character[data-plus-glow=galaxy]{box-shadow:0 0 18px #9274e6,0 0 34px #6e9fdd88!important}
+.sl-pet-character[data-plus-glow=spark]{box-shadow:0 0 18px #f9cf80aa,0 0 34px #e9a35255!important}
+.sl-pet-character[data-plus-mouth=none] .sl-pet-mouth{visibility:hidden!important}
+.sl-pet-character[data-plus-mouth=dot] .sl-pet-mouth{width:5px!important;height:5px!important;border:2px solid currentColor!important;border-radius:50%!important}
+.sl-pet-character[data-plus-mouth=smile] .sl-pet-mouth{width:20px!important;height:8px!important;border-radius:0 0 20px 20px!important}
+.sl-pet-character[data-plus-shape]:not([data-plus-shape=default])::before{border-radius:inherit}
+.sl-mini-timer-panel[data-plus-timer-accent=custom] .sl-mini-timer-clock,html[data-plus-timer-accent=custom] body.sl-mini-window :is(.clock,#clock){filter:drop-shadow(0 0 8px var(--sl-plus-timer-accent))!important}
+.sl-mini-timer-panel[data-plus-timer-accent=custom],html[data-plus-timer-accent=custom] body.sl-mini-window :is(.pip,.mini){border-color:var(--sl-plus-timer-accent)!important}
