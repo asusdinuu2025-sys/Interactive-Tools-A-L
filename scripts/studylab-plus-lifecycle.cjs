@@ -27,7 +27,7 @@ function apply(previous,event){
  const p=Object.hasOwn(s.payments,event.paymentId)?s.payments[event.paymentId]:null;
  if(event.kind==="confirmed"){
   if(!validTime(event.paidUntil)||event.paidUntil<=event.at||!validTime(event.nextBillingAt)||event.nextBillingAt<event.at)throw Error("Invalid paid period");
-  if(p){if(p.state==="confirmed"&&(p.paidUntil!==event.paidUntil||p.nextBillingAt!==event.nextBillingAt))throw Error("Conflicting payment replay");return s;}
+  if(p&&p.state!=="failed"){if(p.state==="confirmed"&&(p.paidUntil!==event.paidUntil||p.nextBillingAt!==event.nextBillingAt))throw Error("Conflicting payment replay");return s;}
   // Late success following a cancellation is recorded but cannot re-enable renewal.
   s.payments[event.paymentId]={state:"confirmed",at:event.at,paidUntil:event.paidUntil,nextBillingAt:event.nextBillingAt};
  }else if(event.kind==="refunded"||event.kind==="disputed"){
@@ -35,7 +35,8 @@ function apply(previous,event){
   if(p?.state==="disputed"||p?.state==="refunded")return s;
   s.payments[event.paymentId]={state:event.kind,at:event.at,paidUntil:p?.paidUntil||null};
  }else{
-  if(!p)s.payments[event.paymentId]={state:"failed",at:event.at,paidUntil:null};
+  if(p&&p.state!=="failed")return s;
+  if(!p||event.at>p.at)s.payments[event.paymentId]={state:"failed",at:event.at,paidUntil:null};
   if(event.at>=s.lastEventAt&&s.state!=="disputed"&&!s.cancelledAt){s.state="past_due";s.lastEventAt=event.at;}
   return s;
  }
