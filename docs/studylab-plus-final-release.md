@@ -47,3 +47,15 @@ The lifecycle tests model sandbox renewals, retries, cancellation, expiry, refun
 6. Validate mobile/desktop UI and all existing Free features with real authenticated test accounts. Only then enable the server rollout and consider live billing.
 
 **Do not merge or activate billing based only on the offline simulator.**
+
+## Additional independent provider reconciliation
+
+`scripts/studylab-payhere-reconcile.cjs` checks a signed-but-unreconciled sandbox notification against the server-retrieved PayHere Subscription Manager API's subscription list and payment history. The order identifier, subscription identifier, payment identifier, LKR amount and `RECEIVED` capture state must match exactly. Duplicate, missing, failed, refunded or ambiguous provider records are rejected.
+
+**This is intentionally not a live payment handler.** It has no network requests, credentials, database writes or entitlement activation. Even a reconciled receipt does not establish its own paid-through date. An authorized server implementation must calculate the billing interval, handle PayHere sandbox's accelerated installment notifications, use idempotent transactions, and preserve the cancellation/expiry policy before giving the member paid access.
+
+PayHere references verified 2026-11-25:
+- Recurring: https://support.payhere.lk/api-%26-mobile-sdk/recurring-api
+- Subscription Manager: https://support.payhere.lk/api-%26-mobile-sdk/subscription-manager-api
+
+`npm run test:plus-lifecycle` now runs all three independent test programs: lifecycle, callback signature and provider reconciliation.
