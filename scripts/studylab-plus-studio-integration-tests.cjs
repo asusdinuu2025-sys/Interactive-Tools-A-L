@@ -56,7 +56,7 @@ async function domTest(){
  const studio=d.querySelector(".sl-plus-studio");
  assert.ok(studio?.open);assert.equal(studio.querySelector(".sl-plus-appearance-sample strong").textContent.includes("Test student"),true);assert.equal(studio.querySelector("[data-category=timer]"),null);assert.equal(studio.querySelector(".sl-plus-studio-layout").firstElementChild.className,"sl-plus-studio-controls");assert.equal((await api.ownAppearance()).active,false);
  studio.querySelector('[data-option-key="cover"][data-choice="galaxy"]').click();studio.querySelector('[data-option-key="pattern"][data-choice="science"]').click();assert.equal(studio.querySelector(".sl-plus-appearance-sample").dataset.plusMotifs,"science");studio.querySelector("[data-category=frame]").click();studio.querySelector('[data-option-key="frame"][data-choice="custom"]').click();assert.equal(studio.querySelector(".sl-plus-custom-palette").hidden,false);studio.querySelector(".sl-plus-custom-palette button").click();assert.equal(studio.querySelector(".sl-plus-sample-avatar").dataset.plusFrame,"custom");
- assert.equal(studio.querySelector(".sl-plus-appearance-sample").dataset.plusCover,"galaxy");
+ studio.querySelector("[data-category=effect]").click();studio.querySelector('[data-option-key="cardPattern"][data-choice="books"]').click();assert.equal(studio.querySelector(".sl-plus-live-sample").dataset.plusMotifs,"books");assert.equal(studio.querySelectorAll(".sl-plus-live-sample > .sl-plus-floats svg").length,6);studio.querySelector("[data-category=bubble]").click();studio.querySelector('[data-option-key="chatFont"][data-choice="italic"]').click();assert.equal(studio.querySelector(".sl-plus-chat-sample").dataset.plusChatFont,"italic");assert.equal(studio.querySelector(".sl-plus-appearance-sample").dataset.plusCover,"galaxy");
  assert.equal((await api.ownAppearance()).cover,"default");
  studio.querySelector(".sl-plus-apply").click();
  await wait(()=>d.querySelector(".sl-plus-plans")?.open);
@@ -68,10 +68,10 @@ async function domTest(){
  assert.equal((await api.ownAppearance()).active,true);
  studio.querySelector(".sl-plus-apply").click();
  await wait(()=>!d.querySelector(".sl-plus-studio"));
- assert.equal((await api.ownAppearance()).cover,"galaxy");assert.equal((await api.ownAppearance()).pattern,"science");
+ assert.equal((await api.ownAppearance()).cover,"galaxy");assert.equal((await api.ownAppearance()).pattern,"science");assert.equal((await api.ownAppearance()).cardPattern,"books");assert.equal((await api.ownAppearance()).chatFont,"italic");const card=d.createElement("article");card.className="room-person-card";card.innerHTML='<div class="room-person-card-name">Student</div>';d.body.append(card);api.decorateName(card.querySelector(".room-person-card-name"),member);assert.equal(card.querySelectorAll(".sl-plus-floats svg").length,6);card.querySelector(".sl-plus-floats").remove();api.decorateName(card.querySelector(".room-person-card-name"),member);assert.equal(card.querySelectorAll(".sl-plus-floats svg").length,6);
  assert.equal(writes,0);
  await api.openStudio("pet");const pet=d.querySelector(".sl-plus-studio");pet.querySelector('[data-option-key="details.shape"][data-choice="orb"]').click();
- assert.equal(pet.querySelector(".sl-plus-pet-sample").dataset.plusShape,"orb");
+ assert.equal(pet.querySelector(".sl-plus-pet-sample").dataset.plusShape,"orb");pet.querySelector('[data-option-key="details.eyes"][data-choice="focused"]').click();assert.equal(pet.querySelector(".sl-plus-pet-sample").dataset.plusEyes,"focused");
  pet.querySelector(".sl-plus-apply").click();await wait(()=>!d.querySelector(".sl-plus-studio"));
  assert.equal((await api.ownAppearance()).details.shape,"orb");
  await api.open();d.querySelector(".is-plus .sl-plus-action").click();assert.equal((await api.ownAppearance()).active,false);
