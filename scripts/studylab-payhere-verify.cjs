@@ -31,10 +31,12 @@ function verifyNotification(body,config){
  const expected=md5(p.merchant_id+p.order_id+p.payhere_amount+p.payhere_currency+p.status_code+md5(config.merchantSecret));
  if(!timingSafeEqual(Buffer.from(p.md5sig,"ascii"),Buffer.from(expected,"ascii")))throw Error("Invalid callback signature");
  if(!/^[A-Za-z0-9_.:-]{1,128}$/.test(p.payment_id)||!/^[A-Za-z0-9_.:-]{1,128}$/.test(p.subscription_id))throw Error("Invalid provider identifiers");
- // AUTHORIZATION_SUCCESS is NOT a paid installment; only captured installments
- // may be considered for granting access by a future separately audited backend.
- const kind=p.status_code==="2"&&p.message_type==="RECURRING_INSTALLMENT_SUCCESS"?"installment_verified":
-   p.status_code==="2"&&p.message_type==="AUTHORIZATION_SUCCESS"?"authorization_only":"status_verified_only";
- return Object.freeze({kind,environment:"sandbox",orderId:order.id,paymentId:p.payment_id,subscriptionId:p.subscription_id,statusCode:p.status_code,messageType:p.message_type,amountMinor:order.amountMinor,currency:"LKR",liveAccess:false});
+ // PayHere's signature does NOT cover message_type, payment_id or subscription_id.
+ // Its authenticity alone cannot establish a captured recurring installment.
+ // Every notification needs independent subscription/payment reconciliation.
+ return Object.freeze({kind:"signature_verified_unreconciled",requiresProviderReconciliation:true,
+  environment:"sandbox",orderId:order.id,paymentId:p.payment_id,subscriptionId:p.subscription_id,
+  statusCode:p.status_code,messageType:p.message_type,amountMinor:order.amountMinor,currency:"LKR",
+  sandboxAccess:false,liveAccess:false});
 }
 module.exports={parse,minorAmount,verifyNotification};
