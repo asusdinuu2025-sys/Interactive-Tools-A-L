@@ -247,3 +247,47 @@ html[data-plus-timer=micro] body.sl-mini-window #clock{font-size:20px!important}
 html:is([data-plus-timer=compact],[data-plus-timer=micro]) body.sl-mini-window #status{font-size:10px!important}
 html:is([data-plus-timer=compact],[data-plus-timer=micro]) body.sl-mini-window .hint{display:none}
 body.study-room-page[data-room-theme] .room-people-grid .room-person-card-name-row .room-person-card-name{flex-wrap:wrap!important;align-content:center;white-space:normal!important;row-gap:2px!important}.room-person-card-name .sl-plus-name-text{flex:1 1 100%;display:block;line-height:1.35!important;max-width:100%}.room-person-card-name .sl-plus-inline-badge,.room-person-card-name .sl-name-mark{line-height:1.2!important}.room-person-card-name .sl-name-mark{color:#38a9ff!important}
+
+/* Studio polish: fixed header/footer, horizontal categories, controls left and preview right. */
+.sl-plus-studio[open]{display:flex;flex-direction:column;gap:9px;max-height:calc(100dvh - 32px);overflow:hidden;padding:18px 22px}
+.sl-plus-studio>.sl-plus-head,.sl-plus-studio>.sl-plus-notice,.sl-plus-studio>.sl-plus-studio-tabs,.sl-plus-studio>.sl-plus-studio-actions{flex:none;margin:0}
+.sl-plus-studio .sl-plus-head h2{font-size:1.4rem;margin:3px 0}
+.sl-plus-studio-tabs{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:5px;padding:4px 0;scrollbar-width:thin}
+.sl-plus-studio-tabs button{flex:1 0 auto;padding:9px 12px;white-space:nowrap;border-radius:99px}
+.sl-plus-studio-layout{grid-template-columns:minmax(0,1.3fr) minmax(230px,1fr);flex:1 1 auto;min-height:0;overflow:auto;align-items:start;padding:2px 5px 6px 0;scrollbar-width:thin}
+.sl-plus-studio-preview{top:0;position:sticky;min-height:260px;padding:12px}
+.sl-plus-studio-controls{min-width:0}.sl-plus-studio-options h3:first-child{margin-top:3px}
+.sl-plus-tile-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.sl-plus-studio-tile{min-width:0;min-height:78px;justify-content:space-between;padding:5px}
+.sl-plus-tile-swatch{height:48px;flex-shrink:0}.sl-plus-tile-swatch svg{width:27px;height:27px}
+.sl-plus-custom-swatch{background:conic-gradient(from 45deg,#f2aa80,#e3d67c,#74cba8,#61aadb,#a48fdf,#e69abb,#f2aa80);color:white}
+.sl-plus-custom-palette{display:flex;gap:7px;align-items:center;flex-wrap:wrap;padding:10px;margin:6px 0;border:1px solid #8299bf55;border-radius:12px}
+.sl-plus-custom-palette[hidden]{display:none!important}.sl-plus-custom-palette button,.sl-plus-custom-palette input{width:29px;height:29px;border:1px solid #8696bd;border-radius:50%;padding:0;cursor:pointer}
+.sl-plus-custom-palette input{border-radius:8px;background:transparent}
+.sl-plus-studio-message{flex:none;min-height:0;margin:0;font-size:.77rem}.sl-plus-studio-message:empty{display:none}
+.sl-plus-studio-actions .sl-plus-apply[data-locked=true]{background:#536aa7;color:#fff;border-color:#8fa8e1}
+.sl-plus-appearance-sample{min-height:248px!important;border-radius:17px;padding:28px 16px!important;gap:10px}
+.sl-plus-appearance-sample strong{display:flex;align-items:center;justify-content:center;gap:4px;flex-wrap:wrap;font-size:1.02rem;max-width:100%;overflow-wrap:anywhere}
+.sl-plus-appearance-sample .sl-plus-inline-badge{font-size:.65rem}
+.sl-plus-sample-avatar{width:78px;height:78px;font-size:1.65rem;border-radius:50%;box-sizing:border-box}
+.sl-plus-sample-avatar .sl-avatar-photo{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
+.sl-plus-sample-avatar[data-plus-frame]:not([data-plus-frame=default]),.sl-plus-ring-swatch[data-plus-frame]:not([data-plus-frame=default]),.sl-pv-avatar[data-plus-frame]:not([data-plus-frame=default]){outline-width:2px;outline-offset:3px}
+.sl-plus-sample-avatar[data-plus-frame=rainbow],.sl-plus-ring-swatch[data-plus-frame=rainbow],.sl-pv-avatar[data-plus-frame=rainbow]{outline:2px solid #a99cf2;box-shadow:0 0 0 3px #56c6d066,0 0 12px #a58ae944}
+.sl-pv-name .sl-plus-member-badge{display:inline-flex;vertical-align:middle;font-size:.5em;white-space:nowrap;max-width:max-content;margin:0 0 0 5px;padding:2px 7px}
+.sl-plus-floats span svg{width:1em;height:1em;display:block}
+.sl-plus-floats span{opacity:.22}
+.room-person-card>.sl-plus-floats{z-index:-1;pointer-events:none;overflow:hidden}
+.room-person-card>.sl-plus-floats span{opacity:.17;font-size:20px;animation:none}
+.room-person-card[data-plus-motifs]:not([data-plus-motifs=none]){isolation:isolate;position:relative}
+.room-person-card[data-plus-card-glow],.sl-plus-glow-swatch{--sl-card-aura:#a78bfa}
+.room-person-card[data-plus-effect=aurora]{--sl-card-aura:#56dbc4}.room-person-card[data-plus-effect=ocean]{--sl-card-aura:#5cc9ff}.room-person-card[data-plus-effect=sakura]{--sl-card-aura:#ed88bd}.room-person-card[data-plus-effect=pulse]{--sl-card-aura:#f6c46e}
+body.study-room-page[data-room-theme] .room-page .room-people-grid .room-person-card[data-plus-card-glow=none],.sl-plus-live-sample[data-plus-card-glow=none]{box-shadow:none!important}
+body.study-room-page[data-room-theme] .room-page .room-people-grid .room-person-card[data-plus-card-glow=soft],.sl-plus-live-sample[data-plus-card-glow=soft],.sl-plus-glow-swatch[data-plus-card-glow=soft]{box-shadow:0 0 12px color-mix(in srgb,var(--sl-card-aura) 35%,transparent)!important}
+body.study-room-page[data-room-theme] .room-page .room-people-grid .room-person-card[data-plus-card-glow=neon],.sl-plus-live-sample[data-plus-card-glow=neon],.sl-plus-glow-swatch[data-plus-card-glow=neon]{box-shadow:0 0 16px color-mix(in srgb,var(--sl-card-aura) 55%,transparent),inset 0 0 0 1px color-mix(in srgb,var(--sl-card-aura) 65%,transparent)!important}
+body.study-room-page[data-room-theme] .room-page .room-people-grid .room-person-card[data-plus-card-glow=halo],.sl-plus-live-sample[data-plus-card-glow=halo],.sl-plus-glow-swatch[data-plus-card-glow=halo]{box-shadow:0 0 24px color-mix(in srgb,var(--sl-card-aura) 30%,transparent),0 0 0 2px color-mix(in srgb,var(--sl-card-aura) 32%,transparent)!important}
+.study-chat-message[data-plus-chat-font=clean] .study-chat-message-text,.sl-plus-font-swatch[data-plus-chat-font=clean]{font-family:"Segoe UI",Arial,"Nirmala UI",sans-serif!important}
+.study-chat-message[data-plus-chat-font=classic] .study-chat-message-text,.sl-plus-font-swatch[data-plus-chat-font=classic]{font-family:Georgia,"Nirmala UI",serif!important}
+.study-chat-message[data-plus-chat-font=mono] .study-chat-message-text,.sl-plus-font-swatch[data-plus-chat-font=mono]{font-family:Consolas,"Nirmala UI",monospace!important}
+.study-chat-message[data-plus-chat-font] .study-chat-message-text{overflow-wrap:anywhere;word-break:normal}
+.profile-account-menu .sl-plus-menu-entry .account-menu-icon{color:#a28af3;background:#a28af320;border-color:#a28af355}
+@media(max-width:680px){.sl-plus-studio[open]{padding:12px;max-height:calc(100dvh - 20px)}.sl-plus-studio-layout{grid-template-columns:minmax(0,1fr);gap:10px}.sl-plus-studio-preview{position:static;grid-row:2;min-height:0}.sl-plus-studio-tabs button{padding:7px 10px}.sl-plus-tile-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.sl-plus-studio-tile{min-height:66px}.sl-plus-tile-swatch{height:40px}.sl-plus-appearance-sample{min-height:180px!important}}
