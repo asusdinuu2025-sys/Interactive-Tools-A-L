@@ -134,4 +134,70 @@ begin
 end; $$;
 revoke all on function public.studylab_plus_public_styles(uuid[]),public.studylab_plus_profile_state(uuid),public.studylab_plus_save_appearance(text,text,text,text,text,text,jsonb,text,text,text,text) from public,anon,authenticated;
 grant execute on function public.studylab_plus_public_styles(uuid[]),public.studylab_plus_profile_state(uuid),public.studylab_plus_save_appearance(text,text,text,text,text,text,jsonb,text,text,text,text) to authenticated;
+
+-- Staged billing ledger. No browser writes, checkout, or live entitlement activation.
+-- A future trusted provider integration must reconcile and validate events before writing.
+create table public.studylab_plus_billing_orders (
+ id uuid primary key,
+ user_id uuid references auth.users(id) on delete set null,
+ environment text not null check(environment in ('sandbox','live')),
+ plan_months integer not null check(plan_months in (1,3,12)),
+ amount_minor integer not null check(amount_minor>0),
+ currency text not null default 'LKR' check(currency='LKR'),
+ created_at timestamptz not null default now(),
+ check(amount_minor=case plan_months when 1 then 19900 when 3 then 49900 when 12 then 179900 end),
+ unique(id,environment)
+);
+create table public.studylab_plus_billing_subscriptions (
+ order_id uuid primary key,
+ environment text not null,
+ provider_subscription_id text not null check(length(provider_subscription_id) between 1 and 128),
+ state text not null check(state in ('pending','active','cancelled','past_due','expired','disputed')),
+ paid_until timestamptz,
+ next_billing_at timestamptz,
+ cancel_at_period_end boolean not null default false,
+ updated_at timestamptz not null default now(),
+ unique(environment,provider_subscription_id),
+ foreign key(order_id,environment) references public.studylab_plus_billing_orders(id,environment) on delete restrict
+);
+create table public.studylab_plus_billing_payments (
+ environment text not null check(environment in ('sandbox','live')),
+ provider_payment_id text not null check(length(provider_payment_id) between 1 and 128),
+ order_id uuid not null,
+ amount_minor integer not null check(amount_minor>0),
+ currency text not null check(currency='LKR'),
+ state text not null check(state in ('confirmed','failed','refunded','disputed')),
+ recorded_at timestamptz not null default now(),
+ primary key(environment,provider_payment_id),
+ foreign key(order_id,environment) references public.studylab_plus_billing_orders(id,environment) on delete restrict
+);
+alter table public.studylab_plus_billing_orders enable row level security;
+alter table public.studylab_plus_billing_subscriptions enable row level security;
+alter table public.studylab_plus_billing_payments enable row level security;
+revoke all on public.studylab_plus_billing_orders,public.studylab_plus_billing_subscriptions,public.studylab_plus_billing_payments from public,anon,authenticated;
+create index studylab_plus_billing_payments_recent on public.studylab_plus_billing_payments(environment,recorded_at desc);
+create function public.studylab_plus_admin_billing_summary(p_environment text default 'live') returns jsonb
+language plpgsql stable security definer set search_path='' as $$
+declare plans jsonb; payments jsonb; result jsonb;
+begin
+ if auth.uid() is null or not coalesce(public.studylab_social_is_admin(),false) then raise exception 'Admin access required' using errcode='42501'; end if;
+ if p_environment is null or p_environment not in ('sandbox','live') then raise exception 'Invalid environment'; end if;
+ select coalesce(jsonb_agg(jsonb_build_object('months',v.months,'paid_members',(
+  select count(distinct o.user_id) from public.studylab_plus_billing_orders o
+  join public.studylab_plus_billing_subscriptions s on s.order_id=o.id and s.environment=o.environment
+  where o.environment=p_environment and o.plan_months=v.months and s.state in ('active','cancelled') and s.paid_until>now()
+ )) order by v.months),'[]'::jsonb) into plans from (values (1),(3),(12)) v(months);
+ select coalesce(jsonb_agg(to_jsonb(t) order by t.recorded_at desc),'[]'::jsonb) into payments from (
+  select o.user_id,o.plan_months,p.amount_minor,p.currency,p.state,p.recorded_at,s.paid_until,s.next_billing_at,s.cancel_at_period_end
+  from public.studylab_plus_billing_payments p join public.studylab_plus_billing_orders o on o.id=p.order_id and o.environment=p.environment
+  left join public.studylab_plus_billing_subscriptions s on s.order_id=o.id and s.environment=o.environment
+  where p.environment=p_environment order by p.recorded_at desc limit 50
+ ) t;
+ select jsonb_build_object('billing_ready',false,'environment',p_environment,'plans',plans,'recent_payments',payments,
+ 'confirmed_receipts_minor',coalesce(sum(amount_minor) filter(where state='confirmed'),0))
+ into result from public.studylab_plus_billing_payments where environment=p_environment;
+ return result;
+end; $$;
+revoke all on function public.studylab_plus_admin_billing_summary(text) from public,anon,authenticated;
+grant execute on function public.studylab_plus_admin_billing_summary(text) to authenticated;
 commit;
