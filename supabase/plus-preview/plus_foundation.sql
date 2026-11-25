@@ -89,13 +89,13 @@ create table public.studylab_plus_appearance (
  card_pattern text not null default 'default' check(card_pattern in ('default','none','science','space','nature','music','books')),
  card_glow text not null default 'default' check(card_glow in ('default','none','soft','neon','halo')),
  chat_font text not null default 'default' check(chat_font in ('default','clean','classic','mono','italic','rog')),
- details jsonb not null default '{"shape":"default","eyes":"default","glow":"default","mouth":"default","eyeColor":"default","timerAccent":"default"}'::jsonb check (jsonb_typeof(details)='object' and details ?& array['shape','eyes','glow','mouth','eyeColor','timerAccent'] and details - array['shape','eyes','glow','mouth','eyeColor','timerAccent'] = '{}'::jsonb
+ details jsonb not null default '{"shape":"default","eyes":"default","glow":"default","mouth":"default","eyeColor":"default","timerAccent":"default","workspace":"default"}'::jsonb check (jsonb_typeof(details)='object' and details ?& array['shape','eyes','glow','mouth','eyeColor','timerAccent','workspace'] and details - array['shape','eyes','glow','mouth','eyeColor','timerAccent','workspace'] = '{}'::jsonb
  and coalesce(details->>'shape','') in ('default','capsule','square','orb')
  and coalesce(details->>'eyes','') in ('default','round','pixel','star','arc','visor','softsquare','droplet','focused','sleepy','happy','diamond')
  and coalesce(details->>'glow','') in ('default','none','soft','neon','galaxy','spark')
  and coalesce(details->>'mouth','') in ('default','smile','dot','none')
  and coalesce(details->>'eyeColor','') ~ '^(default|#[0-9a-fA-F]{6})$'
- and coalesce(details->>'timerAccent','') = 'default')
+ and coalesce(details->>'timerAccent','') = 'default' and coalesce(details->>'workspace','') in ('default','aurora','ocean','galaxy','forest','sunset','prism'))
 );
 alter table public.studylab_plus_appearance enable row level security;
 revoke all on public.studylab_plus_appearance from public,anon,authenticated;
@@ -119,7 +119,7 @@ begin
  result:=coalesce(public.studylab_plus_public_styles(array[p_user])->p_user::text,'{"active":false}'::jsonb);
  if auth.uid()=p_user and coalesce((result->>'active')::boolean,false) then
   select * into prefs from public.studylab_plus_appearance where user_id=p_user;
-  result:=result||jsonb_build_object('pet',coalesce(prefs.pet,'default'),'timer',coalesce(prefs.timer,'standard'),'details',coalesce(prefs.details,'{"shape":"default","eyes":"default","glow":"default","mouth":"default","eyeColor":"default","timerAccent":"default"}'::jsonb));
+  result:=result||jsonb_build_object('pet',coalesce(prefs.pet,'default'),'timer',coalesce(prefs.timer,'standard'),'details',coalesce(prefs.details,'{"shape":"default","eyes":"default","glow":"default","mouth":"default","eyeColor":"default","timerAccent":"default","workspace":"default"}'::jsonb));
  end if;
  return result;
 end; $$;
