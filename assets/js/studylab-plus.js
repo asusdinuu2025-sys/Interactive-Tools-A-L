@@ -2,7 +2,7 @@
 (function(root){
 "use strict";
 const core=["Live Study Room and standard timer","Social and Chat","Past papers and simulations","Existing profile pictures and themes","Tasks, notes and bookmarks","Guardian safety screening"];
-const planned=["Plus membership badge","Premium profile covers, icon packs and avatar rings","Live study card gradients, doodles and glow","Custom studying cards and chat bubbles","Chat bubble colours and 5 extra message fonts","Pet body shapes, eye styles, colours and auras","Compact and micro floating timer"];const future=["Custom website backgrounds","Advanced study reports"];
+const planned=["Plus membership badge","Premium profile covers, icon packs and avatar rings","Live study card gradients, doodles and glow","Custom studying cards and chat bubbles","Chat bubble colours and 5 extra message fonts","Pet body shapes, eye styles, colours and auras","Compact and micro floating timer","Premium Home and Study Room backgrounds","Advanced personal study reports"];const future=[];
 function normalize(s){return {enabled:s?.enabled===true,active:s?.active===true&&s?.enabled===true,granted:s?.granted===true,expires_at:s?.expires_at||null,billing_ready:false};}
 function eligible(u){return Boolean(u?.id&&!u.is_anonymous);}
 function demoAllowed(host){return /^deploy-preview-[0-9]+--studylablk\.netlify\.app$/.test(host)||["localhost","127.0.0.1"].includes(host);}
@@ -11,14 +11,15 @@ function validFrame(value){return typeof value==="string"&&(frames.includes(valu
 const effects=["default","aurora","galaxy","pulse","sakura","ocean"],bubbles=["default","violet","cyan","rose","mint","gold"],pets=["default","nebula","mint","rose","gold"],timerModes=["standard","compact","micro"];
 const plans=Object.freeze([{months:1,price:199,label:"Monthly"},{months:3,price:499,label:"3 months"},{months:12,price:1799,label:"Yearly"}]);
 const petShapes=["default","capsule","square","orb"],petEyes=["default","round","pixel","star","arc","visor","softsquare","droplet","focused","sleepy","happy","diamond"],petGlows=["default","none","soft","neon","galaxy","spark"],petMouths=["default","smile","dot","none"];
+const workspaces=["default","aurora","ocean","galaxy","forest","sunset","prism"];
 const colorValue=(v)=>typeof v==="string"&&/^#[0-9a-f]{6}$/i.test(v)?v.toLowerCase():"default";
-function details(v){return {shape:petShapes.includes(v?.shape)?v.shape:"default",eyes:petEyes.includes(v?.eyes)?v.eyes:"default",glow:petGlows.includes(v?.glow)?v.glow:"default",mouth:petMouths.includes(v?.mouth)?v.mouth:"default",eyeColor:colorValue(v?.eyeColor),timerAccent:"default"};}
+function details(v){return {shape:petShapes.includes(v?.shape)?v.shape:"default",eyes:petEyes.includes(v?.eyes)?v.eyes:"default",glow:petGlows.includes(v?.glow)?v.glow:"default",mouth:petMouths.includes(v?.mouth)?v.mouth:"default",eyeColor:colorValue(v?.eyeColor),timerAccent:"default",workspace:workspaces.includes(v?.workspace)?v.workspace:"default"};}
 const patterns=["default","none","science","space","nature","music","books"],cardGlows=["default","none","soft","neon","halo"],chatFonts=["default","clean","classic","mono","italic","rog"];
 function appearance(s){const active=s?.active===true;return {active,cover:active&&covers.includes(s.cover)?s.cover:"default",frame:active&&validFrame(s.frame)?s.frame:"default",effect:active&&effects.includes(s.effect)?s.effect:"default",bubble:active&&bubbles.includes(s.bubble)?s.bubble:"default",pet:active&&pets.includes(s.pet)?s.pet:"default",timer:active&&timerModes.includes(s.timer)?s.timer:"standard",details:details(active?s.details:null),pattern:active&&patterns.includes(s.pattern)?s.pattern:"default",cardPattern:active&&patterns.includes(s.cardPattern)?s.cardPattern:"default",cardGlow:active&&cardGlows.includes(s.cardGlow)?s.cardGlow:"default",chatFont:active&&chatFonts.includes(s.chatFont)?s.chatFont:"default"};}
 function hasPremiumDraft(s){const a=appearance({...s,active:true}),base=appearance({active:true});return JSON.stringify(a)!==JSON.stringify(base);}
 function sponsored(item){return item?.kind==="sponsored"||item?.design?.preset==="sponsored";}
 function filterSponsored(items){return items;}
-if(typeof module!=="undefined"&&module.exports){module.exports={normalize,core,planned,eligible,demoAllowed,appearance,sponsored,filterSponsored,validFrame,covers,frames,effects,bubbles,pets,timerModes,plans,details,petShapes,petEyes,petGlows,petMouths,hasPremiumDraft,patterns,cardGlows,chatFonts};return;}
+if(typeof module!=="undefined"&&module.exports){module.exports={normalize,core,planned,eligible,demoAllowed,appearance,sponsored,filterSponsored,validFrame,covers,frames,effects,bubbles,pets,timerModes,plans,details,petShapes,petEyes,petGlows,petMouths,hasPremiumDraft,patterns,cardGlows,chatFonts,workspaces};return;}
 const d=root.document;
 const E=(tag,text,cls)=>{const n=d.createElement(tag);if(text!=null)n.textContent=text;if(cls)n.className=cls;return n;};
 const preview=demoAllowed(root.location.hostname);
@@ -88,7 +89,7 @@ async function openStudio(initial="cover"){
  const account=root.StudyLabAccount;await account?.ready;const user=account?.getUser?.();if(!eligible(user))return;
  if(!preview&&!(await status()).enabled)return;
  const saved=await profileState(user.id);if(account.getUser()?.id!==user.id||studio)return;
- let draft=appearance({...saved,active:true}),category=["cover","frame","effect","bubble","pet"].includes(initial)?initial:"cover";
+ let draft=appearance({...saved,active:true}),category=["cover","frame","effect","bubble","pet","workspace"].includes(initial)?initial:"cover";
  const editor=E("dialog",null,"sl-plus-dialog sl-plus-studio");studio=editor;editor.setAttribute("aria-label","StudyLab Plus Studio");
  const previous=d.activeElement,header=E("header",null,"sl-plus-head"),heading=E("div"),closeButton=E("button","×","sl-plus-close");
  heading.append(E("span","STUDYLAB · CUSTOMIZATION","sl-plus-eyebrow"),E("h2","Plus Studio"));closeButton.type="button";closeButton.setAttribute("aria-label","Close without applying");closeButton.onclick=()=>editor.close();header.append(heading,closeButton);
@@ -100,13 +101,13 @@ async function openStudio(initial="cover"){
  const chat=E("article",null,"study-chat-message sl-plus-chat-sample");chat.append(E("strong",profile?.display_name||"You"),E("p","Ready for another study session.","study-chat-message-text"));
  const petBox=E("div",null,"sl-plus-pet-preview"),pet=E("div",null,"sl-pet-character sl-plus-pet-sample"),face=E("div",null,"sl-pet-visual");for(const side of ["left","right"]){const eye=E("div",null,"sl-pet-eye "+side);eye.append(E("i"));face.append(eye);}face.append(E("div",null,"sl-pet-mouth"));pet.append(face);petBox.append(pet,E("small","Your study companion"));
  
- previewPane.append(E("small","LIVE PREVIEW · NOT SAVED","sl-plus-eyebrow"),sample,live,chat,petBox);
- const groupNames={cover:"Profile cover",frame:"Avatar ring",effect:"Study card",bubble:"Chat bubble",pet:"Pet studio"};
+ const workspaceSample=E("div",null,"sl-plus-workspace-sample");workspaceSample.append(E("small","STUDYLAB"),E("strong","Your study workspace"),E("div","Live Study Room","sl-plus-workspace-sample-card"),E("div","Study resources","sl-plus-workspace-sample-card"));previewPane.append(E("small","LIVE PREVIEW · NOT SAVED","sl-plus-eyebrow"),sample,live,chat,petBox,workspaceSample);
+ const groupNames={cover:"Profile cover",frame:"Avatar ring",effect:"Study card",bubble:"Chat bubble",pet:"Pet studio",workspace:"Workspace"};
  const label=v=>v==="default"?"Original":v[0].toUpperCase()+v.slice(1);
  const actionBar=E("footer",null,"sl-plus-studio-actions"),reset=E("button","Reset design","sl-plus-profile-entry"),apply=E("button",saved.active?"Apply style":"🔒 Apply style","sl-plus-profile-entry sl-plus-apply"),message=E("p",null,"sl-plus-studio-message");message.setAttribute("role","status");reset.type=apply.type="button";actionBar.append(reset,apply);
  function refresh(){
   paintAppearance(sample,sampleAvatar,draft);liveAvatar.dataset.plusFrame=sampleAvatar.dataset.plusFrame;liveAvatar.style.setProperty("--sl-plus-ring",sampleAvatar.style.getPropertyValue("--sl-plus-ring"));paintCard(live,draft);paintChat(chat,draft);paintPet(pet,draft);
-  sample.hidden=!["cover","frame"].includes(category);live.hidden=category!=="effect";chat.hidden=category!=="bubble";petBox.hidden=category!=="pet";
+  sample.hidden=!["cover","frame"].includes(category);live.hidden=category!=="effect";chat.hidden=category!=="bubble";petBox.hidden=category!=="pet";workspaceSample.hidden=category!=="workspace";workspaceSample.dataset.plusWorkspace=draft.details.workspace;
   for(const button of tabs.children)button.setAttribute("aria-pressed",String(button.dataset.category===category));
   for(const button of options.querySelectorAll("[data-option-key]")){const k=button.dataset.optionKey;button.setAttribute("aria-pressed",String(button.dataset.choice==="custom"?/^#[0-9a-f]{6}$/i.test(k.startsWith("details.")?draft.details[k.slice(8)]:draft[k]):(k.startsWith("details.")?draft.details[k.slice(8)]:draft[k])===button.dataset.choice));}
  }
@@ -114,7 +115,7 @@ async function openStudio(initial="cover"){
  function tiles(title,key,values,kind){
   options.append(E("h3",title));const group=E("div",null,"sl-plus-tile-grid");for(const v of values){
    const button=E("button",null,"sl-plus-studio-tile");button.type="button";button.dataset.optionKey=key;button.dataset.choice=v;
-   const swatch=E("span",null,"sl-plus-tile-swatch");if(kind==="cover")swatch.dataset.plusCover=v;
+   const swatch=E("span",null,"sl-plus-tile-swatch");if(kind==="cover")swatch.dataset.plusCover=v;else if(kind==="workspace")swatch.dataset.plusWorkspace=v;
    else if(kind==="frame"){const ring=E("span",null,"sl-plus-ring-swatch");const center=E("span",null,"sl-plus-ring-center");center.append(E("span","●"));ring.append(center);ring.dataset.plusFrame=v;swatch.append(ring);}
    else if(kind==="bubble"){swatch.dataset.plusBubble=v;swatch.classList.add("study-chat-message");swatch.textContent="Aa";}
    else if(kind==="effect"){swatch.dataset.plusEffect=v;swatch.classList.add("room-person-card");swatch.textContent="✧";}
@@ -130,6 +131,7 @@ async function openStudio(initial="cover"){
  }
  function renderOptions(){
   options.replaceChildren();
+  if(category==="workspace")tiles("Workspace backgrounds","details.workspace",workspaces,"workspace");
   if(category==="cover"){tiles("Profile backgrounds","cover",covers,"cover");tiles("Profile icon packs","pattern",patterns,"pattern");}
   if(category==="frame")tiles("Avatar rings","frame",frames,"frame");
   if(category==="effect"){tiles("Live studying card effects","effect",effects,"effect");tiles("Card watermark","cardPattern",patterns,"pattern");tiles("Card glow","cardGlow",cardGlows,"glow");}
@@ -185,7 +187,7 @@ async function open(feature){
   
   grid.append(card);
  }
- node.append(head,title,sub,banner,grid);node.append(E("p","Planned, not yet available: "+future.join(" · "),"sl-plus-foot"));
+ node.append(head,title,sub,banner,grid);if(future.length)node.append(E("p","Planned, not yet available: "+future.join(" · "),"sl-plus-foot"));
 
  node.append(E("p","Displayed prices are proposed launch prices. No charges in preview. Plus badge is separate from blue verification. Some benefits are still in development.","sl-plus-foot"));
  node.addEventListener("cancel",e=>{e.preventDefault();close();});node.addEventListener("close",()=>{node.remove();if(dialog===node){dialog=null;session=null;}previous?.focus?.({preventScroll:true});});
@@ -230,5 +232,8 @@ account?.client?.auth?.onAuthStateChange?.((event,session)=>{
 });
 
 async function attachMenu(menu,closeMenu,reposition){const anchor=menu.querySelector('[data-account-action="profile"]');const account=root.StudyLabAccount;const user=account?.getUser?.();if(!anchor||!eligible(user))return;const state=preview?await ownAppearance():await status();if(!anchor.isConnected||account.getUser()?.id!==user.id||(!preview&&!state.enabled))return;const b=E("button");b.type="button";b.setAttribute("role","menuitem");b.className="sl-plus-menu-entry";const icon=E("span","✦","account-menu-icon");icon.setAttribute("aria-hidden","true");const copy=E("span",null,"account-menu-copy");copy.append(E("strong",state.active?"Plus Studio Customizations":"Try StudyLab Plus"),E("small",state.active?"Personalize your study workspace":"Explore membership plans"));b.append(icon,copy);b.onclick=()=>{closeMenu();if(state.active)void openStudio("cover");else void open();};anchor.after(b);reposition?.();}
+let workspaceGeneration=0;
+async function refreshWorkspace(){const generation=++workspaceGeneration;const account=root.StudyLabAccount;const user=account?.getUser?.();const state=await ownAppearance();if(generation!==workspaceGeneration||account?.getUser?.()?.id!==user?.id)return;if(!d.body)return;const isHome=/(?:^\/|\/index\.html)$/.test(root.location.pathname),isRoom=d.body.classList.contains("study-room-page");if(!isHome&&!isRoom)return;if(state.active&&state.details.workspace!=="default")d.body.dataset.plusWorkspace=state.details.workspace;else delete d.body.dataset.plusWorkspace;}
+d.addEventListener("studylab:plus-changed",refreshWorkspace);Promise.resolve(root.StudyLabAccount?.ready).then(refreshWorkspace).catch(()=>{});
 root.StudyLabPlus=Object.freeze({attachMenu,status,sync,open,adFree,filterSponsored,refreshProfile,clearProfile,decorateName,ownAppearance,savePreference,openStudio,paintPet});
 })(typeof window!=="undefined"?window:globalThis);
