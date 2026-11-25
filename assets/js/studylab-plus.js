@@ -84,10 +84,10 @@ function paintPet(node,state){
 }
 let studio=null;
 async function openStudio(initial="cover"){
- if(studio?.open){studio.focus();return;}
+ if(studio){if(studio.open)studio.focus();return;}
  const account=root.StudyLabAccount;await account?.ready;const user=account?.getUser?.();if(!eligible(user))return;
  if(!preview&&!(await status()).enabled)return;
- const saved=await profileState(user.id);if(account.getUser()?.id!==user.id||studio?.open)return;
+ const saved=await profileState(user.id);if(account.getUser()?.id!==user.id||studio)return;
  let draft=appearance({...saved,active:true}),category=["cover","frame","effect","bubble","pet"].includes(initial)?initial:"cover";
  const editor=E("dialog",null,"sl-plus-dialog sl-plus-studio");studio=editor;editor.setAttribute("aria-label","StudyLab Plus Studio");
  const previous=d.activeElement,header=E("header",null,"sl-plus-head"),heading=E("div"),closeButton=E("button","×","sl-plus-close");
@@ -95,17 +95,17 @@ async function openStudio(initial="cover"){
  const note=E("p",saved.demo?"Demo mode · Changes apply only to this tab.":saved.active?"Preview your design, then apply it to your account.":"Explore every design for free. Plus is required only when applying premium changes.","sl-plus-notice");
  const layout=E("div",null,"sl-plus-studio-layout"),previewPane=E("section",null,"sl-plus-studio-preview"),controls=E("section",null,"sl-plus-studio-controls"),tabs=E("nav",null,"sl-plus-studio-tabs"),options=E("div",null,"sl-plus-studio-options");
  const sample=E("div",null,"sl-plus-appearance-sample"),sampleAvatar=E("div","✦","sl-plus-sample-avatar"),sampleName=E("strong","Your profile"),sampleBadge=E("small","✦ Plus","sl-plus-inline-badge");
- const profile=await Promise.resolve(account.getProfile?.()).catch(()=>null);if(account.getUser()?.id!==user.id){studio=null;return;}sampleName.textContent=profile?.display_name||"Your profile";root.StudyLabNameMark?.decorate(sampleName,user.id);sampleName.querySelector(".sl-plus-inline-badge")?.remove();delete sampleName.dataset.slPlusUser;sampleAvatar.textContent=(profile?.display_name||"S").trim().slice(0,1).toUpperCase();root.StudyLabAvatar?.decorate(sampleAvatar,user.id);sampleName.append(sampleBadge);sample.append(sampleAvatar,sampleName,E("small",profile?.username?"@"+profile.username:"Your profile appearance"));
- const live=E("article",null,"room-person-card sl-plus-live-sample");live.append(E("small","● Studying now"),E("strong","Your studying card"),E("small","Combined Mathematics"),E("strong","00:42:18"));
+ const profile=await Promise.resolve(account.getProfile?.()).catch(()=>null);if(account.getUser()?.id!==user.id){studio=null;return;}sampleName.textContent=profile?.display_name||"Your profile";editor.append(sampleName);root.StudyLabNameMark?.decorate(sampleName,user.id);sampleName.querySelector(".sl-plus-inline-badge")?.remove();delete sampleName.dataset.slPlusUser;sampleAvatar.textContent=(profile?.display_name||"S").trim().slice(0,1).toUpperCase();root.StudyLabAvatar?.decorate(sampleAvatar,user.id);sampleName.append(sampleBadge);sample.append(sampleAvatar,sampleName,E("small",profile?.username?"@"+profile.username:"Your profile appearance"));
+ const live=E("article",null,"room-person-card sl-plus-live-sample");const liveAvatar=E("div",sampleAvatar.textContent,"sl-plus-sample-avatar sl-plus-live-avatar");root.StudyLabAvatar?.decorate(liveAvatar,user.id);const liveName=E("strong",profile?.display_name||"Student");live.append(liveAvatar,E("small","● Studying now"),liveName,E("small","Combined Mathematics"),E("strong","00:42:18"));
  const chat=E("article",null,"study-chat-message sl-plus-chat-sample");chat.append(E("strong",profile?.display_name||"You"),E("p","Ready for another study session.","study-chat-message-text"));
  const petBox=E("div",null,"sl-plus-pet-preview"),pet=E("div",null,"sl-pet-character sl-plus-pet-sample"),face=E("div",null,"sl-pet-visual");for(const side of ["left","right"]){const eye=E("div",null,"sl-pet-eye "+side);eye.append(E("i"));face.append(eye);}face.append(E("div",null,"sl-pet-mouth"));pet.append(face);petBox.append(pet,E("small","Your study companion"));
  
  previewPane.append(E("small","LIVE PREVIEW · NOT SAVED","sl-plus-eyebrow"),sample,live,chat,petBox);
  const groupNames={cover:"Profile cover",frame:"Avatar ring",effect:"Study card",bubble:"Chat bubble",pet:"Pet studio"};
  const label=v=>v==="default"?"Original":v[0].toUpperCase()+v.slice(1);
- const actionBar=E("footer",null,"sl-plus-studio-actions"),reset=E("button","Reset design","sl-plus-profile-entry"),apply=E("button","Apply changes","sl-plus-profile-entry sl-plus-apply"),message=E("p",null,"sl-plus-studio-message");message.setAttribute("role","status");reset.type=apply.type="button";actionBar.append(reset,apply);
+ const actionBar=E("footer",null,"sl-plus-studio-actions"),reset=E("button","Reset design","sl-plus-profile-entry"),apply=E("button",saved.active?"Apply style":"🔒 Apply style","sl-plus-profile-entry sl-plus-apply"),message=E("p",null,"sl-plus-studio-message");message.setAttribute("role","status");reset.type=apply.type="button";actionBar.append(reset,apply);
  function refresh(){
-  paintAppearance(sample,sampleAvatar,draft);paintCard(live,draft);paintChat(chat,draft);paintPet(pet,draft);
+  paintAppearance(sample,sampleAvatar,draft);liveAvatar.dataset.plusFrame=sampleAvatar.dataset.plusFrame;liveAvatar.style.setProperty("--sl-plus-ring",sampleAvatar.style.getPropertyValue("--sl-plus-ring"));paintCard(live,draft);paintChat(chat,draft);paintPet(pet,draft);
   sample.hidden=!["cover","frame"].includes(category);live.hidden=category!=="effect";chat.hidden=category!=="bubble";petBox.hidden=category!=="pet";
   for(const button of tabs.children)button.setAttribute("aria-pressed",String(button.dataset.category===category));
   for(const button of options.querySelectorAll("[data-option-key]")){const k=button.dataset.optionKey;button.setAttribute("aria-pressed",String(button.dataset.choice==="custom"?/^#[0-9a-f]{6}$/i.test(k.startsWith("details.")?draft.details[k.slice(8)]:draft[k]):(k.startsWith("details.")?draft.details[k.slice(8)]:draft[k])===button.dataset.choice));}
@@ -137,7 +137,7 @@ async function openStudio(initial="cover"){
   refresh();
  }
  for(const [key,title] of Object.entries(groupNames)){const button=E("button",title);button.type="button";button.dataset.category=key;button.onclick=()=>{category=key;renderOptions();};tabs.append(button);}
- reset.onclick=()=>{draft=appearance({active:true});renderOptions();message.textContent="Defaults previewed. Apply to save.";};
+ reset.onclick=()=>{draft=appearance({active:true,timer:saved.timer});renderOptions();message.textContent="Defaults previewed. Apply to save.";};
  apply.onclick=async()=>{apply.disabled=true;try{
   if(account.getUser()?.id!==user.id)throw Error("Session changed. Reopen the studio.");
   const latest=await profileState(user.id);if(account.getUser()?.id!==user.id)throw Error("Session changed.");
@@ -146,7 +146,7 @@ async function openStudio(initial="cover"){
   await saveAppearance(draft.cover,draft.frame,{effect:draft.effect,bubble:draft.bubble,pet:draft.pet,timer:draft.timer,details:draft.details,pattern:draft.pattern,cardPattern:draft.cardPattern,cardGlow:draft.cardGlow,chatFont:draft.chatFont});editor.close();
  }catch(e){message.textContent=e.message||"Could not save appearance.";}finally{apply.disabled=false;}};
  controls.append(options);layout.append(controls,previewPane);editor.append(header,note,tabs,layout,message,actionBar);
- const updateApply=async()=>{const state=await profileState(user.id);if(studio!==editor)return;apply.textContent=state.active?"Apply style":"🔒 Apply style";apply.dataset.locked=String(!state.active);};void updateApply();d.addEventListener("studylab:plus-changed",updateApply);
+ const updateApply=async()=>{const state=await profileState(user.id);if(studio!==editor||account.getUser()?.id!==user.id)return;apply.textContent=state.active?"Apply style":"🔒 Apply style";apply.dataset.locked=String(!state.active);};void updateApply();d.addEventListener("studylab:plus-changed",updateApply);
  editor.addEventListener("close",()=>{d.removeEventListener("studylab:plus-changed",updateApply);editor.remove();if(studio===editor)studio=null;previous?.focus?.({preventScroll:true});});d.body.append(editor);renderOptions();try{editor.showModal();}catch(_){editor.remove();studio=null;}
 }
 function profileEditor(panel,id){
@@ -203,7 +203,7 @@ function renderNameBadge(node,id){
 }
 function decorateName(node,id){
  if(!node)return;
- if(node.closest(".sl-pv-dialog"))return; // Profile view has a dedicated badge and appearance.
+ if(node.closest(".sl-pv-dialog,.sl-plus-studio"))return; // Profile view has a dedicated badge and appearance.
  node.dataset.slPlusUser=validId(id)?id:"";
  renderNameBadge(node,id);
  if((preview&&id===root.StudyLabAccount?.getUser?.()?.id)||!validId(id)||badgeBlockedUntil>Date.now()||badgeCache.get(id)?.until>Date.now())return;
