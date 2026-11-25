@@ -148,9 +148,7 @@
     const prefs=await window.StudyLabPlus?.ownAppearance();
     const root=document.documentElement;
     root.dataset.plusTimer=prefs?.active?prefs.timer:"standard";
-    const color=prefs?.active?prefs.details?.timerAccent:"default";
-    root.style.removeProperty("--sl-plus-timer-accent");root.dataset.plusTimerAccent="default";
-    if(/^#[0-9a-f]{6}$/i.test(color||"")){root.dataset.plusTimerAccent="custom";root.style.setProperty("--sl-plus-timer-accent",color);}
+    root.style.removeProperty("--sl-plus-timer-accent");delete root.dataset.plusTimerAccent;
   }
   async function init() {
     try {
