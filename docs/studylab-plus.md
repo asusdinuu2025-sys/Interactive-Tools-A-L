@@ -42,3 +42,8 @@ Phase 2B: compact comparison on desktop, scroll fallback on small screens; 12 il
 - Live cards use separate name text and inline badge elements; premium gradients override room-theme backgrounds without changing study state. Chat header permits ring overflow and truncates long names separately. Test light/dark, compact screen and long names.
 - Demo drafts and saved demo cosmetics remain tab-scoped; independent window demo inheritance varies with browser sessionStorage behavior. Public cosmetics use the existing bounded projection; private details are validated by the staged SQL and not projected to other accounts.
 - Release gate: database migration is staged only; test real membership, cross-account visibility, expiry/revocation, and browser UI before production. No ad-free entitlement or real payments.
+
+## Phase 2E: Telegram-inspired polish
+- Blue verification precedes Plus. The Studio uses a single horizontal category row, controls on the left and account preview on the right (stacked on narrow screens), with fixed Apply and Reset controls. The real account name and avatar use existing profile/avatar APIs.
+- Free Apply is locked and opens the plans even for a default-only draft. Custom colours use a matching tile and palette. Profile and card motifs are original vector line art; public style choices include card glow and chat typeface. Timer custom glow and Studio timer tab are retired; existing compact/micro selector remains in the mini timer and follows theme accents.
+- Account menu entry is membership-aware: Try StudyLab Plus / Plus Studio Customizations. Production rollout and payments remain disabled; test signed-in visuals and real cross-account styles before launch.
