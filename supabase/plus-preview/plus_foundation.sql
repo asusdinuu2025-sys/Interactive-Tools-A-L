@@ -85,13 +85,17 @@ create table public.studylab_plus_appearance (
  bubble text not null default 'default' check(bubble in ('default','violet','cyan','rose','mint','gold')),
  pet text not null default 'default' check(pet in ('default','nebula','mint','rose','gold')),
  timer text not null default 'standard' check(timer in ('standard','compact','micro')),
+ pattern text not null default 'default' check(pattern in ('default','none','science','space','nature','music','books')),
+ card_pattern text not null default 'default' check(card_pattern in ('default','none','science','space','nature','music','books')),
+ card_glow text not null default 'default' check(card_glow in ('default','none','soft','neon','halo')),
+ chat_font text not null default 'default' check(chat_font in ('default','clean','classic','mono')),
  details jsonb not null default '{"shape":"default","eyes":"default","glow":"default","mouth":"default","eyeColor":"default","timerAccent":"default"}'::jsonb check (jsonb_typeof(details)='object' and details ?& array['shape','eyes','glow','mouth','eyeColor','timerAccent'] and details - array['shape','eyes','glow','mouth','eyeColor','timerAccent'] = '{}'::jsonb
  and coalesce(details->>'shape','') in ('default','capsule','square','orb')
  and coalesce(details->>'eyes','') in ('default','round','pixel','star','arc')
  and coalesce(details->>'glow','') in ('default','none','soft','neon','galaxy','spark')
  and coalesce(details->>'mouth','') in ('default','smile','dot','none')
  and coalesce(details->>'eyeColor','') ~ '^(default|#[0-9a-fA-F]{6})$'
- and coalesce(details->>'timerAccent','') ~ '^(default|#[0-9a-fA-F]{6})$')
+ and coalesce(details->>'timerAccent','') = 'default')
 );
 alter table public.studylab_plus_appearance enable row level security;
 revoke all on public.studylab_plus_appearance from public,anon,authenticated;
@@ -101,7 +105,7 @@ language plpgsql stable security definer set search_path='' as $$
 declare result jsonb;
 begin
  if auth.uid() is null or not exists(select 1 from auth.users u where u.id=auth.uid() and not coalesce(u.is_anonymous,false)) or coalesce(cardinality(p_users),0)>100 then return '{}'::jsonb; end if;
- select coalesce(jsonb_object_agg(g.user_id::text,jsonb_build_object('active',true,'cover',coalesce(a.cover,'default'),'frame',coalesce(a.frame,'default'),'effect',coalesce(a.effect,'default'),'bubble',coalesce(a.bubble,'default'))),'{}'::jsonb) into result
+ select coalesce(jsonb_object_agg(g.user_id::text,jsonb_build_object('active',true,'cover',coalesce(a.cover,'default'),'frame',coalesce(a.frame,'default'),'effect',coalesce(a.effect,'default'),'bubble',coalesce(a.bubble,'default'),'pattern',coalesce(a.pattern,'default'),'cardPattern',coalesce(a.card_pattern,'default'),'cardGlow',coalesce(a.card_glow,'default'),'chatFont',coalesce(a.chat_font,'default'))),'{}'::jsonb) into result
  from public.studylab_plus_grants g join public.studylab_plus_settings s on s.singleton and s.enabled
  join auth.users u on u.id=g.user_id join public.studylab_profiles p on p.id=u.id
  left join public.studylab_plus_appearance a on a.user_id=g.user_id
@@ -119,15 +123,15 @@ begin
  end if;
  return result;
 end; $$;
-create function public.studylab_plus_save_appearance(p_cover text,p_frame text,p_effect text,p_bubble text,p_pet text,p_timer text,p_details jsonb) returns jsonb
+create function public.studylab_plus_save_appearance(p_cover text,p_frame text,p_effect text,p_bubble text,p_pet text,p_timer text,p_details jsonb,p_pattern text,p_card_pattern text,p_card_glow text,p_chat_font text) returns jsonb
 language plpgsql security definer set search_path='' as $$
 declare uid uuid:=auth.uid();
 begin
  if uid is null or not coalesce((public.studylab_plus_status()->>'active')::boolean,false) then raise exception 'Active Plus required' using errcode='42501'; end if;
- insert into public.studylab_plus_appearance(user_id,cover,frame,effect,bubble,pet,timer,details) values(uid,p_cover,p_frame,p_effect,p_bubble,p_pet,p_timer,p_details)
- on conflict(user_id) do update set cover=excluded.cover,frame=excluded.frame,effect=excluded.effect,bubble=excluded.bubble,pet=excluded.pet,timer=excluded.timer,details=excluded.details;
+ insert into public.studylab_plus_appearance(user_id,cover,frame,effect,bubble,pet,timer,details,pattern,card_pattern,card_glow,chat_font) values(uid,p_cover,p_frame,p_effect,p_bubble,p_pet,p_timer,p_details,p_pattern,p_card_pattern,p_card_glow,p_chat_font)
+ on conflict(user_id) do update set cover=excluded.cover,frame=excluded.frame,effect=excluded.effect,bubble=excluded.bubble,pet=excluded.pet,timer=excluded.timer,details=excluded.details,pattern=excluded.pattern,card_pattern=excluded.card_pattern,card_glow=excluded.card_glow,chat_font=excluded.chat_font;
  return public.studylab_plus_profile_state(uid);
 end; $$;
-revoke all on function public.studylab_plus_public_styles(uuid[]),public.studylab_plus_profile_state(uuid),public.studylab_plus_save_appearance(text,text,text,text,text,text,jsonb) from public,anon,authenticated;
-grant execute on function public.studylab_plus_public_styles(uuid[]),public.studylab_plus_profile_state(uuid),public.studylab_plus_save_appearance(text,text,text,text,text,text,jsonb) to authenticated;
+revoke all on function public.studylab_plus_public_styles(uuid[]),public.studylab_plus_profile_state(uuid),public.studylab_plus_save_appearance(text,text,text,text,text,text,jsonb,text,text,text,text) from public,anon,authenticated;
+grant execute on function public.studylab_plus_public_styles(uuid[]),public.studylab_plus_profile_state(uuid),public.studylab_plus_save_appearance(text,text,text,text,text,text,jsonb,text,text,text,text) to authenticated;
 commit;
