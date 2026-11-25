@@ -77,7 +77,7 @@
     check.setAttribute("stroke-linejoin", "round");
     svg.append(outline, check);
     mark.append(svg);
-    nameNode.insertBefore(mark,nameNode.querySelector(':scope > .sl-plus-inline-badge,:scope > .sl-plus-member-badge'));
+    const plus=nameNode.querySelector(':scope > .sl-plus-inline-badge,:scope > .sl-plus-member-badge');if(plus)nameNode.insertBefore(mark,plus);else nameNode.append(mark);
   }
 
   Object.defineProperty(window, "StudyLabNameMark", {
