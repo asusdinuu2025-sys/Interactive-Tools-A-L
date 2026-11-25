@@ -291,3 +291,5 @@ body.study-room-page[data-room-theme] .room-page .room-people-grid .room-person-
 .study-chat-message[data-plus-chat-font] .study-chat-message-text{overflow-wrap:anywhere;word-break:normal}
 .profile-account-menu .sl-plus-menu-entry .account-menu-icon{color:#a28af3;background:#a28af320;border-color:#a28af355}
 @media(max-width:680px){.sl-plus-studio[open]{padding:12px;max-height:calc(100dvh - 20px)}.sl-plus-studio-layout{grid-template-columns:minmax(0,1fr);gap:10px}.sl-plus-studio-preview{position:static;grid-row:2;min-height:0}.sl-plus-studio-tabs button{padding:7px 10px}.sl-plus-tile-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.sl-plus-studio-tile{min-height:66px}.sl-plus-tile-swatch{height:40px}.sl-plus-appearance-sample{min-height:180px!important}}
+
+.sl-plus-live-avatar{width:52px;height:52px;justify-self:start}.sl-plus-live-sample .sl-plus-live-avatar[data-plus-frame]:not([data-plus-frame=default]){outline-width:2px;outline-offset:2px}
