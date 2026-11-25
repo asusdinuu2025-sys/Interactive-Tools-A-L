@@ -26,7 +26,7 @@ function minorAmount(raw){
 function verifyNotification(body,config){
  if(!config||config.enabled!==true||config.environment!=="sandbox"||typeof config.merchantId!=="string"||!config.merchantId||typeof config.merchantSecret!=="string"||!config.merchantSecret||!config.order||config.order.environment!=="sandbox")throw Error("Sandbox verification is not configured");
  const p=parse(body),order=config.order;
- if(p.merchant_id!==config.merchantId||p.order_id!==order.id||p.payhere_currency!=="LKR"||minorAmount(p.payhere_amount)!==order.amountMinor||!["1","2","0","-1","-2","-3"].includes(p.status_code))throw Error("Callback does not match the trusted order");
+ if(p.merchant_id!==config.merchantId||p.order_id!==order.id||p.payhere_currency!=="LKR"||minorAmount(p.payhere_amount)!==order.amountMinor||!["2","0","-1","-2","-3"].includes(p.status_code))throw Error("Callback does not match the trusted order");
  if(!/^[0-9A-F]{32}$/.test(p.md5sig))throw Error("Invalid callback signature");
  const expected=md5(p.merchant_id+p.order_id+p.payhere_amount+p.payhere_currency+p.status_code+md5(config.merchantSecret));
  if(!timingSafeEqual(Buffer.from(p.md5sig,"ascii"),Buffer.from(expected,"ascii")))throw Error("Invalid callback signature");
