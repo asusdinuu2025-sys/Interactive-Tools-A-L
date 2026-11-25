@@ -2,7 +2,7 @@
 (function(root){
 "use strict";
 const core=["Live Study Room and standard timer","Social and Chat","Past papers and simulations","Existing profile pictures and themes","Tasks, notes and bookmarks","Guardian safety screening"];
-const planned=["Plus membership badge","Premium profile covers, icon packs and avatar rings","Live study card gradients, doodles and glow","Custom studying cards and chat bubbles","Chat bubble colours and 5 extra message fonts","Pet body shapes, eye styles, colours and auras","Compact and micro floating timer","Premium Home and Study Room backgrounds","Advanced personal study reports"];const future=[];
+const planned=["Plus membership badge","Premium profile covers, icon packs and avatar rings","Live study card gradients, doodles and glow","Daily and weekly leaderboard colours and doodles","Custom studying cards and chat bubbles","Chat bubble colours and 5 extra message fonts","Pet body shapes, eye styles, colours and auras","Compact and micro floating timer","Premium Home and Study Room backgrounds","Advanced personal study reports"];const future=[];
 function normalize(s){return {enabled:s?.enabled===true,active:s?.active===true&&s?.enabled===true,granted:s?.granted===true,expires_at:s?.expires_at||null,billing_ready:false};}
 function eligible(u){return Boolean(u?.id&&!u.is_anonymous);}
 function demoAllowed(host){return /^deploy-preview-[0-9]+--studylablk\.netlify\.app$/.test(host)||["localhost","127.0.0.1"].includes(host);}
@@ -10,12 +10,12 @@ const covers=["default","aurora","ocean","sunset","galaxy","nebula","starlight",
 function validFrame(value){return typeof value==="string"&&(frames.includes(value)||/^#[0-9a-f]{6}$/i.test(value));}
 const effects=["default","aurora","galaxy","pulse","sakura","ocean"],bubbles=["default","violet","cyan","rose","mint","gold"],pets=["default","nebula","mint","rose","gold"],timerModes=["standard","compact","micro"];
 const plans=Object.freeze([{months:1,price:199,label:"Monthly"},{months:3,price:499,label:"3 months"},{months:12,price:1799,label:"Yearly"}]);
-const petShapes=["default","capsule","square","orb"],petEyes=["default","round","pixel","star","arc","visor","softsquare","droplet","focused","sleepy","happy","diamond"],petGlows=["default","none","soft","neon","galaxy","spark"],petMouths=["default","smile","dot","none"];
+const petShapes=["default","teardrop","square","orb"],petEyes=["default","round","pixel","arc","visor","softsquare","droplet","focused","sleepy","happy"],petGlows=["default","none","soft","neon","galaxy","spark"],petMouths=["default","smile","dot","none"];
 const workspaces=["default","aurora","ocean","galaxy","forest","sunset","prism"];
 const colorValue=(v)=>typeof v==="string"&&/^#[0-9a-f]{6}$/i.test(v)?v.toLowerCase():"default";
-function details(v){return {shape:petShapes.includes(v?.shape)?v.shape:"default",eyes:petEyes.includes(v?.eyes)?v.eyes:"default",glow:petGlows.includes(v?.glow)?v.glow:"default",mouth:petMouths.includes(v?.mouth)?v.mouth:"default",eyeColor:colorValue(v?.eyeColor),timerAccent:"default",workspace:workspaces.includes(v?.workspace)?v.workspace:"default"};}
+function details(v){return {shape:petShapes.includes(v?.shape)?v.shape:"default",eyes:petEyes.includes(v?.eyes)?v.eyes:"default",glow:petGlows.includes(v?.glow)?v.glow:"default",mouth:petMouths.includes(v?.mouth)?v.mouth:"default",eyeColor:colorValue(v?.eyeColor),timerAccent:"default",workspace:workspaces.includes(v?.workspace)?v.workspace:"default",rankDailyColor:colorValue(v?.rankDailyColor),rankWeeklyColor:colorValue(v?.rankWeeklyColor),rankPattern:patterns.includes(v?.rankPattern)?v.rankPattern:"default"};}
 const patterns=["default","none","science","space","nature","music","books"],cardGlows=["default","none","soft","neon","halo"],chatFonts=["default","clean","classic","mono","italic","rog"];
-function appearance(s){const active=s?.active===true;return {active,cover:active&&covers.includes(s.cover)?s.cover:"default",frame:active&&validFrame(s.frame)?s.frame:"default",effect:active&&effects.includes(s.effect)?s.effect:"default",bubble:active&&bubbles.includes(s.bubble)?s.bubble:"default",pet:active&&pets.includes(s.pet)?s.pet:"default",timer:active&&timerModes.includes(s.timer)?s.timer:"standard",details:details(active?s.details:null),pattern:active&&patterns.includes(s.pattern)?s.pattern:"default",cardPattern:active&&patterns.includes(s.cardPattern)?s.cardPattern:"default",cardGlow:active&&cardGlows.includes(s.cardGlow)?s.cardGlow:"default",chatFont:active&&chatFonts.includes(s.chatFont)?s.chatFont:"default"};}
+function appearance(s){const active=s?.active===true;return {active,cover:active&&covers.includes(s.cover)?s.cover:"default",frame:active&&validFrame(s.frame)?s.frame:"default",effect:active&&effects.includes(s.effect)?s.effect:"default",bubble:active&&bubbles.includes(s.bubble)?s.bubble:"default",pet:active&&pets.includes(s.pet)?s.pet:"default",timer:active&&timerModes.includes(s.timer)?s.timer:"standard",details:details(active?s.details:null),pattern:active&&patterns.includes(s.pattern)?s.pattern:"default",cardPattern:active&&patterns.includes(s.cardPattern)?s.cardPattern:"default",cardGlow:active&&cardGlows.includes(s.cardGlow)?s.cardGlow:"default",chatFont:active&&chatFonts.includes(s.chatFont)?s.chatFont:"default",rankDailyColor:active?colorValue(s.rankDailyColor??s.details?.rankDailyColor):"default",rankWeeklyColor:active?colorValue(s.rankWeeklyColor??s.details?.rankWeeklyColor):"default",rankPattern:active&&patterns.includes(s.rankPattern??s.details?.rankPattern)?(s.rankPattern??s.details?.rankPattern):"default"};}
 function hasPremiumDraft(s){const a=appearance({...s,active:true}),base=appearance({active:true});return JSON.stringify(a)!==JSON.stringify(base);}
 function sponsored(item){return item?.kind==="sponsored"||item?.design?.preset==="sponsored";}
 function filterSponsored(items){return items;}
@@ -47,6 +47,7 @@ async function saveAppearance(cover,frame,extras={}){
 async function ownAppearance(){const a=root.StudyLabAccount;await a?.ready;return profileState(a?.getUser?.()?.id);}
 async function savePreference(key,value){const s=await ownAppearance();if(!s.active){await open("Premium customization");return false;}const allowed={pet:pets,timer:timerModes,effect:effects,bubble:bubbles};if(!allowed[key]?.includes(value))return false;await saveAppearance(s.cover,s.frame,{[key]:value});return true;}
 function paintAppearance(panel,avatar,state){
+ avatar.dataset.plusActive=String(state.active);
  panel.dataset.plusCover=state.active?state.cover:"default";
  avatar.dataset.plusFrame=state.active?state.frame:"default";
  avatar.style.removeProperty("--sl-plus-ring");
@@ -69,6 +70,15 @@ function paintMotifs(panel,pack){
  for(let i=0;i<6;i++){const n=E("span");n.dataset.particle=String(i);n.append(motif(pack,i));layer.append(n);}panel.prepend(layer);
 }
 function paintCard(card,state){card.dataset.plusEffect=state.effect;card.dataset.plusCardGlow=state.cardGlow;paintMotifs(card,state.cardPattern==="default"?"none":state.cardPattern);}
+function paintRank(row,state){
+ const period=row.dataset.plusRankPeriod==="weekly"?"weekly":"daily";
+ const value=state.active?(period==="weekly"?state.rankWeeklyColor:state.rankDailyColor):"default";
+ const color=colorValue(value);
+ row.dataset.plusRankColor=color==="default"?"default":"custom";
+ row.style.removeProperty("--sl-plus-rank-color");
+ if(color!=="default")row.style.setProperty("--sl-plus-rank-color",color);
+ paintMotifs(row,state.active&&state.rankPattern!=="default"?state.rankPattern:"none");
+}
 function paintChat(card,state){card.dataset.plusBubble=state.bubble;card.dataset.plusChatFont=state.chatFont;}
 
 function paintProfile(panel,avatar,name,state){
@@ -89,7 +99,7 @@ async function openStudio(initial="cover"){
  const account=root.StudyLabAccount;await account?.ready;const user=account?.getUser?.();if(!eligible(user))return;
  if(!preview&&!(await status()).enabled)return;
  const saved=await profileState(user.id);if(account.getUser()?.id!==user.id||studio)return;
- let draft=appearance({...saved,active:true}),category=["cover","frame","effect","bubble","pet","workspace"].includes(initial)?initial:"cover";
+ let draft=appearance({...saved,active:true}),category=["cover","frame","effect","rank","bubble","pet","workspace"].includes(initial)?initial:"cover";
  const editor=E("dialog",null,"sl-plus-dialog sl-plus-studio");studio=editor;editor.setAttribute("aria-label","StudyLab Plus Studio");
  const previous=d.activeElement,header=E("header",null,"sl-plus-head"),heading=E("div"),closeButton=E("button","×","sl-plus-close");
  heading.append(E("span","STUDYLAB · CUSTOMIZATION","sl-plus-eyebrow"),E("h2","Plus Studio"));closeButton.type="button";closeButton.setAttribute("aria-label","Close without applying");closeButton.onclick=()=>editor.close();header.append(heading,closeButton);
@@ -101,13 +111,21 @@ async function openStudio(initial="cover"){
  const chat=E("article",null,"study-chat-message sl-plus-chat-sample");chat.append(E("strong",profile?.display_name||"You"),E("p","Ready for another study session.","study-chat-message-text"));
  const petBox=E("div",null,"sl-plus-pet-preview"),pet=E("div",null,"sl-pet-character sl-plus-pet-sample"),face=E("div",null,"sl-pet-visual");for(const side of ["left","right"]){const eye=E("div",null,"sl-pet-eye "+side);eye.append(E("i"));face.append(eye);}face.append(E("div",null,"sl-pet-mouth"));pet.append(face);petBox.append(pet,E("small","Your study companion"));
  
- const workspaceSample=E("div",null,"sl-plus-workspace-sample");workspaceSample.append(E("small","STUDYLAB"),E("strong","Your study workspace"),E("div","Live Study Room","sl-plus-workspace-sample-card"),E("div","Study resources","sl-plus-workspace-sample-card"));previewPane.append(E("small","LIVE PREVIEW · NOT SAVED","sl-plus-eyebrow"),sample,live,chat,petBox,workspaceSample);
- const groupNames={cover:"Profile cover",frame:"Avatar ring",effect:"Study card",bubble:"Chat bubble",pet:"Pet studio",workspace:"Workspace"};
+ const rankBox=E("section",null,"sl-plus-ranking-preview");
+ const dailyRank=E("div",null,"room-rank sl-plus-rank-sample"),weeklyRank=E("div",null,"room-rank sl-plus-rank-sample");
+ for(const [item,period] of [[dailyRank,"daily"],[weeklyRank,"weekly"]]){
+  item.dataset.plusRankPeriod=period;
+  item.append(E("span",period==="daily"?"1":"2","room-rank-number"),E("div","●","room-avatar"));
+  const info=E("div",null,"room-rank-info");info.append(E("strong",profile?.display_name||"Student"),E("span",period==="daily"?"Daily leaderboard":"Weekly leaderboard"));
+  item.append(info,E("span",period==="daily"?"04:35":"28:15","room-time"));rankBox.append(item);
+ }
+ const workspaceSample=E("div",null,"sl-plus-workspace-sample");workspaceSample.append(E("small","STUDYLAB"),E("strong","Your study workspace"),E("div","Live Study Room","sl-plus-workspace-sample-card"),E("div","Study resources","sl-plus-workspace-sample-card"));previewPane.append(E("small","LIVE PREVIEW · NOT SAVED","sl-plus-eyebrow"),sample,live,rankBox,chat,petBox,workspaceSample);
+ const groupNames={cover:"Profile cover",frame:"Avatar ring",effect:"Study card",rank:"Ranking bars",bubble:"Chat bubble",pet:"Pet studio",workspace:"Workspace"};
  const label=v=>v==="default"?"Original":v[0].toUpperCase()+v.slice(1);
  const actionBar=E("footer",null,"sl-plus-studio-actions"),reset=E("button","Reset design","sl-plus-profile-entry"),apply=E("button",saved.active?"Apply style":"🔒 Apply style","sl-plus-profile-entry sl-plus-apply"),message=E("p",null,"sl-plus-studio-message");message.setAttribute("role","status");reset.type=apply.type="button";actionBar.append(reset,apply);
  function refresh(){
-  paintAppearance(sample,sampleAvatar,draft);liveAvatar.dataset.plusFrame=sampleAvatar.dataset.plusFrame;liveAvatar.style.setProperty("--sl-plus-ring",sampleAvatar.style.getPropertyValue("--sl-plus-ring"));paintCard(live,draft);paintChat(chat,draft);paintPet(pet,draft);
-  sample.hidden=!["cover","frame"].includes(category);live.hidden=category!=="effect";chat.hidden=category!=="bubble";petBox.hidden=category!=="pet";workspaceSample.hidden=category!=="workspace";workspaceSample.dataset.plusWorkspace=draft.details.workspace;
+  paintAppearance(sample,sampleAvatar,draft);liveAvatar.dataset.plusActive="true";liveAvatar.dataset.plusFrame=sampleAvatar.dataset.plusFrame;liveAvatar.style.setProperty("--sl-plus-ring",sampleAvatar.style.getPropertyValue("--sl-plus-ring"));paintCard(live,draft);paintRank(dailyRank,{...draft,rankDailyColor:draft.details.rankDailyColor,rankWeeklyColor:draft.details.rankWeeklyColor,rankPattern:draft.details.rankPattern});paintRank(weeklyRank,{...draft,rankDailyColor:draft.details.rankDailyColor,rankWeeklyColor:draft.details.rankWeeklyColor,rankPattern:draft.details.rankPattern});paintChat(chat,draft);paintPet(pet,draft);
+  sample.hidden=!["cover","frame"].includes(category);live.hidden=category!=="effect";rankBox.hidden=category!=="rank";chat.hidden=category!=="bubble";petBox.hidden=category!=="pet";workspaceSample.hidden=category!=="workspace";workspaceSample.dataset.plusWorkspace=draft.details.workspace;
   for(const button of tabs.children)button.setAttribute("aria-pressed",String(button.dataset.category===category));
   for(const button of options.querySelectorAll("[data-option-key]")){const k=button.dataset.optionKey;button.setAttribute("aria-pressed",String(button.dataset.choice==="custom"?/^#[0-9a-f]{6}$/i.test(k.startsWith("details.")?draft.details[k.slice(8)]:draft[k]):(k.startsWith("details.")?draft.details[k.slice(8)]:draft[k])===button.dataset.choice));}
  }
@@ -125,7 +143,7 @@ async function openStudio(initial="cover"){
    else if(kind==="color"){swatch.style.background=/^#[0-9a-f]{6}$/i.test(v)?v:"";swatch.textContent=v==="default"?"Auto":"";}
    else if(kind==="pet"){const mini=E("span","••","sl-plus-pet-tile");mini.dataset.pet=v;swatch.append(mini);}
    else if(key==="details.eyes"){const face=E("span",null,"sl-plus-eye-tile");face.dataset.plusEyes=v;for(const side of ["left","right"]){const eye=E("span",null,"sl-plus-eye-tile-"+side);face.append(eye);}swatch.append(face);}
-   else{swatch.textContent=key==="details.eyes"?({default:"▮ ▮",round:"● ●",pixel:"■ ■",star:"✦ ✦",arc:"⌒ ⌒"}[v]||"✧"):key==="details.shape"?({default:"▢",capsule:"⬭",square:"□",orb:"○"}[v]||"✧"):key==="timer"?"00:42":key==="details.mouth"?({default:"⌣",smile:"◡",dot:"•",none:"—"}[v]||"✧"):"✧";}
+   else{swatch.textContent=key==="details.eyes"?({default:"▮ ▮",round:"● ●",pixel:"■ ■",arc:"⌒ ⌒"}[v]||"✧"):key==="details.shape"?({default:"▢",teardrop:"◕",square:"□",orb:"○"}[v]||"✧"):key==="timer"?"00:42":key==="details.mouth"?({default:"⌣",smile:"◡",dot:"•",none:"—"}[v]||"✧"):"✧";}
    button.append(swatch,E("span",kind==="color"&&v!=="default"?v.toUpperCase():label(v)));button.onclick=()=>set(key,v);group.append(button);
   }if(kind==="frame"||kind==="color"){const custom=E("button",null,"sl-plus-studio-tile");custom.type="button";custom.dataset.optionKey=key;custom.dataset.choice="custom";const swatch=E("span","◉","sl-plus-tile-swatch sl-plus-custom-swatch");custom.append(swatch,E("span","Custom"));const palette=E("div",null,"sl-plus-custom-palette");palette.hidden=true;const picker=E("input");picker.type="color";picker.setAttribute("aria-label","Custom colour");const value=k=>k.startsWith("details.")?draft.details[k.slice(8)]:draft[k];picker.value=/^#[0-9a-f]{6}$/i.test(value(key))?value(key):"#a78bfa";picker.oninput=()=>set(key,picker.value);for(const hex of ["#60a5fa","#a78bfa","#f9a8d4","#fbbf24","#34d399","#22d3ee","#e2e8f0","#f87171"]){const choice=E("button");choice.type="button";choice.style.background=hex;choice.setAttribute("aria-label",hex);choice.onclick=()=>{picker.value=hex;set(key,hex);};palette.append(choice);}palette.append(picker);custom.onclick=()=>{palette.hidden=!palette.hidden;custom.setAttribute("aria-expanded",String(!palette.hidden));};group.append(custom);options.append(group,palette);}else options.append(group);
  }
@@ -135,6 +153,7 @@ async function openStudio(initial="cover"){
   if(category==="cover"){tiles("Profile backgrounds","cover",covers,"cover");tiles("Profile icon packs","pattern",patterns,"pattern");}
   if(category==="frame")tiles("Avatar rings","frame",frames,"frame");
   if(category==="effect"){tiles("Live studying card effects","effect",effects,"effect");tiles("Card watermark","cardPattern",patterns,"pattern");tiles("Card glow","cardGlow",cardGlows,"glow");}
+  if(category==="rank"){tiles("Daily ranking colour","details.rankDailyColor",["default","#a78bfa","#22d3ee","#34d399","#f472b6","#fbbf24"],"color");tiles("Weekly ranking colour","details.rankWeeklyColor",["default","#a78bfa","#22d3ee","#34d399","#f472b6","#fbbf24"],"color");tiles("Ranking bar doodles","details.rankPattern",patterns,"pattern");}
   if(category==="bubble"){tiles("Chat bubble colours","bubble",bubbles,"bubble");tiles("Message typeface","chatFont",chatFonts,"font");}
   if(category==="pet"){tiles("Robot finish","pet",pets,"pet");tiles("Body shape","details.shape",petShapes);tiles("Eye shape","details.eyes",petEyes);tiles("Eye colour","details.eyeColor",["default","#5de7ff","#bba0ff","#ffb6db","#8bffcb","#ffda7a"],"color");tiles("Aura","details.glow",petGlows);tiles("Mouth","details.mouth",petMouths);}
   refresh();
@@ -164,7 +183,7 @@ async function refreshProfile(panel,avatar,name,id,own,valid){
  const state=await profileState(id);if(!stillValid())return;paintProfile(panel,avatar,name,state);
  if(own&&!preview&&(await status()).enabled&&stillValid())profileEditor(panel,id);
 }
-function clearProfile(panel,avatar){refreshGeneration.set(panel,(refreshGeneration.get(panel)||0)+1);panel.querySelector(".sl-plus-member-badge")?.remove();panel.querySelector(".sl-plus-customize")?.remove();delete panel.dataset.plusCover;delete panel.dataset.plusMotifs;delete avatar.dataset.plusFrame;avatar.style.removeProperty("--sl-plus-ring");panel.querySelector(":scope > .sl-plus-floats")?.remove();}
+function clearProfile(panel,avatar){refreshGeneration.set(panel,(refreshGeneration.get(panel)||0)+1);panel.querySelector(".sl-plus-member-badge")?.remove();panel.querySelector(".sl-plus-customize")?.remove();delete panel.dataset.plusCover;delete panel.dataset.plusMotifs;delete avatar.dataset.plusFrame;delete avatar.dataset.plusActive;avatar.style.removeProperty("--sl-plus-ring");panel.querySelector(":scope > .sl-plus-floats")?.remove();}
 async function sync(button){if(!button)return;button.hidden=true;const a=root.StudyLabAccount;await a?.ready;const u=a?.getUser?.();if(!eligible(u))return;const uid=u.id;if(preview){if(button.isConnected&&!button.parentElement?.closest("[hidden]")){button.hidden=false;button.textContent=currentDemo()?"Manage Plus demo":"Get StudyLab Plus";}return;}const state=await status();if(a.getUser()?.id!==uid||!eligible(a.getUser())||!button.isConnected||button.parentElement?.closest("[hidden]"))return;button.hidden=!(preview||state.enabled);button.textContent=currentDemo()?"Manage Plus demo":state.active?"Manage Plus":"Get StudyLab Plus";}
 async function open(feature){
  if(dialog?.open)return;
@@ -198,7 +217,7 @@ const badgeQueue=new Set(),badgeCache=new Map();let badgeTimer=null,badgeBlocked
 const validId=id=>typeof id==="string"&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 function renderNameBadge(node,id){
  const own=root.StudyLabAccount?.getUser?.()?.id===id,demo=own&&currentDemo(),cached=badgeCache.get(id);
- const show=demo||Boolean(cached?.active&&cached.until>Date.now());const state=demo?appearance({...demoAppearance,active:true}):show?appearance(cached):appearance(null);const surface=node.closest(".room-person-card,.room-rank,.study-chat-message");if(surface){if(surface.classList.contains("room-person-card"))paintCard(surface,state);else if(surface.classList.contains("study-chat-message"))paintChat(surface,state);const avatar=surface.querySelector(".room-avatar,.study-chat-message-avatar");if(avatar){avatar.dataset.plusFrame=state.frame;avatar.style.removeProperty("--sl-plus-ring");if(/^#[0-9a-f]{6}$/i.test(state.frame)){avatar.dataset.plusFrame="custom";avatar.style.setProperty("--sl-plus-ring",state.frame);}}}
+ const show=demo||Boolean(cached?.active&&cached.until>Date.now());const state=demo?appearance({...demoAppearance,active:true}):show?appearance(cached):appearance(null);const surface=node.closest(".room-person-card,.room-rank,.study-chat-message");if(surface){if(surface.classList.contains("room-person-card"))paintCard(surface,state);else if(surface.classList.contains("room-rank"))paintRank(surface,state);else if(surface.classList.contains("study-chat-message"))paintChat(surface,state);const avatar=surface.querySelector(".room-avatar,.study-chat-message-avatar");if(avatar){avatar.dataset.plusActive=String(state.active);avatar.dataset.plusFrame=state.frame;avatar.style.removeProperty("--sl-plus-ring");if(/^#[0-9a-f]{6}$/i.test(state.frame)){avatar.dataset.plusFrame="custom";avatar.style.setProperty("--sl-plus-ring",state.frame);}}}
  let mark=node.querySelector(":scope > .sl-plus-inline-badge");
  if(!show){mark?.remove();return;}
  if(!mark){mark=E("small",null,"sl-plus-inline-badge");node.append(mark);}
@@ -214,7 +233,7 @@ function decorateName(node,id){
  if(!badgeTimer)badgeTimer=setTimeout(flushBadges,100);
 }
 async function flushBadges(){
- badgeTimer=null;const a=root.StudyLabAccount;await a?.ready;const viewer=a?.getUser?.();const ids=[...badgeQueue].slice(0,100);ids.forEach(id=>badgeQueue.delete(id));if(!eligible(viewer)||!ids.length)return;
+ badgeTimer=null;const a=root.StudyLabAccount;await a?.ready;const viewer=a?.getUser?.();const ids=[...badgeQueue].slice(0,100);ids.forEach(id=>badgeQueue.delete(id));if(!viewer?.id||!ids.length)return;
  if(badgeViewer!==viewer.id){badgeCache.clear();badgeViewer=viewer.id;}
  try{const result=await a.client.rpc("studylab_plus_public_styles",{p_users:ids});if(a.getUser()?.id!==viewer.id)return;if(result.error)throw result.error;
  const members=result.data&&typeof result.data==="object"?result.data:{};for(const id of ids)badgeCache.set(id,{...appearance(members[id]),until:Date.now()+60000});
