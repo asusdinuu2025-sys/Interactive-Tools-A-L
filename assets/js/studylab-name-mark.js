@@ -53,7 +53,7 @@
       existing?.remove();
       return;
     }
-    if (existing) return;
+    if (existing) {const plus=nameNode.querySelector(':scope > .sl-plus-inline-badge,:scope > .sl-plus-member-badge');if(plus&&existing.nextElementSibling!==plus)nameNode.insertBefore(existing,plus);return;}
 
     const mark = document.createElement("span");
     mark.className = "sl-name-mark";
@@ -77,7 +77,7 @@
     check.setAttribute("stroke-linejoin", "round");
     svg.append(outline, check);
     mark.append(svg);
-    nameNode.append(mark);
+    nameNode.insertBefore(mark,nameNode.querySelector(':scope > .sl-plus-inline-badge,:scope > .sl-plus-member-badge'));
   }
 
   Object.defineProperty(window, "StudyLabNameMark", {
