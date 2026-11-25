@@ -108,7 +108,7 @@ async function openStudio(initial="cover"){
   paintAppearance(sample,sampleAvatar,draft);paintCard(live,draft);paintChat(chat,draft);paintPet(pet,draft);
   sample.hidden=!["cover","frame"].includes(category);live.hidden=category!=="effect";chat.hidden=category!=="bubble";petBox.hidden=category!=="pet";
   for(const button of tabs.children)button.setAttribute("aria-pressed",String(button.dataset.category===category));
-  for(const button of options.querySelectorAll("[data-option-key]")){const k=button.dataset.optionKey;button.setAttribute("aria-pressed",String((k.startsWith("details.")?draft.details[k.slice(8)]:draft[k])===button.dataset.choice));}
+  for(const button of options.querySelectorAll("[data-option-key]")){const k=button.dataset.optionKey;button.setAttribute("aria-pressed",String(button.dataset.choice==="custom"?/^#[0-9a-f]{6}$/i.test(k.startsWith("details.")?draft.details[k.slice(8)]:draft[k]):(k.startsWith("details.")?draft.details[k.slice(8)]:draft[k])===button.dataset.choice));}
  }
  function set(k,v){if(k.startsWith("details."))draft.details[k.slice(8)]=v;else draft[k]=v;refresh();}
  function tiles(title,key,values,kind){
@@ -118,20 +118,22 @@ async function openStudio(initial="cover"){
    else if(kind==="frame"){const ring=E("span","✦","sl-plus-ring-swatch");ring.dataset.plusFrame=v;swatch.append(ring);}
    else if(kind==="bubble"){swatch.dataset.plusBubble=v;swatch.classList.add("study-chat-message");swatch.textContent="Aa";}
    else if(kind==="effect"){swatch.dataset.plusEffect=v;swatch.classList.add("room-person-card");swatch.textContent="✧";}
+   else if(kind==="pattern"){const icon=motif(v,0);if(icon)swatch.append(icon);else swatch.textContent=v==="none"?"×":"Auto";}
+   else if(kind==="font"){swatch.dataset.plusChatFont=v;swatch.classList.add("sl-plus-font-swatch");swatch.textContent="Aa";}
+   else if(kind==="glow"){swatch.dataset.plusCardGlow=v;swatch.classList.add("sl-plus-glow-swatch");swatch.textContent="✧";}
+   else if(kind==="color"){swatch.style.background=/^#[0-9a-f]{6}$/i.test(v)?v:"";swatch.textContent=v==="default"?"Auto":"";}
    else if(kind==="pet"){const mini=E("span","••","sl-plus-pet-tile");mini.dataset.pet=v;swatch.append(mini);}
    else{swatch.textContent=key==="details.eyes"?({default:"▮ ▮",round:"● ●",pixel:"■ ■",star:"✦ ✦",arc:"⌒ ⌒"}[v]||"✧"):key==="details.shape"?({default:"▢",capsule:"⬭",square:"□",orb:"○"}[v]||"✧"):key==="timer"?"00:42":key==="details.mouth"?({default:"⌣",smile:"◡",dot:"•",none:"—"}[v]||"✧"):"✧";}
-   button.append(swatch,E("span",label(v)));button.onclick=()=>set(key,v);group.append(button);
-  }options.append(group);
+   button.append(swatch,E("span",kind==="color"&&v!=="default"?v.toUpperCase():label(v)));button.onclick=()=>set(key,v);group.append(button);
+  }if(kind==="frame"||kind==="color"){const custom=E("button",null,"sl-plus-studio-tile");custom.type="button";custom.dataset.optionKey=key;custom.dataset.choice="custom";const swatch=E("span","◉","sl-plus-tile-swatch sl-plus-custom-swatch");custom.append(swatch,E("span","Custom"));const palette=E("div",null,"sl-plus-custom-palette");palette.hidden=true;const picker=E("input");picker.type="color";picker.setAttribute("aria-label","Custom colour");const value=k=>k.startsWith("details.")?draft.details[k.slice(8)]:draft[k];picker.value=/^#[0-9a-f]{6}$/i.test(value(key))?value(key):"#a78bfa";picker.oninput=()=>set(key,picker.value);for(const hex of ["#60a5fa","#a78bfa","#f9a8d4","#fbbf24","#34d399","#22d3ee","#e2e8f0","#f87171"]){const choice=E("button");choice.type="button";choice.style.background=hex;choice.setAttribute("aria-label",hex);choice.onclick=()=>{picker.value=hex;set(key,hex);};palette.append(choice);}palette.append(picker);custom.onclick=()=>{palette.hidden=!palette.hidden;custom.setAttribute("aria-expanded",String(!palette.hidden));};group.append(custom);options.append(group,palette);}else options.append(group);
  }
- function color(title,key,value){const row=E("label",title,"sl-plus-studio-color"),picker=E("input"),clear=E("button","Default");picker.type="color";picker.value=/^#[0-9a-f]{6}$/i.test(value)?value:"#a78bfa";picker.setAttribute("aria-label",title);picker.oninput=()=>set(key,picker.value);clear.type="button";clear.onclick=e=>{e.preventDefault();set(key,"default");};row.append(picker,clear);options.append(row);}
  function renderOptions(){
   options.replaceChildren();
-  if(category==="cover")tiles("Profile backgrounds","cover",covers,"cover");
-  if(category==="frame"){tiles("Avatar rings","frame",frames,"frame");color("Custom ring colour","frame",draft.frame);}
-  if(category==="effect")tiles("Live studying card effects","effect",effects,"effect");
-  if(category==="bubble")tiles("Chat bubble colours","bubble",bubbles,"bubble");
-  if(category==="pet"){tiles("Robot finish","pet",pets,"pet");tiles("Body shape","details.shape",petShapes);tiles("Eye shape","details.eyes",petEyes);color("Eye colour","details.eyeColor",draft.details.eyeColor);tiles("Aura","details.glow",petGlows);tiles("Mouth","details.mouth",petMouths);}
-  if(category==="timer"){tiles("Floating timer layout","timer",timerModes);color("Timer glow","details.timerAccent",draft.details.timerAccent);}
+  if(category==="cover"){tiles("Profile backgrounds","cover",covers,"cover");tiles("Profile icon packs","pattern",patterns,"pattern");}
+  if(category==="frame")tiles("Avatar rings","frame",frames,"frame");
+  if(category==="effect"){tiles("Live studying card effects","effect",effects,"effect");tiles("Card watermark","cardPattern",patterns,"pattern");tiles("Card glow","cardGlow",cardGlows,"glow");}
+  if(category==="bubble"){tiles("Chat bubble colours","bubble",bubbles,"bubble");tiles("Message typeface","chatFont",chatFonts,"font");}
+  if(category==="pet"){tiles("Robot finish","pet",pets,"pet");tiles("Body shape","details.shape",petShapes);tiles("Eye shape","details.eyes",petEyes);tiles("Eye colour","details.eyeColor",["default","#5de7ff","#bba0ff","#ffb6db","#8bffcb","#ffda7a"],"color");tiles("Aura","details.glow",petGlows);tiles("Mouth","details.mouth",petMouths);}
   refresh();
  }
  for(const [key,title] of Object.entries(groupNames)){const button=E("button",title);button.type="button";button.dataset.category=key;button.onclick=()=>{category=key;renderOptions();};tabs.append(button);}
