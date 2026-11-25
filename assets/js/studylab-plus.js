@@ -12,12 +12,13 @@ const effects=["default","aurora","galaxy","pulse","sakura","ocean"],bubbles=["d
 const plans=Object.freeze([{months:1,price:199,label:"Monthly"},{months:3,price:499,label:"3 months"},{months:12,price:1799,label:"Yearly"}]);
 const petShapes=["default","capsule","square","orb"],petEyes=["default","round","pixel","star","arc"],petGlows=["default","none","soft","neon","galaxy","spark"],petMouths=["default","smile","dot","none"];
 const colorValue=(v)=>typeof v==="string"&&/^#[0-9a-f]{6}$/i.test(v)?v.toLowerCase():"default";
-function details(v){return {shape:petShapes.includes(v?.shape)?v.shape:"default",eyes:petEyes.includes(v?.eyes)?v.eyes:"default",glow:petGlows.includes(v?.glow)?v.glow:"default",mouth:petMouths.includes(v?.mouth)?v.mouth:"default",eyeColor:colorValue(v?.eyeColor),timerAccent:colorValue(v?.timerAccent)};}
-function appearance(s){const active=s?.active===true;return {active,cover:active&&covers.includes(s.cover)?s.cover:"default",frame:active&&validFrame(s.frame)?s.frame:"default",effect:active&&effects.includes(s.effect)?s.effect:"default",bubble:active&&bubbles.includes(s.bubble)?s.bubble:"default",pet:active&&pets.includes(s.pet)?s.pet:"default",timer:active&&timerModes.includes(s.timer)?s.timer:"standard",details:details(active?s.details:null)};}
+function details(v){return {shape:petShapes.includes(v?.shape)?v.shape:"default",eyes:petEyes.includes(v?.eyes)?v.eyes:"default",glow:petGlows.includes(v?.glow)?v.glow:"default",mouth:petMouths.includes(v?.mouth)?v.mouth:"default",eyeColor:colorValue(v?.eyeColor),timerAccent:"default"};}
+const patterns=["default","none","science","space","nature","music","books"],cardGlows=["default","none","soft","neon","halo"],chatFonts=["default","clean","classic","mono"];
+function appearance(s){const active=s?.active===true;return {active,cover:active&&covers.includes(s.cover)?s.cover:"default",frame:active&&validFrame(s.frame)?s.frame:"default",effect:active&&effects.includes(s.effect)?s.effect:"default",bubble:active&&bubbles.includes(s.bubble)?s.bubble:"default",pet:active&&pets.includes(s.pet)?s.pet:"default",timer:active&&timerModes.includes(s.timer)?s.timer:"standard",details:details(active?s.details:null),pattern:active&&patterns.includes(s.pattern)?s.pattern:"default",cardPattern:active&&patterns.includes(s.cardPattern)?s.cardPattern:"default",cardGlow:active&&cardGlows.includes(s.cardGlow)?s.cardGlow:"default",chatFont:active&&chatFonts.includes(s.chatFont)?s.chatFont:"default"};}
 function hasPremiumDraft(s){const a=appearance({...s,active:true}),base=appearance({active:true});return JSON.stringify(a)!==JSON.stringify(base);}
 function sponsored(item){return item?.kind==="sponsored"||item?.design?.preset==="sponsored";}
 function filterSponsored(items){return items;}
-if(typeof module!=="undefined"&&module.exports){module.exports={normalize,core,planned,eligible,demoAllowed,appearance,sponsored,filterSponsored,validFrame,covers,frames,effects,bubbles,pets,timerModes,plans,details,petShapes,petEyes,petGlows,petMouths,hasPremiumDraft};return;}
+if(typeof module!=="undefined"&&module.exports){module.exports={normalize,core,planned,eligible,demoAllowed,appearance,sponsored,filterSponsored,validFrame,covers,frames,effects,bubbles,pets,timerModes,plans,details,petShapes,petEyes,petGlows,petMouths,hasPremiumDraft,patterns,cardGlows,chatFonts};return;}
 const d=root.document;
 const E=(tag,text,cls)=>{const n=d.createElement(tag);if(text!=null)n.textContent=text;if(cls)n.className=cls;return n;};
 const preview=demoAllowed(root.location.hostname);
@@ -40,7 +41,7 @@ async function saveAppearance(cover,frame,extras={}){
  const prior=await profileState(u.id);if(a.getUser()?.id!==u.id)throw Error("Session changed.");const next=appearance({...prior,...extras,active:true,cover,frame});if(currentDemo()){demoAppearance=next;persistDemo();changed();return;}
  const state=await status();if(!state.active||a.getUser()?.id!==u.id)throw Error("Active Plus required.");
  if(preview)throw Error("Preview is read-only for real membership. Switch to demo mode.");
- const r=await a.client.rpc("studylab_plus_save_appearance",{p_cover:next.cover,p_frame:next.frame,p_effect:next.effect,p_bubble:next.bubble,p_pet:next.pet,p_timer:next.timer,p_details:next.details});if(r.error||a.getUser()?.id!==u.id)throw Error(r.error?.message||"Session changed.");badgeCache.delete(u.id);changed();
+ const r=await a.client.rpc("studylab_plus_save_appearance",{p_cover:next.cover,p_frame:next.frame,p_effect:next.effect,p_bubble:next.bubble,p_pet:next.pet,p_timer:next.timer,p_details:next.details,p_pattern:next.pattern,p_card_pattern:next.cardPattern,p_card_glow:next.cardGlow,p_chat_font:next.chatFont});if(r.error||a.getUser()?.id!==u.id)throw Error(r.error?.message||"Session changed.");badgeCache.delete(u.id);changed();
 }
 async function ownAppearance(){const a=root.StudyLabAccount;await a?.ready;return profileState(a?.getUser?.()?.id);}
 async function savePreference(key,value){const s=await ownAppearance();if(!s.active){await open("Premium customization");return false;}const allowed={pet:pets,timer:timerModes,effect:effects,bubble:bubbles};if(!allowed[key]?.includes(value))return false;await saveAppearance(s.cover,s.frame,{[key]:value});return true;}
@@ -49,17 +50,30 @@ function paintAppearance(panel,avatar,state){
  avatar.dataset.plusFrame=state.active?state.frame:"default";
  avatar.style.removeProperty("--sl-plus-ring");
  if(state.active&&/^#[0-9a-f]{6}$/i.test(state.frame)){avatar.dataset.plusFrame="custom";avatar.style.setProperty("--sl-plus-ring",state.frame);}
- panel.querySelector(":scope > .sl-plus-floats")?.remove();
- if(state.active&&state.cover!=="default"){
-  const layer=E("div",null,"sl-plus-floats");layer.setAttribute("aria-hidden","true");
-  const icons={galaxy:"✧ ✦ ◇ ○ ✧ ✦",nebula:"✦ ○ ✧ ◇ ✦ ○",starlight:"✧ ⋆ ✦ ⋆ ✧ ⋆",mountains:"✧ △ ○ ✧ △ ○",forest:"◇ ❋ ◇ ❋ ◇ ❋",sakura:"❀ ✿ ❀ ✿ ❀ ✿",ocean:"○ ◌ ○ ◌ ○ ◌",sunset:"✧ ○ ✧ ○ ✧ ○",aurora:"✧ ◇ ✧ ◇ ✧ ◇",midnight:"⋆ ✧ ⋆ ✧ ⋆ ✧",prism:"◇ △ ◇ △ ◇ △"};
-  for(const [i,shape] of (icons[state.cover]||"✧ ○ ✧ ○ ✧ ○").split(" ").entries()){const n=E("span",shape);n.dataset.particle=String(i);layer.append(n);}panel.prepend(layer);
- }
+ paintMotifs(panel,state.active?(state.pattern==="default"?(state.cover==="default"?"none":state.cover==="forest"||state.cover==="sakura"?"nature":"space"):state.pattern):"none");
 }
+const motifPaths={
+ science:["M9 3h6m-5 0v7l-6 9q-1 2 2 2h12q3 0 2-2l-6-9V3M7 16h10","M12 3c4 0 8 8 8 9s-4 9-8 9-8-8-8-9 4-9 8-9Zm-8 5c3-5 18 5 16 8S2 11 4 8Zm0 8c-2-3 13-13 16-8S7 21 4 16Z","M5 20V4m0 16h16M7 16l5-6 4 3 5-8"],
+ space:["M12 3a8 8 0 1 0 8 8M3 17c-2-3 15-14 18-11s-14 14-18 11Z","M9 14c0-6 4-10 11-11 0 7-4 11-10 12l-1-1ZM9 14l-5 1 1-5 5-3m0 8-1 5 5-1 3-5M5 19l-2 2","M15 3a9 9 0 1 0 6 15A8 8 0 0 1 15 3Z"],
+ nature:["M3 20C3 6 13 3 21 3c0 11-5 17-13 17M4 21 17 8","M12 21V9m0 4c-8 0-10-8-10-8 7 0 10 4 10 8Zm0 4c8 0 10-8 10-8-7 0-10 4-10 8Z","M4 18h16M5 18l5-10 4 6 3-5 4 9"],
+ music:["M9 18V5l12-2v13M9 18a3 2 0 1 1-6 0 3 2 0 1 1 6 0Zm12-2a3 2 0 1 1-6 0 3 2 0 1 1 6 0Z","M4 13v-2a8 8 0 0 1 16 0v2M4 12h3v7H4Zm13 0h3v7h-3Z","M3 12h3l2-6 4 12 3-9 2 3h4"],
+ books:["M3 4q5-2 9 2 4-4 9-2v15q-5-2-9 2-4-4-9-2ZM12 6v15","M4 20h16M6 16 18 4l3 3L9 19 4 20ZM15 7l3 3","M3 8l9-5 9 5-9 5-9-5Zm4 3v6q5 5 10 0v-6M21 8v7"]
+};
+function motif(pack,i){const paths=motifPaths[pack];if(!paths)return null;const svg=d.createElementNS("http://www.w3.org/2000/svg","svg");svg.setAttribute("viewBox","0 0 24 24");svg.setAttribute("fill","none");svg.setAttribute("stroke","currentColor");svg.setAttribute("stroke-width","1.35");svg.setAttribute("stroke-linecap","round");svg.setAttribute("stroke-linejoin","round");const p=d.createElementNS("http://www.w3.org/2000/svg","path");p.setAttribute("d",paths[i%paths.length]);svg.append(p);return svg;}
+function paintMotifs(panel,pack){
+ if(panel.dataset.plusMotifs===pack)return;
+ panel.dataset.plusMotifs=pack;panel.querySelector(":scope > .sl-plus-floats")?.remove();
+ if(!motifPaths[pack])return;
+ const layer=E("div",null,"sl-plus-floats");layer.setAttribute("aria-hidden","true");
+ for(let i=0;i<6;i++){const n=E("span");n.dataset.particle=String(i);n.append(motif(pack,i));layer.append(n);}panel.prepend(layer);
+}
+function paintCard(card,state){card.dataset.plusEffect=state.effect;card.dataset.plusCardGlow=state.cardGlow;paintMotifs(card,state.cardPattern==="default"?"none":state.cardPattern);}
+function paintChat(card,state){card.dataset.plusBubble=state.bubble;card.dataset.plusChatFont=state.chatFont;}
+
 function paintProfile(panel,avatar,name,state){
  paintAppearance(panel,avatar,state);
  panel.querySelector(".sl-plus-member-badge")?.remove();
- if(state.active){const mark=E("span",state.demo?"✦ Plus demo":"✦ Plus","sl-plus-member-badge");name.insertAdjacentElement("afterend",mark);}
+ if(state.active){const mark=E("span",state.demo?"✦ Plus demo":"✦ Plus","sl-plus-member-badge");name.append(mark);}
 }
 function paintPet(node,state){
  const prefs=details(state.active?state.details:null);
@@ -74,26 +88,25 @@ async function openStudio(initial="cover"){
  const account=root.StudyLabAccount;await account?.ready;const user=account?.getUser?.();if(!eligible(user))return;
  if(!preview&&!(await status()).enabled)return;
  const saved=await profileState(user.id);if(account.getUser()?.id!==user.id||studio?.open)return;
- let draft=appearance({...saved,active:true}),category=initial;
+ let draft=appearance({...saved,active:true}),category=["cover","frame","effect","bubble","pet"].includes(initial)?initial:"cover";
  const editor=E("dialog",null,"sl-plus-dialog sl-plus-studio");studio=editor;editor.setAttribute("aria-label","StudyLab Plus Studio");
  const previous=d.activeElement,header=E("header",null,"sl-plus-head"),heading=E("div"),closeButton=E("button","×","sl-plus-close");
  heading.append(E("span","STUDYLAB · CUSTOMIZATION","sl-plus-eyebrow"),E("h2","Plus Studio"));closeButton.type="button";closeButton.setAttribute("aria-label","Close without applying");closeButton.onclick=()=>editor.close();header.append(heading,closeButton);
  const note=E("p",saved.demo?"Demo mode · Changes apply only to this tab.":saved.active?"Preview your design, then apply it to your account.":"Explore every design for free. Plus is required only when applying premium changes.","sl-plus-notice");
  const layout=E("div",null,"sl-plus-studio-layout"),previewPane=E("section",null,"sl-plus-studio-preview"),controls=E("section",null,"sl-plus-studio-controls"),tabs=E("nav",null,"sl-plus-studio-tabs"),options=E("div",null,"sl-plus-studio-options");
  const sample=E("div",null,"sl-plus-appearance-sample"),sampleAvatar=E("div","✦","sl-plus-sample-avatar"),sampleName=E("strong","Your profile"),sampleBadge=E("small","✦ Plus","sl-plus-inline-badge");
- const currentProfile=d.querySelector(".sl-pv-dialog:not([hidden]) .sl-pv-name");const currentPhoto=d.querySelector(".sl-pv-dialog:not([hidden]) .sl-pv-avatar img.sl-avatar-photo:not([hidden])");if(currentProfile&&currentProfile.closest(".sl-pv-view:not([hidden])")){const nameText=[...currentProfile.childNodes].filter(n=>n.nodeType===3).map(n=>n.textContent).join("").trim();if(nameText)sampleName.textContent=nameText;if(currentPhoto){const img=currentPhoto.cloneNode(false);img.removeAttribute("id");img.className="sl-plus-sample-photo";img.alt="";sampleAvatar.replaceChildren(img);}}sample.append(sampleAvatar,sampleName,sampleBadge,E("small","Your profile appearance"));
+ const profile=await Promise.resolve(account.getProfile?.()).catch(()=>null);if(account.getUser()?.id!==user.id){studio=null;return;}sampleName.textContent=profile?.display_name||"Your profile";root.StudyLabNameMark?.decorate(sampleName,user.id);sampleName.querySelector(".sl-plus-inline-badge")?.remove();delete sampleName.dataset.slPlusUser;sampleAvatar.textContent=(profile?.display_name||"S").trim().slice(0,1).toUpperCase();root.StudyLabAvatar?.decorate(sampleAvatar,user.id);sampleName.append(sampleBadge);sample.append(sampleAvatar,sampleName,E("small",profile?.username?"@"+profile.username:"Your profile appearance"));
  const live=E("article",null,"room-person-card sl-plus-live-sample");live.append(E("small","● Studying now"),E("strong","Your studying card"),E("small","Combined Mathematics"),E("strong","00:42:18"));
- const chat=E("article",null,"study-chat-message sl-plus-chat-sample");chat.append(E("strong","You · ✦ Plus"),E("p","Ready for another study session."));
+ const chat=E("article",null,"study-chat-message sl-plus-chat-sample");chat.append(E("strong",profile?.display_name||"You"),E("p","Ready for another study session.","study-chat-message-text"));
  const petBox=E("div",null,"sl-plus-pet-preview"),pet=E("div",null,"sl-pet-character sl-plus-pet-sample"),face=E("div",null,"sl-pet-visual");for(const side of ["left","right"]){const eye=E("div",null,"sl-pet-eye "+side);eye.append(E("i"));face.append(eye);}face.append(E("div",null,"sl-pet-mouth"));pet.append(face);petBox.append(pet,E("small","Your study companion"));
- const timer=E("div",null,"sl-plus-clock-sample"),digits=E("strong","00:42:18"),timerTitle=E("small","StudyLab timer");timer.append(timerTitle,digits,E("small","Start   ·   Pause   ·   End"));
- previewPane.append(E("small","LIVE PREVIEW · NOT SAVED","sl-plus-eyebrow"),sample,live,chat,petBox,timer);
- const groupNames={cover:"Profile cover",frame:"Avatar ring",effect:"Study card",bubble:"Chat bubble",pet:"Pet studio",timer:"Timer"};
+ 
+ previewPane.append(E("small","LIVE PREVIEW · NOT SAVED","sl-plus-eyebrow"),sample,live,chat,petBox);
+ const groupNames={cover:"Profile cover",frame:"Avatar ring",effect:"Study card",bubble:"Chat bubble",pet:"Pet studio"};
  const label=v=>v==="default"?"Original":v[0].toUpperCase()+v.slice(1);
  const actionBar=E("footer",null,"sl-plus-studio-actions"),reset=E("button","Reset design","sl-plus-profile-entry"),apply=E("button","Apply changes","sl-plus-profile-entry sl-plus-apply"),message=E("p",null,"sl-plus-studio-message");message.setAttribute("role","status");reset.type=apply.type="button";actionBar.append(reset,apply);
  function refresh(){
-  paintAppearance(sample,sampleAvatar,draft);live.dataset.plusEffect=draft.effect;chat.dataset.plusBubble=draft.bubble;paintPet(pet,draft);
-  timer.dataset.plusTimer=draft.timer;timer.style.removeProperty("--sl-plus-timer-accent");if(draft.details.timerAccent!=="default")timer.style.setProperty("--sl-plus-timer-accent",draft.details.timerAccent);
-  sample.hidden=!["cover","frame"].includes(category);live.hidden=category!=="effect";chat.hidden=category!=="bubble";petBox.hidden=category!=="pet";timer.hidden=category!=="timer";
+  paintAppearance(sample,sampleAvatar,draft);paintCard(live,draft);paintChat(chat,draft);paintPet(pet,draft);
+  sample.hidden=!["cover","frame"].includes(category);live.hidden=category!=="effect";chat.hidden=category!=="bubble";petBox.hidden=category!=="pet";
   for(const button of tabs.children)button.setAttribute("aria-pressed",String(button.dataset.category===category));
   for(const button of options.querySelectorAll("[data-option-key]")){const k=button.dataset.optionKey;button.setAttribute("aria-pressed",String((k.startsWith("details.")?draft.details[k.slice(8)]:draft[k])===button.dataset.choice));}
  }
@@ -126,12 +139,13 @@ async function openStudio(initial="cover"){
  apply.onclick=async()=>{apply.disabled=true;try{
   if(account.getUser()?.id!==user.id)throw Error("Session changed. Reopen the studio.");
   const latest=await profileState(user.id);if(account.getUser()?.id!==user.id)throw Error("Session changed.");
-  if(!latest.active&&!hasPremiumDraft(draft)){editor.close();return;}
+  
   if(!latest.active){message.textContent="Your preview is unchanged. Choose Plus to apply.";await open("your selected designs");return;}
-  await saveAppearance(draft.cover,draft.frame,{effect:draft.effect,bubble:draft.bubble,pet:draft.pet,timer:draft.timer,details:draft.details});editor.close();
+  await saveAppearance(draft.cover,draft.frame,{effect:draft.effect,bubble:draft.bubble,pet:draft.pet,timer:draft.timer,details:draft.details,pattern:draft.pattern,cardPattern:draft.cardPattern,cardGlow:draft.cardGlow,chatFont:draft.chatFont});editor.close();
  }catch(e){message.textContent=e.message||"Could not save appearance.";}finally{apply.disabled=false;}};
- controls.append(tabs,options);layout.append(previewPane,controls);editor.append(header,note,layout,message,actionBar);
- editor.addEventListener("close",()=>{editor.remove();if(studio===editor)studio=null;previous?.focus?.({preventScroll:true});});d.body.append(editor);renderOptions();try{editor.showModal();}catch(_){editor.remove();studio=null;}
+ controls.append(options);layout.append(controls,previewPane);editor.append(header,note,tabs,layout,message,actionBar);
+ const updateApply=async()=>{const state=await profileState(user.id);if(studio!==editor)return;apply.textContent=state.active?"Apply style":"🔒 Apply style";apply.dataset.locked=String(!state.active);};void updateApply();d.addEventListener("studylab:plus-changed",updateApply);
+ editor.addEventListener("close",()=>{d.removeEventListener("studylab:plus-changed",updateApply);editor.remove();if(studio===editor)studio=null;previous?.focus?.({preventScroll:true});});d.body.append(editor);renderOptions();try{editor.showModal();}catch(_){editor.remove();studio=null;}
 }
 function profileEditor(panel,id){
  panel.querySelector(".sl-plus-customize")?.remove();
@@ -145,7 +159,7 @@ async function refreshProfile(panel,avatar,name,id,own,valid){
  const state=await profileState(id);if(!stillValid())return;paintProfile(panel,avatar,name,state);
  if(own&&!preview&&(await status()).enabled&&stillValid())profileEditor(panel,id);
 }
-function clearProfile(panel,avatar){refreshGeneration.set(panel,(refreshGeneration.get(panel)||0)+1);panel.querySelector(".sl-plus-member-badge")?.remove();panel.querySelector(".sl-plus-customize")?.remove();delete panel.dataset.plusCover;delete avatar.dataset.plusFrame;avatar.style.removeProperty("--sl-plus-ring");panel.querySelector(":scope > .sl-plus-floats")?.remove();}
+function clearProfile(panel,avatar){refreshGeneration.set(panel,(refreshGeneration.get(panel)||0)+1);panel.querySelector(".sl-plus-member-badge")?.remove();panel.querySelector(".sl-plus-customize")?.remove();delete panel.dataset.plusCover;delete panel.dataset.plusMotifs;delete avatar.dataset.plusFrame;avatar.style.removeProperty("--sl-plus-ring");panel.querySelector(":scope > .sl-plus-floats")?.remove();}
 async function sync(button){if(!button)return;button.hidden=true;const a=root.StudyLabAccount;await a?.ready;const u=a?.getUser?.();if(!eligible(u))return;const uid=u.id;if(preview){if(button.isConnected&&!button.parentElement?.closest("[hidden]")){button.hidden=false;button.textContent=currentDemo()?"Manage Plus demo":"Get StudyLab Plus";}return;}const state=await status();if(a.getUser()?.id!==uid||!eligible(a.getUser())||!button.isConnected||button.parentElement?.closest("[hidden]"))return;button.hidden=!(preview||state.enabled);button.textContent=currentDemo()?"Manage Plus demo":state.active?"Manage Plus":"Get StudyLab Plus";}
 async function open(feature){
  if(dialog?.open)return;
@@ -179,7 +193,7 @@ const badgeQueue=new Set(),badgeCache=new Map();let badgeTimer=null,badgeBlocked
 const validId=id=>typeof id==="string"&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 function renderNameBadge(node,id){
  const own=root.StudyLabAccount?.getUser?.()?.id===id,demo=own&&currentDemo(),cached=badgeCache.get(id);
- const show=demo||Boolean(cached?.active&&cached.until>Date.now());const state=demo?appearance({...demoAppearance,active:true}):show?appearance(cached):appearance(null);const surface=node.closest(".room-person-card,.room-rank,.study-chat-message");if(surface){if(surface.classList.contains("room-person-card"))surface.dataset.plusEffect=state.effect;else if(surface.classList.contains("study-chat-message"))surface.dataset.plusBubble=state.bubble;const avatar=surface.querySelector(".room-avatar,.study-chat-message-avatar");if(avatar){avatar.dataset.plusFrame=state.frame;avatar.style.removeProperty("--sl-plus-ring");if(/^#[0-9a-f]{6}$/i.test(state.frame)){avatar.dataset.plusFrame="custom";avatar.style.setProperty("--sl-plus-ring",state.frame);}}}
+ const show=demo||Boolean(cached?.active&&cached.until>Date.now());const state=demo?appearance({...demoAppearance,active:true}):show?appearance(cached):appearance(null);const surface=node.closest(".room-person-card,.room-rank,.study-chat-message");if(surface){if(surface.classList.contains("room-person-card"))paintCard(surface,state);else if(surface.classList.contains("study-chat-message"))paintChat(surface,state);const avatar=surface.querySelector(".room-avatar,.study-chat-message-avatar");if(avatar){avatar.dataset.plusFrame=state.frame;avatar.style.removeProperty("--sl-plus-ring");if(/^#[0-9a-f]{6}$/i.test(state.frame)){avatar.dataset.plusFrame="custom";avatar.style.setProperty("--sl-plus-ring",state.frame);}}}
  let mark=node.querySelector(":scope > .sl-plus-inline-badge");
  if(!show){mark?.remove();return;}
  if(!mark){mark=E("small",null,"sl-plus-inline-badge");node.append(mark);}
@@ -212,5 +226,6 @@ account?.client?.auth?.onAuthStateChange?.((event,session)=>{
  const uid=session?.user?.id||null;if(event==="SIGNED_OUT"||(badgeViewer&&badgeViewer!==uid)){badgeCache.clear();badgeQueue.clear();badgeViewer=uid;demoUser=null;demoAppearance=appearance(null);persistDemo();setTimeout(()=>{close();studio?.close();changed();},0);}
 });
 
-root.StudyLabPlus=Object.freeze({status,sync,open,adFree,filterSponsored,refreshProfile,clearProfile,decorateName,ownAppearance,savePreference,openStudio,paintPet});
+async function attachMenu(menu,closeMenu,reposition){const anchor=menu.querySelector('[data-account-action="profile"]');const account=root.StudyLabAccount;const user=account?.getUser?.();if(!anchor||!eligible(user))return;const state=preview?await ownAppearance():await status();if(!anchor.isConnected||account.getUser()?.id!==user.id||(!preview&&!state.enabled))return;const b=E("button");b.type="button";b.setAttribute("role","menuitem");b.className="sl-plus-menu-entry";const icon=E("span","✦","account-menu-icon");icon.setAttribute("aria-hidden","true");const copy=E("span",null,"account-menu-copy");copy.append(E("strong",state.active?"Plus Studio Customizations":"Try StudyLab Plus"),E("small",state.active?"Personalize your study workspace":"Explore membership plans"));b.append(icon,copy);b.onclick=()=>{closeMenu();if(state.active)void openStudio("cover");else void open();};anchor.after(b);reposition?.();}
+root.StudyLabPlus=Object.freeze({attachMenu,status,sync,open,adFree,filterSponsored,refreshProfile,clearProfile,decorateName,ownAppearance,savePreference,openStudio,paintPet});
 })(typeof window!=="undefined"?window:globalThis);
