@@ -168,6 +168,7 @@
         <span class="account-menu-copy"><strong>Sign out</strong><small>Sign out of this StudyLab account</small></span>
       </button>
       <p class="account-menu-status" role="status" hidden></p>`;
+    if(!isGuest)void window.StudyLabPlus?.attachMenu?.(accountMenu,closeAccountMenu,positionAccountMenu);
     const status=accountMenu.querySelector(".account-menu-status");
     if(status){
       const updates=document.createElement("button");

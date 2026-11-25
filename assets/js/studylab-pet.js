@@ -298,6 +298,19 @@
   const thoughtText = stage.querySelector("[data-pet-thought-text]");
   const launcher = document.getElementById("studylabPetLauncher");
   const panel = document.getElementById("studylabPetPanel");
+  // The same Studio handles pet customization on both Home and Study Room.
+  const plus=window.StudyLabPlus;
+  if(plus){
+    const row=document.createElement("div");row.className="sl-pet-setting sl-plus-pet-setting";
+    const label=document.createElement("span");label.textContent="Pet Studio";
+    const button=document.createElement("button");button.type="button";button.className="sl-plus-profile-entry";button.textContent="Customize ✦";
+    button.addEventListener("click",()=>void plus.openStudio("pet"));
+    row.append(label,button);panel.append(row);
+    let generation=0;
+    async function refreshPlusPet(){const g=++generation;const state=await plus.ownAppearance();if(g!==generation)return;plus.paintPet(character,state);row.hidden=!state.active&&!/^(?:deploy-preview-[0-9]+--studylablk\.netlify\.app|localhost|127\.0\.0\.1)$/.test(location.hostname)&&!(await plus.status()).enabled;}
+    document.addEventListener("studylab:plus-changed",refreshPlusPet);void refreshPlusPet();
+  }
+
   const closeButton = panel.querySelector("[data-pet-close]");
   const enableButton = panel.querySelector("[data-pet-enable]");
   const disableButton = panel.querySelector("[data-pet-disable]");

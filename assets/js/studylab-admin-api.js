@@ -639,6 +639,10 @@
   window.StudyLabAdminAPI = Object.freeze({
     guardianPreview,
     guardianSettings,
+    plusBillingSummary:async(environment='live')=>{requireAccess();if(!['live','sandbox'].includes(environment))throw Error('Invalid billing environment.');return rpc('studylab_plus_admin_billing_summary',{p_environment:environment});},
+    plusStatus:async(id)=>{requireAccess();return rpc('studylab_plus_admin_status',id?{p_user:id}:{});},
+    plusGrant:async(id,days)=>{requireAccess();if(preview||connectedPreview)throw Error('Plus changes require the live admin dashboard.');return rpc('studylab_plus_admin_grant',{p_user:id,p_days:days});},
+    plusEnable:async(value)=>{requireAccess();if(preview||connectedPreview)throw Error('Plus changes require the live admin dashboard.');return rpc('studylab_plus_admin_enable',{p_enabled:value});},
     verificationQueue:async()=>{requireAccess();return rpc('studylab_verification_queue');},
     reviewVerification:async(id,approve)=>{requireAccess();if(preview)throw Error('Read-only preview: use the approved live admin deployment.');return rpc('studylab_review_verification',{p_user:id,p_approve:approve});},
     deviceOverview:async()=>{

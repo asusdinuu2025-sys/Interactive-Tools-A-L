@@ -46,13 +46,14 @@
   function decorate(nameNode, userId) {
     if (!nameNode || typeof nameNode.querySelector !== "function") return;
     nameNode.dataset.slBadgeUser = String(userId || "");
+    window.StudyLabPlus?.decorateName?.(nameNode,userId);
     if (userId) scheduleLookup(userId);
     const existing = nameNode.querySelector(":scope > .sl-name-mark");
     if (!isMarked(userId)) {
       existing?.remove();
       return;
     }
-    if (existing) return;
+    if (existing) {const plus=nameNode.querySelector(':scope > .sl-plus-inline-badge,:scope > .sl-plus-member-badge');if(plus&&existing.nextElementSibling!==plus)nameNode.insertBefore(existing,plus);return;}
 
     const mark = document.createElement("span");
     mark.className = "sl-name-mark";
@@ -76,7 +77,7 @@
     check.setAttribute("stroke-linejoin", "round");
     svg.append(outline, check);
     mark.append(svg);
-    nameNode.append(mark);
+    const plus=nameNode.querySelector(':scope > .sl-plus-inline-badge,:scope > .sl-plus-member-badge');if(plus)nameNode.insertBefore(mark,plus);else nameNode.append(mark);
   }
 
   Object.defineProperty(window, "StudyLabNameMark", {

@@ -273,7 +273,7 @@
     let matchesCount = 0;
     for (const [key, section] of sections) {
       const cards = reorder(key);
-      const categoryAllowed = state.filter === "all" || state.filter === key;
+      const categoryAllowed = (state.filter === "all" || state.filter === key);
       const eligible = cards.filter(card => !card.hidden && matches(card));
       const expanded = state.expanded.has(key);
       section.classList.toggle("sl-tg-section-expanded", expanded);

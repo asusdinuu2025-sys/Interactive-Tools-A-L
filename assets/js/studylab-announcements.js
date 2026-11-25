@@ -79,7 +79,7 @@
     chat:'<svg viewBox="0 0 230 150" fill="none" aria-hidden="true"><rect x="30" y="30" width="135" height="87" rx="23" stroke="currentColor" stroke-width="4"/><path d="m58 117-12 18v-24" stroke="currentColor" stroke-width="4"/><path d="M56 59h83M56 80h62" stroke="#8ceaf6" stroke-width="4" stroke-linecap="round"/><path d="M170 19h22a16 16 0 0 1 16 16v36a16 16 0 0 1-16 16h-7l-17 13V86" stroke="#b496ff" stroke-width="4" stroke-linejoin="round"/></svg>',
     about:'<svg viewBox="0 0 230 150" fill="none" aria-hidden="true"><path d="M50 111V46l65-23 65 23v65l-65 23-65-23Z" stroke="currentColor" stroke-width="3"/><path d="m50 46 65 25 65-25m-65 25v63" stroke="#8ddfff" stroke-width="3"/><path d="m90 49 25-10 25 10-25 10-25-10ZM102 57v12" stroke="#bd9fff" stroke-width="3" stroke-linejoin="round"/><circle cx="176" cy="32" r="14" fill="#83ddff" fill-opacity=".18" stroke="#83ddff" stroke-width="2"/></svg>'
   };
-  let items=[],historyItems=[],current=0,admin=false;
+  let items=[],historyItems=[],current=0,admin=false,loadGeneration=0;
   let interactionUntil=0,hovered=false,visible=true,rotation=null;
   let slideTimer=null,revealTimer=null;
   let historyDialog=null,managerDialog=null,aboutDialog=null;
@@ -277,7 +277,9 @@
   }
   async function loadAnnouncements(){
     if(!client)return;
+    const generation=++loadGeneration;
     const {data,error}=await readBanners();
+    if(generation!==loadGeneration)return;
     if(error){
       console.warn("Announcements unavailable:",error.message);
       return;
@@ -305,6 +307,7 @@
   }
   reduced.addEventListener?.("change",()=>{interactionUntil=Date.now()+1200;scheduleRotation();});
   document.addEventListener("visibilitychange",()=>{if(!document.hidden)scheduleRotation();});
+  document.addEventListener("studylab:plus-changed",()=>void loadAnnouncements());
   render();loadAnnouncements();
 
   function emptyMessage(parent,message){

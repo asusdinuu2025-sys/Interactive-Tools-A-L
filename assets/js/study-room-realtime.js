@@ -275,7 +275,9 @@
   }
   function setLiveText(node, value) {
     const label = String(value ?? '');
-    if (node && node.textContent !== label) node.textContent = label;
+    if (!node) return;
+    if(node.matches('.room-person-card-name')){let text=node.querySelector(":scope > .sl-plus-name-text");if(!text){for(const child of [...node.childNodes])if(child.nodeType===3)child.remove();text=document.createElement("span");text.className="sl-plus-name-text";node.prepend(text);}if(text.textContent!==label)text.textContent=label;return;}if(node.matches('.room-rank-info strong')){let text=[...node.childNodes].find(n=>n.nodeType===3);if(!text){text=document.createTextNode(label);node.prepend(text);}else if(text.nodeValue!==label)text.nodeValue=label;return;}
+    if (node.textContent !== label) node.textContent = label;
   }
   window.addEventListener("studylab:follow-error", event => {
     say(event.detail?.message || "Could not update following. Please retry.", true);
@@ -393,6 +395,7 @@
       const saved = r.today_date === today ? Number(r.today_seconds) || 0 : 0;
       setLiveText(card.querySelector('.room-person-card-time'), profileDuration(saved + pendingSeconds(r, boundary)));
       if (people.children[index] !== card) people.insertBefore(card, people.children[index] || null);
+      window.StudyLabPlus?.decorateName?.(liveName,id);
     });
     for (const card of [...people.querySelectorAll('.room-person-card')]) {
       if (!visible.has(card.dataset.userId)) card.remove();
@@ -422,7 +425,7 @@
           item.className = 'room-rank';
           item.dataset.userId = id;
           item.innerHTML = "<span class='room-rank-number'></span><div class='room-avatar'></div>" +
-            "<div class='room-rank-info'><strong></strong><span></span></div><span class='room-time'></span>";
+            "<div class='room-rank-info'><strong></strong><span class='room-rank-subject'></span></div><span class='room-time'></span>";
         }
         const avatar = item.querySelector('.room-avatar');
         const gender = r.gender === 'female' ? 'female' : 'male';
@@ -436,9 +439,10 @@
         const rankName = item.querySelector('.room-rank-info strong');
         setLiveText(rankName, r.display_name || 'Student');
         window.StudyLabNameMark?.decorate(rankName, id);
-        setLiveText(item.querySelector('.room-rank-info span'), r.subject || '—');
+        setLiveText(item.querySelector('.room-rank-subject'), r.subject || '—');
         setLiveText(item.querySelector('.room-time'), compact(r.score));
         if (board.children[i] !== item) board.insertBefore(item, board.children[i] || null);
+        window.StudyLabPlus?.decorateName?.(rankName,id);
       });
       for (const item of [...board.querySelectorAll('.room-rank')]) {
         if (!visible.has(item.dataset.userId)) item.remove();

@@ -144,6 +144,12 @@
       render();
     }
   }
+  async function refreshPlusLayout() {
+    const prefs=await window.StudyLabPlus?.ownAppearance();
+    const root=document.documentElement;
+    root.dataset.plusTimer=prefs?.active?prefs.timer:"standard";
+    root.style.removeProperty("--sl-plus-timer-accent");delete root.dataset.plusTimerAccent;
+  }
   async function init() {
     try {
       const account = window.StudyLabAccount;
@@ -160,6 +166,9 @@
         accessToken = session?.access_token || null;
       });
       await loadRow();
+      void refreshPlusLayout();
+      document.addEventListener('studylab:plus-changed',refreshPlusLayout);
+      window.addEventListener('focus',refreshPlusLayout);
       startPresenceLifecycle();
       client.channel("study-room-independent-timer")
         .on("postgres_changes", { event: "*", schema: "public", table: "study_room_members" }, () => {
