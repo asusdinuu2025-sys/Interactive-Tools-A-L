@@ -59,3 +59,11 @@ PayHere references verified 2026-11-25:
 - Subscription Manager: https://support.payhere.lk/api-%26-mobile-sdk/subscription-manager-api
 
 `npm run test:plus-lifecycle` now runs all three independent test programs: lifecycle, callback signature and provider reconciliation.
+
+## Offline sandbox checkout form
+
+`scripts/studylab-plus-checkout-form.cjs` creates a **non-deployed**, sandbox-only PayHere recurring checkout form from an immutable server-approved order. It uses LKR 199/month, LKR 499/3 months and LKR 1,799/year, maps the three billing intervals to PayHere's recurrence format, and computes the provider's documented checkout hash **server-side only**. The form builder fails closed if merchant configuration is absent, the order is not sandbox, prices have been changed, or callback URLs are not publicly reachable HTTPS URLs. No merchant secret is returned to the browser.
+
+This helper is not an active checkout flow: a trusted server endpoint, authenticated order creation, customer consent, approved adult-managed merchant, and public callback service must still be set up. The `Forever` recurrence setting is a proposed auto-renewal model requiring clear consent and functional cancellation before any launch. Never expose the helper or merchant secrets in public assets.
+
+`npm run test:plus-lifecycle` now includes sandbox lifecycle, signed-notification, provider reconciliation and checkout-form tests.
