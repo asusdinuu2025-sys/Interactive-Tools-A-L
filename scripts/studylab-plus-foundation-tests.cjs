@@ -11,9 +11,9 @@ assert.equal(demoAllowed("deploy-preview-119--studylablk.netlify.app"),true);ass
 console.log("PASS: registered account eligibility and preview-only demo host.");
 
 assert.equal(demoAllowed("localhost"),true);
-assert.deepEqual(appearance({active:false,cover:"aurora",frame:"gold"}),{active:false,cover:"default",frame:"default",effect:"default",bubble:"default",pet:"default",timer:"standard",details:details(null)});
-assert.deepEqual(appearance({active:true,cover:"aurora",frame:"gold"}),{active:true,cover:"aurora",frame:"gold",effect:"default",bubble:"default",pet:"default",timer:"standard",details:details(null)});
-assert.deepEqual(appearance({active:true,cover:"url(unsafe)",frame:"invalid"}),{active:true,cover:"default",frame:"default",effect:"default",bubble:"default",pet:"default",timer:"standard",details:details(null)});
+assert.deepEqual(appearance({active:false,cover:"aurora",frame:"gold"}),{active:false,cover:"default",frame:"default",effect:"default",bubble:"default",pet:"default",timer:"standard",details:details(null),pattern:"default",cardPattern:"default",cardGlow:"default",chatFont:"default"});
+assert.deepEqual(appearance({active:true,cover:"aurora",frame:"gold"}),{active:true,cover:"aurora",frame:"gold",effect:"default",bubble:"default",pet:"default",timer:"standard",details:details(null),pattern:"default",cardPattern:"default",cardGlow:"default",chatFont:"default"});
+assert.deepEqual(appearance({active:true,cover:"url(unsafe)",frame:"invalid"}),{active:true,cover:"default",frame:"default",effect:"default",bubble:"default",pet:"default",timer:"standard",details:details(null),pattern:"default",cardPattern:"default",cardGlow:"default",chatFont:"default"});
 const banners=[{kind:"announcement"},{kind:"sponsored"},{kind:"announcement",design:{preset:"sponsored"}},{kind:"feature"},{kind:"resource"}];
 assert.equal(filterSponsored(banners,false).length,5);
 assert.deepEqual(filterSponsored(banners,true),banners);
@@ -58,7 +58,7 @@ assert.deepEqual(plans.map(p=>[p.months,p.price]),[[1,199],[3,499],[12,1799]]);
 assert.equal(details({eyeColor:"#ABCDEF",timerAccent:"red",shape:"orb",eyes:"star",glow:"neon",mouth:"smile"}).eyeColor,"#abcdef");
 assert.equal(details({timerAccent:"red"}).timerAccent,"default");
 assert.deepEqual(appearance({active:false,details:{shape:"orb",eyes:"star"}}).details,details(null));
-assert.match(plusCode,/if\(!latest.active&&!hasPremiumDraft\(draft\)\)/);
+assert.match(plusCode,/if\(!latest.active\)\{/);
 assert.match(plusCode,/p_details:next.details/);
 assert.match(sql,/p_details jsonb/);
 assert.match(sql,/details jsonb not null/);
@@ -69,3 +69,11 @@ const pet=fs.readFileSync(path.join(__dirname,"../assets/js/studylab-pet.js"),"u
 const roomPet=fs.readFileSync(path.join(__dirname,"../assets/js/studylab-pet-room.js"),"utf8");
 for(const code of [pet,roomPet]){assert.match(code,/plus.openStudio\("pet"\)/);assert.match(code,/plus.paintPet\(character,state\)/);}
 console.log("PASS: Studio draft entitlement, pricing, pet details, shared cosmetic validation and integration paths.");
+
+assert.equal(details({timerAccent:"#abcdef"}).timerAccent,"default");
+assert.equal(appearance({active:true,pattern:"science",cardPattern:"books",cardGlow:"halo",chatFont:"mono"}).cardPattern,"books");
+assert.equal(appearance({active:false,pattern:"science",cardGlow:"halo",chatFont:"mono"}).chatFont,"default");
+assert.equal(appearance({active:true,pattern:"invalid",cardGlow:"invalid",chatFont:"invalid"}).pattern,"default");
+assert.match(plusCode,/layout.append\(controls,previewPane\)/);assert.match(plusCode,/attachMenu/);assert.match(plusCode,/paintMotifs/);assert.match(plusCode,/p_chat_font:next.chatFont/);
+assert.doesNotMatch(plusCode,/if\(category==="timer"\)/);assert.match(plusCode,/StudyLabAvatar\?\.decorate\(sampleAvatar,user.id\)/);
+console.log("PASS: polished Studio controls, public appearance normalization and theme-controlled timer.");
