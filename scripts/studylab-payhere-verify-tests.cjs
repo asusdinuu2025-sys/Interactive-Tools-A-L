@@ -14,11 +14,11 @@ assert.equal(minorAmount("499.00"),49900);
 assert.equal(minorAmount("000499.09"),49909);
 for(const bad of ["499","499.0","499.000","4e2","0.00","-1.00","Infinity"])assert.throws(()=>minorAmount(bad));
 const verified=verifyNotification(payload(),config);
-assert.equal(verified.kind,"installment_verified");
+assert.equal(verified.kind,"signature_verified_unreconciled");assert.equal(verified.sandboxAccess,false);assert.equal(verified.requiresProviderReconciliation,true);
 assert.equal(verified.liveAccess,false);
 assert.equal(verified.amountMinor,49900);
-assert.equal(verifyNotification(payload({message_type:"AUTHORIZATION_SUCCESS"}),config).kind,"authorization_only");
-assert.equal(verifyNotification(payload({message_type:"RECURRING_INSTALLMENT_FAILED",status_code:"-2"}),config).kind,"status_verified_only");
+assert.equal(verifyNotification(payload({message_type:"AUTHORIZATION_SUCCESS"}),config).kind,"signature_verified_unreconciled");
+assert.equal(verifyNotification(payload({message_type:"RECURRING_INSTALLMENT_FAILED",status_code:"-2"}),config).kind,"signature_verified_unreconciled");
 assert.throws(()=>verifyNotification(payload(),{...config,enabled:false}),/not configured/);
 assert.throws(()=>verifyNotification(payload(),{...config,environment:"live"}),/not configured/);
 assert.throws(()=>verifyNotification(payload(),{...config,order:{...order,environment:"live"}}),/not configured/);
@@ -31,7 +31,7 @@ for(const changes of [{order_id:"other"},{payhere_currency:"USD"},{payhere_amoun
 const altered=new URLSearchParams(payload());altered.set("payhere_amount","1.00");
 assert.throws(()=>verifyNotification(altered.toString(),config),/trusted order/);
 const tampered=new URLSearchParams(payload());tampered.set("message_type","AUTHORIZATION_SUCCESS");
-assert.equal(verifyNotification(tampered.toString(),config).kind,"authorization_only"); // message_type not part of the provider checksum
+assert.equal(verifyNotification(tampered.toString(),config).sandboxAccess,false); // unsigned message_type can change without breaking checksum
 const duplicate=payload()+"&merchant_id=sandbox-id";
 assert.throws(()=>verifyNotification(duplicate,config),/duplicate/);
 assert.throws(()=>parse("a".repeat(5000)),/Invalid callback body/);
