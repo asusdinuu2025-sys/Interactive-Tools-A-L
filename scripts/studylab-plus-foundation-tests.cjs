@@ -88,3 +88,8 @@ assert.match(plusCss,/\.room-person-card>\.sl-plus-floats\{z-index:0/);
 assert.match(plusCode,/Chat bubble colours and 5 extra message fonts/);
 assert.match(plusCode,/Planned, not yet available/);
 console.log("PASS: expanded eye and font catalogs, card watermark stacking and plan feature disclosure.");
+
+assert.equal(details({workspace:"aurora"}).workspace,"aurora");assert.equal(details({workspace:"invalid"}).workspace,"default");
+assert.match(sql,/studylab_plus_admin_billing_summary/);assert.match(sql,/primary key\(environment,provider_payment_id\)/);assert.match(sql,/studylab_plus_billing_payments enable row level security/);
+assert.match(plusCode,/Premium Home and Study Room backgrounds/);assert.match(plusCode,/Advanced personal study reports/);
+console.log("PASS: private backgrounds, explicit plan benefits, payment ledger isolation and admin reporting guard.");
