@@ -2,7 +2,7 @@
 (function(root){
 "use strict";
 const core=["Live Study Room and standard timer","Social and Chat","Past papers and simulations","Existing profile pictures and themes","Tasks, notes and bookmarks","Guardian safety screening"];
-const planned=["Plus membership badge","Custom studying cards and chat bubbles","Premium profile covers and frames","Custom backgrounds and appearance","Compact and micro floating timer","Extra Pet designs","Advanced study reports"];
+const planned=["Plus membership badge","Premium profile covers, icon packs and avatar rings","Live study card gradients, doodles and glow","Custom studying cards and chat bubbles","Chat bubble colours and 5 extra message fonts","Pet body shapes, eye styles, colours and auras","Compact and micro floating timer"];const future=["Custom website backgrounds","Advanced study reports"];
 function normalize(s){return {enabled:s?.enabled===true,active:s?.active===true&&s?.enabled===true,granted:s?.granted===true,expires_at:s?.expires_at||null,billing_ready:false};}
 function eligible(u){return Boolean(u?.id&&!u.is_anonymous);}
 function demoAllowed(host){return /^deploy-preview-[0-9]+--studylablk\.netlify\.app$/.test(host)||["localhost","127.0.0.1"].includes(host);}
@@ -10,10 +10,10 @@ const covers=["default","aurora","ocean","sunset","galaxy","nebula","starlight",
 function validFrame(value){return typeof value==="string"&&(frames.includes(value)||/^#[0-9a-f]{6}$/i.test(value));}
 const effects=["default","aurora","galaxy","pulse","sakura","ocean"],bubbles=["default","violet","cyan","rose","mint","gold"],pets=["default","nebula","mint","rose","gold"],timerModes=["standard","compact","micro"];
 const plans=Object.freeze([{months:1,price:199,label:"Monthly"},{months:3,price:499,label:"3 months"},{months:12,price:1799,label:"Yearly"}]);
-const petShapes=["default","capsule","square","orb"],petEyes=["default","round","pixel","star","arc"],petGlows=["default","none","soft","neon","galaxy","spark"],petMouths=["default","smile","dot","none"];
+const petShapes=["default","capsule","square","orb"],petEyes=["default","round","pixel","star","arc","visor","softsquare","droplet","focused","sleepy","happy","diamond"],petGlows=["default","none","soft","neon","galaxy","spark"],petMouths=["default","smile","dot","none"];
 const colorValue=(v)=>typeof v==="string"&&/^#[0-9a-f]{6}$/i.test(v)?v.toLowerCase():"default";
 function details(v){return {shape:petShapes.includes(v?.shape)?v.shape:"default",eyes:petEyes.includes(v?.eyes)?v.eyes:"default",glow:petGlows.includes(v?.glow)?v.glow:"default",mouth:petMouths.includes(v?.mouth)?v.mouth:"default",eyeColor:colorValue(v?.eyeColor),timerAccent:"default"};}
-const patterns=["default","none","science","space","nature","music","books"],cardGlows=["default","none","soft","neon","halo"],chatFonts=["default","clean","classic","mono"];
+const patterns=["default","none","science","space","nature","music","books"],cardGlows=["default","none","soft","neon","halo"],chatFonts=["default","clean","classic","mono","italic","rog"];
 function appearance(s){const active=s?.active===true;return {active,cover:active&&covers.includes(s.cover)?s.cover:"default",frame:active&&validFrame(s.frame)?s.frame:"default",effect:active&&effects.includes(s.effect)?s.effect:"default",bubble:active&&bubbles.includes(s.bubble)?s.bubble:"default",pet:active&&pets.includes(s.pet)?s.pet:"default",timer:active&&timerModes.includes(s.timer)?s.timer:"standard",details:details(active?s.details:null),pattern:active&&patterns.includes(s.pattern)?s.pattern:"default",cardPattern:active&&patterns.includes(s.cardPattern)?s.cardPattern:"default",cardGlow:active&&cardGlows.includes(s.cardGlow)?s.cardGlow:"default",chatFont:active&&chatFonts.includes(s.chatFont)?s.chatFont:"default"};}
 function hasPremiumDraft(s){const a=appearance({...s,active:true}),base=appearance({active:true});return JSON.stringify(a)!==JSON.stringify(base);}
 function sponsored(item){return item?.kind==="sponsored"||item?.design?.preset==="sponsored";}
@@ -61,7 +61,7 @@ const motifPaths={
 };
 function motif(pack,i){const paths=motifPaths[pack];if(!paths)return null;const svg=d.createElementNS("http://www.w3.org/2000/svg","svg");svg.setAttribute("viewBox","0 0 24 24");svg.setAttribute("fill","none");svg.setAttribute("stroke","currentColor");svg.setAttribute("stroke-width","1.35");svg.setAttribute("stroke-linecap","round");svg.setAttribute("stroke-linejoin","round");const p=d.createElementNS("http://www.w3.org/2000/svg","path");p.setAttribute("d",paths[i%paths.length]);svg.append(p);return svg;}
 function paintMotifs(panel,pack){
- if(panel.dataset.plusMotifs===pack)return;
+ if(panel.dataset.plusMotifs===pack&&(!motifPaths[pack]||panel.querySelector(":scope > .sl-plus-floats")))return;
  panel.dataset.plusMotifs=pack;panel.querySelector(":scope > .sl-plus-floats")?.remove();
  if(!motifPaths[pack])return;
  const layer=E("div",null,"sl-plus-floats");layer.setAttribute("aria-hidden","true");
@@ -115,14 +115,15 @@ async function openStudio(initial="cover"){
   options.append(E("h3",title));const group=E("div",null,"sl-plus-tile-grid");for(const v of values){
    const button=E("button",null,"sl-plus-studio-tile");button.type="button";button.dataset.optionKey=key;button.dataset.choice=v;
    const swatch=E("span",null,"sl-plus-tile-swatch");if(kind==="cover")swatch.dataset.plusCover=v;
-   else if(kind==="frame"){const ring=E("span","✦","sl-plus-ring-swatch");ring.dataset.plusFrame=v;swatch.append(ring);}
+   else if(kind==="frame"){const ring=E("span",null,"sl-plus-ring-swatch");const center=E("span",null,"sl-plus-ring-center");center.append(E("span","●"));ring.append(center);ring.dataset.plusFrame=v;swatch.append(ring);}
    else if(kind==="bubble"){swatch.dataset.plusBubble=v;swatch.classList.add("study-chat-message");swatch.textContent="Aa";}
    else if(kind==="effect"){swatch.dataset.plusEffect=v;swatch.classList.add("room-person-card");swatch.textContent="✧";}
    else if(kind==="pattern"){const icon=motif(v,0);if(icon)swatch.append(icon);else swatch.textContent=v==="none"?"×":"Auto";}
-   else if(kind==="font"){swatch.dataset.plusChatFont=v;swatch.classList.add("sl-plus-font-swatch");swatch.textContent="Aa";}
+   else if(kind==="font"){swatch.dataset.plusChatFont=v;swatch.classList.add("sl-plus-font-swatch");swatch.textContent="Study 123";}
    else if(kind==="glow"){swatch.dataset.plusCardGlow=v;swatch.classList.add("sl-plus-glow-swatch");swatch.textContent="✧";}
    else if(kind==="color"){swatch.style.background=/^#[0-9a-f]{6}$/i.test(v)?v:"";swatch.textContent=v==="default"?"Auto":"";}
    else if(kind==="pet"){const mini=E("span","••","sl-plus-pet-tile");mini.dataset.pet=v;swatch.append(mini);}
+   else if(key==="details.eyes"){const face=E("span",null,"sl-plus-eye-tile");face.dataset.plusEyes=v;for(const side of ["left","right"]){const eye=E("span",null,"sl-plus-eye-tile-"+side);face.append(eye);}swatch.append(face);}
    else{swatch.textContent=key==="details.eyes"?({default:"▮ ▮",round:"● ●",pixel:"■ ■",star:"✦ ✦",arc:"⌒ ⌒"}[v]||"✧"):key==="details.shape"?({default:"▢",capsule:"⬭",square:"□",orb:"○"}[v]||"✧"):key==="timer"?"00:42":key==="details.mouth"?({default:"⌣",smile:"◡",dot:"•",none:"—"}[v]||"✧"):"✧";}
    button.append(swatch,E("span",kind==="color"&&v!=="default"?v.toUpperCase():label(v)));button.onclick=()=>set(key,v);group.append(button);
   }if(kind==="frame"||kind==="color"){const custom=E("button",null,"sl-plus-studio-tile");custom.type="button";custom.dataset.optionKey=key;custom.dataset.choice="custom";const swatch=E("span","◉","sl-plus-tile-swatch sl-plus-custom-swatch");custom.append(swatch,E("span","Custom"));const palette=E("div",null,"sl-plus-custom-palette");palette.hidden=true;const picker=E("input");picker.type="color";picker.setAttribute("aria-label","Custom colour");const value=k=>k.startsWith("details.")?draft.details[k.slice(8)]:draft[k];picker.value=/^#[0-9a-f]{6}$/i.test(value(key))?value(key):"#a78bfa";picker.oninput=()=>set(key,picker.value);for(const hex of ["#60a5fa","#a78bfa","#f9a8d4","#fbbf24","#34d399","#22d3ee","#e2e8f0","#f87171"]){const choice=E("button");choice.type="button";choice.style.background=hex;choice.setAttribute("aria-label",hex);choice.onclick=()=>{picker.value=hex;set(key,hex);};palette.append(choice);}palette.append(picker);custom.onclick=()=>{palette.hidden=!palette.hidden;custom.setAttribute("aria-expanded",String(!palette.hidden));};group.append(custom);options.append(group,palette);}else options.append(group);
@@ -136,7 +137,7 @@ async function openStudio(initial="cover"){
   if(category==="pet"){tiles("Robot finish","pet",pets,"pet");tiles("Body shape","details.shape",petShapes);tiles("Eye shape","details.eyes",petEyes);tiles("Eye colour","details.eyeColor",["default","#5de7ff","#bba0ff","#ffb6db","#8bffcb","#ffda7a"],"color");tiles("Aura","details.glow",petGlows);tiles("Mouth","details.mouth",petMouths);}
   refresh();
  }
- for(const [key,title] of Object.entries(groupNames)){const button=E("button",title);button.type="button";button.dataset.category=key;button.onclick=()=>{category=key;renderOptions();};tabs.append(button);}
+ for(const [key,title] of Object.entries(groupNames)){const button=E("button",title);button.type="button";button.dataset.category=key;button.onclick=()=>{category=key;renderOptions();layout.scrollTop=0;};tabs.append(button);}
  reset.onclick=()=>{draft=appearance({active:true,timer:saved.timer});renderOptions();message.textContent="Defaults previewed. Apply to save.";};
  apply.onclick=async()=>{apply.disabled=true;try{
   if(account.getUser()?.id!==user.id)throw Error("Session changed. Reopen the studio.");
@@ -184,7 +185,7 @@ async function open(feature){
   
   grid.append(card);
  }
- node.append(head,title,sub,banner,grid);
+ node.append(head,title,sub,banner,grid);node.append(E("p","Planned, not yet available: "+future.join(" · "),"sl-plus-foot"));
 
  node.append(E("p","Displayed prices are proposed launch prices. No charges in preview. Plus badge is separate from blue verification. Some benefits are still in development.","sl-plus-foot"));
  node.addEventListener("cancel",e=>{e.preventDefault();close();});node.addEventListener("close",()=>{node.remove();if(dialog===node){dialog=null;session=null;}previous?.focus?.({preventScroll:true});});
