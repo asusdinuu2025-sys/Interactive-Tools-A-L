@@ -77,3 +77,14 @@ assert.equal(appearance({active:true,pattern:"invalid",cardGlow:"invalid",chatFo
 assert.match(plusCode,/layout.append\(controls,previewPane\)/);assert.match(plusCode,/attachMenu/);assert.match(plusCode,/paintMotifs/);assert.match(plusCode,/p_chat_font:next.chatFont/);
 assert.doesNotMatch(plusCode,/if\(category==="timer"\)/);assert.match(plusCode,/StudyLabAvatar\?\.decorate\(sampleAvatar,user.id\)/);
 console.log("PASS: polished Studio controls, public appearance normalization and theme-controlled timer.");
+
+assert.equal(appearance({active:true,chatFont:"italic"}).chatFont,"italic");
+assert.equal(appearance({active:true,chatFont:"rog"}).chatFont,"rog");
+assert.equal(details({eyes:"droplet"}).eyes,"droplet");
+assert.equal(details({eyes:"focused"}).eyes,"focused");
+assert.equal(details({eyes:"sleepy"}).eyes,"sleepy");
+assert.match(plusCss,/data-plus-chat-font=italic/);assert.match(plusCss,/data-plus-chat-font=rog/);
+assert.match(plusCss,/\.room-person-card>\.sl-plus-floats\{z-index:0/);
+assert.match(plusCode,/Chat bubble colours and 5 extra message fonts/);
+assert.match(plusCode,/Planned, not yet available/);
+console.log("PASS: expanded eye and font catalogs, card watermark stacking and plan feature disclosure.");
