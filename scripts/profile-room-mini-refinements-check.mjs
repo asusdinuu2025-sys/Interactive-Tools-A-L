@@ -76,7 +76,7 @@ assert.ok(popup.indexOf("sl-mini-glass-ready")<popup.indexOf('<body class="sl-mi
 assert.ok(popup.includes('document.documentElement.classList.add("sl-mini-glass-ready")'));
 assert.ok(pip.includes("window.StudyRoomPresenceController?.addWindow(pipWindow)"),
   "Mini timer presence logic must remain unchanged");
-assert.ok(popup.includes('src="assets/js/study-room-mini-standalone.js?v=20261103-target-away-v1-plus-8"'),
+assert.ok(popup.includes('src="assets/js/study-room-mini-standalone.js?v=20261103-target-away-v1-plus-9"'),
   "Standalone heartbeat timer must remain intact");
 
 console.log("StudyLab Bio, gender, room profiles, palette adaptation and mini first-paint checks passed.");
