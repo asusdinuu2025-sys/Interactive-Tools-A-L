@@ -88,10 +88,10 @@ create table public.studylab_plus_appearance (
  pattern text not null default 'default' check(pattern in ('default','none','science','space','nature','music','books')),
  card_pattern text not null default 'default' check(card_pattern in ('default','none','science','space','nature','music','books')),
  card_glow text not null default 'default' check(card_glow in ('default','none','soft','neon','halo')),
- chat_font text not null default 'default' check(chat_font in ('default','clean','classic','mono')),
+ chat_font text not null default 'default' check(chat_font in ('default','clean','classic','mono','italic','rog')),
  details jsonb not null default '{"shape":"default","eyes":"default","glow":"default","mouth":"default","eyeColor":"default","timerAccent":"default"}'::jsonb check (jsonb_typeof(details)='object' and details ?& array['shape','eyes','glow','mouth','eyeColor','timerAccent'] and details - array['shape','eyes','glow','mouth','eyeColor','timerAccent'] = '{}'::jsonb
  and coalesce(details->>'shape','') in ('default','capsule','square','orb')
- and coalesce(details->>'eyes','') in ('default','round','pixel','star','arc')
+ and coalesce(details->>'eyes','') in ('default','round','pixel','star','arc','visor','softsquare','droplet','focused','sleepy','happy','diamond')
  and coalesce(details->>'glow','') in ('default','none','soft','neon','galaxy','spark')
  and coalesce(details->>'mouth','') in ('default','smile','dot','none')
  and coalesce(details->>'eyeColor','') ~ '^(default|#[0-9a-fA-F]{6})$'
