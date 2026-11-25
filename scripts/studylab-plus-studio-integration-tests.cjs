@@ -38,7 +38,19 @@ async function sqlTest(){
  await as(member);assert.deepEqual(await data("select studylab_plus_profile_state($1) as data",[member]),{active:false});await assert.rejects(save(),/Active Plus required/);
  await as(admin);await data("select studylab_plus_admin_grant($1,30) as data",[member]);await db.exec("reset role");await db.query("update studylab_plus_grants set expires_at=now()-interval '1 second' where user_id=$1",[member]);
  await as(free);assert.deepEqual(await data("select studylab_plus_profile_state($1) as data",[member]),{active:false});
- console.log("PASS: isolated migration, default off, permissions, validation, public/private styles, revoke and expiry.");
+ // The billing ledger is read-only to users and never grants membership.
+ await assert.rejects(db.query("select studylab_plus_admin_billing_summary('live')"),/Admin access required/);
+ await assert.rejects(db.query("select * from studylab_plus_billing_orders"),/permission denied/);
+ await db.exec("reset role");
+ const order="10000000-0000-4000-8000-000000000010";
+ await db.query("insert into studylab_plus_billing_orders(id,user_id,environment,plan_months,amount_minor) values($1,$2,'sandbox',3,49900)",[order,member]);
+ await db.query("insert into studylab_plus_billing_subscriptions(order_id,environment,provider_subscription_id,state,paid_until,next_billing_at) values($1,'sandbox','test-sub','active',now()+interval '3 months',now()+interval '3 months')",[order]);
+ await db.query("insert into studylab_plus_billing_payments(environment,provider_payment_id,order_id,amount_minor,currency,state) values('sandbox','test-pay',$1,49900,'LKR','confirmed')",[order]);
+ await assert.rejects(db.query("insert into studylab_plus_billing_payments(environment,provider_payment_id,order_id,amount_minor,currency,state) values('sandbox','test-pay',$1,49900,'LKR','confirmed')",[order]),/duplicate key/);
+ await as(admin);const sandbox=await data("select studylab_plus_admin_billing_summary('sandbox') as data"),live=await data("select studylab_plus_admin_billing_summary('live') as data");
+ assert.equal(sandbox.billing_ready,false);assert.equal(sandbox.confirmed_receipts_minor,49900);assert.equal(sandbox.plans[1].paid_members,1);assert.equal(sandbox.recent_payments[0].user_id,member);assert.equal(live.confirmed_receipts_minor,0);assert.equal(live.recent_payments.length,0);
+ await as(member);assert.equal((await data("select studylab_plus_status() as data")).active,false);
+ console.log("PASS: isolated migration, default off, permissions, validation, public/private styles, revoke and expiry; sandbox records never grant live access.");
  }finally{await db.close();}
 }
 async function domTest(){
