@@ -188,9 +188,10 @@ begin
   where o.environment=p_environment and o.plan_months=v.months and s.state in ('active','cancelled') and s.paid_until>now()
  )) order by v.months),'[]'::jsonb) into plans from (values (1),(3),(12)) v(months);
  select coalesce(jsonb_agg(to_jsonb(t) order by t.recorded_at desc),'[]'::jsonb) into payments from (
-  select o.user_id,o.plan_months,p.amount_minor,p.currency,p.state,p.recorded_at,s.paid_until,s.next_billing_at,s.cancel_at_period_end
+  select o.user_id,coalesce(to_jsonb(profile)->>'display_name','') as display_name,o.plan_months,p.amount_minor,p.currency,p.state,p.recorded_at,s.paid_until,s.next_billing_at,s.cancel_at_period_end
   from public.studylab_plus_billing_payments p join public.studylab_plus_billing_orders o on o.id=p.order_id and o.environment=p.environment
   left join public.studylab_plus_billing_subscriptions s on s.order_id=o.id and s.environment=o.environment
+  left join public.studylab_profiles profile on profile.id=o.user_id
   where p.environment=p_environment order by p.recorded_at desc limit 50
  ) t;
  select jsonb_build_object('billing_ready',false,'environment',p_environment,'plans',plans,'recent_payments',payments,
