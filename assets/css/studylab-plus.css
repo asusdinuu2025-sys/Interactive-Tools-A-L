@@ -338,3 +338,7 @@ body[data-room-mode=light] .room-person-card>.sl-plus-floats{color:#335b92}
 :is(.sl-plus-eye-tile[data-plus-eyes=focused]>.sl-plus-eye-tile-right,.sl-pet-character[data-plus-eyes=focused]:not([data-state=sleeping]) .sl-pet-eye.right>i){clip-path:polygon(0 42%,100% 0,100% 80%,80% 100%,25% 100%,0 85%)}
 :is(.sl-plus-eye-tile[data-plus-eyes=happy]>span,.sl-plus-eye-tile[data-plus-eyes=arc]>span,.sl-pet-character[data-plus-eyes=happy]:not([data-state=sleeping]) .sl-pet-eye>i){clip-path:polygon(0 60%,10% 30%,28% 10%,50% 0,72% 10%,90% 30%,100% 60%,100% 90%,80% 68%,60% 56%,40% 56%,20% 68%,0 90%);border-radius:7px!important}
 .sl-pet-character[data-state=sleeping][data-plus-eyes] .sl-pet-eye>i{clip-path:none!important;border-radius:5px!important}
+
+/* Keep the original neon ring only when no premium ring has been selected. */
+.room-avatar.slr-neon-avatar[data-plus-frame]:not([data-plus-frame=default])::after{border:0!important;filter:none!important;box-shadow:none!important;background:none!important}
+.room-avatar[data-plus-frame]:not([data-plus-frame=default]),.study-chat-message-avatar[data-plus-frame]:not([data-plus-frame=default]){outline-offset:2px!important;outline-width:2px!important;box-shadow:none!important}
