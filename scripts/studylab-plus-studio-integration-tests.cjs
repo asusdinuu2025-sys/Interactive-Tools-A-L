@@ -4,7 +4,7 @@ const {PGlite}=require("@electric-sql/pglite");
 const {JSDOM}=require("jsdom");
 
 const admin="10000000-0000-4000-8000-000000000001",member="10000000-0000-4000-8000-000000000002",free="10000000-0000-4000-8000-000000000003",guest="10000000-0000-4000-8000-000000000004";
-const details={shape:"orb",eyes:"star",glow:"neon",mouth:"smile",eyeColor:"#aabbcc",timerAccent:"#00ffee"};
+const details={shape:"orb",eyes:"star",glow:"neon",mouth:"smile",eyeColor:"#aabbcc",timerAccent:"default"};
 async function sqlTest(){
  const db=new PGlite();
  try{
@@ -15,7 +15,7 @@ async function sqlTest(){
  await db.exec(fs.readFileSync("supabase/plus-preview/plus_foundation.sql","utf8"));
  async function as(id,role="authenticated"){await db.exec("reset role");await db.query("select set_config('request.jwt.claim.sub',$1,false)",[id]);await db.exec("set role "+role);}
  const data=async(q,args=[]) => (await db.query(q,args)).rows[0].data;
- const save=(d=details)=>data("select studylab_plus_save_appearance('galaxy','#abcdef','aurora','mint','nebula','micro',$1::jsonb) as data",[JSON.stringify(d)]);
+ const save=(d=details)=>data("select studylab_plus_save_appearance('galaxy','#abcdef','aurora','mint','nebula','micro',$1::jsonb,'science','books','halo','mono') as data",[JSON.stringify(d)]);
  await as(free);
  assert.equal((await data("select studylab_plus_status() as data")).active,false);
  await assert.rejects(save(),/Active Plus required/);
@@ -31,7 +31,7 @@ async function sqlTest(){
  await assert.rejects(save({...details,extra:"unexpected"}),/check constraint/);
  await as(free);
  const publicStyle=await data("select studylab_plus_profile_state($1) as data",[member]);
- assert.deepEqual(publicStyle,{active:true,cover:"galaxy",frame:"#abcdef",effect:"aurora",bubble:"mint"});
+ assert.deepEqual(publicStyle,{active:true,cover:"galaxy",frame:"#abcdef",effect:"aurora",bubble:"mint",pattern:"science",cardPattern:"books",cardGlow:"halo",chatFont:"mono"});
  await assert.rejects(save(),/Active Plus required/);
  await as(guest);assert.deepEqual(await data("select studylab_plus_profile_state($1) as data",[member]),{active:false});
  await as(admin);await data("select studylab_plus_admin_grant($1,0) as data",[member]);
@@ -49,13 +49,13 @@ async function domTest(){
  w.HTMLDialogElement.prototype.showModal=function(){this.setAttribute("open","");};
  w.HTMLDialogElement.prototype.close=function(){this.removeAttribute("open");this.dispatchEvent(new w.Event("close"));};
  let writes=0;
- w.StudyLabAccount={ready:Promise.resolve(),getUser:()=>({id:member,is_anonymous:false}),client:{rpc:async(name)=>{if(name==="studylab_plus_save_appearance")writes++;return {error:{message:"not installed"}};},auth:{onAuthStateChange(){}}}};
+ w.StudyLabAccount={ready:Promise.resolve(),getUser:()=>({id:member,is_anonymous:false}),getProfile:async()=>({display_name:"Test student",username:"teststudent"}),client:{rpc:async(name)=>{if(name==="studylab_plus_save_appearance")writes++;return {error:{message:"not installed"}};},auth:{onAuthStateChange(){}}}};
  w.eval(fs.readFileSync("assets/js/studylab-plus.js","utf8"));
  const api=w.StudyLabPlus;
  await api.openStudio("cover");
  const studio=d.querySelector(".sl-plus-studio");
- assert.ok(studio?.open);assert.equal((await api.ownAppearance()).active,false);
- studio.querySelector('[data-option-key="cover"][data-choice="galaxy"]').click();
+ assert.ok(studio?.open);assert.equal(studio.querySelector(".sl-plus-appearance-sample strong").textContent.includes("Test student"),true);assert.equal(studio.querySelector("[data-category=timer]"),null);assert.equal(studio.querySelector(".sl-plus-studio-layout").firstElementChild.className,"sl-plus-studio-controls");assert.equal((await api.ownAppearance()).active,false);
+ studio.querySelector('[data-option-key="cover"][data-choice="galaxy"]').click();studio.querySelector('[data-option-key="pattern"][data-choice="science"]').click();assert.equal(studio.querySelector(".sl-plus-appearance-sample").dataset.plusMotifs,"science");studio.querySelector("[data-category=frame]").click();studio.querySelector('[data-option-key="frame"][data-choice="custom"]').click();assert.equal(studio.querySelector(".sl-plus-custom-palette").hidden,false);studio.querySelector(".sl-plus-custom-palette button").click();assert.equal(studio.querySelector(".sl-plus-sample-avatar").dataset.plusFrame,"custom");
  assert.equal(studio.querySelector(".sl-plus-appearance-sample").dataset.plusCover,"galaxy");
  assert.equal((await api.ownAppearance()).cover,"default");
  studio.querySelector(".sl-plus-apply").click();
@@ -68,15 +68,14 @@ async function domTest(){
  assert.equal((await api.ownAppearance()).active,true);
  studio.querySelector(".sl-plus-apply").click();
  await wait(()=>!d.querySelector(".sl-plus-studio"));
- assert.equal((await api.ownAppearance()).cover,"galaxy");
+ assert.equal((await api.ownAppearance()).cover,"galaxy");assert.equal((await api.ownAppearance()).pattern,"science");
  assert.equal(writes,0);
  await api.openStudio("pet");const pet=d.querySelector(".sl-plus-studio");pet.querySelector('[data-option-key="details.shape"][data-choice="orb"]').click();
  assert.equal(pet.querySelector(".sl-plus-pet-sample").dataset.plusShape,"orb");
  pet.querySelector(".sl-plus-apply").click();await wait(()=>!d.querySelector(".sl-plus-studio"));
  assert.equal((await api.ownAppearance()).details.shape,"orb");
  await api.open();d.querySelector(".is-plus .sl-plus-action").click();assert.equal((await api.ownAppearance()).active,false);
- await api.openStudio("cover");d.querySelector(".sl-plus-apply").click();await wait(()=>!d.querySelector(".sl-plus-studio"));
- assert.equal(d.querySelector(".sl-plus-plans"),null);
+ await api.openStudio("cover");d.querySelector(".sl-plus-apply").click();await wait(()=>d.querySelector(".sl-plus-plans")?.open);assert.ok(d.querySelector(".sl-plus-studio")?.open);d.querySelector(".sl-plus-plans .sl-plus-close").click();d.querySelector(".sl-plus-studio .sl-plus-close").click();const menu=d.createElement("div");menu.innerHTML='<button data-account-action="profile">Edit</button>';d.body.append(menu);await api.attachMenu(menu,()=>{},()=>{});assert.match(menu.querySelector(".sl-plus-menu-entry").textContent,/Try StudyLab Plus/);
  console.log("PASS: Free draft preview, gated Apply, demo activation, retained draft, pet preview/save, reset and zero database writes.");
  }finally{w.close();}
 }
