@@ -441,7 +441,9 @@ async function setup(admin = true, options = {}) {
   assert.match(adminMarkup, /studylab-admin-config[.]js[?]v=pr115-host-verified-v1/);
   assert.match(read("index.html"), /studylab-popups[.]js[?]v=pr109-live-v1/);
   assert.match(read("index.html"), /studylab-content[.]js[?]v=pr114-custom-sections-v1/);
-  assert.match(adminMarkup,/sladmin-brand-mark" aria-hidden="true">ツ/);
+  assert.match(adminMarkup,
+    /class="sladmin-brand-mark" aria-hidden="true"><img\b[^>]*\bsrc="assets\/icon\/studylab-pwa\.svg(?:\?[^"]*)?"/,
+    "Admin header uses the primary StudyLab icon");
   assert.match(adminMarkup,/sladmin-back-icon/);
   assert.match(adminMarkup,/studylab-popups.css/);
   // New sections must use the same translucent panels as StudyLab,
