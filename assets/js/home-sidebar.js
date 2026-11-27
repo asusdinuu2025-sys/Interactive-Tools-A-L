@@ -15,7 +15,7 @@
   sidebar.id="studyLabHomeNavigation";
   sidebar.innerHTML = `
     <div class="sl-home-sidebar-head">
-      <span class="sl-home-sidebar-brand-mark" aria-label="StudyLab"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m2 9 10-5 10 5-10 5L2 9Z"/><path d="M6 11v5c3.5 3 8.5 3 12 0v-5M22 9v6"/></svg></span>
+      <span class="sl-home-sidebar-brand-mark" aria-label="StudyLab"><img class="sl-brand-icon" src="assets/icon/studylab-pwa.svg?v=sl-infinity-20261127" width="30" height="30" alt=""></span>
       <button class="sl-home-sidebar-collapse" type="button" aria-label="Collapse navigation" aria-expanded="true" title="Collapse navigation">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>
       </button>
@@ -29,13 +29,13 @@
         <span class="sl-home-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4A2 2 0 0 0 19 18l-5-9V3"/><path d="M8 15h8M10 12h4"/></svg></span><span class="sl-home-nav-label">Practical Simulations</span>
       </a>
       <a class="sl-home-nav-item" href="#live-study-room" data-nav-id="live-study-room" title="Live Study Room">
-        <span class="sl-home-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="8" cy="7" r="3"/><circle cx="17" cy="7" r="3"/><path d="M2.5 19v-1.5A4.5 4.5 0 0 1 7 13h2a4.5 4.5 0 0 1 4.5 4.5V19M13 13.5a4.5 4.5 0 0 1 8.5 2V19"/></svg></span><span class="sl-home-nav-label">Live Study Room</span>
+        <span class="sl-home-nav-icon" aria-hidden="true"><img class="sl-brand-icon" src="assets/icon/studylab-live-study-room.svg?v=sl-infinity-20261127" width="25" height="25" alt=""></span><span class="sl-home-nav-label">Live Study Room</span>
       </a>
       <a class="sl-home-nav-item" href="#social" data-nav-id="social" title="Social">
         <span class="sl-home-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5.5h16v11H9l-5 3v-14Z"/><path d="M8 9h8M8 13h5"/></svg></span><span class="sl-home-nav-label">Social</span>
       </a>
       <a class="sl-home-nav-item" href="#past-papers" data-nav-id="past-papers" title="Past Papers">
-        <span class="sl-home-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h4M9 12h7M9 16h7"/></svg></span><span class="sl-home-nav-label">Past Papers</span>
+        <span class="sl-home-nav-icon" aria-hidden="true"><img class="sl-brand-icon" src="assets/icon/studylab-papers-lessons.svg?v=sl-infinity-20261127" width="25" height="25" alt=""></span><span class="sl-home-nav-label">Past Papers</span>
       </a>
       <a class="sl-home-nav-item" href="#telegram-links" data-nav-id="telegram-links" title="A/L Telegram Channel Links">
         <span class="sl-home-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m21 3-7.2 18-3.7-7.1L3 10.2 21 3Z"/><path d="m10.1 13.9 4.6-4.6"/></svg></span><span class="sl-home-nav-label">A/L Telegram Channel Links</span>
@@ -44,7 +44,7 @@
         <span class="sl-home-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h6l2 2h8v12H4z"/><path d="M4 9h16"/></svg></span><span class="sl-home-nav-label">Other A/L Resources</span>
       </a>
       <a class="sl-home-nav-item" href="#free-lesson-packs" data-nav-id="free-lesson-packs" title="Free Lesson Packs">
-        <span class="sl-home-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5.5A3.5 3.5 0 0 1 7.5 2H20v17H7.5A3.5 3.5 0 0 0 4 22z"/><path d="M4 5.5v16.5M8 6h8M8 10h8"/></svg></span><span class="sl-home-nav-label">Free Lesson Packs</span>
+        <span class="sl-home-nav-icon" aria-hidden="true"><img class="sl-brand-icon" src="assets/icon/studylab-papers-lessons.svg?v=sl-infinity-20261127" width="25" height="25" alt=""></span><span class="sl-home-nav-label">Free Lesson Packs</span>
       </a>
       <a class="sl-home-nav-item" href="#more-learning-resources" data-nav-id="more" title="More sections">
         <span class="sl-home-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 10h16M4 15h9"/><path d="m15 17 4 4 4-4"/></svg></span><span class="sl-home-nav-label">More</span>

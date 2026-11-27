@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#101a2b">
   <title>StudyLab Mini Timer</title>
+  <!-- StudyLab favicons -->
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icon/studylab-study-timer-32.png?v=sl-infinity-20261127">
+  <link rel="icon" type="image/svg+xml" sizes="any" href="assets/icon/studylab-study-timer.svg?v=sl-infinity-20261127">
+  <!-- /StudyLab favicons -->
   <meta name="robots" content="noindex, follow">
   <style>
     *{box-sizing:border-box}
@@ -15,6 +19,7 @@
     body{margin:0;min-height:100vh;display:grid;place-items:center;padding:14px;background:radial-gradient(circle at 15% 0%,rgba(45,115,150,.2),transparent 48%),#0c1422;color:#edf5ff}
     .mini{width:100%;max-width:420px;padding:17px;border:1px solid rgba(126,220,255,.2);border-radius:19px;background:rgba(20,34,54,.96);box-shadow:0 18px 48px rgba(0,0,0,.3)}
     header{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px;font-weight:850}
+    header .sl-brand-icon{vertical-align:middle;margin-inline-end:3px}
     header button{width:28px;height:28px;border:0;border-radius:9px;background:rgba(120,135,160,.15);color:inherit;font-size:19px;cursor:pointer}
     #clock{text-align:center;margin:13px 0 3px;font-size:clamp(2.1rem,10vw,2.8rem);font-weight:900;letter-spacing:.025em;font-variant-numeric:tabular-nums}
     #status{text-align:center;min-height:18px;color:#9aabc3;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -40,7 +45,7 @@
 </head>
 <body class="sl-mini-window">
   <main class="mini" aria-label="Independent StudyLab timer">
-    <header><strong>StudyLab · Live Study Timer</strong><button id="close" type="button" aria-label="Close mini timer">×</button></header>
+    <header><strong><img class="sl-brand-icon" src="assets/icon/studylab-study-timer.svg?v=sl-infinity-20261127" width="24" height="24" alt=""> StudyLab · Live Study Timer</strong><button id="close" type="button" aria-label="Close mini timer">×</button></header>
     <div class="sl-mini-clock-glass"><div id="clock" role="timer">00:00:00</div></div>
     <div id="status" role="status" aria-live="polite">Connecting to your Study Room…</div>
     <div class="actions">
@@ -52,7 +57,7 @@
   </main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/studylab-account.js?v=20261115-profile-lifecycle-v2"></script>
-  <script src="assets/js/studylab-auth-gateway.js?v=20261103-google-auth-v1"></script>
+  <script src="assets/js/studylab-auth-gateway.js?v=20261103-google-auth-v1-sl-infinity-20261127"></script>
   <script src="assets/js/study-room-config.js"></script>
   <script src="assets/js/study-room-presence.js?v=20261103-target-presence-v1"></script>
   <script src="assets/js/studylab-plus.js?v=plus-9"></script>

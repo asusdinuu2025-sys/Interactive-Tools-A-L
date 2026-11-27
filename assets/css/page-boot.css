@@ -1,4 +1,4 @@
-/* StudyLab boot overlay: four quarter-arcs, original SL artwork, and matte translucent depth.
+/* StudyLab boot overlay: four quarter-arcs, the SL infinity icon, and matte translucent depth.
    Inlined into the document head; no external CSS, canvas, GIF or runtime animation library. */
 html { background: #061226; }
 html[data-theme="light"] { background: #d9eaf6; }
@@ -33,11 +33,9 @@ html[data-theme="light"].sl-booting::before {
   position: fixed;
   inset: 0;
   z-index: 2147483646;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
+  --orbit-size: min(222px, 64vw, 58vh);
+  display: grid;
+  place-items: center;
   overflow: hidden;
   opacity: 0;
   visibility: hidden;
@@ -76,14 +74,14 @@ html.sl-booting #sl-boot-loader {
 html[data-theme="light"] #sl-boot-loader { color: #102e58; }
 .sl-boot-orbits {
   position: relative;
-  width: 222px;
-  height: 222px;
+  width: var(--orbit-size);
+  height: var(--orbit-size);
   display: grid;
   place-items: center;
   flex: 0 0 auto;
 }
 .sl-boot-ring {
-  --arc-color: #48d9f8;
+  --arc-color: #a8bddc;
   position: absolute;
   left: 50%;
   top: 50%;
@@ -100,10 +98,12 @@ html[data-theme="light"] #sl-boot-loader { color: #102e58; }
   pointer-events: none;
   will-change: transform;
 }
-.sl-boot-ring:nth-child(1) { --ring-size: 218px; --arc-color: #47c5fa; --phase: 12deg; --duration: 1.27s; --rotation: 360deg; }
-.sl-boot-ring:nth-child(2) { --ring-size: 187px; --arc-color: #c073f6; --phase: 176deg; --duration: 1.46s; --rotation: -360deg; }
-.sl-boot-ring:nth-child(3) { --ring-size: 156px; --arc-color: #38e0f0; --phase: 263deg; --duration: 1.09s; --rotation: 360deg; }
-.sl-boot-ring:nth-child(4) { --ring-size: 129px; --arc-color: #9977fd; --phase: 75deg; --duration: 1.36s; --rotation: -360deg; }
+.sl-boot-ring:nth-child(1) { --ring-size: 98%; --arc-color: #b8c9e4; --phase: 12deg; --duration: 1.27s; --rotation: 360deg; }
+.sl-boot-ring:nth-child(2) { --ring-size: 84%; --arc-color: #8fa9d0; --phase: 176deg; --duration: 1.46s; --rotation: -360deg; }
+.sl-boot-ring:nth-child(3) { --ring-size: 70%; --arc-color: #d2ddee; --phase: 263deg; --duration: 1.09s; --rotation: 360deg; }
+.sl-boot-ring:nth-child(4) { --ring-size: 58%; --arc-color: #9eb5da; --phase: 75deg; --duration: 1.36s; --rotation: -360deg; }
+html[data-theme="light"] .sl-boot-ring:nth-child(odd) { --arc-color: #5978a5; }
+html[data-theme="light"] .sl-boot-ring:nth-child(even) { --arc-color: #7996bc; }
 html.sl-booting .sl-boot-ring {
   animation: sl-boot-arc-rotate var(--duration) linear infinite;
 }
@@ -113,14 +113,16 @@ html.sl-booting .sl-boot-ring {
 }
 .sl-boot-icon {
   display: block;
-  width: 104px;
-  height: 104px;
-  border-radius: 23px;
+  width: 47%;
+  height: 47%;
   object-fit: contain;
   flex: 0 0 auto;
 }
 .sl-boot-name {
   display: block;
+  position: absolute;
+  inset-inline: 0;
+  top: calc(50% + var(--orbit-size) / 2 + 9px);
   margin: 0;
   font: 700 24px/1.25 "Segoe UI", "Nirmala UI", Arial, sans-serif;
   letter-spacing: .025em;

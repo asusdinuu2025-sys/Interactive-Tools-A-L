@@ -201,7 +201,7 @@ async function flush(){for(let i=0;i<8;i++)await Promise.resolve();}
     const firstRender=read(path.join(temp,'index.html'));
     assert.equal((firstRender.match(/id="sl-boot-loader"/g)||[]).length,1);
     assert.equal((firstRender.match(/class="sl-boot-ring"/g)||[]).length,4);
-    assert(firstRender.includes('studylab-192.png?v=sl-approved-20261117'));
+    assert(firstRender.includes('studylab-192.png?v=sl-infinity-20261127'));
     assert(firstRender.includes('<strong class="sl-boot-name">StudyLab</strong>'));
     assert.equal((firstRender.match(/id="sl-page-boot"/g)||[]).length,1);
     assert.equal(sync().status,0);

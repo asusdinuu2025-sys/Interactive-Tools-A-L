@@ -1,19 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1220 350" role="img" aria-label="StudyLab logo, for G.C.E. A/L students in Sri Lanka">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1220 350" role="img" aria-label="StudyLab for G.C.E. A/L students in Sri Lanka">
 <defs>
-<linearGradient id="cap" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#18dcf5"/><stop offset=".48" stop-color="#308ef6"/><stop offset="1" stop-color="#cd75ef"/></linearGradient>
-<linearGradient id="left" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#1de5f4"/><stop offset="1" stop-color="#1697ef"/></linearGradient>
-<linearGradient id="right" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#4b68f8"/><stop offset="1" stop-color="#d879f0"/></linearGradient>
-<linearGradient id="lab" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#16d3f3"/><stop offset=".48" stop-color="#4f9ef5"/><stop offset="1" stop-color="#c078ec"/></linearGradient>
+<linearGradient id="royal" gradientUnits="userSpaceOnUse" x1="218" y1="118" x2="364" y2="510">
+<stop offset=".32" stop-color="#081780" stop-opacity="0"/><stop offset=".60" stop-color="#0818a0" stop-opacity=".24"/>
+<stop offset=".85" stop-color="#0821dc" stop-opacity=".83"/><stop offset="1" stop-color="#082afa"/>
+</linearGradient>
+<radialGradient id="upper" gradientUnits="userSpaceOnUse" cx="0" cy="18" r="328">
+<stop stop-color="#0b2391" stop-opacity=".87"/><stop offset="1" stop-color="#0b2391" stop-opacity="0"/>
+</radialGradient>
+<linearGradient id="matte" gradientUnits="userSpaceOnUse" x1="138" y1="140" x2="362" y2="358">
+<stop stop-color="#fff5e1"/><stop offset=".42" stop-color="#efeee7"/><stop offset="1" stop-color="#afc4df"/>
+</linearGradient>
+<linearGradient id="ring" gradientUnits="userSpaceOnUse" x1="80" y1="63" x2="412" y2="415">
+<stop stop-color="#e2ecf7"/><stop offset="1" stop-color="#b1c7e0"/>
+</linearGradient>
 </defs>
-<g transform="translate(20,-26) scale(.85)">
-<path d="M256 225 148 278 148 316 221 352 221 370 148 333 148 374 258 430 258 317 189 283 256 249Z" fill="url(#left)"/>
-<path d="M268 224 308 248 308 365 390 322 390 367 268 430Z" fill="url(#right)"/>
-<path d="M79 181 256 88 433 181 256 272Z M126 181 256 113 386 181 256 245Z" fill="url(#cap)" fill-rule="evenodd"/>
-<path d="M433 181 V252" fill="none" stroke="#c178ef" stroke-width="9" stroke-linecap="round"/>
-<path d="M433 243 C422 254 421 276 433 287 C447 278 444 260 433 243Z" fill="#cc79ef"/>
-</g>
-<path d="M415 69 V282" stroke="#5db4df" stroke-width="2" opacity=".63"/>
-<text x="458" y="211" font-family="Segoe UI, Arial, sans-serif" font-size="122" letter-spacing="-4" font-weight="800" fill="#f5f9ff">Study</text>
-<text x="798" y="211" font-family="Segoe UI, Arial, sans-serif" font-size="122" letter-spacing="-4" font-weight="800" fill="url(#lab)">Lab</text>
-<text x="462" y="259" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="500" letter-spacing="5" fill="#c3d0e9">FOR G.C.E. A/L STUDENTS IN SRI LANKA</text>
+<g transform="translate(44 33) scale(.59)"><rect width="480" height="480" rx="106" fill="#06063b"/><rect width="480" height="480" rx="106" fill="url(#upper)"/><rect width="480" height="480" rx="106" fill="url(#royal)"/><g fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M240 244 C193 195 161 169 117 169 C72 169 38 201 38 244 C38 287 72 319 117 319 C161 319 193 293 240 244 C287 195 319 169 363 169 C408 169 442 201 442 244 C442 287 408 319 363 319 C319 319 287 293 240 244Z" stroke="#607ba7" stroke-width="15" opacity=".77"/><path d="M229 166 C208 137 171 133 145 145 C120 157 109 185 124 207 C140 230 179 233 209 249 C238 264 250 287 237 309 C221 333 185 337 157 326 C134 317 120 301 112 284" stroke="url(#matte)" stroke-width="25"/><path d="M271 144 V324 H362" stroke="url(#matte)" stroke-width="25"/></g></g>
+<text x="391" y="205" font-family="Segoe UI, Arial, sans-serif" font-size="119" font-weight="760" letter-spacing="-4" fill="#f5f5ee">StudyLab</text>
+<text x="396" y="254" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="500" letter-spacing="5" fill="#bbcbe7">FOR G.C.E. A/L STUDENTS IN SRI LANKA</text>
 </svg>
