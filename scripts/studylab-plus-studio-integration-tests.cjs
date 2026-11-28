@@ -13,7 +13,7 @@ async function sqlTest(){
  await db.exec("create function public.studylab_social_is_admin() returns boolean language sql stable as $$select auth.uid()='10000000-0000-4000-8000-000000000001'::uuid$$;");
  for(const id of [admin,member,free,guest]){await db.query("insert into auth.users(id,is_anonymous) values($1,$2)",[id,id===guest]);await db.query("insert into studylab_profiles(id) values($1)",[id]);}
  await db.exec(fs.readFileSync("supabase/plus-preview/plus_foundation.sql","utf8"));
- await db.exec(fs.readFileSync("supabase/migrations/20261128210000_studylab_plus_public_ranks.sql","utf8"));
+ await db.exec(fs.readFileSync("supabase/migrations/20261128210024_studylab_plus_public_ranks.sql","utf8"));
  async function as(id,role="authenticated"){await db.exec("reset role");await db.query("select set_config('request.jwt.claim.sub',$1,false)",[id]);await db.exec("set role "+role);}
  const data=async(q,args=[]) => (await db.query(q,args)).rows[0].data;
  const save=(d=details)=>data("select studylab_plus_save_appearance('galaxy','#abcdef','aurora','mint','nebula','micro',$1::jsonb,'science','books','halo','mono') as data",[JSON.stringify(d)]);

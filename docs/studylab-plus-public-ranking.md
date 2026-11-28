@@ -11,7 +11,7 @@
 ## Database deployment order
 
 1. Baseline Plus foundation was installed in the earlier phase.
-2. Apply **supabase/migrations/20261128210000_studylab_plus_public_ranks.sql** as a single transaction. It expands validated, private per-account details to include rankDailyColor, rankWeeklyColor and rankPattern; updates the bounded public projection; and permits anonymous authenticated guests to view **public cosmetics only**. Older clients keep saving supported appearance fields and preserve any ranking colors and doodles already selected.
+2. Apply **supabase/migrations/20261128210024_studylab_plus_public_ranks.sql** as a single transaction. It expands validated, private per-account details to include rankDailyColor, rankWeeklyColor and rankPattern; updates the bounded public projection; and permits anonymous authenticated guests to view **public cosmetics only**. Older clients keep saving supported appearance fields and preserve any ranking colors and doodles already selected.
 3. Keep Plus disabled until public web hosting, two-account signed-in testing, and merchant checkout verification are ready.
 
 ## Regression checks

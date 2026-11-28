@@ -95,7 +95,7 @@ assert.match(plusCode,/Premium Home and Study Room backgrounds/);assert.match(pl
 console.log("PASS: private backgrounds, explicit plan benefits, payment ledger isolation and admin reporting guard.");
 
 // Ranked colors are public cosmetics; private workspace and pet controls are not.
-const rankSql=fs.readFileSync(path.join(__dirname,"../supabase/migrations/20261128210000_studylab_plus_public_ranks.sql"),"utf8");
+const rankSql=fs.readFileSync(path.join(__dirname,"../supabase/migrations/20261128210024_studylab_plus_public_ranks.sql"),"utf8");
 const rankCss=fs.readFileSync(path.join(__dirname,"../assets/css/studylab-plus-ranks.css"),"utf8");
 assert.match(rankSql,/studylab_plus_public_styles/);assert.match(rankSql,/rankDailyColor/);assert.match(rankSql,/rankWeeklyColor/);assert.match(rankSql,/rankPattern/);
 assert.doesNotMatch(plusCode,/petEyes=\\[[^\\]]*star/);assert.doesNotMatch(plusCode,/petEyes=\\[[^\\]]*diamond/);
