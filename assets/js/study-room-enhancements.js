@@ -81,33 +81,6 @@ function init(){
  const hero=document.querySelector('.room-hero'),layout=document.querySelector('.room-layout'),actions=document.querySelector('.room-session-actions'),board=document.getElementById('leaderboardList');
  if(!hero||!layout||!actions||document.getElementById('slrEnhancementsReady'))return;
  const marker=document.createElement('span');marker.id='slrEnhancementsReady';marker.hidden=true;document.querySelector('.room-page')?.append(marker);
- const achievements=document.createElement('section');achievements.className='room-panel slr-achievements';achievements.id='slrAchievements';
- achievements.innerHTML='<div class="room-panel-head"><div><h2>Study streaks & achievements</h2><div class="tiny">Consistency over endless screen time.</div></div><span aria-hidden="true" style="font-size:1.5rem">🏆</span></div><div class="slr-achievement-summary"><div class="slr-streak-orb" aria-hidden="true">🔥</div><div class="slr-streak-copy"><strong id="slrStreakValue">0-day streak</strong><span id="slrStreakCaption">Record one minute of study to start a streak.</span></div></div><div class="slr-progress-label"><strong>Weekly focus milestone</strong><span id="slrWeeklyProgressText">0h 0m / 7 hours</span></div><div class="slr-achievement-track" role="progressbar" aria-label="Weekly focus milestone" aria-valuemin="0" aria-valuemax="7" aria-valuenow="0" id="slrWeeklyProgress"><span id="slrWeeklyProgressBar"></span></div><div class="slr-badges"><div class="slr-badge" data-kind="hours" data-threshold="3600"><span class="slr-badge-icon">🌱</span><strong>First hour</strong><small>1 hour studied this week</small></div><div class="slr-badge" data-kind="hours" data-threshold="7200"><span class="slr-badge-icon">📘</span><strong>Bookworm</strong><small>2 hours studied this week</small></div><div class="slr-badge" data-kind="hours" data-threshold="10800"><span class="slr-badge-icon">🔥</span><strong>Focus builder</strong><small>3 hours studied this week</small></div><div class="slr-badge" data-kind="hours" data-threshold="14400"><span class="sl-badge-icon slr-badge-icon">🎯</span><strong>On target</strong><small>4 hours studied this week</small></div><div class="slr-badge" data-kind="hours" data-threshold="18000"><span class="slr-badge-icon">💎</span><strong>Consistency gem</strong><small>5 hours studied this week</small></div><div class="slr-badge" data-kind="hours" data-threshold="25200"><span class="slr-badge-icon">⚡</span><strong>Power session</strong><small>7 hours studied this week</small></div><div class="slr-badge" data-kind="streak" data-threshold="3"><span class="slr-badge-icon">🌤️</span><strong>Three-day spark</strong><small>3-day study streak</small></div><div class="slr-badge" data-kind="streak" data-threshold="7"><span class="slr-badge-icon">🗓️</span><strong>Week warrior</strong><small>7-day study streak</small></div><div class="slr-badge" data-kind="streak" data-threshold="14"><span class="slr-badge-icon">🏅</span><strong>Fortnight focus</strong><small>14-day study streak</small></div><div class="slr-badge" data-kind="streak" data-threshold="30"><span class="slr-badge-icon">👑</span><strong>Consistency royalty</strong><small>30-day study streak</small></div><div class="slr-badge" data-kind="streak" data-threshold="60"><span class="slr-badge-icon">🔥</span><strong>Steady Flame</strong><small>60-day study streak</small></div><div class="slr-badge" data-kind="streak" data-threshold="100"><span class="slr-badge-icon">🏆</span><strong>Century Scholar</strong><small>100-day study streak</small></div></div><p class="slr-small-note">Milestones use StudyLab&#39;s existing weekly totals. Streaks use the same daily study history as My Study Analytics. Confirmed study time syncs across devices.</p>';
- layout.insertAdjacentElement('afterend',achievements);
- // Achievements use the same daily history as My Study Analytics.
- const renderStreak=()=>{
-   const stats=window.StudyRoomHistory?.getStreakSummary?.()||{current:0};
-   const n=Math.max(0,Number(stats.current)||0);
-   document.getElementById('slrStreakValue').textContent=n+'-day streak';
-   document.getElementById('slrStreakCaption').textContent=n>0
-     ?'At least one recorded study minute today.'
-     :'Record one minute of study today to build your streak.';
-   achievements.querySelectorAll('.slr-badge[data-kind="streak"]').forEach(b=>b.classList.toggle('is-earned',n>=Number(b.dataset.threshold)));
- };
- const weeklySeconds=()=>{
-   const state=window.StudyRoomTimer?.getState?.();
-   return state?.ready?Math.max(0,(Number(state.weekSeconds)||0)+(Number(state.pendingWeekSeconds)||0)):0;
- };
- const renderAchievements=()=>{
-   const s=weeklySeconds(),target=7*3600,pct=Math.min(100,Math.round(s/target*100));
-   document.getElementById('slrWeeklyProgressText').textContent=Math.floor(s/3600)+'h '+Math.floor(s%3600/60)+'m / 7 hours';
-   document.getElementById('slrWeeklyProgressBar').style.width=pct+'%';
-   document.getElementById('slrWeeklyProgress').setAttribute('aria-valuenow',String(Math.min(7,s/3600)));
-   achievements.querySelectorAll('.slr-badge[data-kind="hours"]').forEach(b=>b.classList.toggle('is-earned',s>=Number(b.dataset.threshold)));
- };
- window.addEventListener('studylab:study-history-updated',renderStreak);
- window.addEventListener('studylab:study-room-timer',renderAchievements);
- renderStreak();renderAchievements();setInterval(renderAchievements,15000);
  const decorate=()=>{
   if(!board)return;
   const isDaily=document.getElementById('dailyBoardTab')?.classList.contains('active');

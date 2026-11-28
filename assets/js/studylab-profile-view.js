@@ -55,6 +55,7 @@
   let edit = null;
   let deleteStart = null;
   let usernameNode = null;
+  let xpNode = null;
   let nameNode = null;
   let avatarNode = null;
   let avatarEditor = null;
@@ -418,7 +419,9 @@
     nameNode = element("h2","sl-pv-name","Student");
     nameNode.id = "slPvHeading";
     usernameNode = element("p","sl-pv-username","@student");
-    titleWrap.append(nameNode,usernameNode);
+    xpNode = element("div","sl-xp-profile");
+    xpNode.hidden = true;
+    titleWrap.append(nameNode,usernameNode,xpNode);
     const avatarWrap=element("div","sl-pv-avatar-wrap");
     avatarToggle=button("sl-pv-avatar-toggle","","Edit profile picture");
     avatarToggle.append(icon("camera"));
@@ -672,7 +675,7 @@
     const title=element("h2","","Delete your StudyLab account?");
     title.id="slPvDeleteTitle";
     const details=element("p","sl-pv-confirm-info",
-      "This permanently deletes your sign-in, posts, likes, comments, follows and Study Room history. Only one anonymized profile record remains, without your name, username, phone, school or bio. This cannot be undone.");
+      "This permanently deletes your sign-in, posts, likes, comments, follows, XP, tasks and Study Room history. Only one anonymized profile record remains, without your name, username, phone, school or bio. This cannot be undone.");
     const inputLabel=element("label","sl-pv-confirm-label","Type DELETE to confirm");
     inputLabel.htmlFor="slPvDeleteInput";
     confirmInput=element("input","sl-pv-confirm-input");
@@ -868,6 +871,8 @@
     viewedUserId=id;
     nameNode.textContent=own?(escText(user.user_metadata?.full_name)||"Student"):"Student";
     usernameNode.textContent="Loading profile…";
+    xpNode.hidden = true;
+    xpNode.replaceChildren();
     joinedNode.textContent=own?joinedDate(user.created_at):"Account created · —";
     paintAvatar("male");
     window.StudyLabAvatar?.decorate(avatarNode,id);
@@ -938,6 +943,8 @@
         bioNode.textContent=escText(profile.bio)||"No bio added yet.";
       }
       usernameNode.textContent=profile.username?"@"+escText(profile.username):"Username not set";
+      void window.StudyLabXP?.showProfile(xpNode,id,
+        ()=>serial===viewSequence&&!view.hidden&&viewedUserId===id);
       joinedNode.textContent=joinedDate((own?user.created_at:null)||profile.joined_at||profile.created_at);
       paintAvatar(profile.gender==="female"?"female":"male");
       window.StudyLabAvatar?.decorate(avatarNode,id);

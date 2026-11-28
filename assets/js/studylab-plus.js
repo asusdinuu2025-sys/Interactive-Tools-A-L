@@ -181,7 +181,32 @@ async function open(feature){
  const grid=E("div",null,"sl-plus-grid");
  for(const plus of [false,true]){
   const card=E("section",null,"sl-plus-plan"+(plus?" is-plus":""));card.append(E("h3",plus?"✦ StudyLab Plus":"StudyLab Free"),E("strong",plus?"Rs. 199 / month":"Rs. 0","sl-plus-price"),E("p",plus?"Choose your billing period":"All essential learning tools"));
-  if(plus){const choices=E("div",null,"sl-plus-duration-grid");const price=card.querySelector(".sl-plus-price");let selected=plans[0];for(const plan of plans){const choice=E("button",null,"sl-plus-duration");choice.type="button";choice.dataset.months=String(plan.months);choice.setAttribute("aria-pressed",String(plan===selected));choice.append(E("strong",plan.label),E("span","Rs. "+plan.price.toLocaleString("en-LK")),E("small",plan.months===1?"Per month":"Save Rs. "+(199*plan.months-plan.price)));choice.onclick=()=>{selected=plan;price.textContent="Rs. "+plan.price.toLocaleString("en-LK")+" / "+(plan.months===1?"month":plan.months+" months");for(const item of choices.children)item.setAttribute("aria-pressed",String(item.dataset.months===String(plan.months)));};choices.append(choice);}card.append(choices);}
+  if (plus) {
+    const choices = E("div", null, "sl-plus-duration-grid");
+    const price = card.querySelector(".sl-plus-price");
+    const reward = E("p", null, "sl-plus-xp-note");
+    reward.setAttribute("aria-live", "polite");
+    function selectPlan(plan) {
+      const amount = plan.price.toLocaleString("en-LK");
+      price.textContent = "Rs. " + amount + " / " + (plan.months === 1 ? "month" : plan.months + " months");
+      reward.textContent = "This purchase adds " + amount + " XP to your total once your payment is confirmed.";
+      for (const item of choices.children) {
+        item.setAttribute("aria-pressed", String(item.dataset.months === String(plan.months)));
+      }
+    }
+    for (const plan of plans) {
+      const choice = E("button", null, "sl-plus-duration");
+      choice.type = "button";
+      choice.dataset.months = String(plan.months);
+      choice.append(E("strong", plan.label), E("span", "Rs. " + plan.price.toLocaleString("en-LK")),
+        E("small", plan.months === 1 ? "Per month" : "Save Rs. " + (plans[0].price * plan.months - plan.price)));
+      choice.addEventListener("click", () => selectPlan(plan));
+      choices.append(choice);
+    }
+    selectPlan(plans[0]);
+    card.insertBefore(reward, price.nextSibling);
+    card.append(choices);
+  }
   const action=E("button",plus?(currentDemo()?"Plus demo active":state.active?"Membership active":"Checkout not available yet"):(currentDemo()?"Free plan (demo)":state.active?"Free plan":"Your current plan"),"sl-plus-action");action.type="button";action.disabled=true;if(preview&&plus){action.disabled=false;action.textContent=currentDemo()?"Switch to Free demo":"Try Plus demo";action.onclick=()=>{if(root.StudyLabAccount?.getUser?.()?.id!==session){close();return;}setDemo(!currentDemo());close();};}card.append(action);
   const list=E("ul");for(const f of (plus?["Everything in Free",...planned]:core))list.append(E("li",f));card.append(list);
   
