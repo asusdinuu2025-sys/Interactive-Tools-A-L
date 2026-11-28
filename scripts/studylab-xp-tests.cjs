@@ -6,7 +6,7 @@ const { PGlite } = require("@electric-sql/pglite");
 const { JSDOM } = require("jsdom");
 const { compact, progression, thresholds } = require("../assets/js/studylab-xp.js");
 
-const migration = path.resolve(__dirname, "../supabase/migrations/20261128145000_studylab_xp.sql");
+const migration = path.resolve(__dirname, "../supabase/migrations/20261128204238_studylab_xp.sql");
 const ids = {
   ada: "10000000-0000-4000-8000-000000000001",
   bee: "10000000-0000-4000-8000-000000000002",
