@@ -427,6 +427,7 @@
           item.innerHTML = "<span class='room-rank-number'></span><div class='room-avatar'></div>" +
             "<div class='room-rank-info'><strong></strong><span class='room-rank-subject'></span></div><span class='room-time'></span>";
         }
+        item.dataset.plusRankPeriod=selectedBoard;
         const avatar = item.querySelector('.room-avatar');
         const gender = r.gender === 'female' ? 'female' : 'male';
         if (avatar.dataset.gender !== gender) {

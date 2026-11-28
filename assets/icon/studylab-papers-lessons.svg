@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 480" role="img" aria-label="StudyLab Past Papers and Lessons">
+<defs>
+<linearGradient id="royal" gradientUnits="userSpaceOnUse" x1="218" y1="118" x2="364" y2="510">
+<stop offset=".32" stop-color="#081780" stop-opacity="0"/><stop offset=".60" stop-color="#0818a0" stop-opacity=".24"/>
+<stop offset=".85" stop-color="#0821dc" stop-opacity=".83"/><stop offset="1" stop-color="#082afa"/>
+</linearGradient>
+<radialGradient id="upper" gradientUnits="userSpaceOnUse" cx="0" cy="18" r="328">
+<stop stop-color="#0b2391" stop-opacity=".87"/><stop offset="1" stop-color="#0b2391" stop-opacity="0"/>
+</radialGradient>
+<linearGradient id="matte" gradientUnits="userSpaceOnUse" x1="138" y1="140" x2="362" y2="358">
+<stop stop-color="#fff5e1"/><stop offset=".42" stop-color="#efeee7"/><stop offset="1" stop-color="#afc4df"/>
+</linearGradient>
+<linearGradient id="ring" gradientUnits="userSpaceOnUse" x1="80" y1="63" x2="412" y2="415">
+<stop stop-color="#e2ecf7"/><stop offset="1" stop-color="#b1c7e0"/>
+</linearGradient>
+</defs>
+<rect width="480" height="480" rx="106" fill="#06063b"/><rect width="480" height="480" rx="106" fill="url(#upper)"/><rect width="480" height="480" rx="106" fill="url(#royal)"/>
+<g fill="none" stroke-linecap="round" stroke-linejoin="round"><g transform="translate(0 -17)"><path d="M229 166 C208 137 171 133 145 145 C120 157 109 185 124 207 C140 230 179 233 209 249 C238 264 250 287 237 309 C221 333 185 337 157 326 C134 317 120 301 112 284" stroke="url(#matte)" stroke-width="25"/><path d="M271 144 V324 H362" stroke="url(#matte)" stroke-width="25"/></g><path d="M240 385 C207 343 154 341 111 359 L102 378 C148 366 198 366 240 385 C282 366 332 366 378 378 L369 359 C326 341 273 343 240 385Z" stroke="url(#matte)" stroke-width="8.5"/></g>
+</svg>
