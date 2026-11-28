@@ -11,9 +11,9 @@ assert.equal(demoAllowed("deploy-preview-119--studylablk.netlify.app"),true);ass
 console.log("PASS: registered account eligibility and preview-only demo host.");
 
 assert.equal(demoAllowed("localhost"),true);
-assert.deepEqual(appearance({active:false,cover:"aurora",frame:"gold"}),{active:false,cover:"default",frame:"default",effect:"default",bubble:"default",pet:"default",timer:"standard",details:details(null),pattern:"default",cardPattern:"default",cardGlow:"default",chatFont:"default"});
-assert.deepEqual(appearance({active:true,cover:"aurora",frame:"gold"}),{active:true,cover:"aurora",frame:"gold",effect:"default",bubble:"default",pet:"default",timer:"standard",details:details(null),pattern:"default",cardPattern:"default",cardGlow:"default",chatFont:"default"});
-assert.deepEqual(appearance({active:true,cover:"url(unsafe)",frame:"invalid"}),{active:true,cover:"default",frame:"default",effect:"default",bubble:"default",pet:"default",timer:"standard",details:details(null),pattern:"default",cardPattern:"default",cardGlow:"default",chatFont:"default"});
+assert.deepEqual(appearance({active:false,cover:"aurora",frame:"gold"}),{active:false,cover:"default",frame:"default",effect:"default",bubble:"default",pet:"default",timer:"standard",details:details(null),pattern:"default",cardPattern:"default",cardGlow:"default",chatFont:"default",rankDailyColor:"default",rankWeeklyColor:"default",rankPattern:"default"});
+assert.deepEqual(appearance({active:true,cover:"aurora",frame:"gold"}),{active:true,cover:"aurora",frame:"gold",effect:"default",bubble:"default",pet:"default",timer:"standard",details:details(null),pattern:"default",cardPattern:"default",cardGlow:"default",chatFont:"default",rankDailyColor:"default",rankWeeklyColor:"default",rankPattern:"default"});
+assert.deepEqual(appearance({active:true,cover:"url(unsafe)",frame:"invalid"}),{active:true,cover:"default",frame:"default",effect:"default",bubble:"default",pet:"default",timer:"standard",details:details(null),pattern:"default",cardPattern:"default",cardGlow:"default",chatFont:"default",rankDailyColor:"default",rankWeeklyColor:"default",rankPattern:"default"});
 const banners=[{kind:"announcement"},{kind:"sponsored"},{kind:"announcement",design:{preset:"sponsored"}},{kind:"feature"},{kind:"resource"}];
 assert.equal(filterSponsored(banners,false).length,5);
 assert.deepEqual(filterSponsored(banners,true),banners);
@@ -55,7 +55,7 @@ assert.equal(hasPremiumDraft({cover:"galaxy"}),true);
 assert.equal(hasPremiumDraft({details:{shape:"orb"}}),true);
 assert.equal(hasPremiumDraft({details:{eyeColor:"url(unsafe)"}}),false);
 assert.deepEqual(plans.map(p=>[p.months,p.price]),[[1,199],[3,499],[12,1799]]);
-assert.equal(details({eyeColor:"#ABCDEF",timerAccent:"red",shape:"orb",eyes:"star",glow:"neon",mouth:"smile"}).eyeColor,"#abcdef");
+assert.equal(details({eyeColor:"#ABCDEF",timerAccent:"red",shape:"orb",eyes:"focused",glow:"neon",mouth:"smile"}).eyeColor,"#abcdef");
 assert.equal(details({timerAccent:"red"}).timerAccent,"default");
 assert.deepEqual(appearance({active:false,details:{shape:"orb",eyes:"star"}}).details,details(null));
 assert.match(plusCode,/if\(!latest.active\)\{/);
@@ -93,3 +93,16 @@ assert.equal(details({workspace:"aurora"}).workspace,"aurora");assert.equal(deta
 assert.match(sql,/studylab_plus_admin_billing_summary/);assert.match(sql,/primary key\(environment,provider_payment_id\)/);assert.match(sql,/studylab_plus_billing_payments enable row level security/);
 assert.match(plusCode,/Premium Home and Study Room backgrounds/);assert.match(plusCode,/Advanced personal study reports/);
 console.log("PASS: private backgrounds, explicit plan benefits, payment ledger isolation and admin reporting guard.");
+
+// Ranked colors are public cosmetics; private workspace and pet controls are not.
+const rankSql=fs.readFileSync(path.join(__dirname,"../supabase/migrations/20261128210000_studylab_plus_public_ranks.sql"),"utf8");
+const rankCss=fs.readFileSync(path.join(__dirname,"../assets/css/studylab-plus-ranks.css"),"utf8");
+assert.match(rankSql,/studylab_plus_public_styles/);assert.match(rankSql,/rankDailyColor/);assert.match(rankSql,/rankWeeklyColor/);assert.match(rankSql,/rankPattern/);
+assert.doesNotMatch(plusCode,/petEyes=\\[[^\\]]*star/);assert.doesNotMatch(plusCode,/petEyes=\\[[^\\]]*diamond/);
+assert.equal(details({shape:"teardrop"}).shape,"teardrop");assert.equal(details({shape:"capsule"}).shape,"default");
+assert.equal(details({eyes:"star"}).eyes,"default");assert.equal(details({eyes:"diamond"}).eyes,"default");
+assert.equal(details({rankDailyColor:"#123ABC"}).rankDailyColor,"#123abc");
+assert.equal(details({rankWeeklyColor:"url(bad)"}).rankWeeklyColor,"default");
+assert.equal(details({rankPattern:"books"}).rankPattern,"books");
+assert.match(rankCss,/data-plus-rank-color/);assert.match(room,/item.dataset.plusRankPeriod=selectedBoard/);
+console.log("PASS: public ranking customization, allowed pet choices, and free appearance safety.");

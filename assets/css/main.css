@@ -1196,3 +1196,33 @@ html[data-theme="light"] .phet-card .phet-badge {
 @media (prefers-reduced-motion: reduce) {
   .lesson-filter-button .lesson-filter-arrow { transition: none; }
 }
+
+/* The StudyLab logos supply their own matte tiles. */
+.sl-brand-icon {
+  display: inline-block;
+  flex-shrink: 0;
+  object-fit: contain;
+  vertical-align: middle;
+}
+.sl-home-sidebar-brand-mark > .sl-brand-icon,
+.brand-mark > .sl-brand-icon,
+.sl-subject-topbar-mark > .sl-brand-icon,
+.sl-subject-hero-icon > .sl-brand-icon,
+.sl-home-nav-icon > .sl-brand-icon,
+.utility-card .card-icon > .sl-brand-icon {
+  max-width: 100%;
+  max-height: 100%;
+}
+.sl-home-sidebar-brand-mark:has(> .sl-brand-icon),
+.brand-mark:has(> .sl-brand-icon),
+.sl-subject-topbar-mark:has(> .sl-brand-icon),
+.sl-subject-hero-icon:has(> .sl-brand-icon) {
+  background: none;
+  border-color: transparent;
+  box-shadow: none;
+}
+.sl-home-section-heading h2 > .sl-brand-icon,
+.room-top h1 > .sl-brand-icon,
+.room-panel-head h2 > .sl-brand-icon {
+  margin-inline-end: .12em;
+}
