@@ -1,0 +1,159 @@
+/* Compact XP chips and expandable totals share the existing glass palette. */
+.sl-xp-pill,.sl-xp-level,.sl-xp-toggle {
+  border: 1px solid color-mix(in srgb, var(--room-accent, #7ba9d9) 36%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--room-accent, #7ba9d9) 13%, transparent);
+  color: inherit;
+  font: inherit;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+.sl-xp-pill,.sl-xp-level {
+  display: inline-block;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: .25em .65em;
+}
+.sl-xp-level { font-size: .82rem; white-space: nowrap; }
+.sl-xp-level[data-tier="1"] { border-color: #86a7ae; }
+.sl-xp-level[data-tier="2"] { border-color: #a0afd4; box-shadow: inset 0 0 0 1px #a0afd460; }
+.sl-xp-level[data-tier="3"] { border-color: #aa93c2; box-shadow: inset 0 0 0 1px #aa93c280; }
+.sl-xp-level[data-tier="4"] { border-color: #c5a978; box-shadow: inset 0 0 0 1px #c5a97890; }
+.sl-xp-full { min-width: 0; max-width: 100%; font-variant-numeric: tabular-nums; }
+.sl-xp-digits { white-space: nowrap; }
+.sl-xp-profile {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: .36rem;
+  max-width: 100%;
+  min-width: 0;
+  margin-block-start: .32rem;
+  text-align: center;
+}
+.sl-xp-profile .sl-xp-full { font-size: .88rem; }
+
+.room-person-card { container: study-card / inline-size; }
+.sl-xp-card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  max-width: 100%;
+  gap: .28rem .4rem;
+}
+.sl-xp-card-meta .room-person-card-subject { flex: 1 1 7ch; min-width: 0; overflow-wrap: anywhere; }
+.sl-xp-live-row { flex: 0 0 auto; max-width: 100%; }
+.sl-xp-live-chip {
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: .74rem;
+  min-height: 28px;
+}
+@container study-card (max-width: 160px) {
+  .sl-xp-card-meta { align-items: flex-start; flex-direction: column; }
+}
+body.study-room-page[data-room-theme] .room-people-grid .room-person-card:has(.sl-xp-live-chip:not([hidden])) .room-person-card-name-row {
+  overflow: visible;
+}
+body.study-room-page[data-room-theme] .room-people-grid .room-person-card:has(.sl-xp-live-chip:not([hidden])) .room-person-card-name-row .room-person-card-name {
+  white-space: normal !important;
+  overflow: visible !important;
+  overflow-wrap: anywhere !important;
+}
+.sl-xp-popup {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .5rem;
+  width: max-content;
+  min-width: 0;
+  max-width: calc(100vw - 16px);
+  margin: 0;
+  padding: .48rem .64rem;
+  box-sizing: border-box;
+  position: fixed;
+  inset: auto;
+  z-index: 3000;
+  border: 1px solid color-mix(in srgb, currentColor 24%, transparent);
+  border-radius: 13px;
+  box-shadow: 0 9px 30px #05081440;
+  background: color-mix(in srgb, var(--room-card, #202740) 94%, #16172f);
+  color: var(--room-text, #f4f5ff);
+  font-size: .88rem;
+}
+body[data-room-mode="light"] .sl-xp-popup {
+  background: color-mix(in srgb, var(--room-card, #f6f5ff) 84%, #fff);
+  color: var(--room-text, #14223a);
+}
+.sl-xp-popup[popover]:not(:popover-open),
+.sl-xp-popup[hidden],.sl-xp-profile[hidden],.sl-xp-live-row[hidden],
+.sl-xp-rankings [hidden],.sl-xp-rankings[hidden],.sl-xp-progress [hidden],
+#leaderboardSection .room-tabs[hidden],#leaderboardList[hidden] {
+  display: none !important;
+}
+.sl-xp-toggle {
+  cursor: pointer;
+  padding: .46em .8em;
+  min-height: 34px;
+  font-size: .84rem;
+}
+.sl-xp-toggle[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--room-accent, #7ba9d9) 28%, transparent);
+  border-color: color-mix(in srgb, var(--room-accent, #7ba9d9) 68%, transparent);
+}
+.sl-xp-toggle:focus-visible,.sl-xp-live-chip:focus-visible,.sl-xp-rank-name:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+.sl-xp-ranking-toggle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .38rem;
+  margin: .65rem 0;
+}
+.sl-xp-caption { margin: .45rem 0; font-size: .86rem; color: var(--room-muted, var(--text-muted, inherit)); }
+.sl-xp-ranking-list { margin: .5rem 0; padding: 0; list-style: none; display: grid; gap: .36rem; }
+.sl-xp-rank {
+  display: grid;
+  grid-template-columns: minmax(2.25rem,auto) minmax(0,1fr) minmax(0,auto);
+  gap: .6rem;
+  align-items: center;
+  border: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+  background: color-mix(in srgb, var(--room-accent, #7ba9d9) 7%, transparent);
+  padding: .45rem .65rem;
+  border-radius: 10px;
+}
+.sl-xp-position,.sl-xp-own-rank { font-variant-numeric: tabular-nums; }
+.sl-xp-rank-name {
+  border: 0;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  background: transparent;
+  cursor: pointer;
+  text-align: start;
+  overflow-wrap: anywhere;
+  padding: .2rem;
+}
+.sl-xp-rank .sl-xp-full { justify-self: end; text-align: end; }
+.sl-xp-own-rank { margin: .65rem 0 .15rem; }
+@media (max-width: 465px) {
+  .sl-xp-rank { grid-template-columns: 2.6rem minmax(0, 1fr); gap: .15rem .4rem; }
+  .sl-xp-rank .sl-xp-full { grid-column: 2; justify-self: start; text-align: start; padding-inline: .2rem; }
+}
+.sl-xp-progress {
+  margin: .72rem 0;
+  border: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+  border-radius: 12px;
+  padding: .64rem .74rem;
+}
+.sl-xp-progress-header { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .7rem; }
+.sl-xp-progress-bar { display: block; width: 100%; height: .5rem; accent-color: var(--room-accent, #7ba9d9); }
+.sl-xp-celebration { font-weight: 750; margin: .48rem 0 0; }
+.sl-xp-celebration.is-celebrating { animation: sl-xp-appear .36s ease-out both; }
+@keyframes sl-xp-appear { from { opacity: 0; transform: translateY(5px); } }
+@media (prefers-reduced-motion: reduce) { .sl-xp-celebration.is-celebrating { animation: none; } }
+#slStreakPanel .sl-streak-grid { grid-template-columns: repeat(auto-fit,minmax(min(100%,9.3rem),1fr)); }
+.sl-plus-xp-note { margin: .56rem 0; font-size: .88rem; }

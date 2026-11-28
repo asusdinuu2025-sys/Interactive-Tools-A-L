@@ -1,4 +1,4 @@
-/* Study Room analytics: cloud-confirmed study credits with private browser-local tasks. */
+/* Study Room analytics: confirmed cloud study credits and private account tasks. */
 (async () => {
 "use strict";
 // Resolve the account before choosing the local, per-student task key.
@@ -15,6 +15,15 @@ const color=n=>{const i=Math.max(0,[...subject.options].findIndex(o=>o.text===n)
 const blank=()=>({days:{},tasks:[]});
 function read(){try{const d=JSON.parse(localStorage.getItem(key)||"null");return d&&typeof d==="object"?{days:d.days||{},tasks:Array.isArray(d.tasks)?d.tasks:[]}:blank();}catch(_){return blank();}}
 let data=read(),period="today",activeSession=null,livePendingSeconds=0,livePendingDay=today(),livePendingSubject="";
+const xp = window.StudyLabXP;
+const accountTasks = Boolean(xp && uid && !window.StudyLabAccount?.getUser?.()?.is_anonymous);
+const importedKey = key + ":account-tasks-imported";
+let everSynced = false;
+try { everSynced = localStorage.getItem(importedKey) === "1"; } catch (_) {}
+let taskMode = accountTasks ? "loading" : "local";
+let originalTasks = data.tasks;
+let taskSaving = false, taskLoading = false, taskRevision = 0;
+const sameOwner = () => window.StudyLabAccount?.getUser?.()?.id === uid;
 try{activeSession=JSON.parse(localStorage.getItem(key+":active")||"null");}catch(_){activeSession=null;}
 const cursorKey=key+":server-cursor";
  let cloudDays=null,cloudSessions=[],cloudEnabled=false;
@@ -24,7 +33,9 @@ function readCursor(){try{return JSON.parse(localStorage.getItem(cursorKey)||"nu
 let serverCursor=readCursor();
 function persistCursor(){try{if(serverCursor)localStorage.setItem(cursorKey,JSON.stringify(serverCursor));else localStorage.removeItem(cursorKey);}catch(_){}}
 
-function save(){try{const cutoff=dateAgo(365);Object.keys(data.days).forEach(k=>{if(k<cutoff)delete data.days[k];});localStorage.setItem(key,JSON.stringify(data));}catch(e){console.warn("StudyLab tracker storage:",e);notice("Browser storage is unavailable or full.");}}
+function save(){try{const cutoff=dateAgo(365);Object.keys(data.days).forEach(k=>{if(k<cutoff)delete data.days[k];});localStorage.setItem(key,JSON.stringify({
+  days:data.days, tasks:taskMode === "local" ? data.tasks : originalTasks
+}));}catch(e){console.warn("StudyLab tracker storage:",e);notice("Browser storage is unavailable or full.");}}
 const panel=document.createElement("section");panel.className="room-panel sl-analytics";panel.id="slLocalStudyAnalytics";
 panel.innerHTML=[
 '<div class="room-panel-head"><div><h2>My Study Analytics</h2><p class="sl-sub">Personal study history · saved on this device</p></div><span class="sl-local">● LOCAL</span></div>',
@@ -33,7 +44,7 @@ panel.innerHTML=[
 '<div class="sl-grid"><article class="sl-card"><div class="sl-head"><h3>Subject distribution</h3><small id="slPiePeriod">Today</small></div><div class="sl-pie-wrap"><div class="sl-pie" id="slPie"><span>0m</span></div><div class="sl-legend" id="slLegend"><p class="sl-empty">Start studying to build your chart.</p></div></div></article>',
 '<article class="sl-card"><div class="sl-head"><h3>Daily activity</h3><small id="slBarsPeriod">Today</small></div><div class="sl-bars" id="slBars"><p class="sl-empty">Your daily activity will appear here.</p></div></article></div>',
 '<article class="sl-card sl-wide"><div class="sl-head"><h3>Time by subject</h3><small>Hours & minutes</small></div><div id="slRows" class="sl-rows"><p class="sl-empty">No study time recorded yet.</p></div></article>',
-'<article class="sl-card sl-wide"><div class="sl-head"><div><h3>My study tasks</h3><p class="sl-sub">Plan today and keep unfinished tasks for later.</p></div><small id="slTaskCount">0 remaining</small></div><form id="slTaskForm" class="sl-form"><input id="slTaskInput" maxlength="90" placeholder="Add a task, e.g. Revise vectors" aria-label="New study task" required><button>Add task</button></form><div id="slTasks" class="sl-tasks"><p class="sl-empty">Add your first study task.</p></div></article>',
+'<article class="sl-card sl-wide"><div class="sl-head"><div><h3>My study tasks</h3><p class="sl-sub" id="slTaskSyncNote">Plan today and keep unfinished tasks for later.</p></div><small id="slTaskCount">0 remaining</small></div><form id="slTaskForm" class="sl-form"><input id="slTaskInput" maxlength="90" placeholder="Add a task, e.g. Revise vectors" aria-label="New study task" required><button>Add task</button></form><div id="slTasks" class="sl-tasks"><p class="sl-empty">Add your first study task.</p></div></article>',
 '<article class="sl-card sl-wide"><div class="sl-head"><h3>Completed tasks</h3><small>Same selected period</small></div><div class="sl-summary sl-task-summary"><article><span>Completed</span><strong id="slTasksDone">0</strong></article><article><span>Remaining</span><strong id="slTasksPending">0</strong></article><article><span>Completion rate</span><strong id="slTasksRate">0%</strong></article></div><div class="sl-task-history-head"><strong>Daily completions</strong><small>Last 7 days</small></div><div class="sl-bars sl-task-bars" id="slTaskBars"><p class="sl-empty">Completed tasks will appear here.</p></div></article>',
 '<article class="sl-card sl-wide"><div class="sl-head"><h3>Recent study sessions</h3></div><div id="slSessionHistory" class="sl-rows"><p class="sl-empty">Loading study history...</p></div></article>',
  '<details class="sl-timer-help"><summary>How StudyLab records time</summary><p>Study time is saved to Supabase while you study. Active clocks refresh locally, and server credits are recorded on heartbeats. After leaving the Study Room, a 60-second grace period applies while the page remains open. If the browser closes without reporting its state, server maintenance detects missed heartbeats. Away time can continue up to your target, but unconfirmed time can be removed after midnight. Personal subject history syncs across devices after cloud recording is enabled; tasks and pre-existing browser history remain on this device.</p></details>',
@@ -167,7 +178,26 @@ const rows=$("slRows");rows.replaceChildren();if(!totals.length)rows.innerHTML='
 const bars=$("slBars");bars.replaceChildren();const last=list;const scrollBars=period==="30"||period==="all";bars.classList.toggle("sl-bars-scroll",scrollBars);$("slBarsPeriod").textContent=period==="today"?"Today":period==="7"?"Last 7 days":period==="30"?"Last 30 days":"All recorded days";bars.style.gridTemplateColumns=scrollBars?"none":`repeat(${Math.max(1,last.length)}, minmax(28px, 1fr))`;const barValues=last.map(d=>[d,totalsFor([d])]);const max=Math.max(1,...barValues.map(([,values])=>values.reduce((a,r)=>a+r[1],0)));barValues.forEach(([d,values])=>{const total=values.reduce((a,r)=>a+r[1],0);const col=document.createElement("div");col.className="sl-day";const val=document.createElement("b");val.textContent=total?fmt(total):"";const stack=document.createElement("div");stack.className="sl-stack";values.forEach(([n,s])=>{const seg=document.createElement("i");seg.className="sl-seg";seg.style.height=(Number(s)/max*135)+"px";seg.style.background=color(n);seg.title=n+": "+fmt(s);stack.append(seg);});const label=document.createElement("small");label.textContent=period==="today"?"Today":new Date(d+"T12:00:00+05:30").toLocaleDateString("en-US",{timeZone:"Asia/Colombo",weekday:"short"});col.append(val,stack,label);bars.append(col);});if(includeTasks)renderTasks();renderPlusReport();}
 function renderTasks(){const list=$("slTasks");list.replaceChildren();$("slTaskCount").textContent=data.tasks.filter(t=>!t.done).length+" remaining";
 const completed=data.tasks.filter(t=>t.done&&t.doneAt&&days().includes(t.doneAt)).length;const pending=data.tasks.filter(t=>!t.done).length;const totalForRate=completed+pending;$("slTasksDone").textContent=completed;$("slTasksPending").textContent=pending;$("slTasksRate").textContent=totalForRate?Math.round(completed/totalForRate*100)+"%":"0%";
-const taskBars=$("slTaskBars");taskBars.replaceChildren();const taskDays=Array.from({length:7},(_,i)=>dateAgo(6-i));const counts=taskDays.map(day=>data.tasks.filter(t=>t.done&&t.doneAt===day).length);const maxTasks=Math.max(1,...counts);taskDays.forEach((day,i)=>{const col=document.createElement("div");col.className="sl-day";const val=document.createElement("b");val.textContent=counts[i]||"";const stack=document.createElement("div");stack.className="sl-stack";if(counts[i]){const seg=document.createElement("i");seg.className="sl-seg";seg.style.height=(counts[i]/maxTasks*105)+"px";stack.append(seg);}const label=document.createElement("small");label.textContent=new Date(day+"T12:00:00+05:30").toLocaleDateString("en-US",{timeZone:"Asia/Colombo",weekday:"short"});col.append(val,stack,label);taskBars.append(col);});const day=today(),visibleTasks=data.tasks.filter(t=>taskView==="all"||(t.done?t.doneAt===day:!t.due||t.due<=day));const daily=data.tasks.filter(t=>t.done?t.doneAt===day:!t.due||t.due<=day);taskToday.textContent=daily.filter(t=>t.done).length+" / "+daily.length+" completed today";if(!visibleTasks.length){list.innerHTML='<p class="sl-empty">No tasks in this view. Add a task or switch to All tasks.</p>';return;}visibleTasks.forEach(t=>{const row=document.createElement("label");row.className="sl-task"+(t.done?" done":"");const box=document.createElement("input");box.type="checkbox";box.checked=!!t.done;box.addEventListener("change",()=>{t.done=box.checked;t.doneAt=t.done?today():null;save();renderTasks();});const title=document.createElement("span");title.className="slws-task-copy";const titleText=document.createElement("span");titleText.textContent=t.title;title.append(titleText);const details=[t.subject?[...subject.options].find(o=>o.value===t.subject)?.textContent||t.subject:"",t.due?"Due "+t.due:"",t.priority&&t.priority!=="normal"?t.priority+" priority":""].filter(Boolean);if(details.length){const small=document.createElement("small");small.textContent=details.join(" · ");title.append(small);}const edit=document.createElement("button");edit.type="button";edit.className="sl-task-study";edit.textContent="Edit";edit.addEventListener("click",e=>{e.preventDefault();editTask(t);});const del=document.createElement("button");del.type="button";del.textContent="×";del.setAttribute("aria-label","Delete task");del.addEventListener("click",e=>{e.preventDefault();data.tasks=data.tasks.filter(x=>x.id!==t.id);if(editTaskId===t.id)resetTaskDraft();save();renderTasks();});const study=document.createElement("button");study.type="button";study.className="sl-task-study";study.textContent="Study";study.setAttribute("aria-label","Use task to prepare study session");study.addEventListener("click",()=>{const match=[...subject.options].find(o=>o.value&&o.value===t.subject)||[...subject.options].find(o=>o.value&&t.title.toLowerCase().includes((o.textContent||"").trim().toLowerCase()));if(match){subject.value=match.value;subject.dispatchEvent(new Event("change",{bubbles:true}));}document.getElementById("timerSection")?.scrollIntoView({behavior:"smooth",block:"start"});});row.append(box,title,study,edit,del);list.append(row);});}
+const taskBars=$("slTaskBars");taskBars.replaceChildren();const taskDays=Array.from({length:7},(_,i)=>dateAgo(6-i));const counts=taskDays.map(day=>data.tasks.filter(t=>t.done&&t.doneAt===day).length);const maxTasks=Math.max(1,...counts);taskDays.forEach((day,i)=>{const col=document.createElement("div");col.className="sl-day";const val=document.createElement("b");val.textContent=counts[i]||"";const stack=document.createElement("div");stack.className="sl-stack";if(counts[i]){const seg=document.createElement("i");seg.className="sl-seg";seg.style.height=(counts[i]/maxTasks*105)+"px";stack.append(seg);}const label=document.createElement("small");label.textContent=new Date(day+"T12:00:00+05:30").toLocaleDateString("en-US",{timeZone:"Asia/Colombo",weekday:"short"});col.append(val,stack,label);taskBars.append(col);});const day=today(),visibleTasks=data.tasks.filter(t=>taskView==="all"||(t.done?t.doneAt===day:!t.due||t.due<=day));const daily=data.tasks.filter(t=>t.done?t.doneAt===day:!t.due||t.due<=day);taskToday.textContent=daily.filter(t=>t.done).length+" / "+daily.length+" completed today";if(!visibleTasks.length){list.innerHTML='<p class="sl-empty">No tasks in this view. Add a task or switch to All tasks.</p>';return;}visibleTasks.forEach(t=>{const row=document.createElement("label");row.className="sl-task"+(t.done?" done":"");const box=document.createElement("input");box.type="checkbox";box.checked=!!t.done;box.disabled=taskSaving||taskMode==="loading";
+box.addEventListener("change",()=>{
+  const done=box.checked;
+  if (taskMode==="account") {
+    box.checked=Boolean(t.done);
+    void changeAccountTasks("studylab_xp_task_complete",{p_id:t.id,p_done:done});
+  } else if (taskMode==="local") {
+    t.done=done;t.doneAt=done?today():null;save();renderTasks();
+  }
+});const title=document.createElement("span");title.className="slws-task-copy";const titleText=document.createElement("span");titleText.textContent=t.title;title.append(titleText);const details=[t.subject?[...subject.options].find(o=>o.value===t.subject)?.textContent||t.subject:"",t.due?"Due "+t.due:"",t.priority&&t.priority!=="normal"?t.priority+" priority":""].filter(Boolean);if(details.length){const small=document.createElement("small");small.textContent=details.join(" · ");title.append(small);}const edit=document.createElement("button");edit.type="button";edit.className="sl-task-study";edit.textContent="Edit";edit.disabled=taskSaving||taskMode==="loading";edit.addEventListener("click",e=>{e.preventDefault();editTask(t);});const del=document.createElement("button");del.type="button";del.textContent="×";del.setAttribute("aria-label","Delete task");del.disabled=taskSaving||taskMode==="loading";
+del.addEventListener("click",e=>{
+  e.preventDefault();
+  if (taskMode==="account") {
+    void changeAccountTasks("studylab_xp_task_delete",{p_id:t.id},()=>{if(editTaskId===t.id)resetTaskDraft();});
+  } else if (taskMode==="local") {
+    data.tasks=data.tasks.filter(x=>x.id!==t.id);
+    if(editTaskId===t.id)resetTaskDraft();
+    save();renderTasks();
+  }
+});const study=document.createElement("button");study.type="button";study.className="sl-task-study";study.textContent="Study";study.setAttribute("aria-label","Use task to prepare study session");study.addEventListener("click",()=>{const match=[...subject.options].find(o=>o.value&&o.value===t.subject)||[...subject.options].find(o=>o.value&&t.title.toLowerCase().includes((o.textContent||"").trim().toLowerCase()));if(match){subject.value=match.value;subject.dispatchEvent(new Event("change",{bubbles:true}));}document.getElementById("timerSection")?.scrollIntoView({behavior:"smooth",block:"start"});});row.append(box,title,study,edit,del);list.append(row);});}
 const taskForm=$("slTaskForm"),taskMeta=document.createElement("div");taskMeta.className="slws-task-meta";
 let taskView="today";const taskFilter=document.createElement("div");taskFilter.className="slws-task-filter";
 const taskToday=document.createElement("small");taskToday.setAttribute("aria-live","polite");
@@ -178,24 +208,135 @@ taskDue.type="date";taskSubject.append(new Option("Any subject",""));[...subject
 for(const v of ["Normal","High","Low"])taskPriority.append(new Option(v,v.toLowerCase()));
 for(const [label,input] of [["Subject",taskSubject],["Due date (optional)",taskDue],["Priority",taskPriority]]){const l=document.createElement("label");l.textContent=label;input.setAttribute("aria-label",label);l.append(input);taskMeta.append(l);}
 taskForm.before(taskMeta);
-let editTaskId=null;const taskSubmit=taskForm.querySelector("button");
+let editTaskId=null, newTaskId=null;const taskSubmit=taskForm.querySelector("button");
 const cancelEdit=document.createElement("button");cancelEdit.type="button";cancelEdit.className="slws-button";cancelEdit.textContent="Cancel edit";cancelEdit.hidden=true;taskForm.after(cancelEdit);
-function resetTaskDraft(){editTaskId=null;$("slTaskInput").value="";taskSubject.value="";taskDue.value="";taskPriority.value="normal";taskSubmit.textContent="Add task";cancelEdit.hidden=true;}
+
+taskSubmit.disabled = taskMode === "loading";
+const taskSyncNote = $("slTaskSyncNote");
+const localTaskMessage = accountTasks
+  ? "Account task sync unavailable. Tasks are saved on this device."
+  : "Tasks are saved on this device. Sign in to earn task XP.";
+taskSyncNote.textContent = accountTasks ? "Loading your tasks…" : localTaskMessage;
+
+async function refreshAccountTasks() {
+  if (!accountTasks || taskLoading || taskSaving || document.hidden || !sameOwner()) return;
+  const revision = taskRevision;
+  taskLoading = true;
+  try {
+    const local = taskMode === "local" ? data.tasks : originalTasks;
+    const shouldImport = !everSynced && local.length > 0;
+    const result = shouldImport
+      ? await xp.rpc("studylab_xp_task_import", {p_tasks:local.slice(0,100)})
+      : await xp.rpc("studylab_xp_tasks");
+    const tasks = shouldImport ? result?.tasks : result;
+    if (revision !== taskRevision || !sameOwner()) return;
+    if (!Array.isArray(tasks)) throw new Error("Account tasks unavailable");
+    originalTasks = local;
+    taskMode = "account";
+    const waiting = shouldImport ? Number(result.waiting) || 0 : 0;
+    if (!waiting) {
+      everSynced = true;
+      try { localStorage.setItem(importedKey,"1"); } catch (_) {}
+    }
+    taskSyncNote.textContent = waiting
+      ? "Some older tasks are saved on this device and will sync when you make space."
+      : "Tasks sync across your devices. Your first three new completions each day earn 4 XP.";
+    taskSubmit.disabled = false;
+    const changed = JSON.stringify(data.tasks) !== JSON.stringify(tasks);
+    data.tasks = tasks;
+    if (changed || revision === 0) renderTasks();
+  } catch (_) {
+    if (revision !== taskRevision || !sameOwner()) return;
+    if (taskMode === "account" || everSynced) {
+      taskSyncNote.textContent = "Couldn’t refresh account tasks. Reconnect to try again.";
+      return;
+    }
+    taskMode = "local";
+    taskSyncNote.textContent = localTaskMessage;
+    taskSubmit.disabled = false;
+    renderTasks();
+  } finally {
+    taskLoading = false;
+  }
+}
+
+async function changeAccountTasks(name, args, afterSave) {
+  if (taskMode !== "account" || taskSaving || !sameOwner()) return;
+  taskSaving = true;
+  taskRevision++;
+  taskSubmit.disabled = true;
+  renderTasks();
+  try {
+    const response = await xp.rpc(name,args);
+    if (!sameOwner()) return;
+    const tasks = Array.isArray(response) ? response : response?.tasks;
+    if (!Array.isArray(tasks)) throw new Error("Task response unavailable");
+    data.tasks = tasks;
+    if (response?.awarded) {
+      notice("Task complete · +" + response.awarded + " XP");
+      xp.refreshOwn();
+    } else if (response?.reason === "daily_limit") {
+      notice("Task complete. You’ve reached today’s task XP limit.");
+    }
+    afterSave?.();
+  } catch (error) {
+    if (sameOwner()) notice(error?.message || "Couldn’t save your task. Please try again.");
+  } finally {
+    taskSaving = false;
+    taskSubmit.disabled = !sameOwner();
+    if (sameOwner()) renderTasks();
+  }
+}
+function resetTaskDraft(){editTaskId=null;newTaskId=null;$("slTaskInput").value="";taskSubject.value="";taskDue.value="";taskPriority.value="normal";taskSubmit.textContent="Add task";cancelEdit.hidden=true;}
 cancelEdit.addEventListener("click",resetTaskDraft);
 function editTask(t){editTaskId=t.id;$("slTaskInput").value=t.title;taskSubject.value=t.subject||"";taskDue.value=t.due||"";taskPriority.value=t.priority||"normal";taskSubmit.textContent="Save task";cancelEdit.hidden=false;$("slTaskInput").focus();}
-taskForm.addEventListener("submit",e=>{e.preventDefault();const title=$("slTaskInput").value.trim();if(!title)return;
-const meta={title,subject:taskSubject.value,due:taskDue.value,priority:taskPriority.value};
-if(editTaskId){const old=data.tasks.find(x=>x.id===editTaskId);if(old)Object.assign(old,meta);}
-else{if(data.tasks.length>=100){notice("Task limit reached. Remove a task before adding another.");return;}data.tasks.unshift({id:Date.now().toString(36)+Math.random().toString(36).slice(2),...meta,done:false,doneAt:null,createdAt:today()});}
-resetTaskDraft();save();renderTasks();});
+taskForm.addEventListener("submit",e=>{
+  e.preventDefault();
+  const title=$("slTaskInput").value.trim();
+  if (!title || taskSaving || taskMode === "loading") return;
+  const meta={title,subject:taskSubject.value,due:taskDue.value,priority:taskPriority.value};
+  if (taskMode === "account") {
+    const id = editTaskId || (newTaskId ||= crypto.randomUUID());
+    void changeAccountTasks("studylab_xp_task_save", {
+      p_id:id,p_title:meta.title,p_subject:meta.subject,p_due:meta.due||null,
+      p_priority:meta.priority,p_create:!editTaskId
+    }, resetTaskDraft);
+    return;
+  }
+  if(editTaskId){
+    const old=data.tasks.find(x=>x.id===editTaskId);
+    if(old)Object.assign(old,meta);
+  }else{
+    if(data.tasks.length>=100){notice("Task limit reached. Remove a task before adding another.");return;}
+    data.tasks.unshift({id:Date.now().toString(36)+Math.random().toString(36).slice(2),...meta,done:false,doneAt:null,createdAt:today()});
+  }
+  originalTasks=data.tasks;
+  save();
+  resetTaskDraft();
+  renderTasks();
+});
 window.StudyLabWorkspace?.mountRoom(panel,$("slTasks").closest(".sl-card"));
 panel.querySelectorAll("[data-period]").forEach(b=>b.addEventListener("click",()=>{period=b.dataset.period;panel.querySelectorAll("[data-period]").forEach(x=>{const on=x===b;x.classList.toggle("active",on);x.setAttribute("aria-pressed",String(on));});render();}));
 render();
 const streakPanel=document.createElement("section");streakPanel.className="room-panel sl-streak-panel";streakPanel.id="slStreakPanel";
-streakPanel.innerHTML='<div class="sl-head"><div><h2>My study streaks</h2><p class="sl-sub">Based on your personal recorded study days</p></div><span class="sl-local">● LOCAL</span></div><div class="sl-streak-grid"><article><span>Current streak</span><strong id="slCurrentStreak">0 days</strong></article><article><span>Best streak</span><strong id="slBestStreak">0 days</strong></article><article><span>Active days · 7 days</span><strong id="slActiveDays">0 / 7</strong></article></div><p class="sl-foot">A day counts when at least one minute of study time is recorded in this browser.</p>';
+streakPanel.innerHTML='<div class="sl-head"><div><h2>Progress</h2><p class="sl-sub">Your StudyLab level and study consistency</p></div></div><div class="sl-streak-grid"><article><span>Current streak</span><strong id="slCurrentStreak">0 days</strong></article><article><span>Best streak</span><strong id="slBestStreak">0 days</strong></article><article><span>Active days · 7 days</span><strong id="slActiveDays">0 / 7</strong></article><article><span>Weekly focus</span><strong id="slWeeklyFocus">—</strong></article></div><p class="sl-foot" id="slStreakNote"></p>';
 const leaderboard=document.getElementById("leaderboardSection");if(leaderboard)leaderboard.insertAdjacentElement("afterend",streakPanel);else panel.insertAdjacentElement("afterend",streakPanel);
 style.textContent += '.sl-streak-panel{margin-top:12px}.sl-streak-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.sl-streak-grid article{padding:13px;border:1px solid var(--card-border);border-radius:13px;background:var(--card-bg)}.sl-streak-grid span{display:block;color:var(--text-muted);font-size:.7rem}.sl-streak-grid strong{display:block;margin-top:7px;font-size:1.15rem}@media(max-width:420px){.sl-streak-grid article{padding:10px}.sl-streak-grid strong{font-size:.95rem}}';
-function renderStreaks(){const activeDays=Object.keys(daySource()).filter(day=>Object.values(daySource()[day]||{}).reduce((a,b)=>a+(Number(b)||0),0)>=60).sort();const set=new Set(activeDays);let current=0,offset=0;while(set.has(dateAgo(offset))){current++;offset++;}let best=0,run=0,previous=null;activeDays.forEach(day=>{const stamp=new Date(day+"T12:00:00+05:30").getTime();if(previous!==null&&stamp-previous===86400000)run++;else run=1;best=Math.max(best,run);previous=stamp;});$("slCurrentStreak").textContent=current+" days";$("slBestStreak").textContent=best+" days";$("slActiveDays").textContent=Array.from({length:7},(_,i)=>dateAgo(i)).filter(d=>set.has(d)).length+" / 7";window.dispatchEvent(new Event("studylab:study-history-updated"));}
+function renderStreaks(){
+  const summary=getStreakSummary();
+  $("slCurrentStreak").textContent=summary.current+" "+(summary.current===1?"day":"days");
+  $("slBestStreak").textContent=summary.best+" "+(summary.best===1?"day":"days");
+  $("slActiveDays").textContent=summary.activeDays+" / 7";
+  $("slStreakNote").textContent=summary.needsToday?"Study today to continue your streak.":"A day counts after one recorded study minute.";
+  window.dispatchEvent(new Event("studylab:study-history-updated"));
+}
+function showWeeklyFocus(state){
+  const label=state?.ready?fmt(Number(state.weekSeconds)||0)+" / 7h":"—";
+  if ($("slWeeklyFocus").textContent!==label) $("slWeeklyFocus").textContent=label;
+}
+xp?.mountProgress(streakPanel);
+showWeeklyFocus(window.StudyRoomTimer?.getState?.());
+window.addEventListener("studylab:study-room-timer",event=>showWeeklyFocus(event.detail));
 
 /* Fixed left navigation only. Preserve the baseline content sizing and panel flow. */
 const fixedNavStyle=document.createElement("style");
@@ -234,9 +375,11 @@ function renderSessionHistory(){
 function getStreakSummary(){
  const activeDays=Object.keys(daySource()).filter(day=>Object.values(daySource()[day]||{}).reduce((sum,seconds)=>sum+(Number(seconds)||0),0)>=60).sort();
  const set=new Set(activeDays);let current=0,best=0,run=0,previous=null;
- while(set.has(dateAgo(current)))current++;
+ const needsToday=!set.has(today())&&set.has(dateAgo(1));
+ const offset=needsToday?1:0;
+ while(set.has(dateAgo(current+offset)))current++;
  activeDays.forEach(day=>{const stamp=Date.parse(day+"T12:00:00+05:30");run=previous!==null&&stamp-previous===86400000?run+1:1;best=Math.max(best,run);previous=stamp;});
- return {current,best,activeDays:Array.from({length:7},(_,i)=>dateAgo(i)).filter(day=>set.has(day)).length};
+ return {current,best,needsToday,activeDays:Array.from({length:7},(_,i)=>dateAgo(i)).filter(day=>set.has(day)).length};
 }
 window.StudyRoomHistory={getStreakSummary,refresh:refreshCloudHistory};
 async function pullCloudHistory(){
@@ -253,10 +396,10 @@ async function pullCloudHistory(){
   if(daily.error)throw daily.error;if(sessions.error)throw sessions.error;
   const days={};for(const row of daily.data||[]){days[row.local_day]||={};days[row.local_day][row.subject]=(Number(days[row.local_day][row.subject])||0)+(Number(row.seconds)||0);}
   cloudDays=days;cloudSessions=sessions.data||[];cloudEnabled=true;
-  const note=$("slHistoryStorageNote");if(note)note.textContent="Confirmed study time and subject history sync to your StudyLab account. Existing older browser-only history and tasks stay on this device.";
+  const note=$("slHistoryStorageNote");if(note)note.textContent="Confirmed study time and subject history sync to your StudyLab account. Existing older browser-only study history stays on this device.";
   const marker=panel.querySelector(".sl-local");if(marker)marker.textContent="● CLOUD TIME";
   render(false);renderStreaks();renderSessionHistory();
- }catch(error){console.warn("Study Room cloud history sync:",error?.message||error);const note=$("slHistoryStorageNote");if(note)note.textContent="Cloud study history could not be refreshed; local study history and tasks are preserved. Check the network and database migration.";renderSessionHistory();}
+ }catch(error){console.warn("Study Room cloud history sync:",error?.message||error);const note=$("slHistoryStorageNote");if(note)note.textContent="Couldn’t refresh cloud study history. Your local history is still available.";renderSessionHistory();}
 }
 // Always enqueue an explicit Pause/End refresh after a request already in flight.
 // A dropped request here is what made saved totals appear late even after Pause.
@@ -264,8 +407,12 @@ function refreshCloudHistory(){
  cloudRefreshQueue=cloudRefreshQueue.then(pullCloudHistory,pullCloudHistory);
  return cloudRefreshQueue;
 }
-window.addEventListener("online",refreshCloudHistory);
-document.addEventListener("visibilitychange",()=>{if(!document.hidden)refreshCloudHistory();});
-setInterval(refreshCloudHistory,60000);
-refreshCloudHistory();
+function refreshAccountData(){
+  void refreshCloudHistory();
+  void refreshAccountTasks();
+}
+window.addEventListener("online",refreshAccountData);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)refreshAccountData();});
+setInterval(refreshAccountData,60000);
+refreshAccountData();
 })();

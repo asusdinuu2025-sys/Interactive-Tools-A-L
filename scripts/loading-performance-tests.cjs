@@ -210,4 +210,8 @@ async function flush(){for(let i=0;i<8;i++)await Promise.resolve();}
 
   } finally {fs.rmSync(temp,{recursive:true,force:true});}
   console.log('PASS: early themes, slow/failed startup recovery, disabled/hidden pet suspension and restart, repeat splash, CSS cascade/content preservation and bundle idempotence.');
-})().catch(e=>{console.error(e);process.exitCode=1;});
+})().then(()=>{
+  const result=spawnSync(process.execPath,[path.join(__dirname,"studylab-xp-tests.cjs")],{stdio:"inherit"});
+  if(result.error)throw result.error;
+  assert.equal(result.status,0,"XP release checks");
+}).catch(e=>{console.error(e);process.exitCode=1;});
